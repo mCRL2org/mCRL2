@@ -15,11 +15,11 @@
 #include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/data/data_variable.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
+#include "mcrl2/data/data_variable.h"
+#include "mcrl2/data/term_traits.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/term_traits.h"
 
 namespace mcrl2 {
 
@@ -423,127 +423,136 @@ namespace pbes_expr_optimized {
 
 } // namespace pbes_expr_optimized
 
-/// \brief Returns true if the pbes expression t is a boolean expression
-inline
-bool is_bes(atermpp::aterm_appl t)
-{
-  using namespace pbes_expr;
-  using namespace accessors;
-
-  if(is_pbes_and(t)) {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if(is_pbes_or(t)) {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if(is_pbes_forall(t)) {
-    return false;
-  }
-  else if(is_pbes_exists(t)) {
-    return false;
-  }
-  else if(is_propositional_variable_instantiation(t)) {
-    return propositional_variable_instantiation(t).parameters().empty();
-  }
-  else if(is_pbes_true(t)) {
-    return true;
-  }
-  else if(is_pbes_false(t)) {
-    return true;
-  }
-
-  return false;
-}
-
-  template <>
-  struct term_traits<pbes_expression>
+  /// \brief Returns true if the pbes expression t is a boolean expression
+  inline
+  bool is_bes(atermpp::aterm_appl t)
   {
-    typedef pbes_expression term_type;
-    typedef data::data_variable variable_type;
-    typedef data::data_expression data_term_type;
-    typedef data::data_variable_list data_variable_sequence_type;
-    typedef propositional_variable_instantiation propositional_variable_type;   
-    
-    static inline
-    pbes_expression true_() { return pbes_expr_optimized::true_(); }
-    
-    static inline
-    pbes_expression false_() { return pbes_expr_optimized::false_(); }
-    
-    static inline
-    pbes_expression not_(pbes_expression p) { return pbes_expr_optimized::not_(p); }
-    
-    static inline
-    pbes_expression and_(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::and_(p, q); }
-    
-    static inline
-    pbes_expression or_(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::or_(p, q); }
-    
-    static inline
-    pbes_expression imp(pbes_expression p, pbes_expression q) { return pbes_expr_optimized::imp(p, q); }
-    
-    static inline
-    pbes_expression forall(data::data_variable_list l, pbes_expression p) { return pbes_expr_optimized::forall(l, p); }
-    
-    static inline
-    pbes_expression exists(data::data_variable_list l, pbes_expression p) { return pbes_expr_optimized::exists(l, p); }
-
-    static inline
-    bool is_true(pbes_expression t) { return pbes_expr::is_true(t); }
-    
-    static inline 
-    bool is_false(pbes_expression t) { return pbes_expr::is_false(t); }
-    
-    static inline 
-    bool is_not(pbes_expression t) { return pbes_expr::is_not(t); }
-    
-    static inline 
-    bool is_and(pbes_expression t) { return pbes_expr::is_and(t); }
-    
-    static inline 
-    bool is_or(pbes_expression t) { return pbes_expr::is_or(t); }
-    
-    static inline 
-    bool is_imp(pbes_expression t) { return pbes_expr::is_imp(t); }
-    
-    static inline 
-    bool is_forall(pbes_expression t) { return pbes_expr::is_forall(t); }
-    
-    static inline 
-    bool is_exists(pbes_expression t) { return pbes_expr::is_exists(t); }
-    
-    static inline 
-    bool is_data(pbes_expression t) { return pbes_expr::is_data(t); }
-    
-    static inline 
-    bool is_prop_var(pbes_expression t) { return pbes_expr::is_propositional_variable_instantiation(t); }
-      
-    static inline
-    data_term_type val(pbes_expression t) { return accessors::val(t); }
-    
-    static inline
-    pbes_expression arg(pbes_expression t) { return accessors::arg(t); }
-    
-    static inline
-    pbes_expression left(pbes_expression t) { return accessors::left(t); }
-    
-    static inline
-    pbes_expression right(pbes_expression t) { return accessors::right(t); }
-    
-    static inline
-    data::data_variable_list var(pbes_expression t) { return accessors::var(t); }
-    
-    static inline
-    core::identifier_string name(pbes_expression t) { return accessors::name(t); }
-    
-    static inline
-    data::data_expression_list param(pbes_expression t) { return accessors::param(t); }
-
-    static inline
-    propositional_variable_type prop_var(pbes_expression t) { return propositional_variable_type(t); }
-  };
+    using namespace pbes_expr;
+    using namespace accessors;
+  
+    if(is_pbes_and(t)) {
+      return is_bes(left(t)) && is_bes(right(t));
+    }
+    else if(is_pbes_or(t)) {
+      return is_bes(left(t)) && is_bes(right(t));
+    }
+    else if(is_pbes_forall(t)) {
+      return false;
+    }
+    else if(is_pbes_exists(t)) {
+      return false;
+    }
+    else if(is_propositional_variable_instantiation(t)) {
+      return propositional_variable_instantiation(t).parameters().empty();
+    }
+    else if(is_pbes_true(t)) {
+      return true;
+    }
+    else if(is_pbes_false(t)) {
+      return true;
+    }
+  
+    return false;
+  }
 
 } // namespace pbes_system
+
+namespace core {
+
+  template <>
+  struct term_traits<pbes_system::pbes_expression>
+  {
+    typedef pbes_system::pbes_expression term_type;
+    typedef data::data_expression data_term_type;
+    typedef data::data_expression_list data_term_sequence_type;
+    typedef data::data_variable variable_type;
+    typedef data::data_variable_list variable_sequence_type;
+    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
+    typedef core::identifier_string string_type;
+   
+    static inline
+    term_type true_() { return pbes_system::pbes_expr_optimized::true_(); }
+    
+    static inline
+    term_type false_() { return pbes_system::pbes_expr_optimized::false_(); }
+    
+    static inline
+    term_type not_(term_type p) { return pbes_system::pbes_expr_optimized::not_(p); }
+    
+    static inline
+    term_type and_(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::and_(p, q); }
+    
+    static inline
+    term_type or_(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::or_(p, q); }
+    
+    static inline
+    term_type imp(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::imp(p, q); }
+    
+    static inline
+    term_type forall(variable_sequence_type l, term_type p) { return pbes_system::pbes_expr_optimized::forall(l, p); }
+    
+    static inline
+    term_type exists(variable_sequence_type l, term_type p) { return pbes_system::pbes_expr_optimized::exists(l, p); }
+
+    static inline
+    bool is_constant(term_type t) { return false; }
+
+    static inline
+    bool is_true(term_type t) { return pbes_system::pbes_expr::is_true(t); }
+    
+    static inline 
+    bool is_false(term_type t) { return pbes_system::pbes_expr::is_false(t); }
+    
+    static inline 
+    bool is_not(term_type t) { return pbes_system::pbes_expr::is_not(t); }
+    
+    static inline 
+    bool is_and(term_type t) { return pbes_system::pbes_expr::is_and(t); }
+    
+    static inline 
+    bool is_or(term_type t) { return pbes_system::pbes_expr::is_or(t); }
+    
+    static inline 
+    bool is_imp(term_type t) { return pbes_system::pbes_expr::is_imp(t); }
+    
+    static inline 
+    bool is_forall(term_type t) { return pbes_system::pbes_expr::is_forall(t); }
+    
+    static inline 
+    bool is_exists(term_type t) { return pbes_system::pbes_expr::is_exists(t); }
+    
+    static inline 
+    bool is_data(term_type t) { return pbes_system::pbes_expr::is_data(t); }
+    
+    static inline 
+    bool is_prop_var(term_type t) { return pbes_system::pbes_expr::is_propositional_variable_instantiation(t); }
+      
+    static inline
+    data_term_type val(term_type t) { return pbes_system::accessors::val(t); }
+    
+    static inline
+    term_type arg(term_type t) { return pbes_system::accessors::arg(t); }
+    
+    static inline
+    term_type left(term_type t) { return pbes_system::accessors::left(t); }
+    
+    static inline
+    term_type right(term_type t) { return pbes_system::accessors::right(t); }
+    
+    static inline
+    variable_sequence_type var(term_type t) { return pbes_system::accessors::var(t); }
+    
+    static inline
+    string_type name(term_type t) { return pbes_system::accessors::name(t); }
+    
+    static inline
+    data_term_sequence_type param(term_type t) { return pbes_system::accessors::param(t); }
+
+    static inline
+    propositional_variable_type prop_var(term_type t) { return propositional_variable_type(t); }
+  };
+
+} // namespace core
 
 } // namespace mcrl2
 

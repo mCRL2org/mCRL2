@@ -15,14 +15,18 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/data_operation.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/sort_arrow.h"
 #include "mcrl2/data/detail/data_functional.h"
 
 using namespace atermpp;
 using namespace mcrl2;
+using namespace mcrl2::core;
 using namespace mcrl2::data;
 
 data_variable nat(std::string name)
@@ -51,7 +55,7 @@ A make_A(data::rewriter& d)
   return result;
 }
 
-void test_rewriter()
+void test1()
 {
   using namespace data_expr;
   
@@ -65,7 +69,6 @@ void test_rewriter()
   data_variable z = nat("z"); 
   data_expression t = datar(greater(min_(x,y), z));
 
-  std::cout << "NAT3" << core::pp(datar(plus(nat(1), nat(2)))) << std::endl;
   BOOST_CHECK(datar(plus(nat(1), nat(2))) == nat(3));
   
   // copy a rewriter
@@ -86,10 +89,69 @@ void test_rewriter()
   data_expression qc = c.r_(t);
 }
 
+void test2()
+{
+  rewriter r = default_data_rewriter(); 
+  data_expression d1 = parse_data_expression("2+7");
+  data_expression d2 = parse_data_expression("4+5");
+  assert(r(d1) == r(d2));
+
+  std::string var_decl = "m, n: Pos;\n";
+  atermpp::map<data_variable, data_expression> substitutions;
+  substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
+  substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+  rewriter_map<atermpp::map<data_variable, data_expression> > sigma(substitutions); 
+
+  // Rewrite two data expressions, and check if they are the same
+  d1 = parse_data_expression("m+n", var_decl);
+  d2 = parse_data_expression("7");
+  assert(r(d1, sigma) == r(d2));
+}
+
+void test3()
+{
+  typedef atermpp::map<data_variable, data_expression_with_variables> substitution_map;
+
+  data_specification data_spec = parse_data_specification(
+    "map dummy1:Pos;  \n"
+    "var dummy2:Bool; \n"
+    "    dummy3:Pos;  \n"
+    "    dummy4:Nat;  \n"
+    "    dummy5:Int;  \n"
+    "    dummy6:Real; \n"
+    "eqn dummy1 = 1;  \n"
+  ); 
+  rewriter_with_variables r(data_spec);
+  data_expression x = parse_data_expression("b == b", "b: Bool;\n");
+  std::set<data_variable> v = find_all_data_variables(x);
+  BOOST_CHECK(v.size() == 1);
+  
+  data_expression_with_variables y(x, data_variable_list(v.begin(), v.end()));
+  data_expression_with_variables z = r(y);
+  std::cout << "y = " << pp(y) << " " << pp(y.variables()) << std::endl;
+  BOOST_CHECK(z.variables().empty());
+  
+  std::string var_decl = "m, n: Pos;\n";
+  substitution_map substitutions;
+  data_variable m = parse_data_expression("m", var_decl);
+  data_variable n = parse_data_expression("n", var_decl);
+  substitutions[m] = r(data_expression_with_variables(parse_data_expression("3")));
+  substitutions[n] = r(data_expression_with_variables(parse_data_expression("4")));
+  rewriter_map<substitution_map> sigma(substitutions); 
+
+  data_expression_with_variables sigma_m = sigma(m);
+
+  data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
+  data_expression_with_variables d2(parse_data_expression("7"));
+  BOOST_CHECK(r(d1, sigma) == r(d2));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv) 
-  test_rewriter();
+  test1();
+  test2();
+  test3();
 
   return 0;
 }

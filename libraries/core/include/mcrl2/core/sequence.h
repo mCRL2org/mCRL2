@@ -22,8 +22,17 @@ namespace core {
 
 namespace detail {
 
-template <typename Iter1, typename Iter2, typename SequenceFunction>
-void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f)
+struct foreach_sequence_assign
+{
+  template <typename T1, typename T2>
+  void operator()(T1& t1, const T2& t2) const
+  {
+    t1 = t2;
+  }
+};
+
+template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
+void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
 {
   if (first == last)
   {
@@ -33,8 +42,8 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f)
   {
     for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
     {
-      *i = *j;
-      foreach_sequence_impl(boost::next(first), last, boost::next(i), f);
+      assign(*i, *j);
+      foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
     }
   }
 }
@@ -44,16 +53,32 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f)
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
-/// the function f is called.
-template <typename SequenceContainer, typename OutIter, typename SequenceFunction>
-void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f)
+/// the function f is called. The assign parameter gives the user control
+/// over how each sequence is built.
+template <typename SequenceContainer,
+          typename OutIter,
+          typename SequenceFunction,
+          typename Assign>
+void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f, Assign assign)
 {
-  typedef typename SequenceContainer::value_type::value_type value_type;
   detail::foreach_sequence_impl(X.begin(),
                                 X.end(),
                                 i,
-                                f
+                                f,
+                                assign
                                );
+}
+
+/// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
+/// as well, this function generates all sequences [x1, ..., xn], where
+/// xi is an element of Xi for all i = 1 ... n. For each of these sequences
+/// the function f is called. 
+template <typename SequenceContainer,
+          typename OutIter,
+          typename SequenceFunction>
+void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f)
+{
+  foreach_sequence(X, i, f, detail::foreach_sequence_assign());
 }
 
 } // namespace core

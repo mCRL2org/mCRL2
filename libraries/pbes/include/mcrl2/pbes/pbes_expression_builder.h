@@ -13,7 +13,12 @@
 #define MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
 
 #include "mcrl2/exception.h"
-#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/term_traits.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
+
+// this is only needed because of the data_true <-> pbes_true problems
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
@@ -31,10 +36,10 @@ template <typename Term, typename Arg = void>
 struct pbes_expression_builder
 {
   typedef Arg argument_type;
-  typedef typename term_traits<Term>::term_type term_type;
-  typedef typename term_traits<Term>::data_term_type data_term_type;
-  typedef typename term_traits<Term>::data_variable_sequence_type data_variable_sequence_type;
-  typedef typename term_traits<Term>::propositional_variable_type propositional_variable_type;
+  typedef typename core::term_traits<Term>::term_type term_type;
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
   bool is_finished(const term_type& x)
   {
@@ -97,14 +102,14 @@ struct pbes_expression_builder
 
   /// Visit forall node.
   ///
-  virtual term_type visit_forall(const term_type& x, const data_variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
+  virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
 
   /// Visit exists node.
   ///
-  virtual term_type visit_exists(const term_type& x, const data_variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
+  virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
@@ -135,7 +140,7 @@ struct pbes_expression_builder
 std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
 #endif
 
-    typedef term_traits<Term> tr;
+    typedef core::term_traits<Term> tr;
 
     term_type result;
 
@@ -158,42 +163,42 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
       term_type n = tr::arg(e);
       result = visit_not(e, n, arg1);
       if (!is_finished(result)) {
-        result = tr::not_(visit(n, arg1));
+        result = core::optimized_not(visit(n, arg1));
       }
     } else if (tr::is_and(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_and(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = tr::and_(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
       }
     } else if (tr::is_or(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_or(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = tr::or_(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
       }
     } else if (tr::is_imp(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_imp(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = tr::imp(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
     } else if (tr::is_forall(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_forall(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = tr::forall(qvars, visit(qexpr, arg1));
+        result = core::optimized_forall(qvars, visit(qexpr, arg1));
       }
     } else if (tr::is_exists(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_exists(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = tr::exists(qvars, visit(qexpr, arg1));
+        result = core::optimized_exists(qvars, visit(qexpr, arg1));
       }
     }
     else if(tr::is_prop_var(e)) {
@@ -209,7 +214,7 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
       }
     }
 
-    // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
+    // TODO: this is a hack, to deal with the data_true <-> pbes_true issue
     if (tr::is_true(result))
     {
       result = data::data_expr::true_();
@@ -235,10 +240,10 @@ template <typename Term>
 struct pbes_expression_builder<Term, void>
 {
   typedef void argument_type;
-  typedef typename term_traits<Term>::term_type term_type;
-  typedef typename term_traits<Term>::data_term_type data_term_type;
-  typedef typename term_traits<Term>::data_variable_sequence_type data_variable_sequence_type;
-  typedef typename term_traits<Term>::propositional_variable_type propositional_variable_type;
+  typedef typename core::term_traits<Term>::term_type term_type;
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
   bool is_finished(const term_type& x)
   {
@@ -301,14 +306,14 @@ struct pbes_expression_builder<Term, void>
 
   /// Visit forall node.
   ///
-  virtual term_type visit_forall(const term_type& x, const data_variable_sequence_type& /* variables */, const term_type& /* expression */)
+  virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
 
   /// Visit exists node.
   ///
-  virtual term_type visit_exists(const term_type& x, const data_variable_sequence_type& /* variables */, const term_type& /* expression */)
+  virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
@@ -339,7 +344,7 @@ struct pbes_expression_builder<Term, void>
 std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
 #endif
 
-    typedef term_traits<Term> tr;
+    typedef core::term_traits<Term> tr;
 
     term_type result;
 
@@ -362,42 +367,42 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
       term_type n = tr::arg(e);
       result = visit_not(e, n);
       if (!is_finished(result)) {
-        result = tr::not_(visit(n));
+        result = core::optimized_not(visit(n));
       }
     } else if (tr::is_and(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_and(e, l, r);
       if (!is_finished(result)) {
-        result = tr::and_(visit(l), visit(r));
+        result = core::optimized_and(visit(l), visit(r));
       }
     } else if (tr::is_or(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_or(e, l, r);
       if (!is_finished(result)) {
-        result = tr::or_(visit(l), visit(r));
+        result = core::optimized_or(visit(l), visit(r));
       }
     } else if (tr::is_imp(e)) {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_imp(e, l, r);
       if (!is_finished(result)) {
-        result = tr::imp(visit(l), visit(r));
+        result = core::optimized_imp(visit(l), visit(r));
       }
     } else if (tr::is_forall(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_forall(e, qvars, qexpr);
       if (!is_finished(result)) {
-        result = tr::forall(qvars, visit(qexpr));
+        result = core::optimized_forall(qvars, visit(qexpr));
       }
     } else if (tr::is_exists(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_exists(e, qvars, qexpr);
       if (!is_finished(result)) {
-        result = tr::exists(qvars, visit(qexpr));
+        result = core::optimized_exists(qvars, visit(qexpr));
       }
     }
     else if(tr::is_prop_var(e)) {

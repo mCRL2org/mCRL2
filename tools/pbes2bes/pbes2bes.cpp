@@ -23,14 +23,16 @@
 
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/pbes/detail/old_rewriter.h"
-#include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
@@ -51,13 +53,12 @@ struct t_tool_options {
 
 bool process(t_tool_options tool_options)
 {
-  typedef mcrl2::data::rewriter data_rewriter;
-  typedef mcrl2::pbes_system::detail::rewriter<data_rewriter> pbes_rewriter;
-
   pbes<> pbes_spec;
   pbes_spec.load(tool_options.infilename);
-  data_rewriter datar(pbes_spec.data());
-  pbes_rewriter pbesr(datar, pbes_spec.data());
+  data::rewriter datar(pbes_spec.data());
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(pbes_spec.data(), datar, generator);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
 
   if (!pbes_spec.is_well_typed())
   {

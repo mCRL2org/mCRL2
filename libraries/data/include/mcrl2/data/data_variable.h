@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <string>
+#include <set>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -86,23 +87,62 @@ class data_variable: public data_expression
     }
   };
                                                             
-/// \brief singly linked list of data variables
-///
-typedef atermpp::term_list<data_variable> data_variable_list;
+  /// \brief singly linked list of data variables
+  ///
+  typedef atermpp::term_list<data_variable> data_variable_list;
+  
+  /// \brief Returns true if the term t is a data variable
+  inline
+  bool is_data_variable(atermpp::aterm_appl t)
+  {
+    return core::detail::gsIsDataVarId(t);
+  }
+  
+  /// \brief Converts a data_variable_list to a data_expression_list.
+  inline
+  data_expression_list make_data_expression_list(data_variable_list l)
+  {
+    return ATermList(l);
+  }
 
-/// \brief Returns true if the term t is a data variable
-inline
-bool is_data_variable(atermpp::aterm_appl t)
-{
-  return core::detail::gsIsDataVarId(t);
-}
+  /// Returns the union of v and w.
+  inline
+  data_variable_list data_variable_list_union(data_variable_list v, data_variable_list w)
+  {
+    if (v.empty())
+    {
+      return w;
+    }
+    if (w.empty())
+    {
+      return v;
+    }
+    std::set<data_variable> result;
+    result.insert(v.begin(), v.end());
+    result.insert(w.begin(), w.end());
+    return data_variable_list(result.begin(), result.end());
+  }
 
-/// \brief Converts a data_variable_list to a data_expression_list.
-inline
-data_expression_list make_data_expression_list(data_variable_list l)
-{
-  return ATermList(l);
-}
+  /// Returns v minus w.
+  inline
+  data_variable_list data_variable_list_difference(data_variable_list v, data_variable_list w)
+  {
+    if (w.empty())
+    {
+      return v;
+    }
+    if (v.empty())
+    {
+      return v;
+    }
+    std::set<data_variable> result;
+    result.insert(v.begin(), v.end());
+    for (data_variable_list::iterator i = w.begin(); i != w.end(); ++i)
+    {
+      result.erase(*i);
+    }
+    return data_variable_list(result.begin(), result.end());
+  }
 
 } // namespace data
 

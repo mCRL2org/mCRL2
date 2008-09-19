@@ -9,6 +9,9 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_DEBUG_ENUMERATE_QUANTIFIERS_BUILDER
+
+#include <sstream>
 #include <iostream>
 #include <iterator>
 #include <utility>
@@ -17,6 +20,7 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
@@ -185,38 +189,28 @@ void test_pbes()
   p.load("pbes_test_file.pbes");
 }
 
-// void test_xyz_generator()
-// {
-//   XYZ_identifier_generator generator(propositional_variable("X1(d:D)"));
-//   identifier_string x;
-//   x = generator(); BOOST_CHECK(std::string(x) == "X");
-//   x = generator(); BOOST_CHECK(std::string(x) == "Y");
-//   x = generator(); BOOST_CHECK(std::string(x) == "Z");
-//   x = generator(); BOOST_CHECK(std::string(x) == "X0");
-//   x = generator(); BOOST_CHECK(std::string(x) == "Y0");
-//   x = generator(); BOOST_CHECK(std::string(x) == "Z0");
-//   x = generator(); BOOST_CHECK(std::string(x) == "Y1"); // X1 should be skipped
-// }
-
 void test_free_variables()
 {
+  std::string TEXT =
+    "var k, n:Nat;                            \n"
+    "pbes                                     \n"
+    "   mu X1(n1, m1:Nat) = X2(n1) || X2(m1); \n"
+    "   mu X2(n2:Nat)     = X1(n2, n);        \n"
+    "                                         \n"
+    "var m, n: Nat;                           \n"
+    "init                                     \n"
+    "   X1(m, n);                             \n"
+    ;
+
   pbes<> p;
-  try {
-    p.load("abp_fv.pbes");
-    atermpp::set< data_variable > freevars = p.free_variables();
-    cout << freevars.size() << endl;
-    BOOST_CHECK(freevars.size() == 20);
-    for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
-    {
-      cout << "<var>" << mcrl2::core::pp(*i) << endl;
-    }
-    freevars = p.free_variables();
-    BOOST_CHECK(freevars.size() == 15);
-  }
-  catch (mcrl2::runtime_error e)
+  std::stringstream s(TEXT);
+  s >> p;
+  atermpp::set<data_variable> freevars = p.free_variables();
+  cout << freevars.size() << endl;
+  BOOST_CHECK(freevars.size() == 3);
+  for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
   {
-    cout << e.what() << endl;
-    BOOST_CHECK(false); // loading is expected to succeed
+    cout << "<var>" << mcrl2::core::pp(*i) << endl;
   }
 }
 
@@ -337,7 +331,7 @@ int test_main(int argc, char** argv)
   test_trivial();
   test_pbes();
   // test_xyz_generator();
-  // test_free_variables();
+  test_free_variables();
   test_pbes_expression_builder();
   test_quantifier_rename_builder();
   test_complement_method_builder();

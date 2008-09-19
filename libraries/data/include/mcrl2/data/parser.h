@@ -171,6 +171,25 @@ namespace detail {
     return result;
   }
 
+  /// Creates a data specification that contains rewrite rules for the standard data types like
+  /// Pos, Nat and Int.
+  /// \return The created data specification
+  inline
+  data_specification default_data_specification()
+  {
+    // Add dummy variables for standard types, to make sure that
+    // rewrite rules are created for them.
+    return parse_data_specification(
+      "map dummy1:Pos;  \n"
+      "var dummy2:Bool; \n"
+      "    dummy3:Pos;  \n"
+      "    dummy4:Nat;  \n"
+      "    dummy5:Int;  \n"
+      "    dummy6:Real; \n"
+      "eqn dummy1 = 1;  \n"
+    );
+  }
+
 } // namespace data
 
 } // namespace mcrl2

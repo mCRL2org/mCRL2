@@ -20,6 +20,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 

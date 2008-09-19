@@ -18,6 +18,7 @@ namespace core {
 
 namespace detail {
 
+  // not(arg)
   template <typename T1, typename T2, typename UnaryFunction, typename UnaryPredicate>
   T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
@@ -29,6 +30,7 @@ namespace detail {
       return not_(arg);
   }
 
+  // and(left, right)
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
   T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
@@ -46,6 +48,7 @@ namespace detail {
       return and_(left, right);
   }
 
+  // or(left, right)
   template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
   T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
@@ -63,6 +66,7 @@ namespace detail {
       return or_(left, right);
   }
 
+  // imp(left, right)
   template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
   T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
@@ -78,6 +82,30 @@ namespace detail {
       return true_;
     else
       return imp(left, right);
+  }
+
+  /// forall v.arg
+  template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Forall>
+  T1 optimized_forall(VariableSequence v, T1 arg, Forall forall, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  {
+    if(is_true(arg))
+      return true_;
+    else if(is_false(arg))
+      return false_;
+    else
+      return forall(v, arg);
+  }
+
+  /// exists v.arg
+  template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Exists>
+  T1 optimized_exists(VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  {
+    if(is_true(arg))
+      return true_;
+    else if(is_false(arg))
+      return false_;
+    else
+      return exists(v, arg);
   }
 
 } // namespace detail

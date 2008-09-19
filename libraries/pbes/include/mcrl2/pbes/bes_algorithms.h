@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_ALGORITHMS_H
 #define MCRL2_PBES_ALGORITHMS_H
 
+#include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -49,7 +50,7 @@ template <typename Container>
 int bes_gauss_elimination(pbes<Container>& p)
 {
   typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
     
   data::rewriter datar(p.data());
@@ -78,7 +79,7 @@ int bes_gauss_elimination(pbes<Container>& p)
 pbes<> pbes2bes(const pbes<>& pbes_spec, bool lazy = false)
 {
   typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_rewriter;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   data::rewriter datar(pbes_spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(pbes_spec.data(), datar, name_generator);

@@ -460,17 +460,17 @@ namespace data_expr {
       return core::detail::gsMakeDataExprNeq(d, e);
     }
     
-    /// \brief Returns or applied to the sequence of data expressions [first, last[
+    /// \brief Returns or applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
-    inline data_expression join_or(FwdIt first, FwdIt last)
+    data_expression join_or(FwdIt first, FwdIt last)
     {
       namespace d = data_expr;
       return core::detail::join(first, last, optimized::or_, d::false_());
     }
     
-    /// \brief Returns and applied to the sequence of data expressions [first, last[
+    /// \brief Returns and applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
-    inline data_expression join_and(FwdIt first, FwdIt last)
+    data_expression join_and(FwdIt first, FwdIt last)
     {
       namespace d = data_expr;
       return core::detail::join(first, last, optimized::and_, d::true_());

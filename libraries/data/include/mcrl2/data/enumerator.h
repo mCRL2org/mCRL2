@@ -116,6 +116,9 @@ class data_enumerator
     }
 
   public:
+    typedef data_variable variable_type;
+    typedef data_expression_with_variables term_type;
+    
     /// Constructor.
     data_enumerator(const data_specification& data_spec,
                     DataRewriter& rewriter,

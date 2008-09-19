@@ -38,6 +38,7 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 

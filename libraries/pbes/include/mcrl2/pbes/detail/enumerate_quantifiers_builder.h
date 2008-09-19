@@ -12,12 +12,18 @@
 #ifndef MCRL2_PBES_DETAIL_ENUMERATE_QUANTIFIERS_BUILDER_H
 #define MCRL2_PBES_DETAIL_ENUMERATE_QUANTIFIERS_BUILDER_H
 
+#include <numeric>
 #include <set>
 #include <utility>
-#include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/pbes/rewriter_substitution.h"
-#include "mcrl2/atermpp/deque.h"
+#include <deque>
+#include <boost/tuple/tuple.hpp>
+#include <boost/bind.hpp>
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/core/sequence.h"
+#include "mcrl2/core/detail/join.h"
+#include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 
 namespace mcrl2 {
 
@@ -27,156 +33,215 @@ namespace detail {
 
   /// Exception that is used as an early escape of the foreach_sequence algorithm.
   struct enumerate_quantifier_stop_early
-  {
-  };
+  {};
 
+  template <typename Term>
   struct enumerate_quantifiers_join_and
   {
     template <typename FwdIt>
-    pbes_expression operator()(FwdIt first, FwdIt last) const
+    Term operator()(FwdIt first, FwdIt last) const
     {
-      return pbes_expr_optimized::join_and(first, last);
+      return std::accumulate(first, last, core::term_traits<Term>::true_(), &core::optimized_and<Term>);
     }
   };
     
+  template <typename Term>
   struct enumerate_quantifiers_join_or
   {
     template <typename FwdIt>
-    pbes_expression operator()(FwdIt first, FwdIt last) const
+    Term operator()(FwdIt first, FwdIt last) const
     {
-      return pbes_expr_optimized::join_or(first, last);
+      return std::accumulate(first, last, core::term_traits<Term>::false_(), &core::optimized_or<Term>);
     }
   };
-    
-  /// This function object is passed to the foreach_sequence algorithm, and
-  /// processes a sequence of elements of D.
-  template <typename PbesRewriter, typename DataSubstitutionRange>
-  struct enumerate_quantifiers_helper
+
+  template <typename MapSubstitution>
+  struct enumerate_quantifiers_sequence_assign
   {
-    atermpp::set<pbes_expression>& A_;
-    PbesRewriter &r_;
-    const pbes_expression& phi_;
-    const DataSubstitutionRange& sigma_;
-    bool& is_constant_;
-    pbes_expression stop_early_;
-  
-    enumerate_quantifiers_helper(atermpp::set<pbes_expression>& A,
-                                 PbesRewriter &r,
-                                 const pbes_expression& phi,
-                                 DataSubstitutionRange& sigma,
-                                 bool& is_constant,
-                                 pbes_expression stop_early
-                                )
-      : A_(A), r_(r), phi_(phi), sigma_(sigma), is_constant_(is_constant), stop_early_(stop_early)
+    typedef typename MapSubstitution::variable_type variable_type;
+    typedef typename MapSubstitution::term_type     term_type;
+
+    MapSubstitution& sigma_;
+    
+    enumerate_quantifiers_sequence_assign(MapSubstitution& sigma)
+      : sigma_(sigma)
     {}
-  
-    void operator()() const
+
+    void operator()(variable_type v, term_type t)
     {
-      std::pair<pbes_expression, bool> c = r_(phi_, sigma_);
-      if (c.first == stop_early_)
+      sigma_[v] = t;
+    }
+  };
+
+  /// This function object is passed to the foreach_sequence algorithm.
+  /// It is invoked for every sequence of substitutions of the set Z in
+  /// the algorithm.
+  template <typename PbesTermSet, 
+            typename PbesRewriter,
+            typename PbesTerm,
+            typename SubstitutionFunction,
+            typename StopCriterion
+           >
+  struct enumerate_quantifiers_sequence_action
+  {
+    PbesTermSet&         A_;
+    PbesRewriter&        r_;
+    const PbesTerm&      phi_;
+    SubstitutionFunction sigma_;
+    bool&                is_constant_;
+    StopCriterion        stop_;
+  
+    enumerate_quantifiers_sequence_action(PbesTermSet& A,
+                                 PbesRewriter &r,
+                                 const PbesTerm& phi,
+                                 SubstitutionFunction sigma,
+                                 bool& is_constant,
+                                 StopCriterion stop
+                                )
+      : A_(A), r_(r), phi_(phi), sigma_(sigma), is_constant_(is_constant), stop_(stop)
+    {}
+
+    void operator()()
+    {
+      PbesTerm c = r_(phi_, sigma_);
+      if (stop_(c))
       {
         throw enumerate_quantifier_stop_early();
       }
-      if (c.second)
+      else if(core::term_traits<PbesTerm>::is_constant(c))
       {
-        is_constant_ = false;
+        A_.insert(c);
       }
       else
       {
-        A_.insert(c.first);
+        is_constant_ = false;
       }
     } 
   };
+
+  template <typename PbesTermSet, 
+            typename PbesRewriter,
+            typename PbesTerm,
+            typename SubstitutionFunction,
+            typename StopCriterion
+           >
+  enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, StopCriterion>
+  make_enumerate_quantifiers_sequence_action(PbesTermSet& A,
+                                 PbesRewriter &r,
+                                 const PbesTerm& phi,
+                                 SubstitutionFunction sigma,
+                                 bool& is_constant,
+                                 StopCriterion stop
+                                )
+  {
+    return enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, StopCriterion>(A, r, phi, sigma, is_constant, stop);
+  }
  
-  /// Eliminate quantors from the expression 'forall x.sigma(phi)'
-  template <typename DataSubstitutionRange,
-            typename DataRewriter,
+  /// Eliminate quantifiers from the expression 'forall x.sigma(phi)'
+  /// This algorithm is documented in the 'PBES implementation notes' document.
+  template <typename DataVariableSequence,
+            typename PbesTerm,
+            typename MapSubstitution,
             typename DataEnumerator,
             typename PbesRewriter,
-            typename JoinFunction
+            typename StopCriterion,
+            typename PbesTermJoinFunction
            >
-  std::pair<pbes_expression, bool> enumerate_quantifiers(data::data_variable_list x,
-                                                         const pbes_expression& phi,
-                                                         DataSubstitutionRange& sigma,
-                                                         DataRewriter& datar,
-                                                         DataEnumerator& datae,
-                                                         PbesRewriter& pbesr,
-                                                         pbes_expression stop,
-                                                         JoinFunction join
-                                                        )
+    PbesTerm enumerate_quantifiers(DataVariableSequence x,
+                                   const PbesTerm& phi,
+                                   MapSubstitution& sigma,
+                                   DataEnumerator& datae,
+                                   PbesRewriter& pbesr,
+                                   StopCriterion stop,
+                                   PbesTerm stop_value,
+                                   PbesTermJoinFunction join
+                                  )
   {
-    atermpp::set<pbes_expression> A;
-    std::vector<atermpp::vector<pbes_rewriter_substitution> > D;
-    atermpp::deque<std::pair<pbes_rewriter_substitution, unsigned int> > todo;
+    typedef typename DataEnumerator::variable_type variable_type;
+    typedef typename DataEnumerator::term_type data_term_type;
+    typedef PbesTerm pbes_term_type;
+    typedef std::pair<variable_type, data_term_type> data_assignment;   
 
-    // make a copy of x, to get random access
-    std::vector<data::data_variable> x_(x.begin(), x.end());
-  
+    atermpp::set<pbes_term_type> A;
+    std::vector<std::vector<data_term_type> > D;
+
+    // For an element (v, t, k) of todo, we have the invariant v == x[k].
+    // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
+    std::deque<boost::tuple<variable_type, data_term_type, unsigned int> > todo;
+
     // initialize D and todo
     unsigned int j = 0;
-    for (data::data_variable_list::iterator i = x.begin(); i != x.end(); ++i)
+    for (typename DataVariableSequence::const_iterator i = x.begin(); i != x.end(); ++i)
     {
-      pbes_rewriter_substitution s(*i, datar);
-      atermpp::vector<pbes_rewriter_substitution> d;
-      d.push_back(s);
-      D.push_back(d);
-      todo.push_back(std::make_pair(s, j++));
+      data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
+      D.push_back(std::vector<data_term_type>(1, t));
+      todo.push_back(boost::make_tuple(*i, t, j++));
     }
-  
-    // make room for adding new substitutions to sigma
-    sigma.insert(sigma.end(), x.size(), pbes_rewriter_substitution());
-  
-    while (!todo.empty())
+
+    try
     {
-      std::pair<pbes_rewriter_substitution, unsigned int> todo_front = todo.front();
-      todo.pop_front();
-      const pbes_rewriter_substitution& y = todo_front.first;
-      unsigned int k = todo_front.second;
-      bool is_constant = false;
-  
-      // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
-      atermpp::vector<pbes_rewriter_substitution> Dk = D[k];
-      atermpp::vector<data::data_expression_with_variables> z = datae.enumerate(y);
-      for (atermpp::vector<data::data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
+      while (!todo.empty())
       {
-        pbes_rewriter_substitution e(x_[k], *i, datar);
-        try {
+        boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
+        todo.pop_front();
+        const variable_type& xk = boost::get<0>(front);
+        const data_term_type& y      = boost::get<1>(front);
+        unsigned int k               = boost::get<2>(front);
+        bool is_constant = false;
+
+        // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
+        std::vector<data_term_type> Dk = D[k];
+        atermpp::vector<data_term_type> z = datae.enumerate(y);
+        for (typename std::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+        {
+          sigma[xk] = *i;
           D[k].clear();
-          D[k].push_back(e);
-          core::foreach_sequence(D, sigma.end() - x.size(), enumerate_quantifiers_helper<PbesRewriter, DataSubstitutionRange>(A, pbesr, phi, sigma, is_constant, stop));
+          D[k].push_back(*i);
+          core::foreach_sequence(D,
+                                 x.begin(),
+                                 make_enumerate_quantifiers_sequence_action(A, pbesr, phi, sigma, is_constant, stop),
+                                 enumerate_quantifiers_sequence_assign<MapSubstitution>(sigma)
+                                );
           if (!is_constant)
           {
-            Dk.push_back(e);
-            if (!e.is_constant())
+            Dk.push_back(*i);
+            if (!core::term_traits<data_term_type>::is_constant(*i))
             {
-              todo.push_back(std::make_pair(e, k));
+              todo.push_back(boost::make_tuple(xk, *i, k));
             }
           }
         }
-        catch (enumerate_quantifier_stop_early /* a */) {
-          A.clear();
-          A.insert(data::data_expr::false_());
-          break;
-        }
+ 
+        // restore D[k]
+        D[k] = Dk;
       }
-      
-      // restore D[k]
-      D[k] = Dk;
+    }
+    catch (enumerate_quantifier_stop_early /* a */)
+    {
+      return stop_value;
     }
   
-    sigma.erase(sigma.end() - x.size(), sigma.end());
-    pbes_expression result = join(A.begin(), A.end());
-    return std::pair<pbes_expression, bool>(result, false); // TODO: check 'false'
+    // remove the added substitutions from sigma
+    for (typename DataVariableSequence::const_iterator i = x.begin(); i != x.end(); ++i)
+    {
+      sigma.erase(*i);
+    }
+    return join(A.begin(), A.end());
   }
 
   // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
-  template <typename DataRewriter, typename DataEnumerator>
-  struct enumerate_quantifiers_builder: public simplify_rewrite_builder<DataRewriter, atermpp::vector<pbes_rewriter_substitution> >
+  /// \param[in] SubstitutionFunction This must be a MapSubstitution.
+  template <typename Term, typename DataRewriter, typename DataEnumerator, typename SubstitutionFunction>
+  struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction>
   {
-    // N.B. The substitution range for this rewriter has a fixed type!
-    typedef atermpp::vector<pbes_rewriter_substitution> substitution_range;
-    typedef simplify_rewrite_builder<DataRewriter, substitution_range> super;
-    typedef typename super::argument_type argument_type;
+    typedef simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction> super;
+    typedef SubstitutionFunction                                               argument_type;
+    typedef typename super::term_type                                          term_type;
+    typedef typename core::term_traits<term_type>::data_term_type              data_term_type;             
+    typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;    
+    typedef typename core::term_traits<term_type>::variable_sequence_type variable_sequence_type;
+    typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
+    typedef core::term_traits<Term> tr;
 
     DataEnumerator& m_data_enumerator;
     
@@ -186,45 +251,35 @@ namespace detail {
       : super(r), m_data_enumerator(enumerator)
     { }
   
+  
     /// Visit forall node.
     ///
-    pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,
-                                           arg.first,
-                                           super::m_data_rewriter,
+                                           sigma,
                                            m_data_enumerator,
                                            *this,
-                                           data::data_expr::false_(),
-                                           enumerate_quantifiers_join_and()
-                                          ).first;
+                                           tr::is_false,
+                                           tr::false_(),
+                                           enumerate_quantifiers_join_and<Term>()
+                                          );
     }
   
     /// Visit exists node.
     ///
-    pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       return detail::enumerate_quantifiers(variables,
                                            phi,
-                                           arg.first,
-                                           super::m_data_rewriter,
+                                           sigma,
                                            m_data_enumerator,
                                            *this,
-                                           data::data_expr::true_(),
-                                           enumerate_quantifiers_join_or()
-                                          ).first;
-    }
-
-    /// Rewrites a pbes expression.
-    ///
-    template <typename DataSubstitutionRange>
-    std::pair<pbes_expression, bool> operator()(const pbes_expression& x, DataSubstitutionRange& sigma)
-    {
-      bool b = false;
-      argument_type a(sigma, b);
-      pbes_expression result = visit(x, a);
-      return std::make_pair(result, b);
+                                           tr::is_true,
+                                           tr::true_(),
+                                           enumerate_quantifiers_join_or<Term>()
+                                          );
     }
   };
 

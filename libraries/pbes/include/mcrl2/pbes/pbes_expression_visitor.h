@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_VISITOR_H
 #define MCRL2_PBES_PBES_EXPRESSION_VISITOR_H
 
-#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/core/term_traits.h"
 
 namespace mcrl2 {
 
@@ -26,10 +26,10 @@ template <typename Term, typename Arg=void>
 struct pbes_expression_visitor
 {
   typedef Arg argument_type;
-  typedef typename term_traits<Term>::term_type term_type;
-  typedef typename term_traits<Term>::data_term_type data_term_type;
-  typedef typename term_traits<Term>::data_variable_sequence_type data_variable_sequence_type;
-  typedef typename term_traits<Term>::propositional_variable_type propositional_variable_type;
+  typedef typename core::term_traits<Term>::term_type term_type;
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
   
   /// These names can be used as return types of the visit functions, to make
   /// the code more readible.
@@ -131,7 +131,7 @@ struct pbes_expression_visitor
 
   /// Visit forall node.
   ///
-  virtual bool visit_forall(const term_type& e, const data_variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
+  virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -143,7 +143,7 @@ struct pbes_expression_visitor
 
   /// Visit exists node.
   ///
-  virtual bool visit_exists(const term_type& e, const data_variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
+  virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -170,7 +170,7 @@ struct pbes_expression_visitor
   /// recursion in this node is stopped.
   void visit(const term_type& e, Arg& a)
   {
-    typedef term_traits<Term> tr;
+    typedef core::term_traits<Term> tr;
 
     if (tr::is_data(e)) {
       visit_data_expression(e, tr::val(e), a);
@@ -216,7 +216,7 @@ struct pbes_expression_visitor
       }
       leave_imp();
     } else if (tr::is_forall(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_forall(e, qvars, qexpr, a);
       if (result) {
@@ -224,7 +224,7 @@ struct pbes_expression_visitor
       }
       leave_forall();
     } else if (tr::is_exists(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_exists(e, qvars, qexpr, a);
       if (result) {
@@ -247,9 +247,9 @@ struct pbes_expression_visitor<Term, void>
 {
   typedef void argument_type;
   typedef Term term_type;
-  typedef typename term_traits<Term>::data_term_type data_term_type;
-  typedef typename term_traits<Term>::data_variable_sequence_type data_variable_sequence_type;
-  typedef typename term_traits<Term>::propositional_variable_type propositional_variable_type;
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
   /// These names can be used as return types of the visit functions, to make
   /// the code more readible.
@@ -351,7 +351,7 @@ struct pbes_expression_visitor<Term, void>
 
   /// Visit forall node.
   ///
-  virtual bool visit_forall(const term_type& e, const data_variable_sequence_type& /* variables */, const term_type& /* expression */)
+  virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return continue_recursion;
   }
@@ -363,7 +363,7 @@ struct pbes_expression_visitor<Term, void>
 
   /// Visit exists node.
   ///
-  virtual bool visit_exists(const term_type& e, const data_variable_sequence_type& /* variables */, const term_type& /* expression */)
+  virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return continue_recursion;
   }
@@ -390,7 +390,7 @@ struct pbes_expression_visitor<Term, void>
   /// recursion in this node is stopped.
   void visit(const term_type& e)
   {
-    typedef term_traits<Term> tr;
+    typedef core::term_traits<Term> tr;
 
     if (tr::is_data(e)) {
       visit_data_expression(e, tr::val(e));
@@ -436,7 +436,7 @@ struct pbes_expression_visitor<Term, void>
       }
       leave_imp();
     } else if (tr::is_forall(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_forall(e, qvars, qexpr);
       if (result) {
@@ -444,7 +444,7 @@ struct pbes_expression_visitor<Term, void>
       }
       leave_forall();
     } else if (tr::is_exists(e)) {
-      data_variable_sequence_type qvars = tr::var(e);
+      variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_exists(e, qvars, qexpr);
       if (result) {

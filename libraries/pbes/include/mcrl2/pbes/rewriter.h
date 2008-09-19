@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITER_H
 #define MCRL2_PBES_REWRITER_H
 
+#include <map>
 #include <set>
 #include <utility>
 #include <vector>
@@ -19,8 +20,10 @@
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/term_traits.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
+#include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
 
@@ -30,13 +33,16 @@ namespace pbes_system {
 
   /// A rewriter that simplifies expressions.
   ///
-  template <typename DataRewriter>
+  template <typename Term, typename DataRewriter>
   class simplifying_rewriter
   {
     protected:
       DataRewriter m_rewriter;
     
     public:
+      typedef typename core::term_traits<Term>::term_type term_type;
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+      
       simplifying_rewriter(const DataRewriter& rewriter)
         : m_rewriter(rewriter)
       {}
@@ -45,32 +51,28 @@ namespace pbes_system {
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \return The rewrite result.
       ///
-      pbes_expression operator()(const pbes_expression& x)
+      term_type operator()(const term_type& x)
       {
-        detail::simplify_rewrite_builder<DataRewriter, int> visitor(m_rewriter);
-        std::pair<int, bool> dummy(0, false);
-        return visitor.visit(x, dummy);
+        detail::simplify_rewrite_builder<Term, DataRewriter> r(m_rewriter);
+        return r(x);
       }
 
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A sequence of rewriter substitutions that is applied during rewriting.
-      /// \return A pair (r, b), where r is the rewrite result, and b denotes whether or not r depends
-      /// on sigma.
+      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \return The rewrite result.
       ///
-      template <typename DataSubstitutionRange>
-      std::pair<pbes_expression, bool> operator()(const pbes_expression& x, const DataSubstitutionRange& sigma)
+      template <typename SubstitutionFunction>
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        detail::simplify_rewrite_builder<DataRewriter, DataSubstitutionRange> visitor(m_rewriter);
-        bool b = false;
-        pbes_expression result = visitor.visit(x, std::make_pair(sigma, b));
-        return std::make_pair(result, b);
+        detail::simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
+        return r(x, sigma);
       }
   };
 
   /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
   ///
-  template <typename DataRewriter, typename DataEnumerator>
+  template <typename Term, typename DataRewriter, typename DataEnumerator>
   class enumerate_quantifiers_rewriter
   {
     protected:
@@ -78,6 +80,10 @@ namespace pbes_system {
       DataEnumerator m_enumerator;
 
     public:
+      typedef typename core::term_traits<Term>::term_type term_type;
+      typedef typename core::term_traits<Term>::data_term_type data_term_type;
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r), m_enumerator(e)
       {}
@@ -86,26 +92,62 @@ namespace pbes_system {
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \return The rewrite result.
       ///
-      pbes_expression operator()(const pbes_expression& x)
+      term_type operator()(const term_type& x)
       {
-        detail::enumerate_quantifiers_builder<DataRewriter, DataEnumerator> visitor(m_rewriter, m_enumerator);     
-        typename detail::enumerate_quantifiers_builder<DataRewriter, DataEnumerator>::argument_type arg;
-        return visitor.visit(x, arg);
+        typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
+        substitution_map sigma;
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator);
+        return r(x, sigma);
       }
       
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A sequence of rewriter substitutions that is applied during rewriting.
-      /// \return A pair (r, b), where r is the rewrite result, and b denotes whether or not r depends
-      /// on sigma.
+      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \return The rewrite result.
       ///
-      template <typename SubstitutionSequence>
-      std::pair<pbes_expression, bool> operator()(const pbes_expression& x, SubstitutionSequence& sigma)
+      template <typename SubstitutionFunction>
+      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
       {
-        detail::enumerate_quantifiers_builder<DataRewriter, DataEnumerator> visitor(m_rewriter, m_enumerator);
-        bool b = false;
-        pbes_expression result = visitor.visit(x, std::make_pair(sigma, b));
-        return std::make_pair(result, b);
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator);
+        return r(x, sigma);
+      }
+  };
+ 
+  /// A specialization for pbes_expression. It uses pbes_expression_with_variables internally.
+  ///
+  template <typename DataRewriter, typename DataEnumerator>
+  class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerator>
+  {
+    protected:
+      enumerate_quantifiers_rewriter<pbes_expression_with_variables, DataRewriter, DataEnumerator> m_rewriter;
+
+    public:
+      typedef pbes_expression term_type;
+      typedef typename core::term_traits<term_type>::data_term_type data_term_type;
+      typedef typename core::term_traits<term_type>::variable_type variable_type;
+
+      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
+        : m_rewriter(r, e)
+      {}
+      
+      /// \brief Rewrites a pbes expression.
+      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \return The rewrite result.
+      ///
+      term_type operator()(const term_type& x)
+      {
+        return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()));
+      }
+      
+      /// \brief Rewrites a pbes expression.
+      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \return The rewrite result.
+      ///
+      template <typename SubstitutionFunction>
+      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+      {
+        return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()), sigma);
       }
   };
  

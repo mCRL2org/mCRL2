@@ -6,22 +6,24 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/term_traits.h
+/// \file mcrl2/core/term_traits.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_TERM_TRAITS_H
-#define MCRL2_PBES_TERM_TRAITS_H
+#ifndef MCRL2_CORE_TERM_TRAITS_H
+#define MCRL2_CORE_TERM_TRAITS_H
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace core {
 
-  template <typename Term>
+  /// Contains type information for terms.
+  template <typename T>
   struct term_traits
-  {}; 
+  {
+  };
 
-} // namespace pbes_system
+} // namespace core
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_TERM_TRAITS_H
+#endif // MCRL2_CORE_TERM_TRAITS_H

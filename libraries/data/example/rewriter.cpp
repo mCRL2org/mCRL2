@@ -25,9 +25,10 @@ void rewrite2()
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
   std::string var_decl = "m, n: Pos;\n";
-  atermpp::vector<rewriter::substitution> sigma;
-  sigma.push_back(rewriter::substitution(r, parse_data_expression("m", var_decl), parse_data_expression("3")));
-  sigma.push_back(rewriter::substitution(r, parse_data_expression("n", var_decl), parse_data_expression("4")));
+  atermpp::map<data_variable, data_expression> substitutions;
+  substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
+  substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+  map_substitution<atermpp::map<data_variable, data_expression> > sigma(substitutions);
 
   // Rewrite two data expressions, and check if they are the same
   data::data_expression d1 = parse_data_expression("m+n", var_decl);

@@ -12,207 +12,145 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
+#include <functional>
+#include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include "mcrl2/data/term_traits.h"
+#include "mcrl2/data/data_expression_with_variables.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
 namespace data {
 
-/// \brief A rewriter class. This class is a wrapper for the Rewriter class.
-/// The purpose of this class is to hide the internal Rewriter format from the
-/// user, and to offer a common C++ interface. Note that copies of a rewriter
-/// share the same rewriter object.
-///
-class rewriter
-{
-  friend class single_term_rewriter;
-  friend class enumerator;
-  
-  private:
-    boost::shared_ptr<Rewriter> m_rewriter;
+  /// Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
+  /// and data_expression_with_variables.
+  template <typename Term>
+  class basic_rewriter
+  {
+    friend class enumerator;
 
-  public:
-    enum strategy
-    {
-      innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
-	    innermost_compiling        = GS_REWR_INNERC  ,  /** \brief Compiling innermost */
-	    jitty                      = GS_REWR_JITTY   ,  /** \brief JITty */
-	    jitty_compiling            = GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
-	    innermost_prover           = GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
-	    innermost_compiling_prover = GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
-	    jitty_prover               = GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
-	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
-    };
+    protected:
+      boost::shared_ptr<Rewriter> m_rewriter;
 
-    /// Represents a substitution of the form data_variable := data_expression.
-    /// Suppose that a user has a sequence [first, last[ of substitutions that
-    /// must be applied to a large number of terms, before feeding them to the
-    /// rewriter. Then it is efficient to do it as follows:
-    /// \code
-    /// rewriter r;
-    /// std::vector<rewriter::substitution> s;
-    /// std::vector<aterm> v;
-    /// // fill s and v
-    /// for (std::vector<aterm>::iterator i = v.begin(); i != v.end(); ++i)
-    /// {
-    ///   *i = r(*i, s.begin(), s.end());
-    /// }
-    /// \endcode
-    ///
-    struct substitution
-    {
-      ATermAppl m_variable;
-      ATerm m_value;
+    public:
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+      typedef Term term_type;
 
-      substitution()
-        : m_variable(0), m_value(0)
+      enum strategy
+      {
+        innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
+  	    innermost_compiling        = GS_REWR_INNERC  ,  /** \brief Compiling innermost */
+  	    jitty                      = GS_REWR_JITTY   ,  /** \brief JITty */
+  	    jitty_compiling            = GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
+  	    innermost_prover           = GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
+  	    innermost_compiling_prover = GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
+  	    jitty_prover               = GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
+  	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
+      };
+
+      /// Constructor.
+      ///
+      basic_rewriter(data_specification d, strategy s = jitty)
+        : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
 
-      substitution(rewriter& rewr, const data_variable& variable, const data_expression& value)
-        : m_variable(variable),
-          m_value(rewr.get_rewriter()->toRewriteFormat(value))
-      {}
-        
-      data_variable variable() const
+		  /// \brief Rewrites a data expression.
+		  /// \param d The term to be rewritten.
+		  /// \return The normal form of d.
+		  // Question: is this function guaranteed to terminate?
+		  ///
+		  term_type operator()(const term_type& d) const
+		  {
+		    return m_rewriter.get()->rewrite(d);
+		  }
+
+		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+		  /// to data variables.
+		  /// \return The normal form of d.
+		  ///
+		  template <typename SubstitutionFunction>
+		  term_type operator()(const term_type& d, SubstitutionFunction sigma) const
+		  {
+		    return this->operator()(replace_data_variables(d, sigma));
+		  }
+
+      /// Adds an equation to the rewrite rules.
+      /// \param[in] eq The equation that is added.
+      /// \return Returns true if the operation succeeded.
+      ///
+      bool add_rule(const data_equation& eq)
       {
-        return data_variable(m_variable);
+        return m_rewriter.get()->addRewriteRule(eq);
       }
 
-      protected:
-        substitution(ATermAppl variable, ATerm value)
-          : m_variable(variable),
-            m_value(value)
-        { }
-    };
-    
-    /// Constructor.
-    ///
-    rewriter(data_specification d, strategy s = jitty)
-      : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
-    { }
+      /// Removes an equation from the rewrite rules.
+      /// \param[in] eq The equation that is removed.
+      ///
+      void remove_rule(const data_equation& eq)
+      {
+        m_rewriter.get()->removeRewriteRule(eq);
+      }
 
-		/// \brief Rewrites a data expression.
-		/// \param d The term to be rewritten.
-		/// \return The normal form of d.
-		// Question: is this function guaranteed to terminate?
-		///
-		data_expression operator()(const data_expression& d) const
-		{
-		  return m_rewriter.get()->rewrite(d);
-		}
+      /// Returns a pointer to the Rewriter class that is used for the implementation.
+      /// \deprecated
+      Rewriter* get_rewriter()
+      {
+        return m_rewriter.get();
+      }
+  };
 
-		/// \brief Rewrites the data expression d, and on the fly applies the substitutions
-		/// in the given sequence.
-		/// \return The normal form of d.
-		///
-		template <typename SubstitutionSequence>
-		data_expression operator()(const data_expression& d, const SubstitutionSequence& sigma) const
-		{
-		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
-		  for (typename SubstitutionSequence::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-		  {
-		    m_rewriter.get()->setSubstitution(i->m_variable, i->m_value);
-		  }
-		  data_expression result = m_rewriter.get()->rewrite(d);
-		  m_rewriter.get()->clearSubstitutions();
-		  return result;
-		}
+  typedef basic_rewriter<data_expression> rewriter;
 
-/*
-TODO: 
-		/// \brief Rewrites the data expression d, and on the fly applies a substitution
-		/// function.
-		/// \param[in] d The data expression that is being rewrittten
-		/// \param[in] sigma A substitution function to data variables, that is applied on the fly
-		/// \return The normal form of d.
-		///
-		template <typename SubstitutionFunction>
-		data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
-		{
-		  data_expression result = m_rewriter.get()->rewrite(d, sigma);
-		  return result;
-		}
-*/
+  typedef basic_rewriter<data_expression_with_variables> rewriter_with_variables;
 
-    /// Adds the equation eq to the rewriter rules. Returns true if the operation succeeded.
-    ///
-    bool add_rule(const data_equation& eq)
-    {
-      return m_rewriter.get()->addRewriteRule(eq);
-    }
+  /// Function object that turns a map of substitutions to variables into a substitution function.
+  template <typename SubstitutionMap>
+  class rewriter_map: public SubstitutionMap
+  {
+    public:
+      typedef typename SubstitutionMap::mapped_type term_type;
+      typedef typename SubstitutionMap::key_type variable_type;
 
-    /// Removes the equation eq from the rewriter rules.
-    ///
-    void remove_rule(const data_equation& eq)
-    {
-      m_rewriter.get()->removeRewriteRule(eq);
-    }
-    
-    /// \deprecated
-    Rewriter* get_rewriter()
-    {
-      return m_rewriter.get();
-    }
-};
+      /// Constructor.
+      ///
+      rewriter_map()
+      {}
 
-/// Creates a rewriter that contains rewrite rules for the standard data types like
-/// Pos, Nat and Int.
-/// \param[in] strategy The rewriter strategy
-/// \return The created rewriter
-inline
-rewriter default_data_rewriter(rewriter::strategy strategy = rewriter::jitty)
-{ 
-  // Add dummy variables for standard types, to make sure that
-  // rewrite rules are created for them.
-  data_specification data_spec = parse_data_specification(
-    "map dummy1:Pos;  \n"
-    "var dummy2:Bool; \n"
-    "    dummy3:Pos;  \n"
-    "    dummy4:Nat;  \n"
-    "    dummy5:Int;  \n"
-    "    dummy6:Real; \n"
-    "eqn dummy1 = 1;  \n"
-  );
-  return data::rewriter(data_spec, strategy);
-}
+      /// Constructor.
+      ///
+      rewriter_map(const rewriter_map<SubstitutionMap>& m)
+        : SubstitutionMap(m)
+      {}
 
-/// Rewriter for rewriting a single term multiple times with different substitutions.
-/// For this special case, this rewriter is more efficient than the default rewriter.
-class single_term_rewriter
-{
-  rewriter& m_rewriter;
-  ATerm m_phi; // expression in internal rewriter format
+      /// Constructor.
+      ///
+      template <typename Iter>
+      rewriter_map(Iter start, Iter end)
+        : SubstitutionMap(start, end)
+      {}
 
-  public:
-    /// Constructor.
-    /// \param phi The term to be rewritten.
-    single_term_rewriter(rewriter& r, const data_expression& phi)
-      : m_rewriter(r)
-    {
-      m_phi = m_rewriter.m_rewriter.get()->toRewriteFormat(phi);
-    }   
+      /// Function application.
+      ///
+      term_type operator()(const variable_type& v) const
+      {
+        typename SubstitutionMap::const_iterator i = this->find(v);
+        return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
+      }
+  };
 
-		/// \brief Rewrites the data expression phi that has been passed through the constructor,
-		/// and on the fly applies the substitutions in the given sequence.
-		/// \return The normal form of phi.
-		///
-		template <typename SubstitutionSequence>
-		data_expression operator()(const SubstitutionSequence& sigma) const
-		{
-		  Rewriter* r = m_rewriter.m_rewriter.get();
-
-		  // TODO: Copying the substitutions can be avoided by making the rewriter more generic.
-		  for (typename SubstitutionSequence::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-		  {
-		    r->setSubstitution(i->m_variable, i->m_value);
-		  }
-		  data_expression result = r->fromRewriteFormat(r->rewriteInternal(m_phi));
-		  r->clearSubstitutions();
-		  return result;
-		}
-};
+  /// Creates a rewriter that contains rewrite rules for the standard data types like
+  /// Pos, Nat and Int.
+  /// \param[in] strategy The rewriter strategy
+  /// \return The created rewriter
+  inline
+  rewriter default_data_rewriter(rewriter::strategy strategy = rewriter::jitty)
+  {
+    return rewriter(default_data_specification(), strategy);
+  }
 
 } // namespace data
 

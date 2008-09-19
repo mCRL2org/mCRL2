@@ -15,74 +15,69 @@
 #include <set>
 #include <utility>
 #include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
-
-  // Is called in the case rewriting is done with a substitution range.
-  template <typename DataRewriter, typename SubstitutionRange>
-  data::data_expression data_rewrite(DataRewriter rewr, data::data_expression d, const SubstitutionRange& sigma, bool& b)
+  
+  struct no_substitution
   {
-    data::data_expression result = rewr(d, sigma);
-    std::set<data::data_variable> v = data::find_all_data_variables(result);
-    b = !v.empty();
-    return result;
-  }
-
-  // Is called in the case rewriting is done without a substitution range.
-  template <typename DataRewriter>
-  data::data_expression data_rewrite(DataRewriter rewr, data::data_expression d, const int&, bool&)
-  {
-    return rewr(d);
-  }
-
-  // Is called in the case rewriting is done with a substitution range.
-  template <typename DataRewriter, typename SubstitutionRange>
-  data::data_expression_list data_rewrite_list(DataRewriter rewr, data::data_expression_list v, const SubstitutionRange& sigma, bool& b)
-  {
-    std::vector<data::data_expression> w;
-    b = false;
-    for (data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
-    {
-      data::data_expression d = rewr(*i, sigma);
-      if (!b)
-      {
-        std::set<data::data_variable> v = data::find_all_data_variables(d);
-        b = !v.empty();
-      }
-      w.push_back(d);
-    }
-    return data::data_expression_list(w.begin(), w.end());
-  }
-
-  // Is called in the case rewriting is done without a substitution range.
-  template <typename DataRewriter>
-  data::data_expression_list data_rewrite_list(DataRewriter rewr, data::data_expression_list v, const int&, bool&)
-  {
-    // TODO: there is probably a more efficient way to compute this
-    std::vector<data::data_expression> w;
-    for (data::data_expression_list::iterator i = v.begin(); i != v.end(); ++i)
-    {
-      w.push_back(rewr(*i));
-    }
-    return data::data_expression_list(w.begin(), w.end());
-  }
+  };
 
   // Simplifying PBES rewriter.
-  // If DataSubstitutionRange is of type int, then the rewriter is called without
-  // a substitution range.
-  template <typename DataRewriter, typename DataSubstitutionRange>
-  struct simplify_rewrite_builder: public pbes_expression_builder<pbes_expression, std::pair<DataSubstitutionRange, bool> >
+  template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
+  struct simplify_rewrite_builder: public pbes_expression_builder<Term, SubstitutionFunction>
   {
-    // argument type of visit functions
-    typedef pbes_expression_builder<pbes_expression, std::pair<DataSubstitutionRange, bool> > super;
-    typedef typename super::argument_type argument_type;
+    typedef pbes_expression_builder<Term, SubstitutionFunction>                super;
+    typedef SubstitutionFunction                                               argument_type;
+    typedef typename super::term_type                                          term_type;
+    typedef typename core::term_traits<term_type>::data_term_type              data_term_type;             
+    typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;    
+    typedef typename core::term_traits<term_type>::variable_sequence_type variable_sequence_type;
+    typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
+    typedef core::term_traits<Term> tr;
 
     DataRewriter& m_data_rewriter;
+
+    // Is called in the case rewriting is done with a substitution function.
+    template <typename T>
+    data_term_type rewrite(data_term_type d, T& sigma)
+    {
+      return m_data_rewriter(d, sigma);
+    }
+    
+    // Is called in the case rewriting is done without a substitution function.
+    data_term_type rewrite(data_term_type d, no_substitution&)
+    {
+      return m_data_rewriter(d);
+    }
+    
+    // Is called in the case rewriting is done with a substitution function.
+    template <typename T>
+    data_term_sequence_type rewrite(const data_term_sequence_type& v, T& sigma)
+    {
+      std::vector<data_term_type> w;
+      for (typename data_term_sequence_type::const_iterator i = v.begin(); i != v.end(); ++i)
+      {
+        w.push_back(rewrite(*i, sigma));
+      }
+      return data_term_sequence_type(w.begin(), w.end());
+    }
+    
+    // Is called in the case rewriting is done without a substitution function.
+    template <typename T>
+    data_term_sequence_type rewrite(const data_term_sequence_type& v, no_substitution& n)
+    {
+      std::vector<data_term_type> w;
+      for (typename data_term_sequence_type::const_iterator i = v.begin(); i != v.end(); ++i)
+      {
+        
+        w.push_back(rewrite(*i, n));
+      }
+      return data_term_sequence_type(w.begin(), w.end());
+    }
 
     /// Constructor.
     ///
@@ -92,156 +87,156 @@ namespace detail {
 
     /// Visit data expression node.
     ///
-    pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, argument_type& arg)
+    term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
     {
-      data::data_expression result = data_rewrite(m_data_rewriter, d, arg.first, arg.second);
+      data_term_type result = rewrite(d, sigma);
       return result;
     }
 
     /// Visit true node.
     ///
-    pbes_expression visit_true(const pbes_expression& x, argument_type& arg)
+    term_type visit_true(const term_type& x, SubstitutionFunction& sigma)
     {
-      return data::data_expr::true_();
+      return tr::true_();
     }
 
     /// Visit false node.
     ///
-    pbes_expression visit_false(const pbes_expression& x, argument_type& arg)
+    term_type visit_false(const term_type& x, SubstitutionFunction& sigma)
     {
-      return data::data_expr::false_();
+      return tr::false_();
     }
 
     /// Visit not node.
     ///
-    pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, argument_type& arg)
+    term_type visit_not(const term_type& x, const term_type& n, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      if (is_true(n))
+      if (tr::is_true(n))
       {
-        arg.second = false;
-        return data::data_expr::false_();
+        return tr::false_();
       }
-      if (is_false(n))
+      if (tr::is_false(n))
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
-      return pbes_expression(); // continue recursion
+      return term_type(); // continue recursion
     }
 
     /// Visit and node.
     ///
-    pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
+    term_type visit_and(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      if (is_true(left))
+      if (tr::is_true(left))
       {
-        return super::visit(right, arg);
+        return super::visit(right, sigma);
       }
-      if (is_true(right))
+      if (tr::is_true(right))
       {
-        return super::visit(left, arg);
+        return super::visit(left, sigma);
       }
-      if (is_false(left))
+      if (tr::is_false(left))
       {
-        arg.second = false;
-        return data::data_expr::false_();
+        return tr::false_();
       }
-      if (is_false(right))
+      if (tr::is_false(right))
       {
-        arg.second = false;
-        return data::data_expr::false_();
+        return tr::false_();
       }
       if (left == right)
       {
-        return super::visit(left, arg);
+        return super::visit(left, sigma);
       }
-      return pbes_expression(); // continue recursion
+      return term_type(); // continue recursion
     }
 
     /// Visit or node.
     ///
-    pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
+    term_type visit_or(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      if (is_true(left))
+      if (tr::is_true(left))
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
-      if (is_true(right))
+      if (tr::is_true(right))
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
-      if (is_false(left))
+      if (tr::is_false(left))
       {
-        return super::visit(right, arg);
+        return super::visit(right, sigma);
       }
-      if (is_false(right))
+      if (tr::is_false(right))
       {
-        return super::visit(left, arg);
+        return super::visit(left, sigma);
       }
       if (left == right)
       {
-        return super::visit(left, arg);
+        return super::visit(left, sigma);
       }
-      return pbes_expression(); // continue recursion
+      return term_type(); // continue recursion
     }
 
     /// Visit imp node.
     ///
-    pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, argument_type& arg)
+    term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      if (is_true(left))
+      if (tr::is_true(left))
       {
-        return super::visit(right, arg);
+        return super::visit(right, sigma);
       }
-      if (is_false(left))
+      if (tr::is_false(left))
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
-      if (is_true(right))
+      if (tr::is_true(right))
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
       if (left == right)
       {
-        arg.second = false;
-        return data::data_expr::true_();
+        return tr::true_();
       }
-      if (is_false(right))
+      if (tr::is_false(right))
       {
-        return super::visit(not_(left), arg);
+        return super::visit(tr::not_(left), sigma);
       }
-      return pbes_expression(); // continue recursion
+      return term_type(); // continue recursion
     }
 
     /// Visit forall node.
     ///
-    pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      return forall(variables, visit(phi, arg));
+      return tr::forall(variables, visit(phi, sigma));
     }
 
     /// Visit exists node.
     ///
-    pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& phi, argument_type& arg)
+    term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      using namespace pbes_expr_optimized;
-      return exists(variables, visit(phi, arg));
+      return tr::exists(variables, visit(phi, sigma));
     }
 
     /// Visit propositional variable node.
     ///
-    pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, argument_type& arg)
+    term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, SubstitutionFunction& sigma)
     {
-      return propositional_variable_instantiation(v.name(), data_rewrite_list(m_data_rewriter, v.parameters(), arg.first, arg.second));
+      return typename tr::propositional_variable_type(tr::name(v), rewrite(tr::param(v), sigma));
+    }
+   
+    /// Applies this builder to the term x.
+    ///
+    term_type operator()(const term_type& x)
+    {
+      SubstitutionFunction tmp;
+      return visit(x, tmp);
+    }
+
+    /// Applies this builder to the term x, with substitution sigma.
+    ///
+    term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+    {
+      return visit(x, sigma);
     }
   };
 
