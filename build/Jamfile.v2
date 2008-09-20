@@ -34,10 +34,15 @@ rule select-configuration ( properties * ) {
   }
   else if <target-os>darwin in $(properties) {
     if <toolset>darwin in $(properties) { # XCode toolset on OS X
+      cxxflags = -std=c++98 ;
+
+      if <debug-symbols>on in $(properties) {
+        cxxflags += -ggdb ;
+      }
+
       requirements += <define>__darwin__
-                      <cxxflags>"-std=c++98"
+                      $(cxxflags)
                       <cflags>"-std=c99"
-                      <debug-symbols>on:<cxxflags>"-ggdb"
                       <linkflags>"-undefined dynamic_lookup" ;
     }
   }
