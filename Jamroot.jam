@@ -259,7 +259,7 @@ project toolset
        : default-build
           <link>$(link-variant)
        : usage-requirements
-          <include>./build/workarounds/all
+          <include>./build/workarounds
        ;
 
 # Only from the root of the source tree

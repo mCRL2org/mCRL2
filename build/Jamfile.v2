@@ -6,53 +6,43 @@ import regex ;
 include $(TOP)/build/config.jam ;
 
 rule select-configuration ( properties * ) {
-  # versions of gcc without signed overflow (breaks ATerm library)
-  local gcc-no-overflow = 4.3.0 4.3.1 ;
+  local requirements ;
 
-  if <target-os>windows in $(properties) {
-    if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
-      return <define>WIN32
-             <define>__WIN32__
-             <define>_CRT_SECURE_NO_DEPRECATE
-             <define>_SCL_SECURE_NO_WARNINGS
-             <define>_SCL_SECURE_NO_DEPRECATE
-             <define>_HAS_ITERATOR_DEBUGGING=0
-             <define>_SECURE_SCL=0
-             <include>$(TOP)/build/workarounds/msvc
-             <exception-handling>on ;
+  if <toolset>gcc in $(properties) { # GCC
+    if <link>static in $(properties) {
+      requirements = <linkflags>-export-dynamic ;
     }
-    else if <toolset>gcc in $(properties) { # MinGW
-      <include>$(TOP)/build/workarounds/mingw
-      <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
-      <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow" ;
+
+    # versions of gcc without signed overflow (breaks ATerm library)
+    if [ MATCH ^(4\.[3456789]).* : [ feature.get-values toolset-gcc:version : $(properties)) ] ] {
+      requirements += <cxxflags>"-fno-strict-overflow" <cflags>"-fno-strict-overflow" ;
+    }
+  }
+  else if <target-os>windows in $(properties) {
+    if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
+      requirements += <define>WIN32
+                      <define>__WIN32__
+                      <define>_CRT_SECURE_NO_DEPRECATE
+                      <define>_CRT_SECURE_NO_WARNINGS
+                      <define>_SCL_SECURE_NO_WARNINGS
+                      <define>_SCL_SECURE_NO_DEPRECATE
+                      <define>_HAS_ITERATOR_DEBUGGING=0
+                      <define>_SECURE_SCL=0
+                      <include>$(TOP)/build/workarounds/msvc
+                      <exception-handling>on ;
     }
   }
   else if <target-os>darwin in $(properties) {
     if <toolset>darwin in $(properties) { # XCode toolset on OS X
-      return <define>__darwin__
-            <include>$(TOP)/build/workarounds
-            <cxxflags>"-std=c++98"
-            <cflags>"-std=c99"
-            <debug-symbols>on:<cxxflags>"-ggdb"
-            <linkflags>"-undefined dynamic_lookup" ;
+      requirements += <define>__darwin__
+                      <cxxflags>"-std=c++98"
+                      <cflags>"-std=c99"
+                      <debug-symbols>on:<cxxflags>"-ggdb"
+                      <linkflags>"-undefined dynamic_lookup" ;
     }
   }
-  else if <target-os>cygwin in $(properties) { # Cygwin
-    return <include>$(TOP)/build/workarounds/cygwin
-           <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-fno-strict-overflow"
-           <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow" ;
-  }
-  else if <target-os>solaris in $(properties) {
-    return <include>$(TOP)/build/workarounds ;
-  }
-  else if <toolset>gcc in $(properties) { # GCC
-    return <toolset-gcc:version>$(gcc-no-overflow):<cxxflags>"-std=c++98 -fno-strict-overflow"
-           <toolset-gcc:version>$(gcc-no-overflow):<cflags>"-std=c99 -fno-strict-overflow"
-           <link>static:<linkflags>-export-dynamic ;
-  }
-  else {
-    return <include>$(TOP)/build/workarounds ;
-  }
+
+  return $(requirements) ;
 }
 
 # Helper rule for extracting compiler/linker options from strings (unix oriented)

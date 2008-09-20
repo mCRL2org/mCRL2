@@ -19,7 +19,7 @@ distclean: clean
 	$(RM) -rf build/bin
 
 parsers: mcrl2parser chiparser ltsview_fsmparser liblts_fsmparser
-	cp /usr/include/FlexLexer.h build/workarounds/all
+	cp /usr/include/FlexLexer.h build/workarounds
 
 liblts_fsmparser:
 	cd libraries/lts/source; \

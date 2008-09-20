@@ -8,7 +8,6 @@
 //
 /// \file lpstrans.h
 
-#include <stdbool.h>
 #include "aterm2.h"
 
 ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs);

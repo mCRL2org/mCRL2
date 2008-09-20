@@ -193,9 +193,9 @@ namespace squadt {
 
       if (process_handle != 0) {
         DWORD exit_code;
-    
+
         WaitForSingleObject(process_handle, INFINITE);
-    
+
         h((GetExitCodeProcess(process_handle, &exit_code) && exit_code == 0) ? process::completed : process::aborted);
       }
       else {
@@ -239,7 +239,7 @@ namespace squadt {
 #if defined(__APPLE__)
     class smaller {
       public:
-        
+
         bool operator() (ProcessSerialNumber const& l, ProcessSerialNumber const& r) const {
           return l.highLongOfPSN < r.highLongOfPSN || (l.highLongOfPSN == r.highLongOfPSN && l.lowLongOfPSN < r.lowLongOfPSN);
         }
