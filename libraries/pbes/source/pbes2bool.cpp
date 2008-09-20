@@ -436,7 +436,9 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bool construct_counter_example,
                    bes::equations  &bes_equations,
                    const bes::variable_type current_variable,
-                   const bool opt_store_as_tree) 
+                   const bool opt_store_as_tree,
+                   const bool opt_precompile_pbes,
+                   Rewriter *rewriter) 
 { 
   
   if (is_propositional_variable_instantiation(p))
@@ -484,13 +486,15 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_and(p))
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
+                            opt_precompile_pbes,rewriter);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
+                            opt_precompile_pbes,rewriter);
     if (is_false(b2))
     { return b2;
     }
@@ -511,14 +515,16 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   { 
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
+                            opt_precompile_pbes,rewriter);
     if (bes::is_true(b1))
     { return b1;
     }
 
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
-                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree);
+                            construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
+                            opt_precompile_pbes,rewriter);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -543,7 +549,13 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   { return bes::false_();
   }
     
-  cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
+  if (opt_precompile_pbes)
+  { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " <<
+                     pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) << "\n";
+  }
+  else
+  { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
+  }
   exit(1);
   return bes::false_();
 }
@@ -731,7 +743,9 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                         tool_options.opt_construct_counter_example,
                         bes_equations,
                         variable_to_be_processed,
-                        tool_options.opt_store_as_tree);
+                        tool_options.opt_store_as_tree,
+                        tool_options.opt_precompile_pbes,
+                        rewriter);
 
       for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
