@@ -16,6 +16,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_expression_with_variables.h"
 #include "mcrl2/data/data_variable.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -26,7 +27,7 @@ namespace core {
   {
     typedef data::data_expression term_type;
     typedef data::data_variable variable_type;
-    typedef data::data_variable_list data_variable_sequence_type;
+    typedef data::data_variable_list variable_sequence_type;
     
     static inline
     term_type true_() { return data::data_expr::true_(); }
@@ -43,15 +44,6 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q) { return data::data_expr::or_(p, q); }
     
-    // static inline
-    // term_type imp(term_type p, term_type q) { return data::data_expr::imp(p, q); }
-    
-    // static inline
-    // term_type forall(data_variable_sequence_type l, term_type p) { return data::data_expr::forall(l, p); }
-    
-    // static inline
-    // term_type exists(data_variable_sequence_type l, term_type p) { return data::data_expr::exists(l, p); }
-
     static inline
     bool is_true(term_type t) { return data::data_expr::is_true(t); }
     
@@ -82,21 +74,11 @@ namespace core {
       return v;
     }
 
-/*    
-    template <typename FwdIt>
-    static
-    term_type join_and(FwdIt first, FwdIt last)
+    static inline
+    bool is_constant(term_type d)
     {
-      return data::data_expr::join_and(first, last);
+      return find_all_data_variables(d).empty();
     }
-
-    template <typename FwdIt>
-    static
-    term_type join_or(FwdIt first, FwdIt last)
-    {
-      return data::data_expr::join_or(first, last);
-    }
-*/    
   };
 
   template <>
@@ -104,7 +86,7 @@ namespace core {
   {
     typedef data::data_expression_with_variables term_type;
     typedef data::data_variable variable_type;
-    typedef data::data_variable_list data_variable_sequence_type;
+    typedef data::data_variable_list variable_sequence_type;
     
     static inline
     term_type true_() { return data::data_expr::true_(); }
@@ -126,24 +108,6 @@ namespace core {
     {
       return term_type(data::data_expr::or_(p, q), data::data_variable_list_union(p.variables(), q.variables()));
     }
-    
-    // static inline
-    // term_type imp(term_type p, term_type q)
-    // {
-    //   return term_type(data::data_expr::imp(p, q), data::data_variable_list_union(p.variables(), q.variables()));
-    // }
-    // 
-    // static inline
-    // term_type forall(data_variable_sequence_type l, term_type p)
-    // {
-    //   return term_type(data::data_expr::forall(l, p), data::data_variable_list_difference(p.variables(), l));
-    // }
-    // 
-    // static inline
-    // term_type exists(data_variable_sequence_type l, term_type p)
-    // {
-    //   return term_type(data::data_expr::exists(l, p), data::data_variable_list_difference(p.variables(), l));
-    // }
     
     static inline
     bool is_true(term_type t) { return data::data_expr::is_true(t); }
@@ -180,21 +144,6 @@ namespace core {
     {
       return d.variables().empty();
     }
-/*    
-    template <typename FwdIt>
-    static
-    term_type join_and(FwdIt first, FwdIt last)
-    {
-      return core::detail::join(first, last, and_, true_());
-    }
-
-    template <typename FwdIt>
-    static
-    term_type join_or(FwdIt first, FwdIt last)
-    {
-      return core::detail::join(first, last, or_, false_());
-    }
-*/    
   };
   
 } // namespace core

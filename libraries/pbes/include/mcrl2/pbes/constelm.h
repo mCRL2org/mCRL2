@@ -430,7 +430,7 @@ namespace detail {
             {
               changed = true;
               data_term_type new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
-              if (tr::is_constant(new_value))
+              if (core::term_traits<data_term_type>::is_constant(new_value))
               {
                 constraints[d] = new_value;
               }
@@ -480,6 +480,9 @@ namespace detail {
       // The edges of the dependency graph. They are stored in a map, to
       // easily access all out-edges corresponding to a particular vertex.
       edge_map m_edges;
+
+      // Store the removed variables.
+      std::map<propositional_variable_decl_type, std::set<variable_type> > m_removed;
 
       // Prints the vertices of the dependency graph.
       void print_vertices() const
@@ -632,6 +635,7 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
             if (u.constraints.empty())
             {
               std::cout << "  equation " << core::pp(u.variable) << std::endl;
+              m_removed[u.variable].insert(u.variable.parameters().begin(), u.variable.parameters().end());
             }
             else
             {
@@ -639,6 +643,7 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
               for (typename std::vector<variable_type>::iterator j = removed.begin(); j != removed.end(); ++j)
               {
                 std::cout << "  parameter (" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
+                m_removed[u.variable].insert(*j);
               }
             }
           }
@@ -678,6 +683,11 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
             );
           }
         }
+      }
+      
+      const std::map<propositional_variable_decl_type, std::set<variable_type> >& removed_variables() const
+      {
+        return m_removed;
       }
   };
 

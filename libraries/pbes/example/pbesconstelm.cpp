@@ -31,8 +31,6 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  typedef data::rewriter my_data_rewriter;
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
   typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
 
   std::string infile;            // location of pbes
@@ -100,7 +98,7 @@ int main(int argc, char* argv[])
     p.load(infile);
 
     // data rewriter
-    my_data_rewriter datar(p.data());
+    data::rewriter datar(p.data());
 
     // name generator
     std::string prefix = "UNIQUE_PREFIX"; // unique_prefix(p);
