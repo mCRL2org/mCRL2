@@ -41,7 +41,7 @@ rule select-configuration ( properties * ) {
       }
 
       requirements += <define>__darwin__
-                      $(cxxflags)
+                      <cxxflags>$(cxxflags)
                       <cflags>"-std=c99"
                       <linkflags>"-undefined dynamic_lookup" ;
     }
