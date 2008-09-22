@@ -65,3 +65,7 @@ Data Library is inside the namespace =mcrl2::data=. Let's look at a simple examp
 [include data_specifications.qbk]
 
 [include data_rewriter.qbk]
+
+[include pbes_rewriter.qbk]
+
+[/ include data_enumerator.qbk]

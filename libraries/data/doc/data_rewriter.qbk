@@ -1,10 +1,10 @@
 [section: Data rewriters]
 
-A data rewriter is a function that rewrites data expressions using a number of rewrite rules.
-In the mCRL2 toolset a class =data::rewriter= is available that is initialized using a
-data specification. The equations of the data specification are used as rewrite rules from
-left to right. An example is given below. The function `default_data_rewriter` returns a
-rewriter containing rewrite rules for all predefined data types.
+A rewriter is a function that rewrites terms using a number of rewrite rules.
+In the mCRL2 toolset a class =data::rewriter= is available that operates on data expressions,
+and that is initialized using a data specification. The equations of the data specification
+are interpreted as rewrite rules from left to right. An example is given below.
+The function `default_data_rewriter` returns a rewriter containing rewrite rules for all predefined data types.
 
     // rewrite two data expressions, and check if they are the same
     rewriter r = default_data_rewriter();
@@ -21,66 +21,84 @@ and =d2= are equivalent, otherwise the answer is unknown.
 
 For efficiency reasons a rewriter can be invoked with an optional substitution function
 __sigma as a second argument, where __sigma maps data variables to data expressions. The
-function __sigma must satisfy the property
+function __sigma must satisfy the property that for all data variables =v=
+
+    __sigma(v) == r(__sigma(v)).
+
+Under this condition the following property holds:
 
     r(d,__sigma) == r(__sigma(d)).
 
-Note that in general the
-computation of [^r(d,__sigma)] can be done much more efficiently than the computation of
-[^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
+Note that in general the computation of [^r(d,__sigma)] can be done more efficiently than the
+computation of [^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
 
-[important
-The class `data::rewriter` does not truly support substitution functions.
-Instead one can pass a sequence of substitutions as a second argument. Limitations of the
-=Rewriter= class that is used for the implementation of =rewriter= prevent to make __sigma
-a generic substitution function. Below an example of the current interface is given:
-]
+An example of rewriting with a substitution function is given below. It uses the
+predefined wrapper class =rewriter_map= to create a substitution function based on a =std::map=. 
 
   rewriter r = default_data_rewriter();
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
-  std::string var_decl = "datavar m, n: Pos;\n";
-  atermpp::vector<rewriter::substitution> sigma;
-  sigma.push_back(rewriter::substitution(r, parse_data_expression("m", var_decl), parse_data_expression("3")));
-  sigma.push_back(rewriter::substitution(r, parse_data_expression("n", var_decl), parse_data_expression("4")));
+  std::string var_decl = "m, n: Pos;\n";
+  rewriter_map<atermpp::map<data_variable, data_expression> > sigma; 
+  sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
+  sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
-  // Rewrite two data expressions, and check if they are the same
   data::data_expression d1 = parse_data_expression("m+n", var_decl);
   data::data_expression d2 = parse_data_expression("7");
   assert(r(d1, sigma) == r(d2));
 
-[/
-  struct substitution_function
-  {
-    const std::map<data::data_variable, data::data_expression>& s; 
-
-    substitution_function(const std::map<data::data_variable, data::data_expression>& s_)
-      : s(s_)
-    {}
-  
-    data::data_expression operator()(data::data_variable v) const
-    {
-      std::map<data::data_variable, data::data_expression>::const_iterator i = s.find(v);
-      return i == s.end() ? v : *i;
-    }
-  };
-
-  // precompute substitutions
-  std::string var_decl = "var m, n: Pos;\n";
-  std::map<data::data_variable, data::data_expression> m;
-  m[parse_data_expression("m", var_decl)] = parse_data_expression("3"));
-  m[parse_data_expression("n", var_decl)] = parse_data_expression("4"));
-  substitution_function sigma(m);
-
-  data::data_expression d1 = r(parse_data_expression("m+n"), sigma);
-  data::data_expression d2 = r(parse_data_expression("7"));
-  assert(d1 == d2);
-]
-
 [caution
 The current implementation of rewriting with substitutions to data variables is
-inefficient, since a lot of unnecessary copying takes place. The interface of the
-underlying =Rewriter= class needs to be improved to get rid of these inefficiencies.
+inefficient. The interface of the underlying =Rewriter= class needs to be adapted
+to get rid of these inefficiencies.
 ]
+
+[section: Rewriter Concept]
+
+In the mCRL2 toolset a =Rewriter= is a concept with the following requirements:
+
+[table Associated types
+    [[Expression] [Meaning]]
+    [ [ [^Rewriter::term_type    ] ] [the type of the terms on which the rewriter operates ]]
+    [ [ [^Rewriter::variable_type] ] [the type of the variables ]]
+]
+
+A =SubstitutionFunction= is a function that maps variables to terms. Let =sigma= be a
+substitution function, and let =v= be an expression of type =Rewriter::variable_type=.
+
+[table Expression semantics for SubstitutionFunction
+    [[Expression] [Result]]
+    [ [ [^sigma(v)       ] ] [Returns an expression of type =Rewriter::term_type=]]
+]
+
+Let =r= be a =Rewriter=, let =d= be an expression of type =Rewriter::term_type=
+and let =sigma= be a =SubstitutionFunction=.
+
+[table Expression semantics for Rewriter
+    [[Expression] [Result]]
+    [ [ [^r(d)           ] ] [Returns an expression of type =Rewriter::term_type= that is the result of applying the rewriter =r= to term =d= ]]
+    [ [ [^r(d, sigma)    ] ] [Returns an expression of type =Rewriter::term_type= that is the result of applying the rewriter =r= to term =d=,
+                              while on the fly applying the substitution function =sigma= to all data variables in =d=.]
+                             ]
+]
+
+[endsect] [/ Rewriter Concept]
+
+[section: Algorithms using a rewriter]
+
+Algorithms that use a rewriter are typically implemented with a template parameter
+for the rewriter. An example of this is the constelm algorithm of the LPS library:
+
+    template <typename Rewriter>
+    specification constelm(const specification& spec, Rewriter r, bool verbose = false)
+    {
+      ...
+    }
+
+The algorithm may only assume that the requirements of the Rewriter Concept hold,
+with proper choices for the nested variable and term types.
+
+[endsect] [/ Algorithms using a rewriter]
+
 
 [endsect] [/ Data rewriters]
