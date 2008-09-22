@@ -9,7 +9,7 @@
 /// \file rewriter_test.cpp
 /// \brief Test for the pbes rewriters.
 
-#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include <iostream>
 #include <set>
@@ -210,12 +210,36 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
 }
 
+void test_substitutions()
+{
+  std::cout << "<test_substitutions>" << std::endl;
+
+  data::rewriter datar = data::default_data_rewriter();
+  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
+
+  data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma; 
+  sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
+  sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));
+
+  std::string var_decl =
+    "datavar         \n"
+    "  m, n:  Pos;   \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Pos;       \n"
+    ;
+  pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
+  pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
+  BOOST_CHECK(r(d1, sigma) == r(d2));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
+  test_substitutions();
 
   return 0;
 }

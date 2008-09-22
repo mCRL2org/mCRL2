@@ -551,6 +551,12 @@ namespace core {
 
     static inline
     propositional_variable_type prop_var(term_type t) { return propositional_variable_type(t); }
+
+    static inline
+    term_type variable2term(variable_type v)
+    {
+      return v;
+    }
   };
 
 } // namespace core

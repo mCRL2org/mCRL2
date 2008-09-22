@@ -203,7 +203,14 @@ namespace core {
 
     static inline
     propositional_variable_type prop_var(term_type t) { return propositional_variable_type(t); }
+
+    static inline
+    term_type variable2term(variable_type v)
+    {
+      return term_type(v, atermpp::make_list(v));
+    }
   };
+
 } // namespace core
 
 } // namespace mcrl2
