@@ -561,8 +561,8 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
 
 # Target for a library that is part of the big mcrl2 library when link=shared
 rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requirements * ) {
-  alias headers : : [ property.select use include : $(requirements) ]
-                : : [ property.select use include : $(usage-requirements) ] ;
+  alias headers : : [ property.change $(requirements) : <library> ]
+                : : [ property.change $(usage-requirements) : <library> ] ;
 
   if $(sources) {
     if $(link-variant) != static {
