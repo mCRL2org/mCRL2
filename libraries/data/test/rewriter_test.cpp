@@ -97,10 +97,9 @@ void test2()
   assert(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  atermpp::map<data_variable, data_expression> substitutions;
-  substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
-  substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
-  rewriter_map<atermpp::map<data_variable, data_expression> > sigma(substitutions); 
+  rewriter_map<atermpp::map<data_variable, data_expression> > sigma; 
+  sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
+  sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
   // Rewrite two data expressions, and check if they are the same
   d1 = parse_data_expression("m+n", var_decl);
@@ -132,12 +131,11 @@ void test3()
   BOOST_CHECK(z.variables().empty());
   
   std::string var_decl = "m, n: Pos;\n";
-  substitution_map substitutions;
+  rewriter_map<substitution_map> sigma; 
   data_variable m = parse_data_expression("m", var_decl);
   data_variable n = parse_data_expression("n", var_decl);
-  substitutions[m] = r(data_expression_with_variables(parse_data_expression("3")));
-  substitutions[n] = r(data_expression_with_variables(parse_data_expression("4")));
-  rewriter_map<substitution_map> sigma(substitutions); 
+  sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
+  sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
   data_expression_with_variables sigma_m = sigma(m);
 
