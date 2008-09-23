@@ -22,9 +22,10 @@
 #
 #===============================================================================
 #
-# Usage: codegen.py [-v] "<input>"
+# Usage: codegen.py [-v] "<input> <output>"
 #                          ^^^^^^^
 #                          <input> is a filename
+#                          <output> is a filename
 #
 #===============================================================================
 
@@ -38,17 +39,17 @@ import Parsing
 #
 # Translator, used to store global substitutions as a dictionary
 #
-sorts_table = {}
-functions_table = {}
-variables_table = {}
-recognisers = {}
-includes_table = {}
-current_sort = "" # current sort, to map include file to sort
-# Global string to collect the generated code
-outputcode = ""
+sorts_table = {}      # Maps sorts to internal names
+functions_table = {}  # Maps ids to function names
+arity_table = {}      # Maps (id,arity) pairs to function names
+variables_table = {}  # Maps variables to sorts
+recognisers = {'':set()}
+includes_table = {}   # Maps sorts to include files
+current_sort = ""     # current sort, to map include file to sort
+
+outputcode = ""       # String to collect the generated code
 
 # MACROS
-
 FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
 #define MCRL2_DATA_%(uppercasename)s_H
 
@@ -227,6 +228,15 @@ def store_projection_arguments(id, label, sortexpr):
                 recognisers[id] = [(label.label, index)]
             index += 1    
 
+
+def remove_duplicates(list):
+    new_list = []
+    for l in list:
+        print l
+        if l not in new_list:
+            new_list.append(l)
+    return new_list
+
 #--------------------------------------------------------------#
 # generate_projection_functions
 #--------------------------------------------------------------#
@@ -235,8 +245,7 @@ def generate_projection_functions():
     code = ''
 
     for recogniser in recognisers:
-        functions = recognisers[recogniser]
-        print "recogniser: %s\n function:%s\n" % (recogniser, functions)
+        functions = remove_duplicates(recognisers[recogniser])
         assertions = 'assert('
         cases = ''
         for function in functions:
@@ -568,6 +577,7 @@ class OpDecls(Parsing.Nonterm):
         print "Parsing opdecl"
         self.code = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
+        arity_table[(id.string,sortexpr.arity)] = label.label
         store_projection_arguments(id, label, sortexpr)
         
         # Debugging
@@ -579,6 +589,7 @@ class OpDecls(Parsing.Nonterm):
         print "Parsing opdecls"
         self.lastcode = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
+        arity_table[(id.string,sortexpr.arity)] = label.label
         store_projection_arguments(id, label, sortexpr)
         self.code = opdecls.code + self.lastcode
 
@@ -594,7 +605,7 @@ class EqnDecls(Parsing.Nonterm):
         self.variables = lhs.variables
         self.variables= self.variables.union(rhs.variables)
         self.condition = TokenID(parser, "true")
-        self.condition.inlinecode = "%s()" % (functions_table[self.condition.string])
+        self.condition.inlinecode = "%s()" % (arity_table[(self.condition.string,0)])
         self.inlinecode = generate_equation_code(self.variables, self.condition, lhs, rhs)
         self.equations = [self.inlinecode]
 
@@ -620,7 +631,7 @@ class EqnDecls(Parsing.Nonterm):
         self.variables = lhs.variables
         self.variables = self.variables.union(rhs.variables)
         self.condition = TokenID(parser, "true")
-        self.condition.inlinecode = "%s()" % (functions_table[self.condition.string])
+        self.condition.inlinecode = "%s()" % (arity_table[(self.condition.string,0)])
         self.eqncode = generate_equation_code(self.variables, self.condition, lhs, rhs)
         self.inlinecode = dataeqns.inlinecode + "\n" + self.eqncode
         self.equations = dataeqns.equations
@@ -662,7 +673,7 @@ class DataExpr(Parsing.Nonterm):
 
     def reduceApplication(self, head, lbrack, arguments, rbrack):
         "%reduce DataExpr lbrack DataExprs rbrack"
-        self.inlinecode = "%s(%s)" % (head.inlinecode.rstrip('()'), arguments.inlinecode)
+        self.inlinecode = "%s(%s)" % (arity_table[(head.string, arguments.count)], arguments.inlinecode)
         self.variables = head.variables
         self.variables = self.variables.union(arguments.variables)
 
@@ -675,6 +686,7 @@ class DataExprPrimary(Parsing.Nonterm):
     def reduceID(self, id):
         "%reduce id"
         if id.string in functions_table:
+            self.inlinecode = "UNDEF"
             self.inlinecode = "%s()" % (functions_table[id.string])
             self.variables = set()
         else:
@@ -700,6 +712,7 @@ class DataExprs(Parsing.Nonterm):
         "%reduce DataExpr"
         self.inlinecode = dataexpr.inlinecode
         self.variables = dataexpr.variables
+        self.count = 1
 
         # Debugging
         self.string = dataexpr.string
@@ -710,6 +723,7 @@ class DataExprs(Parsing.Nonterm):
         self.inlinecode = dataexprs.inlinecode + ", " + dataexpr.inlinecode
         self.variables = dataexprs.variables
         self.variables = self.variables.union(dataexpr.variables)
+        self.count = dataexprs.count + 1
 
         # Debugging
         self.string = dataexprs.string + ", " + dataexpr.string
@@ -723,6 +737,7 @@ class SortExpr(Parsing.Nonterm):
         self.inlinecode = sortexpr.inlinecode
         self.argumentcode = sortexpr.argumentcode
         self.recogniserstring = sortexpr.recogniserstring
+        self.arity = 0
         
         # Debugging
         self.string = sortexpr.string
@@ -735,6 +750,7 @@ class SortExpr(Parsing.Nonterm):
         self.inlinecode = "function_sort(%s, %s)" % (domain.inlinecode, sortexpr.inlinecode)
         self.argumentcode = domain.argumentcode
         self.recogniserstring = domain.recogniserstring
+        self.arity = domain.arity
 
         # Debugging
         self.string = "%s -> %s" % (domain.string, sortexpr.string)
@@ -749,6 +765,7 @@ class Domain(Parsing.Nonterm):
         self.inlinecode = "%s()" % (sorts_table[expr.string])
         self.argumentcode = "%s" % (sorts_table[expr.string])
         self.recogniserstring = "%s" % (label.label)
+        self.arity = 1
 
         # Debugging
         self.string = expr.string + label.string
@@ -760,6 +777,7 @@ class Domain(Parsing.Nonterm):
         self.inlinecode = "%s, %s" % (Domain.inlinecode, SortExprPrimary.inlinecode)
         self.argumentcode = "%s, %s" % (Domain.argumentcode, SortExprPrimary.argumentcode)
         self.recogniserstring = "%s, %s" % (Domain.recogniserstring, label.label)
+        self.arity = Domain.arity + 1
 
         # Debugging
         self.string = Domain.string + " # " + SortExprPrimary.string + label.label
@@ -773,6 +791,7 @@ class SortExprPrimary(Parsing.Nonterm):
         self.inlinecode = "%s()" % (sorts_table[expr.string])
         self.argumentcode = "%s" % (sorts_table[expr.string])
         self.recogniserstring = ""
+        self.arity = 0
 
         # Debugging
         self.string = expr.string
@@ -784,6 +803,7 @@ class SortExprPrimary(Parsing.Nonterm):
         self.inlinecode = SortExpr.inlinecode
         self.argumentcode = SortExpr.argumentscode
         self.recogniserstring = SortExpr.recogniserstring
+        self.arity = self.arity = 0
 
         # Debugging
         self.string = "(" + SortExpr.string + ")"

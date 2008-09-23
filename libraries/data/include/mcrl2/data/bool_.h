@@ -8,6 +8,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
 
+
 namespace mcrl2 {
 
   namespace data {
@@ -526,30 +527,30 @@ namespace mcrl2 {
       data_equation_list bool__generate_equations_code()
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("b", bool_())), equal_to(variable("b", bool_()), variable("b", bool_())), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), equal_to(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), equal_to(false_(), variable("b", bool_())), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), equal_to(variable("b", bool_()), true_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), equal_to(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), not_equal_to(variable("b", bool_()), variable("c", bool_())), not_(equal_to(variable("b", bool_()), variable("c", bool_())))));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), if_(true_(), variable("b", bool_()), variable("c", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), if_(false_(), variable("b", bool_()), variable("c", bool_())), variable("c", bool_())));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), if_(variable("b", bool_()), variable("c", bool_()), variable("c", bool_())), variable("c", bool_())));
-        result.push_back(data_equation(variable_list(), not_(true_()), false_()));
-        result.push_back(data_equation(variable_list(), not_(false_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), not_(not_(variable("b", bool_()))), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), and_(variable("b", bool_()), true_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), and_(variable("b", bool_()), false_()), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), and_(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), and_(false_(), variable("b", bool_())), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), or_(variable("b", bool_()), true_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), or_(variable("b", bool_()), false_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), or_(true_(), variable("b", bool_())), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), or_(false_(), variable("b", bool_())), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), implies(variable("b", bool_()), true_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), implies(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), implies(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), implies(false_(), variable("b", bool_())), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), variable("b", bool_())), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(true_(), variable("b", bool_())), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(false_(), variable("b", bool_())), not_(variable("b", bool_()))));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), true_()), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
+        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), not_equal_to(variable("b", bool_()), variable("c", bool_())), not_(equal_to(variable("b", bool_()), variable("c", bool_())))));
+        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(true_(), variable("b", bool_()), variable("c", bool_())), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(false_(), variable("b", bool_()), variable("c", bool_())), variable("c", bool_())));
+        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(variable("b", bool_()), variable("c", bool_()), variable("c", bool_())), variable("c", bool_())));
+        result.push_back(data_equation(variable_list(), true_(), not_(true_()), false_()));
+        result.push_back(data_equation(variable_list(), true_(), not_(false_()), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), not_(not_(variable("b", bool_()))), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(variable("b", bool_()), true_()), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(variable("b", bool_()), false_()), false_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(true_(), variable("b", bool_())), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(false_(), variable("b", bool_())), false_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(variable("b", bool_()), true_()), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(variable("b", bool_()), false_()), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(true_(), variable("b", bool_())), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(false_(), variable("b", bool_())), false_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(variable("b", bool_()), true_()), true_()));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(true_(), variable("b", bool_())), variable("b", bool_())));
+        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(false_(), variable("b", bool_())), true_()));
 
         return result;
       }

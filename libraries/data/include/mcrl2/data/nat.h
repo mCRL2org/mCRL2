@@ -1492,7 +1492,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_max_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_plus_application(e) || is_plus_application(e) || is_times_application(e));
+        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1519,27 +1519,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
         if (is_min_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_plus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_plus_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -1592,13 +1572,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_gtesubt_application(e) || is_gtesubt_application(e) || is_gtesubt_application(e) || is_div_application(e) || is_div_application(e) || is_mod_application(e) || is_mod_application(e) || is_exp_application(e) || is_exp_application(e) || is_divmod_application(e) || is_divmod_application(e) || is_divmod_application(e));
+        assert(is_gtesubt_application(e) || is_gtesubt_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e));
         
-        if (is_gtesubt_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
         if (is_gtesubt_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
@@ -1614,37 +1589,12 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_div_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_mod_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
         if (is_mod_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
 
         if (is_exp_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_exp_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_divmod_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_divmod_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
@@ -1662,13 +1612,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_gtesubt_application(e) || is_gtesubt_application(e) || is_gtesubt_application(e) || is_div_application(e) || is_div_application(e) || is_mod_application(e) || is_mod_application(e) || is_exp_application(e) || is_exp_application(e) || is_divmod_application(e) || is_divmod_application(e));
+        assert(is_gtesubt_application(e) || is_gtesubt_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e));
         
-        if (is_gtesubt_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
         if (is_gtesubt_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
@@ -1684,32 +1629,12 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_div_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_mod_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
         if (is_mod_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
 
         if (is_exp_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_exp_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_divmod_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -1727,13 +1652,8 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_divmod_application(e) || is_divmod_application(e));
+        assert(is_divmod_application(e));
         
-        if (is_divmod_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[2];
-        }
-
         if (is_divmod_application(e))
         {
           return static_cast<const application&>(e).arguments()[2];
@@ -1852,7 +1772,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_max_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_plus_application(e) || is_plus_application(e) || is_times_application(e));
+        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1879,27 +1799,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
         if (is_min_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_plus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_plus_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
