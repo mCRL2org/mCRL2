@@ -29,19 +29,22 @@ alias messenger
       store_visitor.cpp
       restore_visitor.o
       detail/event_handlers.cpp
+      /site-config//socket
     : <threading>multi
     : # no default build
     : <library>/site-config//boost_filesystem
       <library>/site-config//boost_thread
       <library>/libraries//ticpp
       <library>/site-config//boost_system
-      <os>SOLARIS:<library>/site-config//socket
-      <os>NT:<library>/site-config//winsock
-      <os>CYGWIN:<library>/site-config//winsock
     ;
 
-obj tool_communicator.o       : tool/communicator.cpp ;
-obj controller_communicator.o : controller/communicator.cpp ;
+obj tool_communicator.o
+          : tool/communicator.cpp
+          : <use>/site-config//socket ;
+
+obj controller_communicator.o
+          : controller/communicator.cpp
+          : <use>/site-config//socket ;
 
 lib tipi-controller
     : controller_communicator.o

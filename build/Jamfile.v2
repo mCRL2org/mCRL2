@@ -230,24 +230,27 @@ alias dynamic_loading : : <os>FREEBSD ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
-lib nsl    : : <name>nsl ;
-lib socket : : <name>socket : : <library>nsl ;
+lib nsl       : : <name>nsl ;
+lib ws2_32    : : <name>"ws2_32" ;
 
-alias winsock
-    : winsock32 ws2_32
-    : <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0501
-      <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0501
+alias socket ;
+lib   socket : nsl : <target-os>solaris <name>socket : : ;
+lib   socket
+    : ws2_32
+    : <target-os>cygwin
+      <name>wsock32
     :
-    : <os>CYGWIN:<define>__USE_W32_SOCKETS
-      <os>CYGWIN:<define>_WIN32_WINNT=0x0501
-      <os>NT:<define>__USE_W32_SOCKETS
-      <os>NT:<define>_WIN32_WINNT=0x0501
+    : <define>__USE_W32_SOCKETS
+      <define>_WIN32_WINNT=0x0501
     ;
-
-lib winsock32 : : <name>"wsock32" ;
-lib ws2_32 : : <name>"ws2_32" ;
+lib   socket
+    : ws2_32
+    : <target-os>windows
+      <name>wsock32
+    :
+    : <define>__USE_W32_SOCKETS
+      <define>_WIN32_WINNT=0x0501
+    ;
 
 if $(CADP_HEADERS) {
   lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;
