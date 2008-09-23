@@ -347,11 +347,13 @@ class TokenID(Parsing.Token):
 # Includes ::= "#include" ID
 #          | Includes "#include" ID
 # Spec ::= SortSpec ConsSpec MapSpec EqnSpec
-# SortSpec ::= "sort" SortExpr Label
+# SortSpec ::= "sort" SortDecls        
 # ConsSpec ::= "cons" OpDecls
 # MapSpec ::= "map" OpDecls
 # VarSpec ::= "var" VarDecls
 # EqnSpec ::= "eqn" EqnDecls
+# SortDecls ::= SortExpr Label
+#            | SortDecls SortExpr Label
 # VarDecls ::= ID ":" SortExpr
 #            | VarDecls ID ":" SortExpr
 # OpDecls ::= ID Label ":" SortExpr
@@ -378,6 +380,7 @@ class Result(Parsing.Nonterm):
     def reduceResult(self, spec):
         "%reduce Spec"
         global outputcode # needed in order to modify outputcode
+        global sorts_table
         self.code = spec.code
         file_header = FILE_HEADER % {
           'uppercasename' : sorts_table[spec.sort].upper(),
@@ -401,6 +404,7 @@ class Result(Parsing.Nonterm):
     def reduceIncludesResult(self, includes, spec):
         "%reduce Includes Spec"
         global outputcode # needed in order to modify outputcode
+        global sorts_table
         self.code = spec.code
         file_header = FILE_HEADER % {
           'uppercasename' : sorts_table[spec.sort].upper(),
@@ -424,6 +428,7 @@ class Includes(Parsing.Nonterm):
     "%nonterm"
     def reduceInclude(self, include, id):
         "%reduce include id"
+        global sorts_table
         self.code = "#include \"mcrl2/data/%s.h\"\n" % (sorts_table[includes_table[id.string]])
 
         # Debugging
@@ -432,6 +437,7 @@ class Includes(Parsing.Nonterm):
 
     def reduceIncludes(self, includes, include, id):
         "%reduce Includes include id"
+        global sorts_table
         self.code = includes.code + "#include \"mcrl2/data/%s.h\"\n" % (sorts_table[includes_table[id.string]])
 
         # Debugging
@@ -442,13 +448,15 @@ class Spec(Parsing.Nonterm):
     "%nonterm"
     def reduce(self, sortspec, consspec, mapspec, varspec, eqnspec):
         "%reduce SortSpec ConsSpec MapSpec VarSpec EqnSpec"
+        global sorts_table
+        print sortspec.sorts
+        self.sort = sortspec.sorts[0]
         self.code = sortspec.code + \
                     consspec.code + \
                     mapspec.code + \
                     generate_projection_functions() + \
                     varspec.code + \
-                    generate_equations_code(sorts_table[sortspec.sort], eqnspec.equations)
-        self.sort = sortspec.sort
+                    generate_equations_code(sorts_table[self.sort], eqnspec.equations)
 
         # Debugging
         self.string = sortspec.string + '\n' + consspec.string + '\n' + mapspec.string + '\n' + varspec.string + '\n' + eqnspec.string
@@ -456,17 +464,13 @@ class Spec(Parsing.Nonterm):
 
 class SortSpec(Parsing.Nonterm):
     "%nonterm"
-    def reduceSortSpec(self, sort, sortexpr, label, semicolon):
-#        "%reduce sort SortExpr Label semicolon" This causes ambiguity
-        "%reduce sort id Label semicolon"
-        global current_sort
-        sorts_table[sortexpr.string] = label.label # Register sort for usage in substitution
-        self.code = generate_sort_expression_constructors(label, sortexpr)
-        self.sort = sortexpr.string
-        current_sort = sortexpr.string
-
+    def reduceSortSpec(self, sort, sortdecls):
+        "%reduce sort SortDecls"
+        self.code = sortdecls.code
+        self.sorts = sortdecls.sorts
+        
         # Debugging
-        self.string = "sort %s %s;" % (sortexpr.string, label.string)
+        self.string = "sort %s;" % (sortdecls.string)
         print "Parsed sort specification: %s" % (self.string)
 
 class ConsSpec(Parsing.Nonterm):
@@ -510,6 +514,32 @@ class EqnSpec(Parsing.Nonterm):
         # Debugging
         self.string = "eqn %s" % (eqndecls.string)
         print "Parsed equation specification %s" % (self.string)
+
+class SortDecls(Parsing.Nonterm):
+    "%nonterm"
+    def reduceSortDecl(self, sortexpr, label, semicolon):
+        "%reduce id Label semicolon"
+        global current_sort
+        global sorts_table
+        sorts_table[sortexpr.string] = label.label # Register sort for usage in substitution
+        self.code = generate_sort_expression_constructors(label, sortexpr)
+        self.sorts = [sortexpr.string]
+        current_sort = sortexpr.string
+
+        self.string = "%s %s" % (sortexpr.string, label.label)
+        print "Parsed single sort declaration %s" % (self.string)
+
+    def reduceSortDecls(self, sortdecls, sortexpr, label, semicolon):
+        "%reduce SortDecls id Label semicolon"
+        global current_sort
+        global sorts_table
+        sorts_table[sortexpr.string] = label.label # Register sort for usage in substitution
+        self.code = sortdecls.code + generate_sort_expression_constructors(label, sortexpr)
+        self.sorts = sortdecls.sorts
+        self.sorts.append(sortexpr.string)
+
+        self.string = "%s\n%s %s" % (sortdecls.string, sortexpr.string, label.label)
+        print "Parsed sort declaration %s" % (self.string)
 
 class VarDecls(Parsing.Nonterm):
     "%nonterm"
@@ -647,7 +677,6 @@ class DataExprPrimary(Parsing.Nonterm):
         if id.string in functions_table:
             self.inlinecode = "%s()" % (functions_table[id.string])
             self.variables = set()
-            print self.variables
         else:
             self.inlinecode = "variable(\"%s\", %s())" % (id.string, sorts_table[variables_table[id.string]])
             self.variables = set(id.string)
@@ -883,7 +912,7 @@ def get_includes(input):
     includes = []
     for line in lines:
         if re.match('#include.*', line):
-            includes.append(line.lstrip('#include '))
+            includes.append(line.replace('#include ',''))
         else:
             break
     return includes
@@ -892,6 +921,7 @@ def parse_spec(infilename):
     global outputcode
     global recognisers
     global parser
+    global includes_table
     input = filter_comments(infilename)
     includes = get_includes(input)
 
@@ -901,14 +931,15 @@ def parse_spec(infilename):
 
     # Now first process the includes:
     for include in includes:
-        includeinput = parse_spec(include)
-        includes_table[include] = current_sort
+        if not includes_table.has_key(include):
+            includeinput = parse_spec(include)
+            includes_table[include] = current_sort
 
     outputcode = ""
     recognisers = {}
-    print "table of includes: %s" % (includes_table)
     parser.reset()
-    parser.scan(input)
+    if input not in includes_table:
+        parser.scan(input)
 
 
 # -------------------------------------------------------#
