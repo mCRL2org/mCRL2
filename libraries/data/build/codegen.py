@@ -216,6 +216,7 @@ def generate_function_constructors(id, label, sortexpr):
 #
 # store_projection_arguments
 def store_projection_arguments(id, label, sortexpr):
+    global recognisers
     ids = sortexpr.recogniserstring.split(", ")
     index = 0
     for id in ids:
@@ -230,6 +231,7 @@ def store_projection_arguments(id, label, sortexpr):
 # generate_projection_functions
 #--------------------------------------------------------------#
 def generate_projection_functions():
+    global recognisers
     code = ''
 
     for recogniser in recognisers:
@@ -258,6 +260,7 @@ def generate_projection_functions():
     return code
 
 def generate_equation_code(vars, condition, lhs, rhs):
+    global variables_table
     var_code = ''
     for var in vars:
         if var_code <> '':
@@ -683,16 +686,6 @@ class DataExprs(Parsing.Nonterm):
         self.string = dataexprs.string + ", " + dataexpr.string
         print "Parsed data expressions: %s" % (self.string)
 
-# This causes ambiguities
-#class DataExprInfix(Parsing.Nonterm):
-#    "%nonterm"
-#    def reduceInfix(self, lhs, op, rhs):
-#        "%reduce DataExpr id DataExpr"
-#        self.lhs = lhs.string
-#        self.op = op.string
-#        self.rhs = rhs.string
-#        print "Parsed infix expression: %s" % (self.string)
-
 class SortExpr(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, sortexpr):
@@ -839,11 +832,6 @@ class Parser(Parsing.Lr):
 	self.eoi()
 
 #--------------------------------------------------------#
-# generate_functions
-#--------------------------------------------------------#
-#def generate_functions():
-
-#--------------------------------------------------------#
 #                  read_text
 #--------------------------------------------------------#
 # returns the contents of the file 'filename' as a string
@@ -872,7 +860,7 @@ def read_paragraphs(file):
 #-------------------------------------------------------#
 # parse_spec
 #-------------------------------------------------------#
-# This parser the input file and removes comment lines from it
+# This parses the input file and removes comment lines from it
 
 def filter_comments(filename):
     paragraphs = read_paragraphs(filename)
@@ -902,10 +890,14 @@ def get_includes(input):
 
 def parse_spec(infilename):
     global outputcode
+    global recognisers
+    global parser
     input = filter_comments(infilename)
     includes = get_includes(input)
 
     parser.reset()
+    outputcode = ""
+    recognisers = {}
 
     # Now first process the includes:
     for include in includes:
