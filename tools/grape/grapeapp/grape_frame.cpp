@@ -23,6 +23,7 @@
 #include "grape_glcanvas.h"
 #include "grape_logpanel.h"
 #include "grape_clipboard.h"
+#include "grape_listbox.h"
 #include "grape_ids.h"
 
 // window icon
@@ -39,8 +40,8 @@ grape_frame::grape_frame( const wxString &p_filename )
 {
   // initialize widgets
   m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype speci&fication") );
-  m_process_diagram_list = new wxListBox(this, GRAPE_PROCESS_DIAGRAM_LIST, wxDefaultPosition, wxSize( 200, 200 ), 0, 0, wxLB_SORT );
-  m_architecture_diagram_list = new wxListBox(this, GRAPE_ARCHITECTURE_DIAGRAM_LIST, wxDefaultPosition, wxSize( 200, 200), 0, 0, wxLB_SORT );
+  m_process_diagram_list = new grape_listbox(this, GRAPE_PROCESS_DIAGRAM_LIST, this);
+  m_architecture_diagram_list = new grape_listbox(this, GRAPE_ARCHITECTURE_DIAGRAM_LIST, this);
   m_splitter = new wxSplitterWindow( this, GRAPE_SPLITTER );
   m_splitter->SetMinimumPaneSize( 1 );
   m_clipboard = new grape_clipboard( this );
@@ -172,12 +173,12 @@ grape_menubar * grape_frame::get_menubar( void )
   return m_menubar;
 }
 
-wxListBox* grape_frame::get_process_diagram_listbox( void )
+grape_listbox * grape_frame::get_process_diagram_listbox( void )
 {
   return m_process_diagram_list;
 }
 
-wxListBox* grape_frame::get_architecture_diagram_listbox( void )
+grape_listbox * grape_frame::get_architecture_diagram_listbox( void )
 {
   return m_architecture_diagram_list;
 }
@@ -538,9 +539,9 @@ void grape_frame::update_toolbar( void )
 {
   // update UNDO and REDO right for the toolbar
   GetToolBar()->EnableTool( wxID_UNDO, m_menubar->IsEnabled( wxID_UNDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ) );
+  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelText( m_menubar->FindItem( wxID_UNDO )->GetItemLabelText() ).Mid(1) );
   GetToolBar()->EnableTool( wxID_REDO, m_menubar->IsEnabled( wxID_REDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelFromText( m_menubar->FindItem( wxID_REDO )->GetLabel() ) );
+  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelText( m_menubar->FindItem( wxID_REDO )->GetItemLabelText() ).Mid(1) );
 
   // update DELETE and PROPERTIES right for the toolbar
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );

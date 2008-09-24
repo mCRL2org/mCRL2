@@ -10,6 +10,7 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 
 #include "event_diagram.h"
 
@@ -39,7 +40,7 @@ bool grape_event_add_architecture_diagram::Do( void )
   m_main_frame->set_mode( GRAPE_MODE_ARCH );
 
   // update architecture diagram listbox
-  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   int pos = arch_listbox->Append( new_arch_ptr->get_name() );
   arch_listbox->Select( pos );
 
@@ -61,7 +62,7 @@ bool grape_event_add_architecture_diagram::Undo( void )
   spec->check_references( del_arch_ptr->get_name(), dummy_ptr );
 
   // update process listbox
-  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   int pos = arch_listbox->FindString( del_arch_ptr->get_name() );
   arch_listbox->Delete( pos );
   if ( pos != 0 )

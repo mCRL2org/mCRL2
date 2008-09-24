@@ -10,6 +10,7 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 #include "grape_logpanel.h"
 
 #include "event_file.h"

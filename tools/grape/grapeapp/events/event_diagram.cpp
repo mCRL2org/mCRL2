@@ -13,6 +13,7 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 #include "grape_logpanel.h"
 
 #include "event_select.h"
@@ -150,7 +151,7 @@ bool grape_event_rename_diagram::Do( void )
       m_main_frame->set_mode( GRAPE_MODE_PROC );
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
-      wxListBox *proc_list = m_main_frame->get_process_diagram_listbox();
+      grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
       proc_list->SetString( proc_list->FindString( m_orig_name ), m_new_name );
       proc_list->SetStringSelection( m_new_name );
       // show selected diagram
@@ -163,7 +164,7 @@ bool grape_event_rename_diagram::Do( void )
       m_main_frame->set_mode( GRAPE_MODE_ARCH );
       // check whether any  architecturereferences exist that should point to the new name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
-      wxListBox *arch_list = m_main_frame->get_architecture_diagram_listbox();
+      grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
       arch_list->SetString( arch_list->FindString( m_orig_name ), m_new_name );
       arch_list->SetStringSelection( m_new_name );
       // show selected diagram
@@ -193,7 +194,7 @@ bool grape_event_rename_diagram::Undo( void )
       m_main_frame->set_mode( GRAPE_MODE_PROC );
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
-      wxListBox *proc_list = m_main_frame->get_process_diagram_listbox();
+      grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
       proc_list->SetString( proc_list->FindString( m_new_name ), m_orig_name );
       proc_list->SetStringSelection( m_orig_name );
       break;
@@ -203,7 +204,7 @@ bool grape_event_rename_diagram::Undo( void )
       m_main_frame->set_mode( GRAPE_MODE_ARCH );
       // check whether any  architecturereferences exist that should point to the old name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
-      wxListBox *arch_list = m_main_frame->get_architecture_diagram_listbox();
+      grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
       arch_list->SetString( arch_list->FindString( m_new_name ), m_orig_name );
       arch_list->SetStringSelection( m_orig_name );
       break;
@@ -509,7 +510,7 @@ bool grape_event_remove_diagram::Do( void )
     spec->check_references( del_arch_dia_ptr->get_name(), dummy );
 
     // update architecture listbox
-    wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+    grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
     int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name() );
     if ( pos != wxNOT_FOUND )
     {
@@ -579,7 +580,7 @@ bool grape_event_remove_diagram::Do( void )
     spec->check_references( proc_dia_ptr->get_name(), dummy );
 
     // update process listbox
-    wxListBox *proc_listbox = m_main_frame->get_process_diagram_listbox();
+    grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
     int pos = proc_listbox->FindString( proc_dia_ptr->get_name() );
     proc_listbox->Delete( pos );
     if ( pos != 0 )
@@ -662,7 +663,7 @@ bool grape_event_remove_diagram::Undo( void )
     m_main_frame->set_mode( GRAPE_MODE_ARCH );
 
     // update architecture diagram listbox
-    wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+    grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
     int pos = arch_listbox->Append( arch_dia_ptr->get_name() );
     arch_listbox->Select( pos );
   }
@@ -709,7 +710,7 @@ bool grape_event_remove_diagram::Undo( void )
     m_main_frame->set_mode( GRAPE_MODE_PROC );
 
     // update process diagram listbox
-    wxListBox *proc_listbox = m_main_frame->get_process_diagram_listbox();
+    grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
     int pos = proc_listbox->Append( proc_dia_ptr->get_name() );
     proc_listbox->Select( pos );
   }
@@ -766,8 +767,8 @@ bool grape_event_export_current_diagram_image::Do( void )
 
     //calculate max (x,y) position of objects
     uint count = m_main_frame->get_glcanvas()->count_visual_object();
-    float maxx = 0;
-    float maxy = 0;
+    int maxx = 0;
+    int maxy = 0;
     for ( uint i = 0; i < count; ++i )
     {
       visual_object* vis_obj = m_main_frame->get_glcanvas()->get_visual_object(i);
@@ -776,8 +777,8 @@ bool grape_event_export_current_diagram_image::Do( void )
         object* obj = vis_obj->get_selectable_object();
         if (obj != 0) 
         {
-          float coordx = (obj->get_coordinate().m_x+obj->get_width())*300;
-          float coordy = (-obj->get_coordinate().m_y+obj->get_height())*300;
+          int coordx = int (obj->get_coordinate().m_x+obj->get_width())*300;
+          int coordy = int (-obj->get_coordinate().m_y+obj->get_height())*300;
           if (maxx < coordx) 
           {
             maxx = coordx;
@@ -1284,6 +1285,8 @@ bool grape_event_delete_selected_objects::Do( void )
     grape_event_remove_architecture_reference event = m_arch_ref.Item( i );
     event.Do();
   }
+
+  m_main_frame->get_glcanvas()->SetFocus();
   return true;
 }
 
@@ -1357,5 +1360,7 @@ bool grape_event_delete_selected_objects::Undo( void )
     grape_event_remove_blocked event = m_blocked.Item( i );
     event.Undo();
   }
+
+  m_main_frame->get_glcanvas()->SetFocus();
   return true;
 }

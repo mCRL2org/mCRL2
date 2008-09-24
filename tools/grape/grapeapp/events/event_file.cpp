@@ -15,6 +15,7 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 
 #include "event_diagram.h"
 #include "event_file.h"
@@ -125,7 +126,7 @@ bool grape_event_open::Do( void )
   m_main_frame->set_grape_specification( new_spec );
 
   // update process listbox
-  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   if ( arch_listbox->GetCount() >= 1 )
   {
     arch_listbox->Select( 0 );
