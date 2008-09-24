@@ -14,11 +14,20 @@
 #include "font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
+#include <cmath>
 
 using namespace grape::grapeapp;
 
 const float DEG2RAD = M_PI/180;
 const uint ELLIPSE_POINTS = 360; //pre: shouldn't be zero
+
+
+coordinate grape::grapeapp::get_coordinate_from_controlpoints(coordinate p_startp, coordinate p_cp, coordinate p_endp, float pos)
+{
+  float neg_pos = 1-pos;
+  coordinate point = {pos*pos*p_endp.m_x + 2*pos*neg_pos*p_cp.m_x + neg_pos*neg_pos*p_startp.m_x, pos*pos*p_endp.m_y + 2*pos*neg_pos*p_cp.m_y + neg_pos*neg_pos*p_startp.m_y};
+  return point;
+}
 
 coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_state* p_compound_state)
 {
@@ -158,8 +167,6 @@ bool grape::grapeapp::is_inside(coordinate p_poly[], int p_count, const coordina
   }
   return inside;
 }
-
-// NOTE: Checked methods from here
 
 void grape::grapeapp::set_color(const color p_color, bool p_selected)
 {
@@ -484,23 +491,20 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
 
 void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color )
 {
-  glPushMatrix();
   // set color of line
   set_color( p_color, p_selected );
 
   // draw line
-  glBegin(GL_LINES);
+  glBegin(GL_LINE_STRIP);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
     glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
+    glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
+    glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
   glEnd();
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width, float p_height, bool p_selected )
 {
-  glPushMatrix();
-
   // set color of the designator
   set_color(g_color_designator, p_selected);
 
@@ -551,8 +555,6 @@ void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width,
     glVertex3f( sixth.m_x, sixth.m_y, 0.0f );
     glVertex3f( third.m_x, third.m_y, 0.0f );
   glEnd();
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, const coordinate &p_end, bool p_selected )
@@ -619,6 +621,73 @@ bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coor
   return is_inside_line( p_ntt_coord, sum_base, p_coord ) || is_inside_line( p_ntt_coord, sum_head, p_coord );
 }
 
+void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text )
+{
+  float distance_begin_to_end = sqrt( pow( p_end.m_y - p_begin.m_y, 2 ) + pow( p_end.m_x - p_begin.m_x, 2 ) ) / 2;
+  float angle = atan2(( p_end.m_x - p_begin.m_x), ( p_end.m_y - p_begin.m_y));
+  coordinate p_control_left = {p_control.m_x + distance_begin_to_end * sin( angle - M_PI ), p_control.m_y + distance_begin_to_end * cos( angle - M_PI )};
+  coordinate p_control_right = {p_control.m_x + distance_begin_to_end * sin( angle - M_PI*2 ), p_control.m_y + distance_begin_to_end * cos( angle - M_PI*2 )};
+
+  //draw bezier
+  coordinate pre_pnt;
+  coordinate pnt = p_begin;
+  for(uint i=1;i<=40;++i) 
+  {
+    pre_pnt = pnt;
+    if (i <= 20)
+    {
+      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));
+    } 
+    else
+    {
+      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05));
+    };
+    draw_line(pre_pnt, pnt, p_selected, g_color_black);
+  }
+
+  // calculate rotation of arrow
+  // correction + get_coordinate not necessary as this results in 0
+  angle = atan2(( pre_pnt.m_x - pnt.m_x), ( pre_pnt.m_y - pnt.m_y));
+
+  // draw arrow head based on calculated angle
+  float one_side_x = pnt.m_x + 0.03 * sin( angle - M_PI_4 );
+  float one_side_y = pnt.m_y + 0.03 * cos( angle - M_PI_4 );
+  float other_side_x = pnt.m_x + 0.03 * sin( angle + M_PI_4 );
+  float other_side_y = pnt.m_y + 0.03 * cos( angle + M_PI_4 );
+
+  // draw transition arrow
+  glBegin(GL_TRIANGLES);
+    glVertex3f( pnt.m_x, pnt.m_y, 0.0f);
+    glVertex3f( one_side_x, one_side_y, 0.0f);
+    glVertex3f( other_side_x, other_side_y, 0.0f);
+  glEnd();
+
+  // draw text
+  // calculate midpoint
+  coordinate midpoint;
+  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
+  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
+  // render text based on the calculated angle
+  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
+  {
+    render_text(p_label_text, p_control.m_x - 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+  }
+  else // text should be rendered to the right of and above the transition
+  {
+    render_text(p_label_text, p_control.m_x + 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+  }
+
+  //draw control point
+  if (p_selected)
+  {
+    draw_line_rectangle(p_control, 0.03, 0.03, false, g_color_black);
+  } 
+  else
+  {
+    draw_filled_rectangle(p_control, 0.015, 0.015, false, g_color_black);
+  };
+}
+
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text )
 {
   coordinate end_coord = { p_begin.m_x + p_width, p_begin.m_y + p_height };
@@ -657,8 +726,6 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text )
@@ -710,8 +777,6 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected )
@@ -745,7 +810,6 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
       glVertex3f( cos( degInRad ) * p_radius, sin( degInRad ) * p_radius, 0.0f );
     }
   glEnd();
-
   glPopMatrix();
 }
 
@@ -793,6 +857,7 @@ void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_w
     glVertex3f(p_width, p_height, 0.0f);
     glVertex3f(0,   p_height, 0.0f);
   glEnd();
+
   glPopMatrix();
 }
 
@@ -809,6 +874,7 @@ void grape::grapeapp::draw_cross( const coordinate &p_center, float p_width, flo
     glVertex3f(p_width, 0,   0.0f);
     glVertex3f(0,   p_height, 0.0f);
   glEnd();
+
   glPopMatrix();
 }
 
@@ -861,6 +927,7 @@ void grape::grapeapp::draw_process_reference_corner(const coordinate &p_center, 
       glVertex3f( cos( degInRad ) * p_radius_x, sin( degInRad ) * p_radius_y, 0.0f);
     }
   glEnd();
+
   glPopMatrix();
 }
 
@@ -928,6 +995,7 @@ void grape::grapeapp::draw_process_reference(const coordinate &p_center, float p
     glVertex3f( 0.0f, 0.75 * p_height, 0.0f );
     glVertex3f( p_width, 0.75 * p_height, 0.0f );
   glEnd();
+
   glPopMatrix();
 }
 
@@ -935,7 +1003,7 @@ void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_wid
 {
   if ( p_selected )
   {
-    glPushMatrix();
+    //glPushMatrix();
 
     // Draw the eight rectangles
     coordinate left_low = { p_center.m_x - 0.5 * p_width - 2 * g_cursor_margin, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
@@ -956,7 +1024,7 @@ void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_wid
     coordinate center_low = { p_center.m_x, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
     draw_line_rectangle( center_low, g_cursor_margin, g_cursor_margin, false, g_color_black );
 
-    glPopMatrix();
+    //glPopMatrix();
   } // end if
 }
 

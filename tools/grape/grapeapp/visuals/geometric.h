@@ -32,6 +32,7 @@ struct color
 };
 
 //color definitions
+const color g_color_blue = {0.0f, 0.0f, 1.0f};
 const color g_color_black = {0.0f, 0.0f, 0.0f};
 const color g_color_white = {1.0f, 1.0f, 1.0f};
 const color g_color_state = {(float)120/255, (float)255/255, (float)120/255};
@@ -77,6 +78,15 @@ namespace grape
       GRAPE_DIR_WEST,     /**< Left */
       GRAPE_DIR_ANY       /**< Any direction. Handy for lines or ellipses.*/
     };
+
+    /**
+     * Get coordinate of a bezier curve from controlpoints
+     * @param p_startp start coordinate of the bezier
+     * @param p_cp controlpoint 1 of the bezier
+     * @param p_endp end coordinate of the bezier
+     * @return Returns coordinate on the bezier curve
+     */
+    coordinate get_coordinate_from_controlpoints(coordinate p_startp, coordinate p_cp, coordinate p_endp, float pos);
 
     /**
      * Get intersection coordinate depending on the compound_state type
@@ -268,9 +278,20 @@ namespace grape
     /**
      * Nonterminating transition (arrow) draw function.
      * @param p_begin The begin coordinate of the arrow.
+     * @param p_control The control coordinate of the arrow.
+     * @param p_end The end coordinate of the arrow.
+     * @param p_selected A flag indicating whether the object is selected.
+     * @param p_label_text The label of the object.
+     */
+    void draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text );
+
+    /**
+     * Nonterminating transition (arrow) draw function.
+     * @param p_begin The begin coordinate of the arrow.
      * @param p_width The width of the arrow.
      * @param p_height The width of the arrow.
      * @param p_selected A flag indicating whether the object is selected.
+     * @param p_label_text The label of the object.
      */
     void draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text );
 
@@ -279,6 +300,7 @@ namespace grape
      * @param p_begin The begin coordinate of the arrow
      * @param p_end The end coordinate of the arrow.
      * @param p_selected A flag indicating whether the object is selected.
+     * @param p_label_text The label of the object.
      */
     void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text );
 
@@ -287,6 +309,7 @@ namespace grape
      * @param p_begin The begin coordinate of the arrow
      * @param p_end The end coordinate of the arrow.
      * @param p_selected A flag indicating whether the object is selected.
+     * @param p_label_text The label of the object.
      */
     void draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text );
 

@@ -15,7 +15,6 @@
 #include "state.h"
 #include "font_renderer.h"
 #include "label.h"
-#include <math.h>
 
 using namespace grape::grapeapp;
 
@@ -83,11 +82,15 @@ visualnonterminating_transition::~visualnonterminating_transition( void )
 
 void visualnonterminating_transition::draw( void )
 {
+  nonterminating_transition *transition = static_cast<nonterminating_transition *>(m_object);
+  wxString text = transition->get_label()->get_text();
   bool selected = m_object->get_selected();
 
-  nonterminating_transition *transition = static_cast<nonterminating_transition *>(m_object);
-  wxString label_text = transition->get_label()->get_text();
-  draw_nonterminating_transition_same_state( m_object->get_coordinate(), m_arrow_base, m_arrow_head, selected, label_text );
+  coordinate startpoint = {m_arrow_base.m_x + m_object->get_coordinate().m_x, m_arrow_base.m_y + m_object->get_coordinate().m_y};
+  coordinate controlpoint = m_object->get_coordinate();
+  coordinate endpoint = {m_arrow_head.m_x + m_object->get_coordinate().m_x, m_arrow_head.m_y + m_object->get_coordinate().m_y};
+
+  draw_nonterminating_transition( startpoint, controlpoint, endpoint, selected, text);
 }
 
 bool visualnonterminating_transition::is_inside( libgrape::coordinate &p_coord )
