@@ -539,9 +539,9 @@ void grape_frame::update_toolbar( void )
 {
   // update UNDO and REDO right for the toolbar
   GetToolBar()->EnableTool( wxID_UNDO, m_menubar->IsEnabled( wxID_UNDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelText( m_menubar->FindItem( wxID_UNDO )->GetItemLabelText() ).Mid(1) );
+  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ).Mid(1) );
   GetToolBar()->EnableTool( wxID_REDO, m_menubar->IsEnabled( wxID_REDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelText( m_menubar->FindItem( wxID_REDO )->GetItemLabelText() ).Mid(1) );
+  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelFromText( m_menubar->FindItem( wxID_REDO )->GetLabel() ).Mid(1) );
 
   // update DELETE and PROPERTIES right for the toolbar
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
