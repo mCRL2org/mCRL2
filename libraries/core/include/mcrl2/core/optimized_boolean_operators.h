@@ -58,7 +58,7 @@ namespace core {
   Term optimized_exists(VariableSequence v, Term arg)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_exists(v, arg, tr::forall, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_exists(v, arg, tr::exists, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
 } // namespace core
