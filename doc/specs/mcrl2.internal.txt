@@ -335,3 +335,24 @@
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+
+//Boolean expressions
+//-------------------
+
+// BES specification (equations + initialization)
+<BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
+
+// boolean equation
+<BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
+
+// boolean variable
+<BooleanVariable>   ::= BooleanVariable(<String>)
+
+// boolean expression
+<BooleanExpression> ::= BooleanTrue
+                      | BooleanFalse
+                      | <BooleanVariable>
+                      | BooleanNot(<BooleanExpression>)
+                      | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanOr(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanImp(<BooleanExpression>, <BooleanExpression>)
