@@ -1,5 +1,9 @@
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+
+// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+
 #include <iostream>
 #include <map>
 #include <string>

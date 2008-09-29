@@ -31,6 +31,19 @@ namespace pbes_system {
 
 namespace detail {
 
+  template <typename Sequence>
+  bool empty_intersection(Sequence s1, Sequence s2)
+  {
+    for (typename Sequence::const_iterator i = s1.begin(); i != s1.end(); ++i)
+    {
+      if (std::find(s2.begin(), s2.end(), *i) != s2.end())
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Exception that is used as an early escape of the foreach_sequence algorithm.
   struct enumerate_quantifier_stop_early
   {};
@@ -80,6 +93,7 @@ namespace detail {
             typename PbesRewriter,
             typename PbesTerm,
             typename SubstitutionFunction,
+            typename VariableSequence,
             typename StopCriterion
            >
   struct enumerate_quantifiers_sequence_action
@@ -88,6 +102,7 @@ namespace detail {
     PbesRewriter&        r_;
     const PbesTerm&      phi_;
     SubstitutionFunction sigma_;
+    VariableSequence     v_;
     bool&                is_constant_;
     StopCriterion        stop_;
   
@@ -95,21 +110,28 @@ namespace detail {
                                  PbesRewriter &r,
                                  const PbesTerm& phi,
                                  SubstitutionFunction sigma,
+                                 VariableSequence v,
                                  bool& is_constant,
                                  StopCriterion stop
                                 )
-      : A_(A), r_(r), phi_(phi), sigma_(sigma), is_constant_(is_constant), stop_(stop)
+      : A_(A), r_(r), phi_(phi), sigma_(sigma), v_(v), is_constant_(is_constant), stop_(stop)
     {}
 
     void operator()()
     {
       PbesTerm c = r_(phi_, sigma_);
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "r(sigma(phi)) = " << core::pp(c) << " is " << (core::term_traits<PbesTerm>::is_constant(c) ? "" : "not ") << "constant" << std::endl;
+#endif
       if (stop_(c))
       {
         throw enumerate_quantifier_stop_early();
       }
-      else if(core::term_traits<PbesTerm>::is_constant(c))
+      else if (empty_intersection(v_, c.variables()))
       {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "<A.insert> " << core::pp(c) << std::endl;
+#endif
         A_.insert(c);
       }
       else
@@ -123,18 +145,20 @@ namespace detail {
             typename PbesRewriter,
             typename PbesTerm,
             typename SubstitutionFunction,
+            typename VariableSequence,
             typename StopCriterion
            >
-  enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, StopCriterion>
+  enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>
   make_enumerate_quantifiers_sequence_action(PbesTermSet& A,
                                  PbesRewriter &r,
                                  const PbesTerm& phi,
                                  SubstitutionFunction sigma,
+                                 VariableSequence v,
                                  bool& is_constant,
                                  StopCriterion stop
                                 )
   {
-    return enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, StopCriterion>(A, r, phi, sigma, is_constant, stop);
+    return enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>(A, r, phi, sigma, v, is_constant, stop);
   }
  
   /// Eliminate quantifiers from the expression 'forall x.sigma(phi)'
@@ -162,6 +186,12 @@ namespace detail {
     typedef PbesTerm pbes_term_type;
     typedef std::pair<variable_type, data_term_type> data_assignment;   
 
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "x = " << core::pp(x) << std::endl;
+  std::cout << "phi = " << core::pp(phi) << std::endl;
+  std::cout << "stop_value = " << core::pp(stop_value) << std::endl;
+#endif
+
     atermpp::set<pbes_term_type> A;
     std::vector<std::vector<data_term_type> > D;
 
@@ -175,6 +205,10 @@ namespace detail {
     {
       data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
       D.push_back(std::vector<data_term_type>(1, t));
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "D[" << j << "] = {" << core::pp(t) << "}" << std::endl;
+  std::cout << "todo = todo + (" << core::pp(*i) << ", " << j << ")" << std::endl;
+#endif
       todo.push_back(boost::make_tuple(*i, t, j++));
     }
 
@@ -185,8 +219,11 @@ namespace detail {
         boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
         todo.pop_front();
         const variable_type& xk = boost::get<0>(front);
-        const data_term_type& y      = boost::get<1>(front);
-        unsigned int k               = boost::get<2>(front);
+        const data_term_type& y = boost::get<1>(front);
+        unsigned int k          = boost::get<2>(front);
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "---\nchoose y = " << core::pp(y) << ", k = " << k << ", xk = " << core::pp(xk) << std::endl;
+#endif
         bool is_constant = false;
 
         // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
@@ -194,19 +231,29 @@ namespace detail {
         atermpp::vector<data_term_type> z = datae.enumerate(y);
         for (typename std::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
         {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "e = " << core::pp(*i) << std::endl;
+#endif
           sigma[xk] = *i;
           D[k].clear();
           D[k].push_back(*i);
           core::foreach_sequence(D,
                                  x.begin(),
-                                 make_enumerate_quantifiers_sequence_action(A, pbesr, phi, sigma, is_constant, stop),
+                                 make_enumerate_quantifiers_sequence_action(A, pbesr, phi, sigma, i->variables(), is_constant, stop),
                                  enumerate_quantifiers_sequence_assign<MapSubstitution>(sigma)
                                 );
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "|A| = " << A.size() << std::endl;
+  std::cout << "Z is " << (is_constant ? "" : "not ") << "constant" << std::endl;
+#endif
           if (!is_constant)
           {
             Dk.push_back(*i);
             if (!core::term_traits<data_term_type>::is_constant(*i))
             {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "todo = todo + (" << core::pp(*i) << ", " << k << ")" << std::endl;
+#endif
               todo.push_back(boost::make_tuple(xk, *i, k));
             }
           }
@@ -226,6 +273,14 @@ namespace detail {
     {
       sigma.erase(*i);
     }
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+  std::cout << "join(";
+  for (atermpp::set<pbes_term_type>::const_iterator i = A.begin(); i != A.end(); ++i)
+  {
+    std::cout << ", " << core::pp(*i);
+  }
+  std::cout << ") = -> " << core::pp(join(A.begin(), A.end())) << std::endl;
+#endif
     return join(A.begin(), A.end());
   }
 
