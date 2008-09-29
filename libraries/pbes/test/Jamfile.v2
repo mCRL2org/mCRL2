@@ -14,6 +14,7 @@ exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
 
 test-suite pbes
     :
+      [ run boolean_expression_test.cpp ]
       [ run boolean_operator_test.cpp ]
       [ run parse_test.cpp ]
       [ run txt2pbes_test.cpp ]

@@ -44,12 +44,14 @@ ATermList constructList()
 }
 
 //--- begin generated code
+ATermAppl constructBooleanOr();
 ATermAppl constructProcEqn();
 ATermAppl constructHide();
 ATermAppl constructSortArrow();
 ATermAppl constructForall();
 ATermAppl constructCommExpr();
 ATermAppl constructStateNot();
+ATermAppl constructBooleanFalse();
 ATermAppl constructIfThen();
 ATermAppl constructStateImp();
 ATermAppl constructPBESExists();
@@ -59,6 +61,7 @@ ATermAppl constructSortsPossible();
 ATermAppl constructSortRef();
 ATermAppl constructProcEqnSpec();
 ATermAppl constructStateForall();
+ATermAppl constructBooleanImp();
 ATermAppl constructSortId();
 ATermAppl constructStateNu();
 ATermAppl constructRegNil();
@@ -70,14 +73,17 @@ ATermAppl constructDataEqnSpec();
 ATermAppl constructLinearProcessSummand();
 ATermAppl constructSortSpec();
 ATermAppl constructActionRenameRules();
+ATermAppl constructBooleanEquation();
 ATermAppl constructConsSpec();
 ATermAppl constructSortList();
 ATermAppl constructSum();
 ATermAppl constructDataVarId();
 ATermAppl constructProcVarId();
 ATermAppl constructProcessInit();
+ATermAppl constructBES();
 ATermAppl constructMapSpec();
 ATermAppl constructStateYaled();
+ATermAppl constructBooleanAnd();
 ATermAppl constructLinProcSpec();
 ATermAppl constructSetBagComp();
 ATermAppl constructChoice();
@@ -91,6 +97,7 @@ ATermAppl constructStructCons();
 ATermAppl constructMu();
 ATermAppl constructPBEqnSpec();
 ATermAppl constructActNot();
+ATermAppl constructBooleanTrue();
 ATermAppl constructBlock();
 ATermAppl constructRename();
 ATermAppl constructExists();
@@ -112,6 +119,7 @@ ATermAppl constructSortStruct();
 ATermAppl constructAtTime();
 ATermAppl constructActOr();
 ATermAppl constructComm();
+ATermAppl constructBooleanNot();
 ATermAppl constructDelta();
 ATermAppl constructStateAnd();
 ATermAppl constructLMerge();
@@ -120,6 +128,7 @@ ATermAppl constructActForall();
 ATermAppl constructRenameExpr();
 ATermAppl constructMerge();
 ATermAppl constructActSpec();
+ATermAppl constructBooleanVariable();
 ATermAppl constructAction();
 ATermAppl constructPBESAnd();
 ATermAppl constructLambda();
@@ -179,6 +188,23 @@ ATermAppl constructActFrm();
 ATermAppl constructActionRenameRuleRHS();
 ATermAppl constructFixPoint();
 ATermAppl constructPBExpr();
+ATermAppl constructBooleanExpression();
+
+// BooleanOr
+inline
+ATermAppl initConstructBooleanOr(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunBooleanOr(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanOr()
+{
+  static ATermAppl t = initConstructBooleanOr(t);
+  return t;
+}
 
 // ProcEqn
 inline
@@ -273,6 +299,22 @@ inline
 ATermAppl constructStateNot()
 {
   static ATermAppl t = initConstructStateNot(t);
+  return t;
+}
+
+// BooleanFalse
+inline
+ATermAppl initConstructBooleanFalse(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunBooleanFalse());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanFalse()
+{
+  static ATermAppl t = initConstructBooleanFalse(t);
   return t;
 }
 
@@ -417,6 +459,22 @@ inline
 ATermAppl constructStateForall()
 {
   static ATermAppl t = initConstructStateForall(t);
+  return t;
+}
+
+// BooleanImp
+inline
+ATermAppl initConstructBooleanImp(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunBooleanImp(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanImp()
+{
+  static ATermAppl t = initConstructBooleanImp(t);
   return t;
 }
 
@@ -596,6 +654,22 @@ ATermAppl constructActionRenameRules()
   return t;
 }
 
+// BooleanEquation
+inline
+ATermAppl initConstructBooleanEquation(ATermAppl& t)
+{
+  t = ATmakeAppl3(gsAFunBooleanEquation(), reinterpret_cast<ATerm>(constructFixPoint()), reinterpret_cast<ATerm>(constructBooleanVariable()), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanEquation()
+{
+  static ATermAppl t = initConstructBooleanEquation(t);
+  return t;
+}
+
 // ConsSpec
 inline
 ATermAppl initConstructConsSpec(ATermAppl& t)
@@ -692,6 +766,22 @@ ATermAppl constructProcessInit()
   return t;
 }
 
+// BES
+inline
+ATermAppl initConstructBES(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunBES(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBES()
+{
+  static ATermAppl t = initConstructBES(t);
+  return t;
+}
+
 // MapSpec
 inline
 ATermAppl initConstructMapSpec(ATermAppl& t)
@@ -721,6 +811,22 @@ inline
 ATermAppl constructStateYaled()
 {
   static ATermAppl t = initConstructStateYaled(t);
+  return t;
+}
+
+// BooleanAnd
+inline
+ATermAppl initConstructBooleanAnd(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunBooleanAnd(), reinterpret_cast<ATerm>(constructBooleanExpression()), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanAnd()
+{
+  static ATermAppl t = initConstructBooleanAnd(t);
   return t;
 }
 
@@ -929,6 +1035,22 @@ inline
 ATermAppl constructActNot()
 {
   static ATermAppl t = initConstructActNot(t);
+  return t;
+}
+
+// BooleanTrue
+inline
+ATermAppl initConstructBooleanTrue(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunBooleanTrue());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanTrue()
+{
+  static ATermAppl t = initConstructBooleanTrue(t);
   return t;
 }
 
@@ -1268,6 +1390,22 @@ ATermAppl constructComm()
   return t;
 }
 
+// BooleanNot
+inline
+ATermAppl initConstructBooleanNot(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunBooleanNot(), reinterpret_cast<ATerm>(constructBooleanExpression()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanNot()
+{
+  static ATermAppl t = initConstructBooleanNot(t);
+  return t;
+}
+
 // Delta
 inline
 ATermAppl initConstructDelta(ATermAppl& t)
@@ -1393,6 +1531,22 @@ inline
 ATermAppl constructActSpec()
 {
   static ATermAppl t = initConstructActSpec(t);
+  return t;
+}
+
+// BooleanVariable
+inline
+ATermAppl initConstructBooleanVariable(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunBooleanVariable(), reinterpret_cast<ATerm>(constructString()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructBooleanVariable()
+{
+  static ATermAppl t = initConstructBooleanVariable(t);
   return t;
 }
 
@@ -2185,6 +2339,13 @@ inline
 ATermAppl constructPBExpr()
 {
   return constructDataExpr();
+}
+
+// BooleanExpression
+inline
+ATermAppl constructBooleanExpression()
+{
+  return constructBooleanTrue();
 }
 //--- end generated code
 
