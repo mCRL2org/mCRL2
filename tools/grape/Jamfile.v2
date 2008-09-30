@@ -8,6 +8,7 @@ tool grape
       : <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
         <include>libgrape
         <include>grapeapp
+        <include>mcrl2gen
         <include>.
         <wx>yes
         <opengl>yes

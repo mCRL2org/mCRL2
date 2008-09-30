@@ -23,7 +23,7 @@
 #include "dialogs/parameterdialog.h"
 
 #include "libgrape/xml.h"
-#include "../../mcrl2gen.h"
+#include "mcrl2gen/mcrl2gen.h"
 
 
 

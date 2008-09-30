@@ -9,7 +9,7 @@
 // Main file of the GraPE application
 
 #include <wx/wx.h>
-#include "../mcrl2gen.h"
+#include "mcrl2gen/mcrl2gen.h"
 #include <wx/aboutdlg.h>
 #include "grape_frame.h"
 
