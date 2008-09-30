@@ -1,30 +1,39 @@
-% This file contains an mCRL2 version of the sliding window protocol
+% This file contains a variant of the mCRL2 version of the sliding window protocol
 % as it occurs in the book "Modelling Reactive Systems" by Fokkink, Groote
-% and Reniers.
+% and Reniers. The buffers are modelled using lists instead of functions as is
+% done in swp_func.mcrl2.
+%
 % The `constant' n is the size of the buffers in the protocol, set to 2. 
-% There is a domain D of data elements. In this specification it made
-% finite. It has two data elements d1 and d2. It also contains two
-% unspecified functions q1 and q2, which represent initial buffers with
-% garbage content.
+% There is a domain D of data elements. In this specification it is made
+% finite. It has an infinite number of data elements, modelled by the natural
+% numbers. It also contains two unspecified lists q1 and q2, which represent 
+% initial buffers with garbage content.
+%
+% State space generation is impossible, but is feasible if the domain D is
+% a finite set, e.g. by setting D = struct d1|d2;
+% Absence of deadlock can be checked via translation to pbes and removing the
+% data domain D using pbesparelm.
 
 map  n: Pos;
 eqn  n=2;
 
-sort D = struct d1 | d2;
-     DBuf = Nat -> D;
-     BBuf = Nat -> Bool;
+sort D = Nat; 
+     DBuf = List(D); 
+     BBuf = List(Bool); 
 map  empty: BBuf;
      insert: D#Nat#DBuf -> DBuf;
      insert: Bool#Nat#BBuf -> BBuf;
      nextempty_mod: Nat#BBuf#Nat#Pos -> Nat;
      q1,q2:DBuf;
-var  d:D; i,j,m: Nat; q: DBuf; c:Bool; n':Pos; b:BBuf;
-eqn  empty = lambda j:Nat.false;
-     insert(d,i,q) = lambda j:Nat.if(i==j,d,q(j)); 
-     insert(c,i,b) = lambda j:Nat.if(i==j,c,b(j)); 
-     b(i mod n') && m>0 -> 
+var  d,d':D; i,j,m: Nat; q: DBuf; c,c':Bool; n':Pos; b:BBuf;
+eqn  empty = [false,false];      
+     i == 0 -> insert(d,i,q) = d |> tail(q);
+     i > 0 -> insert(d,i, d'|>q) = d' |> insert(d,Int2Nat(i-1),q);
+     i == 0 -> insert(c,i,b) = c |> tail(b);
+     i > 0 -> insert(c,i,c'|>b) = c' |> insert(c,Int2Nat(i-1),b);
+     b.(i mod n') && m>0 -> 
          nextempty_mod(i,b,m,n') = nextempty_mod((i+1) mod 2*n', b,Int2Nat(m-1),n');
-     !(b(i mod n') && m>0) -> 
+     !(b.(i mod n') && m>0) -> 
          nextempty_mod(i,b,m,n') =i mod 2*n';
 
 act  r1,s4: D;
@@ -35,14 +44,14 @@ act  r1,s4: D;
 proc S(l,m:Nat,q:DBuf) =
         sum d:D. (m<n) ->
                 r1(d).S(l,m+1,insert(d,(l+m) mod n,q))<>delta+
-        sum k:Nat. (k<m) -> s2(q((l+k) mod n),(l+k) mod 2*n).S(l,m,q)<>delta+
+        sum k:Nat. (k<m) -> s2(q.((l+k) mod n),(l+k) mod 2*n).S(l,m,q)<>delta+
         sum k:Nat. r6(k).S(k,(m-k+l) mod 2*n,q);
 
      R(l':Nat,q':DBuf,b:BBuf) =
         sum d:D,k:Nat. r3(d,k).(((k-l') mod (2*n) < n) 
                   -> R(l',insert(d,k mod n,q'),insert(true,k mod n,b)) 
                   <> R(l',q',b))+
-        b(l' mod n) -> s4(q'(l' mod n)).
+        (b.(l' mod n)) -> s4(q'.(l' mod n)).
                           R((l'+1) mod 2*n,q',insert(false,l' mod n,b))<>delta+
         s5(nextempty_mod(l',b,n,n)).R(l',q',b);
 
@@ -57,4 +66,4 @@ proc S(l,m:Nat,q:DBuf) =
               L || 
               R(0,q',empty)));
 
-init SWP(q1,q2);
+init SWP(q1,q1);
