@@ -406,6 +406,12 @@ void grape_glcanvas::event_scroll_pagedown(wxScrollWinEvent &p_event)
 
 void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 {
+  // update statusbar
+  if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
+  {
+    m_main_frame->get_statusbar()->PopStatusText();
+  }
+
   if ( p_event.Dragging() )
   {
     coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;

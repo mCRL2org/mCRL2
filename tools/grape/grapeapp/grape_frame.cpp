@@ -39,7 +39,7 @@ grape_frame::grape_frame( const wxString &p_filename )
 , m_mode( GRAPE_MODE_NONE )
 {
   // initialize widgets
-  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype speci&fication") );
+  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype specification") );
   m_process_diagram_list = new grape_listbox(this, GRAPE_PROCESS_DIAGRAM_LIST, this);
   m_architecture_diagram_list = new grape_listbox(this, GRAPE_ARCHITECTURE_DIAGRAM_LIST, this);
   m_splitter = new wxSplitterWindow( this, GRAPE_SPLITTER );
@@ -390,12 +390,16 @@ void grape_frame::toggle_view( grape_mode p_mode )
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
+    m_architecture_diagram_list->Disable();
+    m_process_diagram_list->Disable();
   }
   else // switching back to canvas
   {
     save_datatype_specification();
     m_splitter->ReplaceWindow( m_splitter->GetWindow1(), m_glcanvas );
     m_datatext->Hide();
+    m_process_diagram_list->Enable();
+    m_architecture_diagram_list->Enable();
     m_glcanvas->Show();
     if ( m_glcanvas->get_diagram() )
     {

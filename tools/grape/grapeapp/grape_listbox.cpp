@@ -33,11 +33,23 @@ void grape_listbox::event_delete( wxKeyEvent &p_event )
 
 void grape_listbox::event_click( wxMouseEvent &p_event )
 {
-  wxCommandEvent event;
-  m_main_frame->event_menu_deselect_all( event );
+  if (!IsEmpty())
+  {
+    wxCommandEvent event;
+    m_main_frame->event_menu_deselect_all( event );
+  }
+}
+
+void grape_listbox::event_enter( wxMouseEvent &p_event )
+{
+  if ( m_main_frame->get_statusbar()->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
+  {
+    m_main_frame->get_statusbar()->PushStatusText( _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") );
+  }
 }
 
 BEGIN_EVENT_TABLE(grape_listbox, wxListBox)
   EVT_KEY_UP( grape_listbox::event_delete )
   EVT_LEFT_UP( grape_listbox::event_click )
+  EVT_MOTION( grape_listbox::event_enter )
 END_EVENT_TABLE()
