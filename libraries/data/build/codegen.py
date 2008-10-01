@@ -91,7 +91,7 @@ SORT_EXPRESSION_CONSTRUCTORS = '''      // Sort expression %(fullname)s
       {
         if (e.is_basic_sort())
         {
-          return static_cast<const basic_sort&>(e).name() == %(name)s();
+          return static_cast<const basic_sort&>(e) == %(name)s();
         }
         return false;
       }
@@ -419,8 +419,10 @@ class TokenID(Parsing.Token):
 #          | Include Spec
 # Includes ::= "#include" ID
 #          | Includes "#include" ID
-# Spec ::= SortSpec ConsSpec MapSpec EqnSpec
+# Spec ::= SortSpec FunctionSpec VarSpec EqnSpec
 # SortSpec ::= "sort" SortDecls        
+# FunctionSpec ::= MapSpec
+#                | ConsSpec MapSpec
 # ConsSpec ::= "cons" OpDecls
 # MapSpec ::= "map" OpDecls
 # VarSpec ::= "var" VarDecls
@@ -526,8 +528,8 @@ class Includes(Parsing.Nonterm):
 
 class Spec(Parsing.Nonterm):
     "%nonterm"
-    def reduce(self, sortspec, consspec, mapspec, varspec, eqnspec):
-        "%reduce SortSpec ConsSpec MapSpec VarSpec EqnSpec"
+    def reduce(self, sortspec, functionspec, varspec, eqnspec):
+        "%reduce SortSpec FunctionSpec VarSpec EqnSpec"
         global sorts_table
         print sortspec.sorts
         self.sort = sortspec.sorts[0]
@@ -536,14 +538,13 @@ class Spec(Parsing.Nonterm):
         else:
           self.sortstring = parameter_sorts_table[self.sort]
         self.code = sortspec.code + \
-                    consspec.code + \
-                    mapspec.code + \
+                    functionspec.code + \
                     generate_projection_functions() + \
                     varspec.code + \
                     generate_equations_code(self.sortstring, eqnspec.equations)
 
         # Debugging
-        self.string = sortspec.string + '\n' + consspec.string + '\n' + mapspec.string + '\n' + varspec.string + '\n' + eqnspec.string
+        self.string = sortspec.string + '\n' + functionspec.string + '\n' + varspec.string + '\n' + eqnspec.string
         print "Parsed specification:\n%s\n" % self.string
 
 class SortSpec(Parsing.Nonterm):
@@ -556,6 +557,20 @@ class SortSpec(Parsing.Nonterm):
         # Debugging
         self.string = "sort %s;" % (sortdecls.string)
         print "Parsed sort specification: %s" % (self.string)
+
+class FunctionSpec(Parsing.Nonterm):
+    "%nonterm"
+    def reduceMapSpec(self, mapspec):
+        "%reduce MapSpec"
+        self.code = mapspec.code
+
+        self.string = mapspec.string
+
+    def reduceConsMapSpec(self, consspec, mapspec):
+        "%reduce ConsSpec MapSpec"
+        self.code = consspec.code + mapspec.code
+
+        self.string = consspec.string + '\n' + mapspec.string
 
 class ConsSpec(Parsing.Nonterm):
     "%nonterm"
