@@ -40,6 +40,7 @@ import Parsing
 # Translator, used to store global substitutions as a dictionary
 #
 sorts_table = {}      # Maps sorts to internal names
+parameter_sorts_table = {} # Maps sort parameters to internal names
 functions_table = {}  # Maps ids to function names
 arity_table = {}      # Maps (id,arity) pairs to function names
 variables_table = {}  # Maps variables to sorts
@@ -90,7 +91,28 @@ SORT_EXPRESSION_CONSTRUCTORS = '''      // Sort expression %(fullname)s
       {
         if (e.is_basic_sort())
         {
-          return static_cast<const basic_sort&>(e) == %(name)s();
+          return static_cast<const basic_sort&>(e).name() == %(name)s();
+        }
+        return false;
+      }
+
+'''
+
+SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      // Sort expression %(container)s(%(param)s)
+      inline
+      container_sort %(label)s(const sort_expression& %(param)s)
+      {
+        static container_sort %(label)s("%(label)s", %(param)s);
+        return %(label)s;
+      }
+
+      // Recogniser for sort expression %(container)s(%(param)s)
+      inline
+      bool is_%(label)s(const sort_expression& e)
+      {
+        if (e.is_container_sort())
+        {
+          return static_cast<const container_sort&>(e).name() == "%(label)s";
         }
         return false;
       }
@@ -99,7 +121,7 @@ SORT_EXPRESSION_CONSTRUCTORS = '''      // Sort expression %(fullname)s
 
 FUNCTION_CONSTRUCTOR = '''      // Function symbol %(fullname)s
       inline
-      function_symbol %(name)s()
+      function_symbol %(name)s(%(sortparams)s)
       {
         static function_symbol %(name)s("%(fullname)s", %(sort)s);
         return %(name)s;
@@ -113,7 +135,7 @@ FUNCTION_RECOGNISER = '''      // Recogniser for %(fullname)s
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == %(name)s();
+          return static_cast<const function_symbol&>(e).name() == %(name)s();
         }
         return false;
       }
@@ -122,10 +144,10 @@ FUNCTION_RECOGNISER = '''      // Recogniser for %(fullname)s
 
 FUNCTION_APPLICATION='''      // Application of %(fullname)s
       inline
-      application %(name)s(%(formparams)s)
+      application %(name)s(%(formsortparams)s, %(formparams)s)
       {
         %(assertions)s
-        return application(%(name)s(),%(actparams)s);
+        return application(%(name)s(%(actsortparams)s),%(actparams)s);
       }
 
 '''
@@ -173,11 +195,34 @@ def generate_sort_expression_constructors(label, sortexpr):
     }
     return code
 
+def generate_sort_expression_constructors_param(label, container, param):
+    code = SORT_EXPRESSION_CONSTRUCTORS_PARAM % {
+      'label'     : label.label,
+      'container' : container.string,
+      'param'     : parameter_sorts_table[param.string]
+    }
+    return code
+
 # -------------------------------------------------------#
 # generate_function_constructors
 # -------------------------------------------------------#
 def generate_function_constructors(id, label, sortexpr):
+    global parameter_sorts_table
+    formsortparams = ""
+    actsortparams = ""
+    for s in sortexpr.parameters:
+        if formsortparams <> "":
+            formsortparams += ", "
+            actsortparams += ", "
+        s_code = parameter_sorts_table[s]
+        formsortparams += "const sort_expression& %s" % s_code
+        actsortparams += "%s" % s_code
+    print "id: %s" % id.string
+    print "label: %s" % label.label
+    print "sortexpr: %s" % sortexpr.inlinecode
+    print "sortparams: %s" % sortexpr.parameters
     code = FUNCTION_CONSTRUCTOR % {
+      'sortparams' : formsortparams,
       'fullname'  : id.string,
       'name'      : label.label,
       'sort'      : sortexpr.inlinecode
@@ -191,16 +236,22 @@ def generate_function_constructors(id, label, sortexpr):
     formalparameters = ""
     actualparameters = ""
     assertions = ""
-    for a in arguments:
+    for a in arguments: 
+        a = a.split('(')[0].lower() # Cleaning for parameterised sorts
         if index <> 0:
           formalparameters += ", "
           actualparameters += ", "
         formalparameters += "const data_expression& arg%s" % index
         actualparameters += "arg%s" % index
-        assertions += "assert(is_%s(arg%s.sort()));\n        " % (a,index)
+        if a in actsortparams:
+          assertions += "assert(arg%s.sort() == %s);\n        " % (index, a)
+        else:
+          assertions += "assert(is_%s(arg%s.sort()));\n        " % (a,index)
         index += 1
 
     code += FUNCTION_APPLICATION % {
+      'formsortparams': formsortparams,
+      'actsortparams': actsortparams,
       'fullname'  : id.string,
       'name'      : label.label,
       'formparams': formalparameters,
@@ -274,7 +325,11 @@ def generate_equation_code(vars, condition, lhs, rhs):
     for var in vars:
         if var_code <> '':
             var_code += ", "
-        var_code += "variable(\"%s\", %s())" % (var, sorts_table[variables_table[var]])
+        s = variables_table[var]
+        if s in sorts_table:
+          var_code += "variable(\"%s\", %s())" % (var, sorts_table[s])
+        else:
+          var_code += "variable(\"%s\", %s)" % (var, parameter_sorts_table[s])
     if var_code == '':
         eqn_code = "data_equation(variable_list(), %s, %s, %s)" % (condition.inlinecode, lhs.inlinecode, rhs.inlinecode)
     else:
@@ -282,12 +337,21 @@ def generate_equation_code(vars, condition, lhs, rhs):
     return eqn_code
     
 def generate_equations_code(sortlabel, equations):
+    if sortlabel.find('(') <> -1:
+      print sortlabel.split('(')
+      label = sortlabel.split('(')[0]
+      argument = "const sort_expression& %s" % (sortlabel.split('(')[1].strip(')'))
+    else:
+      label = sortlabel
+      argument = ""
+    print label
+    print argument
     code = '''      // Give all system defined equations for %s
       inline
-      data_equation_list %s_generate_equations_code()
+      data_equation_list %s_generate_equations_code(%s)
       {
         data_equation_list result;
-''' % (sortlabel, sortlabel)
+''' % (label, label, argument)
     for equation in equations:
         code += "        result.push_back(%s);\n" % (equation)
     code += '''
@@ -362,6 +426,7 @@ class TokenID(Parsing.Token):
 # VarSpec ::= "var" VarDecls
 # EqnSpec ::= "eqn" EqnDecls
 # SortDecls ::= SortExpr Label
+#            | ID "(" SortParam ")" Label
 #            | SortDecls SortExpr Label
 # VarDecls ::= ID ":" SortExpr
 #            | VarDecls ID ":" SortExpr
@@ -378,6 +443,8 @@ class TokenID(Parsing.Token):
 #            | DataExprs "," DataExpr
 # SortExpr ::= SortExprPrimary
 #            | Domain -> SortExpr
+#            | ID "(" SortParam ")"
+# SortParam ::= ID
 # Domain ::= SortExprPrimary Label
 #          | Domain # SortExprPrimary Label
 # SortExprPrimary ::= ID
@@ -415,14 +482,18 @@ class Result(Parsing.Nonterm):
         global outputcode # needed in order to modify outputcode
         global sorts_table
         self.code = spec.code
+        if spec.sort in sorts_table:
+          s = sorts_table[spec.sort]
+        else:
+          s = parameter_sorts_table[spec.sort].split('(')[0]
         file_header = FILE_HEADER % {
-          'uppercasename' : sorts_table[spec.sort].upper(),
-          'name'          : sorts_table[spec.sort],
+          'uppercasename' : s.upper(),
+          'name'          : s,
           'includes'      : includes.code
         }
         file_footer = FILE_FOOTER % {
-          'uppercasename' : sorts_table[spec.sort].upper(),
-          'name'          : sorts_table[spec.sort]
+          'uppercasename' : s.upper(),
+          'name'          : s
         }
         outputcode = outputcode + file_header + spec.code + file_footer
 
@@ -460,12 +531,16 @@ class Spec(Parsing.Nonterm):
         global sorts_table
         print sortspec.sorts
         self.sort = sortspec.sorts[0]
+        if self.sort in sorts_table:
+          self.sortstring = sorts_table[self.sort]
+        else:
+          self.sortstring = parameter_sorts_table[self.sort]
         self.code = sortspec.code + \
                     consspec.code + \
                     mapspec.code + \
                     generate_projection_functions() + \
                     varspec.code + \
-                    generate_equations_code(sorts_table[self.sort], eqnspec.equations)
+                    generate_equations_code(self.sortstring, eqnspec.equations)
 
         # Debugging
         self.string = sortspec.string + '\n' + consspec.string + '\n' + mapspec.string + '\n' + varspec.string + '\n' + eqnspec.string
@@ -538,6 +613,18 @@ class SortDecls(Parsing.Nonterm):
         self.string = "%s %s" % (sortexpr.string, label.label)
         print "Parsed single sort declaration %s" % (self.string)
 
+    def reduceSortDeclParam(self, container, lbrack, param, rbrack, label, semicolon):
+        "%reduce id lbrack SortParam rbrack Label semicolon"
+        self.code = generate_sort_expression_constructors_param(label, container, param)
+        self.sortstring = "%s(%s)" % (container.string, param.string)
+        self.inlinecode = "%s(%s)" % (label.label, param.string.lower())
+        parameter_sorts_table[self.sortstring] = self.inlinecode
+        self.sorts = [self.sortstring]
+        current_sort = container.string
+
+        self.string = "%s(%s) %s" % (container.string, param.string, label.string)
+        print "Parsed parameterised sort declaration %s" % (self.string)
+
     def reduceSortDecls(self, sortdecls, sortexpr, label, semicolon):
         "%reduce SortDecls id Label semicolon"
         global current_sort
@@ -575,6 +662,7 @@ class OpDecls(Parsing.Nonterm):
     def reduceOpDecl(self, id, label, colon, sortexpr, semicolon):
         "%reduce id Label colon SortExpr semicolon"
         print "Parsing opdecl"
+        self.sortparameters = sortexpr.parameters
         self.code = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
         arity_table[(id.string,sortexpr.arity)] = label.label
@@ -587,6 +675,8 @@ class OpDecls(Parsing.Nonterm):
     def reduceOpDecls(self, opdecls, id, label, colon, sortexpr, semicolon):
         "%reduce OpDecls id Label colon SortExpr semicolon"
         print "Parsing opdecls"
+        self.sortparameters = opdecls.sortparameters
+        self.sortparameters = self.sortparameters.union(sortexpr.parameters)
         self.lastcode = generate_function_constructors(id, label, sortexpr)
         functions_table[id.string] = label.label
         arity_table[(id.string,sortexpr.arity)] = label.label
@@ -690,7 +780,13 @@ class DataExprPrimary(Parsing.Nonterm):
             self.inlinecode = "%s()" % (functions_table[id.string])
             self.variables = set()
         else:
-            self.inlinecode = "variable(\"%s\", %s())" % (id.string, sorts_table[variables_table[id.string]])
+            s = variables_table[id.string]
+            print sorts_table
+            print parameter_sorts_table
+            if s in sorts_table:
+              self.inlinecode = "variable(\"%s\", %s())" % (id.string, sorts_table[variables_table[id.string]])
+            else:
+              self.inlinecode = "variable(\"%s\", %s)" % (id.string, parameter_sorts_table[variables_table[id.string]])
             self.variables = set(id.string)
 
         # Debugging
@@ -734,6 +830,7 @@ class SortExpr(Parsing.Nonterm):
     def reduceSortExprPrimary(self, sortexpr):
         "%reduce SortExprPrimary"
         print "Parsing SortExprPrimary"
+        self.parameters = sortexpr.parameters
         self.inlinecode = sortexpr.inlinecode
         self.argumentcode = sortexpr.argumentcode
         self.recogniserstring = sortexpr.recogniserstring
@@ -747,6 +844,8 @@ class SortExpr(Parsing.Nonterm):
     def reduceSortExprArrow(self, domain, arrow, sortexpr):
         "%reduce Domain arrow SortExpr"
         print "Parsing sort arrow"
+        self.parameters = domain.parameters
+        self.parameters.union(sortexpr.parameters)
         self.inlinecode = "function_sort(%s, %s)" % (domain.inlinecode, sortexpr.inlinecode)
         self.argumentcode = domain.argumentcode
         self.recogniserstring = domain.recogniserstring
@@ -757,13 +856,25 @@ class SortExpr(Parsing.Nonterm):
         print "Parsed SortExprArrow: %s" % (self.string)
         print "recogniserstring: %s" % (self.recogniserstring)
 
+class SortParam(Parsing.Nonterm):
+    "%nonterm"
+    def reduceId(self, id):
+        "%reduce id"
+        global parameter_sorts_table
+        parameter_sorts_table[id.string] = id.string.lower()
+        self.parameters = set(id.string)
+
+        self.string = id.string
+        print "Parsed SortParam: %s" % (self.string)
+
 class Domain(Parsing.Nonterm):
     "%nonterm"
     def reduceSortExprPrimary(self, expr, label):
         "%reduce SortExprPrimary Label"
         print "Parsing singular domain"
-        self.inlinecode = "%s()" % (sorts_table[expr.string])
-        self.argumentcode = "%s" % (sorts_table[expr.string])
+        self.parameters = expr.parameters
+        self.inlinecode = expr.inlinecode
+        self.argumentcode = expr.argumentcode
         self.recogniserstring = "%s" % (label.label)
         self.arity = 1
 
@@ -774,6 +885,8 @@ class Domain(Parsing.Nonterm):
     def reduceHashedDomain(self, Domain, hash, SortExprPrimary, label):
         "%reduce Domain hash SortExprPrimary Label"
         print "Parsing domain"
+        self.parameters = Domain.parameters
+        self.parameters.union(SortExprPrimary.parameters)
         self.inlinecode = "%s, %s" % (Domain.inlinecode, SortExprPrimary.inlinecode)
         self.argumentcode = "%s, %s" % (Domain.argumentcode, SortExprPrimary.argumentcode)
         self.recogniserstring = "%s, %s" % (Domain.recogniserstring, label.label)
@@ -787,9 +900,16 @@ class SortExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceId(self, expr):
         "%reduce id"
-        print "Parsing id"
-        self.inlinecode = "%s()" % (sorts_table[expr.string])
-        self.argumentcode = "%s" % (sorts_table[expr.string])
+        global sorts_table
+        global parameter_sorts_table
+        if expr.string in sorts_table:
+          self.inlinecode = "%s()" % (sorts_table[expr.string])
+          self.argumentcode = "%s" % (sorts_table[expr.string])
+          self.parameters = set()
+        else:
+          self.inlinecode = "%s" % (parameter_sorts_table[expr.string])
+          self.argumentcode = "%s" % (parameter_sorts_table[expr.string])
+          self.parameters = set(expr.string)
         self.recogniserstring = ""
         self.arity = 0
 
@@ -800,6 +920,7 @@ class SortExprPrimary(Parsing.Nonterm):
     def reduceParen(self, lbrack, SortExpr, rbrack):
         "%reduce lbrack SortExpr rbrack"
         print "parsing Paren"
+        self.parameters = SortExpr.parameters
         self.inlinecode = SortExpr.inlinecode
         self.argumentcode = SortExpr.argumentscode
         self.recogniserstring = SortExpr.recogniserstring
@@ -808,6 +929,18 @@ class SortExprPrimary(Parsing.Nonterm):
         # Debugging
         self.string = "(" + SortExpr.string + ")"
         print "Parsed bracketed expression: %s" % (self.string)
+
+    def reduceSortExprParam(self, container, lbrack, param, rbrack):
+        "%reduce id lbrack SortParam rbrack"
+        self.parameters = param.parameters
+        self.inlinecode = "%s(%s)" % (container.string, param.string)
+        self.inlinecode = self.inlinecode.lower()
+        self.argumentcode = self.inlinecode
+        self.recogniserstring = ""
+        self.arity = 0
+
+        self.string = "%s(%s)" % (container.string, param.string)
+        print "Parsed SortExprParam: %s" % (self.string)
 
 class Label(Parsing.Nonterm):
     "%nonterm"
