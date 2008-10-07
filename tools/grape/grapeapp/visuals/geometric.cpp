@@ -623,10 +623,18 @@ bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coor
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text )
 {
-  float distance_begin_to_end = sqrt( pow( p_end.m_y - p_begin.m_y, 2 ) + pow( p_end.m_x - p_begin.m_x, 2 ) ) / 2;
-  float angle = atan2(( p_end.m_x - p_begin.m_x), ( p_end.m_y - p_begin.m_y));
-  coordinate p_control_left = {p_control.m_x + distance_begin_to_end * sin( angle - M_PI ), p_control.m_y + distance_begin_to_end * cos( angle - M_PI )};
-  coordinate p_control_right = {p_control.m_x + distance_begin_to_end * sin( angle - M_PI*2 ), p_control.m_y + distance_begin_to_end * cos( angle - M_PI*2 )};
+  float distance_begin_to_control = sqrt( pow( p_control.m_y - p_begin.m_y, 2 ) + pow( p_control.m_x - p_begin.m_x, 2 ) );
+  float distance_control_to_end = sqrt( pow( p_end.m_y - p_control.m_y, 2 ) + pow( p_end.m_x - p_control.m_x, 2 ) );
+  float strength = distance_begin_to_control/(distance_begin_to_control + distance_control_to_end);
+  float distance_min;
+  if (distance_begin_to_control < distance_control_to_end) distance_min = distance_begin_to_control; else distance_min = distance_control_to_end;
+
+  coordinate p_right = {(1-strength)*p_begin.m_x + strength*p_control.m_x, (1-strength)*p_begin.m_y + strength*p_control.m_y};
+  coordinate p_left = {(1-strength)*p_control.m_x + strength*p_end.m_x, (1-strength)*p_control.m_y + strength*p_end.m_y};
+  float angle_control = atan2(( p_left.m_x - p_right.m_x), ( p_left.m_y - p_right.m_y));
+
+  coordinate p_control_left = {p_control.m_x + distance_min * sin( angle_control - M_PI ), p_control.m_y + distance_min * cos( angle_control - M_PI )};
+  coordinate p_control_right = {p_control.m_x + distance_min * sin( angle_control - M_PI*2 ), p_control.m_y + distance_min * cos( angle_control - M_PI*2 )};
 
   //draw bezier
   coordinate pre_pnt;
@@ -646,14 +654,14 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   }
 
   // calculate rotation of arrow
-  // correction + get_coordinate not necessary as this results in 0
-  angle = atan2(( pre_pnt.m_x - pnt.m_x), ( pre_pnt.m_y - pnt.m_y));
+  float angle_arrow = atan2((pre_pnt.m_x - pnt.m_x), (pre_pnt.m_y - pnt.m_y));
+//  angle = atan2((p_control.m_x - pnt.m_x), (p_control.m_y - pnt.m_y));
 
   // draw arrow head based on calculated angle
-  float one_side_x = pnt.m_x + 0.03 * sin( angle - M_PI_4 );
-  float one_side_y = pnt.m_y + 0.03 * cos( angle - M_PI_4 );
-  float other_side_x = pnt.m_x + 0.03 * sin( angle + M_PI_4 );
-  float other_side_y = pnt.m_y + 0.03 * cos( angle + M_PI_4 );
+  float one_side_x = pnt.m_x + 0.03 * sin( angle_arrow - M_PI_4 );
+  float one_side_y = pnt.m_y + 0.03 * cos( angle_arrow - M_PI_4 );
+  float other_side_x = pnt.m_x + 0.03 * sin( angle_arrow + M_PI_4 );
+  float other_side_y = pnt.m_y + 0.03 * cos( angle_arrow + M_PI_4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
@@ -662,13 +670,18 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
+//  draw_line(p_control, p_control_left, true, g_color_blue);
+//  draw_line(p_control, p_control_right, true, g_color_blue);
+
   // draw text
   // calculate midpoint
   coordinate midpoint;
   midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
+
+
   // render text based on the calculated angle
-  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
+  if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
     render_text(p_label_text, p_control.m_x - 0.05f, p_control.m_y + 0.05f, 999, 999, true);
   }
