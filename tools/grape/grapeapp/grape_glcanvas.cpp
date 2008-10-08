@@ -406,12 +406,6 @@ void grape_glcanvas::event_scroll_pagedown(wxScrollWinEvent &p_event)
 
 void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 {
-  // update statusbar
-  if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
-  {
-    m_main_frame->get_statusbar()->PopStatusText();
-  }
-
   if ( p_event.Dragging() )
   {
     coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
@@ -467,6 +461,14 @@ void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 
 void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
 {
+  // update statusbar
+  if ( ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_main_frame->get_statusbar()->GetStatusText() == wxEmptyString ) ) {
+    if ( ( m_main_frame->get_mode() == GRAPE_MODE_ARCH ) || ( m_main_frame->get_mode() == GRAPE_MODE_PROC ) )
+    {
+      m_main_frame->get_statusbar()->PopStatusText();
+    }
+  }
+
   coordinate released_coordinate = get_canvas_coordinate( p_event.GetX(), p_event.GetY() );
   // if the released_coordinate was outside of the canvas, put it back inside the canvas
   // g_cursor_margin is defined in visuals/geometric.h

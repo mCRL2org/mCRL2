@@ -55,17 +55,17 @@ namespace grape
 
 	/**
 	 * select diagram event handler.
-	 * Processes the select diagram event.
+	 * Processes the select listbox event.
 	 * @param p_event The generated event.
 	 */
 	void event_click( wxMouseEvent &p_event );
 
 	/**
 	 * Enter listbox event handler.
-	 * Processes the enter listbox event.
+	 * Processes the select diagram event.
 	 * @param p_event The generated event.
 	 */
-	void event_enter( wxMouseEvent &p_event );
+	void event_select( wxCommandEvent &p_event );
     };
   } // namespace grapeapp
 } // namespace grape

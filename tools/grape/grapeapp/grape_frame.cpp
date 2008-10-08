@@ -390,16 +390,19 @@ void grape_frame::toggle_view( grape_mode p_mode )
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
-    m_architecture_diagram_list->Disable();
-    m_process_diagram_list->Disable();
+//    m_architecture_diagram_list->Disable();
+//    m_process_diagram_list->Disable();
+
+    // update statusbar
+    m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
   }
   else // switching back to canvas
   {
     save_datatype_specification();
     m_splitter->ReplaceWindow( m_splitter->GetWindow1(), m_glcanvas );
     m_datatext->Hide();
-    m_process_diagram_list->Enable();
-    m_architecture_diagram_list->Enable();
+//    m_process_diagram_list->Enable();
+//    m_architecture_diagram_list->Enable();
     m_glcanvas->Show();
     if ( m_glcanvas->get_diagram() )
     {
@@ -411,7 +414,28 @@ void grape_frame::toggle_view( grape_mode p_mode )
         m_process_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() );
       }
     }
-    m_statusbar->PushStatusText( wxEmptyString );
+    // update statusbar
+    if ( m_statusbar->GetStatusText() == _T("In the text field you can enter a datatype specification") )
+    {
+      m_statusbar->PopStatusText();
+      if ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) 
+      {
+        m_statusbar->PopStatusText();
+      }
+      else if ( m_statusbar->GetStatusText() == wxEmptyString )
+      {
+        if ( m_mode != GRAPE_MODE_SPEC )
+        {
+          m_statusbar->PopStatusText();
+          m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
+        }
+      }
+      else
+      {
+        m_statusbar->PopStatusText();
+        m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
+      }
+    }
   }
 }
 
@@ -551,7 +575,7 @@ void grape_frame::update_toolbar( void )
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
   GetToolBar()->EnableTool( GRAPE_MENU_PROPERTIES, m_menubar->IsEnabled( GRAPE_MENU_PROPERTIES ) );
 }
-
+  
 void grape_frame::update_menubar( void )
 {
   diagram *dia_ptr = m_glcanvas->get_diagram();
@@ -576,60 +600,90 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
 {
   if ( m_mode == GRAPE_MODE_DATASPEC )
   {
-    m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
+    if ( p_event.GetSelection() == -1 )
+    {
+      if ( m_statusbar->GetStatusText() != _T("In the text field you can enter a datatype specification") )
+      {
+        m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
+      }
+    }
   }
   else
   {
     if ( p_event.GetSelection() == -1 )
     {
-      canvas_state state = m_glcanvas->get_canvas_state();
-      m_statusbar->PushStatusText( wxEmptyString );
-      wxString status_text;
-      switch( state )
+      if ( ( m_mode == GRAPE_MODE_ARCH ) || ( m_mode == GRAPE_MODE_PROC ) )
       {
-        case SELECT:
-          status_text = _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties."); break;
-        case ATTACH:
-          {
-            if ( m_architecture_diagram_list->GetSelection() != wxNOT_FOUND )
+        canvas_state state = m_glcanvas->get_canvas_state();
+        wxString status_text;
+        switch( state )
+        {
+          case SELECT:
+            status_text = _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties."); break;
+          case ATTACH:
             {
-              status_text = _T("Drag from visible / blocked to channel (communication), channel communication to channel, comment to an object or vice versa.");
+              if ( m_architecture_diagram_list->GetSelection() != wxNOT_FOUND )
+              {
+                status_text = _T("Drag from visible / blocked to channel (communication), channel communication to channel, comment to an object or vice versa.");
+              }
+              else
+              {
+                status_text = _T("Drag from (terminating) transition / initial designator to state / process reference, comment to an object or vice versa.");
+              }
+              break;
             }
-            else
-            {
-              status_text = _T("Drag from (terminating) transition / initial designator to state / process reference, comment to an object or vice versa.");
-            }
-            break;
+          case DETACH:
+            status_text = _T("Click one of the attached objects to detach it."); break;
+          case ADD_COMMENT:
+            status_text = _T("Click to add a comment"); break;
+          case ADD_TERMINATING_TRANSITION:
+            status_text = _T("Drag from a state to add a terminating transition"); break;
+          case ADD_NONTERMINATING_TRANSITION:
+            status_text = _T("Drag from a beginstate to an endstate to add a transition"); break;
+          case ADD_INITIAL_DESIGNATOR:
+            status_text = _T("Click a state to add an initial designator"); break;
+          case ADD_STATE:
+            status_text = _T("Click to add a state"); break;
+          case ADD_REFERENCE_STATE:
+          case ADD_PROCESS_REFERENCE:
+            status_text = _T("Click to add a process reference"); break;
+          case ADD_ARCHITECTURE_REFERENCE:
+            status_text = _T("Click to add an architecture reference"); break;
+          case ADD_CHANNEL:
+            status_text = _T("Click on a reference to add a channel"); break;
+          case ADD_CHANNEL_COMMUNICATION:
+            status_text = _T("Drag from a channel to another channel to add a channel communication"); break;
+          case ADD_VISIBLE:
+            status_text = _T("Click on a channel or channel communication to make it visible"); break;
+          case ADD_BLOCKED:
+            status_text = _T("Click on a channel or channel communication to make it blocked"); break;
+          case IDLE:
+          default: status_text = wxEmptyString; break;
+        }
+        if ( ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_glcanvas == FindFocus() ) )
+        {
+          m_statusbar->PopStatusText();
+          if ( m_statusbar->GetStatusText() != wxEmptyString ) {
+            m_statusbar->PopStatusText();
+            m_statusbar->PushStatusText( status_text );
           }
-        case DETACH:
-          status_text = _T("Click one of the attached objects to detach it."); break;
-        case ADD_COMMENT:
-          status_text = _T("Click to add a comment"); break;
-        case ADD_TERMINATING_TRANSITION:
-          status_text = _T("Drag from a state to add a terminating transition"); break;
-        case ADD_NONTERMINATING_TRANSITION:
-          status_text = _T("Drag from a beginstate to an endstate to add a transition"); break;
-        case ADD_INITIAL_DESIGNATOR:
-          status_text = _T("Click a state to add an initial designator"); break;
-        case ADD_STATE:
-          status_text = _T("Click to add a state"); break;
-        case ADD_REFERENCE_STATE:
-        case ADD_PROCESS_REFERENCE:
-          status_text = _T("Click to add a process reference"); break;
-        case ADD_ARCHITECTURE_REFERENCE:
-          status_text = _T("Click to add an architecture reference"); break;
-        case ADD_CHANNEL:
-          status_text = _T("Click on a reference to add a channel"); break;
-        case ADD_CHANNEL_COMMUNICATION:
-          status_text = _T("Drag from a channel to another channel to add a channel communication"); break;
-        case ADD_VISIBLE:
-          status_text = _T("Click on a channel or channel communication to make it visible"); break;
-        case ADD_BLOCKED:
-          status_text = _T("Click on a channel or channel communication to make it blocked"); break;
-        case IDLE:
-        default: status_text = wxEmptyString; break;
+          else
+          {
+            m_statusbar->PushStatusText( status_text );
+          }
+        }
       }
-      m_statusbar->PushStatusText( status_text );
+      else
+      {
+        m_statusbar->PushStatusText(wxEmptyString);
+      }
+    }
+    else
+    {
+      if ( ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) && ( m_glcanvas == FindFocus() ) )
+      {
+        m_statusbar->PopStatusText();
+      }
     }
   }
 }

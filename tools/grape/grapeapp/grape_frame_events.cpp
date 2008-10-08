@@ -100,6 +100,7 @@ void grape_frame::event_tool_selected(wxCommandEvent& p_event)
   // deselect all objects
   grape_event_deselect_all *event = new grape_event_deselect_all(this);
   m_event_handler->Submit(event, false);
+  m_glcanvas->SetFocus();
   update_bars();
 }
 
@@ -187,6 +188,7 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
   {
     set_mode(GRAPE_MODE_SPEC);
     m_event_handler->Undo();
+    m_statusbar->SetStatusText(wxEmptyString);
     update_bars();
 
     // mark as modified
@@ -199,6 +201,8 @@ void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
   // redo last event
   set_mode(GRAPE_MODE_SPEC);
   m_event_handler->Redo();
+  m_statusbar->PopStatusText();
+  m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
   update_bars();
 
   // mark as modified
