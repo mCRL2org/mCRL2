@@ -37,17 +37,35 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
   if ( astate != 0 ) // Cast succesful
   {
     // calculate x, y around begin state
-    float bx = p_start.m_x;
-    float by = p_start.m_y;
-    float erw = astate->get_width()/2;
-    float erh = astate->get_height()/2;
+    float px = p_start.m_x;
+    float py = p_start.m_y;
+    float w = astate->get_width()/2;
+    float h = astate->get_height()/2;
     float ex = astate->get_coordinate().m_x;
     float ey = astate->get_coordinate().m_y;
-    float r1 = atan2((bx-ex)/(erh), (by-ey)/(erw));
-    float fx = ex+(erw)*sin(r1);
-    float fy = ey+(erh)*cos(r1);
 
-    coordinate coord = {fx, fy};
+    float npx;
+    float npy;
+    float s = (py-ey)/(px-ex);
+
+    if (px != ex) {
+      s = (py-ey)/(px-ex);
+      if (px > py) {
+        npx = w*sqrt(1/(1+pow(s*w/h,2)));
+      } else {
+        npx = -w*sqrt(1/(1+pow(s*w/h,2)));
+      }
+     npy = s*npx;
+
+    } else {
+     npx = 0;
+     if (py > ex) {
+       npy = h;
+     } else {
+       npy = -h;
+     }
+   }
+    coordinate coord = {npx+ex, npy+ey};
     return coord;
   }
   else // Cast failed
