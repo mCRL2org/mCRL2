@@ -13,6 +13,7 @@
 #define __MCRL2_EXCEPTION_H__
 
 #include <stdexcept>
+#include <string>
 #include <cassert>
 
 namespace mcrl2 {

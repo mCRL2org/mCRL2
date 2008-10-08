@@ -8,8 +8,8 @@
 //
 /// \file include/tipi/detail/basic_messenger.ipp
 
-#ifndef BASIC_MESSENGER_TCC
-#define BASIC_MESSENGER_TCC
+#ifndef BASIC_MESSENGER_IPP
+#define BASIC_MESSENGER_IPP
 
 #include <algorithm>
 #include <functional>
@@ -19,30 +19,30 @@
 #include <map>
 #include <iostream>
 
-#include <workarounds.h>
-
-#include <tipi/detail/transport/detail/transporter.ipp>
-#include <tipi/detail/basic_messenger.hpp>
-#include <tipi/detail/utility/standard_utility.hpp>
-#include <tipi/common.hpp>
-
 #include "boost/ref.hpp"
 #include "boost/bind.hpp"
 #include "boost/foreach.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/thread/condition_variable.hpp"
 
+#include "tipi/detail/transport/detail/transporter.ipp"
+#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/detail/utility/standard_utility.hpp"
+#include "tipi/common.hpp"
+
+#include <workarounds.h>
+
 /// \cond INTERNAL_DOCS
 /**
  * Workaround for older compilers to force instantiation of
- * boost::recursive_mutex::scoped_lock::unlock\
+ * boost::recursive_mutex::scoped_lock::unlock
  * 
  *  The problem is that the indirect use of this method through boost::bind
  *  does not cause some compilers to instantiate this method
  */
 inline bool workaround() {
   boost::recursive_mutex              l;
-  boost::recursive_mutex::scoped_lock c(l); 
+  boost::recursive_mutex::scoped_lock c(l);
 
   c.unlock();
 
@@ -72,9 +72,9 @@ namespace tipi {
         /** \brief Strict weak order on handler_type (for use with std::set) */
         class compare_handlers {
           public:
-  
+
             /** \brief Comparison method */
-            inline bool operator()(handler_type const& l, handler_type const& r) {
+            inline bool operator()(handler_type const& l, handler_type const& r) const {
               return &l < &r;
             }
         };
@@ -151,7 +151,7 @@ namespace tipi {
 
               return m_tasks.size();
             }
-            
+
             inline void clear() {
               boost::mutex::scoped_lock l(m_lock);
 
@@ -171,21 +171,21 @@ namespace tipi {
 
         /** \brief Monitor synchronisation construct */
         class waiter_data {
-       
+
           public:
-       
+
             /** \brief boost::mutex synchronisation primitive */
             boost::mutex                                     mutex;
-       
+
             /** \brief boost::condition synchronisation primitive */
             boost::condition_variable                        condition;
 
           private:
-       
+
             boost::shared_ptr< const M >                     message;
-       
+
           public:
-       
+
             /** \brief Wake up with timouut all treads that are blocked on the condition */
             inline void wake(boost::shared_ptr< const M > const& m) {
               message = m;
@@ -209,10 +209,10 @@ namespace tipi {
 
         /** \brief Handlers based on message types */
         handler_map                        handlers;
- 
+
         /** \brief For blocking until delivery (used with function await_message) */
         waiter_map                         waiters;
- 
+
         /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
         boost::recursive_mutex             waiter_lock;
 
@@ -221,7 +221,7 @@ namespace tipi {
 
         /** \brief Buffer that holds content until a message is complete */
         std::string                        buffer;
- 
+
         /** \brief Whether or not a message start tag has been matched after the most recent message end tag */
         bool                               message_open;
 
@@ -258,10 +258,10 @@ namespace tipi {
 
         /** \brief Queues incoming messages */
         virtual void deliver(std::istream&, transport::basic_transceiver const*);
- 
+
         /** \brief Queues incoming messages */
         virtual void deliver(std::string const&, transport::basic_transceiver const*);
- 
+
       public:
 
         /** \brief Default constructor */
@@ -272,19 +272,19 @@ namespace tipi {
 
         /** \brief Send a message */
         void send_message(M const&);
- 
+
         /** \brief Wait until the next message of a certain type arrives */
         boost::shared_ptr < const M > await_message(typename M::type_identifier_t);
- 
+
         /** \brief Wait until the next message of a certain type arrives */
         boost::shared_ptr < const M > await_message(typename M::type_identifier_t, long const&);
- 
+
         /** \brief Wait until the first message of type t has arrived */
         boost::shared_ptr < const M > find_message(const typename M::type_identifier_t);
- 
+
         /** \brief Breaks all connections */
         void disconnect();
- 
+
         /** \brief Set the handler for a type */
         void add_handler(const typename M::type_identifier_t, handler_type);
 
@@ -322,7 +322,7 @@ namespace tipi {
     template < typename M >
     basic_messenger< M >::basic_messenger(boost::shared_ptr < basic_messenger_impl< M > > const& c) : transport::transporter(c) {
     }
- 
+
     /** Get the current logger */
     template < typename M >
     utility::logger& basic_messenger< M >::get_logger() {
@@ -424,11 +424,11 @@ namespace tipi {
     template < class M >
     void basic_messenger_impl< M >::deliver(std::istream& d, transport::basic_transceiver const* o) {
       std::ostringstream s;
- 
+
       s << d.rdbuf() << std::flush;
- 
+
       std::string content = s.str();
- 
+
       deliver(content, o);
     }
 
@@ -450,7 +450,7 @@ namespace tipi {
     template < class M >
     inline void basic_messenger_impl< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
       boost::recursive_mutex::scoped_lock w(waiter_lock);
-      
+
       if (handlers.count(t) == 0) {
         handlers[t] = std::set < handler_type, compare_handlers >();
       }
@@ -479,7 +479,7 @@ namespace tipi {
         handlers.erase(t);
       }
     }
- 
+
     /**
      * \param t the message type for which to clear the event handler
      * \param h the handler to remove

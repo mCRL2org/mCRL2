@@ -9,13 +9,9 @@
 /// \file process.cpp
 /// \brief Add your file description here.
 
-#ifndef PROCESS_TCC
-#define PROCESS_TCC
-
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
-#include <cerrno>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
@@ -542,6 +538,4 @@ namespace squadt {
     }
   }
 }
-
-#endif
 

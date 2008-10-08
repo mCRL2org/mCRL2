@@ -11,12 +11,12 @@
 #define NAME "squadt"
 #define AUTHOR "Jeroen van der Wulp"
 
-#include "boost/bind.hpp"
-#include "boost/filesystem/convenience.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/function.hpp"
+#include "boost/bind.hpp"
+#include "boost/filesystem/convenience.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
 
@@ -107,7 +107,7 @@ void SQuADt::parse_command_line(int& argc, wxChar** argv) {
     interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()), NAME, AUTHOR, "[OPTION]... [PATH]\n",
         "Graphical environment that provides a uniform interface for using all kinds of "
         "other connected tools. If PATH is provided, it provides an existing project in "
-        "PATH."); 
+        "PATH.");
 
     clinterface.
       add_option("create", "create new project in PATH", 'c').
@@ -176,7 +176,7 @@ bool SQuADt::OnInit() {
 
   // Windows specific workaround for correct handling of icon transparency
   wxSystemOptions::SetOption(wxT("msw.remap"), 0);
-    
+
   splash* splash_window = new splash(1);
 
   try {
@@ -216,9 +216,9 @@ bool SQuADt::OnInit() {
 
       return false;
     }
-   
+
     splash_window->set_category("Querying tools", global_build_system.get_tool_manager().number_of_tools());
-   
+
     /* Perform initialisation */
     bool finished = false;
     std::vector< boost::shared_ptr < tool > > retry_list;

@@ -152,12 +152,12 @@ namespace utility {
       protected:
 
         std::vector< S > m_map;
-  
+
       public:
 
         inline S& insert(S const& o) {
           typename std::vector < S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), o);
-  
+
           if (i == m_map.end() || *i != o) {
             i = m_map.insert(i, o);
           }
@@ -167,7 +167,7 @@ namespace utility {
 
         inline S& find(S const& o) {
           typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), o);
-  
+
           if (i == m_map.end() || *i != o) {
             throw false;
           }
@@ -176,8 +176,8 @@ namespace utility {
         }
 
         inline S& search(visitable const& e) {
-          typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), typeid(e));
-  
+          typename std::vector< S >::iterator i = std::lower_bound(m_map.begin(), m_map.end(), static_cast< S >(typeid(e)));
+
           if (i == m_map.end() || *i != typeid(e)) {
             for (typename std::vector< S >::iterator j = m_map.begin(); j != m_map.end(); ++j) {
               if (j->try_cast(&e)) {
@@ -252,7 +252,7 @@ namespace utility {
         boost::shared_ptr< basic_caster > m_caster;
   
       public:
-  
+
         type_info_wrapper(std::type_info const& o) : m_info(&o) {
         }
 
@@ -279,19 +279,19 @@ namespace utility {
         bool operator==(std::type_info const& o) const {
           return (*m_info == o);
         }
-  
+
         bool operator==(type_info_wrapper const& o) const {
           return (*m_info == *o.m_info);
         }
-  
+
         bool operator!=(std::type_info const& o) const {
           return (*m_info != o);
         }
-  
+
         bool operator!=(type_info_wrapper const& o) const {
           return (*m_info != *o.m_info);
         }
-  
+
         bool operator<(std::type_info const& o) const {
           return (m_info->before(o) != 0);
         };
@@ -308,11 +308,11 @@ namespace utility {
       friend T& vector_map< T >::search(visitable const&);
 
       private:
-  
+
         vector_map< S > m_map;
 
       private:
-  
+
         inline type_info_map_wrapper(std::type_info const& o) : type_info_wrapper(o) {
         }
 
@@ -326,7 +326,7 @@ namespace utility {
 
           return w;
         }
-  
+
         template < typename T >
         inline S& insert() {
           S& w(m_map.insert(S::template create< T >()));
@@ -363,7 +363,7 @@ namespace utility {
 
           return w;
         }
-  
+
         template < typename R, typename V, typename T, typename U >
         inline void set(visit_method_wrapper< R, V, T, U > const& o) {
           callback.reset(new visit_method_wrapper< R, V, T, U >(o));

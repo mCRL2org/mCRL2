@@ -9,9 +9,9 @@
 /// \file task_monitor.ipp
 /// \brief Add your file description here.
 
-#include "task_monitor.hpp"
-
 #include "tipi/detail/controller.ipp"
+
+#include "task_monitor.hpp"
 
 namespace squadt {
   namespace execution {
@@ -24,19 +24,19 @@ namespace squadt {
       friend class utility::visitor;
 
       private:
- 
+
         /** \brief Type for event distinction */
         enum event_type {
           change,     ///< Status of the associated process has changed
           connection, ///< A new connection has been established
           completion  ///< A tool completed its operation
         };
-       
+
         /** \brief The type for a map that contains the event handlers */
         typedef std::multimap < const event_type, boost::function < bool () > >  handler_map;
 
       private:
- 
+
         /** \brief Semaphore to guarantee mutual exclusion (for use with register_condition) */
         mutable boost::mutex                            register_lock;
 
@@ -45,10 +45,10 @@ namespace squadt {
 
         /** \brief Monitor for waiting until process has registered */
         boost::condition_variable                       connection_condition;
-        
+
         /** \brief Monitor for waiting until process has registered */
         boost::condition_variable                       completion_condition;
-        
+
         /** \brief A pointer to the process associated to this listener or 0 */
         boost::shared_ptr< process >                    associated_process;
 
@@ -59,7 +59,7 @@ namespace squadt {
 
         /** \brief Constructor */
         inline task_monitor_impl();
- 
+
         /** \brief Executes a handler a specified number of times and then */
         inline static bool countdown_handler_wrapper(boost::shared_ptr < unsigned int >, boost::function < void () >);
 
@@ -128,7 +128,7 @@ namespace squadt {
     inline bool task_monitor_impl::countdown_handler_wrapper(boost::shared_ptr < unsigned int > n, boost::function < void () > h) {
       h();
 
-      return (--*n == 0); 
+      return (--*n == 0);
     }
 
     /**
@@ -137,7 +137,7 @@ namespace squadt {
     inline bool task_monitor_impl::perpetual_handler_wrapper(boost::function < void () > h) {
       h();
 
-      return (false); 
+      return (false);
     }
 
     /**

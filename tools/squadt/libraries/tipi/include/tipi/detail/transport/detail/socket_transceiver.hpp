@@ -15,12 +15,12 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 #include <boost/asio.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 
 #include <tipi/detail/transport/transporter.hpp>
 #include <tipi/detail/transport/detail/transceiver.ipp>
@@ -40,7 +40,7 @@ namespace transport {
      **/
     class socket_transceiver : public basic_transceiver {
       friend class transport::listener::socket_listener;
-  
+
       private:
 
         /** \brief Scheduler for asynchronous socket communication */
@@ -58,7 +58,7 @@ namespace transport {
 
         /** \brief The local endpoint of a connection */
         boost::asio::ip::tcp::socket                 m_socket;
- 
+
         /** \brief Used to make operations: read, write and disconnect mutually exclusive */
         boost::mutex                                 m_operation_lock;
 
@@ -87,7 +87,7 @@ namespace transport {
 
         /** \brief Send a string input stream to the peer */
         void send(boost::weak_ptr < socket_transceiver >, const std::string&);
-  
+
         /** \brief Send the contents of an input stream to the peer */
         void send(boost::weak_ptr < socket_transceiver >, std::istream&);
 
@@ -119,7 +119,7 @@ namespace transport {
 
         /** \brief Send a string input stream to the peer */
         void send(const std::string&);
-  
+
         /** \brief Send the contents of an input stream to the peer */
         void send(std::istream&);
 

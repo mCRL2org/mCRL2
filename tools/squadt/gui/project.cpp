@@ -723,7 +723,7 @@ namespace squadt {
 
           /// Add new outputs as objects to view
           BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-            std::set< std::string >::const_iterator existing_object(existing.find(boost::filesystem::path(object->get_location()).leaf()));
+            std::set< std::string >::iterator existing_object(existing.find(boost::filesystem::path(object->get_location()).leaf()));
 
             if (existing_object == existing.end()) {
               add_to_object_view(s, object);

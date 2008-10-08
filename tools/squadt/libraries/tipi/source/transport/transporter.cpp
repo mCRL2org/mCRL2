@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <functional>
 
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>

@@ -9,8 +9,8 @@
 /// \file project_manager.ipp
 /// \brief Add your file description here.
 
-#ifndef PROJECT_MANAGER_TCC_
-#define PROJECT_MANAGER_TCC_
+#ifndef PROJECT_MANAGER_IPP_
+#define PROJECT_MANAGER_IPP_
 
 #include <boost/thread/recursive_mutex.hpp>
 
@@ -48,7 +48,7 @@ namespace squadt {
 
       /** \brief A description of the project */
       std::string                         description;
- 
+
       /** \brief The list of processors for this project */
       processor_list                      processors;
 
@@ -57,7 +57,7 @@ namespace squadt {
 
       /** \brief Count of the number of processors added to the project */
       processor_count                     count;
- 
+
       /** \brief Reverse dependency relation */
       dependency_map                      reverse_depends;
 
@@ -98,7 +98,7 @@ namespace squadt {
 
       /** \brief Recursively add all files in a directory to the project */
       void import_directory(boost::filesystem::path const&);
- 
+
       /** \brief Add a file to the project under a new name */
       boost::shared_ptr < processor > import_file(boost::filesystem::path const&, const std::string& = "");
 
@@ -110,7 +110,7 @@ namespace squadt {
 
       /** \brief Given a processor, it produces a list of object_descriptors that conflict with its outputs */
       std::auto_ptr < conflict_list > get_conflict_list(boost::shared_ptr< processor > p) const;
- 
+
       /** \brief Removes all files that cannot be recreated by any of the processors */
       void clean_store(boost::shared_ptr< processor > p, bool b);
 

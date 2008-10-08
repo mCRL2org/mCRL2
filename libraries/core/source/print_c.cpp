@@ -8,8 +8,8 @@
 //
 /// \file print_c.cpp
 
-#include <stdint.h>
-#include <stddef.h>
+#include <boost/cstdint.hpp>
+#include <cstddef>
 #include "mcrl2/core/print.h"
 
 #define PRINT_C

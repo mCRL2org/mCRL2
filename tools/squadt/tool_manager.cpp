@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <functional>
 
+#include "tipi/detail/controller.ipp" // stlport workarounds because boost::thread uses errno.h
+
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
@@ -21,8 +23,6 @@
 
 #include "tipi/detail/utility/generic_visitor.hpp"
 #include "tipi/detail/visitors.hpp"
-
-#include "tipi/detail/controller.ipp"
 
 #include "settings_manager.hpp"
 #include "tool_manager.ipp"

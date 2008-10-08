@@ -141,6 +141,7 @@ namespace mcrl2 {
 }
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 # include "mcrl2/core/messaging.h"
+# include <unistd.h>
 
 namespace mcrl2 {
   namespace data {

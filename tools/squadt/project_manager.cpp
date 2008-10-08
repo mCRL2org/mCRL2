@@ -20,6 +20,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/ref.hpp>
+#include <boost/thread.hpp> // workaround for boost::thread that includes errno.h
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/function.hpp>
@@ -227,9 +228,15 @@ namespace squadt {
    *      - f(p) = 1 + f(max i : f(p.inputs[i].generator))
    **/
   void project_manager_impl::sort_processors() {
-    unsigned int number = 0; /* The number of */
+    unsigned int number = 0; /* The number of inputs */
 
-    std::map < processor*, unsigned short > weights;
+    struct compare_by_weight {
+      static bool less(std::map< processor*, unsigned int >& weights, boost::shared_ptr< processor > const& a, boost::shared_ptr< processor > const& b) {
+        return weights[a.get()] < weights[b.get()];
+      }
+    };
+
+    std::map < processor*, unsigned int > weights;
 
     /* Compute weights */
     processor_list::const_iterator j = processors.begin(); /* Lower bound */
@@ -263,7 +270,7 @@ namespace squadt {
               }
               else {
                 unsigned int current_weight = weights[target.get()];
-             
+
                 if (maximum_weight < current_weight) {
                   maximum_weight = current_weight;
                 }
@@ -279,11 +286,7 @@ namespace squadt {
     }
 
     /* Do the actual sorting */
-    std::stable_sort(processors.begin(), processors.end(), boost::bind(std::less< unsigned short >(), 
-                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&boost::shared_ptr< processor >::get, _1)),
-                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&boost::shared_ptr< processor >::get, _2))));
+    std::stable_sort(processors.begin(), processors.end(), boost::bind(&compare_by_weight::less, weights, _1, _2));
   }
 
   /**

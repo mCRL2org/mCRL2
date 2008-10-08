@@ -915,17 +915,17 @@ namespace mcrl2 {
       if (m_options.count("help")) {
         std::cout << d.textual_description();
 
-        exit(0);
+        _exit(0);
       }
       else if (m_options.count("version")) {
         std::cout << d.version_information();
 
-        exit(0);
+        _exit(0);
       }
       else if (m_options.count("generate-man-page")) {
         std::cout << d.man_page(MCRL2_REVISION);
 
-        exit(0);
+        _exit(0);
       }
       else if (!m_options.count("rewriter")) {
         // Add rewrite option for default strategy

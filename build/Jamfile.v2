@@ -2,6 +2,7 @@ project site-config ;
 
 import os ;
 import regex ;
+import property ;
 
 include $(TOP)/build/config.jam ;
 
@@ -151,6 +152,8 @@ if $(WX_CPPFLAGS) {
         : <cxxflags>$(WX_CPPFLAGS)
           <wx>yes
           <toolset>msvc:<user-interface>gui
+          <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
+          <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET
         ;
 
   libraries_from_string wx_gl
@@ -161,6 +164,8 @@ if $(WX_CPPFLAGS) {
         <wx>yes
         <opengl>yes
         <toolset>msvc:<user-interface>gui
+        <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
+        <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET
       ;
 }
 
@@ -168,9 +173,18 @@ if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
 }
 
-local rule boost-library ( name : requirements * : use-local-boost ? : use-system-boost ? ) {
+local rule boost-library ( name link ? : requirements * : use-local-boost ? : use-system-boost ? ) {
+  rule find-target ( target ) {
+    if $(link) {
+      return $(target)/$(link) ;
+    }
+    else {
+      return $(target) ;
+    }
+  }
+
   if $(use-local-boost) {
-    alias boost_$(name) : $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) : $(requirements) <threading>multi : : $(requirements) ;
+    alias boost_$(name) : [ find-target $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) ] : $(requirements) <threading>multi : : $(requirements) ;
   }
   else if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) {
     if $(BOOST_INCLUDE_PATH) {
@@ -190,7 +204,7 @@ local rule boost-library ( name : requirements * : use-local-boost ? : use-syste
     }
   }
   else {
-    alias boost_$(name) : /boost//$(name) : $(requirements) <threading>multi ;
+    alias boost_$(name) : [ find-target /boost//$(name) ] : $(requirements) <threading>multi ;
   }
 
   explicit boost_$(name) ;
@@ -209,7 +223,7 @@ else {
 boost-library filesystem ;
 boost-library program_options ;
 boost-library thread ;
-boost-library signals : <link>static ;
+boost-library signals <link>static ;
 boost-library test ;
 boost-library system : ;
 boost-library md5 : <include>$(BOOST_ROOT)/boost/md5 : local ;  # not part of Boost 1.36

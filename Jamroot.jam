@@ -255,7 +255,7 @@ project toolset
           <conditional>@select-configuration
           <define>_FILE_OFFSET_BITS=64
           <dll-path>$(libdir)
-          $(build-options)
+          [ property.change $(build-options) : <link> ]
        : default-build
           <link>$(link-variant)
        : usage-requirements

@@ -9,14 +9,15 @@
 /// \file store_visitor.cpp
 /// \brief Add your file description here.
 
-#include "visitors.hpp"
-
 #include <fstream>
 #include <exception>
 
+#include <boost/thread.hpp> // workaround, because boost::thread includes errno.h
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+
+#include "visitors.hpp"
 
 #include "build_system.hpp"
 #include "settings_manager.hpp"

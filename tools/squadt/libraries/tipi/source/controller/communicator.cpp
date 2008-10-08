@@ -11,14 +11,14 @@
 
 #include <boost/bind.hpp>
 
-#include <tipi/detail/controller.ipp>
+#include "tipi/detail/controller.ipp"
 #include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
   namespace controller {
 
     controller::capabilities communicator::m_controller_capabilities;
- 
+
     communicator::communicator() :
         tipi::messenger(boost::shared_ptr < tipi::messaging::basic_messenger_impl< tipi::message > > (new communicator_impl)) {
     }
@@ -36,12 +36,12 @@ namespace tipi {
     void communicator::set_configuration(boost::shared_ptr < tipi::configuration > c) {
       boost::static_pointer_cast < communicator_impl > (impl)->m_configuration = c;
     }
- 
+
     /** \attention use get_configuration().swap() to set the configuration */
     boost::shared_ptr < configuration > communicator::get_configuration() const {
       return (boost::static_pointer_cast < communicator_impl > (impl)->m_configuration);
     }
- 
+
     /**
      * \param[in] c the input combination on which to base the new configuration
      **/
@@ -53,7 +53,7 @@ namespace tipi {
     void communicator::request_tool_capabilities() {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_capabilities);
     }
- 
+
     /**
      * \pre c.get != 0
      * Send the selected input configuration
@@ -61,12 +61,12 @@ namespace tipi {
     void communicator::send_configuration(boost::shared_ptr < tipi::configuration > const& c) {
         boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(visitors::store(*c), tipi::message_configuration));
     }
- 
+
     /* Request a tool to terminate */
     void communicator::request_termination() {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_termination);
     }
- 
+
     void communicator::send_start_signal() {
       boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message_task);
     }
@@ -104,7 +104,7 @@ namespace tipi {
         static void capabilities(boost::shared_ptr< const tipi::message >& m, communicator_impl& impl) {
           if (m->is_empty()) {
             message m(visitors::store(communicator::m_controller_capabilities), tipi::message_capabilities);
-        
+
             impl.send_message(m);
           }
         }
@@ -119,7 +119,7 @@ namespace tipi {
       add_handler(tipi::message_capabilities, bind(&trampoline::capabilities, _1, boost::ref(*this)));
       add_handler(tipi::message_configuration, bind(&trampoline::configuration, _1, boost::ref(*this)));
     }
-    
+
     /**
      * \param[in] impl a weak pointer to this object (for lifetime check)
      * \param h the function that is called when a new layout for the display has been received
@@ -146,7 +146,7 @@ namespace tipi {
         if (!h.empty()) {
           add_handler(tipi::message_report, boost::bind(&trampoline::status_message, _1, h));
         }
-      } 
+      }
     }
 
     /**
@@ -162,18 +162,18 @@ namespace tipi {
 
           if (g) {
             std::vector < tipi::layout::element const* > elements;
-     
+
             if (g->get_manager() != 0) {
               tipi::visitors::restore(*g, elements, m->to_string());
             }
-     
+
             h(elements);
           }
         }
 
         static void send_display_data(boost::weak_ptr < communicator_impl > impl, void const* e, boost::shared_ptr< tipi::display const > display) { 
           boost::shared_ptr < communicator_impl > g(impl.lock());
-      
+
           if (g.get() != 0) {
             try {
               if (dynamic_cast< tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) { // safe to do reinterpret cast
@@ -181,7 +181,7 @@ namespace tipi {
                       visitors::store(*reinterpret_cast < tipi::layout::element const* > (e),
                             display->find(reinterpret_cast < tipi::layout::element const* > (e))), tipi::message_display_data)); 
               }
-            } 
+            }
             catch (bool) {
               // find failed for some reason
             }
@@ -189,23 +189,23 @@ namespace tipi {
               g->logger->log(1, "Failed sending data message: `" + std::string(e.what()) + "'\n");
             }
           }
-        } 
+        }
 
         static void instantiate(boost::shared_ptr< const tipi::message >& m, boost::weak_ptr < communicator_impl > impl, display_layout_handler_function h1, display_update_handler_function h2) {
           boost::shared_ptr< communicator_impl > g(impl.lock());
 
           if (g) {
             boost::shared_ptr< tipi::tool_display > d(new tool_display);
-          
+
             // Make sure the global event handler is empty
             d->impl->remove();
-          
+
             try {
               // Remove existing display data handler
               g->clear_handlers(tipi::message_display_data);
-           
+
               visitors::restore(*d, m->to_string());
-            
+
               h1(d);
 
               // Register display data handler (incoming)

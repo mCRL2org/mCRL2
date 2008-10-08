@@ -44,7 +44,7 @@ namespace tipi {
 
         /** \brief Send data to update the state of the last communicated display layout */
         void send_display_data(layout::element const*);
- 
+
         /** \brief Set the current tool configuration object */
         inline void set_configuration(boost::shared_ptr < configuration >);
 
@@ -52,12 +52,12 @@ namespace tipi {
 
         /** \brief Constructor for derived implementation object */
         communicator(boost::shared_ptr < tipi::tool::communicator_impl > const&);
- 
+
       public:
- 
+
         /** \brief Default constructor */
         communicator();
- 
+
         /** \brief Activate the communicator via connection arguments from the command line */
         bool activate(int&, char** const);
 
@@ -66,40 +66,40 @@ namespace tipi {
 
         /** \brief Activate the communicator via connection arguments from a vector of arguments */
         bool activate(std::vector < std::string> const&);
- 
+
         /** \brief Request details about the amount of space that the controller currently has reserved for this tool */
         void request_controller_capabilities();
- 
+
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_configuration();
 
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_configuration(tipi::configuration&);
- 
+
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(tipi::tool_display&);
- 
+
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();
- 
+
         /** \brief Send a signal that the tool has finished its last operation */
         void send_task_done(bool);
- 
+
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();
- 
+
         /** \brief Send a status report to the controller */
         void send_report(tipi::report const&) const;
 
         /** \brief Sends an error report to the controller */
         void send_status_report(tipi::report::type, std::string const&) const;
- 
+
         /** \brief Get the tool capabilities object that will be sent when a request is received */
         tool::capabilities& get_capabilities();
- 
+
         /** \brief Get the current tool configuration object be sent when a request is received */
         configuration& get_configuration();
- 
+
         /** \brief Get the last communicated set of controller capabilities */
         const boost::shared_ptr < controller::capabilities > get_controller_capabilities() const;
 

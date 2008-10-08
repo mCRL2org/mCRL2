@@ -11,20 +11,21 @@
 
 #include <fstream>
 
+#include <boost/thread.hpp> // workaround for boost::thread that includes errno.h (stlport)
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include "build_system.hpp"
-#include "settings_manager.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
+
 #include "tool_manager.ipp"
 #include "project_manager.ipp"
+#include "settings_manager.hpp"
+#include "build_system.hpp"
 #include "type_registry.hpp"
 #include "executor.ipp"
 #include "processor.ipp"
-
-#include "tipi/detail/utility/generic_visitor.hpp"
-#include "tipi/detail/visitors.hpp"
 
 #include "visitors.hpp"
 
@@ -36,13 +37,13 @@ namespace squadt {
   class restore_visitor_impl {
 
     protected:
-  
+
       typedef std::map < unsigned long, boost::shared_ptr < processor_impl::object_descriptor > > id_conversion_map;
-  
+
       struct id_helper {
         id_conversion_map  cmap;
         ticpp::Element*    tree;
-  
+
         inline id_helper(ticpp::Element* t) : tree(t) {
         }
       };

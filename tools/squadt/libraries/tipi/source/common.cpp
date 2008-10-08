@@ -8,9 +8,9 @@
 
 #define TIPI_IMPORT_STATIC_DEFINITIONS
 
+#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/configuration.hpp"
 #include "tipi/tool/category.hpp"
-#include "tipi/detail/basic_messenger.ipp"
 #include "tipi/common.hpp"
 
 namespace tipi {

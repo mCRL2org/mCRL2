@@ -42,7 +42,7 @@ namespace squadt {
           completed, ///< has terminated successfully 
           aborted    ///< was aborted
         };
- 
+
         /** \brief Convenience type for weak pointer implementation */
         typedef boost::weak_ptr < process >            wptr;
 
@@ -61,34 +61,34 @@ namespace squadt {
 
         /** \brief Constructor */
         process();
-    
+
       public:
 
         /** \brief Factory method */
         static boost::shared_ptr < process > create();
-    
+
         /** \brief Start the process by executing a command */
         void execute(const command&);
-     
+
         /** \brief Start the process by executing a command */
         void execute(const command&, termination_handler const& h);
-     
+
         /** \brief Returns the process status */
         status get_status() const;
 
         /** \brief Returns the process id */
         pid_t get_identifier() const;
- 
+
         /** \brief Returns the process id */
         std::string get_executable_name() const;
 
         /** \brief Terminates the process */
         bool terminate();
- 
+
         /** \brief Returns the last command that is (or was) executing */
         command const& get_command() const;
     };
   }
 }
-  
+
 #endif
