@@ -5,7 +5,7 @@ tool grape
         /site-config//wx_gl
         /libraries//core
         /libraries/utilities//command_line_interfacing
-      : <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
+      : <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share/mcrl2/grape\\\"\"
         <include>libgrape
         <include>grapeapp
         <include>mcrl2gen
