@@ -6,17 +6,19 @@ rule import_user_config {
 
   # For C/C++ programs
   toolset.using msvc ;
+
+  toolset.using stlport : 5.1.6 : "C:/Program Files/STLport/stlport"
+                                  "C:/Program Files/STLport/bin"
+                                  "C:/Program Files/STLport/lib" ;
 }
 
 # Build specific settings (default command line options to bjam)
 BUILD_OPTIONS  = pch=off link=static ;
 
 # Library specific variables
-WX_PREFIX          = "C:/wxWidgets/wxMSW-2.8.8" ;
-WX_CPPFLAGS        = "/I$(WX_PREFIX)/lib/vc_lib/msw /I$(WX_PREFIX)/include" ;
-WX_BASE_LDFLAGS    = "rpcrt4 kernel32 user32 gdi32 ole32 oleaut32 comctl32 comdlg32 uuid advapi32 shell32 /LIBPATH:$(WX_PREFIX)/lib/vc_lib wxmsw28_core wxbase28 wxtiff wxpng wxzlib wxjpeg" ;
-WX_GL_LDFLAGS      = "$(WX_BASE_LDFLAGS) wxmsw28_gl" ;
+WX_PREFIX          = "C:/wxWidgets/wxMSW-2.8.9" ;
+WX_CPPFLAGS        = "/I$(WX_PREFIX)/lib/vc_lib/mswd /I$(WX_PREFIX)/include /D__WXDEBUG__" ;
+WX_BASE_LDFLAGS    = "rpcrt4 kernel32 user32 gdi32 ole32 oleaut32 comctl32 comdlg32 uuid advapi32 shell32 /LIBPATH:$(WX_PREFIX)/lib/vc_lib wxmsw28d_core wxbase28d wxtiffd wxpngd wxzlibd wxjpegd" ;
+WX_GL_LDFLAGS      = "$(WX_BASE_LDFLAGS) wxmsw28d_gl" ;
 
 OPENGL_NAME        = "opengl32" ;
-# OPENGL_IPATH       = "" ;
-# OPENGL_LPATH       = "" ;
