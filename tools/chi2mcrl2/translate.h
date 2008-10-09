@@ -119,6 +119,12 @@ inline std::string to_string (const T& t)
   return ss.str();
 }
 
+template < >
+inline std::string to_string (const std::string& t)
+{
+  return t;
+}
+
 class CAsttransform
 {
   public:

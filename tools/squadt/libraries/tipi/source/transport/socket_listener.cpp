@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/format.hpp>
-#include <boost/thread.hpp> // workaround for boost::thread that includes errno.h (stlport)
 
 #include <tipi/detail/transport/transporter.hpp>
 #include <tipi/detail/transport/detail/socket_listener.hpp>

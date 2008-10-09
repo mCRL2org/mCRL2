@@ -19,16 +19,16 @@
 #include <map>
 #include <iostream>
 
+#include "tipi/detail/transport/detail/transporter.ipp"
+#include "tipi/detail/basic_messenger.hpp"
+#include "tipi/detail/utility/standard_utility.hpp"
+#include "tipi/common.hpp"
+
 #include "boost/ref.hpp"
 #include "boost/bind.hpp"
 #include "boost/foreach.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/thread/condition_variable.hpp"
-
-#include "tipi/detail/transport/detail/transporter.ipp"
-#include "tipi/detail/basic_messenger.hpp"
-#include "tipi/detail/utility/standard_utility.hpp"
-#include "tipi/common.hpp"
 
 #include <workarounds.h>
 

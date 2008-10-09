@@ -14,8 +14,8 @@
 #include <list>
 #include <istream>
 
-#include <boost/thread/recursive_mutex.hpp>
 #include <boost/asio/ip/address.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include <tipi/detail/transport/transporter.hpp>
 #include <tipi/detail/transport/detail/listener.hpp>

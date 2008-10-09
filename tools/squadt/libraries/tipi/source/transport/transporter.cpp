@@ -9,11 +9,11 @@
 #include <algorithm>
 #include <functional>
 
-#include <boost/thread/recursive_mutex.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include <tipi/detail/transport/detail/transporter.ipp>
 #include <tipi/detail/transport/detail/transceiver.ipp>

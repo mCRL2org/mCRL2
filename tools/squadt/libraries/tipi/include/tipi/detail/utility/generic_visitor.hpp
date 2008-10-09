@@ -304,19 +304,14 @@ namespace utility {
     template < typename S >
     class type_info_map_wrapper : public type_info_wrapper  {
 
-      template < typename T >
-      friend T& vector_map< T >::search(visitable const&);
-
       private:
 
         vector_map< S > m_map;
 
-      private:
+      public:
 
         inline type_info_map_wrapper(std::type_info const& o) : type_info_wrapper(o) {
         }
-
-      public:
 
         template < typename T >
         static type_info_map_wrapper create() {

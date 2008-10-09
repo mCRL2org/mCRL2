@@ -25,7 +25,7 @@ namespace atermpp
   {
     std::string s(t);
     assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
-    return std::string(++s.begin(), --s.end());
+    return std::string(s, 1, s.size() - 2);
   }
 
 } // namespace atermpp

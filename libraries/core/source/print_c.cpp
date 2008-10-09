@@ -16,6 +16,7 @@
 #include "mcrl2/core/detail/print_implementation.h"
 
 using namespace mcrl2::core::detail;
+using boost::intmax_t;
 
 namespace mcrl2 {
   namespace core {

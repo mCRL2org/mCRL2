@@ -9,7 +9,9 @@
 #include <wx/textfile.h>
 #include <iostream>
 #include <sstream>
-#include <math.h>
+#include <cmath>
+
+#include "workarounds.h" // for M_PI on Windows with MSVC
 
 ExporterSVG::ExporterSVG(Graph* g) : Exporter(g) {};
 
