@@ -56,26 +56,6 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of []
-      inline
-      application nil(const sort_expression& s, const data_expression& arg0)
-      {
-        assert(is_list(arg0.sort()));
-        
-        return application(nil(s),arg0);
-      }
-
-      // Recogniser for application of []
-      inline
-      bool is_nil_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_nil_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
       // Function symbol |>
       inline
       function_symbol cons_(const sort_expression& s)
@@ -646,7 +626,7 @@ namespace mcrl2 {
         assert(false); 
       }
 
-      // Give all system defined equations for list
+      // Give all system defined equations for List
       inline
       data_equation_list list_generate_equations_code(const sort_expression& s)
       {

@@ -8,6 +8,7 @@ cons [] <"nil"> : List(S);
      |> <"cons_"> : S <"head"> # List(S) <"tail"> -> List(S);
 
 map in <"in"> : S <"arg1"> # List(S) <"arg2"> -> Bool;
+% For reasons of ambiguity, we use cnt as internal symbol for # for now
     cnt <"count"> : List(S) <"list"> -> Nat;
     <| <"snoc"> : List(S) <"rtail"> # S <"rhead"> -> List(S);
     ++ <"concat"> : List(S) <"left"> # List(S) <"right"> -> List(S);

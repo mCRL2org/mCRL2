@@ -19,7 +19,7 @@ map @cReal <"creal"> : Int <"arg"> -> Real;
     min <"min"> : Real <"left"> # Real <"right"> -> Real;
     abs <"abs"> : Real <"arg"> -> Real;
     - <"negate"> : Real <"arg"> -> Real;
-    pred <"succ"> : Real <"arg"> -> Real;
+    succ <"succ"> : Real <"arg"> -> Real;
     pred <"pred"> : Real <"arg"> -> Real;
     + <"plus"> : Real <"left"> # Real <"right"> -> Real;
     - <"minus"> : Real <"left"> # Real <"right"> -> Real;
@@ -27,6 +27,7 @@ map @cReal <"creal"> : Int <"arg"> -> Real;
     exp <"exp"> : Real <"left"> # Nat <"right"> -> Real;
 
 var n:Nat;
+    p:Pos;
     x:Int;
     y:Int;
     r:Real;

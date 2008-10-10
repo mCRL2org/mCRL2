@@ -49,27 +49,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == c1();
-        }
-        return false;
-      }
-
-      // Application of @c1
-      inline
-      application c1(const data_expression& arg0)
-      {
-        assert(is_pos(arg0.sort()));
-        
-        return application(c1(),arg0);
-      }
-
-      // Recogniser for application of @c1
-      inline
-      bool is_c1_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_c1_function_symbol(static_cast<const application&>(e).head());
+          return static_cast<const function_symbol&>(e).name() == "@c1";
         }
         return false;
       }
@@ -88,7 +68,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == cdub();
+          return static_cast<const function_symbol&>(e).name() == "@cDub";
         }
         return false;
       }
@@ -128,7 +108,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == less_equal();
+          return static_cast<const function_symbol&>(e).name() == "<=";
         }
         return false;
       }
@@ -168,7 +148,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == less();
+          return static_cast<const function_symbol&>(e).name() == "<";
         }
         return false;
       }
@@ -208,7 +188,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == geq();
+          return static_cast<const function_symbol&>(e).name() == ">=";
         }
         return false;
       }
@@ -248,7 +228,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == greater();
+          return static_cast<const function_symbol&>(e).name() == ">";
         }
         return false;
       }
@@ -288,7 +268,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == max();
+          return static_cast<const function_symbol&>(e).name() == "max";
         }
         return false;
       }
@@ -328,7 +308,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == min();
+          return static_cast<const function_symbol&>(e).name() == "min";
         }
         return false;
       }
@@ -368,7 +348,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == abs();
+          return static_cast<const function_symbol&>(e).name() == "abs";
         }
         return false;
       }
@@ -407,7 +387,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == succ();
+          return static_cast<const function_symbol&>(e).name() == "succ";
         }
         return false;
       }
@@ -446,7 +426,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == plus();
+          return static_cast<const function_symbol&>(e).name() == "+";
         }
         return false;
       }
@@ -486,7 +466,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == add_with_carry();
+          return static_cast<const function_symbol&>(e).name() == "@addc";
         }
         return false;
       }
@@ -527,7 +507,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == times();
+          return static_cast<const function_symbol&>(e).name() == "*";
         }
         return false;
       }
@@ -567,7 +547,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == multir();
+          return static_cast<const function_symbol&>(e).name() == "@multir";
         }
         return false;
       }
@@ -800,7 +780,7 @@ namespace mcrl2 {
         assert(false); 
       }
 
-      // Give all system defined equations for pos
+      // Give all system defined equations for Pos
       inline
       data_equation_list pos_generate_equations_code()
       {

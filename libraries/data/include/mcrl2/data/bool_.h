@@ -48,27 +48,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == true_();
-        }
-        return false;
-      }
-
-      // Application of true
-      inline
-      application true_(const data_expression& arg0)
-      {
-        assert(is_bool_(arg0.sort()));
-        
-        return application(true_(),arg0);
-      }
-
-      // Recogniser for application of true
-      inline
-      bool is_true__application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_true__function_symbol(static_cast<const application&>(e).head());
+          return static_cast<const function_symbol&>(e).name() == "true";
         }
         return false;
       }
@@ -87,27 +67,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == false_();
-        }
-        return false;
-      }
-
-      // Application of false
-      inline
-      application false_(const data_expression& arg0)
-      {
-        assert(is_bool_(arg0.sort()));
-        
-        return application(false_(),arg0);
-      }
-
-      // Recogniser for application of false
-      inline
-      bool is_false__application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_false__function_symbol(static_cast<const application&>(e).head());
+          return static_cast<const function_symbol&>(e).name() == "false";
         }
         return false;
       }
@@ -126,7 +86,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == equal_to();
+          return static_cast<const function_symbol&>(e).name() == "==";
         }
         return false;
       }
@@ -166,7 +126,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == not_equal_to();
+          return static_cast<const function_symbol&>(e).name() == "!=";
         }
         return false;
       }
@@ -206,7 +166,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == if_();
+          return static_cast<const function_symbol&>(e).name() == "if";
         }
         return false;
       }
@@ -247,7 +207,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == not_();
+          return static_cast<const function_symbol&>(e).name() == "!";
         }
         return false;
       }
@@ -286,7 +246,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == and_();
+          return static_cast<const function_symbol&>(e).name() == "&&";
         }
         return false;
       }
@@ -326,7 +286,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == or_();
+          return static_cast<const function_symbol&>(e).name() == "||";
         }
         return false;
       }
@@ -366,7 +326,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e) == implies();
+          return static_cast<const function_symbol&>(e).name() == "=>";
         }
         return false;
       }
@@ -522,7 +482,7 @@ namespace mcrl2 {
         assert(false); 
       }
 
-      // Give all system defined equations for bool_
+      // Give all system defined equations for Bool
       inline
       data_equation_list bool__generate_equations_code()
       {

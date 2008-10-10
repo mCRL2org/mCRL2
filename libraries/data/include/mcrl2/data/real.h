@@ -51,14 +51,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == creal();
+          return static_cast<const function_symbol&>(e).name() == "@cReal";
         }
         return false;
       }
 
       // Application of @cReal
       inline
-      application creal(, const data_expression& arg0)
+      application creal(const data_expression& arg0)
       {
         assert(is_int_(arg0.sort()));
         
@@ -90,14 +90,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == pos2real();
+          return static_cast<const function_symbol&>(e).name() == "Pos2Real";
         }
         return false;
       }
 
       // Application of Pos2Real
       inline
-      application pos2real(, const data_expression& arg0)
+      application pos2real(const data_expression& arg0)
       {
         assert(is_pos(arg0.sort()));
         
@@ -129,14 +129,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == nat2real();
+          return static_cast<const function_symbol&>(e).name() == "Nat2Real";
         }
         return false;
       }
 
       // Application of Nat2Real
       inline
-      application nat2real(, const data_expression& arg0)
+      application nat2real(const data_expression& arg0)
       {
         assert(is_nat(arg0.sort()));
         
@@ -168,14 +168,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == int2real();
+          return static_cast<const function_symbol&>(e).name() == "Int2Real";
         }
         return false;
       }
 
       // Application of Int2Real
       inline
-      application int2real(, const data_expression& arg0)
+      application int2real(const data_expression& arg0)
       {
         assert(is_int_(arg0.sort()));
         
@@ -207,14 +207,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == real2pos();
+          return static_cast<const function_symbol&>(e).name() == "Real2Pos";
         }
         return false;
       }
 
       // Application of Real2Pos
       inline
-      application real2pos(, const data_expression& arg0)
+      application real2pos(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -246,14 +246,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == real2nat();
+          return static_cast<const function_symbol&>(e).name() == "Real2Nat";
         }
         return false;
       }
 
       // Application of Real2Nat
       inline
-      application real2nat(, const data_expression& arg0)
+      application real2nat(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -285,14 +285,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == real2int();
+          return static_cast<const function_symbol&>(e).name() == "Real2Int";
         }
         return false;
       }
 
       // Application of Real2Int
       inline
-      application real2int(, const data_expression& arg0)
+      application real2int(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -324,14 +324,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == less_equal();
+          return static_cast<const function_symbol&>(e).name() == "<=";
         }
         return false;
       }
 
       // Application of <=
       inline
-      application less_equal(, const data_expression& arg0, const data_expression& arg1)
+      application less_equal(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -364,14 +364,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == less();
+          return static_cast<const function_symbol&>(e).name() == "<";
         }
         return false;
       }
 
       // Application of <
       inline
-      application less(, const data_expression& arg0, const data_expression& arg1)
+      application less(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -404,14 +404,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == greater_equal();
+          return static_cast<const function_symbol&>(e).name() == ">=";
         }
         return false;
       }
 
       // Application of >=
       inline
-      application greater_equal(, const data_expression& arg0, const data_expression& arg1)
+      application greater_equal(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -444,14 +444,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == greater();
+          return static_cast<const function_symbol&>(e).name() == ">";
         }
         return false;
       }
 
       // Application of >
       inline
-      application greater(, const data_expression& arg0, const data_expression& arg1)
+      application greater(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -484,14 +484,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == max();
+          return static_cast<const function_symbol&>(e).name() == "max";
         }
         return false;
       }
 
       // Application of max
       inline
-      application max(, const data_expression& arg0, const data_expression& arg1)
+      application max(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -524,14 +524,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == min();
+          return static_cast<const function_symbol&>(e).name() == "min";
         }
         return false;
       }
 
       // Application of min
       inline
-      application min(, const data_expression& arg0, const data_expression& arg1)
+      application min(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -564,14 +564,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == abs();
+          return static_cast<const function_symbol&>(e).name() == "abs";
         }
         return false;
       }
 
       // Application of abs
       inline
-      application abs(, const data_expression& arg0)
+      application abs(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -603,14 +603,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == negate();
+          return static_cast<const function_symbol&>(e).name() == "-";
         }
         return false;
       }
 
       // Application of -
       inline
-      application negate(, const data_expression& arg0)
+      application negate(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -628,35 +628,35 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol pred
+      // Function symbol succ
       inline
       function_symbol succ()
       {
-        static function_symbol succ("pred", function_sort(real_(), real_()));
+        static function_symbol succ("succ", function_sort(real_(), real_()));
         return succ;
       }
 
-      // Recogniser for pred
+      // Recogniser for succ
       inline
       bool is_succ_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == succ();
+          return static_cast<const function_symbol&>(e).name() == "succ";
         }
         return false;
       }
 
-      // Application of pred
+      // Application of succ
       inline
-      application succ(, const data_expression& arg0)
+      application succ(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
         return application(succ(),arg0);
       }
 
-      // Recogniser for application of pred
+      // Recogniser for application of succ
       inline
       bool is_succ_application(const data_expression& e)
       {
@@ -681,14 +681,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == pred();
+          return static_cast<const function_symbol&>(e).name() == "pred";
         }
         return false;
       }
 
       // Application of pred
       inline
-      application pred(, const data_expression& arg0)
+      application pred(const data_expression& arg0)
       {
         assert(is_real_(arg0.sort()));
         
@@ -720,14 +720,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == plus();
+          return static_cast<const function_symbol&>(e).name() == "+";
         }
         return false;
       }
 
       // Application of +
       inline
-      application plus(, const data_expression& arg0, const data_expression& arg1)
+      application plus(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -760,14 +760,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == minus();
+          return static_cast<const function_symbol&>(e).name() == "-";
         }
         return false;
       }
 
       // Application of -
       inline
-      application minus(, const data_expression& arg0, const data_expression& arg1)
+      application minus(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -800,14 +800,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == times();
+          return static_cast<const function_symbol&>(e).name() == "*";
         }
         return false;
       }
 
       // Application of *
       inline
-      application times(, const data_expression& arg0, const data_expression& arg1)
+      application times(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_real_(arg1.sort()));
@@ -840,14 +840,14 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == exp();
+          return static_cast<const function_symbol&>(e).name() == "exp";
         }
         return false;
       }
 
       // Application of exp
       inline
-      application exp(, const data_expression& arg0, const data_expression& arg1)
+      application exp(const data_expression& arg0, const data_expression& arg1)
       {
         assert(is_real_(arg0.sort()));
         assert(is_nat(arg1.sort()));
@@ -864,66 +864,6 @@ namespace mcrl2 {
           return is_exp_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
-      }
-
-      // Function for projecting out left
-      inline
-      data_expression left(const data_expression& e)
-      {
-        assert(is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e));
-        
-        if (is_less_equal_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_less_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_greater_equal_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_greater_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_min_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_plus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_minus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_times_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_exp_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
       }
 
       // Function for projecting out right
@@ -980,6 +920,66 @@ namespace mcrl2 {
         if (is_exp_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
+        }
+
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
+
+      // Function for projecting out left
+      inline
+      data_expression left(const data_expression& e)
+      {
+        assert(is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e));
+        
+        if (is_less_equal_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_less_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_greater_equal_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_greater_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_max_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_min_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_plus_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_minus_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_times_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_exp_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
         }
 
         // This should never be reached, otherwise something is severely wrong.
@@ -1051,7 +1051,7 @@ namespace mcrl2 {
         assert(false); 
       }
 
-      // Give all system defined equations for real_
+      // Give all system defined equations for Real
       inline
       data_equation_list real__generate_equations_code()
       {
