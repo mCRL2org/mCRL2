@@ -5,5 +5,3 @@ tool tbf2lps
          lpstrans.cpp
          /libraries//core
        ;
-
-install-tools tbf2lps ;

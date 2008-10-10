@@ -4,5 +4,3 @@ tool pbespp
        : pbespp.cpp
          /libraries//pbes
        ;
-
-install-tools pbespp ;

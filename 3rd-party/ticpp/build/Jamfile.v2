@@ -7,7 +7,6 @@ project ticpp
 lib ticpp
        : [ glob *.cpp ]
        : <define>TIXML_USE_TICPP
-         <threading>single
        :
        : <define>TIXML_USE_TICPP
          <include>../include

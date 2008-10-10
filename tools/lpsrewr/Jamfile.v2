@@ -4,5 +4,3 @@ tool lpsrewr
        : lpsrewr.cpp
          /libraries//data
        ;
-
-install-tools lpsrewr ;

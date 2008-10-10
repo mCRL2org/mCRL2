@@ -5,5 +5,3 @@ tool lpsactionrename
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsactionrename ;

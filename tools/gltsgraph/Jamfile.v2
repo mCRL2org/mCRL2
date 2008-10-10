@@ -1,6 +1,4 @@
-project toolset/gltsgraph
-       : build-dir $(BUILD_TOP)/gltsgraph
-       ;
+project toolset/gltsgraph ;
 
 tool gltsgraph
        : [ glob *.cpp ]
@@ -8,11 +6,7 @@ tool gltsgraph
          /libraries/utilities//font_renderer
          /libraries//core
          /libraries//lts
-         /site-config//wx_gl
-       : <wx>yes
-         <opengl>yes
+         /libraries//ticpp
+       : <wx>gl
          <squadt-connectivity>implemented
-         <dependency>/libraries//ticpp
        ;
-
-install-tools gltsgraph ;

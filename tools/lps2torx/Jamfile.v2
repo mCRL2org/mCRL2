@@ -4,5 +4,3 @@ tool lps2torx
        : lps2torx.cpp
          /libraries//lps
        ;
-
-install-tools lps2torx ;

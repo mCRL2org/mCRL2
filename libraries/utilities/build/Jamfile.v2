@@ -3,7 +3,7 @@ project libraries/utilities
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
+          <use>/site-config//boost
        ;
 
 alias spinctrlfloat : spinctrlfloat.o ;
@@ -17,17 +17,19 @@ obj font_renderer.o : source/font_renderer.cpp : <use>/site-config//wx_base <inc
 # mCRL2 specific tool for SQuADt interface
 obj squadt_interface
       : source/squadt_interface.cpp
-      : <threading>multi
-        <use>/libraries/tipi//tool-interface
+      : <use>/libraries/tipi//tool
       :
-      : <library>/libraries/tipi//tool-interface
+      : <library>/libraries/tipi//tool
         <toolset>darwin:<framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
+        <include>../include
       ;
 
 obj command_line_interfacing
       : source/command_line.cpp
-      : <use>/site-config//boost_headers
+      : <use>/site-config//boost
+      :
+      : <include>../include
       ;
 
 mcrl2-library utilities
@@ -37,10 +39,10 @@ mcrl2-library utilities
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
         /libraries/utilities//command_line_interfacing
-      : <use>/site-config//boost_headers
-        <use>/libraries/atermpp//headers
+      : <use>/site-config//boost
+        <library>/libraries//atermpp
         <include>../../core/include      # Circular dependency
         <include>../../data/include      # Circular dependency
       :
-      : <library>/libraries//aterm
+      : <include>../include
       ;

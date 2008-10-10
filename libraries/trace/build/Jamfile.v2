@@ -3,13 +3,12 @@ project libraries/trace
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library trace
        : source/trace.cpp
-       : <use>/libraries/core//headers
-         <use>/libraries/utilities//headers
-       :
        : <library>/libraries//core
+         <library>/libraries//utilities
+       :
+       : <include>../include
        ;

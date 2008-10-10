@@ -2,17 +2,17 @@ project aterm
        : source-location ..
        : requirements
           <include>../include/aterm
+          <address-model>64:<define>AT_64BIT
        : usage-requirements
-          <include>../include/aterm
        ;
 
 mcrl2-library aterm
        : [ glob source/*.c ]
          source/protaterm.cpp
-       : <address-model>64:<define>AT_64BIT
        :
-       : <address-model>64:<define>AT_64BIT
+       :
+       : <include>../include/aterm
+         <address-model>64:<define>AT_64BIT
          <toolset>darwin:<cflags>"-fPIC -fno-common"
-         <toolset>gcc,<os>NT:<cflags>""
          <toolset>gcc,<os>LINUX:<cflags>-fPIC
        ;

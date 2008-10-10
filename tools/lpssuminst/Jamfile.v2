@@ -5,5 +5,3 @@ tool lpssuminst
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpssuminst ;

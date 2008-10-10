@@ -324,7 +324,7 @@ flags darwin.compile OPTIONS : -no-cpp-precomp -gdwarf-2 ;
 # Add the framework names to use.
 flags darwin.link FRAMEWORK <framework> ;
 
-flags darwin.link.dll NO_BUNDLE <bundle>no : " " ;
+flags darwin.link.dll BUNDLE <bundle>no : -dynamiclib ;
 flags darwin.link.dll BUNDLE <bundle>yes : -bundle ;
 
 # This is flag is useful for debugging the link step
@@ -356,8 +356,8 @@ rule link
 
 actions link bind LIBRARIES
 {
-   "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
-   $(NEED_STRIP)"$(.STRIP)" $(NEED_STRIP)"$(<)"
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
+    $(NEED_STRIP)"$(.STRIP)" $(NEED_STRIP)"$(<)"
 }
 
 rule link.dll
@@ -367,8 +367,9 @@ rule link.dll
 
 actions link.dll bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" $(NO_BUNDLE)-dynamiclib$(NO_BUNDLE)-install_name$(NO_BUNDLE)"$(RPATH[1])/$(<:B)$(<:S)" $(BUNDLE) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
+    "$(CONFIG_COMMAND)" $(BUNDLE) -Wl,-single_module -install_name "$(<:B)$(<:S)" -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
 }
+#    "$(CONFIG_COMMAND)" $(NO_BUNDLE)-dynamiclib$(NO_BUNDLE)-install_name$(NO_BUNDLE)"$(RPATH[1])/$(<:B)$(<:S)" $(BUNDLE) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
 
 # We use libtool instead of ar to support universal binary linking
 # TODO: Find a way to use the underlying tools, i.e. lipo, to do this.

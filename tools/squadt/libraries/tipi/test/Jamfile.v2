@@ -1,7 +1,7 @@
 project libraries/tipi/test
     : requirements
-       <use>/site-config//boost_headers
-       <use>/libraries/tipi//tool-interface
+       <use>/site-config//boost
+       <use>/libraries/tipi//tool
     ;
 
 include $(TOP)/build/testing/header_test.jam ;
@@ -19,7 +19,7 @@ include $(TOP)/build/testing/header_test.jam ;
 #        /site-config//boost_test ;
 
 test-suite tipi
-         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool-interface ]
-#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool-interface ]
+         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool ]
+#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool ]
            [ compile-headers ../include ]
          ;

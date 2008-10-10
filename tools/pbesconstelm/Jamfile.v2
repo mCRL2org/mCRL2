@@ -5,5 +5,3 @@ tool pbesconstelm
          /libraries//pbes
        : <status>experimental
        ;
-
-install-tools pbesconstelm ;

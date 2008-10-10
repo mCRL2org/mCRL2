@@ -5,5 +5,3 @@ tool tracepp
          /libraries//core
          /libraries//trace
        ;
-
-install-tools tracepp ;

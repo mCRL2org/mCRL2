@@ -6,5 +6,3 @@ tool ltsinfo
          /libraries//lts
        : <squadt-connectivity>implemented
        ;
-
-install-tools ltsinfo ;

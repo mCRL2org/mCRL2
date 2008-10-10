@@ -8,5 +8,3 @@ tool ltsmin
          /libraries//svc
        : <status>deprecated
        ;
-
-install-tools ltsmin ;

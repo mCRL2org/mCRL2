@@ -1,11 +1,10 @@
 project svc
        : source-location ../source
        : requirements
-          <toolset>darwin:<cflags>-std=c99
-          <toolset>gcc:<cflags>-std=c99
           <include>../include
+          <toolset>darwin:<cflags>"-fno-common"
        : usage-requirements
-          <include>../include
+          <toolset>darwin:<cflags>"-fno-common"
        ;
 
 mcrl2-library svc
@@ -18,10 +17,7 @@ mcrl2-library svc
          ptable.c
          svc1.c
          svc2.c
-       : <toolset>darwin:<cflags>"-fno-common"
-         <use>/libraries/aterm//headers
-       :
        : <library>/libraries//aterm
+       :
+       : <include>../include
        ;
-
-install-libraries svc ;

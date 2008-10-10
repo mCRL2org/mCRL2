@@ -1,10 +1,10 @@
 project libraries/core/test
    : source-location .
    : requirements
-      <use>/libraries/utilities//headers
-      <use>/libraries/atermpp//headers
-      <use>/libraries/core//headers
-      <use>/site-config//boost_headers 
+      <use>/libraries//utilities
+      <use>/libraries//atermpp
+      <use>/libraries//core
+      <use>/site-config//boost
       <library>/libraries//core
    ;
 

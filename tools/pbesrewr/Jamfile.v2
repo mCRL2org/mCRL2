@@ -5,5 +5,3 @@ tool pbesrewr
          /libraries//lps
          /libraries//pbes
        ;
-
-install-tools pbesrewr ;

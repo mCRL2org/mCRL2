@@ -1,30 +1,23 @@
 project pbes
-       : source-location ..
+       : source-location ../source
        : requirements
           <include>../include
-          <dependency>/site-config//boost_headers
-          <dependency>/libraries/atermpp//headers
-       : usage-requirements
-          <include>../include
-          <dependency>/site-config//boost_headers
-          <dependency>/libraries/atermpp//headers
+          <use>/site-config//boost
+          <use>/libraries/data//data
+          <use>/libraries/lps//lps
        ;
 
-obj pbes_data_elimination.o
-       : source/data_elimination.cpp
-       : <use>/libraries/data//headers
-         <use>/libraries/lps//headers
-       ;
+
 
 mcrl2-library pbes
-       : source/pbes_rewrite.cpp
-         source/pbes2bool.cpp
-         source/gauss.cpp
-         source/sort_instantiator.cpp
-         pbes_data_elimination.o
-       : <use>/libraries/data//headers
-         <use>/libraries/lps//headers
-       :
+       : pbes_rewrite.cpp
+         [ obj pbes2bool.o : pbes2bool.cpp ]
+         gauss.cpp
+         sort_instantiator.cpp
+         [ obj data_elimination.o : data_elimination.cpp ]
        : <library>/libraries//data
          <library>/libraries//lps
+       :
+       : <include>../include
+         <use>/site-config//boost
        ;

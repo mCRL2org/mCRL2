@@ -4,5 +4,3 @@ tool lpspp
        : lpspp.cpp
          /libraries//core
        ;
-
-install-tools lpspp ;

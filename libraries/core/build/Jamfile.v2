@@ -3,18 +3,13 @@ project core
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
-       ;
-
-obj mcrl2parser.o
-       : source/mcrl2parser.cpp
-       : <use>/libraries/utilities//headers
-         <use>/libraries/aterm//headers
-         <include>../include/mcrl2/core/detail
        ;
 
 mcrl2-library core
-       : mcrl2parser.o
+       : [ obj mcrl2parser.o
+                 : source/mcrl2parser.cpp
+                 : <use>/libraries/utilities//utilities
+                   <include>../include/mcrl2/core/detail ]
          source/struct.cpp
          source/struct_core.cpp
          source/mcrl2lexer.cpp
@@ -28,10 +23,9 @@ mcrl2-library core
          source/data_common.cpp
          source/data_reconstruct.cpp
          source/alpha.cpp
-       : <use>/libraries/atermpp//headers
-         <use>/libraries/utilities//headers
-       :
        : <library>/libraries//atermpp
          <library>/libraries//utilities
-         <toolset>gcc,<link>static:<linkflags>-export-dynamic
+       :
+       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
+         <include>../include
        ;

@@ -4,5 +4,3 @@ tool formcheck
        : formcheck.cpp
          /libraries//data
        ;
-
-install-tools formcheck ;

@@ -6,10 +6,6 @@ tool diagraphica
         /libraries/utilities//colorbutton
         /libraries/utilities//command_line_interfacing
         /libraries//ticpp
-        /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <wx>yes
-        <opengl>yes
+        <wx>gl
       ;
-
-install-tools diagraphica ;

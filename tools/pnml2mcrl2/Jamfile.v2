@@ -6,5 +6,3 @@ tool pnml2mcrl2
        : <library>/libraries//ticpp
          <squadt-connectivity>implemented
        ;
-
-install-tools pnml2mcrl2 ;

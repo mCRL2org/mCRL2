@@ -9,5 +9,3 @@ tool lps2lts
          /libraries//lts
        : <squadt-connectivity>implemented
        ;
-
-install-tools lps2lts ;

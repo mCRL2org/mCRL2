@@ -5,5 +5,3 @@ tool pbesinfo
          /libraries//lps
          /libraries//pbes
        ;
-
-install-tools pbesinfo ;

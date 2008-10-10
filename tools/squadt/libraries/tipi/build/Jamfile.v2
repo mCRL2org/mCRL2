@@ -2,24 +2,19 @@ project squadt/libraries/tipi
     : source-location
        ../source
     : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <c++-template-depth>512
        <include>../include
     : usage-requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <include>../include
-    ;
-
-obj restore_visitor.o
-    : restore_visitor.cpp
-    : <dependency>/libraries//ticpp
-      <dependency>/site-config//boost_filesystem
     ;
 
 alias messenger
     : [ glob ../source/transport/*.cpp ]
       [ obj tool_capabilities.o : tool/capabilities.cpp ]
       [ obj controller_capabilities.o : controller/capabilities.cpp ]
+      [ obj restore_vistor.o : restore_visitor.cpp : <use>/libraries//ticpp ]
       basic_datatype.cpp
       common.cpp
       command_line_interface.cpp
@@ -27,50 +22,43 @@ alias messenger
       display.cpp
       mime_type.cpp
       store_visitor.cpp
-      restore_visitor.o
       detail/event_handlers.cpp
+      /libraries/ticpp
+      /site-config//boost_filesystem
+      /site-config//boost_thread
+      /site-config//boost_system
       /site-config//socket
     : <threading>multi
-    : # no default build
-    : <library>/site-config//boost_filesystem
-      <library>/site-config//boost_thread
-      <library>/libraries//ticpp
-      <library>/site-config//boost_system
     ;
 
-obj tool_communicator.o
+obj communicator_tool.o
           : tool/communicator.cpp
           : <use>/site-config//socket ;
 
-obj controller_communicator.o
+obj communicator_controller.o
           : controller/communicator.cpp
           : <use>/site-config//socket ;
 
 lib tipi-controller
-    : controller_communicator.o
+    : communicator_tool.o
       messenger
-    : <threading>multi
-      <link>static
-    ;
-
-lib tipi
-    : controller_communicator.o
-      tool_communicator.o
-      messenger
-    : <threading>multi
-      <link>shared
+    : <link>static
     ;
 
 lib tipi-tool
-    : tool_communicator.o
+    : communicator_tool.o
       messenger
-    : <threading>multi
-      <link>static
+    : <link>static
     ;
 
-alias tool-interface       : tipi/<link>shared            : <link>shared ;
-alias tool-interface       : tipi-tool/<link>static       : <link>static ;
-alias controller-interface : tipi/<link>shared            : <link>shared ;
-alias controller-interface : tipi-controller/<link>static : <link>static ;
+lib tipi
+    : communicator_tool.o
+      communicator_controller.o
+      messenger
+    : <link>shared
+    ;
 
-install-libraries tool-interface controller-interface ;
+alias tool       : : <link>shared:<source>tipi <link>static:<source>tipi-tool ;
+alias controller : : <link>shared:<source>tipi <link>static:<source>tipi-controller ;
+
+install-libraries tool controller ;

@@ -9,5 +9,3 @@ tool pbes2bes
        : <squadt-connectivity>implemented
          <status>experimental 
        ;
-
-install-tools pbes2bes ;

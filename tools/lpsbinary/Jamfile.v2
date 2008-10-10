@@ -5,5 +5,3 @@ tool lpsbinary
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsbinary ;

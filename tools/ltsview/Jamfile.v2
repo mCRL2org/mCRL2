@@ -32,10 +32,6 @@ tool ltsview
         /libraries//trace
         /libraries//core
         /site-config//boost_signals
-        /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <wx>yes
-        <opengl>yes
+        <wx>gl
       ;
-
-install-tools ltsview ;

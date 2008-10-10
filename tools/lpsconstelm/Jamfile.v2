@@ -5,5 +5,3 @@ tool lpsconstelm
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsconstelm ;

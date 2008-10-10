@@ -1,0 +1,495 @@
+# Author: Jeroen van der Wulp
+#
+#  Copyright (C) 2008 Eindhoven University of Technology.
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+# 
+
+import feature ;
+import regex ;
+import path ;
+import set ;
+import project ;
+import property ;
+
+# Feature for building/installing optional tools/libraries
+feature.feature install : no yes : incidental ;
+
+# Feature that specifies an alternative name for the install rule
+feature.feature install-rule : : free ;
+
+# Feature for specifying install (plugin) dependencies
+feature.feature install-plugin : : free ;
+
+# Feature for specifying install dependencies
+feature.feature install-dependency : : free ;
+
+# Feature to mark tools as basic experimental or deprecated
+feature.feature status : basic experimental deprecated
+                                              : composite incidental ;
+
+# Stores command line options (ARGV) and default options from configuration file
+
+local configuration-options ;
+
+# Gets option arguments from options passed on the command line primarily and
+# otherwise the BUILD_OPTIONS variable
+local rule get-option ( name : default ) {
+  local result = [ MATCH --$(name)=(.*) : $(configuration-options) ] ;
+
+  if $(result) {
+    return $(result[1]) ;
+  }
+  else {
+    return $(default) ;
+  }
+}
+
+local rule is-option ( name : default ) {
+  local result = [ MATCH --($(name)) : $(configuration-options) ] ;
+
+  if $(result) {
+    return $(result[1]) ;
+  }
+  else {
+    return $(default) ;
+  }
+}
+
+# Prints message
+local rule build-notice ( message ) {
+  if [ is-option no-display-notice : no ] = no {
+    ECHO "Notice: $(message)" ;
+  }
+}
+
+rule install-data ( name : targets * : requirements ) {
+  local data-sub-location = [ feature.get-values data-sub-location : $(requirements) ] ;
+
+  if $(data-sub-location) {
+    install $(name) : $(targets) : <location>$(datadir)/$(data-sub-location) ;
+  }
+  else {
+    error "missing feature <data-sub-location>directory-name" ;
+  }
+}
+
+rule install-libraries ( names * : requirements * ) {
+  local project      = [ project.current ] ;
+  local project-root = [ $(project).get source-location ] ;
+
+  if [ feature.defaults <install> ] = <install>yes {
+    # Get install location information
+    if ! [ property.select location : $(requirements) ] {
+      requirements += <location>$(libdir) ;
+    }
+
+    local headers = [ path.glob-tree [ path.parent [ $(project).get location ] ] :
+                                         *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
+    # Install header files
+    if $(headers)  {
+      if [ MATCH .*(include/mcrl2/.*) : $(headers) ] {
+        headers = [ MATCH (.*/include/mcrl2/.*) : $(headers) ] ;
+      }
+      else if [ MATCH (.*/include/$(names)/.*) : $(headers) ] {
+        headers = [ MATCH (.*/include/$(names)/.*) : $(headers) ] ;
+      }
+    }
+
+    if $(headers) {
+      local short-headers ;
+
+      for local header in $(headers) {
+        short-headers += [ path.relative-to $(project-root) $(header) ] ;
+      }
+
+      local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
+
+      while $(header-root:B) != "include" {
+        header-root = [ path.parent $(header-root) ] ;
+      }
+
+      install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
+      install install-libraries : $(names) : <install-dependencies>on <install-type>LIB $(requirements) ;
+
+      alias install : install-libraries install-headers ;
+    }
+    else {
+      install install : $(names) : <install-dependencies>on <install-type>LIB $(requirements) ;
+    }
+  }
+  else {
+    install install : $(names) : <location>$(build-root)/stage ;
+  }
+
+  module [ $(project).project-module ] {
+    explicit install install-libraries install-headers ;
+  }
+}
+
+rule install-tool ( name : requirements * ) {
+  local c = [ project.current ] ;
+  local m = [ $(c).project-module ] ;
+
+  if ! <build>no in $(requirements) {
+    local destination = $(bindir) ;
+    local targets ;
+
+    if [ feature.defaults <install> ] != <install>yes {
+      destination = $(build-root)/stage ;
+    }
+    else { # install man pages
+      man $(name).1 : $(name) : <dependency>/libraries//install <location>$(mandir)/man1 ;
+
+      targets += $(name).1 ;
+    }
+
+    # OS X bundle installation
+    if [ modules.peek : OS ] = MACOSX && $(WX_CPPFLAGS) {
+      bundles = [ MATCH (.*).plist : [ $(m).glob $(name).plist ] ] ;
+
+      name = [ set.difference $(name) : $(bundles) ] ;
+
+      # Mac application bundles
+      for local bundle in $(bundles) {
+        # Create bundle targets
+        mac-bundle $(bundle).app
+             : $(bundle)
+               $(bundle).plist
+               $(bundle).icns
+             : <location>$(destination)
+             ;
+      }
+
+      targets += $(bundles).app ;
+    }
+
+    local install-requirements = [ property.select install-dependency install-plugin install-rule : $(requirements) ] ;
+
+    if $(name) {
+      install install-$(name) : $(name) : <install-dependencies>off <install-type>EXE <location>$(destination) ;
+
+      if [ get-option link : shared ] != static {
+        for local plugin in [ feature.get-values install-plugin : $(requirements) ] {
+          install install-$(plugin) : $(plugin) : <location>$(plugindir)/$(name) ;
+
+          targets += install-$(plugin) ;
+        }
+      }
+    }
+
+    if [ property.select install-rule : $(install-requirements) ] {
+      local rule-name = [ feature.get-values install-rule : $(install-requirements) ] ;
+
+      alias $(rule-name) : install-$(name) $(targets) ;
+    }
+    else {
+      alias install : install-$(name) $(targets) ;
+    }
+
+    module $(m) {
+      explicit install-$(1) ;
+    }
+  }
+  else {
+    local install-rule-name = [ feature.get-values install-rule : $(requirements) ] install ;
+
+    alias $(install-rule-name[1]) ;
+  }
+}
+
+rule get-build-tag ( ) {
+  local build-tag = $(BUILD_TAG) ;
+
+  # Build tag
+  if ! $(BUILD_TAG) {
+    local revision = [ SHELL "svnversion -n \".\"" ] ;
+    local link-variant = [ get-option link : shared ] ;
+
+    if ! $(revision) {
+      $(revision) = "unknown" ;
+    }
+
+    build-tag = "$(revision)-$(link-variant)" ;
+  }
+
+  return $(build-tag) ;
+}
+
+# checks against system requirements and returns an updated list of requirements (with <build>no on failure)
+rule process-requirements ( requirements * ) {
+  local filter = <install-rule> <install-dependency> <install-plugin> <status> <opengl> <wx> ;
+  local no-build ;
+
+  if [ property.select status : $(requirements) ] {
+    # do not install if the expanded property set contains <install>
+    if [ property.select install : [ feature.expand [ property.select status : $(requirements) ] ] ] {
+      no-build = <build>no ;
+    }
+  }
+  if [ property.select opengl : $(requirements) ] {
+
+    if $(OPENGL_NAME) {
+      requirements += <library>/site-config//opengl ;
+    }
+    else {
+      no-build = <build>no ;
+    }
+  }
+  if [ property.select wx : $(requirements) ] {
+    if $(WX_CPPFLAGS) {
+      local wx-library = [ feature.get-values wx : $(requirements) ] ;
+
+      requirements += <library>/site-config//wx_$(wx-library) ;
+
+      if $(wx-library) = gl && ! $(OPENGL_NAME) {
+        no-build = <build>no ;
+      }
+    }
+    else {
+      no-build = <build>no ;
+    }
+  }
+
+  if ! $(no-build) {
+    for local term in $(filter) {
+      requirements = [ property.change $(requirements) : $(term) ] ;
+    }
+  }
+  else {
+    requirements = $(no-build) [ property.select $(filter) : $(requirements) ] ;
+  }
+
+  return $(requirements) ;
+}
+
+rule get-plugin-root ( ) {
+  return $(plugindir) ;
+}
+
+rule get-install-root ( ) {
+  return $(install-prefix) ;
+}
+
+# Helper rule for boost root path setup (only use from Jamroot)
+rule get-boost-path {
+  if $(BOOST_INCLUDE_PATH) != "" {
+    return $(BOOST_INCLUDE_PATH) ;  # User supplied path
+  }
+  else {
+    return ./3rd-party/boost ;  # packaged Boost
+  }
+}
+
+rule platform-configuration ( properties * ) {
+  local requirements = <dll-path>$(libdir) ;
+
+  if <toolset>gcc in $(properties) { # GCC
+    if <link>static in $(properties) {
+      requirements += <linkflags>-export-dynamic ;
+    }
+
+    # versions of gcc without signed overflow (breaks ATerm library)
+    if [ MATCH ^(4\.[3456789]).* : [ feature.get-values toolset-gcc:version : $(properties)) ] ] {
+      requirements += <cxxflags>"-fno-strict-overflow" <cflags>"-fno-strict-overflow" ;
+    }
+  }
+  else if <target-os>windows in $(properties) {
+    if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
+      requirements += <define>WIN32
+                      <define>__WIN32__
+                      <define>_CRT_SECURE_NO_DEPRECATE
+                      <define>_CRT_SECURE_NO_WARNINGS
+                      <define>_SCL_SECURE_NO_WARNINGS
+                      <define>_SCL_SECURE_NO_DEPRECATE
+                      <define>_HAS_ITERATOR_DEBUGGING=0
+                      <define>_SECURE_SCL=0
+                      <include>$(build-root)/workarounds/msvc
+                      <exception-handling>on ;
+    }
+  }
+  else if <target-os>darwin in $(properties) {
+    # Remove when staging, due to strange behaviour of the native linker
+    if [ feature.defaults <install> ] != <install>yes {
+      requirements = [ property.change $(requirements) : <dll-path> ] ;
+    }
+
+    if <toolset>darwin in $(properties) { # XCode toolset on OS X
+      local cxxflags = -std=c++98 ;
+
+      if <debug-symbols>on in $(properties) {
+        cxxflags += -ggdb ;
+      }
+
+      requirements += <define>__darwin__
+                      <cxxflags>$(cxxflags)
+                      <cflags>"-std=c99"
+                      <linkflags>"-undefined dynamic_lookup" ;
+    }
+  }
+
+  return $(requirements) ;
+}
+
+rule load-configuration ( build-root-path configuration-file-name ) {
+  build-root = $(build-root-path) ;
+
+  include "$(build-root)/$(configuration-file-name)" ;
+
+  # Install when requested
+  if install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+    feature.set-default install : yes ;
+  }
+
+  configuration-options = [ modules.peek : ARGV ] $(BUILD_OPTIONS) ;
+
+  if [ is-option enable-experimental : no ] = no {
+    build-notice "not building experimental tools!" ;
+
+    feature.compose <status>experimental : <install>no ;
+  }
+  if [ is-option enable-deprecated : no ] = no {
+    build-notice "not building deprecated tools!" ;
+
+    feature.compose <status>deprecated : <install>no ;
+  }
+
+  if [ get-option prefix : no ] = no {
+    ECHO "Warning: missing final installation path!" ;
+    ECHO "" ;
+    ECHO "  This path information is needed at build time on some platforms to correctly install the toolset." ;
+    ECHO "" ;
+    ECHO "Hint: Use --prefix=<directory> argument." ;
+    ECHO "" ;
+  }
+
+  prefix         = [ path.make $(build-root)/stage ] ;
+  install-prefix = [ get-option prefix : $(prefix) ] ;
+
+  # Set installation/stage locations
+  if [ feature.defaults <install> ] = <install>yes {
+    prefix     = $(install-prefix) ;
+    bindir     = [ get-option bindir     : [ path.make $(prefix)/bin ] ] ;
+    libdir     = [ get-option libdir     : [ path.make $(prefix)/lib/mcrl2 ] ] ;
+    plugindir  = [ path.make $(libdir)/plugins ] ;
+    includedir = [ get-option includedir : [ path.make $(prefix)/include/mcrl2 ] ] ;
+    datadir    = [ get-option datadir    : [ path.make $(prefix)/share/mcrl2 ] ] ;
+    mandir     = [ get-option mandir     : [ path.make $(prefix)/share/man ] ] ;
+  }
+  else {
+    bindir    = [ path.make $(prefix) ] ;
+    libdir    = [ get-option libdir : [ path.make $(install-prefix)/lib/mcrl2 ] ] ;
+    plugindir = [ path.make $(prefix)/plugins ] ;
+  }
+
+  if [ modules.peek : NT ] && [ get-option link : shared ] != static {
+    libdir = $(bindir) ;
+  }
+
+  # Add prefix for packaging
+  if [ get-option destdir : no ] != no {
+    local destdir = [ get-option destdir : "" ] ;
+
+    prefix     = $(destdir)$(prefix) ;
+    bindir     = $(destdir)$(bindir) ;
+    libdir     = $(destdir)$(libdir) ;
+    includedir = $(destdir)$(includedir) ;
+    datadir    = $(destdir)$(datadir) ;
+  }
+}
+
+# Feature for data installation in subdirectory
+feature.feature data-sub-location : : free optional incidental ;
+
+# Feature for building/installing tools that use opengl
+feature.feature opengl : yes no : incidental ;
+
+# Feature for building/installing tools that use wxWidgets
+feature.feature wx : base gl none : incidental ;
+
+# Specifies that squadt connectivity is implemented in a tool
+feature.feature squadt-connectivity : none implemented : incidental composite ;
+
+rule feature-configuration ( ) {
+  local properties ;
+
+  # Extract build requirements from command line options
+  for option in [ modules.peek : ARGV ] {
+    local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+  
+    if $(temporary) {
+      local value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+      local values = [ regex.split $(value) "," ] ;
+  
+      if ! [ MATCH ^(-).* : $(option) ] {
+        properties += <$(temporary)>$(values) ;
+      }
+    }
+    else if $(option) in debug profile release {
+      properties += <variant>$(option) ;
+    }
+  }
+
+  # Extract build requirements imported from build/config.jam
+  for option in $(BUILD_OPTIONS) {
+    local temporary = [ MATCH ([^=]+)= : $(option) ] ;
+  
+    if $(temporary) {
+      if ! [ feature.get-values $(temporary) : $(properties) ] {
+        local value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
+  
+        if ! [ MATCH ^(-).* : $(option) ] {
+          properties += $(value:G=<$(temporary)>) ;
+        }
+      }
+    }
+  }
+
+  if ! $(OPENGL_NAME) {
+    feature.set-default opengl : no ;
+
+    build-notice "Not building tools that depend on OpenGL!" ;
+  }
+  if ! $(WX_CPPFLAGS) {
+    feature.set-default wx : none ;
+
+    build-notice "Not building tools that depend on wxWidgets!" ;
+  }
+
+  if [ is-option disable-squadt-support : no ] = no {
+    feature.feature squadt-interface : enabled disabled : symmetric optional ;
+
+    feature.compose <squadt-connectivity>implemented
+          : <squadt-interface>enabled
+            <library>/libraries/utilities//squadt_interface
+          ;
+
+    properties += <threading>multi ;
+  }
+  else {
+    feature.feature squadt-interface : disabled enabled : implicit incidental optional ;
+
+    feature.compose <squadt-connectivity>implemented
+          : <squadt-interface>disabled
+          ;
+
+    build-notice "not building squadt support in tools!" ;
+  }
+
+  return [ property.change [ property.change $(properties) : <link> ] : <toolset> ] ;
+}
+
+IMPORT $(__name__) : install-tool           : : install-tool ;
+IMPORT $(__name__) : install-data           : : install-data ;
+IMPORT $(__name__) : build-notice           : : build-notice ;
+IMPORT $(__name__) : get-build-tag          : : get-build-tag ;
+IMPORT $(__name__) : get-boost-path         : : get-boost-path ;
+IMPORT $(__name__) : get-plugin-root        : : get-plugin-root ;
+IMPORT $(__name__) : get-install-root       : : get-install-root ;
+IMPORT $(__name__) : install-libraries      : : install-libraries ;
+IMPORT $(__name__) : load-configuration     : : load-configuration ;
+IMPORT $(__name__) : process-requirements   : : process-requirements ;
+IMPORT $(__name__) : platform-configuration : : platform-configuration ;
+IMPORT $(__name__) : feature-configuration  : : feature-configuration ;

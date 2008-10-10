@@ -1,33 +1,29 @@
 project lps
-       : source-location ..
+       : source-location ../source
        : requirements
           <include>../include
-          <dependency>/site-config//boost_headers
+          <include>$(BOOST_ROOT)
+          <use>/libraries/data//data
        : usage-requirements
-          <include>../include
-          <dependency>/site-config//boost_headers
+          <include>$(BOOST_ROOT)
        ;
 
-obj lps_data_elimination.o
-       : source/data_elimination.cpp
-       : <use>/libraries/data//headers
-       ;
+
 
 mcrl2-library lps
-       : source/lin_std.cpp
-         source/binary.cpp
-         lps_data_elimination.o
-         source/sumelm.cpp
-         source/suminst.cpp
-         source/untime.cpp
-         source/nextstate.cpp
-         source/nextstate_standard.cpp
-         source/confluence_checker.cpp
-         source/disjointness_checker.cpp
-         source/invariant_checker.cpp
-         source/invariant_eliminator.cpp
-       : <use>/libraries/data//headers
-         <use>/libraries/atermpp//headers
-       :
+       : lin_std.cpp
+         binary.cpp
+         sumelm.cpp
+         suminst.cpp
+         untime.cpp
+         nextstate.cpp
+         nextstate_standard.cpp
+         confluence_checker.cpp
+         disjointness_checker.cpp
+         invariant_checker.cpp
+         invariant_eliminator.cpp
+         [ obj lps_data_elimination.o : data_elimination.cpp ]
        : <library>/libraries//data
+       :
+       : <include>../include
        ;

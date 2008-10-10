@@ -3,7 +3,6 @@ project data
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library data
@@ -13,13 +12,12 @@ mcrl2-library data
          source/formula_checker.cpp
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
-       : <use>/libraries/core//headers
-         <use>/libraries/atermpp//headers
-         <use>/libraries/utilities//headers
-         <use>/site-config//cvc
-         <library>/site-config//m               # for rewrite
-         <library>/site-config//dynamic_loading # for rewrite
+         /site-config//cvc
+         /site-config//m               # for rewrite
+         /site-config//dynamic_loading # for rewrite
+       : <library>/libraries//core
+         <library>/libraries//atermpp
+         <library>/libraries//utilities
        :
-       : <library>/libraries/core
-         <library>/site-config//cvc
+       : <include>../include
        ;

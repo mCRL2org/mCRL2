@@ -11,10 +11,8 @@ plugin xsim_garage_view
          visutils.cpp
          /libraries//lps
          /tools/xsim//xsim_core
-         /site-config//wx_gl
        : <define>GARAGEFRAMEDLL
-         <wx>yes
-         <opengl>yes
+         <wx>gl
        ;
 
 tool garage
@@ -22,10 +20,8 @@ tool garage
          garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         /site-config//wx_gl
        : <library>/libraries//lps
-         <wx>yes
-         <opengl>yes
+         <wx>gl
        ;
 
 explicit garage ;

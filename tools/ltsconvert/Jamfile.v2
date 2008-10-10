@@ -5,5 +5,3 @@ tool ltsconvert
          /libraries//lts
        : <squadt-connectivity>implemented
        ;
-
-install-tools ltsconvert ;

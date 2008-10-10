@@ -8,5 +8,3 @@ tool chi2mcrl2
          /libraries//core
        : <squadt-connectivity>implemented
        ;
-
-install-tools chi2mcrl2 ;

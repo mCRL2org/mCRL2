@@ -1,50 +1,35 @@
+# Author: Jeroen van der Wulp
+#
+#  Copyright (C) 2008 Eindhoven University of Technology.
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+# 
+
 project site-config ;
 
 import os ;
-import regex ;
+import feature ;
 import property ;
 
 include $(TOP)/build/config.jam ;
 
-rule select-configuration ( properties * ) {
-  local requirements ;
+# Helper rule for extracting compiler/linker options from strings (unix oriented)
+local rule requirements-from-string ( arguments * ) {
+  for local argument in $(arguments) {
+    if [ MATCH ^[-/]D(.*) : $(argument) ] {
+      local value = [ MATCH ^[-/]D(.*) : $(argument) ] ;
 
-  if <toolset>gcc in $(properties) { # GCC
-    if <link>static in $(properties) {
-      requirements = <linkflags>-export-dynamic ;
+      requirements += <define>$(value) ;
     }
+    else if [ MATCH ^[-/]I(.*) : $(argument) ] {
+      local value = [ MATCH ^[-/]I(.*) : $(argument) ] ;
 
-    # versions of gcc without signed overflow (breaks ATerm library)
-    if [ MATCH ^(4\.[3456789]).* : [ feature.get-values toolset-gcc:version : $(properties)) ] ] {
-      requirements += <cxxflags>"-fno-strict-overflow" <cflags>"-fno-strict-overflow" ;
+      requirements += <include>$(value) ;
     }
-  }
-  else if <target-os>windows in $(properties) {
-    if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
-      requirements += <define>WIN32
-                      <define>__WIN32__
-                      <define>_CRT_SECURE_NO_DEPRECATE
-                      <define>_CRT_SECURE_NO_WARNINGS
-                      <define>_SCL_SECURE_NO_WARNINGS
-                      <define>_SCL_SECURE_NO_DEPRECATE
-                      <define>_HAS_ITERATOR_DEBUGGING=0
-                      <define>_SECURE_SCL=0
-                      <include>$(TOP)/build/workarounds/msvc
-                      <exception-handling>on ;
-    }
-  }
-  else if <target-os>darwin in $(properties) {
-    if <toolset>darwin in $(properties) { # XCode toolset on OS X
-      cxxflags = -std=c++98 ;
-
-      if <debug-symbols>on in $(properties) {
-        cxxflags += -ggdb ;
-      }
-
-      requirements += <define>__darwin__
-                      <cxxflags>$(cxxflags)
-                      <cflags>"-std=c99"
-                      <linkflags>"-undefined dynamic_lookup" ;
+    else {
+      requirements += <cxxflags>$(argument) ;
     }
   }
 
@@ -52,21 +37,13 @@ rule select-configuration ( properties * ) {
 }
 
 # Helper rule for extracting compiler/linker options from strings (unix oriented)
-local rule libraries_from_string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
-  local splitted ;
+local rule libraries-from-string ( name : ldflags + : requirements * : default * : usage-requirements * ) {
   local library_search_paths ;
   local library_link_paths ;
   local library_names ;
   local framework_names ;
 
-  if [ os.name ] = NT {
-    splitted = [ regex.split " $(ldflags)" " " ] ;
-  }
-  else {
-    splitted = [ regex.split " $(ldflags)" " -" ] ;
-  }
-
-  for part in $(splitted) {
+  for local part in $(ldflags) {
     if $(part) {
       if [ MATCH "^-?L(.*)$" : $(part) ] {
         local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
@@ -75,17 +52,21 @@ local rule libraries_from_string ( name : ldflags + : requirements * : default *
         library_link_paths += <link>shared:<dll-path>$(search_path) ;
       }
       else if [ MATCH "^-?l(.*)$" : $(part) ] {
-        local library_name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
+        local library-name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
      
-        lib $(name)$(library_name)
-            :
-            : <name>$(library_name) $(library_search_paths)
-            :
-            : $(framework_names)
-              $(library_link_paths)
-            ;
+        if ! $(library-name) in $(library-targets) {
+          lib $(library-name)
+              :
+              : <name>$(library-name) $(library_search_paths)
+              :
+              : $(framework_names)
+                $(library_link_paths)
+              ;
+
+          library-targets += $(library-name) ;
+        }
      
-        library_names += $(name)$(library_name) ;
+        library_names += $(library-name) ;
       }
       else if [ MATCH "^-?m(.*)$" : $(part) ] {
       }
@@ -120,57 +101,53 @@ local rule libraries_from_string ( name : ldflags + : requirements * : default *
 }
 
 # OpenGL library
-if $(OPENGL_NAME) {
-  lib GLU : : <os>NT <name>glu32 ;
-  lib GLU : : <os>CYGWIN <name>glu32 ;
-  lib GLU : : <os>SOLARIS <name>GLU ;
-  alias GLU ;
-  
-  if $(OPENGL_LPATH) {
-    lib opengl : : <name>$(OPENGL_NAME) <search>$(OPENGL_LPATH) : : <include>$(OPENGL_IPATH) <library>GLU ;
+rule opengl-requirements ( properties * ) {
+  local opengl-name = GL ;
+
+  if <target-os>windows in $(properties) || <target-os>cygwin in $(properties) {
+    lib GLU : : <name>glu32 ;
+
+    gl = opengl32 ;
   }
-  else if $(OPENGL_IPATH) {
-    lib opengl : : <name>$(OPENGL_NAME) : : <include>$(OPENGL_IPATH) <library>GLU ;
+  else if <target-os>solaris in $(properties) {
+    lib GLU : : <target-os>SOLARIS <name>GLU ;
+  }
+
+  if <toolset>darwin in $(properties) {
+    alias opengl : : <toolset>darwin : : <framework>OpenGL ;
   }
   else {
-    if [ modules.peek : OS ] = MACOSX {
-      alias opengl : : <toolset>darwin : : <framework>OpenGL ;
-    }
-    else {
-      lib opengl : : <name>$(OPENGL_NAME) : : <library>GLU <os>CYGWIN:<library>GLU ;
-    }
+    lib opengl : GLU : <name>$(opengl-name) <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
   }
-
-  explicit opengl GLU ;
 }
 
-if $(WX_CPPFLAGS) {
-  libraries_from_string wx_base
-	: $(WX_BASE_LDFLAGS)
-        : <threading>multi
-        :
-        : <cxxflags>$(WX_CPPFLAGS)
-          <wx>yes
-          <toolset>msvc:<user-interface>gui
-          <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
-          <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET
-        ;
+# OpenGL configuration
+local needs-glu = windows cygwin solaris ; 
 
-  libraries_from_string wx_gl
-      : $(WX_GL_LDFLAGS)
-      : <threading>multi
-      :
-      : <cxxflags>$(WX_CPPFLAGS)
-        <wx>yes
-        <opengl>yes
-        <toolset>msvc:<user-interface>gui
-        <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
-        <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET
-      ;
-}
+lib GLU : : <target-os>windows <name>glu32 ;
+lib GLU : : <target-os>cygwin <name>glu32 ;
+lib GLU : : <target-os>solaris <name>GLU ;
+
+lib opengl   :
+             : <name>GL
+               <target-os>solaris:<source>GLU
+               <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
+lib opengl   : GLU
+             : <target-os>windows
+               <name>opengl32
+               <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
+lib opengl   : GLU
+             : <target-os>cygwin
+               <name>opengl32
+               <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
+alias opengl : : <target-os>darwin : : <framework>OpenGL ;
+
+use-project /boost : ../3rd-party/boost ;
+
+alias boost : : : : <include>$(BOOST_ROOT) ;
 
 if $(BOOST_LIBRARY_PATH) {
-  boost-library-path = <library-path>$(BOOST_LIBRARY_PATH) ;
+  boost-library-path = <library-path>"$(BOOST_LIBRARY_PATH)" ;
 }
 
 local rule boost-library ( name link ? : requirements * : use-local-boost ? : use-system-boost ? ) {
@@ -186,17 +163,17 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
   if $(use-local-boost) {
     alias boost_$(name) : [ find-target $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) ] : $(requirements) <threading>multi : : $(requirements) ;
   }
-  else if ( $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) ) {
+  else if $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) {
     if $(BOOST_INCLUDE_PATH) {
       lib boost_$(name)
              :
              : $(boost-library-path)
                <name>"boost_$(name)"
-               <include>$(BOOST_INCLUDE_PATH)
-               <search>$(BOOST_LIBRARY_PATH)
+               <include>"$(BOOST_INCLUDE_PATH)"
+               <search>"$(BOOST_LIBRARY_PATH)"
              :
              : <define>BOOST_ALL_NO_LIB=1
-               <include>$(BOOST_INCLUDE_PATH)
+               <include>"$(BOOST_INCLUDE_PATH)"
              ;
     }
     else {
@@ -214,7 +191,7 @@ if ! $(BOOST_INCLUDE_PATH) {
   alias boost_headers : /boost//headers ;
 }
 else if $(BOOST_INCLUDE_PATH) != "default" {
-  alias boost_headers : : <include>$(BOOST_INCLUDE_PATH) ;
+  alias boost_headers : : <include>"$(BOOST_INCLUDE_PATH)" ;
 }
 else {
   alias boost_headers ;
@@ -236,11 +213,11 @@ else {
 }
 
 lib   m  : : <name>"m" ;
-alias m  : : <os>NT ;
+alias m  : : <target-os>NT ;
 lib   z  : : <name>"z" ;
 
-alias dynamic_loading : : <os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
-alias dynamic_loading : : <os>FREEBSD ;
+alias dynamic_loading : : <target-os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
+alias dynamic_loading : : <target-os>FREEBSD ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
@@ -249,48 +226,42 @@ lib ws2_32    : : <name>"ws2_32" ;
 
 alias socket ;
 lib   socket : nsl : <target-os>solaris <name>socket : : ;
-lib   socket
-    : ws2_32
-    : <target-os>cygwin
-      <name>wsock32
-    :
-    : <define>__USE_W32_SOCKETS
-      <define>_WIN32_WINNT=0x0501
-    ;
-lib   socket
-    : ws2_32
-    : <target-os>windows
-      <name>wsock32
-    :
-    : <define>__USE_W32_SOCKETS
-      <define>_WIN32_WINNT=0x0501
-    ;
+lib   socket : ws2_32
+             : <target-os>windows
+               <name>wsock32
+             :
+             : <define>__USE_W32_SOCKETS
+               <define>_WIN32_WINNT=0x0501
+             ;
+lib   socket : ws2_32
+             : <target-os>cygwin
+               <name>wsock32
+             :
+             : <define>__USE_W32_SOCKETS
+               <define>_WIN32_WINNT=0x0501
+             ;
 
 if $(CADP_HEADERS) {
-  lib bcg : : <name>BCG <search>$(CADP_LIBRARIES) ;
-  lib bcg_io : : <name>BCG_IO <search>$(CADP_LIBRARIES) ;
+  lib bcg : : <name>BCG <search>"$(CADP_LIBRARIES)" ;
+  lib bcg_io : : <name>BCG_IO <search>"$(CADP_LIBRARIES)" ;
 
-  alias BCG : bcg bcg_io : : : <include>$(CADP_HEADERS) <define>USE_BCG ;
+  alias BCG : bcg bcg_io : : : <include>"$(CADP_HEADERS)" <define>USE_BCG ;
 }
 else {
   alias BCG : : : : ;
 }
 
 if $(USE_CVC) {
-  lib gmp
-      :
-      : <name>gmp
-      ;
+  lib gmp : : <name>gmp ;
 
   lib cvc
-      :
+      : gmp
       : <name>cvc3
-        <search>$(USE_CVC)/lib
+        <search>"$(USE_CVC)/lib"
       :
       : <define>HAVE_CVC
 #        <define>HAVE___GNU_CXX__EXT_HASH_MAP
 #        <define>HAVE___GNU_CXX__EXT_HASH_SET
-        <library>gmp
         <include>$(USE_CVC)/include/cvc3
       ;
 }
@@ -298,4 +269,18 @@ else {
   alias cvc ;
 }
 
-IMPORT $(__name__) : select-configuration : : select-configuration ;
+if $(WX_CPPFLAGS) {
+  local wx-requirements = [ requirements-from-string $(WX_CPPFLAGS) ]
+                           <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
+                           <toolset-intel:platform>win:<user-interface>gui
+                           <toolset>msvc:<user-interface>gui
+                           <toolset>gcc,<target-os>windows:<linkflags>-subsystem:windows <linkflags>-mwindows
+                           <toolset>gcc,<target-os>cygwin:<linkflags>-subsystem:windows <linkflags>-mwindows
+                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
+                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
+
+  libraries-from-string wx_base : $(WX_BASE_LDFLAGS) : : : $(wx-requirements) ;
+
+  libraries-from-string wx_gl : $(WX_GL_LDFLAGS) opengl : : : $(wx-requirements) ;
+}
+

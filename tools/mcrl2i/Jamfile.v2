@@ -5,5 +5,3 @@ tool mcrl2i
          /libraries//data
        : <status>experimental
        ;
-
-install-tools mcrl2i ;

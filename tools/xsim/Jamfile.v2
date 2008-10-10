@@ -1,7 +1,7 @@
 project toolset/xsim
        : requirements
-          <use>/libraries/lps//headers
-          <use>/libraries/trace//headers
+          <use>/libraries//lps
+          <use>/libraries//trace
        ;
 
 alias sim_shared
@@ -19,7 +19,7 @@ explicit sim_shared simbasegui.o xsim_core ;
 local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
 
 for plugin in $(plugins) {
-  use-project /xsim-$(plugin) : plugins/$(plugin) ;
+  alias $(plugin) : plugins/$(plugin)//xsim_$(plugin)_view ;
 }
 
 tool xsim
@@ -30,9 +30,11 @@ tool xsim
          xsimtrace.cpp
          /libraries//trace
          /libraries//lps
-         /site-config//wx_base
        : <squadt-connectivity>implemented
-         <wx>yes
+         <wx>gl
+         <define>PLUGINDIR=\"\\\"$(PLUGIN_ROOT)\\\"\"
+         <install-plugin>$(plugins)
+         <install-rule>xsim-install
        ;
 
 tool sim
@@ -40,6 +42,7 @@ tool sim
          sim_shared
          /libraries//lps
          /libraries//trace
+       : <install-rule>sim-install
        ;
 
-install-tools xsim sim : <source>/xsim-$(plugins) ;
+alias install : xsim-install sim-install ;

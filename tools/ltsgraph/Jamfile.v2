@@ -5,9 +5,6 @@ tool ltsgraph
          /libraries/utilities//spinctrlfloat
          /libraries//core
          /libraries//lts
-         /site-config//wx_base
-       : <wx>yes
+       : <wx>base
          <squadt-connectivity>implemented
        ;
-
-install-tools ltsgraph ;

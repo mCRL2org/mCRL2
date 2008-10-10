@@ -3,16 +3,13 @@ project lts
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library lts
        : [ glob source/*.cpp ]
-       : <use>/libraries/svc//headers
-         <use>/libraries/lps//headers
-         <library>/site-config//BCG
-       :
-       : <library>/site-config//BCG
+         /site-config//BCG
+       : <library>/libraries//svc
          <library>/libraries//lps
-         <library>/libraries//svc
+       :
+       : <include>../include
        ;
