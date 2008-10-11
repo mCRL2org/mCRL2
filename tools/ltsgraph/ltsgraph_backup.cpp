@@ -152,10 +152,10 @@ bool LtsgraphBackup::Restore(wxString Rfilename) {
         StateRadius = tmp;
 	if (!RtrFile.GetNextLine().ToLong(&tmp))
 		return false;
-        StateLabel = tmp;
+        StateLabel = 0 < tmp;
 	if (!RtrFile.GetNextLine().ToLong(&tmp))
 		return false;
-        TransitionLabel = tmp;
+        TransitionLabel = 0 < tmp;
 
 	std::map<unsigned int, Node*> NodeMap;
 	wxString wxstr = RtrFile.GetNextLine();

@@ -19,6 +19,7 @@ extern "C" {
 #else
 # if defined(_WIN32_) || defined(_MSC_VER)
 #  include <windows.h>
+#  undef __in_range // For STLport
 # endif
 # include <GL/gl.h>
 # include <GL/glu.h>

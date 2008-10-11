@@ -207,7 +207,7 @@ namespace mcrl2 {
       size_t ascii = static_cast<int>(c);
 
       // lowercase
-      if (97 <= ascii & ascii <= 122)
+      if (97 <= ascii && ascii <= 122)
       {
         result = ascii - 97;
       }

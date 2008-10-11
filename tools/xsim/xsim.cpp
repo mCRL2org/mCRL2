@@ -16,6 +16,7 @@
 #endif
 
 # include <wx/wxprec.h>
+#undef __in_range // For STLport on Windows
 
 #ifdef __BORLANDC__
     #pragma hdrstop

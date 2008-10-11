@@ -11,7 +11,7 @@
 
 #include "primitives.h"
 #include "utils.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Utils;
 

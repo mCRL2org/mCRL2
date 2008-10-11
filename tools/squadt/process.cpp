@@ -15,6 +15,7 @@
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
+# undef __in_range // for STLport
 # include <workarounds.h>
 # include <tchar.h>
 #else

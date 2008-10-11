@@ -43,6 +43,8 @@
   #include <GL/glu.h>
 #endif
 
+#undef __in_range // For STLport
+
 #include "visutils.h"
 
 

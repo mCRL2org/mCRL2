@@ -100,27 +100,6 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
   alias $(name) : $(library_names) : $(requirements) : $(default) : $(usage-requirements) ;
 }
 
-# OpenGL library
-rule opengl-requirements ( properties * ) {
-  local opengl-name = GL ;
-
-  if <target-os>windows in $(properties) || <target-os>cygwin in $(properties) {
-    lib GLU : : <name>glu32 ;
-
-    gl = opengl32 ;
-  }
-  else if <target-os>solaris in $(properties) {
-    lib GLU : : <target-os>SOLARIS <name>GLU ;
-  }
-
-  if <toolset>darwin in $(properties) {
-    alias opengl : : <toolset>darwin : : <framework>OpenGL ;
-  }
-  else {
-    lib opengl : GLU : <name>$(opengl-name) <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
-  }
-}
-
 # OpenGL configuration
 local needs-glu = windows cygwin solaris ; 
 
@@ -134,17 +113,17 @@ lib opengl   :
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 lib opengl   : GLU
              : <target-os>windows
-               <name>opengl32
+               <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 lib opengl   : GLU
              : <target-os>cygwin
-               <name>opengl32
+               <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 alias opengl : : <target-os>darwin : : <framework>OpenGL ;
 
 use-project /boost : ../3rd-party/boost ;
 
-alias boost : : : : <include>$(BOOST_ROOT) ;
+alias boost : : : : <include>$(BOOST_ROOT) <define>BOOST_ALL_NO_LIB=1 ;
 
 if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>"$(BOOST_LIBRARY_PATH)" ;
@@ -213,11 +192,11 @@ else {
 }
 
 lib   m  : : <name>"m" ;
-alias m  : : <target-os>NT ;
+alias m  : : <target-os>windows ;
 lib   z  : : <name>"z" ;
 
-alias dynamic_loading : : <target-os>NT <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
-alias dynamic_loading : : <target-os>FREEBSD ;
+alias dynamic_loading : : <target-os>windows <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
+alias dynamic_loading : : <target-os>freebsd ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
@@ -274,13 +253,11 @@ if $(WX_CPPFLAGS) {
                            <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
                            <toolset-intel:platform>win:<user-interface>gui
                            <toolset>msvc:<user-interface>gui
-                           <toolset>gcc,<target-os>windows:<linkflags>-subsystem:windows <linkflags>-mwindows
-                           <toolset>gcc,<target-os>cygwin:<linkflags>-subsystem:windows <linkflags>-mwindows
                            <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
                            <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
 
   libraries-from-string wx_base : $(WX_BASE_LDFLAGS) : : : $(wx-requirements) ;
 
-  libraries-from-string wx_gl : $(WX_GL_LDFLAGS) opengl : : : $(wx-requirements) ;
+  libraries-from-string wx_gl : $(WX_GL_LDFLAGS) : : : $(wx-requirements) <library>opengl ;
 }
 

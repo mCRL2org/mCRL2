@@ -74,8 +74,8 @@ load-configuration $(TOP)/build config.jam ;
 use-project /site-config               : build ;
 use-project /libraries                 : libraries ;
 
-path-constant INSTALL_ROOT : [ get-install-root ] ;
-path-constant PLUGIN_ROOT  : [ get-plugin-root ] ;
+constant      INSTALL_ROOT : [ get-install-root ] ;
+constant      PLUGIN_ROOT  : [ get-plugin-root ] ;
 constant      BUILD_TAG    : [ get-build-tag ] ;
 path-constant BOOST_ROOT   : [ get-boost-path ] ;  # Boost prefix
 

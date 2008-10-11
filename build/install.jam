@@ -83,7 +83,13 @@ rule install-libraries ( names * : requirements * ) {
   if [ feature.defaults <install> ] = <install>yes {
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
-      requirements += <location>$(libdir) ;
+      if [ modules.peek : OS ] = NT {
+        requirements += <link>shared:<location>$(bindir)
+                        <link>static:<location>$(libdir) ;
+      }
+      else {
+        requirements += <location>$(libdir) ;
+      }
     }
 
     local headers = [ path.glob-tree [ path.parent [ $(project).get location ] ] :
@@ -119,12 +125,12 @@ rule install-libraries ( names * : requirements * ) {
       }
 
       install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
-      install install-libraries : $(names) : <install-dependencies>on <install-type>LIB $(requirements) ;
+      install install-libraries : $(names) : <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
 
       alias install : install-libraries install-headers ;
     }
     else {
-      install install : $(names) : <install-dependencies>on <install-type>LIB $(requirements) ;
+      install install : $(names) : <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
     }
   }
   else {
@@ -138,7 +144,15 @@ rule install-libraries ( names * : requirements * ) {
 
 # install fule for the large mcrl2 shared library
 rule install-mcrl2-library ( requirements * ) {
-  install install : mcrl2 : <link>shared <location>$(libdir) <install-type>SHARED_LIB <install-dependencies>on $(requirements) ;
+  local location = <location>$(libdir) ;
+
+  if [ modules.peek : OS ] = NT {
+    location = <link>shared:<location>$(bindir)
+               <link>static:<location>$(libdir) ;
+  }
+
+  install install : mcrl2 : <link>shared $(location) <install-type>SHARED_LIB
+                            <install-dependencies>on $(requirements) ;
 
   alias install : [ feature.get-values <dependency> : $(requirements) ] ;
 }
@@ -380,7 +394,7 @@ rule load-configuration ( build-root-path configuration-file-name ) {
   }
 
   prefix         = [ path.make $(build-root)/stage ] ;
-  install-prefix = [ get-option prefix : $(prefix) ] ;
+  install-prefix = [ path.make [ get-option prefix : $(prefix) ] ] ;
 
   # Set installation/stage locations
   if [ feature.defaults <install> ] = <install>yes {
@@ -396,10 +410,6 @@ rule load-configuration ( build-root-path configuration-file-name ) {
     bindir    = [ path.make $(prefix) ] ;
     libdir    = [ get-option libdir : [ path.make $(install-prefix)/lib/mcrl2 ] ] ;
     plugindir = [ path.make $(prefix)/plugins ] ;
-  }
-
-  if [ modules.peek : NT ] && [ get-option link : shared ] != static {
-    libdir = $(bindir) ;
   }
 
   # Add prefix for packaging

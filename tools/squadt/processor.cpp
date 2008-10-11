@@ -461,7 +461,9 @@ namespace squadt {
           register_output(id, object, object_descriptor::reproducible_nonexistent);
         }
 
-        if (!boost::filesystem::exists(new_object_location) && check) {
+        if (check && !boost::filesystem::exists(
+              path(g->get_project_store()) / new_object_location)) {
+
           current_monitor->get_logger().log(1, "Warning, output file with name: " + new_object_location.string() + " does not exist!\n");
         }
 

@@ -5,6 +5,7 @@ project squadt/libraries/tipi
        <use>/site-config//boost
        <c++-template-depth>512
        <include>../include
+       <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
     : usage-requirements
        <use>/site-config//boost
        <include>../include
@@ -29,6 +30,11 @@ alias messenger
       /site-config//boost_system
       /site-config//socket
     : <threading>multi
+    :
+    : <library>/site-config//boost_filesystem
+      <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <library>/site-config//socket
     ;
 
 obj communicator_tool.o
@@ -40,7 +46,7 @@ obj communicator_controller.o
           : <use>/site-config//socket ;
 
 lib tipi-controller
-    : communicator_tool.o
+    : communicator_controller.o
       messenger
     : <link>static
     ;
