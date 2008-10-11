@@ -630,7 +630,7 @@ static void set_bithash(unsigned long long i)
 static void remove_state_from_bithash(ATerm state)
 {
   unsigned long long i = calc_hash(state);
-  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1 << (i%(8*sizeof(unsigned long))));
+  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
 }
 
 static unsigned long long add_state(ATerm state, bool *is_new)
