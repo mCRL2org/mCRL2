@@ -65,11 +65,11 @@ local rule build-notice ( message ) {
   }
 }
 
-rule install-data ( name : targets * : requirements ) {
+rule install-data ( name : targets * : requirements * ) {
   local data-sub-location = [ feature.get-values data-sub-location : $(requirements) ] ;
 
   if $(data-sub-location) {
-    install $(name) : $(targets) : <location>$(datadir)/$(data-sub-location) ;
+    install $(name) : $(targets) : <location>$(datadir)/$(data-sub-location) [ property.change $(requirements) : <data-sub-location> ] ;
   }
   else {
     error "missing feature <data-sub-location>directory-name" ;
@@ -108,7 +108,14 @@ rule install-libraries ( names * : requirements * ) {
       local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
 
       while $(header-root:B) != "include" {
-        header-root = [ path.parent $(header-root) ] ;
+        local new-header-root = [ path.parent $(header-root) ] ;
+
+        if [ path.basename $(new-header-root) ] = "include" && [ path.basename $(header-root) ] != mcrl2 {
+          header-root = [ path.join $(new-header-root) mcrl2 ] ;
+        }
+        else {
+          header-root = $(new-header-root) ;
+        }
       }
 
       install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
@@ -127,6 +134,13 @@ rule install-libraries ( names * : requirements * ) {
   module [ $(project).project-module ] {
     explicit install install-libraries install-headers ;
   }
+}
+
+# install fule for the large mcrl2 shared library
+rule install-mcrl2-library ( requirements * ) {
+  install install : mcrl2 : <link>shared <location>$(libdir) <install-type>SHARED_LIB <install-dependencies>on $(requirements) ;
+
+  alias install : [ feature.get-values <dependency> : $(requirements) ] ;
 }
 
 rule install-tool ( name : requirements * ) {
@@ -491,5 +505,6 @@ IMPORT $(__name__) : get-install-root       : : get-install-root ;
 IMPORT $(__name__) : install-libraries      : : install-libraries ;
 IMPORT $(__name__) : load-configuration     : : load-configuration ;
 IMPORT $(__name__) : process-requirements   : : process-requirements ;
+IMPORT $(__name__) : install-mcrl2-library  : : install-mcrl2-library ;
 IMPORT $(__name__) : platform-configuration : : platform-configuration ;
 IMPORT $(__name__) : feature-configuration  : : feature-configuration ;

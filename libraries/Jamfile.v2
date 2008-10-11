@@ -97,7 +97,11 @@ lib mcrl2
           <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
         ;
 
-alias install : /libraries/$(libraries)//install /libraries/aterm//install ;
+install-mcrl2-library
+          <dependency>/libraries/$(libraries)//install
+          <dependency>/libraries/tipi//install
+          <dependency>/libraries/aterm//install
+        ;
 
 IMPORT $(__name__) : mcrl2-library-components
                      mcrl2-library-targets  

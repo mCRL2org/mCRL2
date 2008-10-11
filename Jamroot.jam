@@ -136,16 +136,15 @@ if [ path.exists ./tools ] {
     }
     else {
       # Complete install
-      targets = /tools/$(tools)//install /libraries//install ;
+      alias install : /tools/$(tools)//install /libraries//install examples ;
 
       # General examples
-      install install-examples
+      install-data examples
               : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
               : <location>$(datadir)
-                <install-source-root>.
+                <install-source-root>./examples
+                <data-sub-location>examples
               ;
-
-      alias install : $(targets) install-examples ;
     }
   }
 }
