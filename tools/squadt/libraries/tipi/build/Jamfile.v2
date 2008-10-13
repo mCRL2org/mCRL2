@@ -35,6 +35,7 @@ alias messenger
       <library>/site-config//boost_thread
       <library>/site-config//boost_system
       <library>/site-config//socket
+      <library>/libraries/ticpp
     ;
 
 obj communicator_tool.o
