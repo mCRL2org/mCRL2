@@ -59,7 +59,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
               :
               : <name>$(library-name) $(library_search_paths)
               :
-              : $(framework_names)
+              : <framework>$(framework_names)
                 $(library_link_paths)
               ;
 
@@ -72,10 +72,13 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
       }
       else if [ MATCH "^-?Wl(.*)$" : $(part) ] {
       }
-      else if [ MATCH "-?framework (.*)$" : $(part) ] { # OS X specific
-        local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
+      else if $(is-framework-name) { # OS X specific
+        is-framework-name = ;
 
-        framework_names += <framework>$(framework_name) ;
+        framework_names += $(part) ;
+      }
+      else if $(part) = -framework { # OS X specific
+        is-framework-name = true ;
       }
       else if [ modules.peek : NT ] { # MSVC specific
         if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] {
@@ -88,7 +91,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
               :
               : <name>$(part) $(library_search_paths)
               :
-              : $(framework_names) $(library_link_paths)
+              : $(library_link_paths)
               ;
 
           library_names += $(name)$(part) ;
@@ -109,7 +112,8 @@ lib GLU : : <target-os>solaris <name>GLU ;
 
 lib opengl   :
              : <name>GL
-               <target-os>solaris:<source>GLU
+               <link>shared
+               <target-os>solaris:<source>GLU/<link>shared
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 lib opengl   : GLU
              : <target-os>windows
@@ -250,7 +254,6 @@ else {
 
 if $(WX_CPPFLAGS) {
   local wx-requirements = [ requirements-from-string $(WX_CPPFLAGS) ]
-                           <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
                            <toolset-intel:platform>win:<user-interface>gui
                            <toolset>msvc:<user-interface>gui ;
 #                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP

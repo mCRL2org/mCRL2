@@ -125,12 +125,14 @@ rule install-libraries ( names * : requirements * ) {
       }
 
       install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
-      install install-libraries : $(names) : <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+      install install-libraries : $(names) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+      install install-libraries : $(names) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
 
       alias install : install-libraries install-headers ;
     }
     else {
-      install install : $(names) : <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+      install install : $(names) : <link>shared <install-dependencies>on <target-os>windows:<install-type>SHARED_LIB $(requirements) ;
+      install install : $(names) : <link>static <install-dependencies>on <target-os>windows:<install-type>STATIC_LIB $(requirements) ;
     }
   }
   else {
@@ -353,8 +355,7 @@ rule platform-configuration ( properties * ) {
 
       requirements += <define>__darwin__
                       <cxxflags>$(cxxflags)
-                      <cflags>"-std=c99"
-                      <linkflags>"-undefined dynamic_lookup" ;
+                      <cflags>"-std=c99" ;
     }
   }
 

@@ -13,6 +13,4 @@ mcrl2-library aterm
        :
        : <include>../include/aterm
          <address-model>64:<define>AT_64BIT
-         <toolset>darwin:<cflags>"-fPIC -fno-common"
-         <toolset>gcc,<os>LINUX:<cflags>-fPIC
        ;

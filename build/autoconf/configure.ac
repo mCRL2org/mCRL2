@@ -40,6 +40,17 @@ case $host in
     HOST_OS="BSD"
     ;;
   *-*-darwin*)
+    case $host in
+      arm-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=arm"
+      ;;
+      i386-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=x86"
+      ;;
+      powerpc-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=power"
+      ;;
+    esac
     HOST_OS="MACOSX"
     R_CFLAGS="-Wno-unused -O3"
     R_CXXFLAGS="-Wno-unused -O3"

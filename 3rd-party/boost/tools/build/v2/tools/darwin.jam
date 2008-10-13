@@ -157,7 +157,7 @@ rule init ( version ? : command * : options * : requirement * )
         strip =
             [ common.get-invocation-command darwin
                 : strip : [ feature.get-values <striper> : $(options) ] : $(bin) : search-path ] ;
-        flags darwin.link .STRIP $(condition) : $(strip[1]) -S ;
+        flags darwin.link .STRIP $(condition) : $(strip[1]) ;
         if $(.debug-configuration)
         {
             ECHO notice: using strip :: $(condition) :: $(strip[1]) ;
@@ -288,7 +288,7 @@ local rule arch-addr-flags ( toolset variable
             : $(values) ;
     }
     flags $(toolset) $(variable)
-#        <architecture>/<address-model>$(address-model)
+        <architecture>/<address-model>$(address-model)
         <architecture>$(architecture)/<address-model>$(address-model)
         : $(values) ;
 }
@@ -354,10 +354,14 @@ rule link
     prepare-framework-path $(<) ;
 }
 
+# Note that using strip without any options was reported to result in broken
+# binaries, at least on OS X 10.5.5, see:
+#    http://svn.boost.org/trac/boost/ticket/2347
+# So we pass -S -x.
 actions link bind LIBRARIES
 {
     "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(FRAMEWORK_PATH) -framework$(_)$(FRAMEWORK:D=:S=) $(OPTIONS) $(USER_OPTIONS)
-    $(NEED_STRIP)"$(.STRIP)" $(NEED_STRIP)"$(<)"
+    $(NEED_STRIP)"$(.STRIP)" $(NEED_STRIP)-S $(NEED_STRIP)-x $(NEED_STRIP)"$(<)"
 }
 
 rule link.dll
