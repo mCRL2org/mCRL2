@@ -32,17 +32,17 @@ namespace mcrl2
     /**
      * \brief Number of characters within the character set.
      **/
-    const int CHARSETSIZE = 96;
+    const size_t CHARSETSIZE = 96;
 
     /**
      * \brief Pixel width per character.
      **/
-    const int CHARWIDTH = 16;
+    const size_t CHARWIDTH = 16;
 
     /**
      * \brief Pixel height per character.
      **/
-    const int CHARHEIGHT = 32;
+    const size_t CHARHEIGHT = 32;
 
     /**
      * \brief A font renderer for use with OpenGL

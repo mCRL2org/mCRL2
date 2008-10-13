@@ -21,7 +21,7 @@
 
 namespace mcrl2 {
   namespace utilities {
-    
+
     font_renderer::font_renderer()
     {
       // Create textures.
@@ -47,25 +47,25 @@ namespace mcrl2 {
         for (size_t h = 0; h < CHARHEIGHT; ++h)
         {
           for (size_t w = 0; w < CHARWIDTH; ++w)
-          {   
+          {
             red   = (GLubyte)image.GetRed(w, h);
-            green = (GLubyte)image.GetGreen(w, h);  
+            green = (GLubyte)image.GetGreen(w, h);
             blue  = (GLubyte)image.GetBlue(w, h);
-            
+
             tex_char[i][count] = (GLubyte)(255.0 - (red + green + blue) / 3.0);
 
             ++count;
-          } 
+          }
         }
-        
+
         // Build a MIP map for the texture. This gives faster renders and better
         // anti-aliasing effects. See http://en.wikipedia.org/wiki/Mipmap for an
         // introduction to the technique.
-        
+
         gluBuild2DMipmaps(
           GL_TEXTURE_2D,
           GL_ALPHA,
-          CHARWIDTH, 
+          CHARWIDTH,
           CHARHEIGHT,
           GL_ALPHA,
           GL_UNSIGNED_BYTE,
@@ -115,14 +115,14 @@ namespace mcrl2 {
 
       switch(align_vertical)
       {
-        case al_top: 
-        { 
-          ySBot = y; 
+        case al_top:
+        {
+          ySBot = y;
           break;
         }
         case al_bottom:
         {
-          ySBot = y - (CHARHEIGHT * scale); 
+          ySBot = y - (CHARHEIGHT * scale);
           break;
         }
 

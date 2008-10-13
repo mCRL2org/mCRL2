@@ -47,13 +47,13 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
     if $(part) {
       if [ MATCH "^-?L(.*)$" : $(part) ] {
         local search_path = [ MATCH "-?L([^ ]+)[ ]*$" : $(part) ] ;
-     
+
         library_search_paths += <search>$(search_path) ;
         library_link_paths += <link>shared:<dll-path>$(search_path) ;
       }
       else if [ MATCH "^-?l(.*)$" : $(part) ] {
         local library-name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
-     
+
         if ! $(library-name) in $(library-targets) {
           lib $(library-name)
               :
@@ -65,7 +65,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
 
           library-targets += $(library-name) ;
         }
-     
+
         library_names += $(library-name) ;
       }
       else if [ MATCH "^-?m(.*)$" : $(part) ] {
@@ -74,13 +74,13 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
       }
       else if [ MATCH "-?framework (.*)$" : $(part) ] { # OS X specific
         local framework_name = [ MATCH "-?framework (([^ ]+)[ ]*)" : $(part) ] ;
-     
+
         framework_names += <framework>$(framework_name) ;
       }
       else if [ modules.peek : NT ] { # MSVC specific
         if [ MATCH "^/LIBPATH:(.*)$" : $(part) ] {
           local search_path = [ MATCH "/LIBPATH:(.*)$" : $(part) ] ;
-      
+
           library_search_paths += <search>$(search_path) ;
         }
         else if ! [ MATCH "-.*" : $(part) ] {
@@ -90,7 +90,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
               :
               : $(framework_names) $(library_link_paths)
               ;
-         
+
           library_names += $(name)$(part) ;
         }
       }
@@ -101,7 +101,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
 }
 
 # OpenGL configuration
-local needs-glu = windows cygwin solaris ; 
+local needs-glu = windows cygwin solaris ;
 
 lib GLU : : <target-os>windows <name>glu32 ;
 lib GLU : : <target-os>cygwin <name>glu32 ;
@@ -140,7 +140,7 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
   }
 
   if $(use-local-boost) {
-    alias boost_$(name) : [ find-target $(BOOST_ROOT)/libs/$(name)/build//boost_$(name) ] : $(requirements) <threading>multi : : $(requirements) ;
+    alias boost_$(name) : [ find-target $(TOP)/3rd-party/boost/libs/$(name)/build//boost_$(name) ] : $(requirements) <threading>multi : : $(requirements) ;
   }
   else if $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) {
     if $(BOOST_INCLUDE_PATH) {
@@ -182,7 +182,7 @@ boost-library thread ;
 boost-library signals <link>static ;
 boost-library test ;
 boost-library system : ;
-boost-library md5 : <include>$(BOOST_ROOT)/boost/md5 : local ;  # not part of Boost 1.36
+boost-library md5 : <include>$(TOP)/3rd-party/boost/boost/md5 : local ;  # not part of Boost 1.36
 
 if $(DL) {
   lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
@@ -252,9 +252,9 @@ if $(WX_CPPFLAGS) {
   local wx-requirements = [ requirements-from-string $(WX_CPPFLAGS) ]
                            <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
                            <toolset-intel:platform>win:<user-interface>gui
-                           <toolset>msvc:<user-interface>gui
-                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
-                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
+                           <toolset>msvc:<user-interface>gui ;
+#                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
+#                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
 
   libraries-from-string wx_base : $(WX_BASE_LDFLAGS) : : : $(wx-requirements) ;
 
