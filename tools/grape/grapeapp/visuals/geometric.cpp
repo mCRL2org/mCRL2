@@ -49,23 +49,29 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
     float s = (py-ey)/(px-ex);
 
     if (px != ex) {
-      s = (py-ey)/(px-ex);
       if (px > py) {
         npx = w*sqrt(1/(1+pow(s*w/h,2)));
       } else {
         npx = -w*sqrt(1/(1+pow(s*w/h,2)));
       }
      npy = s*npx;
-
     } else {
-     npx = 0;
-     if (py > ex) {
-       npy = h;
-     } else {
-       npy = -h;
-     }
-   }
-    coordinate coord = {npx+ex, npy+ey};
+      npx = 0;
+      if (py > ex) {
+        npy = h;
+      } else {
+        npy = -h;
+      }
+    }
+
+    coordinate coord;
+    if (px > ex) {
+      coord.m_x = ex+npx;
+      coord.m_y = ey+npy;
+    } else {
+      coord.m_x = ex-npx;
+      coord.m_y = ey-npy;
+    }
     return coord;
   }
   else // Cast failed
@@ -672,8 +678,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   }
 
   // calculate rotation of arrow
-  float angle_arrow = atan2((pre_pnt.m_x - pnt.m_x), (pre_pnt.m_y - pnt.m_y));
-//  angle = atan2((p_control.m_x - pnt.m_x), (p_control.m_y - pnt.m_y));
+  float angle_arrow = atan2((pre_pnt.m_x-pnt.m_x), (pre_pnt.m_y-pnt.m_y));
 
   // draw arrow head based on calculated angle
   float one_side_x = pnt.m_x + 0.03 * sin( angle_arrow - M_PI_4 );
@@ -688,15 +693,11 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
-//  draw_line(p_control, p_control_left, true, g_color_blue);
-//  draw_line(p_control, p_control_right, true, g_color_blue);
-
   // draw text
   // calculate midpoint
   coordinate midpoint;
   midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
-
 
   // render text based on the calculated angle
   if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
