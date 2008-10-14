@@ -9,6 +9,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
 
 

@@ -1,5 +1,6 @@
 #include bool.spec
 #include pos.spec
+#include nat.spec
 #include int.spec
 
 sort Real <"real_">;

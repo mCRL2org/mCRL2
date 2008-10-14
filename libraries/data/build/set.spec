@@ -20,10 +20,10 @@ var d : S;
 eqn ==(@set(f),@set(g)) = ==(f,g); 
     {} = @set(lambda(x:S, false));
     in(d,@set(f)) = f(d);
-    <=(@set(f),@set(g)) = forall(x:S, =>(f(x),g(x)));
+    <=(@set(f),@set(g)) = forall(x:S, <=(f(x),g(x)));
     <(s,t) = &&(<=(s,t), !=(s,t));
     +(@set(f),@set(g)) = @set(lambda(x:S, ||(f(x), g(x))));
-    -(@set(f),@set(g)) = *(s, -(t));
+    -(s,t) = *(s, -(t));
     *(@set(f),@set(g)) = @set(lambda(x:S, &&(f(x), g(x))));
     -(@set(f)) = @set(lambda(x:S, !(f(x))));
 
