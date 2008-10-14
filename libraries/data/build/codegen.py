@@ -38,6 +38,8 @@ import Parsing
 #
 # Global variables to collect needed information during parsing.
 #
+verbose = False       # Switch on debug output?
+debug = False         # Switch on verbose output? 
 sorts_cache = []
 functions_cache = []
 functions_table = {}  # Maps ids to function names
@@ -201,7 +203,6 @@ def get_projection_arguments(id, label, sortexpr):
 def remove_duplicates(list):
     new_list = []
     for l in list:
-        print l
         if l not in new_list:
             new_list.append(l)
     return new_list
@@ -248,14 +249,14 @@ def generate_projection_functions(projection_arguments):
     return code
 
 def lookup_identifier(functions, data_expression, arity):
-  print "look up identifier %s with arity %d in %s" % (data_expression.string, arity, functions)
+  if verbose:
+    print "look up identifier %s with arity %d in %s" % (data_expression.string, arity, functions)
   if data_expression.string == "true":
     return "true_"
   elif data_expression.string == "false":
     return "false_"
   else:
     for f in functions:
-      print "id: %s, label: %s, sort: %s, arity: %d" % (f[0].string, f[1].label, f[2].string, f[2].arity)
       # The or arity == 0 is to support use of functions without argument
       if f[0].string == data_expression.string and (f[2].arity == arity or arity == 0):
         return f[1].label
@@ -278,7 +279,8 @@ def generate_variables_code(sorts, variable_declarations, variables):
     return variable_code
 
 def generate_data_expression_code(sorts, functions, variable_declarations, data_expression, arity = 0):
-    print "generate code for data expression: %s" % data_expression
+    if verbose:
+      print "generate code for data expression: %s" % data_expression
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
@@ -308,7 +310,8 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
         return id
 
 def generate_sorts_code(sorts_ctx, sorts):
-  print "generate code for sorts %s" % (sorts)
+  if verbose:
+    print "generate code for sorts %s" % (sorts)
   code = ""
   for i in sorts:
     if code <> "":
@@ -317,7 +320,8 @@ def generate_sorts_code(sorts_ctx, sorts):
   return code
 
 def generate_sort_code(sorts, sort):
-  print "generate code for sort %s" % (sort)
+  if verbose:
+    print "generate code for sort %s" % (sort)
   sort_expression = sort
   if sort_expression[0] == "sortarrow":
     domain_code = generate_sort_code(sorts, sort_expression[1])
@@ -337,11 +341,9 @@ def generate_sort_code(sorts, sort):
     return "%s(%s)" % (get_label(sorts, sort_expression[1]), param_code)
   else:
     l = get_label(sorts, sort_expression[0])
-    print "sort label: %s" % l
     if l <> "":
       return "%s()" % (l)
     else:
-      print "Label for sort %s not found" % (sort_expression[0].string)
       return sort_expression[0].string.lower()
 
 def lookup_sort(variable_declarations, var):
@@ -349,17 +351,17 @@ def lookup_sort(variable_declarations, var):
       s = var.string
     except:
       s = var
-    print "look up sort for variable %s in %s" % (s, variable_declarations)
+    if verbose:
+      print "look up sort for variable %s in %s" % (s, variable_declarations)
     for v in variable_declarations:
       if v[0].string == s:
-        print "result: %s" % v[1].string
         return v[1]
     
 
 def get_label(sorts, sort):
-    print "get label for %s in %s" % (sort.string, sorts)
+    if verbose:
+      print "get label for %s in %s" % (sort.string, sorts)
     for s in sorts:
-      print "sort: %s" % (s[0].string)
       if len(s) == 2 and s[0].string == sort.string:
           return s[1].label
       elif len(s) == 3 and s[0].string == sort.string:
@@ -367,7 +369,8 @@ def get_label(sorts, sort):
     return ""
 
 def generate_equation_code(sorts, functions, variable_declarations, equation):
-    print "generate_equation_code"
+    if verbose:
+      print "generate_equation_code"
     variable_code = generate_variables_code(sorts, variable_declarations, equation[0])
     condition_code = generate_data_expression_code(sorts, functions, variable_declarations, equation[1])
     lhs_code = generate_data_expression_code(sorts, functions, variable_declarations, equation[2])
@@ -375,7 +378,8 @@ def generate_equation_code(sorts, functions, variable_declarations, equation):
     return "data_equation(%s, %s, %s, %s)" % (variable_code, condition_code, lhs_code, rhs_code)
 
 def get_sort_parameters_from_sort_expression(sorts, sortexpr):
-    print "get sort parameters from sort expression %s" % sortexpr
+    if verbose:
+      print "get sort parameters from sort expression %s" % sortexpr
     if sortexpr[0] == "sortarrow":
       params = set()
       params |= get_sort_parameters_from_sort_expression(sorts, sortexpr[1])
@@ -399,7 +403,8 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
       return set()
 
 def get_sort_parameters_from_data_expression(sorts, functions, dataexpr):
-    print "data expression: %s" % dataexpr
+    if verbose:
+      print "data expression: %s" % dataexpr
     if dataexpr[0] == "application":
       params = set()
       params |= get_sort_parameters_from_data_expression(sorts, functions, dataexpr[1].expr)
@@ -413,7 +418,6 @@ def get_sort_parameters_from_data_expression(sorts, functions, dataexpr):
     elif dataexpr[0] == "dataexprs":
       params = set()
       for i in dataexpr[1]:
-        print get_sort_parameters_from_data_expression(sorts, functions, i)
         params |= get_sort_parameters_from_data_expression(sorts, functions, i)
       return params
     else:
@@ -429,7 +433,8 @@ def get_sort_parameters_from_variables(sorts, variable_decls, variables):
     return params
 
 def get_sort_parameters_from_equations(sorts, functions, variable_decls, equations):
-    print "get sort parameters from equations"
+    if verbose:
+      print "get sort parameters from equations"
     sort_parameters = set()
     for eqn in equations:
       sort_parameters |= get_sort_parameters_from_variables(sorts, variable_decls, eqn[0])
@@ -448,7 +453,8 @@ def generate_sort_parameters_code(sorts, functions, variable_declarations, equat
     return code
 
 def generate_equations_code(sorts, functions, variable_declarations, equations):
-    print "generate equations code"
+    if verbose:
+      print "generate equations code"
     argument = generate_sort_parameters_code(sorts, functions, variable_declarations, equations)
     sort = sorts[0]
     sortstring = sort[0].string
@@ -538,7 +544,8 @@ def generate_functionspec_code(sorts, functionspec):
 # generate_function_constructors
 # -------------------------------------------------------#
 def generate_function_constructors(sorts, id, label, sortexpr):
-    print "generate constructors for function %s, with label %s and sort %s" % (id.string, label.label, sortexpr.string)
+    if verbose:
+      print "generate constructors for function %s, with label %s and sort %s" % (id.string, label.label, sortexpr.string)
     formalsortparameters = ""
     actualsortparameters = ""
     sort_params = get_sort_parameters_from_sort_expression(sorts, sortexpr.expr)
@@ -565,20 +572,15 @@ def generate_function_constructors(sorts, id, label, sortexpr):
     formalparameters = ""
     actualparameters = ""
     assertions = ""
-# Fix assertions   
     sort = sortexpr.expr
     if sort[0] == "sortarrow":
-      print "orig domain: %s" % sort[1]
       domain = sort[1][1]
-      print "domain: %s" % domain
       for a in domain:
-        print "domain[%d]: %s" % (index, domain)
         if index <> 0:
           formalparameters += ", "
           actualparameters += ", "
         formalparameters += "const data_expression& arg%s" % index
         actualparameters += "arg%s" % index
-        print "sort: %s" % a
         if a[0] == "param_expr":
           assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[1]), index)
         elif a[0].string in sort_params:
@@ -602,23 +604,6 @@ def generate_function_constructors(sorts, id, label, sortexpr):
         'fullname'  : id.string,
         'name'      : label.label
       }
-
-#    for a in sort_params:
-#        a = a.split('(')[0].lower() # Cleaning for parameterised sorts
-#        if index <> 0:
-#          formalparameters += ", "
-#          actualparameters += ", "
-#        formalparameters += "const data_expression& arg%s" % index
-#        actualparameters += "arg%s" % index
-#        if a in actualsortparameters:
-#          assertions += "assert(arg%s.sort() == %s);\n        " % (index, a)
-#        else:
-#          assertions += "assert(is_%s(arg%s.sort()));\n        " % (a,index)
-#        index += 1
-
-    
-
-
     return code
 
 
@@ -677,7 +662,6 @@ class TokenID(Parsing.Token):
     def __init__(self, parser, s):
         Parsing.Token.__init__(self, parser)
         self.string = s
-        print "Parsed identifier %s" % s
 
 #===============================================================================
 # Nonterminals, with associated productions.  In traditional BNF, the following
@@ -750,7 +734,8 @@ class Result(Parsing.Nonterm):
 
         # Debugging
         self.string = result.string
-        print "Parsed %s" % (self.string)
+        if verbose:
+          print "Parsed %s" % (self.string)
 
 class IncludesSpec(Parsing.Nonterm):
     "%nonterm"
@@ -768,7 +753,8 @@ class IncludesSpec(Parsing.Nonterm):
 
         # Debugging
         self.string = includes.string + "\n\n" + spec.string
-        print "Parsed specification with include(s):\n%s" % (self.string)
+        if verbose:
+          print "Parsed specification with include(s):\n%s" % (self.string)
 
 class Includes(Parsing.Nonterm):
     "%nonterm"
@@ -778,7 +764,8 @@ class Includes(Parsing.Nonterm):
 
         # Debugging
         self.string = include.string
-        print "Parsed include: %s" % (self.string)
+        if verbose:
+          print "Parsed include: %s" % (self.string)
 
     def reduceIncludes(self, includes, include):
         "%reduce Includes Include"
@@ -786,7 +773,8 @@ class Includes(Parsing.Nonterm):
 
         # Debugging
         self.string = includes.string + include.string
-        print "Parsed includes: %s" % (self.string)
+        if verbose:
+          print "Parsed includes: %s" % (self.string)
 
 class Include(Parsing.Nonterm):
     "%nonterm"
@@ -796,7 +784,8 @@ class Include(Parsing.Nonterm):
 
         # Debugging
         self.string = "#include %s" % (id.string)
-        print "Parsed include: %s" % (self.string)
+        if verbose:
+          print "Parsed include: %s" % (self.string)
 
 class Spec(Parsing.Nonterm):
     "%nonterm"
@@ -814,7 +803,8 @@ class Spec(Parsing.Nonterm):
 
         # Debugging
         self.string = sortspec.string + '\n' + functionspec.string + '\n' + varspec.string + '\n' + eqnspec.string
-        print "Parsed specification:\n%s\n" % self.string
+        if verbose:
+          print "Parsed specification:\n%s\n" % self.string
 
 class SortSpec(Parsing.Nonterm):
     "%nonterm"
@@ -824,7 +814,8 @@ class SortSpec(Parsing.Nonterm):
         
         # Debugging
         self.string = "sort %s;" % (sortdecls.string)
-        print "Parsed sort specification: %s" % (self.string)
+        if verbose:
+          print "Parsed sort specification: %s" % (self.string)
 
 class FunctionSpec(Parsing.Nonterm):
     "%nonterm"
@@ -836,7 +827,8 @@ class FunctionSpec(Parsing.Nonterm):
 
         # Debugging
         self.string = mapspec.string
-        print "Parsed function specification : %s" % (self.string)
+        if verbose:
+          print "Parsed function specification : %s" % (self.string)
 
     def reduceConsMapSpec(self, consspec, mapspec):
         "%reduce ConsSpec MapSpec"
@@ -845,7 +837,8 @@ class FunctionSpec(Parsing.Nonterm):
 
         # Debugging
         self.string = consspec.string + '\n' + mapspec.string
-        print "Parsed function specification : %s" % (self.string)
+        if verbose:
+          print "Parsed function specification : %s" % (self.string)
 
 class ConsSpec(Parsing.Nonterm):
     "%nonterm"
@@ -856,7 +849,8 @@ class ConsSpec(Parsing.Nonterm):
         
         # Debugging
         self.string = "cons %s" % (opdecls.string)
-        print "Parsed constructor specification: %s" % (self.string)
+        if verbose:
+          print "Parsed constructor specification: %s" % (self.string)
 
 class MapSpec(Parsing.Nonterm):
     "%nonterm"
@@ -867,7 +861,8 @@ class MapSpec(Parsing.Nonterm):
 
         # Debugging
         self.string = "map %s" % (opdecls.string)
-        print "Parsed mapping specification %s" % (self.string)
+        if verbose:
+          print "Parsed mapping specification %s" % (self.string)
 
 class VarSpec(Parsing.Nonterm):
     "%nonterm"
@@ -877,7 +872,8 @@ class VarSpec(Parsing.Nonterm):
 
         # Debugging        
         self.string = "var %s" % (vardecls.string)
-        print "Parsed variable specification %s" % (self.string)
+        if verbose:
+          print "Parsed variable specification %s" % (self.string)
 
 class EqnSpec(Parsing.Nonterm):
     "%nonterm"
@@ -887,7 +883,8 @@ class EqnSpec(Parsing.Nonterm):
 
         # Debugging
         self.string = "eqn %s" % (eqndecls.string)
-        print "Parsed equation specification %s" % (self.string)
+        if verbose:
+          print "Parsed equation specification %s" % (self.string)
 
 class SortDecls(Parsing.Nonterm):
     "%nonterm"
@@ -896,14 +893,16 @@ class SortDecls(Parsing.Nonterm):
         self.sorts = sortdecl.sorts
         
         self.string = sortdecl.string + ";"
-        print "Parsed sort declarations: %s" % (self.string)
+        if verbose:
+          print "Parsed sort declarations: %s" % (self.string)
 
     def reduceSortDecls(self, sortdecls, sortdecl, semicolon):
         "%reduce SortDecls SortDecl semicolon"
         self.sorts = sortdecls.sorts + sortdecl.sorts
 
         self.string = "%s\n%s;" % (sortdecls.string, sortdecl.string)
-        print "Parsed sort declarations: %s" % (self.string)
+        if verbose:
+          print "Parsed sort declarations: %s" % (self.string)
 
 class SortDecl(Parsing.Nonterm):
     "%nonterm"
@@ -912,14 +911,16 @@ class SortDecl(Parsing.Nonterm):
         self.sorts = [[sortexpr, label]]
 
         self.string = "%s %s" % (sortexpr.string, label.label)
-        print "Parsed single sort declaration %s" % (self.string)
+        if verbose:
+          print "Parsed single sort declaration %s" % (self.string)
 
     def reduceSortDeclParam(self, container, lbrack, param, rbrack, label):
         "%reduce id lbrack SortParam rbrack Label"
         self.sorts = [[container, param, label]]
 
         self.string = "%s(%s) %s" % (container.string, param.string, label.string)
-        print "Parsed parameterised sort declaration %s" % (self.string)
+        if verbose:
+          print "Parsed parameterised sort declaration %s" % (self.string)
 
 class VarDecls(Parsing.Nonterm):
     "%nonterm"
@@ -929,7 +930,8 @@ class VarDecls(Parsing.Nonterm):
 
         # Debugging
         self.string = vardecl.string
-        print "Parsed single variable declaration: %s" % (self.string)
+        if verbose:
+          print "Parsed single variable declaration: %s" % (self.string)
 
     def reduceVarDecls(self, vardecls, vardecl, semicolon):
         "%reduce VarDecls VarDecl semicolon"
@@ -937,7 +939,8 @@ class VarDecls(Parsing.Nonterm):
 
         # Debugging
         self.string = vardecls.string + ';\n' + vardecl.string + ";"
-        print "Parsed variable declarations: %s" % (self.string)
+        if verbose:
+          print "Parsed variable declarations: %s" % (self.string)
 
 class VarDecl(Parsing.Nonterm):
     "%nonterm"
@@ -948,7 +951,8 @@ class VarDecl(Parsing.Nonterm):
 
         # Debugging
         self.string = id.string + ":" + sortexpr.string
-        print "Parsed single variable declaration: %s" % (self.string)
+        if verbose:
+          print "Parsed single variable declaration: %s" % (self.string)
 
 class OpDecls(Parsing.Nonterm):
     "%nonterm"
@@ -959,7 +963,8 @@ class OpDecls(Parsing.Nonterm):
 
         # Debugging
         self.string = opdecl.string
-        print "Parsed single function declaration: %s" % (self.string)
+        if verbose:
+          print "Parsed single function declaration: %s" % (self.string)
 
     def reduceOpDecls(self, opdecls, opdecl, semicolon):
         "%reduce OpDecls OpDecl semicolon"
@@ -968,7 +973,8 @@ class OpDecls(Parsing.Nonterm):
 
         # Debugging
         self.string = opdecls.string + ';\n' + opdecl.string + ";"
-        print "Parsed function declarations: %s" % (self.string)    
+        if verbose:
+          print "Parsed function declarations: %s" % (self.string)    
 
 class OpDecl(Parsing.Nonterm):
     "%nonterm"
@@ -980,7 +986,8 @@ class OpDecl(Parsing.Nonterm):
         
         # Debugging
         self.string = id.string + label.string + ":" + sortexpr.string
-        print "Parsed single function declaration: %s" % (self.string)
+        if verbose:
+          print "Parsed single function declaration: %s" % (self.string)
 
 class EqnDecls(Parsing.Nonterm):
     "%nonterm"
@@ -989,14 +996,16 @@ class EqnDecls(Parsing.Nonterm):
         self.equations = eqndecl.equations
 
         self.string = eqndecl.string
-        print "Parsed single equation declaration: %s" % (self.string)
+        if verbose:
+          print "Parsed single equation declaration: %s" % (self.string)
 
     def reduceDataEqns(self, eqndecls, eqndecl, semicolon):
         "%reduce EqnDecls EqnDecl semicolon"
         self.equations = eqndecls.equations + eqndecl.equations
 
         self.string = eqndecls.string + "\n" + eqndecl.string
-        print "Parsed equation declarations: %s" % (self.string)
+        if verbose:
+          print "Parsed equation declarations: %s" % (self.string)
 
 class EqnDecl(Parsing.Nonterm):
     "%nonterm"
@@ -1009,7 +1018,8 @@ class EqnDecl(Parsing.Nonterm):
 
         # Debugging
         self.string = lhs.string + " = " + rhs.string
-        print "Parsed single data equation: %s" % (self.string)
+        if verbose:
+          print "Parsed single data equation: %s" % (self.string)
 
     def reduceDataEqnCondition(self, condition, arrow, lhs, equals, rhs):
         "%reduce DataExpr arrow DataExpr equals DataExpr"
@@ -1018,75 +1028,75 @@ class EqnDecl(Parsing.Nonterm):
 
         # Debugging
         self.string = condition.string + " -> " + lhs.string + " = " + rhs.string
-        print "Parsed single data equation: %s" % (self.string)
+        if verbose:
+          print "Parsed single data equation: %s" % (self.string)
 
 class DataExpr(Parsing.Nonterm):
     "%nonterm"
     def reduceDataExprPrimary(self, dataexprprimary):
         "%reduce DataExprPrimary"
         self.expr = dataexprprimary.expr
-        print self.expr
 
         self.variables = dataexprprimary.variables
         self.abstraction = False
 
         # Debugging
         self.string = dataexprprimary.string
-        print "Parsed simple data expression: %s" % (self.string)
+        if verbose:
+          print "Parsed simple data expression: %s" % (self.string)
 
     def reduceApplication(self, head, lbrack, arguments, rbrack):
         "%reduce DataExpr lbrack DataExprs rbrack"
         self.expr = ["application", head, arguments]
-        print self.expr
 
         self.variables = head.variables | arguments.variables
 
         # Debugging
         self.string = head.string +"(" + arguments.string + ")"
-        print "Parsed function application: %s" % (self.string)
+        if verbose:
+          print "Parsed function application: %s" % (self.string)
 
     def reduceLambda(self, lmb, lbrack, vardecl, comma, expr, rbrack):
         "%reduce lambda lbrack VarDecl comma DataExpr rbrack"
         self.expr = ["lambda", vardecl, expr]
-        print self.expr
 
         self.variables = expr.variables
         self.variables = self.variables.difference(set(vardecl.name))
 
         # Debugging
         self.string = "lambda(%s, %s)" % (vardecl.string, expr.string)
-        print "Parsed lambda expression: %s" % (self.string)
+        if verbose:
+          print "Parsed lambda expression: %s" % (self.string)
 
     def reduceForall(self, forall, lbrack, vardecl, comma, expr, rbrack):
         "%reduce forall lbrack VarDecl comma DataExpr rbrack"
         self.expr = ["forall", vardecl, expr]
-        print self.expr
 
         self.variables = expr.variables
         self.variables = self.variables.difference(set(vardecl.name))
 
         # Debugging
         self.string = "forall(%s, %s)" % (vardecl.string, expr.string)
-        print "Parsed forall expression: %s" % (self.string)
+        if verbose:
+          print "Parsed forall expression: %s" % (self.string)
 
     def reduceExists(self, exists, lbrack, vardecl, comma, expr, rbrack):
         "%reduce exists lbrack VarDecl comma DataExpr rbrack"
         self.expr = ["exists", vardecl, expr]
-        print self.expr
 
         self.variables = expr.variables
         self.variables = self.variables.difference(set(vardecl.name))
 
         # Debugging
         self.string = "exists(%s, %s)" % (vardecl.string, expr.string)
-        print "Parsed exists expression: %s" % (self.string)
+        if verbose:
+          print "Parsed exists expression: %s" % (self.string)
 
 class DataExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceID(self, id):
         "%reduce id"
         self.expr = [id]
-        print self.expr
 
         if id.string in functions_table:
             self.variables = set()
@@ -1095,33 +1105,33 @@ class DataExprPrimary(Parsing.Nonterm):
 
         # Debugging
         self.string = id.string
-        print "Parsed simple data expression: %s" % (self.string)
+        if verbose:
+          print "Parsed simple data expression: %s" % (self.string)
 
     def reduceBracketedDataExpr(self, lbrack, dataexpr, rbrack):
         "%reduce lbrack DataExpr rbrack"
         self.expr = dataexpr.expr
-        print self.expr
 
         self.variables = dataexpr.variables
 
         # Debugging
         self.string = "(" + dataexpr.string + ")"
-        print "Parsed bracketed data expression: %s" % (self.string)
+        if verbose:
+          print "Parsed bracketed data expression: %s" % (self.string)
 
 class DataExprs(Parsing.Nonterm):
     "%nonterm"
     def reduceDataExpr(self, dataexpr):
         "%reduce DataExpr"
-        print dataexpr.expr
         self.expr = ["dataexprs", [dataexpr.expr]]
-        print self.expr
 
         self.variables = dataexpr.variables
         self.count = 1
 
         # Debugging
         self.string = dataexpr.string
-        print "Parsed data expression: %s" % (self.string)
+        if verbose:
+          print "Parsed data expression: %s" % (self.string)
 
     def reduceDataExprs(self, dataexprs, comma, dataexpr):
         "%reduce DataExprs comma DataExpr"
@@ -1134,7 +1144,8 @@ class DataExprs(Parsing.Nonterm):
 
         # Debugging
         self.string = dataexprs.string + ", " + dataexpr.string
-        print "Parsed data expressions: %s" % (self.string)
+        if verbose:
+          print "Parsed data expressions: %s" % (self.string)
 
 class SortExpr(Parsing.Nonterm):
     "%nonterm"
@@ -1147,8 +1158,8 @@ class SortExpr(Parsing.Nonterm):
         
         # Debugging
         self.string = sortexpr.string
-        print "Parsed SortExprPrimary: %s" % (sortexpr.string)
-        print "recogniserstring: %s" % (self.recogniserstring)
+        if verbose:
+          print "Parsed SortExprPrimary: %s" % (sortexpr.string)
 
     def reduceSortExprArrowLabelled(self, domain, arrow, sortexpr):
         "%reduce LabelledDomain arrow SortExpr"
@@ -1159,8 +1170,8 @@ class SortExpr(Parsing.Nonterm):
 
         # Debugging
         self.string = "%s -> %s" % (domain.string, sortexpr.string)
-        print "Parsed SortExprArrowLabelled: %s" % (self.string)
-        print "recogniserstring: %s" % (self.recogniserstring)
+        if verbose:
+          print "Parsed SortExprArrowLabelled: %s" % (self.string)
 
     def reduceSortExprArrow(self, domain, arrow, sortexpr):
         "%reduce Domain arrow SortExpr"
@@ -1171,8 +1182,8 @@ class SortExpr(Parsing.Nonterm):
 
         # Debugging
         self.string = "%s -> %s" % (domain.string, sortexpr.string)
-        print "Parsed SortExprArrow: %s" % (self.string)
-        print "recogniserstring: %s" % (self.recogniserstring)
+        if verbose:
+          print "Parsed SortExprArrow: %s" % (self.string)
 
 class SortParam(Parsing.Nonterm):
     "%nonterm"
@@ -1181,7 +1192,8 @@ class SortParam(Parsing.Nonterm):
         self.expr = ["param", [id]]
 
         self.string = id.string
-        print "Parsed SortParam: %s" % (self.string)
+        if verbose:
+          print "Parsed SortParam: %s" % (self.string)
 
 class Domain(Parsing.Nonterm):
     "%nonterm"
@@ -1194,7 +1206,8 @@ class Domain(Parsing.Nonterm):
 
         # Debugging
         self.string = expr.string
-        print "Parsed SortExprPrimary: %s" % (self.string)
+        if verbose:
+          print "Parsed SortExprPrimary: %s" % (self.string)
 
     def reduceHashedDomain(self, Domain, hash, SortExprPrimary):
         "%reduce Domain hash SortExprPrimary"
@@ -1207,7 +1220,8 @@ class Domain(Parsing.Nonterm):
 
         # Debugging
         self.string = Domain.string + " # " + SortExprPrimary.string
-        print "Parsed SortExprHashedDomain: %s" % (self.string)
+        if verbose:
+          print "Parsed SortExprHashedDomain: %s" % (self.string)
 
 class LabelledDomain(Parsing.Nonterm):
     "%nonterm"
@@ -1220,7 +1234,8 @@ class LabelledDomain(Parsing.Nonterm):
 
         # Debugging
         self.string = expr.string + label.string
-        print "Parsed SortExprPrimary: %s" % (self.string)
+        if verbose:
+          print "Parsed SortExprPrimary: %s" % (self.string)
 
     def reduceHashedLabelledDomain(self, Domain, hash, SortExprPrimary, label):
         "%reduce LabelledDomain hash SortExprPrimary Label"
@@ -1233,7 +1248,8 @@ class LabelledDomain(Parsing.Nonterm):
 
         # Debugging
         self.string = Domain.string + " # " + SortExprPrimary.string + label.label
-        print "Parsed SortExprHashedDomain: %s" % (self.string)
+        if verbose:
+          print "Parsed SortExprHashedDomain: %s" % (self.string)
 
 class SortExprPrimary(Parsing.Nonterm):
     "%nonterm"
@@ -1246,7 +1262,8 @@ class SortExprPrimary(Parsing.Nonterm):
 
         # Debugging
         self.string = expr.string
-        print "Parsed sort identifier: %s" % (self.string)
+        if verbose:
+          print "Parsed sort identifier: %s" % (self.string)
 
     def reduceParen(self, lbrack, SortExpr, rbrack):
         "%reduce lbrack SortExpr rbrack"
@@ -1257,7 +1274,8 @@ class SortExprPrimary(Parsing.Nonterm):
 
         # Debugging
         self.string = "(" + SortExpr.string + ")"
-        print "Parsed bracketed expression: %s" % (self.string)
+        if verbose:
+          print "Parsed bracketed expression: %s" % (self.string)
 
     def reduceSortExprParam(self, container, lbrack, param, rbrack):
         "%reduce id lbrack SortParam rbrack"
@@ -1268,7 +1286,8 @@ class SortExprPrimary(Parsing.Nonterm):
 
         # Debugging
         self.string = "%s(%s)" % (container.string, param.string)
-        print "Parsed SortExprParam: %s" % (self.string)
+        if verbose:
+          print "Parsed SortExprParam: %s" % (self.string)
 
 class Label(Parsing.Nonterm):
     "%nonterm"
@@ -1278,7 +1297,8 @@ class Label(Parsing.Nonterm):
 
         # Debugging
         self.string = "< %s >" % (self.label)
-        print "Parsed label: %s" % self.string
+        if verbose:
+          print "Parsed label: %s" % self.string
 
 # -------------------------------------------------------#
 # parser
@@ -1331,7 +1351,8 @@ class Parser(Parsing.Lr):
 
         # Split the input at whitespace, producing the tokens
         p=re.compile(r'\s+')
-        print p.split(input)
+        if verbose:
+          print "split input: %s" % (p.split(input))
 
         for word in p.split(input):
             if word != '':
@@ -1434,6 +1455,8 @@ def parse_spec(infilename):
 # -------------------------------------------------------#
 def main():
     global outputcode
+    global verbose
+    global debug
     usage = "usage: %prog [options] infile outfile"
     option_parser = OptionParser(usage)
     option_parser.add_option("-v", "--verbose", action="store_true", help="give verbose output")
@@ -1441,9 +1464,11 @@ def main():
     (options, args) = option_parser.parse_args()
 
     if options.verbose:
-        pass
+        verbose = True
 
     if options.debug:
+        verbose = True
+        debug = True
         parser.verbose = True
 
     if len(args) > 0:
