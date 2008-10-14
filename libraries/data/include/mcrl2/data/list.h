@@ -7,7 +7,7 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/bool_.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
 
@@ -51,7 +51,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == nil();
+          return static_cast<const function_symbol&>(e).name() == "[]";
         }
         return false;
       }
@@ -70,7 +70,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == cons_();
+          return static_cast<const function_symbol&>(e).name() == "|>";
         }
         return false;
       }
@@ -110,7 +110,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == in();
+          return static_cast<const function_symbol&>(e).name() == "in";
         }
         return false;
       }
@@ -150,7 +150,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == count();
+          return static_cast<const function_symbol&>(e).name() == "cnt";
         }
         return false;
       }
@@ -189,7 +189,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == snoc();
+          return static_cast<const function_symbol&>(e).name() == "<|";
         }
         return false;
       }
@@ -229,7 +229,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == concat();
+          return static_cast<const function_symbol&>(e).name() == "++";
         }
         return false;
       }
@@ -269,7 +269,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == element_at();
+          return static_cast<const function_symbol&>(e).name() == ".";
         }
         return false;
       }
@@ -309,7 +309,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == head();
+          return static_cast<const function_symbol&>(e).name() == "head";
         }
         return false;
       }
@@ -348,7 +348,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == tail();
+          return static_cast<const function_symbol&>(e).name() == "tail";
         }
         return false;
       }
@@ -387,7 +387,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == rhead();
+          return static_cast<const function_symbol&>(e).name() == "rhead";
         }
         return false;
       }
@@ -426,7 +426,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == rtail();
+          return static_cast<const function_symbol&>(e).name() == "rtail";
         }
         return false;
       }

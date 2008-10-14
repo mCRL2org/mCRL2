@@ -7,9 +7,9 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/bool_.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
-#include "mcrl2/data/int_.h"
+#include "mcrl2/data/int.h"
 
 
 namespace mcrl2 {

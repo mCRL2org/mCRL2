@@ -502,11 +502,11 @@ def generate_result_code(spec, includescode):
 # generate_includes_code
 #
 def generate_includes_code(includes, sorts):
+    if verbose:
+      print "generate code for includes: %s" % (includes)
     code = ""
     for i in includes:
-      for s in sorts_cache:
-        if s[0].string == includes_table[i].string:
-          code += "#include \"mcrl2/data/%s.h\"\n" % (s[1].label)
+      code += "#include \"mcrl2/data/%s.h\"\n" % (i.split(".")[0])
     return code
 
 #
