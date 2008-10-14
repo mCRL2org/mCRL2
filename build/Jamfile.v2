@@ -112,8 +112,7 @@ lib GLU : : <target-os>solaris <name>GLU ;
 
 lib opengl   :
              : <name>GL
-               <link>shared
-               <target-os>solaris:<source>GLU/<link>shared
+               <target-os>solaris:<source>GLU
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 lib opengl   : GLU
              : <target-os>windows
