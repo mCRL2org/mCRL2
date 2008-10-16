@@ -358,7 +358,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
 
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
-    xFactor = (8 *(xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
+    xFactor = (8 *(xVirtual - xState)) / (3 * (cosGamma + cosDelta));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
     
@@ -372,7 +372,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
   }
   else
   {
-    yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
+    yFactor = (8 * (yVirtual - yState)) / (3 * (sinGamma + sinDelta));
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
     

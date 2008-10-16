@@ -3,6 +3,7 @@
 #include <wx/menu.h>
 #include "export_svg.h"
 #include "export_xml.h"
+#include "export_latex.h"
 
 using namespace IDS;
 
@@ -116,7 +117,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   //TODO: Default file name, input file name
   
   wxString caption = wxT("Export layout as");
-  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml");
+  wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml|LaTeX TikZ drawing (*.tex)|*.tex");
   wxString defaultDir = wxEmptyString; // Empty string -> cwd
   wxString defaultFileName = wxEmptyString;
 
@@ -141,6 +142,10 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
           fileName.Append(wxT(".xml"));
           exporter = new ExporterXML(app->getGraph());
           break;
+        case 2: // TeX item
+          fileName.Append(wxT(".tex"));
+          exporter = new ExporterLatex(app->getGraph());
+          break;
       }
     }
     else
@@ -153,6 +158,10 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       else if (extension == wxT("xml"))
       {
         exporter = new ExporterXML(app->getGraph());
+      }
+      else if (extension == wxT("tex"))
+      {
+        exporter = new ExporterLatex(app->getGraph());
       }
       else 
       {

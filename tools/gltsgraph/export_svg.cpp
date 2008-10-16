@@ -151,7 +151,6 @@ bool ExporterSVG::export_to(wxString filename)
     return false;
   }
   
-  // TODO: Proper return
   return true;
 }
 

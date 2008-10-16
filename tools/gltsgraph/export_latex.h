@@ -4,51 +4,25 @@
 //
 /// \file ./export_latex.h
 
-#ifndef ltx_h
-#define ltx_h
+#ifndef LATEX_EXPORT_H
+#define LATEX_EXPORT_H
 
-#include <wx/string.h>
-#include <vector>
-#include <string>
+#include "exporter.h"
 
-using namespace std;
-
-typedef struct {
-	unsigned int num;
-	double x, y;
-	string lbl;
-} nodeLatex;
-
-typedef struct {
-	unsigned int numNode1, numNode2;
-	string lbl;
-} edgeLatex ;
-
-
-
-class ExportToLatex
+class ExporterLatex: public Exporter
 {
-public:
-	ExportToLatex(wxString _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height);
-	bool Generate();
-	
+  public:
+    ExporterLatex(Graph* g);
+    ~ExporterLatex() {};
+    bool export_to(wxString _filename);
 
-private:
-
-	string EscSpecChar(string);//To escape special characters
-	string str_replace(string to_replace, string replace_by, string replace_in);
-
-	wxString filename;
-	string LatexCode;
-
-	vector<nodeLatex> node;
-	vector<edgeLatex> edge;
-
-	int height; //height of the drawing area
-
-
+  private:
+    std::string tikz_code;
+    
+    void drawBezier(Transition* tr);
+    void drawSelfLoop(Transition* tr);
 };
 
 
 
-#endif //latex_h
+#endif //LATEX_EXPORT_H
