@@ -433,9 +433,37 @@ namespace mcrl2 {
 
       // Function symbol max
       inline
-      function_symbol max()
+      function_symbol max(const sort_expression& s0, const sort_expression& s1)
       {
-        static function_symbol max("max", function_sort(pos(), int_(), pos()));
+        assert((s0 == pos() && s1 == int_())||
+               (s0 == int_() && s1 == pos())||
+               (s0 == nat() && s1 == int_())||
+               (s0 == int_() && s1 == nat())||
+               (s0 == int_() && s1 == int_()))
+
+        sort_expression target_sort;
+        if(s0 == pos() && s1 == int_())
+        {
+          target_sort = pos()
+        }
+        if(s0 == int_() && s1 == pos())
+        {
+          target_sort = pos()
+        }
+        if(s0 == nat() && s1 == int_())
+        {
+          target_sort = nat()
+        }
+        if(s0 == int_() && s1 == nat())
+        {
+          target_sort = nat()
+        }
+        if(s0 == int_() && s1 == int_())
+        {
+          target_sort = int_()
+        }
+
+        static function_symbol max("max", function_sort(s0, s1, target_sort));
         return max;
       }
 
@@ -454,170 +482,8 @@ namespace mcrl2 {
       inline
       application max(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_pos(arg0.sort()));
-        assert(is_int_(arg1.sort()));
         
-        return application(max(),arg0, arg1);
-      }
-
-      // Recogniser for application of max
-      inline
-      bool is_max_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_max_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol max
-      inline
-      function_symbol max()
-      {
-        static function_symbol max("max", function_sort(int_(), pos(), pos()));
-        return max;
-      }
-
-      // Recogniser for max
-      inline
-      bool is_max_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "max";
-        }
-        return false;
-      }
-
-      // Application of max
-      inline
-      application max(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_int_(arg0.sort()));
-        assert(is_pos(arg1.sort()));
-        
-        return application(max(),arg0, arg1);
-      }
-
-      // Recogniser for application of max
-      inline
-      bool is_max_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_max_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol max
-      inline
-      function_symbol max()
-      {
-        static function_symbol max("max", function_sort(nat(), int_(), nat()));
-        return max;
-      }
-
-      // Recogniser for max
-      inline
-      bool is_max_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "max";
-        }
-        return false;
-      }
-
-      // Application of max
-      inline
-      application max(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_nat(arg0.sort()));
-        assert(is_int_(arg1.sort()));
-        
-        return application(max(),arg0, arg1);
-      }
-
-      // Recogniser for application of max
-      inline
-      bool is_max_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_max_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol max
-      inline
-      function_symbol max()
-      {
-        static function_symbol max("max", function_sort(int_(), nat(), nat()));
-        return max;
-      }
-
-      // Recogniser for max
-      inline
-      bool is_max_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "max";
-        }
-        return false;
-      }
-
-      // Application of max
-      inline
-      application max(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_int_(arg0.sort()));
-        assert(is_nat(arg1.sort()));
-        
-        return application(max(),arg0, arg1);
-      }
-
-      // Recogniser for application of max
-      inline
-      bool is_max_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_max_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol max
-      inline
-      function_symbol max()
-      {
-        static function_symbol max("max", function_sort(int_(), int_(), int_()));
-        return max;
-      }
-
-      // Recogniser for max
-      inline
-      bool is_max_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "max";
-        }
-        return false;
-      }
-
-      // Application of max
-      inline
-      application max(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_int_(arg0.sort()));
-        assert(is_int_(arg1.sort()));
-        
-        return application(max(),arg0, arg1);
+        return application(max(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of max
@@ -712,9 +578,14 @@ namespace mcrl2 {
 
       // Function symbol -
       inline
-      function_symbol negate()
+      function_symbol negate(const sort_expression& s0)
       {
-        static function_symbol negate("-", function_sort(pos(), int_()));
+        assert((s0 == pos())||
+               (s0 == nat())||
+               (s0 == int_()))
+
+        sort_expression target_sort(int_());
+        static function_symbol negate("-", function_sort(s0, target_sort));
         return negate;
       }
 
@@ -733,87 +604,8 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        assert(is_pos(arg0.sort()));
         
-        return application(negate(),arg0);
-      }
-
-      // Recogniser for application of -
-      inline
-      bool is_negate_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_negate_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol -
-      inline
-      function_symbol negate()
-      {
-        static function_symbol negate("-", function_sort(nat(), int_()));
-        return negate;
-      }
-
-      // Recogniser for -
-      inline
-      bool is_negate_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "-";
-        }
-        return false;
-      }
-
-      // Application of -
-      inline
-      application negate(const data_expression& arg0)
-      {
-        assert(is_nat(arg0.sort()));
-        
-        return application(negate(),arg0);
-      }
-
-      // Recogniser for application of -
-      inline
-      bool is_negate_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_negate_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol -
-      inline
-      function_symbol negate()
-      {
-        static function_symbol negate("-", function_sort(int_(), int_()));
-        return negate;
-      }
-
-      // Recogniser for -
-      inline
-      bool is_negate_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "-";
-        }
-        return false;
-      }
-
-      // Application of -
-      inline
-      application negate(const data_expression& arg0)
-      {
-        assert(is_int_(arg0.sort()));
-        
-        return application(negate(),arg0);
+        return application(negate(arg0.sort()),arg0);
       }
 
       // Recogniser for application of -
@@ -868,9 +660,13 @@ namespace mcrl2 {
 
       // Function symbol pred
       inline
-      function_symbol pred()
+      function_symbol pred(const sort_expression& s0)
       {
-        static function_symbol pred("pred", function_sort(nat(), int_()));
+        assert((s0 == nat())||
+               (s0 == int_()))
+
+        sort_expression target_sort(int_());
+        static function_symbol pred("pred", function_sort(s0, target_sort));
         return pred;
       }
 
@@ -889,48 +685,8 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        assert(is_nat(arg0.sort()));
         
-        return application(pred(),arg0);
-      }
-
-      // Recogniser for application of pred
-      inline
-      bool is_pred_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_pred_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol pred
-      inline
-      function_symbol pred()
-      {
-        static function_symbol pred("pred", function_sort(int_(), int_()));
-        return pred;
-      }
-
-      // Recogniser for pred
-      inline
-      bool is_pred_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "pred";
-        }
-        return false;
-      }
-
-      // Application of pred
-      inline
-      application pred(const data_expression& arg0)
-      {
-        assert(is_int_(arg0.sort()));
-        
-        return application(pred(),arg0);
+        return application(pred(arg0.sort()),arg0);
       }
 
       // Recogniser for application of pred
@@ -1026,9 +782,14 @@ namespace mcrl2 {
 
       // Function symbol -
       inline
-      function_symbol minus()
+      function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
-        static function_symbol minus("-", function_sort(pos(), pos(), int_()));
+        assert((s0 == pos() && s1 == pos())||
+               (s0 == nat() && s1 == nat())||
+               (s0 == int_() && s1 == int_()))
+
+        sort_expression target_sort(int_());
+        static function_symbol minus("-", function_sort(s0, s1, target_sort));
         return minus;
       }
 
@@ -1047,90 +808,8 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_pos(arg0.sort()));
-        assert(is_pos(arg1.sort()));
         
-        return application(minus(),arg0, arg1);
-      }
-
-      // Recogniser for application of -
-      inline
-      bool is_minus_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_minus_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol -
-      inline
-      function_symbol minus()
-      {
-        static function_symbol minus("-", function_sort(nat(), nat(), int_()));
-        return minus;
-      }
-
-      // Recogniser for -
-      inline
-      bool is_minus_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "-";
-        }
-        return false;
-      }
-
-      // Application of -
-      inline
-      application minus(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_nat(arg0.sort()));
-        assert(is_nat(arg1.sort()));
-        
-        return application(minus(),arg0, arg1);
-      }
-
-      // Recogniser for application of -
-      inline
-      bool is_minus_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_minus_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol -
-      inline
-      function_symbol minus()
-      {
-        static function_symbol minus("-", function_sort(int_(), int_(), int_()));
-        return minus;
-      }
-
-      // Recogniser for -
-      inline
-      bool is_minus_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "-";
-        }
-        return false;
-      }
-
-      // Application of -
-      inline
-      application minus(const data_expression& arg0, const data_expression& arg1)
-      {
-        assert(is_int_(arg0.sort()));
-        assert(is_int_(arg1.sort()));
-        
-        return application(minus(),arg0, arg1);
+        return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of -

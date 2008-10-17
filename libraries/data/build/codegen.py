@@ -116,6 +116,18 @@ SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      // Sort expression %(container)s(%
 
 '''
 
+POLYMORPHIC_FUNCTION_CONSTRUCTOR = '''      // Function symbol %(fullname)s
+      inline
+      function_symbol %(name)s(%(sortparams)s%(comma)s%(domainparams)s)
+      {
+        %(asserts)s
+        %(targetsort)s
+        static function_symbol %(name)s("%(fullname)s", %(sort)s);
+        return %(name)s;
+      }
+
+'''
+
 FUNCTION_CONSTRUCTOR = '''      // Function symbol %(fullname)s
       inline
       function_symbol %(name)s(%(sortparams)s)
@@ -137,6 +149,14 @@ FUNCTION_RECOGNISER = '''      // Recogniser for %(fullname)s
         return false;
       }
 
+'''
+
+POLYMORPHIC_FUNCTION_APPLICATION = '''      // Application of %(fullname)s
+      inline
+      application %(name)s(%(formsortparams)s%(comma)s%(formparams)s)
+      {
+        return application(%(name)s(%(actsortparams)s),%(actparams)s);
+      }
 '''
 
 FUNCTION_APPLICATION='''      // Application of %(fullname)s
@@ -180,6 +200,12 @@ PROJECTION_FUNCTION='''      // Function for projecting out %(name)s
       }
 
 '''
+
+def add_to_comma_sep_string(string, addition):
+  if string <> "":
+    string += ", "
+  string += addition
+  return string
 
 #
 # get_projection_arguments
@@ -269,9 +295,7 @@ def generate_variable_code(sorts, variable_declarations, variable):
 def generate_variables_code(sorts, variable_declarations, variables):
     variable_code = ''
     for var in variables:
-      if variable_code <> '':
-        variable_code += ", "
-      variable_code += generate_variable_code(sorts, variable_declarations, var)
+      variable_code = add_to_comma_sep_string(variable_code, generate_variable_code(sorts, variable_declarations, var))
     if variable_code == '':
       variable_code = "variable_list()"
     else:
@@ -295,9 +319,7 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
       code = ""
       data_expressions = data_expression[1]
       for i in data_expressions:
-        if code <> "":
-          code += ", "
-        code += generate_data_expression_code(sorts, functions, variable_declarations, i)
+        code = add_to_comma_sep_string(code, generate_data_expression_code(sorts, functions, variable_declarations, i))
       return code
     else:
       # This must be a variable, or a function symbol
@@ -314,9 +336,7 @@ def generate_sorts_code(sorts_ctx, sorts):
     print "generate code for sorts %s" % (sorts)
   code = ""
   for i in sorts:
-    if code <> "":
-      code += ", "
-    code += generate_sort_code(sorts_ctx, i)
+    code = add_to_comma_sep_string(code, generate_sort_code(sorts_ctx, i))
   return code
 
 def generate_sort_code(sorts, sort):
@@ -344,7 +364,11 @@ def generate_sort_code(sorts, sort):
     if l <> "":
       return "%s()" % (l)
     else:
-      return sort_expression[0].string.lower()
+# TODO: Fix this properly
+      try:
+        return sort_expression[0].string.lower()
+      except:
+        return sort_expression[0]
 
 def lookup_sort(variable_declarations, var):
     try:
@@ -359,14 +383,17 @@ def lookup_sort(variable_declarations, var):
     
 
 def get_label(sorts, sort):
-    if verbose:
-      print "get label for %s in %s" % (sort.string, sorts)
-    for s in sorts:
-      if len(s) == 2 and s[0].string == sort.string:
-          return s[1].label
-      elif len(s) == 3 and s[0].string == sort.string:
-          return s[2].label
-    return ""
+    try:
+      if verbose:
+        print "get label for %s in %s" % (sort.string, sorts)
+      for s in sorts:
+        if len(s) == 2 and s[0].string == sort.string:
+            return s[1].label
+        elif len(s) == 3 and s[0].string == sort.string:
+            return s[2].label
+      return ""
+    except:
+      return ""
 
 def generate_equation_code(sorts, functions, variable_declarations, equation):
     if verbose:
@@ -447,9 +474,7 @@ def generate_sort_parameters_code(sorts, functions, variable_declarations, equat
     params = get_sort_parameters_from_equations(sorts, functions, variable_declarations, equations)
     code = ""
     for p in params:
-      if code <> "":
-        code += ", "
-      code += "const sort_expression& %s" % (p.lower())
+      code = add_to_comma_sep_string(code, "const sort_expression& %s" % (p.lower()))
     return code
 
 def generate_equations_code(sorts, functions, variable_declarations, equations):
@@ -532,78 +557,218 @@ def generate_sortspec_code(sortspec):
 # generate_functionspec_code
 #
 def generate_functionspec_code(sorts, functionspec):
+    functions = merge_duplicates(functionspec.functions)
     code = ""
-    for f in functionspec.functions:
+    for f in functions:
       id = f[0]
       label = f[1]
-      sortexpr = f[2]
-      code += generate_function_constructors(sorts, id, label, sortexpr)
+      sortexprs = f[2]
+      code += generate_function_constructors(sorts, id, label, sortexprs)
     return code
+
+def merge_duplicates(list):
+    new_list = []
+    for l in list:
+      found = False
+      for m in new_list:
+        if l[0].string == m[0].string and l[1].label == m[1].label:
+          m[2] = m[2] + [l[2]]
+          found = True
+      if not(found):
+        new_list.append([l[0], l[1], [l[2]]])
+    return new_list
 
 # -------------------------------------------------------#
 # generate_function_constructors
 # -------------------------------------------------------#
-def generate_function_constructors(sorts, id, label, sortexpr):
+def generate_function_constructors(sorts, id, label, sortexprs):
     if verbose:
-      print "generate constructors for function %s, with label %s and sort %s" % (id.string, label.label, sortexpr.string)
+      print "generate constructors for function %s, with label %s" % (id.string, label.label)
+
+    # See if the function contains a parameterised sort
     formalsortparameters = ""
     actualsortparameters = ""
-    sort_params = get_sort_parameters_from_sort_expression(sorts, sortexpr.expr)
+    sort_params = []
+    for s in sortexprs:
+      sort_params += get_sort_parameters_from_sort_expression(sorts, s.expr)
+
     for s in sort_params:
-        if formalsortparameters <> "":
-            formalsortparameters += ", "
-            actualsortparameters += ", "
-        formalsortparameters += "const sort_expression& %s" % s.lower()
-        actualsortparameters += "%s" % s.lower()
+        formalsortparameters = add_to_comma_sep_string(formalsortparameters, "const sort_expression& %s" % s.lower())
+        actualsortparameters = add_to_comma_sep_string(actualsortparameters, "%s" % s.lower())
+
     comma = ""
     if formalsortparameters <> "":
       comma = ", "
-    code = FUNCTION_CONSTRUCTOR % {
-      'sortparams' : formalsortparameters,
-      'fullname'  : id.string,
-      'name'      : label.label,
-      'sort'      : generate_sort_code(sorts, sortexpr.expr)
-    }
-    code += FUNCTION_RECOGNISER % {
-      'fullname'  : id.string,
-      'name'      : label.label
-    }
-    index = 0
-    formalparameters = ""
-    actualparameters = ""
-    assertions = ""
-    sort = sortexpr.expr
-    if sort[0] == "sortarrow":
-      domain = sort[1][1]
-      for a in domain:
-        if index <> 0:
-          formalparameters += ", "
-          actualparameters += ", "
-        formalparameters += "const data_expression& arg%s" % index
-        actualparameters += "arg%s" % index
-        if a[0] == "param_expr":
-          assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[1]), index)
-        elif a[0].string in sort_params:
-          assertion = "assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
-        else:
-          assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[0]), index)
-        assertions += assertion
-        index +=1
 
-      code += FUNCTION_APPLICATION % {
-        'formsortparams': formalsortparameters,
-        'comma'     : comma,
-        'actsortparams': actualsortparameters,
+    if len(sortexprs) == 1:
+      # No polymorphism, generate simple functions
+      # Generate code for constructors for functions
+      code = FUNCTION_CONSTRUCTOR % {
+        'sortparams' : formalsortparameters,
         'fullname'  : id.string,
         'name'      : label.label,
-        'formparams': formalparameters,
-        'actparams' : actualparameters,
-        'assertions': assertions
+        'sort'      : generate_sort_code(sorts, sortexprs[0].expr)
       }
-      code += FUNCTION_APPLICATION_RECOGNISER % {
-        'fullname'  : id.string,
-        'name'      : label.label
+      code += FUNCTION_RECOGNISER % {
+      'fullname'  : id.string,
+      'name'      : label.label
       }
+
+      # Compute number and sorts of arguments for applications
+      index = 0
+      formalparameters = ""
+      actualparameters = ""
+      assertions = ""
+      sort = sortexprs[0].expr
+      if sort[0] == "sortarrow":
+        domain = sort[1][1]
+        for a in domain:
+          if index <> 0:
+            formalparameters += ", "
+            actualparameters += ", "
+          formalparameters += "const data_expression& arg%s" % index
+          actualparameters += "arg%s" % index
+          if a[0] == "param_expr":
+            assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[1]), index)
+          elif a[0].string in sort_params:
+            assertion = "assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
+          else:
+            assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[0]), index)
+          assertions += assertion
+          index +=1
+
+        # Generate code for applications
+        code += FUNCTION_APPLICATION % {
+          'formsortparams': formalsortparameters,
+          'comma'     : comma,
+          'actsortparams': actualsortparameters,
+          'fullname'  : id.string,
+          'name'      : label.label,
+          'formparams': formalparameters,
+          'actparams' : actualparameters,
+          'assertions': assertions
+        }
+        code += FUNCTION_APPLICATION_RECOGNISER % {
+          'fullname'  : id.string,
+          'name'      : label.label
+        }
+
+    else:
+      # We have polymorphism, so we need to determine correct types
+      domains = []
+      codomains = []
+      for s in sortexprs:
+        assert s.expr[0] == "sortarrow"
+        domain = s.expr[1]
+        codomain = s.expr[2]
+        if domain[0] == "labelled_domain":
+          domain[0] = "domain"
+          index = 0
+          for i in domain[1]:
+            domain[1][index] = [i[0]]
+            index += 1
+        assert domain[0] == "domain"
+        assert len(codomain) == 1
+        domains = domains + domain[1:]
+        codomains = codomains + codomain[0:]
+
+      domain_strings = {}
+      for (index, i) in enumerate(domains[0]):
+        domain_strings[index] = [i[0].string]
+      for d in domains[1:]:
+        for (index, i) in enumerate(d):
+          domain_strings[index].append(i[0].string)
+
+      codomain_strings = []
+      for i in codomains:
+        codomain_strings.append(i.string)
+
+      domainparams = ""
+      newdomain = ["domain", []]
+      for d in domain_strings:
+        if len(remove_duplicates(domain_strings[d])) <> 1:
+          domainparams = add_to_comma_sep_string(domainparams, "const sort_expression& s%s" % (d))
+          newdomain[1] += [["s%s" % (d)]]
+
+      # Only allow sorts that were specified
+      assertions = "assert("
+      for i in range(len(domains)):
+        if i <> 0:
+          assertions += "||\n               "
+        if len(domains) <> 1:
+          assertions += "("
+        for (index, j) in enumerate(domains[i]):
+          if index <> 0:
+            assertions += " && "
+          assertions += "s%s == %s" % (index, generate_sort_code(sorts, j))
+        if len(domains) <> 1:
+          assertions += ")"
+      assertions += ")\n"
+
+      # Bases on the parameters determine the target sort
+      if len(remove_duplicates(codomain_strings)) <> 1:
+        target_sort = "sort_expression target_sort;\n"
+        for i in range(len(domains)):
+          target_sort += "        if("
+          for (index, j) in enumerate(domains[i]):
+            if index <> 0:
+              target_sort += " && "
+            target_sort += "s%s == %s" % (index, generate_sort_code(sorts, j))
+          target_sort += ")\n        {\n"
+          target_sort += "          target_sort = %s" % (generate_sort_code(sorts, [codomains[i]]))
+          target_sort += "\n        }\n"
+      else:
+        target_sort = "sort_expression target_sort(%s);" % (generate_sort_code(sorts, [codomains[0]]))
+      newsort = ["sortarrow", newdomain, ["target_sort"]]
+      sortcode = generate_sort_code(sorts, newsort)
+
+      code = POLYMORPHIC_FUNCTION_CONSTRUCTOR % {
+        'fullname'   : id.string,
+        'name'       : label.label,
+        'sortparams' : formalsortparameters,
+        'comma'      : comma,
+        'domainparams' : domainparams,
+        'asserts'    : assertions,
+        'targetsort' : target_sort,
+        'sort'       : sortcode
+      }
+      
+      code += FUNCTION_RECOGNISER % {
+      'fullname'  : id.string,
+      'name'      : label.label
+      }
+
+      # Compute number and sorts of arguments for applications
+      index = 0
+      formalparameters = ""
+      actualparameters = ""
+      assertions = ""
+      sort = sortexprs[0].expr
+      if sort[0] == "sortarrow":
+        domain = sort[1][1]
+        for a in domain:
+          formalparameters =  add_to_comma_sep_string(formalparameters, "const data_expression& arg%s" % index)
+          actualparameters = add_to_comma_sep_string(actualparameters, "arg%s" % index)
+          actualsortparameters = add_to_comma_sep_string(actualsortparameters, "arg%s.sort()" % index)
+          index +=1
+
+
+        # Generate code for applications
+        code += FUNCTION_APPLICATION % {
+          'formsortparams': formalsortparameters,
+          'comma'     : comma,
+          'actsortparams': actualsortparameters,
+          'fullname'  : id.string,
+          'name'      : label.label,
+          'formparams': formalparameters,
+          'actparams' : actualparameters,
+          'assertions': assertions
+        }
+        code += FUNCTION_APPLICATION_RECOGNISER % {
+          'fullname'  : id.string,
+          'name'      : label.label
+        }
+    
     return code
 
 
