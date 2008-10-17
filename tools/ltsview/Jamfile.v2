@@ -17,6 +17,7 @@ tool ltsview
         primitivefactory.cpp
         primitives.cpp
         savepicdialog.cpp
+        savevecdialog.cpp
         settings.cpp
         settingsdialog.cpp
         simulation.cpp
@@ -28,6 +29,7 @@ tool ltsview
         visobjectfactory.cpp
         visualizer.cpp
         /libraries//tr
+        /libraries//gl2ps
         /libraries/utilities//colorbutton
         /libraries//trace
         /libraries//core

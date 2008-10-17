@@ -15,13 +15,13 @@ for library in $(libraries) {
 use-project /libraries/tipi : ../tools/squadt/libraries/tipi/build ;
 
 # some 3rd-party libraries
-for library in aterm ticpp svc tr {
+for library in aterm gl2ps svc ticpp tr {
   use-project /libraries/$(library) : $(TOP)/3rd-party/$(library)/build ;
 }
 
 local mcrl2-libraries = lps pbes lts svc aterm data core trace utilities ;
 
-for library in $(libraries) aterm ticpp svc tr {
+for library in $(libraries) aterm gl2ps svc ticpp tr {
   if $(library) in $(mcrl2-libraries) {
     alias $(library) : /libraries//mcrl2 : <link>shared ;
     alias $(library) : /libraries/$(library)//$(library)/<link>static : <link>static ;

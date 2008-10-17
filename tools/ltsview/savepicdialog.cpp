@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file savepicdialog.cpp
-/// \brief Add your file description here.
+/// \brief Implements the SavePicDialog class
 
 #include "savepicdialog.h"
 #include <algorithm>
@@ -21,12 +21,12 @@ using namespace std;
 #endif
 
 BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
-  EVT_SPINCTRL(myID_W_SPIN,SavePicDialog::onSpin)
-  EVT_SPINCTRL(myID_H_SPIN,SavePicDialog::onSpin)
-  EVT_CHECKBOX(myID_AR_CHECK,SavePicDialog::onARCheck)
+  EVT_SPINCTRL(SavePicDialog::myID_W_SPIN,SavePicDialog::onSpin)
+  EVT_SPINCTRL(SavePicDialog::myID_H_SPIN,SavePicDialog::onSpin)
+  EVT_CHECKBOX(SavePicDialog::myID_AR_CHECK,SavePicDialog::onARCheck)
   EVT_BUTTON(wxID_OK,SavePicDialog::OnOK)
-  EVT_BUTTON(myID_F_BUTTON,SavePicDialog::onChangeFile)
-  EVT_CHOICE(myID_FT_CHOICE,SavePicDialog::onChoice)
+  EVT_BUTTON(SavePicDialog::myID_F_BUTTON,SavePicDialog::onChangeFile)
+  EVT_CHOICE(SavePicDialog::myID_FT_CHOICE,SavePicDialog::onChoice)
 END_EVENT_TABLE()
 
 SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
@@ -253,22 +253,6 @@ void SavePicDialog::onChoice(wxCommandEvent& event)
     f_name.SetExt(newext);
     f_text->SetLabel(f_name.GetFullName());
   }
-}
-
-
-int SavePicDialog::getImageWidth()
-{
-  return w_spin->GetValue();
-}
-
-int SavePicDialog::getImageHeight()
-{
-  return h_spin->GetValue();
-}
-
-wxString SavePicDialog::getFileName()
-{
-  return f_name.GetFullPath();
 }
 
 void SavePicDialog::OnOK(wxCommandEvent& /*event*/)

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mainframe.cpp
-/// \brief Add your file description here.
+/// \brief Implements the main LTSView window
 
 #include "mainframe.h"
 #include <wx/filedlg.h>
@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
   EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)
+  EVT_MENU  (myID_SAVEVEC, MainFrame::onSaveVec)
   EVT_MENU  (myID_SAVETXT, MainFrame::onSaveText)
   EVT_MENU  (wxID_EXIT, MainFrame::onExit)
   EVT_MENU  (wxID_RESET, MainFrame::onResetView)
@@ -71,6 +72,7 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   settings = ss;
   progDialog = NULL;
   savePicDialog = NULL;
+  saveVecDialog = NULL;
   settingsDialog = NULL;
   infoDialog = new InfoDialog(this);
   simDialog = new SimDialog(this, mediator);
@@ -110,6 +112,8 @@ void MainFrame::setupMenuBar() {
       wxT("Export picture to bitmap"));
   exportMenu->Append(myID_SAVETXT,wxT("&Text..."),
       wxT("Export picture to text"));
+  exportMenu->Append(myID_SAVEVEC,wxT("&Vector..."),
+      wxT("Export picture to vector graphics"));
   fileMenu->AppendSubMenu(exportMenu,wxT("Export"),wxT("Export picture"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
@@ -247,7 +251,8 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
   dialog->Destroy();
 }
 
-void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
+void MainFrame::onSavePic(wxCommandEvent& /*event*/)
+{
   if (savePicDialog == NULL)
   {
     savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
@@ -257,6 +262,15 @@ void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
     savePicDialog->updateAspectRatio();
   }
   savePicDialog->ShowModal();
+}
+
+void MainFrame::onSaveVec(wxCommandEvent& /*event*/)
+{
+  if (saveVecDialog == NULL)
+  {
+    saveVecDialog = new SaveVecDialog(this,GetStatusBar(),glCanvas,filename);
+  }
+  saveVecDialog->ShowModal();
 }
 
 void MainFrame::onSaveText(wxCommandEvent& /*event*/)
@@ -273,15 +287,23 @@ void MainFrame::onExit(wxCommandEvent& /*event*/) {
   Close();
 }
 
-void MainFrame::onClose(wxCloseEvent &event) {
-  if (settingsDialog != NULL) {
+void MainFrame::onClose(wxCloseEvent &event)
+{
+  if (settingsDialog != NULL)
+  {
     settingsDialog->Destroy();
   }
-  if (progDialog != NULL) {
+  if (progDialog != NULL)
+  {
     progDialog->Destroy();
   }
-  if (savePicDialog != NULL) {
+  if (savePicDialog != NULL)
+  {
     savePicDialog->Destroy();
+  }
+  if (saveVecDialog != NULL)
+  {
+    saveVecDialog->Destroy();
   }
   infoDialog->Destroy();
   simDialog->Destroy();

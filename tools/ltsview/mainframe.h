@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mainframe.h
-/// \brief Add your file description here.
+/// \brief Header file for the main LTSView window
 
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
@@ -24,6 +24,7 @@
 #include "markdialog.h"
 #include "settingsdialog.h"
 #include "savepicdialog.h"
+#include "savevecdialog.h"
 #include "glcanvas.h"
 #include "mediator.h"
 #include "settings.h"
@@ -45,6 +46,7 @@ class MainFrame : public wxFrame {
     void onOpen(wxCommandEvent& event);
     void onOpenTrace(wxCommandEvent& event);
     void onSavePic(wxCommandEvent& event);
+    void onSaveVec(wxCommandEvent& event);
     void onSaveText(wxCommandEvent& event);
     void onRankStyle(wxCommandEvent& event);
     void onVisStyle(wxCommandEvent& event);
@@ -101,6 +103,7 @@ class MainFrame : public wxFrame {
     wxRadioButton*    nomarksRadio;
     wxProgressDialog* progDialog;
     SavePicDialog*    savePicDialog;
+    SaveVecDialog*    saveVecDialog;
     SettingsDialog*   settingsDialog;
     InfoDialog*       infoDialog;
     MarkDialog*       markDialog;
