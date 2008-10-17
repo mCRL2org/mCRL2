@@ -98,10 +98,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //terminals
 //---------
 
-%token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_DATA_SPEC TAG_MULT_ACT
-%token <appl> TAG_PROC_EXPR TAG_PROC_SPEC TAG_PBES_SPEC TAG_STATE_FRM
-%token <appl> TAG_DATA_VARS
-%token <appl> TAG_ACTION_RENAME
+%token <appl> TAG_IDENTIFIER TAG_SORT_EXPR TAG_DATA_EXPR TAG_DATA_SPEC
+%token <appl> TAG_MULT_ACT TAG_PROC_EXPR TAG_PROC_SPEC TAG_PBES_SPEC
+%token <appl> TAG_STATE_FRM TAG_DATA_VARS TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
@@ -204,7 +203,12 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 //start
 start:
-  TAG_SORT_EXPR sort_expr
+  TAG_IDENTIFIER ID
+    {
+      safe_assign($$, (ATerm) $2);
+      spec_tree = $$;
+    }
+  | TAG_SORT_EXPR sort_expr
     {
       safe_assign($$, (ATerm) $2);
       spec_tree = $$;

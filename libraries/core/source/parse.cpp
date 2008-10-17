@@ -28,6 +28,10 @@ ATerm parse_tagged_stream(const string &tag, istream &stream);
        NULL, otherwise
 */ 
 
+ATermAppl parse_identifier(istream &se_stream) {
+  return (ATermAppl) parse_tagged_stream("identifier", se_stream);
+}
+
 ATermAppl parse_sort_expr(istream &se_stream) {
   return (ATermAppl) parse_tagged_stream("sort_expr", se_stream);
 }

@@ -20,6 +20,15 @@
 namespace mcrl2 {
   namespace core {
   
+/** \brief  Parse an mCRL2 identifier.
+  * \param[in] se_stream An input stream from which can be read.
+  * \post   The content of se_stream is parsed as an mCRL2 identifier.
+  * \return The parsed identifier, if everything went well;
+  *         NULL, otherwise.
+**/ 
+ATermAppl parse_identifier(std::istream &se_stream);
+
+
 /** \brief  Parse an mCRL2 sort expression.
   * \param[in] se_stream An input stream from which can be read.
   * \post   The content of se_stream is parsed as an mCRL2 sort expression.

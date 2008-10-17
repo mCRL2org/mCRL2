@@ -84,6 +84,7 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { col_nr += YYLeng(); /* comment */ }
 
+"identifier"    { process_string(); return TAG_IDENTIFIER; }
 "sort_expr"     { process_string(); return TAG_SORT_EXPR; }
 "data_expr"     { process_string(); return TAG_DATA_EXPR; }
 "data_spec"     { process_string(); return TAG_DATA_SPEC; }
