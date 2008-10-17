@@ -102,7 +102,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
-  std::string infilename = c.get_input(lts_file_for_input).get_location();
+  std::string infilename = c.get_input(lts_file_for_input).location();
 
   /* Create display */
   tipi::tool_display d;
@@ -132,7 +132,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   // Display
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait for the OK button to be pressed */
   okay_button.await_change();
@@ -168,21 +168,21 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::configuration::object& input_object = c.get_input(lts_file_for_input);
 
   lts l;
-  mcrl2::lts::lts_type t = lts::parse_format(input_object.get_mime_type().get_sub_type());
+  mcrl2::lts::lts_type t = lts::parse_format(input_object.type().sub_type());
 
   tool_options task_options;
 
   // Extract configuration
   extract_task_options(c, task_options);
 
-  if (l.read_from(input_object.get_location(), t)) {
+  if (l.read_from(input_object.location(), t)) {
     /* Create and add the top layout manager */
     tipi::tool_display d;
- 
+
     layout::horizontal_box& m = d.create< horizontal_box >();
 
     std::string deterministic("-");
- 
+
     if(task_options.determinism_equivalence != mcrl2::lts::lts_eq_none) {
       l.reduce(task_options.determinism_equivalence);
 
@@ -201,7 +201,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text("Created by:")),
              margins(0,5,0,5));
-   
+
     /* Second column */
     m.append(d.create< vertical_box >().set_default_alignment(layout::right).
                 append(d.create< label >().set_text(boost::lexical_cast < std::string > (l.num_states()))).
@@ -214,12 +214,12 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
                 append(d.create< label >().set_text("")).
                 append(d.create< label >().set_text(l.get_creator())),
              margins(0,5,0,5));
-   
+
     layout::vertical_box& n = d.create< vertical_box >();
 
     n.append(m).
         append(d.create< label >().
-             set_text("Input read from " + input_object.get_location() + " (" + lts::string_for_type(t) + " format)"),
+             set_text("Input read from " + input_object.location() + " (" + lts::string_for_type(t) + " format)"),
                         margins(5,0,5,20));
 
     gsVerboseMsg("checking reachability...\n");
@@ -227,11 +227,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         n.append(d.create< label >().set_text("Warning: some states are not reachable from the initial state!")).
           append(d.create< label >().set_text("(This might result in unspecified behaviour of LTS tools.)"));
     }
-        
-    send_display_layout(d.set_manager(n));
+
+    send_display_layout(d.manager(n));
   }
   else {
-    send_error("Could not read `" + c.get_input(lts_file_for_input).get_location() + "', corruption or incorrect format?\n");
+    send_error("Could not read `" + c.get_input(lts_file_for_input).location() + "', corruption or incorrect format?\n");
 
     return (false);
   }
@@ -286,7 +286,7 @@ tool_options parse_command_line(int argc, char** argv) {
         (opts.determinism_equivalence != lts_eq_none ||
         parser.option_argument("equivalence") == "none"))
     {
-      parser.error("option -e/--equivalence has illegal argument '" + 
+      parser.error("option -e/--equivalence has illegal argument '" +
           parser.option_argument("equivalence") + "'");
     }
   }
@@ -329,7 +329,7 @@ void process(tool_options const& opts) {
     gsVerboseMsg("reading LTS from '%s'...\n",opts.infilename.c_str());
 
     bool success = l.read_from(opts.infilename,opts.intype);
-  
+
     if (!success && (opts.intype == lts_none)) { // XXX really do this?
       gsVerboseMsg("reading failed; trying to force format by extension...\n");
 
@@ -348,7 +348,7 @@ void process(tool_options const& opts) {
        << "Number of states: " << l.num_states() << std::endl
        << "Number of labels: " << l.num_labels() << std::endl
        << "Number of transitions: " << l.num_transitions() << std::endl;
- 
+
   if ( l.has_state_info() )
   {
     std::cout << "Has state information." << std::endl;

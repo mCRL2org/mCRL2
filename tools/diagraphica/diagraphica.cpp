@@ -87,7 +87,7 @@ std::string parse_error;
 
       // Performs the task specified by a configuration
       bool perform_task(tipi::configuration& c) {
-        fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
+        fsm_file_argument = c.get_input(fsm_file_for_input).location();
 
         return wx_tool_interface::perform_task(c);
       }

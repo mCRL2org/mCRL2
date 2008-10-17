@@ -68,9 +68,9 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
     bool check_configuration(tipi::configuration const& c) const {
       if (c.input_exists(lts_file_for_input)) {
         /* The input object is present, verify whether the specified format is supported */
-        if (mcrl2::lts::lts::parse_format(c.get_input(lts_file_for_input).get_mime_type().get_sub_type().c_str()) == mcrl2::lts::lts_none) {
+        if (mcrl2::lts::lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == mcrl2::lts::lts_none) {
           send_error("Invalid configuration: unsupported type `" +
-              c.get_input(lts_file_for_input).get_mime_type().get_sub_type() + "' for main input");
+              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
         }
         else {
           return true;
@@ -81,7 +81,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
     }
 
     bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(lts_file_for_input).get_location();
+      lts_file_argument = c.get_input(lts_file_for_input).location();
 
       return mcrl2_wx_tool_interface::perform_task(c);
     }

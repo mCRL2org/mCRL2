@@ -34,7 +34,7 @@ namespace tipi {
 
         while (*x != 0) {
           if (*x == matches[1]) {
-            m_main = static_cast < main_type > (x - &main_type_as_string[0]);
+            m_main = static_cast < category_type > (x - &main_type_as_string[0]);
 
             break;
           }
@@ -55,7 +55,7 @@ namespace tipi {
    * \param[in] s the subtype string (must not contain white space characters)
    * \param[in] m the main type
    **/
-  mime_type::mime_type(std::string const& s, main_type m) : m_main(m), m_sub(s) {
+  mime_type::mime_type(std::string const& s, category_type m) : m_main(m), m_sub(s) {
     assert(!s.empty() && (s.find(' ') == std::string::npos) && (s.find('\t') == std::string::npos));
   }
 }

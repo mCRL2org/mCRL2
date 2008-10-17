@@ -9,15 +9,12 @@
 /// \file tipi/report.hpp
 /// \brief Type used to represent a report (protocol concept)
 
-#ifndef TIPI_REPORT_H
-#define TIPI_REPORT_H
+#ifndef _TIPI_REPORT_HPP__
+#define _TIPI_REPORT_HPP__
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include "tipi/detail/utility/generic_visitor.hpp"
-#include "tipi/configuration.hpp"
 
 namespace tipi {
 
@@ -29,9 +26,6 @@ namespace tipi {
     friend class ::utility::visitor;
 
     public:
-
-      /** \brief Type alias for convenience */
-      typedef boost::shared_ptr < report > sptr;
 
       /** \brief The message class */
       enum type {
@@ -46,27 +40,23 @@ namespace tipi {
       type        m_report_type;
 
       /** \brief Room for errors (any error here implies unsuccessful termination) */
-      std::string description;
+      std::string m_description;
 
     public:
 
-      /** \brief Constructor */
-      inline report(type const& = notice, std::string const& = "");
+      /** \brief Constructor
+       * \param[in] t the type of the report
+       * \param[in] d a description
+       **/
+      inline report(type const& t = notice, std::string const& d = "") :
+                                        m_report_type(t), m_description(d) {
+      }
 
       /** \brief Gets the description */
-      inline std::string get_description();
+      inline std::string description() {
+        return m_description;
+      }
   };
-
-  /**
-   * \param[in] t the type of the report
-   * \param[in] d a description
-   **/
-  inline report::report(type const& t, std::string const& d) : m_report_type(t), description(d) {
-  }
-
-  inline std::string report::get_description() {
-    return (description);
-  }
 }
 
 #endif

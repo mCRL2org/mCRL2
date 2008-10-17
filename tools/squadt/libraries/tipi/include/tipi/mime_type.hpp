@@ -9,8 +9,8 @@
 /// \file tipi/mime_type.hpp
 /// \brief Type used for representing MIME-types
 
-#ifndef MIME_TYPE_H__
-#define MIME_TYPE_H__
+#ifndef _MIME_TYPE_HPP__
+#define _MIME_TYPE_HPP__
 
 #include <string>
 #include <iostream>
@@ -24,8 +24,8 @@ namespace tipi {
 
     public:
 
-      /** \brief Recognised main types */
-      enum main_type {
+      /** \brief Available main types */
+      enum category_type {
         application,
         audio,
         image,
@@ -36,9 +36,6 @@ namespace tipi {
         unknown
       };
 
-      /** \brief Recognised sub types */
-      typedef std::string sub_type;
-
     private:
 
       /** \brief Strings for conversion of main types */
@@ -47,10 +44,10 @@ namespace tipi {
     private:
 
       /** \brief The main type */
-      main_type   m_main;
+      category_type m_main;
 
       /** \brief The sub type */
-      sub_type    m_sub;
+      std::string   m_sub;
 
     public:
 
@@ -58,25 +55,19 @@ namespace tipi {
       mime_type(std::string const&);
 
       /** \brief Constructor */
-      mime_type(std::string const&, main_type s);
+      mime_type(std::string const&, category_type s);
 
-      /** \brief Whether the main type is known */
-      bool known_main_type() const;
-
-      /** \brief Gets the main type */
-      bool is_type(tipi::mime_type::main_type const) const;
+      /** \brief Gets the category */
+      category_type category() const;
 
       /** \brief Gets the main type */
-      std::string get_main_type() const;
+      std::string main_type() const;
 
       /** \brief Gets the sub type */
-      std::string get_sub_type() const;
+      std::string sub_type() const;
 
       /** \brief Converts to string */
-      std::string as_string() const;
-
-      /** \brief Converts to string */
-      std::string to_string() const;
+      std::string string() const;
 
       /** \brief Compare for equality */
       bool operator== (mime_type const&) const;
@@ -90,32 +81,24 @@ namespace tipi {
 
   /** \brief Output to stream as string */
   inline std::ostream& operator<<(std::ostream& o, mime_type const& t) {
-    o << t.as_string();
+    o << t.string();
 
-    return (o);
+    return o;
   }
 
-  inline bool mime_type::known_main_type() const {
-    return (m_main != unknown);
+  inline mime_type::category_type mime_type::category() const {
+    return m_main;
   }
 
-  inline bool mime_type::is_type(tipi::mime_type::main_type const m) const {
-    return (m_main == m);
-  }
-
-  inline std::string mime_type::get_main_type() const {
+  inline std::string mime_type::main_type() const {
     return (main_type_as_string[m_main]);
   }
 
-  inline std::string mime_type::get_sub_type() const {
+  inline std::string mime_type::sub_type() const {
     return (m_sub);
   }
 
-  inline std::string mime_type::as_string() const {
-    return (std::string(main_type_as_string[m_main]) + "/" + m_sub);
-  }
-
-  inline std::string mime_type::to_string() const {
+  inline std::string mime_type::string() const {
     return (std::string(main_type_as_string[m_main]) + "/" + m_sub);
   }
 

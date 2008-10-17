@@ -245,7 +245,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
@@ -259,11 +259,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     /* Add output file to the configuration */
     if (c.output_exists(bes_file_for_output)) {
       tipi::configuration::object& output_file = c.get_output(bes_file_for_output);
-   
-      output_file.set_location(c.get_output_name(".txt"));
+
+      output_file.location(c.get_output_name(".txt"));
     }
     else {
-      c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::application), 
+      c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::application),
                    c.get_output_name(".txt"));
     }
   }
@@ -308,7 +308,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   if (tool_options.opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
 
-    c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text), 
+    c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text),
                  tool_options.opt_counter_example_file);
   }
 
@@ -316,16 +316,16 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   tool_options.opt_strategy = c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0);
 
-  tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
+  tool_options.infilename       = c.get_input(pbes_file_for_input).location();
 
   if (c.output_exists(bes_file_for_output)) {
-    tool_options.outfilename = c.get_output(bes_file_for_output).get_location();
+    tool_options.outfilename = c.get_output(bes_file_for_output).location();
   }
 
   send_clear_display();
 
   process(tool_options);
- 
+
   return true;
 }
 #endif

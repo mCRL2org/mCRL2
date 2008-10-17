@@ -45,19 +45,19 @@ namespace tipi {
      **/
     enumeration< size_t >& enumeration< size_t >::add(const size_t v, std::string const& s) {
       using namespace boost::xpressive;
- 
+
       if (!regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\'])))) {
         throw std::runtime_error(std::string("malformed value `").
                         append(s).append("' for enumerated type."));
       }
- 
+
       if (m_values.find(v) == m_values.end()) {
         m_values[v] = s;
       }
- 
+
       return *this;
     }
- 
+
     /**
      * \param[in] s the string to evaluate
      * \return the associated value of the enumerated type
@@ -68,23 +68,8 @@ namespace tipi {
           return i->first;
         }
       }
- 
+
       return m_values.end()->first;
-    }
- 
-    /** \brief Converts to a string representation
-     * \param[in] s the string to convert (value must be in the domain)
-     * \return the string representation of the value of the enumerated type
-     **/
-    std::string enumeration< size_t >::convert(size_t const& s) const {
-      std::map< size_t, std::string >::const_iterator i =
-         m_values.find(static_cast < const size_t > (s));
-
-      if (i == m_values.end()) { 
-        throw std::runtime_error("invalid operand to conversion");
-      }
-
-      return i->second;
     }
 
     /**
@@ -100,25 +85,29 @@ namespace tipi {
 
       return false;
     }
- 
+
     /// \cond INTERNAL_DOCS
     std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
       std::auto_ptr < basic_integer_range > new_range;
- 
+
+      assert(false);
+
       return new_range;
     }
 
     std::auto_ptr < basic_real_range > basic_real_range::reconstruct(std::string const& s) {
       using namespace boost::xpressive;
- 
+
       smatch results;
- 
+
       regex_match(s, results, sregex((as_xpr('[') | '(') >> (s1= +_d) >> "..." >> (s2= +_d) >> (as_xpr(']') | ')')));
- 
+
       std::cerr << results[1] << " " << results[2] << std::endl;
- 
+
       std::auto_ptr < basic_real_range > new_range;
- 
+
+      assert(false);
+
       return new_range;
     }
     /// \endcond

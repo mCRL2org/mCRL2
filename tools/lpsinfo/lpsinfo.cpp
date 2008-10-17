@@ -133,10 +133,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
- 
+
   specification lps_specification;
 
-  lps_specification.load(c.get_input(lps_file_for_input).get_location());
+  lps_specification.load(c.get_input(lps_file_for_input).location());
 
   linear_process lps = lps_specification.process();
 
@@ -158,7 +158,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   /* Second column */
   m.append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(d.create< label >().set_text(c.get_input(lps_file_for_input).get_location())).
+                append(d.create< label >().set_text(c.get_input(lps_file_for_input).location())).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.summands().size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_tau_summands(lps)))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
@@ -167,7 +167,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_used_actions(lps)))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   return true;
 }

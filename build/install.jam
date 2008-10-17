@@ -189,7 +189,7 @@ rule install-tool ( name : requirements * ) {
              : $(bundle)
                $(bundle).plist
                $(bundle).icns
-             : <location>$(destination)
+             : <location>$(prefix)
              ;
       }
 

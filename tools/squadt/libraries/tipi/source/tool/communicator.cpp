@@ -35,10 +35,18 @@ namespace tipi {
       return (boost::static_pointer_cast < communicator_impl > (impl)->activate(this, argc, argv));
     }
 
+    /**
+     * \param[in] argv a pointer to an unparsed command line
+     * \return whether options were found and whether a connection is being opened with a controller
+     **/
     bool communicator::activate(char*& argv) {
       return (boost::static_pointer_cast < communicator_impl > (impl)->activate(this, argv));
     }
 
+    /**
+     * \param[in] arguments a vector with strings representing command line options
+     * \return whether options were found and whether a connection is being opened with a controller
+     **/
     bool communicator::activate(std::vector < std::string > const& arguments) {
       int                        argc = arguments.size();
       boost::shared_array<char*> argv(new char*[argc]);
@@ -116,7 +124,7 @@ namespace tipi {
       assert(c);
 
       if (c) {
-        c->set_fresh(false);
+        c->fresh(false);
 
         message m(tipi::visitors::store(*c), tipi::message_configuration);
 
@@ -128,7 +136,7 @@ namespace tipi {
      * \param[in] c the configuration object that specifies the accepted configuration
      **/
     void communicator::send_configuration(tipi::configuration& c) {
-      c.set_fresh(false);
+      c.fresh(false);
 
       message m(tipi::visitors::store(c), tipi::message_configuration);
 

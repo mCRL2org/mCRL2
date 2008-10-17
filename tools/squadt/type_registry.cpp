@@ -56,12 +56,12 @@ namespace squadt {
 
     if (!extension.empty()) {
       std::auto_ptr < wxFileType > wtype(m.GetFileTypeFromExtension(wxString(extension.substr(1).c_str(), wxConvLocal)));
-     
+
       if (wtype.get()) {
         wxString mime_type;
-     
+
         wtype->GetMimeType(&mime_type);
-     
+
         return tipi::mime_type(std::string(mime_type.fn_str()));
       }
     }
@@ -72,12 +72,12 @@ namespace squadt {
   std::string system_mime_type_manager::get_command(tipi::mime_type const& type) const {
     static wxMimeTypesManager m;
 
-    std::auto_ptr< wxFileType > wtype(m.GetFileTypeFromMimeType(wxString(type.to_string().c_str(), wxConvLocal)));
+    std::auto_ptr< wxFileType > wtype(m.GetFileTypeFromMimeType(wxString(type.string().c_str(), wxConvLocal)));
 
     if (wtype.get()) {
       return std::string(wtype->GetOpenCommand(wxT("$")).fn_str());
     }
-    else if (type.is_type(tipi::mime_type::text)) {
+    else if (type.category() == tipi::mime_type::text) {
 #if defined(__APPLE__)
       return "open -t $"; // .GetFileTypeFromMimeType("text/plain") does not work on OS X
 #else
@@ -131,25 +131,25 @@ namespace squadt {
     for (tool_manager::const_tool_sequence::const_iterator t = tools.begin(); t != tools.end(); ++t) {
       if ((*t)->is_usable()) {
         capabilities::input_configuration_range inputs((*t)->get_capabilities()->get_input_configurations());
-       
+
         BOOST_FOREACH(capabilities::input_configuration_range::value_type j, inputs) {
           capabilities::input_configuration::object_sequence input_range(j->object_range());
-       
+
           BOOST_FOREACH(capabilities::input_configuration::object_sequence::value_type input_descriptor, input_range) {
             tipi::mime_type& format(input_descriptor.second);
-       
+
             if (categories_for_format.find(format) == categories_for_format.end()) {
               /* Format unknown, create new map */
               tools_for_category temporary;
-       
+
               categories_for_format.insert(std::make_pair(format, temporary));
-       
+
               /* Make sure the type is registered */
               if (!has_registered_command(format, true)) {
                 register_command(format, command_none);
               }
             }
-       
+
             categories_for_format[format].insert(std::make_pair(j->get_category(), *t));
           }
         }
@@ -172,7 +172,7 @@ namespace squadt {
       range = boost::make_iterator_range(p.begin(), p.end());
     }
     else {
-      i = categories_for_format.find(tipi::mime_type(f.get_sub_type(), tipi::mime_type::text));
+      i = categories_for_format.find(tipi::mime_type(f.sub_type(), tipi::mime_type::text));
 
       if (i != categories_for_format.end()) { // for unknown main type
         tools_for_category const& p((*i).second);
@@ -180,7 +180,7 @@ namespace squadt {
         range = boost::make_iterator_range(p.begin(), p.end());
       }
       else {
-        i = categories_for_format.find(tipi::mime_type(f.get_sub_type(), tipi::mime_type::application));
+        i = categories_for_format.find(tipi::mime_type(f.sub_type(), tipi::mime_type::application));
 
         if (i != categories_for_format.end()) { // for unknown main type
           tools_for_category const& p((*i).second);
@@ -203,7 +203,7 @@ namespace squadt {
    **/
   std::set < type_registry::tool_category > type_registry::categories_by_mime_type(build_system::mime_type const& f) const {
     std::set < tool_category > categories;
-    
+
     categories_for_mime_type::const_iterator i = categories_for_format.find(f);
 
     if (i != categories_for_format.end()) {
@@ -217,7 +217,7 @@ namespace squadt {
 
   std::set < build_system::tool_category > type_registry::get_categories() const {
     std::set < tool_category > categories;
-    
+
     BOOST_FOREACH(categories_for_mime_type::value_type i, categories_for_format) {
       BOOST_FOREACH(tools_for_category::value_type j, i.second) {
         categories.insert(j.first);
@@ -266,7 +266,7 @@ namespace squadt {
     extension = ((extension.size() <= 1) ? "unknown" : extension.substr(1));
 
     BOOST_FOREACH(categories_for_mime_type::value_type c, categories_for_format) {
-      if (c.first.get_sub_type() == extension) {
+      if (c.first.sub_type() == extension) {
         return c.first;
       }
     }
@@ -284,19 +284,19 @@ namespace squadt {
 
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
-		  boost::bind(&mime_type::operator==, mime_type(t.get_sub_type(), mime_type::text), boost::bind(&actions_for_type::value_type::first, _1)));
+		  boost::bind(&mime_type::operator==, mime_type(t.sub_type(), mime_type::text), boost::bind(&actions_for_type::value_type::first, _1)));
     }
     if (i == command_for_type.end()) {
       i = std::find_if(command_for_type.begin(), command_for_type.end(),
-		  boost::bind(&mime_type::operator==, mime_type(t.get_sub_type(), mime_type::application), boost::bind(&actions_for_type::value_type::first, _1)));
+		  boost::bind(&mime_type::operator==, mime_type(t.sub_type(), mime_type::application), boost::bind(&actions_for_type::value_type::first, _1)));
     }
 
     if (i == command_for_type.end()) {
       if (c) {
         bool result = global_mime_types_manager.is_known_type(t);
 
-        return result || ((t.is_type(tipi::mime_type::text))
-                && (global_mime_types_manager.guess_mime_type("m.txt").get_sub_type() != "unknown"));
+        return result || ((t.category() == tipi::mime_type::text)
+                && (global_mime_types_manager.guess_mime_type("m.txt").sub_type() != "unknown"));
       }
     }
     else {

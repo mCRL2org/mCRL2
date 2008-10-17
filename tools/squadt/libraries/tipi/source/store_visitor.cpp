@@ -344,15 +344,15 @@ namespace utility {
     out << "<report type=\"" << c.m_report_type << "\">";
 
     /* Include description */
-    if (!c.description.empty()) {
+    if (!c.m_description.empty()) {
       const std::string pattern("]]>");
 
       /* Sanity check... (todo better would be to use Base-64 or some other encoding) */
-      if (std::search(c.description.begin(), c.description.end(), pattern.begin(), pattern.end()) != c.description.end()) {
+      if (std::search(c.m_description.begin(), c.m_description.end(), pattern.begin(), pattern.end()) != c.m_description.end()) {
         throw std::runtime_error("Illegal instance of ']]>' found");
       }
 
-      out << "<description><![CDATA[" << c.description << "]]></description>";
+      out << "<description><![CDATA[" << c.m_description << "]]></description>";
     }
 
     out << "</report>";
@@ -452,10 +452,10 @@ namespace utility {
     out << "<properties "
         << "horizontal-alignment=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
         << "\" vertical-alignment=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
-        << "\" margin-top=\"" << c.m_margin.top
-        << "\" margin-left=\"" << c.m_margin.left
-        << "\" margin-bottom=\"" << c.m_margin.bottom
-        << "\" margin-right=\"" << c.m_margin.right;
+        << "\" margin-top=\"" << c.m_margin.m_top
+        << "\" margin-left=\"" << c.m_margin.m_left
+        << "\" margin-bottom=\"" << c.m_margin.m_bottom
+        << "\" margin-right=\"" << c.m_margin.m_right;
 
     if (c.m_grow) {
       out << "\" grow=\"" << c.m_grow;
@@ -483,17 +483,17 @@ namespace utility {
     if (c0.m_alignment_vertical != c1.m_alignment_vertical) {
       out << " vertical-alignment=\"" << tipi::alignment_to_text[c0.m_alignment_vertical] << "\"";
     }
-    if (c0.m_margin.top != c1.m_margin.top) {
-      out << " margin-top=\"" << c0.m_margin.top << "\"";
+    if (c0.m_margin.m_top != c1.m_margin.m_top) {
+      out << " margin-top=\"" << c0.m_margin.m_top << "\"";
     }
-    if (c0.m_margin.left != c1.m_margin.left) {
-      out << " margin-left=\"" << c0.m_margin.left << "\"";
+    if (c0.m_margin.m_left != c1.m_margin.m_left) {
+      out << " margin-left=\"" << c0.m_margin.m_left << "\"";
     }
-    if (c0.m_margin.bottom != c1.m_margin.bottom) {
-      out << " margin-bottom=\"" << c0.m_margin.bottom << "\"";
+    if (c0.m_margin.m_bottom != c1.m_margin.m_bottom) {
+      out << " margin-bottom=\"" << c0.m_margin.m_bottom << "\"";
     }
-    if (c0.m_margin.right != c1.m_margin.right) {
-      out << " margin-right=\"" << c0.m_margin.right << "\"";
+    if (c0.m_margin.m_right != c1.m_margin.m_right) {
+      out << " margin-right=\"" << c0.m_margin.m_right << "\"";
     }
     if (c1.m_grow != c0.m_grow) {
       out << " grow=\"" << c0.m_grow << "\"";
@@ -583,8 +583,8 @@ namespace utility {
     out << "<display-layout visible=\"" << c.m_visible << "\">"
         << "<layout-manager>";
 
-    if (c.get_manager() != 0) {
-      do_visit(*c.get_manager(), static_cast < tipi::display const& > (c));
+    if (c.manager() != 0) {
+      do_visit(*c.manager(), static_cast < tipi::display const& > (c));
     }
 
     out << "</layout-manager>"

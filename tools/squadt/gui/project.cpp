@@ -528,7 +528,7 @@ namespace squadt {
 
       try {
         type_registry& registry(global_build_system.get_type_registry());
-       
+
         switch (e.GetId()) {
           case cmID_EDIT:
             p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
@@ -536,9 +536,9 @@ namespace squadt {
           case cmID_REMOVE:
             if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
                              wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
-       
+
               manager->remove(p);
-       
+
               object_view->Delete(selection);
             }
             break;
@@ -547,10 +547,10 @@ namespace squadt {
             break;
           case cmID_REFRESH:
             p->flush_outputs();
-       
+
             /* Register handler to on update the object view after process termination */
             p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
-       
+
             /* Attach tool display */
             manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
             break;
@@ -559,24 +559,24 @@ namespace squadt {
             break;
           case cmID_DETAILS: {
               dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
-       
+
               dialog.set_name(object_view->GetItemText(selection));
-       
+
               if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
                 dialog.show_tool_selector(false);
                 dialog.show_input_objects(false);
               }
               else {
                 boost::shared_ptr< const tool > selected_tool = p->get_tool();
-       
+
                 if (p->has_input_configuration()) {
                   /* Add the main input (must exist) */
-                  dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
-                 
+                  dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.sub_type()));
+
                   if (selected_tool) {
                     dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());
                   }
-                 
+
                   dialog.allow_tool_selection(false);
                 }
                 else {

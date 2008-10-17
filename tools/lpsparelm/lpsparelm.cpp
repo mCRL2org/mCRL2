@@ -105,9 +105,9 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
-  tool_configuration tc(c.get_input(lps_file_for_input).get_location(),
-                        c.get_output(lps_file_for_output).get_location());
-  
+  tool_configuration tc(c.get_input(lps_file_for_input).location(),
+                        c.get_output(lps_file_for_output).location());
+
   return tc.execute();
 }
 #endif
@@ -115,7 +115,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {

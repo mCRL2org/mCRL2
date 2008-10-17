@@ -127,7 +127,7 @@ namespace tipi {
    **/
   std::string configuration::get_input_name(std::string const& n) const {
     for (position_list_partition::const_iterator i = m_input_objects.begin(); i != m_input_objects.end(); ++i) {
-      return(boost::filesystem::basename(boost::filesystem::path((static_cast< const object* > (*i))->get_location())) + n);
+      return(boost::filesystem::basename(boost::filesystem::path((static_cast< const object* > (*i))->location())) + n);
     }
 
     return (m_output_prefix + n);

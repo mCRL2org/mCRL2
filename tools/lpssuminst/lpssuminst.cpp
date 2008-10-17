@@ -138,11 +138,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   if (configuration.option_exists(option_rewrite_strategy)) {
     strategy_selector.set_selection(configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
-  
-  send_display_layout(d.set_manager(m));
+
+  send_display_layout(d.manager(m));
 
   okay_button.await_change();
-  
+
   /* Update configuration */
   configuration.get_option(option_tau_only).
      set_argument_value< 0 >(tau_only.get_status());
@@ -169,8 +169,8 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   using namespace tipi::layout::elements;
 
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
   options.suminst_opts.tau_only = configuration.option_exists(option_tau_only);
   options.suminst_opts.finite_only = configuration.option_exists(option_finite_only);
   options.suminst_opts.strategy = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
@@ -178,13 +178,13 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   /* Create display */
   tipi::tool_display d;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text("Declustering in progress"), layout::left)));
 
   //Perform instantiation
   bool result = do_suminst(options) == 0;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text(std::string("Declustering ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
   return result;

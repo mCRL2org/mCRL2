@@ -52,6 +52,10 @@ namespace tipi {
 
         /** \brief Constructor for derived implementation object */
         communicator(boost::shared_ptr < tipi::tool::communicator_impl > const&);
+      protected:
+
+        /** \brief Waits until a configuration is delivered and returns a pointer to it */
+        void await_configuration() const;
 
       public:
 
@@ -102,9 +106,6 @@ namespace tipi {
 
         /** \brief Get the last communicated set of controller capabilities */
         const boost::shared_ptr < controller::capabilities > get_controller_capabilities() const;
-
-        /** \brief Waits until a configuration is delivered and returns a pointer to it */
-        void await_configuration() const;
     };
   }
 }

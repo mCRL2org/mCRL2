@@ -43,12 +43,6 @@ namespace squadt {
           aborted    ///< was aborted
         };
 
-        /** \brief Convenience type for weak pointer implementation */
-        typedef boost::weak_ptr < process >            wptr;
-
-        /** \brief Convenience type to hide shared pointer implementation */
-        typedef boost::shared_ptr < process >          sptr;
-
         /** \brief Convenience type for handlers */
         typedef boost::function < void (boost::shared_ptr < process >) >    termination_handler;
 

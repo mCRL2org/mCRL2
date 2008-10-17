@@ -51,13 +51,8 @@ namespace tipi {
       inline tool_display() : m_visible(true) {
       }
 
-      /** \brief Factory function */
-      inline static boost::shared_ptr < tool_display > create() {
-        return boost::shared_ptr< tipi::tool_display >(new tool_display());
-      }
-
       /** \brief Returns whether or not the contents should be visible */
-      inline bool get_visibility() const {
+      inline bool visible() const {
         return m_visible;
       }
 
@@ -67,7 +62,7 @@ namespace tipi {
       }
 
       /** \brief Get the layout manager that contains all widgets for this display */
-      inline layout::manager const* get_manager() const {
+      inline layout::manager const* manager() const {
         return impl->get_manager().get();
       }
 
@@ -75,7 +70,7 @@ namespace tipi {
        * \param[in] m the new top layout manager
        * \return *this
        **/
-      inline tool_display& set_manager(::tipi::layout::manager& m) {
+      inline tool_display& manager(::tipi::layout::manager& m) {
         impl->set_manager(m);
 
         return *this;

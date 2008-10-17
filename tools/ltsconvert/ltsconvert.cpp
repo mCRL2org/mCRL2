@@ -539,7 +539,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     transformation_selector.set_selection(c.get_option_argument< lts_equivalence >(option_selected_transformation, 0));
   }
   if (c.input_exists(lps_file_auxiliary)) {
-      lps_file_field.set_text(c.get_input(lps_file_auxiliary).get_location());
+      lps_file_field.set_text(c.get_input(lps_file_auxiliary).location());
   }
   if (c.option_exists(option_no_reachability_check)) {
     check_reachability.set_status(c.get_option_argument< bool >(option_no_reachability_check));
@@ -554,7 +554,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     tau_field.set_text(c.get_option_argument< std::string >(option_tau_actions));
   }
 
-  send_display_layout(d.set_manager(m.append(okay_button, layout::top)));
+  send_display_layout(d.manager(m.append(okay_button, layout::top)));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
@@ -575,8 +575,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     std::string  extension(extensions[format_selector.get_selection()]);
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
 
-    output_file.set_mime_type(tipi::mime_type(extension));
-    output_file.set_location(c.get_output_name("." + extension));
+    output_file.type(tipi::mime_type(extension));
+    output_file.location(c.get_output_name("." + extension));
   }
   else {
     std::string  extension(extensions[format_selector.get_selection()]);
@@ -586,16 +586,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
   if ((format_selector.get_selection() == fsm && (
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc" ||
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc+mcrl" ||
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc+mcrl2"))
+         c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
+         c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl" ||
+         c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl2"))
    || (format_selector.get_selection() == svc_mcrl2 && (
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "aut" ||
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc" ||
-         c.get_input(lts_file_for_input).get_mime_type().get_sub_type() == "svc+mcrl"))) {
+         c.get_input(lts_file_for_input).type().sub_type() == "aut" ||
+         c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
+         c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl"))) {
 
     if (c.input_exists(lps_file_auxiliary)) {
-      c.get_input(lps_file_auxiliary).set_location(lps_file_field.get_text());
+      c.get_input(lps_file_auxiliary).location(lps_file_field.get_text());
     }
     else {
       c.add_input(lps_file_auxiliary, tipi::mime_type("lps", tipi::mime_type::application), lps_file_field.get_text());
@@ -660,7 +660,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
   if (c.input_exists(lps_file_auxiliary)) {
-    tool_options.lpsfile = c.get_input(lps_file_auxiliary).get_location();
+    tool_options.lpsfile = c.get_input(lps_file_auxiliary).location();
   }
   if (c.option_exists(option_no_state_information)) {
     tool_options.print_dot_state = !(c.get_option_argument< bool >(option_no_state_information));
@@ -669,10 +669,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     tool_options.check_reach = !(c.get_option_argument< bool >(option_no_reachability_check));
   }
 
-  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).get_mime_type().get_sub_type());
-  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).get_mime_type().get_sub_type());
-  tool_options.set_source(c.get_input(lts_file_for_input).get_location());
-  tool_options.set_target(c.get_output(lts_file_for_output).get_location());
+  tool_options.intype  = lts::parse_format(c.get_output(lts_file_for_input).type().sub_type());
+  tool_options.outtype = lts::parse_format(c.get_output(lts_file_for_output).type().sub_type());
+  tool_options.set_source(c.get_input(lts_file_for_input).location());
+  tool_options.set_target(c.get_output(lts_file_for_output).location());
 
   lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
 

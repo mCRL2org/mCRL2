@@ -7,8 +7,10 @@
 #include "export_latex.h"
 #include <iostream>
 #include <boost/format.hpp>
-#include <math.h>
+#include <cmath>
 #include <wx/textfile.h>
+
+#include <workarounds.h> // for M_PI
 
 ExporterLatex::ExporterLatex(Graph* g) : Exporter(g)
 {

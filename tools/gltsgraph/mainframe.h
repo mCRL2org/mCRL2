@@ -1,6 +1,7 @@
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
+#include <wx/wx.h>
 #include <wx/frame.h>
 
 #ifndef LTSGRAPH_H

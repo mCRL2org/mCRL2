@@ -204,7 +204,7 @@ namespace squadt {
      * \param[in] c the command to execute
      **/
     inline void process_impl::create_process(command const& c, boost::function < void (process::status) > h) {
-      LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
+      LPTSTR command = _tcsdup(TEXT(c.string().c_str()));
 
       int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.string().c_str(),&m_information.startup,&m_information.process);
 
@@ -342,7 +342,7 @@ namespace squadt {
                 FSRef executable_path;
 
                 if (FSPathMakeRef(reinterpret_cast < const UInt8* > ((path(c.executable) / std::string("Contents/MacOS") / local::as_string(CFURLGetString(executable_url))).string().c_str()), &executable_path, 0) == noErr) {
-                  std::string unparsed_command_line_arguments(c.as_string());
+                  std::string unparsed_command_line_arguments(c.string());
 
                   AppleEvent          initialEvent;
                   ProcessSerialNumber serial_number;

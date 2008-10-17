@@ -24,7 +24,7 @@
 namespace squadt {
 
   class tool_manager_impl;
- 
+
   namespace execution {
 
     class task_monitor_impl;
@@ -38,13 +38,8 @@ namespace squadt {
       friend class executor_impl;
       friend class squadt::tool_manager_impl;
 
-      public:
- 
-        /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::shared_ptr < task_monitor > sptr;
-
       protected:
- 
+
         /** \brief Waits until a connection has been established with the running process */
         bool await_connection(unsigned int const&);
 
@@ -61,7 +56,7 @@ namespace squadt {
         virtual void signal_change(boost::shared_ptr < execution::process > p, const execution::process::status);
 
       private:
- 
+
         /** \brief Associates a process with this listener */
         void attach_process(const boost::shared_ptr< process >& p);
 
@@ -75,7 +70,7 @@ namespace squadt {
 
         /** \brief Constructor */
         task_monitor();
- 
+
         /** \brief Gets a pointer to the associated process */
         boost::shared_ptr< process > get_process(const bool b = false) const;
 

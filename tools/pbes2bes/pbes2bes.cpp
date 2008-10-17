@@ -197,17 +197,17 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     format_selector.set_selection(
         c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
   }
-  
-  send_display_layout(d.set_manager(m));
+
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
-  
+
   /* Add output file to the configuration */
   if (c.output_exists(pbes_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(pbes_file_for_output);
- 
-    output_file.set_location(c.get_output_name(".pbes"));
+
+    output_file.location(c.get_output_name(".pbes"));
   }
   else {
     c.add_output(pbes_file_for_output, tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
@@ -238,11 +238,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
   tool_options.opt_strategy     = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
-  tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
-  tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();
+  tool_options.infilename       = c.get_input(pbes_file_for_input).location();
+  tool_options.outfilename      = c.get_output(pbes_file_for_output).location();
 
   bool result = process(tool_options);
- 
+
   send_clear_display();
 
   return (result);

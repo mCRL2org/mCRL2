@@ -339,7 +339,7 @@ namespace utility {
 
     tree->GetAttribute("category", &category);
 
-    c.m_category = tipi::tool::category::fit(category);
+    c.m_category = tipi::tool::category::match(category);
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       std::string identifier = e->GetAttribute("id");
@@ -377,7 +377,7 @@ namespace utility {
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration");
 
-    cp.reset(new capabilities::input_configuration(tipi::tool::category::fit(tree->GetAttribute("category"))));
+    cp.reset(new capabilities::input_configuration(tipi::tool::category::match(tree->GetAttribute("category"))));
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       cp->m_object_map.insert(std::make_pair(e->GetAttribute("id"), e->GetAttribute("format")));
@@ -398,7 +398,7 @@ namespace utility {
       static capabilities::input_configuration dummy(tipi::tool::category("unknown"));
 
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-     
+
         if (e->Value() == "protocol-version") {
           c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("major")));
           c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
@@ -448,11 +448,11 @@ namespace utility {
 
     c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttribute("type")));
 
-    c.description.clear();
+    c.m_description.clear();
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "description") {
-        c.description += e->GetText(false);
+        c.m_description += e->GetText(false);
       }
     }
   }
@@ -464,7 +464,7 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::label& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
-    
+
     c.m_text = tree->GetText(false);
 
     c.m_event_handler->process(&c, false, true);
@@ -675,10 +675,10 @@ namespace utility {
       c.m_visible = text_to_visibility(s); 
     }
 
-    tree->GetAttribute("margin-top", &c.m_margin.top, false);
-    tree->GetAttribute("margin-left", &c.m_margin.left, false);
-    tree->GetAttribute("margin-bottom", &c.m_margin.bottom, false);
-    tree->GetAttribute("margin-right", &c.m_margin.right, false);
+    tree->GetAttribute("margin-top", &c.m_margin.m_top, false);
+    tree->GetAttribute("margin-left", &c.m_margin.m_left, false);
+    tree->GetAttribute("margin-bottom", &c.m_margin.m_bottom, false);
+    tree->GetAttribute("margin-right", &c.m_margin.m_right, false);
     tree->GetAttribute("grow", &c.m_grow, false);
     tree->GetAttribute("enabled", &c.m_enabled, false);
   }
@@ -881,8 +881,8 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
-  
-    if (c.get_manager() != 0) {
+
+    if (c.manager() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
           ::tipi::display::element_identifier id;

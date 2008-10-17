@@ -188,21 +188,21 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values if the configuration specifies them
   if (c.input_exists(rename_file_for_input)) {
-    rename_file_field.set_text(c.get_input(rename_file_for_input).get_location());
+    rename_file_field.set_text(c.get_input(rename_file_for_input).location());
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
-  
+
   c.add_input(rename_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), rename_file_field.get_text());
 
   /* Add output file to the configuration */
   if (c.output_exists(lps_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(lps_file_for_output);
 
-    output_file.set_location(c.get_output_name(".lps"));
+    output_file.location(c.get_output_name(".lps"));
   }
   else {
     c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
@@ -227,9 +227,9 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
-  tool_options.action_rename_filename = c.get_input(rename_file_for_input).get_location();
-  tool_options.infilename             = c.get_input(lps_file_for_input).get_location();
-  tool_options.outfilename            = c.get_output(lps_file_for_output).get_location();
+  tool_options.action_rename_filename = c.get_input(rename_file_for_input).location();
+  tool_options.infilename             = c.get_input(lps_file_for_input).location();
+  tool_options.outfilename            = c.get_output(lps_file_for_output).location();
 
   bool result = process(tool_options);
 

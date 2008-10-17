@@ -45,63 +45,65 @@ namespace tipi {
 
     /** \brief Type for the margins that should be observed around the element */
     struct margins {
-      unsigned short top;    ///< top margin in pixels
-      unsigned short right;  ///< right margin in pixels
-      unsigned short bottom; ///< bottom margin in pixels
-      unsigned short left;   ///< left margin in pixels
+      unsigned short m_top;    ///< top margin in pixels
+      unsigned short m_right;  ///< right margin in pixels
+      unsigned short m_bottom; ///< bottom margin in pixels
+      unsigned short m_left;   ///< left margin in pixels
 
       /** \brief Constructor */
       inline margins(const unsigned short = 0, const unsigned short = 0, const unsigned short = 0, const unsigned short = 0);
 
       /** \brief Sets all margins at once */
       inline margins& set(const unsigned short n) {
-        top = right = bottom = left = n;
+        m_top = m_right = m_bottom = m_left = n;
 
         return *this;
       }
 
       /** \brief Sets top margin */
-      inline margins& set_top(const unsigned short ntop) {
-        top = ntop;
+      inline margins& set_top(const unsigned short top) {
+        m_top = top;
 
         return *this;
       }
 
       /** \brief Sets right margin */
-      inline margins& set_right(const unsigned int nright) {
-        right = nright;
+      inline margins& set_right(const unsigned int right) {
+        m_right = right;
 
         return *this;
       }
 
       /** \brief Sets bottom margin */
-      inline margins& set_bottom(const unsigned int nbottom) {
-        bottom = nbottom;
+      inline margins& set_bottom(const unsigned int bottom) {
+        m_bottom = bottom;
 
         return *this;
       }
 
       /** \brief Sets left margin */
       inline margins& set_left(const unsigned int nleft) {
-        left = nleft;
+        m_left = left;
 
         return *this;
       }
 
       /**
        * \brief Compares for equality
-       * \param[in] m the margins to compare agains
+       * \param[in] other the margins to compare against
        **/
-      inline bool operator==(margins const& m) const {
-        return (top == m.top && left == m.left && bottom == m.bottom && right == m.right);
+      inline bool operator==(margins const& other) const {
+        return (m_top == other.m_top && m_left == other.m_left &&
+                m_bottom == other.m_bottom && m_right == other.m_right);
       }
 
       /**
        * \brief Compares for inequality
-       * \param[in] m the margins to compare agains
+       * \param[in] other the margins to compare against
        **/
-      inline bool operator!=(margins const& m) const {
-        return (top != m.top || left != m.left || bottom != m.bottom || right != m.right);
+      inline bool operator!=(margins const& other) const {
+        return (m_top != other.m_top || m_left != other.m_left ||
+                m_bottom != other.m_bottom || m_right != other.m_right);
       }
     };
 
@@ -138,12 +140,12 @@ namespace tipi {
         inline properties(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
                                                 m_alignment_horizontal(ah), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
         }
-       
+
         /** \brief Constructor, for when horizontal alignment does not matter */
         inline properties(vertical_alignment const& av, margins const& m, visibility const& v) :
                                                 m_alignment_horizontal(center), m_alignment_vertical(av), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
         }
-       
+
         /** \brief Constructor, for when vertical alignment does not matter */
         inline properties(horizontal_alignment const& ah, margins const& m, visibility const& v) :
                                                 m_alignment_horizontal(ah), m_alignment_vertical(top), m_margin(m), m_visible(v), m_grow(true), m_enabled(true) {
@@ -155,19 +157,19 @@ namespace tipi {
         }
 
         /** \brief Compares for equality */
-        inline bool operator==(properties const& c) const {
-          return (m_alignment_horizontal == c.m_alignment_horizontal &&
-              m_alignment_vertical == c.m_alignment_vertical &&
-              m_margin == c.m_margin && m_visible == c.m_visible &&
-              m_grow == c.m_grow && m_enabled == c.m_enabled);
+        inline bool operator==(properties const& other) const {
+          return (m_alignment_horizontal == other.m_alignment_horizontal &&
+              m_alignment_vertical == other.m_alignment_vertical &&
+              m_margin == other.m_margin && m_visible == other.m_visible &&
+              m_grow == other.m_grow && m_enabled == other.m_enabled);
         }
 
         /** \brief Compares for inequality */
-        inline bool operator!=(properties const& c) const {
-          return (m_alignment_horizontal != c.m_alignment_horizontal ||
-              m_alignment_vertical != c.m_alignment_vertical ||
-              m_margin != c.m_margin || m_visible != c.m_visible ||
-              m_grow != c.m_grow || m_enabled != c.m_enabled);
+        inline bool operator!=(properties const& other) const {
+          return (m_alignment_horizontal != other.m_alignment_horizontal ||
+              m_alignment_vertical != other.m_alignment_vertical ||
+              m_margin != other.m_margin || m_visible != other.m_visible ||
+              m_grow != other.m_grow || m_enabled != other.m_enabled);
         }
     };
     /// \endcond
@@ -200,6 +202,11 @@ namespace tipi {
 
         /** \brief Constructor */
         manager();
+
+        /** \brief Whether an element is set to grow to fill available space */
+        bool grows(element const& e) const {
+          return e.get_grow();
+        }
 
       public:
 
@@ -243,20 +250,20 @@ namespace tipi {
         /** \brief Gets the default visibility used for adding elements */
         visibility get_default_visibility() const;
 
-        /** \brief Enables an element */ 
+        /** \brief Finds a child element and makes it enabled/disabled */
         virtual void enable(element*, bool = true) = 0;
 
-        /** \brief Disables an element */ 
+        /** \brief Disables an element */
         virtual void disable(element*) = 0;
 
-        /** \brief Makes an element visible */ 
+        /** \brief Finds a child element and makes it visible/invisible */
         virtual void show(element*, bool = true) = 0;
 
-        /** \brief Makes an element invisible */ 
+        /** \brief Finds an element and makes it invisible */
         virtual void hide(element*) = 0;
 
         /** \brief Destructor */
-        virtual ~manager() = 0;
+        virtual ~manager() {};
     };
 
     /**
@@ -274,20 +281,20 @@ namespace tipi {
       template < typename R, typename S >
       friend class ::utility::visitor;
 
-      protected:
+      private:
 
         /** \brief The type of the list with the element managed by this manager */
         typedef std::vector< layout_descriptor > children_list;
 
-      protected:
+      private:
 
         /** \brief The layout elements directly contained in this box */
         children_list    m_children;
 
-      protected:
+      private:
 
         /** \brief Constructor */
-        box();
+        box() {}
 
         /** \brief Resets private members to defaults */
         void clear();
@@ -349,16 +356,16 @@ namespace tipi {
         template < typename T >
         box< A >& append(T&, A const&, margins const&, visibility const&);
 
-        /** \brief Enables an element visible */ 
+        /** \brief Enables an element */
         void enable(element*, bool = true);
 
-        /** \brief Disables an element invisible */ 
+        /** \brief Disables an element */
         void disable(element*);
 
-        /** \brief Makes an element */ 
+        /** \brief Shows or hides the element is visible, (does not influence layout) */
         void show(element*, bool = true);
 
-        /** \brief Makes an element invisible */ 
+        /** \brief Makes an element invisible */
         void hide(element*);
     };
 
@@ -376,17 +383,15 @@ namespace tipi {
      **/
     typedef box< vertical_alignment >   horizontal_box;
 
-    inline manager::~manager() {
-    }
-
     /**
-     * \param[in] t the top margin
-     * \param[in] r the right margin
-     * \param[in] b the bottom margin
-     * \param[in] l the left margin
+     * \param[in] top the top margin
+     * \param[in] right the right margin
+     * \param[in] bottom the bottom margin
+     * \param[in] left the left margin
      **/
-    inline margins::margins(const unsigned short t, const unsigned short r, const unsigned short b, const unsigned short l) :
-                                                                top(t), right(r), bottom(b), left(l) {
+    inline margins::margins(const unsigned short top, const unsigned short right,
+                            const unsigned short bottom, const unsigned short left) :
+                               m_top(top), m_right(right), m_bottom(bottom), m_left(left) {
     }
 
     inline manager::manager() : m_default_properties(top, left, margins(0,0,0,0), visible) {
@@ -462,10 +467,6 @@ namespace tipi {
     }
 
     template < typename A >
-    inline box< A >::box() {
-    }
-
-    template < typename A >
     inline void box< A >::clear() {
       m_children.clear();
     }
@@ -486,7 +487,7 @@ namespace tipi {
     inline element& box< A >::add(element& e, properties const& c) {
       properties cn(c);
 
-      cn.set_growth(e.get_grow());
+      cn.set_growth(grows(e));
 
       m_children.push_back(layout_descriptor(&e,cn));
 
@@ -546,6 +547,10 @@ namespace tipi {
       return *this;
     }
 
+    /**
+     * \param[in] e the element 
+     * \param[in] b whether it should be enabled
+     **/
     template < typename A >
     inline void box< A >::enable(element* e, bool b) {
       for (children_list::iterator i = m_children.begin(); i != m_children.end(); ++i) {
@@ -557,11 +562,18 @@ namespace tipi {
       activate_handlers();
     }
 
+    /**
+     * \param[in] e the element 
+     **/
     template < typename A >
     inline void box< A >::disable(element* e) {
       enable(e, false);
     }
 
+    /**
+     * \param[in] e the element 
+     * \param[in] b whether it should be visible
+     **/
     template < typename A >
     inline void box< A >::show(element* e, bool b) {
       for (children_list::iterator i = m_children.begin(); i != m_children.end(); ++i) {
@@ -573,6 +585,9 @@ namespace tipi {
       activate_handlers();
     }
 
+    /**
+     * \param[in] e the element 
+     **/
     template < typename A >
     inline void box< A >::hide(element* e) {
       show(e, false);

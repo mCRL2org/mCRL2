@@ -89,8 +89,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& configura
 bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
   return (do_untime(options)==0);
 }
 
@@ -100,7 +100,7 @@ int do_untime(const tool_options& options)
 {
   mcrl2::lps::specification lps_specification;
   lps_specification.load(options.input_file);
-  mcrl2::lps::untime(lps_specification).save(options.output_file); 
+  mcrl2::lps::untime(lps_specification).save(options.output_file);
   return 0;
 }
 

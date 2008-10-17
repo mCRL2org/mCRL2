@@ -61,7 +61,7 @@ namespace tipi {
           return &event_handler;
         }
 
-      protected:
+      private:
 
         /** \brief The current event handler for this object */
         basic_event_handler*        m_event_handler;
@@ -103,29 +103,37 @@ namespace tipi {
           return *m_event_handler;
         }
 
-      public:
-
         /** \brief Constructor */
         element() : m_event_handler(get_default_event_handler()), m_grow(true) {
         }
 
-        /** \brief Set whether the element is allowed to grow or not */
+        /** \brief Set whether the element is allowed to grow or not
+         * \param[in] b whether the element should grow to fill the available space
+         **/
         inline void set_grow(bool b) {
           m_grow = b;
         }
 
-        /** \brief Get whether the element is allowed to grow or not */
-        inline bool get_grow() {
+        /** \brief Get whether the element is allowed to grow or not
+         * \return whether the element grows to fill the available space
+         **/
+        inline bool get_grow() const {
           return m_grow;
         }
 
-        /** \brief Enables user interaction */
-        inline void set_enabled(bool b) {
+      public:
+
+        /** \brief Enables user interaction
+         * \param[in] b whether the element should be active
+         **/
+        inline void set_active(bool b) {
           m_enabled = b;
         }
 
-        /** \brief Disables user interaction */
-        inline bool get_enabled() {
+        /** \brief Disables user interaction
+         * \return whether the element is currently active
+         **/
+        inline bool is_active() const {
           return m_enabled;
         }
 

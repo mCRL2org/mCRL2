@@ -654,6 +654,7 @@ LIBOBJS
 WX_GL_LDFLAGS
 WX_BASE_LDFLAGS
 WX_CPPFLAGS
+WX_TYPE
 WX_CONFIG
 OPENGL_NAME
 OPENGL_LPATH
@@ -1414,7 +1415,8 @@ Optional Packages:
   --with-boost=prefix     try this for the boost prefix install directory
 
   --with-opengl=DIR       OpenGL/Mesa installation directory
-  --with-wx=DIR           use wxWidgets configuration program wx-config in DIR
+  --with-wx-config=FILE   use FILE for wxWidgets configuration program
+                          wx-config
 
 
 Some influential environment variables:
@@ -5418,7 +5420,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_WX_CONFIG="$with_wx/wx-config"
+    ac_cv_prog_WX_CONFIG="$with_wx_config"
     $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -5490,13 +5492,13 @@ else
   ac_cv_prog_WX_CONFIG="$WX_CONFIG" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $with_wx
+for as_dir in $with_wx_config
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_WX_CONFIG="$with_wx/wx-config-2.8"
+    ac_cv_prog_WX_CONFIG="$with_wx_config-2.8"
     $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -5559,8 +5561,15 @@ fi
 if test $WX_CONFIG; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl,xml,html,adv)"
+  if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="shared"
+  else
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="static"
+  fi
 else
   USE_WX=no
 fi

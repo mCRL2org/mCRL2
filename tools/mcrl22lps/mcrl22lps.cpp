@@ -123,7 +123,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
-  std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
+  std::string infilename = c.get_input(mcrl2_file_for_input).location();
 
   // Set defaults for options
   if (!c.option_exists(option_final_cluster)) {
@@ -230,7 +230,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     method_selector.set_selection(c.get_option_argument< t_lin_method >(option_linearisation_method, 0));
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait for the OK button to be pressed */
   okay_button.await_change();
@@ -279,7 +279,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   bool result = true;
 
   if (c.input_exists(mcrl2_file_for_input)) {
-    task_options.infilename = c.get_input(mcrl2_file_for_input).get_location();
+    task_options.infilename = c.get_input(mcrl2_file_for_input).location();
   }
   else {
     send_error("Configuration does not contain an input object\n");
@@ -288,7 +288,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   }
 
   if (c.output_exists(lps_file_for_output) ) {
-    task_options.outfilename = c.get_output(lps_file_for_output).get_location();
+    task_options.outfilename = c.get_output(lps_file_for_output).location();
   }
   else {
     send_error("Configuration does not contain an output object\n");
@@ -334,7 +334,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   t_lin_options task_options;
-  
+
   // Extract configuration
   extract_task_options(c, task_options);
 
@@ -342,8 +342,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::tool_display d;
 
   label& message = d.create< label >();
- 
-  d.set_manager(d.create< vertical_box >().
+
+  d.manager(d.create< vertical_box >().
                         append(message.set_text("Linearisation in progress"), layout::left));
 
   send_display_layout(d);

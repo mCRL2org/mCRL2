@@ -76,7 +76,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
 {
   gsDebugMsg("squadt_interactor: User interactive configuration\n");
 
-  if (configuration.is_fresh()) {
+  if (configuration.fresh()) {
     if (!configuration.output_exists(lps_file_for_output)) {
       configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
     }
@@ -96,8 +96,8 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   gsDebugMsg("squadt_interactor: Performing task\n");
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
 
   gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_sumelm(options)==0);

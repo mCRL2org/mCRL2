@@ -234,16 +234,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase));
 
   if (c.input_exists(formula_file_for_input)) {
-    formula_field.set_text(c.get_input(formula_file_for_input).get_location());
+    formula_field.set_text(c.get_input(formula_file_for_input).location());
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
-  
+
   if (c.output_exists(formula_file_for_input)) {
-    c.get_input(formula_file_for_input).set_location(formula_field.get_text());
+    c.get_input(formula_file_for_input).location(formula_field.get_text());
   }
   else {
     c.add_input(formula_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), formula_field.get_text());
@@ -253,7 +253,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   if (c.output_exists(pbes_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(pbes_file_for_output);
 
-    output_file.set_location(c.get_output_name(".pbes"));
+    output_file.location(c.get_output_name(".pbes"));
   }
   else {
     if (format_selector.get_selection() == normal) {
@@ -289,9 +289,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.pretty           = c.get_option_argument< pbes_output_format >(option_selected_output_format) != normal;
   tool_options.timed            = c.get_option_argument< bool >(option_timed);
   tool_options.end_phase        = c.get_option_argument< t_phase >(option_end_phase);
-  tool_options.formfilename     = c.get_input(formula_file_for_input).get_location();
-  tool_options.infilename       = c.get_input(lps_file_for_input).get_location();
-  tool_options.outfilename      = c.get_output(pbes_file_for_output).get_location();
+  tool_options.formfilename     = c.get_input(formula_file_for_input).location();
+  tool_options.infilename       = c.get_input(lps_file_for_input).location();
+  tool_options.outfilename      = c.get_output(pbes_file_for_output).location();
 
   bool result = process(tool_options);
 

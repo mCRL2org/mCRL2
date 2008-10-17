@@ -163,7 +163,7 @@ namespace tipi {
           if (g) {
             std::vector < tipi::layout::element const* > elements;
 
-            if (g->get_manager() != 0) {
+            if (g->manager() != 0) {
               tipi::visitors::restore(*g, elements, m->to_string());
             }
 

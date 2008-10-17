@@ -31,7 +31,7 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/datetime.h>
-     
+
 class tipi_export_visitor_impl : public tipi::layout::basic_event_handler {
 
   protected:
@@ -98,8 +98,8 @@ namespace utility {
   template <>
   template <>
   std::auto_ptr< wxObject > visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > >::visit(tipi::tool_display const& t) {
-    if (t.get_manager() != 0) {
-      return do_visit(*t.get_manager());
+    if (t.manager() != 0) {
+      return do_visit(*t.manager());
     }
 
     return std::auto_ptr< wxObject >();
@@ -113,10 +113,10 @@ namespace utility {
     for (tipi::layout::box< tipi::layout::vertical_alignment >::children_list::const_iterator i = b.m_children.begin(); i != b.m_children.end(); ++i) {
       tipi::layout::properties const& properties = i->layout_properties;
 
-      if (0 < properties.m_margin.top) {
-        sizer->AddSpacer(properties.m_margin.top);
+      if (0 < properties.m_margin.m_top) {
+        sizer->AddSpacer(properties.m_margin.m_top);
       }
-       
+
       std::auto_ptr< wxObject > new_child(do_visit(*i->layout_element));
 
       if (properties.m_visible == tipi::layout::hidden) {
@@ -145,23 +145,23 @@ namespace utility {
         if (dynamic_cast< tipi::layout::manager const* > (i->layout_element) != 0) {
           flags |= wxEXPAND;
 
-          sizer->Add(static_cast< wxSizer* > (new_child.release()), 0, flags, (properties.m_margin.left + properties.m_margin.right) >> 1);
+          sizer->Add(static_cast< wxSizer* > (new_child.release()), 0, flags, (properties.m_margin.m_left + properties.m_margin.m_right) >> 1);
         }
         else {
           flags |= (properties.m_grow) ? wxEXPAND : 0;
 
-          sizer->Add(static_cast< wxWindow* > (new_child.release()), 0, flags, (properties.m_margin.left + properties.m_margin.right) >> 1);
+          sizer->Add(static_cast< wxWindow* > (new_child.release()), 0, flags, (properties.m_margin.m_left + properties.m_margin.m_right) >> 1);
         }
       }
-      
-      if (0 < properties.m_margin.bottom) {
-        sizer->AddSpacer(properties.m_margin.bottom);
+
+      if (0 < properties.m_margin.m_bottom) {
+        sizer->AddSpacer(properties.m_margin.m_bottom);
       }
     }
 
     return std::auto_ptr< wxObject > (sizer);
   }
-     
+
   /**
    * \return a standard auto pointer to a mediator object with current the mediator with which to attach the children
    **/
@@ -173,10 +173,10 @@ namespace utility {
     for (tipi::layout::box< tipi::layout::horizontal_alignment >::children_list::const_iterator i = b.m_children.begin(); i != b.m_children.end(); ++i) {
       tipi::layout::properties const& properties = i->layout_properties;
 
-      if (0 < properties.m_margin.left) {
-        sizer->AddSpacer(properties.m_margin.left);
+      if (0 < properties.m_margin.m_left) {
+        sizer->AddSpacer(properties.m_margin.m_left);
       }
-       
+
       std::auto_ptr< wxObject > new_child(do_visit(*i->layout_element));
 
       if (properties.m_visible == tipi::layout::hidden) {
@@ -205,23 +205,23 @@ namespace utility {
         if (dynamic_cast< tipi::layout::manager const* > (i->layout_element) != 0) {
           flags |= wxEXPAND;
 
-          sizer->Add(static_cast< wxSizer* > (new_child.release()), 0, flags, (properties.m_margin.top + properties.m_margin.bottom) >> 1);
+          sizer->Add(static_cast< wxSizer* > (new_child.release()), 0, flags, (properties.m_margin.m_top + properties.m_margin.m_bottom) >> 1);
         }
         else {
           flags |= (properties.m_grow) ? wxEXPAND : 0;
 
-          sizer->Add(static_cast< wxWindow* > (new_child.release()), 0, flags, (properties.m_margin.top + properties.m_margin.bottom) >> 1);
+          sizer->Add(static_cast< wxWindow* > (new_child.release()), 0, flags, (properties.m_margin.m_top + properties.m_margin.m_bottom) >> 1);
         }
       }
 
-      if (0 < properties.m_margin.right) {
-        sizer->AddSpacer(properties.m_margin.right);
+      if (0 < properties.m_margin.m_right) {
+        sizer->AddSpacer(properties.m_margin.m_right);
       }
     }
 
     return std::auto_ptr< wxObject > (sizer);
   }
-     
+
   /**
    * \param[in] e the element that is associated with the new control
    **/
@@ -241,7 +241,7 @@ namespace utility {
 
     return std::auto_ptr< wxObject > (label);
   }
-     
+
   /**
    * \param[in] e the element that is associated with the new control
    * \param[in] s the text of the label
@@ -256,7 +256,7 @@ namespace utility {
     };
 
     std::auto_ptr< wxButton > button;
- 
+
     if (e.get_label() == "OK") {
       button.reset(new wxButton(m_current_window, wxID_OK));
     }
@@ -269,7 +269,7 @@ namespace utility {
 
     // For processing updates to the display that originate at the tool side
     tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*button)));
- 
+
     event_helper< tipi::layout::elements::button, wxButton >* l(
             new event_helper< tipi::layout::elements::button, wxButton >(e, *button));
 
@@ -313,12 +313,12 @@ namespace utility {
 
     // For processing updates to the display that originate at the tool side
     tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*button)));
-  
+
     event_helper< radio_button, wxRadioButton >* l = new event_helper< radio_button, wxRadioButton >(e, *button);
 
     // For processing updates to the display that originate from local user interaction
     l->connect(wxEVT_COMMAND_RADIOBUTTON_SELECTED);
-  
+
     return std::auto_ptr< wxObject > (button);
   }
 
@@ -336,20 +336,20 @@ namespace utility {
     };
 
     std::auto_ptr< wxCheckBox > checkbox(new wxCheckBox(m_current_window, wxID_ANY, wxString(e.get_label().c_str(), wxConvLocal)));
-  
+
     checkbox->SetValue(e.get_status());
-  
+
     // For processing updates to the display that originate at the tool side
     tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*checkbox)));
-  
+
     event_helper< tipi::layout::elements::checkbox, wxCheckBox >* l =
             new event_helper< tipi::layout::elements::checkbox, wxCheckBox >(e, *checkbox);
 
     l->connect(wxEVT_COMMAND_CHECKBOX_CLICKED);
-  
+
     return std::auto_ptr< wxObject > (checkbox);
   }
-  
+
   /**
    * \param[in] e the element that is associated with the new control
    **/
@@ -364,17 +364,17 @@ namespace utility {
     };
 
     std::auto_ptr< wxGauge > progress_bar(new wxGauge(m_current_window, wxID_ANY, e.get_maximum() - e.get_minimum(), wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL));
-  
+
     // SetRange() avoids a bug with range setting in the constructor (wx-2.8)
     progress_bar->SetRange(e.get_maximum() - e.get_minimum());
     progress_bar->SetValue(e.get_value() - e.get_minimum());
-  
+
     // For processing updates to the display that originate at the tool side
     tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*progress_bar)));
-  
+
     return std::auto_ptr< wxObject > (progress_bar);
   }
-  
+
   /**
    * \param[in] e the element that is associated with the new control
    **/
@@ -388,15 +388,15 @@ namespace utility {
     };
 
     std::auto_ptr< wxTextCtrl > text_field(new wxTextCtrl(m_current_window, wxID_ANY, wxString(e.get_text().c_str(), wxConvLocal), wxDefaultPosition, wxSize(200,-1)));
-  
+
     // For processing updates to the display that originate at the tool side
     tipi::layout::basic_event_handler::add(&e, boost::bind(&trampoline::import, boost::cref(e), boost::ref(*text_field)));
-  
+
     event_helper< tipi::layout::elements::text_field, wxTextCtrl >* l =
             new event_helper< tipi::layout::elements::text_field, wxTextCtrl >(e, *text_field);
 
     l->connect(wxEVT_COMMAND_TEXT_UPDATED);
-  
+
     return std::auto_ptr< wxObject > (text_field);
   }
 
@@ -423,14 +423,14 @@ namespace squadt {
 
     /** \brief Translates a tipi layout to a functional wxWidgets layout */
     class tool_display_mediator : public ::utility::visitor< tipi_export_visitor_impl, std::auto_ptr< wxObject > > {
- 
+
       public:
-  
+
         /** \brief Constructor */
         tool_display_mediator(tool_display& w) {
           m_current_window = &w;
         }
- 
+
         /** \param[in] w The sizer to which the elements will be attached */
         std::auto_ptr< wxSizer > instantiate_layout(tipi::display const& t) {
           return std::auto_ptr< wxSizer >(static_cast< wxSizer* > (do_visit(t).release()));
@@ -607,15 +607,15 @@ namespace squadt {
             GetSizer()->Insert(1, m_content, 1, wxALL|wxALIGN_LEFT, 2);
 
             Layout();
-           
-            if (!m_layout->get_visibility()) {
+
+            if (!m_layout->visible()) {
               // Show minimised
               m_content->SetMinSize(GetClientSize().GetWidth(), m_content->GetItem((size_t) 0)->GetSize().GetHeight());
             }
-           
+
             Show(true);
           }
-           
+
           /* Toggle scrollbar availability on demand */
           toggle_scrollbar_helper();
         }
@@ -639,7 +639,7 @@ namespace squadt {
         BOOST_FOREACH(tipi::layout::element const* i, l) {
           m_mediator->execute_handlers(i, false);
         }
-       
+
         /* Toggle scrollbar availability on demand */
         toggle_scrollbar_helper();
       }
@@ -655,7 +655,7 @@ namespace squadt {
       if (m_log == 0) {
         wxSizer* sizer = GetSizer();
 
-        m_log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->get_description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
+        m_log = new wxTextCtrl(this, wxID_ANY, stamp + wxString(l->description().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
         m_log->SetSize(-1, 40);
 
         sizer->Add(m_log, 0, wxALL|wxEXPAND|wxALIGN_CENTER, 2);
@@ -667,7 +667,7 @@ namespace squadt {
         m_log->Show(true);
       }
       else {
-        m_log->AppendText(stamp + wxString(l->get_description().c_str(), wxConvLocal));
+        m_log->AppendText(stamp + wxString(l->description().c_str(), wxConvLocal));
 
         m_log->ShowPosition(m_log->GetLastPosition());
       }

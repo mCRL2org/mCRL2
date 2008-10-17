@@ -533,29 +533,36 @@ AC_SUBST([OPENGL_NAME],[])
 # Check for wxWidgets
 AC_ARG_WITH(
   [wx],
-  AS_HELP_STRING([--with-wx=DIR],[use wxWidgets configuration program wx-config in DIR])
+  AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
 if test $with_wx; then
-  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx/wx-config],[],[$with_wx])
-else 
+  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx_config],[],[$with_wx])
+else
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
 fi
 if test -z $WX_CONFIG; then
   if test $with_wx; then
-    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[$with_wx/wx-config-2.8],[],[$with_wx])
-  else 
+    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[$with_wx_config-2.8],[],[$with_wx_config])
+  else
     AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
   fi
 fi
 if test $WX_CONFIG; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl,xml,html,adv)"
+  if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="shared"
+  else
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="static"
+  fi
 else
   USE_WX=no
 fi
-AC_SUBST([WX_CONFIG],[])
+AC_SUBST([WX_TYPE],[])
 AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_BASE_LDFLAGS],[])
 AC_SUBST([WX_GL_LDFLAGS],[])

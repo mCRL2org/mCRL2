@@ -41,8 +41,8 @@ namespace tipi {
       friend class communicator_impl;
     /// \endcond
 
-      protected:
- 
+      private:
+
         /** \brief The capabilities object of the controller as it is send, when requested */
         static controller::capabilities         m_controller_capabilities;
 

@@ -232,13 +232,13 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   if (c.option_exists(option_rewrite_strategy)) {
     strategy_selector.set_selection(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
-  
+
   button& okay_button = d.create< button >().set_label("OK");
 
   m.append(d.create< label >().set_text(" ")).
     append(okay_button, layout::right);
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
@@ -276,8 +276,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   send_hide_display();
 
-  constelm.loadFile(c.get_input(lps_file_for_input).get_location());
-  constelm.setSaveFile(c.get_output(lps_file_for_output).get_location());
+  constelm.loadFile(c.get_input(lps_file_for_input).location());
+  constelm.setSaveFile(c.get_output(lps_file_for_output).location());
 
   constelm.filter();
   constelm.output();
@@ -286,7 +286,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) { 
+lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) {
   p_spec.protect();
 }
 

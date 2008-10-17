@@ -73,7 +73,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_opt
   bool result = true;
 
   if (c.input_exists(chi_file_for_input)) {
-    task_options.infilename = c.get_input(chi_file_for_input).get_location();
+    task_options.infilename = c.get_input(chi_file_for_input).location();
   }
   else {
     send_error("Configuration does not contain an input object\n");
@@ -82,7 +82,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_opt
   }
 
   if (c.output_exists(mcrl2_file_for_output) ) {
-    task_options.outfilename = c.get_output(mcrl2_file_for_output).get_location();
+    task_options.outfilename = c.get_output(mcrl2_file_for_output).location();
   }
   else {
     send_error("Configuration does not contain an output object\n");
@@ -120,15 +120,15 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   extract_task_options(c, options);
- 
+
   label& message = d.create< label >();
- 
-  d.set_manager(d.create< vertical_box >().
+
+  d.manager(d.create< vertical_box >().
                         append(message.set_text("Translation in progress"), layout::left));
 
   send_display_layout(d);
 
-  std::string mcrl2spec; 
+  std::string mcrl2spec;
 
   ATermAppl ast_result = translate_file(options);
 

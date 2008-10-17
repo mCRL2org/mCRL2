@@ -31,20 +31,20 @@ namespace squadt {
      **/
     class command {
       friend class process_impl;
-  
+
       private:
-  
+
         /** \brief Path to the program that is to be executed */
         std::string                 executable;
 
         /** \brief Path to the working directory of the tool */
         boost::filesystem::path     working_directory;
-  
+
         /** \brief The arguments to the command */
         std::deque < std::string >  arguments;
 
       private:
-       
+
         /** \brief Get the command line arguments as an array */
         boost::shared_array < char const* > get_array(bool = true) const;
 
@@ -52,17 +52,17 @@ namespace squadt {
 
         /** \brief A sequence of arguments that are part of a command */
         typedef boost::iterator_range < std::deque < std::string >::const_iterator > const_argument_sequence;
-  
+
         /** \brief A sequence of arguments that are part of a command */
         typedef boost::iterator_range < std::deque < std::string >::iterator >       argument_sequence;
-  
+
       public:
 
         /** \brief Parse command as if passed from the command line */
         static std::auto_ptr < command > from_command_line(std::string const&);
 
       public:
-  
+
         /** \brief Constructor */
         command(const std::string&);
 
@@ -74,10 +74,10 @@ namespace squadt {
 
         /** \brief Gets the working directory */
         boost::filesystem::path get_working_directory() const;
-  
+
         /** \brief Sets the working directory */
         void set_working_directory(boost::filesystem::path const&);
-  
+
         /** \brief Adds an argument */
         void prepend_argument(std::string const&);
 
@@ -85,7 +85,7 @@ namespace squadt {
         void append_argument(std::string const&);
 
         /** \brief Get arguments as a string */
-        std::string as_string(bool = true) const;
+        std::string string(bool = true) const;
 
         /** \brief Get arguments as an array of constant C strings */
         const_argument_sequence get_arguments() const;
@@ -99,7 +99,7 @@ namespace squadt {
         /** \brief Returns the basename of the executable */
         std::string get_executable() const;
     };
-  
+
     /**
      * @param[in] e a complete path to an executable of the program that is to be executed
      **/
@@ -136,14 +136,14 @@ namespace squadt {
     inline void command::prepend_argument(std::string const& a) {
       arguments.push_front(a);
     }
-  
+
     /**
      * @param a a single argument
      **/
     inline void command::append_argument(std::string const& a) {
       arguments.push_back(a);
     }
-  
+
     /**
      * @param e name of an executable or its full path
      **/

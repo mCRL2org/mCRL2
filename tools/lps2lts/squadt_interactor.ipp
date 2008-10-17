@@ -191,16 +191,16 @@ class squadt_interactor::storage_configuration {
 
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
         tipi::configuration::object& o = c.get_output(lts_file_for_output);
-     
-        o.set_mime_type(mt);
-        o.set_location(outfile);
+
+        o.type(mt);
+        o.location(outfile);
       }
       else {
         c.add_output(lts_file_for_output, mt, outfile);
       }
-      
+
       c.add_option(option_out_info).set_argument_value< 0 >(cb_out_info.get_status());
-      
+
       c.add_option(option_usedummies).set_argument_value< 0 >(cb_usedummies.get_status());
       c.add_option(option_state_format_tree).set_argument_value< 0 >(cb_state_format_tree.get_status());
       c.add_option(option_removeunused).set_argument_value< 0 >(cb_removeunused.get_status());
@@ -212,8 +212,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
-  
-  bool make_lts = c.get_category() == tipi::tool::category::transformation;
+
+  bool make_lts = c.category() == tipi::tool::category::transformation;
 
   /* Set default configuration, for unspecified options */
   if (!c.option_exists(option_detect_deadlock)) {
@@ -348,7 +348,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
         c.get_option_argument< exploration_strategy >(option_exploration_strategy, 0));
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
@@ -406,7 +406,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 bool squadt_interactor::check_configuration(tipi::configuration const &c) const
 {
   return c.input_exists(lps_file_for_input) &&
-       (!(c.get_category() == tipi::tool::category::transformation) || c.output_exists(lts_file_for_output));
+       (!(c.category() == tipi::tool::category::transformation) || c.output_exists(lts_file_for_output));
 }
 
 class squadt_interactor::status_display {
@@ -457,10 +457,10 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
           append(lb_seen).
           append(lb_transitions))).
     append(progbar);
-  
+
   lgopts.display_status = boost::bind(&squadt_interactor::status_display::update, this, _1, _2, _3, _4, _5);
 
-  m_communicator.send_display_layout(display.set_manager(m));
+  m_communicator.send_display_layout(display.manager(m));
 }
 
 void squadt_interactor::status_display::update(unsigned long level, unsigned long long explored,
@@ -498,15 +498,15 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lts_generation_options lgopts;
   status_display         display(*this, lgopts);
 
-  lgopts.specification = configuration.get_input(lps_file_for_input).get_location();
+  lgopts.specification = configuration.get_input(lps_file_for_input).location();
 
-  if (configuration.get_category() == tipi::tool::category::transformation) {
-    lgopts.lts = configuration.get_output(lts_file_for_output).get_location();
+  if (configuration.category() == tipi::tool::category::transformation) {
+    lgopts.lts = configuration.get_output(lts_file_for_output).location();
 
     lgopts.outinfo = configuration.get_option_argument< bool >(option_out_info);
- 
+
     lgopts.outformat = configuration.get_option_argument< mcrl2::lts::lts_type >(option_lts_type);
- 
+
     lgopts.usedummies   = configuration.get_option_argument< bool >(option_usedummies);
     lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;
     lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);

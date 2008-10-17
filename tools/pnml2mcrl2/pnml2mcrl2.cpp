@@ -170,7 +170,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
    * that mcrl22lps can be restarted later with exactly
    * the same parameters
    */
-  if (c.is_fresh()) {
+  if (c.fresh()) {
     if (!c.output_exists(mcrl2_file_for_output)) {
       c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
     }
@@ -191,8 +191,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   rec_par=ATfalse;
 
-  tool_options_type tool_options = { c.get_input(pnml_file_for_input).get_location().c_str(),
-                                     c.get_output(mcrl2_file_for_output).get_location().c_str()};
+  tool_options_type tool_options = { c.get_input(pnml_file_for_input).location().c_str(),
+                                     c.get_output(mcrl2_file_for_output).location().c_str()};
 
   return ::perform_task(tool_options);
 }
@@ -3105,7 +3105,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
     }
     ParamList=ATreverse(ParamList);
     SumList=ATreverse(SumList);
-    
+
     //add the monitor action
     Actions=ATinsert(Actions,(ATerm)ATmakeAppl0(ATappendAFun(ATprependAFun("t_",CurrentTransId),"_mon"))); //MonitorAction
     ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());

@@ -38,9 +38,7 @@ namespace tipi {
       private:
 
         /** \brief Name of the category */
-        std::string name;
-
-      private:
+        std::string m_name;
 
         /** \brief unknown, for everything that does not map to one of the public categories */
         static const category unknown;
@@ -54,31 +52,65 @@ namespace tipi {
         static const category visualisation;  ///< visualisation of objects
         static const category simulation;     ///< simulation
 
-        /** \brief The standard available tool categories */
-        static const boost::array < category const*, 7 > categories;
+      private:
 
       public:
 
-        /** \brief Constructor */
-        inline category(std::string const&);
+        /** \brief Constructor
+         * \param[in] name a name for the category
+         **/
+        inline category(std::string const& name) : m_name(name) {
+        }
+
+        /** \brief Chooses the best matching category for a string that is interpreted as category name
+         * \param[in] n a name for the category
+         * \return the best matching category object
+         **/
+        inline static category const& match(std::string const& n) {
+          static const boost::array < category const*, 7 > categories = { {
+            &category::unknown,
+            &category::editing,
+            &category::reporting,
+            &category::conversion,
+            &category::transformation,
+            &category::visualisation,
+            &category::simulation,
+          } };
+
+          boost::array < category const*, 7 >::const_iterator i = std::find_if(categories.begin(), categories.end(),
+                      boost::bind(std::equal_to< std::string const >(), n, boost::bind(&category::m_name, _1)));
+
+          if (i != categories.end()) {
+            return (**i);
+          }
+
+          return (unknown);
+        }
 
         /** \brief Gets the name of the category */
-        inline std::string get_name() const;
+        inline std::string get_name() const {
+          return (m_name);
+        }
 
         /** \brief Whether or not the category is unknown */
-        inline bool is_unknown();
-
-        /** \brief Chooses the best matching category for a string that is interpreted as category name */
-        inline static category const& fit(std::string const&);
+        inline bool is_unknown() const {
+          return (&unknown == this);
+        }
 
         /** \brief Compare for smaller */
-        inline bool operator <(category const&) const;
+        inline bool operator <(category const& c) const {
+          return (m_name < c.m_name);
+        }
 
         /** \brief Compare for equality */
-        inline bool operator ==(category const&) const;
+        inline bool operator ==(category const& c) const {
+          return (m_name == c.m_name);
+        }
 
         /** \brief Conversion to STL string */
-        inline operator std::string() const;
+        inline operator std::string() const {
+          return m_name;
+        }
     };
 
 #ifdef TIPI_IMPORT_STATIC_DEFINITIONS
@@ -89,55 +121,11 @@ namespace tipi {
     const category category::transformation("transformation");
     const category category::visualisation("visualisation");
     const category category::simulation("simulation");
-
-    const boost::array < category const*, 7 > category::categories = { {
-      &category::unknown,
-      &category::editing,
-      &category::reporting,
-      &category::conversion,
-      &category::transformation,
-      &category::visualisation,
-      &category::simulation,
-    } };
 #endif
-
-    inline category::category(std::string const& n) : name(n) {
-    }
-
-    inline std::string category::get_name() const {
-      return (name);
-    }
-
-    inline bool category::is_unknown() {
-      return (&unknown == this);
-    }
-
-    inline category const& category::fit(std::string const& n) {
-      boost::array < category const*, 5 >::const_iterator i = std::find_if(categories.begin(), categories.end(),
-                  boost::bind(std::equal_to< std::string const >(), n, boost::bind(&category::name, _1)));
-
-      if (i != categories.end()) {
-        return (**i);
-      }
-
-      return (unknown);
-    }
 
     /** \brief Conversion to print category to a standard stream */
     inline std::ostream& operator <<(std::ostream& s, category const& c) {
-      return (s << c.name);
-    }
-
-    inline bool category::operator <(category const& c) const {
-      return (name < c.name);
-    }
-
-    inline bool category::operator ==(category const& c) const {
-      return (name == c.name);
-    }
-
-    inline category::operator std::string() const {
-      return (name);
+      return (s << c.m_name);
     }
   }
 }

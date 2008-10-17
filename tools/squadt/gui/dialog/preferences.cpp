@@ -190,13 +190,13 @@ namespace squadt {
           long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
 
           mime_type mt(std::string(format_dialog.GetValue().fn_str()));
-      
-          formats_and_actions->SetItem(row, 0, wxString(mt.to_string().c_str(), wxConvLocal));
+
+          formats_and_actions->SetItem(row, 0, wxString(mt.string().c_str(), wxConvLocal));
 
           std::auto_ptr< command > c = global_build_system.get_type_registry().get_registered_command(mt, "$");
 
           if (c.get()) {
-            formats_and_actions->SetItem(row, 1, wxString(c->as_string().c_str(), wxConvLocal));
+            formats_and_actions->SetItem(row, 1, wxString(c->string().c_str(), wxConvLocal));
           }
           else {
             formats_and_actions->SetItem(row, 1, wxEmptyString);
@@ -265,8 +265,8 @@ namespace squadt {
       BOOST_FOREACH(tipi::mime_type f, types) {
         std::auto_ptr < command > command_line = registry.get_registered_command(f, "$");
 
-        formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
-        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->as_string().c_str(), wxConvLocal) : no_action);
+        formats_and_actions->InsertItem(row, wxString(f.string().c_str(), wxConvLocal));
+        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->string().c_str(), wxConvLocal) : no_action);
       }
 
       known_formats->AddSpacer(5);

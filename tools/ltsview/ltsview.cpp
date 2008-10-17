@@ -75,7 +75,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
     }
 
     bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(fsm_file_for_input).get_location();
+      lts_file_argument = c.get_input(fsm_file_for_input).location();
 
       return mcrl2_wx_tool_interface::perform_task(c);
     }

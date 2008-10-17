@@ -9,8 +9,8 @@
 /// \file processor.ipp
 /// \brief Add your file description here.
 
-#ifndef PROCESSOR_IPP
-#define PROCESSOR_IPP
+#ifndef _PROCESSOR_IPP__
+#define _PROCESSOR_IPP__
 
 #include <algorithm>
 #include <functional>
@@ -342,7 +342,7 @@ namespace squadt {
   inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     assert(selected_input_configuration.get());
 
-    c->set_fresh();
+    c->fresh();
 
     configure(t, c, w);
   }
@@ -353,7 +353,7 @@ namespace squadt {
   inline void processor_impl::update_configuration(tipi::configuration& c) const {
     BOOST_FOREACH(processor::configurated_object_descriptor const& i, inputs) {
       if (c.input_exists(i.identifier)) {
-        c.get_input(i.identifier).set_location(
+        c.get_input(i.identifier).location(
                 boost::static_pointer_cast< object_descriptor > (i.object)->location);
       }
     }

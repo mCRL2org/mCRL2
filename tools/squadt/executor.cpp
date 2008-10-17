@@ -31,7 +31,7 @@ namespace squadt {
     /// \cond INTERNAL_DOCS
     inline executor_impl::executor_impl(unsigned int m) : maximum_instance_count(m) {
     }
-    
+
     /**
      * \param[in] p the process to remove
      **/
@@ -44,7 +44,7 @@ namespace squadt {
         }
       }
     }
- 
+
     /**
      * \param[in] c the command to execute
      * \param[in] w a pointer to the associated implementation object
@@ -69,7 +69,7 @@ namespace squadt {
 
       if (l) {
         l->attach_process(p);
-        l->get_logger().log(1, "executing command `" + c.as_string() + "'\n");
+        l->get_logger().log(1, "executing command `" + c.string() + "'\n");
         l->signal_change(p, process::running);
       }
 
@@ -116,7 +116,7 @@ namespace squadt {
       std::list < boost::shared_ptr < process > > aprocesses;
 
       aprocesses.swap(processes);
-    
+
       delayed_commands.clear();
 
       BOOST_FOREACH(boost::shared_ptr < process > p, aprocesses) {
@@ -132,21 +132,21 @@ namespace squadt {
     inline void executor_impl::start_delayed(boost::shared_ptr < executor_impl >& w) {
       if (0 < delayed_commands.size()) {
         boost::function < void (boost::shared_ptr < executor_impl >&) > f = delayed_commands.front();
- 
+
         delayed_commands.pop_front();
- 
+
         f(w);
       }
     }
-    
+
     size_t executor_impl::get_maximum_instance_count() const {
       return (maximum_instance_count);
     }
- 
+
     void executor_impl::set_maximum_instance_count(size_t m) {
       maximum_instance_count = m;
     }
- 
+
     /**
      * \param p a pointer to a process object
      **/
@@ -155,7 +155,7 @@ namespace squadt {
 
       if (alive) {
         remove(p.get());
- 
+
         start_delayed(alive);
       }
     }
@@ -177,7 +177,7 @@ namespace squadt {
         }
 
         remove(p.get());
- 
+
         start_delayed(alive);
       }
     }
@@ -191,7 +191,7 @@ namespace squadt {
      **/
     executor::executor(unsigned int const& m) : impl(new executor_impl(m)) {
     }
-    
+
     executor::~executor() {
       impl->terminate_all();
     }
@@ -199,11 +199,11 @@ namespace squadt {
     size_t executor::get_maximum_instance_count() const {
       return (impl->maximum_instance_count);
     }
- 
+
     void executor::set_maximum_instance_count(size_t m) {
       impl->maximum_instance_count = m;
     }
- 
+
     /**
      * \param[in] p the process to remove
      **/
@@ -217,12 +217,12 @@ namespace squadt {
     void executor::start_process(const command& c) {
       impl->start_process(c, impl);
     }
- 
+
     /**
      * \param[in] c the command to execute
      * \param[in] l reference to a process listener
      **/
-    void executor::start_process(const command& c, task_monitor::sptr& l) {
+    void executor::start_process(const command& c, boost::shared_ptr< task_monitor >& l) {
       impl->start_process(c, l, impl);
     }
 
@@ -232,12 +232,12 @@ namespace squadt {
     void executor::terminate_all() {
       impl->terminate_all();
     }
- 
+
     /* Start processing commands if the queue contains any waiters */
     void executor::start_delayed() {
       impl->start_delayed(impl);
     }
- 
+
     /**
      * \param[in] c the command that is to be executed
      * \param[in] l a shared pointer a listener (or reference to) for process state changes

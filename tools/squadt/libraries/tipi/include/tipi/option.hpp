@@ -9,8 +9,8 @@
 /// \file tipi/option.hpp
 /// \brief Type used to represent an option in a configuration (protocol concept) 
 
-#ifndef TIPI_OPTION_H
-#define TIPI_OPTION_H
+#ifndef _TIPI_CONFIGURATION_OPTION_HPP__
+#define _TIPI_CONFIGURATION_OPTION_HPP__
 
 #include <boost/shared_ptr.hpp>
 #include <boost/call_traits.hpp>
@@ -81,7 +81,7 @@ namespace tipi {
 
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
   class configuration::option : public configuration::parameter {
-    friend class tipi::configuration; 
+    friend class tipi::configuration;
 
     template < typename R, typename S >
     friend class ::utility::visitor;
@@ -95,9 +95,6 @@ namespace tipi {
       typedef std::vector < type_value_pair >                           type_value_list;
 
     public:
-
-      /** \brief Convenience type to hide the shared pointer wrapping */
-      typedef boost::shared_ptr < option >  sptr;
 
       /** \brief Iterator over the argument values */
       class argument_iterator {
@@ -174,7 +171,7 @@ namespace tipi {
        **/
       template < typename S, typename T >
       inline void append_argument(boost::shared_ptr< S > const& t, typename boost::call_traits< const T >::param_type d) {
-        m_arguments.push_back(std::make_pair(t, t->convert(d)));
+        m_arguments.push_back(std::make_pair(t, convert(*t, d)));
       }
 
       /**
@@ -199,12 +196,12 @@ namespace tipi {
         if (n < m_arguments.size()) {
           if (b) {
             if (dynamic_cast< S const* > (m_arguments[n].first.get())) {
-              m_arguments[n].second = m_arguments[n].first->convert(t);
+              m_arguments[n].second = convert(*m_arguments[n].first,t);
             }
             else {
               boost::shared_ptr< S > a_type(new S);
-       
-              m_arguments[n] = std::make_pair(a_type, a_type->convert(t));
+
+              m_arguments[n] = std::make_pair(a_type, convert(*a_type,t));
             }
           }
         }
@@ -226,12 +223,12 @@ namespace tipi {
         if (n < m_arguments.size()) {
           if (b) {
             if (dynamic_cast< guessed_type const* > (m_arguments[n].first.get())) {
-              m_arguments[n].second = m_arguments[n].first->convert(t);
+              m_arguments[n].second = convert(*m_arguments[n].first, t);
             }
             else {
               boost::shared_ptr< guessed_type > a_type(new guessed_type);
-       
-              m_arguments[n] = std::make_pair(a_type, a_type->convert(t));
+
+              m_arguments[n] = std::make_pair(a_type, convert(*a_type,t));
             }
           }
         }
@@ -264,7 +261,7 @@ namespace tipi {
   inline T configuration::option::get_value(size_t const& n) const {
     assert(n < m_arguments.size());
 
-    return (m_arguments[n].first->evaluate< T >(m_arguments[n].second));
+    return tipi::datatype::convert< T >(*m_arguments[n].first, m_arguments[n].second);
   }
 
   /**
@@ -273,7 +270,7 @@ namespace tipi {
    **/
   template < >
   inline void configuration::option::append_argument< datatype::basic_datatype, const std::string >(
- 	boost::shared_ptr< datatype::basic_datatype > const& t, boost::call_traits< const std::string >::param_type d) {
+    boost::shared_ptr< datatype::basic_datatype > const& t, boost::call_traits< const std::string >::param_type d) {
 
     assert(t->validate(d));
 
@@ -287,7 +284,7 @@ namespace tipi {
       if (b) {
         assert(typeid(S) == typeid(*m_arguments[n].first));
 
-        m_arguments[n].second = m_arguments[n].first->convert(t);
+        m_arguments[n].second = convert(*m_arguments[n].first, t);
       }
     }
     else {

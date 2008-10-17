@@ -119,7 +119,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   else {
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   okay_button.await_change();
 
@@ -150,20 +150,20 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   using namespace tipi::layout::elements;
 
   tool_options options;
-  options.input_file  = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file  = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
   options.strategy    = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
 
   /* Create display */
   tipi::tool_display d;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text("Binary in progress"), layout::left)));
 
   //Perform declustering
   bool result = do_binary(options) == 0;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
   return result;

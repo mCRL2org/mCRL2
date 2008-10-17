@@ -47,7 +47,7 @@ namespace mcrl2 {
                       /* Insert configuration in tool communicator object */
                       valid_configuration_present = check_configuration(configuration);
 
-                      if (configuration.is_fresh()) {
+                      if (configuration.fresh()) {
                         do {
                           user_interactive_configuration(configuration);
 

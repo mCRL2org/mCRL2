@@ -22,26 +22,26 @@ namespace tipi {
     namespace elements {
 
       using namespace tipi::datatype;
-     
+
       /** \brief A basic text label widget */
       class label : public layout::element {
         friend class layout::element;
 
         template < typename R, typename S >
         friend class ::utility::visitor;
-     
+
         private:
-     
+
           /** \brief The text to be displayed */
           std::string m_text;
 
         private:
-     
+
           /** \brief Default constructor */
           inline label() {}
-     
+
         public:
-     
+
           /** \brief Change the text */
           inline std::string get_text() const {
             return m_text;
@@ -60,28 +60,28 @@ namespace tipi {
             return *this;
           }
       };
-     
+
       /** \brief A basic button widget */
       class button : public layout::element {
         friend class layout::element;
 
         template < typename R, typename S >
         friend class ::utility::visitor;
-     
+
         private:
 
           /** \brief The caption */
           std::string m_label;
-     
+
         private:
-     
+
           /** \brief Default constructor */
           inline button() {
             set_grow(false);
           }
-     
+
         public:
-     
+
           /** \brief Change the text */
           inline std::string get_label() const {
             return m_label;
@@ -105,7 +105,7 @@ namespace tipi {
             activate_handlers();
           }
       };
-     
+
       /**
        * \brief A basic radio button widget
        *
@@ -119,7 +119,7 @@ namespace tipi {
        **/
       class radio_button : public layout::element {
         friend class layout::element;
-     
+
         template < typename R, typename S >
         friend class ::utility::visitor;
 
@@ -127,7 +127,7 @@ namespace tipi {
 
           /** \brief The caption */
           std::string          m_label;
-     
+
           /** \brief The connection reference */
           radio_button*        m_connection;
 
@@ -135,7 +135,7 @@ namespace tipi {
           bool                 m_selected;
 
         private:
-     
+
           /**
            * \brief Set state of the radio button
            * \param[in] b whether or not to send an event
@@ -144,13 +144,13 @@ namespace tipi {
             for (radio_button* r = m_connection; r != this; r = r->m_connection) {
               if (r->m_selected) {
                 r->m_selected = false;
-       
+
                 break;
               }
             }
-       
+
             m_selected = true;
- 
+
             activate_handlers(b);
           }
 
@@ -160,7 +160,7 @@ namespace tipi {
           }
 
         public:
-     
+
           /**
            * \brief sets the label for the radio button
            * \param[in] l the new text of the label for the radio button
@@ -186,23 +186,23 @@ namespace tipi {
               // disconnect from group if it contains more than one button
               if (r.m_connection != &r) {
                 radio_button* n = r.m_connection;
-           
+
                 while (n->m_connection != &r) {
                   n = n->m_connection;
                 }
-           
+
                 n->m_connection = r.m_connection;
-           
+
                 if (r.m_selected) {
                   n->m_selected = true;
                 }
               }
-           
+
               r.m_selected   = false;
               r.m_connection = m_connection;
               m_connection   = &r;
             }
-           
+
             return *this;
           }
 
@@ -244,13 +244,13 @@ namespace tipi {
             return m_selected;
           }
       };
-     
+
       /**
        * \brief A checkbox widget
        **/
       class checkbox : public layout::element {
         friend class layout::element;
-     
+
         template < typename R, typename S >
         friend class ::utility::visitor;
 
@@ -261,14 +261,14 @@ namespace tipi {
 
           /** \brief The status of the checkbox */
           bool                 m_status;
-     
+
         private:
-     
+
           /** \brief Default constructor */
           inline checkbox() {}
 
         public:
-     
+
           /**
            * \brief Set the status
            * \param[in] b the new status
@@ -302,34 +302,34 @@ namespace tipi {
             return m_status;
           }
       };
-     
+
       /** \brief A basic progress bar widget */
       class progress_bar : public layout::element {
         friend class layout::element;
 
         template < typename R, typename S >
         friend class ::utility::visitor;
-     
+
         private:
 
           /** \brief The minimum value */
           unsigned int m_minimum;
-     
+
           /** \brief The maximum value */
           unsigned int m_maximum;
-     
+
           /** \brief The current value */
           unsigned int m_current;
-     
+
         private:
-     
+
           /** \brief Default constructor */
           inline progress_bar() : m_minimum(0), m_maximum(0), m_current(0) {
           }
 
 
         public:
-     
+
           /**
            * \brief Sets the current value of the progress bar
            * \param[in] v the new value
@@ -343,12 +343,12 @@ namespace tipi {
 
             return *this;
           }
-     
+
           /** \brief Gets the current value of the progress bar */
           inline unsigned int get_value() const {
             return m_current;
           }
-     
+
           /**
            * \brief Sets the minimum value of the progress bar
            * \param[in] v the new value
@@ -361,12 +361,12 @@ namespace tipi {
 
             return *this;
           }
-     
+
           /** \brief Sets the minimum value of the progress bar */
           inline unsigned int get_minimum() const {
             return m_minimum;
           }
-     
+
           /**
            * \brief Sets the minimum value of the progress bar
            * \param[in] v the new value
@@ -385,7 +385,7 @@ namespace tipi {
             return m_maximum;
           }
       };
-     
+
       /**
        * \brief A text input field
        *
@@ -397,23 +397,23 @@ namespace tipi {
 
         template < typename R, typename S >
         friend class ::utility::visitor;
-     
+
         private:
-     
+
           /** \brief The text to be displayed initially */
           std::string                         m_text;
-     
+
           /** \brief Type for validation purposes */
           boost::shared_ptr< basic_datatype > m_type;
-     
+
         private:
-     
+
           /** \brief Default constructor */
           inline text_field() : m_text(""), m_type(new tipi::datatype::string()) {
           }
 
         public:
-     
+
           /**
            * \brief Sets the text
            * \param[in] s the new text
@@ -426,7 +426,7 @@ namespace tipi {
 
             return *this;
           }
-     
+
           /**
            * \brief Sets the type
            * \param[in] t the new type to validate against
