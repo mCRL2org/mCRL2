@@ -20,18 +20,6 @@ endif
 
 BOOST_BUILD       := $(BJAM) @BUILD_OPTIONS@
 
-# Creates an application bundle on Mac OS X
-.PHONY: all bjam install tools test
-
-all: $(BJAM) config.status
-	$(BOOST_BUILD)
-
-install: $(BJAM) config.status
-	$(BOOST_BUILD) --install
-
-test: $(BJAM) config.status
-	$(BJAM) ./status -l300 --enable-experimental --enable-deprecated --tool-tests
-
 # Build boost build tool
 bjam: $(BJAM)
 
@@ -40,6 +28,11 @@ $(BJAM):
 	@cd 3rd-party/boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf 3rd-party/boost/tools/jam/bootstrap
 
+configure: build/autoconf/configure.ac
+	autoconf -o $@ -W all $<
+
 config.status: configure build/autoconf/config.jam.in
-	$(error Update to configure detected, please run: ./config.status --recheck; ./config.status)
+	@echo "Update to configure detected reconfiguring..."
+	@./config.status --recheck
+	@./config.status
 

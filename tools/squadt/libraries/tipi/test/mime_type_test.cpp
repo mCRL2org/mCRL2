@@ -15,11 +15,11 @@ using boost::unit_test::test_suite;
 void object_construction() {
   tipi::mime_type t("mcrl2");
 
-  BOOST_CHECK(t.get_sub_type() == "mcrl2" && t.get_main_type() == "application");
+  BOOST_CHECK(t.sub_type() == "mcrl2" && t.main_type() == "application");
 
   t = tipi::mime_type("text/mcrl2");
 
-  BOOST_CHECK(t.get_sub_type() == "mcrl2" && t.get_main_type() == "text");
+  BOOST_CHECK(t.sub_type() == "mcrl2" && t.main_type() == "text");
 }
 
 int test_main(int argc, char * argv[]) {

@@ -357,6 +357,8 @@ rule platform-configuration ( properties * ) {
                       <cxxflags>$(cxxflags)
                       <cflags>"-std=c99" ;
     }
+
+    requirements += <linkflags>"-undefined dynamic_lookup" ;
   }
 
   return $(requirements) ;
