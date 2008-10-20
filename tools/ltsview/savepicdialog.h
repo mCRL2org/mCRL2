@@ -45,7 +45,6 @@ class SavePicDialog : public wxDialog {
     wxStaticText* r_text;
     wxChoice*     ft_choice;
     wxStaticText* f_text;
-    wxStaticText* d_text;
     wxButton*     f_button;
     wxFileName    f_name;
     wxArrayString f_exts;
@@ -53,6 +52,9 @@ class SavePicDialog : public wxDialog {
 
     void update_h_spin();
     void update_w_spin();
+    void update_file_name();
+
+    static const unsigned int MAX_LABEL_LENGTH = 50;
 
     DECLARE_EVENT_TABLE()
 };

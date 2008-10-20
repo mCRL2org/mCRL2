@@ -38,7 +38,6 @@ class SaveVecDialog : public wxDialog {
     std::vector<GLint> f_formats;
     wxChoice*     ft_choice;
     wxStaticText* f_text;
-    wxStaticText* d_text;
     wxButton*     f_button;
     wxFileName    f_name;
 
@@ -48,6 +47,9 @@ class SaveVecDialog : public wxDialog {
     wxCheckBox*   blend_check;
     wxCheckBox*   cull_check;
     wxCheckBox*   bbox_check;
+    void update_file_name();
+
+    static const unsigned int MAX_LABEL_LENGTH = 50;
 
     DECLARE_EVENT_TABLE()
 };

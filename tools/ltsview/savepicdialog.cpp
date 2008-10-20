@@ -98,13 +98,12 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   
   f_name.Assign(filename);
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
-  f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
-  f_text->SetLabel(f_name.GetFullName());
-  d_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
-  d_text->SetLabel(f_name.GetPath());
+  f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,
+      wxSize(300,-1),wxST_NO_AUTORESIZE);
+  update_file_name();
   f_button = new wxButton(this,myID_F_BUTTON,wxT("Change..."));
 
-  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(6,3,0,0);
+  wxFlexGridSizer* controlSizer = new wxFlexGridSizer(5,3,0,0);
   // Row 0
   controlSizer->Add(new wxStaticText(this,-1,wxT("Width:")),0,
     wxEXPAND|wxALL,5);
@@ -120,16 +119,11 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   controlSizer->AddSpacer(0);
   controlSizer->AddSpacer(0);
   // Row 3
-  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Directory:")),0,
-    wxEXPAND|wxALL,5);
-  controlSizer->Add(d_text,0,wxEXPAND|wxALL,5);
-  controlSizer->AddSpacer(0);
-  // Row 4
-  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File name:")),0,
+  controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(f_text,0,wxEXPAND|wxALL,5);
   controlSizer->Add(f_button,0,wxEXPAND|wxALL,5);
-  // Row 5
+  // Row 4
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File type:")),0,
     wxEXPAND|wxALL,5);
   controlSizer->Add(ft_choice,0,wxEXPAND|wxALL,5);
@@ -237,8 +231,7 @@ void SavePicDialog::onChangeFile(wxCommandEvent& event)
       f_name.SetName(f_name.GetFullName());
       f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
     }
-    f_text->SetLabel(f_name.GetFullName());
-    d_text->SetLabel(f_name.GetPath());
+    update_file_name();
   }
 }
 
@@ -251,7 +244,7 @@ void SavePicDialog::onChoice(wxCommandEvent& event)
       !(newext == wxT("tif") && oldext == wxT("tiff")))
   {
     f_name.SetExt(newext);
-    f_text->SetLabel(f_name.GetFullName());
+    update_file_name();
   }
 }
 
@@ -297,4 +290,16 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
   statusbar->Update();
   GetParent()->Enable();
   GetParent()->SetCursor(wxNullCursor);
+}
+
+void SavePicDialog::update_file_name()
+{
+  wxString text = f_name.GetFullPath();
+  if (text.Len() > MAX_LABEL_LENGTH)
+  {
+    text = text.Left((MAX_LABEL_LENGTH - 3) / 2) 
+      + wxT("...") 
+      + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
+  }
+  f_text->SetLabel(text);
 }
