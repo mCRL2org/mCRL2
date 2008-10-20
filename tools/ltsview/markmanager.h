@@ -36,8 +36,11 @@ class MarkManager {
     void setMarkRuleData(int mr,int param,bool neg,Utils::RGB_Color col,
         std::vector<bool> &vals);
     void setMarkRuleActivated(int mr,bool act);
+
     void setMatchStyle(Utils::MatchStyle ms);
     Utils::MatchStyle getMatchStyle();
+    void setMatchStyleClusters(Utils::MatchStyle ms);
+    Utils::MatchStyle getMatchStyleClusters();
 
     int getNumMarkedStates();
     int getNumMarkedTransitions();
@@ -59,6 +62,7 @@ class MarkManager {
     std::vector< bool* > label_marks;
     std::vector< MarkRule* >::iterator first_free_mark_rule;
     Utils::MatchStyle match_style;
+    Utils::MatchStyle match_style_clusters;
     Utils::MarkStyle mark_style;
     int num_marked_states_any;
     int num_marked_states_all;
@@ -68,7 +72,6 @@ class MarkManager {
 
     void activateMarkRule(int mr);
     void deactivateMarkRule(int mr);
-    void changeMatchStyle(Utils::MatchStyle ms);
     bool matchesRule(State *s,int mr);
     void recomputeMarkedStateNumbers();
     void reset();

@@ -34,6 +34,7 @@ class Mediator {
     virtual void removeMarkRule(int index) = 0;
     virtual void setMarkStyle(Utils::MarkStyle ms) = 0;
     virtual void setMatchStyle(Utils::MatchStyle ms) = 0;
+    virtual void setMatchStyleClusters(Utils::MatchStyle ms) = 0;
     virtual void setRankStyle(Utils::RankStyle rs) = 0;
     virtual void setVisStyle(Utils::VisStyle vs) = 0;
     virtual void setFSMStyle(bool b) = 0;

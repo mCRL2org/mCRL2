@@ -34,6 +34,7 @@ namespace IDs
     // Event identifiers
     myID_MARK_RADIOBUTTON,
     myID_MARK_ANYALL,
+    myID_MARK_CLUSTER,
     myID_MARK_RULES,
     myID_ADD_RULE,
     myID_REMOVE_RULE,

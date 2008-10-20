@@ -13,6 +13,7 @@ using namespace std;
 BEGIN_EVENT_TABLE(MarkDialog, wxDialog)
   EVT_RADIOBUTTON(myID_MARK_RADIOBUTTON, MarkDialog::onMarkRadio)
   EVT_CHOICE(myID_MARK_ANYALL, MarkDialog::onMarkAnyAll)
+  EVT_CHOICE(myID_MARK_CLUSTER, MarkDialog::onMarkCluster)
   EVT_LISTBOX_DCLICK(myID_MARK_RULES, MarkDialog::onMarkRuleEdit)
   EVT_CHECKLISTBOX(myID_MARK_RULES, MarkDialog::onMarkRuleActivate)
   EVT_CHECKLISTBOX(myID_MARK_TRANSITIONS, MarkDialog::onMarkTransition)
@@ -22,22 +23,21 @@ END_EVENT_TABLE()
 
 
 MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
-  : wxDialog(parent, wxID_ANY, wxT("Mark"), wxDefaultPosition, wxDefaultSize,
-             wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
+  : wxDialog(parent, wxID_ANY, wxT("Mark"), wxDefaultPosition,
+      wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
 {
   mediator = owner;
-  
 
-  wxFlexGridSizer* markSizer = new wxFlexGridSizer(6,1,0,0);
+  wxFlexGridSizer* markSizer = new wxFlexGridSizer(7,1,0,0);
   markSizer->AddGrowableCol(0);
-  markSizer->AddGrowableRow(4);
   markSizer->AddGrowableRow(5);
+  markSizer->AddGrowableRow(6);
 
   int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int border = 3;
   
-  nomarksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,wxT("No marks"),
-      wxDefaultPosition,wxDefaultSize,wxRB_GROUP);
+  nomarksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
+      wxT("No marks"),wxDefaultPosition,wxDefaultSize,wxRB_GROUP);
   nomarksRadio->SetValue(true);
   markDeadlocksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
       wxT("Mark deadlocks"));
@@ -50,16 +50,24 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
   markSizer->Add(markDeadlocksRadio,0,flags,border);
   markSizer->Add(markStatesRadio,0,flags,border);
   markSizer->Add(markTransitionsRadio,0,flags,border);
+
+  wxString choices1[2] = {
+    wxT("Mark cluster if any state is marked"),
+    wxT("Mark cluster if all states are marked") };
+  markClusterChoice = new wxChoice(this,myID_MARK_CLUSTER,
+      wxDefaultPosition,wxDefaultSize,2,choices1);
+  markClusterChoice->SetSelection(0);
+  markSizer->Add(markClusterChoice,0,flags,border);
   
-  wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,this,
-      wxT("Mark states"));
+  wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,
+      this,wxT("Mark states"));
 
-  //TODO: Name correct?
-  wxString choices[3] = { wxT("Match any of the following"),
-      wxT("Match all of the following"), wxT("Match the following separately") };
-
-  markAnyAllChoice = new wxChoice(this,myID_MARK_ANYALL,wxDefaultPosition,
-      wxDefaultSize,3,choices);
+  wxString choices2[3] = {
+    wxT("Match any of the following"),
+    wxT("Match all of the following"),
+    wxT("Match the following separately") };
+  markAnyAllChoice = new wxChoice(this,myID_MARK_ANYALL,
+      wxDefaultPosition,wxDefaultSize,3,choices2);
   markAnyAllChoice->SetSelection(0);
   markStatesSizer->Add(markAnyAllChoice,0,flags,border);
   
@@ -69,20 +77,21 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
   //markStatesListBox->SetMinSize(wxSize(200,-1));
   markStatesSizer->Add(markStatesListBox,1,flags|wxEXPAND,border);
   wxBoxSizer* addremoveSizer = new wxBoxSizer(wxHORIZONTAL);
-  addremoveSizer->Add(new wxButton(this,myID_ADD_RULE,wxT("Add")),0,flags,
-      border);
-  addremoveSizer->Add(new wxButton(this,myID_REMOVE_RULE,wxT("Remove")),0,
+  addremoveSizer->Add(new wxButton(this,myID_ADD_RULE,wxT("Add")),0,
       flags,border);
+  addremoveSizer->Add(new wxButton(this,myID_REMOVE_RULE,wxT("Remove")),
+      0,flags,border);
 
   markStatesSizer->Add(addremoveSizer,0,flags,border);
   
-  wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(wxVERTICAL,
-      this,wxT("Mark transitions"));
-  markTransitionsListBox = new wxCheckListBox(this,myID_MARK_TRANSITIONS,
-      wxDefaultPosition,wxSize(200,-1),0,NULL,wxLB_SINGLE|wxLB_SORT|
-      wxLB_NEEDED_SB|wxLB_HSCROLL);
+  wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(
+      wxVERTICAL,this,wxT("Mark transitions"));
+  markTransitionsListBox = new wxCheckListBox(this,
+      myID_MARK_TRANSITIONS,wxDefaultPosition,wxSize(200,-1),0,NULL,
+      wxLB_SINGLE|wxLB_SORT|wxLB_NEEDED_SB|wxLB_HSCROLL);
   markTransitionsListBox->SetMinSize(wxSize(200,-1));
-  markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,border);
+  markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,
+      border);
   
   markSizer->Add(markStatesSizer,0,wxEXPAND|wxALL,border);
   markSizer->Add(markTransitionsSizer,0,wxEXPAND|wxALL,border);
@@ -118,8 +127,8 @@ void MarkDialog::onMarkRuleActivate(wxCommandEvent& event)
 
 void MarkDialog::onMarkRuleEdit(wxCommandEvent& event)
 {
-  mediator->editMarkRule(
-      *(static_cast<int*>(markStatesListBox->GetClientData(event.GetInt()))));
+  mediator->editMarkRule(*(static_cast<int*>
+        (markStatesListBox->GetClientData(event.GetInt()))));
 }
 
 void MarkDialog::onMarkAnyAll(wxCommandEvent& event)
@@ -132,6 +141,18 @@ void MarkDialog::onMarkAnyAll(wxCommandEvent& event)
     mediator->setMatchStyle(MATCH_MULTI);
   }
   markStatesRadio->SetValue(true);
+}
+
+void MarkDialog::onMarkCluster(wxCommandEvent& event)
+{
+  if (event.GetSelection() == 0)
+  {
+    mediator->setMatchStyleClusters(MATCH_ANY);
+  }
+  else if (event.GetSelection() == 1)
+  {
+    mediator->setMatchStyleClusters(MATCH_ALL);
+  }
 }
 
 void MarkDialog::onAddMarkRuleButton(wxCommandEvent& /*event*/)
@@ -165,8 +186,8 @@ void MarkDialog::onRemoveMarkRuleButton(wxCommandEvent& /*event*/)
 void MarkDialog::onMarkTransition(wxCommandEvent& event)
 {
   int i = event.GetInt();
-  mediator->setActionMark(
-      static_cast<string>(markTransitionsListBox->GetString(i).fn_str()),
+  mediator->setActionMark(static_cast<string>
+      (markTransitionsListBox->GetString(i).fn_str()),
       markTransitionsListBox->IsChecked(i));
   markTransitionsRadio->SetValue(true);
 }
@@ -175,10 +196,12 @@ void MarkDialog::replaceMarkRule(wxString str,int mr)
 {
   unsigned int i = 0;
   while (i < markStatesListBox->GetCount() && 
-      mr != *(static_cast<int*>(markStatesListBox->GetClientData(i)))) {
+      mr != *(static_cast<int*>(markStatesListBox->GetClientData(i))))
+  {
     ++i;
   }
-  if (i == markStatesListBox->GetCount()) {
+  if (i == markStatesListBox->GetCount())
+  {
     return;
   }
   bool isChecked = markStatesListBox->IsChecked(i);
@@ -189,7 +212,8 @@ void MarkDialog::replaceMarkRule(wxString str,int mr)
 
 void MarkDialog::resetMarkRules()
 {
-  for (unsigned int i = 0; i < markStatesListBox->GetCount(); ++i) {
+  for (unsigned int i = 0; i < markStatesListBox->GetCount(); ++i)
+  {
     delete static_cast<int*>(markStatesListBox->GetClientData(i));
   }
   markStatesListBox->Clear();
@@ -203,7 +227,9 @@ void MarkDialog::setActionLabels(vector<string> &labels)
 {
   wxArrayString strLabels;
   strLabels.Alloc(labels.size());
-  for (vector<string>::iterator it = labels.begin(); it != labels.end(); ++it) {
+  for (vector<string>::iterator it = labels.begin(); it != labels.end();
+      ++it)
+  {
     strLabels.Add(wxString(it->c_str(),wxConvLocal));
   }
   strLabels.Sort();

@@ -57,6 +57,7 @@ class LTSView : public wxApp, public Mediator {
     void setActionMark(std::string label,bool b);
     void setMarkStyle(Utils::MarkStyle ms);
     void setMatchStyle(Utils::MatchStyle ms);
+    void setMatchStyleClusters(Utils::MatchStyle ms);
     void setRankStyle(Utils::RankStyle rs);
     void setVisStyle(Utils::VisStyle vs);
     void setFSMStyle(bool b);

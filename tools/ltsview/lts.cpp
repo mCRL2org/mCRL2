@@ -609,7 +609,10 @@ void LTS::computeClusterInfo() {
   for (li = states.begin(); li != states.end(); ++li) {
     s = *li;
     c = s->getCluster();
-    c->setDeadlock(c->hasDeadlock() || s->isDeadlock());
+    if (s->isDeadlock())
+    {
+      c->addDeadlock();
+    }
     for (t = 0; t < s->getNumOutTransitions(); ++t) {
       c->addActionLabel(s->getOutTransition(t)->getLabel());
     }

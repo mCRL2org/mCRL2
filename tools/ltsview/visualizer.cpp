@@ -535,15 +535,6 @@ void Visualizer::sortClusters(Point3D viewpoint) {
   visObjectFactory->sortObjects(viewpoint);
 }
 
-/*
-bool Visualizer::isMarked(Cluster* c) {
-  return c != NULL &&
-           ((markStyle == MARK_STATES && c->hasMarkedState()) ||
-            (markStyle == MARK_MULTI && c->hasMarkedState())  ||
-            (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
-            (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
-}*/
-
 // ------------- STATES --------------------------------------------------------
 
 void Visualizer::drawStates(bool simulating) {

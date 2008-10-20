@@ -64,8 +64,8 @@ class Cluster {
     void addUndecidedState(State* s);
     State* getState(int i) const;
     int getNumStates() const;
-    bool hasDeadlock() const;
-    void setDeadlock( bool b );
+    int getNumDeadlocks() const;
+    void addDeadlock();
 
     void addMatchedRule(int mr);
     void removeMatchedRule(int mr);
@@ -139,7 +139,7 @@ class Cluster {
     std::map< int, int > actionLabelCounts;
     Cluster* ancestor;
     float baseRadius;
-    bool deadlock;
+    int numDeadlocks;
     std::vector< Cluster* > descendants;
     std::vector<std::vector<bool> > severedDescendants;
     unsigned int severedDescendantsC;

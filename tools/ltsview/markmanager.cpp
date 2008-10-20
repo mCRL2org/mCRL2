@@ -16,6 +16,7 @@ MarkManager::MarkManager() {
   lts = NULL;
   first_free_mark_rule = mark_rules.end();
   match_style = MATCH_ANY;
+  match_style_clusters = MATCH_ANY;
   mark_style = NO_MARKS;
   num_active_mark_rules = 0;
   num_marked_states_all = 0;
@@ -195,15 +196,30 @@ void MarkManager::setActionMark(std::string label,bool b) {
   }
 }
 
-void MarkManager::setMatchStyle(MatchStyle ms) {
-  if (match_style != ms) {
-    changeMatchStyle(ms);
+void MarkManager::setMatchStyle(MatchStyle ms)
+{
+  if (match_style != ms)
+  {
     match_style = ms;
   }
 }
 
-MatchStyle MarkManager::getMatchStyle() {
+MatchStyle MarkManager::getMatchStyle()
+{
   return match_style;
+}
+
+void MarkManager::setMatchStyleClusters(MatchStyle ms)
+{
+  if (ms != MATCH_MULTI && match_style_clusters != ms)
+  {
+    match_style_clusters = ms;
+  }
+}
+
+MatchStyle MarkManager::getMatchStyleClusters()
+{
+  return match_style_clusters;
 }
 
 void MarkManager::setMarkStyle(MarkStyle ms) {
@@ -320,9 +336,6 @@ void MarkManager::deactivateMarkRule(int mr) {
   --num_active_mark_rules;
 }
 
-void MarkManager::changeMatchStyle(MatchStyle ms) {
-}
-
 bool MarkManager::matchesRule(State *s,int mr) {
   MarkRule *rule = mark_rules[mr];
   bool retval = rule->value_set[s->getParameterValue(rule->param_index)];
@@ -347,17 +360,29 @@ bool MarkManager::isMarked(State* s) {
   return false;
 }
 
-bool MarkManager::isMarked(Cluster* c) {
+bool MarkManager::isMarked(Cluster* c)
+{
   if (c == NULL) return false;
-  switch (mark_style) {
+
+  int limit = 1;
+  if (match_style_clusters == MATCH_ALL)
+  {
+    limit = c->getNumStates();
+  }
+  
+  switch (mark_style)
+  {
     case MARK_STATES:
-      if (match_style == MATCH_ALL) {
-        return (c->getNumMarkedStatesAll() > 0);
-      } else {
-        return (c->getNumMarkedStatesAny() > 0);
+      if (match_style == MATCH_ALL)
+      {
+        return (c->getNumMarkedStatesAll() >= limit);
+      }
+      else
+      {
+        return (c->getNumMarkedStatesAny() >= limit);
       }
     case MARK_DEADLOCKS:
-      return c->hasDeadlock();
+      return c->getNumDeadlocks() >= limit;
     case MARK_TRANSITIONS:
       return c->hasMarkedTransition();
     default:

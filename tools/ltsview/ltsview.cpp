@@ -520,30 +520,45 @@ void LTSView::activateMarkRule(int mr,bool activate) {
   }
 }
 
-void LTSView::setMatchStyle(Utils::MatchStyle ms) {
+void LTSView::setMatchStyle(Utils::MatchStyle ms)
+{
   if (lts == NULL) return;
   markManager->setMatchStyle(ms);
-  if (markManager->getMarkStyle() != MARK_STATES) {
+  if (markManager->getMarkStyle() != MARK_STATES)
+  {
     setMarkStyle(MARK_STATES);
-  } else {
+  }
+  else
+  {
     applyMarkStyle();
   }
 }
 
-void LTSView::setActionMark(string label,bool b) {
+void LTSView::setMatchStyleClusters(Utils::MatchStyle ms)
+{
+  if (lts == NULL) return;
+  markManager->setMatchStyleClusters(ms);
+  applyMarkStyle();
+}
+
+void LTSView::setActionMark(string label,bool b)
+{
   markManager->setActionMark(label,b);
   setMarkStyle(MARK_TRANSITIONS);
 }
 
-void LTSView::setMarkStyle(Utils::MarkStyle ms) {
+void LTSView::setMarkStyle(Utils::MarkStyle ms)
+{
   markManager->setMarkStyle(ms);
   applyMarkStyle();
 }
 
-void LTSView::applyMarkStyle() {
+void LTSView::applyMarkStyle()
+{
   if (lts == NULL) return;
 
-  switch (markManager->getMarkStyle()) {
+  switch (markManager->getMarkStyle())
+  {
     case MARK_DEADLOCKS:
       mainFrame->setMarkedStatesInfo(lts->getNumDeadlocks());
       mainFrame->setMarkedTransitionsInfo(0);

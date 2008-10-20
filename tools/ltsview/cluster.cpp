@@ -29,7 +29,7 @@ Cluster::Cluster(int r) {
   position = 0.0f;
   baseRadius = 0.0f;
   topRadius = 0.0f;
-  deadlock = false;
+  numDeadlocks = 0;
   numMarkedStatesAll = 0;
   numMarkedStatesAny = 0;
   visObject = -1;
@@ -762,12 +762,14 @@ int Cluster::setActionMark(int l,bool b) {
   return numMarkedTransitions;
 }
 
-bool Cluster::hasDeadlock() const {
-  return deadlock;
+int Cluster::getNumDeadlocks() const
+{
+  return numDeadlocks;
 }
 
-void Cluster::setDeadlock(bool b) {
-  deadlock = b;
+void Cluster::addDeadlock()
+{
+  ++numDeadlocks;
 }
 
 int Cluster::getVisObject() const {
