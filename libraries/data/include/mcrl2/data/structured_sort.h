@@ -13,6 +13,7 @@
 #define MCRL2_DATA_STRUCTURED_SORT_H
 
 #include <string>
+#include <boost/range/iterator_range.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
