@@ -331,10 +331,9 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
+      print f[0].string
       sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
-      g = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
-      sort_args |= get_sort_parameters_from_sort_expressions(sorts, g[len(g)-1].expr)
       sort_args_code = ""
       for a in sort_args:
         sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower())) 
@@ -360,7 +359,12 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
         return generate_variable_code(sorts, variable_declarations, data_expression[0].string)
       namespace = get_namespace(sorts, functions, id)
       if arity == 0:
-        return "%s::%s()" % (namespace, id)
+        f = lookup_function_symbol(functions + variable_declarations, data_expression)
+        sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
+        sort_args_code = ""
+        for a in sort_args:
+          sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower()))
+        return "%s::%s(%s)" % (namespace, id, sort_args_code)
       else:
         return "%s::%s" % (namespace, id)
 
@@ -459,6 +463,8 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
         params |= get_sort_parameters_from_sort_expression(sorts, i)
       return params
     elif sortexpr[0] == "param_expr":
+        print sortexpr[1].string
+        print sortexpr[2]
         return get_sort_parameters_from_sort_expression(sorts, sortexpr[2])
     else:
       return set()
@@ -466,6 +472,7 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
 def get_sort_parameters_from_sort_expressions(sorts, sortexprs):
     params = set()
     for s in sortexprs:
+      print "s: %s" % s
       params |= get_sort_parameters_from_sort_expression(sorts, s)
     return params
 
