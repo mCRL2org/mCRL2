@@ -373,16 +373,13 @@ if [ ! $OFFLINE ] ; then
     TAGFILES="$TAGFILES $3/$2.tag=../$2"
     DOXYCONFIG="
       GENERATE_TAGFILE = $3/$2.tag
+      HTML_FILE_EXTENSION = .php
       INPUT = $DOXYINPUT"
     if [ -e $3/doc/Doxyfile ] ; then
       ( cat $DOXYMASTER $3/doc/Doxyfile ; echo "$DOXYCONFIG" ) | doxygen -
     else
       ( cat $DOXYMASTER ; echo "$DOXYCONFIG" ) | doxygen -
     fi
-
-    # FIX for Doxygen 1.5.7.1: the names of anchorfiles in tag files
-    # incorrectly have the .html extension, which leads to broken links.
-    sed -i -e "s/\.html//g" $3/$2.tag
   done
 
   # Create the footer that will be used for all generated files
