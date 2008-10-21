@@ -117,7 +117,7 @@ namespace mcrl2 {
       inline
       function_symbol cpair()
       {
-        static function_symbol cpair("@cPair", function_sort(sort_nat::nat(), sort_nat::nat(), sort_natpair::natpair()));
+        static function_symbol cpair("@cPair", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::natpair()));
         return cpair;
       }
 
@@ -825,13 +825,13 @@ namespace mcrl2 {
 
       // Function symbol div
       inline
-      function_symbol div(const sort_expression& s0)
+      function_symbol div(const sort_expression& s0, const sort_expression& s1)
       {
         assert((s0 == sort_pos::pos() && s1 == sort_pos::pos())||
                (s0 == sort_nat::nat() && s1 == sort_pos::pos()));
 
         sort_expression target_sort(sort_nat::nat());
-        static function_symbol div("div", function_sort(s0, target_sort));
+        static function_symbol div("div", function_sort(s0, s1, target_sort));
         return div;
       }
 
@@ -867,13 +867,13 @@ namespace mcrl2 {
 
       // Function symbol |
       inline
-      function_symbol mod(const sort_expression& s0)
+      function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
         assert((s0 == sort_pos::pos() && s1 == sort_pos::pos())||
                (s0 == sort_nat::nat() && s1 == sort_pos::pos()));
 
         sort_expression target_sort(sort_nat::nat());
-        static function_symbol mod("|", function_sort(s0, target_sort));
+        static function_symbol mod("|", function_sort(s0, s1, target_sort));
         return mod;
       }
 
@@ -909,7 +909,7 @@ namespace mcrl2 {
 
       // Function symbol exp
       inline
-      function_symbol exp(const sort_expression& s0)
+      function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
         assert((s0 == sort_pos::pos() && s1 == sort_nat::nat())||
                (s0 == sort_nat::nat() && s1 == sort_nat::nat()));
@@ -924,7 +924,7 @@ namespace mcrl2 {
           target_sort = sort_nat::nat();
         }
 
-        static function_symbol exp("exp", function_sort(s0, target_sort));
+        static function_symbol exp("exp", function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -1001,7 +1001,7 @@ namespace mcrl2 {
       inline
       function_symbol first()
       {
-        static function_symbol first("@first", function_sort(sort_natpair::natpair(), sort_nat::nat()));
+        static function_symbol first("@first", function_sort(sort_nat::natpair(), sort_nat::nat()));
         return first;
       }
 
@@ -1020,7 +1020,7 @@ namespace mcrl2 {
       inline
       application first(const data_expression& arg0)
       {
-        assert(sort_natpair::is_natpair(arg0.sort()));
+        assert(sort_nat::is_natpair(arg0.sort()));
         
         return application(first(),arg0);
       }
@@ -1040,7 +1040,7 @@ namespace mcrl2 {
       inline
       function_symbol last()
       {
-        static function_symbol last("@last", function_sort(sort_natpair::natpair(), sort_nat::nat()));
+        static function_symbol last("@last", function_sort(sort_nat::natpair(), sort_nat::nat()));
         return last;
       }
 
@@ -1059,7 +1059,7 @@ namespace mcrl2 {
       inline
       application last(const data_expression& arg0)
       {
-        assert(sort_natpair::is_natpair(arg0.sort()));
+        assert(sort_nat::is_natpair(arg0.sort()));
         
         return application(last(),arg0);
       }
@@ -1079,7 +1079,7 @@ namespace mcrl2 {
       inline
       function_symbol divmod()
       {
-        static function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), sort_natpair::natpair()));
+        static function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), sort_nat::natpair()));
         return divmod;
       }
 
@@ -1119,7 +1119,7 @@ namespace mcrl2 {
       inline
       function_symbol gdivmod()
       {
-        static function_symbol gdivmod("@gdivmod", function_sort(sort_natpair::natpair(), sort_bool_::bool_(), sort_pos::pos(), sort_natpair::natpair()));
+        static function_symbol gdivmod("@gdivmod", function_sort(sort_nat::natpair(), sort_bool_::bool_(), sort_pos::pos(), sort_nat::natpair()));
         return gdivmod;
       }
 
@@ -1138,7 +1138,7 @@ namespace mcrl2 {
       inline
       application gdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        assert(sort_natpair::is_natpair(arg0.sort()));
+        assert(sort_nat::is_natpair(arg0.sort()));
         assert(sort_bool_::is_bool_(arg1.sort()));
         assert(sort_pos::is_pos(arg2.sort()));
         
@@ -1160,7 +1160,7 @@ namespace mcrl2 {
       inline
       function_symbol ggdivmod()
       {
-        static function_symbol ggdivmod("@ggdivmod", function_sort(sort_nat::nat(), sort_nat::nat(), sort_pos::pos(), sort_natpair::natpair()));
+        static function_symbol ggdivmod("@ggdivmod", function_sort(sort_nat::nat(), sort_nat::nat(), sort_pos::pos(), sort_nat::natpair()));
         return ggdivmod;
       }
 

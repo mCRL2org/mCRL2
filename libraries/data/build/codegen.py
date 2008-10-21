@@ -42,6 +42,7 @@ verbose = False       # Switch on debug output?
 debug = False         # Switch on verbose output? 
 sorts_cache = []
 sorts_to_functions = {}
+sorts_to_namespaces = {}
 functions_cache = []
 functions_table = {}  # Maps ids to function names
 includes_table = {}   # Maps sorts to include files
@@ -209,10 +210,11 @@ def add_to_comma_sep_string(string, addition):
   return string
 
 def add_namespace(string):
+  global sorts_to_namespaces
   if string == current_sort:
     return "%s" % string
   else:
-    return "sort_%s::%s" % (string, string)
+    return "sort_%s::%s" % (sorts_to_namespaces[string], string)
 
 def get_namespace(sorts, functions, function):
   global sorts_to_functions
@@ -220,6 +222,12 @@ def get_namespace(sorts, functions, function):
     for f in sorts_to_functions[s]:
       if f[1].label == function:
         return "sort_%s" % (get_label(sorts, s))
+  assert(False)
+
+def lookup_function_symbol(functions, function):
+  for f in functions:
+    if f[0].string == function[0].string:
+      return f
   assert(False)
 
 #
@@ -322,9 +330,11 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
       print "generate code for data expression: %s" % data_expression
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
-      sort_args = get_sort_parameters_from_data_expression(sorts, functions, data_expression[1].expr)
+      f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
+      sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
-      sort_args |= get_sort_parameters_from_data_expression(sorts, functions, data_expression[2].expr)
+      g = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
+      sort_args |= get_sort_parameters_from_sort_expressions(sorts, g[len(g)-1].expr)
       sort_args_code = ""
       for a in sort_args:
         sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower())) 
@@ -453,6 +463,12 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
     else:
       return set()
 
+def get_sort_parameters_from_sort_expressions(sorts, sortexprs):
+    params = set()
+    for s in sortexprs:
+      params |= get_sort_parameters_from_sort_expression(sorts, s)
+    return params
+
 def get_sort_parameters_from_data_expression(sorts, functions, dataexpr):
     if verbose:
       print "data expression: %s" % dataexpr
@@ -563,7 +579,9 @@ def generate_includes_code(includes, sorts):
 #
 def generate_sortspec_code(sortspec):
     code = ""
+    sort = sortspec.sorts[0][len(sortspec.sorts[0])-1].label
     for s in sortspec.sorts:
+      sorts_to_namespaces[s[len(s)-1].label] = sort
       if len(s) == 2:
         code += SORT_EXPRESSION_CONSTRUCTORS % {
           'fullname' : s[0].string,
@@ -654,12 +672,12 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           actualparameters += "arg%s" % index
           if a[0] == "param_expr":
             l = get_label(sorts, a[1])
-            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (l, l, index)
+            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
           elif a[0].string in sort_params:
             assertion = "assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
           else:
             l = get_label(sorts, a[0])
-            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (l, l, index)
+            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
           assertions += assertion
           index +=1
 
@@ -712,7 +730,7 @@ def generate_function_constructors(sorts, id, label, sortexprs):
       domainparams = ""
       newdomain = ["domain", []]
       for d in domain_strings:
-        if len(remove_duplicates(domain_strings[d])) <> 1:
+        #if len(remove_duplicates(domain_strings[d])) <> 1:
           domainparams = add_to_comma_sep_string(domainparams, "const sort_expression& s%s" % (d))
           newdomain[1] += [["s%s" % (d)]]
 
