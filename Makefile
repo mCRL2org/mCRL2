@@ -1,10 +1,3 @@
-ifneq ($(filter all bjam install test, ${MAKECMDGOALS}),)
-  include build/Makefile
-endif
-ifeq (${MAKECMDGOALS},)
-  include build/Makefile
-endif
-
 .PHONY: all bjam install test tags clean distclean parsers mcrl2parser ltsview_fsmparser liblts_fsmparser doxy
 
 all: bjam config.status
@@ -23,6 +16,13 @@ clean:
 distclean: clean
 	@$(RM) -rf build/Makefile config.log config.status build/config.jam libraries/utilities/include/mcrl2/setup.h
 	$(RM) -rf build/bin
+
+ifneq ($(filter all bjam install test, ${MAKECMDGOALS}),)
+  include build/Makefile
+endif
+ifeq (${MAKECMDGOALS},)
+  include build/Makefile
+endif
 
 parsers: mcrl2parser chiparser ltsview_fsmparser liblts_fsmparser
 	cp /usr/include/FlexLexer.h build/workarounds
