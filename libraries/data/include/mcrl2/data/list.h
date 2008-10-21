@@ -10,6 +10,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
+#include "mcrl2/data/container_sort.h"
 
 
 namespace mcrl2 {
@@ -32,7 +33,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).name() == "list";
+          return static_cast<const container_sort&>(e).container_name() == "list";
         }
         return false;
       }
@@ -41,7 +42,7 @@ namespace mcrl2 {
       inline
       function_symbol nil(const sort_expression& s)
       {
-        static function_symbol nil("[]", list(s));
+        static function_symbol nil("[]", sort_list::list(s));
         return nil;
       }
 
@@ -60,7 +61,7 @@ namespace mcrl2 {
       inline
       function_symbol cons_(const sort_expression& s)
       {
-        static function_symbol cons_("|>", function_sort(s, list(s), list(s)));
+        static function_symbol cons_("|>", function_sort(s, sort_list::list(s), sort_list::list(s)));
         return cons_;
       }
 
@@ -80,7 +81,7 @@ namespace mcrl2 {
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         assert(arg0.sort() == s);
-        assert(is_list(arg1.sort()));
+        assert(sort_list::is_list(arg1.sort()));
         
         return application(cons_(s),arg0, arg1);
       }
@@ -100,7 +101,7 @@ namespace mcrl2 {
       inline
       function_symbol in(const sort_expression& s)
       {
-        static function_symbol in("in", function_sort(s, list(s), bool_()));
+        static function_symbol in("in", function_sort(s, sort_list::list(s), sort_bool_::bool_()));
         return in;
       }
 
@@ -120,7 +121,7 @@ namespace mcrl2 {
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         assert(arg0.sort() == s);
-        assert(is_list(arg1.sort()));
+        assert(sort_list::is_list(arg1.sort()));
         
         return application(in(s),arg0, arg1);
       }
@@ -140,7 +141,7 @@ namespace mcrl2 {
       inline
       function_symbol count(const sort_expression& s)
       {
-        static function_symbol count("cnt", function_sort(list(s), nat()));
+        static function_symbol count("cnt", function_sort(sort_list::list(s), sort_nat::nat()));
         return count;
       }
 
@@ -159,7 +160,7 @@ namespace mcrl2 {
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         
         return application(count(s),arg0);
       }
@@ -179,7 +180,7 @@ namespace mcrl2 {
       inline
       function_symbol snoc(const sort_expression& s)
       {
-        static function_symbol snoc("<|", function_sort(list(s), s, list(s)));
+        static function_symbol snoc("<|", function_sort(sort_list::list(s), s, sort_list::list(s)));
         return snoc;
       }
 
@@ -198,7 +199,7 @@ namespace mcrl2 {
       inline
       application snoc(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         assert(arg1.sort() == s);
         
         return application(snoc(s),arg0, arg1);
@@ -219,7 +220,7 @@ namespace mcrl2 {
       inline
       function_symbol concat(const sort_expression& s)
       {
-        static function_symbol concat("++", function_sort(list(s), list(s), list(s)));
+        static function_symbol concat("++", function_sort(sort_list::list(s), sort_list::list(s), sort_list::list(s)));
         return concat;
       }
 
@@ -238,8 +239,8 @@ namespace mcrl2 {
       inline
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_list(arg0.sort()));
-        assert(is_list(arg1.sort()));
+        assert(sort_list::is_list(arg0.sort()));
+        assert(sort_list::is_list(arg1.sort()));
         
         return application(concat(s),arg0, arg1);
       }
@@ -259,7 +260,7 @@ namespace mcrl2 {
       inline
       function_symbol element_at(const sort_expression& s)
       {
-        static function_symbol element_at(".", function_sort(list(s), nat(), s));
+        static function_symbol element_at(".", function_sort(sort_list::list(s), sort_nat::nat(), s));
         return element_at;
       }
 
@@ -278,8 +279,8 @@ namespace mcrl2 {
       inline
       application element_at(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_list(arg0.sort()));
-        assert(is_nat(arg1.sort()));
+        assert(sort_list::is_list(arg0.sort()));
+        assert(sort_nat::is_nat(arg1.sort()));
         
         return application(element_at(s),arg0, arg1);
       }
@@ -299,7 +300,7 @@ namespace mcrl2 {
       inline
       function_symbol head(const sort_expression& s)
       {
-        static function_symbol head("head", function_sort(list(s), s));
+        static function_symbol head("head", function_sort(sort_list::list(s), s));
         return head;
       }
 
@@ -318,7 +319,7 @@ namespace mcrl2 {
       inline
       application head(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         
         return application(head(s),arg0);
       }
@@ -338,7 +339,7 @@ namespace mcrl2 {
       inline
       function_symbol tail(const sort_expression& s)
       {
-        static function_symbol tail("tail", function_sort(list(s), list(s)));
+        static function_symbol tail("tail", function_sort(sort_list::list(s), sort_list::list(s)));
         return tail;
       }
 
@@ -357,7 +358,7 @@ namespace mcrl2 {
       inline
       application tail(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         
         return application(tail(s),arg0);
       }
@@ -377,7 +378,7 @@ namespace mcrl2 {
       inline
       function_symbol rhead(const sort_expression& s)
       {
-        static function_symbol rhead("rhead", function_sort(list(s), s));
+        static function_symbol rhead("rhead", function_sort(sort_list::list(s), s));
         return rhead;
       }
 
@@ -396,7 +397,7 @@ namespace mcrl2 {
       inline
       application rhead(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         
         return application(rhead(s),arg0);
       }
@@ -416,7 +417,7 @@ namespace mcrl2 {
       inline
       function_symbol rtail(const sort_expression& s)
       {
-        static function_symbol rtail("rtail", function_sort(list(s), list(s)));
+        static function_symbol rtail("rtail", function_sort(sort_list::list(s), sort_list::list(s)));
         return rtail;
       }
 
@@ -435,7 +436,7 @@ namespace mcrl2 {
       inline
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_list(arg0.sort()));
+        assert(sort_list::is_list(arg0.sort()));
         
         return application(rtail(s),arg0);
       }
@@ -631,26 +632,26 @@ namespace mcrl2 {
       data_equation_list list_generate_equations_code(const sort_expression& s)
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), equal_to(nil(), cons_(variable("d", s), variable("s", list(s)))), false_()));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), equal_to(cons_(variable("d", s), variable("s", list(s))), nil()), false_()));
-        result.push_back(data_equation(make_vector(variable("e", s), variable("d", s), variable("s", list(s)), variable("t", list(s))), true_(), equal_to(cons_(variable("d", s), variable("s", list(s))), cons_(variable("e", s), variable("t", list(s)))), and_(equal_to(variable("d", s), variable("e", s)), equal_to(variable("s", list(s)), variable("t", list(s))))));
-        result.push_back(data_equation(make_vector(variable("d", s)), true_(), in(variable("d", s), nil()), false_()));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("e", s), variable("d", s)), true_(), in(variable("d", s), cons_(variable("e", s), variable("s", list(s)))), or_(equal_to(variable("d", s), variable("e", s)), in(variable("d", s), variable("s", list(s))))));
-        result.push_back(data_equation(variable_list(), true_(), count(nil()), c0()));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), count(cons_(variable("d", s), variable("s", list(s)))), cnat(succ(count(variable("s", list(s)))))));
-        result.push_back(data_equation(make_vector(variable("d", s)), true_(), snoc(nil(), variable("d", s)), cons_(variable("d", s), nil())));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("e", s), variable("d", s)), true_(), snoc(cons_(variable("d", s), variable("s", list(s))), variable("e", s)), cons_(variable("d", s), snoc(variable("s", list(s)), variable("e", s)))));
-        result.push_back(data_equation(make_vector(variable("s", list(s))), true_(), concat(nil(), variable("s", list(s))), variable("s", list(s))));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s), variable("t", list(s))), true_(), concat(cons_(variable("d", s), variable("s", list(s))), variable("t", list(s))), cons_(variable("d", s), concat(variable("s", list(s)), variable("t", list(s))))));
-        result.push_back(data_equation(make_vector(variable("s", list(s))), true_(), concat(variable("s", list(s)), nil()), variable("s", list(s))));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), element_at(cons_(variable("d", s), variable("s", list(s))), c0()), variable("d", s)));
-        result.push_back(data_equation(make_vector(variable("p", pos()), variable("s", list(s)), variable("d", s)), true_(), element_at(cons_(variable("d", s), variable("s", list(s))), cnat(variable("p", pos()))), element_at(variable("s", list(s)), pred(variable("p", pos())))));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), head(cons_(variable("d", s), variable("s", list(s)))), variable("d", s)));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("d", s)), true_(), tail(cons_(variable("d", s), variable("s", list(s)))), variable("s", list(s))));
-        result.push_back(data_equation(make_vector(variable("d", s)), true_(), rhead(cons_(variable("d", s), nil())), variable("d", s)));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("e", s), variable("d", s)), true_(), rhead(cons_(variable("d", s), cons_(variable("e", s), variable("s", list(s))))), rhead(cons_(variable("e", s), variable("s", list(s))))));
-        result.push_back(data_equation(make_vector(variable("d", s)), true_(), rtail(cons_(variable("d", s), nil())), nil()));
-        result.push_back(data_equation(make_vector(variable("s", list(s)), variable("e", s), variable("d", s)), true_(), rtail(cons_(variable("d", s), cons_(variable("e", s), variable("s", list(s))))), cons_(variable("d", s), rtail(cons_(variable("e", s), variable("s", list(s)))))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_bool_::equal_to(s, sort_list::nil(), sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_bool_::equal_to(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_list::nil()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("e", s), variable("d", s), variable("s", sort_list::list(s)), variable("t", sort_list::list(s))), sort_bool_::true_(), sort_bool_::equal_to(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_list::cons_(s, variable("e", s), variable("t", sort_list::list(s)))), sort_bool_::and_(sort_bool_::equal_to(variable("d", s), variable("e", s)), sort_bool_::equal_to(variable("s", sort_list::list(s)), variable("t", sort_list::list(s))))));
+        result.push_back(data_equation(make_vector(variable("d", s)), sort_bool_::true_(), sort_list::in(s, variable("d", s), sort_list::nil()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("e", s), variable("d", s)), sort_bool_::true_(), sort_list::in(s, variable("d", s), sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s)))), sort_bool_::or_(s, sort_bool_::equal_to(variable("d", s), variable("e", s)), sort_list::in(s, variable("d", s), variable("s", sort_list::list(s))))));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_list::count(s, sort_list::nil()), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_list::count(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), sort_nat::cnat(s, sort_pos::succ(s, sort_list::count(s, variable("s", sort_list::list(s)))))));
+        result.push_back(data_equation(make_vector(variable("d", s)), sort_bool_::true_(), sort_list::snoc(s, sort_list::nil(), variable("d", s)), sort_list::cons_(s, variable("d", s), sort_list::nil())));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("e", s), variable("d", s)), sort_bool_::true_(), sort_list::snoc(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), variable("e", s)), sort_list::cons_(s, variable("d", s), sort_list::snoc(s, variable("s", sort_list::list(s)), variable("e", s)))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s))), sort_bool_::true_(), sort_list::concat(s, sort_list::nil(), variable("s", sort_list::list(s))), variable("s", sort_list::list(s))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s), variable("t", sort_list::list(s))), sort_bool_::true_(), sort_list::concat(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), variable("t", sort_list::list(s))), sort_list::cons_(s, variable("d", s), sort_list::concat(s, variable("s", sort_list::list(s)), variable("t", sort_list::list(s))))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s))), sort_bool_::true_(), sort_list::concat(s, variable("s", sort_list::list(s)), sort_list::nil()), variable("s", sort_list::list(s))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_list::element_at(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_nat::c0()), variable("d", s)));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_list::element_at(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_list::element_at(s, variable("s", sort_list::list(s)), sort_nat::pred(variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_list::head(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), variable("d", s)));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("d", s)), sort_bool_::true_(), sort_list::tail(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), variable("s", sort_list::list(s))));
+        result.push_back(data_equation(make_vector(variable("d", s)), sort_bool_::true_(), sort_list::rhead(s, sort_list::cons_(s, variable("d", s), sort_list::nil())), variable("d", s)));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("e", s), variable("d", s)), sort_bool_::true_(), sort_list::rhead(s, sort_list::cons_(s, variable("d", s), sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s))))), sort_list::rhead(s, sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s))))));
+        result.push_back(data_equation(make_vector(variable("d", s)), sort_bool_::true_(), sort_list::rtail(s, sort_list::cons_(s, variable("d", s), sort_list::nil())), sort_list::nil()));
+        result.push_back(data_equation(make_vector(variable("s", sort_list::list(s)), variable("e", s), variable("d", s)), sort_bool_::true_(), sort_list::rtail(s, sort_list::cons_(s, variable("d", s), sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s))))), sort_list::cons_(s, variable("d", s), sort_list::rtail(s, sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s)))))));
 
         return result;
       }

@@ -8,6 +8,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/container_sort.h"
 
 
 namespace mcrl2 {
@@ -30,7 +31,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).name() == "set";
+          return static_cast<const container_sort&>(e).container_name() == "set";
         }
         return false;
       }
@@ -39,7 +40,7 @@ namespace mcrl2 {
       inline
       function_symbol set_comprehension(const sort_expression& s)
       {
-        static function_symbol set_comprehension("@set", function_sort(s, set(s)));
+        static function_symbol set_comprehension("@set", function_sort(s, sort_set::set(s)));
         return set_comprehension;
       }
 
@@ -78,7 +79,7 @@ namespace mcrl2 {
       inline
       function_symbol emptyset(const sort_expression& s)
       {
-        static function_symbol emptyset("{}", set(s));
+        static function_symbol emptyset("{}", sort_set::set(s));
         return emptyset;
       }
 
@@ -97,7 +98,7 @@ namespace mcrl2 {
       inline
       function_symbol in(const sort_expression& s)
       {
-        static function_symbol in("in", function_sort(s, set(s), bool_()));
+        static function_symbol in("in", function_sort(s, sort_set::set(s), sort_bool_::bool_()));
         return in;
       }
 
@@ -117,7 +118,7 @@ namespace mcrl2 {
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         assert(arg0.sort() == s);
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(in(s),arg0, arg1);
       }
@@ -137,7 +138,7 @@ namespace mcrl2 {
       inline
       function_symbol subset_or_equal(const sort_expression& s)
       {
-        static function_symbol subset_or_equal("<=", function_sort(set(s), set(s), bool_()));
+        static function_symbol subset_or_equal("<=", function_sort(sort_set::set(s), sort_set::set(s), sort_bool_::bool_()));
         return subset_or_equal;
       }
 
@@ -156,8 +157,8 @@ namespace mcrl2 {
       inline
       application subset_or_equal(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_set(arg0.sort()));
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg0.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(subset_or_equal(s),arg0, arg1);
       }
@@ -177,7 +178,7 @@ namespace mcrl2 {
       inline
       function_symbol subset(const sort_expression& s)
       {
-        static function_symbol subset("<", function_sort(set(s), set(s), bool_()));
+        static function_symbol subset("<", function_sort(sort_set::set(s), sort_set::set(s), sort_bool_::bool_()));
         return subset;
       }
 
@@ -196,8 +197,8 @@ namespace mcrl2 {
       inline
       application subset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_set(arg0.sort()));
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg0.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(subset(s),arg0, arg1);
       }
@@ -217,7 +218,7 @@ namespace mcrl2 {
       inline
       function_symbol union_(const sort_expression& s)
       {
-        static function_symbol union_("+", function_sort(set(s), set(s), set(s)));
+        static function_symbol union_("+", function_sort(sort_set::set(s), sort_set::set(s), sort_set::set(s)));
         return union_;
       }
 
@@ -236,8 +237,8 @@ namespace mcrl2 {
       inline
       application union_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_set(arg0.sort()));
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg0.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(union_(s),arg0, arg1);
       }
@@ -257,7 +258,7 @@ namespace mcrl2 {
       inline
       function_symbol difference(const sort_expression& s)
       {
-        static function_symbol difference("-", function_sort(set(s), set(s), set(s)));
+        static function_symbol difference("-", function_sort(sort_set::set(s), sort_set::set(s), sort_set::set(s)));
         return difference;
       }
 
@@ -276,8 +277,8 @@ namespace mcrl2 {
       inline
       application difference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_set(arg0.sort()));
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg0.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(difference(s),arg0, arg1);
       }
@@ -297,7 +298,7 @@ namespace mcrl2 {
       inline
       function_symbol intersection(const sort_expression& s)
       {
-        static function_symbol intersection("*", function_sort(set(s), set(s), set(s)));
+        static function_symbol intersection("*", function_sort(sort_set::set(s), sort_set::set(s), sort_set::set(s)));
         return intersection;
       }
 
@@ -316,8 +317,8 @@ namespace mcrl2 {
       inline
       application intersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_set(arg0.sort()));
-        assert(is_set(arg1.sort()));
+        assert(sort_set::is_set(arg0.sort()));
+        assert(sort_set::is_set(arg1.sort()));
         
         return application(intersection(s),arg0, arg1);
       }
@@ -337,7 +338,7 @@ namespace mcrl2 {
       inline
       function_symbol complement(const sort_expression& s)
       {
-        static function_symbol complement("-", function_sort(set(s), set(s)));
+        static function_symbol complement("-", function_sort(sort_set::set(s), sort_set::set(s)));
         return complement;
       }
 
@@ -356,7 +357,7 @@ namespace mcrl2 {
       inline
       application complement(const sort_expression& s, const data_expression& arg0)
       {
-        assert(is_set(arg0.sort()));
+        assert(sort_set::is_set(arg0.sort()));
         
         return application(complement(s),arg0);
       }
@@ -477,15 +478,15 @@ namespace mcrl2 {
       data_equation_list set_generate_equations_code(const sort_expression& s)
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, bool_())), variable("f", function_sort(s, bool_()))), true_(), equal_to(set_comprehension(variable("f", function_sort(s, bool_()))), set_comprehension(variable("g", function_sort(s, bool_())))), equal_to(variable("f", function_sort(s, bool_())), variable("g", function_sort(s, bool_())))));
-        result.push_back(data_equation(variable_list(), true_(), emptyset(), set_comprehension(lambda(make_vector(variable("x", s)),false_()))));
-        result.push_back(data_equation(make_vector(variable("d", s), variable("f", function_sort(s, bool_()))), true_(), in(variable("d", s), set_comprehension(variable("f", function_sort(s, bool_())))), variable("f", function_sort(s, bool_()))(variable("d", s))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, bool_())), variable("f", function_sort(s, bool_()))), true_(), subset_or_equal(set_comprehension(variable("f", function_sort(s, bool_()))), set_comprehension(variable("g", function_sort(s, bool_())))), forall(make_vector(variable("x", s)),subset_or_equal(variable("f", function_sort(s, bool_()))(variable("x", s)), variable("g", function_sort(s, bool_()))(variable("x", s))))));
-        result.push_back(data_equation(make_vector(variable("s", set(s)), variable("t", set(s))), true_(), subset(variable("s", set(s)), variable("t", set(s))), and_(subset_or_equal(variable("s", set(s)), variable("t", set(s))), not_equal_to(variable("s", set(s)), variable("t", set(s))))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, bool_())), variable("f", function_sort(s, bool_()))), true_(), union_(set_comprehension(variable("f", function_sort(s, bool_()))), set_comprehension(variable("g", function_sort(s, bool_())))), set_comprehension(lambda(make_vector(variable("x", s)),or_(variable("f", function_sort(s, bool_()))(variable("x", s)), variable("g", function_sort(s, bool_()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("s", set(s)), variable("t", set(s))), true_(), difference(variable("s", set(s)), variable("t", set(s))), intersection(variable("s", set(s)), complement(variable("t", set(s))))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, bool_())), variable("f", function_sort(s, bool_()))), true_(), intersection(set_comprehension(variable("f", function_sort(s, bool_()))), set_comprehension(variable("g", function_sort(s, bool_())))), set_comprehension(lambda(make_vector(variable("x", s)),and_(variable("f", function_sort(s, bool_()))(variable("x", s)), variable("g", function_sort(s, bool_()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, bool_()))), true_(), complement(set_comprehension(variable("f", function_sort(s, bool_())))), set_comprehension(lambda(make_vector(variable("x", s)),not_(variable("f", function_sort(s, bool_()))(variable("x", s)))))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_bool_::equal_to(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), sort_bool_::equal_to(variable("f", function_sort(s, sort_bool_::bool_())), variable("g", function_sort(s, sort_bool_::bool_())))));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_set::emptyset(), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::false_()))));
+        result.push_back(data_equation(make_vector(variable("d", s), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::in(s, variable("d", s), sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_())))), variable("f", function_sort(s, sort_bool_::bool_()))(variable("d", s))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::subset_or_equal(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), forall(make_vector(variable("x", s)),sort_set::subset_or_equal(s, variable("f", function_sort(s, sort_bool_::bool_()))(variable("x", s)), variable("g", function_sort(s, sort_bool_::bool_()))(variable("x", s))))));
+        result.push_back(data_equation(make_vector(variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::true_(), sort_set::subset(s, variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::and_(s, sort_set::subset_or_equal(s, variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::not_equal_to(variable("s", sort_set::set(s)), variable("t", sort_set::set(s))))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::union_(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::or_(variable("f", function_sort(s, sort_bool_::bool_()))(variable("x", s)), variable("g", function_sort(s, sort_bool_::bool_()))(variable("x", s)))))));
+        result.push_back(data_equation(make_vector(variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::true_(), sort_set::difference(s, variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_set::intersection(s, variable("s", sort_set::set(s)), sort_set::complement(s, variable("t", sort_set::set(s))))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::intersection(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::and_(variable("f", function_sort(s, sort_bool_::bool_()))(variable("x", s)), variable("g", function_sort(s, sort_bool_::bool_()))(variable("x", s)))))));
+        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::complement(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_())))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::not_(variable("f", function_sort(s, sort_bool_::bool_()))(variable("x", s)))))));
 
         return result;
       }

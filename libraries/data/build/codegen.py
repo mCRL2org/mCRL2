@@ -41,6 +41,7 @@ import Parsing
 verbose = False       # Switch on debug output?
 debug = False         # Switch on verbose output? 
 sorts_cache = []
+sorts_to_functions = {}
 functions_cache = []
 functions_table = {}  # Maps ids to function names
 includes_table = {}   # Maps sorts to include files
@@ -109,7 +110,7 @@ SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      // Sort expression %(container)s(%
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).name() == "%(label)s";
+          return static_cast<const container_sort&>(e).container_name() == "%(label)s";
         }
         return false;
       }
@@ -206,6 +207,20 @@ def add_to_comma_sep_string(string, addition):
     string += ", "
   string += addition
   return string
+
+def add_namespace(string):
+  if string == current_sort:
+    return "%s" % string
+  else:
+    return "sort_%s::%s" % (string, string)
+
+def get_namespace(sorts, functions, function):
+  global sorts_to_functions
+  for s in sorts_to_functions:
+    for f in sorts_to_functions[s]:
+      if f[1].label == function:
+        return "sort_%s" % (get_label(sorts, s))
+  assert(False)
 
 #
 # get_projection_arguments
@@ -307,7 +322,14 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
       print "generate code for data expression: %s" % data_expression
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
+      sort_args = get_sort_parameters_from_data_expression(sorts, functions, data_expression[1].expr)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
+      sort_args |= get_sort_parameters_from_data_expression(sorts, functions, data_expression[2].expr)
+      sort_args_code = ""
+      for a in sort_args:
+        sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower())) 
+      if sort_args_code <> "":
+        args_code = sort_args_code + ", " + args_code
       return "%s(%s)" % (head_code, args_code)
     elif data_expression[0] == "lambda" or data_expression[0] == "forall" or data_expression[0] == "exists":
       vardecl = data_expression[1]
@@ -326,10 +348,11 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
       id = lookup_identifier(functions, data_expression[0], arity)
       if id == "":
         return generate_variable_code(sorts, variable_declarations, data_expression[0].string)
+      namespace = get_namespace(sorts, functions, id)
       if arity == 0:
-        return "%s()" % (id)
+        return "%s::%s()" % (namespace, id)
       else:
-        return id
+        return "%s::%s" % (namespace, id)
 
 def generate_sorts_code(sorts_ctx, sorts):
   if verbose:
@@ -358,11 +381,12 @@ def generate_sort_code(sorts, sort):
     return generate_sorts_code(sorts, domain)
   elif sort_expression[0] == "param_expr":
     param_code = generate_sort_code(sorts, sort_expression[2])
-    return "%s(%s)" % (get_label(sorts, sort_expression[1]), param_code)
+    l = get_label(sorts, sort_expression[1])
+    return "%s(%s)" % (add_namespace(l), param_code)
   else:
     l = get_label(sorts, sort_expression[0])
     if l <> "":
-      return "%s()" % (l)
+      return "%s()" % (add_namespace(l))
     else:
 # TODO: Fix this properly
       try:
@@ -388,9 +412,9 @@ def get_label(sorts, sort):
         print "get label for %s in %s" % (sort.string, sorts)
       for s in sorts:
         if len(s) == 2 and s[0].string == sort.string:
-            return s[1].label
+          return s[1].label
         elif len(s) == 3 and s[0].string == sort.string:
-            return s[2].label
+          return s[2].label
       return ""
     except:
       return ""
@@ -470,7 +494,7 @@ def get_sort_parameters_from_equations(sorts, functions, variable_decls, equatio
       sort_parameters |= get_sort_parameters_from_data_expression(sorts, functions, eqn[3])
     return sort_parameters
 
-def generate_sort_parameters_code(sorts, functions, variable_declarations, equations):
+def generate_formal_sort_parameters_code(sorts, functions, variable_declarations, equations):
     params = get_sort_parameters_from_equations(sorts, functions, variable_declarations, equations)
     code = ""
     for p in params:
@@ -480,7 +504,7 @@ def generate_sort_parameters_code(sorts, functions, variable_declarations, equat
 def generate_equations_code(sorts, functions, variable_declarations, equations):
     if verbose:
       print "generate equations code"
-    argument = generate_sort_parameters_code(sorts, functions, variable_declarations, equations)
+    argument = generate_formal_sort_parameters_code(sorts, functions, variable_declarations, equations)
     sort = sorts[0]
     sortstring = sort[0].string
     if len(sort) == 2:
@@ -629,11 +653,13 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           formalparameters += "const data_expression& arg%s" % index
           actualparameters += "arg%s" % index
           if a[0] == "param_expr":
-            assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[1]), index)
+            l = get_label(sorts, a[1])
+            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (l, l, index)
           elif a[0].string in sort_params:
             assertion = "assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
           else:
-            assertion = "assert(is_%s(arg%s.sort()));\n        " % (get_label(sorts, a[0]), index)
+            l = get_label(sorts, a[0])
+            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (l, l, index)
           assertions += assertion
           index +=1
 
@@ -703,7 +729,7 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           assertions += "s%s == %s" % (index, generate_sort_code(sorts, j))
         if len(domains) <> 1:
           assertions += ")"
-      assertions += ")\n"
+      assertions += ");\n"
 
       # Bases on the parameters determine the target sort
       if len(remove_duplicates(codomain_strings)) <> 1:
@@ -714,8 +740,8 @@ def generate_function_constructors(sorts, id, label, sortexprs):
             if index <> 0:
               target_sort += " && "
             target_sort += "s%s == %s" % (index, generate_sort_code(sorts, j))
-          target_sort += ")\n        {\n"
-          target_sort += "          target_sort = %s" % (generate_sort_code(sorts, [codomains[i]]))
+          target_sort += ");\n        {\n"
+          target_sort += "          target_sort = %s;" % (generate_sort_code(sorts, [codomains[i]]))
           target_sort += "\n        }\n"
       else:
         target_sort = "sort_expression target_sort(%s);" % (generate_sort_code(sorts, [codomains[0]]))
@@ -889,13 +915,29 @@ class Result(Parsing.Nonterm):
         global current_sort
         global sorts_cache
         global functions_cache
+        global sorts_to_functions
         self.includes = result.includes
         self.spec = result.spec
+
+        has_container = False
+        for s in self.spec.sorts:
+          if len(s) == 3:
+            has_container = True
+        if has_container:
+          self.includes += ["container_sort"]
+
         functions_cache = functions_cache + self.spec.functions
 
-        outputcode = generate_result_code(self.spec, generate_includes_code(self.includes, self.spec.sorts))
         current_sort = self.spec.sorts[0][0]
         sorts_cache += self.spec.sorts
+        sorts_to_functions[current_sort] = self.spec.functions
+
+        self.spec.code = generate_sortspec_code(self.spec.sortspec) + \
+                    generate_functionspec_code(self.spec.sorts + sorts_cache, self.spec.functionspec) + \
+                    generate_projection_functions(self.spec.functionspec.projection_arguments) + \
+                    generate_equations_code(self.spec.sorts + sorts_cache, self.spec.functionspec.functions + functions_cache, self.spec.varspec.vars, self.spec.eqnspec.equations)
+
+        outputcode = generate_result_code(self.spec, generate_includes_code(self.includes, self.spec.sorts))
 
         # Debugging
         self.string = result.string
@@ -958,13 +1000,13 @@ class Spec(Parsing.Nonterm):
         "%reduce SortSpec FunctionSpec VarSpec EqnSpec"
         global sorts_cache
         global functions_cache
+        self.sortspec = sortspec
+        self.functionspec = functionspec
+        self.varspec = varspec
+        self.eqnspec = eqnspec
         self.sorts = sortspec.sorts
         self.functions = functionspec.functions
-        self.sort = sortspec.sorts[0]
-        self.code = generate_sortspec_code(sortspec) + \
-                    generate_functionspec_code(self.sorts + sorts_cache, functionspec) + \
-                    generate_projection_functions(functionspec.projection_arguments) + \
-                    generate_equations_code(self.sorts + sorts_cache, functionspec.functions + functions_cache, varspec.vars, eqnspec.equations)
+        self.sort = self.sortspec.sorts[0]
 
         # Debugging
         self.string = sortspec.string + '\n' + functionspec.string + '\n' + varspec.string + '\n' + eqnspec.string

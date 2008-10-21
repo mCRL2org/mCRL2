@@ -38,7 +38,7 @@ namespace mcrl2 {
       inline
       function_symbol true_()
       {
-        static function_symbol true_("true", bool_());
+        static function_symbol true_("true", sort_bool_::bool_());
         return true_;
       }
 
@@ -57,7 +57,7 @@ namespace mcrl2 {
       inline
       function_symbol false_()
       {
-        static function_symbol false_("false", bool_());
+        static function_symbol false_("false", sort_bool_::bool_());
         return false_;
       }
 
@@ -76,7 +76,7 @@ namespace mcrl2 {
       inline
       function_symbol equal_to()
       {
-        static function_symbol equal_to("==", function_sort(bool_(), bool_(), bool_()));
+        static function_symbol equal_to("==", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return equal_to;
       }
 
@@ -95,8 +95,8 @@ namespace mcrl2 {
       inline
       application equal_to(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
         
         return application(equal_to(),arg0, arg1);
       }
@@ -116,7 +116,7 @@ namespace mcrl2 {
       inline
       function_symbol not_equal_to()
       {
-        static function_symbol not_equal_to("!=", function_sort(bool_(), bool_(), bool_()));
+        static function_symbol not_equal_to("!=", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return not_equal_to;
       }
 
@@ -135,8 +135,8 @@ namespace mcrl2 {
       inline
       application not_equal_to(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
         
         return application(not_equal_to(),arg0, arg1);
       }
@@ -156,7 +156,7 @@ namespace mcrl2 {
       inline
       function_symbol if_()
       {
-        static function_symbol if_("if", function_sort(bool_(), bool_(), bool_(), bool_()));
+        static function_symbol if_("if", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return if_;
       }
 
@@ -175,9 +175,9 @@ namespace mcrl2 {
       inline
       application if_(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
-        assert(is_bool_(arg2.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg2.sort()));
         
         return application(if_(),arg0, arg1, arg2);
       }
@@ -197,7 +197,7 @@ namespace mcrl2 {
       inline
       function_symbol not_()
       {
-        static function_symbol not_("!", function_sort(bool_(), bool_()));
+        static function_symbol not_("!", function_sort(sort_bool_::bool_(), sort_bool_::bool_()));
         return not_;
       }
 
@@ -216,7 +216,7 @@ namespace mcrl2 {
       inline
       application not_(const data_expression& arg0)
       {
-        assert(is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
         
         return application(not_(),arg0);
       }
@@ -236,7 +236,7 @@ namespace mcrl2 {
       inline
       function_symbol and_()
       {
-        static function_symbol and_("&&", function_sort(bool_(), bool_(), bool_()));
+        static function_symbol and_("&&", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return and_;
       }
 
@@ -255,8 +255,8 @@ namespace mcrl2 {
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
         
         return application(and_(),arg0, arg1);
       }
@@ -276,7 +276,7 @@ namespace mcrl2 {
       inline
       function_symbol or_()
       {
-        static function_symbol or_("||", function_sort(bool_(), bool_(), bool_()));
+        static function_symbol or_("||", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return or_;
       }
 
@@ -295,8 +295,8 @@ namespace mcrl2 {
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
         
         return application(or_(),arg0, arg1);
       }
@@ -316,7 +316,7 @@ namespace mcrl2 {
       inline
       function_symbol implies()
       {
-        static function_symbol implies("=>", function_sort(bool_(), bool_(), bool_()));
+        static function_symbol implies("=>", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
         return implies;
       }
 
@@ -335,8 +335,8 @@ namespace mcrl2 {
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(is_bool_(arg0.sort()));
-        assert(is_bool_(arg1.sort()));
+        assert(sort_bool_::is_bool_(arg0.sort()));
+        assert(sort_bool_::is_bool_(arg1.sort()));
         
         return application(implies(),arg0, arg1);
       }
@@ -487,30 +487,30 @@ namespace mcrl2 {
       data_equation_list bool__generate_equations_code()
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), variable("b", bool_())), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(false_(), variable("b", bool_())), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), true_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), equal_to(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), not_equal_to(variable("b", bool_()), variable("c", bool_())), not_(equal_to(variable("b", bool_()), variable("c", bool_())))));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(true_(), variable("b", bool_()), variable("c", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(false_(), variable("b", bool_()), variable("c", bool_())), variable("c", bool_())));
-        result.push_back(data_equation(make_vector(variable("c", bool_()), variable("b", bool_())), true_(), if_(variable("b", bool_()), variable("c", bool_()), variable("c", bool_())), variable("c", bool_())));
-        result.push_back(data_equation(variable_list(), true_(), not_(true_()), false_()));
-        result.push_back(data_equation(variable_list(), true_(), not_(false_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), not_(not_(variable("b", bool_()))), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(variable("b", bool_()), true_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(variable("b", bool_()), false_()), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), and_(false_(), variable("b", bool_())), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(variable("b", bool_()), true_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(variable("b", bool_()), false_()), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(true_(), variable("b", bool_())), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), or_(false_(), variable("b", bool_())), false_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(variable("b", bool_()), true_()), true_()));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(variable("b", bool_()), false_()), not_(variable("b", bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(true_(), variable("b", bool_())), variable("b", bool_())));
-        result.push_back(data_equation(make_vector(variable("b", bool_())), true_(), implies(false_(), variable("b", bool_())), true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::equal_to(variable("b", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::equal_to(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::equal_to(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::equal_to(variable("b", sort_bool_::bool_()), sort_bool_::true_()), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::equal_to(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
+        result.push_back(data_equation(make_vector(variable("c", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::not_equal_to(variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), sort_bool_::not_(sort_bool_::equal_to(variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())))));
+        result.push_back(data_equation(make_vector(variable("c", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::if_(sort_bool_::true_(), variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("c", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::if_(sort_bool_::false_(), variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), variable("c", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("c", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::if_(variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), variable("c", sort_bool_::bool_())));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_bool_::not_(sort_bool_::true_()), sort_bool_::false_()));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_bool_::not_(sort_bool_::false_()), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::not_(sort_bool_::not_(variable("b", sort_bool_::bool_()))), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::true_()), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::and_(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::and_(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::or_(variable("b", sort_bool_::bool_()), sort_bool_::true_()), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::or_(variable("b", sort_bool_::bool_()), sort_bool_::false_()), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::or_(sort_bool_::true_(), variable("b", sort_bool_::bool_())), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::or_(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::implies(variable("b", sort_bool_::bool_()), sort_bool_::true_()), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::implies(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::implies(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_bool_::implies(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::true_()));
 
         return result;
       }

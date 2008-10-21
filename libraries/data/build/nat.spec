@@ -29,7 +29,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     + <"plus">:Nat <"left"> #Nat <"right">->Nat;
     @gtesubt <"gtesubt">:Pos <"arg1"> # Pos <"arg2"> -> Nat;
     @gtesubt <"gtesubt">:Nat <"arg1"> # Nat <"arg2"> -> Nat;
-    @gtesubtb <"gtesubt">: Bool <"bit"> # Pos <"arg1"> # Pos <"arg2"> -> Nat;
+    @gtesubtb <"gtesubtb">: Bool <"bit"> # Pos <"arg1"> # Pos <"arg2"> -> Nat;
     * <"times">:Nat <"left"> #Nat <"right">->Nat;
     div <"div">: Pos <"arg1"> # Pos <"arg2"> -> Nat;
     div <"div">: Nat <"arg1"> # Pos <"arg2"> -> Nat;
@@ -43,8 +43,8 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     @first <"first"> : @NatPair <"pair"> -> Nat;
     @last <"last"> : @NatPair <"pair"> -> Nat;
     @divmod <"divmod"> : Pos <"arg1"> # Pos <"arg2"> -> @NatPair;
-    @gdivmod <"divmod"> : @NatPair <"arg1"> # Bool <"bit"> # Pos <"arg3"> -> @NatPair;
-    @ggdivmod <"divmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair;
+    @gdivmod <"gdivmod"> : @NatPair <"arg1"> # Bool <"bit"> # Pos <"arg3"> -> @NatPair;
+    @ggdivmod <"ggdivmod"> : Nat <"arg1"> # Nat <"arg2"> # Pos <"arg3"> -> @NatPair;
 
 
 var b:Bool;
