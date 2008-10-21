@@ -1,9 +1,14 @@
+ifneq ($(filter all bjam install test, ${MAKECMDGOALS}),)
+  include build/Makefile
+endif
+ifeq (${MAKECMDGOALS},)
+  include build/Makefile
+endif
+
 .PHONY: all bjam install test tags clean distclean parsers mcrl2parser ltsview_fsmparser liblts_fsmparser doxy
 
 all: bjam config.status
 	$(BOOST_BUILD)
-
-include build/Makefile
 
 install: bjam config.status
 	$(BOOST_BUILD) --install
