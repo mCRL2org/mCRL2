@@ -104,6 +104,23 @@ namespace mcrl2 {
             m_arguments(make_vector(arg1, arg2, arg3))
         { }
 
+        /// \brief Convenience constructor for application with three arguments
+        ///
+        /// \param[in] head The data expression that is applied
+        /// \param[in] arg1 The first argument head is applied to
+        /// \param[in] arg2 The second argument head is applied to
+        /// \param[in] arg3 The third argument head is applied to
+        /// \param[in] arg4 The fourth argument head is applied to
+        /// \post \this represents head(arg1, arg2, arg3, arg4)
+        application(const data_expression& head,
+                    const data_expression& arg1,
+                    const data_expression& arg2,
+                    const data_expression& arg3,
+                    const data_expression& arg4)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3, arg4)))),
+            m_arguments(make_vector(arg1, arg2, arg3, arg4))
+        { }
+
         /* Should be enabled when the implementation in data_expression is
          * removed
         /// \overload
