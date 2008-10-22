@@ -532,7 +532,7 @@ AC_SUBST([OPENGL_NAME],[])
 
 # Check for wxWidgets
 AC_ARG_WITH(
-  [wx],
+  [wx-config],
   AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
 if test $with_wx; then

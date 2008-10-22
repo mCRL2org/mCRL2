@@ -747,7 +747,7 @@ with_aterm
 with_cadp
 with_boost
 with_opengl
-with_wx
+with_wx_config
 '
       ac_precious_vars='build_alias
 host_alias
@@ -5397,9 +5397,9 @@ fi
 
 # Check for wxWidgets
 
-# Check whether --with-wx was given.
-if test "${with_wx+set}" = set; then
-  withval=$with_wx;
+# Check whether --with-wx-config was given.
+if test "${with_wx_config+set}" = set; then
+  withval=$with_wx_config;
 fi
 
 if test $with_wx; then
