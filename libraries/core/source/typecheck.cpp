@@ -749,8 +749,6 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
   
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
 
-  ATermAppl Result=NULL;
-
   gsDebugMsg ("type checking phase started\n");
 
   gstcDataInit();

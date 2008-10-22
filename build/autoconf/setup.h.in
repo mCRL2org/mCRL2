@@ -31,6 +31,8 @@
 #define ATERM_CPPFLAGS   "@IATERM_CPPFLAGS@"
 #define ATERM_LDFLAGS    "@IATERM_LDFLAGS@"
 
+#ifndef USE_BCG
 @USE_BCG@#define USE_BCG
+#endif
 
 #endif
