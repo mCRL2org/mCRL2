@@ -22,7 +22,7 @@
 #include <aterm2.h>
 
 // mCRL2 core libraries
-#include "mcrl2/core/detail/struct.h"                      // ATerm building blocks.
+#include "mcrl2/core/detail/struct.h"               // ATerm building blocks.
 #include "mcrl2/core/messaging.h"                   // Library for messaging.
 
 // mCRL2 core/detail libraries
@@ -252,7 +252,8 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
   bool is_valid = true;
 
   // validate datatype specification
-  if(!validate_datatype_specification(doc_root))
+  ATermAppl datatype_spec;
+  if(!validate_datatype_specification(doc_root, datatype_spec))
   {
     is_valid = false;
   }
@@ -261,7 +262,7 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
   wxXmlNode *process_diagrams = get_child(doc_root, _T("processdiagramlist"));
   for(wxXmlNode *process_diagram = process_diagrams->GetChildren(); process_diagram != 0; process_diagram = process_diagram->GetNext())
   {
-    if(!validate_process_diagram(doc_root, process_diagram))
+    if(!validate_process_diagram(doc_root, process_diagram, datatype_spec))
     {
       is_valid = false;
     }
@@ -269,7 +270,7 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
   wxXmlNode *architecture_diagrams = get_child(doc_root, _T("architecturediagramlist"));
   for(wxXmlNode *architecture_diagram = architecture_diagrams->GetChildren(); architecture_diagram != 0; architecture_diagram = architecture_diagram->GetNext())
   {
-    if(!validate_architecture_diagram(doc_root, architecture_diagram))
+    if(!validate_architecture_diagram(doc_root, architecture_diagram, datatype_spec))
     {
       is_valid = false;
     }
@@ -306,6 +307,13 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
 {
   wxXmlNode *doc_root = p_spec.GetRoot();
 
+// validate datatype specification
+  ATermAppl datatype_spec;
+  if(!validate_datatype_specification(doc_root, datatype_spec))
+  {
+    return false;
+  }
+
   wxXmlNode *process_diagram = 0;
   try
   {
@@ -317,7 +325,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
     return false;
   }
 
-  if(!validate_process_diagram(doc_root, process_diagram))
+  if(!validate_process_diagram(doc_root, process_diagram, datatype_spec))
   {
     cerr << "+process diagram is not valid." << endl;
     return false;
@@ -328,7 +336,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
   return true;
 }
 
-bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram)
+bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, ATermAppl &datatype_spec)
 {
   bool  designator_list_is_valid = false, ref_state_list_is_valid = false, state_list_is_valid = false,
         term_trans_list_is_valid = false, trans_list_is_valid = false;
@@ -346,7 +354,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
   list_of_decl_init preamble_vars;
   try
   {
-    parse_preamble(p_process_diagram, preamble_params, preamble_vars);
+    parse_preamble(p_process_diagram, preamble_params, preamble_vars, datatype_spec);
   }
   catch(...)
   {
@@ -369,7 +377,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
     }
     else if(curr_list->GetName() == _T("referencestatelist"))
     {
-      ref_state_list_is_valid = validate_reference_state_list(p_doc_root, p_process_diagram, curr_list);
+      ref_state_list_is_valid = validate_reference_state_list(p_doc_root, p_process_diagram, curr_list, datatype_spec);
     }
     else if(curr_list->GetName() == _T("statelist"))
     {
@@ -377,11 +385,11 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
     }
     else if(curr_list->GetName() == _T("terminatingtransitionlist"))
     {
-      term_trans_list_is_valid = validate_terminating_transition_list(p_process_diagram, curr_list, preamble_params, preamble_vars);
+      term_trans_list_is_valid = validate_terminating_transition_list(p_process_diagram, curr_list, preamble_params, preamble_vars, datatype_spec);
     }
     else if(curr_list->GetName() == _T("nonterminatingtransitionlist"))
     {
-      trans_list_is_valid = validate_nonterminating_transition_list(p_process_diagram, curr_list, preamble_params, preamble_vars);
+      trans_list_is_valid = validate_nonterminating_transition_list(p_process_diagram, curr_list, preamble_params, preamble_vars, datatype_spec);
     }
   }
 
@@ -397,6 +405,13 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
 {
   wxXmlNode *doc_root = p_spec.GetRoot();
 
+  // validate datatype specification
+  ATermAppl datatype_spec;
+  if(!validate_datatype_specification(doc_root, datatype_spec))
+  {
+    return false;
+  }
+
   wxXmlNode *arch_diagram = 0;
   try
   {
@@ -409,7 +424,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
     return false;
   }
 
-  if(!validate_architecture_diagram(doc_root, arch_diagram))
+  if(!validate_architecture_diagram(doc_root, arch_diagram, datatype_spec))
   {
     cerr << "+architecture diagram is not valid." << endl;
     return false;
@@ -420,7 +435,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
   return true;
 }
 
-bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram)
+bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, ATermAppl &datatype_spec)
 {
   bool blocked_list_is_valid = false, visible_list_is_valid = false, channel_communication_list_is_valid = false,
        channel_list_is_valid = false, architecture_reference_list_is_valid = false, process_reference_list_is_valid = false;
@@ -448,7 +463,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
     }
     else if(curr_list->GetName() == _T("processreferencelist"))
     {
-      process_reference_list_is_valid = validate_process_reference_list(p_doc_root, p_architecture_diagram, curr_list);
+      process_reference_list_is_valid = validate_process_reference_list(p_doc_root, p_architecture_diagram, curr_list, datatype_spec);
     }
   }
 
@@ -470,7 +485,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
       }
       else if(curr_list->GetName() == _T("channellist"))
       {
-        channel_list_is_valid = validate_channel_list(p_doc_root, p_architecture_diagram, curr_list);
+        channel_list_is_valid = validate_channel_list(p_doc_root, p_architecture_diagram, curr_list, datatype_spec);
       }
     }
   }
@@ -483,24 +498,37 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   return true;
 }
 
-bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root)
+bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec)
 {
   bool is_valid = true;
 
   wxXmlNode *datspeclist = get_child(p_doc_root, _T("datatypespecificationlist"));
   wxString datspec = get_child_value(datspeclist, _T("datatypespecification"));
 
-  datspec += _T("\ninit tau;");
+// why was this added?????
+// datspec += _T("\ninit tau;");
 
   // try to parse the mCRL2 specification
   string mcrl2_spec = string(datspec.mb_str());
   const char *m_spec = mcrl2_spec.c_str();
   istringstream iss(m_spec);
-  ATermAppl a_parsed_mcrl2_spec = parse_proc_spec(iss);
+//  ATermAppl a_parsed_mcrl2_spec = parse_proc_spec(iss);
+  ATermAppl a_parsed_mcrl2_spec = parse_data_spec(iss);
   if(a_parsed_mcrl2_spec == 0)
   {
     cerr << "+specification is not valid: could not parse the datatype specification." << endl;
     is_valid = false;
+  }
+  else
+  {
+  // parse succeeded: try to type check
+    ATermAppl a_type_checked_mcrl2_spec = type_check_data_spec(a_parsed_mcrl2_spec);
+    datatype_spec = a_type_checked_mcrl2_spec;
+    if(a_type_checked_mcrl2_spec == 0)
+    {
+      cerr << "+specification is not valid: could not type check the datatype specification." << endl;
+      is_valid = false;
+    }
   }
 
   return is_valid;
@@ -588,7 +616,7 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_process_diag
   return is_valid;
 }
 
-bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_ref_state_list)
+bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_ref_state_list, ATermAppl &datatype_spec)
 {
   // validate each reference: a reference is valid when it points to a valid process diagram
   // AND it has a valid parameter initialization
@@ -646,7 +674,7 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
       list_of_decl_init preamble_vars;
       try
       {
-        parse_preamble(referenced_diagram, preamble_params, preamble_vars);
+        parse_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
       }
       catch(...)
       {
@@ -802,7 +830,7 @@ bool grape::mcrl2gen::validate_state_list(wxXmlNode *p_process_diagram, wxXmlNod
   return is_valid;
 }
 
-bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_term_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables)
+bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_term_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec)
 {
   // for each label, infer if the beginstates exist and try to parse it
   bool is_valid = true;
@@ -829,7 +857,7 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
     bool label_valid;
     try
     {
-      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions);
+      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions, datatype_spec);
     }
     catch(...)
     {
@@ -844,7 +872,7 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
   return is_valid;
 }
 
-bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables)
+bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec)
 {
   // for each label, infer if the begin- and endstates exist and try to parse it
   bool is_valid = true;
@@ -873,7 +901,7 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
     bool label_valid;
     try
     {
-      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions);
+      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions, datatype_spec);
     }
     catch(...)
     {
@@ -888,7 +916,7 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
   return is_valid;
 }
 
-bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls)
+bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   p_preamble_parameter_decls.Empty();
   p_preamble_local_var_decls.Empty();
@@ -911,28 +939,210 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
     wxXmlNode *param_list = get_child(child, _T("parameterlist"));
     if(var_list != 0)
     {
-      wxString local_vars = var_list->GetNodeContent();
-      diag_preamble.set_local_variable_declarations(local_vars);
-      if(!diag_preamble.check_local_variable_declarations_syntax())
+      for(wxXmlNode *local_var = var_list->GetChildren(); local_var != 0; local_var = local_var->GetNext())
       {
-        // ERROR: preamble contains invalid local variable syntax
-        cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-             << " contains an invalid local variable declaration in its preamble." << endl;
-        throw CONVERSION_ERROR;
-        return false;
+	wxString var = local_var->GetNodeContent();
+	// process local variable declaration
+        wxStringTokenizer tkt( var, _T(":") );
+        if ( tkt.CountTokens() != 2 || var.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString var_name = tkt.GetNextToken();
+        var_name.Trim( true );
+        var_name.Trim( false );
+        wxStringTokenizer tks( var_name );
+        if ( tks.CountTokens() != 1 || var_name.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString var_rest = tkt.GetNextToken();
+        wxStringTokenizer tkr( var_rest, _T("=") );
+        if ( tkr.CountTokens() != 2 || var_rest.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString var_type = tkr.GetNextToken();
+        var_type.Trim( true );
+        var_type.Trim( false );
+        tks.SetString( var_type );
+        if ( tks.CountTokens() != 1 || var_type.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString var_val = tkr.GetNextToken();
+        var_val.Trim( true );
+        var_val.Trim( false );
+        tks.SetString( var_val );
+        if ( tks.CountTokens() != 1 || var_val.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() 
+               << " declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+
+        // parse local variable name (identifier)
+        string local_var_id = string(var_name.mb_str());
+        const char *l_v_id = local_var_id.c_str();
+        istringstream iss(l_v_id);
+        ATermAppl a_parsed_local_var_id = parse_identifier(iss);
+        if ( a_parsed_local_var_id == 0 )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
+               << "> declaration in its preamble. The variable name '" << var_name.ToAscii() << "' could not be parsed." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+
+        // parse local variable type (sortexpression)
+        string local_var_sort = string(var_type.mb_str());
+        const char *l_v_sort = local_var_sort.c_str();
+        istringstream iss1(l_v_sort);
+        ATermAppl a_parsed_local_var_sort = parse_sort_expr(iss1);
+        ATermAppl a_type_checked_local_var_sort;
+        if ( a_parsed_local_var_sort == 0 )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
+               << "> declaration in its preamble. The variable type '" << var_type.ToAscii() << "' could not be parsed." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        else
+        {
+          // parse succeeded: try to type check
+          a_type_checked_local_var_sort = type_check_sort_expr( a_parsed_local_var_sort, datatype_spec );
+          if ( a_type_checked_local_var_sort == 0 )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
+                 << "> declaration in its preamble. The variable type '" << var_type.ToAscii() << "' could not be type checked." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+        }
+
+        // parse local variable value (dataexpression)
+        string local_var_expr = string(var_val.mb_str());
+        const char *l_v_expr = local_var_expr.c_str();
+        istringstream iss2(l_v_expr);
+        ATermAppl a_parsed_local_var_expr = parse_data_expr(iss2);
+        if ( a_parsed_local_var_expr == 0 )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
+               << "> declaration in its preamble. The variable value '" << var_val.ToAscii() << "' could not be parsed." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        else
+        {
+          // parse succeeded: try to type check
+          ATermAppl a_type_checked_local_var_expr = type_check_data_expr( a_parsed_local_var_expr, a_type_checked_local_var_sort, datatype_spec );
+          if ( a_type_checked_local_var_expr == 0 )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
+                 << "> declaration in its preamble. The variable value '" << var_val.ToAscii() << "' could not be type checked." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+        }
       }
     }
+
     if(param_list != 0)
     {
-      wxString params = param_list->GetNodeContent();
-      diag_preamble.set_parameter_declarations(params);
-      if(!diag_preamble.check_parameter_declarations_syntax())
+      for(wxXmlNode *parameter = param_list->GetChildren(); parameter != 0; parameter = parameter->GetNext())
       {
-        // ERROR: preamble contains invalid parameter declarations
-        cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-             << " contains an invalid parameter declaration in its preamble." << endl;
-        throw CONVERSION_ERROR;
-        return false;
+        wxString param = parameter->GetNodeContent();
+	// process local variable declaration
+        wxStringTokenizer tkt( param, _T(":") );
+        if ( tkt.CountTokens() != 2 || param.IsEmpty() )
+        {
+          // ERROR: parameter declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString param_name = tkt.GetNextToken();
+        param_name.Trim( true );
+        param_name.Trim( false );
+        wxStringTokenizer tks( param_name );
+        if ( tks.CountTokens() != 1 || param_name.IsEmpty() )
+        {
+          // ERROR: parameter declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        wxString param_type = tkt.GetNextToken();
+        param_type.Trim( true );
+        param_type.Trim( false );
+        tks.SetString( param_type );
+        if ( tks.CountTokens() != 1 || param_type.IsEmpty() )
+        {
+          // ERROR: variable declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+
+        // parse parameter name (identifier)
+        string param_id = string(param_name.mb_str());
+        const char *par_id = param_id.c_str();
+        istringstream iss(par_id);
+        ATermAppl a_parsed_param_id = parse_identifier(iss);
+        if ( a_parsed_param_id == 0 )
+        {
+          // ERROR: parameter declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
+               << "> declaration in its preamble. The parameter name '" << param_name.ToAscii() << "' could not be parsed." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+
+        // parse parameter type (sortexpression)
+        string param_sort = string(param_type.mb_str());
+        const char *par_sort = param_sort.c_str();
+        istringstream iss1(par_sort);
+        ATermAppl a_parsed_param_sort = parse_sort_expr(iss1);
+        if ( a_parsed_param_sort == 0 )
+        {
+          // ERROR: parameter declaration is not valid
+          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
+               << "> declaration in its preamble. The parameter type '" << param_type.ToAscii() << "' could not be parsed." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+        else
+        {
+          // parse succeeded: try to type check
+          ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );
+          if ( a_type_checked_param_sort == 0 )
+          {
+            // ERROR: parameter declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
+                 << "> declaration in its preamble. The parameter type '" << param_type.ToAscii() << "' could not be type checked." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+        }
       }
     }
 
@@ -947,9 +1157,9 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
   return false;
 }
 
-bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions)
+bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions, ATermAppl &datatype_spec)
 {
-  wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
+/*  wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
 
   // load label
   label trans_label;
@@ -962,13 +1172,38 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
     return false;
   }
   wxString actions = trans_label.get_actions().get_expression();
+  ATermAppl a_parsed_multi_action, a_type_checked_multi_action;
   if(actions != wxEmptyString)
   {
     // parse label to ATerm
     string mult_action = std::string(actions.mb_str());
     const char *str = mult_action.c_str();
     istringstream iss(str);
-    ATermAppl a_multi_action = parse_mult_act(iss);
+    a_parsed_multi_action = parse_data_expr(iss);
+    if (a_parsed_multi_action == 0)
+    {
+      cerr << "multiaction in transition label: " << p_label.ToAscii()
+           << " in process diagram " << diagram_name.ToAscii()
+           << " could not be parsed. " << endl;
+      throw CONVERSION_ERROR;
+      return false;
+    }
+    else
+    {
+      // parse succeeded: try to type check
+      a_type_checked_multi_action = type_check_data_expr(a_parsed_multi_action, NULL, datatype_spec, NULL);
+      if (a_type_checked_multi_action == 0)
+      {
+        cerr << "multiaction in transition label: " << p_label.ToAscii()
+             << " in process diagram " << diagram_name.ToAscii()
+             << " could not be type checked. " << endl;
+        throw CONVERSION_ERROR;
+        return false;
+      }
+    }
+
+*/
+/*    ATermAppl a_multi_action = parse_mult_act(iss);
     if(a_multi_action == NULL)
     {
       // ERROR: label is not a valid (parameterised) multiaction
@@ -977,7 +1212,8 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
       throw CONVERSION_ERROR;
       return false;
     }
-
+*/
+/*
     // parse transition label variable declarations
     list_of_decl trans_var_decls;
     trans_var_decls.Empty();
@@ -1014,13 +1250,16 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
         }
         var_decl_var.Trim(true);
         var_decl_var.Trim(false);
-        v_decl.set_type(var_decl_var);
+        sortexpression var_decl_var_sort;
+        var_decl_var_sort.set_expression(var_decl_var);
+        v_decl.set_type(var_decl_var_sort);
         trans_var_decls.Add(v_decl);
       }
     }
 
     // get multiactions
-    ATermList a_actions = (ATermList)ATgetArgument(a_multi_action, 0); // 1st parameter of MultAct is a list of ParamId's
+//    ATermList a_actions = (ATermList)ATgetArgument(a_multi_action, 0); // 1st parameter of MultAct is a list of ParamId's
+    ATermList a_actions = (ATermList)ATgetArgument(a_type_checked_multi_action, 0); // 1st parameter of MultAct is a list of ParamId's
     int list_length = ATgetLength(a_actions);
     for(int i=0; i<list_length; ++i)
     {
@@ -1041,9 +1280,9 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
         char *a_action_type = ATwriteToString(a_type_id_name);
         wxString t_act_type(a_action_type, wxConvUTF8);
         t_act_type = t_act_type.Mid(1, t_act_type.Len()-2);
-        wxString typed_act_type = infer_action_type(t_act_type, p_preamble_parameter_decls, p_preamble_local_var_decls, trans_var_decls);
+        sortexpression typed_act_type = infer_action_type(t_act_type, p_preamble_parameter_decls, p_preamble_local_var_decls, trans_var_decls);
 
-        if(typed_act_type == wxEmptyString)
+        if(typed_act_type.get_expression() == wxEmptyString)
         {
           cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
                << " contains a parameterised action in a transition label of which the type of parameter "
@@ -1056,7 +1295,7 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
         {
           act_type += _T(" # ");
         }
-        act_type += typed_act_type;
+        act_type += typed_act_type.get_expression();
 
         more_params = true;
         a_param_id_act_type = (ATermList)ATgetNext(a_param_id_act_type);
@@ -1068,7 +1307,7 @@ bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram
       p_actions.Add(t_action_type);
     }
   }
-
+*/
   return true;
 }
 
@@ -1098,7 +1337,7 @@ wxString grape::mcrl2gen::infer_action_type(wxString &p_type, list_of_decl &p_pr
     }
   }
 
-  return wxEmptyString;
+  return sortexpression().get_expression();
 }
 
 bool grape::mcrl2gen::validate_blocked_list(wxXmlNode *p_architecture_diagram, wxXmlNode *p_blocked_list)
@@ -1294,7 +1533,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
   return is_valid;
 }
 
-bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_list)
+bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_list, ATermAppl &datatype_spec)
 {
   // a channel is valid when its name corresponds to an action inside its reference, its <onreference> tag is valid
   // and its <onchannelcommunication> tag is also valid
@@ -1421,7 +1660,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
           wxString proc_ref_id = get_child_value(reference, _T("id"));
           try
           {
-            ref_actions = infer_process_actions(p_doc_root, proc_ref_id);
+            ref_actions = infer_process_actions(p_doc_root, proc_ref_id, datatype_spec);
           }
           catch(...)
           {
@@ -1568,7 +1807,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
   return is_valid;
 }
 
-bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list)
+bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list, ATermAppl &datatype_spec)
 {
   // a process reference is valid when it refers to a process diagram, the parameter initialisation matches and every associated channel name is unique
   bool is_valid = true;
@@ -1630,7 +1869,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
       list_of_decl_init preamble_vars;
       try
       {
-        parse_preamble(referenced_diagram, preamble_params, preamble_vars);
+        parse_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
       }
       catch(...)
       {
@@ -1744,7 +1983,7 @@ wxArrayString grape::mcrl2gen::infer_architecture_visibles(wxXmlNode *p_architec
   return visibles;
 }
 
-wxArrayString grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id)
+wxArrayString grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec)
 {
   wxArrayString actions;
   actions.Empty();
@@ -1773,7 +2012,7 @@ wxArrayString grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxSt
     //wxString curr_id = infer_process_diagram_id(p_doc_root, curr);
     wxXmlNode *curr_diag = get_process_diagram(p_doc_root, curr);
     wxString diagram_name = get_child_value(curr_diag, _T("name"));
-    parse_preamble(curr_diag, preamble_params, preamble_vars);
+    parse_preamble(curr_diag, preamble_params, preamble_vars, datatype_spec);
     arr_action_type acts = process_diagram_mcrl2_action(curr_diag, preamble_params, preamble_vars);
     for(unsigned int i=0; i<acts.GetCount(); ++i)
     {
@@ -1860,7 +2099,8 @@ arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_proce
             return actions;
           }
           // child_trans_label = <label>
-          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions);
+          ATermAppl expr;
+          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr);
         }
       }
       if(child->GetName() == _T("nonterminatingtransitionlist"))
@@ -1882,7 +2122,8 @@ arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_proce
             return actions;
           }
           // child_trans_label = <label>
-          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions);
+          ATermAppl expr1;
+          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr1);
         }
       }
     }

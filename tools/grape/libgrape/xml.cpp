@@ -80,16 +80,29 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
       { // offspring of xml_preamble_declarations
 
         /* node <localvariablelist> */
-        wxString text = proc_preamble->get_local_variable_declarations();
-        wxXmlNode* xml_loc_var = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE,
-                                                _T( "localvariablelist" ), text );
-
-        new wxXmlNode( xml_loc_var, wxXML_TEXT_NODE, _T( "value" ), text );
+	list_of_decl_init local_vars = proc_preamble->get_local_variable_declarations_list();
+        wxXmlNode* xml_loc_var_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE,
+                                                _T( "localvariablelist" ) );
+        
+	for (uint i = 0; i < local_vars.GetCount(); ++i)
+        {
+          decl_init local_var = local_vars.Item( i );
+          wxString text = local_var.get_name() + _T(":") + local_var.get_type() + _T("=") + local_var.get_value();
+          wxXmlNode* xml_loc_var = new wxXmlNode( xml_loc_var_list, wxXML_ELEMENT_NODE, _T( "var" ) );
+          new wxXmlNode( xml_loc_var, wxXML_TEXT_NODE, _T( "value" ), text );
+        }
 
         /* node <parameterlist> */
-        text = proc_preamble->get_parameter_declarations();
-        wxXmlNode* xml_parameter_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE, _T( "parameterlist" ), text );
-        new wxXmlNode( xml_parameter_list, wxXML_TEXT_NODE, _T( "value" ), text );
+        list_of_decl params = proc_preamble->get_parameter_declarations_list();
+        wxXmlNode* xml_parameter_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE, _T( "parameterlist" ) );
+
+        for (uint i = 0; i < params.GetCount(); ++i)
+        {
+          decl param = params.Item( i );
+          wxString text = param.get_name() + _T(":") + param.get_type();
+          wxXmlNode* xml_param = new wxXmlNode( xml_parameter_list, wxXML_ELEMENT_NODE, _T( "param" ) );
+          new wxXmlNode( xml_param, wxXML_TEXT_NODE, _T( "value" ), text );
+        }
 
       } // end offspring xml_preamble_declarations
 

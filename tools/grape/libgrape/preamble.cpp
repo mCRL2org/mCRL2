@@ -15,7 +15,6 @@ using namespace grape::libgrape;
 
 decl_init::decl_init(void) : decl()
 {
-  m_value = wxEmptyString;
 }
 
 decl_init::decl_init(const decl_init &p_decl_init) : decl(p_decl_init)
@@ -29,12 +28,12 @@ decl_init::~decl_init(void)
 
 wxString decl_init::get_value(void) const
 {
-  return m_value;
+  return m_value.get_expression();
 }
 
 void decl_init::set_value(const wxString &p_value)
 {
-  m_value = p_value;
+  m_value.set_expression(p_value);
 }
 
 // WxWidgets dynamic array implementation.
@@ -67,7 +66,13 @@ preamble::~preamble( void )
 
 wxString preamble::get_parameter_declarations( void ) const
 {
-  return m_parameter_declarations;
+  wxString result = wxEmptyString;
+  for ( uint i = 0; i < m_parameter_declarations_list.GetCount(); ++i )
+  {
+    decl parameter = m_parameter_declarations_list.Item( i );
+    result += parameter.get_name() + _T(": ") + parameter.get_type() + _T(";\n");
+  }
+  return result;
 }
 
 void preamble::set_parameter_declarations( const wxString &p_parameter_declarations )
@@ -129,7 +134,13 @@ void preamble::set_parameter_declarations_list( const list_of_decl &p_parameter_
 
 wxString preamble::get_local_variable_declarations( void ) const
 {
-  return m_local_variable_declarations;
+  wxString result = wxEmptyString;
+  for ( uint i = 0; i < m_local_variable_declarations_list.GetCount(); ++i )
+  {
+    decl_init local_variable = m_local_variable_declarations_list.Item( i );
+    result += local_variable.get_name() + _T(": ") + local_variable.get_type() + _T(" = ") + local_variable.get_value() + _T(";\n");
+  }
+  return result;
 }
 
 void preamble::set_local_variable_declarations( const wxString &p_local_variable_declarations )

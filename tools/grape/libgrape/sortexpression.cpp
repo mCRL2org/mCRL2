@@ -31,6 +31,11 @@ void sortexpression::set_expression( const wxString &p_expression )
   m_expression = p_expression;
 }
 
+wxString sortexpression::get_expression( void ) const
+{
+  return m_expression;
+}
+
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY( list_of_sortexpression );

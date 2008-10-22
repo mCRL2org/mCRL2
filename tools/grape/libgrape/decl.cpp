@@ -15,7 +15,6 @@ using namespace grape::libgrape;
 decl::decl( void )
 {
   m_name = wxEmptyString;
-  m_type = wxEmptyString;
 }
 
 decl::decl( const decl &p_decl )
@@ -40,12 +39,12 @@ void decl::set_name( const wxString &p_name )
 
 wxString decl::get_type( void ) const
 {
-  return m_type;
+  return m_type.get_expression();
 }
 
 void decl::set_type( const wxString &p_type )
 {
-  m_type = p_type;
+  m_type.set_expression(p_type);
 }
 
 // WxWidgets dynamic array implementation.

@@ -11,6 +11,8 @@
 #ifndef LIBGRAPE_LABEL_H
 #define LIBGRAPE_LABEL_H
 
+#include "action.h"
+#include "decl.h"
 #include "varupdate.h"
 
 namespace grape
@@ -31,12 +33,12 @@ namespace grape
       private:
         bool              m_is_valid;     /**< @c true if the label's text is syntactically correct and processed successfully.*/
       protected:
-        wxString          m_text;         /**< The label's text */
-        dataexpression    m_actions;      /**< The label's actions */
-        dataexpression    m_declarations; /**< The label's declarations */
+        wxString          m_text;         /**< The label's text 	m_declarations.[m_condition]m_actions@timestamp/varupdates */
+        list_of_decl      m_declarations; /**< The label's declarations */
+        dataexpression    m_condition;    /**< The label's condition */
+        list_of_action    m_actions;      /**< The label's actions */
         dataexpression    m_timestamp;    /**< The label's timestamp */
         list_of_varupdate m_variable_updates; /**< The label's variable updates */
-        dataexpression    m_conditions;   /**< The label's conditions */
 
         /**
          * Processes the text supplied with set_text().
@@ -81,13 +83,13 @@ namespace grape
          * Label actions retrieval function
          * @return the actions of the label
          */
-        dataexpression &get_actions( void );
+        list_of_action &get_actions( void );
 
         /**
          * Label declarations retrieval function
          * @return the declarations of the label
          */
-        dataexpression &get_declarations( void );
+        list_of_decl &get_declarations( void );
 
         /**
          * Label timestamp retrieval function
@@ -105,7 +107,7 @@ namespace grape
          * Label donditions retrieval function
          * @return the conditions of the label
          */
-        dataexpression &get_conditions( void );
+        dataexpression &get_condition( void );
 
         /**
          * Label has a valid text.

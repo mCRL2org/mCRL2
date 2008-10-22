@@ -8,6 +8,8 @@
 //
 // Implements functions to convert an XML file into a grape specification.
 
+#include <wx/tokenzr.h>
+
 #include "specification.h"
 #include "xmlopen.h"
 
@@ -116,8 +118,8 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
   wxXmlNode* proc_dia_node = p_proc_list_node->GetChildren();
   while ( proc_dia_node )
   {
-    wxString preamble_parameters = wxEmptyString;
-    wxString preamble_variables = wxEmptyString;
+    list_of_decl preamble_parameters;
+    list_of_decl_init preamble_variables;
     uint proc_dia_id = 0;
     wxString proc_dia_name = _T( "" );
     wxString node_name = proc_dia_node->GetName();
@@ -149,11 +151,92 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
           {
             if(preamble_node->GetName() == _T("parameterlist"))
             {
-              preamble_parameters = preamble_node->GetNodeContent();
+              // get the parameterlist
+              decl preamble_parameter_decl;
+              for(wxXmlNode *preamble_parameter = preamble_node->GetChildren(); preamble_parameter != 0; preamble_parameter = preamble_parameter->GetNext())
+              {
+                if(preamble_parameter->GetName() == _T("param"))
+                {
+                  wxString preamble_param = preamble_parameter->GetNodeContent();
+                  // process parameter declaration
+                  wxStringTokenizer tkt( preamble_param, _T(":") );
+                  if ( tkt.CountTokens() != 2 || preamble_param.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString param_name = tkt.GetNextToken();
+                  param_name.Trim( true );
+                  param_name.Trim( false );
+                  wxStringTokenizer tks( param_name );
+                  if ( tks.CountTokens() != 1 || param_name.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString param_type = tkt.GetNextToken();
+                  param_type.Trim( true );
+                  param_type.Trim( false );
+                  tks.SetString( param_type );
+                  if ( tks.CountTokens() != 1 || param_type.IsEmpty() )
+                  {
+                    return false;
+                  }
+		  preamble_parameter_decl.set_name(param_name);
+                  preamble_parameter_decl.set_type( param_type );
+                  preamble_parameters.Add( preamble_parameter_decl );
+                }
+              }
             }
             else if(preamble_node->GetName() == _T("localvariablelist"))
             {
-              preamble_variables = preamble_node->GetNodeContent();
+              // get the localvariablelist
+              decl_init preamble_local_var_decl;
+              for(wxXmlNode *preamble_local_variable = preamble_node->GetChildren(); preamble_local_variable != 0; preamble_local_variable = preamble_local_variable->GetNext())
+              {
+                if(preamble_local_variable->GetName() == _T("var"))
+                {
+                  wxString preamble_local_var = preamble_local_variable->GetNodeContent();
+                  // process parameter declaration
+                  wxStringTokenizer tkt( preamble_local_var, _T(":") );
+                  if ( tkt.CountTokens() != 2 || preamble_local_var.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString local_var_name = tkt.GetNextToken();
+                  local_var_name.Trim( true );
+                  local_var_name.Trim( false );
+                  wxStringTokenizer tks( local_var_name );
+                  if ( tks.CountTokens() != 1 || local_var_name.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString local_var_rest = tkt.GetNextToken();
+                  wxStringTokenizer tkr( local_var_rest, _T("=") );
+                  if ( tkr.CountTokens() != 2 || local_var_rest.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString local_var_type = tkr.GetNextToken();
+                  local_var_type.Trim( true );
+                  local_var_type.Trim( false );
+                  tks.SetString( local_var_type );
+                  if ( tks.CountTokens() != 1 || local_var_type.IsEmpty() )
+                  {
+                    return false;
+                  }
+                  wxString local_var_val = tkr.GetNextToken();
+                  local_var_val.Trim( true );
+                  local_var_val.Trim( false );
+                  tks.SetString( local_var_val );
+                  if ( tks.CountTokens() != 1 || local_var_val.IsEmpty() )
+                  {
+                    return false;
+                  }
+		  preamble_local_var_decl.set_name(local_var_name);
+                  preamble_local_var_decl.set_type( local_var_type );
+                  preamble_local_var_decl.set_value( local_var_val );
+                  preamble_variables.Add( preamble_local_var_decl );
+                }
+              }
             }
           }
         }
@@ -165,8 +248,8 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
       process_diagram* new_process_diagram = p_spec->add_process_diagram( proc_dia_id, proc_dia_name );
 
       // create the preamble
-      new_process_diagram->get_preamble()->set_parameter_declarations(preamble_parameters);
-      new_process_diagram->get_preamble()->set_local_variable_declarations(preamble_variables);
+      new_process_diagram->get_preamble()->set_parameter_declarations_list(preamble_parameters);
+      new_process_diagram->get_preamble()->set_local_variable_declarations_list(preamble_variables);
 
       result = result && open_states( p_spec, proc_dia_node, new_process_diagram );
       result = result && open_reference_states( p_spec, proc_dia_node, new_process_diagram );

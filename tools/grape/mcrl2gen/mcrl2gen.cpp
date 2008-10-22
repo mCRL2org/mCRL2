@@ -409,15 +409,15 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
     throw CONVERSION_ERROR;
     return;
   }
-  wxString variables = trans_label.get_declarations().get_expression();
-  wxString condition = trans_label.get_conditions().get_expression();
-  wxString actions = trans_label.get_actions().get_expression();
-  if(actions == wxEmptyString)
+//TODO  wxString variables = trans_label.get_declarations().get_expression();
+  wxString condition = trans_label.get_condition().get_expression();
+//TODO  wxString actions = trans_label.get_actions().get_expression();
+/*TODO  if(actions == wxEmptyString)
   {
     // an empty multiaction is translated as a tau
     actions = _T("tau");
   }
-  wxString timestamp = trans_label.get_timestamp().get_expression();
+*/  wxString timestamp = trans_label.get_timestamp().get_expression();
   list_of_varupdate updates = trans_label.get_variable_updates();
 
   p_declaration += _T("\n");
@@ -441,11 +441,11 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   }
 
   // add optional variables
-  if(variables != wxEmptyString)
+/*TODO  if(variables != wxEmptyString)
   {
     p_declaration += _T("sum ") + variables + _T(".");
   }
-
+*/
   // add optional condition
   if(condition != wxEmptyString)
   {
@@ -453,11 +453,11 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   }
 
   // add multiaction
-  if(actions != wxEmptyString)
+/*TODO  if(actions != wxEmptyString)
   {
     p_declaration += actions;
   }
-
+*/
   if(!p_is_terminating)
   {
     p_declaration += _T(".");
@@ -551,7 +551,8 @@ list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_nam
   // parse preamble of diagram
   list_of_decl preamble_params;
   list_of_decl_init preamble_vars;
-  parse_preamble(proc_diag, preamble_params, preamble_vars);
+  ATermAppl expr;
+  parse_preamble(proc_diag, preamble_params, preamble_vars, expr);
 
   // sort p_inits
   if(p_inits.GetCount() != preamble_params.GetCount())
@@ -1184,8 +1185,18 @@ void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_arch
       aref.m_diagram_id = ref_id;
       aref.m_is_process_reference = true;
 
-      // infer possibles for this reference
-      aref.m_actions = infer_process_actions(p_doc_root, ref_id);
+      // validate datatype specification
+      ATermAppl datatype_spec;
+      if(!validate_datatype_specification(p_doc_root, datatype_spec))
+      {
+        // ERROR: datatype specification is not valid
+        cerr << "mCRL2 conversion error: datatype specification is not valid." << endl;
+        throw CONVERSION_ERROR;
+        return;
+      }
+
+      // infer possible actions for this reference
+      aref.m_actions = infer_process_actions(p_doc_root, ref_id, datatype_spec);
       p_possibles.Add(aref);
     }
   }
@@ -2576,7 +2587,8 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   // get diagrams preamble
   list_of_decl preamble_parameter_decls;
   list_of_decl_init preamble_local_var_decls;
-  parse_preamble(diagram, preamble_parameter_decls, preamble_local_var_decls);
+  ATermAppl expr;
+  parse_preamble(diagram, preamble_parameter_decls, preamble_local_var_decls, expr);
   if(p_verbose)
   {
     cerr << "+preamble:" << endl;

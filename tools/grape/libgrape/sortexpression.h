@@ -51,6 +51,12 @@ namespace grape
          * @param p_expression The text of the sort expression
          */
         void set_expression( const wxString &p_expression );
+
+        /**
+         * The sort expression text retreival function
+         * @return The text of the sort expression
+         */
+        wxString get_expression( void ) const;
     };
 
     /**

@@ -27,7 +27,7 @@ label::label( const label &p_label )
   m_declarations = p_label.m_declarations;
   m_timestamp = p_label.m_timestamp;
   m_variable_updates = p_label.m_variable_updates;
-  m_conditions = p_label.m_conditions;
+  m_condition = p_label.m_condition;
   m_is_valid = p_label.m_is_valid;
 }
 
@@ -48,12 +48,12 @@ bool label::set_text( const wxString &p_text )
   return m_is_valid;
 }
 
-dataexpression &label::get_actions( void )
+list_of_action &label::get_actions( void )
 {
   return m_actions;
 }
 
-dataexpression &label::get_declarations( void )
+list_of_decl &label::get_declarations( void )
 {
   return m_declarations;
 }
@@ -68,9 +68,9 @@ list_of_varupdate &label::get_variable_updates( void )
   return m_variable_updates;
 }
 
-dataexpression &label::get_conditions( void )
+dataexpression &label::get_condition( void )
 {
-  return m_conditions;
+  return m_condition;
 }
 
 void label::process_text( void )
@@ -84,7 +84,7 @@ void label::process_text( void )
   {
     // remove variable declarations
     pos = text.Find(_T("."));
-    m_declarations.set_expression(text.Mid(0, pos));
+/*TODO    m_declarations.set_expression(text.Mid(0, pos));
     wxString local_decls = m_declarations.get_expression();
     text = text.Mid(pos+1);
 
@@ -109,7 +109,7 @@ void label::process_text( void )
         return;
       }
     }
-  }
+*/  }
   if(text.Find(_T("[")) != wxNOT_FOUND)
   {
     // remove condition
@@ -120,7 +120,7 @@ void label::process_text( void )
       // ERROR: invalid syntax
       return;
     }
-    m_conditions.set_expression(condition_text.Mid(0, pos));
+    m_condition.set_expression(condition_text.Mid(0, pos));
     wxString tcondition = condition_text.Mid(0, pos);
     text = text.Mid(text.Find(_T("]"))+1);
 
@@ -221,7 +221,7 @@ void label::process_text( void )
   }
 
   // save multiaction
-  m_actions.set_expression(text);
+//TODO  m_actions.set_expression(text);
 
   m_is_valid = true;
 }

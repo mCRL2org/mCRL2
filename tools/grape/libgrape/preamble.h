@@ -11,6 +11,7 @@
 #ifndef LIBGRAPE_PREAMBLE_H
 #define LIBGRAPE_PREAMBLE_H
 
+#include "dataexpression.h"
 #include "decl.h"
 
 namespace grape
@@ -24,7 +25,7 @@ namespace grape
     class decl_init : public decl
     {
       protected:
-        wxString m_value;        /**< initial value of this variable. */
+        dataexpression    m_value;        /**< initial value of this variable. */
       public:
         /**
          * Default constructor.

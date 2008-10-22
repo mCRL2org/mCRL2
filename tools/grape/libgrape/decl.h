@@ -11,6 +11,8 @@
 #ifndef LIBGRAPE_DECL_H
 #define LIBGRAPE_DECL_H
 
+#include "sortexpression.h"
+
 #include <wx/wx.h>
 #include <wx/dynarray.h>
 
@@ -26,7 +28,7 @@ namespace grape
     {
       protected:
         wxString m_name; /**< name of this action. */
-        wxString m_type; /**< type of this action. */
+        sortexpression m_type; /**< type of this action. */
       public:
         /**
          * Default constructor.

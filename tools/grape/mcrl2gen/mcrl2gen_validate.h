@@ -16,6 +16,8 @@
 #include "libgrape/preamble.h"
 #include "libgrape/decl.h"
 
+#include <aterm2.h>
+
 #define CONVERSION_ERROR            17
 
 using namespace grape::libgrape;
@@ -184,11 +186,12 @@ namespace grape
      * Datatype specification validation function.
      * Validates the datatype specification.
      * @param p_doc_root An XML specification.
+     * @param datatype_spec The datatype specification
      * @return True if the datatype specification contained in p_doc_root is valid, false otherwise.
      * @pre p_doc_root is a valid pointer to an XML specification.
      * @post True is returned if the datatype specification is valid, false otherwise and error messages are produced.
      */
-    bool validate_datatype_specification(wxXmlNode *p_doc_root);
+    bool validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec);
 
     /**
      * Initial designator list validation function.
@@ -208,9 +211,10 @@ namespace grape
      * @post The process diagram is validated and error messages are produced if necessary.
      * @param p_doc_root The GraPE XML specification containing the diagram to validate.
      * @param p_process_diagram The XML process diagram to validate.
+     * @param datatype_spec The datatype specification against which data expressions are checked
      * @return True if the diagram is valid, false otherwise.
      */
-    bool validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram);
+    bool validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, ATermAppl &datatype_spec);
 
     /**
      * XML architecture diagram validation function.
@@ -219,9 +223,10 @@ namespace grape
      * @post The architecture diagram is validated and error messages are produced if necessary.
      * @param p_doc_root The GraPE XML specification containing the diagram to validate.
      * @param p_architecture_diagram The XML architecture diagram to validate.
+     * @param datatype_spec The datatype specification.
      * @return True is the architecture diagram is valid, false otherwise.
      */
-    bool validate_architecture_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram);
+    bool validate_architecture_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, ATermAppl &datatype_spec);
 
     /**
      * Reference state list validation function.
@@ -229,11 +234,12 @@ namespace grape
      * @param p_doc_root The XML GraPE specification containing the list of reference states.
      * @param p_process_diagram The XML process diagram containing the list to validate.
      * @param p_ref_state_list The XML list of reference states.
+     * @param datatype_spec The datatype specification.
      * @return True if the list of reference states is valid, false otherwise.
      * @pre p_doc_root is a valid pointer the the XML GraPE specification containing the list of reference states and p_ref_state_list is a valid pointer to an XML list of reference states.
      * @post The validity of the list of reference states is returned and error messages are produced if necessary.
      */
-    bool validate_reference_state_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_ref_state_list);
+    bool validate_reference_state_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_ref_state_list, ATermAppl &datatype_spec);
 
     /**
      * State list validation function.
@@ -253,11 +259,12 @@ namespace grape
      * @param p_term_trans_list The XML list of terminating transitions.
      * @param p_preamble_parameters The parameters in the preamble.
      * @param p_preamble_variables The variables in the preamble.
+     * @param datatype_spec The datatype specification
      * @return True if the list of terminating transitions is valid, false otherwise.
      * @pre p_process_diagram is a valid pointer to an XML process diagram containing the list of terminating transitions and p_term_trans_list is a valid pointer to an XML list of terminating transitions.
      * @post The validity of the list of terminating transitions is returned and error messages are produced if necessary.
      */
-    bool validate_terminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_term_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables);
+    bool validate_terminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_term_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec);
 
     /**
      * Non-terminating transition list validation function.
@@ -266,11 +273,12 @@ namespace grape
      * @param p_trans_list The XML list of non-terminating transitions.
      * @param p_preamble_parameters The parameters in the preamble.
      * @param p_preamble_variables The variables in the preamble.
+     * @param datatype_spec The datatype specification
      * @return True if the list of non-terminating transitions is valid, false otherwise.
      * @pre p_process_diagram is a valid pointer to an XML process diagram containing the list of non-terminating transitions and p_trans_list is a valid pointer to an XML list of non-terminating transitions.
      * @post The validity of the list of non-terminating transitions is returned and error messages are produced if necessary.
      */
-    bool validate_nonterminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables);
+    bool validate_nonterminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec);
 
     /**
      * XML process diagram preamble parsing function.
@@ -278,11 +286,12 @@ namespace grape
      * @param p_process_diagram A valid XML process diagram node.
      * @param p_preamble_parameter_decls A list of parameter declarations.
      * @param p_preamble_local_var_decls A list of local variable declarations.
+     * @param datatype_spec The datatype specification against which data expressions are checked
      * @return True if parsing went successfully, false otherwise.
      * @pre p_process_diagram is a valid XML process diagram preamble.
      * @post p_preamble_parameter_decls contains the parameter declarations present in the preamble and p_preamble_local_var_decls contains the local variable declarations present in the preamble or error messages are produced.
      */
-    bool parse_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls);
+    bool parse_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
 
     /**
      * Transition label multiaction parsing function.
@@ -292,11 +301,12 @@ namespace grape
      * @param p_preamble_local_var_decls The local variable declarations in the preamble.
      * @param p_label The multiaction of the transition label.
      * @param p_actions List of actions (with type) present in the multiaction.
+     * @param datatype_spec The datatype specification
      * @return True if parsing went successfully, false otherwise.
      * @pre p_label is a valid multiaction and p_process_diagram is a valid XML process diagram.
      * @post p_actions contains the actions present in the multiaction, together with their associated type or error messages are produced.
      */
-    bool parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions);
+    bool parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions, ATermAppl &datatype_spec);
 
     /**
      * Action type inference function.
@@ -352,11 +362,12 @@ namespace grape
      * @param p_doc_root The XML GraPE specification containing the list of channels.
      * @param p_architecture_diagram The XML architecture diagram containing the list of channels.
      * @param p_channel_list The XML list of channels.
+     * @param datatype_spec The datatype specification.
      * @return True if the list of channels is valid, false otherwise.
      * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of channels, p_architecture_diagram is a valid pointer to an XML architecture diagram containing the list of channels and p_channel_list is a valid pointer to an XML list of channels.
      * @post The validity of the list of channels is returned and error messages are produced if necessary.
      */
-    bool validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_list);
+    bool validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_list, ATermAppl &datatype_spec);
 
     /**
      * Architecture reference list validation function.
@@ -387,11 +398,12 @@ namespace grape
      * @param p_doc_root The XML GraPE specification containing the list of process references.
      * @param p_architecture_diagram The XML architecture diagram containing the list of process references.
      * @param p_reference_list The XML list of process references.
+     * @param datatype_spec The datatype specification.
      * @return True if the list of process references is valid, false otherwise.
      * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of process references, p_architecture_diagram is a valid pointer to the XML architecture diagram containing the list of process references and p_reference_list is a valid pointer to an XML list of process references.
      * @post The validity of the list of process references is returned and error messages are produced if necessary.
      */
-    bool validate_process_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list);
+    bool validate_process_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list, ATermAppl &datatype_spec);
 
     /**
      * Architecture diagram visibles inference function.
@@ -408,11 +420,12 @@ namespace grape
      * Infers all actions occuring in a process diagram, including those in process references.
      * @param p_doc_root An XML specification.
      * @param p_diagram_id The identifier of the diagram to infer the actions of.
+     * @param datatype_spec The datatype specification.
      * @return An array of strings containing all the actions occuring in this diagram and any contained process references, or the empty string.
      * @pre p_doc_root is a valid pointer to an XML specification and p_diagram_id is a valid reference to a diagram identifier.
      * @post The actions occuring in this diagram and any contained process references are returned or the empty string is returned and error messages are produced.
      */
-    wxArrayString infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id);
+    wxArrayString infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
 
     /**
      * XML process diagram to mCRL2 action convertor function.
