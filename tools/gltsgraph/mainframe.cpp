@@ -5,6 +5,14 @@
 #include "export_xml.h"
 #include "export_latex.h"
 
+// For compatibility with older wxWidgets versions (pre 2.8)
+#if (wxMINOR_VERSION < 8)
+# define wxFD_SAVE wxSAVE 
+# define wxFD_OPEN wxOPEN 
+# define wxFD_CHANGE_DIR wxCHANGE_DIR
+# define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
+#endif
+
 using namespace IDS;
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -91,7 +99,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
     wxT("All supported formats(*.xml;*.aut;*.svc)|*.xml;*.aut;*.svc|XML layout file (*.xml)|*.xml|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"),
-    wxOPEN|wxCHANGE_DIR);
+    wxFD_OPEN|wxFD_CHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -118,7 +126,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 
   wxFileDialog dialog(this, caption, defaultDir, defaultFileName, wildcard,
-                      wxSAVE | wxOVERWRITE_PROMPT | wxCHANGE_DIR);
+                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT | wxFD_CHANGE_DIR);
 
   if(dialog.ShowModal() == wxID_OK)
   {
