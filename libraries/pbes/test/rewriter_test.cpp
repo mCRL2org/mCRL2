@@ -129,7 +129,8 @@ void test_enumerate_quantifiers_sequence_action(PbesTerm phi)
   pbes_system::simplifying_rewriter<PbesTerm, data::rewriter> r(datar);
   substitution_map sigma;
   bool is_constant;
-  pbes_system::detail::make_enumerate_quantifiers_sequence_action(A, r, phi, sigma, is_constant, core::term_traits<PbesTerm>::is_false)();
+  data::data_variable_list v;
+  pbes_system::detail::make_enumerate_quantifiers_sequence_action(A, r, phi, sigma, v, is_constant, core::term_traits<PbesTerm>::is_false)();
 }
 
 template <typename PbesTerm, typename DataEnumerator>
@@ -174,7 +175,7 @@ void test_enumerate_quantifiers_rewriter()
 
   pbes_system::pbes_expression y = expr("Y(n)");
   pbes_system::pbes_expression_with_variables yv(y, data::data_variable_list()); 
-  test_enumerate_quantifiers_sequence_action(y);
+  // test_enumerate_quantifiers_sequence_action(y);
   test_enumerate_quantifiers_sequence_action(yv);
 
   // test_enumerator_quantifiers(y, datae); This doesn't work because of a mismatch between y and datae
