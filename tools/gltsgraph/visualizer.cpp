@@ -9,6 +9,8 @@ Visualizer::Visualizer(GLTSGraph* app)
   width = 0;
   height = 0;
   pixelSize = 1;
+  radius = 10;
+  showHandles = false;
   fr = NULL;
 }
 
@@ -87,7 +89,7 @@ void Visualizer::drawState(State* s)
 {
   double x = s->getX();
   double y = s->getY();
-  double rad =  10 * pixelSize; // TODO: Make parameterisable 
+  double rad =  radius * pixelSize;
 
   x = (x / 2000.0) * (width - rad * 2);
   y = (y / 2000.0) * (height - rad * 2);
@@ -172,7 +174,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
   State* from = tr->getFrom();
   State* to = tr->getTo();
 
-  double rad = 10 * pixelSize; //TODO: Make parameterisable
+  double rad = radius * pixelSize;
 
   double xFrom = from->getX();
   double yFrom = from->getY();
@@ -258,38 +260,41 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
  
   // Transitions are uniquely identified by their from state and the identifier
   // within this state
-  glPushName(IDS::TRANSITION);
-  glPushName(from->getValue());
-  glPushName(trid);
 
-  glColor3ub(255, 255, 255);
-  glBegin(GL_QUADS);
-    glVertex2d(xVirtual , yVirtual - .015);
-    glVertex2d(xVirtual - .015, yVirtual);
-    glVertex2d(xVirtual, yVirtual + .015);
-    glVertex2d(xVirtual + .015, yVirtual);
-  glEnd();
+  if(showHandles)
+  {
+    glPushName(IDS::TRANSITION);
+    glPushName(from->getValue());
+    glPushName(trid);
+
+    glColor3ub(255, 255, 255);
+    glBegin(GL_QUADS);
+      glVertex2d(xVirtual , yVirtual - .015);
+      glVertex2d(xVirtual - .015, yVirtual);
+      glVertex2d(xVirtual, yVirtual + .015);
+      glVertex2d(xVirtual + .015, yVirtual);
+    glEnd();
+     
+     if(tr->isSelected())
+    {
+      glColor3ub(255, 0, 0);
+    }
+    else
+    {
+      glColor3ub(0, 0, 0);
+    }
+    
+    glBegin(GL_LINE_LOOP);
+      glVertex2d(xVirtual , yVirtual - .015);
+      glVertex2d(xVirtual - .015, yVirtual);
+      glVertex2d(xVirtual, yVirtual + .015);
+      glVertex2d(xVirtual + .015, yVirtual); 
+    glEnd();
    
-   if(tr->isSelected())
-  {
-    glColor3ub(255, 0, 0);
+    glPopName();
+    glPopName();
+    glPopName();  
   }
-  else
-  {
-    glColor3ub(0, 0, 0);
-  }
- 
-  glBegin(GL_LINE_LOOP);
-    glVertex2d(xVirtual , yVirtual - .015);
-    glVertex2d(xVirtual - .015, yVirtual);
-    glVertex2d(xVirtual, yVirtual + .015);
-    glVertex2d(xVirtual + .015, yVirtual); 
-  glEnd();
- 
-  glPopName();
-  glPopName();
-  glPopName();  
-
   // Draw label near the control point (for the moment, fixed above the control 
   // point
   fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
@@ -326,7 +331,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
   // We are drawing a self loop, so t.to == t.from
   State* s = tr->getFrom();
 
-  double rad = 10 * pixelSize; // TODO: Param 
+  double rad = radius * pixelSize;
   double beta = .25 * M_PI;
   
   double xState, yState;
@@ -438,30 +443,31 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
     }
   glEnd(); 
   
+  if(showHandles)
+  {
+    glPushName(IDS::SELF_LOOP);
+    glPushName(s->getValue());
+    glPushName(j);
+    glColor3ub(255, 255, 255);
+    glBegin(GL_QUADS);
+      glVertex2d(xVirtual , yVirtual - .015);
+      glVertex2d(xVirtual - .015, yVirtual);
+      glVertex2d(xVirtual, yVirtual + .015);
+      glVertex2d(xVirtual + .015, yVirtual);
+    glEnd();
+    
+    glColor3ub(0, 0, 0);
+    glBegin(GL_LINE_LOOP);
+      glVertex2d(xVirtual , yVirtual - .015);
+      glVertex2d(xVirtual - .015, yVirtual);
+      glVertex2d(xVirtual, yVirtual + .015);
+      glVertex2d(xVirtual + .015, yVirtual);
+    glEnd();
 
-  glPushName(IDS::SELF_LOOP);
-  glPushName(s->getValue());
-  glPushName(j);
-  glColor3ub(255, 255, 255);
-  glBegin(GL_QUADS);
-    glVertex2d(xVirtual , yVirtual - .015);
-    glVertex2d(xVirtual - .015, yVirtual);
-    glVertex2d(xVirtual, yVirtual + .015);
-    glVertex2d(xVirtual + .015, yVirtual);
-  glEnd();
-  
-  glColor3ub(0, 0, 0);
-  glBegin(GL_LINE_LOOP);
-    glVertex2d(xVirtual , yVirtual - .015);
-    glVertex2d(xVirtual - .015, yVirtual);
-    glVertex2d(xVirtual, yVirtual + .015);
-    glVertex2d(xVirtual + .015, yVirtual);
-  glEnd();
-
-  glPopName();
-  glPopName();
-  glPopName();
- 
+    glPopName();
+    glPopName();
+    glPopName();
+  } 
   // Draw label.
   fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
                 8 * pixelSize / 20.0f, 
@@ -495,4 +501,14 @@ void Visualizer::initFontRenderer()
   {
     fr = new mcrl2::utilities::font_renderer();
   }
+}
+
+void Visualizer::setRadius(int radius)
+{
+  this->radius = radius;
+}
+
+void Visualizer::setCurves(bool value)
+{
+  showHandles = value;
 }

@@ -24,10 +24,10 @@ bool ExporterLatex::export_to(wxString filename)
 
   tikz_code += "\\begin{document}\n";
   tikz_code += "\\begin{tikzpicture}\n";
-  tikz_code += "  [scale=2,\n";
-  tikz_code += "   state/.style={circle, draw},\n";
-  tikz_code += "   initstate/.style={state,draw=green},\n";
-  tikz_code += "   transition/.style={->,>=stealth'}]\n";
+  tikz_code += "  [scale=2]\n\n";
+  tikz_code += "   \\tikzstyle{state}=[circle, draw]\n";
+  tikz_code += "   \\tikzstyle{initstate}=[state,draw=green]\n";
+  tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
 
 
   // TODO: Draw states, transitions

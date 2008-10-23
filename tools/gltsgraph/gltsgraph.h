@@ -31,6 +31,7 @@ class GLTSGraph : public wxApp
     Transition* selectedTransition;
 
     std::string parse_error;
+    std::string fileName;
 
   public:
     virtual int OnExit();   
@@ -51,12 +52,15 @@ class GLTSGraph : public wxApp
 
     // Setters
     void setLTSInfo(int is, int ns, int nt, int nl);
+    void setRadius(int radius);
+    void setCurves(bool value);
     
     // Getters
     Graph* getGraph();
     size_t getNumberOfAlgorithms() const;
     LayoutAlgorithm* getAlgorithm(size_t i) const;
     size_t getNumberOfObjects();
+    std::string getFileName() const;
 
 };
 

@@ -23,12 +23,16 @@ class Visualizer
     void setWidth(double width); 
     void setHeight(double height); 
     void setPixelSize(double size);
+    void setRadius(int radius);
+    void setCurves(bool value);
     // Getters
   private:
     GLTSGraph* owner;
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height
+    int radius;
+    bool showHandles;
 
 
     void drawStates(bool inSelectMode);

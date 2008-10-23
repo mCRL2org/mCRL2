@@ -8,7 +8,8 @@ Transition::Transition(State* from, State* to, std::string lbl)
   fromState = from;
   toState = to;
   label = lbl;
-  controlAlpha = .1 * M_PI;
+  
+  controlAlpha = 0;
   controlDist = 0.5;
 
   selected = false;
@@ -116,6 +117,10 @@ void Transition::setControl(const double x, const double y)
   }
 }
 
+void Transition::setControlAlpha(const double alpha)
+{
+  controlAlpha = alpha;
+}
 
 void Transition::deselect()
 {

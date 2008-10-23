@@ -22,6 +22,12 @@
   class AlgoDialog;
 #endif
 
+#ifndef SETTINGS_DIALOG_H
+  #include "settingsdialog.h"
+#else
+  class SettingsDialog;
+#endif
+
 #include "infodialog.h"
 
 class MainFrame : public wxFrame
@@ -36,6 +42,7 @@ class MainFrame : public wxFrame
     GLTSGraph *app;
     GLCanvas *glCanvas;
     AlgoDialog *algoDlg;
+    SettingsDialog *settingsDlg;
     InfoDialog *infoDlg;
 
     void setupMenuBar();
@@ -45,6 +52,7 @@ class MainFrame : public wxFrame
     void onOpen(wxCommandEvent& event);
     void onQuit(wxCommandEvent& event);
     void onAlgo(wxCommandEvent& event);
+    void onSettings(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
 

@@ -1,5 +1,6 @@
 #include "state.h"
-#include "workarounds.h"
+#include <cmath>
+#include <workarounds.h> // for M_PI
 
 State::State(unsigned int _value, bool _isInitialState)
 {
@@ -8,6 +9,7 @@ State::State(unsigned int _value, bool _isInitialState)
   selected = false;
   dragged = false;
   locked = false;
+  outCurve = 0.0;
   
   pos.x = 0;
   pos.y = 0;
@@ -29,7 +31,18 @@ bool State::isInitialState() const
 }
 
 void State::addOutTransition(Transition* ot)
-{
+{ 
+  State* to = ot->getTo();
+  if (hasTransitionTo(to)) {
+    outCurve += .025;
+    ot->setControlAlpha(outCurve * M_PI);
+  }
+  // If the target of this transition has a returning transition, we curve it
+  else if(to->hasTransitionTo(this)) {
+    ot->setControlAlpha(.25 * M_PI);
+  }
+  
+  
   outTransitions.push_back(ot);
 }
 
@@ -234,3 +247,13 @@ bool State::isDragged() const
   return dragged;
 }
 
+bool State::hasTransitionTo(State* to)
+{
+  bool result = false;
+  
+  for(size_t i = 0; i < outTransitions.size() && !result; ++i) {
+    result = outTransitions[i]->getTo() == to;
+  }
+
+  return result;
+}

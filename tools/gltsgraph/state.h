@@ -73,11 +73,14 @@ class State
    
     void setLabel(std::string label);
 
+    bool hasTransitionTo(State* to);
   private:
     bool isInitial;
     bool selected;
     bool locked;
     bool dragged;
+  
+    double outCurve;
 
     unsigned int value;
     Utils::Vect pos;  // Current position, Y

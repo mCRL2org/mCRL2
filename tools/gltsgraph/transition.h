@@ -17,6 +17,7 @@ class Transition
 
     // Setters
     void setControl(const double x, const double y);
+    void setControlAlpha(const double alpha);
     
     // Getters
     State* getFrom() const;

@@ -216,8 +216,12 @@ int main(int argc, char **argv)
 
 void GLTSGraph::openFile(std::string const &path)
 {
+  // Set fileName
+  fileName = path;
   // Find out file format based on extension
   std::string ext = path.substr(path.find_last_of( '.' ) + 1);
+  
+  // Get file's basename
 
   Importer* imp;
   // Create (on stack) appropriate importer imp
@@ -229,7 +233,7 @@ void GLTSGraph::openFile(std::string const &path)
   else
   {
     // Assume we have an LTS file, so create an LTS importer
-    imp = new LTSImporter;
+    imp = new LTSImporter();
   }
 
   graph = imp->importFile(path);
@@ -355,4 +359,21 @@ void GLTSGraph::selectTransition(size_t state, size_t transition)
 void GLTSGraph::selectSelfLoop(size_t state, size_t transition)
 {
   selectedTransition = graph->selectSelfLoop(state, transition);
+}
+
+void GLTSGraph::setRadius(int radius)
+{
+  visualizer->setRadius(radius);
+  display();
+}
+
+void GLTSGraph::setCurves(bool value)
+{
+  visualizer->setCurves(value);
+  display();
+}
+
+std::string GLTSGraph::getFileName() const
+{
+  return fileName;
 }

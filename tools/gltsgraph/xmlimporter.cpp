@@ -67,9 +67,11 @@ Graph* XMLImporter::importFile(std::string filename)
           State* fromState = g->getState(from);
           State* toState = g->getState(to);
           Transition* t = new Transition(fromState, toState, label);
-          t->setControl(x,y);
 
           fromState->addOutTransition(t);
+          // Now set the transitions control, as the state's add method can 
+          // change this.
+          t->setControl(x,y);
           toState->addInTransition(t);
         }
       }

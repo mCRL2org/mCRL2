@@ -13,6 +13,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MainFrame::onQuit)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
+  EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
+  EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
 END_EVENT_TABLE()
 
 
@@ -25,6 +27,7 @@ MainFrame::MainFrame(GLTSGraph* owner)
   glCanvas = new GLCanvas(app, this, wxDefaultSize, attribList);
   
   algoDlg = new AlgoDialog(app, this);
+  settingsDlg = new SettingsDialog(app, this);
   infoDlg = new InfoDialog(this);
 
   setupMenuBar();
@@ -47,35 +50,21 @@ void MainFrame::setupMenuBar()
 
   fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit GLTSGraph."));
   
-  // View menu
-  wxMenu* viewMenu = new wxMenu;
-  wxMenuItem* displayState = viewMenu->Append(myID_DISPLAY_STATE_LBL,
-               wxT("Display state labels"),
-               wxT("Toggle the display of state labels."), wxITEM_CHECK);
-  displayState->Check();
-
-  wxMenuItem* displayTrans = viewMenu->Append(myID_DISPLAY_TRANS_LBL,
-                wxT("Display transition labels"),
-                wxT("Toggle the display of transitions labels."), wxITEM_CHECK);
-  displayTrans->Check();
-
-  viewMenu->Append(wxID_PREFERENCES, wxT("Settings..."), 
-                   wxT("Display the settings dialog."));
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
-  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-i"), 
-                    wxT("Display dialog with information about this LTS."));
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
+  toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."), 
+                   wxT("Display the visualization settings dialog."));
+  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-i"), 
+                    wxT("Display dialog with information about this LTS."));
 
- 
   // Help menu
   wxMenu* helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, wxT("&About..."), wxEmptyString);
 
 
   menuBar->Append(fileMenu, wxT("&File"));
-  menuBar->Append(viewMenu, wxT("&View"));
   menuBar->Append(toolsMenu, wxT("&Tools"));
   menuBar->Append(helpMenu, wxT("&Help"));
   
@@ -101,7 +90,8 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats(*.xml;*.aut;*.svc)|*.xml;*.aut;*.svc|XML layout file (*.xml)|*.xml|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"));
+    wxT("All supported formats(*.xml;*.aut;*.svc)|*.xml;*.aut;*.svc|XML layout file (*.xml)|*.xml|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"),
+    wxOPEN|wxCHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -114,15 +104,21 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
 void MainFrame::onExport(wxCommandEvent& /*event*/)
 {
-  //TODO: Default file name, input file name
   
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml|LaTeX TikZ drawing (*.tex)|*.tex");
   wxString defaultDir = wxEmptyString; // Empty string -> cwd
-  wxString defaultFileName = wxEmptyString;
+  
+  wxString defaultFileName(app->getFileName().c_str(), wxConvLocal);
+  
+  // Strip extension from filename
+  if(defaultFileName.Find('.') != -1 )
+  {
+    defaultFileName = defaultFileName.BeforeLast('.');
+  }
 
   wxFileDialog dialog(this, caption, defaultDir, defaultFileName, wildcard,
-                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                      wxSAVE | wxOVERWRITE_PROMPT | wxCHANGE_DIR);
 
   if(dialog.ShowModal() == wxID_OK)
   {
@@ -131,7 +127,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
     wxString extension = fileName.AfterLast('.');
     if(extension == fileName)
     {
-      // No extension given, get it from the filter index and append it.
+      // No extension given, get it from the filter index
       switch(dialog.GetFilterIndex())
       {
         case 0: // SVG item
@@ -165,9 +161,8 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       }
       else 
       {
-        // Unknown file format, export to svg.
-        fileName.Append(wxT(".svg"));
-        exporter = new ExporterSVG(app->getGraph());
+        // Unknown file format, export to xml 
+        exporter = new ExporterXML(app->getGraph());
       }
     }
     
@@ -203,8 +198,18 @@ void MainFrame::onAlgo(wxCommandEvent& /* event */)
   algoDlg->Show();
 }
 
+void MainFrame::onSettings(wxCommandEvent& /* event */)
+{
+  settingsDlg->Show();
+}
+
+
 void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
 {
   infoDlg->setLTSInfo(is, ns, nt, nl);
+  
+  wxString title(app->getFileName().c_str(), wxConvLocal);
+  title = wxT("GLTSGraph - ") + title;
+  SetTitle(title);
 }
 
