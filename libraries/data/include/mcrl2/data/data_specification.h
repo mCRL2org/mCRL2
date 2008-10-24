@@ -15,6 +15,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/set.h"
@@ -32,6 +33,7 @@
 #include "application.h"
 
 #include "data_equation.h"
+#include "detail/compatibility.h"
 
 namespace mcrl2 {
   
@@ -165,7 +167,27 @@ namespace mcrl2 {
 
       public:
 
+      ///\brief Default constructor
       data_specification()
+      {}
+
+      ///\internal
+      data_specification(const atermpp::aterm_appl& t)
+        : m_sorts(detail::aterm_sort_spec_to_sort_expression_list(atermpp::arg1(t))),
+          m_constructors(detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(t))),
+          m_functions(detail::aterm_map_spec_to_function_list(atermpp::arg3(t))),
+          m_equations(detail::aterm_data_eqn_spec_to_equation_list(atermpp::arg4(t)))
+      {}
+
+      ///\brief Constructor
+      data_specification(const boost::iterator_range<sort_expression_list::const_iterator>& sorts,
+                         const boost::iterator_range<atermpp::map<sort_expression, function_symbol_list>::const_iterator>& constructors,
+                         const boost::iterator_range<function_symbol_list::const_iterator>& functions,
+                         const boost::iterator_range<data_equation_list::const_iterator>& equations)
+        : m_sorts(sorts.begin(), sorts.end()),
+          m_constructors(constructors.begin(), constructors.end()),
+          m_functions(functions.begin(), functions.end()),
+          m_equations(equations.begin(), equations.end())
       {}
 
       /// \brief Gets the sort declarations

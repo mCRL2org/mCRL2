@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 
@@ -81,6 +82,22 @@ namespace mcrl2 {
         bool is_alias() const
         {
           return core::detail::gsIsSortRef(*this);
+        }
+
+        /// \brief Returns the target sort of this expression.
+        /// \ret codomain if this is a function sort,
+        ///      this sort otherwise
+        inline
+        sort_expression target_sort() const
+        {
+          if(is_function_sort())
+          {
+            return atermpp::arg2(*this);
+          }
+          else
+          {
+            return *this;
+          }
         }
 
     }; // class sort_expression

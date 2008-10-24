@@ -35,6 +35,11 @@ namespace mcrl2 {
           : data_expression(core::detail::constructOpId())
         {}
 
+        /// \internal
+        function_symbol(const atermpp::aterm_appl& a)
+          : data_expression(a)
+        {}
+
         /// \brief Constructor.
         ///
         /// \param[in] d A data expression.
