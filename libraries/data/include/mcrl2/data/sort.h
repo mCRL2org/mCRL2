@@ -13,12 +13,9 @@
 #define MCRL2_DATA_SORT_H
 
 #include "alias.h"
-#include "bag_sort.h"
 #include "basic_sort.h"
 #include "container_sort.h"
 #include "function_sort.h"
-#include "list_sort.h"
-#include "set_sort.h"
 #include "structured_sort.h"
 
 #endif // MCRL2_DATA_SORT_H

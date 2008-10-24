@@ -19,9 +19,6 @@
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/list_sort.h"
-#include "mcrl2/data/set_sort.h"
-#include "mcrl2/data/bag_sort.h"
 
 using namespace mcrl2::data;
 
@@ -161,72 +158,13 @@ void container_sort_test()
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
-  list_sort ls0(s0);
-  list_sort ls1(s1);
-  set_sort ss0(s0);
-  set_sort ss1(s1);
-  bag_sort bs0(s0);
-  bag_sort bs1(s1);
+  container_sort ls0("List", s0);
+  container_sort ls1("List", s1);
 
   BOOST_CHECK(ls0.container_name() == "List");
   BOOST_CHECK(ls0.element_sort() == s0);
-  BOOST_CHECK(ls0.is_list_sort());
-  BOOST_CHECK(!ls0.is_set_sort());
-  BOOST_CHECK(!ls0.is_bag_sort());
+  BOOST_CHECK(ls1.element_sort() == s1);
   BOOST_CHECK(ls0.element_sort() != ls1.element_sort());
-
-  BOOST_CHECK(ss0.container_name() == "Set");
-  BOOST_CHECK(ss0.element_sort() == s0);
-  BOOST_CHECK(!ss0.is_list_sort());
-  BOOST_CHECK(ss0.is_set_sort());
-  BOOST_CHECK(!ss0.is_bag_sort());
-  BOOST_CHECK(ss0.element_sort() != ss1.element_sort());
-
-  BOOST_CHECK(bs0.container_name() == "Bag");
-  BOOST_CHECK(bs0.element_sort() == s0);
-  BOOST_CHECK(!bs0.is_list_sort());
-  BOOST_CHECK(!bs0.is_set_sort());
-  BOOST_CHECK(bs0.is_bag_sort());
-  BOOST_CHECK(ss0.element_sort() != ss1.element_sort());
-
-  container_sort cls0(ls0);
-  BOOST_CHECK(cls0.container_name() == "List");
-  BOOST_CHECK(cls0.is_list_sort());
-  list_sort cls0_(cls0);
-  BOOST_CHECK(cls0_ == ls0);
-  BOOST_CHECK(cls0_.container_name() == ls0.container_name());
-  BOOST_CHECK(cls0_.element_sort() == ls0.element_sort());
-  sort_expression cls0_e(cls0);
-  container_sort cls0_e_(cls0_e);
-  BOOST_CHECK(cls0_e_ == cls0);
-  BOOST_CHECK(cls0_e_.container_name() == cls0.container_name());
-  BOOST_CHECK(cls0_e_.element_sort() == cls0.element_sort());
-
-  container_sort css0(ss0);
-  BOOST_CHECK(css0.container_name() == "Set");
-  BOOST_CHECK(css0.is_set_sort());
-  set_sort css0_(css0);
-  BOOST_CHECK(css0_ == ss0);
-  BOOST_CHECK(css0_.container_name() == ss0.container_name());
-  BOOST_CHECK(css0_.element_sort() == ss0.element_sort());
-  sort_expression css0_e(css0);
-  container_sort css0_e_(css0_e);
-  BOOST_CHECK(css0_e_ == css0);
-  BOOST_CHECK(css0_e_.container_name() == css0.container_name());
-  BOOST_CHECK(css0_e_.element_sort() == css0.element_sort());
-
-  container_sort cbs0(bs0);
-  BOOST_CHECK(cbs0.container_name() == "Bag");
-  BOOST_CHECK(cbs0.is_bag_sort());
-  bag_sort cbs0_(cbs0);
-  BOOST_CHECK(cbs0_ == bs0);
-  BOOST_CHECK(cbs0_.container_name() == bs0.container_name());
-  BOOST_CHECK(cbs0_.element_sort() == bs0.element_sort());
-  sort_expression cbs0_e(cbs0);
-  container_sort cbs0_e_(cbs0_e);
-  BOOST_CHECK(cbs0_e_ == cbs0);
-  BOOST_CHECK(cbs0_e_.container_name() == cbs0.container_name());
-  BOOST_CHECK(cbs0_e_.element_sort() == cbs0.element_sort());
 }
 
 int test_main(int argc, char** argv)
