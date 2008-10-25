@@ -535,15 +535,13 @@ AC_ARG_WITH(
   [wx-config],
   AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
-if test $with_wx; then
-  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx_config],[],[$with_wx])
+if test $with_wx_config; then
+  if test $($with_wx_config --version 2>/dev/null); then
+    WX_CONFIG="$with_wx_config"
+  fi
 else
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
-fi
-if test -z $WX_CONFIG; then
-  if test $with_wx; then
-    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[$with_wx_config-2.8],[],[$with_wx_config])
-  else
+  if test -z $WX_CONFIG; then
     AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
   fi
 fi

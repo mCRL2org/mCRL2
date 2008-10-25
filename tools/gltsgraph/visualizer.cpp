@@ -336,8 +336,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
   
   double xState, yState;
   double xVirtual, yVirtual;
-  double xControl1, yControl1;
-  double xControl2, yControl2;
   
   double alpha = tr->getControlAlpha();
   double dist = tr->getControlDist();
@@ -364,10 +362,11 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
     xFactor = (8 *(xVirtual - xState)) / (3 * (cosGamma + cosDelta));
-    xControl1 = xState + xFactor * cosGamma;
-    xControl2 = xState + xFactor * cosDelta;
-    
   }
+  double xControl1 = xState + xFactor * cosGamma;
+  double xControl2 = xState + xFactor * cosDelta;
+  double yControl1;
+  double yControl2;
   
   if(fabs(sinGamma + sinDelta) <= 0.01)
   {

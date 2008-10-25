@@ -357,7 +357,7 @@ void trBeginTile(TRcontext *tr)
 
 int trEndTile(TRcontext *tr)
 {
-   GLint prevRowLength, prevSkipRows, prevSkipPixels, prevAlignment;
+   GLint prevRowLength, prevSkipRows, prevSkipPixelsi; /* , prevAlignment; */
 
    if (!tr)
       return 0;

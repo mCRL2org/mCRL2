@@ -1,3 +1,4 @@
+#include <memory>
 #include "mainframe.h"
 #include "ids.h"
 #include <wx/menu.h>
@@ -7,8 +8,8 @@
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
-# define wxFD_SAVE wxSAVE 
-# define wxFD_OPEN wxOPEN 
+# define wxFD_SAVE wxSAVE
+# define wxFD_OPEN wxOPEN
 # define wxFD_CHANGE_DIR wxCHANGE_DIR
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
@@ -33,7 +34,7 @@ MainFrame::MainFrame(GLTSGraph* owner)
 
   int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };
   glCanvas = new GLCanvas(app, this, wxDefaultSize, attribList);
-  
+
   algoDlg = new AlgoDialog(app, this);
   settingsDlg = new SettingsDialog(app, this);
   infoDlg = new InfoDialog(this);
@@ -57,7 +58,7 @@ void MainFrame::setupMenuBar()
                wxT("Export this LTS to file."));
 
   fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit GLTSGraph."));
-  
+
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
@@ -75,7 +76,7 @@ void MainFrame::setupMenuBar()
   menuBar->Append(fileMenu, wxT("&File"));
   menuBar->Append(toolsMenu, wxT("&Tools"));
   menuBar->Append(helpMenu, wxT("&Help"));
-  
+
   SetMenuBar(menuBar);
 }
 
@@ -130,7 +131,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
 
   if(dialog.ShowModal() == wxID_OK)
   {
-    Exporter* exporter;
+    std::auto_ptr< Exporter > exporter;
     wxString fileName = dialog.GetPath();
     wxString extension = fileName.AfterLast('.');
     if(extension == fileName)
@@ -140,15 +141,15 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       {
         case 0: // SVG item
           fileName.Append(wxT(".svg"));
-          exporter = new ExporterSVG(app->getGraph());
+          exporter.reset(new ExporterSVG(app->getGraph()));
           break;
         case 1: // XML item
           fileName.Append(wxT(".xml"));
-          exporter = new ExporterXML(app->getGraph());
+          exporter.reset(new ExporterXML(app->getGraph()));
           break;
         case 2: // TeX item
           fileName.Append(wxT(".tex"));
-          exporter = new ExporterLatex(app->getGraph());
+          exporter.reset(new ExporterLatex(app->getGraph()));
           break;
       }
     }
@@ -157,20 +158,20 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       // An extension was given
       if (extension == wxT("svg"))
       {
-        exporter = new ExporterSVG(app->getGraph());
+        exporter.reset(new ExporterSVG(app->getGraph()));
       }
       else if (extension == wxT("xml"))
       {
-        exporter = new ExporterXML(app->getGraph());
+        exporter.reset(new ExporterXML(app->getGraph()));
       }
       else if (extension == wxT("tex"))
       {
-        exporter = new ExporterLatex(app->getGraph());
+        exporter.reset(new ExporterLatex(app->getGraph()));
       }
       else 
       {
         // Unknown file format, export to xml 
-        exporter = new ExporterXML(app->getGraph());
+        exporter.reset(new ExporterXML(app->getGraph()));
       }
     }
     
