@@ -341,11 +341,6 @@ rule platform-configuration ( properties * ) {
     }
   }
   else if <target-os>darwin in $(properties) {
-    # Remove when staging, due to strange behaviour of the native linker
-    if [ feature.defaults <install> ] != <install>yes {
-      requirements = [ property.change $(requirements) : <dll-path> ] ;
-    }
-
     if <toolset>darwin in $(properties) { # XCode toolset on OS X
       local cxxflags = -std=c++98 ;
 

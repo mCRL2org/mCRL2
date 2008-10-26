@@ -535,7 +535,7 @@ AC_ARG_WITH(
   [wx-config],
   AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
-if test $with_wx_config; then
+if test "$with_wx_config"; then
   if test $($with_wx_config --version 2>/dev/null); then
     WX_CONFIG="$with_wx_config"
   fi
@@ -545,7 +545,7 @@ else
     AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
   fi
 fi
-if test $WX_CONFIG; then
+if test "$WX_CONFIG"; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
