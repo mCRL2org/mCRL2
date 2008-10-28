@@ -34,6 +34,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param a An allocator.
     explicit deque(const Allocator& a)
       : std::deque<T, Allocator>(a)
     {
@@ -42,6 +43,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
     explicit deque(typename std::deque<T, Allocator>::size_type count)
       : std::deque<T, Allocator>(count)
     {
@@ -50,6 +52,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
     deque(typename std::deque<T, Allocator>::size_type count, const T& val)
       : std::deque<T, Allocator>(count, val)
     {
@@ -58,6 +62,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
+    /// \param a An allocator.
     deque(typename std::deque<T, Allocator>::size_type count, const T& val, const Allocator& a)
       : std::deque<T, Allocator>(count, val, a)
     {
@@ -66,6 +73,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param right A deque.
     deque(const deque& right)
       : std::deque<T, Allocator>(right)
     {
@@ -74,6 +82,8 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
         deque(InIt first, InIt last)
       : std::deque<T, Allocator>(first, last)
@@ -83,6 +93,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.   
     template<class InIt>
         deque(InIt first, InIt last, const Allocator& a)
       : std::deque<T, Allocator>(first, last, a)

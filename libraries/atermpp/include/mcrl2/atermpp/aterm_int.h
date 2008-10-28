@@ -28,12 +28,14 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param t A term containing an int.
       aterm_int(ATermInt t)
         : aterm_base(t)
       {}
   
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
+      /// \param t A term.
       aterm_int(aterm t)
         : aterm_base(t)
       {
@@ -42,6 +44,7 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param value An integer value.
       aterm_int(int value)
         : aterm_base(ATmakeInt(value))
       {}
@@ -55,6 +58,7 @@ namespace atermpp
 
       /// Assignment operator.
       ///
+      /// \param t A term.
       aterm_int& operator=(aterm_base t)
       {
         assert(t.type() == AT_INT);
@@ -64,6 +68,7 @@ namespace atermpp
 
       /// Get the integer value of the aterm_int.
       ///
+      /// \return The value of the term.
       int value() const
       {
         return ATgetInt(reinterpret_cast<ATermInt>(m_term));

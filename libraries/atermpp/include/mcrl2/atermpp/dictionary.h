@@ -30,6 +30,8 @@ namespace atermpp
 
       /// Get the value belonging to a given key in the dictionary.
       ///
+      /// \param key A key value.
+      /// \return The value belonging to the key.
       aterm get(aterm key)
       {
         return ATdictGet(*this, key);
@@ -39,6 +41,8 @@ namespace atermpp
       /// If key does not already exist in the dictionary, this function adds the (key,
       /// value)-pair to the dictionary. Otherwise, it updates the value to value.
       ///
+      /// \param key A key value.
+      /// \param value A value.
       void put(aterm key, aterm value)
       {
         m_term = ATdictPut(*this, key, value);
@@ -47,6 +51,7 @@ namespace atermpp
       /// Remove the (key, value)-pair from the dictionary.
       /// This function can be used to remove an entry from the dictionary.
       ///
+      /// \param key A key value.
       void remove(aterm key)
       {
         m_term = ATdictRemove(*this, key);

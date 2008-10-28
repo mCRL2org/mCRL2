@@ -19,6 +19,8 @@ namespace atermpp
 {
   /// Makes a list with a fixed number of arguments.
   ///
+  /// \param t0 A list element.
+  /// \return The generated list.
   template <typename T0>
   aterm_list make_list(T0 t0)
   {
@@ -27,6 +29,9 @@ namespace atermpp
   
   /// Makes a list with a fixed number of arguments.
   ///
+  /// \param t0 A list element.
+  /// \param t1 A list element.
+  /// \return The generated list.
   template <typename T0, typename T1>
   aterm_list make_list(T0 t0, T1 t1)
   {
@@ -35,6 +40,10 @@ namespace atermpp
   
   /// Makes a list with a fixed number of arguments.
   ///
+  /// \param t0 A list element.
+  /// \param t1 A list element.
+  /// \param t2 A list element.
+  /// \return The generated list.
   template <typename T0, typename T1, typename T2>
   aterm_list make_list(T0 t0, T1 t1, T2 t2)
   {
@@ -43,6 +52,11 @@ namespace atermpp
 
   /// Makes a list with a fixed number of arguments.
   ///
+  /// \param t0 A list element.
+  /// \param t1 A list element.
+  /// \param t2 A list element.
+  /// \param t3 A list element.
+  /// \return The generated list.
   template <typename T0, typename T1, typename T2, typename T3>
   aterm_list make_list(T0 t0, T1 t1, T2 t2, T3 t3)
   {

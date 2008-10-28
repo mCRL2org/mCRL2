@@ -22,17 +22,22 @@ namespace atermpp
   class function_symbol
   {
     protected:
+      /// The wrapped AFun value.
       AFun m_function;
   
     public:
       /// Constructor.
       ///
+      /// \param name A string.
+      /// \param arity The arity of the function.
+      /// \param quoted True if the function symbol is a quoted string.
       function_symbol(const std::string& name, int arity, bool quoted = false)
         : m_function(ATmakeAFun(const_cast<char*>(name.c_str()), arity, quoted ? ATtrue : ATfalse))
       {}
       
       /// Constructor.
       ///
+      /// \param function The wrapped AFun value.
       function_symbol(AFun function):
         m_function(function)
       {}
@@ -46,7 +51,7 @@ namespace atermpp
         ATprotectAFun(m_function);
       }
   
-      /// Release an function_symbol's protection.
+      /// Release a function symbol's protection.
       ///
       void unprotect()
       {
@@ -55,6 +60,7 @@ namespace atermpp
       
       /// Return the name of the function_symbol.
       ///
+      /// \return The name of the function symbol.
       std::string name() const
       {
         return std::string(ATgetName(m_function));
@@ -62,6 +68,7 @@ namespace atermpp
       
       /// Return the arity (number of arguments) of the function symbol (function_symbol).
       ///
+      /// \return The arity of the function symbol.
       unsigned int arity() const
       {
         return ATgetArity(m_function);
@@ -69,6 +76,7 @@ namespace atermpp
       
       /// Determine if the function symbol (function_symbol) is quoted or not.
       ///
+      /// \return True if the function symbol is quoted.
       bool is_quoted() const
       {
         return ATisQuoted(m_function);
@@ -82,10 +90,13 @@ namespace atermpp
       friend bool operator!=(const function_symbol& x, const function_symbol& y);
   };
 
-  /// Tests equality of function symbols f1 and f2.
-  /// Function symbols f1 and f2 are considered equal if they have the same name,
+  /// Equality operator.
+  /// Function symbols x and y are considered equal if they have the same name,
   /// the same arity and the same value for the quoted attribute.
   ///
+  /// \param x A function symbol.
+  /// \param y A function symbol.
+  /// \return True if the function symbols are equal.
   inline
   bool operator==(const function_symbol& x, const function_symbol& y)
   { 
@@ -93,8 +104,13 @@ namespace atermpp
     return AFun(x) == AFun(y);
   }
   
-  /// Returns !(x==y).
+  /// Inequality operator.
+  /// Function symbols x and y are considered equal if they have the same name,
+  /// the same arity and the same value for the quoted attribute.
   ///
+  /// \param x A function symbol.
+  /// \param y A function symbol.
+  /// \return True if the function symbols are not equal.
   inline
   bool operator!=(const function_symbol& x, const function_symbol& y)
   { return !(x == y); }

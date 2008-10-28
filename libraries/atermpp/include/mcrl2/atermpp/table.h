@@ -33,6 +33,7 @@ namespace atermpp
   class table
   {
    protected:
+      /// The wrapped ATermTable.
       boost::shared_ptr<_ATermTable> m_table;
 
    public:
@@ -46,6 +47,8 @@ namespace atermpp
       /// a maximum load percentage of 75%. You are not required to do this, it merely saves a runtime
       /// expansion and rehashing of the table which increases efficiency.
       ///
+      /// \param initial_size The initial capacity of the set.
+      /// \param max_load_pct The maximum load percentage.
       table(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
         : m_table(ATtableCreate(initial_size, max_load_pct), table_deleter())
       {}
@@ -67,6 +70,8 @@ namespace atermpp
       /// If key does not already exist in the table, this function adds the (key, value)-pair
       /// to the table. Otherwise, it updates the value to value.
       ///
+      /// \param key A key value.
+      /// \param value A value.
       void put(aterm key, aterm value)
       {
         ATtablePut(m_table.get(), key, value);
@@ -74,6 +79,8 @@ namespace atermpp
       
       /// Get the value belonging to a given key in a table.
       ///
+      /// \param key A key value.
+      /// \return The corresponding value.
       aterm get(aterm key)
       {
         return ATtableGet(m_table.get(), key);
@@ -81,16 +88,18 @@ namespace atermpp
       
       /// Remove the (key, value)-pair from table.
       ///
+      /// \param key A key value.
       void remove(aterm key)
       {
         ATtableRemove(m_table.get(), key);
       }
       
-      /// Get an term_list of all the keys in a table.
+      /// Get a list of all the keys in a table.
       /// This function can be useful if you need to iterate over all elements in a table. It
       /// returns an term_list containing all the keys in the table. The corresponding values of each key
       /// you are interested in can then be retrieved through respective calls to table_get.
       ///
+      /// \return A list containing the elements of the table.
       aterm_list table_keys()
       {
         return aterm_list(ATtableKeys(m_table.get()));

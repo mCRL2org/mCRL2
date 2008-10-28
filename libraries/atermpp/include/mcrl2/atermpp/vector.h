@@ -34,6 +34,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param a An allocator.
     explicit vector(const Allocator& a)
       : std::vector<T, Allocator>(a)
     {
@@ -42,6 +43,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
     explicit vector(typename std::vector<T, Allocator>::size_type count)
       : std::vector<T, Allocator>(count)
     {
@@ -50,6 +52,8 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
     
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
     vector(typename std::vector<T, Allocator>::size_type count, const T& val)
       : std::vector<T, Allocator>(count, val)
     {
@@ -58,6 +62,9 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
+    /// \param a An allocator.
     vector(typename std::vector<T, Allocator>::size_type count, const T& val, const Allocator& a)
       : std::vector<T, Allocator>(count, val, a)
     {
@@ -66,6 +73,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param right A vector.
     vector(const vector& right)
       : std::vector<T, Allocator>(right)
     {
@@ -74,6 +82,8 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
         vector(InIt first, InIt last)
       : std::vector<T, Allocator>(first, last)
@@ -83,6 +93,9 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.   
     template<class InIt>
         vector(InIt first, InIt last, const Allocator& a)
       : std::vector<T, Allocator>(first, last, a)

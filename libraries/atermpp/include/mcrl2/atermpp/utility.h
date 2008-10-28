@@ -20,6 +20,8 @@ namespace atermpp
 
   /// Remove leading and trailing quotes from a quoted aterm_string.
   ///
+  /// \param t A term containing a quoted string.
+  /// \return The string without quotes.
   inline
   std::string unquote(aterm_string t)
   {

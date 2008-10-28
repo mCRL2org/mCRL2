@@ -55,9 +55,11 @@ namespace atermpp {
   class term_list: public aterm_base
   {
     protected:
+      /// \return The wrapped ATermList.
       const ATermList list() const
       { return reinterpret_cast<const ATermList>(m_term); }
   
+      /// \return The wrapped ATermList.
       ATermList list()
       { return reinterpret_cast<ATermList>(m_term); }
 
@@ -102,6 +104,7 @@ namespace atermpp {
 
       /// Construction from ATermList.
       ///
+      /// \param l A list.
       term_list(ATermList l)
         : aterm_base(l)
       {
@@ -109,10 +112,12 @@ namespace atermpp {
 
       /// Construction from aterm_list.
       ///
+      /// \param t A term containing a list.
       term_list(const term_list<aterm>& t);
 
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
+      /// \param t A term containing a list.
       term_list(aterm t)
         : aterm_base(t)
       {
@@ -121,7 +126,8 @@ namespace atermpp {
 
       /// Creates an term_list with a copy of a range.
       ///
-
+      /// \param first The start of a range of elements.
+      /// \param last The end of a range of elements.
       template <class Iter>
       term_list(Iter first, Iter last)
         : aterm_base(ATmakeList0())
@@ -132,6 +138,7 @@ namespace atermpp {
 
       /// Assignment operator.
       ///
+      /// \param t A term containing a list.
       term_list<Term>& operator=(aterm_base t)
       {
         assert(t.type() == AT_LIST);
@@ -141,6 +148,7 @@ namespace atermpp {
 
       /// Assignment operator.
       ///
+      /// \param t A term containing a list.
       term_list<Term>& operator=(ATermList t)
       {
         m_term = reinterpret_cast<ATerm>(t);
@@ -149,39 +157,47 @@ namespace atermpp {
 
       /// Returns a const_iterator pointing to the beginning of the term_list.
       ///
+      /// \return The beginning of the list.
       const_iterator begin() const
       { return const_iterator(list()); } 
 
       /// Returns a const_iterator pointing to the end of the term_list.     
       ///
+      /// \return The end of the list.
       const_iterator end() const
       { return const_iterator(ATmakeList0()); }
   
       ///
       /// Returns the size of the term_list.
       ///
+      /// \return The size of the list.
       size_type size() const
       { return aterm_get_length(list()); }     
 
       ///
       /// Returns the largest possible size of the term_list.
       ///
+      /// \return The largest possible size of the list.
       size_type max_size() const
       { return GET_LENGTH((std::numeric_limits<unsigned long>::max)()); }
 
       ///
       /// true if the list's size is 0.
       ///
+      /// \return True if the list is empty.
       bool empty() const
       { return ATisEmpty(list()) == ATtrue; }
 
       /// Returns the first element.
       ///
+      /// \return The first element of the list.
       Term front() const
       { return Term(void2appl(term2void(aterm_get_first(list())))); }
 
       /// pos must be a valid iterator in *this. The return value is an iterator prev such that ++prev == pos. Complexity: linear in the number of iterators in the range [begin(), pos).
       ///
+      /// \param pos An iterator that points to an element in the list.
+      /// \return An iterator that points to the previous element in the list.
       const_iterator previous(const_iterator pos) const
       {
         const_iterator prev = end();
@@ -202,6 +218,8 @@ namespace atermpp {
       /// Applies a substitution to this list and returns the result.
       /// The Substitution object must supply the method aterm operator()(aterm).
       ///
+      /// \param f A substitution function.
+      /// \return The transformed list.
       template <typename Substitution>
       term_list<Term> substitute(Substitution f) const
       {
@@ -214,7 +232,8 @@ namespace atermpp {
   typedef term_list<aterm> aterm_list;
 
   /// Returns the first element of the list l.
-  ///
+  /// \param l A list
+  /// \return The first element of the list.
   template <typename Term>
   inline
   Term front(term_list<Term> l)
@@ -223,7 +242,9 @@ namespace atermpp {
   }
 
   /// Returns the list obtained by inserting a new element at the beginning.
-  ///
+  /// \param l A list.
+  /// \param elem A list element.
+  /// \return The list with an element inserted in front of it.
   template <typename Term>
   inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
@@ -235,6 +256,9 @@ namespace atermpp {
   /// that the complexity of this function is O(n), with n the number of
   /// elements in the list!!!
   ///
+  /// \param l A list.
+  /// \param elem A list element.
+  /// \return The list with an element appended to it.
   template <typename Term>
   inline
   term_list<Term> push_back(term_list<Term> l, Term elem)
@@ -244,6 +268,8 @@ namespace atermpp {
 
   /// Returns the list obtained by removing the first element.
   ///
+  /// \param l A list.
+  /// \return The list with the first element removed.
   template <typename Term>
   inline
   term_list<Term> pop_front(term_list<Term> l)
@@ -253,6 +279,8 @@ namespace atermpp {
 
   /// Returns the list with the elements in reversed order.
   ///
+  /// \param l A list.
+  /// \return The reversed list.
   template <typename Term>
   inline
   term_list<Term> reverse(term_list<Term> l)
@@ -260,8 +288,10 @@ namespace atermpp {
     return term_list<Term>(ATreverse(l));
   }
 
-  /// Applies the function f to all elements of the list and returns the result.
-  ///
+  /// Applies a function to all elements of the list and returns the result.
+  /// \param l The list that is transformed.
+  /// \param f The function that is applied to the elements of the list.
+  /// \return The transformed list.
   template <typename Term, typename Function>
   inline
   aterm_list apply(term_list<Term> l, const Function f)
@@ -274,21 +304,30 @@ namespace atermpp {
     return reverse(result);
   }
 
-  /// Return the concatenation of the lists l and m.
+  /// Returns the concatenation of two lists.
+  /// \param l A list.
+  /// \param m A list.
+  /// \return The concatenation of the lists.
   ///
   template <typename Term>
   inline
   term_list<Term> operator+(term_list<Term> l, term_list<Term> m)
   { return term_list<Term>(ATconcat(l, m)); }
 
-  /// Return the concatenation of the list l and the element t.
+  /// Appends an element to a list.
+  /// \param l A list.
+  /// \param t A list element.
+  /// \return The list with an element appended to it.
   ///
   template <typename Term>
   inline
   term_list<Term> operator+(term_list<Term> l, Term t)
   { return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); }
 
-  /// Return the concatenation of the element t and the list l.
+  /// Appends an element to a list.
+  /// \param t A list element.
+  /// \param l A list.
+  /// \return The list with one element appended to it.
   ///
   template <typename Term>
   inline
@@ -309,6 +348,10 @@ namespace atermpp {
   /// \endcond
 
   /// Equality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are equal.
+  ///
   template <typename Term>
   bool operator==(const term_list<Term>& x, const term_list<Term>& y)
   {
@@ -316,6 +359,10 @@ namespace atermpp {
   }
   
   /// Equality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are equal.
+  ///
   template <typename Term>
   bool operator==(const term_list<Term>& x, ATermList y)
   {
@@ -323,6 +370,10 @@ namespace atermpp {
   }
   
   /// Equality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are equal.
+  ///
   template <typename Term>
   bool operator==(ATermList x, const term_list<Term>& y)
   {
@@ -330,6 +381,10 @@ namespace atermpp {
   }
 
   /// Inequality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are not equal.
+  ///
   template <typename Term>
   bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
   {
@@ -337,6 +392,10 @@ namespace atermpp {
   }
   
   /// Inequality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are not equal.
+  ///
   template <typename Term>
   bool operator!=(const term_list<Term>& x, ATermList y)
   {
@@ -344,6 +403,10 @@ namespace atermpp {
   }
   
   /// Inequality operator.
+  /// \param x A list.
+  /// \param y A list.
+  /// \return True if the arguments are not equal.
+  ///
   template <typename Term>
   bool operator!=(ATermList x, const term_list<Term>& y)
   {

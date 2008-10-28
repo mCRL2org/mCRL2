@@ -23,17 +23,24 @@ namespace atermpp
 /// Utility class for applying a substitution to a term.
 struct substitution
 {
+  /// A value.
   aterm m_src;
+  
+  /// A replacement.
   aterm m_dest;
   
   /// Constructor.
   ///
+  /// \param src A value.
+  /// \param dest A replacement.
   substitution(aterm src, aterm dest)
     : m_src(src), m_dest(dest)
   {}
   
   /// Function call operator.
   ///
+  /// \param t A term.
+  /// \return The term to which the substitution has been applied.
   aterm operator()(aterm t) const
   {
     return atermpp::replace(t, m_src, m_dest);
@@ -52,11 +59,16 @@ substitution make_substitution(Src src, Dest dest)
 template <typename Src, typename Dest>
 struct list_substitution
 {
+  /// A sequence of values.
   Src m_src;
+  
+  /// A sequence of replacements.
   Dest m_dest;
   
   /// Constructor.
   ///
+  /// \param src A sequence of values.
+  /// \param dest A sequence of replacements.
   list_substitution(Src src, Dest dest)
     : m_src(src), m_dest(dest)
   {
@@ -65,6 +77,8 @@ struct list_substitution
   
   /// Function call operator.
   ///
+  /// \param t A term.
+  /// \return The term to which all substitutions have been applied.
   aterm operator()(aterm t) const
   {
     typename Src::const_iterator i;
@@ -78,6 +92,9 @@ struct list_substitution
 };
 
 /// Creation function for a list of substitutions.
+/// \param src A sequence of values.
+/// \param dest A sequence of replacements.
+/// \return The corresponding list substitution.
 template <typename Src, typename Dest>
 list_substitution<Src, Dest> make_list_substitution(Src src, Dest dest)
 {

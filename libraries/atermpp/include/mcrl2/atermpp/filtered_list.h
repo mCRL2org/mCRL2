@@ -24,6 +24,7 @@ namespace atermpp {
   class filtered_list: public List
   {
     protected:
+      /// A predicate.
       const Predicate& m_predicate;
     
     public:
@@ -33,6 +34,8 @@ namespace atermpp {
 
       /// Constructor.
       ///
+      /// \param l A list.
+      /// \param predicate A predicate.
       filtered_list(List l, Predicate predicate)
         : List(l), m_predicate(predicate)
       {
@@ -40,6 +43,7 @@ namespace atermpp {
 
       /// Returns a const iterator pointing to the beginning of the filtered list.     
       ///
+      /// \return A const iterator pointing to the beginning of the filtered list.
       iterator begin() const
       {
         return iterator(m_predicate, List::begin(), List::end());
@@ -47,6 +51,7 @@ namespace atermpp {
 
       /// Returns a const iterator pointing to the end of the filtered list.
       ///
+      /// \return A const iterator pointing to the end of the filtered list.
       iterator end() const
       {
         return iterator(m_predicate, List::end(), List::end());

@@ -35,6 +35,7 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// Constructor.
     ///
+    /// \param t A pointer to a term.
     term_appl_iterator(ATerm* t)
       : m_term(t)
     {}

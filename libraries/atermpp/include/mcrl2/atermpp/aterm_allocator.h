@@ -40,6 +40,8 @@ namespace atermpp {
    /// Is called when num elements are allocated at memory location p.
    ///
    // general case; works only for T = ATerm, ATermList, ...
+   /// \param p A memory location.
+   /// \param num A positive number.
    template <class T>
    void on_allocate(T* p, std::size_t num)
    {
@@ -50,6 +52,8 @@ namespace atermpp {
 
    /// Is called when the memory at location p is freed.
    ///
+   /// \param p A memory location.
+   /// \param num A positive number.
    template <class T>
    void on_deallocate(T* p, std::size_t num)
    {
@@ -59,6 +63,7 @@ namespace atermpp {
 
    /// Is called when an element is constructed at memory location p.
    ///
+   /// \param p A memory location.
    template <class T>
    void on_construct(T* p)
    {
@@ -66,6 +71,7 @@ namespace atermpp {
 
    /// Is called when the element at location p is destroyed.
    ///
+   /// \param p A memory location.
    template <class T>
    void on_destroy(T* p)
    {
@@ -76,30 +82,47 @@ namespace atermpp {
    template <class T>
    class aterm_allocator {
      public:
-       // type definitions
+       /// The size type
        typedef std::size_t    size_type;
+        
+       /// The difference type
        typedef std::ptrdiff_t difference_type;
+        
+       /// The pointer type
        typedef T*             pointer;
+       
+       /// The const pointer type
        typedef const T*       const_pointer;
+       
+       /// The reference type
        typedef T&             reference;
+       
+       /// The const reference type
        typedef const T&       const_reference;
+       
+       /// The value type
        typedef T              value_type;
 
        /// Rebind aterm_allocator to type U.
        ///
        template <class U>
        struct rebind {
+           /// An aterm allocator.
            typedef aterm_allocator<U> other;
        };
 
        /// Return address of value.
        ///
+       /// \param value A value
+       /// \return The address of the value
        pointer address (reference value) const {
            return &value;
        }
 
        /// Return address of value.
        ///
+       /// \param value A value
+       /// \return The address of the value
        const_pointer address (const_reference value) const {
            return &value;
        }
@@ -127,12 +150,15 @@ namespace atermpp {
 
        /// Returns the maximum number of elements that can be allocated.
        ///
+       /// \return The maximum number of elements that can be allocated.
        size_type max_size () const throw() {
            return std::numeric_limits<std::size_t>::max() / sizeof(T);
        }
 
        /// Allocates but doesn't initialize num elements of type T.
        ///
+       /// \param num A positive number
+       /// \return A pointer to uninitialized memory
        pointer allocate (size_type num)
        {
 #ifdef ATERM_DEBUG_ALLOCATOR
@@ -149,6 +175,8 @@ std::cout << "aterm_allocator.allocate(" << num << ") " << n << " elements alloc
 
        /// Initialize elements of allocated storage p with value value.
        ///
+       /// \param p A pointer
+       /// \param value A value
        void construct (pointer p, const T& value) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;
@@ -161,6 +189,7 @@ std::cout << "aterm_allocator.construct() " << ++n << " elements constructed" <<
 
        /// Destroy elements of initialized storage p.
        ///
+       /// \param p A pointer
        void destroy (pointer p) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;
@@ -173,6 +202,8 @@ std::cout << "aterm_allocator.destroy() " << ++n << " elements destroyed" << std
 
        /// Deallocate storage p of deleted elements.
        ///
+       /// \param p A pointer
+       /// \param num A positive number
        void deallocate (pointer p, size_type num) {
 #ifdef ATERM_DEBUG_ALLOCATOR
 static int n = 0;

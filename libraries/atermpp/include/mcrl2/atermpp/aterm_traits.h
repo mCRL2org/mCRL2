@@ -111,7 +111,9 @@ struct aterm_traits<ATermInt>
                                       
 } // namespace atermpp
 
-#define MCRL2_ATERM_TRAITS_SPECIALIZATION(type)          \
+/// Generates an aterm_traits specialization for a given type.
+/// \param type The type for which a specialization is generated.
+#define MCRL2_ATERM_TRAITS_SPECIALIZATION(type)       \
 namespace atermpp {                                   \
 template<>                                            \
 struct aterm_traits<type>                             \

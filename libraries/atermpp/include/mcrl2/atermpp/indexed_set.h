@@ -33,11 +33,14 @@ namespace atermpp
   class indexed_set
   {
    protected:
+     /// The wrapped ATermTable.
      boost::shared_ptr<_ATermTable> m_set;
 
    public:
       /// Create a new indexed_set.
       ///
+      /// \param initial_size The initial capacity of the set.
+      /// \param max_load_pct The maximum load percentage.
       indexed_set(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
         : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
       {}
@@ -59,6 +62,9 @@ namespace atermpp
       /// element that has been removed, or, if such a number is not available, the lowest non used number
       /// is assigned to elem and returned. The lowest number that is used is 0.
       ///
+      /// \param elem A term.
+      /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
+      /// was already contained in the set.
       std::pair<long, bool> put(aterm elem)
       {
         ATbool b;
@@ -70,6 +76,8 @@ namespace atermpp
       /// The index assigned to elem is returned, except when elem is not in the set, in
       /// which case the return value is a negative number.
       ///
+      /// \param elem An element of the set.
+      /// \return The index of the element.
       long index(aterm elem)
       {
         return ATindexedSetGetIndex(m_set.get(), elem);
@@ -79,6 +87,8 @@ namespace atermpp
       /// This function must be invoked with a valid index and it returns the elem assigned
       /// to this index. If it is invoked with an invalid index, effects are not predictable.
       ///
+      /// \param index A positive number.
+      /// \return The element in the set with the given index.
       aterm get(long index)
       {
         return ATindexedSetGetElem(m_set.get(), index);
@@ -88,6 +98,7 @@ namespace atermpp
       /// The elem is removed from the indexed set, and if a number was assigned to elem,
       /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
       ///
+      /// \param elem An element of the set.
       void remove(aterm elem)
       {
         ATindexedSetRemove(m_set.get(), elem);
@@ -97,6 +108,7 @@ namespace atermpp
       /// A list with all valid elements stored in the indexed set is returned.  The list is
       /// ordered from element with index 0 onwards.
       ///
+      /// \return An ordered list containing the elements of the set.
       aterm_list elements()
       {
         return aterm_list(ATindexedSetElements(m_set.get()));

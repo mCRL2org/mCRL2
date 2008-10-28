@@ -18,6 +18,8 @@ namespace atermpp
 {
   /// Make a term from a string pattern.
   ///
+  /// \param pattern A string pattern.
+  /// \return The term constructed from the pattern.
   inline
   aterm make_term(const std::string& pattern)
   {

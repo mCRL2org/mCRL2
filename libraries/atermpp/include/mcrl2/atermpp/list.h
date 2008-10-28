@@ -34,6 +34,7 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param a An allocator.
     explicit list(const Allocator& a)
       : std::list<T, Allocator>(a)
     {
@@ -42,6 +43,7 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
     explicit list(typename std::list<T, Allocator>::size_type count)
       : std::list<T, Allocator>(count)
     {
@@ -50,6 +52,8 @@ class list: public std::list<T, Allocator>, IProtectedATerm
     
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
     list(typename std::list<T, Allocator>::size_type count, const T& val)
       : std::list<T, Allocator>(count, val)
     {
@@ -58,6 +62,9 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param count A positive number.
+    /// \param val A value.
+    /// \param a An allocator.
     list(typename std::list<T, Allocator>::size_type count, const T& val, const Allocator& a)
       : std::list<T, Allocator>(count, val, a)
     {
@@ -66,6 +73,7 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param right A list.
     list(const list& right)
       : std::list<T, Allocator>(right)
     {
@@ -74,6 +82,8 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
         list(InIt first, InIt last)
       : std::list<T, Allocator>(first, last)
@@ -83,6 +93,9 @@ class list: public std::list<T, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.   
     template<class InIt>
         list(InIt first, InIt last, const Allocator& a)
       : std::list<T, Allocator>(first, last, a)

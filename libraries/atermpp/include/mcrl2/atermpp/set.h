@@ -35,6 +35,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param comp A compare function.
     explicit set(const Compare& comp)
       : std::set<T, Compare, Allocator>(comp)
     {
@@ -43,6 +44,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param comp A compare function.
+    /// \param a An allocator.
     set(const Compare& comp, const Allocator& a)
       : std::set<T, Compare, Allocator>(comp, a)
     {
@@ -51,6 +54,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param right A set.
     set(const set& right)
       : std::set<T, Compare, Allocator>(right)
     {
@@ -59,6 +63,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of set elements.
+    /// \param last The end of a range of set elements.
     template<class InIt>
     set(InIt first, InIt last)
       : std::set<T, Compare, Allocator>(first, last)
@@ -68,6 +74,9 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of set elements.
+    /// \param last The end of a range of set elements.
+    /// \param comp A compare function.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp)
       : std::set<T, Compare, Allocator>(first, last, comp)
@@ -77,6 +86,10 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of set elements.
+    /// \param last The end of a range of set elements.
+    /// \param comp A compare function.
+    /// \param a An allocator.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::set<T, Compare, Allocator>(first, last, comp, a)
@@ -93,6 +106,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
 
     /// Assignment operator.
     ///
+    /// \param other A set.
     atermpp::set<T, Compare, Allocator>& operator=(const std::set<T, Compare, Allocator>& other)
     {
       std::set<T, Compare, Allocator>::operator=(other);
@@ -128,6 +142,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param comp A compare function.
     explicit multiset(const Compare& comp)
       : std::multiset<T, Compare, Allocator>(comp)
     {
@@ -136,6 +151,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param comp A compare function.
+    /// \param a An allocator.
     multiset(const Compare& comp, const Allocator& a)
       : std::multiset<T, Compare, Allocator>(comp, a)
     {
@@ -144,6 +161,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param right A multiset.
     multiset(const multiset& right)
       : std::multiset<T, Compare, Allocator>(right)
     {
@@ -152,6 +170,8 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of multiset elements.
+    /// \param last The end of a range of multiset elements.
     template<class InIt>
     multiset(InIt first, InIt last)
       : std::multiset<T, Compare, Allocator>(first, last)
@@ -161,6 +181,9 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of multiset elements.
+    /// \param last The end of a range of multiset elements.
+    /// \param comp A compare function.
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp)
       : std::multiset<T, Compare, Allocator>(first, last, comp)
@@ -170,6 +193,10 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
 
     /// Constructor.
     ///
+    /// \param first The start of a range of multiset elements.
+    /// \param last The end of a range of multiset elements.
+    /// \param comp A compare function.
+    /// \param a An allocator.
     template<class InIt>
     multiset(InIt first, InIt last, const Compare& comp, const Allocator& a)
       : std::multiset<T, Compare, Allocator>(first, last, comp, a)

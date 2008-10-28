@@ -29,12 +29,14 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param t A term containing a blob.
       aterm_blob(ATermBlob t)
         : aterm_base(t)
       {}
 
       /// Constructor.
       ///
+      /// \param t A term.
       aterm_blob(ATerm t)
         : aterm_base(t)
       {
@@ -43,6 +45,7 @@ namespace atermpp
 
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
+      /// \param t A term.     
       aterm_blob(aterm t)
         : aterm_base(t)
       {
@@ -55,12 +58,15 @@ namespace atermpp
       ///    Note:  due to the internal representation of a blob, size cannot exceed 224 in the current
       /// implementation. This limits the size of the data area to 16 Mb.
       ///
+      /// \param size A positive number.
+      /// \param data A pointer to data.
       aterm_blob(unsigned int size, void* data)
         : aterm_base(ATmakeBlob(size, data))
       {}
 
       /// Assignment operator.
       ///
+      /// \param t A term.
       aterm_blob& operator=(aterm_base t)
       {
         assert(t.type() == AT_BLOB);
@@ -70,6 +76,7 @@ namespace atermpp
 
       /// Get the data section of the blob.
       ///
+      /// \return A pointer to the data of the blob.
       void* data()
       {
         return ATgetBlobData(void2blob(m_term));
@@ -77,6 +84,7 @@ namespace atermpp
 
       /// Get the size (in bytes) of the blob.
       ///
+      /// \return The size of the blob.
       unsigned int size() const
       {
         return ATgetBlobSize(void2blob(m_term));

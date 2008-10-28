@@ -39,6 +39,8 @@ namespace atermpp
       }
 
     protected:
+      /// \return The wrapped ATerm.
+      ///
       const ATermAppl appl() const
       {
         return reinterpret_cast<const ATermAppl>(m_term);
@@ -84,6 +86,7 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param term A term.
       term_appl(ATerm term)
         : aterm_base(term)
       {
@@ -92,24 +95,31 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param term A term.
       term_appl(ATermAppl term)
         : aterm_base(term)
       {}
 
       /// Constructor.
       ///
+      /// \param sym A function symbol.
+      /// \param args A list of arguments.
       term_appl(function_symbol sym, term_list<Term> args)
         : aterm_base(ATmakeApplList(sym, args))
       {}
 
       /// Allow construction from an aterm. The aterm must be of the right type.
       ///
+      /// \param t A term.
       term_appl(aterm t)
         : aterm_base(t)
       {}
 
       /// Constructor.
       ///
+      /// \param sym A function symbol.
+      /// \param first The start of a range of elements.
+      /// \param last The end of a range of elements.
       template <typename Iter>
       term_appl(function_symbol sym, Iter first, Iter last)
       {
@@ -123,6 +133,7 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param sym A function symbol.
       term_appl(function_symbol sym)
         : aterm_base(ATmakeAppl0(sym))
       {
@@ -139,6 +150,8 @@ namespace atermpp
 
       /// Assignment operator.
       ///
+      /// \param t A term.
+      /// \return The result of the assignment.
       term_appl<Term>& operator=(aterm_base t)
       {
         assert(t.type() == AT_APPL);
@@ -148,43 +161,51 @@ namespace atermpp
 
       /// Assignment operator.
       ///
+      /// \param t A term.
+      /// \return The result of the assignment.
       term_appl<Term>& operator=(ATermAppl t)
       {
         m_term = reinterpret_cast<ATerm>(t);
         return *this;
       }
 
-      /// Returns the size of the term_list.
+      /// Returns the size of the list.
       ///
+      /// \return The size of the list.
       size_type size() const
       { return ATgetArity(ATgetAFun(appl())); }
 
-      /// Returns an iterator pointing to the end of the term_list.     
+      /// Returns an iterator pointing to the beginning of the list.     
       ///
+      /// \return An iterator pointing to the beginning of the list.
       const_iterator begin() const
       {
         return const_iterator(((ATerm *)(m_term) + ARG_OFFSET));
       } 
 
-      /// Returns a const_iterator pointing to the beginning of the term_list.
+      /// Returns a const_iterator pointing to the beginning of the list.
       ///
+      /// \return A const_iterator pointing to the beginning of the list.
       const_iterator end() const
       {
         return const_iterator(((ATerm *)(m_term) + ARG_OFFSET + size()));
       }
   
-      /// Returns the largest possible size of the term_list.
+      /// Returns the largest possible size of the list.
       ///
+      /// \return The largest possible size of the list.
       size_type max_size() const
       { return (std::numeric_limits<unsigned long>::max)(); }
 
       /// true if the list's size is 0.
       ///
+      /// \return True if the function application has no arguments.
       bool empty() const
       { return size() == 0; }
 
       /// Get the function symbol (function_symbol) of the application.
       ///
+      /// \return The function symbol of the function application.
       function_symbol function() const
       {
         return function_symbol(ATgetAFun(appl()));
@@ -192,6 +213,7 @@ namespace atermpp
  
       /// Returns true if the term is quoted.
       /// 
+      /// \return True if the term is quoted.
       bool is_quoted() const
       {
         return function().is_quoted();
@@ -199,30 +221,38 @@ namespace atermpp
 
       /// Returns the i-th argument.
       /// 
+      /// \param i A positive number.
+      /// \return The argument with the given index.
       Term operator()(unsigned int i) const
       {
         return Term(ATgetArgument(appl(), i));
       }
   
       /// Returns a copy of the term with the i-th child replaced by t.
-      /// DEPRECATED!
+      /// \deprecated
       ///
+      /// \param t A term.
+      /// \param i A positive number.
+      /// \return The term with one of its arguments replaced.
       term_appl<Term> set_argument(Term t, unsigned int i)
       {
         return ATsetArgument(appl(), t, i);
       }
 
       /// Get the i-th argument of the application.
-      /// DEPRECATED!
+      /// \deprecated
       ///
+      /// \param i A positive number.
+      /// \return The argument with the given index.
       aterm argument(unsigned int i) const
       {
         return aterm(ATgetArgument(appl(), i));
       }
 
       /// Get the list of arguments of the application.
-      /// DEPRECATED!
+      /// \deprecated
       ///
+      /// \return A list containing the function arguments.
       term_list<Term> argument_list() const
       {
         return term_list<Term>(ATgetArguments(appl()));
@@ -248,6 +278,9 @@ namespace atermpp
 
   /// Equality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   template <typename Term>
   bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
   {
@@ -256,6 +289,9 @@ namespace atermpp
   
   /// Equality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   template <typename Term>
   bool operator==(const term_appl<Term>& x, ATermAppl y)
   {
@@ -264,6 +300,9 @@ namespace atermpp
   
   /// Equality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   template <typename Term>
   bool operator==(ATermAppl x, const term_appl<Term>& y)
   {
@@ -272,6 +311,9 @@ namespace atermpp
 
   /// Inequality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   template <typename Term>
   bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
   {
@@ -280,6 +322,9 @@ namespace atermpp
   
   /// Inequality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   template <typename Term>
   bool operator!=(const term_appl<Term>& x, ATermAppl y)
   {
@@ -288,6 +333,9 @@ namespace atermpp
   
   /// Inequality operator.
   ///
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   template <typename Term>
   bool operator!=(ATermAppl x, const term_appl<Term>& y)
   {

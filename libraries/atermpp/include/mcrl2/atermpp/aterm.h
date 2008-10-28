@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_ATERM_H
 #define MCRL2_ATERMPP_ATERM_H
 
-#include <string>
+#include <string> 
 #include <iostream>
 #include <cassert>
 #include "aterm2.h"
@@ -28,11 +28,14 @@ namespace atermpp
     friend struct aterm_traits;
     
     protected:
+      /// The wrapped ATerm.
       ATerm m_term;
   
+      /// \return A const reference to the wrapped ATerm.
       const ATerm& term() const
       { return m_term; }
       
+      /// \return A reference to the wrapped ATerm.
       ATerm& term()
       { return m_term; }
 
@@ -45,6 +48,7 @@ namespace atermpp
       
       /// Constructor.
       ///
+      /// \param term A term.
       aterm_base(ATerm term)
         : m_term(term)
       {
@@ -52,12 +56,14 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param term A term containing a list.
       aterm_base(ATermList term)
         : m_term(reinterpret_cast<ATerm>(term))
       {}
   
       /// Constructor.
       ///
+      /// \param term A term containing an integer.
       aterm_base(ATermInt term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
@@ -65,6 +71,7 @@ namespace atermpp
   
       /// Constructor.
       ///
+      /// \param term A term containing a real.
       aterm_base(ATermReal term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
@@ -72,6 +79,7 @@ namespace atermpp
   
       /// Constructor.
       ///
+      /// \param term A term containing a blob.
       aterm_base(ATermBlob term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
@@ -79,6 +87,7 @@ namespace atermpp
   
       /// Constructor.
       ///
+      /// \param term A term containing a function application.
       aterm_base(ATermAppl term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
@@ -86,6 +95,7 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param s A string.
       aterm_base(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
@@ -118,15 +128,17 @@ namespace atermpp
       /// Result is one of AT_APPL, AT_INT,
       /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
       ///
+      /// \return The type of the term.
       int type() const
       { return ATgetType(m_term); }
       
       /// Writes the term to a string.
       ///
+      /// \return A string representation of the term.
       std::string to_string() const
       { return std::string(ATwriteToString(m_term)); }
   };
-
+ 
   /// \cond INTERNAL_DOCS
   template <>                           
   struct aterm_traits<aterm_base>
@@ -142,6 +154,8 @@ namespace atermpp
 
   /// Returns true if x has the default value of an aterm. In the ATerm Library
   /// this value is given by ATfalse.
+  /// \param x A term.
+  /// \return True if the value of the term is ATfalse.
   inline
   bool operator!(const aterm_base& x)
   {
@@ -149,6 +163,9 @@ namespace atermpp
   }
 
   /// Writes a string representation of the aterm t to the stream out.
+  /// \param out An output stream.
+  /// \param t A term.
+  /// \return The stream to which the string representation has been written.
   inline
   std::ostream& operator<<(std::ostream& out, const aterm_base& t)
   {
@@ -168,48 +185,56 @@ namespace atermpp
 
       /// Constructor.
       ///
+      /// \param term A term.
       aterm(aterm_base term)
         : aterm_base(term)
       { }
 
       /// Constructor.
       ///
+      /// \param term A term.
       aterm(ATerm term)
         : aterm_base(term)
       { }
 
       /// Constructor.
       ///
+      /// \param term A term containing a list.
       aterm(ATermList term)
         : aterm_base(term)
       { }
   
       /// Constructor.
       ///
+      /// \param term A term containing an integer.
       aterm(ATermInt term)
         : aterm_base(term)
       { }
   
       /// Constructor.
       ///
+      /// \param term A term containing a real.
       aterm(ATermReal term)
         : aterm_base(term)
       { }
   
       /// Constructor.
       ///
+      /// \param term A term containing a blob.
       aterm(ATermBlob term)
         : aterm_base(term)
       { }
   
       /// Constructor.
       ///
+      /// \param term A term containing a function application.
       aterm(ATermAppl term)
         : aterm_base(term)
       { }
 
       /// Constructor.
       ///
+      /// \param s A string.
       aterm(const std::string& s)
         : aterm_base(s)
       { }
@@ -236,6 +261,8 @@ namespace atermpp
   /// Read an aterm from string.
   /// This function parses a character string into an aterm.
   ///
+  /// \param s A string representation of a term.
+  /// \return The term corresponding to the string.
   inline
   aterm read_from_string(const std::string& s)
   {
@@ -245,6 +272,9 @@ namespace atermpp
   /// Read a aterm from a string in baf format.
   /// This function decodes a baf character string into an aterm.
   ///
+  /// \param s A string representation of a term in baf format.
+  /// \param size The size of the string.
+  /// \return The term corresponding to the string.
   inline
   aterm read_from_binary_string(const std::string& s, unsigned int size)
   {
@@ -254,6 +284,9 @@ namespace atermpp
   /// Read a aterm from a string in taf format.
   /// This function decodes a taf character string into an aterm.
   ///
+  /// \param s A string.
+  /// \param size A positive number.
+  /// \return The term read from string.
   inline
   aterm read_from_shared_string(const std::string& s, unsigned int size)
   {
@@ -264,6 +297,8 @@ namespace atermpp
   /// This function reads an aterm file filename. A test is performed to see if the file
   /// is in baf, taf, or plain text. "-" is standard input's filename.
   ///
+  /// \param name The name of a file.
+  /// \return A term that was read from a file.
   inline
   aterm read_from_named_file(const std::string& name)
   {
@@ -274,6 +309,9 @@ namespace atermpp
   /// This function writes aterm t in textual representation to file filename. "-" is
   /// standard output's filename.
   ///
+  /// \param t A term.
+  /// \param filename The name of a file.
+  /// \return True if the operation succeeded.
   inline
   bool write_to_named_text_file(aterm t, const std::string& filename)
   {
@@ -282,6 +320,9 @@ namespace atermpp
 
   /// Writes term t to file named filename in Binary aterm Format (baf).
   ///
+  /// \param t A term.
+  /// \param filename The name of a file.
+  /// \return True if the operation succeeded. 
   inline
   bool write_to_named_binary_file(aterm t, const std::string& filename)
   {
@@ -290,6 +331,9 @@ namespace atermpp
 
   /// Writes term t to file named filename in Streamable aterm Format (saf).
   ///
+  /// \param t A term.
+  /// \param filename The name of a file.
+  /// \return True if the operation succeeded.
   inline
   bool write_to_named_saf_file(aterm t, const std::string& filename)
   {
@@ -300,6 +344,10 @@ namespace atermpp
   /// Creates a version of t that is annotated with annotation and labeled by
   /// label.
   ///
+  /// \param t A term.
+  /// \param label A label.
+  /// \param annotation An annotation.
+  /// \return A term with an added annotation.
   inline
   aterm set_annotation(aterm t, aterm label, aterm annotation)
   {
@@ -311,6 +359,9 @@ namespace atermpp
   /// no annotations, or no annotation labeled with label exists, `aterm()` is returned. Otherwise the
   /// annotation is returned.
   ///
+  /// \param t A term.
+  /// \param label A label.
+  /// \return The annotation with the given label.
   inline
   aterm get_annotation(aterm t, aterm label)
   {
@@ -321,6 +372,9 @@ namespace atermpp
   /// This function returns a version of t which has its annotation with label label
   /// removed. If t has no annotations, or no annotation labeled with label exists, t itself is returned.
   ///
+  /// \param t A term.
+  /// \param label A label.
+  /// \return The term with a removed annotation.
   inline
   aterm remove_annotation(aterm t, aterm label)
   {
@@ -328,6 +382,9 @@ namespace atermpp
   }
 
   /// Equality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   inline
   bool operator==(const aterm& x, const aterm& y)
   {
@@ -335,6 +392,9 @@ namespace atermpp
   }
   
   /// Equality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   inline
   bool operator==(const aterm& x, ATerm y)
   {
@@ -342,6 +402,9 @@ namespace atermpp
   }
   
   /// Equality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are equal.
   inline
   bool operator==(const ATerm& x, aterm y)
   {
@@ -349,6 +412,9 @@ namespace atermpp
   }
 
   /// Inequality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   inline
   bool operator!=(const aterm& x, const aterm& y)
   {
@@ -356,6 +422,9 @@ namespace atermpp
   }
   
   /// Inequality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   inline
   bool operator!=(const aterm& x, ATerm y)
   {
@@ -363,6 +432,9 @@ namespace atermpp
   }
   
   /// Inequality operator.
+  /// \param x A term.
+  /// \param y A term.
+  /// \return True if the terms are not equal.
   inline
   bool operator!=(const ATerm& x, aterm y)
   {

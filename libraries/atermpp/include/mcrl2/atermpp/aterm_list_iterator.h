@@ -45,6 +45,7 @@ class term_list_iterator: public boost::iterator_facade<
 
     /// Constructor.
     ///
+    /// \param l A list.
     term_list_iterator(ATermList l)
       : m_list(l)
     {}
