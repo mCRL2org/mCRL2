@@ -16,5 +16,6 @@ test-suite data
       [ run data_specification_test.cpp ]
       [ run bool_test.cpp ]
       [ run compatibility_test.cpp ]
+      [ run parser_test.cpp ]
       [ compile-headers ../include ]
     ;
