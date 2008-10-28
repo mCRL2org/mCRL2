@@ -19,6 +19,10 @@ namespace mcrl2 {
 
 namespace core { 
 
+  /// Operator not.
+  ///
+  /// \param arg A term.
+  /// \return The application of not to the argument.
   template <typename Term>
   Term optimized_not(Term arg)
   {
@@ -26,6 +30,11 @@ namespace core {
     return detail::optimized_not(arg, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
+  /// Operator and.
+  ///
+  /// \param left A term.
+  /// \param right A term.
+  /// \return The application of and to the arguments.
   template <typename Term>
   Term optimized_and(Term left, Term right)
   {
@@ -33,6 +42,11 @@ namespace core {
     return detail::optimized_and(left, right, tr::and_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
+  /// Operator or.
+  ///
+  /// \param left A term.
+  /// \param right A term.
+  /// \return The application of or to the arguments.
   template <typename Term>
   Term optimized_or(Term left, Term right)
   {
@@ -40,6 +54,11 @@ namespace core {
     return detail::optimized_or(left, right, tr::or_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
+  /// Implication.
+  ///
+  /// \param left A term.
+  /// \param right A term.
+  /// \return The application of implication to the arguments.
   template <typename Term>
   Term optimized_imp(Term left, Term right)
   {
@@ -47,6 +66,11 @@ namespace core {
     return detail::optimized_imp(left, right, tr::imp, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
+  /// Universal quantification.
+  ///
+  /// \param v A sequence of variables.
+  /// \param arg A term.
+  /// \return The application of universal quantification to the arguments.
   template <typename Term, typename VariableSequence>
   Term optimized_forall(VariableSequence v, Term arg)
   {
@@ -54,6 +78,11 @@ namespace core {
     return detail::optimized_forall(v, arg, tr::forall, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
+  /// Existential quantification.
+  ///
+  /// \param v A sequence of variables.
+  /// \param arg A term.
+  /// \return The application of existential quantification to the arguments.
   template <typename Term, typename VariableSequence>
   Term optimized_exists(VariableSequence v, Term arg)
   {

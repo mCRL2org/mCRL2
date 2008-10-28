@@ -22,31 +22,33 @@ namespace core {
 
 namespace detail {
 
-struct foreach_sequence_assign
-{
-  template <typename T1, typename T2>
-  void operator()(T1& t1, const T2& t2) const
+  /// \cond INTERNAL_DOCS
+  struct foreach_sequence_assign
   {
-    t1 = t2;
-  }
-};
-
-template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
-void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
-{
-  if (first == last)
-  {
-    f();
-  }
-  else
-  {
-    for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
+    template <typename T1, typename T2>
+    void operator()(T1& t1, const T2& t2) const
     {
-      assign(*i, *j);
-      foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
+      t1 = t2;
+    }
+  };
+  
+  template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
+  void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
+  {
+    if (first == last)
+    {
+      f();
+    }
+    else
+    {
+      for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
+      {
+        assign(*i, *j);
+        foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
+      }
     }
   }
-}
+  /// \endcond
 
 } // namespace detail
 
@@ -55,6 +57,10 @@ void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f,
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
 /// the function f is called. The assign parameter gives the user control
 /// over how each sequence is built.
+/// \param X A sequence.
+/// \param i An output iterator to where the generated sequences are written.
+/// \param f A function that is called for each generated sequence.
+/// \param assign The assign operation is called to assign values to the generated sequence.
 template <typename SequenceContainer,
           typename OutIter,
           typename SequenceFunction,
@@ -73,6 +79,9 @@ void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f,
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
 /// the function f is called. 
+/// \param X A sequence.
+/// \param i An output iterator to where the generated sequences are written.
+/// \param f A function that is called for each generated sequence.
 template <typename SequenceContainer,
           typename OutIter,
           typename SequenceFunction>
