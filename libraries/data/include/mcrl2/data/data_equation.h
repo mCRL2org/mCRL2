@@ -23,7 +23,9 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \brief A conditional data equation. The equality holds if
+/// \brief Conditional data equation.
+///
+/// The equality holds if
 /// the condition evaluates to true. A declaration of variables
 /// that can be used in the expressions is included. The condition
 /// is optional. In case there is no condition, it has the value
@@ -34,12 +36,20 @@ namespace data {
 class data_equation: public atermpp::aterm_appl
 {
   protected:
+    /// The variables that are used in the equation.
     data_variable_list m_variables;
+    
+    /// The condition of the equation.
     data_expression m_condition;
+    
+    /// The left hand side of the equation.
     data_expression m_lhs;
+    
+    /// The right hand side of the equation.
     data_expression m_rhs;
 
   public:
+    /// An iterator for the variable sequence.
     typedef data_variable_list::iterator variable_iterator;
 
     /// Constructor.
@@ -50,6 +60,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param t A term.
     data_equation(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
     {
@@ -64,6 +75,10 @@ class data_equation: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param variables The variables that are used in the equation.
+    /// \param condition The condition of the equation.
+    /// \param lhs The left hand side of the equation.
+    /// \param rhs The right hand side of the equation.
     data_equation(data_variable_list variables,
                   data_expression    condition,
                   data_expression    lhs,
@@ -80,6 +95,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// Returns the variables of the equation.
     ///
+    /// \return The variables of the equation.
     data_variable_list variables() const
     {
       return m_variables;
@@ -87,6 +103,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// Returns the condition of the equation.
     ///
+    /// \return The condition of the equation.
     data_expression condition() const
     {
       return m_condition;
@@ -94,6 +111,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// Returns the left hand side of the equation.
     ///
+    /// \return The left hand side of the equation.
     data_expression lhs() const
     {
       return m_lhs;
@@ -101,6 +119,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// Returns the right hand side of the equation.
     ///
+    /// \return The right hand side of the equation.
     data_expression rhs() const
     {
       return m_rhs;
@@ -109,6 +128,8 @@ class data_equation: public atermpp::aterm_appl
     /// Applies a substitution to this data equation and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
+    /// \param f A substitution function.
+    /// \return The application of the substitution to the equation.
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
@@ -120,6 +141,7 @@ class data_equation: public atermpp::aterm_appl
     /// <li>the types of the left and right hand side are equal</li>
     /// </ul>
     ///
+    /// \return True if the equation is well typed.
     bool is_well_typed() const
     {
       // check 1)
@@ -138,6 +160,8 @@ class data_equation: public atermpp::aterm_appl
 typedef atermpp::term_list<data_equation> data_equation_list;
 
 /// \brief Returns true if the term t is a data equation
+/// \param t A term.
+/// \return True if the term is a data equation.
 inline
 bool is_data_equation(atermpp::aterm_appl t)
 {

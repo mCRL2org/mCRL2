@@ -33,9 +33,10 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
-/// \brief data expression
-/// Represents a data expression or nil.
-/// Before using a data expression, the user must make sure that it is not nil.
+/// \brief Data expression
+///
+/// Represents a data expression or nil. The user must make sure that the
+/// expression is not nil before using it.
 class data_expression: public atermpp::aterm_appl
 {
   public:
@@ -47,6 +48,7 @@ class data_expression: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param term A term.
     data_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
@@ -55,6 +57,7 @@ class data_expression: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param term A term.
     data_expression(ATermAppl term)
       : atermpp::aterm_appl(term)
     {
@@ -63,6 +66,7 @@ class data_expression: public atermpp::aterm_appl
 
     /// Returns the sort of the data expression.
     ///
+    /// \return The sort of the data expression.
     sort_expression sort() const
     {
       ATermAppl result = core::detail::gsGetSort(*this);
@@ -73,6 +77,8 @@ class data_expression: public atermpp::aterm_appl
     /// Applies a substitution to this data expression and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     ///
+    /// \param f A substitution function.
+    /// \return The application of the substitution to the expression.
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
@@ -81,6 +87,8 @@ class data_expression: public atermpp::aterm_appl
 };
 
 /// \brief Returns true if the term t is a data expression
+/// \param t A term.
+/// \return True if the term is a data expression.
 inline
 bool is_data_expression(atermpp::aterm_appl t)
 {
@@ -88,6 +96,7 @@ bool is_data_expression(atermpp::aterm_appl t)
 }
 
 /// Returns the head of the data expression t.
+/// \return The head of the data expression.
 /// \deprecated
 inline
 data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
@@ -96,6 +105,7 @@ data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 }
 
 /// Returns the arguments of the data expression t.
+/// \return The arguments of the data expression.
 /// \deprecated
 inline
 data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)

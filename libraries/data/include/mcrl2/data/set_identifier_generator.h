@@ -20,9 +20,8 @@ namespace mcrl2 {
 
 namespace data {
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. The context is stored
-/// in a set.
+/// \brief Identifier generator that stores the identifiers of the
+/// context in a set.
 ///
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
@@ -30,6 +29,7 @@ namespace data {
 class set_identifier_generator: public identifier_generator
 {
   protected:
+    /// The context of the identifier generator.
     atermpp::set<core::identifier_string> m_identifiers;
 
   public:
@@ -40,6 +40,7 @@ class set_identifier_generator: public identifier_generator
 
     /// Constructor.
     ///
+    /// \param t A context.
     template <typename Term>
     set_identifier_generator(Term t)
     {
@@ -77,18 +78,19 @@ class set_identifier_generator: public identifier_generator
     }
 };
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. The context is stored
-/// in a multiset. If an identifier occurs multiple times,
+/// \brief Identifier generator that stores the identifiers of the
+/// context in a multiset.
+///
+/// If an identifier occurs multiple times,
 /// multiple calls to remove_from_context are required to
 /// remove it.
-///
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
 /// context.
 class multiset_identifier_generator: public identifier_generator
 {
   protected:
+    /// The context of the identifier generator.
     atermpp::multiset<core::identifier_string> m_identifiers;
 
   public:
@@ -99,6 +101,7 @@ class multiset_identifier_generator: public identifier_generator
 
     /// Constructor.
     ///
+    /// \param t A context.
     template <typename Term>
     multiset_identifier_generator(Term t)
     {

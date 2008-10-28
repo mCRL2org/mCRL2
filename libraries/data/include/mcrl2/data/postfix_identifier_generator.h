@@ -18,21 +18,25 @@ namespace mcrl2 {
 
 namespace data {
 
-/// Uses the given postfix as a hint for generating identifiers.
+/// \brief Identifier generator that uses a given postfix as a hint for generating identifiers.
 class postfix_identifier_generator: public set_identifier_generator
 {
   protected:
+    /// A postfix.
     std::string m_postfix;
 
   public:
     /// Constructor.
     ///
+    /// \param postfix A string that is used for generating new names.
     postfix_identifier_generator(std::string postfix)
       : m_postfix(postfix)
     {}
 
     /// Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
+    /// \param hint A string that is used for generating new names.
+    /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string id(hint);

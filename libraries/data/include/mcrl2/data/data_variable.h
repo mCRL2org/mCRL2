@@ -28,7 +28,7 @@ namespace data {
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
-/// \brief data variable
+/// \brief Data variable
 ///
 // DataVarId(<String>, <SortExpr>)
 class data_variable: public data_expression
@@ -42,6 +42,7 @@ class data_variable: public data_expression
 
     /// Constructor.
     ///             
+    /// \param t A term.
     data_variable(atermpp::aterm_appl t)
      : data_expression(t)
     {
@@ -51,6 +52,7 @@ class data_variable: public data_expression
     /// Constructor for strings like "d:D".
     /// Only works for constant sorts.
     ///
+    /// \param s A string representation of a variable.
     data_variable(const std::string& s)
     {
       std::string::size_type idx = s.find(':');
@@ -62,18 +64,23 @@ class data_variable: public data_expression
 
     /// Constructor.
     ///             
+    /// \param name The name of a variable.
+    /// \param s A sort.
     data_variable(core::identifier_string name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(name, s))
     {}
 
     /// Constructor.
     ///             
+    /// \param name The name of a variable.
+    /// \param s A sort.
     data_variable(const std::string& name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), s))
     {}
 
     /// Returns the name of the data_variable.
     ///
+    /// \return The name of the data variable.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
@@ -81,6 +88,7 @@ class data_variable: public data_expression
 
     /// Returns the sort of the data_variable.
     ///
+    /// \return The sort of the data variable.
     data::sort_expression sort() const
     {
       return atermpp::arg2(*this);
@@ -92,6 +100,8 @@ class data_variable: public data_expression
   typedef atermpp::term_list<data_variable> data_variable_list;
   
   /// \brief Returns true if the term t is a data variable
+  /// \param t A term.
+  /// \return True if the term is a data variable.
   inline
   bool is_data_variable(atermpp::aterm_appl t)
   {
@@ -99,6 +109,8 @@ class data_variable: public data_expression
   }
   
   /// \brief Converts a data_variable_list to a data_expression_list.
+  /// \param l A sequence of data variables.
+  /// \return The conversion of the sequence to data expressions.
   inline
   data_expression_list make_data_expression_list(data_variable_list l)
   {
@@ -106,6 +118,9 @@ class data_variable: public data_expression
   }
 
   /// Returns the union of v and w.
+  /// \param v A sequence of data variables.
+  /// \param w A sequence of data variables.
+  /// \return The union of the sequences.
   inline
   data_variable_list data_variable_list_union(data_variable_list v, data_variable_list w)
   {
@@ -124,6 +139,9 @@ class data_variable: public data_expression
   }
 
   /// Returns v minus w.
+  /// \param v A sequence of data variables.
+  /// \param w A sequence of data variables.
+  /// \return The difference of the sequences.
   inline
   data_variable_list data_variable_list_difference(data_variable_list v, data_variable_list w)
   {

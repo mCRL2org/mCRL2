@@ -25,13 +25,16 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \brief data_assignment is an assignment of a data expression to a data variable.
+/// \brief Assignment of a data expression to a data variable.
 ///
 class data_assignment: public atermpp::aterm_appl
 {
   protected:
-    data_variable   m_lhs;         // left hand side of the assignment
-    data_expression m_rhs;         // right hand side of the assignment
+    /// Left hand side of the assignment
+    data_variable   m_lhs;
+    
+    /// Right hand side of the assignment
+    data_expression m_rhs;
 
   public:
     /// Constructor.
@@ -42,6 +45,7 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param t A term
     data_assignment(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
     {
@@ -53,6 +57,8 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param lhs Left hand side of the assignment.
+    /// \param rhs Right hand side of the assignment.
     data_assignment(data_variable lhs, data_expression rhs)
      : 
        atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
@@ -63,6 +69,7 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Returns true if the sorts of the left and right hand side are equal.
     ///
+    /// \return True if the assignement is well typed.
     bool is_well_typed() const
     {
       bool result = m_lhs.sort() == m_rhs.sort();
@@ -76,6 +83,8 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Applies the assignment to t and returns the result.
     ///
+    /// \param t A term.
+    /// \return The application of the assignment to the term.
     atermpp::aterm operator()(atermpp::aterm t) const
     {
       return atermpp::replace(t, atermpp::aterm(m_lhs), atermpp::aterm(m_rhs));
@@ -83,6 +92,7 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Returns the left hand side of the assignment.
     ///
+    /// \return The left hand side of the assignment.
     data_variable lhs() const
     {
       return m_lhs;
@@ -90,6 +100,7 @@ class data_assignment: public atermpp::aterm_appl
 
     /// Returns the right hand side of the assignment.
     ///
+    /// \return The right hand side of the assignment.
     data_expression rhs() const
     {
       return m_rhs;
@@ -103,6 +114,7 @@ class data_assignment: public atermpp::aterm_appl
 typedef atermpp::term_list<data_assignment> data_assignment_list;
 
 /// \brief Returns true if the term t is a data assignment
+/// \param t A term.
 inline
 bool is_data_assignment(atermpp::aterm_appl t)
 {
@@ -111,6 +123,9 @@ bool is_data_assignment(atermpp::aterm_appl t)
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Makes a data_assignment_list from lhs and rhs
+/// \param lhs A sequence of data variables.
+/// \param rhs A sequence of data expressions.
+/// \return The corresponding assigment list.
 inline
 data_assignment_list make_assignment_list(data_variable_list lhs, data_expression_list rhs)
 {
@@ -127,6 +142,8 @@ data_assignment_list make_assignment_list(data_variable_list lhs, data_expressio
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the right hand sides of the assignments
+/// \param l An assignment list.
+/// \return The right hand sides of the assignments.
 inline
 data_expression_list data_assignment_expressions(data_assignment_list l)
 {
@@ -140,13 +157,13 @@ data_expression_list data_assignment_expressions(data_assignment_list l)
 
 ///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
-/// \brief Utility class for applying a sequence of data assignments
-/// Can be used in the replace algorithms of the atermpp library.
-//
+/// \brief Sequence of data assignments.
+///
 // A linear search is done in the list of assignments.
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
 struct assignment_list_substitution
 {
+  /// An assignment list.
   const data_assignment_list& m_assignments;
 
   /// \cond INTERNAL_DOCS
@@ -193,12 +210,15 @@ struct assignment_list_substitution
   
   /// Constructor.
   ///
+  /// \param assignments An assignment list.
   assignment_list_substitution(const data_assignment_list& assignments)
     : m_assignments(assignments)
   {}
   
   /// Applies the assignments to the term t and returns the result.
   ///
+  /// \param t A term.
+  /// \return The application of the assignments to the term.
   atermpp::aterm operator()(atermpp::aterm t) const
   {
     return partial_replace(t, assignment_list_substitution_helper(m_assignments));

@@ -60,34 +60,6 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   return atermpp::reverse(result);
 }
 
-/// Creates an identifier built from name and index.
-struct default_identifier_creator
-{
-  std::string operator()(const std::string& name, int index) const
-  {
-    if (index <= 0)
-      return name;
-    return str(boost::format(name + "%02d") % index++);
-  }
-};
-
-/// Creates an identifier built from name and index.
-struct postfix_identifier_creator
-{
-  std::string postfix_;
-  
-  postfix_identifier_creator(const std::string& postfix)
-    : postfix_(postfix)
-  { }   
-  
-  std::string operator()(const std::string& name, int index) const
-  {
-    if (index <= 0)
-      return name + postfix_;
-    return str(boost::format(name + "%02d" + postfix_) % index++);
-  }
-};
-
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename IdentifierCreator>
 core::identifier_string fresh_identifier(const std::set<core::identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
@@ -109,6 +81,21 @@ core::identifier_string fresh_identifier(Term context, const std::string& hint, 
   return fresh_identifier(find_identifiers(context), hint, id_creator);
 }
 
+/// Creates an identifier built from name and index.
+struct default_identifier_creator
+{
+  /// Constructor.
+  /// \param name A name.
+  /// \param index A positive number.
+  /// \return An identifier.
+  std::string operator()(const std::string& name, int index) const
+  {
+    if (index <= 0)
+      return name;
+    return str(boost::format(name + "%02d") % index++);
+  }
+};
+
 /// \brief Returns an identifier that doesn't appear in the term context
 template <typename Term>
 core::identifier_string fresh_identifier(const Term& context, const std::string& hint)
@@ -124,14 +111,18 @@ data_variable fresh_variable(Term context, sort_expression s, std::string hint)
   return data_variable(id, s);
 }
 
-/// Fresh variable generator that generates data variables with
-/// names that do not appear in the given context.
+/// \brief Variable generator that generates data variables with names that do not appear in a given context.
 class fresh_variable_generator
 {
   protected:
+    /// The identifiers of the context.
     atermpp::set<core::identifier_string> m_identifiers;
-    sort_expression m_sort;                    // used for operator()()
-    std::string m_hint;                  // used as a hint for operator()()
+    
+    /// A sort for the generated variables.
+    sort_expression m_sort;
+    
+    /// A hint for the name of generated variables.
+    std::string m_hint;
 
   public:
     /// Constructor.
@@ -142,6 +133,9 @@ class fresh_variable_generator
 
     /// Constructor.
     ///
+    /// \param context The context.
+    /// \param s The sort of the generated variables.
+    /// \param hint A hint for the name of generated variables.
     template <typename Term>
     fresh_variable_generator(Term context, sort_expression s = sort_expr::real(), std::string hint = "t")
     {
@@ -152,6 +146,7 @@ class fresh_variable_generator
 
     /// Set a new hint.
     ///
+    /// \param hint A hint for the name of generated variables.
     void set_hint(std::string hint)
     {
       m_hint = hint;
@@ -159,6 +154,7 @@ class fresh_variable_generator
 
     /// Returns the current hint.
     ///
+    /// \return The current hint.
     std::string hint() const
     {
       return m_hint;
@@ -166,6 +162,7 @@ class fresh_variable_generator
 
     /// Set a new context.
     ///
+    /// \param context A context.
     template <typename Term>
     void set_context(Term context)
     {
@@ -174,6 +171,7 @@ class fresh_variable_generator
 
     /// Set a new sort.
     ///
+    /// \param s A sort.
     void set_sort(sort_expression s)
     {
       m_sort = s;
@@ -181,6 +179,7 @@ class fresh_variable_generator
 
     /// Returns the current sort.
     ///
+    /// \return The current sort.
     sort_expression sort() const
     {
       return m_sort;
@@ -188,6 +187,7 @@ class fresh_variable_generator
 
     /// Add term t to the context.
     ///
+    /// \param t A term.
     template <typename Term>
     void add_to_context(Term t)
     {
@@ -198,6 +198,7 @@ class fresh_variable_generator
     /// Returns a unique variable of the given sort, with the given hint as prefix.
     /// The returned variable is added to the context.
     ///
+    /// \return A fresh variable that does not appear in the current context.
     data_variable operator()()
     {
       core::identifier_string id(m_hint);
@@ -214,6 +215,9 @@ class fresh_variable_generator
     /// Returns a unique variable with the same sort as the variable v, and with
     /// the same prefix. The returned variable is added to the context.
     ///
+    /// \param v A data variable.
+    /// \return A fresh variable with the same sort as the given variable, and with the name of
+    /// the variable as prefix.
     data_variable operator()(data_variable v)
     {
       std::string hint = v.name();

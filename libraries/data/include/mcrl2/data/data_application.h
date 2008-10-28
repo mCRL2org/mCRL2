@@ -37,6 +37,7 @@ class data_application: public data_expression
 
     /// Constructor.
     ///
+    /// \param t A term.
     data_application(atermpp::aterm_appl t)
      : data_expression(t)
     {
@@ -45,24 +46,29 @@ class data_application: public data_expression
 
     /// Constructor.
     ///
+    /// \param expr A data expression.
+    /// \param args A sequence of data expressions.
     data_application(data_expression expr, data_expression_list args)
      : data_expression(core::detail::gsMakeDataAppl(expr, args))
     {}
 
     /// Returns the head of the data application.
     ///
+    /// \return The head of the data application.
     data_expression head() const
     {
       return core::detail::gsGetDataExprHead(*this);
     }
 
-    /// Returns the arguments of the data expression.
+    /// Returns the arguments of the data application.
     ///
+    /// \return The arguments of the data application.
     data_expression_list arguments() const
     {
       return core::detail::gsGetDataExprArgs(*this);
     }
 
+    /// \return The sort of the data application.
     sort_expression sort() const
     {
       sort_expression s = this->head().sort();
@@ -77,6 +83,8 @@ class data_application: public data_expression
 typedef atermpp::term_list<data_application> data_application_list;
 
 /// \brief Returns true if the term t is a data application
+/// \param t A term.
+/// \return True if the term is a data application.
 inline
 bool is_data_application(atermpp::aterm_appl t)
 {

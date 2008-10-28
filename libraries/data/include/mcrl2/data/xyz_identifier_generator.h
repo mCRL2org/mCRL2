@@ -18,20 +18,16 @@ namespace mcrl2 {
 
 namespace data {
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. The context is stored
-/// in a multiset. If an identifier occurs multiple times,
-/// multiple calls to remove_from_context are required to
-/// remove it.
+/// \brief Identifier generator that generates names from the range X, Y, Z, X0, Y0, Z0, X1, ...
 ///
-/// Using the operator()() and operator()(std::string) fresh
-/// identifiers can be generated that do not appear in the
-/// context.
 class xyz_identifier_generator: public multiset_identifier_generator
 {
   protected:
-    int m_index; // index of last generated identifier
-    char m_char; // character of last generated identifier
+    /// The index of the last generated identifier.
+    int m_index;
+    
+    /// The character of the last generated identifier.
+    char m_char; 
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
     ///
@@ -64,6 +60,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
 
     /// Constructor.
     ///
+    /// \param t A context.
     template <typename Term>
     xyz_identifier_generator(Term t)
      : m_index(-2), m_char('Z')
@@ -75,6 +72,8 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
     ///
+    /// \param hint A hint for the name of generated identifiers.
+    /// \return A fresh identifier.
     core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string result(hint);

@@ -32,7 +32,7 @@ class sort_expression;
 ///
 typedef atermpp::term_list<sort_expression> sort_expression_list;
 
-/// \brief sort expression.
+/// \brief Sort expression.
 ///
 /// A sort expression can either be a sort identifier or a sort arrow.
 /// 
@@ -56,6 +56,7 @@ class sort_expression: public atermpp::aterm_appl
 
     /// Constructor.
     ///
+    /// \param t A term containing a sort.
     sort_expression(ATermAppl t)
       : atermpp::aterm_appl(t)
     {
@@ -64,6 +65,7 @@ class sort_expression: public atermpp::aterm_appl
 
     /// Constructor.
     ///
+    /// \param t A term containing a sort.
     sort_expression(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -72,12 +74,14 @@ class sort_expression: public atermpp::aterm_appl
 
     /// Constructor.
     ///
+    /// \param s A string representation of a sort arrow.
     sort_expression(std::string s)
       : atermpp::aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
     
     /// Returns true if it is a sort_expression of type A -> B.
     ///
+    /// \return True if the sort is an arrow sort.
     bool is_arrow() const
     {
       return core::detail::gsIsSortArrow(*this);
@@ -85,6 +89,8 @@ class sort_expression: public atermpp::aterm_appl
 };
 
 /// \brief Returns true if the term t is a sort_expression
+/// \param t A term.
+/// \return True if the term is a sort expression.
 inline
 bool is_sort_expression(atermpp::aterm_appl t)
 {
@@ -92,6 +98,9 @@ bool is_sort_expression(atermpp::aterm_appl t)
 }
 
 /// Returns the sort_expression 'domain -> range'.
+/// \param domain A domain sort.
+/// \param range A range sort.
+/// \return The arrow sort corresponding to the given domain and range.
 inline
 sort_expression arrow(sort_expression_list domain, sort_expression range)
 {
@@ -100,6 +109,8 @@ sort_expression arrow(sort_expression_list domain, sort_expression range)
 
 /// Returns the domain sorts of s.
 /// \deprecated
+/// \param s A sort.
+/// \return The domain sorts of the given sort.
 inline
 sort_expression_list domain_sorts(sort_expression s)
 {
@@ -108,6 +119,8 @@ sort_expression_list domain_sorts(sort_expression s)
 
 /// Returns the range sort of s.
 /// \deprecated
+/// \param s A sort.
+/// \return The range sort of the given sort.
 inline
 sort_expression result_sort(sort_expression s)
 {
@@ -120,6 +133,8 @@ sort_expression result_sort(sort_expression s)
 /// <li>source(A->B) = [A]</li>
 /// </ul>
 /// \deprecated
+/// \param s A sort.
+/// \return The source of the sort.
 inline
 sort_expression_list source(sort_expression s)
 {
@@ -135,6 +150,8 @@ sort_expression_list source(sort_expression s)
 /// <li>target(A->B) = B</li>
 /// </ul>
 /// \deprecated
+/// \param s A sort.
+/// \return The target of the sort.
 inline
 sort_expression target(sort_expression s)
 {
@@ -148,6 +165,7 @@ sort_expression target(sort_expression s)
 namespace sort_expr {
 
   /// Returns the predefined sort_expression real.
+  /// \return The predefined sort Real.
   inline
   sort_expression real()
   {
@@ -155,6 +173,7 @@ namespace sort_expr {
   }
   
   /// Returns the predefined sort_expression int.
+  /// \return The predefined sort Int.
   inline
   sort_expression int_()
   {
@@ -162,6 +181,7 @@ namespace sort_expr {
   }
   
   /// Returns the predefined sort_expression pos.
+  /// \return The predefined sort Pos.
   inline
   sort_expression pos()
   {
@@ -169,6 +189,7 @@ namespace sort_expr {
   }
   
   /// Returns the predefined sort_expression nat.
+  /// \return The predefined sort Nat.
   inline
   sort_expression nat()
   {
@@ -176,6 +197,7 @@ namespace sort_expr {
   }
   
   /// Returns the predefined sort_expression bool.
+  /// \return The predefined sort Bool.
   inline
   sort_expression bool_()
   {

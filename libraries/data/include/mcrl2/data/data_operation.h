@@ -24,7 +24,7 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \brief An operation on data.
+/// \brief Operation on data.
 ///
 class data_operation: public data_expression
 {
@@ -37,6 +37,7 @@ class data_operation: public data_expression
 
     /// Constructor.
     ///             
+    /// \param t A term.
     data_operation(atermpp::aterm_appl t)
      : data_expression(t)
     {
@@ -45,12 +46,15 @@ class data_operation: public data_expression
 
     /// Constructor.
     ///             
+    /// \param name A name.
+    /// \param s A sort expression.
     data_operation(core::identifier_string name, sort_expression s)
      : data_expression(core::detail::gsMakeOpId(name, s))
     {}
 
     /// Returns the name of the data_operation.
     ///
+    /// \return The name of the data operation.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
@@ -58,6 +62,7 @@ class data_operation: public data_expression
     
     /// Returns the sort of the data_operation.
     ///
+    /// \return The sort of the data operation.
     sort_expression sort() const
     {
       return atermpp::arg2(*this);
@@ -65,6 +70,8 @@ class data_operation: public data_expression
 
     /// Apply the data_operation to a list of arguments.
     ///
+    /// \param args A sequence of arguments.
+    /// \return The application of the operation to the arguments.
     data_expression operator()(data_expression_list args) const
     {
       if (args.empty())
@@ -83,6 +90,8 @@ class data_operation: public data_expression
 typedef atermpp::term_list<data_operation> data_operation_list;
 
 /// \brief Returns true if the term t is a data operation
+/// \param t A term.
+/// \return True if the term is a data operation.
 inline
 bool is_data_operation(atermpp::aterm_appl t)
 {

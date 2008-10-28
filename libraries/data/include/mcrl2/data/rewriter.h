@@ -26,7 +26,7 @@ namespace mcrl2 {
 
 namespace data {
 
-  /// Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
+  /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
   /// and data_expression_with_variables.
   template <typename Term>
   class basic_rewriter
@@ -34,12 +34,17 @@ namespace data {
     friend class enumerator;
 
     protected:
+      /// The wrapped Rewriter.
       boost::shared_ptr<Rewriter> m_rewriter;
 
     public:
+      /// The variable type of the rewriter.
       typedef typename core::term_traits<Term>::variable_type variable_type;
+
+      /// The term type of the rewriter.
       typedef Term term_type;
 
+      /// The strategy of the rewriter.
       enum strategy
       {
         innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
@@ -54,6 +59,8 @@ namespace data {
 
       /// Constructor.
       ///
+      /// \param d A data specification.
+      /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
@@ -70,7 +77,9 @@ namespace data {
 
 		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
 		  /// to data variables.
-		  /// \return The normal form of d.
+		  /// \param d A term.
+		  /// \param sigma A substitution function.
+		  /// \return The normal form of the term.
 		  ///
 		  template <typename SubstitutionFunction>
 		  term_type operator()(const term_type& d, SubstitutionFunction sigma) const
@@ -95,7 +104,8 @@ namespace data {
         m_rewriter.get()->removeRewriteRule(eq);
       }
 
-      /// Returns a pointer to the Rewriter class that is used for the implementation.
+      /// Returns a pointer to the Rewriter object that is used for the implementation.
+      /// \return A pointer to the wrapped Rewriter object.
       /// \deprecated
       Rewriter* get_rewriter()
       {
@@ -103,8 +113,10 @@ namespace data {
       }
   };
 
+  /// Rewriter that operates on data expressions.
   typedef basic_rewriter<data_expression> rewriter;
 
+  /// Rewriter that operates on data expressions with variables.
   typedef basic_rewriter<data_expression_with_variables> rewriter_with_variables;
 
   /// Function object that turns a map of substitutions to variables into a substitution function.
@@ -112,7 +124,10 @@ namespace data {
   class rewriter_map: public SubstitutionMap
   {
     public:
+      /// The mapped type.
       typedef typename SubstitutionMap::mapped_type term_type;
+        
+      /// The key type.
       typedef typename SubstitutionMap::key_type variable_type;
 
       /// Constructor.
@@ -122,12 +137,15 @@ namespace data {
 
       /// Constructor.
       ///
+      /// \param m A rewriter map.
       rewriter_map(const rewriter_map<SubstitutionMap>& m)
         : SubstitutionMap(m)
       {}
 
       /// Constructor.
       ///
+      /// \param start The start of a range of substitutions.
+      /// \param end The end of a range of substitutions.     
       template <typename Iter>
       rewriter_map(Iter start, Iter end)
         : SubstitutionMap(start, end)
@@ -135,6 +153,8 @@ namespace data {
 
       /// Function application.
       ///
+      /// \param v A variable.
+      /// \return The corresponding value.
       term_type operator()(const variable_type& v) const
       {
         typename SubstitutionMap::const_iterator i = this->find(v);

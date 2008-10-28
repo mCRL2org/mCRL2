@@ -46,6 +46,7 @@ class sort_arrow: public sort_expression
 
     /// Constructor.
     ///
+    /// \param t A term containing a sort.
     sort_arrow(ATermAppl t)
       : sort_expression(t)
     {
@@ -54,6 +55,7 @@ class sort_arrow: public sort_expression
 
     /// Constructor.
     ///
+    /// \param t A term containing a sort.
     sort_arrow(atermpp::aterm_appl t)
       : sort_expression(t)
     {
@@ -62,6 +64,8 @@ class sort_arrow: public sort_expression
    
     /// Constructor.
     ///
+    /// \param arguments A sequence of arguments.
+    /// \param result A target sort.
     sort_arrow(sort_expression_list arguments, sort_expression result)
       : sort_expression(core::detail::gsMakeSortArrow(arguments, result))
     {
@@ -70,6 +74,7 @@ class sort_arrow: public sort_expression
    
     /// \overload
     ///
+    /// \return Always returns true.
     bool is_arrow() const
     {
       return true;
@@ -77,6 +82,7 @@ class sort_arrow: public sort_expression
 
     /// Returns the argument sorts.
     ///
+    /// \return The arguments of the sort arrow.
     sort_expression_list argument_sorts() const
     {
       return atermpp::list_arg1(*this);
@@ -84,6 +90,7 @@ class sort_arrow: public sort_expression
 
     /// Returns the result sort.
     ///
+    /// \return The target sort of the sort arrow.
     sort_expression result_sort() const
     {
       return atermpp::arg2(*this);
@@ -91,6 +98,8 @@ class sort_arrow: public sort_expression
 };
 
 /// \brief Returns true if the term t is a sort arrow.
+/// \param t A term.
+/// \return True if the term is a sort arrow.
 inline
 bool is_sort_arrow(atermpp::aterm_appl t)
 {

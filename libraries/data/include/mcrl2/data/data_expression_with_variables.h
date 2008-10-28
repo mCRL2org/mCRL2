@@ -20,12 +20,13 @@ namespace mcrl2 {
 
 namespace data {
 
-  /// A data expression that stores a list of variables. The
-  /// intended use case is to store the free variables of the
-  /// expression.
+  /// \brief Data expression with a sequence of variables attached to it
+  ///
+  /// The intended use case is to store the free variables of the expression.
   class data_expression_with_variables: public data_expression
   {
     protected:
+      /// The attached variables.
       data_variable_list m_variables;
       
     public:
@@ -36,6 +37,7 @@ namespace data {
   
       /// Constructor.
       ///             
+      /// \param term A term.
       data_expression_with_variables(atermpp::aterm_appl term)
         : data_expression(term)
       {
@@ -45,6 +47,7 @@ namespace data {
   
       /// Constructor.
       ///             
+      /// \param term A term.
       data_expression_with_variables(ATermAppl term)
         : data_expression(term)
       {
@@ -54,12 +57,15 @@ namespace data {
 
       /// Constructor.
       ///             
+      /// \param expression A data expression.
+      /// \param variables A sequence of variables.
       data_expression_with_variables(data_expression expression, data_variable_list variables)
         : data_expression(expression), m_variables(variables)
       {}
       
       /// Return the variables.
       ///
+      /// \return The variables of the data expression.
       data_variable_list variables() const
       {
         return m_variables;
@@ -67,12 +73,14 @@ namespace data {
       
       /// Return the variables.
       ///
+      /// \return The variables of the data expression.
       data_variable_list& variables()
       {
         return m_variables;
       }
       
-      /// Returns true if the list of variables is empty.
+      /// Returns true if the sequence of variables is empty.
+      /// \return True if the sequence of variables is empty.
       bool is_constant() const
       {
         return m_variables.empty();

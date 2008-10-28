@@ -29,7 +29,6 @@ namespace mcrl2 {
 namespace data {
 
 /// \cond INTERNAL_DOCS
-
 namespace detail {
 
   struct has_result_sort
@@ -49,8 +48,7 @@ namespace detail {
 
 /// \endcond
 
-/// \brief A data specification is merely a struct containing
-/// sequences of sorts, constructors, mappings and equations.
+/// \brief Container of sorts, constructors, mappings and equations.
 ///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
@@ -58,14 +56,21 @@ class data_specification: public atermpp::aterm_appl
 {
 
   protected:
+    /// The sorts of the data specification.
     sort_expression_list m_sorts;
+
+    /// The constructors of the data specification.
     data_operation_list  m_constructors;
+
+    /// The operations of the data specification.
     data_operation_list  m_mappings;
+
+    /// The equations of the data specification.
     data_equation_list   m_equations;
 
-    // The following map contains for each sort a default term of that particular
-    // sort. Each default term remains valid, as long as no constructors or mappings
-    // are removed from the specification.
+    /// The following map contains for each sort a default term of that particular
+    /// sort. Each default term remains valid, as long as no constructors or mappings
+    /// are removed from the specification.
     atermpp::map < sort_expression, data_expression > default_expression_map;
 
     /// Caches if a sort is finite or not.
@@ -89,6 +94,7 @@ class data_specification: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param t A term.
     data_specification(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -102,6 +108,10 @@ class data_specification: public atermpp::aterm_appl
 
     /// Constructor.
     ///             
+    /// \param sorts The sorts of the data specification.
+    /// \param constructors The constructors of the data specification.
+    /// \param mappings The mappings of the data specification.
+    /// \param equations The equations of the data specification.
     data_specification(sort_expression_list sorts, data_operation_list constructors, data_operation_list mappings, data_equation_list equations)
       : atermpp::aterm_appl(core::detail::gsMakeDataSpec(
                       core::detail::gsMakeSortSpec(sorts),
@@ -118,6 +128,7 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns the sorts of the data specification.
     ///
+    /// \return The sorts of the data specification.
     sort_expression_list sorts() const
     {
       return m_sorts;
@@ -125,12 +136,15 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns the constructors of the data specification.
     ///
+    /// \return The constructors of the data specification.
     data_operation_list constructors() const
     {
       return m_constructors;
     }
 
     /// Returns the constructors of the data specification that have s as their target.
+    /// \param s A sort expression.
+    /// \return The constructors of the data specification that have s as their target.
     data_operation_list constructors(sort_expression s) const
     {
       atermpp::vector<data_operation> result;
@@ -145,6 +159,7 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns the mappings of the data specification.
     ///
+    /// \return The mappings of the data specification.
     data_operation_list mappings() const
     {
       return m_mappings;
@@ -152,6 +167,8 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns the mappings of the data specification that have s as their target.
     ///
+    /// \param s A sort expression.
+    /// \return The mappings of the data specification that have s as their target.
     data_operation_list mappings(sort_expression s) const
     {
       atermpp::vector<data_operation> result;
@@ -165,6 +182,7 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns the equations of the data specification.
     ///
+    /// \return The equations of the data specification.
     data_equation_list equations() const
     {
       return m_equations;
@@ -184,6 +202,9 @@ class data_specification: public atermpp::aterm_appl
     /// So, generating a term with nesting depth 10, and subsequentely with nesting depth
     /// 1 can still yield a term of nesting depth larger than 1, because the earlier
     /// generated term is returned.
+    /// \param s A sort expression.
+    /// \param max_recursion_depth A positive number.
+    /// \return A constant data expression of the given sort.
     data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3) 
     // data_expression default_expression(sort_expression s) const
     {
@@ -272,6 +293,8 @@ class data_specification: public atermpp::aterm_appl
 
     /// Returns true if the sort s has a finite number of values.
     /// For efficiency, the results of this function are cached.
+    /// \param s A sort expression.
+    /// \return True if the sort is finite.
     bool is_finite(sort_expression s)
     {
       std::map<sort_expression, bool>::const_iterator i = m_finite_sorts.find(s);
@@ -290,6 +313,7 @@ class data_specification: public atermpp::aterm_appl
     /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
     /// </ul>
     ///
+    /// \return True if the data specification is well typed.
     bool is_well_typed() const
     {
       std::set<sort_expression> sorts = detail::make_set(m_sorts);
@@ -313,6 +337,9 @@ class data_specification: public atermpp::aterm_appl
 };
 
 /// \brief Sets the sequence of sorts
+/// \param s A data specification.
+/// \param sorts A sequence of sorts.
+/// \return The updated data specification.
 inline
 data_specification set_sorts(data_specification s, sort_expression_list sorts)
 {
@@ -324,6 +351,9 @@ data_specification set_sorts(data_specification s, sort_expression_list sorts)
 }
 
 /// \brief Sets the sequence of constructors
+/// \param s A data specification.
+/// \param constructors A sequence of constructors.
+/// \return The updated data specification.
 inline
 data_specification set_constructors(data_specification s, data_operation_list constructors)
 {
@@ -335,6 +365,9 @@ data_specification set_constructors(data_specification s, data_operation_list co
 }
 
 /// \brief Sets the sequence of mappings
+/// \param s A data specification.
+/// \param mappings A sequence of mappings.
+/// \return The updated data specification.
 inline
 data_specification set_mappings(data_specification s, data_operation_list mappings)
 {
@@ -346,6 +379,9 @@ data_specification set_mappings(data_specification s, data_operation_list mappin
 }
 
 /// \brief Sets the sequence of data equations
+/// \param s A data specification.
+/// \param equations A sequence of equations.
+/// \return The updated data specification.
 inline
 data_specification set_equations(data_specification s, data_equation_list equations)
 {
