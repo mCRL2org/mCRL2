@@ -41,6 +41,11 @@ transition::~transition( void )
 {
 }
 
+void transition::set_label( const label& p_label )
+{
+  m_label = p_label;
+}
+
 label * transition::get_label( void )
 {
   return &m_label;

@@ -54,9 +54,14 @@ void process_reference::set_relationship_refers_to( process_diagram* p_proc_diag
   m_refers_to_process = p_proc_diagram;
 }
 
-list_of_varupdate* process_reference::get_varupdate( void )
+list_of_varupdate process_reference::get_parameter_updates( void ) const
 {
-  return &m_parameter_assignments;
+  return m_parameter_assignments;
+}
+
+void process_reference::set_parameter_updates( const list_of_varupdate& p_parameter_assignments )
+{
+  m_parameter_assignments = p_parameter_assignments;
 }
 
 bool process_reference::set_text( const wxString &p_text )
@@ -79,7 +84,13 @@ bool process_reference::set_text( const wxString &p_text )
 
 wxString process_reference::get_text() const
 {
-  return m_text;
+  wxString result;
+  for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  {
+    varupdate parameter_assignment = m_parameter_assignments.Item( i );
+    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";\n" );
+  }
+  return result;
 }
 
 // WxWidgets dynamic array implementation.

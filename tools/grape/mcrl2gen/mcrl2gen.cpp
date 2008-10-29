@@ -410,14 +410,14 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
     return;
   }
 //TODO  wxString variables = trans_label.get_declarations().get_expression();
-  wxString condition = trans_label.get_condition().get_expression();
+  wxString condition = trans_label.get_condition();
 //TODO  wxString actions = trans_label.get_actions().get_expression();
 /*TODO  if(actions == wxEmptyString)
   {
     // an empty multiaction is translated as a tau
     actions = _T("tau");
   }
-*/  wxString timestamp = trans_label.get_timestamp().get_expression();
+*/  wxString timestamp = trans_label.get_timestamp();
   list_of_varupdate updates = trans_label.get_variable_updates();
 
   p_declaration += _T("\n");
@@ -479,9 +479,9 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
       // check for updates
       for(unsigned int j=0; j<updates.GetCount(); ++j)
       {
-        if(updates[j].get_lhs()->get_var() == p_preamble_parameter_decls[i].get_name())
+        if(updates[j].get_lhs() == p_preamble_parameter_decls[i].get_name())
         {
-          variable_update = _T(", ") + updates[j].get_rhs()->get_expression();
+          variable_update = _T(", ") + updates[j].get_rhs();
           break;
         }
       }
@@ -493,9 +493,9 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
       // check for updates
       for(unsigned int j=0; j<updates.GetCount(); ++j)
       {
-        if(updates[j].get_lhs()->get_var() == p_preamble_local_var_decls[i].get_name())
+        if(updates[j].get_lhs() == p_preamble_local_var_decls[i].get_name())
         {
-          variable_update = _T(", ") + updates[j].get_rhs()->get_expression();
+          variable_update = _T(", ") + updates[j].get_rhs();
           break;
         }
       }

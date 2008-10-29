@@ -67,6 +67,8 @@ namespace grape
          */
         virtual ~transition( void );
 
+        void set_label( const label& p_label );
+
         /**
          * Label retrieval function.
          * @return Returns a pointer to the label.

@@ -71,7 +71,9 @@ namespace grape
          * Parameterassignments retrieval function.
          * @return Returns the list of parameterassignments in the form of variable updates.
          */
-        list_of_varupdate* get_varupdate( void );
+        list_of_varupdate get_parameter_updates( void ) const;
+
+        void set_parameter_updates( const list_of_varupdate& p_parameter_assignments );
 
         /**
          * Sets the variable updates with a string. Will process the text;

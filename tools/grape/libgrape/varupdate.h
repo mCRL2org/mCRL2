@@ -29,9 +29,9 @@ namespace grape
     class varupdate
     {
       protected:
-        wxString m_varupdate;              /**< full string declaration of variable update. */
-        dataexpression *m_dataexpression;   /**< data expression declaration of variable update. */
-        var *m_var;                         /**< variable declaration of variable update. */
+        wxString         m_varupdate;        /**< full string declaration of variable update. */
+        dataexpression   m_dataexpression;   /**< data expression declaration of variable update. */
+        var              m_var;              /**< variable declaration of variable update. */
       public:
         /**
          * Default constructor.
@@ -68,13 +68,17 @@ namespace grape
          * Left hand side retrieval function.
          * @return The variable of the variable update.
          */
-        var * get_lhs( void );
+        wxString get_lhs( void ) const;
+
+        void set_lhs( const wxString& p_var );
 
         /**
          * Right hand side retrieval function.
          * @return The data expression of the variable update.
          */
-        dataexpression * get_rhs( void );
+        wxString get_rhs( void ) const;
+
+        void set_rhs( const wxString& p_update );
     };
 
     /**

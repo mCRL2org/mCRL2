@@ -80,10 +80,10 @@ grape_event_remove_process_reference::grape_event_remove_process_reference( grap
   m_proc_ref = p_proc_ref->get_id();
   m_name = p_proc_ref->get_name();
   m_parameter_assignments.Empty();
-  list_of_varupdate* param = p_proc_ref->get_varupdate();
-  for ( uint i = 0; i < param->GetCount(); ++i )
+  list_of_varupdate param = p_proc_ref->get_parameter_updates();
+  for ( uint i = 0; i < param.GetCount(); ++i )
   {
-    varupdate existing_var = param->Item( i );
+    varupdate existing_var = param.Item( i );
     varupdate* new_var = new varupdate( existing_var );
     m_parameter_assignments.Add( new_var );
   }
@@ -151,12 +151,12 @@ bool grape_event_remove_process_reference::Undo( void )
   new_proc_ref->set_diagram( dia_ptr );
 
   // Restore parameter assignments
-  list_of_varupdate* param = new_proc_ref->get_varupdate();
+  list_of_varupdate param = new_proc_ref->get_parameter_updates();
   for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
   {
     varupdate existing_var = m_parameter_assignments.Item( i );
     varupdate* new_var = new varupdate( existing_var );
-    param->Add( new_var );
+    param.Add( new_var );
   }
 
   // Restore comment connections.

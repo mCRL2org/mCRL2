@@ -17,8 +17,6 @@ using namespace grape::libgrape;
 varupdate::varupdate( void )
 {
   m_varupdate = wxEmptyString;
-  m_dataexpression = 0;
-  m_var = 0;
 }
 
 varupdate::varupdate( const varupdate &p_varupdate )
@@ -42,36 +40,24 @@ void varupdate::set_varupdate( const wxString &p_varupdate )
   m_varupdate = p_varupdate;
 }
 
-var * varupdate::get_lhs( void )
+wxString varupdate::get_lhs( void ) const
 {
-  m_var = new var;
-
-  if(m_varupdate.Find(_T(":")) != wxNOT_FOUND)
-  {
-    int pos = m_varupdate.Find(_T(":"));
-    wxString variable = m_varupdate.Mid(0, pos);
-    variable.Trim(true);
-    variable.Trim(false);
-    m_var->set_var(variable);
-  }
-
-  return m_var;
+  return m_var.get_var();
 }
 
-dataexpression * varupdate::get_rhs( void )
+void varupdate::set_lhs( const wxString& p_var )
 {
-  m_dataexpression = new dataexpression;
+  m_var.set_var( p_var );
+}
 
-  if(m_varupdate.Find(_T("=")) != wxNOT_FOUND)
-  {
-    int pos = m_varupdate.Find(_T("="));
-    wxString upd = m_varupdate.Mid(pos+1);
-    upd.Trim(true);
-    upd.Trim(false);
-    m_dataexpression->set_expression(upd);
-  }
+wxString varupdate::get_rhs( void ) const
+{
+  return m_dataexpression.get_expression();
+}
 
-  return m_dataexpression;
+void varupdate::set_rhs( const wxString& p_update )
+{
+  m_dataexpression.set_expression( p_update );
 }
 
 // WxWidgets dynamic array implementation.

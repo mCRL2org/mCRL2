@@ -156,10 +156,9 @@ namespace grape
          * @param p_id The id of the nonterminating transition.
          * @param p_beginstate The state in which the nonterminating transition begins.
          * @param p_endstate The state in which the nonterminating transition ends.
-         * @param p_label The label of this nonterminating transition.
          * @return Returns a pointer to the newly created nonterminating trannsition
          */
-        nonterminating_transition* add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate, wxString p_label = wxEmptyString );
+        nonterminating_transition* add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate );
 
         /**
          * Nonterminating Transition removal function.
@@ -194,10 +193,9 @@ namespace grape
          * @param p_id The id of the terminating transition.
          * @param p_beginstate The state in which the terminating transition begins.
          * @param p_endcoordinate The state in which the terminating transition ends.
-         * @param p_label The label of this terminating transition.
          * @return Returns a pointer to the newly created terminating transition.
          */
-        terminating_transition* add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate, wxString p_label = wxEmptyString );
+        terminating_transition* add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate );
 
         /**
          * Terminating Transition removal function.

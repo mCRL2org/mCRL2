@@ -70,7 +70,7 @@ namespace grape
          * Label text retrieval function
          * @return the text of the label
          */
-        wxString get_text( void );
+        wxString get_text( void ) const;
 
         /**
          * Label text assignment function
@@ -95,7 +95,7 @@ namespace grape
          * Label timestamp retrieval function
          * @return the timestamp of the label
          */
-        dataexpression &get_timestamp( void );
+        wxString get_timestamp( void ) const;
 
         /**
          * Label variable updates retrieval function
@@ -107,7 +107,13 @@ namespace grape
          * Label donditions retrieval function
          * @return the conditions of the label
          */
-        dataexpression &get_condition( void );
+        wxString get_condition( void ) const;
+
+        void set_declarations( const list_of_decl &p_declarations );
+        void set_condition( const wxString &p_condition );
+        void set_actions( const list_of_action &p_actions );
+        void set_timestamp( const wxString &p_timestamp );
+        void set_variable_updates( const list_of_varupdate &p_variable_updates );
 
         /**
          * Label has a valid text.

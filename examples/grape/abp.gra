@@ -21,7 +21,18 @@
                         <id>63</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s4(x)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>x</param>
+                                    <name>s4</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>48</to>
                         <from>47</from>
                     </nonterminatingtransition>
@@ -37,7 +48,20 @@
                         <id>62</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s5(b)/b:=!b</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>b</param>
+                                    <name>s5</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>46</to>
                         <from>48</from>
                     </nonterminatingtransition>
@@ -53,7 +77,23 @@
                         <id>60</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>d:D.[b]r3(d,b)/x:=d</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>d</param>
+                                    <param>b</param>
+                                    <name>r3</name>
+                                </action>
+                            </actions>
+                            <condition>b</condition>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                            </variabledeclarations>
+                        </label>
                         <to>47</to>
                         <from>46</from>
                     </nonterminatingtransition>
@@ -69,7 +109,18 @@
                         <id>59</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s5(!b)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>!b</param>
+                                    <name>s5</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>46</to>
                         <from>49</from>
                     </nonterminatingtransition>
@@ -85,7 +136,23 @@
                         <id>58</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>d:D.[!b]r3(d,!b)/x:=d</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>d</param>
+                                    <param>!b</param>
+                                    <name>r3</name>
+                                </action>
+                            </actions>
+                            <condition>!b</condition>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                            </variabledeclarations>
+                        </label>
                         <to>49</to>
                         <from>46</from>
                     </nonterminatingtransition>
@@ -101,7 +168,18 @@
                         <id>57</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>r3(e)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>e</param>
+                                    <name>r3</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>49</to>
                         <from>46</from>
                     </nonterminatingtransition>
@@ -200,7 +278,18 @@
                         <id>83</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s6(x)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>x</param>
+                                    <name>s6</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>74</to>
                         <from>75</from>
                     </nonterminatingtransition>
@@ -216,7 +305,22 @@
                         <id>82</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>b:Bool.r5(b)/x:=b</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>x:=b</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>b</param>
+                                    <name>r5</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations>
+                                <variabledeclaration>b:Bool</variabledeclaration>
+                            </variabledeclarations>
+                        </label>
                         <to>76</to>
                         <from>74</from>
                     </nonterminatingtransition>
@@ -232,7 +336,18 @@
                         <id>81</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s6(e)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>e</param>
+                                    <name>s6</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>74</to>
                         <from>77</from>
                     </nonterminatingtransition>
@@ -248,7 +363,17 @@
                         <id>80</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>i</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>75</to>
                         <from>76</from>
                     </nonterminatingtransition>
@@ -264,7 +389,17 @@
                         <id>79</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>i</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>77</to>
                         <from>76</from>
                     </nonterminatingtransition>
@@ -361,7 +496,18 @@
                         <id>73</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s3(e)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>e</param>
+                                    <name>s3</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>64</to>
                         <from>66</from>
                     </nonterminatingtransition>
@@ -377,7 +523,17 @@
                         <id>72</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>i</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>65</to>
                         <from>67</from>
                     </nonterminatingtransition>
@@ -393,7 +549,17 @@
                         <id>71</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>i</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>66</to>
                         <from>67</from>
                     </nonterminatingtransition>
@@ -409,7 +575,19 @@
                         <id>70</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s3(x,y)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>x</param>
+                                    <param>y</param>
+                                    <name>s3</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>64</to>
                         <from>65</from>
                     </nonterminatingtransition>
@@ -425,7 +603,25 @@
                         <id>69</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>d:D,b:Bool.r2(d,b)/x:=d,y:=b</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                                <variableupdate>y:=b</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>d</param>
+                                    <param>b</param>
+                                    <name>r2</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                                <variabledeclaration>b:Bool</variabledeclaration>
+                            </variabledeclarations>
+                        </label>
                         <to>67</to>
                         <from>64</from>
                     </nonterminatingtransition>
@@ -523,7 +719,22 @@
                         <id>29</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>d:D.r1(d)/x:=d</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>d</param>
+                                    <name>r1</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                            </variabledeclarations>
+                        </label>
                         <to>26</to>
                         <from>25</from>
                     </nonterminatingtransition>
@@ -539,7 +750,19 @@
                         <id>30</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>s2(x,b)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>x</param>
+                                    <param>b</param>
+                                    <name>s2</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>27</to>
                         <from>26</from>
                     </nonterminatingtransition>
@@ -555,7 +778,18 @@
                         <id>31</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>r6(!b)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>!b</param>
+                                    <name>r6</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>26</to>
                         <from>27</from>
                     </nonterminatingtransition>
@@ -571,7 +805,18 @@
                         <id>32</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>r6(e)</label>
+                        <label>
+                            <variableupdates/>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>e</param>
+                                    <name>r6</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>26</to>
                         <from>27</from>
                     </nonterminatingtransition>
@@ -587,7 +832,20 @@
                         <id>33</id>
                         <breakpointlist/>
                         <linetype>straight</linetype>
-                        <label>r6(b)/b:=!b</label>
+                        <label>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
+                            <timestamp/>
+                            <actions>
+                                <action>
+                                    <param>b</param>
+                                    <name>r6</name>
+                                </action>
+                            </actions>
+                            <condition/>
+                            <variabledeclarations/>
+                        </label>
                         <to>25</to>
                         <from>27</from>
                     </nonterminatingtransition>
@@ -674,7 +932,7 @@
                             <x>1.826667</x>
                         </coord>
                         <id>5</id>
-                        <parameterassignmentlist></parameterassignmentlist>
+                        <parameterassignmentlist/>
                         <propertyof>2</propertyof>
                         <channellist>
                             <channel>34</channel>
@@ -693,7 +951,9 @@
                             <x>2.691667</x>
                         </coord>
                         <id>6</id>
-                        <parameterassignmentlist>b := true;</parameterassignmentlist>
+                        <parameterassignmentlist>
+                            <parameterassignment>b:=true</parameterassignment>
+                        </parameterassignmentlist>
                         <propertyof>4</propertyof>
                         <channellist>
                             <channel>12</channel>
@@ -712,7 +972,7 @@
                             <x>1.833333</x>
                         </coord>
                         <id>7</id>
-                        <parameterassignmentlist></parameterassignmentlist>
+                        <parameterassignmentlist/>
                         <propertyof>3</propertyof>
                         <channellist>
                             <channel>35</channel>
@@ -731,7 +991,9 @@
                             <x>0.880000</x>
                         </coord>
                         <id>8</id>
-                        <parameterassignmentlist>b := true;</parameterassignmentlist>
+                        <parameterassignmentlist>
+                            <parameterassignment>b:=true</parameterassignment>
+                        </parameterassignmentlist>
                         <propertyof>1</propertyof>
                         <channellist>
                             <channel>18</channel>

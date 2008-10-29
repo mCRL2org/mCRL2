@@ -551,7 +551,7 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
               float ntt_width = 0.1f;
               uint ntt_to_id = 0;
               uint ntt_from_id = 0;
-              wxString ntt_label = wxEmptyString;
+              label ntt_label;
 
               wxXmlNode* ntt_information = ntt_node->GetChildren();
               while ( ntt_information )
@@ -632,7 +632,141 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                 }
                 else if ( what_info == _T("label"))
                 {
-                  ntt_label = ntt_information->GetNodeContent();
+                  wxXmlNode* label_info = ntt_information->GetChildren();
+                  list_of_decl variable_decl_list;
+                  wxString condition;
+                  list_of_action action_list;
+                  wxString timestamp;
+                  list_of_varupdate variable_update_list;
+                  while( label_info )
+                  {
+                    if ( label_info->GetName() == _T( "variabledeclarations" ) )
+                    {
+                      wxXmlNode* variable_declarations = label_info->GetChildren();
+                      while ( variable_declarations )
+                      {
+                        if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
+                        {
+                          wxString variable_declaration = variable_declarations->GetNodeContent();
+                          wxStringTokenizer tkt( variable_declaration, _T(":") );
+                          if ( tkt.CountTokens() == 2 || !variable_declaration.IsEmpty() )
+                          {
+                            wxString variable_name = tkt.GetNextToken();
+                            variable_name.Trim(true);
+                            variable_name.Trim(false);
+                            wxStringTokenizer tks( variable_name );
+                            if (tks.CountTokens() != 1 || variable_name.IsEmpty() )
+                            {
+                              /* invalid */
+                            }
+                            wxString variable_type = tkt.GetNextToken();
+                            variable_type.Trim(true);
+                            variable_type.Trim(false);
+                            tks.SetString( variable_type );
+                            if (tks.CountTokens() != 1 || variable_type.IsEmpty() )
+                            {
+                              /* invalid */
+                            }
+                            decl variable_decl;
+                            variable_decl.set_name( variable_name );
+                            variable_decl.set_type( variable_type );
+                            variable_decl_list.Add( variable_decl );
+                          }
+                        }
+                        variable_declarations = variable_declarations->GetNext();
+                      }
+                    }
+                    else if ( label_info->GetName() == _T( "condition" ) )
+                    {
+                      condition = label_info->GetNodeContent();
+                    }
+                    else if ( label_info->GetName() == _T( "actions" ) )
+                    {
+                      wxXmlNode* actions_info = label_info->GetChildren();
+                      while ( actions_info )
+                      {
+                        action action;
+                        if ( actions_info->GetName() == _T( "action" ) )
+                        {
+                          wxXmlNode* action_info = actions_info->GetChildren();
+                          wxString action_name;
+                          list_of_dataexpression param_list;
+                          while ( action_info )
+                          {
+                            if ( action_info->GetName() == _T( "name" ) )
+                            {
+                              action_name = action_info->GetNodeContent();
+                            }
+                            else if ( action_info->GetName() == _T( "param" ) )
+                            {
+                              dataexpression action_param;
+                              action_param.set_expression( action_info->GetNodeContent() );
+                              param_list.Add( action_param );
+                            }
+                            else
+                            {
+                              /* invalid */
+                            }
+
+                            action_info = action_info->GetNext();
+                          }
+                          action.set_name( action_name );
+                          action.set_parameters( param_list );
+                        }
+                        else
+                        {
+                          /* invalid */
+                        }
+                        action_list.Add( action );
+
+                        actions_info = actions_info->GetNext();
+                      }
+                    }
+                    else if ( label_info->GetName() == _T( "timestamp" ) )
+                    {
+                      timestamp = label_info->GetNodeContent();
+                    }
+                    else if ( label_info->GetName() == _T( "variableupdates" ) )
+                    {
+                      wxXmlNode* variable_updates = label_info->GetChildren();
+                      varupdate variable_update;
+                      while ( variable_updates )
+                      {
+                        
+                        if ( variable_updates->GetName() == _T( "variableupdate" ) )
+                        {
+                          wxString variable_update_text = variable_updates->GetNodeContent();
+                          int pos = variable_update_text.Find( _T( ":=" ) );
+                          wxString variable_update_lhs = variable_update_text.Mid( 0, pos );
+                          wxString variable_update_rhs = variable_update_text.Mid( pos+2 );
+                          if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
+                          {
+                            /* invalid */
+                          }
+                          variable_update.set_lhs( variable_update_lhs );
+                          variable_update.set_rhs( variable_update_rhs );
+                        }
+                        else
+                        {
+                          /* invalid */
+                        }
+                        variable_update_list.Add( variable_update );
+
+                        variable_updates = variable_updates->GetNext();
+                      }
+                    }
+                    else
+                    {
+                      /* invalid */
+                    }
+
+                    label_info = label_info->GetNext();
+                  }
+                  ntt_label.set_declarations( variable_decl_list );
+                  ntt_label.set_condition( condition );
+                  ntt_label.set_actions( action_list );
+                  ntt_label.set_timestamp( timestamp );
+                  ntt_label.set_variable_updates( variable_update_list );
                 }
                 else
                 { /* invalid! */ }
@@ -647,11 +781,14 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
               compound_state* end_state_ptr = find_compound_state( p_proc_dia_ptr, ntt_to_id );
 
               // create the nonterminating transition
-              nonterminating_transition* ntt_ptr = p_proc_dia_ptr->add_nonterminating_transition( ntt_identifier, begin_state_ptr, end_state_ptr, ntt_label );
+              nonterminating_transition* ntt_ptr = p_proc_dia_ptr->add_nonterminating_transition( ntt_identifier, begin_state_ptr, end_state_ptr );
               // set the nonterminating transition width, height and coordinate
               ntt_ptr->set_width( ntt_width );
               ntt_ptr->set_height( ntt_height );
               ntt_ptr->set_coordinate( ntt_coordinate );
+
+              // set the nonterminating transition label
+              ntt_ptr->set_label( ntt_label );
 
               // retrieve the next nonterminating transition
               ntt_node = ntt_node->GetNext();
@@ -698,7 +835,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
               float tt_height = 0.1f;
               float tt_width = 0.1f;
               uint tt_from_id = 0;
-              wxString tt_label = wxEmptyString;
+              label tt_label;
 
               wxXmlNode* tt_information = tt_node->GetChildren();
               while ( tt_information )
@@ -772,7 +909,140 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                 }
                 else if ( what_info == _T("label"))
                 {
-                  tt_label = tt_information->GetNodeContent();
+                  wxXmlNode* label_info = tt_information->GetChildren();
+                  list_of_decl variable_decl_list;
+                  wxString condition;
+                  list_of_action action_list;
+                  wxString timestamp;
+                  list_of_varupdate variable_update_list;
+                  while( label_info )
+                  {
+                    if ( label_info->GetName() == _T( "variabledeclarations" ) )
+                    {
+                      wxXmlNode* variable_declarations = label_info->GetChildren();
+                      while ( variable_declarations )
+                      {
+                        if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
+                        {
+                          wxString variable_declaration = variable_declarations->GetNodeContent();
+                          wxStringTokenizer tkt( variable_declaration, _T(":") );
+                          if ( tkt.CountTokens() == 2 || !variable_declaration.IsEmpty() )
+                          {
+                            wxString variable_name = tkt.GetNextToken();
+                            variable_name.Trim(true);
+                            variable_name.Trim(false);
+                            wxStringTokenizer tks( variable_name );
+                            if (tks.CountTokens() != 1 || variable_name.IsEmpty() )
+                            {
+                              /* invalid */
+                            }
+                            wxString variable_type = tkt.GetNextToken();
+                            variable_type.Trim(true);
+                            variable_type.Trim(false);
+                            tks.SetString( variable_type );
+                            if (tks.CountTokens() != 1 || variable_type.IsEmpty() )
+                            {
+                              /* invalid */
+                            }
+                            decl variable_decl;
+                            variable_decl.set_name( variable_name );
+                            variable_decl.set_type( variable_type );
+                            variable_decl_list.Add( variable_decl );
+                          }
+                        }
+                        variable_declarations = variable_declarations->GetNext();
+                      }
+                    }
+                    else if ( label_info->GetName() == _T( "condition" ) )
+                    {
+                      condition = label_info->GetNodeContent();
+                    }
+                    else if ( label_info->GetName() == _T( "actions" ) )
+                    {
+                      wxXmlNode* actions_info = label_info->GetChildren();
+                      while ( actions_info )
+                      {
+                        action action;
+                        if ( actions_info->GetName() == _T( "action" ) )
+                        {
+                          wxXmlNode* action_info = actions_info->GetChildren();
+                          wxString action_name;
+                          list_of_dataexpression param_list;
+                          while ( action_info )
+                          {
+                            if ( action_info->GetName() == _T( "name" ) )
+                            {
+                              action_name = action_info->GetNodeContent();
+                            }
+                            else if ( action_info->GetName() == _T( "param" ) )
+                            {
+                              dataexpression action_param;
+                              action_param.set_expression( action_info->GetNodeContent() );
+                              param_list.Add( action_param );
+                            }
+                            else
+                            {
+                              /* invalid */
+                            }
+
+                            action_info = action_info->GetNext();
+                          }
+                          action.set_name( action_name );
+                          action.set_parameters( param_list );
+                        }
+                        else
+                        {
+                          /* invalid */
+                        }
+                        action_list.Add( action );
+
+                        actions_info = actions_info->GetNext();
+                      }
+                    }
+                    else if ( label_info->GetName() == _T( "timestamp" ) )
+                    {
+                      timestamp = label_info->GetNodeContent();
+                    }
+                    else if ( label_info->GetName() == _T( "variableupdates" ) )
+                    {
+                      wxXmlNode* variable_updates = label_info->GetChildren();
+                      varupdate variable_update;
+                      while ( variable_updates )
+                      {
+                        if ( variable_updates->GetName() == _T( "variableupdate" ) )
+                        {
+                          wxString variable_update_text = variable_updates->GetNodeContent();
+                          int pos = variable_update_text.Find( _T( ":=" ) );
+                          wxString variable_update_lhs = variable_update_text.Mid( 0, pos );
+                          wxString variable_update_rhs = variable_update_text.Mid( pos+2 );
+                          if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
+                          {
+                            /* invalid */
+                          }
+                          variable_update.set_lhs( variable_update_lhs );
+                          variable_update.set_rhs( variable_update_rhs );
+                        }
+                        else
+                        {
+                          /* invalid */
+                        }
+                        variable_update_list.Add( variable_update );
+
+                        variable_updates = variable_updates->GetNext();
+                      }
+                    }
+                    else
+                    {
+                      /* invalid */
+                    }
+
+                    label_info = label_info->GetNext();
+                  }
+                  tt_label.set_declarations( variable_decl_list );
+                  tt_label.set_condition( condition );
+                  tt_label.set_actions( action_list );
+                  tt_label.set_timestamp( timestamp );
+                  tt_label.set_variable_updates( variable_update_list );
                 }
                 else
                 { /* invalid! */ }
@@ -786,11 +1056,14 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
               // create the terminating transition
               // use a dummy coordinate, width and height and coordinate are set later.
               coordinate dummy_coordinate;
-              terminating_transition* tt_ptr = p_proc_dia_ptr->add_terminating_transition( tt_identifier, begin_state_ptr, dummy_coordinate, tt_label );
+              terminating_transition* tt_ptr = p_proc_dia_ptr->add_terminating_transition( tt_identifier, begin_state_ptr, dummy_coordinate );
               // set the terminating transition width, height and coordinate
               tt_ptr->set_width( tt_width );
               tt_ptr->set_height( tt_height );
               tt_ptr->set_coordinate( tt_coordinate );
+
+              // set the terminating transition label
+              tt_ptr->set_label( tt_label );
 
               // retrieve the next terminating transition
               tt_node = tt_node->GetNext();
@@ -1158,7 +1431,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
               float proc_ref_height = 0.1f;
               float proc_ref_width = 0.1f;
               wxString proc_ref_name = _T( "" );
-              wxString proc_ref_parameter_assignments = _T( "" );
+              list_of_varupdate proc_ref_parameter_assignments;
 
               wxXmlNode* proc_ref_information = proc_ref_node->GetChildren();
               while ( proc_ref_information )
@@ -1229,7 +1502,31 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                 }
                 else if ( what_info == _T( "parameterassignmentlist" ) )
                 {
-                  proc_ref_parameter_assignments = proc_ref_information->GetNodeContent();
+                  wxXmlNode* parameter_info = proc_ref_information->GetChildren();
+                  varupdate parameter_update;
+                  while ( parameter_info )
+                  {
+                    if ( parameter_info->GetName() == _T( "parameterassignment" ) )
+                    {
+                      wxString parameter_update_text = parameter_info->GetNodeContent();
+                      int pos = parameter_update_text.Find( _T( ":=" ) );
+                      wxString parameter_update_lhs = parameter_update_text.Mid( 0, pos );
+                      wxString parameter_update_rhs = parameter_update_text.Mid( pos+2 );
+                      if ( parameter_update_lhs.IsEmpty() || parameter_update_rhs.IsEmpty() )
+                      {
+                        /* invalid */
+                      }
+                      parameter_update.set_lhs( parameter_update_lhs );
+                      parameter_update.set_rhs( parameter_update_rhs );
+                    }
+                    else
+                    {
+                      /* invalid */
+                    }
+                    proc_ref_parameter_assignments.Add( parameter_update );
+
+                    parameter_info = parameter_info->GetNext();
+                  }
                 }
                 else
                 { /* invalid! */ }
@@ -1241,7 +1538,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
               process_reference* proc_ref_ptr = p_arch_dia_ptr->add_process_reference( proc_ref_identifier, proc_ref_coordinate, proc_ref_width, proc_ref_height );
               // set the state name
               proc_ref_ptr->set_name( proc_ref_name );
-              proc_ref_ptr->set_text( proc_ref_parameter_assignments );
+              proc_ref_ptr->set_parameter_updates( proc_ref_parameter_assignments );
 
               // set the relationship refers to later
               // retrieve the next state

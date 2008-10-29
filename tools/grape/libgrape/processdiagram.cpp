@@ -227,7 +227,7 @@ arr_reference_state* process_diagram::get_reference_state_list( void )
 }
 
 
-nonterminating_transition* process_diagram::add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate, wxString p_label )
+nonterminating_transition* process_diagram::add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate )
 {
   // deselect all objects
   deselect_all_objects();
@@ -235,7 +235,6 @@ nonterminating_transition* process_diagram::add_nonterminating_transition( uint 
   // Create new nonterminating_transition
   nonterminating_transition* new_ntt = new nonterminating_transition(p_beginstate, p_endstate);
   new_ntt->set_id( p_id );
-  new_ntt->get_label()->set_text(p_label);
 
   // Calculate coordinate of transition based on average between beginstate and endstate
   coordinate new_coord;
@@ -298,7 +297,7 @@ arr_nonterminating_transition* process_diagram::get_nonterminating_transition_li
 }
 
 
-terminating_transition* process_diagram::add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate, wxString p_label )
+terminating_transition* process_diagram::add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate )
 {
   // deselect all objects
   deselect_all_objects();
@@ -306,7 +305,6 @@ terminating_transition* process_diagram::add_terminating_transition( uint p_id, 
   //Create new terminating transition
   terminating_transition* new_tt = new terminating_transition( p_beginstate );
   new_tt->set_id( p_id );
-  new_tt->get_label()->set_text(p_label);
   select_object( new_tt );
 
   // Calculate coordinate and width of transition based on beginstate and endstate

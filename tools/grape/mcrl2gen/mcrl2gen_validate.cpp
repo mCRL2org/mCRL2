@@ -926,7 +926,6 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
     wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
 
     // extract the preamble
-    preamble diag_preamble;
     wxXmlNode *child = get_child(p_process_diagram, _T("preambledeclarations"));
     if(child == 0)
     {
@@ -1063,6 +1062,12 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
             return false;
           }
         }
+        // save declaration
+        decl_init var_decl;
+        var_decl.set_name( var_name );
+        var_decl.set_type( var_type );
+        var_decl.set_value( var_val );
+        p_preamble_local_var_decls.Add( var_decl );
       }
     }
 
@@ -1071,7 +1076,7 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
       for(wxXmlNode *parameter = param_list->GetChildren(); parameter != 0; parameter = parameter->GetNext())
       {
         wxString param = parameter->GetNodeContent();
-	// process local variable declaration
+	// process parameter declaration
         wxStringTokenizer tkt( param, _T(":") );
         if ( tkt.CountTokens() != 2 || param.IsEmpty() )
         {
@@ -1143,12 +1148,13 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
             return false;
           }
         }
+        // save declaration
+        decl param_decl;
+        param_decl.set_name( param_name );
+        param_decl.set_type( param_type );
+        p_preamble_parameter_decls.Add( param_decl );
       }
     }
-
-    // save declarations
-    p_preamble_parameter_decls = diag_preamble.get_parameter_declarations_list();
-    p_preamble_local_var_decls = diag_preamble.get_local_variable_declarations_list();
 
     return true;
   }
@@ -1880,7 +1886,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
       {
         cerr << "+specification is not valid: architecture diagram " << diagram_name.ToAscii()
              << " contains a process reference to process diagram " << ref_name.ToAscii()
-             << " that does not contain the same number of parameters." << endl;
+             << " that does not contain the same number of parameters." << preamble_params.GetCount() << "!=" << ref_inits.GetCount() << endl;
         is_valid = false;
       }
 
@@ -2146,7 +2152,7 @@ list_of_decl_init grape::mcrl2gen::parse_reference_parameters(wxString &p_parame
 
   // the parameter initialisation is of the form: param1 := expression1, ..., paramn := expressionn
 
-  wxStringTokenizer tkp(p_parameter_initialisation, _T(","));
+  wxStringTokenizer tkp(p_parameter_initialisation, _T(";"));
   while(tkp.HasMoreTokens())
   {
     wxString param_text = tkp.GetNextToken();

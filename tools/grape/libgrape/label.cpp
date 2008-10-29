@@ -36,9 +36,72 @@ label::~label( void )
   m_variable_updates.Clear();
 }
 
-wxString label::get_text( void )
+wxString label::get_text( void ) const
 {
-  return m_text;
+  wxString result;
+  int count = m_declarations.GetCount();
+  for ( int i = 0; i < count; ++i )
+  {
+    decl declaration = m_declarations.Item( i );
+    result += declaration.get_name() + _T( ":" ) + declaration.get_type();
+    if ( i < count - 1 )
+    {
+      result += _T( "," );
+    }
+  }
+  if ( count > 0 )
+  {
+    result += _T( "." );
+  }
+  if ( !get_condition().IsEmpty() )
+  {
+    result += _T( "[" ) + get_condition() + _T( "]" );
+  }
+  count = m_actions.GetCount();
+  for ( int i = 0; i < count; ++i )
+  {
+    action action = m_actions.Item( i );
+    result += action.get_name();
+    list_of_dataexpression params = action.get_parameters();
+    int count2 = params.GetCount();
+    if ( count2 > 0 )
+    {
+      result += _T( "(" );
+      for ( int j = 0; j < count2; ++j )
+      {
+        result += params.Item( j ).get_expression();
+        if ( j < count2 - 1 )
+        {
+          result += _T( "," );
+        }
+      }
+      result += _T( ")" );
+    }
+    if ( i < count - 1 )
+    {
+      result += _T( "|" );
+    }
+  }
+  if ( !get_timestamp().IsEmpty() )
+  {
+    result += _T( "@" ) +  get_timestamp();
+  }
+  count = m_variable_updates.GetCount();
+  if ( count > 0 )
+  {
+    result += _T( "/" );
+    for ( int i = 0; i < count; ++i )
+    {
+      varupdate var_upd = m_variable_updates.Item( i );
+      result += var_upd.get_lhs() + _T( ":=" ) + var_upd.get_rhs();
+      if ( i < count - 1 )
+      {
+        result += _T( "," );
+      }
+    }
+  }
+
+  return result;
 }
 
 bool label::set_text( const wxString &p_text )
@@ -58,9 +121,9 @@ list_of_decl &label::get_declarations( void )
   return m_declarations;
 }
 
-dataexpression &label::get_timestamp( void )
+wxString label::get_timestamp( void ) const
 {
-  return m_timestamp;
+  return m_timestamp.get_expression();
 }
 
 list_of_varupdate &label::get_variable_updates( void )
@@ -68,9 +131,9 @@ list_of_varupdate &label::get_variable_updates( void )
   return m_variable_updates;
 }
 
-dataexpression &label::get_condition( void )
+wxString label::get_condition( void ) const
 {
-  return m_condition;
+  return m_condition.get_expression();
 }
 
 void label::process_text( void )
@@ -83,33 +146,47 @@ void label::process_text( void )
   if(text.Find(_T(".")) != wxNOT_FOUND)
   {
     // remove variable declarations
+    m_declarations.Empty();
     pos = text.Find(_T("."));
-/*TODO    m_declarations.set_expression(text.Mid(0, pos));
-    wxString local_decls = m_declarations.get_expression();
+    wxString local_decls = text.Mid(0, pos);
     text = text.Mid(pos+1);
 
     // check
     wxStringTokenizer tkv(local_decls, _T(","));
     while(tkv.HasMoreTokens())
     {
-      wxString ldecl = tkv.GetNextToken();
-      wxStringTokenizer tkvd(ldecl, _T(":"));
-      if(tkvd.CountTokens() != 2 || ldecl.IsEmpty())
+      wxString decl_text = tkv.GetNextToken();
+      wxStringTokenizer tkvd( decl_text, _T(":") );
+      if ( tkvd.CountTokens() != 2 || decl_text.IsEmpty() )
       {
         // not valid
         return;
       }
-      wxString decl = tkvd.GetNextToken();
-      decl.Trim(true); decl.Trim(false);
-      wxString decl_type = tkvd.GetNextToken();
-      decl_type.Trim(true); decl_type.Trim(false);
-      if(decl.IsEmpty() || decl_type.IsEmpty())
+      wxString local_decl_name = tkvd.GetNextToken();
+      local_decl_name.Trim( true );
+      local_decl_name.Trim( false );
+      wxStringTokenizer tks( local_decl_name );
+      if ( tks.CountTokens() != 1 || local_decl_name.IsEmpty() )
       {
         // not valid
         return;
       }
+      wxString local_decl_type = tkvd.GetNextToken();
+      local_decl_type.Trim( true );
+      local_decl_type.Trim( false );
+      tks.SetString( local_decl_type );
+      if ( tks.CountTokens() != 1 || local_decl_type.IsEmpty() )
+      {
+        // not valid
+        return;
+      }
+      // save declaration
+      decl local_decl;
+      local_decl.set_name( local_decl_name );
+      local_decl.set_type( local_decl_type );
+      m_declarations.Add( local_decl );
     }
-*/  }
+  }
   if(text.Find(_T("[")) != wxNOT_FOUND)
   {
     // remove condition
@@ -131,6 +208,26 @@ void label::process_text( void )
       // not valid
       return;
     }
+  }
+  if(text.Find(_T("@")) != wxNOT_FOUND)
+  {
+    // remove timestamp
+    pos = text.Find(_T("@"));
+    wxString timest = text.Mid(pos+1);
+    timest.Trim(true); timest.Trim(false);
+    if(timest.IsEmpty())
+    {
+      // not valid
+      return;
+    }
+    wxStringTokenizer tkt(timest, _T(" "));
+    if(tkt.CountTokens() > 1)
+    {
+      // not valid
+      return;
+    }
+    m_timestamp.set_expression(timest);
+    text = text.Mid(0, pos);
   }
   if(text.Find(_T("/")) != wxNOT_FOUND)
   {
@@ -154,14 +251,14 @@ void label::process_text( void )
           return;
         }
         var_update.set_varupdate(var_upd);
-        wxString upd_var = var_update.get_lhs()->get_var();
+        wxString upd_var = var_update.get_lhs();
         upd_var.Trim(true); upd_var.Trim(false);
         if(upd_var.IsEmpty())
         {
           // not valid
           return;
         }
-        wxString upd_val = var_update.get_rhs()->get_expression();
+        wxString upd_val = var_update.get_rhs();
         upd_val.Trim(true); upd_val.Trim(false);
         if(upd_val.IsEmpty())
         {
@@ -180,14 +277,14 @@ void label::process_text( void )
           return;
         }
         var_update.set_varupdate(curr_update);
-        wxString upd_var = var_update.get_lhs()->get_var();
+        wxString upd_var = var_update.get_lhs();
         upd_var.Trim(true); upd_var.Trim(false);
         if(upd_var.IsEmpty())
         {
           // not valid
           return;
         }
-        wxString upd_val = var_update.get_rhs()->get_expression();
+        wxString upd_val = var_update.get_rhs();
         upd_val.Trim(true); upd_val.Trim(false);
         if(upd_val.IsEmpty())
         {
@@ -199,31 +296,79 @@ void label::process_text( void )
       }
     }
   }
-  if(text.Find(_T("@")) != wxNOT_FOUND)
-  {
-    // remove timestamp
-    pos = text.Find(_T("@"));
-    wxString timest = text.Mid(pos+1);
-    timest.Trim(true); timest.Trim(false);
-    if(timest.IsEmpty())
-    {
-      // not valid
-      return;
-    }
-    wxStringTokenizer tkt(timest, _T(" "));
-    if(tkt.CountTokens() > 1)
-    {
-      // not valid
-      return;
-    }
-    m_timestamp.set_expression(timest);
-    text = text.Mid(0, pos);
-  }
 
   // save multiaction
-//TODO  m_actions.set_expression(text);
+  m_actions.Empty();
+  wxString multiaction = text;
+
+  // check
+  wxStringTokenizer tkma(multiaction, _T("|"));
+  while(tkma.HasMoreTokens())
+  {
+    wxString action_text = tkma.GetNextToken();
+    action action;
+    int pos1 = action_text.Find( _T("(") );
+    int pos2 = action_text.Find( ')', true );
+    if( ( pos1 != wxNOT_FOUND ) && ( pos2 != wxNOT_FOUND ) )
+    {
+      // remove action
+      wxString action_name = action_text.Mid(0, pos1);
+      action_name.Trim(true);
+      action_name.Trim(false);
+      action.set_name( action_name );
+      wxString action_params_text = action_text.Mid(pos1+1, pos2-pos1-1);
+      wxStringTokenizer tka(action_params_text, _T(","));
+      if (tka.HasMoreTokens())
+      {
+        list_of_dataexpression action_params;
+        while(tka.HasMoreTokens())
+        {
+          wxString action_param_text = tka.GetNextToken();
+          if(action_param_text.IsEmpty())
+          {
+            // not valid
+            return;
+          }
+          dataexpression action_param;
+          action_param.set_expression(action_param_text);
+          action_params.Add(action_param);
+        }
+        action.set_parameters( action_params );
+      }
+    }
+    else
+    {
+      action.set_name(action_text);
+    }
+    m_actions.Add(action);
+  }
 
   m_is_valid = true;
+}
+
+void label::set_declarations( const list_of_decl &p_declarations )
+{
+  m_declarations = p_declarations;
+}
+
+void label::set_condition( const wxString &p_condition )
+{
+  m_condition.set_expression( p_condition );
+}
+
+void label::set_actions( const list_of_action &p_actions )
+{
+  m_actions = p_actions;
+}
+
+void label::set_timestamp( const wxString &p_timestamp )
+{
+  m_timestamp.set_expression( p_timestamp );
+}
+
+void label::set_variable_updates( const list_of_varupdate &p_variable_updates )
+{
+  m_variable_updates = p_variable_updates;
 }
 
 bool label::has_valid_text() const
