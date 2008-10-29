@@ -410,9 +410,9 @@ inline bool lpsConstElm::inFreeVarList(data_expression dexpr) {
 // value which is not constant
 //
 inline mcrl2::data::data_assignment lpsConstElm::newExpression(mcrl2::data::data_assignment ass) {
-  char buffer [99];
-  sprintf(buffer, "%s^%d", std::string(ass.lhs().name()).c_str(), p_newVarCounter++);
-  data_variable w(buffer, ass.lhs().sort() );
+  std::ostringstream s;
+  s << ass.lhs().name() << "^" << p_newVarCounter++;
+  data_variable w(s.str() , ass.lhs().sort() );
   data_assignment a(ass.lhs() , w);
   return a;
 }
