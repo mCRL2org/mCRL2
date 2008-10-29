@@ -117,8 +117,8 @@ namespace tipi {
 
     /** \brief Specialisation for C strings */
     template < >
-    inline boost::enable_if< boost::is_pod< char* >::type, std::string >::type
-    basic_datatype::convert(char* t) const {
+    inline boost::enable_if< boost::is_pod< char const* >::type, std::string >::type
+    basic_datatype::convert(char const* t) const {
       return specialised_convert(boost::any(std::string(t)));
     }
     /// \endcond
