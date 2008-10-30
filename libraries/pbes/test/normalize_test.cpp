@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file pbes_test.cpp
-/// \brief Add your file description here.
+/// \brief Test for normalization functions.
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
@@ -17,18 +17,15 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/detail/pfnf_visitor.h"
 
-using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::modal;
-using namespace mcrl2::lps;
-using namespace mcrl2::pbes_system;
 
 void test_normalize1()
 {
-  using namespace pbes_expr;
+  using namespace pbes_system;
+  using namespace pbes_system::pbes_expr;
 
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
@@ -69,13 +66,13 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = data_variable("x:X");
-  y = data_variable("y:Y");
-  z = data_variable("z:Z");
+  x = data::data_variable("x:X");
+  y = data::data_variable("y:Y");
+  z = data::data_variable("z:Z");
 
   f  = not_(x);
   f1 = normalize(f);
-  f2 = data_expr::not_(x);
+  f2 = data::data_expr::not_(x);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -83,7 +80,7 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = normalize(f);
-  f2 = or_(or_(data_expr::not_(x), data_expr::not_(y)), z);
+  f2 = or_(or_(data::data_expr::not_(x), data::data_expr::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -96,8 +93,8 @@ void test_normalize1()
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
-  data_variable_list ab;
-  ab = push_front(ab, data_variable("s:S"));
+  data::data_variable_list ab;
+  ab = atermpp::push_front(ab, data::data_variable("s:S"));
   x = propositional_variable_instantiation("x:X");
   y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
   z = normalize(y);
@@ -108,24 +105,78 @@ void test_normalize1()
 void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
-  specification spec     = mcrl22lps("init tau + tau;");
-  state_formula formula  = mcrl2::modal::detail::mcf2statefrm("nu X. [true]X", spec);
+  lps::specification spec       = lps::mcrl22lps("init tau + tau;");
+  modal::state_formula formula  = modal::detail::mcf2statefrm("nu X. [true]X", spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
 }
 
 void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
-  specification spec = mcrl22lps(
+  lps::specification spec = lps::mcrl22lps(
     "proc P = tau.P;\n"
     "init P;        \n"
   );
-  state_formula formula  = mcrl2::modal::detail::mcf2statefrm("![true*]<true>true", spec);
+  modal::state_formula formula = modal::detail::mcf2statefrm("![true*]<true>true", spec);
   bool timed = false;
-  pbes<> p = lps2pbes(spec, formula, timed);
+  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
+}
+
+const std::string VARIABLE_SPECIFICATION =
+  "datavar         \n"
+  "  b:  Bool;     \n"
+  "  b1: Bool;     \n"
+  "  b2: Bool;     \n"
+  "  b3: Bool;     \n"
+  "                \n"
+  "  n:  Nat;      \n"
+  "  n1: Nat;      \n"
+  "  n2: Nat;      \n"
+  "  n3: Nat;      \n"
+  "                \n"
+  "  p:  Pos;      \n"
+  "  p1: Pos;      \n"
+  "  p2: Pos;      \n"
+  "  p3: Pos;      \n"
+  "                \n"
+  "predvar         \n"
+  "  X;            \n"
+  "  Y: Nat;       \n"
+  "  Z: Bool, Pos; \n"
+  ;
+
+inline
+pbes_system::pbes_expression expr(const std::string& text)
+{
+  return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
+}
+
+void test_pfnf_expression(std::string s)
+{
+  pbes_system::detail::pfnf_visitor<pbes_system::pbes_expression> visitor;
+  pbes_expression t1 = expr(s);
+  visitor.visit(t1);
+  pbes_expression t2 = visitor.evaluate();
+  data::rewriter datar = data::default_data_rewriter();
+  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
+  if (R(t1) != R(t2))
+  {
+    BOOST_CHECK(R(t1) == R(t2));
+    std::cout << "--- failed test --- " << std::endl;
+    std::cout << "t1    " << core::pp(t1) << std::endl;
+    std::cout << "t2    " << core::pp(t2) << std::endl;
+    std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
+    std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
+  }
+}
+
+void test_pfnf_visitor()
+{
+  test_pfnf_expression("forall m:Nat. false");
+  test_pfnf_expression("X && Y(3) || X");
 }
 
 int test_main(int argc, char** argv)
@@ -135,6 +186,7 @@ int test_main(int argc, char** argv)
   test_normalize1(); 
   test_normalize2();
   test_normalize3();
+  test_pfnf_visitor();
 
   return 0;
 }
