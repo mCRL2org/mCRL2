@@ -454,6 +454,35 @@ namespace mcrl2 {
         return false;
       }
 
+      // Give all system defined constructors for Bag
+      inline
+      function_symbol_list bag_generate_constructors_code()
+      {
+        function_symbol_list result;
+
+        return result;
+      }
+
+      // Give all system defined constructors for Bag
+      inline
+      function_symbol_list bag_generate_functions_code(const sort_expression& s)
+      {
+        function_symbol_list result;
+        result.push_back(bag_comprehension(s))
+        result.push_back(emptybag(s))
+        result.push_back(count(s))
+        result.push_back(in(s))
+        result.push_back(subbag_or_equal(s))
+        result.push_back(subbag(s))
+        result.push_back(union_(s))
+        result.push_back(difference(s))
+        result.push_back(intersection(s))
+        result.push_back(bag2set(s))
+        result.push_back(set2bag(s))
+
+        return result;
+      }
+
       // Function for projecting out right
       inline
       data_expression right(const data_expression& e)
@@ -575,16 +604,16 @@ namespace mcrl2 {
       {
         data_equation_list result;
         result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bool_::equal_to(sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bool_::equal_to(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat())))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_bag::emptybag(), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::c0()))));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_bag::emptybag(s), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::c0()))));
         result.push_back(data_equation(make_vector(variable("d", s), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bag::count(s, variable("d", s), sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat())))), variable("f", function_sort(s, sort_nat::nat()))(variable("d", s))));
-        result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s)), variable("d", s)), sort_bool_::true_(), sort_set::in(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_pos::greater(sort_bag::count(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s)), variable("d", s)), sort_bool_::true_(), sort_bag::in(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_pos::greater(sort_bag::count(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_nat::c0())));
         result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bag::subbag_or_equal(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), forall(make_vector(variable("x", s)),sort_bag::subbag_or_equal(s, variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))))));
         result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))), sort_bool_::true_(), sort_bag::subbag(s, variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))), sort_bool_::and_(sort_bag::subbag_or_equal(s, variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))), sort_bool_::not_equal_to(variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_set::union_(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_set::union_(s, variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_set::difference(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::if_(sort_pos::greater(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))), sort_nat::gtesubt(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))), sort_nat::c0())))));
-        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_set::intersection(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_pos::min(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s))), sort_bool_::true_(), sort_bag::bag2set(s, variable("s", sort_bag::bag(s))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_set::in(s, variable("x", s), variable("s", sort_bag::bag(s)))))));
-        result.push_back(data_equation(make_vector(variable("u", sort_set::set(s))), sort_bool_::true_(), sort_bag::set2bag(s, variable("u", sort_set::set(s))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::if_(sort_set::in(s, variable("x", s), variable("u", sort_set::set(s))), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bag::union_(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bag::union_(s, variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bag::difference(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::if_(sort_pos::greater(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))), sort_nat::gtesubt(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))), sort_nat::c0())))));
+        result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_nat::nat())), variable("f", function_sort(s, sort_nat::nat()))), sort_bool_::true_(), sort_bag::intersection(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_pos::min(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
+        result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s))), sort_bool_::true_(), sort_bag::bag2set(s, variable("s", sort_bag::bag(s))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bag::in(s, variable("x", s), variable("s", sort_bag::bag(s)))))));
+        result.push_back(data_equation(make_vector(variable("u", sort_set::set(s))), sort_bool_::true_(), sort_bag::set2bag(s, variable("u", sort_set::set(s))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::if_(sort_bag::in(s, variable("x", s), variable("u", sort_set::set(s))), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
 
         return result;
       }

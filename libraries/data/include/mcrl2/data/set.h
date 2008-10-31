@@ -373,6 +373,33 @@ namespace mcrl2 {
         return false;
       }
 
+      // Give all system defined constructors for Set
+      inline
+      function_symbol_list set_generate_constructors_code()
+      {
+        function_symbol_list result;
+
+        return result;
+      }
+
+      // Give all system defined constructors for Set
+      inline
+      function_symbol_list set_generate_functions_code(const sort_expression& s)
+      {
+        function_symbol_list result;
+        result.push_back(set_comprehension(s))
+        result.push_back(emptyset(s))
+        result.push_back(in(s))
+        result.push_back(subset_or_equal(s))
+        result.push_back(subset(s))
+        result.push_back(union_(s))
+        result.push_back(difference(s))
+        result.push_back(intersection(s))
+        result.push_back(complement(s))
+
+        return result;
+      }
+
       // Function for projecting out right
       inline
       data_expression right(const data_expression& e)
@@ -479,7 +506,7 @@ namespace mcrl2 {
       {
         data_equation_list result;
         result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_bool_::equal_to(sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), sort_bool_::equal_to(variable("f", function_sort(s, sort_bool_::bool_())), variable("g", function_sort(s, sort_bool_::bool_())))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_set::emptyset(), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::false_()))));
+        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_set::emptyset(s), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bool_::false_()))));
         result.push_back(data_equation(make_vector(variable("d", s), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::in(s, variable("d", s), sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_())))), variable("f", function_sort(s, sort_bool_::bool_()))(variable("d", s))));
         result.push_back(data_equation(make_vector(variable("g", function_sort(s, sort_bool_::bool_())), variable("f", function_sort(s, sort_bool_::bool_()))), sort_bool_::true_(), sort_set::subset_or_equal(s, sort_set::set_comprehension(s, variable("f", function_sort(s, sort_bool_::bool_()))), sort_set::set_comprehension(s, variable("g", function_sort(s, sort_bool_::bool_())))), forall(make_vector(variable("x", s)),sort_set::subset_or_equal(s, variable("f", function_sort(s, sort_bool_::bool_()))(variable("x", s)), variable("g", function_sort(s, sort_bool_::bool_()))(variable("x", s))))));
         result.push_back(data_equation(make_vector(variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::true_(), sort_set::subset(s, variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::and_(sort_set::subset_or_equal(s, variable("s", sort_set::set(s)), variable("t", sort_set::set(s))), sort_bool_::not_equal_to(variable("s", sort_set::set(s)), variable("t", sort_set::set(s))))));

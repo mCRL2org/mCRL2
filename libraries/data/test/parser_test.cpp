@@ -6,9 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file compatibility_test.cpp
-/// \brief Regression test for the transformations between new and old data
-///       format.
+/// \file parser_test.cpp
+/// \brief Regression test for parsing a data specification.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>

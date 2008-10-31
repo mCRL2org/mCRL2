@@ -331,7 +331,6 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
-      print f[0].string
       sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
       sort_args_code = ""
@@ -463,8 +462,6 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
         params |= get_sort_parameters_from_sort_expression(sorts, i)
       return params
     elif sortexpr[0] == "param_expr":
-        print sortexpr[1].string
-        print sortexpr[2]
         return get_sort_parameters_from_sort_expression(sorts, sortexpr[2])
     else:
       return set()
@@ -472,8 +469,7 @@ def get_sort_parameters_from_sort_expression(sorts, sortexpr):
 def get_sort_parameters_from_sort_expressions(sorts, sortexprs):
     params = set()
     for s in sortexprs:
-      print "s: %s" % s
-      params |= get_sort_parameters_from_sort_expression(sorts, s)
+      params |= get_sort_parameters_from_sort_expression(sorts, s.expr)
     return params
 
 def get_sort_parameters_from_data_expression(sorts, functions, dataexpr):
@@ -523,6 +519,64 @@ def generate_formal_sort_parameters_code(sorts, functions, variable_declarations
     for p in params:
       code = add_to_comma_sep_string(code, "const sort_expression& %s" % (p.lower()))
     return code
+
+def generate_function_code(sorts, functions, function):
+    sortargs = ""
+    code = ""
+    for s in get_sort_parameters_from_sort_expressions(sorts, function[2]):
+      sortargs = add_to_comma_sep_string(sortargs, s.lower());
+
+    if len(function[2]) == 1:
+      code += "        result.push_back(%s(%s))\n" % (function[1].label, sortargs)
+    else:
+      for s in function[2]:
+        add_sort_args = ""
+        assert s.expr[0] == "sortarrow"
+        domain = s.expr[1]
+        if domain[0] == "labelled_domain":
+          domain[0] = "domain"
+          for (index,d) in enumerate(domain[1]):
+            domain[1][i] = d[1]
+        for d in domain[1]:
+          add_sort_args = add_to_comma_sep_string(add_sort_args, "%s()" % get_label(sorts, d[0]))
+        code += "        result.push_back(%s(%s))\n" % (function[1].label, add_to_comma_sep_string(sortargs,add_sort_args))
+    return code
+
+def generate_functions_code(sorts, functions, function_type):
+    sort = sorts[0]
+    sortstring = sort[0].string
+    if len(sort) == 2:
+      sortlabel = sort[1].label
+    else:
+      sortlabel = sort[2].label
+    sort_params = set()
+    for f in functions:
+      for s in f[2]:
+        sort_params |= get_sort_parameters_from_sort_expression(sorts, s.expr)
+    argument = ""
+    for p in sort_params:
+      argument = add_to_comma_sep_string(argument, "const sort_expression& %s" % p.lower())
+    code = '''      // Give all system defined constructors for %s
+      inline
+      function_symbol_list %s_generate_%s_code(%s)
+      {
+        function_symbol_list result;
+''' % (sortstring, sortlabel, function_type, argument)
+    for f in functions:
+      code += generate_function_code(sorts, functions, f)
+    code += '''
+        return result;
+      }
+
+'''
+    return code
+
+def generate_constructors_code(sorts, constructors):
+    return generate_functions_code(sorts, constructors, "constructors")
+
+
+def generate_mappings_code(sorts, functions):
+    return generate_functions_code(sorts, functions, "functions")
 
 def generate_equations_code(sorts, functions, variable_declarations, equations):
     if verbose:
@@ -613,6 +667,8 @@ def generate_functionspec_code(sorts, functionspec):
       label = f[1]
       sortexprs = f[2]
       code += generate_function_constructors(sorts, id, label, sortexprs)
+    code += generate_constructors_code(sorts, merge_duplicates(functionspec.constructors))
+    code += generate_mappings_code(sorts, merge_duplicates(functionspec.mappings))
     return code
 
 def merge_duplicates(list):
@@ -1054,6 +1110,8 @@ class FunctionSpec(Parsing.Nonterm):
     def reduceMapSpec(self, mapspec):
         "%reduce MapSpec"
         self.functions = mapspec.functions
+        self.constructors = []
+        self.mappings = mapspec.functions
 
         self.projection_arguments = mapspec.projection_arguments
 
@@ -1065,6 +1123,8 @@ class FunctionSpec(Parsing.Nonterm):
     def reduceConsMapSpec(self, consspec, mapspec):
         "%reduce ConsSpec MapSpec"
         self.functions = consspec.functions + mapspec.functions
+        self.constructors = consspec.functions
+        self.mappings = mapspec.functions
         self.projection_arguments = merge_dictionaries(consspec.projection_arguments, mapspec.projection_arguments)
 
         # Debugging

@@ -867,6 +867,45 @@ namespace mcrl2 {
         return false;
       }
 
+      // Give all system defined constructors for Real
+      inline
+      function_symbol_list real__generate_constructors_code()
+      {
+        function_symbol_list result;
+
+        return result;
+      }
+
+      // Give all system defined constructors for Real
+      inline
+      function_symbol_list real__generate_functions_code()
+      {
+        function_symbol_list result;
+        result.push_back(creal())
+        result.push_back(pos2real())
+        result.push_back(nat2real())
+        result.push_back(int2real())
+        result.push_back(real2pos())
+        result.push_back(real2nat())
+        result.push_back(real2int())
+        result.push_back(less_equal())
+        result.push_back(less())
+        result.push_back(greater_equal())
+        result.push_back(greater())
+        result.push_back(max())
+        result.push_back(min())
+        result.push_back(abs())
+        result.push_back(negate())
+        result.push_back(succ())
+        result.push_back(pred())
+        result.push_back(plus())
+        result.push_back(minus())
+        result.push_back(times())
+        result.push_back(exp())
+
+        return result;
+      }
+
       // Function for projecting out right
       inline
       data_expression right(const data_expression& e)
@@ -1071,11 +1110,11 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("s", sort_real_::real_()), variable("r", sort_real_::real_())), sort_bool_::true_(), sort_pos::max(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_bool_::if_(sort_pos::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
         result.push_back(data_equation(make_vector(variable("s", sort_real_::real_()), variable("r", sort_real_::real_())), sort_bool_::true_(), sort_pos::min(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_bool_::if_(sort_pos::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_bool_::true_(), sort_pos::abs(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_int_::cint(sort_pos::abs(variable("x", sort_int_::int_()))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_bool_::true_(), sort_int_::negate(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_int_::negate(variable("x", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_bool_::true_(), sort_real_::negate(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::negate(variable("x", sort_int_::int_())))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_bool_::true_(), sort_pos::succ(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_pos::succ(variable("x", sort_int_::int_())))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_bool_::true_(), sort_nat::pred(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_nat::pred(variable("x", sort_int_::int_())))));
         result.push_back(data_equation(make_vector(variable("y", sort_int_::int_()), variable("x", sort_int_::int_())), sort_bool_::true_(), sort_pos::plus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_pos::plus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("y", sort_int_::int_()), variable("x", sort_int_::int_())), sort_bool_::true_(), sort_int_::minus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_int_::minus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("y", sort_int_::int_()), variable("x", sort_int_::int_())), sort_bool_::true_(), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::minus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
         result.push_back(data_equation(make_vector(variable("y", sort_int_::int_()), variable("x", sort_int_::int_())), sort_bool_::true_(), sort_pos::times(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_pos::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::exp(sort_real_::creal(variable("x", sort_int_::int_())), variable("n", sort_nat::nat())), sort_real_::creal(sort_nat::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())))));
 

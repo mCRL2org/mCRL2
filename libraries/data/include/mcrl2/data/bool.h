@@ -352,6 +352,33 @@ namespace mcrl2 {
         return false;
       }
 
+      // Give all system defined constructors for Bool
+      inline
+      function_symbol_list bool__generate_constructors_code()
+      {
+        function_symbol_list result;
+        result.push_back(true_())
+        result.push_back(false_())
+
+        return result;
+      }
+
+      // Give all system defined constructors for Bool
+      inline
+      function_symbol_list bool__generate_functions_code()
+      {
+        function_symbol_list result;
+        result.push_back(equal_to())
+        result.push_back(not_equal_to())
+        result.push_back(if_())
+        result.push_back(not_())
+        result.push_back(and_())
+        result.push_back(or_())
+        result.push_back(implies())
+
+        return result;
+      }
+
       // Function for projecting out right
       inline
       data_expression right(const data_expression& e)
