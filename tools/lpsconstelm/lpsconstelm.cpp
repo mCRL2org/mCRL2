@@ -31,6 +31,7 @@
 //Aterm
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/vector.h"
 
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"

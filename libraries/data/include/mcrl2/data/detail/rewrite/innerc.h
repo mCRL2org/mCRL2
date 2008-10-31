@@ -12,6 +12,7 @@
 #define __REWR_INNERC_H
 
 #include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 //#define _INNERC_STORE_TREES
 

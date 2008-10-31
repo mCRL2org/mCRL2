@@ -87,6 +87,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <utility>
 #include <string>
 #include <sstream>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

@@ -24,6 +24,8 @@
 #include "squadt_interactor.h"
 #include "exploration.h"
 #include "lts.h"
+#include "mcrl2/atermpp/vector.h"
+
 
 using namespace std;
 using namespace mcrl2::utilities;
