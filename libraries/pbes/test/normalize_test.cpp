@@ -177,6 +177,8 @@ void test_pfnf_visitor()
 {
   test_pfnf_expression("forall m:Nat. false");
   test_pfnf_expression("X && Y(3) || X");
+  // test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
+  // test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
 }
 
 int test_main(int argc, char** argv)
@@ -187,6 +189,8 @@ int test_main(int argc, char** argv)
   test_normalize2();
   test_normalize3();
   test_pfnf_visitor();
+
+  BOOST_CHECK(false);
 
   return 0;
 }

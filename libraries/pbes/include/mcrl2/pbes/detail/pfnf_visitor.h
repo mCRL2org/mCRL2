@@ -50,7 +50,7 @@ namespace detail {
     /// Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
     typedef std::pair<bool, variable_sequence_type> quantifier;
 
-    /// Represents the implication g => ( X0(e0) /\ ... /\ Xk(ek) )
+    /// Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
     typedef std::pair<term_type, std::vector<propositional_variable_type> > implication;
 
     /// Represents an expression in PFNF format.
@@ -71,12 +71,12 @@ namespace detail {
       pbes_expression h = boost::get<1>(expr);
       std::vector<implication> g = boost::get<2>(expr);
       pbes_expression result = h;
-      for (std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
+      for (typename std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
       {
         pbes_expression x = std::accumulate(i->second.begin(), i->second.end(), tr::false_(), &core::optimized_or<Term>);
         result = core::optimized_and(result, core::optimized_imp(i->first, x));
       }
-      for (std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
+      for (typename std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
       {
         result = i->first ? tr::forall(i->second, result) : tr::exists(i->second, result);
       }
@@ -88,12 +88,12 @@ namespace detail {
       std::vector<quantifier> q = boost::get<0>(expr);
       pbes_expression h = boost::get<1>(expr);
       std::vector<implication> g = boost::get<2>(expr);
-      for (std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
+      for (typename std::vector<quantifier>::iterator i = q.begin(); i != q.end(); ++i)
       {
         std::cout << (i->first ? "forall " : "exists ") << core::pp(i->second) << " ";
       }
       std::cout << (q.empty() ? "" : " . ") << core::pp(h) << "\n";
-      for (std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
+      for (typename std::vector<implication>::iterator i = g.begin(); i != g.end(); ++i)
       {
         std::cout << " /\\ " << core::pp(i->first) << " => ";
         if (i->second.empty())
@@ -103,7 +103,7 @@ namespace detail {
         else
         {
           std::cout << "( ";
-          for (std::vector<propositional_variable_type>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<propositional_variable_type>::iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             if (j != i->second.begin())
             {
@@ -121,7 +121,7 @@ namespace detail {
     void print(std::string msg = "") const
     {
       std::cout << "--- " << msg << std::endl;
-      for (std::vector<expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
+      for (typename std::vector<expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
       {
         print_expression(*i);
       }
@@ -133,7 +133,7 @@ namespace detail {
     bool visit_data_expression(const term_type& e, const data_term_type& /* d */)
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Visit true node.
@@ -142,7 +142,7 @@ namespace detail {
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
 print("true");
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Visit false node.
@@ -151,7 +151,7 @@ print("true");
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
 print("false");
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Visit not node.
@@ -159,7 +159,7 @@ print("false");
     bool visit_not(const term_type& e, const term_type& /* arg */)
     {
       throw std::runtime_error("operation not should not occur");
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Leave and node.
@@ -204,21 +204,21 @@ print("and");
       std::vector<implication> g;
 
       // first conjunction
-      for (std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (typename std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
         g.push_back(implication(core::optimized_and(not_h_psi, i->first), i->second));
       }
 
       // second conjunction
-      for (std::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
+      for (typename std::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
       {
         g.push_back(implication(core::optimized_and(not_h_phi, i->first), i->second));
       }
 
       // third conjunction
-      for (std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (typename std::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        for (std::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
+        for (typename std::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
         {
           g.push_back(implication(core::optimized_and(i->first, k->first), concat(i->second, k->second)));
         }
@@ -232,7 +232,7 @@ print("and");
     bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
     {
       throw std::runtime_error("operation imp should not occur");
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Visit forall node.
@@ -240,7 +240,7 @@ print("and");
     bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Leave forall node.
@@ -258,7 +258,7 @@ print("forall");
     bool visit_exists(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
-      return continue_recursion;
+      return super::continue_recursion;
     }
 
     /// Leave exists node.
@@ -281,7 +281,7 @@ print("exists");
       std::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
       expression_stack.push_back(boost::make_tuple(q, h, g));
 print("propvar");
-      return continue_recursion;
+      return super::continue_recursion;
     }    
   };
 
