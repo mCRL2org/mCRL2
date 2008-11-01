@@ -1609,12 +1609,17 @@ static ATermAppl fresh_name(char const* name)
   { i=ATgetInt((ATermInt)index);
   }
 
+  static char temporary_buffer[STRINGLENGTH+1];
   for( ; (existsString(str->s)) ; i++)
-  { if (i==0)
+  { assert(i>=0);
+    if (i==0)
     { snprintf(str->s,STRINGLENGTH,"%s",name); 
     }
     else
-    { snprintf(str->s,STRINGLENGTH,"%s%d",name,i); 
+    { /* The code below is needed to guarantee that always
+         a fresh string is generated */
+      snprintf(temporary_buffer,STRINGLENGTH-12,"%s",name); 
+      snprintf(str->s,STRINGLENGTH,"%s%d",temporary_buffer,i); 
     }
   }
   /* check that name does not already exist, otherwise,
