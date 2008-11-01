@@ -2425,22 +2425,29 @@ static ATermAppl distributeActionOverConditions(
   if (gsIsIfThen(restterm))
   { /* Here we check whether the process body has the form
        a (c -> x). For state space generation it turns out
-       to be beneficial to rewrite this to c-> a x, as in
+       to be beneficial to rewrite this to c-> a x + !c -> a.delta@0, as in
        certain cases this leads to a reduction of the number
        of states. In this code, we recursively check whether
        the action must be distributed over x. This optimisation
        was observed by Yaroslav Usenko, May 2006. Implemented by JFG.
        On industrial examples, it appears to reduce the state space
-       with a factor up to 2. */
+       with a factor up to 2. 
+       Before october 2008 this code was wrong, as it transformed
+       an expression to c-> a x, ommitting the a.delta@0. */
 
-        
        ATermAppl c=ATAgetArgument(restterm,0);
 
-       ATermAppl r=distributeActionOverConditions(
+       ATermAppl r=gsMakeChoice(
+                       distributeActionOverConditions(
                                  action,
                                  gsMakeDataExprAnd(condition,c),
                                  ATAgetArgument(restterm,1),
-                                 freevars);
+                                 freevars),
+                       distributeActionOverConditions(
+                                 action,
+                                 gsMakeDataExprAnd(condition,gsMakeDataExprNot(c)),
+                                 gsMakeDeltaAtZero(),  
+                                 freevars));
 
        return r; 
   }
@@ -2607,7 +2614,7 @@ static ATermAppl bodytovarheadGNF(
       body1=bodytovarheadGNF(body1,name,freevars,v);
       if ((gsIsIfThen(body2)) && (s<=sum))
       { /* Here we check whether the process body has the form
-           a (c -> x). For state space generation it turns out
+           a (c -> x) + !c -> delta@0. For state space generation it turns out
            to be beneficial to rewrite this to c-> a x, as in
            certain cases this leads to a reduction of the number
            of states. An extra change (24/12/2006) is that the
@@ -2615,11 +2622,14 @@ static ATermAppl bodytovarheadGNF(
            all conditions. The optimisation
            was observed by Yaroslav Usenko, May 2006. Implemented by JFG.
            On industrial examples, it appears to reduce the state space
-           with a factor up to 2. */
+           with a factor up to 2. Until 1/11/2008 this code was incorrect,
+           because the summand a (!c -> delta@0) was not forgotten.*/
         
         ATermAppl c=ATAgetArgument(body2,0);
 
-        ATermAppl r=distributeActionOverConditions(body1,c,ATAgetArgument(body2,1),freevars);
+        ATermAppl r= gsMakeChoice(
+                       distributeActionOverConditions(body1,c,ATAgetArgument(body2,1),freevars),
+                       distributeActionOverConditions(body1,gsMakeDataExprNot(c),gsMakeDeltaAtZero(),freevars));
         return r; 
       }
       if ((gsIsIfThenElse(body2)) && (s<=sum))
