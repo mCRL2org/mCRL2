@@ -27,6 +27,8 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
+#include <iostream>
+#include <sstream>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
@@ -83,7 +85,7 @@ typedef struct specificationbasictype {
 
 
 typedef struct localstring {
-  char s[STRINGLENGTH];
+  std::string s;
   struct localstring *next; } localstring;
 
 static int canterminatebody(
@@ -120,7 +122,7 @@ static ATermAppl getfreshvariable(char const* s,ATermAppl sort, const int reusab
 static ATermList construct_renaming(ATermList pars1, ATermList pars2,
                 ATermList *pars3, ATermList *pars4,const bool unique=true);
 static void alphaconversion(ATermAppl procId, ATermList parameters);
-static ATermAppl fresh_name(char const* name);
+static ATermAppl fresh_name(const std::string &name);
 static void declare_equation_variables(ATermList t1);
 static void end_equation_section(void);
 static void newequation(
@@ -333,25 +335,25 @@ static localstring *emptystringlist =NULL;
 
 static void release_string(localstring *c)
 {
-  
   c->next = emptystringlist;
   emptystringlist = c;
-  strncpy(&c->s[0],"",STRINGLENGTH);
+  c->s=std::string("");
 } 
 
-static localstring *new_string(char const*s)
+static localstring *new_string(const std::string &s)
 {
   localstring *c;
   
   if (emptystringlist == NULL) {
-    { c = (localstring *)malloc(sizeof(localstring));
+    { // c = (localstring *)malloc(sizeof(localstring));
+      c=new localstring;
       if (c==NULL) return NULL;}
   } else {
     c = emptystringlist;
     emptystringlist = emptystringlist->next;
   }
   c->next=NULL;
-  strncpy(&c->s[0],s,STRINGLENGTH);
+  c->s=s;
   return c;
 }
 
@@ -383,12 +385,12 @@ static void removeObject(ATermAppl o)
 { ATindexedSetRemove(objectIndexTable,(ATerm)o);
 }
 
-static void addString(char *str)
-{ ATindexedSetPut(stringTable,ATmake("<str>",str),NULL);
+static void addString(const std::string str)
+{ ATindexedSetPut(stringTable,ATmake("<str>",str.c_str()),NULL);
 }
 
-static ATbool existsString(char *str)
-{ return (ATbool) (ATindexedSetGetIndex(stringTable,ATmake("<str>",str))>=0);
+static ATbool existsString(std::string str)
+{ return (ATbool) (ATindexedSetGetIndex(stringTable,ATmake("<str>",str.c_str()))>=0);
 }
 
 static ATermAppl getTargetSort(ATermAppl sortterm)
@@ -1592,7 +1594,7 @@ static ATermList collectPcrlProcesses(
 /************ correctopenterm ********************************************/ 
 
 
-static ATermAppl fresh_name(char const* name)
+static ATermAppl fresh_name(const std::string &name)
 { /* it still has to be checked whether a name is already being used 
      in that case a new name has to be generated. The result
      is of type ATermAppl, because the string is generally used
@@ -1600,7 +1602,7 @@ static ATermAppl fresh_name(char const* name)
   localstring *str;
   int i;
   str=new_string(name);
-  ATerm stringterm=(ATerm)gsString2ATermAppl(str->s);
+  ATerm stringterm=(ATerm)gsString2ATermAppl(str->s.c_str());
   ATerm index=ATtableGet(freshstringIndices,stringterm);
   if (index==NULL)
   { i=0;
@@ -1609,24 +1611,24 @@ static ATermAppl fresh_name(char const* name)
   { i=ATgetInt((ATermInt)index);
   }
 
-  static char temporary_buffer[STRINGLENGTH+1];
   for( ; (existsString(str->s)) ; i++)
   { assert(i>=0);
     if (i==0)
-    { snprintf(str->s,STRINGLENGTH,"%s",name); 
+    { str->s=name;
     }
     else
     { /* The code below is needed to guarantee that always
          a fresh string is generated */
-      snprintf(temporary_buffer,STRINGLENGTH-12,"%s",name); 
-      snprintf(str->s,STRINGLENGTH,"%s%d",temporary_buffer,i); 
+      std::ostringstream tempstringstream;
+      tempstringstream << name << i;
+      str->s = tempstringstream.str();
     }
   }
   /* check that name does not already exist, otherwise,
      add some suffix and check again */
   ATtablePut(freshstringIndices,stringterm,(ATerm)ATmakeInt(i));
   addString(str->s);
-  stringterm=(ATerm)gsString2ATermAppl(str->s);
+  stringterm=(ATerm)gsString2ATermAppl(str->s.c_str());
   release_string(str);
   return (ATermAppl)stringterm;
 }
@@ -2358,7 +2360,7 @@ static ATermAppl wraptime(
 
 typedef enum { alt, sum, /* cond,*/ seq, name, multiaction } state;
 
-static ATermAppl getfreshvariable(char const *s, ATermAppl sort, const int reuse_index)
+static ATermAppl getfreshvariable(const char *s, ATermAppl sort, const int reuse_index)
 { /* If reuse_index is smaller than 0 (-1 is the default value), an unused variable name is returned,
      based on the string s with sort `sort'. If reuse_index is larger or equal to
      0 the reuse_index+1 generated variable is returned. If for a particular reuse_index 
@@ -9298,7 +9300,6 @@ void lin_std_initialize_global_variables()
   rewr = NULL;
   time_operators_used=0;
   seq_varnames=NULL;
-  // char scratch1[STRINGLENGTH];
   objectIndexTable=NULL;
   stringTable=NULL;
   freshstringIndices=NULL;
