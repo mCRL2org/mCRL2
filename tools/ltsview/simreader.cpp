@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file simreader.cpp
-/// \brief Add your file description here.
+/// \brief Source file for simReader class
 
 #include "simreader.h"
 

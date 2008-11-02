@@ -12,12 +12,27 @@
 #ifndef SAVEVECDIALOG_H
 #define SAVEVECDIALOG_H
 
+#include <vector>
 #include <wx/wx.h>
 #include <wx/filename.h>
-#include <wx/statusbr.h>
-#include <wx/statusbr.h>
-#include <vector>
-#include "glcanvas.h"
+
+extern "C" {
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+# include <OpenGL/glu.h>
+#else
+# if defined(_WIN32_) || defined(_MSC_VER)
+#  include <windows.h>
+#  undef __in_range // For STLport
+# endif
+# include <GL/gl.h>
+# include <GL/glu.h>
+#endif
+}
+
+
+class GLCanvas;
+class wxStatusBar;
 
 class SaveVecDialog : public wxDialog {
   public:

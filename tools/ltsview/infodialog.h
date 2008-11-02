@@ -12,9 +12,10 @@
 #ifndef INFODIALOG_H
 #define INFODIALOG_H
 #include <string>
-#include <wx/wx.h>
-#include <wx/listctrl.h>
 #include <vector>
+#include <wx/wx.h>
+
+class wxListCtrl;
 
 class InfoDialog: public wxDialog {
   public:

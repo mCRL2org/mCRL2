@@ -7,11 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file utils.h
-/// \brief Add your file description here.
+/// \brief Header file for Utils namespace
 
 #ifndef UTILS_H
 #define UTILS_H
-#include <vector>
 #include <wx/colour.h>
 
 namespace Utils {

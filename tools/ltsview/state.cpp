@@ -7,8 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file state.cpp
-/// \brief Add your file description here.
+/// \brief Source file for State class
+
 #include "state.h"
+#include "transition.h"
+
 using namespace std;
 using namespace Utils;
 

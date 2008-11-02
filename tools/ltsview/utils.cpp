@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file utils.cpp
-/// \brief Add your file description here.
+/// \brief Source file for Utils namespace
 
 #include "utils.h"
 #include <cmath>

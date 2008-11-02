@@ -7,12 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file cluster.cpp
-/// \brief Add your file description here.
+/// \brief Implementation of the Cluster class
 
 #include "cluster.h"
 #include <algorithm>
 #include <math.h>
+#include "state.h"
 #include "utils.h"
+
 using namespace std;
 using namespace Utils;
 

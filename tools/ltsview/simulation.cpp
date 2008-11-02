@@ -7,9 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file simulation.cpp
-/// \brief Add your file description here.
+/// \brief Source file for Simulation class
 
 #include "simulation.h"
+#include "transition.h"
+#include "state.h"
 
 using namespace std;
 
@@ -19,8 +21,6 @@ Simulation::Simulation()
   started=false;
   chosenTrans = -1;
 }
-
-
 
 void Simulation::setInitialState(State* init)
 {

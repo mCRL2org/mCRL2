@@ -10,11 +10,22 @@
 /// \brief Implements the main LTSView window
 
 #include "mainframe.h"
+#include <wx/checklst.h>
 #include <wx/filedlg.h>
 #include <wx/notebook.h>
+#include <wx/progdlg.h>
 //#include <time.h>
-#include "ids.h"
+#include "glcanvas.h"
 #include "icons/main_window.xpm"
+#include "ids.h"
+#include "infodialog.h"
+#include "simdialog.h"
+#include "markdialog.h"
+#include "mediator.h"
+#include "savepicdialog.h"
+#include "savevecdialog.h"
+#include "settings.h"
+#include "settingsdialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)

@@ -14,12 +14,14 @@
 #include <wx/wx.h>
 #include <string>
 #include "mediator.h"
-#include "mainframe.h"
-#include "glcanvas.h"
-#include "lts.h"
-#include "visualizer.h"
 #include "utils.h"
-#include "markmanager.h"
+
+class MainFrame;
+class GLCanvas;
+class LTS;
+class Visualizer;
+class MarkManager;
+class Settings;
 
 class LTSView : public wxApp, public Mediator {
   private:

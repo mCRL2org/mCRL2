@@ -7,14 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitivefactory.h
-/// \brief Add your file description here.
+/// \brief Header file for PrimitiveFactory class
 
 #ifndef PRIMITIVEFACTORY_H
 #define PRIMITIVEFACTORY_H
 #include <vector>
-#include "primitives.h"
-#include "conedb.h"
 #include "settings.h"
+
+class ConeDB;
+class Primitive;
+class P_ObliqueCone;
 
 class PrimitiveFactory: public Subscriber {
   public:

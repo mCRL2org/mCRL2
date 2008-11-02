@@ -7,19 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file cluster.h
-/// \brief Add your file description here.
+/// \brief Header file of the Cluster class
 
 #ifndef CLUSTER_H
 #define CLUSTER_H
 #include <vector>
 #include <map>
-#include "utils.h"
+#include <set>
 
-#ifndef STATE_H
-  #include "state.h"
-#else
-  class State;
-#endif
+class State;
 
 // forward declaration
 class Cluster;

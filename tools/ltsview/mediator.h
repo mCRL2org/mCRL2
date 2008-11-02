@@ -7,15 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mediator.h
-/// \brief Add your file description here.
+/// \brief Header file for Mediator class
 
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
 #include <string>
 #include "utils.h"
-#include "state.h"
-#include "cluster.h"
-#include "transition.h"
+
+class State;
+class Cluster;
+class Transition;
 
 class Mediator {
   public:

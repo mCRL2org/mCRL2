@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -35,7 +35,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -89,6 +88,8 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#endif /* ! C99 */
+
 #endif /* ! FLEXINT_H */
 
 /* begin standard C++ headers. */
@@ -105,11 +106,12 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif	/* __STDC__ */
+#endif	/* defined (__STDC__) */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -187,14 +189,9 @@ extern int yyleng;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -417,6 +414,16 @@ static yyconst flex_int16_t yy_chk[40] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "ltsview_fsmlexer.ll"
 #line 2 "ltsview_fsmlexer.ll"
+// Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ltsview_fsmlexer.ll
+
 #include <string>
 #include "ltsview_fsmlexer.h"
 #include "ltsview_fsmparser.hpp"
@@ -446,9 +453,9 @@ typedef ltsview::LTSViewFSMParser::token_type token_type;
 /* enables the use of start condition stacks */
 /* The following paragraph suffices to track locations accurately. Each time
  * yylex is invoked, the begin position is moved onto the end position. */
-#line 45 "ltsview_fsmlexer.ll"
+#line 55 "ltsview_fsmlexer.ll"
 #define YY_USER_ACTION  yylloc->columns(yyleng);
-#line 452 "ltsview_fsmlexer.cpp"
+#line 459 "ltsview_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -548,7 +555,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 48 "ltsview_fsmlexer.ll"
+#line 58 "ltsview_fsmlexer.ll"
 
  
  /* code to place at the beginning of yylex() */
@@ -561,7 +568,7 @@ YY_DECL
 
 
  /* white space */
-#line 565 "ltsview_fsmlexer.cpp"
+#line 572 "ltsview_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -642,7 +649,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 60 "ltsview_fsmlexer.ll"
+#line 70 "ltsview_fsmlexer.ll"
 {
   yylloc->step();
 }
@@ -651,7 +658,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 65 "ltsview_fsmlexer.ll"
+#line 75 "ltsview_fsmlexer.ll"
 {
   yylloc->lines(yyleng);
   yylloc->step();
@@ -661,7 +668,7 @@ YY_RULE_SETUP
 /* section separator */
 case 3:
 YY_RULE_SETUP
-#line 72 "ltsview_fsmlexer.ll"
+#line 82 "ltsview_fsmlexer.ll"
 {
   return token::SECSEP;
 }
@@ -669,7 +676,7 @@ YY_RULE_SETUP
 /* parenthesis left */
 case 4:
 YY_RULE_SETUP
-#line 77 "ltsview_fsmlexer.ll"
+#line 87 "ltsview_fsmlexer.ll"
 { 
   return token::LPAR;
 }
@@ -677,7 +684,7 @@ YY_RULE_SETUP
 /* parenthesis right */
 case 5:
 YY_RULE_SETUP
-#line 82 "ltsview_fsmlexer.ll"
+#line 92 "ltsview_fsmlexer.ll"
 { 
   return token::RPAR;
 }
@@ -685,7 +692,7 @@ YY_RULE_SETUP
 /* arrow symbol */
 case 6:
 YY_RULE_SETUP
-#line 87 "ltsview_fsmlexer.ll"
+#line 97 "ltsview_fsmlexer.ll"
 {
   return token::ARROW;
 }
@@ -693,7 +700,7 @@ YY_RULE_SETUP
 /* ID */
 case 7:
 YY_RULE_SETUP
-#line 92 "ltsview_fsmlexer.ll"
+#line 102 "ltsview_fsmlexer.ll"
 {
   yylval->stringVal = new std::string(yytext,yyleng);
   return token::ID;
@@ -703,7 +710,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 98 "ltsview_fsmlexer.ll"
+#line 108 "ltsview_fsmlexer.ll"
 {
   quotedstring = std::string(yytext,yyleng);
   yylval->stringVal = new std::string(quotedstring.substr(1,
@@ -714,7 +721,7 @@ YY_RULE_SETUP
 /* Number */
 case 9:
 YY_RULE_SETUP
-#line 106 "ltsview_fsmlexer.ll"
+#line 116 "ltsview_fsmlexer.ll"
 {
   yylval->integerVal = atoi(yytext);
   return token::NUMBER;
@@ -723,17 +730,17 @@ YY_RULE_SETUP
 /* pass all other characters up to bison */
 case 10:
 YY_RULE_SETUP
-#line 112 "ltsview_fsmlexer.ll"
+#line 122 "ltsview_fsmlexer.ll"
 { 
   return static_cast<token_type>(*yytext);
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 116 "ltsview_fsmlexer.ll"
+#line 126 "ltsview_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 737 "ltsview_fsmlexer.cpp"
+#line 744 "ltsview_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -867,6 +874,8 @@ case YY_STATE_EOF(INITIAL):
 		} /* end of scanning one token */
 } /* end of yylex */
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 {
 	yyin = arg_yyin;
@@ -887,14 +896,26 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 	yy_start_stack_ptr = yy_start_stack_depth = 0;
 	yy_start_stack = NULL;
 
-    (yy_buffer_stack) = 0;
-    (yy_buffer_stack_top) = 0;
-    (yy_buffer_stack_max) = 0;
+	yy_buffer_stack = 0;
+	yy_buffer_stack_top = 0;
+	yy_buffer_stack_max = 0;
 
 	yy_state_buf = 0;
 
 }
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
+yyFlexLexer::~yyFlexLexer()
+{
+	delete [] yy_state_buf;
+	LTSViewFSMfree(yy_start_stack  );
+	yy_delete_buffer( YY_CURRENT_BUFFER );
+	LTSViewFSMfree(yy_buffer_stack  );
+}
+
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1063,6 +1084,14 @@ int yyFlexLexer::yy_get_next_buffer()
 
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
+
+	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) LTSViewFSMrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
 	(yy_n_chars) += number_to_move;
 	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
@@ -1469,7 +1498,9 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		(yy_buffer_stack) = (struct yy_buffer_state**)LTSViewFSMalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
-		
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+								  
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
 		(yy_buffer_stack_max) = num_to_alloc;
@@ -1487,6 +1518,8 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1510,8 +1543,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 			(yy_start_stack) = (int *) LTSViewFSMrealloc((void *) (yy_start_stack),new_size  );
 
 		if ( ! (yy_start_stack) )
-			YY_FATAL_ERROR(
-			"out of memory expanding start-condition stack" );
+			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
 		}
 
 	(yy_start_stack)[(yy_start_stack_ptr)++] = YY_START;
@@ -1561,29 +1593,6 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-yyFlexLexer::~yyFlexLexer()
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_delete_buffer( YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yypop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	LTSViewFSMfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-    /* Destroy the start condition stack. */
-        LTSViewFSMfree((yy_start_stack)  );
-        (yy_start_stack) = NULL;
-
-	delete [] (yy_state_buf);
-	LTSViewFSMfree((yy_start_stack)  );
-
-}
-
 /*
  * Internal utility routines.
  */
@@ -1632,7 +1641,7 @@ void LTSViewFSMfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 116 "ltsview_fsmlexer.ll"
+#line 126 "ltsview_fsmlexer.ll"
 
 
 

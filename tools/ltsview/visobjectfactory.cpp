@@ -7,11 +7,27 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visobjectfactory.cpp
-/// \brief Add your file description here.
+/// \brief Source file for VisObjectFactory class
 
+#include "visobjectfactory.h"
 #include <algorithm>
 #include <cstdlib>
-#include "visobjectfactory.h"
+#include "primitivefactory.h"
+
+extern "C" {
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+# include <OpenGL/glu.h>
+#else
+# if defined(_WIN32_) || defined(_MSC_VER)
+#  include <windows.h>
+#  undef __in_range // For STLport
+# endif
+# include <GL/gl.h>
+# include <GL/glu.h>
+#endif
+}
+
 using namespace std;
 using namespace Utils;
 

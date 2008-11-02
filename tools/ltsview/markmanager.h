@@ -11,13 +11,14 @@
 
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
-#include <list>
 #include <vector>
-#include "lts.h"
-#include "state.h"
 #include "utils.h"
 
 struct MarkRule;
+class LTS;
+class State;
+class Cluster;
+class Transition;
 
 class MarkManager {
   public:
@@ -55,9 +56,6 @@ class MarkManager {
     bool isMarked(Transition *t);
 
   private:
-    //std::list< State* > marked_states;
-    //std::list< State* > unmarked_states;
-    //std::list< int > active_mark_rules;
     std::vector< MarkRule* > mark_rules;
     std::vector< bool* > label_marks;
     std::vector< MarkRule* >::iterator first_free_mark_rule;

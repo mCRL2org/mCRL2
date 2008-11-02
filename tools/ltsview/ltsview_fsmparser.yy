@@ -1,7 +1,15 @@
+// Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ltsview_fsmparser.yy
+
 %{
-#include <stdio.h>
 #include <string>
-#include "lts.h"
 %}
 
 /* Require bison 2.3 or later */
@@ -56,6 +64,7 @@
 %{
 #include "fileloader.h"
 #include "ltsview_fsmlexer.h"
+#include "lts.h"
 
 /* this "connects" the bison parser in the fileloader to the flex
  * scanner class object. it defines the yylex() function call to pull

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file state.h
-/// \brief Add your file description here.
+/// \brief Header file for State class
 
 #ifndef STATE_H
 #define STATE_H
@@ -16,17 +16,8 @@
 #include <set>
 #include "utils.h"
 
-#ifndef TRANSITION_H
-  #include "transition.h"
-#else
-  class Transition;
-#endif
-
-#ifndef CLUSTER_H
-  #include "cluster.h"
-#else
-  class Cluster;
-#endif
+class Transition;
+class Cluster;
 
 class State {
   public:

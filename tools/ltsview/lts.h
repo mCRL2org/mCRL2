@@ -7,20 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lts.h
-/// \brief Add your file description here.
+/// \brief Header file of LTS class
 
 #ifndef LTS_H
 #define LTS_H
+#include <string>
 #include <vector>
 #include <map>
-#include "mediator.h"
-#include "state.h"
-#include "transition.h"
-#include "cluster.h"
 #include "utils.h"
-#include "simreader.h"
 
 class LTS;
+class Mediator;
+class State;
+class Cluster;
+class Simulation;
 
 class Cluster_iterator {
   public:

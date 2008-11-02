@@ -7,10 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitivefactory.cpp
-/// \brief Add your file description here.
+/// \brief Source file for PrimitiveFactory class
 
 #include "primitivefactory.h"
 #include <cmath>
+#include "conedb.h"
+#include "primitives.h"
 
 using namespace Utils;
 

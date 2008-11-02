@@ -7,13 +7,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lts.cpp
-/// \brief Add your file description here.
+/// \brief Source file of LTS class
 
 #include "lts.h"
+#include "cluster.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
-#include <algorithm>
+#include "mediator.h"
+#include "simulation.h"
+#include "state.h"
+#include "transition.h"
 
 using namespace Utils;
 using namespace std;

@@ -9,15 +9,38 @@
 /// \file visualizer.cpp
 /// \brief Implements the visualizer
 
+#include "visualizer.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream> 
 #include <fstream> 
-#include "visualizer.h"
+#include "cluster.h"
+#include "lts.h"
+#include "mediator.h"
+#include "primitivefactory.h"
+#include "settings.h"
+#include "state.h"
+#include "transition.h"
+#include "visobjectfactory.h"
+
+extern "C" {
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+# include <OpenGL/glu.h>
+#else
+# if defined(_WIN32_) || defined(_MSC_VER)
+#  include <windows.h>
+#  undef __in_range // For STLport
+# endif
+# include <GL/gl.h>
+# include <GL/glu.h>
+#endif
+}
+
 using namespace std;
 using namespace Utils;
-#define SELECT_BLEND 0.3f
 
+#define SELECT_BLEND 0.3f
 
 Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   lts = NULL;

@@ -12,11 +12,10 @@
 #ifndef SIMDIALOG_H
 #define SIMDIALOG_H
 #include <wx/wx.h>
-#include <wx/listctrl.h>
-
 #include "simreader.h"
-#include "ids.h"
-#include "mediator.h"
+
+class Mediator;
+class wxListView;
 
 class SimDialog: public wxDialog, public simReader
 {

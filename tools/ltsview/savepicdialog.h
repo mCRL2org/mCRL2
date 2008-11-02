@@ -12,12 +12,14 @@
 #ifndef SAVEPICDIALOG_H
 #define SAVEPICDIALOG_H
 
-#include <wx/wx.h>
-#include <wx/spinctrl.h>
-#include <wx/filename.h>
-#include <wx/statusbr.h>
 #include <vector>
-#include "glcanvas.h"
+#include <wx/wx.h>
+#include <wx/filename.h>
+
+class GLCanvas;
+class wxSpinCtrl;
+class wxSpinEvent;
+class wxStatusBar;
 
 class SavePicDialog : public wxDialog {
   public:

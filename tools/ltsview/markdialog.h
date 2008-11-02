@@ -12,8 +12,11 @@
 #ifndef MARKDIALOG_H
 #define MARKDIALOG_H
 
+#include <string>
+#include <vector>
 #include <wx/wx.h>
-#include "mediator.h"
+
+class Mediator;
 
 class MarkDialog: public wxDialog {
   public:

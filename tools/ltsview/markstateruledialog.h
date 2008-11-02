@@ -7,17 +7,19 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file markstateruledialog.h
-/// \brief Add your file description here.
+/// \brief Header file for MarkStateRuleDialog class
 
 #ifndef MARKSTATERULEDIALOG_H
 #define MARKSTATERULEDIALOG_H
 #include <map>
+#include <vector>
 #include <wx/wx.h>
-#include <wx/checklst.h>
-#include "mediator.h"
-#include "lts.h"
-#include "utils.h"
 #include "mcrl2/utilities/colorbutton.h"
+#include "utils.h"
+
+class LTS;
+class wxCheckListBox;
+class Mediator;
 
 class MarkStateRuleDialog : public wxDialog { 
   public:

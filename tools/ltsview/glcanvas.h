@@ -7,16 +7,18 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file glcanvas.h
-/// \brief Add your file description here.
+/// \brief Header file for GLCanvas class
 
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
-#include "mediator.h"
-#include "visualizer.h"
-#include "utils.h"
 #include "settings.h"
+#include "simreader.h"
+#include "utils.h"
+
+class Mediator;
+class Visualizer;
 
 class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
   public:

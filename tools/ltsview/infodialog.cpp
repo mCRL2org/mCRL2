@@ -1,8 +1,17 @@
-#include "infodialog.h"
+// Author(s): Bas Ploeger and Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file infodialog.cpp
+/// \brief Source file for information dialog class
+
+#include "infodialog.h"
 #include <wx/notebook.h>
-#include <algorithm>
+#include <wx/listctrl.h>
 
 InfoDialog::InfoDialog(wxWindow* parent) :
   wxDialog(parent,wxID_ANY,wxT("Info"),wxDefaultPosition,wxDefaultSize,

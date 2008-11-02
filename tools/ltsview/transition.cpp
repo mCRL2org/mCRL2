@@ -7,10 +7,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file transition.cpp
-/// \brief Add your file description here.
+/// \brief Source file for Transition class
 
 #include "transition.h"
-using namespace Utils;
+#include "state.h"
 
 // Constructor and Destructor
 

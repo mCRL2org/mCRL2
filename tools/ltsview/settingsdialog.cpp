@@ -14,6 +14,8 @@
 #include <wx/spinctrl.h>
 #include <wx/slider.h>
 #include "mcrl2/utilities/colorbutton.h"
+#include "glcanvas.h"
+#include "settings.h"
 #include "ids.h"
 #include "utils.h"
 

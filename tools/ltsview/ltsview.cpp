@@ -6,41 +6,35 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file
+/// \file ltsview.cpp
 /// \brief Contains implementation of the LTSView application.
 
 #define NAME "ltsview"
 #define AUTHOR "Bas Ploeger and Carst Tankink"
 
+#include "ltsview.h"
 #include <string>
 #include <wx/wx.h>
+#include <wx/filename.h>
+#include <wx/image.h>
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "cluster.h"
+#include "fileloader.h"
+#include "glcanvas.h"
+#include "lts.h"
+#include "mainframe.h"
+#include "markmanager.h"
+#include "markstateruledialog.h"
+#include "settings.h"
+#include "state.h"
+#include "visualizer.h"
 
-std::string get_about_message() {
-  static const std::string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-    std::string("\n"
-     "Tool for interactive visualisation of state transition systems.\n"
-     "Developed by Bas Ploeger and Carst Tankink.\n"
-     "\n"
-     "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. "
-     "See: F. van Ham, H. van de Wetering and J.J. van Wijk, "
-     "\"Visualization of State Transition Graphs\". "
-     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-     "\n"
-     "The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n"
-     "\n"
-     "This tool is part of the mCRL2 toolset.\n"
-     "For information see http://www.mcrl2.org\n"
-     "\n"
-     "For feature requests or bug reports,\n"
-     "please visit http://www.mcrl2.org/issuetracker");
-
-  return version_information;
-}
+using namespace std;
+using namespace Utils;
 
 std::string lts_file_argument;
+std::string parse_error;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //SQuADT protocol interface
@@ -80,22 +74,31 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
       return mcrl2_wx_tool_interface::perform_task(c);
     }
 };
-#endif
+#endif // ENABLE_SQUADT_CONNECTIVITY
 
-#include <wx/filename.h>
-#include <wx/image.h>
-#include "mcrl2/utilities/aterm_ext.h"
-#include "ltsview.h"
-#include "markstateruledialog.h"
-#include "fileloader.h"
-#include "settings.h"
+std::string get_about_message() {
+  static const std::string version_information =
+        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
+                                                        version_information() +
+    std::string("\n"
+     "Tool for interactive visualisation of state transition systems.\n"
+     "Developed by Bas Ploeger and Carst Tankink.\n"
+     "\n"
+     "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. "
+     "See: F. van Ham, H. van de Wetering and J.J. van Wijk, "
+     "\"Visualization of State Transition Graphs\". "
+     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+     "\n"
+     "The default colour scheme for state marking was obtained through http://www.colorbrewer.org\n"
+     "\n"
+     "This tool is part of the mCRL2 toolset.\n"
+     "For information see http://www.mcrl2.org\n"
+     "\n"
+     "For feature requests or bug reports,\n"
+     "please visit http://www.mcrl2.org/issuetracker");
 
-using namespace std;
-using namespace Utils;
-IMPLEMENT_APP_NO_MAIN(LTSView)
-
-BEGIN_EVENT_TABLE(LTSView, wxApp)
-END_EVENT_TABLE()
+  return version_information;
+}
 
 void parse_command_line(int argc, wxChar** argv) {
 
@@ -121,7 +124,10 @@ void parse_command_line(int argc, wxChar** argv) {
   }
 }
 
-std::string parse_error;
+IMPLEMENT_APP_NO_MAIN(LTSView)
+
+BEGIN_EVENT_TABLE(LTSView, wxApp)
+END_EVENT_TABLE()
 
 bool LTSView::OnInit()
 {

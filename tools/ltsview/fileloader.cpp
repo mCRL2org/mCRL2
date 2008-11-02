@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file
+/// \file fileloader.cpp
 /// \brief Implementation of the FileLoader for loading FSM files
 
+#include "fileloader.h"
 #include <fstream>
 #include <sstream>
-#include "fileloader.h"
 #include "ltsview_fsmparser.hpp"
 #include "ltsview_fsmlexer.h"
 

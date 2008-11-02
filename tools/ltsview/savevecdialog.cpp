@@ -10,9 +10,12 @@
 /// \brief Implements the SaveVecDialog class
 
 #include "savevecdialog.h"
-#include <wx/statline.h>
 #include <vector>
+#include <wx/statline.h>
+#include <wx/statusbr.h>
 #include "gl2ps/gl2ps.h"
+#include "glcanvas.h"
+
 using namespace std;
 
 // For compatibility with older wxWidgets versions (pre 2.8)

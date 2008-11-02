@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settings.h
-/// \brief Add your file description here.
+/// \brief Header file for Settings class
 
 #ifndef SETTINGS_H
 #define SETTINGS_H

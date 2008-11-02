@@ -11,8 +11,12 @@
 
 #include "savepicdialog.h"
 #include <algorithm>
+#include <wx/spinctrl.h>
 #include <wx/statline.h>
+#include <wx/statusbr.h>
+#include "glcanvas.h"
 #include "utils.h"
+
 using namespace std;
 
 // For compatibility with older wxWidgets versions (pre 2.8)

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitives.h
-/// \brief Add your file description here.
+/// \brief Header file for primitive classes
 
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H

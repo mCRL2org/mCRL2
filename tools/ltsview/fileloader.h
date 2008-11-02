@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file 
+/// \file fileloader.h
 /// \brief Declaration of the FileLoader for loading FSM files
 
 #ifndef FILELOADER_H
@@ -15,7 +15,8 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "lts.h"
+
+class LTS;
 
 namespace ltsview {
 

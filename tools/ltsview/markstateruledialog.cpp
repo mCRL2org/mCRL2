@@ -7,12 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file markstateruledialog.cpp
-/// \brief Add your file description here.
+/// \brief Source file for MarkStateRuleDialog class
 
 #include "markstateruledialog.h"
+#include <wx/checklst.h>
 #include <wx/statline.h>
 #include <wx/splitter.h>
 #include "ids.h"
+#include "lts.h"
+#include "mediator.h"
 #include "utils.h"
 
 using namespace std;

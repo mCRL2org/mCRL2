@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file conedb.cpp
-/// \brief Implements a database for storing cone objects.
+/// \brief Source file for the ConeDB class.
 
 #include "conedb.h"
 #include "utils.h"

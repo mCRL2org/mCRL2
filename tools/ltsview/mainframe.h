@@ -13,22 +13,22 @@
 #define MAINFRAME_H
 
 #include <string>
+#include <vector>
 #include <wx/wx.h>
-#include <wx/checklst.h>
 #include <wx/filename.h>
-#include <wx/listctrl.h>
-#include <wx/progdlg.h>
 
-#include "infodialog.h"
-#include "simdialog.h"
-#include "markdialog.h"
-#include "settingsdialog.h"
-#include "savepicdialog.h"
-#include "savevecdialog.h"
-#include "glcanvas.h"
-#include "mediator.h"
-#include "settings.h"
-
+class wxCheckListBox;
+class wxProgressDialog;
+class InfoDialog;
+class SimDialog;
+class MarkDialog;
+class SettingsDialog;
+class SavePicDialog;
+class SaveVecDialog;
+class GLCanvas;
+class Mediator;
+class Settings;
+class Simulation;
 
 class MainFrame : public wxFrame {
   public:

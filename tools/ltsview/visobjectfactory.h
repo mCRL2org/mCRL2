@@ -7,14 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visobjectfactory.h
-/// \brief Add your file description here.
+/// \brief Header file for VisObjectFactory class
 
 #ifndef VISOBJECTFACTORY_H
 #define VISOBJECTFACTORY_H
 #include <vector>
-#include "primitivefactory.h"
 #include "utils.h"
 
+class PrimitiveFactory; /* forward declaration */
 class VisObject; /* forward declaration */
 
 class VisObjectFactory {

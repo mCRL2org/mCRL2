@@ -38,10 +38,11 @@
 #include "ltsview_fsmparser.hpp"
 
 /* User implementation prologue.  */
-#line 56 "ltsview_fsmparser.yy"
+#line 64 "ltsview_fsmparser.yy"
 
 #include "fileloader.h"
 #include "ltsview_fsmlexer.h"
+#include "lts.h"
 
 /* this "connects" the bison parser in the fileloader to the flex
  * scanner class object. it defines the yylex() function call to pull
@@ -53,7 +54,7 @@
 
 
 /* Line 317 of lalr1.cc.  */
-#line 57 "ltsview_fsmparser.cpp"
+#line 58 "ltsview_fsmparser.cpp"
 
 #ifndef YY_
 # if YYENABLE_NLS
@@ -211,29 +212,29 @@ namespace ltsview
     switch (yytype)
       {
         case 8: /* "\"string\"" */
-#line 53 "ltsview_fsmparser.yy"
+#line 61 "ltsview_fsmparser.yy"
 	{ delete (yyvaluep->stringVal); };
-#line 217 "ltsview_fsmparser.cpp"
+#line 218 "ltsview_fsmparser.cpp"
 	break;
       case 9: /* "\"quoted string\"" */
-#line 53 "ltsview_fsmparser.yy"
+#line 61 "ltsview_fsmparser.yy"
 	{ delete (yyvaluep->stringVal); };
-#line 222 "ltsview_fsmparser.cpp"
+#line 223 "ltsview_fsmparser.cpp"
 	break;
       case 23: /* "type_name" */
-#line 54 "ltsview_fsmparser.yy"
+#line 62 "ltsview_fsmparser.yy"
 	{ delete (yyvaluep->stringVal); };
-#line 227 "ltsview_fsmparser.cpp"
+#line 228 "ltsview_fsmparser.cpp"
 	break;
       case 24: /* "type_name1" */
-#line 54 "ltsview_fsmparser.yy"
+#line 62 "ltsview_fsmparser.yy"
 	{ delete (yyvaluep->stringVal); };
-#line 232 "ltsview_fsmparser.cpp"
+#line 233 "ltsview_fsmparser.cpp"
 	break;
       case 33: /* "action" */
-#line 54 "ltsview_fsmparser.yy"
+#line 62 "ltsview_fsmparser.yy"
 	{ delete (yyvaluep->stringVal); };
-#line 237 "ltsview_fsmparser.cpp"
+#line 238 "ltsview_fsmparser.cpp"
 	break;
 
 	default:
@@ -309,13 +310,13 @@ namespace ltsview
 
 
     /* User initialization code.  */
-    #line 26 "ltsview_fsmparser.yy"
+    #line 34 "ltsview_fsmparser.yy"
 {
     // initialize the initial location object
     yylloc.begin.filename = yylloc.end.filename = &fileloader.filename;
 }
   /* Line 547 of yacc.c.  */
-#line 319 "ltsview_fsmparser.cpp"
+#line 320 "ltsview_fsmparser.cpp"
     /* Initialize the stacks.  The initial state will be pushed in
        yynewstate, since the latter expects the semantical and the
        location values to have been already stored, initialize these
@@ -431,24 +432,24 @@ namespace ltsview
     switch (yyn)
       {
 	  case 2:
-#line 72 "ltsview_fsmparser.yy"
+#line 81 "ltsview_fsmparser.yy"
     { fileloader.num_pars = 0;
       fileloader.ignore_par.clear();
     ;}
     break;
 
   case 3:
-#line 77 "ltsview_fsmparser.yy"
+#line 86 "ltsview_fsmparser.yy"
     { fileloader.state_id = 0; ;}
     break;
 
   case 6:
-#line 88 "ltsview_fsmparser.yy"
+#line 97 "ltsview_fsmparser.yy"
     { fileloader.par_values.clear(); ;}
     break;
 
   case 7:
-#line 90 "ltsview_fsmparser.yy"
+#line 99 "ltsview_fsmparser.yy"
     { if (!fileloader.ignore_par[fileloader.num_pars]) {
         fileloader.lts->addParameter(fileloader.par_name,
             fileloader.par_type,fileloader.par_values);
@@ -458,58 +459,58 @@ namespace ltsview
     break;
 
   case 9:
-#line 100 "ltsview_fsmparser.yy"
+#line 109 "ltsview_fsmparser.yy"
     { fileloader.par_name = *(yysemantic_stack_[(1) - (1)].stringVal) ;}
     break;
 
   case 11:
-#line 106 "ltsview_fsmparser.yy"
+#line 115 "ltsview_fsmparser.yy"
     { fileloader.ignore_par.push_back((yysemantic_stack_[(3) - (2)].integerVal) == 0);
       fileloader.par_values.reserve((yysemantic_stack_[(3) - (2)].integerVal));
     ;}
     break;
 
   case 12:
-#line 113 "ltsview_fsmparser.yy"
+#line 122 "ltsview_fsmparser.yy"
     { fileloader.par_type = *(yysemantic_stack_[(1) - (1)].stringVal); ;}
     break;
 
   case 14:
-#line 119 "ltsview_fsmparser.yy"
+#line 128 "ltsview_fsmparser.yy"
     { (yyval.stringVal) = new std::string("") ;}
     break;
 
   case 15:
-#line 122 "ltsview_fsmparser.yy"
+#line 131 "ltsview_fsmparser.yy"
     { (yyval.stringVal) = (yysemantic_stack_[(1) - (1)].stringVal) ;}
     break;
 
   case 16:
-#line 125 "ltsview_fsmparser.yy"
+#line 134 "ltsview_fsmparser.yy"
     {
       (yyval.stringVal) = new std::string(*(yysemantic_stack_[(3) - (1)].stringVal) + "->" + *(yysemantic_stack_[(3) - (3)].stringVal));
     ;}
     break;
 
   case 17:
-#line 132 "ltsview_fsmparser.yy"
+#line 141 "ltsview_fsmparser.yy"
     { (yyval.stringVal) = (yysemantic_stack_[(1) - (1)].stringVal) ;}
     break;
 
   case 18:
-#line 135 "ltsview_fsmparser.yy"
+#line 144 "ltsview_fsmparser.yy"
     {
       (yyval.stringVal) = new std::string("(" + *(yysemantic_stack_[(3) - (2)].stringVal) + ")");
     ;}
     break;
 
   case 21:
-#line 149 "ltsview_fsmparser.yy"
+#line 158 "ltsview_fsmparser.yy"
     { fileloader.par_values.push_back(*(yysemantic_stack_[(1) - (1)].stringVal)); ;}
     break;
 
   case 23:
-#line 158 "ltsview_fsmparser.yy"
+#line 167 "ltsview_fsmparser.yy"
     { 
       fileloader.par_index = 0; 
       fileloader.state_vector.clear();
@@ -517,7 +518,7 @@ namespace ltsview
     break;
 
   case 24:
-#line 163 "ltsview_fsmparser.yy"
+#line 172 "ltsview_fsmparser.yy"
     { 
       fileloader.lts->addState(fileloader.state_id,fileloader.state_vector);
       ++fileloader.state_id;
@@ -525,7 +526,7 @@ namespace ltsview
     break;
 
   case 27:
-#line 174 "ltsview_fsmparser.yy"
+#line 183 "ltsview_fsmparser.yy"
     { 
       if (fileloader.par_index >= fileloader.ignore_par.size())
       {
@@ -549,7 +550,7 @@ namespace ltsview
     break;
 
   case 30:
-#line 207 "ltsview_fsmparser.yy"
+#line 216 "ltsview_fsmparser.yy"
     {
       std::map< std::string,int >::iterator p = fileloader.labels.find(*(yysemantic_stack_[(3) - (3)].stringVal));
       int l;
@@ -569,18 +570,18 @@ namespace ltsview
     break;
 
   case 31:
-#line 227 "ltsview_fsmparser.yy"
+#line 236 "ltsview_fsmparser.yy"
     { (yyval.stringVal) = new std::string("") ;}
     break;
 
   case 32:
-#line 230 "ltsview_fsmparser.yy"
+#line 239 "ltsview_fsmparser.yy"
     { (yyval.stringVal) = (yysemantic_stack_[(1) - (1)].stringVal) ;}
     break;
 
 
     /* Line 675 of lalr1.cc.  */
-#line 584 "ltsview_fsmparser.cpp"
+#line 585 "ltsview_fsmparser.cpp"
 	default: break;
       }
     YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);
@@ -940,10 +941,10 @@ namespace ltsview
   const unsigned char
   LTSViewFSMParser::yyrline_[] =
   {
-         0,    72,    72,    77,    72,    84,    88,    90,    87,   100,
-     100,   105,   113,   112,   119,   121,   124,   131,   134,   141,
-     144,   148,   154,   158,   163,   157,   170,   173,   198,   201,
-     206,   227,   229
+         0,    81,    81,    86,    81,    93,    97,    99,    96,   109,
+     109,   114,   122,   121,   128,   130,   133,   140,   143,   150,
+     153,   157,   163,   167,   172,   166,   179,   182,   207,   210,
+     215,   236,   238
   };
 
   // Print the state stack on the debug stream.
@@ -1031,7 +1032,7 @@ namespace ltsview
 
 } // namespace ltsview
 
-#line 233 "ltsview_fsmparser.yy"
+#line 242 "ltsview_fsmparser.yy"
 
 
 void ltsview::LTSViewFSMParser::error(const LTSViewFSMParser::location_type &l, 

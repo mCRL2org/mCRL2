@@ -9,9 +9,8 @@
 /// \file glcanvas.cpp
 /// \brief Implements the OpenGL canvas
 
-#include <cmath>
-#include <wx/image.h>
 #include "glcanvas.h"
+#include <wx/image.h>
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
@@ -19,6 +18,9 @@
 #include "icons/pan_cursor_mask.xpm"
 #include "icons/rotate_cursor.xpm"
 #include "icons/rotate_cursor_mask.xpm"
+#include "mediator.h"
+#include "settings.h"
+#include "visualizer.h"
 #include "tr/tr.h"
 
 using namespace Utils;

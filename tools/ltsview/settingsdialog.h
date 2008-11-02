@@ -12,10 +12,11 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 #include <wx/wx.h>
-#include <wx/spinctrl.h>
-#include "glcanvas.h"
 #include "settings.h"
 #include "utils.h"
+
+class GLCanvas;
+class wxSpinEvent;
 
 class SettingsDialog: public wxDialog, public Subscriber {
   public:
