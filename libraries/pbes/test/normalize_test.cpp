@@ -190,7 +190,5 @@ int test_main(int argc, char** argv)
   test_normalize3();
   test_pfnf_visitor();
 
-  BOOST_CHECK(false);
-
   return 0;
 }
