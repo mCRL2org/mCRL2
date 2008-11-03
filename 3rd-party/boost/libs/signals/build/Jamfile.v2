@@ -7,15 +7,15 @@
 
 # For more information, see http://www.boost.org
 
-project boost/signals 
+project boost/signals
     : source-location ../src
     ;
 
 # Base names of the source files for libboost_signals
 SOURCES = trackable connection named_slot_map signal_base slot ;
 
-lib boost_signals : $(SOURCES).cpp 
-    :         
+lib boost_signals : $(SOURCES).cpp
+    :
         <define>BOOST_SIGNALS_NO_LIB=1
         <link>shared:<define>BOOST_SIGNALS_DYN_LINK=1
     ;

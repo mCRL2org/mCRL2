@@ -203,7 +203,7 @@ namespace boost
       }
 
       basic_path & remove_filename();
-      basic_path & replace_extension( const string_type & new_extension = "" );
+      basic_path & replace_extension( const string_type & new_extension = string_type() );
 
 # ifndef BOOST_FILESYSTEM_NO_DEPRECATED
       basic_path & remove_leaf() { return remove_filename(); }
@@ -227,8 +227,10 @@ namespace boost
       string_type  extension() const;
 
 # ifndef BOOST_FILESYSTEM_NO_DEPRECATED
-      string_type  leaf() const { return filename(); }
-      basic_path   branch_path() const { return parent_path(); }
+      string_type  leaf() const            { return filename(); }
+      basic_path   branch_path() const     { return parent_path(); }
+      bool         has_leaf() const        { return !m_path.empty(); }
+      bool         has_branch_path() const { return !parent_path().empty(); }
 # endif
 
       bool empty() const               { return m_path.empty(); } // name consistent with std containers
@@ -237,7 +239,7 @@ namespace boost
       bool has_root_name() const;
       bool has_root_directory() const;
       bool has_relative_path() const   { return !relative_path().empty(); }
-      bool has_filename() const            { return !m_path.empty(); }
+      bool has_filename() const        { return !m_path.empty(); }
       bool has_parent_path() const     { return !parent_path().empty(); }
 
       // iterators
@@ -531,7 +533,7 @@ namespace boost
     //  inserters and extractors  --------------------------------------------//
 
 // bypass VC++ 7.0 and earlier, and broken Borland compilers
-# if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300) && !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
+# if !BOOST_WORKAROUND(BOOST_MSVC, <= 1300) && !BOOST_WORKAROUND(__BORLANDC__, < 0x610)
     template< class Path >
     std::basic_ostream< typename Path::string_type::value_type,
       typename Path::string_type::traits_type > &
