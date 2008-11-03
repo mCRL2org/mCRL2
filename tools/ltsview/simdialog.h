@@ -16,6 +16,7 @@
 
 class Mediator;
 class wxListView;
+class wxListEvent;
 
 class SimDialog: public wxDialog, public simReader
 {
