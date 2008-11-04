@@ -8,15 +8,19 @@
 //
 /// \file nextstate_standard.cpp
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iterator>
+#include <memory>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
-#include <mcrl2/data/enum.h>
-#include <mcrl2/data/rewrite.h>
-#include <mcrl2/lps/nextstate/standard.h>
+#include "mcrl2/data/enum.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -107,10 +111,10 @@ ATerm NextStateStandard::buildTree(ATerm *args)
 		{
 			args[i/2] = (ATerm) ATmakeAppl2(info.pairAFun,args[i],args[i+1]);
 		}
-		
+
 		n /= 2;
 	}
-	
+
 	return args[0];
 }
 
@@ -293,7 +297,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
                 // Take dataspec from current_spec, then take the consspec from the dataspec
                 // and take the list of opids (l) from this consspec
 		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
-                
+
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
@@ -683,7 +687,7 @@ void NextStateStandard::prioritise(const char *action)
 		}
 		pos++;
 	}
-	
+
 	info.num_prioritised += rest;
 }
 
@@ -697,10 +701,43 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, NextStateGener
 	if ( old == NULL )
 	{
 		return new NextStateGeneratorStandard(state,info,next_id++);
-	} else {
-		((NextStateGeneratorStandard *) old)->reset(state);
-		return old;
 	}
+
+        static_cast< NextStateGeneratorStandard* >(old)->reset(state);
+
+	return old;
+}
+
+class NextStateGeneratorSummand : public NextStateGeneratorStandard {
+
+  private:
+
+    int m_summand;
+
+  public:
+
+    NextStateGeneratorSummand(int summand, ATerm state, ns_info& info, unsigned int identifier)
+                          : NextStateGeneratorStandard(state, info, identifier, true), m_summand(summand) {
+
+      reset(state, summand);
+    }
+
+    void reset(ATerm state, int summand) {
+      m_summand = summand;
+
+      NextStateGeneratorStandard::reset(state, summand);
+    }
+};
+
+NextStateGenerator *NextStateStandard::getNextStates(ATerm state, int index, NextStateGenerator *old)
+{
+  if ( old != 0 ) {
+    static_cast< NextStateGeneratorSummand* >(old)->reset(state, index);
+
+    return old;
+  }
+
+  return new NextStateGeneratorSummand(index, state,info,next_id++);
 }
 
 Rewriter *NextStateStandard::getRewriter()
@@ -719,7 +756,7 @@ Enumerator *NextStateStandard::getEnumerator()
 ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 {
 	ATermList l;
-		
+
 	if ( *info.current_id != id )
 	{
 		set_substitutions();
@@ -800,10 +837,12 @@ void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
 	*vars = ATgetNext(*vars);
 }
 
-NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier)
+NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand)
 {
 	info = Info;
 	id = identifier;
+        error = false;
+        single_summand = SingleSummand;
 
 	cur_state = NULL;
 	cur_act = NULL;
@@ -860,7 +899,7 @@ void NextStateGeneratorStandard::set_substitutions()
 	*info.current_id = id;
 }
 
-void NextStateGeneratorStandard::reset(ATerm State)
+void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 {
 	error = false;
 
@@ -872,11 +911,11 @@ void NextStateGeneratorStandard::reset(ATerm State)
 	{
 		sols = info.enum_obj->findSolutions(ATmakeList0(),info.rewr_obj->toRewriteFormat(gsMakeDataExprFalse()),sols);
 	} else {
-		cur_act = ATgetArgument(info.summands[0],2);
-		cur_nextstate = (ATermList) ATgetArgument(info.summands[0],3);
-		sols = info.enum_obj->findSolutions(ATLgetArgument(info.summands[0],0),ATgetArgument(info.summands[0],1),sols);
+		cur_act = ATgetArgument(info.summands[SummandIndex],2);
+		cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
+		sols = info.enum_obj->findSolutions(ATLgetArgument(info.summands[SummandIndex],0),ATgetArgument(info.summands[SummandIndex],1),sols);
 	}
-	sum_idx = 1;
+	sum_idx = SummandIndex + 1;
 }
 
 bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool *prioritised)
@@ -897,8 +936,12 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 			}
 
 			sols = info.enum_obj->findSolutions(ATLgetArgument(info.summands[sum_idx],0),ATgetArgument(info.summands[sum_idx],1),sols);
-		
+
 			sum_idx++;
+
+                        if (single_summand) {
+                          return false;
+                        }
 		}
 	}
 	error |= sols->errorOccurred();
@@ -936,7 +979,7 @@ bool NextStateGeneratorStandard::errorOccurred()
 	return error;
 }
 
-ATerm NextStateGeneratorStandard::get_state()
+ATerm NextStateGeneratorStandard::get_state() const
 {
 	return cur_state;
 }

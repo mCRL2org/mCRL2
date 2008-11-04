@@ -11,6 +11,8 @@
 #ifndef _LIBNEXTSTATE_H
 #define _LIBNEXTSTATE_H
 
+#include <memory>
+#include <vector>
 #include <aterm2.h>
 #include <mcrl2/data/enum.h>
 #include <mcrl2/data/rewrite.h>
@@ -75,7 +77,7 @@ class NextStateGenerator
 		 *        originate.
 		 * \return The state being explored.
 		 **/
-		virtual ATerm get_state() = 0;
+		virtual ATerm get_state() const = 0;
 };
 
 /**
@@ -147,10 +149,43 @@ class NextState
 					) = 0;
 
 		/**
+		 * \brief Get the transitions from a given state.
+		 * \param state The state to explore.
+                 * \param index Index of the summand of which to generate the next states.
+		 * \param old   A NextStateGenerator to be used for retreiving
+		 *              the transitions. If NULL, a new object is
+		 *              created.
+                 * \pre the list of summands does not contain delta summands (implementation limitation)
+		 * \return A NextStateGenerator which can be used to retreive
+		 *         the transitions from state. If old is not NULL, old
+		 *         itself is returned (reinitialised for the new state).
+		 *
+		 * The optional argument old allows one to reuse
+		 * NextStateGenerator objects (avoiding superfluous allocation
+		 * and deallocation). Typical use is as follows (where ns is a
+		 * NextState object):
+		 *
+		 * \code
+		 *   NextStateGenerator *gen = NULL;
+		 *   while ( c )
+		 *   {
+		 *     gen = ns->getNextStates(state,gen);
+		 *     ...
+		 *   }
+		 * \endcode
+		 **/
+		virtual NextStateGenerator *getNextStates(
+					ATerm state,
+                                        int index,
+					NextStateGenerator *old = NULL
+					) = 0;
+
+		/**
 		 * \brief Get number of state parameters.
 		 * \return Number of state parameters.
 		 **/
 		virtual int getStateLength() = 0;
+
 		/**
 		 * \brief Get an argument from a state.
 		 * \param state The state to get the argument from.

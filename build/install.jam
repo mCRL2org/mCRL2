@@ -113,15 +113,8 @@ rule install-libraries ( names * : requirements * ) {
 
       local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
 
-      while $(header-root:B) != "include" {
-        local new-header-root = [ path.parent $(header-root) ] ;
-
-        if [ path.basename $(new-header-root) ] = "include" && [ path.basename $(header-root) ] != mcrl2 {
-          header-root = [ path.join $(new-header-root) mcrl2 ] ;
-        }
-        else {
-          header-root = $(new-header-root) ;
-        }
+      while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
+        header-root = [ path.parent $(header-root) ] ;
       }
 
       install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
@@ -326,6 +319,11 @@ rule platform-configuration ( properties * ) {
       requirements += <cxxflags>"-fno-strict-overflow" <cflags>"-fno-strict-overflow" ;
     }
   }
+  else if <target-os>linux in $(properties) {
+    if <toolset>intel in $(properties) {
+      requirements += <define>"\"__sync_fetch_and_add(ptr,addend)=_InterlockedExchangeAdd(const_cast<void*>(reinterpret_cast<volatile void*>(ptr)), addend)\"" ;
+    }
+  }
   else if <target-os>windows in $(properties) {
     if <toolset>msvc in $(properties) || <toolset>intel in $(properties) {
       requirements += <define>WIN32
@@ -440,11 +438,11 @@ rule feature-configuration ( ) {
   # Extract build requirements from command line options
   for option in [ modules.peek : ARGV ] {
     local temporary = [ MATCH ([^=]+)= : $(option) ] ;
-  
+
     if $(temporary) {
       local value  = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
       local values = [ regex.split $(value) "," ] ;
-  
+
       if ! [ MATCH ^(-).* : $(option) ] {
         properties += <$(temporary)>$(values) ;
       }
@@ -457,11 +455,11 @@ rule feature-configuration ( ) {
   # Extract build requirements imported from build/config.jam
   for option in $(BUILD_OPTIONS) {
     local temporary = [ MATCH ([^=]+)= : $(option) ] ;
-  
+
     if $(temporary) {
       if ! [ feature.get-values $(temporary) : $(properties) ] {
         local value = [ MATCH [^=]+=([^=]+)$ : $(option) ] ;
-  
+
         if ! [ MATCH ^(-).* : $(option) ] {
           properties += $(value:G=<$(temporary)>) ;
         }
