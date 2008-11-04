@@ -457,8 +457,8 @@ namespace mcrl2 {
       function_symbol_list list_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_list result;
-        result.push_back(nil(s))
-        result.push_back(cons_(s))
+        result.push_back(nil(s));
+        result.push_back(cons_(s));
 
         return result;
       }
@@ -468,15 +468,15 @@ namespace mcrl2 {
       function_symbol_list list_generate_functions_code(const sort_expression& s)
       {
         function_symbol_list result;
-        result.push_back(in(s))
-        result.push_back(count(s))
-        result.push_back(snoc(s))
-        result.push_back(concat(s))
-        result.push_back(element_at(s))
-        result.push_back(head(s))
-        result.push_back(tail(s))
-        result.push_back(rhead(s))
-        result.push_back(rtail(s))
+        result.push_back(in(s));
+        result.push_back(count(s));
+        result.push_back(snoc(s));
+        result.push_back(concat(s));
+        result.push_back(element_at(s));
+        result.push_back(head(s));
+        result.push_back(tail(s));
+        result.push_back(rhead(s));
+        result.push_back(rtail(s));
 
         return result;
       }

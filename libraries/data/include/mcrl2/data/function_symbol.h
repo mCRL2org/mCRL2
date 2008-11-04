@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/application.h"
 
 namespace mcrl2 {
   
@@ -68,12 +69,30 @@ namespace mcrl2 {
           : data_expression(core::detail::gsMakeOpId(name, sort))
         {}
 
+        /// \brief Returns the application of this function symbol to an argument.
+        /// \pre this->sort() is a function sort.
+        /// \param[in] e The data expression to which the function symbol is applied
+        application operator()(const data_expression& e) const
+        {
+          assert(this->sort().is_function_sort());
+          return application(*this, e);
+        }
+
         /// \brief Returns the name of the variable.
         inline
         std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }
+
+        /// \brief Returns true iff this function symbol is a number.
+        inline
+        bool is_number() const
+        {
+          return core::detail::gsIsNumericString(name().c_str());
+        }
+
+
 
         /*
         /// \overload

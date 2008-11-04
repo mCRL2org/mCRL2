@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/application.h"
 
 namespace mcrl2 {
   
@@ -66,6 +67,15 @@ namespace mcrl2 {
         std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
+        }
+
+        /// \brief Returns the application of this variable to an argument.
+        /// \pre this->sort() is a function sort.
+        /// \param[in] e The data expression to which the variable is applied
+        application operator()(const data_expression& e)
+        {
+          assert(this->sort().is_function_sort());
+          return application(*this, e);
         }
 
         /* Should be enabled when the implementation in data_expression is

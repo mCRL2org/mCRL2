@@ -9,6 +9,8 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/forall.h"
 
 
 namespace mcrl2 {
@@ -387,15 +389,15 @@ namespace mcrl2 {
       function_symbol_list set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_list result;
-        result.push_back(set_comprehension(s))
-        result.push_back(emptyset(s))
-        result.push_back(in(s))
-        result.push_back(subset_or_equal(s))
-        result.push_back(subset(s))
-        result.push_back(union_(s))
-        result.push_back(difference(s))
-        result.push_back(intersection(s))
-        result.push_back(complement(s))
+        result.push_back(set_comprehension(s));
+        result.push_back(emptyset(s));
+        result.push_back(in(s));
+        result.push_back(subset_or_equal(s));
+        result.push_back(subset(s));
+        result.push_back(union_(s));
+        result.push_back(difference(s));
+        result.push_back(intersection(s));
+        result.push_back(complement(s));
 
         return result;
       }

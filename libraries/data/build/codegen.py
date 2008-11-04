@@ -40,6 +40,9 @@ import Parsing
 #
 verbose = False       # Switch on debug output?
 debug = False         # Switch on verbose output? 
+has_lambda = False
+has_forall = False
+has_exists = False
 sorts_cache = []
 sorts_to_functions = {}
 sorts_to_namespaces = {}
@@ -527,7 +530,7 @@ def generate_function_code(sorts, functions, function):
       sortargs = add_to_comma_sep_string(sortargs, s.lower());
 
     if len(function[2]) == 1:
-      code += "        result.push_back(%s(%s))\n" % (function[1].label, sortargs)
+      code += "        result.push_back(%s(%s));\n" % (function[1].label, sortargs)
     else:
       for s in function[2]:
         add_sort_args = ""
@@ -538,8 +541,8 @@ def generate_function_code(sorts, functions, function):
           for (index,d) in enumerate(domain[1]):
             domain[1][i] = d[1]
         for d in domain[1]:
-          add_sort_args = add_to_comma_sep_string(add_sort_args, "%s()" % get_label(sorts, d[0]))
-        code += "        result.push_back(%s(%s))\n" % (function[1].label, add_to_comma_sep_string(sortargs,add_sort_args))
+          add_sort_args = add_to_comma_sep_string(add_sort_args, "%s()" % add_namespace(get_label(sorts, d[0])))
+        code += "        result.push_back(%s(%s));\n" % (function[1].label, add_to_comma_sep_string(sortargs,add_sort_args))
     return code
 
 def generate_functions_code(sorts, functions, function_type):
@@ -1006,6 +1009,12 @@ class Result(Parsing.Nonterm):
             has_container = True
         if has_container:
           self.includes += ["container_sort"]
+        if has_lambda:
+          self.includes += ["lambda"]
+        if has_forall:
+          self.includes += ["forall"]
+        if has_exists:
+          self.includes += ["exists"]
 
         functions_cache = functions_cache + self.spec.functions
 
@@ -1350,6 +1359,8 @@ class DataExpr(Parsing.Nonterm):
 
     def reduceLambda(self, lmb, lbrack, vardecl, comma, expr, rbrack):
         "%reduce lambda lbrack VarDecl comma DataExpr rbrack"
+        global has_lambda
+        has_lambda = True
         self.expr = ["lambda", vardecl, expr]
 
         self.variables = expr.variables
@@ -1362,6 +1373,8 @@ class DataExpr(Parsing.Nonterm):
 
     def reduceForall(self, forall, lbrack, vardecl, comma, expr, rbrack):
         "%reduce forall lbrack VarDecl comma DataExpr rbrack"
+        global has_forall
+        has_forall = True
         self.expr = ["forall", vardecl, expr]
 
         self.variables = expr.variables
@@ -1374,6 +1387,8 @@ class DataExpr(Parsing.Nonterm):
 
     def reduceExists(self, exists, lbrack, vardecl, comma, expr, rbrack):
         "%reduce exists lbrack VarDecl comma DataExpr rbrack"
+        global has_exists
+        has_exists = True
         self.expr = ["exists", vardecl, expr]
 
         self.variables = expr.variables

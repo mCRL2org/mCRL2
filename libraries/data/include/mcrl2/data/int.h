@@ -988,8 +988,8 @@ namespace mcrl2 {
       function_symbol_list int__generate_constructors_code()
       {
         function_symbol_list result;
-        result.push_back(cint())
-        result.push_back(cneg())
+        result.push_back(cint());
+        result.push_back(cneg());
 
         return result;
       }
@@ -999,36 +999,36 @@ namespace mcrl2 {
       function_symbol_list int__generate_functions_code()
       {
         function_symbol_list result;
-        result.push_back(nat2int())
-        result.push_back(int2nat())
-        result.push_back(pos2int())
-        result.push_back(int2pos())
-        result.push_back(less_equal())
-        result.push_back(less())
-        result.push_back(geq())
-        result.push_back(greater())
-        result.push_back(max(pos(), int_()))
-        result.push_back(max(int_(), pos()))
-        result.push_back(max(nat(), int_()))
-        result.push_back(max(int_(), nat()))
-        result.push_back(max(int_(), int_()))
-        result.push_back(min())
-        result.push_back(abs())
-        result.push_back(negate(pos()))
-        result.push_back(negate(nat()))
-        result.push_back(negate(int_()))
-        result.push_back(succ())
-        result.push_back(pred(nat()))
-        result.push_back(pred(int_()))
-        result.push_back(dub())
-        result.push_back(plus())
-        result.push_back(minus(pos(), pos()))
-        result.push_back(minus(nat(), nat()))
-        result.push_back(minus(int_(), int_()))
-        result.push_back(times())
-        result.push_back(div())
-        result.push_back(mod())
-        result.push_back(exp())
+        result.push_back(nat2int());
+        result.push_back(int2nat());
+        result.push_back(pos2int());
+        result.push_back(int2pos());
+        result.push_back(less_equal());
+        result.push_back(less());
+        result.push_back(geq());
+        result.push_back(greater());
+        result.push_back(max(sort_pos::pos(), sort_int_::int_()));
+        result.push_back(max(sort_int_::int_(), sort_pos::pos()));
+        result.push_back(max(sort_nat::nat(), sort_int_::int_()));
+        result.push_back(max(sort_int_::int_(), sort_nat::nat()));
+        result.push_back(max(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(min());
+        result.push_back(abs());
+        result.push_back(negate(sort_pos::pos()));
+        result.push_back(negate(sort_nat::nat()));
+        result.push_back(negate(sort_int_::int_()));
+        result.push_back(succ());
+        result.push_back(pred(sort_nat::nat()));
+        result.push_back(pred(sort_int_::int_()));
+        result.push_back(dub());
+        result.push_back(plus());
+        result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(minus(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(times());
+        result.push_back(div());
+        result.push_back(mod());
+        result.push_back(exp());
 
         return result;
       }

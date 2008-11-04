@@ -11,6 +11,8 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/forall.h"
 
 
 namespace mcrl2 {
@@ -468,17 +470,17 @@ namespace mcrl2 {
       function_symbol_list bag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_list result;
-        result.push_back(bag_comprehension(s))
-        result.push_back(emptybag(s))
-        result.push_back(count(s))
-        result.push_back(in(s))
-        result.push_back(subbag_or_equal(s))
-        result.push_back(subbag(s))
-        result.push_back(union_(s))
-        result.push_back(difference(s))
-        result.push_back(intersection(s))
-        result.push_back(bag2set(s))
-        result.push_back(set2bag(s))
+        result.push_back(bag_comprehension(s));
+        result.push_back(emptybag(s));
+        result.push_back(count(s));
+        result.push_back(in(s));
+        result.push_back(subbag_or_equal(s));
+        result.push_back(subbag(s));
+        result.push_back(union_(s));
+        result.push_back(difference(s));
+        result.push_back(intersection(s));
+        result.push_back(bag2set(s));
+        result.push_back(set2bag(s));
 
         return result;
       }

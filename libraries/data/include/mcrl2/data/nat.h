@@ -1202,9 +1202,9 @@ namespace mcrl2 {
       function_symbol_list nat_generate_constructors_code()
       {
         function_symbol_list result;
-        result.push_back(c0())
-        result.push_back(cnat())
-        result.push_back(cpair())
+        result.push_back(c0());
+        result.push_back(cnat());
+        result.push_back(cpair());
 
         return result;
       }
@@ -1214,39 +1214,39 @@ namespace mcrl2 {
       function_symbol_list nat_generate_functions_code()
       {
         function_symbol_list result;
-        result.push_back(pos2nat())
-        result.push_back(nat2pos())
-        result.push_back(less_equal())
-        result.push_back(less())
-        result.push_back(geq())
-        result.push_back(greater())
-        result.push_back(max(pos(), nat()))
-        result.push_back(max(nat(), pos()))
-        result.push_back(max(nat(), nat()))
-        result.push_back(min())
-        result.push_back(abs())
-        result.push_back(succ())
-        result.push_back(pred())
-        result.push_back(dub())
-        result.push_back(plus(pos(), nat()))
-        result.push_back(plus(nat(), pos()))
-        result.push_back(plus(nat(), nat()))
-        result.push_back(gtesubt(pos(), pos()))
-        result.push_back(gtesubt(nat(), nat()))
-        result.push_back(gtesubtb())
-        result.push_back(times())
-        result.push_back(div(pos(), pos()))
-        result.push_back(div(nat(), pos()))
-        result.push_back(mod(pos(), pos()))
-        result.push_back(mod(nat(), pos()))
-        result.push_back(exp(pos(), nat()))
-        result.push_back(exp(nat(), nat()))
-        result.push_back(even())
-        result.push_back(first())
-        result.push_back(last())
-        result.push_back(divmod())
-        result.push_back(gdivmod())
-        result.push_back(ggdivmod())
+        result.push_back(pos2nat());
+        result.push_back(nat2pos());
+        result.push_back(less_equal());
+        result.push_back(less());
+        result.push_back(geq());
+        result.push_back(greater());
+        result.push_back(max(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(max(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(max(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(min());
+        result.push_back(abs());
+        result.push_back(succ());
+        result.push_back(pred());
+        result.push_back(dub());
+        result.push_back(plus(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(plus(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(plus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(gtesubt(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(gtesubt(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(gtesubtb());
+        result.push_back(times());
+        result.push_back(div(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(div(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(mod(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(mod(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(exp(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(exp(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(even());
+        result.push_back(first());
+        result.push_back(last());
+        result.push_back(divmod());
+        result.push_back(gdivmod());
+        result.push_back(ggdivmod());
 
         return result;
       }

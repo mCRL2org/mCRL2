@@ -580,8 +580,8 @@ namespace mcrl2 {
       function_symbol_list pos_generate_constructors_code()
       {
         function_symbol_list result;
-        result.push_back(c1())
-        result.push_back(cdub())
+        result.push_back(c1());
+        result.push_back(cdub());
 
         return result;
       }
@@ -591,18 +591,18 @@ namespace mcrl2 {
       function_symbol_list pos_generate_functions_code()
       {
         function_symbol_list result;
-        result.push_back(less_equal())
-        result.push_back(less())
-        result.push_back(geq())
-        result.push_back(greater())
-        result.push_back(max())
-        result.push_back(min())
-        result.push_back(abs())
-        result.push_back(succ())
-        result.push_back(plus())
-        result.push_back(add_with_carry())
-        result.push_back(times())
-        result.push_back(multir())
+        result.push_back(less_equal());
+        result.push_back(less());
+        result.push_back(geq());
+        result.push_back(greater());
+        result.push_back(max());
+        result.push_back(min());
+        result.push_back(abs());
+        result.push_back(succ());
+        result.push_back(plus());
+        result.push_back(add_with_carry());
+        result.push_back(times());
+        result.push_back(multir());
 
         return result;
       }
