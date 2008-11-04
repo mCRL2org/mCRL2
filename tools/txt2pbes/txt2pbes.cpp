@@ -20,7 +20,7 @@
 //mCRL2 specific
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
 #include "mcrl2/pbes/pbes.h"

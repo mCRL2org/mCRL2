@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/old_data/find.h"
 #include "mcrl2/old_data/rewriter.h"
 #include "mcrl2/pbes/utility.h"

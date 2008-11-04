@@ -14,7 +14,7 @@
 #define MCRL2_DATAIMPL_H
 
 #include <aterm2.h>
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {

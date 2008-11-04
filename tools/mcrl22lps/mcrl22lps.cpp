@@ -27,7 +27,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 

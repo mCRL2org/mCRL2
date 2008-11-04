@@ -31,7 +31,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include <mcrl2/core/data_implementation.h>
+#include <mcrl2/data/detail/data_implementation.h>
 #include <mcrl2/core/data_reconstruct.h>
 #include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/utilities/aterm_ext.h"

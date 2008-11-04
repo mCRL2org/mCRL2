@@ -11,6 +11,7 @@ project lps
 obj lps_data_elimination.o
        : source/data_elimination.cpp
        : <use>/libraries/old_data//headers
+         <use>/libraries/data//headers
        ;
 
 mcrl2-library lps

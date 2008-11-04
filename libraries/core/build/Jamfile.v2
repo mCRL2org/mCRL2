@@ -24,7 +24,6 @@ mcrl2-library core
          source/print.cpp
          source/print_c.cpp
          source/messaging.cpp
-         source/data_implementation_concrete.cpp
          source/data_common.cpp
          source/data_reconstruct.cpp
          source/alpha.cpp
