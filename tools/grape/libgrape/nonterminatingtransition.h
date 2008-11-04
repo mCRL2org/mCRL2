@@ -79,6 +79,12 @@ namespace grape
          * Calculates the new center coordinate of the transition, based on the coordinates of the compound states it is attached to.
          */
         void set_center_coordinate( void );
+        
+        /**
+         * Transition get end coordinate
+         * Get the end coordinate of a transition
+         */
+        coordinate get_end_coordinate( void );
     };
 
     /**

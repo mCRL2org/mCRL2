@@ -139,6 +139,12 @@ namespace grape
          * @return @c true if the coordinate of the transition can be changed, otherwise @c false
          */
         bool movable( void ) const;
+        
+        /**
+         * Transition get begin coordinate
+         * Get the begin coordinate of a transition
+         */
+        coordinate get_begin_coordinate( void );
     };
 
     /**

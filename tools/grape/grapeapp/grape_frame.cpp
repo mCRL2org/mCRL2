@@ -373,6 +373,7 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
 
   // datatype specification
   EVT_TEXT( GRAPE_DATASPEC_TEXT, grape_frame::dataspec_modified )
+
 END_EVENT_TABLE()
 
 wxHelpController* grape_frame::get_help_controller( void )

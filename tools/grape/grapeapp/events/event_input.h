@@ -100,7 +100,7 @@ namespace grape
     class grape_event_drag : public grape_event_base
     {
       private:
-        int        m_obj; /**< The identifier of the dragged object. */
+        int         m_obj; /**< The identifier of the dragged object. */
         coordinate  m_down; /**< The coordinate where the mouse was clicked. */
         coordinate  m_up;   /**< The coordinate where the mouse was released. */
         grape_direction m_click_location; /**< Contains the border where the object was clicked, if it was clicked on a border.*/

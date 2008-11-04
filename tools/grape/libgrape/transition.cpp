@@ -10,6 +10,7 @@
 
 #include "transition.h"
 #include "compoundstate.h"
+#include "visuals/geometric.h"
 
 using namespace grape::libgrape;
 
@@ -107,3 +108,15 @@ bool transition::movable( void ) const
 {
   return m_beginstate == 0;
 }
+
+coordinate transition::get_begin_coordinate( void )
+{ 
+  coordinate tail_coordinate = get_coordinate();
+  // get coordinate of begin state
+  if (m_beginstate != 0) 
+  {
+    // if there is an endstate, find the intersection point with the end state
+    tail_coordinate = grape::grapeapp::get_coordinate_on_edge( get_coordinate(), get_beginstate() );            
+  }
+  return tail_coordinate;
+} 

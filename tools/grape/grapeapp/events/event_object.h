@@ -27,6 +27,7 @@ namespace grape
         object_type m_obj_type;   /**< The type of the object. */
         coordinate  m_old_coord; /**< The original coordinate of the object. */
         coordinate  m_new_coord;  /**< The new coordinate of the object. */
+        int         m_flag;  /**< Flag params. */
         uint        m_diagram_id;    /**< The identifier of the diagram the object is in. */
       public:
 
@@ -34,11 +35,12 @@ namespace grape
          * Initializes the event.
          * @param p_main_frame Pointer to the main frame.
          * @param p_obj A pointer to the clicked object.
-         * @param p_orig_coord The original coordinate of the object.
+         * @param p_old_coord The original coordinate of the object.
          * @param p_new_coord The new coordinate of the object.
          * @param p_undo Should be @c true (default) if the action should be undoable.
+         * @param p_flag for passing flags.
          */
-        grape_event_move( grape_frame *p_main_frame, object* p_obj, coordinate &p_new_coord, bool p_undo = true );
+        grape_event_move( grape_frame *p_main_frame, object* p_obj, coordinate &p_old_coord, coordinate &p_new_coord, bool p_undo = true, int p_flag = -1 );
 
         /**
          * Default destructor.

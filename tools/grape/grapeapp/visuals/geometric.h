@@ -123,6 +123,14 @@ namespace grape
     bool is_nearest_beginpoint( const coordinate &p_begin, const coordinate &p_end, const coordinate &p_coord );
 
     /**
+     * Distance function of two coordinates.
+     * @param p_begin The begin coordinate
+     * @param p_end The end coordinate
+     * @return Returns the distance between the begin and end coordinate.
+     */
+    float distance( const coordinate &p_begin, const coordinate &p_end );
+
+    /**
      * Function to see if a coordinate is on a line, taking into account the cursor margin.
      * @param p_begin The begin coordinate of the line.
      * @param p_end The end coordinate of the line.

@@ -9,6 +9,7 @@
 // Implements the event handlers of the main frame.
 
 #include <wx/msgdlg.h>
+#include <wx/textdlg.h>
 
 #include "grape_frame.h"
 #include "grape_events.h"
@@ -405,3 +406,5 @@ void grape_frame::dataspec_modified( wxCommandEvent & WXUNUSED(p_event) )
 {
   set_is_modified( true );
 }
+
+

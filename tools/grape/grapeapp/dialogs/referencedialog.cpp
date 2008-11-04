@@ -12,6 +12,7 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
+#include "grape_ids.h"
 #include "referencedialog.h"
 
 using namespace grape::grapeapp;
@@ -106,9 +107,18 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, const wxStr
   text = new wxStaticText( panel, wxID_ANY, _T("Parameter initializations:") );
   vsizer->Add( text, 0 );
 
-  // create text control
-  m_input = new wxTextCtrl( panel, wxID_ANY, p_text, wxDefaultPosition, wxSize(400, 300), wxTE_MULTILINE );
-  vsizer->Add(m_input, 1, wxEXPAND );
+  m_text = p_text;
+
+  // create grid
+  m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
+  m_grid->CreateGrid( 1, 2 );
+  m_grid->SetColSize( 0, 100 );
+  m_grid->SetColSize( 1, 170 );
+  m_grid->SetColLabelValue(0, _T("Name"));
+  m_grid->SetColLabelValue(1, _T("Type"));
+  m_grid->SetRowLabelSize(30);
+
+  vsizer->Add(m_grid, 1, wxEXPAND );
 
   panel->SetSizer( vsizer );
 
@@ -148,7 +158,7 @@ grape_reference_dialog::~grape_reference_dialog()
 
 bool grape_reference_dialog::show_modal()
 {
-  return ShowModal() != wxID_CANCEL;
+  return ShowModal() != wxID_CANCEL;  
 }
 
 int grape_reference_dialog::get_diagram_id()
@@ -169,7 +179,33 @@ wxString grape_reference_dialog::get_diagram_name() const
   return m_combo->GetValue();
 }
 
+
 wxString grape_reference_dialog::get_initializations() const
 {
-  return m_input ? m_input->GetValue() : _T("");
+  return m_text;
 }
+
+ 
+void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
+{
+  int rows_count = m_grid->GetNumberRows();
+
+  while ( (m_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_grid->GetCellValue(rows_count-1, 1) != _T(""))) {
+    m_grid->AppendRows();
+    rows_count = m_grid->GetNumberRows();
+  }
+
+/* FIX: DeleteRows doesn't work properly
+  while ( (rows_count > 10) && (m_grid->GetCellValue(rows_count-1, 0) = _T("")) && (m_grid->GetCellValue(rows_count-1, 1) = _T(""))) {
+  int result = wxMessageBox( m_grid->GetCellValue(rows_count-1, 0), _T("Question"), wxICON_QUESTION | wxYES_NO, this );
+    m_grid->DeleteRows(rows_count-1);
+    rows_count = m_grid->GetNumberRows();
+  }
+*/
+}
+     
+
+BEGIN_EVENT_TABLE(grape_reference_dialog, wxDialog)
+  EVT_GRID_CMD_CELL_CHANGE(GRAPE_GRID_TEXT, grape_reference_dialog::event_change_text)
+END_EVENT_TABLE()
+

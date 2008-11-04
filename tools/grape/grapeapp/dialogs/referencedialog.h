@@ -12,6 +12,8 @@
 #define grape_reference_dialog_H
 
 #include <wx/dialog.h>
+#include <wx/grid.h>
+#include <wx/event.h>
 
 #include "architecturereference.h"
 #include "processreference.h"
@@ -35,10 +37,11 @@ namespace grape
     class grape_reference_dialog : protected wxDialog
     {
       private:
+        wxString      m_text;             /**< text of the reference. */
         wxComboBox    *m_combo; /**< Combobox with all diagrams. */
-        wxTextCtrl    *m_input; /**< The input field shown in the dialog, used for parameter declarations.*/
+      //  wxTextCtrl    *m_input; /**< The input field shown in the dialog, used for parameter declarations.*/
         diagramhash   m_pos2diagramid; /**< Maps the combobox positions to references. */
-
+        wxGrid        *m_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
         /**
          * Private default constructor.
          */
@@ -58,6 +61,9 @@ namespace grape
          * @param p_panel The panel used to show above the OK and Cancel buttons.
          */
         void init( wxPanel *p_panel );
+
+        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+
       public:
 
         /**
@@ -100,6 +106,13 @@ namespace grape
 
         /** @return The variable initializations entered in the input field. */
         wxString get_initializations() const;
+
+	/**
+	 * Change grid event handler.
+	 * Appending grid rows.
+	 * @param p_event The generated event.
+	 */
+        void event_change_text( wxGridEvent &p_event );
     };
   }
 }

@@ -256,6 +256,11 @@ bool grape::grapeapp::is_nearest_beginpoint( const coordinate &p_begin, const co
   return ( distance_to_beginpoint < distance_to_endpoint );
 }
 
+float grape::grapeapp::distance( const coordinate &p_begin, const coordinate &p_end )
+{
+  return sqrt( pow( p_end.m_y - p_begin.m_y, 2 ) + pow( p_end.m_x - p_begin.m_x, 2 ) );
+}
+
 bool grape::grapeapp::is_inside_ellipse( const coordinate &p_center, float p_radius_x, float p_radius_y, const coordinate &p_coord, bool p_minus_margin )
 {
   // Determine the difference between the clicked and the center coordinate (treat as if center of ellipse is {0,0} and all axes are positive. )
@@ -718,6 +723,9 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   {
     draw_filled_rectangle(p_control, 0.015, 0.015, false, g_color_black);
   };
+
+  draw_filled_rectangle(p_begin, 0.015, 0.015, false, g_color_black);
+  draw_filled_rectangle(p_end, 0.015, 0.015, false, g_color_black);
 }
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text )

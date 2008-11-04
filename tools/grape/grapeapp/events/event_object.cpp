@@ -33,7 +33,7 @@
 
 using namespace grape::grapeapp;
 
-grape_event_move::grape_event_move( grape_frame *p_main_frame, object* p_obj, coordinate &p_new_coord, bool p_undo )
+grape_event_move::grape_event_move( grape_frame *p_main_frame, object* p_obj, coordinate &p_old_coord, coordinate &p_new_coord, bool p_undo, int p_flag )
 : grape_event_base( p_main_frame, p_undo, _T( "move item" ) )
 {
   m_obj_id = p_obj->get_id();
@@ -41,18 +41,17 @@ grape_event_move::grape_event_move( grape_frame *p_main_frame, object* p_obj, co
 
   // remember the initial object coordinate, not where the mouse was initially pressed
   static bool s_new_move = true;
-  static coordinate s_orig_coord;
   if ( !p_undo && s_new_move )
   {
-    s_orig_coord = p_obj->get_coordinate();
     s_new_move = false;
   }
   else if ( p_undo )
   {
     s_new_move = true;
   }
-  m_old_coord = s_orig_coord;
+  m_old_coord = p_old_coord;
   m_new_coord = p_new_coord;
+  m_flag = p_flag;
   m_diagram_id = m_main_frame->get_glcanvas()->get_diagram()->get_id();
 }
 
@@ -176,7 +175,21 @@ bool grape_event_move::Do( void )
     case NONTERMINATING_TRANSITION: 
     {
       nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( obj_ptr );
-      ntt_ptr->set_coordinate( m_new_coord ); 
+
+      if (m_flag == -1) //if we selected the transition
+      { 
+        ntt_ptr->set_coordinate( m_new_coord );
+      } else if (m_flag == 0) //if we selected the end state
+      {
+        coordinate delta = m_new_coord - m_old_coord; 
+
+        ntt_ptr->set_width(delta.m_x);
+        ntt_ptr->set_height(delta.m_y);
+      } else if (m_flag == 1) //if we selected the begin state 
+      {   
+      	 // dragging is only possible when the begin state doesn't exist
+         if (ntt_ptr->get_beginstate() == 0) ntt_ptr->set_coordinate( m_new_coord );
+      }
       break;
     }
     case VISIBLE: 

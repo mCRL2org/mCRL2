@@ -10,6 +10,7 @@
 
 #include "nonterminatingtransition.h"
 #include "compoundstate.h"
+#include "visuals/geometric.h"
 
 using namespace grape::libgrape;
 
@@ -61,6 +62,18 @@ void nonterminating_transition::detach_endstate( void )
   m_endstate = 0;
 }
 
+coordinate nonterminating_transition::get_end_coordinate( void ) 
+{ 
+  coordinate head_coordinate = {get_coordinate().m_x+get_width(), get_coordinate().m_y+get_height()};
+  // get coordinate of end state
+  if (m_endstate != 0) 
+  {
+    // if there is an endstate, find the intersection point with the end state
+    head_coordinate = grape::grapeapp::get_coordinate_on_edge( get_coordinate(), get_endstate() );              
+  }
+  return head_coordinate;
+}        
+  
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY( arr_nonterminating_transition );
