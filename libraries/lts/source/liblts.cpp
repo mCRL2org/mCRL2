@@ -14,6 +14,9 @@
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
+#include <aterm2.h>
+#include "mcrl2/atermpp/list.h"
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/liblts.h"
 #include "mcrl2/core/messaging.h"
@@ -21,6 +24,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::utilities;
 
 #ifdef USE_BCG
 #include <bcg_user.h>
@@ -1444,6 +1448,246 @@ bool lts::has_label_info()
 void lts::remove_state_values()
 {
   p_remove_state_values();
+}
+
+bool lts::has_state_parameters()
+{
+  return state_info && ( ( type == lts_mcrl2 ) ||
+                         ( type == lts_mcrl ) ||
+                         ( type == lts_fsm ) );
+}
+
+unsigned int lts::num_state_parameters()
+{
+  if ( type == lts_mcrl2 )
+  {
+    if ( is_timed_pair((ATermAppl) state_values[0]) )
+    {
+      return ATgetArity(ATgetAFun(ATAgetArgument((ATermAppl) state_values[0],0)));
+    } else {
+      return ATgetArity(ATgetAFun((ATermAppl) state_values[0]));
+    }
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATgetLength((ATermList) state_values[0]);
+  }
+
+  assert(0);
+  return 0;
+}
+
+ATerm lts::state_parameter_name(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"p%u",idx);
+    return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_type(idx));
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"p%u",idx);
+    return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
+  } else if ( type == lts_fsm )
+  {
+    return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),0);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::state_parameter_name_str(unsigned int idx)
+{
+  if ( type == lts_mcrl2 || type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"p%u",idx);
+    return s;
+  } else if ( type == lts_fsm )
+  {
+    return ATgetName(ATgetAFun((ATermAppl) state_parameter_name(idx)));
+  }
+
+  assert(0);
+  return "";
+}
+
+ATerm lts::state_parameter_type(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return (ATerm) gsGetSort((ATermAppl) get_state_parameter(0,idx));
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"D%u",idx);
+    return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
+  } else if ( type == lts_fsm )
+  {
+    return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),1);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::state_parameter_type_str(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(state_parameter_type(idx),ppDefault);
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"D%u",idx);
+    return s;
+  } else if ( type == lts_fsm )
+  {
+    return ATgetName(ATgetAFun((ATermAppl) state_parameter_type(idx)));
+  }
+
+  assert(0);
+  return "";
+}
+
+ATerm lts::get_state_parameter(unsigned int state, unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return ATgetArgument((ATermAppl) state_values[state],idx);
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATelementAt((ATermList) state_values[state],idx);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::get_state_parameter_str(unsigned int state, unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(get_state_parameter(state,idx),ppDefault);
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATwriteToString(get_state_parameter(state,idx));
+  }
+
+  assert(0);
+  return "";
+}
+
+atermpp::list<ATerm> lts::get_unique_label_values()
+{
+  ATermIndexedSet vals = ATindexedSetCreate(100,50);
+  atermpp::list<ATerm> r;
+  
+  for (unsigned int i=0; i<nlabels; i++)
+  {
+    ATbool b;
+    ATindexedSetPut(vals,label_values[i], &b);
+    if ( b == ATtrue )
+    {
+      r.push_back(label_values[i]);
+    }
+  }
+
+  ATindexedSetDestroy(vals);
+
+  return r;
+}
+
+atermpp::list<ATerm> lts::get_unique_state_values()
+{
+  ATermIndexedSet vals = ATindexedSetCreate(100,50);
+  atermpp::list<ATerm> r;
+  
+  for (unsigned int i=0; i<nstates; i++)
+  {
+    ATbool b;
+    ATindexedSetPut(vals,state_values[i], &b);
+    if ( b == ATtrue )
+    {
+      r.push_back(state_values[i]);
+    }
+  }
+
+  ATindexedSetDestroy(vals);
+
+  return r;
+}
+
+atermpp::list<ATerm> lts::get_unique_state_parameters(unsigned int idx)
+{
+  ATermIndexedSet vals = ATindexedSetCreate(100,50);
+  atermpp::list<ATerm> r;
+  
+  for (unsigned int i=0; i<nstates; i++)
+  {
+    ATbool b;
+    ATindexedSetPut(vals,get_state_parameter(i,idx), &b);
+    if ( b == ATtrue )
+    {
+      r.push_back(get_state_parameter(i,idx));
+    }
+  }
+
+  ATindexedSetDestroy(vals);
+
+  return r;
+}
+
+std::string lts::pretty_print_label_value(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(value,ppDefault);
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATwriteToString(value);
+  }
+
+  assert(0);
+  return "";
+}
+
+std::string lts::pretty_print_state_value(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    std::string s = "[";
+    for (unsigned int i=0; i<ATgetArity(ATgetAFun((ATermAppl) value)); i++)
+    {
+      if ( i > 0 )
+      {
+        s += ",";
+      }
+      s += PrintPart_CXX(ATgetArgument(value,i),ppDefault);
+    }
+    return s+"]";
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATwriteToString(value);
+  }
+
+  assert(0);
+  return "";
+}
+
+std::string lts::pretty_print_state_parameter(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(value,ppDefault);
+  } else if ( type == lts_mcrl || type == lts_fsm )
+  {
+    return ATwriteToString(value);
+  }
+
+  assert(0);
+  return "";
 }
 
 void p_lts::p_remove_state_values()
