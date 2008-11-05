@@ -32,12 +32,20 @@ varupdate::~varupdate( void )
 
 wxString varupdate::get_varupdate( void ) const
 {
-  return m_varupdate;
+  return get_lhs()+_T(":=")+get_rhs()+_T( ";" );
 }
 
 void varupdate::set_varupdate( const wxString &p_varupdate )
-{
-  m_varupdate = p_varupdate;
+{                          
+  int pos = p_varupdate.Find( _T( ":=" ) );
+  wxString variable_update_lhs = p_varupdate.Mid( 0, pos );
+  wxString variable_update_rhs = p_varupdate.Mid( pos+2 );
+  if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
+  {
+    /* invalid */
+  }
+  set_lhs( variable_update_lhs );
+  set_rhs( variable_update_rhs );
 }
 
 wxString varupdate::get_lhs( void ) const

@@ -20,14 +20,15 @@ using namespace grape::grapeapp;
 grape_reference_dialog::grape_reference_dialog( process_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 {
-  init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_text(), p_spec );
+  list_of_varupdate varupdate_list = p_ref->get_parameter_updates();
+  init_for_processes( p_ref->get_relationship_refers_to(), &varupdate_list, p_spec );
 }
 
 grape_reference_dialog::grape_reference_dialog( reference_state *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 // description != bug
 {
-  init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_text(), p_spec );
+  init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_varupdate(), p_spec );
 }
 
 // The following exception is to make grape compile on Apple platforms, where wxWidgets do
@@ -39,7 +40,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
 grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T("Edit architecture reference") )
 #endif
-{
+{  
   wxPanel *panel = new wxPanel( this );
 
   wxGridSizer *grid = new wxFlexGridSizer( 2, 3, 0 );
@@ -65,7 +66,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
   m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND, 0 );
   m_combo->SetSelection( selected );
-
+  
   panel->SetSizer( grid );
 
   init( panel );
@@ -73,7 +74,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
   m_combo->SetFocus();
 }
 
-void grape_reference_dialog::init_for_processes( diagram *p_diagram, const wxString &p_text, grape_specification *p_spec )
+void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_varupdate *p_list_of_varupdate, grape_specification *p_spec )
 {
   wxPanel *panel = new wxPanel( this );
 
@@ -107,11 +108,17 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, const wxStr
   text = new wxStaticText( panel, wxID_ANY, _T("Parameter initializations:") );
   vsizer->Add( text, 0 );
 
-  m_text = p_text;
-
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( 1, 2 );
+  m_grid->CreateGrid( p_list_of_varupdate->GetCount()+1, 2 );
+  for ( uint i = 0; i < p_list_of_varupdate->GetCount(); ++i )
+  {     
+    //fill cells
+    varupdate parameter_assignment = p_list_of_varupdate->Item( i );
+    m_grid->SetCellValue(i, 0, parameter_assignment.get_lhs());
+    m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());    
+  }
+  
   m_grid->SetColSize( 0, 100 );
   m_grid->SetColSize( 1, 170 );
   m_grid->SetColLabelValue(0, _T("Name"));
@@ -182,7 +189,12 @@ wxString grape_reference_dialog::get_diagram_name() const
 
 wxString grape_reference_dialog::get_initializations() const
 {
-  return m_text;
+  wxString result;
+  for ( uint i = 0; i < m_grid->GetNumberRows(); ++i )
+  {
+    if (m_grid->GetCellValue(i, 0).IsEmpty() == false) result += m_grid->GetCellValue(i, 0) + _T( ":=" ) + m_grid->GetCellValue(i, 1) + _T( ";" );
+  }
+  return result;  
 }
 
  

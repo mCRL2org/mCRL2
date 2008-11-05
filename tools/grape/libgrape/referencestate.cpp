@@ -89,7 +89,7 @@ bool reference_state::set_text( const wxString &p_text )
   // Do processing, i.e. make parameter declarations
 
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw(m_text, _T(","));
+  wxStringTokenizer tkw(m_text, _T(";"));
   varupdate p_upd;
   while(tkw.HasMoreTokens())
   {

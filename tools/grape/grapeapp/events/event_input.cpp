@@ -802,7 +802,6 @@ bool grape_event_drag::Do( void )
         }
         case INITIAL_DESIGNATOR:
         {
-          ////////MORGEN DAN///////// !!!!!!!!!!!!!!!!!!!!///////////////    wxMessageBox( _T("Question"), _T("Question"), wxICON_QUESTION | wxYES_NO, m_main_frame );
           if ( endobject->get_type() == STATE )
           {
             grape_event_attach_initial_designator* event = new grape_event_attach_initial_designator( m_main_frame, static_cast<initial_designator*> ( begin_object_ptr  ), static_cast<libgrape::state*> ( endobject ) );

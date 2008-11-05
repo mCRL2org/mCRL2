@@ -70,7 +70,7 @@ bool process_reference::set_text( const wxString &p_text )
   // Do processing, i.e. make parameter declarations
 
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw(m_text, _T(","));
+  wxStringTokenizer tkw(m_text, _T(";"));
   varupdate p_upd;
   while(tkw.HasMoreTokens())
   {
@@ -88,7 +88,7 @@ wxString process_reference::get_text() const
   for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
   {
     varupdate parameter_assignment = m_parameter_assignments.Item( i );
-    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";\n" );
+    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";" );
   }
   return result;
 }
