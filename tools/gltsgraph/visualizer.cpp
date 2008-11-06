@@ -507,6 +507,10 @@ void Visualizer::setRadius(int radius)
   this->radius = radius;
 }
 
+int Visualizer::getRadius() const {
+  return radius;
+}
+
 void Visualizer::setCurves(bool value)
 {
   showHandles = value;

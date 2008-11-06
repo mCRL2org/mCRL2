@@ -145,7 +145,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       {
         case 0: // SVG item
           fileName.Append(wxT(".svg"));
-          exporter.reset(new ExporterSVG(app->getGraph()));
+          exporter.reset(new ExporterSVG(app->getGraph(), app));
           break;
         case 1: // XML item
           fileName.Append(wxT(".xml"));
@@ -162,7 +162,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       // An extension was given
       if (extension == wxT("svg"))
       {
-        exporter.reset(new ExporterSVG(app->getGraph()));
+        exporter.reset(new ExporterSVG(app->getGraph(), app));
       }
       else if (extension == wxT("xml"))
       {

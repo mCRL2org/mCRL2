@@ -25,7 +25,9 @@ class Visualizer
     void setPixelSize(double size);
     void setRadius(int radius);
     void setCurves(bool value);
+
     // Getters
+    int getRadius() const;
   private:
     GLTSGraph* owner;
     double pixelSize; // Pixel size in world coordinates.

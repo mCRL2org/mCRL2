@@ -406,3 +406,12 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
 
   ptr = NULL; 
 }
+
+
+double GLCanvas::getAspectRatio() const {
+  int width, height;
+
+  GetClientSize(&width, &height);
+
+  return static_cast<double>(width) / static_cast<double>(height); 
+}

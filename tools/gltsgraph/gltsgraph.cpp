@@ -367,6 +367,10 @@ void GLTSGraph::setRadius(int radius)
   display();
 }
 
+int GLTSGraph::getRadius() const {
+  return visualizer->getRadius();
+}
+
 void GLTSGraph::setCurves(bool value)
 {
   visualizer->setCurves(value);
@@ -376,4 +380,9 @@ void GLTSGraph::setCurves(bool value)
 std::string GLTSGraph::getFileName() const
 {
   return fileName;
+}
+
+double GLTSGraph::getAspectRatio() const
+{
+  return glCanvas->getAspectRatio();
 }

@@ -10,10 +10,13 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include "gltsgraph.h"
 
 #include "workarounds.h" // for M_PI on Windows with MSVC
 
-ExporterSVG::ExporterSVG(Graph* g) : Exporter(g) {};
+ExporterSVG::ExporterSVG(Graph* g, GLTSGraph* app) : Exporter(g) {
+  owner = app;
+}
 
 
 ExporterSVG::~ExporterSVG() {};
@@ -21,23 +24,42 @@ ExporterSVG::~ExporterSVG() {};
 
 bool ExporterSVG::export_to(wxString filename)
 {
+  double aspect = owner->getAspectRatio();
   // SVG header
   svg_code  = "<?xml version = \"1.0\" standalone=\"no\"?>\n\n";
   svg_code += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://w3c.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n\n";
   
   // For the size of the viewBox (canvas), we stick to the virtual size of 
-  // the graph's model, which is 2000 by 2000.
-  svg_code += "<svg viewBox=\"0 0 2000 2000\" width = \"100%\" height=\"100%\" version=\"1.1.\" \n";
+  // the graph's model, which is 2000 by 2000. To make a more true-to-screen
+  // representation, we multiply by the windows aspect ratio (width / height)
+  double width = 2000 * aspect;
+  boost::format vb("<svg viewBox=\"0 0 %1% 2000\" width = \"100%%\" height=\"100%%\" version=\"1.1.\" \n");
+  vb%width;
+  svg_code += boost::str(vb);
 
   svg_code += "xmlns=\"http://www.w3.org/2000/svg\">\n\n";
 
   // Add a "marker" definition for arrow heads,
   svg_code += "<defs>\n";
-  svg_code += "<marker id = \"Arrowhead\" viewBox = \"0 0 20 10\" \n";
-  svg_code += " refX=\"20\" refY = \"5\" \n";
+  boost::format arrowHead1("<marker id = \"Arrowhead\" viewBox = \"0 0 %1% %2%\" \n");
+  int radius = owner->getRadius();
+  arrowHead1%(radius * 2)%radius;
+  svg_code += boost::str(arrowHead1);
+
+  boost::format arrowHead2(" refX=\"%1%\" refY = \"%2%\" \n");
+  arrowHead2%(radius * 2) % (radius / 2);
+  svg_code += boost::str(arrowHead2);
+  
   svg_code += " markerUnits = \"strokeWidth\" orient = \"auto\" \n";
-  svg_code += " markerWidth = \"40\" markerHeight = \"40\">\n";
-  svg_code += " <polyline points = \"0,0 10,5 0,10 1,5\" fill = \"black\" />\n";
+  
+  boost::format arrowHead3(" markerWidth = \"%1%\" markerHeight = \"%1%\">\n");
+  arrowHead3%(radius * 4);
+  svg_code += boost::str(arrowHead3);
+  
+  boost::format arrowHead4(" <polyline points = \"0,0 %1%,%2% 0,%1% %3%,%2%\" fill = \"black\" />\n");
+  arrowHead4%radius%(radius/2)%(radius/10);
+  svg_code += boost::str(arrowHead4);
+
   svg_code += "</marker></defs>\n\n";
 
   // First put in the transitions, since transitions move from/to the centers
@@ -67,9 +89,9 @@ bool ExporterSVG::export_to(wxString filename)
     State* from = graph->getState(i);
     boost::format f("<circle cx = \"%1%\" cy =\"%2%\" r=\"%3%\" stroke=\"%4%\" stroke-width=\"%5%\" fill=\"rgb(%6%, %7%, %8%)\"/>\n\n");
 
-    double fromX = 1000 + from->getX();
+    double fromX = (1000 + from->getX()) * aspect;
     double fromY = 1000 - from->getY();
-    double radius = 20; // TODO
+    double radius = owner->getRadius() * 2;
 
     unsigned int stroke_width;
     std::string stroke;
@@ -158,19 +180,22 @@ void ExporterSVG::drawBezier(Transition* tr)
 {
   State *from, *to;
   double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, xControl, yControl;
-  
+  double aspect = owner->getAspectRatio();
+
   from = tr->getFrom();
   to = tr->getTo();
   
-  xFrom = 1000.0 + from->getX();
+  xFrom = (1000.0 + from->getX()) * aspect;
   yFrom = 1000.0 - from->getY();
 
-  xTo = 1000.0 + to->getX();
+  xTo = (1000.0 + to->getX()) * aspect;
   yTo = 1000.0 - to->getY();
   
   tr->getControl(xVirtual, yVirtual);
   
   xVirtual += 1000.0;
+  xVirtual *= aspect;
+
   yVirtual = 1000.0 - yVirtual;
   // For a justification of the xControl, yControl computations, see the 
   // drawTransition method in visualizer.cpp
@@ -209,8 +234,9 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   double alpha = tr->getControlAlpha();
   double beta = .25 * M_PI;
   double dist = tr->getControlDist();
+  double aspect = owner->getAspectRatio();
 
-  double xState = 1000 + s->getX();
+  double xState = (1000 + s->getX()) * aspect;
   double yState = 1000 - s->getY();
 
   double xVirtual = xState + cos(alpha) * dist * 200.0f;

@@ -45,7 +45,7 @@ class GLCanvas : public wxGLCanvas
 
 
     double getPixelSize();
-
+    double getAspectRatio() const;
   private:
     GLTSGraph* owner;
     Visualizer* visualizer;

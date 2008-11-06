@@ -61,7 +61,8 @@ class GLTSGraph : public wxApp
     LayoutAlgorithm* getAlgorithm(size_t i) const;
     size_t getNumberOfObjects();
     std::string getFileName() const;
-
+    int getRadius() const;
+    double getAspectRatio() const;
 };
 
 
