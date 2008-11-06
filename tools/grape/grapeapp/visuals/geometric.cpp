@@ -1043,8 +1043,6 @@ void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_wid
 {
   if ( p_selected )
   {
-    //glPushMatrix();
-
     // Draw the eight rectangles
     coordinate left_low = { p_center.m_x - 0.5 * p_width - 2 * g_cursor_margin, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
     draw_line_rectangle( left_low, g_cursor_margin, g_cursor_margin, false, g_color_black );
@@ -1064,7 +1062,17 @@ void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_wid
     coordinate center_low = { p_center.m_x, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
     draw_line_rectangle( center_low, g_cursor_margin, g_cursor_margin, false, g_color_black );
 
-    //glPopMatrix();
+    //draw dashed rectangle
+    glLineStipple(1, 0x3F07);
+    glEnable(GL_LINE_STIPPLE);  
+    glColor3f( 0.5, 0.5, 0.5 );
+    glBegin(GL_LINE_LOOP);
+      glVertex3f(left_low.m_x,   left_low.m_y,   0.0f);
+      glVertex3f(left_up.m_x, left_up.m_y,   0.0f);
+      glVertex3f(right_up.m_x, right_up.m_y, 0.0f);
+      glVertex3f(right_low.m_x, right_low.m_y, 0.0f);
+    glEnd();
+    glDisable(GL_LINE_STIPPLE);   
   } // end if
 }
 
