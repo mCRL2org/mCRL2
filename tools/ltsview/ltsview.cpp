@@ -38,6 +38,7 @@ std::string parse_error;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 //SQuADT protocol interface
+#undef check // macro that conflicts with Boost code included below (seems OS X 10.4 specific)
 #include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 using namespace mcrl2::utilities::squadt;

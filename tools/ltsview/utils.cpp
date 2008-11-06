@@ -9,6 +9,7 @@
 /// \file utils.cpp
 /// \brief Source file for Utils namespace
 
+#include <algorithm> // for std::min/std::max
 #include "utils.h"
 #include <cmath>
 
@@ -109,8 +110,8 @@ float rad_to_deg(float rad) {
 }
 
 Utils::HSV_Color RGB_to_HSV(RGB_Color c) {
-  unsigned char MIN = std::min(c.r,std::min(c.g,c.b));
-  unsigned char MAX = std::max(c.r,std::max(c.g,c.b));
+  unsigned char MIN = (std::min)(c.r,(std::min)(c.g,c.b));
+  unsigned char MAX = (std::max)(c.r,(std::max)(c.g,c.b));
   
   HSV_Color result;
   if (MAX == MIN) {
