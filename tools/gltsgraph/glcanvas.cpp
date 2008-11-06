@@ -64,7 +64,7 @@ void GLCanvas::display()
   {
     int width, height;
     
-    GetSize( &width, &height);
+    GetClientSize( &width, &height);
     // This is current context
     SetCurrent();
    
@@ -304,7 +304,7 @@ void GLCanvas::pickObjects(int x, int y)
     
     // Get current size of canvas
     int width,height;
-    GetSize(&width,&height);
+    GetClientSize(&width,&height);
 
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 

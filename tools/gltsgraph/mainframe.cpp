@@ -2,6 +2,7 @@
 #include "mainframe.h"
 #include "ids.h"
 #include <wx/menu.h>
+#include <wx/filename.h>
 #include "export_svg.h"
 #include "export_xml.h"
 #include "export_latex.h"
@@ -110,7 +111,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
 void MainFrame::onExport(wxCommandEvent& /*event*/)
 {
-  
+  bool startExport = false; 
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml|LaTeX TikZ drawing (*.tex)|*.tex");
   wxString defaultDir = wxEmptyString; // Empty string -> cwd
@@ -124,12 +125,18 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 
   wxFileDialog dialog(this, caption, defaultDir, defaultFileName, wildcard,
-                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT | wxFD_CHANGE_DIR);
+                      wxFD_SAVE | wxFD_CHANGE_DIR);      
+  std::auto_ptr< Exporter > exporter;
+  wxString fileName;
 
-  if(dialog.ShowModal() == wxID_OK)
+  while(!startExport) 
   {
-    std::auto_ptr< Exporter > exporter;
-    wxString fileName = dialog.GetPath();
+    if(dialog.ShowModal() == wxID_CANCEL)
+    {
+      return;
+    }
+
+    fileName = dialog.GetPath();
     wxString extension = fileName.AfterLast('.');
     if(extension == fileName)
     {
@@ -171,16 +178,28 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
         exporter.reset(new ExporterXML(app->getGraph()));
       }
     }
-    
-    if(exporter->export_to(fileName))
-    {
-      wxMessageDialog msgDlg(
+    // Check if the file exsits
+    wxFileName fn(fileName);
+    if(fn.FileExists()) {
+      wxMessageDialog fileExistDialog(
         this,
-        wxT("The layout was exported to file:\n\n") + fileName,
-        wxT("Layout exported"),
-        wxOK | wxICON_INFORMATION);
-      msgDlg.ShowModal();
+        wxT("The file ") + fileName + wxT(" already exists, overwrite?\n"),
+        wxT("File exists"),
+        wxYES_NO | wxNO_DEFAULT | wxICON_EXCLAMATION);
+      if(fileExistDialog.ShowModal() == wxID_YES) {
+        startExport = true;
+      }
     }
+  }
+
+  if(exporter->export_to(fileName))
+  {
+    wxMessageDialog msgDlg(
+      this,
+      wxT("The layout was exported to file:\n\n") + fileName,
+      wxT("Layout exported"),
+      wxOK | wxICON_INFORMATION);
+    msgDlg.ShowModal();
   }
 }
 
