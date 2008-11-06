@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #define NAME "pbes2bes"
-#define AUTHOR "Alexander van Dam"
+#define AUTHOR "Alexander van Dam, Wieger Wesselink"
 
 //C++
 #include <cstdio>
@@ -28,8 +28,8 @@
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 #include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/filter_tool.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -38,50 +38,197 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 
-//Type definitions
-//----------------
-struct t_tool_options {
-	string opt_outputformat;
-	string opt_strategy;
-	string infilename;
-	string outfilename;
-
-  t_tool_options()
-    : opt_outputformat("binary"), opt_strategy("lazy")
-  {}
+/// The output formats of the tool.
+enum pbes_output_format {
+  of_binary,
+  of_internal,
+  of_cwi
 };
 
-bool process(t_tool_options tool_options)
+/// The transformation strategies of the tool.
+enum transformation_strategy {
+  ts_lazy,
+  ts_finite
+};
+
+/// The pbes2bes tool.
+class pbes2bes_tool: public core::filter_tool
 {
-  pbes<> pbes_spec;
-  pbes_spec.load(tool_options.infilename);
-  data::rewriter datar(pbes_spec.data());
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(pbes_spec.data(), datar, generator);
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
+  protected:
+    transformation_strategy m_strategy;
+    pbes_output_format m_output_format;
 
-  if (!pbes_spec.is_well_typed())
-  {
-    gsErrorMsg("The PBES is not well formed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-  }
+  public:
+    /// Sets the transformation strategy.
+    /// \param s A transformation strategy.
+    void set_transformation_strategy(const std::string& s)
+    {
+      if (s == "lazy")
+      {
+        m_strategy = ts_lazy;
+      }
+      else if (s == "finite")
+      {
+        m_strategy = ts_finite;
+      }
+      else
+      {
+        throw std::runtime_error("unknown output strategy specified (got `" + s + "')");
+      }
+    }
 
-  if (!pbes_spec.is_closed())
-  {
-    gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-  }
+    /// Sets the output format.
+    /// \param format An output format.
+    void set_output_format(const std::string& format)
+    {
+      if (format == "binary")
+      {
+        m_output_format = of_binary;
+      }
+      else if (format == "internal")
+      {
+        m_output_format = of_internal;
+      }
+      else if (format == "cwi")
+      {
+        m_output_format = of_cwi;
+      }
+      else
+      {
+        throw std::runtime_error("unknown output format specified (got `" + format + "')");
+      }
+    }
 
-  if (tool_options.opt_strategy == "finite")
-  {
-    pbes_spec = do_finite_algorithm(pbes_spec, pbesr);
-  }
-  else if (tool_options.opt_strategy == "lazy")
-  {
-    pbes_spec = do_lazy_algorithm(pbes_spec, pbesr);
-  }
-  save_pbes(pbes_spec, tool_options.outfilename, tool_options.opt_outputformat);
+  protected:
+    /// Parse the non-default options.
+    void parse_options(/* const */ command_line_parser& parser)
+    {
+      set_output_format(parser.option_argument("output"));
+      set_transformation_strategy(parser.option_argument("strategy"));
+    }
 
-  return true;
-}
+    void add_options(interface_description& clinterface)
+    {
+      clinterface.add_rewriting_options();
+      clinterface.
+        add_option("strategy",
+          make_mandatory_argument("NAME"),
+          "compute the BES using strategy NAME:\n"
+          "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
+          "  'finite' for computing all possible boolean equations.",
+          's').
+        add_option("output",
+          make_mandatory_argument("NAME"),
+          "store the BES in output format NAME:\n"
+          "  'binary' for the internal binary format (default),\n"
+          "  'internal' for the internal textual format, or\n"
+          "  'cwi' for the format used by the CWI to solve a BES.",
+          'o');
+    }
+
+    /// \return A string representation of the transformation strategy.
+    std::string strategy_string() const
+    {
+      if (m_strategy == ts_lazy)
+      {
+        return "lazy";
+      }
+      else if (m_strategy == ts_finite)
+      {
+        return "finite";
+      }
+      return "unknown";
+    }
+
+    /// \return A string representation of the output format.
+    std::string output_format_string() const
+    {
+      if (m_output_format == of_binary)
+      {
+        return "binary";
+      }
+      else if (m_output_format == of_cwi)
+      {
+        return "cwi";
+      }
+      else if (m_output_format == of_internal)
+      {
+        return "internal";
+      }
+      return "unknown";
+    }
+
+  public:
+    /// Constructor.
+    pbes2bes_tool()
+      : filter_tool(
+          "pbes2bes",
+          "Alexander van Dam, Wieger Wesselink",
+          "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
+          "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
+          "standard output is used."
+        ),
+        m_strategy(ts_lazy),
+        m_output_format(of_binary)
+    {}
+
+    /// Runs the algorithm.
+    bool run()
+    {
+      if (mcrl2::core::gsVerbose)
+      {
+        std::cout << "pbes2bes parameters:" << std::endl;
+        std::cout << "  input file:         " << m_input_filename << std::endl;
+        std::cout << "  output file:        " << m_output_filename << std::endl;
+        std::cout << "  strategy:           " << strategy_string() << std::endl;
+        std::cout << "  output format:      " << output_format_string() << std::endl;
+      }
+
+      // load the pbes
+      pbes<> p;
+      p.load(m_input_filename);
+
+      if (!p.is_closed())
+      {
+        gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+        return false;
+      }
+
+      // data rewriter
+      data::rewriter datar(p.data());
+
+      // name generator
+      std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
+      data::number_postfix_generator name_generator(prefix);
+
+      // data enumerator
+      data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(p.data(), datar, name_generator);
+
+      // pbes rewriter
+      pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);   
+
+      if (m_strategy == ts_finite)
+      {
+        p = do_finite_algorithm(p, pbesr);
+      }
+      else if (m_strategy == ts_lazy)
+      {
+        p = do_lazy_algorithm(p, pbesr);
+      }
+
+      // save the result
+      save_pbes(p, m_output_filename, output_format_string());
+
+      return true;
+    }
+
+    /// Sets the output filename.
+    /// \param filename The name of a file.
+    void set_output_filename(const std::string& filename)
+    {
+      m_output_filename = filename;
+    }
+};
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -93,18 +240,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static const char*  pbes_file_for_input;  ///< file containing an LPS
     static const char*  pbes_file_for_output; ///< file used to write the output to
-
-    enum pbes_output_format {
-      binary,
-      internal,
-      cwi
-    };
-
-    enum transformation_strategy {
-      lazy,
-      finite
-    };
-
     static const char* option_transformation_strategy;
     static const char* option_selected_output_format;
 
@@ -112,15 +247,15 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
     
       transformation_strategy_enumeration.
-        add(lazy, "lazy").
-        add(finite, "finite");
+        add(ts_lazy, "lazy").
+        add(ts_finite, "finite");
     
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
     
       output_format_enumeration.
-        add(binary, "binary").
-        add(internal, "internal").
-        add(cwi, "cwi");
+        add(of_binary, "binary").
+        add(of_internal, "internal").
+        add(of_cwi, "cwi");
 
       return true;
     }
@@ -175,13 +310,13 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
-                append(format_selector.associate(binary, "binary")).
-                append(format_selector.associate(internal, "internal")).
-                append(format_selector.associate(cwi, "cwi")),
+                append(format_selector.associate(of_binary, "binary")).
+                append(format_selector.associate(of_internal, "internal")).
+                append(format_selector.associate(of_cwi, "cwi")),
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Transformation strategy : ")).
-    append(strategy_selector.associate(lazy, "lazy: only boolean equations reachable from the initial state")).
-    append(strategy_selector.associate(finite, "finite: all possible boolean equations"));
+    append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
+    append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
 
   button& okay_button = d.create< button >().set_label("OK");
 
@@ -234,85 +369,18 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   static std::string strategies[] = { "lazy", "finite" };
   static std::string formats[]    = { "binary", "internal", "cwi" };
 
-  t_tool_options tool_options;
-
-  tool_options.opt_outputformat = formats[c.get_option_argument< size_t >(option_selected_output_format)];
-  tool_options.opt_strategy     = strategies[c.get_option_argument< size_t >(option_transformation_strategy)];
-  tool_options.infilename       = c.get_input(pbes_file_for_input).location();
-  tool_options.outfilename      = c.get_output(pbes_file_for_output).location();
-
-  bool result = process(tool_options);
+  pbes2bes_tool tool;
+  tool.set_input_filename(c.get_input(pbes_file_for_input).location());
+  tool.set_output_filename(c.get_output(pbes_file_for_output).location());
+  tool.set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
+  tool.set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
+  bool result = tool.run();
 
   send_clear_display();
 
-  return (result);
+  return result;
 }
 #endif
-
-//function parse_command_line
-//---------------------------
-/// \brief Parse the command line options.
-t_tool_options parse_command_line(int ac, char** av)
-{
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-      "Transform the PBES from INFILE into an equivalent BES and write it to OUTFILE. "
-      "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.");
-
-  clinterface.add_rewriting_options();
-
-  clinterface.
-    add_option("strategy",
-      make_mandatory_argument("NAME"),
-      "compute the BES using strategy NAME:\n"
-      "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-      "  'finite' for computing all possible boolean equations.",
-      's').
-    add_option("output",
-      make_mandatory_argument("NAME"),
-      "store the BES in output format NAME:\n"
-      "  'binary' for the internal binary format (default),\n"
-      "  'internal' for the internal textual format, or\n"
-      "  'cwi' for the format used by the CWI to solve a BES.",
-      'o');
-
-  command_line_parser parser(clinterface, ac, av);
-
-  t_tool_options tool_options;
-
-  if (parser.options.count("output")) { // Output format
-    std::string format = parser.option_argument("output");
-
-    if (!((format == "binary") || (format == "internal") || (format == "cwi"))) {
-      parser.error("unknown output format specified (got `" + format + "')");
-    }
-
-    tool_options.opt_outputformat = format;
-  }
-
-  if (parser.options.count("strategy")) { // Strategy
-    std::string strategy = parser.option_argument("strategy");
-
-    if (!((strategy == "lazy") || (strategy == "finite"))) {
-      parser.error("unknown output strategy specified (got `" + strategy + "')");
-    }
-
-    tool_options.opt_strategy = strategy;
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[1];
-    }
-  }
-
-  return tool_options;
-}
 
 //Main Program
 //------------
@@ -323,14 +391,14 @@ int main(int argc, char** argv)
 
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
+    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv))
+    {
       return EXIT_SUCCESS;
     }
+#else
+    pbes2bes_tool tool;
+    return tool.execute(argc, argv);
 #endif
-
-    process(parse_command_line(argc, argv));
-
-    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

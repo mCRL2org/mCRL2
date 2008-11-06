@@ -30,18 +30,15 @@ namespace core {
       std::string m_tool_description;
       std::string m_input_filename;
       std::string m_output_filename;
-  
-      /// run the tool
-      virtual void run() = 0;   
-  
+
       /// add additional options
       virtual void add_options(utilities::interface_description& desc)
       {}
-  
+
       /// parse non-standard options
       virtual void parse_options(const utilities::command_line_parser& parser)
       {}
-    
+
       void parse_options(int argc, char* argv[])
       {
         utilities::interface_description clinterface(argv[0], m_name, m_author, "[OPTION]... [INFILE [OUTFILE]]\n", m_tool_description);
@@ -50,7 +47,7 @@ namespace core {
         if (0 < parser.arguments.size())
         {
           m_input_filename = parser.arguments[0];
-        }     
+        }
         if (1 < parser.arguments.size())
         {
           m_output_filename = parser.arguments[1];
@@ -61,14 +58,15 @@ namespace core {
         }
         parse_options(parser);
       }
-  
+
     public:
+      /// Constructor.
       filter_tool(const std::string& name,
                   const std::string& author,
                   const std::string& tool_description
                  )
         : m_name            (name),
-          m_author          (author),        
+          m_author          (author),
           m_tool_description(tool_description)
       {
       }
@@ -76,17 +74,41 @@ namespace core {
       virtual ~filter_tool()
       {}
 
+      /// Run the tool. The options must be set manually.
+      virtual bool run() = 0;
+
+      /// Run the tool with the given command line options.
       int execute(int argc, char* argv[])
       {
         try {
           parse_options(argc, argv);
-          run();
-          return EXIT_SUCCESS;
+          if (run())
+          {
+            return EXIT_SUCCESS;
+          }
+          else
+          {
+            return EXIT_FAILURE;
+          }
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
           return EXIT_FAILURE;
         }
+      }
+
+      /// Sets the input filename.
+      /// \param filename The name of a file.
+      void set_input_filename(const std::string& filename)
+      {
+        m_input_filename = filename;
+      }
+
+      /// Sets the output filename.
+      /// \param filename The name of a file.
+      void set_output_filename(const std::string& filename)
+      {
+        m_output_filename = filename;
       }
   };
 

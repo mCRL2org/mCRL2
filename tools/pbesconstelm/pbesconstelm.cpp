@@ -40,7 +40,22 @@ class pbes_constelm_tool: public core::filter_tool
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
     }
 
-    void run()
+    void add_options(interface_description& clinterface)
+    {
+      clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
+    }
+
+  public:
+    pbes_constelm_tool()
+      : filter_tool(
+          "pbesconstelm",
+          "Wieger Wesselink",
+          "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "
+          "is not present, standard output is used. If INFILE is not present, standard input is used."
+        )
+    {}
+
+    bool run()
     {
       if (mcrl2::core::gsVerbose)
       {
@@ -72,22 +87,9 @@ class pbes_constelm_tool: public core::filter_tool
       
       // save the result
       p.save(m_output_filename);
+      
+      return true;
     }
-
-    void add_options(interface_description& clinterface)
-    {
-      clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
-    }
-
-  public:
-    pbes_constelm_tool()
-      : filter_tool(
-          "pbesconstelm",
-          "Wieger Wesselink",
-          "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "
-          "is not present, standard output is used. If INFILE is not present, standard input is used."
-        )
-    {}
 };
 
 int main(int argc, char* argv[])
