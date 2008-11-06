@@ -8,15 +8,17 @@
 #define LATEX_EXPORT_H
 
 #include "exporter.h"
+class GLTSGraph;
 
 class ExporterLatex: public Exporter
 {
   public:
-    ExporterLatex(Graph* g);
+    ExporterLatex(Graph* g, GLTSGraph* app);
     ~ExporterLatex() {};
     bool export_to(wxString _filename);
 
   private:
+    GLTSGraph* owner;
     std::string tikz_code;
     
     void drawBezier(Transition* tr);

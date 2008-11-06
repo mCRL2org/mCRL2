@@ -6,14 +6,16 @@
 
 #include "export_latex.h"
 #include <iostream>
+#include "gltsgraph.h"
 #include <boost/format.hpp>
 #include <cmath>
 #include <wx/textfile.h>
 
 #include <workarounds.h> // for M_PI
 
-ExporterLatex::ExporterLatex(Graph* g) : Exporter(g)
+ExporterLatex::ExporterLatex(Graph* g, GLTSGraph* owner) : Exporter(g)
 {
+  this->owner = owner;
 };
 
 bool ExporterLatex::export_to(wxString filename)
@@ -46,8 +48,9 @@ bool ExporterLatex::export_to(wxString filename)
     {
       node = boost::format("\\node at (%1%pt, %2%pt) [state] (state%3%) {%3%};\n");
     }
-
-    double x = s->getX() / 10.0;
+    
+    double aspect = owner->getAspectRatio();
+    double x = s->getX() / 10.0 * aspect;
     double y = s->getY() / 10.0;
     
     node%x%y%i;
@@ -123,9 +126,10 @@ void ExporterLatex::drawBezier(Transition* tr)
   size_t toState = to->getValue();
 
   double controlX, controlY;
-  
+  double aspect = owner->getAspectRatio();
   tr->getControl(controlX, controlY);
   controlX /= 10.0;
+  controlX = controlX * aspect;
   controlY /= 10.0;
   
   draw%fromState%toState

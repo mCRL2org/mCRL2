@@ -153,7 +153,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
           break;
         case 2: // TeX item
           fileName.Append(wxT(".tex"));
-          exporter.reset(new ExporterLatex(app->getGraph()));
+          exporter.reset(new ExporterLatex(app->getGraph(), app));
           break;
       }
     }
@@ -170,7 +170,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       }
       else if (extension == wxT("tex"))
       {
-        exporter.reset(new ExporterLatex(app->getGraph()));
+        exporter.reset(new ExporterLatex(app->getGraph(), app));
       }
       else 
       {
