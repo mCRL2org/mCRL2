@@ -34,7 +34,7 @@ namespace mcrl2 {
 #if defined(__LIBREWRITE_H)
     inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
       char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    
+
       is.readsome(strategy, 9);
 
       s = RewriteStrategyFromString(strategy);
@@ -42,14 +42,14 @@ namespace mcrl2 {
       if (s == GS_REWR_INVALID) {
         is.setstate(std::ios_base::failbit);
       }
-    
+
       return is;
     }
 #endif
 #if defined(BDD_PATH_ELIMINATOR_H)
     inline std::istream& operator>>(std::istream& is, SMT_Solver_Type& s) {
       char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    
+
       /// no standard conversion available function, so implement on-the-spot
       is.readsome(solver_type, 10);
 
@@ -153,12 +153,12 @@ namespace mcrl2 {
         class basic_argument {
 
           protected:
-       
+
             /// name of the argument (for reference purposes in option description)
             std::string m_name;
 
           protected:
-       
+
             /// sets the name for the argument
             void set_name(std::string const& n) {
               m_name = n;
@@ -723,7 +723,7 @@ namespace mcrl2 {
          * \throw std::logic_error containing a message that the option
          * does not take argument
          **/
-        std::string const& option_argument(std::string const& long_identifier) {
+        std::string const& option_argument(std::string const& long_identifier) const {
           if (options.count(long_identifier) == 0) {
             throw std::logic_error("Fatal error: argument requested of unspecified option!");
           }
@@ -742,11 +742,11 @@ namespace mcrl2 {
          * \return t : T where t << std::istringstream(options.find(long_identifier)->second)
          **/
         template < typename T >
-        inline T option_argument_as(std::string const& long_identifier) {
+        inline T option_argument_as(std::string const& long_identifier) const {
           std::istringstream in(option_argument(long_identifier));
 
           T result;
-           
+
           in >> result;
 
           if (in.fail()) {
@@ -784,11 +784,11 @@ namespace mcrl2 {
         /// Checks whether string is convertible to a value of a specific type
         inline bool validate(std::string const& s) const {
           std::istringstream test(s);
-         
+
           T result;
-       
+
           s >> result;
-         
+
           return !test.fail();
         }
     };
@@ -811,14 +811,14 @@ namespace mcrl2 {
       friend class interface_description;
       friend class interface_description::option_descriptor;
       friend class command_line_parser;
-    
+
       protected:
-      
+
         /// default value
         std::string m_default;
 
       public:
-    
+
         virtual basic_argument* clone() const {
           return new optional_argument< T >(*this);
         }
@@ -850,9 +850,9 @@ namespace mcrl2 {
     /// Represents a mandatory argument to an option
     template < typename T >
     class interface_description::mandatory_argument : public typed_argument< T > {
-    
+
       public:
-    
+
         virtual basic_argument* clone() const {
           return new mandatory_argument< T >(*this);
         }
