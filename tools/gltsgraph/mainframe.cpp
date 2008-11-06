@@ -32,9 +32,6 @@ MainFrame::MainFrame(GLTSGraph* owner)
 {
   app = owner;
 
-  int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };
-  glCanvas = new GLCanvas(app, this, wxDefaultSize, attribList);
-
   algoDlg = new AlgoDialog(app, this);
   settingsDlg = new SettingsDialog(app, this);
   infoDlg = new InfoDialog(this);

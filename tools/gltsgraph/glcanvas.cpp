@@ -60,7 +60,6 @@ void GLCanvas::setVisualizer(Visualizer *vis)
 
 void GLCanvas::display()
 {
-
   if (GetContext())
   {
     int width, height;
@@ -99,10 +98,6 @@ void GLCanvas::display()
   
     if (visualizer)
     {
-    /*   visualizer->setWidth(wwidth);
-      visualizer->setHeight(wheight);
-      visualizer->setPixelSize(pS);
-      */
       // Draw 
       visualizer->visualize(wwidth, wheight, pS, false);
     }
