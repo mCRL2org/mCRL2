@@ -47,7 +47,7 @@ struct t_tool_options {
 	string outfilename;
 
   t_tool_options()
-    : opt_outputformat("lazy"), opt_strategy("binary")
+    : opt_outputformat("binary"), opt_strategy("lazy")
   {}
 };
 
@@ -292,7 +292,7 @@ t_tool_options parse_command_line(int ac, char** av)
   if (parser.options.count("strategy")) { // Strategy
     std::string strategy = parser.option_argument("strategy");
 
-    if (!((strategy == "lazy") || (strategy == "internal") || (strategy == "cwi"))) {
+    if (!((strategy == "lazy") || (strategy == "finite"))) {
       parser.error("unknown output strategy specified (got `" + strategy + "')");
     }
 
@@ -307,7 +307,7 @@ t_tool_options parse_command_line(int ac, char** av)
       tool_options.infilename = parser.arguments[0];
     }
     if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[0];
+      tool_options.outfilename = parser.arguments[1];
     }
   }
 
