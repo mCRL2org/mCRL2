@@ -395,10 +395,10 @@ int main(int argc, char** argv)
     {
       return EXIT_SUCCESS;
     }
-#else
-    pbes2bes_tool tool;
-    return tool.execute(argc, argv);
 #endif
+    pbes2bes_tool tool;
+
+    return tool.execute(argc, argv);
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
