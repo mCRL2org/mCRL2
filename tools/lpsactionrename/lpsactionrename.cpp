@@ -64,7 +64,8 @@ struct t_tool_options {
   string          outfilename;
   RewriteStrategy rewrite_strategy;
 
-  t_tool_options() : pretty(false), no_rewrite(false), no_sumelm(false), end_phase(PH_NONE) {
+  t_tool_options() : pretty(false), no_rewrite(false), no_sumelm(false),
+    end_phase(PH_NONE), rewrite_strategy(GS_REWR_JITTY) {
   }
 };
 
