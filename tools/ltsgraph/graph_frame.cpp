@@ -10,7 +10,7 @@
 
 #include "graph_frame.h"
 #include "workarounds.h"
-#include <mcrl2/lts/liblts.h>
+#include <mcrl2/lts/lts.h>
 
 #include <map>
 

@@ -16,7 +16,7 @@
 #include <aterm2.h>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "lps2lts.h"
 #include "exploration.h"
 #include "lts.h"

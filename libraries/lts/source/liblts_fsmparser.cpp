@@ -101,7 +101,7 @@
 #line 9 "liblts_fsmparser.yy"
 
 #include <vector>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"
 

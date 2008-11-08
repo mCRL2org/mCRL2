@@ -4,7 +4,7 @@
 #define __FSMLEXER_H
 
 #include <aterm2.h>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 
 class fsm_lexer
 {

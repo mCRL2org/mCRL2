@@ -21,7 +21,7 @@
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"
 #include "liblts_fsmparser.h"
 

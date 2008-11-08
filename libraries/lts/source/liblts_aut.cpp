@@ -13,7 +13,7 @@
 #include <fstream>
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 
 using namespace mcrl2::core;

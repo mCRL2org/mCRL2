@@ -10,7 +10,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/atermpp/atermpp.h>
-#include <mcrl2/lts/liblts.h>
+#include <mcrl2/lts/lts.h>
 
 using namespace mcrl2::lts;
 

@@ -7,7 +7,7 @@
 
 #include "springlayout.h"
 
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 

@@ -1,5 +1,5 @@
 #include "ltsimporter.h"
-#include <mcrl2/lts/liblts.h>
+#include <mcrl2/lts/lts.h>
 #include <map>
 
 using namespace mcrl2::lts;

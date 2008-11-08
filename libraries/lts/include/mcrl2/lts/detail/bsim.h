@@ -16,7 +16,7 @@
 #include <string.h>
 #include "aterm1.h"
 #include <assert.h>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 
 /* extern declarations data structures */
 #define INITSIZE 50

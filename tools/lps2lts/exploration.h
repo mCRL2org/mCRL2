@@ -20,7 +20,7 @@
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 
 #include "workarounds.h"
 

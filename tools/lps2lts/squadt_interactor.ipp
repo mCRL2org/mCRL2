@@ -15,7 +15,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
@@ -257,7 +257,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   mcrl2::utilities::squadt::radio_button_helper< RewriteStrategy >      rewrite_strategy_selector(d);
   
   // Helper for rewrite strategy selection
-  mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type >      lts_type_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type > lts_type_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >();
 

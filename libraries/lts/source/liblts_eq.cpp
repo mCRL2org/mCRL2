@@ -13,7 +13,7 @@
 #include <stack>
 #include <string>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 #include "mcrl2/lts/detail/liblts_sim.h"
 

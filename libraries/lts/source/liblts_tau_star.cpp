@@ -9,7 +9,7 @@
 /// \file liblts_tau_star.cpp
 
 #include "mcrl2/core/messaging.h"
-#include <mcrl2/lts/liblts.h>
+#include <mcrl2/lts/lts.h>
 
 #include "workarounds.h" // DECL_A
 
