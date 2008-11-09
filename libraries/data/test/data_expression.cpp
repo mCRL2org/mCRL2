@@ -15,7 +15,7 @@
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;

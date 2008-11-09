@@ -14,8 +14,8 @@
 
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/exception.h"

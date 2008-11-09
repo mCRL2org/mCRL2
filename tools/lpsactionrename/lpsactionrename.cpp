@@ -29,7 +29,7 @@
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/data/find.h"

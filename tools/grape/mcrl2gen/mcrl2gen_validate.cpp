@@ -30,7 +30,7 @@
 #include "mcrl2/core/typecheck.h"            // Type check library.
 
 // mCRL2 utility libraries
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;

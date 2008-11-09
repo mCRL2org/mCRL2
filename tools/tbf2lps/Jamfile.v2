@@ -4,4 +4,5 @@ tool tbf2lps
        : tbf2lps.cpp
          lpstrans.cpp
          /libraries//core
+         /libraries/utilities//command_line_interfacing
        ;

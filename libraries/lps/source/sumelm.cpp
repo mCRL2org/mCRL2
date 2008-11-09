@@ -23,7 +23,7 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 #include "mcrl2/lps/sumelm.h"
 

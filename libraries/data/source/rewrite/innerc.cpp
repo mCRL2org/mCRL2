@@ -85,7 +85,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <aterm2.h>
 #include <stdexcept>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"

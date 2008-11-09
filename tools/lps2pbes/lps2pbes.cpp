@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace std;

@@ -100,7 +100,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"

@@ -28,7 +28,7 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace mcrl2::utilities;

@@ -34,8 +34,8 @@
 #include <mcrl2/core/data_implementation.h>
 #include <mcrl2/core/data_reconstruct.h>
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace std;

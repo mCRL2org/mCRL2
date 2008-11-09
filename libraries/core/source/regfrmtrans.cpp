@@ -20,7 +20,7 @@
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 #include "workarounds.h"
 

@@ -13,7 +13,7 @@
 #define BDD_INFO_H
 
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 /// \brief The class BDD_Info provides information about the structure of binary decision diagrams.
 class BDD_Info {

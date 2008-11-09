@@ -33,9 +33,7 @@ obj command_line_interfacing
       ;
 
 mcrl2-library utilities
-      : source/aterm_ext.cpp
-        source/numeric_string.cpp
-        source/info.cpp            # Temporary?
+      : source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
         /libraries/utilities//command_line_interfacing

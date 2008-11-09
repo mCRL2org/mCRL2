@@ -19,7 +19,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 //Temporary workaround for the passing of the determinism

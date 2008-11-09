@@ -17,7 +17,7 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;

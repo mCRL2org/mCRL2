@@ -26,7 +26,7 @@
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace mcrl2::utilities;

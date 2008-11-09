@@ -12,7 +12,7 @@
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
 
 using namespace ::mcrl2::utilities;

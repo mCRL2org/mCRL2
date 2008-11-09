@@ -25,7 +25,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
 
 using namespace mcrl2::utilities;

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/aterm_ext.h
+/// \file mcrl2/core/aterm_ext.h
 /// \brief Collection of convenience functions for ATerms
 
 #ifndef __ATERM_EXT_H__

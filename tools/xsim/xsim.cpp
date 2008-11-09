@@ -31,7 +31,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 std::string get_about_message() {

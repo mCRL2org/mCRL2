@@ -17,7 +17,7 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "cluster.h"
 #include "fileloader.h"

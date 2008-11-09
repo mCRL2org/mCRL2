@@ -12,7 +12,7 @@
 #include <math.h>
 #include <ctype.h>
 
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "workarounds.h"
 
 namespace mcrl2 {

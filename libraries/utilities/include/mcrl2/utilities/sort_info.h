@@ -12,7 +12,7 @@
 #ifndef SORT_INFO_H
 #define SORT_INFO_H
 
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 
 /// \brief Class that provides information on sort expressions.

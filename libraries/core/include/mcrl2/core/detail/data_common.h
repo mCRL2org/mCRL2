@@ -12,7 +12,7 @@
 #define MCRL2_DATA_COMMON_H
 
 #include <aterm2.h>
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {

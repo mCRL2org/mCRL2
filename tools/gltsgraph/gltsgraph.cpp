@@ -8,7 +8,7 @@
 #include "springlayout.h"
 
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 std::string lts_file_argument;

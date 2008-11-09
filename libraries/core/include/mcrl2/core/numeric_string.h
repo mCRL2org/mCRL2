@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/numeric_string.h
+/// \file mcrl2/core/numeric_string.h
 /// \brief Collection of functions dealing with strings representing numbers
 
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__

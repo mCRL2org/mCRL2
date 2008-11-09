@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_operation.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;

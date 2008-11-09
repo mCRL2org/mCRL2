@@ -15,7 +15,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/confluence_checker.h>
 #include <mcrl2/lps/mcrl22lps.h>
-#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/core/aterm_ext.h>
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;

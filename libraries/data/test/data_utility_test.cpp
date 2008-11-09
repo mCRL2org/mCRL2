@@ -18,7 +18,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;
