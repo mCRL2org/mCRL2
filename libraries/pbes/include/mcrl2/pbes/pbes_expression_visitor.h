@@ -233,7 +233,7 @@ struct pbes_expression_visitor
       leave_exists();
     }
     else if(tr::is_prop_var(e)) {
-      visit_propositional_variable(e, tr::prop_var(e), a);
+      visit_propositional_variable(e, e, a);
       leave_propositional_variable();
     }
   }
@@ -453,7 +453,7 @@ struct pbes_expression_visitor<Term, void>
       leave_exists();
     }
     else if(tr::is_prop_var(e)) {
-      visit_propositional_variable(e, tr::prop_var(e));
+      visit_propositional_variable(e, e);
       leave_propositional_variable();
     }
   }

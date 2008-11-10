@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {
 
@@ -51,6 +52,17 @@ std::set<propositional_variable_instantiation> find_all_propositional_variable_i
                               );
 */                              
   return variables;
+}
+
+/// \brief Finds free data variables in a pbes expression.
+/// \param e A pbes expression.
+/// \return The free data variables occurring in the expression.
+inline
+std::set<data::data_variable> find_free_variables(const pbes_expression& e)
+{
+  detail::free_variable_visitor<pbes_expression> visitor;
+  visitor.visit(e);
+  return visitor.result;
 }
 
 } // namespace pbes_system

@@ -202,7 +202,7 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
       }
     }
     else if(tr::is_prop_var(e)) {
-      result = visit_propositional_variable(e, tr::prop_var(e), arg1);
+      result = visit_propositional_variable(e, e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
@@ -406,7 +406,7 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
       }
     }
     else if(tr::is_prop_var(e)) {
-      result = visit_propositional_variable(e, tr::prop_var(e));
+      result = visit_propositional_variable(e, e);
       if (!is_finished(result)) {
         result = e;
       }

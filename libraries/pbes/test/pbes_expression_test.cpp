@@ -15,8 +15,10 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
+#include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 
 using namespace std;
 using namespace atermpp;
@@ -183,12 +185,41 @@ void test_pbes_expression_with_variables()
   BOOST_CHECK(z.variables().size() == 0);
 }
 
+void test_pbes_expression_with_propositional_variables()
+{
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  m: Nat;       \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+    ;
+
+  pbes_expression x = parse_pbes_expression("Y(1) && Y(m)", VARSPEC);
+  std::set<data::data_variable> vx = find_free_variables(x);
+  std::set<propositional_variable_instantiation> px = find_all_propositional_variable_instantiations(x); 
+  pbes_expression_with_propositional_variables X(x, data::data_variable_list(vx.begin(), vx.end()), propositional_variable_instantiation_list(px.begin(), px.end()));
+
+  pbes_expression y = parse_pbes_expression("Y(n) || Y(4)", VARSPEC);
+  std::set<data::data_variable> vy = find_free_variables(y);
+  std::set<propositional_variable_instantiation> py = find_all_propositional_variable_instantiations(y); 
+  pbes_expression_with_propositional_variables Y(y, data::data_variable_list(vy.begin(), vy.end()), propositional_variable_instantiation_list(py.begin(), py.end()));
+
+  typedef core::term_traits<pbes_expression_with_propositional_variables> tr;
+  pbes_expression_with_propositional_variables Z = tr::and_(X, Y);
+  BOOST_CHECK(Z.variables().size() == 2);
+  BOOST_CHECK(Z.propositional_variables().size() == 4);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_accessors();
   test_pbes_expression_with_variables();
+  test_pbes_expression_with_propositional_variables();
 
   return 0;
 }

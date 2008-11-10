@@ -527,6 +527,12 @@ namespace core {
     
     static inline 
     bool is_prop_var(term_type t) { return pbes_system::pbes_expr::is_propositional_variable_instantiation(t); }
+
+    static inline
+    propositional_variable_type prop_var(const string_type& name, const data_term_sequence_type& parameters)
+    {
+      return propositional_variable_type(name, parameters);
+    }
       
     static inline
     data_term_type val(term_type t) { return pbes_system::accessors::val(t); }
@@ -548,9 +554,6 @@ namespace core {
     
     static inline
     data_term_sequence_type param(term_type t) { return pbes_system::accessors::param(t); }
-
-    static inline
-    propositional_variable_type prop_var(term_type t) { return propositional_variable_type(t); }
 
     static inline
     term_type variable2term(variable_type v)
