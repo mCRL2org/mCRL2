@@ -14,8 +14,10 @@
 #include <map>
 #include <vector>
 #include <wx/wx.h>
-#include "mcrl2/utilities/colorbutton.h"
 #include "utils.h"
+#include "mcrl2/utilities/colorbutton.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set.h"
 
 class LTS;
 class wxCheckListBox;
@@ -27,10 +29,11 @@ class MarkStateRuleDialog : public wxDialog {
     ~MarkStateRuleDialog();
     int getParamIndex();
     bool getNegated();
-    void getValues(std::vector<bool> &vals);
+    atermpp::set<ATerm> getValues();
     Utils::RGB_Color getColor();
     wxString getMarkRuleString();
-    void setData(int p,Utils::RGB_Color col,bool neg,std::vector<bool> &vals);
+    void setData(int p,Utils::RGB_Color col,bool neg,
+        atermpp::set<ATerm> vals);
     void onParameterChoice(wxCommandEvent& event);
   private:
     Mediator* mediator;
@@ -38,7 +41,7 @@ class MarkStateRuleDialog : public wxDialog {
     wxListBox* parameterListBox;
     wxListBox* relationListBox;
     mcrl2::utilities::wxColorButton* ruleClrButton;
-    std::map< wxString, int > valueIndices;
+    atermpp::map< wxString, ATerm > values;
     wxCheckListBox* valuesListBox;
     LTS*  lts;
     void loadValues(wxString paramName);

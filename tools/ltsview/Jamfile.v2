@@ -3,13 +3,10 @@ project toolset/ltsview ;
 tool ltsview
       : cluster.cpp
         conedb.cpp
-        fileloader.cpp
         glcanvas.cpp
         infodialog.cpp
         lts.cpp
         ltsview.cpp
-        ltsview_fsmlexer.cpp
-        ltsview_fsmparser.cpp
         mainframe.cpp
         markmanager.cpp
         markdialog.cpp
@@ -31,6 +28,8 @@ tool ltsview
         /libraries//tr
         /libraries//gl2ps
         /libraries/utilities//colorbutton
+        /libraries//atermpp
+        /libraries//lts
         /libraries//trace
         /libraries//core
         /site-config//boost_signals

@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <wx/wx.h>
 
 class Mediator;
@@ -39,6 +40,8 @@ class MarkDialog: public wxDialog {
     
   private:
     Mediator* mediator;
+
+    std::map<wxString,int> label_index;
 
     wxRadioButton* nomarksRadio;
     wxRadioButton* markDeadlocksRadio;

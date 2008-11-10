@@ -20,7 +20,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "cluster.h"
-#include "fileloader.h"
 #include "glcanvas.h"
 #include "lts.h"
 #include "mainframe.h"
@@ -235,26 +234,23 @@ std::string LTSView::getVersionString() {
 void LTSView::openFile(string fileName) {
   glCanvas->disableDisplay();
 
-  mainFrame->createProgressDialog("Opening file","Parsing file");
-  mainFrame->updateProgressDialog(0,"Parsing file");
+  mainFrame->createProgressDialog("Opening file","Loading file");
+  mainFrame->updateProgressDialog(0,"Loading file");
   LTS* newlts = new LTS(this);
-  try {
-    ltsview::FileLoader floader = ltsview::FileLoader(newlts);
-    if (!floader.parse_file(fileName))
-    {
-      throw "Parsing failed.";
-    }
-  }
-  catch (string msg) {
+  if (!newlts->readFromFile(fileName))
+  {
     delete newlts;
     mainFrame->updateProgressDialog(100,"Error loading file");
-    mainFrame->showMessage("Error loading file",msg);
+    mainFrame->showMessage(
+        "Error loading file",
+        "Could not load file " + fileName);
     return;
   }
-  if (lts != NULL) delete lts;
+  if (lts != NULL)
+  {
+    delete lts;
+  }
   lts = newlts;
-  // first remove all unreachable states
-  lts->trim();
   
   mainFrame->updateProgressDialog(17,"Ranking states");
   lts->rankStates(rankStyle);
@@ -360,21 +356,28 @@ void LTSView::setFSMStyle(bool b) {
   }
 }
 
-void LTSView::addMarkRule() {
-  if (lts != NULL) {
+void LTSView::addMarkRule()
+{
+  if (lts != NULL)
+  {
     MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
     msrdlg->CentreOnParent();
-    if (msrdlg->ShowModal() == wxID_OK) {
-      if (msrdlg->getParamIndex() != -1) {
-        vector<bool> vals;
-        msrdlg->getValues(vals);
+    if (msrdlg->ShowModal() == wxID_OK)
+    {
+      if (msrdlg->getParamIndex() != -1)
+      {
+        
         int mr = markManager->createMarkRule(msrdlg->getParamIndex(),
-            msrdlg->getNegated(),msrdlg->getColor(),vals);
+            msrdlg->getNegated(),msrdlg->getColor(),
+            msrdlg->getValues());
         mainFrame->addMarkRule(msrdlg->getMarkRuleString(),mr);
 
-        if (markManager->getMarkStyle() != MARK_STATES) {
+        if (markManager->getMarkStyle() != MARK_STATES)
+        {
           setMarkStyle(MARK_STATES);
-        } else {
+        }
+        else
+        {
           applyMarkStyle();
         }
       }
@@ -384,33 +387,44 @@ void LTSView::addMarkRule() {
   }
 }
 
-void LTSView::removeMarkRule(int mr) {
+void LTSView::removeMarkRule(int mr)
+{
   markManager->removeMarkRule(mr);
-  if (markManager->getMarkStyle() != MARK_STATES) {
+  if (markManager->getMarkStyle() != MARK_STATES)
+  {
     setMarkStyle(MARK_STATES);
-  } else {
+  }
+  else
+  {
     applyMarkStyle();
   }
 }
 
-void LTSView::editMarkRule(int mr) {
-  if (lts != NULL) {
-    MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,this,lts);
-    vector< bool > vals;
-    markManager->getMarkRuleValues(mr,vals);
+void LTSView::editMarkRule(int mr)
+{
+  if (lts != NULL)
+  {
+    MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,
+        this,lts);
     msrdlg->setData(markManager->getMarkRuleParam(mr),
-        markManager->getMarkRuleColor(mr),markManager->getMarkRuleNegated(mr),
-        vals);
+        markManager->getMarkRuleColor(mr),
+        markManager->getMarkRuleNegated(mr),
+        markManager->getMarkRuleValues(mr));
     msrdlg->CentreOnParent();
-    if (msrdlg->ShowModal() == wxID_OK) {
-      if (msrdlg->getParamIndex() != -1) {
-        msrdlg->getValues(vals);
+    if (msrdlg->ShowModal() == wxID_OK)
+    {
+      if (msrdlg->getParamIndex() != -1)
+      {
         markManager->setMarkRuleData(mr,msrdlg->getParamIndex(),
-            msrdlg->getNegated(),msrdlg->getColor(),vals);
+            msrdlg->getNegated(),msrdlg->getColor(),
+            msrdlg->getValues());
         mainFrame->replaceMarkRule(msrdlg->getMarkRuleString(),mr);
-        if (markManager->getMarkStyle() != MARK_STATES) {
+        if (markManager->getMarkStyle() != MARK_STATES)
+        {
           setMarkStyle(MARK_STATES);
-        } else {
+        }
+        else
+        {
           applyMarkStyle();
         }
       }
@@ -548,9 +562,9 @@ void LTSView::setMatchStyleClusters(Utils::MatchStyle ms)
   applyMarkStyle();
 }
 
-void LTSView::setActionMark(string label,bool b)
+void LTSView::setActionMark(int l,bool b)
 {
-  markManager->setActionMark(label,b);
+  markManager->setActionMark(l,b);
   setMarkStyle(MARK_TRANSITIONS);
 }
 
@@ -638,10 +652,10 @@ string LTSView::getParName(const int i) const {
   }
 }
 
-string LTSView::getParValue(const int i, const int j) const {
+string LTSView::getParValue(State *s, const int j) const {
   if (lts != NULL)
   {
-    return lts->getParameterValue(i, j);
+    return lts->getStateParameterValueStr(s,j);
   }
   else
   {
@@ -650,13 +664,16 @@ string LTSView::getParValue(const int i, const int j) const {
 }
 
 
-void LTSView::selectStateByID(const int id) {
-  if (lts != NULL) {
+void LTSView::selectStateByID(const int id)
+{
+  if (lts != NULL)
+  {
     State* s = lts->selectStateByID(id);
     lts->getSimulation()->setInitialState(s);
-    for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
-      mainFrame->setParameterValue(i,lts->getParameterValue(i,
-            s->getParameterValue(i)));
+    for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
+    {
+      mainFrame->setParameterValue(i,
+          lts->getStateParameterValueStr(s,i));
     }
   }
 }
@@ -669,18 +686,15 @@ void LTSView::selectCluster(const int rank, const int pos)
     mainFrame->setClusterStateNr(c->getNumStates());
     for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
     {
-      std::vector<int> vs; 
+      atermpp::set<ATerm> values = lts->getClusterParameterValues(c,i);
+      atermpp::set<ATerm>::iterator val_it;
       std::vector<std::string> val;
-
-      c->getParameterValues(i, vs);
-
-      for(size_t j = 0; j < vs.size(); ++j)
+      for (val_it = values.begin(); val_it != values.end(); ++val_it)
       {
-        val.push_back(lts->getParameterValue(i, vs[j]));
+        val.push_back(lts->prettyPrintParameterValue(*val_it));
       }
       mainFrame->setParameterValues(i, val);
     }
-
   }
 }
 

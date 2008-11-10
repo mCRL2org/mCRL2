@@ -28,7 +28,7 @@ class Mediator {
     virtual std::string getVersionString() = 0;
     virtual Utils::RGB_Color getMarkRuleColor(int mr) = 0;
     virtual Utils::RGB_Color getNewRuleColour() = 0;
-    virtual void setActionMark(std::string label,bool b) = 0;
+    virtual void setActionMark(int label,bool b) = 0;
     virtual void notifyRenderingFinished() = 0;
     virtual void notifyRenderingStarted() = 0;
     virtual void openFile(std::string fileName) = 0;
@@ -76,7 +76,7 @@ class Mediator {
 
     // Returns the value of the parameter with index i in the state with index 
     // j.
-    virtual std::string getParValue(const int i, const int j) const = 0;
+    virtual std::string getParValue(State* s, const int j) const = 0;
 
 
     virtual void generateBackTrace() = 0;

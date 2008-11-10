@@ -72,23 +72,6 @@ class Cluster {
     void setNumMarkedStatesAny(int n);
     int getNumMarkedTransitions();
 
-    void getParameterValues(int i, std::vector<int> &vs);
-    /*
-    bool getMarking() const;
-    void setMarking(bool b);
-    void setMarkAllEmpty(bool b);
-    bool hasMarkedState() const;
-    int getMarkedTransitionCount() const;
-
-    // Calls s->mark(rule) for all s in states that match rule, and adapts
-    // markedState to the number of states marked.
-    void markState(Utils::MarkRule* rule);
-
-    // Calls s->unmark(rule) for all s in states that match rule, and adapts 
-    // markedState to the number of states marked.
-    void unmarkState(Utils::MarkRule* rule);
-    */
-
     unsigned int getTotalNumSlots() const;
     unsigned int getNumSlots(unsigned int ring) const;
     void occupySlot(unsigned int ring,float pos,State* s);
@@ -141,9 +124,6 @@ class Cluster {
     unsigned int severedDescendantsC;
     int numMarkedStatesAll;
     int numMarkedStatesAny;
-    /*
-    bool marking;
-    bool markAllEmpty;*/
     int numMarkedTransitions;
     float position;
     int rank;

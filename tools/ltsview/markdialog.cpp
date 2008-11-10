@@ -196,8 +196,8 @@ void MarkDialog::onRemoveMarkRuleButton(wxCommandEvent& /*event*/)
 void MarkDialog::onMarkTransition(wxCommandEvent& event)
 {
   int i = event.GetInt();
-  mediator->setActionMark(static_cast<string>
-      (markTransitionsListBox->GetString(i).fn_str()),
+  mediator->setActionMark(
+      label_index[markTransitionsListBox->GetString(i)],
       markTransitionsListBox->IsChecked(i));
   markTransitionsRadio->SetValue(true);
 }
@@ -237,10 +237,13 @@ void MarkDialog::setActionLabels(vector<string> &labels)
 {
   wxArrayString strLabels;
   strLabels.Alloc(labels.size());
-  for (vector<string>::iterator it = labels.begin(); it != labels.end();
-      ++it)
+  label_index.clear();
+  wxString wxlabel;
+  for (unsigned int i = 0; i < labels.size(); ++i)
   {
-    strLabels.Add(wxString(it->c_str(),wxConvLocal));
+    wxlabel = wxString(labels[i].c_str(),wxConvLocal);
+    strLabels.Add(wxlabel);
+    label_index[wxlabel] = i;
   }
   strLabels.Sort();
   markTransitionsListBox->Set(strLabels);

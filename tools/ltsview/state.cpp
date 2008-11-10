@@ -15,7 +15,7 @@
 using namespace std;
 using namespace Utils;
 
-State::State(int aid,vector<int> &sv) {
+State::State(int aid) {
   cluster = NULL;
   rank = 0;
   positionRadius = 0.0f;
@@ -24,7 +24,6 @@ State::State(int aid,vector<int> &sv) {
   simulated = false;
   selected = false;
   zoomLevel = 0;
-  stateVector = sv;
 }
 
 State::~State() {
@@ -200,10 +199,6 @@ Transition* State::getLoop(int i) const {
 
 int State::getNumLoops() const {
   return loops.size();
-}
-
-int State::getParameterValue(int parindex) {
-  return stateVector[parindex];
 }
 
 void State::setSimulated(bool simulated) {

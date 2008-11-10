@@ -11,6 +11,7 @@
 
 #include "lts.h"
 #include "cluster.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
@@ -23,65 +24,88 @@ using namespace Utils;
 using namespace std;
 using namespace mcrl2::trace;
 using namespace mcrl2::core;
+using namespace mcrl2::lts;
 
 /**************************** Cluster_iterator ********************************/
 
-Cluster_iterator::Cluster_iterator(LTS *l,bool rev) {
+Cluster_iterator::Cluster_iterator(LTS *l,bool rev)
+{
   reverse = rev;
   lts = l;
-  if (reverse) {
+  if (reverse)
+  {
     rank = lts->getMaxRanks()-1;
-  } else {
+  }
+  else
+  {
     rank = 0;
   }
   cluster = 0;
-  while (!is_end() && !is_ok()) {
+  while (!is_end() && !is_ok())
+  {
     next();
   }
 }
 
-Cluster_iterator::~Cluster_iterator() {
+Cluster_iterator::~Cluster_iterator()
+{
 }
 
-void Cluster_iterator::operator++() {
-  if (!is_end()) {
+void Cluster_iterator::operator++()
+{
+  if (!is_end())
+  {
     next();
-    while (!is_end() && !is_ok()) {
+    while (!is_end() && !is_ok())
+    {
       next();
     }
   }
 }
 
-Cluster* Cluster_iterator::operator*() {
+Cluster* Cluster_iterator::operator*()
+{
   return lts->clustersInRank[rank][cluster];
 }
 
-bool Cluster_iterator::is_ok() {
+bool Cluster_iterator::is_ok()
+{
   return (lts->clustersInRank[rank].size() > 0)
       && (lts->clustersInRank[rank][cluster] != NULL);
 }
 
-bool Cluster_iterator::is_end() {
-  if (reverse) {
+bool Cluster_iterator::is_end()
+{
+  if (reverse)
+  {
     return (rank == -1);
-  } else {
+  }
+  else
+  {
     return (rank == lts->getMaxRanks());
   }
 }
 
-void Cluster_iterator::next() {
+void Cluster_iterator::next()
+{
   ++cluster;
-  if (cluster >= lts->clustersInRank[rank].size()) {
+  if (cluster >= lts->clustersInRank[rank].size())
+  {
     cluster = 0;
-    if (reverse) {
+    if (reverse)
+    {
       --rank;
-      while (rank >= 0 && lts->clustersInRank[rank].size() == 0) {
+      while (rank >= 0 && lts->clustersInRank[rank].size() == 0)
+      {
         --rank;
       }
-    } else {
+    }
+    else
+    {
       ++rank;
       while (rank < lts->getMaxRanks() &&
-          lts->clustersInRank[rank].size() == 0) {
+          lts->clustersInRank[rank].size() == 0)
+      {
         ++rank;
       }
     }
@@ -90,42 +114,49 @@ void Cluster_iterator::next() {
 
 /**************************** State_iterator **********************************/
 
-State_iterator::State_iterator(LTS *l) {
+State_iterator::State_iterator(LTS *l)
+{
   lts = l;
   state_it = lts->states.begin();
 }
 
-State_iterator::~State_iterator() {
+State_iterator::~State_iterator()
+{
 }
 
-void State_iterator::operator++() {
-  if (!is_end()) {
+void State_iterator::operator++()
+{
+  if (!is_end())
+  {
     ++state_it;
   }
 }
 
-State* State_iterator::operator*() {
+State* State_iterator::operator*()
+{
   return *state_it;
 }
 
-bool State_iterator::is_end() {
+bool State_iterator::is_end()
+{
   return (state_it == lts->states.end());
 }
 
 /**************************** LTS *********************************************/
 
-LTS::LTS(Mediator* owner) {
+LTS::LTS(Mediator* owner)
+{
   mediator = owner;
-  initialState = NULL;
   deadlockCount = -1;
-  transitionCount = 0;
   simulation = new Simulation();
+  initialState = NULL;
   selectedState = NULL;
   selectedCluster = NULL;
   lastCluster = NULL;
   previousLevel = NULL;
   lastWasAbove = false;
   zoomLevel = 0;
+  mcrl2_lts = NULL;
 }
 
 LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
@@ -141,29 +172,7 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
   // simulation = new Simulation();
   simulation = previousLevel->getSimulation();
 
-  for (unsigned int i = 0; i < previousLevel->getNumParameters(); ++i)
-  {
-    parameterNames.push_back(previousLevel->getParameterName(i));
-    parameterTypes.push_back(previousLevel->getParameterType(i));
-    
-    vector< string > values;
-
-    for (int j = 0; j < previousLevel->getNumParameterValues(i); ++j)
-    {
-      values.push_back(previousLevel->getParameterValue(i,j));
-    }
-
-    valueTable.push_back(values);
-  }
-  
-  previousLevel->getActionLabels(labels);
-
-  for(size_t i = 0; i < labels.size(); ++i)
-  {
-    pair<string, int> invLabel(labels[i], i);
-    labels_inv.insert(invLabel);
-  }
-
+  mcrl2_lts = previousLevel->getmCRL2LTS();
 
   if (lastWasAbove)
   {
@@ -204,14 +213,17 @@ LTS::~LTS()
     // This LTS is the top level LTS, so delete all its contents.
     unsigned int i,r;
     vector< State* >::iterator li;
-    for (li = states.begin(); li != states.end(); ++li) {
+    for (li = states.begin(); li != states.end(); ++li)
+    {
       delete *li;
     }
     states.clear();
     initialState = NULL;
     
-    for (r = 0; r < clustersInRank.size(); ++r) {
-      for (i = 0; i < clustersInRank[r].size(); ++i) {
+    for (r = 0; r < clustersInRank.size(); ++r)
+    {
+      for (i = 0; i < clustersInRank[r].size(); ++i)
+      {
         delete clustersInRank[r][i];
       }
     }
@@ -219,6 +231,11 @@ LTS::~LTS()
 
     simulation->stop();
     delete simulation;
+    if (mcrl2_lts != NULL)
+    {
+      delete mcrl2_lts;
+      mcrl2_lts = NULL;
+    }
   }
   else
   {
@@ -227,36 +244,128 @@ LTS::~LTS()
   }
 }
 
-Cluster_iterator LTS::getClusterIterator(bool reverse) {
+Cluster_iterator LTS::getClusterIterator(bool reverse)
+{
   return Cluster_iterator(this,reverse);
 }
 
-State_iterator LTS::getStateIterator() {
+State_iterator LTS::getStateIterator()
+{
   return State_iterator(this);
 }
 
-void LTS::addParameter(string parname,string partype,
-    vector<string> &parvalues) {
-  parameterNames.push_back(parname);
-  parameterTypes.push_back(partype);
-  valueTable.push_back(parvalues);
+string LTS::getParameterName(int parindex)
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    return "";
+  }
+  return mcrl2_lts->state_parameter_name_str(parindex);
 }
 
-string LTS::getParameterName(int parindex) {
-  return parameterNames[parindex];
+atermpp::set<ATerm> LTS::getParameterDomain(int parindex)
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    atermpp::set<ATerm> empty_set;
+    return empty_set;
+  }
+  return mcrl2_lts->get_state_parameter_values(parindex);
 }
 
-string LTS::getParameterType(int parindex) {
-  return parameterTypes[parindex];
+string LTS::prettyPrintParameterValue(ATerm parvalue)
+{
+  return mcrl2_lts->pretty_print_state_value(parvalue);
 }
 
-string LTS::getParameterValue(int parindex,int valindex) {
-  return valueTable[parindex][valindex];
+ATerm LTS::getStateParameterValue(State* state,unsigned int param)
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    return NULL;
+  }
+  return mcrl2_lts->get_state_parameter_value(state->getID(),param);
 }
 
-State* LTS::selectStateByID(int id) {
+std::string LTS::getStateParameterValueStr(State* state,
+    unsigned int param)
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    return "";
+  }
+  return mcrl2_lts->pretty_print_state_value(
+      mcrl2_lts->get_state_parameter_value(state->getID(),param));
+}
+
+atermpp::set<ATerm> LTS::getClusterParameterValues(Cluster* cluster,
+    unsigned int param)
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    atermpp::set<ATerm> empty_set;
+    return empty_set;
+  }
+  atermpp::set<ATerm> result;
+  for (int i = 0; i < cluster->getNumStates(); ++i)
+  {
+    result.insert(getStateParameterValue(cluster->getState(i),param));
+  }
+  return result;
+}
+
+mcrl2::lts::lts* LTS::getmCRL2LTS()
+{
+  return mcrl2_lts;
+}
+
+bool LTS::readFromFile(std::string filename)
+{
+  mcrl2_lts = new mcrl2::lts::lts();
+  bool success = mcrl2_lts->read_from(filename,
+      mcrl2::lts::lts::guess_format(filename));
+  if (!success)
+  {
+    delete mcrl2_lts;
+    mcrl2_lts = NULL;
+    return false;
+  }
+
+  // remove unreachable states
+  mcrl2_lts->reachability_check(true);
+
+  states.clear();
+  states.reserve(mcrl2_lts->num_states());
+  for (unsigned int i = 0; i < mcrl2_lts->num_states(); ++i)
+  {
+    states.push_back(new State(i));
+  }
+
+  initialState = states[mcrl2_lts->initial_state()];
+  simulation->setInitialState(initialState);
+
+  transition_iterator ti(mcrl2_lts);
+  for ( ; ti.more(); ++ti)
+  {
+    State *s1 = states[ti.from()];
+    State *s2 = states[ti.to()];
+    Transition* t = new Transition(s1,s2,ti.label());
+    if (s1 != s2)
+    {
+      s1->addOutTransition(t);
+      s2->addInTransition(t);
+    }
+    else
+    {
+      s1->addLoop(t);
+    }
+  }
+  return true;
+}
+
+State* LTS::selectStateByID(int id)
+{
   State *s = states[id];
-  
   if (s)
   {
     s->select();
@@ -277,7 +386,6 @@ State* LTS::selectStateByID(int id) {
       }
     }
   }
-
   return selectedState;
 }
 
@@ -291,8 +399,10 @@ Cluster* LTS::selectCluster(const int rank, const int pos)
   return selectedCluster;
 }
 
-void LTS::deselect() {
-  if (selectedState != NULL) {
+void LTS::deselect()
+{
+  if (selectedState != NULL)
+  {
     selectedState->deselect();
     simulation->setInitialState(initialState);
     selectedState = NULL;
@@ -305,30 +415,23 @@ void LTS::deselect() {
   }
 }
 
-int LTS::getNumLabels() {
-  return labels.size();
+int LTS::getNumLabels()
+{
+  return mcrl2_lts->num_labels();
 }
 
-unsigned int LTS::getNumParameters() const {
-  return parameterNames.size();
+unsigned int LTS::getNumParameters() const
+{
+  if (!mcrl2_lts->has_state_parameters())
+  {
+    return 0;
+  }
+  return mcrl2_lts->num_state_parameters();
 }
 
-int LTS::getNumParameterValues(int parindex) const {
-  return valueTable[parindex].size();
-}
-
-string LTS::getLabel(int labindex) {
-  return labels[labindex];
-}
-
-int LTS::getLabelIndex(std::string label) {
-  return labels_inv[label];
-}
-
-int LTS::addLabel(string label) {
-  labels.push_back(label);
-  labels_inv[label] = labels.size()-1;
-  return labels.size()-1;
+string LTS::getLabel(int labindex)
+{
+  return mcrl2_lts->label_value_str(labindex);
 }
 
 void LTS::addCluster(Cluster* c)
@@ -342,13 +445,15 @@ void LTS::addCluster(Cluster* c)
     clustersInRank.resize(rank + 1);
   }
   
-  if (clustersInRank[rank].size() <= pos) {
+  if (clustersInRank[rank].size() <= pos)
+  {
     clustersInRank[rank].resize(pos + 1);
   }
 
   clustersInRank[rank][pos] = c;
 
-  for (int i = 0; i < c->getNumStates(); ++i) {
+  for (int i = 0; i < c->getNumStates(); ++i)
+  {
     State* s = c->getState(i);
     unsigned int sid = s->getID();
     if (states.size() <= sid)
@@ -374,48 +479,27 @@ void LTS::addClusterAndBelow(Cluster* c)
   }
 }
 
-
-void LTS::addState(int sid,vector<int> &sv)
+void LTS::getActionLabels(vector< string > &ls) const
 {
-  State *s = new State(sid,sv);
-  if (sid == 0) {
-    initialState = s;
-    simulation->setInitialState(s);
+  ls.clear();
+  for (unsigned int i = 0; i < mcrl2_lts->num_labels(); ++i)
+  {
+    ls.push_back(mcrl2_lts->label_value_str(i));
   }
-  states.push_back(s);
 }
 
-void LTS::addTransition(int bs,int es,int l) {
-  if (bs != es) {
-    State *s1 = states[bs];
-    State *s2 = states[es];
-    Transition* t = new Transition(s1,s2,l);
-    s1->addOutTransition(t);
-    s2->addInTransition(t);
-  } else {
-    State *s = states[bs];
-    Transition* t = new Transition(s,s,l);
-    s->addLoop(t);
-  }
-  ++transitionCount;
-}
-
-void LTS::getActionLabels(vector< string > &ls) const {
-  ls = labels;
-}
-
-State* LTS::getInitialState() const {
+State* LTS::getInitialState() const
+{
   return initialState;
 }
 
-int LTS::getNumRanks() const {
+int LTS::getNumRanks() const
+{
   int offset = 0;
   while(clustersInRank[offset].empty())
   {
     ++offset;
   }
-
-
   return clustersInRank.size() - offset;
 }
 
@@ -424,21 +508,27 @@ int LTS::getMaxRanks() const
   return clustersInRank.size();
 }
 
-int LTS::getNumClusters() const {
+int LTS::getNumClusters() const
+{
   int result = 0;
-  for (size_t i = 0; i < clustersInRank.size(); ++i) {
+  for (size_t i = 0; i < clustersInRank.size(); ++i)
+  {
     result += clustersInRank[i].size();
   }
   return result;
 }
 
-int LTS::getNumDeadlocks() {
-  if (deadlockCount == -1) {
+int LTS::getNumDeadlocks()
+{
+  if (deadlockCount == -1)
+  {
     // a value of -1 indicates that we have to compute it
     deadlockCount = 0;
     vector< State* >::iterator state_it;
-    for (state_it  = states.begin(); state_it != states.end(); ++state_it) {
-      if ((**state_it).isDeadlock()) {
+    for (state_it  = states.begin(); state_it != states.end(); ++state_it)
+    {
+      if ((**state_it).isDeadlock())
+      {
         ++deadlockCount;
       }
     }
@@ -446,22 +536,27 @@ int LTS::getNumDeadlocks() {
   return deadlockCount;
 }
 
-int LTS::getNumStates() const {
-  return states.size();
+int LTS::getNumStates() const
+{
+  return mcrl2_lts->num_states();
 }
 
-int LTS::getNumTransitions() const {
-  return transitionCount;
+int LTS::getNumTransitions() const
+{
+  return mcrl2_lts->num_transitions();
 }
 
-void LTS::clearRanksAndClusters() {
+void LTS::clearRanksAndClusters()
+{
   vector< State* >::iterator it;
-  for (it = states.begin(); it != states.end(); ++it) {
+  for (it = states.begin(); it != states.end(); ++it)
+  {
     (*it)->setRank(-1);
     (*it)->setCluster(NULL);
   }
 
-  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci) {
+  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
+  {
     delete *ci;
   }
   
@@ -469,7 +564,8 @@ void LTS::clearRanksAndClusters() {
   clustersInRank.swap(temp2);
 }
 
-void LTS::rankStates(Utils::RankStyle rs) {
+void LTS::rankStates(Utils::RankStyle rs)
+{
   clearRanksAndClusters();
   int rankNumber = 0;
 
@@ -480,25 +576,32 @@ void LTS::rankStates(Utils::RankStyle rs) {
   int i;
   vector< State* >::iterator it;
   State *s,*t;
-  while (currRank.size() > 0) {
+  while (currRank.size() > 0)
+  {
     nextRank.clear();
     // iterate over the states in this rank
-    for (it  = currRank.begin(); it != currRank.end(); ++it) {
+    for (it  = currRank.begin(); it != currRank.end(); ++it)
+    {
       s = *it;
-      if (rs == CYCLIC) {
+      if (rs == CYCLIC)
+      {
         // iterate over all in-transitions of cs
-        for (i = 0; i < s->getNumInTransitions(); ++i) {
+        for (i = 0; i < s->getNumInTransitions(); ++i)
+        {
           t = s->getInTransition(i)->getBeginState();
-          if (t->getRank() == -1) {
+          if (t->getRank() == -1)
+          {
             t->setRank(rankNumber+1);
             nextRank.push_back(t);
           }
         }
       }
       // iterate over all out-transitions of cs
-      for (i = 0; i < s->getNumOutTransitions(); ++i) {
+      for (i = 0; i < s->getNumOutTransitions(); ++i)
+      {
         t = s->getOutTransition(i)->getEndState();
-        if (t->getRank() == -1) {
+        if (t->getRank() == -1)
+        {
           t->setRank(rankNumber+1);
           nextRank.push_back(t);
         }
@@ -509,7 +612,8 @@ void LTS::rankStates(Utils::RankStyle rs) {
   }
 }
 
-void LTS::clusterStates(Utils::RankStyle rs) {
+void LTS::clusterStates(Utils::RankStyle rs)
+{
   Cluster *d = new Cluster(0);
   vector< Cluster* > cs;
   cs.push_back(d);
@@ -518,30 +622,39 @@ void LTS::clusterStates(Utils::RankStyle rs) {
   clusterTree(initialState,d,rs == CYCLIC);
 }
 
-void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
+void LTS::clusterTree(State *v,Cluster *c,bool cyclic)
+{
   int h,i,j,r;
   State *w, *y;
   c->addState(v);
   v->setCluster(c);
-  for (i = 0; i < v->getNumOutTransitions(); ++i) {
+  for (i = 0; i < v->getNumOutTransitions(); ++i)
+  {
     w = v->getOutTransition(i)->getEndState();
-    if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+    if (w->getCluster() == NULL && w->getRank() == v->getRank())
+    {
       clusterTree(w,c,cyclic);
     }
   }
-  for (i = 0; i < v->getNumInTransitions(); ++i) {
+  for (i = 0; i < v->getNumInTransitions(); ++i)
+  {
     w = v->getInTransition(i)->getBeginState();
-    if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+    if (w->getCluster() == NULL && w->getRank() == v->getRank())
+    {
       clusterTree(w,c,cyclic);
     }
   }
-  if (cyclic) {
-    for (i = 0; i < v->getNumInTransitions(); ++i) {
+  if (cyclic)
+  {
+    for (i = 0; i < v->getNumInTransitions(); ++i)
+    {
       w = v->getInTransition(i)->getBeginState();
       r = w->getRank();
-      if (w->getCluster() == NULL && r == v->getRank()+1) {
+      if (w->getCluster() == NULL && r == v->getRank()+1)
+      {
         Cluster *d = new Cluster(r);
-        if ((unsigned int)(r) >= clustersInRank.size()) {
+        if ((unsigned int)(r) >= clustersInRank.size())
+        {
           vector< Cluster* > cs;
           clustersInRank.push_back(cs);
         }
@@ -551,17 +664,22 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
         c->addDescendant(d);
         clusterTree(w,d,cyclic);
 
-        for (h = 0; h < d->getNumStates(); ++h) {
+        for (h = 0; h < d->getNumStates(); ++h)
+        {
           y = d->getState(h);
-          for (j = 0; j < y->getNumOutTransitions(); ++j) {
+          for (j = 0; j < y->getNumOutTransitions(); ++j)
+          {
             w = y->getOutTransition(j)->getEndState();
-            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
+            {
               clusterTree(w,c,cyclic);
             }
           }
-          for (j = 0; j < y->getNumInTransitions(); ++j) {
+          for (j = 0; j < y->getNumInTransitions(); ++j)
+          {
             w = y->getInTransition(j)->getBeginState();
-            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
+            {
               clusterTree(w,c,cyclic);
             }
           }
@@ -569,12 +687,15 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
       }
     }
   }
-  for (i = 0; i < v->getNumOutTransitions(); ++i) {
+  for (i = 0; i < v->getNumOutTransitions(); ++i)
+  {
     w = v->getOutTransition(i)->getEndState();
     r = w->getRank();
-    if (w->getCluster() == NULL && r == v->getRank()+1) {
+    if (w->getCluster() == NULL && r == v->getRank()+1)
+    {
       Cluster *d = new Cluster(r);
-      if ((unsigned int)(r) >= clustersInRank.size()) {
+      if ((unsigned int)(r) >= clustersInRank.size())
+      {
         vector< Cluster* > cs;
         clustersInRank.push_back(cs);
       }
@@ -584,19 +705,25 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
       c->addDescendant(d);
       clusterTree(w,d,cyclic);
 
-      for (h = 0; h < d->getNumStates(); ++h) {
+      for (h = 0; h < d->getNumStates(); ++h)
+      {
         y = d->getState(h);
-        if (cyclic) {
-          for (j = 0; j < y->getNumOutTransitions(); ++j) {
+        if (cyclic)
+        {
+          for (j = 0; j < y->getNumOutTransitions(); ++j)
+          {
             w = y->getOutTransition(j)->getEndState();
-            if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
+            {
               clusterTree(w,c,cyclic);
             }
           }
         }
-        for (j = 0; j < y->getNumInTransitions(); ++j) {
+        for (j = 0; j < y->getNumInTransitions(); ++j)
+        {
           w = y->getInTransition(j)->getBeginState();
-          if (w->getCluster() == NULL && w->getRank() == v->getRank()) {
+          if (w->getCluster() == NULL && w->getRank() == v->getRank())
+          {
             clusterTree(w,c,cyclic);
           }
         }
@@ -605,51 +732,63 @@ void LTS::clusterTree(State *v,Cluster *c,bool cyclic) {
   }
 }
 
-void LTS::computeClusterInfo() {
+void LTS::computeClusterInfo()
+{
   State* s;
   Cluster* c;
   vector< State* >::iterator li;
   int t;
-  for (li = states.begin(); li != states.end(); ++li) {
+  for (li = states.begin(); li != states.end(); ++li)
+  {
     s = *li;
     c = s->getCluster();
     if (s->isDeadlock())
     {
       c->addDeadlock();
     }
-    for (t = 0; t < s->getNumOutTransitions(); ++t) {
+    for (t = 0; t < s->getNumOutTransitions(); ++t)
+    {
       c->addActionLabel(s->getOutTransition(t)->getLabel());
     }
-    for (t = 0; t < s->getNumLoops(); ++t) {
+    for (t = 0; t < s->getNumLoops(); ++t)
+    {
       c->addActionLabel(s->getLoop(t)->getLabel());
     }
   }
 }
 
-void LTS::positionClusters(bool fsmstyle) {
-  if (fsmstyle) {
+void LTS::positionClusters(bool fsmstyle)
+{
+  if (fsmstyle)
+  {
     initialState->getCluster()->computeSizeAndPositions_FSM();
-  } else {
+  }
+  else
+  {
     initialState->getCluster()->computeSizeAndPositions();
   }
   // position the initial state's cluster
   initialState->getCluster()->center();
 }
 
-void LTS::positionStates() {
+void LTS::positionStates()
+{
   vector< State* > undecided;
   edgeLengthBottomUp(undecided);
   edgeLengthTopDown(undecided);
   resolveClusterSlots();
 }
 
-void LTS::clearStatePositions() {
+void LTS::clearStatePositions()
+{
   int i;
   Cluster *c;
-  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci) {
+  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
+  {
     c = *ci;
     // center all states
-    for (i = 0; i < c->getNumStates(); ++i) {
+    for (i = 0; i < c->getNumStates(); ++i)
+    {
       c->getState(i)->center();
     }
     // clear the slots and undecided states
@@ -657,7 +796,8 @@ void LTS::clearStatePositions() {
   }
 }
 
-void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
+void LTS::edgeLengthBottomUp(vector< State* > &undecided)
+{
   //Phase 1: Processes states bottom-up, keeping edges as short as possible.
   //Pre:  clustersInRank is correctly sorted by rank. 
   //Post: states are positioned bottom up, keeping edges as 
@@ -672,19 +812,24 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
   Cluster* currCluster;
   // Iterate over the ranks in reverse order (bottom-up): 
   // we create a *reverse* cluster iterator
-  for (Cluster_iterator ci = getClusterIterator(true); !ci.is_end(); ++ci) {
+  for (Cluster_iterator ci = getClusterIterator(true); !ci.is_end(); ++ci)
+  {
     currCluster = *ci;
     // Iterate over the states in this cluster
-    for (s = 0; s < currCluster->getNumStates(); ++s) {
+    for (s = 0; s < currCluster->getNumStates(); ++s)
+    {
       currState = currCluster->getState(s);
       // Compute the position of the state, based on number and position of 
       // descendants of its cluster.
-      if (currCluster->getNumStates() == 1) {
+      if (currCluster->getNumStates() == 1)
+      {
         currState->center();
         currCluster->occupyCenterSlot(currState);
       }
-      else {
-        switch (currCluster->getNumDescendants()) {
+      else
+      {
+        switch (currCluster->getNumDescendants())
+        {
           case 0:
           {
             // Case three: No descendant clusters.
@@ -694,10 +839,12 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
             // if the cluster is centered, this state has to be processed in the
             // second pass, otherwise it will skip the second pass and be
             // processed in the third pass.
-            if (currCluster->isCentered()) {
+            if (currCluster->isCentered())
+            {
               undecided.push_back(currState);
             }
-            else {
+            else
+            {
               currCluster->addUndecidedState(currState);
             }
             break;
@@ -715,33 +862,41 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
             // centered.
             bool allcentered = true;
             t = 0;
-            while (allcentered && t < currState->getNumOutTransitions()) {
+            while (allcentered && t < currState->getNumOutTransitions())
+            {
               succ = currState->getOutTransition(t)->getEndState();
-              if (currState->getRank()+1 == succ->getRank()) {
+              if (currState->getRank()+1 == succ->getRank())
+              {
                 allcentered = succ->isCentered();
               }
               ++t;
             }
 
-            if (allcentered) {
+            if (allcentered)
+            {
               // Center the state and mark it as undecided
               currState->center();
               // if the cluster is centered, this state has to be processed in the
               // second pass, otherwise it will skip the second pass and be
               // processed in the third pass.
-              if (currCluster->isCentered()) {
+              if (currCluster->isCentered())
+              {
                 undecided.push_back(currState);
               }
-              else {
+              else
+              {
                 currCluster->addUndecidedState(currState);
               }
             }
-            else {
+            else
+            {
               Vect v = {0,0};
-              for (t = 0; t < currState->getNumOutTransitions(); ++t) {
+              for (t = 0; t < currState->getNumOutTransitions(); ++t)
+              {
                 succ = currState->getOutTransition(t)->getEndState();
                 if (currState->getRank()+1 == succ->getRank()
-                    && !succ->isCentered()) {
+                    && !succ->isCentered())
+                {
                   // convert subordinate position to a vector and add
                   v = v + succ->getPositionRadius() *
                     deg_to_vec(succ->getPositionAngle());
@@ -752,12 +907,14 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
                   currCluster->getTopRadius());
               ring = min(ring,NUM_RINGS-1);
 
-              if (ring == 0) {
+              if (ring == 0)
+              {
                 // v is sufficiently small, center the state.
                 currState->center();
                 currCluster->occupyCenterSlot(currState);
               }
-              else {
+              else
+              {
                 // Transform v into an angle, assign it to state position.
                 float angle = vec_to_deg(v);
                 currState->setPositionAngle(angle);
@@ -773,19 +930,25 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
             // Case two: More than one descendant cluster.
             // Iterate over subordinates, calculating sum of vectors.
             Vect v = {0,0};
-            for (t = 0; t < currState->getNumOutTransitions(); ++t) {
+            for (t = 0; t < currState->getNumOutTransitions(); ++t)
+            {
               succ = currState->getOutTransition(t)->getEndState();
-              if (currState->getRank()+1 == succ->getRank()) {
-                if (succ->getCluster()->isCentered()) {
-                  if (!succ->isCentered()) {
+              if (currState->getRank()+1 == succ->getRank())
+              {
+                if (succ->getCluster()->isCentered())
+                {
+                  if (!succ->isCentered())
+                  {
                     v = v + succ->getPositionRadius() *
                       deg_to_vec(succ->getPositionAngle());
                   }
                 }
-                else {
+                else
+                {
                   v = v + currCluster->getBaseRadius() *
                     deg_to_vec(succ->getCluster()->getPosition());
-                  if (!succ->isCentered()) {
+                  if (!succ->isCentered())
+                  {
                     v = v + succ->getPositionRadius() *
                       deg_to_vec(succ->getPositionAngle() +
                           succ->getCluster()->getPosition());
@@ -794,16 +957,18 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
               }
             }
             
-            unsigned int ring = round_to_int(vec_length(v) * float(NUM_RINGS-1)
-                / currCluster->getTopRadius());
+            unsigned int ring = round_to_int(vec_length(v) *
+                float(NUM_RINGS-1) / currCluster->getTopRadius());
             ring = min(ring,NUM_RINGS-1);
 
-            if (ring == 0) {
+            if (ring == 0)
+            {
               // v is sufficiently small, center the state.
               currState->center();
               currCluster->occupyCenterSlot(currState);
             }
-            else {
+            else
+            {
               // Transform v into an angle, assign it to state position.
               float angle = vec_to_deg(v);
               currState->setPositionAngle(angle);
@@ -819,11 +984,14 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided) {
   }
 }
 
-void LTS::edgeLengthTopDown(vector< State* > &ss) {
-  //Phase 2: Process states top-down, keeping edges as short as possible.
-  //Pre:  ss is correctly sorted by rank, bottom-up.
-  //Post: ss contains the states that could not be placed by this phase, sorted
-  //top-down.
+void LTS::edgeLengthTopDown(vector< State* > &ss)
+{
+  /* Phase 2: Process states top-down, keeping edges as short as
+   * possible.
+   * Pre:  ss is correctly sorted by rank, bottom-up.
+   * Post: ss contains the states that could not be placed by this
+   *       phase, sorted top-down.
+   */
   Cluster* currCluster;
   State* pred;
   int t;
@@ -831,7 +999,8 @@ void LTS::edgeLengthTopDown(vector< State* > &ss) {
 
   // Iterate over the states in reverse order (top-down)
   for (vector<State*>::reverse_iterator state_it = ss.rbegin(); state_it !=
-      ss.rend(); ++state_it) {
+      ss.rend(); ++state_it)
+  {
 
     // We know that this state is already centered after the previous pass
     // 
@@ -849,22 +1018,28 @@ void LTS::edgeLengthTopDown(vector< State* > &ss) {
     // Calculate the sum of the vectors gained from all subordinate angles
     allcentered = true;
     t = 0;
-    while (allcentered && t < (**state_it).getNumInTransitions()) {
+    while (allcentered && t < (**state_it).getNumInTransitions())
+    {
       pred = (**state_it).getInTransition(t)->getBeginState();
-      if ((**state_it).getRank()-1 == pred->getRank()) {
+      if ((**state_it).getRank()-1 == pred->getRank())
+      {
         allcentered = pred->isCentered();
       }
       ++t;
     }
-    if (allcentered) {
+    if (allcentered)
+    {
       currCluster->addUndecidedState(*state_it);
     }
-    else {
+    else
+    {
       Vect v = {0,0};
-      for (t = 0; t < (**state_it).getNumInTransitions(); ++t) {
+      for (t = 0; t < (**state_it).getNumInTransitions(); ++t)
+      {
         pred = (**state_it).getInTransition(t)->getBeginState();
         if ((**state_it).getRank()-1 == pred->getRank()
-            && !pred->isCentered()) {
+            && !pred->isCentered())
+        {
           v = v + pred->getPositionRadius() * 
             deg_to_vec(pred->getPositionAngle());
         }
@@ -874,12 +1049,14 @@ void LTS::edgeLengthTopDown(vector< State* > &ss) {
           currCluster->getTopRadius());
       ring = min(ring,NUM_RINGS-1);
 
-      if (ring == 0) {
+      if (ring == 0)
+      {
         // v is sufficiently small, center the state.
         (*state_it)->center();
         currCluster->occupyCenterSlot(*state_it);
       }
-      else {
+      else
+      {
         // Transform v into an angle, assign it to state position.
         float angle = vec_to_deg(v);
         (*state_it)->setPositionAngle(angle);
@@ -891,39 +1068,54 @@ void LTS::edgeLengthTopDown(vector< State* > &ss) {
   }
 }
 
-void LTS::resolveClusterSlots() {
+void LTS::resolveClusterSlots()
+{
   //Resolves the slots of each cluster, positioning the states within each slot
   //in such a way that they do not overlap.
-  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci) {
+  for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
+  {
     (**ci).resolveSlots();
   }
 }
 
-LTS* LTS::zoomIntoAbove() {
-  if (selectedCluster != NULL) {
+LTS* LTS::zoomIntoAbove()
+{
+  if (selectedCluster != NULL)
+  {
     LTS* newLTS = new LTS(mediator, this, true);
     return newLTS;
-  } else {
+  }
+  else
+  {
     return this;
   }
 }
 
-LTS* LTS::zoomIntoBelow() {
-  if (selectedCluster != NULL) {
+LTS* LTS::zoomIntoBelow()
+{
+  if (selectedCluster != NULL)
+  {
     LTS* newLTS = new LTS(mediator, this, false);
     return newLTS;
-  } else {
+  }
+  else
+  {
     return this;
   }
 }
 
-LTS* LTS::zoomOut() {
-  if (previousLevel != NULL) {
-    if (lastWasAbove) {
+LTS* LTS::zoomOut()
+{
+  if (previousLevel != NULL)
+  {
+    if (lastWasAbove)
+    {
       Cluster* child = NULL;
       Cluster* parent = lastCluster;
-      do {
-        for (int i = 0; i < parent->getNumDescendants(); ++i) {
+      do
+      {
+        for (int i = 0; i < parent->getNumDescendants(); ++i)
+        {
           parent->healSeverance(i);
         }
         child = parent;
@@ -931,14 +1123,17 @@ LTS* LTS::zoomOut() {
       } while (child != initialState->getCluster());
     }
     vector< State* >::iterator li;
-    for (li = states.begin(); li != states.end(); ++li) {
+    for (li = states.begin(); li != states.end(); ++li)
+    {
       if (*li)
       {
         (*li)->setZoomLevel(zoomLevel - 1);
       }
     }
     return previousLevel;
-  } else {
+  }
+  else
+  {
     return this;
   }
 }
@@ -983,29 +1178,13 @@ void LTS::setZoomLevel(const int level)
   zoomLevel = level;
 }
 
-void LTS::trim() {
-  // removes unreachable parts from the LTS
-  visit(initialState);
-  vector<State*> temp;
-  vector<State*>::iterator li;
-  State *s;
-  for (li = states.begin(); li != states.end(); ++li) {
-    s = *li;
-    if (s->isSelected()) {
-      s->deselect();
-      s->setID(temp.size());
-      temp.push_back(s);
-    } else {
-      delete s;
-    }
-  }
-  states.swap(temp);
-}
-
-void LTS::visit(State* s) {
-  if (!s->isSelected()) {
+void LTS::visit(State* s)
+{
+  if (!s->isSelected())
+  {
     s->select();
-    for (int i = 0; i < s->getNumOutTransitions(); ++i) {
+    for (int i = 0; i < s->getNumOutTransitions(); ++i)
+    {
       visit(s->getOutTransition(i)->getEndState());
     }
   }
@@ -1017,7 +1196,8 @@ void LTS::loadTrace(std::string const& path)
   try
   {
     tr.load(path);
-  } catch (...)
+  }
+  catch (...)
   {
     std::string error = "Error loading file: " + path;
     mediator->reportError(error);
@@ -1054,8 +1234,7 @@ void LTS::loadTrace(std::string const& path)
       ATerm currVal = ATgetArgument(currState, i);
       string value = PrintPart_CXX(currVal, ppDefault);
 
-      std::string paramValue = valueTable[i]
-                                         [initState->getParameterValue(i)];
+      std::string paramValue = getStateParameterValueStr(initState,i);
     }
 
     // Load the rest of the trace.
@@ -1072,7 +1251,7 @@ void LTS::loadTrace(std::string const& path)
 
       for(size_t i = 0; i < posTrans.size(); ++i)
       { 
-        if (action == labels[posTrans[i]->getLabel()])
+        if (action == mcrl2_lts->label_value_str(posTrans[i]->getLabel()))
         {
           ++possibilities;
           toChoose = i;
@@ -1108,7 +1287,7 @@ void LTS::loadTrace(std::string const& path)
 
             std::map<std::string, std::string>::iterator it;
 
-            if (currVal == valueTable[i][s->getParameterValue(i)])
+            if (currVal == getStateParameterValueStr(s,i))
             {
               ++match;
             }

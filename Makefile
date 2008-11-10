@@ -1,4 +1,4 @@
-.PHONY: all bjam install test tags clean distclean parsers mcrl2parser ltsview_fsmparser liblts_fsmparser doxy
+.PHONY: all bjam install test tags clean distclean parsers mcrl2parser chiparser liblts_fsmparser doxy
 
 all: bjam config.status
 	$(BOOST_BUILD)
@@ -24,7 +24,7 @@ ifeq (${MAKECMDGOALS},)
   include build/Makefile
 endif
 
-parsers: mcrl2parser chiparser ltsview_fsmparser liblts_fsmparser
+parsers: mcrl2parser chiparser liblts_fsmparser
 	cp /usr/include/FlexLexer.h build/workarounds
 
 liblts_fsmparser:
@@ -32,11 +32,6 @@ liblts_fsmparser:
 	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
 	bison -p fsm -d -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
 	mv liblts_fsmparser.hpp ../include/mcrl2
-
-ltsview_fsmparser:
-	cd tools/ltsview; \
-	flex -+ -oltsview_fsmlexer.cpp ltsview_fsmlexer.ll; \
-	bison -d -o ltsview_fsmparser.cpp ltsview_fsmparser.yy
 
 mcrl2parser:
 	cd libraries/core/source; \

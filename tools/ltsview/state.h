@@ -21,7 +21,7 @@ class Cluster;
 
 class State {
   public:
-    State(int aid,std::vector<int> &sv);
+    State(int aid);
     ~State();
     void addInTransition(Transition* trans);
     void addLoop(Transition* trans);
@@ -47,7 +47,6 @@ class State {
     Utils::Point3D getLoopControl2() const;
     int getRank() const;
     bool isSimulated() const;
-    int getParameterValue(int parindex);
     bool isCentered() const;
     bool isDeadlock() const;
     bool isSelected() const;
@@ -113,7 +112,6 @@ class State {
     Utils::Point3D loopControl2;
     int rank;
     bool simulated;
-    std::vector< int > stateVector;
     bool selected;
     Utils::Point3D force;
     Utils::Vect velocity;

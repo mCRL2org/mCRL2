@@ -56,7 +56,7 @@ class LTSView : public wxApp, public Mediator {
     void notifyRenderingStarted();
     void openFile(std::string fileName);
     void removeMarkRule(int mr);
-    void setActionMark(std::string label,bool b);
+    void setActionMark(int l,bool b);
     void setMarkStyle(Utils::MarkStyle ms);
     void setMatchStyle(Utils::MatchStyle ms);
     void setMatchStyleClusters(Utils::MatchStyle ms);
@@ -67,7 +67,7 @@ class LTSView : public wxApp, public Mediator {
     int getNumberOfParams() const;
     std::string getActionLabel(const int i) const;
     std::string getParName(const int i) const;
-    std::string getParValue(const int i, const int j) const;
+    std::string getParValue(State *s, const int j) const;
     void selectStateByID(const int id);
     void selectCluster(const int rank, const int pos);
     void deselect();

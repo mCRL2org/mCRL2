@@ -479,75 +479,83 @@ float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
   return r * cos(phi) / sqrt(1.0f - f*f);
 }
 
-void Visualizer::updateColors() {
+void Visualizer::updateColors()
+{
   Cluster *cl;
   RGB_Color c;
-  if (mediator->getMarkStyle() == NO_MARKS) {
+  if (mediator->getMarkStyle() == NO_MARKS)
+  {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
         settings->getRGB(InterpolateColor2),
         lts->getMaxRanks(),
         settings->getBool(LongInterpolation));
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+        ++ci)
+    {
       cl = *ci;
       c = ipr.getColor(cl->getRank());
-      if (cl->isSelected()) {
+      if (cl->isSelected())
+      {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
       }
       // set color of cluster cl
       visObjectFactory->updateObjectColor(cl->getVisObject(),c);
       // and its branches
-      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
-        if (cl->getBranchVisObject(i) != -1) {
-          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
+      {
+        if (cl->getBranchVisObject(i) != -1)
+        {
+          visObjectFactory->updateObjectColor(
+              cl->getBranchVisObject(i),c);
         }
       }
     }
-  } else {
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+  }
+  else // mediator->getMarkStyle() != NO_MARKS
+  {
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+        ++ci)
+    {
       cl = *ci;
       vector<RGB_Color> rule_colours;
 
-      // set color of cluster cl
+      c = RGB_WHITE;
       if (mediator->isMarked(cl)) 
       {
-        if (mediator->getMatchStyle() != MATCH_MULTI)
+        if (mediator->getMarkStyle() == MARK_STATES &&
+            mediator->getMatchStyle() == MATCH_MULTI)
         {
-          c = settings->getRGB(MarkedColor);
-        }
-        else
-        {
-          c = settings->getRGB(StateColor);
-
           vector<int> cluster_rules;
-
           cl->getMatchedRules(cluster_rules);
-
           for(size_t i = 0; i <  cluster_rules.size(); ++i)
           {
             rule_colours.push_back(
                     mediator->getMarkRuleColor(cluster_rules[i]));
-
           }
         }
-
+        else
+        {
+          c = settings->getRGB(MarkedColor);
+        }
       } 
-      else {
-        c = RGB_WHITE;
-      }
       
-      if (cl->isSelected()) {
+      if (cl->isSelected())
+      {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
       }
 
       visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-      visObjectFactory->updateObjectTexture(cl->getVisObject(), 
-                                           rule_colours);
+      visObjectFactory->updateObjectTexture(cl->getVisObject(),
+          rule_colours);
 
-      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
-        if (cl->getBranchVisObject(i) != -1) {
-          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
-          visObjectFactory->updateObjectTexture(cl->getBranchVisObject(i), 
-                                                rule_colours);
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
+      {
+        if (cl->getBranchVisObject(i) != -1)
+        {
+          visObjectFactory->updateObjectColor(
+              cl->getBranchVisObject(i),c);
+          visObjectFactory->updateObjectTexture(
+              cl->getBranchVisObject(i),rule_colours);
         }
       }
     }
@@ -952,17 +960,6 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
     }
   }
 }
-
-/*
-bool Visualizer::isMarked(State* s) {
-  return ((markStyle == MARK_STATES && s->isMarked()) || 
-          (markStyle == MARK_DEADLOCKS && s->isDeadlock()));
-}
-
-bool Visualizer::isMultiMarked(State* s) 
-{
-  return (markStyle == MARK_MULTI && s->isMarked());
-}*/
 
 // ------------- FORCE DIRECTED ------------------------------------------------
 

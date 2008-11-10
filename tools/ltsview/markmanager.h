@@ -13,6 +13,7 @@
 #define MARKMANAGER_H
 #include <vector>
 #include "utils.h"
+#include "mcrl2/atermpp/set.h"
 
 struct MarkRule;
 class LTS;
@@ -27,15 +28,15 @@ class MarkManager {
 
     /* Mark rules */
     int createMarkRule(int param,bool neg,Utils::RGB_Color col,
-        std::vector<bool> &vals);
+        atermpp::set<ATerm> vals);
     void removeMarkRule(int mr);
     int getMarkRuleParam(int mr);
     bool getMarkRuleActivated(int mr);
     bool getMarkRuleNegated(int mr);
     Utils::RGB_Color getMarkRuleColor(int mr);
-    void getMarkRuleValues(int mr,std::vector<bool> &vals);
+    atermpp::set<ATerm> getMarkRuleValues(int mr);
     void setMarkRuleData(int mr,int param,bool neg,Utils::RGB_Color col,
-        std::vector<bool> &vals);
+        atermpp::set<ATerm> vals);
     void setMarkRuleActivated(int mr,bool act);
 
     void setMatchStyle(Utils::MatchStyle ms);
@@ -48,7 +49,7 @@ class MarkManager {
     void setLTS(LTS *l,bool need_reset);
     void setMarkStyle(Utils::MarkStyle ms);
     Utils::MarkStyle getMarkStyle();
-    void setActionMark(std::string label,bool b);
+    void setActionMark(int l,bool b);
     void markClusters();
 
     bool isMarked(State *s);

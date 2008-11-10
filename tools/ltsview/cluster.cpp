@@ -89,33 +89,6 @@ int Cluster::getNumStates() const {
   return states.size();
 }
 
-void Cluster::getParameterValues(int i, std::vector<int> &vs)
-{
-  std::vector<int> pars; 
-  // TODO: Very inefficient
-  for (size_t j = 0; j != states.size(); ++j)
-  {
-    int par = states[j]->getParameterValue(i);
-    
-    bool found = false;
-    
-    for(size_t k = 0; k != pars.size() && !found; ++k)
-    {
-      if (pars[k] == par)
-      {
-        found = true;
-      }
-    }
-
-    if (!found)
-    {
-      pars.push_back(par);
-    }
-  }
-
-  vs = pars;
-}
-
 Cluster* Cluster::getAncestor() const {
   return ancestor;
 }

@@ -227,10 +227,8 @@ void SimDialog::refresh() {
         wxString stateChange = wxT("");
         if ((nextState != NULL) && (currState != NULL)) {
           for(int j = 0; j < mediator->getNumberOfParams(); ++j) {
-            string nextVal = mediator->getParValue(j, 
-                                       nextState->getParameterValue(j));
-            if (mediator->getParValue(j, currState->getParameterValue(j)) !=
-                nextVal) {
+            string nextVal = mediator->getParValue(nextState,j);
+            if (mediator->getParValue(currState,j) != nextVal) {
               stateChange += wxString(mediator->getParName(j).c_str(), 
                                wxConvLocal) +  
                             wxT(":=") + 
