@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -121,45 +122,22 @@ class data_variable: public data_expression
   /// \param v A sequence of data variables.
   /// \param w A sequence of data variables.
   /// \return The union of the sequences.
+  /// \deprecated Use atermpp::term_list_union instead.
   inline
   data_variable_list data_variable_list_union(data_variable_list v, data_variable_list w)
   {
-    if (v.empty())
-    {
-      return w;
-    }
-    if (w.empty())
-    {
-      return v;
-    }
-    std::set<data_variable> result;
-    result.insert(v.begin(), v.end());
-    result.insert(w.begin(), w.end());
-    return data_variable_list(result.begin(), result.end());
+    return atermpp::term_list_union(v, w);
   }
 
   /// Returns v minus w.
   /// \param v A sequence of data variables.
   /// \param w A sequence of data variables.
   /// \return The difference of the sequences.
+  /// \deprecated Use atermpp::term_list_difference instead.
   inline
   data_variable_list data_variable_list_difference(data_variable_list v, data_variable_list w)
   {
-    if (w.empty())
-    {
-      return v;
-    }
-    if (v.empty())
-    {
-      return v;
-    }
-    std::set<data_variable> result;
-    result.insert(v.begin(), v.end());
-    for (data_variable_list::iterator i = w.begin(); i != w.end(); ++i)
-    {
-      result.erase(*i);
-    }
-    return data_variable_list(result.begin(), result.end());
+    return atermpp::term_list_difference(v, w);
   }
 
 } // namespace data

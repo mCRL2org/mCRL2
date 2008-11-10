@@ -176,11 +176,11 @@ void test_pbes_expression_with_variables()
 
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
   pbes_expression_with_variables y(x);
-  BOOST_CHECK(y.variables().size() == 2);
+  BOOST_CHECK(y.variables().size() == 0);
   
   x = parse_pbes_expression("forall k:Nat.X(true, 2) && Y(n+1) && Y(k)", VARSPEC);
   pbes_expression_with_variables z(x);
-  BOOST_CHECK(z.variables().size() == 1);
+  BOOST_CHECK(z.variables().size() == 0);
 }
 
 int test_main(int argc, char** argv)

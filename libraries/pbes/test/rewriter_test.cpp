@@ -231,6 +231,31 @@ void test_substitutions()
     ;
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
+  BOOST_CHECK(r(d1, sigma) == r(d2)); 
+}
+
+void test_substitutions2()
+{
+  data::data_specification data_spec = default_data_specification();
+  data::rewriter datar(data_spec);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > r(datar, datae);
+    
+  data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
+  sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
+  sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));   
+
+  std::string var_decl =
+    "datavar         \n"
+    "  m, n:  Pos;   \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Pos;       \n"
+    ;
+
+  pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
+  pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
@@ -241,6 +266,7 @@ int test_main(int argc, char* argv[])
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
   test_substitutions();
+  test_substitutions2();
 
   return 0;
 }

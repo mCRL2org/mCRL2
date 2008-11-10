@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Unknown
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -15,7 +15,6 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/confluence_checker.h>
 #include <mcrl2/lps/mcrl22lps.h>
-#include <mcrl2/core/aterm_ext.h>
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
@@ -64,7 +63,7 @@ static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   using namespace mcrl2::lps;
 

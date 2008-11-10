@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_variable.h"
-#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -35,25 +34,19 @@ namespace data {
       data_expression_with_variables()
       {}
   
-      /// Constructor.
+      /// Constructor. Creates a data expression with an empty sequence of variables.
       ///             
       /// \param term A term.
       data_expression_with_variables(atermpp::aterm_appl term)
         : data_expression(term)
-      {
-        std::set<data_variable> v = find_all_data_variables(*this);
-        m_variables = data_variable_list(v.begin(), v.end());
-      }
+      {}
   
-      /// Constructor.
+      /// Constructor. Creates a data expression with an empty sequence of variables.
       ///             
       /// \param term A term.
       data_expression_with_variables(ATermAppl term)
         : data_expression(term)
-      {
-        std::set<data_variable> v = find_all_data_variables(*this);
-        m_variables = data_variable_list(v.begin(), v.end());
-      }
+      {}
 
       /// Constructor.
       ///             

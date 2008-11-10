@@ -15,7 +15,6 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;
@@ -25,7 +24,7 @@ using namespace mcrl2::data;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   identifier_string f_name("f");
   sort_identifier T("T");

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/pbes_expression_with_variables.h
-/// \brief add your file description here.
+/// \brief A pbes expression with an associated sequence of data variables.
 
 #ifndef MCRL2_PBES_PBES_EXPRESSION_WITH_VARIABLES_H
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_VARIABLES_H
@@ -18,7 +18,6 @@
 #include "mcrl2/data/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {
 
@@ -38,25 +37,17 @@ namespace pbes_system {
       pbes_expression_with_variables()
       {}
   
-      /// Constructor.
+      /// Constructor. Creates a data expression with an empty sequence of variables.
       ///             
       pbes_expression_with_variables(atermpp::aterm_appl term)
         : pbes_expression(term)
-      {
-        pbes_system::detail::free_variable_visitor<pbes_expression> visitor;
-        visitor.visit(term);
-        m_variables = data::data_variable_list(visitor.result.begin(), visitor.result.end());
-      }
+      {}
   
-      /// Constructor.
+      /// Constructor. Creates a data expression with an empty sequence of variables.
       ///             
       pbes_expression_with_variables(ATermAppl term)
         : pbes_expression(term)
-      {
-        pbes_system::detail::free_variable_visitor<pbes_expression> visitor;
-        visitor.visit(pbes_expression(term));
-        m_variables = data::data_variable_list(visitor.result.begin(), visitor.result.end());
-      }
+      {}
 
       /// Constructor.
       ///             

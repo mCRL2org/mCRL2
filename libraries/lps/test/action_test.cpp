@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/core/aterm_ext.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;
@@ -26,7 +25,7 @@ using namespace mcrl2::lps;
 
 int test_main(int argc, char** argv )
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   sort_expression X("X");
   sort_expression Y("Y");

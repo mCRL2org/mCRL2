@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/core/aterm_ext.h"
 
 using namespace mcrl2::data;
 using namespace atermpp;
@@ -25,7 +24,7 @@ using namespace mcrl2::data::data_expr;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv) 
 
   data_variable v;
   std::string name = v.name();
