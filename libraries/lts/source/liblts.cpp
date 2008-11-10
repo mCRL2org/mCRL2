@@ -15,7 +15,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <aterm2.h>
-#include "mcrl2/atermpp/list.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
@@ -1482,7 +1482,7 @@ ATerm lts::state_parameter_name(unsigned int idx)
   {
     char s[2+sizeof(unsigned int)*3];
     sprintf(s,"p%u",idx);
-    return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_type(idx));
+    return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_sort(idx));
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
@@ -1513,11 +1513,11 @@ std::string lts::state_parameter_name_str(unsigned int idx)
   return "";
 }
 
-ATerm lts::state_parameter_type(unsigned int idx)
+ATerm lts::state_parameter_sort(unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    return (ATerm) gsGetSort((ATermAppl) get_state_parameter(0,idx));
+    return (ATerm) gsGetSort((ATermAppl) get_state_parameter_value(0,idx));
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
@@ -1532,11 +1532,11 @@ ATerm lts::state_parameter_type(unsigned int idx)
   return NULL;
 }
 
-std::string lts::state_parameter_type_str(unsigned int idx)
+std::string lts::state_parameter_sort_str(unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    return PrintPart_CXX(state_parameter_type(idx),ppDefault);
+    return PrintPart_CXX(state_parameter_sort(idx),ppDefault);
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
@@ -1544,97 +1544,76 @@ std::string lts::state_parameter_type_str(unsigned int idx)
     return s;
   } else if ( type == lts_fsm )
   {
-    return ATgetName(ATgetAFun((ATermAppl) state_parameter_type(idx)));
+    return ATgetName(ATgetAFun((ATermAppl) state_parameter_sort(idx)));
   }
 
   assert(0);
   return "";
 }
 
-ATerm lts::get_state_parameter(unsigned int state, unsigned int idx)
+ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
     return ATgetArgument((ATermAppl) state_values[state],idx);
-  } else if ( type == lts_mcrl || type == lts_fsm )
+  } else if ( type == lts_mcrl )
   {
     return ATelementAt((ATermList) state_values[state],idx);
+  } else if ( type == lts_fsm )
+  {
+    return ATgetArgument(ATAelementAt((ATermList) state_values[state],idx),0);
   }
 
   assert(0);
   return NULL;
 }
 
-std::string lts::get_state_parameter_str(unsigned int state, unsigned int idx)
+std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    return PrintPart_CXX(get_state_parameter(state,idx),ppDefault);
+    return PrintPart_CXX(get_state_parameter_value(state,idx),ppDefault);
   } else if ( type == lts_mcrl || type == lts_fsm )
   {
-    return ATwriteToString(get_state_parameter(state,idx));
+    return ATwriteToString(get_state_parameter_value(state,idx));
   }
 
   assert(0);
   return "";
 }
 
-atermpp::list<ATerm> lts::get_unique_label_values()
+atermpp::set<ATerm> lts::get_label_values()
 {
-  ATermIndexedSet vals = ATindexedSetCreate(100,50);
-  atermpp::list<ATerm> r;
+  atermpp::set<ATerm> r;
   
   for (unsigned int i=0; i<nlabels; i++)
   {
-    ATbool b;
-    ATindexedSetPut(vals,label_values[i], &b);
-    if ( b == ATtrue )
-    {
-      r.push_back(label_values[i]);
-    }
+    r.insert(label_values[i]);
   }
-
-  ATindexedSetDestroy(vals);
 
   return r;
 }
 
-atermpp::list<ATerm> lts::get_unique_state_values()
+atermpp::set<ATerm> lts::get_state_values()
 {
-  ATermIndexedSet vals = ATindexedSetCreate(100,50);
-  atermpp::list<ATerm> r;
+  atermpp::set<ATerm> r;
   
   for (unsigned int i=0; i<nstates; i++)
   {
-    ATbool b;
-    ATindexedSetPut(vals,state_values[i], &b);
-    if ( b == ATtrue )
-    {
-      r.push_back(state_values[i]);
-    }
+    r.insert(state_values[i]);
   }
-
-  ATindexedSetDestroy(vals);
 
   return r;
 }
 
-atermpp::list<ATerm> lts::get_unique_state_parameters(unsigned int idx)
+atermpp::set<ATerm> lts::get_state_parameter_values(unsigned int idx)
 {
-  ATermIndexedSet vals = ATindexedSetCreate(100,50);
-  atermpp::list<ATerm> r;
+  atermpp::set<ATerm> r;
   
   for (unsigned int i=0; i<nstates; i++)
   {
-    ATbool b;
-    ATindexedSetPut(vals,get_state_parameter(i,idx), &b);
-    if ( b == ATtrue )
-    {
-      r.push_back(get_state_parameter(i,idx));
-    }
+    r.insert(get_state_parameter_value(i,idx));
   }
-
-  ATindexedSetDestroy(vals);
 
   return r;
 }
@@ -1676,7 +1655,7 @@ std::string lts::pretty_print_state_value(ATerm value)
   return "";
 }
 
-std::string lts::pretty_print_state_parameter(ATerm value)
+std::string lts::pretty_print_state_parameter_value(ATerm value)
 {
   if ( type == lts_mcrl2 )
   {

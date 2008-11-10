@@ -22,7 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <aterm2.h>
-#include <mcrl2/atermpp/list.h>
+#include <mcrl2/atermpp/set.h>
 #include <mcrl2/lps/specification.h>
 
 #ifdef USE_BCG
@@ -640,64 +640,68 @@ namespace lts
       /** \brief Returns the name of a parameter.
        * \param[in] idx  The index of the parameter.
        * \return         The name of the idx'th parameter if it is known and
-       *                 'unknown' otherwise.
+       *                 'p<idx>' otherwise.
        * \pre            States have parameters. */
       ATerm state_parameter_name(unsigned int idx);
 
       /** \brief Returns the name of a parameter as a string.
        * \param[in] idx  The index of the parameter.
        * \return         The name of the idx'th parameter as string if it is
-       *                 known and 'unknown' otherwise.
+       *                 known and 'p<idx>' otherwise.
        * \pre            States have parameters. */
       std::string state_parameter_name_str(unsigned int idx);
 
-      /** \brief Returns the type of a parameter.
+      /** \brief Returns the sort of a parameter.
        * \param[in] idx  The index of the parameter.
-       * \return         The type of the idx'th parameter if it is known and
-       *                 'unknown' otherwise.
+       * \return         The sort of the idx'th parameter if it is known and
+       *                 'D<idx>' otherwise.
        * \pre            States have parameters. */
-      ATerm state_parameter_type(unsigned int idx);
+      ATerm state_parameter_sort(unsigned int idx);
 
-      /** \brief Returns the type of a parameter as a string.
+      /** \brief Returns the sort of a parameter as a string.
        * \param[in] idx  The index of the parameter.
-       * \return         The type of the idx'th parameter as string if it is
-       *                 known and 'unknown' otherwise.
+       * \return         The sort of the idx'th parameter as string if it is
+       *                 known and 'D<idx>' otherwise.
        * \pre            States have parameters. */
-      std::string state_parameter_type_str(unsigned int idx);
+      std::string state_parameter_sort_str(unsigned int idx);
 
-      /** \brief Returns a parameter of a state.
-       * \param[in] state  The state from which the parameter must be taken.
+      /** \brief Returns a parameter value of a state.
+       * \param[in] state  The state from which the parameter value must be
+       *                   taken.
        * \param[in] idx    The index of the parameter.
-       * \return           The idx'th parameter of state.
+       * \return           The value of the idx'th parameter of state.
        * \pre              States have parameters. */
-      ATerm get_state_parameter(unsigned int state, unsigned int idx);
+      ATerm get_state_parameter_value(unsigned int state, unsigned int idx);
 
-      /** \brief Returns the string representation of a parameter of a state.
-       * \param[in] state  The state from which the parameter must be taken.
+      /** \brief Returns the string representation of a parameter value of a
+       *         state.
+       * \param[in] state  The state from which the parameter value must be
+       *                   taken.
        * \param[in] idx    The index of the parameter.
-       * \return           The idx'th parameter of state as a string.
+       * \return           The value of the idx'th parameter of state as a
+       *                   string.
        * \pre              States have parameters. */
-      std::string get_state_parameter_str(unsigned int state, unsigned int idx);
+      std::string get_state_parameter_value_str(unsigned int state, unsigned int idx);
 
       /** \brief Returns a list of all unique label values that occur in this
        *         LTS.
        * \return A list of all unique label values that occur in this LTS.
-       * \return This LTS has label information. */
-      atermpp::list<ATerm> get_unique_label_values();
+       * \pre    This LTS has label information. */
+      atermpp::set<ATerm> get_label_values();
 
       /** \brief Returns a list of all unique state values that occur in this
        *         LTS.
        * \return A list of all unique state values that occur in this LTS.
-       * \return This LTS has state information. */
-      atermpp::list<ATerm> get_unique_state_values();
+       * \pre    This LTS has state information. */
+      atermpp::set<ATerm> get_state_values();
 
-      /** \brief Returns a list of all unique state parameters that occur
-       *         in this LTS.
+      /** \brief Returns a list of all unique state parameters values that
+       *         occur in this LTS.
        * \param[in] idx  The index of the state parameter.
-       * \return         A list of all unique state parameters that occur
-       *                 in this LTS as idx'th parameter.
+       * \return         A list of all unique state parameters values that
+       *                 occur in this LTS as idx'th parameter.
        * \pre            States have parameters. */
-      atermpp::list<ATerm> get_unique_state_parameters(unsigned int idx);
+      atermpp::set<ATerm> get_state_parameter_values(unsigned int idx);
 
       /** \brief Pretty print a label value of this LTS.
        * \param[in] value  The label value to pretty print.
@@ -711,11 +715,11 @@ namespace lts
        * \pre              value occurs as state value in this LTS. */
       std::string pretty_print_state_value(ATerm value);
 
-      /** \brief Pretty print a state parameter of this LTS.
-       * \param[in] value  The state paramater to pretty print.
+      /** \brief Pretty print a state parameter value of this LTS.
+       * \param[in] value  The state parameter value to pretty print.
        * \return           The pretty-printed representation of value.
-       * \pre              value occurs as state parameter in this LTS. */
-      std::string pretty_print_state_parameter(ATerm value);
+       * \pre              value occurs as state parameter value in this LTS. */
+      std::string pretty_print_state_parameter_value(ATerm value);
 
       /** \brief Sorts the transitions using a sort style.
        * \param[in] ts The sort style to use. */
