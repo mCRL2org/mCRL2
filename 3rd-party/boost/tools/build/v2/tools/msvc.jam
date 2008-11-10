@@ -898,7 +898,7 @@ local rule configure-really ( version ? : options * )
             }
             else
             {
-                toolset.flags msvc.link .MT $(cpu-conditions) : $(manifest-tool) -nologo ;
+                toolset.flags msvc.link .MT $(cpu-conditions) : $(setup-$(c))$(manifest-tool) -nologo ;
             }
 
             if $(cc-filter)

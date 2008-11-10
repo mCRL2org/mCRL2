@@ -206,24 +206,27 @@ alias dynamic_loading : : <target-os>freebsd ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
-lib nsl       : : <name>nsl ;
-lib ws2_32    : : <name>"ws2_32" ;
+lib nsl : : <name>nsl ;
+lib ws2 : : <name>"ws2_32" ;
 
 alias socket ;
-lib   socket : nsl : <target-os>solaris <name>socket : : ;
-lib   socket : ws2_32
+lib   socket : : <target-os>solaris <name>socket : : <library>nsl ;
+lib   socket :
              : <target-os>windows
                <name>wsock32
              :
              : <define>__USE_W32_SOCKETS
                <define>_WIN32_WINNT=0x0501
+               <library>ws2_32
              ;
-lib   socket : ws2_32
+
+lib   socket :
              : <target-os>cygwin
                <name>wsock32
              :
              : <define>__USE_W32_SOCKETS
                <define>_WIN32_WINNT=0x0501
+               <library>ws2_32
              ;
 
 if $(CADP_HEADERS) {
