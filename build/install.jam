@@ -37,7 +37,7 @@ local configuration-options ;
 # Gets option arguments from options passed on the command line primarily and
 # otherwise the BUILD_OPTIONS variable
 local rule get-option ( name : default ) {
-  local result = [ MATCH --$(name)=(.*) : $(configuration-options) ] ;
+  local result = [ MATCH -?-?$(name)=(.*) : $(configuration-options) ] ;
 
   if $(result) {
     return $(result[1]) ;
@@ -48,7 +48,7 @@ local rule get-option ( name : default ) {
 }
 
 local rule is-option ( name : default ) {
-  local result = [ MATCH --($(name)) : $(configuration-options) ] ;
+  local result = [ MATCH -?-?($(name)) : $(configuration-options) ] ;
 
   if $(result) {
     return $(result[1]) ;
