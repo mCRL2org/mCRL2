@@ -15,8 +15,11 @@
 #include "mcrl2/core/detail/data_common.h"
 
 namespace mcrl2 {
-  namespace core {
+  namespace data {
     namespace detail {
+
+using namespace mcrl2::core::detail;
+using namespace mcrl2::core;
 
 //\pre spec represents an mCRL2 data, process or PBES specification that
 //     adheres to the internal ATerm structure after the type checking phase.

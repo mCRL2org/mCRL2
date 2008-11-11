@@ -43,6 +43,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::old_data;
+using namespace mcrl2::data::detail;
 
 char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "
                       "rewritten to normal form and printed. Also, one can assign values to declared "

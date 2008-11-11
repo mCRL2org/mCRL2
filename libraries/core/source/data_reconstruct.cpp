@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/table.h"
 
 #include "mcrl2/core/data_reconstruct.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/aterm_ext.h"
@@ -28,6 +28,7 @@
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data::detail;
 
 namespace mcrl2 {
   namespace core {
@@ -865,11 +866,6 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
       // removed with the rest of these.
       impl_sort_nat     (&data_decls_impl);
     }
-    if (sorts_table.get(gsMakeSortExprNatPair()) != NULL) {
-      // NatPair includes implementation of Nat, so it needs to be included in a larger
-      // batch.
-      impl_sort_nat_pair(&data_decls_impl);
-    }
     if (sorts_table.get(gsMakeSortExprInt()) != NULL) {
       // Int includes implementation of Nat, so it needs to be included in a
       // larger batch.
@@ -1400,7 +1396,7 @@ void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p
   {
     ATermAppl sort = ATAgetFirst(l);
     if (p_ctx->sorts_table.get(sort) == NULL) { // Unique sorts in the table
-      p_ctx->sorts_table.put         (sort, (ATerm) ATtrue);
+      p_ctx->sorts_table.put                (sort, (ATerm) ATtrue);
       p_ctx->sort_constructors.insert       (std::make_pair(sort, atermpp::indexed_set(20,50)));
       p_ctx->num_sort_constructors.insert   (std::make_pair(sort, 0));
       p_ctx->sort_mappings.insert           (std::make_pair(sort, atermpp::indexed_set(20,50)));

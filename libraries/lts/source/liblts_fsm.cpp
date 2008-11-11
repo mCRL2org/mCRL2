@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/liblts.h"
@@ -28,6 +28,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data::detail;
 using namespace mcrl2;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

@@ -24,10 +24,10 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_implementation.h"
 
 namespace mcrl2 {
 
@@ -61,11 +61,12 @@ namespace detail {
       throw mcrl2::runtime_error("alpha reduction error");
     return result;
   }
-  
+
+  // \deprecated
   inline
-  ATermAppl implement_data_specification(ATermAppl spec)
+  ATermAppl deprecated_implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::implement_data_proc_spec(spec);
+    ATermAppl result = implement_data_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -90,6 +91,28 @@ namespace detail {
     result           = data::detail::alpha_reduce(result);
    
     return data_specification(atermpp::arg1(result));
+  }
+
+  /// \deprecated This function will be removed after decent testing of
+  //              parse_data_specification has been performed.
+  /// Parses a data specification and implements the data types.
+  inline
+  atermpp::aterm_appl parse_data_specification_and_implement(const std::string& text)
+  {
+    // TODO: This is only a temporary solution. A decent standalone parser needs
+    // to be made for data specifications.
+
+    // make a fake linear process
+    std::stringstream lps_stream;
+    lps_stream << text;
+    lps_stream << "init delta;\n";
+
+    ATermAppl result = data::detail::parse_specification(lps_stream);
+    result           = data::detail::type_check_specification(result);
+    result           = data::detail::alpha_reduce(result);
+    result           = data::detail::deprecated_implement_data_specification(result);
+   
+    return atermpp::arg1(result);
   }
 
 } // namespace data

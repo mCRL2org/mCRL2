@@ -10,15 +10,16 @@
 ///
 /// \brief Implement data types in type checked mCRL2 specifications and expressions.
 
-#ifndef MCRL2_DATAIMPL_H
-#define MCRL2_DATAIMPL_H
+#ifndef MCRL2_DATA_DATAIMPL_H
+#define MCRL2_DATA_DATAIMPL_H
 
 #include <aterm2.h>
 #include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {
-  namespace core {
+  namespace data {
+    namespace detail {
 
 
 /** \brief     Implement data types of a type checked mCRL2 data
@@ -36,8 +37,8 @@ namespace mcrl2 {
  **/
 inline ATermAppl implement_data_data_spec(ATermAppl spec)
 {
-  assert(detail::gsIsDataSpec(spec));
-  return detail::implement_data_spec(spec);
+  assert(core::detail::gsIsDataSpec(spec));
+  return implement_data_spec(spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 process
@@ -55,8 +56,8 @@ inline ATermAppl implement_data_data_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
-  assert(detail::gsIsProcSpec(spec));
-  return detail::implement_data_spec(spec);
+  assert(core::detail::gsIsProcSpec(spec));
+  return implement_data_spec(spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 parameterised
@@ -74,8 +75,8 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 {
-  assert(detail::gsIsPBES(spec));
-  return detail::implement_data_spec(spec);
+  assert(core::detail::gsIsPBES(spec));
+  return implement_data_spec(spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 sort
@@ -100,8 +101,8 @@ inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
 {
-  assert(detail::gsIsSortExpr(sort_expr));
-  return detail::impl_exprs_with_spec(sort_expr, spec);
+  assert(core::detail::gsIsSortExpr(sort_expr));
+  return impl_exprs_with_spec(sort_expr, spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 data expression
@@ -125,8 +126,8 @@ inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
 {
-  assert(detail::gsIsDataExpr(data_expr));
-  return detail::impl_exprs_with_spec(data_expr, spec);
+  assert(core::detail::gsIsDataExpr(data_expr));
+  return impl_exprs_with_spec(data_expr, spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 multiaction
@@ -150,8 +151,8 @@ inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 {
-  assert(detail::gsIsMultAct(mult_act));
-  return detail::impl_exprs_with_spec(mult_act, spec);
+  assert(core::detail::gsIsMultAct(mult_act));
+  return impl_exprs_with_spec(mult_act, spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 process
@@ -176,8 +177,8 @@ inline ATermAppl implement_data_mult_act(ATermAppl mult_act, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
 {
-  assert(detail::gsIsProcExpr(proc_expr));
-  return detail::impl_exprs_with_spec(proc_expr, spec);
+  assert(core::detail::gsIsProcExpr(proc_expr));
+  return impl_exprs_with_spec(proc_expr, spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 state formula
@@ -201,8 +202,8 @@ inline ATermAppl implement_data_proc_expr(ATermAppl proc_expr, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 {
-  assert(detail::gsIsStateFrm(state_frm));
-  return detail::impl_exprs_with_spec(state_frm, spec);
+  assert(core::detail::gsIsStateFrm(state_frm));
+  return impl_exprs_with_spec(state_frm, spec);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 action rename
@@ -227,11 +228,12 @@ inline ATermAppl implement_data_state_frm(ATermAppl state_frm, ATermAppl& spec)
 **/
 inline ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl& lps_spec)
 {
-  assert(detail::gsIsActionRenameSpec(ar_spec));
-  assert(detail::gsIsLinProcSpec(lps_spec));
-  return detail::impl_data_action_rename_spec_detail(ar_spec, lps_spec);
+  assert(core::detail::gsIsActionRenameSpec(ar_spec));
+  assert(core::detail::gsIsLinProcSpec(lps_spec));
+  return impl_data_action_rename_spec_detail(ar_spec, lps_spec);
 }
 
-  }
-}
-#endif // MCRL2_DATAIMPL_H
+    } // namespace detail
+  } // namespace data
+} // namespace mcrl2
+#endif // MCRL2_DATA_DATAIMPL_H

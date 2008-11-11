@@ -30,6 +30,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data::detail;
 
   /// \mainpage formcheck
   /// \section section_introduction Introduction

@@ -67,7 +67,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::implement_data_proc_spec(spec);
+    ATermAppl result = data::detail::implement_data_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -107,7 +107,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = core::implement_data_state_frm(formula, spec);
+    ATermAppl result = data::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;

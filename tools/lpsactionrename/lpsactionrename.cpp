@@ -42,6 +42,7 @@
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::old_data::data_expr;
 using namespace mcrl2::old_data;
 using namespace mcrl2::lps;

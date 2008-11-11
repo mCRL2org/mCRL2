@@ -14,6 +14,7 @@ mcrl2-library old_data
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
        : <use>/libraries/core//headers
+         <use>/libraries/data//headers
          <use>/libraries/atermpp//headers
          <use>/libraries/utilities//headers
          <use>/site-config//cvc

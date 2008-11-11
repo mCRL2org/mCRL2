@@ -544,6 +544,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 
   if (isnew==0)
   { gsErrorMsg("function %T is added twice\n",constructor); 
+    assert(0);
     exit(1);
   }
 
@@ -932,6 +933,7 @@ static specificationbasictype *create_spec(ATermAppl t)
      in the same order in the output */
   spec->sorts = ATempty;
   ATermAppl data_spec = ATAgetArgument(t,0);
+  gsVerboseMsg("data_spec: %T\n", data_spec);
   for(ATermList sorts = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,0),0)); 
     !ATisEmpty(sorts); sorts = ATgetNext(sorts) )
   {

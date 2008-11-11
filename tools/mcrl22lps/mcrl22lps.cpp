@@ -36,6 +36,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::data::detail;
 
 //Functions used by the main program
 static t_lin_options parse_command_line(int argc, char *argv[]);

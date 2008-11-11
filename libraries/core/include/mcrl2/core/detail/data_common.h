@@ -244,6 +244,7 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 /// \ret if(BoolExpr, 1, 0) of sort SortExpr
 inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
 {
+  assert(gsGetSort(BoolExpr) == gsMakeSortExprBool());
   // TODO Maybe enforce that SortExpr is a PNIR sort
   return gsMakeDataExprIf(BoolExpr,
            gsMakeOpId(gsString2ATermAppl("1"), SortExpr),
