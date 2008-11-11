@@ -27,6 +27,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/filter_tool.h"
@@ -48,7 +49,8 @@ enum pbes_output_format {
 /// The transformation strategies of the tool.
 enum transformation_strategy {
   ts_lazy,
-  ts_finite
+  ts_finite,
+  ts_newlazy
 };
 
 /// The pbes2bes tool.
@@ -115,7 +117,8 @@ class pbes2bes_tool: public core::filter_tool
           make_mandatory_argument("NAME"),
           "compute the BES using strategy NAME:\n"
           "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-          "  'finite' for computing all possible boolean equations.",
+          "  'finite' for computing all possible boolean equations, or\n"
+          "  'newlazy' for an improved version of the lazy algorithm.",
           's').
         add_option("output",
           make_mandatory_argument("NAME"),
@@ -194,26 +197,35 @@ class pbes2bes_tool: public core::filter_tool
         return false;
       }
 
-      // data rewriter
-      data::rewriter datar(p.data());
-
-      // name generator
-      std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-      data::number_postfix_generator name_generator(prefix);
-
-      // data enumerator
-      data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(p.data(), datar, name_generator);
-
-      // pbes rewriter
-      pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);   
-
-      if (m_strategy == ts_finite)
+      if (m_strategy == ts_newlazy)
       {
-        p = do_finite_algorithm(p, pbesr);
+        pbes2bes_algorithm algorithm(p.data());
+        algorithm.run(p);
+        p = algorithm.get_result();
       }
-      else if (m_strategy == ts_lazy)
+      else
       {
-        p = do_lazy_algorithm(p, pbesr);
+        // data rewriter
+        data::rewriter datar(p.data());
+        
+        // name generator
+        std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
+        data::number_postfix_generator name_generator(prefix);
+        
+        // data enumerator
+        data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(p.data(), datar, name_generator);
+        
+        // pbes rewriter
+        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);   
+        
+        if (m_strategy == ts_finite)
+        {
+          p = do_finite_algorithm(p, pbesr);
+        }
+        else if (m_strategy == ts_lazy)
+        {
+          p = do_lazy_algorithm(p, pbesr);
+        }
       }
 
       // save the result
