@@ -77,7 +77,7 @@ namespace mcrl2 {
                       const data_expression& rhs)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
               atermpp::term_list<variable>(variables.begin(), variables.end()),
-              function_symbol("true", basic_sort("Bool")), lhs, rhs)),
+              core::detail::gsMakeNil(), lhs, rhs)),
             m_variables(variables.begin(), variables.end())
         {}
 

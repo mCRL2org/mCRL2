@@ -33,7 +33,7 @@
 #include "application.h"
 
 #include "data_equation.h"
-#include "detail/compatibility.h"
+#include "mcrl2/data/detail/compatibility.h"
 
 namespace mcrl2 {
   

@@ -13,9 +13,12 @@
 #ifndef MCRL2_DATA_DETAIL_COMPATIBILITY_H
 #define MCRL2_DATA_DETAIL_COMPATIBILITY_H
 
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/data_equation.h"
 
 namespace mcrl2 {
 
