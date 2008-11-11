@@ -13,7 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/bool_.h"
+#include "mcrl2/data/bool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
