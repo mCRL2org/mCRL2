@@ -1573,9 +1573,13 @@ std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int 
   if ( type == lts_mcrl2 )
   {
     return PrintPart_CXX(get_state_parameter_value(state,idx),ppDefault);
-  } else if ( type == lts_mcrl || type == lts_fsm )
+  } else if ( type == lts_mcrl )
   {
     return ATwriteToString(get_state_parameter_value(state,idx));
+  } else if ( type == lts_fsm )
+  {
+    std::string s = ATwriteToString(get_state_parameter_value(state,idx));
+    return s.substr(1,s.size()-2);
   }
 
   assert(0);
@@ -1625,7 +1629,8 @@ std::string lts::pretty_print_label_value(ATerm value)
     return PrintPart_CXX(value,ppDefault);
   } else if ( type == lts_mcrl || type == lts_fsm )
   {
-    return ATwriteToString(value);
+    std::string s = ATwriteToString(value);
+    return s.substr(1,s.size()-2);
   }
 
   assert(0);
@@ -1660,9 +1665,13 @@ std::string lts::pretty_print_state_parameter_value(ATerm value)
   if ( type == lts_mcrl2 )
   {
     return PrintPart_CXX(value,ppDefault);
-  } else if ( type == lts_mcrl || type == lts_fsm )
+  } else if ( type == lts_mcrl )
   {
     return ATwriteToString(value);
+  } else if ( type == lts_fsm )
+  {
+    std::string s = ATwriteToString(value);
+    return s.substr(1,s.size()-2);
   }
 
   assert(0);
