@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/pbes2bes_algorithm.h"
 
 using namespace mcrl2;
 
@@ -34,6 +35,14 @@ pbes<> pbes2bes(const pbes<>& pbes_spec, bool finite = true)
   }
   pbes<> result = (finite ? do_finite_algorithm(pbes_spec, pbesr) : do_lazy_algorithm(pbes_spec, pbesr));
   return result;
+}
+
+inline
+pbes<> pbes2bes_new(const pbes<>& pbes_spec)
+{
+  pbes2bes_algorithm algorithm(pbes_spec.data());
+  algorithm.run(pbes_spec);
+  return algorithm.get_result();
 }
 
 std::string test1 =
@@ -126,29 +135,51 @@ std::string test8 =
   "init X(true);                                                                     \n"
   ;
 
-void test_pbes(const std::string& pbes_spec)
+void test_pbes(const std::string& pbes_spec, bool finite)
 {
   using namespace pbes_system;
 
   core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
+  std::cout << "------------------------------\n" << core::pp(p) << std::endl;
+
+  pbes<> q1 = pbes2bes(p, finite);
   core::gsSetVerboseMsg();
-  pbes<> q = pbes2bes(p);
-  std::cout << "------------------------------\n"
-            << core::pp(p) << std::endl
-            << core::pp(q) << std::endl;
+  std::cout << "<old version> " << (finite ? "finite\n" : "infinite\n") << core::pp(q1) << std::endl;
+}
+
+void test_pbes_new(const std::string& pbes_spec)
+{
+  using namespace pbes_system;
+
+  pbes<> p = txt2pbes(pbes_spec);
+  pbes<> q2 = pbes2bes_new(p);
+  std::cout << "<new version>\n" << core::pp(q2) << std::endl;
 }
 
 void test_pbes2bes()
 {
-  test_pbes(test1);
-  test_pbes(test2);
-  test_pbes(test3);
-  test_pbes(test4);
-  test_pbes(test5);
-  test_pbes(test6);
-  test_pbes(test7);
-  test_pbes(test8);
+  test_pbes(test1, true);
+  test_pbes(test2, true);
+  test_pbes(test3, true);
+  test_pbes(test4, true);
+  test_pbes(test5, true);
+  test_pbes(test6, true);
+  test_pbes(test7, true);
+  test_pbes(test8, true);
+
+  test_pbes(test2, false);
+  test_pbes_new(test2);
+  test_pbes(test4, false);
+  test_pbes_new(test4);
+  test_pbes(test5, false);
+  test_pbes_new(test5);
+  test_pbes(test6, false);
+  test_pbes_new(test6);
+  test_pbes(test7, false);
+  test_pbes_new(test7);
+  test_pbes(test8, false);
+  test_pbes_new(test8);
 }
 
 int test_main(int argc, char** argv)
@@ -156,7 +187,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_pbes2bes();
-  BOOST_CHECK(false);
+  //BOOST_CHECK(false);
 
   return 0;
 }

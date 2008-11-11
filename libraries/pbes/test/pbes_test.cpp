@@ -18,6 +18,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_parse.h"
@@ -28,17 +29,23 @@
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 
-using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::detail;
+using atermpp::make_list;
+using core::identifier_string;
+using data::data_expression;
+using data::data_variable;
+using data::multiset_identifier_generator;
+using modal::detail::mcf2statefrm;
+using modal::state_formula;
+using lps::mcrl22lps;
+using lps::specification;
+using pbes_system::pbes;
+using pbes_system::pbes_expression;
+using pbes_system::pbes_expression_builder;
+using pbes_system::pbes_equation;
+using pbes_system::lps2pbes;
+using pbes_system::propositional_variable_instantiation;
+using pbes_system::detail::make_quantifier_rename_builder;
 
 const std::string SPECIFICATION =
 "act a:Nat;                               \n"
@@ -156,7 +163,7 @@ const std::string MPSU_FORMULA =
 
 void test_pbes()
 {
-  specification spec    = mcrl22lps(SPECIFICATION);
+  specification spec = mcrl22lps(SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA2, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
@@ -176,7 +183,7 @@ void test_pbes()
 
   try
   {
-    aterm t = atermpp::make_term("f(x)");
+    atermpp::aterm t = atermpp::make_term("f(x)");
     std::string filename = "write_to_named_text_file.pbes";
     atermpp::write_to_named_text_file(t, filename);
     p.load(filename);
@@ -206,11 +213,11 @@ void test_free_variables()
   std::stringstream s(TEXT);
   s >> p;
   atermpp::set<data_variable> freevars = p.free_variables();
-  cout << freevars.size() << endl;
+  std::cout << freevars.size() << std::endl;
   BOOST_CHECK(freevars.size() == 3);
   for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
   {
-    cout << "<var>" << mcrl2::core::pp(*i) << endl;
+    std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;
   }
 }
 
@@ -232,8 +239,8 @@ void test_pbes_expression_builder()
 
 void test_quantifier_rename_builder()
 {
-  using namespace pbes_expr;
-  namespace d = data_expr; 
+  using namespace pbes_system::pbes_expr;
+  namespace d = data::data_expr; 
 
   data_variable mN("m:N");
   data_variable nN("n:N");
@@ -266,8 +273,8 @@ void test_quantifier_rename_builder()
 
 void test_complement_method_builder()
 {
-  using namespace pbes_expr;
-  namespace d = data_expr;
+  using namespace pbes_system::pbes_expr;
+  namespace d = data::data_expr;
 
   data_variable X("x:X");
   data_variable Y("y:Y");
@@ -282,8 +289,8 @@ void test_complement_method_builder()
 
 void test_pbes_expression()
 {
-  namespace p = pbes_expr;
-  namespace d = data_expr;
+  namespace p = pbes_system::pbes_expr;
+  namespace d = data::data_expr;
 
   data_variable x1("x1:X");
   pbes_expression e = x1;
@@ -313,7 +320,7 @@ void test_instantiate_free_variables()
     "init d.P(1);             \n"
   ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec    = mcrl22lps(spec_text);
+  specification spec = mcrl22lps(spec_text);
   state_formula formula = mcf2statefrm(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
