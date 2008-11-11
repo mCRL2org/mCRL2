@@ -321,10 +321,16 @@ namespace mcrl2 {
 
       // Function symbol <=
       inline
-      function_symbol less_equal()
+      function_symbol less_equal(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol less_equal("<=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol less_equal("<=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort(sort_bool_::bool_());
+        //static function_symbol less_equal("<=", function_sort(s0, s1, target_sort));
+        function_symbol less_equal("<=", function_sort(s0, s1, target_sort));
         return less_equal;
       }
 
@@ -343,10 +349,8 @@ namespace mcrl2 {
       inline
       application less_equal(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(less_equal(),arg0, arg1);
+        return application(less_equal(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of <=
@@ -362,10 +366,16 @@ namespace mcrl2 {
 
       // Function symbol <
       inline
-      function_symbol less()
+      function_symbol less(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol less("<", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol less("<", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort(sort_bool_::bool_());
+        //static function_symbol less("<", function_sort(s0, s1, target_sort));
+        function_symbol less("<", function_sort(s0, s1, target_sort));
         return less;
       }
 
@@ -384,10 +394,8 @@ namespace mcrl2 {
       inline
       application less(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(less(),arg0, arg1);
+        return application(less(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of <
@@ -405,8 +413,8 @@ namespace mcrl2 {
       inline
       function_symbol greater_equal()
       {
-        //static function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //static function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_bool_::bool_()));
+        function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_bool_::bool_()));
         return greater_equal;
       }
 
@@ -444,10 +452,16 @@ namespace mcrl2 {
 
       // Function symbol >
       inline
-      function_symbol greater()
+      function_symbol greater(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol greater(">", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol greater(">", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort(sort_bool_::bool_());
+        //static function_symbol greater(">", function_sort(s0, s1, target_sort));
+        function_symbol greater(">", function_sort(s0, s1, target_sort));
         return greater;
       }
 
@@ -466,10 +480,8 @@ namespace mcrl2 {
       inline
       application greater(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(greater(),arg0, arg1);
+        return application(greater(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of >
@@ -485,10 +497,67 @@ namespace mcrl2 {
 
       // Function symbol max
       inline
-      function_symbol max()
+      function_symbol max(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol max("max", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol max("max", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_pos::pos() && s1 == sort_int_::int_())||
+               //(s0 == sort_int_::int_() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_int_::int_())||
+               //(s0 == sort_int_::int_() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol max("max", function_sort(s0, s1, target_sort));
+        function_symbol max("max", function_sort(s0, s1, target_sort));
         return max;
       }
 
@@ -507,10 +576,8 @@ namespace mcrl2 {
       inline
       application max(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(max(),arg0, arg1);
+        return application(max(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of max
@@ -526,10 +593,37 @@ namespace mcrl2 {
 
       // Function symbol min
       inline
-      function_symbol min()
+      function_symbol min(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol min("min", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol min("min", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol min("min", function_sort(s0, s1, target_sort));
+        function_symbol min("min", function_sort(s0, s1, target_sort));
         return min;
       }
 
@@ -548,10 +642,8 @@ namespace mcrl2 {
       inline
       application min(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(min(),arg0, arg1);
+        return application(min(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of min
@@ -567,10 +659,37 @@ namespace mcrl2 {
 
       // Function symbol abs
       inline
-      function_symbol abs()
+      function_symbol abs(const sort_expression& s0)
       {
-        //static function_symbol abs("abs", function_sort(sort_real_::real_(), sort_real_::real_()));
-        function_symbol abs("abs", function_sort(sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_())||
+               //(s0 == sort_pos::pos())||
+               //(s0 == sort_nat::nat())||
+               //(s0 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol abs("abs", function_sort(s0, target_sort));
+        function_symbol abs("abs", function_sort(s0, target_sort));
         return abs;
       }
 
@@ -589,9 +708,8 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
         
-        return application(abs(),arg0);
+        return application(abs(arg0.sort()),arg0);
       }
 
       // Recogniser for application of abs
@@ -607,10 +725,37 @@ namespace mcrl2 {
 
       // Function symbol -
       inline
-      function_symbol negate()
+      function_symbol negate(const sort_expression& s0)
       {
-        //static function_symbol negate("-", function_sort(sort_real_::real_(), sort_real_::real_()));
-        function_symbol negate("-", function_sort(sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_())||
+               //(s0 == sort_pos::pos())||
+               //(s0 == sort_nat::nat())||
+               //(s0 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if(s0 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if(s0 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol negate("-", function_sort(s0, target_sort));
+        function_symbol negate("-", function_sort(s0, target_sort));
         return negate;
       }
 
@@ -629,9 +774,8 @@ namespace mcrl2 {
       inline
       application negate(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
         
-        return application(negate(),arg0);
+        return application(negate(arg0.sort()),arg0);
       }
 
       // Recogniser for application of -
@@ -647,10 +791,37 @@ namespace mcrl2 {
 
       // Function symbol succ
       inline
-      function_symbol succ()
+      function_symbol succ(const sort_expression& s0)
       {
-        //static function_symbol succ("succ", function_sort(sort_real_::real_(), sort_real_::real_()));
-        function_symbol succ("succ", function_sort(sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_())||
+               //(s0 == sort_pos::pos())||
+               //(s0 == sort_nat::nat())||
+               //(s0 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol succ("succ", function_sort(s0, target_sort));
+        function_symbol succ("succ", function_sort(s0, target_sort));
         return succ;
       }
 
@@ -669,9 +840,8 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
         
-        return application(succ(),arg0);
+        return application(succ(arg0.sort()),arg0);
       }
 
       // Recogniser for application of succ
@@ -687,10 +857,37 @@ namespace mcrl2 {
 
       // Function symbol pred
       inline
-      function_symbol pred()
+      function_symbol pred(const sort_expression& s0)
       {
-        //static function_symbol pred("pred", function_sort(sort_real_::real_(), sort_real_::real_()));
-        function_symbol pred("pred", function_sort(sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_())||
+               //(s0 == sort_pos::pos())||
+               //(s0 == sort_nat::nat())||
+               //(s0 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if(s0 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol pred("pred", function_sort(s0, target_sort));
+        function_symbol pred("pred", function_sort(s0, target_sort));
         return pred;
       }
 
@@ -709,9 +906,8 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
         
-        return application(pred(),arg0);
+        return application(pred(arg0.sort()),arg0);
       }
 
       // Recogniser for application of pred
@@ -727,10 +923,47 @@ namespace mcrl2 {
 
       // Function symbol +
       inline
-      function_symbol plus()
+      function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol plus("+", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol plus("+", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol plus("+", function_sort(s0, s1, target_sort));
+        function_symbol plus("+", function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -749,10 +982,8 @@ namespace mcrl2 {
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(plus(),arg0, arg1);
+        return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of +
@@ -768,10 +999,37 @@ namespace mcrl2 {
 
       // Function symbol -
       inline
-      function_symbol minus()
+      function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol minus("-", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol minus("-", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol minus("-", function_sort(s0, s1, target_sort));
+        function_symbol minus("-", function_sort(s0, s1, target_sort));
         return minus;
       }
 
@@ -790,10 +1048,8 @@ namespace mcrl2 {
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(minus(),arg0, arg1);
+        return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of -
@@ -809,10 +1065,37 @@ namespace mcrl2 {
 
       // Function symbol *
       inline
-      function_symbol times()
+      function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol times("*", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
-        function_symbol times("*", function_sort(sort_real_::real_(), sort_real_::real_(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol times("*", function_sort(s0, s1, target_sort));
+        function_symbol times("*", function_sort(s0, s1, target_sort));
         return times;
       }
 
@@ -831,10 +1114,8 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(times(),arg0, arg1);
+        return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of *
@@ -850,10 +1131,37 @@ namespace mcrl2 {
 
       // Function symbol exp
       inline
-      function_symbol exp()
+      function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol exp("exp", function_sort(sort_real_::real_(), sort_nat::nat(), sort_real_::real_()));
-        function_symbol exp("exp", function_sort(sort_real_::real_(), sort_nat::nat(), sort_real_::real_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_nat::nat())||
+               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_nat::nat()));
+
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol exp("exp", function_sort(s0, s1, target_sort));
+        function_symbol exp("exp", function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -872,10 +1180,8 @@ namespace mcrl2 {
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_nat::is_nat(arg1.sort()));
         
-        return application(exp(),arg0, arg1);
+        return application(exp(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of exp
@@ -910,20 +1216,67 @@ namespace mcrl2 {
         result.push_back(real2pos());
         result.push_back(real2nat());
         result.push_back(real2int());
-        result.push_back(less_equal());
-        result.push_back(less());
+        result.push_back(less_equal(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(less_equal(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(less_equal(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(less_equal(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(less(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(less(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(less(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(less(sort_int_::int_(), sort_int_::int_()));
         result.push_back(greater_equal());
-        result.push_back(greater());
-        result.push_back(max());
-        result.push_back(min());
-        result.push_back(abs());
-        result.push_back(negate());
-        result.push_back(succ());
-        result.push_back(pred());
-        result.push_back(plus());
-        result.push_back(minus());
-        result.push_back(times());
-        result.push_back(exp());
+        result.push_back(greater(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(greater(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(greater(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(greater(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(max(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(max(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(max(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(max(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(max(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(max(sort_pos::pos(), sort_int_::int_()));
+        result.push_back(max(sort_int_::int_(), sort_pos::pos()));
+        result.push_back(max(sort_nat::nat(), sort_int_::int_()));
+        result.push_back(max(sort_int_::int_(), sort_nat::nat()));
+        result.push_back(max(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(min(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(min(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(min(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(min(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(abs(sort_real_::real_()));
+        result.push_back(abs(sort_pos::pos()));
+        result.push_back(abs(sort_nat::nat()));
+        result.push_back(abs(sort_int_::int_()));
+        result.push_back(negate(sort_real_::real_()));
+        result.push_back(negate(sort_pos::pos()));
+        result.push_back(negate(sort_nat::nat()));
+        result.push_back(negate(sort_int_::int_()));
+        result.push_back(succ(sort_real_::real_()));
+        result.push_back(succ(sort_pos::pos()));
+        result.push_back(succ(sort_nat::nat()));
+        result.push_back(succ(sort_int_::int_()));
+        result.push_back(pred(sort_real_::real_()));
+        result.push_back(pred(sort_pos::pos()));
+        result.push_back(pred(sort_nat::nat()));
+        result.push_back(pred(sort_int_::int_()));
+        result.push_back(plus(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(plus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(plus(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(plus(sort_nat::nat(), sort_pos::pos()));
+        result.push_back(plus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(plus(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(minus(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(minus(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(times(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(times(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(times(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(times(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(exp(sort_real_::real_(), sort_nat::nat()));
+        result.push_back(exp(sort_pos::pos(), sort_nat::nat()));
+        result.push_back(exp(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(exp(sort_int_::int_(), sort_nat::nat()));
 
         return result;
       }
@@ -1125,20 +1478,20 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2int(sort_real_::creal(variable("x", sort_int_::int_()))), variable("x", sort_int_::int_())));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2nat(sort_real_::creal(variable("x", sort_int_::int_()))), sort_int_::int2nat(variable("x", sort_int_::int_()))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2pos(sort_real_::creal(variable("x", sort_int_::int_()))), sort_int_::int2pos(variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_pos::less_equal(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_pos::less_equal(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_pos::less(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_pos::less(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::greater_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_pos::less_equal(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_pos::greater(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_pos::less(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_pos::max(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_pos::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_pos::min(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_pos::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_pos::abs(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_int_::cint(sort_pos::abs(variable("x", sort_int_::int_()))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::less_equal(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::less_equal(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::less(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::less(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::greater_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::less_equal(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::greater(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::less(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::max(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_real_::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::min(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_real_::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::abs(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_int_::cint(sort_real_::abs(variable("x", sort_int_::int_()))))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::negate(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::negate(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_pos::succ(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_pos::succ(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_nat::pred(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_nat::pred(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_pos::plus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_pos::plus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::minus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_pos::times(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_pos::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("x", sort_int_::int_())), sort_nat::exp(sort_real_::creal(variable("x", sort_int_::int_())), variable("n", sort_nat::nat())), sort_real_::creal(sort_nat::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::succ(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::succ(variable("x", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::pred(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::pred(variable("x", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::plus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), sort_real_::negate(variable("y", sort_int_::int_()))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::times(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("x", sort_int_::int_())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_())), variable("n", sort_nat::nat())), sort_real_::creal(sort_real_::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())))));
 
         return result;
       }

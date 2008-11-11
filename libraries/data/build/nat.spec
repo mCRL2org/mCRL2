@@ -90,7 +90,7 @@ eqn ==(@c0, @cNat(p)) = false;
     +(@cNat(p),q) = @addc(false,p,q);
     +(@c0,n) = n;
     +(n,@c0) = n;
-    +(@cNat(p),@cNat(q)) = @addc(false,p,q);
+    +(@cNat(p),@cNat(q)) = @cNat(@addc(false,p,q));
     @gtesubt(p,q) = @gtesubtb(false,p,q);
     @gtesubt(n,@c0) = n;
     @gtesubt(@cNat(p),@cNat(q)) = @gtesubtb(false, p,q);
@@ -127,12 +127,12 @@ eqn ==(@c0, @cNat(p)) = false;
     <=(p,q) -> mod(@cDub(false,p),@cDub(true,q)) = @cNat(@cDub(false,p));
     <(q,p) -> mod(@cDub(false,p),@cDub(true,q)) = @last(@gdivmod(@divmod(p,@cDub(true,q)), false, @cDub(true, q)));
     <=(p,q) -> mod(@cDub(true,p),@cDub(true,q)) = if(==(p,q), @c0, @cNat(@cDub(true,p)));
-    <(q,p) -> mod(@cDub(false,p),@cDub(true,q)) = @last(@gdivmod(@divmod(p,@cDub(true,q)), true, @cDub(true, q)));
+    <(q,p) -> mod(@cDub(true,p),@cDub(true,q)) = @last(@gdivmod(@divmod(p,@cDub(true,q)), true, @cDub(true, q)));
     mod(@c0,p) = @c0;
     mod(@cNat(p),q) = mod(p,q);
 
 % equations for natpair
-    ==(@cPair(m,n), @cPair(v,u)) = &&(==(m,v),==(n,u));
+    ==(@cPair(m,n), @cPair(u,v)) = &&(==(m,u),==(n,v));
     @first(@cPair(m,n)) = m;
     @last(@cPair(m,n)) = n;
     @divmod(@c1,@c1) = @cPair(@cNat(@c1),@c0);

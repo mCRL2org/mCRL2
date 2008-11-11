@@ -34,6 +34,7 @@ import os
 import string
 from optparse import OptionParser
 import Parsing
+import copy
 
 # MACROS
 FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
@@ -208,6 +209,11 @@ def add_namespace(string):
 
 def get_namespace(sorts, functions, function):
   global sorts_to_functions
+  global current_sort
+  # Prefer current namespace
+  for f in sorts_to_functions[current_sort]:
+    if f[1].label == function:
+      return "sort_%s" % (get_label(sorts, current_sort))
   for s in sorts_to_functions:
     for f in sorts_to_functions[s]:
       if f[1].label == function:
@@ -354,9 +360,7 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     else:
       # This must be a variable, or a function symbol
       id = lookup_identifier(functions, data_expression[0], arity)
-      if id == "if" or id == "==" or id == "!=":
-        print "hoi"
-      elif id == "":
+      if id == "":
         return generate_variable_code(sorts, variable_declarations, data_expression[0].string)
       namespace = get_namespace(sorts, functions, id)
       if namespace <> "":
@@ -531,12 +535,20 @@ def generate_formal_sort_parameters_code(sorts, functions, variable_declarations
     return code
 
 def generate_function_code(sorts, functions, function):
+    global functions_cache
+    similar_functions = []
+    for f in functions_cache:
+      if f[0].string == function[0].string and f[1].label == function[1].label:
+        for s in function[2]:
+          if f[2].string <> s.string:
+            similar_functions += [f]
+
     sortargs = ""
     code = ""
     for s in get_sort_parameters_from_sort_expressions(sorts, function[2]):
       sortargs = add_to_comma_sep_string(sortargs, s.lower());
 
-    if len(function[2]) == 1:
+    if len(function[2]) == 1 and similar_functions == []:
       code += "        result.push_back(%s(%s));\n" % (function[1].label, sortargs)
     else:
       for s in function[2]:
@@ -1027,7 +1039,18 @@ class Result(Parsing.Nonterm):
         if has_exists:
           self.includes += ["exists"]
 
-        functions_cache = functions_cache + self.spec.functions
+        # This is to make sure all possible sorts get correctly coded.
+        # This should eventually be solved by a recursive call in the generated
+        # code.
+        old_functions = copy.deepcopy(self.spec.functions)
+
+        for f in functions_cache:
+          for g in self.spec.functions:
+            if f[0].string == g[0].string and f[1].label == g[1].label:
+              self.spec.functions += [f]
+              break
+
+        functions_cache = functions_cache + old_functions
 
         current_sort = self.spec.sorts[0][0]
         sorts_cache += self.spec.sorts

@@ -7,12 +7,12 @@ sort Bag(S) <"bag">;
 map @bag <"bag_comprehension"> : S <"arg"> -> Bag(S);
     {} <"emptybag"> : Bag(S);
     count <"count"> : S <"left"> # Bag(S) <"right"> -> Nat;
-    in <"in"> : S <"left"> # Bag(S) <"right"> -> Bool;
+    in <"bagin"> : S <"left"> # Bag(S) <"right"> -> Bool;
     <= <"subbag_or_equal"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bool;
     < <"subbag"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bool;
-    + <"union_"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    - <"difference"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    * <"intersection"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    + <"bagunion_"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    - <"bagdifference"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    * <"bagintersection"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     Bag2Set <"bag2set"> : Bag(S) <"arg"> -> Set(S);
     Set2Bag <"set2bag"> : Set(S) <"arg"> -> Bag(S);
 

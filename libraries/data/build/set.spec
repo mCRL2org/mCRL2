@@ -4,13 +4,13 @@ sort Set(S) <"set">;
 
 map @set <"set_comprehension"> : S <"arg"> -> Set(S);
     {} <"emptyset"> : Set(S);
-    in <"in"> : S <"left"> # Set(S) <"right"> -> Bool;
+    in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;
     <= <"subset_or_equal"> : Set(S) <"left"> # Set(S) <"right"> -> Bool;
     < <"subset"> : Set(S) <"left"> # Set(S) <"right"> -> Bool;
-    + <"union_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    - <"difference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    * <"intersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
-    - <"complement"> : Set(S) <"arg"> -> Set(S);
+    + <"setunion_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+    - <"setdifference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+    * <"setintersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
+    - <"setcomplement"> : Set(S) <"arg"> -> Set(S);
 
 var d : S;
     s : Set(S);
