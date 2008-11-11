@@ -275,7 +275,7 @@ atermpp::set<ATerm> LTS::getParameterDomain(int parindex)
 
 string LTS::prettyPrintParameterValue(ATerm parvalue)
 {
-  return mcrl2_lts->pretty_print_state_value(parvalue);
+  return mcrl2_lts->pretty_print_state_parameter_value(parvalue);
 }
 
 ATerm LTS::getStateParameterValue(State* state,unsigned int param)
@@ -294,7 +294,7 @@ std::string LTS::getStateParameterValueStr(State* state,
   {
     return "";
   }
-  return mcrl2_lts->pretty_print_state_value(
+  return mcrl2_lts->pretty_print_state_parameter_value(
       mcrl2_lts->get_state_parameter_value(state->getID(),param));
 }
 
@@ -322,13 +322,21 @@ mcrl2::lts::lts* LTS::getmCRL2LTS()
 bool LTS::readFromFile(std::string filename)
 {
   mcrl2_lts = new mcrl2::lts::lts();
-  bool success = mcrl2_lts->read_from(filename,
-      mcrl2::lts::lts::guess_format(filename));
+  
+  // first try to determine the file format from the file contents
+  bool success = mcrl2_lts->read_from(filename,lts_none);
   if (!success)
   {
-    delete mcrl2_lts;
-    mcrl2_lts = NULL;
-    return false;
+    // now try to force the file format based on the file extension
+    success = mcrl2_lts->read_from(filename,
+        mcrl2::lts::lts::guess_format(filename));
+    if (!success)
+    {
+      // bullocks, this file is no good...
+      delete mcrl2_lts;
+      mcrl2_lts = NULL;
+      return false;
+    }
   }
 
   // remove unreachable states

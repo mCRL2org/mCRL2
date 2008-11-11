@@ -138,7 +138,8 @@ void MarkStateRuleDialog::loadValues(wxString paramName)
   valuesListBox->Set(wxvalues);
 }
 
-void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event) {
+void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event)
+{
   loadValues(event.GetString());
 }
 
@@ -162,15 +163,18 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
   }
 }
 
-int MarkStateRuleDialog::getParamIndex() {
+int MarkStateRuleDialog::getParamIndex()
+{
   int parIndex = parameterListBox->GetSelection();
-  if (parIndex == wxNOT_FOUND) {
+  if (parIndex == wxNOT_FOUND)
+  {
     return -1;
   }
   return parameterIndices[parameterListBox->GetString(parIndex)];
 }
 
-bool MarkStateRuleDialog::getNegated() {
+bool MarkStateRuleDialog::getNegated()
+{
   return (relationListBox->GetSelection() == 1);
 }
 

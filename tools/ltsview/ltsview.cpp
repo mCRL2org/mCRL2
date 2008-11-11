@@ -110,7 +110,16 @@ void parse_command_line(int argc, wxChar** argv) {
     "Start the LTSView application and open INFILE. If INFILE is not "
     "supplied then LTSView is started without opening an LTS.\n"
     "\n"
-    "INFILE should be in the FSM format.");
+    "The input format is determined by the contents of INFILE. If that fails, "
+    "an attempt is made to force the input format based on the file extension. "
+    "The supported formats with file extensions are:\n"
+    "  Aldebaran format (CADP; *.aut);\n"
+#ifdef USE_BCG
+    "  Binary Coded Graph format (CADP; *.bcg);\n"
+#endif
+    "  Finite State Machine format (*.fsm);\n"
+    "  mCRL SVC format (*.svc);\n"
+    "  mCRL2 SVC format (*.svc).");
 
   command_line_parser parser(clinterface, argc, argv);
 
