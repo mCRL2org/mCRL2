@@ -108,36 +108,17 @@ class t_tool_options {
     }
 
     void read_lts(lts& l) const {
-      bool success = false;
-
       gsVerboseMsg("reading LTS from %s...\n", source_string().c_str());
 
       lts_extra extra = get_extra(intype);
 
+      bool success = false;
       if (infilename.empty()) {
         success = l.read_from(std::cin,intype,extra);
       }
       else {
         success = l.read_from(infilename,intype,extra);
-
-        if (!success && (intype == lts_none)) {
-          gsVerboseMsg("reading failed; trying to force format by extension...\n");
-
-          lts_type guessed_type(lts::guess_format(infilename));
-
-          if ( guessed_type == lts_none ) {
-            gsVerboseMsg("unsupported input format extension\n");
-          }
-          else {
-            success = l.read_from(infilename,guessed_type, get_extra(guessed_type));
-
-            if (!success) {
-              gsVerboseMsg("reading based on format extension failed as well\n");
-            }
-          }
-        }
       }
-
       if (!success) {
         throw mcrl2::runtime_error("cannot read LTS from " + source_string() +
                                                "\nretry with -v/--verbose for more information");

@@ -328,17 +328,7 @@ void process(tool_options const& opts) {
   else {
     gsVerboseMsg("reading LTS from '%s'...\n",opts.infilename.c_str());
 
-    bool success = l.read_from(opts.infilename,opts.intype);
-
-    if (!success && (opts.intype == lts_none)) { // XXX really do this?
-      gsVerboseMsg("reading failed; trying to force format by extension...\n");
-
-      lts_type guessedtype = lts::guess_format(opts.infilename);
-      if ( guessedtype != lts_none ) {
-        success = l.read_from(opts.infilename, guessedtype);
-      }
-    }
-    if (!success) {
+    if (!l.read_from(opts.infilename,opts.intype)) {
       throw mcrl2::runtime_error("cannot read LTS from file '" + opts.infilename +
                                              "'\nretry with -v/--verbose for more information");
     }

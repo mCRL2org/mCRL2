@@ -323,20 +323,13 @@ bool LTS::readFromFile(std::string filename)
 {
   mcrl2_lts = new mcrl2::lts::lts();
   
-  // first try to determine the file format from the file contents
-  bool success = mcrl2_lts->read_from(filename,lts_none);
-  if (!success)
+  // try to read the file
+  if (!mcrl2_lts->read_from(filename,lts_none))
   {
-    // now try to force the file format based on the file extension
-    success = mcrl2_lts->read_from(filename,
-        mcrl2::lts::lts::guess_format(filename));
-    if (!success)
-    {
-      // bullocks, this file is no good...
-      delete mcrl2_lts;
-      mcrl2_lts = NULL;
-      return false;
-    }
+    // bullocks, this file is no good...
+    delete mcrl2_lts;
+    mcrl2_lts = NULL;
+    return false;
   }
 
   // remove unreachable states

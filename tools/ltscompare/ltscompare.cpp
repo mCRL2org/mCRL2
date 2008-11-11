@@ -226,36 +226,14 @@ int process(t_tool_options const & tool_options) {
     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
     if ( !l1.read_from(tool_options.name_for_first, tool_options.format_for_first) ) {
-      bool failed = true; 
-      if ( tool_options.format_for_first == lts_none ) { // XXX really do this? 
-        gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
-        lts_type guessedtype = lts::guess_format(tool_options.name_for_first); 
-        if ( (guessedtype != lts_none) && l1.read_from(tool_options.name_for_first,guessedtype) ) 
-        { 
-          failed = false; 
-        } 
-      } 
-      if ( failed ) {
-        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
-      }
+      throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
     }
   }
 
   gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
   if ( !l2.read_from(tool_options.name_for_second, tool_options.format_for_second) ) {
-    bool failed = true; 
-    if ( tool_options.format_for_second == lts_none ) { // XXX really do this? 
-      gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
-      lts_type guessedtype = lts::guess_format(tool_options.name_for_second); 
-      if ( (guessedtype != lts_none) && l2.read_from(tool_options.name_for_second,guessedtype) ) 
-      { 
-        failed = false; 
-      } 
-    } 
-    if ( failed ) {
-      throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
-    }
+    throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
   }
 
   bool result;

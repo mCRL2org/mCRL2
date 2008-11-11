@@ -839,7 +839,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
   if ( type == lts_none )
   {
     type = detect_type(filename);
-    if ( type == lts_none )
+    if ( type == lts_none && (type = guess_format(filename)) == lts_none )
     {
       gsVerboseMsg("could not determine type of input file '%s'\n",filename.c_str());
       return false;
