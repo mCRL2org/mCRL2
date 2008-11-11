@@ -7,6 +7,7 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/standard.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 
@@ -59,7 +60,8 @@ namespace mcrl2 {
       inline
       function_symbol c0()
       {
-        static function_symbol c0("@c0", sort_nat::nat());
+        //static function_symbol c0("@c0", sort_nat::nat());
+        function_symbol c0("@c0", sort_nat::nat());
         return c0;
       }
 
@@ -78,7 +80,8 @@ namespace mcrl2 {
       inline
       function_symbol cnat()
       {
-        static function_symbol cnat("@cNat", function_sort(sort_pos::pos(), sort_nat::nat()));
+        //static function_symbol cnat("@cNat", function_sort(sort_pos::pos(), sort_nat::nat()));
+        function_symbol cnat("@cNat", function_sort(sort_pos::pos(), sort_nat::nat()));
         return cnat;
       }
 
@@ -97,7 +100,7 @@ namespace mcrl2 {
       inline
       application cnat(const data_expression& arg0)
       {
-        assert(sort_pos::is_pos(arg0.sort()));
+        //assert(sort_pos::is_pos(arg0.sort()));
         
         return application(cnat(),arg0);
       }
@@ -117,7 +120,8 @@ namespace mcrl2 {
       inline
       function_symbol cpair()
       {
-        static function_symbol cpair("@cPair", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::natpair()));
+        //static function_symbol cpair("@cPair", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::natpair()));
+        function_symbol cpair("@cPair", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::natpair()));
         return cpair;
       }
 
@@ -136,8 +140,8 @@ namespace mcrl2 {
       inline
       application cpair(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(cpair(),arg0, arg1);
       }
@@ -157,7 +161,8 @@ namespace mcrl2 {
       inline
       function_symbol pos2nat()
       {
-        static function_symbol pos2nat("Pos2Nat", function_sort(sort_pos::pos(), sort_nat::nat()));
+        //static function_symbol pos2nat("Pos2Nat", function_sort(sort_pos::pos(), sort_nat::nat()));
+        function_symbol pos2nat("Pos2Nat", function_sort(sort_pos::pos(), sort_nat::nat()));
         return pos2nat;
       }
 
@@ -176,7 +181,7 @@ namespace mcrl2 {
       inline
       application pos2nat(const data_expression& arg0)
       {
-        assert(sort_pos::is_pos(arg0.sort()));
+        //assert(sort_pos::is_pos(arg0.sort()));
         
         return application(pos2nat(),arg0);
       }
@@ -196,7 +201,8 @@ namespace mcrl2 {
       inline
       function_symbol nat2pos()
       {
-        static function_symbol nat2pos("Nat2Pos", function_sort(sort_nat::nat(), sort_pos::pos()));
+        //static function_symbol nat2pos("Nat2Pos", function_sort(sort_nat::nat(), sort_pos::pos()));
+        function_symbol nat2pos("Nat2Pos", function_sort(sort_nat::nat(), sort_pos::pos()));
         return nat2pos;
       }
 
@@ -215,7 +221,7 @@ namespace mcrl2 {
       inline
       application nat2pos(const data_expression& arg0)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
         
         return application(nat2pos(),arg0);
       }
@@ -235,7 +241,8 @@ namespace mcrl2 {
       inline
       function_symbol less_equal()
       {
-        static function_symbol less_equal("<=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        //static function_symbol less_equal("<=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        function_symbol less_equal("<=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
         return less_equal;
       }
 
@@ -254,8 +261,8 @@ namespace mcrl2 {
       inline
       application less_equal(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(less_equal(),arg0, arg1);
       }
@@ -275,7 +282,8 @@ namespace mcrl2 {
       inline
       function_symbol less()
       {
-        static function_symbol less("<", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        //static function_symbol less("<", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        function_symbol less("<", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
         return less;
       }
 
@@ -294,8 +302,8 @@ namespace mcrl2 {
       inline
       application less(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(less(),arg0, arg1);
       }
@@ -315,7 +323,8 @@ namespace mcrl2 {
       inline
       function_symbol geq()
       {
-        static function_symbol geq(">=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        //static function_symbol geq(">=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        function_symbol geq(">=", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
         return geq;
       }
 
@@ -334,8 +343,8 @@ namespace mcrl2 {
       inline
       application geq(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(geq(),arg0, arg1);
       }
@@ -355,7 +364,8 @@ namespace mcrl2 {
       inline
       function_symbol greater()
       {
-        static function_symbol greater(">", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        //static function_symbol greater(">", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
+        function_symbol greater(">", function_sort(sort_nat::nat(), sort_nat::nat(), sort_bool_::bool_()));
         return greater;
       }
 
@@ -374,8 +384,8 @@ namespace mcrl2 {
       inline
       application greater(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(greater(),arg0, arg1);
       }
@@ -395,25 +405,30 @@ namespace mcrl2 {
       inline
       function_symbol max(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               (s0 == sort_nat::nat() && s1 == sort_pos::pos())||
-               (s0 == sort_nat::nat() && s1 == sort_nat::nat()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat()));
 
         sort_expression target_sort;
-        if(s0 == sort_pos::pos() && s1 == sort_nat::nat());
+        if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
           target_sort = sort_pos::pos();
         }
-        if(s0 == sort_nat::nat() && s1 == sort_pos::pos());
+        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
         {
           target_sort = sort_pos::pos();
         }
-        if(s0 == sort_nat::nat() && s1 == sort_nat::nat());
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
+        else
+        {
+          assert(false);
+        }
 
-        static function_symbol max("max", function_sort(s0, s1, target_sort));
+        //static function_symbol max("max", function_sort(s0, s1, target_sort));
+        function_symbol max("max", function_sort(s0, s1, target_sort));
         return max;
       }
 
@@ -451,7 +466,8 @@ namespace mcrl2 {
       inline
       function_symbol min()
       {
-        static function_symbol min("min", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
+        //static function_symbol min("min", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
+        function_symbol min("min", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
         return min;
       }
 
@@ -470,8 +486,8 @@ namespace mcrl2 {
       inline
       application min(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(min(),arg0, arg1);
       }
@@ -491,7 +507,8 @@ namespace mcrl2 {
       inline
       function_symbol abs()
       {
-        static function_symbol abs("abs", function_sort(sort_nat::nat(), sort_nat::nat()));
+        //static function_symbol abs("abs", function_sort(sort_nat::nat(), sort_nat::nat()));
+        function_symbol abs("abs", function_sort(sort_nat::nat(), sort_nat::nat()));
         return abs;
       }
 
@@ -510,7 +527,7 @@ namespace mcrl2 {
       inline
       application abs(const data_expression& arg0)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
         
         return application(abs(),arg0);
       }
@@ -530,7 +547,8 @@ namespace mcrl2 {
       inline
       function_symbol succ()
       {
-        static function_symbol succ("succ", function_sort(sort_nat::nat(), sort_pos::pos()));
+        //static function_symbol succ("succ", function_sort(sort_nat::nat(), sort_pos::pos()));
+        function_symbol succ("succ", function_sort(sort_nat::nat(), sort_pos::pos()));
         return succ;
       }
 
@@ -549,7 +567,7 @@ namespace mcrl2 {
       inline
       application succ(const data_expression& arg0)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
         
         return application(succ(),arg0);
       }
@@ -569,7 +587,8 @@ namespace mcrl2 {
       inline
       function_symbol pred()
       {
-        static function_symbol pred("pred", function_sort(sort_pos::pos(), sort_nat::nat()));
+        //static function_symbol pred("pred", function_sort(sort_pos::pos(), sort_nat::nat()));
+        function_symbol pred("pred", function_sort(sort_pos::pos(), sort_nat::nat()));
         return pred;
       }
 
@@ -588,7 +607,7 @@ namespace mcrl2 {
       inline
       application pred(const data_expression& arg0)
       {
-        assert(sort_pos::is_pos(arg0.sort()));
+        //assert(sort_pos::is_pos(arg0.sort()));
         
         return application(pred(),arg0);
       }
@@ -608,7 +627,8 @@ namespace mcrl2 {
       inline
       function_symbol dub()
       {
-        static function_symbol dub("@dub", function_sort(sort_bool_::bool_(), sort_nat::nat(), sort_nat::nat()));
+        //static function_symbol dub("@dub", function_sort(sort_bool_::bool_(), sort_nat::nat(), sort_nat::nat()));
+        function_symbol dub("@dub", function_sort(sort_bool_::bool_(), sort_nat::nat(), sort_nat::nat()));
         return dub;
       }
 
@@ -627,8 +647,8 @@ namespace mcrl2 {
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_bool_::is_bool_(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_bool_::is_bool_(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(dub(),arg0, arg1);
       }
@@ -648,25 +668,30 @@ namespace mcrl2 {
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               (s0 == sort_nat::nat() && s1 == sort_pos::pos())||
-               (s0 == sort_nat::nat() && s1 == sort_nat::nat()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat()));
 
         sort_expression target_sort;
-        if(s0 == sort_pos::pos() && s1 == sort_nat::nat());
+        if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
           target_sort = sort_pos::pos();
         }
-        if(s0 == sort_nat::nat() && s1 == sort_pos::pos());
+        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
         {
           target_sort = sort_pos::pos();
         }
-        if(s0 == sort_nat::nat() && s1 == sort_nat::nat());
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
+        else
+        {
+          assert(false);
+        }
 
-        static function_symbol plus("+", function_sort(s0, s1, target_sort));
+        //static function_symbol plus("+", function_sort(s0, s1, target_sort));
+        function_symbol plus("+", function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -704,11 +729,12 @@ namespace mcrl2 {
       inline
       function_symbol gtesubt(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               (s0 == sort_nat::nat() && s1 == sort_nat::nat()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat()));
 
         sort_expression target_sort(sort_nat::nat());
-        static function_symbol gtesubt("@gtesubt", function_sort(s0, s1, target_sort));
+        //static function_symbol gtesubt("@gtesubt", function_sort(s0, s1, target_sort));
+        function_symbol gtesubt("@gtesubt", function_sort(s0, s1, target_sort));
         return gtesubt;
       }
 
@@ -746,7 +772,8 @@ namespace mcrl2 {
       inline
       function_symbol gtesubtb()
       {
-        static function_symbol gtesubtb("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), sort_nat::nat()));
+        //static function_symbol gtesubtb("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), sort_nat::nat()));
+        function_symbol gtesubtb("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), sort_nat::nat()));
         return gtesubtb;
       }
 
@@ -765,9 +792,9 @@ namespace mcrl2 {
       inline
       application gtesubtb(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        assert(sort_bool_::is_bool_(arg0.sort()));
-        assert(sort_pos::is_pos(arg1.sort()));
-        assert(sort_pos::is_pos(arg2.sort()));
+        //assert(sort_bool_::is_bool_(arg0.sort()));
+        //assert(sort_pos::is_pos(arg1.sort()));
+        //assert(sort_pos::is_pos(arg2.sort()));
         
         return application(gtesubtb(),arg0, arg1, arg2);
       }
@@ -787,7 +814,8 @@ namespace mcrl2 {
       inline
       function_symbol times()
       {
-        static function_symbol times("*", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
+        //static function_symbol times("*", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
+        function_symbol times("*", function_sort(sort_nat::nat(), sort_nat::nat(), sort_nat::nat()));
         return times;
       }
 
@@ -806,8 +834,8 @@ namespace mcrl2 {
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
         
         return application(times(),arg0, arg1);
       }
@@ -827,11 +855,12 @@ namespace mcrl2 {
       inline
       function_symbol div(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               (s0 == sort_nat::nat() && s1 == sort_pos::pos()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos()));
 
         sort_expression target_sort(sort_nat::nat());
-        static function_symbol div("div", function_sort(s0, s1, target_sort));
+        //static function_symbol div("div", function_sort(s0, s1, target_sort));
+        function_symbol div("div", function_sort(s0, s1, target_sort));
         return div;
       }
 
@@ -865,30 +894,31 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol |
+      // Function symbol mod
       inline
       function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               (s0 == sort_nat::nat() && s1 == sort_pos::pos()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_pos::pos()));
 
         sort_expression target_sort(sort_nat::nat());
-        static function_symbol mod("|", function_sort(s0, s1, target_sort));
+        //static function_symbol mod("mod", function_sort(s0, s1, target_sort));
+        function_symbol mod("mod", function_sort(s0, s1, target_sort));
         return mod;
       }
 
-      // Recogniser for |
+      // Recogniser for mod
       inline
       bool is_mod_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "|";
+          return static_cast<const function_symbol&>(e).name() == "mod";
         }
         return false;
       }
 
-      // Application of |
+      // Application of mod
       inline
       application mod(const data_expression& arg0, const data_expression& arg1)
       {
@@ -896,7 +926,7 @@ namespace mcrl2 {
         return application(mod(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of |
+      // Recogniser for application of mod
       inline
       bool is_mod_application(const data_expression& e)
       {
@@ -911,20 +941,25 @@ namespace mcrl2 {
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
-        assert((s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               (s0 == sort_nat::nat() && s1 == sort_nat::nat()));
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat()));
 
         sort_expression target_sort;
-        if(s0 == sort_pos::pos() && s1 == sort_nat::nat());
+        if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
           target_sort = sort_pos::pos();
         }
-        if(s0 == sort_nat::nat() && s1 == sort_nat::nat());
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
+        else
+        {
+          assert(false);
+        }
 
-        static function_symbol exp("exp", function_sort(s0, s1, target_sort));
+        //static function_symbol exp("exp", function_sort(s0, s1, target_sort));
+        function_symbol exp("exp", function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -962,7 +997,8 @@ namespace mcrl2 {
       inline
       function_symbol even()
       {
-        static function_symbol even("@even", function_sort(sort_nat::nat(), sort_bool_::bool_()));
+        //static function_symbol even("@even", function_sort(sort_nat::nat(), sort_bool_::bool_()));
+        function_symbol even("@even", function_sort(sort_nat::nat(), sort_bool_::bool_()));
         return even;
       }
 
@@ -981,7 +1017,7 @@ namespace mcrl2 {
       inline
       application even(const data_expression& arg0)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
         
         return application(even(),arg0);
       }
@@ -1001,7 +1037,8 @@ namespace mcrl2 {
       inline
       function_symbol first()
       {
-        static function_symbol first("@first", function_sort(sort_nat::natpair(), sort_nat::nat()));
+        //static function_symbol first("@first", function_sort(sort_nat::natpair(), sort_nat::nat()));
+        function_symbol first("@first", function_sort(sort_nat::natpair(), sort_nat::nat()));
         return first;
       }
 
@@ -1020,7 +1057,7 @@ namespace mcrl2 {
       inline
       application first(const data_expression& arg0)
       {
-        assert(sort_nat::is_natpair(arg0.sort()));
+        //assert(sort_nat::is_natpair(arg0.sort()));
         
         return application(first(),arg0);
       }
@@ -1040,7 +1077,8 @@ namespace mcrl2 {
       inline
       function_symbol last()
       {
-        static function_symbol last("@last", function_sort(sort_nat::natpair(), sort_nat::nat()));
+        //static function_symbol last("@last", function_sort(sort_nat::natpair(), sort_nat::nat()));
+        function_symbol last("@last", function_sort(sort_nat::natpair(), sort_nat::nat()));
         return last;
       }
 
@@ -1059,7 +1097,7 @@ namespace mcrl2 {
       inline
       application last(const data_expression& arg0)
       {
-        assert(sort_nat::is_natpair(arg0.sort()));
+        //assert(sort_nat::is_natpair(arg0.sort()));
         
         return application(last(),arg0);
       }
@@ -1079,7 +1117,8 @@ namespace mcrl2 {
       inline
       function_symbol divmod()
       {
-        static function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), sort_nat::natpair()));
+        //static function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), sort_nat::natpair()));
+        function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), sort_nat::natpair()));
         return divmod;
       }
 
@@ -1098,8 +1137,8 @@ namespace mcrl2 {
       inline
       application divmod(const data_expression& arg0, const data_expression& arg1)
       {
-        assert(sort_pos::is_pos(arg0.sort()));
-        assert(sort_pos::is_pos(arg1.sort()));
+        //assert(sort_pos::is_pos(arg0.sort()));
+        //assert(sort_pos::is_pos(arg1.sort()));
         
         return application(divmod(),arg0, arg1);
       }
@@ -1119,7 +1158,8 @@ namespace mcrl2 {
       inline
       function_symbol gdivmod()
       {
-        static function_symbol gdivmod("@gdivmod", function_sort(sort_nat::natpair(), sort_bool_::bool_(), sort_pos::pos(), sort_nat::natpair()));
+        //static function_symbol gdivmod("@gdivmod", function_sort(sort_nat::natpair(), sort_bool_::bool_(), sort_pos::pos(), sort_nat::natpair()));
+        function_symbol gdivmod("@gdivmod", function_sort(sort_nat::natpair(), sort_bool_::bool_(), sort_pos::pos(), sort_nat::natpair()));
         return gdivmod;
       }
 
@@ -1138,9 +1178,9 @@ namespace mcrl2 {
       inline
       application gdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        assert(sort_nat::is_natpair(arg0.sort()));
-        assert(sort_bool_::is_bool_(arg1.sort()));
-        assert(sort_pos::is_pos(arg2.sort()));
+        //assert(sort_nat::is_natpair(arg0.sort()));
+        //assert(sort_bool_::is_bool_(arg1.sort()));
+        //assert(sort_pos::is_pos(arg2.sort()));
         
         return application(gdivmod(),arg0, arg1, arg2);
       }
@@ -1160,7 +1200,8 @@ namespace mcrl2 {
       inline
       function_symbol ggdivmod()
       {
-        static function_symbol ggdivmod("@ggdivmod", function_sort(sort_nat::nat(), sort_nat::nat(), sort_pos::pos(), sort_nat::natpair()));
+        //static function_symbol ggdivmod("@ggdivmod", function_sort(sort_nat::nat(), sort_nat::nat(), sort_pos::pos(), sort_nat::natpair()));
+        function_symbol ggdivmod("@ggdivmod", function_sort(sort_nat::nat(), sort_nat::nat(), sort_pos::pos(), sort_nat::natpair()));
         return ggdivmod;
       }
 
@@ -1179,9 +1220,9 @@ namespace mcrl2 {
       inline
       application ggdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        assert(sort_nat::is_nat(arg0.sort()));
-        assert(sort_nat::is_nat(arg1.sort()));
-        assert(sort_pos::is_pos(arg2.sort()));
+        //assert(sort_nat::is_nat(arg0.sort()));
+        //assert(sort_nat::is_nat(arg1.sort()));
+        //assert(sort_pos::is_pos(arg2.sort()));
         
         return application(ggdivmod(),arg0, arg1, arg2);
       }
@@ -1255,7 +1296,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1305,7 +1346,7 @@ namespace mcrl2 {
       inline
       data_expression proj2(const data_expression& e)
       {
-        assert(is_cpair_application(e));
+        //assert( || is_cpair_application(e));
         
         if (is_cpair_application(e))
         {
@@ -1320,7 +1361,7 @@ namespace mcrl2 {
       inline
       data_expression proj1(const data_expression& e)
       {
-        assert(is_cpair_application(e));
+        //assert( || is_cpair_application(e));
         
         if (is_cpair_application(e))
         {
@@ -1335,7 +1376,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
+        //assert( || is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
         
         if (is_gtesubt_application(e))
         {
@@ -1385,7 +1426,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
+        //assert( || is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
         
         if (is_gtesubt_application(e))
         {
@@ -1430,7 +1471,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_gdivmod_application(e) || is_ggdivmod_application(e));
+        //assert( || is_gdivmod_application(e) || is_ggdivmod_application(e));
         
         if (is_gdivmod_application(e))
         {
@@ -1450,7 +1491,7 @@ namespace mcrl2 {
       inline
       data_expression number(const data_expression& e)
       {
-        assert(is_abs_application(e) || is_succ_application(e) || is_pred_application(e));
+        //assert( || is_abs_application(e) || is_succ_application(e) || is_pred_application(e));
         
         if (is_abs_application(e))
         {
@@ -1475,7 +1516,7 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_dub_application(e) || is_even_application(e));
+        //assert( || is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_dub_application(e) || is_even_application(e));
         
         if (is_cnat_application(e))
         {
@@ -1510,7 +1551,7 @@ namespace mcrl2 {
       inline
       data_expression pair(const data_expression& e)
       {
-        assert(is_first_application(e) || is_last_application(e));
+        //assert( || is_first_application(e) || is_last_application(e));
         
         if (is_first_application(e))
         {
@@ -1530,7 +1571,7 @@ namespace mcrl2 {
       inline
       data_expression bit(const data_expression& e)
       {
-        assert(is_dub_application(e) || is_gtesubtb_application(e) || is_gdivmod_application(e));
+        //assert( || is_dub_application(e) || is_gtesubtb_application(e) || is_gdivmod_application(e));
         
         if (is_dub_application(e))
         {
@@ -1555,7 +1596,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1606,88 +1647,91 @@ namespace mcrl2 {
       data_equation_list nat_generate_equations_code()
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_bool_::equal_to(sort_nat::c0(), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_bool_::equal_to(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::c0()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_bool_::equal_to(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_bool_::equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::pos2nat(), sort_nat::cnat()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::nat2pos(variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::less_equal(sort_nat::c0(), variable("n", sort_nat::nat())), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::less_equal(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::c0()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::less_equal(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::less(variable("n", sort_nat::nat()), sort_nat::c0()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::less(sort_nat::c0(), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::less(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::geq(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_pos::less_equal(variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::greater(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_pos::less(variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::max(variable("p", sort_pos::pos()), sort_nat::c0()), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::max(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::max(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::max(sort_nat::c0(), variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::max(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_pos::max(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::max(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::if_(sort_pos::less_equal(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::min(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::if_(sort_pos::less_equal(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::abs(variable("n", sort_nat::nat())), variable("n", sort_nat::nat())));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_pos::succ(sort_nat::c0()), sort_nat::cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::succ(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_pos::succ(variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::pred(sort_pos::c1()), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::pred(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))), sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::pred(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos()))), sort_nat::dub(sort_bool_::true_(), sort_nat::pred(variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::dub(sort_bool_::false_(), sort_nat::c0()), sort_nat::c0()));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::dub(sort_bool_::true_(), sort_nat::c0()), sort_nat::cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::dub(variable("b", sort_bool_::bool_()), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::plus(variable("p", sort_pos::pos()), sort_nat::c0()), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::plus(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::plus(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::plus(sort_nat::c0(), variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::plus(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_pos::plus(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::plus(sort_nat::c0(), variable("n", sort_nat::nat())), variable("n", sort_nat::nat())));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::plus(variable("n", sort_nat::nat()), sort_nat::c0()), variable("n", sort_nat::nat())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::plus(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::add_with_carry(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::gtesubt(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::gtesubt(variable("n", sort_nat::nat()), sort_nat::c0()), variable("n", sort_nat::nat())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::gtesubt(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_nat::gtesubt(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::pred(variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::gtesubtb(sort_bool_::true_(), variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::pred(sort_nat::nat2pos(sort_nat::pred(variable("p", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::dub(sort_bool_::not_(variable("b", sort_bool_::bool_())), sort_nat::gtesubtb(sort_bool_::true_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::dub(sort_bool_::not_(variable("b", sort_bool_::bool_())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::times(sort_nat::c0(), variable("n", sort_nat::nat())), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_pos::times(variable("n", sort_nat::nat()), sort_nat::c0()), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_pos::times(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_nat::cnat(sort_pos::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::c0()), sort_pos::c1()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::c1())), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos())))), sort_nat::exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), variable("p", sort_pos::pos())), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos())))), sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), sort_nat::exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), variable("p", sort_pos::pos())), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::exp(variable("n", sort_nat::nat()), sort_nat::c0()), sort_nat::cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::exp(sort_nat::cnat(variable("p", sort_pos::pos())), variable("n", sort_nat::nat())), sort_nat::cnat(sort_nat::exp(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())))));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::even(sort_nat::c0()), sort_bool_::true_()));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::even(sort_nat::cnat(sort_pos::c1())), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::even(sort_nat::cnat(sort_pos::cdub(variable("p", sort_pos::pos()), variable("p", sort_pos::pos())))), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::div(variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::cnat(variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::div(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::div(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::div(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::greater(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::first(sort_nat::divmod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::if_(sort_bool_::equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::greater(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::first(sort_nat::divmod(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::div(sort_nat::c0(), variable("p", sort_pos::pos())), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::div(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::div(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::mod(variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::mod(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::mod(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::dub(variable("b", sort_bool_::bool_()), sort_nat::mod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::cnat(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::greater(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::last(sort_nat::divmod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::if_(sort_bool_::equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::c0(), sort_nat::cnat(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_pos::greater(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::last(sort_nat::divmod(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::mod(sort_nat::c0(), variable("p", sort_pos::pos())), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::mod(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::mod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()), variable("u", sort_nat::nat()), variable("v", sort_nat::nat())), sort_bool_::true_(), sort_bool_::equal_to(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_nat::cpair(variable("v", sort_nat::nat()), variable("u", sort_nat::nat()))), sort_bool_::and_(sort_bool_::equal_to(variable("m", sort_nat::nat()), variable("v", sort_nat::nat())), sort_bool_::equal_to(variable("n", sort_nat::nat()), variable("u", sort_nat::nat())))));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::first(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))), variable("m", sort_nat::nat())));
-        result.push_back(data_equation(make_vector(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::last(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))), variable("n", sort_nat::nat())));
-        result.push_back(data_equation(variable_list(), sort_bool_::true_(), sort_nat::divmod(sort_pos::c1(), sort_pos::c1()), sort_nat::cpair(sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::divmod(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::cpair(sort_nat::c0(), sort_nat::cnat(sort_pos::c1()))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("b", sort_bool_::bool_())), sort_bool_::true_(), sort_nat::divmod(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("b", sort_bool_::bool_()), variable("q", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("m", sort_nat::nat()), variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_bool_::true_(), sort_nat::gdivmod(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::dub(variable("b", sort_bool_::bool_()), variable("n", sort_nat::nat())), variable("m", sort_nat::nat()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())), sort_bool_::true_(), sort_nat::ggdivmod(sort_nat::c0(), variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::false_(), variable("n", sort_nat::nat())), sort_nat::cnat(variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("n", sort_nat::nat())), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::ggdivmod(variable("p", sort_pos::pos()), variable("n", sort_nat::nat()), variable("q", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::false_(), variable("n", sort_nat::nat())), sort_nat::cnat(variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()), variable("n", sort_nat::nat())), sort_pos::geq(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::cnat(variable("p", sort_pos::pos())), variable("n", sort_nat::nat()), variable("q", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::true_(), variable("n", sort_nat::nat())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), equal_to(sort_nat::c0(), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), equal_to(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::c0()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), equal_to(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(variable_list(), sort_nat::pos2nat(), sort_nat::cnat()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::nat2pos(sort_nat::cnat(variable("p", sort_pos::pos()))), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::less_equal(sort_nat::c0(), variable("n", sort_nat::nat())), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::less_equal(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::c0()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::less(variable("n", sort_nat::nat()), sort_nat::c0()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::less(sort_nat::c0(), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_pos::geq(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_pos::less_equal(variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_pos::greater(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_pos::less(variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::max(variable("p", sort_pos::pos()), sort_nat::c0()), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::max(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))), if_(sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::max(sort_nat::c0(), variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::max(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), if_(sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_pos::max(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), if_(sort_pos::less_equal(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("n", sort_nat::nat()), variable("m", sort_nat::nat()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_pos::min(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), if_(sort_pos::less_equal(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::abs(variable("n", sort_nat::nat())), variable("n", sort_nat::nat())));
+        result.push_back(data_equation(variable_list(), sort_pos::succ(sort_nat::c0()), sort_pos::c1()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::succ(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_pos::succ(variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::succ(sort_pos::succ(variable("n", sort_nat::nat()))), sort_pos::cdub(equal_to(sort_nat::mod(variable("n", sort_nat::nat()), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1())), sort_nat::cnat(sort_pos::c1())), sort_pos::succ(sort_nat::div(variable("n", sort_nat::nat()), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(variable_list(), sort_nat::pred(sort_pos::c1()), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::pred(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))), sort_nat::cnat(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::pred(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos()))), sort_nat::dub(sort_bool_::true_(), sort_nat::pred(variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(variable_list(), sort_nat::dub(sort_bool_::false_(), sort_nat::c0()), sort_nat::c0()));
+        result.push_back(data_equation(variable_list(), sort_nat::dub(sort_bool_::true_(), sort_nat::c0()), sort_nat::cnat(sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::dub(variable("b", sort_bool_::bool_()), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_nat::cnat(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::plus(variable("p", sort_pos::pos()), sort_nat::c0()), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::plus(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::add_with_carry(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::plus(sort_nat::c0(), variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::plus(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_pos::add_with_carry(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::plus(sort_nat::c0(), variable("n", sort_nat::nat())), variable("n", sort_nat::nat())));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::plus(variable("n", sort_nat::nat()), sort_nat::c0()), variable("n", sort_nat::nat())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::plus(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_pos::add_with_carry(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubt(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_nat::gtesubt(variable("n", sort_nat::nat()), sort_nat::c0()), variable("n", sort_nat::nat())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubt(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::pred(variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::gtesubtb(sort_bool_::true_(), variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::pred(sort_nat::nat2pos(sort_nat::pred(variable("p", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), sort_pos::cdub(variable("c", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(variable("c", sort_bool_::bool_()), variable("q", sort_pos::pos()))), sort_nat::dub(variable("b", sort_bool_::bool_()), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::dub(sort_bool_::not_(variable("b", sort_bool_::bool_())), sort_nat::gtesubtb(sort_bool_::true_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::gtesubtb(variable("b", sort_bool_::bool_()), sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::dub(sort_bool_::not_(variable("b", sort_bool_::bool_())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::times(sort_nat::c0(), variable("n", sort_nat::nat())), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_pos::times(variable("n", sort_nat::nat()), sort_nat::c0()), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::times(sort_nat::cnat(variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_nat::cnat(sort_pos::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::c0()), sort_pos::c1()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::c1())), variable("p", sort_pos::pos())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos())))), sort_nat::exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::exp(variable("p", sort_pos::pos()), sort_nat::cnat(sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos())))), sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), sort_nat::exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), variable("p", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::cnat(variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_nat::exp(variable("n", sort_nat::nat()), sort_nat::c0()), sort_nat::cnat(sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::exp(sort_nat::c0(), sort_nat::cnat(variable("p", sort_pos::pos()))), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_nat::exp(sort_nat::cnat(variable("p", sort_pos::pos())), variable("n", sort_nat::nat())), sort_nat::cnat(sort_nat::exp(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())))));
+        result.push_back(data_equation(variable_list(), sort_nat::even(sort_nat::c0()), sort_bool_::true_()));
+        result.push_back(data_equation(variable_list(), sort_nat::even(sort_nat::cnat(sort_pos::c1())), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::even(sort_nat::cnat(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())))), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::div(variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::cnat(variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::div(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::div(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::first(sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::false_(), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), if_(equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::div(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::first(sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::true_(), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::div(sort_nat::c0(), variable("p", sort_pos::pos())), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::div(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::div(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::mod(variable("p", sort_pos::pos()), sort_pos::c1()), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::mod(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::cnat(sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_nat::dub(variable("b", sort_bool_::bool_()), sort_nat::mod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::cnat(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::last(sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::false_(), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), if_(equal_to(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::c0(), sort_nat::cnat(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::mod(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_nat::last(sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::true_(), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_nat::mod(sort_nat::c0(), variable("p", sort_pos::pos())), sort_nat::c0()));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::mod(sort_nat::cnat(variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::mod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("v", sort_nat::nat()), variable("u", sort_nat::nat()), variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), equal_to(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_nat::cpair(variable("v", sort_nat::nat()), variable("u", sort_nat::nat()))), sort_bool_::and_(equal_to(variable("m", sort_nat::nat()), variable("v", sort_nat::nat())), equal_to(variable("n", sort_nat::nat()), variable("u", sort_nat::nat())))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_nat::first(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))), variable("m", sort_nat::nat())));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), sort_nat::last(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))), variable("n", sort_nat::nat())));
+        result.push_back(data_equation(variable_list(), sort_nat::divmod(sort_pos::c1(), sort_pos::c1()), sort_nat::cpair(sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::divmod(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_nat::cpair(sort_nat::c0(), sort_nat::cnat(sort_pos::c1()))));
+        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::divmod(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), variable("q", sort_pos::pos())), sort_nat::gdivmod(sort_nat::divmod(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("b", sort_bool_::bool_()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("n", sort_nat::nat()), variable("m", sort_nat::nat()), variable("b", sort_bool_::bool_())), sort_nat::gdivmod(sort_nat::cpair(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::dub(variable("b", sort_bool_::bool_()), variable("n", sort_nat::nat())), variable("m", sort_nat::nat()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::c0(), variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::false_(), variable("n", sort_nat::nat())), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::cnat(variable("p", sort_pos::pos())), variable("n", sort_nat::nat()), variable("q", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::false_(), variable("n", sort_nat::nat())), sort_nat::cnat(variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("q", sort_pos::pos()), variable("p", sort_pos::pos())), sort_nat::ggdivmod(sort_nat::cnat(variable("p", sort_pos::pos())), variable("n", sort_nat::nat()), variable("q", sort_pos::pos())), sort_nat::cpair(sort_nat::dub(sort_bool_::true_(), variable("n", sort_nat::nat())), sort_nat::gtesubtb(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
 
         return result;
       }

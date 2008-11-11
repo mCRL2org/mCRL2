@@ -35,23 +35,6 @@ import string
 from optparse import OptionParser
 import Parsing
 
-#
-# Global variables to collect needed information during parsing.
-#
-verbose = False       # Switch on debug output?
-debug = False         # Switch on verbose output? 
-has_lambda = False
-has_forall = False
-has_exists = False
-sorts_cache = []
-sorts_to_functions = {}
-sorts_to_namespaces = {}
-functions_cache = []
-functions_table = {}  # Maps ids to function names
-includes_table = {}   # Maps sorts to include files
-current_sort = ""     # current sort, to map include file to sort
-outputcode = ""       # String to collect the generated code
-
 # MACROS
 FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
 #define MCRL2_DATA_%(uppercasename)s_H
@@ -62,6 +45,7 @@ FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/standard.h"
 %(includes)s
 
 namespace mcrl2 {
@@ -104,7 +88,8 @@ SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      // Sort expression %(container)s(%
       inline
       container_sort %(label)s(const sort_expression& %(param)s)
       {
-        static container_sort %(label)s("%(label)s", %(param)s);
+        //static container_sort %(label)s("%(label)s", %(param)s);
+        container_sort %(label)s("%(label)s", %(param)s);
         return %(label)s;
       }
 
@@ -127,7 +112,8 @@ POLYMORPHIC_FUNCTION_CONSTRUCTOR = '''      // Function symbol %(fullname)s
       {
         %(asserts)s
         %(targetsort)s
-        static function_symbol %(name)s("%(fullname)s", %(sort)s);
+        //static function_symbol %(name)s("%(fullname)s", %(sort)s);
+        function_symbol %(name)s("%(fullname)s", %(sort)s);
         return %(name)s;
       }
 
@@ -137,7 +123,8 @@ FUNCTION_CONSTRUCTOR = '''      // Function symbol %(fullname)s
       inline
       function_symbol %(name)s(%(sortparams)s)
       {
-        static function_symbol %(name)s("%(fullname)s", %(sort)s);
+        //static function_symbol %(name)s("%(fullname)s", %(sort)s);
+        function_symbol %(name)s("%(fullname)s", %(sort)s);
         return %(name)s;
       }
 
@@ -225,12 +212,13 @@ def get_namespace(sorts, functions, function):
     for f in sorts_to_functions[s]:
       if f[1].label == function:
         return "sort_%s" % (get_label(sorts, s))
-  assert(False)
+  return ""
 
 def lookup_function_symbol(functions, function):
   for f in functions:
     if f[0].string == function[0].string:
       return f
+  return function
   assert(False)
 
 #
@@ -278,12 +266,12 @@ def generate_projection_functions(projection_arguments):
 
     for arg in projection_arguments:
         functions = remove_duplicates(projection_arguments[arg])
-        assertions = 'assert('
+        assertions = '//assert('
         cases = ''
         for function in functions:
             name = function[0]
             index = function[1]
-            if assertions <> 'assert(':
+            if assertions <> '\\assert(':
                 assertions += " || "
             assertions += "is_%s_application(e)" % (name)
             cases += PROJECTION_CASE % {
@@ -307,6 +295,12 @@ def lookup_identifier(functions, data_expression, arity):
     return "true_"
   elif data_expression.string == "false":
     return "false_"
+  elif data_expression.string == "if":
+    return "if_"
+  elif data_expression.string == "==":
+    return "equal_to"
+  elif data_expression.string == "!=":
+    return "not_equal_to"
   else:
     for f in functions:
       # The or arity == 0 is to support use of functions without argument
@@ -334,7 +328,10 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
-      sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
+      if f[0].string == "if" or f[0].string == "==" or f[0].string == "!=":
+        sort_args = ""
+      else:
+        sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
       args_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[2].expr)
       sort_args_code = ""
       for a in sort_args:
@@ -357,18 +354,22 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     else:
       # This must be a variable, or a function symbol
       id = lookup_identifier(functions, data_expression[0], arity)
-      if id == "":
+      if id == "if" or id == "==" or id == "!=":
+        print "hoi"
+      elif id == "":
         return generate_variable_code(sorts, variable_declarations, data_expression[0].string)
       namespace = get_namespace(sorts, functions, id)
+      if namespace <> "":
+        namespace += "::"
       if arity == 0:
         f = lookup_function_symbol(functions + variable_declarations, data_expression)
         sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
         sort_args_code = ""
         for a in sort_args:
           sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower()))
-        return "%s::%s(%s)" % (namespace, id, sort_args_code)
+        return "%s%s(%s)" % (namespace, id, sort_args_code)
       else:
-        return "%s::%s" % (namespace, id)
+        return "%s%s" % (namespace, id)
 
 def generate_sorts_code(sorts_ctx, sorts):
   if verbose:
@@ -420,7 +421,6 @@ def lookup_sort(variable_declarations, var):
     for v in variable_declarations:
       if v[0].string == s:
         return v[1]
-    
 
 def get_label(sorts, sort):
     try:
@@ -438,11 +438,18 @@ def get_label(sorts, sort):
 def generate_equation_code(sorts, functions, variable_declarations, equation):
     if verbose:
       print "generate_equation_code"
-    variable_code = generate_variables_code(sorts, variable_declarations, equation[0])
+    vars = []
+    for v in equation[0]:
+      vars += [v]
+    vars.reverse()
+    variable_code = generate_variables_code(sorts, variable_declarations, vars)
     condition_code = generate_data_expression_code(sorts, functions, variable_declarations, equation[1])
     lhs_code = generate_data_expression_code(sorts, functions, variable_declarations, equation[2])
     rhs_code = generate_data_expression_code(sorts, functions, variable_declarations, equation[3])
-    return "data_equation(%s, %s, %s, %s)" % (variable_code, condition_code, lhs_code, rhs_code)
+    if condition_code == "sort_bool_::true_()":
+      return "data_equation(%s, %s, %s)" % (variable_code, lhs_code, rhs_code)
+    else:
+      return "data_equation(%s, %s, %s, %s)" % (variable_code, condition_code, lhs_code, rhs_code)
 
 def get_sort_parameters_from_sort_expression(sorts, sortexpr):
     if verbose:
@@ -738,12 +745,12 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           actualparameters += "arg%s" % index
           if a[0] == "param_expr":
             l = get_label(sorts, a[1])
-            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
+            assertion = "//assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
           elif a[0].string in sort_params:
-            assertion = "assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
+            assertion = "//assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
           else:
             l = get_label(sorts, a[0])
-            assertion = "assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
+            assertion = "//assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
           assertions += assertion
           index +=1
 
@@ -801,12 +808,12 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           newdomain[1] += [["s%s" % (d)]]
 
       # Only allow sorts that were specified
-      assertions = "assert("
+      assertions = "//assert("
       for i in range(len(domains)):
         if i <> 0:
           assertions += "||\n               "
         if len(domains) <> 1:
-          assertions += "("
+          assertions += "//("
         for (index, j) in enumerate(domains[i]):
           if index <> 0:
             assertions += " && "
@@ -819,14 +826,18 @@ def generate_function_constructors(sorts, id, label, sortexprs):
       if len(remove_duplicates(codomain_strings)) <> 1:
         target_sort = "sort_expression target_sort;\n"
         for i in range(len(domains)):
-          target_sort += "        if("
+          if i == 0:
+            target_sort += "        if("
+          else:
+            target_sort += "        else if("
           for (index, j) in enumerate(domains[i]):
             if index <> 0:
               target_sort += " && "
             target_sort += "s%s == %s" % (index, generate_sort_code(sorts, j))
-          target_sort += ");\n        {\n"
+          target_sort += ")\n        {\n"
           target_sort += "          target_sort = %s;" % (generate_sort_code(sorts, [codomains[i]]))
           target_sort += "\n        }\n"
+        target_sort += "        else\n        {\n          assert(false);\n        }\n"
       else:
         target_sort = "sort_expression target_sort(%s);" % (generate_sort_code(sorts, [codomains[0]]))
       newsort = ["sortarrow", newdomain, ["target_sort"]]
@@ -1814,6 +1825,24 @@ spec = Parsing.Spec(sys.modules[__name__],
 # program, we are only creating one parser instance, but it is possible for
 # multiple parsers to use the same Spec simultaneously.
 parser = Parser(spec)
+
+
+#
+# Global variables to collect needed information during parsing.
+#
+verbose = False       # Switch on debug output?
+debug = False         # Switch on verbose output? 
+has_lambda = False
+has_forall = False
+has_exists = False
+sorts_cache = []
+sorts_to_functions = {}
+sorts_to_namespaces = {}
+functions_cache = []
+functions_table = {'==':'equal_to', '!=':'not_equal_to', 'if':'if_'}  # Maps ids to function names
+includes_table = {}   # Maps sorts to include files
+current_sort = ""     # current sort, to map include file to sort
+outputcode = ""       # String to collect the generated code
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ project data
 
 mcrl2-library data
        : source/data_implementation_concrete.cpp 
+         source/standard.cpp
        : <use>/libraries/core//headers 
          <use>/libraries/atermpp//headers
          <use>/site-config//cvc
