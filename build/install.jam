@@ -117,15 +117,15 @@ rule install-libraries ( names * : requirements * ) {
         header-root = [ path.parent $(header-root) ] ;
       }
 
-      install install-headers   : $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
+      install install-headers   : $(short-headers) : <install-dependencies>off <install-type>H <location>$(includedir) <install-source-root>$(header-root) ;
       install install-libraries : $(names) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
       install install-libraries : $(names) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
 
       alias install : install-libraries install-headers ;
     }
     else {
-      install install : $(names) : <link>shared <install-dependencies>on <target-os>windows:<install-type>SHARED_LIB $(requirements) ;
-      install install : $(names) : <link>static <install-dependencies>on <target-os>windows:<install-type>STATIC_LIB $(requirements) ;
+      install install : $(names) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+      install install : $(names) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
     }
   }
   else {
@@ -265,7 +265,8 @@ rule process-requirements ( requirements * ) {
     if $(WX_CPPFLAGS) {
       local wx-library = [ feature.get-values wx : $(requirements) ] ;
 
-      requirements += <library>/site-config//wx_$(wx-library) ;
+      requirements += <library>/site-config//wx_$(wx-library)
+                      <pch>on:<source>/site-config//wx.pch ;
 
       if $(wx-library) = gl && ! $(OPENGL_NAME) {
         no-build = <build>no ;
@@ -308,9 +309,12 @@ rule get-boost-path {
 
 rule platform-configuration ( properties * ) {
   local requirements = <dll-path>$(libdir) ;
+  local pch-path     = $(build-root)/precompile ;
 
   if <toolset>gcc in $(properties) { # GCC
-    requirements +=  <cxxflags>-pipe ;
+    if <pch>on in $(properties) {
+      pch-path =  $(build-root)/precompile/dummies ;
+    }
 
     if <link>static in $(properties) {
       requirements += <linkflags>-export-dynamic ;
@@ -341,12 +345,12 @@ rule platform-configuration ( properties * ) {
     }
   }
   else if <target-os>darwin in $(properties) {
+    if <pch>on in $(properties) {
+      pch-path = $(build-root)/precompile/dummies ;
+    }
+
     if <toolset>darwin in $(properties) { # XCode toolset on OS X
       local cxxflags = -std=c++98 -pipe ;
-
-      if <debug-symbols>on in $(properties) {
-        cxxflags += -ggdb ;
-      }
 
       requirements += <define>__darwin__
                       <cxxflags>$(cxxflags)
@@ -356,7 +360,7 @@ rule platform-configuration ( properties * ) {
     requirements += <linkflags>"-undefined dynamic_lookup" ;
   }
 
-  return $(requirements) ;
+  return <include>$(pch-path) $(requirements) ;
 }
 
 rule load-configuration ( build-root-path configuration-file-name ) {
@@ -433,6 +437,12 @@ feature.feature wx : base gl none : incidental ;
 
 # Specifies that squadt connectivity is implemented in a tool
 feature.feature squadt-connectivity : none implemented : incidental composite ;
+
+rule default-configuration ( ) {
+  local link-variant = [ get-option link : shared ] ;
+
+  return <link>$(link-variant) ;
+}
 
 rule feature-configuration ( ) {
   local properties ;
@@ -516,3 +526,4 @@ IMPORT $(__name__) : process-requirements   : : process-requirements ;
 IMPORT $(__name__) : install-mcrl2-library  : : install-mcrl2-library ;
 IMPORT $(__name__) : platform-configuration : : platform-configuration ;
 IMPORT $(__name__) : feature-configuration  : : feature-configuration ;
+IMPORT $(__name__) : default-configuration  : : default-configuration ;

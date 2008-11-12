@@ -131,8 +131,38 @@ use-project /boost : ../3rd-party/boost ;
 
 alias boost : : : : <include>$(BOOST_ROOT) <define>BOOST_ALL_NO_LIB=1 ;
 
+boost-requirements =
+      <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
+      <target-os>windows:<define>_WIN32_WINNT=0x0501 ;
+
 if $(BOOST_LIBRARY_PATH) {
   boost-library-path = <library-path>"$(BOOST_LIBRARY_PATH)" ;
+
+  cpp-pch boost.pch
+              : precompile/boost.hpp
+              : <include>./precompile
+                <use>/boost//headers
+                $(boost-requirements)
+              :
+              : $(boost-requirements)
+                <toolset>msvc:<cxxflags>/FIboost.hpp
+                <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp
+              ;
+}
+else {
+  cpp-pch boost.pch
+              : precompile/boost.hpp
+              : <include>./precompile
+                <use>/boost//headers
+                <use>/boost//filesystem
+                <use>/boost//thread
+                $(boost-requirements)
+              :
+              : <library>/boost//system
+                $(boost-requirements)
+                <toolset>msvc:<cxxflags>/FIboost.hpp
+                <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp
+              ;
 }
 
 local rule boost-library ( name link ? : requirements * : use-local-boost ? : use-system-boost ? ) {
@@ -146,7 +176,8 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
   }
 
   if $(use-local-boost) {
-    alias boost_$(name) : [ find-target $(TOP)/3rd-party/boost/libs/$(name)/build//boost_$(name) ] : $(requirements) <threading>multi : : $(requirements) ;
+    alias boost_$(name) : [ find-target $(TOP)/3rd-party/boost/libs/$(name)/build//boost_$(name) ]
+                        : <pch>on:<source>boost.pch $(requirements) <threading>multi : : $(requirements) ;
   }
   else if $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) {
     if $(BOOST_INCLUDE_PATH) {
@@ -154,8 +185,8 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
              :
              : $(boost-library-path)
                <name>"boost_$(name)"
-               <include>"$(BOOST_INCLUDE_PATH)"
                <search>"$(BOOST_LIBRARY_PATH)"
+               <pch>on:<source>boost.pch
              :
              : <define>BOOST_ALL_NO_LIB=1
                <include>"$(BOOST_INCLUDE_PATH)"
@@ -166,20 +197,17 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
     }
   }
   else {
-    alias boost_$(name) : [ find-target /boost//$(name) ] : $(requirements) <threading>multi ;
+    alias boost_$(name) : [ find-target /boost//$(name) ] : <pch>on:<source>boost.pch $(requirements) <threading>multi : ;
   }
 
   explicit boost_$(name) ;
 }
 
 if ! $(BOOST_INCLUDE_PATH) {
-  alias boost_headers : /boost//headers ;
-}
-else if $(BOOST_INCLUDE_PATH) != "default" {
-  alias boost_headers : : <include>"$(BOOST_INCLUDE_PATH)" ;
+  alias boost_headers : /boost//headers : : : ;
 }
 else {
-  alias boost_headers ;
+  alias boost_headers : : : : <include>"$(BOOST_INCLUDE_PATH)" ;
 }
 
 boost-library filesystem ;
@@ -217,7 +245,7 @@ lib   socket :
              :
              : <define>__USE_W32_SOCKETS
                <define>_WIN32_WINNT=0x0501
-               <library>ws2_32
+               <library>ws2
              ;
 
 lib   socket :
@@ -226,7 +254,7 @@ lib   socket :
              :
              : <define>__USE_W32_SOCKETS
                <define>_WIN32_WINNT=0x0501
-               <library>ws2_32
+               <library>ws2
              ;
 
 if $(CADP_HEADERS) {
@@ -264,8 +292,22 @@ if $(WX_CPPFLAGS) {
 #                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
 #                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
 
-  libraries-from-string wx_base : $(WX_BASE_LDFLAGS) : : : $(wx-requirements) ;
+  cpp-pch wx.pch
+           : precompile/wx.hpp
+           : <include>./precompile
+             $(wx-requirements)
+             <use>/boost//headers
+           :
+           : <toolset>msvc:<cxxflags>/FIwx.hpp
+             <target-os>windows,<include>intel:<cxxflags>/FIwx.hpp
+           ;
 
-  libraries-from-string wx_gl : $(WX_GL_LDFLAGS) : : : $(wx-requirements) <library>opengl ;
+  libraries-from-string wx_base
+          : $(WX_BASE_LDFLAGS)
+          : : : <pch>on:<source>wx.pch $(wx-requirements) ;
+
+  libraries-from-string wx_gl
+          : $(WX_GL_LDFLAGS)
+          : : : <library>opengl <pch>on:<source>wx.pch $(wx-requirements) ;
 }
 

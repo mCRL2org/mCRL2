@@ -990,7 +990,7 @@ class msvc-linking-generator : linking-generator
     # whatever.gch.
     rule generated-targets ( sources + : property-set : project name ? )
     {
-        local result = [ generator.generated-targets $(sources)
+        local result = [ linking-generator.generated-targets $(sources)
           : $(property-set) : $(project) $(name) ] ;
         if [ $(property-set).get <embed-manifest> ] = "off"
         {

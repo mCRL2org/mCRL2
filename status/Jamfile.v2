@@ -2,11 +2,11 @@
 
 project status
     : source-location .
-    : requirements <hardcode-dll-paths>true  
+    : requirements <hardcode-dll-paths>true
       <dependency>/site-config//boost_headers
       <define>BOOST_ALL_NO_LIB
     ;
-        
+
 # Tests from Jamfiles in individual library test subdirectories
 # Please keep these in alphabetic order by test-suite name
 
@@ -27,35 +27,35 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
   use-project /tools/mcrl22lps : ../tools/mcrl22lps ;
 
   all-tools = [ path.glob-tree $(TOP)/tools/ : Jamfile.v2 ] ;
-  
+
   for tool in [ MATCH .*/tools/(.*)/Jamfile.v2 : $(all-tools) ] {
     use-project /tools/$(tool) : ../tools/$(tool) ;
   }
-  
+
   local lps-tools  = [ MATCH .*/tools/(lps.*)/Jamfile.v2 : $(all-tools) ] ;
   local pbes-tools = [ MATCH .*/tools/(pbes.*)/Jamfile.v2 : $(all-tools) ] ;
   local lts-tools  = [ MATCH .*/tools/(lts.*)/Jamfile.v2 : $(all-tools) ] ;
-  
+
   lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
   lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] ] ;
-  
+
   actions generate-lps {
     $(>) $(<)
   }
-  
+
   actions generate-pbes {
     $(>[2]) --formula=$(>[3]) $(>[1]) $(<)
   }
-  
+
   actions generate-lts {
     $(>[2]) $(>[1]) $(<)
   }
-  
+
   make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
   make test.pbes : /tools/lps2pbes//lps2pbes $(TOP)/examples/modal-formulas/nodeadlock.mcf test.lps : @generate-pbes ;
   make test.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
   make test2.svc : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
-   
+
   for tool in $(lps-tools) {
     if $(tool) in lpsinfo lpspp {
       tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true ] ;
@@ -70,11 +70,11 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
       tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true <testing.post-pipes>/tools/lpspp//lpspp ] ;
     }
   }
-  
+
   for tool in $(pbes-tools) {
     tests += [ run /tools/$(tool)//$(tool) : : test.pbes : <testing.preserve>true ] ;
   }
-  
+
   for tool in $(lts-tools) {
     if $(tool) in ltscompare ltsmin {
       tests += [ run /tools/$(tool)//$(tool) : : test.svc test2.svc : <testing.preserve>true ] ;
@@ -83,6 +83,6 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
       tests += [ run /tools/$(tool)//$(tool) : : test.svc : <testing.preserve>true ] ;
     }
   }
-  
+
   test-suite command-line-interface : $(tests) ;
 }

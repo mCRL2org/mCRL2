@@ -7,7 +7,7 @@ rule import_user_config {
 }
 
 # Build specific settings (Boost Build v2 default command line arguments)
-BUILD_OPTIONS  = @BUILD_OPTIONS@ ;
+BUILD_OPTIONS  = pch=off @BUILD_OPTIONS@ ;
 
 # Library specific variables
 WX_CPPFLAGS        = @WX_CPPFLAGS@ ;

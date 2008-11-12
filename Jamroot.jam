@@ -89,13 +89,14 @@ project toolset
           [ build/install.feature-configuration ]
        : default-build
           <variant>debug
+          [ build/install.default-configuration ]
        ;
 
 
 # Only from the root of the source tree
 if [ path.exists ./tools ] {
   root  = [ path.make $(TOP) ] ;
-  tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
+  tools = [ MATCH $(root)/tools/(.*)/.* : [ glob tools/*/Jamfile.v2 ] ] ;
 
   local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
   local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
@@ -164,7 +165,8 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 
 # Target for a tool in the mCRL2 toolset
 rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
-  build-requirements = <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
+  build-requirements = <pch>on:<source>/site-config//boost.pch
+                       <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
                                 [ process-requirements $(requirements) ] ;
 
   if ! <build>no in $(build-requirements) {
