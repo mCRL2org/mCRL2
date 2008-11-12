@@ -183,6 +183,9 @@ bool grape_event_base::close_specification()
   // reset logpanel
   m_main_frame->get_logpanel()->Clear();
 
+  // reset canvas
+  m_main_frame->get_glcanvas()->set_diagram( 0 );
+
   // reset frame (variables)
   m_main_frame->set_filename( wxFileName( wxEmptyString ) );
   m_main_frame->set_is_modified( false );
