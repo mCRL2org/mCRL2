@@ -8,6 +8,8 @@
 //
 /// \file data_elimination.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #include <mcrl2/core/data_implementation.h>
 #include <mcrl2/core/detail/struct.h>
 #include <mcrl2/core/messaging.h>

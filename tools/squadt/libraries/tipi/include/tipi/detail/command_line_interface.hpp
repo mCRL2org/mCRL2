@@ -21,14 +21,10 @@
 namespace tipi {
 
   namespace messaging {
-    template < typename M >
     class scheme;
   }
 
   namespace command_line_interface {
-
-    /** \brief Convenience type for hiding boost shared pointers */
-    typedef boost::shared_ptr < tipi::messaging::scheme< tipi::message > > scheme_ptr;
 
     /**
      * \brief Class used for extraction of protocol related command line arguments
@@ -52,13 +48,13 @@ namespace tipi {
         static const size_t known_scheme_number;
 
         /** \brief The number of the last matched known_option or known_scheme. */
-        size_t              last_matched;
+        size_t                                       m_last_matched;
 
         /** \brief the scheme that was last parsed successfully */
-        scheme_ptr          selected_scheme;
+        boost::shared_ptr< tipi::messaging::scheme > m_scheme;
 
         /** \brief A unique number that identifies this instance */
-        long int            identifier;
+        long int                                     m_identifier;
 
       private:
 
@@ -80,14 +76,14 @@ namespace tipi {
         void process(int&, char** const);
 
         /** \brief Get the arguments for the selected scheme */
-        scheme_ptr get_scheme() const;
+        boost::shared_ptr< messaging::scheme > get_scheme() const;
 
         /** \brief Get the identifier */
         long get_identifier() const;
     };
 
     /** Constructor */
-    inline argument_extractor::argument_extractor(int& argc, char** const argv) : identifier(-1) {
+    inline argument_extractor::argument_extractor(int& argc, char** const argv) : m_identifier(-1) {
       process(argc, argv);
     }
   }

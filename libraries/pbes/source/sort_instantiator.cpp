@@ -6,17 +6,17 @@
 //
 /// \file ./sort_instantiator.cpp
 
+#include "boost.hpp" // precompiled headers
 
 #include "mcrl2/pbes/sort_instantiator.h"
 
-
 //C++ 
-#include <cstdio> 
-#include <exception> 
-#include <iostream> 
-#include <fstream> 
-#include <string> 
-#include <utility> 
+#include <cstdio>
+#include <exception>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <utility>
 
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/utility.h"

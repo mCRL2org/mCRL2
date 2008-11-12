@@ -7,7 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file build_system.cpp
-/// \brief Add your file description here.
+
+#include "boost.hpp" // precompiled headers
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

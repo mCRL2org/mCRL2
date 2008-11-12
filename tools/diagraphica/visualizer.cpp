@@ -8,6 +8,8 @@
 //
 /// \file ./visualizer.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"

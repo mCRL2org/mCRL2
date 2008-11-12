@@ -8,6 +8,8 @@
 //
 /// \file rewr_inner.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #include "mcrl2/data/detail/rewrite/inner.h"
 
 #define NAME "rewr_inner"

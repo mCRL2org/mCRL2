@@ -8,6 +8,8 @@
 //
 /// \file lpsuntime.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsuntime"
 #define AUTHOR "Jeroen Keiren"
 

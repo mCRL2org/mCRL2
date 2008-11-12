@@ -9,6 +9,8 @@
 /// \file pbes_rewrite.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"

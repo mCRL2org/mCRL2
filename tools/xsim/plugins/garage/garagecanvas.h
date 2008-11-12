@@ -27,12 +27,7 @@
 #ifndef GARAGECANVAS_H
 #define GARAGECANVAS_H
 
-// For compilers that support precompiled headers
-#include <wx/wxprec.h>
-// Else include 'wx/wx.h'
-#ifndef WX_PRECOMP
-  #include <wx/wx.h>
-#endif
+#include <wx/wx.h>
 #include <wx/glcanvas.h>
 
 #ifdef __APPLE__

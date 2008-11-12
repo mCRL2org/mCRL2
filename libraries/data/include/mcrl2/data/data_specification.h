@@ -34,11 +34,11 @@ namespace detail {
   struct has_result_sort
   {
     sort_expression m_result;
-  
+
     has_result_sort(sort_expression target)
       : m_result(target)
     {}
-  
+
     bool operator()(data_operation f)
     {
       return result_sort(f.sort()) == m_result;
@@ -74,12 +74,12 @@ class data_specification: public atermpp::aterm_appl
     atermpp::map < sort_expression, data_expression > default_expression_map;
 
     /// Caches if a sort is finite or not.
-    std::map<data::sort_expression, bool> m_finite_sorts;  
+    std::map<data::sort_expression, bool> m_finite_sorts;
 
   public:
     /// Iterator for the sequence of sorts.
     typedef sort_expression_list::iterator sort_iterator;
-      
+
     /// Iterator for the sequences of constructors and mappings.
     typedef data_operation_list::iterator  function_iterator;
 
@@ -205,39 +205,39 @@ class data_specification: public atermpp::aterm_appl
     /// \param s A sort expression.
     /// \param max_recursion_depth A positive number.
     /// \return A constant data expression of the given sort.
-    data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3) 
+    data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3)
     // data_expression default_expression(sort_expression s) const
     {
       // first check whether a term has already been constructed for this sort.
 
       data_expression result;
       atermpp::map < sort_expression,data_expression >::iterator l=default_expression_map.find(s);
-      
+
       if (l!=default_expression_map.end())
       { // a default data_expression is found.
         return l->second;
       }
 
       // check if there is a constant constructor for s
-      data_operation_list::iterator i = std::find_if(constructors(s).begin(), 
-                                                     constructors(s).end(), 
+      data_operation_list::iterator i = std::find_if(constructors(s).begin(),
+                                                     constructors(s).end(),
                                                      detail::is_constant_operation());
       if (i != constructors().end())
-      { 
+      {
         result=data_expression((atermpp::aterm_appl)*i);
         default_expression_map.insert(std::make_pair(s,result));
         return result;
       }
-      
+
       // check if there is a constant mapping for s
       i = std::find_if(mappings(s).begin(), mappings(s).end(), detail::is_constant_operation());
       if (i != mappings().end())
-      { 
+      {
         result=data_expression((atermpp::aterm_appl)*i);
         default_expression_map.insert(std::make_pair(s,result));
         return result;
       }
-      
+
       if (max_recursion_depth>0)
       { // recursively traverse constructor functions
         for(data_operation_list::iterator i=constructors(s).begin();
@@ -262,11 +262,11 @@ class data_specification: public atermpp::aterm_appl
             }
           }
         }
-  
+
         // recursively traverse mappings
         for(data_operation_list::iterator i=mappings(s).begin();
             i!=mappings(s).end(); i++)
-        { if (i->sort().is_arrow())                 
+        { if (i->sort().is_arrow())
           { sort_expression_list argument_sorts=domain_sorts((*i).sort());
             data_expression_list arguments;
             sort_expression_list::iterator j;

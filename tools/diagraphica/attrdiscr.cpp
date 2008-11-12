@@ -8,6 +8,8 @@
 //
 /// \file ./attrdiscr.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "attrdiscr.h"
 
 // -- constructors and destructor -----------------------------------

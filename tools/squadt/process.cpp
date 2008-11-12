@@ -9,6 +9,8 @@
 /// \file process.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <cstdlib>
 #include <csignal>
 #include <cstring>

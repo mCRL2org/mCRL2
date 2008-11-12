@@ -8,6 +8,8 @@
 //
 /// \file lpspp.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpspp"
 #define AUTHOR "Aad Mathijssen"
 

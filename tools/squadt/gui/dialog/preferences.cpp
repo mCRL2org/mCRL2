@@ -9,6 +9,8 @@
 /// \file gui/dialog/preferences.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include "gui/dialog/preferences.hpp"
 #include "build_system.hpp"
 #include "tool_manager.hpp"

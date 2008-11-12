@@ -25,9 +25,9 @@ namespace lps {
   /// Generates a linearized process specification from a specification in text.
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
-  {   
+  {
     lin_std_initialize_global_variables();
-    
+
     // the lineariser expects data from a stream...
     std::stringstream spec_stream;
     spec_stream << spec;

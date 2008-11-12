@@ -9,6 +9,8 @@
 /// \file chi2mcrl2.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "chi2mcrl2"
 #define AUTHOR "Frank Stappers"
 

@@ -8,15 +8,14 @@
 //
 /// \file xsim.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "xsim"
 #define AUTHOR "Muck van Weerdenburg"
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsim.h"
 #endif
-
-# include <wx/wxprec.h>
-#undef __in_range // For STLport on Windows
 
 #ifdef __BORLANDC__
     #pragma hdrstop

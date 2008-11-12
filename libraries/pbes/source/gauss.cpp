@@ -6,7 +6,7 @@
 //
 /// \file ./gauss.cpp
 
-
+#include "boost.hpp" // precompiled headers
 
 
 //C++ 

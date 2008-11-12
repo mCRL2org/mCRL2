@@ -9,6 +9,8 @@
 /// \file markdialog.cpp
 /// \brief Source file for mark dialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "markdialog.h"
 #include "mediator.h"
 #include "ids.h"

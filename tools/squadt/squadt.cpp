@@ -8,6 +8,8 @@
 //
 /// \file squadt.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "squadt"
 #define AUTHOR "Jeroen van der Wulp"
 

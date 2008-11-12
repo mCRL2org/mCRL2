@@ -8,6 +8,8 @@
 //
 /// \file ./diagraph.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 

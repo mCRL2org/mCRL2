@@ -10,5 +10,6 @@ plugin xsim_trace_view
          /libraries//data
        : <include>../..
          <wx>base
+         <pch>on:<source>/site-config//wx.pch
        ;
 

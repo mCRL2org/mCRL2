@@ -9,6 +9,8 @@
 /// \file utils.cpp
 /// \brief Source file for Utils namespace
 
+#include "wx.hpp" // precompiled headers
+
 #include <algorithm> // for std::min/std::max
 #include "utils.h"
 #include <cmath>

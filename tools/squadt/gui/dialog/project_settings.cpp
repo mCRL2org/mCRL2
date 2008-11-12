@@ -9,6 +9,8 @@
 /// \file gui/dialog/project_settings.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <boost/filesystem/operations.hpp>
 
 #include "gui/dialog/project_settings.hpp"

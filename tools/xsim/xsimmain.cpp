@@ -8,12 +8,11 @@
 //
 /// \file xsimmain.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimmain.h"
 #endif
-
-#include <wx/wxprec.h>
-#undef __in_range // For STLport on Windows
 
 #ifdef __BORLANDC__
     #pragma hdrstop

@@ -9,6 +9,8 @@
 /// \file settingsdialog.cpp
 /// \brief Implements the settings dialog
 
+#include "wx.hpp" // precompiled headers
+
 #include "settingsdialog.h"
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

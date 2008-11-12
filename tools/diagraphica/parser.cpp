@@ -8,6 +8,7 @@
 //
 /// \file ./parser.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "parser.h"
 

@@ -5,6 +5,7 @@ project pbes
           <use>/site-config//boost
           <use>/libraries/data//data
           <use>/libraries/lps//lps
+          <pch>on:<source>/site-config//boost.pch
        ;
 
 

@@ -8,6 +8,8 @@
 //
 /// \file ./lpsparelm.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsparelm"
 #define AUTHOR "Jeroen van der Wulp and Wieger Wesselink"
 

@@ -9,6 +9,8 @@
 /// \file markstateruledialog.cpp
 /// \brief Source file for MarkStateRuleDialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "markstateruledialog.h"
 #include <wx/checklst.h>
 #include <wx/statline.h>

@@ -8,6 +8,8 @@
 //
 /// \file ./attrconti.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "attrconti.h"
 
 // -- constructors and destructor -----------------------------------

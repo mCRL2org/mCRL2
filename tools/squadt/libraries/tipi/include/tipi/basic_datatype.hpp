@@ -209,7 +209,7 @@ namespace tipi {
          **/
         std::string convert(size_t const& s) const {
           std::map< size_t, std::string >::const_iterator i =
-             m_values.find(static_cast < const size_t > (s));
+             m_values.find(s);
 
           if (i == m_values.end()) {
             throw std::runtime_error("invalid operand to conversion");

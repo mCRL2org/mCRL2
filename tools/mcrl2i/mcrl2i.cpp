@@ -8,6 +8,8 @@
 //
 /// \file mcrl2i.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "mcrl2i"
 #define AUTHOR "Muck van Weerdenburg"
 

@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include <memory>
 #include "mainframe.h"
 #include "ids.h"

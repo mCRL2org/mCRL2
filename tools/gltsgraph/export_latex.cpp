@@ -4,6 +4,8 @@
 //
 /// \file ./export_latex.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "export_latex.h"
 #include <iostream>
 #include "gltsgraph.h"

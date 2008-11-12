@@ -9,6 +9,8 @@
 /// \file lts.cpp
 /// \brief Source file of LTS class
 
+#include "wx.hpp" // precompiled headers
+
 #include "lts.h"
 #include "cluster.h"
 #include "mcrl2/lts/lts.h"

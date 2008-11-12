@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include "springlayout.h"
 #include <wx/sizer.h>
 #include <wx/slider.h>

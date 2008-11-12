@@ -8,9 +8,7 @@
 //
 /// \file simulatorgui.cpp
 
-#if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "simulatorgui.h"
-#endif
+#include "wx.hpp" // precompiled headers
 
 #ifdef __BORLANDC__
     #pragma hdrstop

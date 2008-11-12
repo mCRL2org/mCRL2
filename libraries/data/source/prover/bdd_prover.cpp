@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <cstdlib>
 #include <ctime>
 
@@ -177,7 +179,7 @@ using namespace mcrl2::core::detail;
       v_new_time_limit = f_deadline - time(0);
       if (v_new_time_limit > 0 || f_time_limit == 0) {
         gsDebugMsg("Simplifying the BDD:\n");
-        f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
+        f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, 0));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
         gsDebugMsg("Resulting BDD: %P\n", f_bdd);
       }

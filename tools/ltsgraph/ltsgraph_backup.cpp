@@ -8,6 +8,8 @@
 //
 /// \file ./ltsgraph_backup.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "ltsgraph_backup.h"
 #include "node.h"
 #include <wx/textfile.h>

@@ -8,6 +8,7 @@
 //
 /// \file ./value.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "value.h"
 

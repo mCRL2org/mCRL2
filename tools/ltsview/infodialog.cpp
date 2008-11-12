@@ -9,6 +9,8 @@
 /// \file infodialog.cpp
 /// \brief Source file for information dialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "infodialog.h"
 #include <wx/notebook.h>
 #include <wx/listctrl.h>

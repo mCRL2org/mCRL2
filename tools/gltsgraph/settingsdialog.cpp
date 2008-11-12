@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include "settingsdialog.h"
 #include <wx/sizer.h>
 #include "ids.h"

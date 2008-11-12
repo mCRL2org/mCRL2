@@ -9,6 +9,8 @@
 /// \file settings.cpp
 /// \brief Implements the settings store
 
+#include "wx.hpp" // precompiled headers
+
 #include <vector>
 #include "settings.h"
 #include "utils.h"

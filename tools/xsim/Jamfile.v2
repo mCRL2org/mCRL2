@@ -5,7 +5,7 @@ project toolset/xsim
        ;
 
 alias sim_shared
-       : [ obj simbase.o   : simbase.cpp  ]
+       : [ obj simbase.o   : simbase.cpp   ]
          [ obj simulator.o : simulator.cpp ]
        ;
 

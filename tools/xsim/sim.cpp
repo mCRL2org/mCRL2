@@ -8,6 +8,8 @@
 //
 /// \file sim.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "sim"
 #define AUTHOR "Muck van Weerdenburg"
 

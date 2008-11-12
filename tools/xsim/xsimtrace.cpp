@@ -8,16 +8,17 @@
 //
 /// \file xsimtrace.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimtrace.h"
 #endif
-
-#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
+#include <wx/wx.h>
 #include <sstream>
 #include <aterm2.h>
 #include "xsimtrace.h"

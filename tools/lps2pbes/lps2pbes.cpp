@@ -9,6 +9,8 @@
 /// \file lps2pbes.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lps2pbes"
 #define AUTHOR "Alexander van Dam, Aad Mathijssen and Wieger Wesselink"
 

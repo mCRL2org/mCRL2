@@ -8,6 +8,8 @@
 //
 /// \file ./pbessolve.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "pbessolve" 
 #define AUTHOR "Simona Orzan" 
  

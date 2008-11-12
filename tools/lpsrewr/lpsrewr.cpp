@@ -8,6 +8,8 @@
 //
 /// \file lpsrewr.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsrewr"
 #define AUTHOR "Aad Mathijssen"
 

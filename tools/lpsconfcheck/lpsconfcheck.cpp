@@ -9,6 +9,8 @@
 /// \file lpsconfcheck.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsconfcheck"
 #define AUTHOR "Luc Engelen"
 

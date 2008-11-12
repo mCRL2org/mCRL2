@@ -9,6 +9,8 @@
 /// \file savepicdialog.cpp
 /// \brief Implements the SavePicDialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "savepicdialog.h"
 #include <algorithm>
 #include <wx/spinctrl.h>

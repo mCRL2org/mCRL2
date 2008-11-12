@@ -8,6 +8,8 @@
 //
 /// \file ./frame.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "frame.h"
 #include "figures.xpm"
 

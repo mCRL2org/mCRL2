@@ -8,6 +8,7 @@
 //
 /// \file ./examiner.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "examiner.h"
 

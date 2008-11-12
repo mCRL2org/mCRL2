@@ -9,6 +9,8 @@
 /// \file lpsactionrename.cpp
 /// \brief The tool lpsactionrename renames actions in an LPS
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsactionrename"
 #define AUTHOR "Jan Friso Groote and Tom Haenen"
 

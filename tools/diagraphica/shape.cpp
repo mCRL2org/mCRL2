@@ -8,6 +8,8 @@
 //
 /// \file ./shape.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #ifdef __APPLE__
     #include <GLUT/glut.h>
 #else

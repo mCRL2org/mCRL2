@@ -4,6 +4,7 @@ project lps
           <include>../include
           <include>$(BOOST_ROOT)
           <use>/libraries/data//data
+          <pch>on:<source>/site-config//boost.pch
        : usage-requirements
           <include>$(BOOST_ROOT)
        ;

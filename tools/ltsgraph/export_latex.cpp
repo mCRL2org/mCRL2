@@ -8,6 +8,8 @@
 //
 /// \file ./export_latex.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "export_latex.h"
 
 #include <wx/textfile.h>

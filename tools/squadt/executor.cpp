@@ -9,6 +9,8 @@
 /// \file executor.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <ostream>
 #include <deque>

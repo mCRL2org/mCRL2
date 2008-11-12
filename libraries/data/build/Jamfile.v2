@@ -2,6 +2,7 @@ project data
        : source-location ..
        : requirements
           <include>../include
+          <pch>on:<source>/site-config//boost.pch
        : usage-requirements
        ;
 

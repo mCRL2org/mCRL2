@@ -8,6 +8,8 @@
 //
 /// \file rewr_jittyc.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define USE_NEW_CALCTERM 1
 #define EXTEND_NFS 1
 #define F_DONT_TEST_ISAPPL 1
@@ -88,14 +90,14 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 #include <dlfcn.h>
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"

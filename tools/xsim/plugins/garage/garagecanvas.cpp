@@ -8,6 +8,8 @@
 //
 /// \file garagecanvas.cpp
 
+#include "wx.hpp" // precompiled headers
+
 // ---------------------------------
 //
 // This class extends wxGLCanvas and

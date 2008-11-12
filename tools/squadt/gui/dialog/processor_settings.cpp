@@ -9,6 +9,8 @@
 /// \file gui/dialog/processor_settings.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <cmath>
 #include <ctime>
 #include <stack>

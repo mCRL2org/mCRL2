@@ -7,6 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file include/tipi/detail/tool.ipp
+#ifndef __TIPI_TOOL_IPP__
+#define __TIPI_TOOL_IPP__
 
 #include "tipi/detail/basic_messenger.ipp"
 #include "tipi/detail/command_line_interface.hpp"
@@ -23,25 +25,25 @@ namespace tipi {
     /// \cond INTERNAL_DOCS
     class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi::message > {
       friend class communicator;
-      friend class messaging::scheme< tipi::message >;
- 
+      friend class messaging::scheme;
+
       private:
 
         /** \brief The last received set of controller capabilities */
         boost::shared_ptr < controller::capabilities > current_controller_capabilities;
- 
+
         /** \brief The object that described the capabilities of the current tool */
         tool::capabilities                             current_tool_capabilities;
- 
+
         /** \brief This object reflects the current configuration */
         boost::shared_ptr < configuration >            current_configuration;
- 
+
         /** \brief This object reflects the current configuration */
         boost::shared_ptr < display >                  current_display;
- 
+
         /** \brief Unique identifier for the running tool, obtained via the command line */
         long                                           instance_identifier;
- 
+
       private:
 
         /** \brief Send details about the controllers capabilities */
@@ -63,7 +65,7 @@ namespace tipi {
         }
 
       public:
- 
+
         /** \brief Constructor */
         communicator_impl();
 
@@ -74,11 +76,11 @@ namespace tipi {
         bool activate(tipi::tool::communicator*, char*&);
 
         /** \brief Attempts to build a connection using a scheme object */
-        bool activate(tipi::tool::communicator*, command_line_interface::scheme_ptr const&, long const&);
+        bool activate(tipi::tool::communicator*, boost::shared_ptr< messaging::scheme > const&, long const&);
 
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(boost::shared_ptr< communicator_impl >, tool_display&);
- 
+
         /** \brief Sends the empty layout specification for the display space */
         void send_clear_display();
     };
@@ -87,19 +89,19 @@ namespace tipi {
      * \attention please use connect() to manually establish a connection with a controller
      **/
     inline communicator_impl::communicator_impl() : current_tool_capabilities() {
- 
+
       /* Register event handlers for some message types */
       add_handler(tipi::message_capabilities, boost::bind(&communicator_impl::handle_capabilities_request, this, _1));
       add_handler(tipi::message_configuration, boost::bind(&communicator_impl::receive_configuration_handler, this, _1));
     }
- 
+
     /**
      * \param[in,out] argv a pointer to the list of command line arguments
      **/
     inline bool communicator_impl::activate(tipi::tool::communicator* c, char*& argv) {
       command_line_interface::argument_extractor e(argv);
 
-      return (activate(c, e.get_scheme(), e.get_identifier())); 
+      return activate(c, e.get_scheme(), e.get_identifier());
     }
 
     /**
@@ -109,25 +111,25 @@ namespace tipi {
     inline bool communicator_impl::activate(tipi::tool::communicator* c, int& argc, char** const argv) {
       command_line_interface::argument_extractor e(argc, argv);
 
-      return (activate(c, e.get_scheme(), e.get_identifier())); 
+      return activate(c, e.get_scheme(), e.get_identifier());
     }
 
     /**
      * \param[in] s a scheme object that represents the method of connecting
      * \param[in] id an identifier used in the connection
      **/
-    inline bool communicator_impl::activate(tipi::tool::communicator* c, command_line_interface::scheme_ptr const& s, long const& id) {
+    inline bool communicator_impl::activate(tipi::tool::communicator* c, boost::shared_ptr< messaging::scheme > const& s, long const& id) {
       if (s.get() != 0) {
-        s->connect(c);
- 
+        s->connect(*c);
+
         instance_identifier = id;
- 
+
         /* Identify the tool instance to the controller */
         tipi::message m(boost::str(boost::format("%u") % id), tipi::message_identification);
- 
+
         send_message(m);
       }
- 
+
       return (s.get() != 0);
     }
 
@@ -150,14 +152,14 @@ namespace tipi {
       if (m->is_empty()) {
         try {
           tipi::message m(tipi::visitors::store(current_tool_capabilities), tipi::message_capabilities);
- 
+
           send_message(m);
         }
         catch (...) {
         }
       }
     }
-    
+
     /**
      * \param[in] m shared pointer reference to an offer_configuration message
      **/
@@ -175,5 +177,6 @@ namespace tipi {
       }
     }
     /// \endcond
-  } 
+  }
 }
+#endif

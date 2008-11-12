@@ -1,7 +1,7 @@
+#include "wx.hpp" // precompiled headers
+
 #include "infodialog.h"
 #include <wx/notebook.h>
-
-
 
 InfoDialog::InfoDialog(wxWindow* parent) :
   wxDialog(parent, wxID_ANY, wxT("Info"), wxDefaultPosition, wxDefaultSize,

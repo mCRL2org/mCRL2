@@ -24,6 +24,8 @@
 //
 // ======================================================================
 
+#include "boost.hpp" // precompiled headers
+
 //C++
 #include <ostream>
 #include <exception>

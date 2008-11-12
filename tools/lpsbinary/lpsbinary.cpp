@@ -9,6 +9,8 @@
 /// \file lpsbinary.cpp
 /// \brief The binary tool, this runs the binary algorithm. 
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsbinary"
 #define AUTHOR "Jeroen Keiren"
 

@@ -1057,7 +1057,7 @@ std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 /// \param spec the lps::specification
 /// \param determines whether the timed or untimed variant of the algorithm is chosen
 /// \return The resulting pbes
-pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)
+inline pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)
 {
   if (formula.has_time() || spec.process().has_time())
   {

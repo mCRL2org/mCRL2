@@ -9,6 +9,8 @@
 /// \file simreader.cpp
 /// \brief Source file for simReader class
 
+#include "wx.hpp" // precompiled headers
+
 #include "simreader.h"
 
 simReader::simReader(Simulation* s)

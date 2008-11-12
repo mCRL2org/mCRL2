@@ -9,6 +9,8 @@
 /// \file gui/tool_display.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <deque>
 #include <utility>
 

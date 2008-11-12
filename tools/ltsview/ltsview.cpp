@@ -9,6 +9,8 @@
 /// \file ltsview.cpp
 /// \brief Contains implementation of the LTSView application.
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "ltsview"
 #define AUTHOR "Bas Ploeger and Carst Tankink"
 

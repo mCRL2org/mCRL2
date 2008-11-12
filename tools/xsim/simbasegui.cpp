@@ -12,10 +12,6 @@
     #pragma implementation "simbasegui.h"
 #endif
 
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
 #include <wx/wx.h>
 #include "simbasegui.h"
 

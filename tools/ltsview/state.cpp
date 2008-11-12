@@ -9,6 +9,8 @@
 /// \file state.cpp
 /// \brief Source file for State class
 
+#include "wx.hpp" // precompiled headers
+
 #include "state.h"
 #include "transition.h"
 

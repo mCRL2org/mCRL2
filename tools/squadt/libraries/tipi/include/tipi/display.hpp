@@ -133,7 +133,7 @@ namespace tipi {
       T& create();
 
       /** \brief Find the id for an element */
-      const ::tipi::display::element_identifier find(tipi::layout::element const* element) const {
+      ::tipi::display::element_identifier find(tipi::layout::element const* element) const {
         return impl->find(element);
       }
 
@@ -146,7 +146,7 @@ namespace tipi {
       inline T const& find(tipi::display::element_identifier id) const {
         return static_cast < T const& > (*impl->find(id));
       }
-  
+
       /**
        * \param[in] id the identifier of the element to find
        * \pre the element should be in the list

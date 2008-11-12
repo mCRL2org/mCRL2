@@ -8,6 +8,8 @@
 //
 /// \file ./lpsinfo.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsinfo"
 #define AUTHOR "Frank Stappers"
 

@@ -6,7 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// file: mcrl2/lps/untime.cpp
+// \file: mcrl2/lps/untime.cpp
+
+#include "boost.hpp" // precompiled headers
+
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 

@@ -9,6 +9,8 @@
 /// \file restore_visitor.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <fstream>
 
 #include <boost/thread.hpp> // workaround for boost::thread that includes errno.h (stlport)

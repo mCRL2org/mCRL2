@@ -9,6 +9,8 @@
 /// \file visualizer.cpp
 /// \brief Implements the visualizer
 
+#include "wx.hpp" // precompiled headers
+
 #include "visualizer.h"
 #include <cmath>
 #include <cstdlib>

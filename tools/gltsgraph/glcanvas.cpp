@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include "glcanvas.h"
 #include <wx/dcclient.h>
 #include <iostream>

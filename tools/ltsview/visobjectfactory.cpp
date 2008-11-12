@@ -9,6 +9,8 @@
 /// \file visobjectfactory.cpp
 /// \brief Source file for VisObjectFactory class
 
+#include "wx.hpp" // precompiled headers
+
 #include "visobjectfactory.h"
 #include <algorithm>
 #include <cstdlib>

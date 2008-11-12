@@ -8,6 +8,8 @@
 //
 /// \file gui/project.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include <map>
 #include <set>
 #include <stack>

@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include "visualizer.h"
 #include <sstream>
 #include <cmath>

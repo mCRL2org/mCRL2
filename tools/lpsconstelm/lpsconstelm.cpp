@@ -8,6 +8,8 @@
 //
 /// \file ./lpsconstelm.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsconstelm"
 #define AUTHOR "Frank Stappers"
 
@@ -578,7 +580,7 @@ void lpsConstElm::findSingleton() {
           if (result_sort(j->sort()) == *i){
             sort_expression_list sorts = domain_sorts(j->sort());
             for(sort_expression_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
-              b = std::max(p_countSort[*k], b);
+              b = (std::max)(p_countSort[*k], b);
             }
           }
         }

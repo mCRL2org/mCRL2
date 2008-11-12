@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include "workarounds.h" // DECL_A
 
 #ifdef NO_DYNLOAD
@@ -74,14 +76,14 @@ void RewriterCompilingInnermost::clearSubstitutions()
 
 #define NAME "rewr_innerc"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 #include <string.h>
 #include <dlfcn.h>
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
 #include <stdexcept>
 #include "mcrl2/core/messaging.h"

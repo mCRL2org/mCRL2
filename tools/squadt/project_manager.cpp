@@ -9,6 +9,8 @@
 /// \file project_manager.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <fstream>
 #include <map>

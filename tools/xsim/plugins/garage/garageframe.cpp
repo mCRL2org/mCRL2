@@ -8,6 +8,8 @@
 //
 /// \file garageframe.cpp
 
+#include "wx.hpp" // precompiled headers
+
 // ---------------------------------
 //
 // This class is used to creat the

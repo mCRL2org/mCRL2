@@ -4,6 +4,8 @@
 //
 /// \file ./export_svg.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "export_svg.h"  
 #include <boost/format.hpp>
 #include <wx/textfile.h>

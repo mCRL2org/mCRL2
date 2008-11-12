@@ -8,6 +8,8 @@
 //
 /// \file lps2torx.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lps2torx"
 #define AUTHOR "Muck van Weerdenburg"
 

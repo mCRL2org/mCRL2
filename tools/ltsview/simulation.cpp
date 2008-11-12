@@ -9,6 +9,8 @@
 /// \file simulation.cpp
 /// \brief Source file for Simulation class
 
+#include "wx.hpp" // precompiled headers
+
 #include "simulation.h"
 #include "transition.h"
 #include "state.h"

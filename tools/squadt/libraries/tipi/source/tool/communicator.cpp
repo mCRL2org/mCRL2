@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <boost/shared_array.hpp>
 
 #include "tipi/detail/tool.ipp"
@@ -186,7 +188,7 @@ namespace tipi {
                 c->send_message(tipi::message(
                       visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
 		           (*reinterpret_cast < tipi::layout::element const* > (e),
-                           reinterpret_cast < const ::tipi::display::element_identifier > (e)), tipi::message_display_data));
+                           reinterpret_cast < ::tipi::display::element_identifier > (e)), tipi::message_display_data));
 
               }
             }
@@ -254,7 +256,7 @@ namespace tipi {
         try {
           boost::static_pointer_cast < communicator_impl > (impl)->send_message(tipi::message(
               visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
-                    (*e, reinterpret_cast < const ::tipi::display::element_identifier > (e)), tipi::message_display_data));
+                    (*e, reinterpret_cast < ::tipi::display::element_identifier > (e)), tipi::message_display_data));
         }
         catch (std::exception& e) {
           get_logger().log(1, "Failure sending display data (" + std::string(e.what()) + ")\n");

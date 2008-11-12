@@ -16,6 +16,9 @@
 /// is untimed.
 /// \author Muck van Weerdenburg
 
+#ifndef _TRACE_H__
+#define _TRACE_H__
+
 #include <aterm2.h>
 #include <iostream>
 #include <string>
@@ -235,3 +238,4 @@ class Trace
 
 }
 }
+#endif

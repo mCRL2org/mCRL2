@@ -2,6 +2,7 @@ project libraries/utilities
        : source-location ..
        : requirements
           <include>../include
+          <pch>on:<source>/site-config//boost.pch
        : usage-requirements
           <use>/site-config//boost
        ;
@@ -10,9 +11,11 @@ alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
 alias font_renderer : font_renderer.o ;
 
-obj spinctrlfloat.o : source/spinctrlfloat.cpp : <use>/site-config//wx_base <include>../include/mcrl2/utilities ;
-obj colorbutton.o   : source/colorbutton.cpp   : <use>/site-config//wx_base <include>../include/mcrl2/utilities ;
-obj font_renderer.o : source/font_renderer.cpp : <use>/site-config//wx_base <include>../include/mcrl2/utilities ;
+wx-requirements = <pch>on:<source>/site-config//wx.pch <use>/site-config//wx_base <include>../include/mcrl2/utilities ;
+
+obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) ;
+obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) ;
+obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) ;
 
 # mCRL2 specific tool for SQuADt interface
 obj squadt_interface

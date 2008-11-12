@@ -8,12 +8,11 @@
 //
 /// \file xsimtracedll.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimtracedll.h"
 #endif
-
-#include <wx/wxprec.h>
-#undef __in_range // For STLport
 
 #ifdef __BORLANDC__
     #pragma hdrstop

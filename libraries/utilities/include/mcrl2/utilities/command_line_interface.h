@@ -9,6 +9,8 @@
 /// \file mcrl2/utilities/command_line_interface.h
 /// \brief Components for command line interfaces of mCRL2 tools
 
+#ifndef __MCRL2_UTILITIES_HPP_
+#define __MCRL2_UTILITIES_HPP_
 #include <algorithm>
 #include <vector>
 #include <map>
@@ -969,3 +971,4 @@ namespace mcrl2 {
     /// \endcond
   }
 }
+#endif

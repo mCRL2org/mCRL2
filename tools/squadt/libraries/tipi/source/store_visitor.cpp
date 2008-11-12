@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <sstream>
 #include <fstream>
 
@@ -530,7 +532,8 @@ namespace utility {
       }
 
       try {
-        do_visit(*(i->layout_element), d.find(i->layout_element));
+        do_visit< const tipi::layout::element, const tipi::display::element_identifier>(
+                                                *(i->layout_element), d.find(i->layout_element));
       }
       catch (...) {
         // Assume element is a layout manager
@@ -563,7 +566,8 @@ namespace utility {
       }
 
       try {
-        do_visit(*(i->layout_element), d.find(i->layout_element));
+        do_visit< const tipi::layout::element, const tipi::display::element_identifier>(
+                                                *(i->layout_element), d.find(i->layout_element));
       }
       catch (...) {
         // Assume element is a layout manager

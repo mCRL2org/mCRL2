@@ -9,6 +9,8 @@
 /// \file pbes2bes.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "pbes2bes"
 #define AUTHOR "Alexander van Dam, Wieger Wesselink"
 

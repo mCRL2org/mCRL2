@@ -11,11 +11,7 @@
 #ifndef edge_h
 #define edge_h
 
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include "wx/wxprec.h"
+#include <wx/wx.h>
 #include <wx/dcps.h>
 #include "node.h"
 #include <string>

@@ -9,6 +9,8 @@
 /// \file savevecdialog.cpp
 /// \brief Implements the SaveVecDialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "savevecdialog.h"
 #include <vector>
 #include <wx/statline.h>

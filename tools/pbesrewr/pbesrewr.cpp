@@ -19,6 +19,8 @@
 //
 // ======================================================================
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "pbesrewr"
 #define AUTHOR "Jan Friso Groote"
 

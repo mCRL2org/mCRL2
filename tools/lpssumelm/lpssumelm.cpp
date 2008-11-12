@@ -8,6 +8,8 @@
 //
 /// \file lpssumelm.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpssumelm"
 #define AUTHOR "Jeroen Keiren"
 

@@ -9,6 +9,8 @@
 //
 // \brief Implements the font renderer class.
 
+#include "wx.hpp" // precompiled headers
+
 #include "font_renderer.h"
 #include "font/character_set.xpm"
 #include <wx/image.h>

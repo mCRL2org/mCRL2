@@ -9,6 +9,8 @@
 /// \file glcanvas.cpp
 /// \brief Implements the OpenGL canvas
 
+#include "wx.hpp" // precompiled headers
+
 #include "glcanvas.h"
 #include <wx/image.h>
 #include "ids.h"

@@ -9,6 +9,8 @@
 /// \file processor.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -912,7 +914,7 @@ namespace squadt {
               get_logger().log(1, boost::format("process aborted `%s' (process id %u)\n") % p->get_executable_name() %
                                  p->get_identifier());
             }
-     
+
             BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& o, output_range) {
               if (o->status == object_descriptor::generation_in_progress) {
                 o->status = object_descriptor::reproducible_nonexistent;
@@ -924,7 +926,7 @@ namespace squadt {
     }
 
     task_monitor::signal_change(p, s);
-     
+
     if (guard && s != process::running) {
       guard->check_status(false);
     }
@@ -1287,11 +1289,11 @@ namespace squadt {
     }
   }
 
-  const size_t processor::number_of_inputs() const {
+  size_t processor::number_of_inputs() const {
     return (impl->inputs.size());
   }
 
-  const size_t processor::number_of_outputs() const {
+  size_t processor::number_of_outputs() const {
     return (impl->outputs.size());
   }
 

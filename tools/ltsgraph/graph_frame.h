@@ -8,11 +8,7 @@
 //
 /// \file ./graph_frame.h
 
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include <wx/wxprec.h>
+#include <wx/wx.h>
 #include <wx/cmdline.h>
 #include <wx/utils.h>
 #include <wx/msgdlg.h>

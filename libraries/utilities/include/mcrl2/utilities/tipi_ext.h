@@ -15,9 +15,14 @@
 #include <memory>
 #include <string>
 
-#include <tipi/display.hpp>
-#include <tipi/layout_manager.hpp>
-#include <tipi/layout_elements.hpp>
+
+#include "tipi/report.hpp"
+#include "tipi/tool_display.hpp"
+#include "tipi/configuration.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/display.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/layout_elements.hpp"
 
 /**
  * \brief mCRL2 toolset related functionality

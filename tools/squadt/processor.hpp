@@ -234,10 +234,10 @@ namespace squadt {
                 object_descriptor::status_type const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief The number of input objects of this processor */
-      const size_t number_of_inputs() const;
+      size_t number_of_inputs() const;
 
       /** \brief The number output objects of this processor */
-      const size_t number_of_outputs() const;
+      size_t number_of_outputs() const;
 
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();

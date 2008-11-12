@@ -9,6 +9,8 @@
 /// \file markmanager.cpp
 /// \brief Mark manager source file
 
+#include "wx.hpp" // precompiled headers
+
 #include "markmanager.h"
 #include <algorithm>
 #include "lts.h"

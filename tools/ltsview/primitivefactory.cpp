@@ -9,6 +9,8 @@
 /// \file primitivefactory.cpp
 /// \brief Source file for PrimitiveFactory class
 
+#include "wx.hpp" // precompiled headers
+
 #include "primitivefactory.h"
 #include <cmath>
 #include "conedb.h"

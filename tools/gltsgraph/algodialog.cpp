@@ -1,3 +1,5 @@
+#include "wx.hpp" // precompiled headers
+
 #include "algodialog.h"
 #include <wx/sizer.h>
 #include <wx/notebook.h>

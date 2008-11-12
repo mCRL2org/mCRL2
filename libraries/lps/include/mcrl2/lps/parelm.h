@@ -17,8 +17,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <boost/integer.hpp> // workaround, must come before adjacency_list.hpp
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/integer.hpp>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"

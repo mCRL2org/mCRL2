@@ -9,6 +9,8 @@
 /// \file gui/main.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include "gui/main.hpp"
 #include "gui/about.hpp"
 #include "gui/project.hpp"

@@ -9,6 +9,8 @@
 /// \file task_monitor.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include "task_monitor.ipp"
 
 #include <boost/function.hpp>

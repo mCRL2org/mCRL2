@@ -9,6 +9,8 @@
 /// \file pnml2mcrl2.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "pnml2mcrl2"
 #define AUTHOR "Johfra Kamphuis and Yaroslav Usenko"
 

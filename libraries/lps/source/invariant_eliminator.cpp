@@ -9,8 +9,7 @@
 /// \file source/invariant_eliminator.cpp
 /// \brief Add your file description here.
 
-// Implementation of class Invariant_Eliminator
-// file: invariant_eliminator.cpp
+#include "boost.hpp" // precompiled headers
 
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/core/messaging.h"

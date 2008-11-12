@@ -9,6 +9,8 @@
 /// \file tool_manager.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <functional>
 

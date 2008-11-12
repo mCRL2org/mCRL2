@@ -9,6 +9,8 @@
 /// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "mcrl22lps"
 #define AUTHOR "Jan Friso Groote"
 

@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <exception>
 #include <sstream>
 
@@ -171,15 +173,16 @@ namespace tipi {
           }
         }
 
-        static void send_display_data(boost::weak_ptr < communicator_impl > impl, void const* e, boost::shared_ptr< tipi::display const > display) { 
+        static void send_display_data(boost::weak_ptr < communicator_impl > impl, void const* e, boost::shared_ptr< tipi::display const > display) {
           boost::shared_ptr < communicator_impl > g(impl.lock());
 
           if (g.get() != 0) {
             try {
               if (dynamic_cast< tipi::layout::element const* > (reinterpret_cast < tipi::layout::element const* > (e))) { // safe to do reinterpret cast
                 g->send_message(tipi::message(
-                      visitors::store(*reinterpret_cast < tipi::layout::element const* > (e),
-                            display->find(reinterpret_cast < tipi::layout::element const* > (e))), tipi::message_display_data)); 
+                      visitors::store< tipi::layout::element const, const tipi::display::element_identifier >
+                         (*reinterpret_cast < tipi::layout::element const* > (e),
+                            display->find(reinterpret_cast < tipi::layout::element const* > (e))), tipi::message_display_data));
               }
             }
             catch (bool) {
@@ -212,7 +215,7 @@ namespace tipi {
               g->add_handler(tipi::message_display_data, boost::bind(&trampoline::update, _1, d, h2));
 
               // Register interaction event handler (outgoing)
-              d->impl->add(boost::bind(&trampoline::send_display_data, g, _1, d)); 
+              d->impl->add(boost::bind(&trampoline::send_display_data, g, _1, d));
             }
             catch (std::runtime_error& e) {
               g->logger->log(1, "Failure with interpretation of message: `" + std::string(e.what()) + "'\n");

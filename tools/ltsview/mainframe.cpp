@@ -9,6 +9,8 @@
 /// \file mainframe.cpp
 /// \brief Implements the main LTSView window
 
+#include "wx.hpp" // precompiled headers
+
 #include "mainframe.h"
 #include <wx/checklst.h>
 #include <wx/filedlg.h>

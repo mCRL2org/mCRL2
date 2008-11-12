@@ -1,5 +1,6 @@
 project toolset/xsim/plugins/garage
        : requirements <include>../..
+         <pch>on:<source>/site-config//wx.pch
        : default-build <threading>multi
        ;
 

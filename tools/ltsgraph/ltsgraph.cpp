@@ -8,6 +8,8 @@
 //
 /// \file ./ltsgraph.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "ltsgraph"
 #define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
 

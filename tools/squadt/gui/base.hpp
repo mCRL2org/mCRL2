@@ -9,6 +9,8 @@
 /// \file gui/dialog/base.h
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #ifndef GUI_DIALOG_BASE_H
 #define GUI_DIALOG_BASE_H
 

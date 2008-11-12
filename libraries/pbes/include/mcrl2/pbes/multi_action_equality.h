@@ -53,7 +53,7 @@ namespace detail {
     
     /// Returns true if the actions in a and b have the same names, and the same sorts.
     /// \pre a and b are sorted w.r.t. to the names of the actions.
-    bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
+    inline bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
     {
       if (a.size() != b.size())
       {
@@ -176,7 +176,7 @@ std::cout << "  <and-term> " << pp(expr) << std::endl;
     
     /// Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are equal.
-    data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
+    inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
 std::cout << "\n<equal multi actions>" << std::endl;
@@ -221,7 +221,7 @@ std::cout << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
     
     /// Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are not equal.
-    data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
+    inline data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
     {
       using namespace data::data_expr::optimized;
     

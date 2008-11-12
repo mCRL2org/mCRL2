@@ -9,6 +9,8 @@
 /// \file simdialog.cpp
 /// \brief Source file for simulation dialog class
 
+#include "wx.hpp" // precompiled headers
+
 #include "simdialog.h"
 #include <vector>
 #include <wx/listctrl.h>
