@@ -26,6 +26,5 @@ test-suite lps
       [ run sumelm_test.cpp ]
       [ run suminst_test.cpp ]
       [ run untime_test.cpp ]
-      [ run symbolic_reachability.cpp ]
       [ compile-headers ../include ]
     ;
