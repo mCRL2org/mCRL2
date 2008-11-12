@@ -1402,7 +1402,7 @@ void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p
   {
     ATermAppl sort = ATAgetFirst(l);
     if (p_ctx->sorts_table.get(sort) == NULL) { // Unique sorts in the table
-      p_ctx->sorts_table.put         (sort, (ATerm) ATtrue);
+      p_ctx->sorts_table.put                (sort, (ATerm) ATtrue);
       p_ctx->sort_constructors.insert       (std::make_pair(sort, atermpp::indexed_set(20,50)));
       p_ctx->num_sort_constructors.insert   (std::make_pair(sort, 0));
       p_ctx->sort_mappings.insert           (std::make_pair(sort, atermpp::indexed_set(20,50)));
@@ -1596,17 +1596,20 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         }
         assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
         assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
-        assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
-        if (p_ctx->num_map_equations[head] > 0) {
-          // there can be only one data equation for a projection function,
-          // hence head is not a projection function.
-          p_ctx->projects.erase(std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0)));
-          //remove_mapping_not_list(head, sort, sort_mappings, map_equations, num_map_equations);
-        } else {
-          put_result = p_ctx->map_equations[head].put(data_eqn);
-          p_ctx->projects[std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0))] = head;
-          if (put_result.second) {
-            p_ctx->num_map_equations[head]++;
+        //assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
+        if(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0)
+        {
+          if (p_ctx->num_map_equations[head] > 0) {
+            // there can be only one data equation for a projection function,
+            // hence head is not a projection function.
+            p_ctx->projects.erase(std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0)));
+            //remove_mapping_not_list(head, sort, sort_mappings, map_equations, num_map_equations);
+          } else {
+            put_result = p_ctx->map_equations[head].put(data_eqn);
+            p_ctx->projects[std::make_pair(arg0, ATindexOf(args, (ATerm) data_eqn_rhs, 0))] = head;
+            if (put_result.second) {
+              p_ctx->num_map_equations[head]++;
+            }
           }
         }
       } else if (find_match_in_list(data_eqn, generic_equations)) {
