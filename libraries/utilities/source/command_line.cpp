@@ -629,6 +629,16 @@ namespace mcrl2 {
 
         m_arguments.push_back(argument);
       }
+
+      // add entries for default options
+      for (interface_description::option_map::const_iterator i = d.m_options.begin(); i != d.m_options.end(); ++i)
+      {
+        const interface_description::option_descriptor& desc = i->second;
+        if (desc.is_optional() && m_options.find(i->first) == m_options.end())
+        {
+          m_options.insert(std::make_pair(desc.m_long, desc.m_argument->get_default()));
+        }
+      }
     }
 
     /// \cond INTERNAL
