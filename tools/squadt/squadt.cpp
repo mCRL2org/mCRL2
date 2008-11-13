@@ -13,6 +13,7 @@
 #define NAME "squadt"
 #define AUTHOR "Jeroen van der Wulp"
 
+#include "boost/version.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/shared_ptr.hpp"
@@ -36,6 +37,14 @@
 #include <wx/image.h>
 #include <wx/msgdlg.h>
 #include <wx/sysopt.h>
+
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
+}
 
 using namespace squadt::GUI;
 
@@ -259,7 +268,7 @@ bool SQuADt::OnInit() {
           }
         };
 
-        boost::filesystem::path path_to_try(retry_list[0]->get_location().parent_path());
+        boost::filesystem::path path_to_try(parent_path(retry_list[0]->get_location()));
 
         // Perform initialisation
         for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {

@@ -443,7 +443,7 @@ if test $with_boost; then
         #include "$with_boost/include/boost/version.hpp"
       
         int main() {
-          return !(103600 <= BOOST_VERSION);
+          return !(103500 <= BOOST_VERSION);
         }
        ],
        [

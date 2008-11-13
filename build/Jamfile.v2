@@ -133,20 +133,20 @@ alias boost : : : : <include>$(BOOST_ROOT) <define>BOOST_ALL_NO_LIB=1 ;
 
 boost-requirements =
       <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
-      <target-os>windows:<define>_WIN32_WINNT=0x0501 ;
+      <target-os>windows:<define>_WIN32_WINNT=0x0501
+      <toolset>msvc:<cxxflags>/FIboost.hpp
+      <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
 
 if $(BOOST_LIBRARY_PATH) {
-  boost-library-path = <library-path>"$(BOOST_LIBRARY_PATH)" ;
-
   cpp-pch boost.pch
               : precompile/boost.hpp
               : <include>./precompile
+                <include>$(BOOST_ROOT) 
                 <use>/boost//headers
                 $(boost-requirements)
               :
-              : $(boost-requirements)
-                <toolset>msvc:<cxxflags>/FIboost.hpp
-                <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp
+              : <library>boost_system
+                $(boost-requirements)
               ;
 }
 else {
@@ -160,8 +160,6 @@ else {
               :
               : <library>/boost//system
                 $(boost-requirements)
-                <toolset>msvc:<cxxflags>/FIboost.hpp
-                <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp
               ;
 }
 
@@ -183,10 +181,9 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
     if $(BOOST_INCLUDE_PATH) {
       lib boost_$(name)
              :
-             : $(boost-library-path)
-               <name>"boost_$(name)"
+             : <library-path>"$(BOOST_LIBRARY_PATH)"
+               <name>"boost_$(name)-mt"
                <search>"$(BOOST_LIBRARY_PATH)"
-               <pch>on:<source>boost.pch
              :
              : <define>BOOST_ALL_NO_LIB=1
                <include>"$(BOOST_INCLUDE_PATH)"

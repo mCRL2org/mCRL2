@@ -18,6 +18,7 @@
 #include <set>
 #include <memory>
 
+#include <boost/version.hpp>
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
@@ -33,6 +34,21 @@
 #include "settings_manager.hpp"
 #include "type_registry.hpp"
 #include "visitors.hpp"
+
+inline std::string filename(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.filename();
+#else
+  return p.leaf();
+#endif
+}
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
+}
 
 namespace squadt {
   /// \cond INTERNAL_DOCS
@@ -59,11 +75,11 @@ namespace squadt {
 
     assert(!l.empty());
 
-    if (l.filename() == settings_manager::project_definition_base_name) {
-      store = l.parent_path();
+    if (filename(l) == settings_manager::project_definition_base_name) {
+      store = parent_path(l);
     }
     else {
-      store = (exists(l) && !is_directory(l)) ? l.parent_path() : l;
+      store = (exists(l) && !is_directory(l)) ? parent_path(l) : l;
     }
 
     filesystem::path project_file = store / filesystem::path(settings_manager::project_definition_base_name);
@@ -204,7 +220,7 @@ namespace squadt {
 
     for (bf::directory_iterator i(l); i != end; ++i) {
       if (!is_directory(*i) && !symbolic_link_exists(*i)) {
-        if ((*i).filename() != settings_manager::project_definition_base_name) {
+        if (filename(*i) != settings_manager::project_definition_base_name) {
           import_file(*i);
         }
       }
@@ -463,7 +479,7 @@ namespace squadt {
 
     assert(exists(s) && !is_directory(s));
 
-    path           destination_path  = store / path(d.empty() ? s.filename() : d);
+    path           destination_path  = store / path(d.empty() ? filename(s) : d);
     boost::shared_ptr< processor > p = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
@@ -471,8 +487,8 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(destination_path.filename()),
-                                destination_path.filename(), processor::object_descriptor::original);
+    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(filename(destination_path)),
+                                filename(destination_path), processor::object_descriptor::original);
 
     processors.push_back(p);
 
@@ -623,14 +639,16 @@ namespace squadt {
       boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
       BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-        objects.insert(bf::path(object->get_location()).filename());
+        objects.insert(filename(bf::path(object->get_location())));
       }
     }
 
     for (bf::directory_iterator i(store); i != bf::directory_iterator(); ++i) {
-      if (objects.find((*i).filename()) == objects.end()) {
-        if (bf::exists((*i).filename()) && !bf::is_directory((*i).filename()) && !bf::symbolic_link_exists((*i).filename())) {
-          bf::remove((*i).filename());
+      std::string name(filename(*i));
+
+      if (objects.find(name) == objects.end()) {
+        if (bf::exists(name) && !bf::is_directory(name) && !bf::symbolic_link_exists(name)) {
+          bf::remove(name);
         }
       }
     }
@@ -669,7 +687,7 @@ namespace squadt {
   }
 
   std::string project_manager::get_name() const {
-    return (impl->store.filename());
+    return (filename(impl->store));
   }
 
   void project_manager_impl::write() const {

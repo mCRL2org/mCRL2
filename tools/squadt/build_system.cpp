@@ -10,6 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
+#include <boost/version.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -22,6 +23,14 @@
 #include "tool_manager.hpp"
 #include "executor.hpp"
 #include "tool.hpp"
+
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
+}
 
 /**
  * \namespace squadt
@@ -53,7 +62,7 @@ namespace squadt {
         path_to_binary = default_path / path_to_binary;
       }
       else {
-        path_to_binary = default_path.parent_path() / path_to_binary;
+        path_to_binary = parent_path(default_path) / path_to_binary;
       }
 #else
       path path_to_binary(basename(*t));

@@ -18,6 +18,7 @@
 #include <ctime>
 #include <exception>
 
+#include "boost/version.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/function.hpp"
@@ -31,6 +32,14 @@
 #include "processor.ipp"
 #include "project_manager.ipp"
 #include "task_monitor.hpp"
+
+inline bool has_parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.has_parent_path();
+#else
+  return p.has_branch_path();
+#endif
+}
 
 namespace squadt {
 
@@ -422,7 +431,7 @@ namespace squadt {
       for (tipi::configuration::const_iterator_input_range::const_iterator i = input_range.begin(); i != input_range.end(); ++i) {
         tipi::configuration::object const& object(static_cast < tipi::configuration::object& > (*i));
 
-        if (!boost::filesystem::path(object.location()).has_parent_path()) {
+        if (!has_parent_path(boost::filesystem::path(object.location()))) {
           // Assume that the object is located in the project directory
           boost::shared_ptr < processor::object_descriptor > descriptor(g->impl->search_object_descriptor(object.location()));
 
