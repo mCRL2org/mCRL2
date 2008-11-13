@@ -111,8 +111,23 @@ class pbes2bes_tool: public core::filter_tool
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
-      set_output_format(parser.option_argument("output"));
-      set_transformation_strategy(parser.option_argument("strategy"));
+      try
+      {
+        set_output_format(parser.option_argument("output"));
+      }
+      catch (std::logic_error)
+      {
+        set_output_format("binary");
+      }
+
+      try
+      {
+        set_transformation_strategy(parser.option_argument("strategy"));
+      }
+      catch (std::logic_error)
+      {
+        set_transformation_strategy("lazy");
+      }
     }
 
     void add_options(interface_description& clinterface)
