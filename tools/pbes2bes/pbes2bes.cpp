@@ -75,6 +75,10 @@ class pbes2bes_tool: public core::filter_tool
       {
         m_strategy = ts_finite;
       }
+      else if (s == "newlazy")
+      {
+        m_strategy = ts_newlazy;
+      }
       else
       {
         throw std::runtime_error("unknown output strategy specified (got `" + s + "')");
@@ -103,9 +107,9 @@ class pbes2bes_tool: public core::filter_tool
       }
     }
 
-  protected:
+  protected:   
     /// Parse the non-default options.
-    void parse_options(/* const */ command_line_parser& parser)
+    void parse_options(const command_line_parser& parser)
     {
       set_output_format(parser.option_argument("output"));
       set_transformation_strategy(parser.option_argument("strategy"));
@@ -116,14 +120,14 @@ class pbes2bes_tool: public core::filter_tool
       clinterface.add_rewriting_options();
       clinterface.
         add_option("strategy",
-          make_mandatory_argument("NAME"),
+          make_optional_argument("NAME", "lazy"),
           "compute the BES using strategy NAME:\n"
           "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
           "  'finite' for computing all possible boolean equations, or\n"
           "  'newlazy' for an improved version of the lazy algorithm.",
           's').
         add_option("output",
-          make_mandatory_argument("NAME"),
+          make_optional_argument("NAME", "binary"),
           "store the BES in output format NAME:\n"
           "  'binary' for the internal binary format (default),\n"
           "  'internal' for the internal textual format, or\n"
@@ -141,6 +145,10 @@ class pbes2bes_tool: public core::filter_tool
       else if (m_strategy == ts_finite)
       {
         return "finite";
+      }
+      else if (m_strategy == ts_newlazy)
+      {
+        return "newlazy";
       }
       return "unknown";
     }
