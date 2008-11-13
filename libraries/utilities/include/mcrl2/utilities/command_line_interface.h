@@ -301,13 +301,6 @@ namespace mcrl2 {
             }
 
             /**
-             * \brief Whether the option takes an optional argument
-             **/
-            inline bool is_optional() const {
-              return m_argument.get() != 0 && m_argument->is_optional();
-            }
-
-            /**
              * \brief Whether the option takes a mandatory argument
              **/
             inline bool accepts_argument() const {
