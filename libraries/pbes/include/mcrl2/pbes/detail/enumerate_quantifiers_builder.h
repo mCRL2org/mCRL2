@@ -24,12 +24,14 @@
 #include "mcrl2/core/sequence.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
+#include "gc.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
+
 
   template <typename Sequence>
   bool empty_intersection(Sequence s1, Sequence s2)
@@ -181,6 +183,16 @@ namespace detail {
                                    PbesTermJoinFunction join
                                   )
   {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+std::cout << "x, phi, sigma = " << core::pp(x) << "\n" << core::pp(phi) << "\nstop = " << core::pp(stop_value) << std::endl;
+std::cout << "--- sigma ---" << std::endl;
+for (typename MapSubstitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+{
+  std::cout << core::pp(i->first) << " -> " << core::pp(i->second) << std::endl;
+}
+std::cout << "-------------" << std::endl;
+#endif
+
     typedef typename DataEnumerator::variable_type variable_type;
     typedef typename DataEnumerator::term_type data_term_type;
     typedef PbesTerm pbes_term_type;
@@ -193,7 +205,7 @@ namespace detail {
 #endif
 
     atermpp::set<pbes_term_type> A;
-    std::vector<std::vector<data_term_type> > D;
+    std::vector<atermpp::vector<data_term_type> > D;
 
     // For an element (v, t, k) of todo, we have the invariant v == x[k].
     // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
@@ -204,7 +216,7 @@ namespace detail {
     for (typename DataVariableSequence::const_iterator i = x.begin(); i != x.end(); ++i)
     {
       data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
-      D.push_back(std::vector<data_term_type>(1, t));
+      D.push_back(atermpp::vector<data_term_type>(1, t));
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cout << "D[" << j << "] = {" << core::pp(t) << "}" << std::endl;
   std::cout << "todo = todo + (" << core::pp(*i) << ", " << j << ")" << std::endl;
@@ -212,11 +224,17 @@ namespace detail {
       todo.push_back(boost::make_tuple(*i, t, j++));
     }
 
+//std::cout << "collect 0 " << std::endl;
+//AT_collect();
+
     try
     {
       while (!todo.empty())
       {
+//std::cout << "collect 1 " << std::flush;
+//AT_collect();
         boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
+//std::cout << "done" << std::endl;
         todo.pop_front();
         const variable_type& xk = boost::get<0>(front);
         const data_term_type& y = boost::get<1>(front);
@@ -227,9 +245,12 @@ namespace detail {
         bool is_constant = false;
 
         // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
-        std::vector<data_term_type> Dk = D[k];
+        atermpp::vector<data_term_type> Dk = D[k];
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+std::cout << "enumerating y: " << core::pp(y) << std::endl;
+#endif
         atermpp::vector<data_term_type> z = datae.enumerate(y);
-        for (typename std::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+        for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
         {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cout << "e = " << core::pp(*i) << std::endl;
@@ -275,7 +296,7 @@ namespace detail {
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cout << "join(";
-  for (atermpp::set<pbes_term_type>::const_iterator i = A.begin(); i != A.end(); ++i)
+  for (typename atermpp::set<pbes_term_type>::const_iterator i = A.begin(); i != A.end(); ++i)
   {
     std::cout << ", " << core::pp(*i);
   }
