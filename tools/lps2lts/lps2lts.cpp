@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lps2lts"
+// NAME is defined in lps2lts.h
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
