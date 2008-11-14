@@ -78,7 +78,7 @@ namespace pbes_system {
   /// for types like Pos and Nat are generated or not.
   /// \return The parsed expression and the data specification that was used.
   inline
-  std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text)
+  std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
   {
     std::string unique_prefix("UNIQUE_PREFIX");
     int unique_prefix_index = 0;
@@ -159,7 +159,7 @@ namespace pbes_system {
     {
       pbesspec = pbesspec
         + "\nmu "
-        + unique_prefix\
+        + unique_prefix
         + boost::lexical_cast<std::string>(unique_prefix_index++)
         + (datavar_text.empty() ? "" : "(")
         + datavar_text
@@ -169,7 +169,7 @@ namespace pbes_system {
     }
     
     // add an initialization section to the pbes
-    pbesspec = pbesspec + "\ninit dummy1;";
+    pbesspec = data_spec + (data_spec.empty() ? "" : "\n") + pbesspec + "\ninit dummy1;";
 
     pbes<> p;
     std::stringstream in(pbesspec);
@@ -210,9 +210,9 @@ namespace pbes_system {
   /// \endcode
   /// \result the parsed expression
   inline
-  pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n")
+  pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n", std::string data_spec = "")
   {
-    return parse_pbes_expressions(var_decl + "\nexpressions\n" + text).first.front();
+    return parse_pbes_expressions(var_decl + "\nexpressions\n" + text, data_spec).first.front();
   }
 
 } // namespace pbes_system

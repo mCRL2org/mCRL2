@@ -137,7 +137,7 @@ namespace detail {
   /// \endcode
   /// \result the parsed expression
   inline
-  data_expression parse_data_expression(std::string text, std::string var_decl = "")
+  data_expression parse_data_expression(std::string text, std::string var_decl = "", std::string data_spec = "")
   {
     using namespace utilities;
 
@@ -147,8 +147,9 @@ namespace detail {
     std::string s = "eqn (" + text + ") = (" + text + ");";
     if (!boost::trim_copy(var_decl).empty())
     {
-      s = "var\n" + var_decl + s;
+      s = "var\n" + var_decl + "\n" + s;
     }
+    s = data_spec + (data_spec.empty() ? "" : "\n") + s;
 
     try
     {
@@ -169,6 +170,28 @@ namespace detail {
       std::cout << e.what() << std::endl;
     }
     return result;
+  }
+
+  /// Parses a data variable.
+  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat".
+  /// \param[in] data_spec A data specification
+  /// \result The parsed variable
+  inline
+  data_variable parse_data_variable(std::string var_decl, std::string data_spec = "")
+  {
+    using namespace utilities;
+
+    data_variable result;
+
+    std::string::size_type loc = var_decl.find(':');
+    if (loc == std::string::npos)
+    {
+      throw std::runtime_error("Error in parse_data_variable: no colon found in " + var_decl);
+    }
+    std::string text = var_decl.substr(0, loc);
+
+    data_expression expr = parse_data_expression(text, var_decl + ";", data_spec);
+    return data_variable(atermpp::aterm_appl(expr));
   }
 
   /// Creates a data specification that contains rewrite rules for the standard data types like
