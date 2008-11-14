@@ -37,7 +37,7 @@ namespace mcrl2 {
       /** \brief Helper function for showing/hiding an element based on widget state changes */
       template < typename T >
       void change_visibility_on_toggle(T& r, tipi::layout::manager* m, tipi::layout::element*& c);
-  
+
       /** \brief Helper function for showing/hiding an element based on radio_button widget state changes */
       template <>
       inline void change_visibility_on_toggle(tipi::layout::elements::radio_button& r, tipi::layout::manager* m, tipi::layout::element*& c) {
@@ -48,7 +48,7 @@ namespace mcrl2 {
           m->hide(c);
         }
       }
-  
+
       /** \brief Helper function for showing/hiding an element based on checkbox widget state changes */
       template <>
       inline void change_visibility_on_toggle(tipi::layout::elements::checkbox& r, tipi::layout::manager* m, tipi::layout::element*& c) {
@@ -59,7 +59,7 @@ namespace mcrl2 {
           m->hide(c);
         }
       }
-  
+
       /** \brief Helper class to work with tipi::radio_buttons
        *
        * A group of tipi::radio_button objects behave as a single control. The
@@ -74,51 +74,51 @@ namespace mcrl2 {
        **/
       template < typename T >
       class radio_button_helper {
-  
+
         private:
 
           /** \brief Associates radio buttons with values */
           typedef std::map < tipi::layout::elements::radio_button const*, T > button_to_value_map;
 
         private:
-  
+
           /** \brief Associates buttons with values */
           button_to_value_map                   selector;
-  
+
           /** \brief The display for which to create the radio button objects */
           tipi::display&                        display;
-  
+
           /** \brief The first button in the group */
           tipi::layout::elements::radio_button* first;
-  
+
         public:
-  
+
           /** \brief constructor */
           radio_button_helper(tipi::display&);
-  
+
           /** \brief associate a radio button with a layout manager and a value */
           tipi::layout::elements::radio_button& associate(T const&, std::string const&, bool = false);
-  
+
           /** \brief gets the first button associated with a value */
           tipi::layout::elements::radio_button& get_button(T const&);
-  
+
           /** \brief sets the selection for the group of radio buttons */
           void set_selection(T const&);
-  
+
           /** \brief get the value for the selected radio button */
           T get_selection();
-  
+
           /** \brief gets the label of the selected radio button */
           std::string get_selection_label() const;
       };
-  
+
       /**
        * \param[in] d the display for which the radio button objects will be created
        **/
       template < typename T >
       inline radio_button_helper< T >::radio_button_helper(tipi::display& d) : display(d), first(0) {
       }
-  
+
       /**
        * \param[in] v the value to associate the button with
        * \param[in] s the label of the radio button
@@ -129,7 +129,7 @@ namespace mcrl2 {
         using tipi::layout::elements::radio_button;
 
         radio_button& button = display.create< radio_button >();
-  
+
         if (first == 0) {
           first = &button;
         }
@@ -144,10 +144,10 @@ namespace mcrl2 {
         button.set_label(s);
 
         selector[&button] = v;
-  
+
         return button;
       }
-  
+
       /**
        * \pre there must be a button that is associated with the value
        * \param[in] t the value for which to find the associated button
@@ -161,10 +161,10 @@ namespace mcrl2 {
             return const_cast < radio_button& > (*(i->first));
           }
         }
-  
+
         return *first;
       }
-  
+
       /**
        * \param[in] t the value for which to select the associated button
        **/
@@ -178,12 +178,12 @@ namespace mcrl2 {
           }
         }
       }
-  
+
       template < typename T >
       inline T radio_button_helper< T >::get_selection() {
         return selector[&first->selected()];
       }
-  
+
       template < typename T >
       std::string radio_button_helper< T >::get_selection_label() const {
         return first->selected().get_label();
@@ -191,5 +191,5 @@ namespace mcrl2 {
     }
   }
 }
- 
+
 #endif

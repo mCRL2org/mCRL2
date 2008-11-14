@@ -37,21 +37,21 @@ const char*  ::squadt_interactor::option_removeunused         = "remove_unused";
 const char*  ::squadt_interactor::option_rewrite_strategy     = "rewrite_strategy";
 
 const char*  ::squadt_interactor::option_exploration_strategy = "expl_strat";
-  
+
 const char*  ::squadt_interactor::option_detect_deadlock      = "detect_deadlock";
 const char*  ::squadt_interactor::option_detect_actions       = "detect_actions";
 const char*  ::squadt_interactor::option_trace                = "trace";
 const char*  ::squadt_interactor::option_max_traces           = "max_traces";
 const char*  ::squadt_interactor::option_error_trace          = "error_trace";
-  
+
 const char*  ::squadt_interactor::option_confluence_reduction = "confluence_reduction";
 const char*  ::squadt_interactor::option_confluent_tau        = "confluent_tau";
-  
+
 const char*  ::squadt_interactor::option_max_states           = "max_states";
-  
+
 const char*  ::squadt_interactor::option_bithashing           = "bithashing";
 const char*  ::squadt_interactor::option_bithashsize          = "bithash_size";
-  
+
 const char*  ::squadt_interactor::option_init_tsize           = "init_tsize";
 
 const char*  ::squadt_interactor::lps_file_for_input          = "lps_in";
@@ -60,23 +60,11 @@ const char*  ::squadt_interactor::trc_file_for_output         = "trc_out";
 
 static bool initialise_types() {
   tipi::datatype::enumeration< exploration_strategy > exploration_enumeration;
-  tipi::datatype::enumeration< mcrl2::lts::lts_type > lts_type_enumeration;
 
   exploration_enumeration.
     add(es_breadth, "breadth-first").
     add(es_depth, "depth-first").
     add(es_random, "random");
-
-  lts_type_enumeration.
-    add(mcrl2::lts::lts_aut, "Aldebaran").
-#ifdef USE_BCG
-    add(mcrl2::lts::lts_bcg, "BCG").
-#endif
-    add(mcrl2::lts::lts_dot, "DOT").
-    add(mcrl2::lts::lts_fsm, "FSM").
-    add(mcrl2::lts::lts_svc, "SVC").
-    add(mcrl2::lts::lts_mcrl, "mCRL").
-    add(mcrl2::lts::lts_mcrl2, "mCRL2");
 
   return true;
 }

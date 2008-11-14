@@ -390,29 +390,10 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       dot          ///< dot
     };
 
-    static bool initialise_types() {
-      tipi::datatype::enumeration< lts_output_format > output_format_enumeration;
-
-      output_format_enumeration.
-        add(aldebaran, "Aldebaran").
-        add(svc_mcrl, "SVC_mCRL").
-        add(svc_mcrl2, "SVC_mCRL2").
-#ifdef USE_BCG
-        add(bcg, "BCG").
-#endif
-        add(fsm, "FSM").
-        add(dot, "dot");
-
-        return true;
-      }
-
   public:
 
     /** \brief constructor */
     squadt_interactor() {
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
     }
 
     /** \brief configures tool capabilities */
