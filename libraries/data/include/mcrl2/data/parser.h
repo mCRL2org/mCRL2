@@ -173,25 +173,17 @@ namespace detail {
   }
 
   /// Parses a data variable.
-  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat".
+  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat;".
   /// \param[in] data_spec A data specification
   /// \result The parsed variable
   inline
   data_variable parse_data_variable(std::string var_decl, std::string data_spec = "")
   {
-    using namespace utilities;
-
-    data_variable result;
-
-    std::string::size_type loc = var_decl.find(':');
-    if (loc == std::string::npos)
-    {
-      throw std::runtime_error("Error in parse_data_variable: no colon found in " + var_decl);
-    }
-    std::string text = var_decl.substr(0, loc);
-
-    data_expression expr = parse_data_expression(text, var_decl + ";", data_spec);
-    return data_variable(atermpp::aterm_appl(expr));
+    std::istringstream in(var_decl);
+    atermpp::aterm_list v = core::parse_data_vars(in);
+    assert(v.size() == 1);
+    data_variable_list w = core::type_check_data_vars(v, parse_data_specification(data_spec));
+    return w.front();
   }
 
   /// Creates a data specification that contains rewrite rules for the standard data types like

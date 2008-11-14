@@ -129,12 +129,12 @@ void test3()
   data_expression_with_variables z = r(y);
   std::cout << "y = " << pp(y) << " " << pp(y.variables()) << std::endl;
   BOOST_CHECK(z.variables().empty());
-  
+
   std::string var_decl = "m, n: Pos;\n";
   rewriter_map<substitution_map> sigma; 
   data_variable m = parse_data_expression("m", var_decl);
   data_variable n = parse_data_expression("n", var_decl);
-  data_variable q = parse_data_variable("q:Nat");
+  data_variable q = parse_data_variable("q:Nat;");
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
   sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
