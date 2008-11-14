@@ -1,6 +1,6 @@
-project toolset/formcheck ;
+project toolset/formulacheck ;
 
-tool formcheck
+tool formulacheck
        : formcheck.cpp
          /libraries//data
        ;

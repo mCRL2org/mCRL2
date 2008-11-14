@@ -1,15 +1,15 @@
 % This specification serves as an example of the use of
-% formcheck. The file "formulas" contains a list of
+% formulacheck. The file "formulas" contains a list of
 % formulas in internal mCRL2 format. These formulas can
 % be checked using the data specification of this 
 % specification as context. 
 %
 %
 % The following commands illustrate the use of
-% formcheck:
+% formulacheck:
 %
 % mcrl22lps formulas.mcrl2 formulas.lps
-% formcheck formulas.lps -f formulas
+% formulacheck formulas.lps -f formulas
 
 map
   f: Bool -> Bool;
