@@ -173,7 +173,7 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 
   if ( this_xsim == NULL )
   {
-    fprintf(stderr,msg);
+    fprintf(stderr,"%s",msg);
     fprintf(stderr,"this message was brought to you by XSim (all rights reserved)\n");
   } else {
     const char *msg_end = msg+std::strlen(msg)-1;

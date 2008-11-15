@@ -360,7 +360,7 @@ inline static void PRINT_FUNC(fprints)(PRINT_OUTTYPE OutStream,
   assert(false);
 #endif
 #if defined(PRINT_C)
-  fprintf(OutStream, Value);
+  fprintf(OutStream, "%s", Value);
 #elif defined(PRINT_CXX)
   OutStream << Value;
 #endif
