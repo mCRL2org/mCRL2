@@ -20,4 +20,5 @@ lib boost_system
    : $(SOURCES).cpp
    : <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
      <link>static:<define>BOOST_SYSTEM_STATIC_LINK=1
+     <include>../../..
    ;

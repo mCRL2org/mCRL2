@@ -1,1 +1,1 @@
-#error "Not using precompiled header for wxWidgets"
+#warning "Not using precompiled header for wxWidgets"

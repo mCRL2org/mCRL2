@@ -1,1 +1,1 @@
-#error "Not using precompiled header for Boost"
+#warning "Not using precompiled header for Boost"

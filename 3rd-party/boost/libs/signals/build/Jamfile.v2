@@ -9,6 +9,8 @@
 
 project boost/signals
     : source-location ../src
+    : requirements
+       <include>../../..
     ;
 
 # Base names of the source files for libboost_signals
