@@ -806,7 +806,7 @@ inline bool lpsConstElm::output() {
      {
        gsVerboseMsg("lpsconstelm: Cannot write to the CSV log-file: %s. Writing of the log-file is omitted.\n", p_logfile.c_str() ); 
      } else {
-       fprintf (pFile, p_logstring.c_str() );
+       fprintf (pFile, "%s", p_logstring.c_str() );
        fclose (pFile);
      }
     }
