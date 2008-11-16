@@ -239,7 +239,8 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 */
 
 void MainFrame::onOpen(wxCommandEvent& /*event*/) {
-  wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
+  //wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
+  wxString filemask = wxT("*.*");
   wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),
       filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
   dialog->CentreOnParent();
