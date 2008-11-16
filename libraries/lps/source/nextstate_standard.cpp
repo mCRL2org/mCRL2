@@ -321,13 +321,15 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			}
 		}
 	} else {
-		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
+		for (unsigned int i=1; i<3; ++i)
+		{ // first check all constructors, then the mappings
+		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),i),0);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
-			if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
+			ATermAppl funcsort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(gsGetSortExprResult(funcsort),sort) )
 			{
-				ATermList domains = gsGetSortExprDomains(conssort);
+				ATermList domains = gsGetSortExprDomains(funcsort);
 				ATermAppl t = ATAgetFirst(l);
 	
 				bool found = true;
@@ -354,32 +356,6 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 				}
 			}
 		}
-	
-		l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
-		for (; !ATisEmpty(l); l=ATgetNext(l))
-		{
-			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
-			if ( ATisEqual(gsGetSortExprResult(mapsort),sort) )
-			{
-				ATermList domain = gsGetSortExprDomain(mapsort);
-				ATermAppl t = ATAgetFirst(l);
-	
-				bool found = true;
-				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
-				{
-					if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
-					{
-						found = false;
-						break;
-					}
-					t = gsMakeDataAppl1(t,FindDummy(ATAgetFirst(domain),no_dummy));
-				}
-	
-				if ( found )
-				{
-					return t;
-				}
-			}
 		}
 	}
 

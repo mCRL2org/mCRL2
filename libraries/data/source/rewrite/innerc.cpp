@@ -1519,7 +1519,16 @@ gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
 static int getArity(ATermAppl op)
 {
   ATermAppl sort = ATAgetArgument(op,1);
-  return ATgetLength(gsGetSortExprDomain(sort));
+  int arity = 0;
+
+  while ( gsIsSortArrow(sort) )
+  {
+    ATermList sort_dom = ATLgetArgument(sort, 0);
+    arity += ATgetLength(sort_dom);
+    sort = ATAgetArgument(sort, 1);
+  }
+
+  return arity;
 }
 
 void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
