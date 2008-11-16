@@ -10,8 +10,8 @@ project libraries/core/test
 
 include $(TOP)/build/testing/header_test.jam ;
 
-use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
-use-project /tools/lpspp : $(TOP)/tools/lpspp ;
+use-project /tools/mcrl22lps : ../../../tools/mcrl22lps ;
+use-project /tools/lpspp : ../../../tools/lpspp ;
 
 for file in [ glob-tree *.mcrl2 ] {
   tests-with-files += [

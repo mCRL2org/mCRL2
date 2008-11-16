@@ -1,6 +1,6 @@
 project libraries/pbes/test
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries//lps
        <source>/libraries//pbes
        <source>/site-config//boost_program_options

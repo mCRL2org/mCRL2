@@ -62,11 +62,11 @@ if [ modules.peek : OS ] = MACOSX {
   import build/macosx/mac-bundle ;
 }
 
-# Activate header cache
-modules.poke : HCACHEFILE : $(TOP)/build/bin/.jamdeps ;
-
 # Constants for commonly used paths
 path-constant TOP : . ;
+
+# Activate header cache
+modules.poke : HCACHEFILE : $(TOP)/build/bin/.jamdeps ;
 
 load-configuration $(TOP)/build config.jam ;
 

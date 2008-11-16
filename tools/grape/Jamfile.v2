@@ -1,7 +1,7 @@
 project toolset/grape ;
 
 tool grape
-      : [ MATCH $(TOP)/tools/grape/(.*) : [ glob-tree *.cpp : .svn ] ]
+      : [ glob-tree *.cpp : .svn ]
         /libraries//core
         /libraries/utilities//command_line_interfacing
       : <define>GRAPE_HELP_DIR=\"\\\"$(INSTALL_ROOT)/share/mcrl2/grape\\\"\"

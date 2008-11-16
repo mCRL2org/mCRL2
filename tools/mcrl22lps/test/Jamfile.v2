@@ -1,7 +1,7 @@
 project toolset/mcrl22lps/test ;
 
-use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
-use-project /tools/lpspp : $(TOP)/tools/lpspp ;
+use-project /tools/mcrl22lps : .. ;
+use-project /tools/lpspp : ../../lpspp ;
 
 test-cases = [ glob-tree *.mcrl2 ] ;
 

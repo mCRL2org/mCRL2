@@ -1,6 +1,6 @@
 project libraries/utilities/test
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries/utilities//command_line_interfacing
        <source>/libraries//data
    ;

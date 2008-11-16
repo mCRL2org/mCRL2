@@ -1,6 +1,6 @@
 project libraries/data/test
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries//data
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem

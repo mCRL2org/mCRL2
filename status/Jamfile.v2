@@ -3,8 +3,8 @@
 project status
     : source-location .
     : requirements <hardcode-dll-paths>true
-      <dependency>/site-config//boost_headers
-      <define>BOOST_ALL_NO_LIB
+      <dependency>/site-config//boost
+      <define>"MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\""
     ;
 
 # Tests from Jamfiles in individual library test subdirectories

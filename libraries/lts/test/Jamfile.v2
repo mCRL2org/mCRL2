@@ -1,6 +1,6 @@
 project libraries/lts/test
    : requirements
-       <dependency>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries//lts
    ;
 
