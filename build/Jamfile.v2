@@ -143,10 +143,8 @@ cpp-pch boost.pch
               <use>/boost//filesystem
               <use>/boost//thread
               $(boost-requirements)
-              <define>BOOST_ERROR_CODE_HEADER_ONLY
             :
             : $(boost-requirements)
-              <define>BOOST_ERROR_CODE_HEADER_ONLY
               <use>/boost//filesystem # for preprocessor symbols
               <use>/boost//thread     # for preprocessor symbols
             ;
