@@ -190,7 +190,7 @@ wxString grape_reference_dialog::get_diagram_name() const
 wxString grape_reference_dialog::get_initializations() const
 {
   wxString result;
-  for ( uint i = 0; i < m_grid->GetNumberRows(); ++i )
+  for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
   {
     if (m_grid->GetCellValue(i, 0).IsEmpty() == false) result += m_grid->GetCellValue(i, 0) + _T( ":=" ) + m_grid->GetCellValue(i, 1) + _T( ";" );
   }
