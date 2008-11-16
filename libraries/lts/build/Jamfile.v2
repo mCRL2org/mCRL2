@@ -7,9 +7,9 @@ project lts
 
 mcrl2-library lts
        : [ glob source/*.cpp ]
-         /site-config//BCG
        : <library>/libraries//svc
          <library>/libraries//lps
+         <library>/site-config//BCG
        :
        : <include>../include
        ;

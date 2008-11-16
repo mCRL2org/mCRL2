@@ -129,39 +129,33 @@ alias opengl : : <target-os>darwin : : <framework>OpenGL ;
 
 use-project /boost : ../3rd-party/boost ;
 
-alias boost : : : : <include>$(BOOST_ROOT) <define>BOOST_ALL_NO_LIB=1 ;
+local boost-requirements =
+               <include>$(BOOST_ROOT)
+               <define>BOOST_ALL_NO_LIB=1 # no autolinking
+               <define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
+               <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
+               <target-os>windows:<define>_WIN32_WINNT=0x0501 ;
 
-boost-requirements =
-      <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
-      <target-os>windows:<define>_WIN32_WINNT=0x0501
-      <toolset>msvc:<cxxflags>/FIboost.hpp
-      <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
+cpp-pch boost.pch
+            : precompile/boost.hpp
+            : <include>./precompile
+              $(boost-requirements)
+              <use>/boost//filesystem
+              <use>/boost//thread
+              $(boost-requirements)
+              <define>BOOST_ERROR_CODE_HEADER_ONLY
+            :
+            : $(boost-requirements)
+              <define>BOOST_ERROR_CODE_HEADER_ONLY
+              <use>/boost//filesystem # for preprocessor symbols
+              <use>/boost//thread     # for preprocessor symbols
+            ;
 
-if $(BOOST_LIBRARY_PATH) {
-  cpp-pch boost.pch
-              : precompile/boost.hpp
-              : <include>./precompile
-                <include>$(BOOST_ROOT) 
-                <use>/boost//headers
-                $(boost-requirements)
-              :
-              : <library>boost_system
-                $(boost-requirements)
-              ;
-}
-else {
-  cpp-pch boost.pch
-              : precompile/boost.hpp
-              : <include>./precompile
-                <use>/boost//headers
-                <use>/boost//filesystem
-                <use>/boost//thread
-                $(boost-requirements)
-              :
-              : <library>/boost//system
-                $(boost-requirements)
-              ;
-}
+alias boost : : : :
+              $(boost-requirements)
+              <pch>on:<source>boost.pch
+              <toolset>msvc:<cxxflags>/FIboost.hpp
+              <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
 
 local rule boost-library ( name link ? : requirements * : use-local-boost ? : use-system-boost ? ) {
   rule find-target ( target ) {
@@ -174,37 +168,22 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
   }
 
   if $(use-local-boost) {
-    alias boost_$(name) : [ find-target $(TOP)/3rd-party/boost/libs/$(name)/build//boost_$(name) ]
-                        : <pch>on:<source>boost.pch $(requirements) <threading>multi : : $(requirements) ;
+    alias boost_$(name) : [ find-target ../3rd-party/boost/libs/$(name)/build//boost_$(name) ]
+                        : $(requirements) <threading>multi : : $(requirements) <use>boost ;
   }
-  else if $(BOOST_INCLUDE_PATH) && ( "default" != "$(BOOST_INCLUDE_PATH)" ) {
-    if $(BOOST_INCLUDE_PATH) {
-      lib boost_$(name)
-             :
-             : <library-path>"$(BOOST_LIBRARY_PATH)"
-               <name>"boost_$(name)-mt"
-               <search>"$(BOOST_LIBRARY_PATH)"
-             :
-             : <define>BOOST_ALL_NO_LIB=1
-               <include>"$(BOOST_INCLUDE_PATH)"
-             ;
-    }
-    else {
-      alias boost_$(name) : : <build>no ;
-    }
+  else if $(BOOST_INCLUDE_PATH) {
+    lib boost_$(name)
+           :
+           : <library-path>"$(BOOST_LIBRARY_PATH)"
+             <name>"boost_$(name)-mt"
+             <search>"$(BOOST_LIBRARY_PATH)"
+           :
+           : <use>boost
+           ;
   }
   else {
-    alias boost_$(name) : [ find-target /boost//$(name) ] : <pch>on:<source>boost.pch $(requirements) <threading>multi : ;
+    alias boost_$(name) : [ find-target /boost//$(name) ] : $(requirements) <threading>multi : : <use>boost ;
   }
-
-  explicit boost_$(name) ;
-}
-
-if ! $(BOOST_INCLUDE_PATH) {
-  alias boost_headers : /boost//headers : : : ;
-}
-else {
-  alias boost_headers : : : : <include>"$(BOOST_INCLUDE_PATH)" ;
 }
 
 boost-library filesystem ;
@@ -213,7 +192,7 @@ boost-library thread ;
 boost-library signals <link>static ;
 boost-library test ;
 boost-library system : ;
-boost-library md5 : <include>$(TOP)/3rd-party/boost/boost/md5 : local ;  # not part of Boost 1.36
+boost-library md5 : <include>../3rd-party/boost/boost/md5 : local ;  # not part of Boost 1.36
 
 if $(DL) {
   lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
@@ -293,7 +272,7 @@ if $(WX_CPPFLAGS) {
            : precompile/wx.hpp
            : <include>./precompile
              $(wx-requirements)
-             <use>/boost//headers
+             <use>boost
            :
            : <toolset>msvc:<cxxflags>/FIwx.hpp
              <target-os>windows,<include>intel:<cxxflags>/FIwx.hpp

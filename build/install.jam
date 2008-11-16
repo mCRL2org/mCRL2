@@ -77,10 +77,32 @@ rule install-data ( name : targets * : requirements * ) {
 }
 
 rule install-libraries ( names * : requirements * ) {
-  local project      = [ project.current ] ;
-  local project-root = [ $(project).get source-location ] ;
+  local project = [ project.current ] ;
+  local m       = [ $(project).project-module ] ;
+
+  module $(m) {
+    rule install-headers ( sources * : requirements * ) {
+      install install-headers : $(short-headers) : <install-dependencies>off <install-type>H ;
+    }
+
+    rule install-libraries ( name headers ? : sources * : requirements * ) {
+      if $(headers) {
+        install install-libraries : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+        install install-libraries : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
+
+        alias $(name) : install-libraries $(headers) ;
+
+      }
+      else {
+        install $(name) : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+        install $(name) : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
+      }
+    }
+  }
 
   if [ feature.defaults <install> ] = <install>yes {
+    local project-root = [ $(project).get source-location ] ;
+
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
       if [ modules.peek : OS ] = NT {
@@ -93,7 +115,7 @@ rule install-libraries ( names * : requirements * ) {
     }
 
     local headers = [ path.glob-tree [ path.parent [ $(project).get location ] ] :
-                                         *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
+                                       *.h *.hpp *.ipp : .svn build* test* source* example* ] ;
     # Install header files
     if $(headers)  {
       if [ MATCH .*(include/mcrl2/.*) : $(headers) ] {
@@ -104,36 +126,28 @@ rule install-libraries ( names * : requirements * ) {
       }
     }
 
-    if $(headers) {
-      local short-headers ;
-
-      for local header in $(headers) {
-        short-headers += [ path.relative-to $(project-root) $(header) ] ;
-      }
-
-      local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
-
-      while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
-        header-root = [ path.parent $(header-root) ] ;
-      }
-
-      install install-headers   : $(short-headers) : <install-dependencies>off <install-type>H <location>$(includedir) <install-source-root>$(header-root) ;
-      install install-libraries : $(names) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
-      install install-libraries : $(names) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
-
-      alias install : install-libraries install-headers ;
+    local short-headers ;
+ 
+    for local header in $(headers) {
+      short-headers += [ path.relative-to $(project-root) $(header) ] ;
+    }
+ 
+    local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
+ 
+    while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
+      header-root = [ path.parent $(header-root) ] ;
+    }
+ 
+    if $(headers) { 
+      modules.call-in $(m) : install-headers $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
+      modules.call-in $(m) : install-libraries install install-headers : $(names) : $(requirements) ;
     }
     else {
-      install install : $(names) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
-      install install : $(names) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
+      modules.call-in $(m) : install-libraries install : $(names) : $(requirements) ;
     }
   }
   else {
-    install install : $(names) : <location>$(build-root)/stage ;
-  }
-
-  module [ $(project).project-module ] {
-    explicit install install-libraries install-headers ;
+    modules.call-in $(m) : install-libraries install : $(names) : [ property.change $(requirements) : <location> $(build-root)/stage ] ;
   }
 }
 
@@ -196,7 +210,7 @@ rule install-tool ( name : requirements * ) {
 
       if [ get-option link : shared ] != static {
         for local plugin in [ feature.get-values install-plugin : $(requirements) ] {
-          install install-$(plugin) : $(plugin) : <location>$(plugindir)/$(name) ;
+          install install-$(plugin) : $(plugin) : <location>$(plugindir)/$(name) <install-type>SHARED_LIB ;
 
           targets += install-$(plugin) ;
         }
@@ -299,7 +313,7 @@ rule get-install-root ( ) {
 
 # Helper rule for boost root path setup (only use from Jamroot)
 rule get-boost-path {
-  if $(BOOST_INCLUDE_PATH) != "" {
+  if $(BOOST_INCLUDE_PATH) {
     return $(BOOST_INCLUDE_PATH) ;  # User supplied path
   }
   else {

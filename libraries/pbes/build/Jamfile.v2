@@ -1,23 +1,19 @@
 project pbes
        : source-location ../source
-       : requirements
-          <include>../include
-          <use>/site-config//boost
-          <use>/libraries/data//data
-          <use>/libraries/lps//lps
-          <pch>on:<source>/site-config//boost.pch
        ;
 
 
 
 mcrl2-library pbes
        : pbes_rewrite.cpp
-         [ obj pbes2bool.o : pbes2bool.cpp ]
+         pbes2bool.cpp
          gauss.cpp
          sort_instantiator.cpp
-         [ obj data_elimination.o : data_elimination.cpp ]
+         data_elimination.cpp
        : <library>/libraries//data
          <library>/libraries//lps
+         <include>../include
+         <use>/site-config//boost
        :
        : <include>../include
          <use>/site-config//boost

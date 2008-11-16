@@ -269,7 +269,7 @@ class gcc-pch-generator : pch-generator
 
         # return result of base class and pch-file property as usage-requirements
         return
-            [ property-set.create <pch-file>$(pch-file) <cflags>-Winvalid-pch ]
+            [ property-set.create <pch-file>$(pch-file) <cxxflags>-Winvalid-pch <cflags>-Winvalid-pch ]
             $(pch-file)
           ;
     }
@@ -280,8 +280,9 @@ class gcc-pch-generator : pch-generator
     rule generated-targets ( sources + : property-set : project name ? )
     {
         name = [ $(sources[1]).name ] ;
+        # return result of base class and pch-file property as usage-requirements
         return [ generator.generated-targets $(sources)
-          : $(property-set) : $(project) $(name) ] ;
+          : $(property-set) : $(project) $(name)$(name:S) ] ;
     }
 }
 
@@ -552,7 +553,7 @@ toolset.flags gcc.link FINDLIBS-ST <find-static-library> ;
 toolset.flags gcc.link FINDLIBS-SA <find-shared-library> ;
 toolset.flags gcc.link LIBRARIES <library-file> ;
 
-toolset.flags gcc.link.dll .IMPLIB-COMMAND <target-os>windows : "-Wl,--out-implib," ; 
+toolset.flags gcc.link.dll .IMPLIB-COMMAND <target-os>windows : "-Wl,--out-implib," ;
 
 # For <runtime-link>static we made sure there are no dynamic libraries in the
 # link. On HP-UX not all system libraries exist as archived libraries (for

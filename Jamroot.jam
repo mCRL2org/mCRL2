@@ -71,8 +71,18 @@ path-constant TOP : . ;
 load-configuration $(TOP)/build config.jam ;
 
 # Some sub projects
-use-project /site-config               : build ;
-use-project /libraries                 : libraries ;
+use-project /site-config : build ;
+use-project /libraries   : libraries ;
+
+# Register individual library projects
+libraries = [ MATCH (.*)/build/Jamfile.v2 : [ glob-tree Jamfile.v2 : .svn ] ] ;
+
+for library in [ MATCH (.*libraries/[^//]*)$ : $(libraries) ]
+               [ MATCH (.*3rd-party/[^//]*)$ : $(libraries) ] {
+  local name = [ MATCH .*/([^//]*)$ : $(library) ] ;
+
+  use-project /libraries/$(name) : $(library)/build ;
+}
 
 constant      INSTALL_ROOT : [ get-install-root ] ;
 constant      PLUGIN_ROOT  : [ get-plugin-root ] ;
@@ -95,8 +105,7 @@ project toolset
 
 # Only from the root of the source tree
 if [ path.exists ./tools ] {
-  root  = [ path.make $(TOP) ] ;
-  tools = [ MATCH $(root)/tools/(.*)/.* : [ glob tools/*/Jamfile.v2 ] ] ;
+  tools = [ MATCH .*/?tools/(.*)/.* : [ glob tools/*/Jamfile.v2 ] ] ;
 
   local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
   local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
@@ -170,7 +179,7 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
 
   if ! <build>no in $(build-requirements) {
     exe $(name) : $(sources)
-                : <pch>on:<source>/site-config//boost.pch $(build-requirements)
+                : $(build-requirements)
                 : $(defaults) : $(usage-requirements) ;
 
     # generate install targets

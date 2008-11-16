@@ -2,7 +2,6 @@ project libraries/utilities
        : source-location ..
        : requirements
           <include>../include
-          <pch>on:<source>/site-config//boost.pch
        : usage-requirements
           <use>/site-config//boost
        ;
@@ -39,7 +38,7 @@ mcrl2-library utilities
       : source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
-        /libraries/utilities//command_line_interfacing
+        source/command_line.cpp
       : <use>/site-config//boost
         <library>/libraries//atermpp
         <include>../../core/include      # Circular dependency

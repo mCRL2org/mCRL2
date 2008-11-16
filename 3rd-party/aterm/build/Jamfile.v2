@@ -1,15 +1,12 @@
 project aterm
        : source-location ..
-       : requirements
-          <include>../include/aterm
-          <address-model>64:<define>AT_64BIT
-       : usage-requirements
        ;
 
 mcrl2-library aterm
        : [ glob source/*.c ]
          source/protaterm.cpp
-       :
+       : <include>../include/aterm
+         <address-model>64:<define>AT_64BIT
        :
        : <include>../include/aterm
          <address-model>64:<define>AT_64BIT

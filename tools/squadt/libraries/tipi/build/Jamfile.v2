@@ -3,9 +3,8 @@ project squadt/libraries/tipi
        ../source
     : requirements
        <use>/site-config//boost
-       <c++-template-depth>512
-       <pch>on:<source>/site-config//boost.pch
        <include>../include
+       <c++-template-depth>512
        <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
     : usage-requirements
        <use>/site-config//boost
@@ -14,9 +13,9 @@ project squadt/libraries/tipi
 
 alias messenger
     : [ glob ../source/transport/*.cpp ]
-      [ obj tool_capabilities.o       : tool/capabilities.cpp ]
-      [ obj controller_capabilities.o : controller/capabilities.cpp ]
-      [ obj restore_vistor.o          : restore_visitor.cpp : <use>/libraries//ticpp ]
+      tool/capabilities.cpp
+      controller/capabilities.cpp
+      restore_visitor.cpp/<use>/libraries/ticpp//ticpp
       basic_datatype.cpp
       common.cpp
       command_line_interface.cpp
@@ -25,7 +24,7 @@ alias messenger
       mime_type.cpp
       store_visitor.cpp
       detail/event_handlers.cpp
-      /libraries/ticpp
+      /libraries/ticpp//ticpp
       /site-config//boost_filesystem
       /site-config//boost_thread
       /site-config//boost_system
@@ -39,14 +38,14 @@ alias messenger
     ;
 
 obj communicator_tool.o
-          : tool/communicator.cpp
-          : <use>/site-config//socket
-          ;
+    : tool/communicator.cpp
+    : <use>/site-config//socket
+    ;
 
 obj communicator_controller.o
-          : controller/communicator.cpp
-          : <use>/site-config//socket
-          ;
+    : controller/communicator.cpp
+    : <use>/site-config//socket
+    ;
 
 lib tipi-controller
     : communicator_controller.o

@@ -1,15 +1,9 @@
 project core
        : source-location ..
-       : requirements
-          <include>../include
-       : usage-requirements
        ;
 
 mcrl2-library core
-       : [ obj mcrl2parser.o
-                 : source/mcrl2parser.cpp
-                 : <include>../include/mcrl2/core/detail
-                   <use>/libraries//atermpp ]
+       : source/mcrl2parser.cpp/<include>../include/mcrl2/core/detail
          source/struct.cpp
          source/struct_core.cpp
          source/mcrl2lexer.cpp
@@ -26,6 +20,7 @@ mcrl2-library core
          source/aterm_ext.cpp
          source/numeric_string.cpp
        : <library>/libraries//atermpp
+         <include>../include
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic
          <include>../include

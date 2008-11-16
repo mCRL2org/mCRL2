@@ -14,6 +14,8 @@
     #pragma implementation "xsimtracedll.h"
 #endif
 
+#include <wx/wx.h>
+
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
