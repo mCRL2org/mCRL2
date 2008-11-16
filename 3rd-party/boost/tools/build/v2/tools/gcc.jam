@@ -282,7 +282,7 @@ class gcc-pch-generator : pch-generator
         name = [ $(sources[1]).name ] ;
         # return result of base class and pch-file property as usage-requirements
         return [ generator.generated-targets $(sources)
-          : $(property-set) : $(project) $(name)$(name:S) ] ;
+          : $(property-set) : $(project) $(name) ] ;
     }
 }
 

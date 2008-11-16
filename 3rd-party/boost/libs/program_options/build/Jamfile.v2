@@ -2,6 +2,7 @@
 project boost/program_options 
     :
     source-location ../src 
+    :
     requirements
       <include>../../..
     ;
