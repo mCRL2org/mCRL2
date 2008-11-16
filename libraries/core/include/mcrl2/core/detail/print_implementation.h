@@ -1922,11 +1922,19 @@ bool gsIsOpIdPrefix(ATermAppl Term)
   if (!gsIsOpId(Term)) {
     return false;
   }
+  ATermAppl TermSort = ATAgetArgument(Term, 1);
+  if (!gsIsSortArrow(TermSort)) {
+    return false;
+  }
+  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 1) {
+    return false;
+  }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 1) && (
-    (OpIdName == gsMakeOpIdNameNot()) || (OpIdName == gsMakeOpIdNameNeg()) ||
-    (OpIdName == gsMakeOpIdNameListSize()) || (OpIdName == gsMakeOpIdNameSetCompl())
-    );
+  return
+     (OpIdName == gsMakeOpIdNameNot())      ||
+     (OpIdName == gsMakeOpIdNameNeg())      ||
+     (OpIdName == gsMakeOpIdNameListSize()) ||
+     (OpIdName == gsMakeOpIdNameSetCompl()); 
 }
 
 bool gsIsOpIdInfix(ATermAppl Term)
@@ -1934,9 +1942,16 @@ bool gsIsOpIdInfix(ATermAppl Term)
   if (!gsIsOpId(Term)) {
     return false;
   }
+  ATermAppl TermSort = ATAgetArgument(Term, 1);
+  if (!gsIsSortArrow(TermSort)) {
+    return false;
+  }
+  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 2) {
+    return false;
+  }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 2) &&
-    ((OpIdName == gsMakeOpIdNameImp())          ||
+  return
+     (OpIdName == gsMakeOpIdNameImp())          ||
      (OpIdName == gsMakeOpIdNameAnd())          ||
      (OpIdName == gsMakeOpIdNameOr())           ||
      (OpIdName == gsMakeOpIdNameEq())           ||
@@ -1964,7 +1979,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameMult())         ||
      (OpIdName == gsMakeOpIdNameEltAt())        ||
      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-     (OpIdName == gsMakeOpIdNameBagIntersect()));
+     (OpIdName == gsMakeOpIdNameBagIntersect());
 }
 
 int gsPrecOpIdPrefix()
