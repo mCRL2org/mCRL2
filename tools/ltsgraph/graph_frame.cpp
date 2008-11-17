@@ -14,9 +14,6 @@
 #include "workarounds.h"
 #include <mcrl2/lts/lts.h>
 
-#include <wx/colour.h>
-
-#include <deque>
 #include <map>
 
 static const wxColour &border_colour_selected = *wxBLUE;
@@ -84,8 +81,8 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   // values below are reset later when the right panel is setuped
   EdgeStiffness = 1.0; 
   NodeStrength = 1000.0; 
-  node_radius = 10;
   NaturalLength = 20.0;
+  node_radius = 10;
 
   BuildLayout();
 
@@ -150,10 +147,10 @@ void GraphFrame::BuildLayout() {
   wxStaticBoxSizer* algoSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Algorithm settings") );
   wxFlexGridSizer* middleRightSizer = new wxFlexGridSizer( 0, 1, 0, 0 );
 	
-  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 200, 0, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 6, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderNodeStrength  = new wxSlider(rightPanel, wxID_ANY, 2000, 100, 10000, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+  sliderEdgeStiffness = new wxSlider(rightPanel, wxID_ANY, 1, 0, 15, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
   sliderNaturalLength = new wxSlider(rightPanel, wxID_ANY, 10, 1, 500, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 50, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  slider_speedup = new wxSlider(rightPanel, wxID_ANY, 0, 0, 250, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
   
 
   middleRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State repulsion") ), 0, lflags, 4 );
@@ -498,26 +495,6 @@ void GraphFrame::Init(wxString LTSfile) {
   }
 }
 
-// Helper for moving nodes with separated data for display and positioning
-static std::deque< Node* > moved_vertices;
-
-// Helper structure for OptimizeDrawing() method
-struct vertex_and_forces {
-  double x;
-  double y;
-  double x_force;
-  double y_force;
-
-  vertex_and_forces(double cx, double cy) : x(cx), y(cy), x_force(0), y_force(0) {
-  }
-
-  void apply_force() {
-    x += x_force;
-    y += y_force;
-
-    x_force = y_force = 0;
-  }
-};
 
 bool GraphFrame::OptimizeDrawing(double precision) {
   /* A short explanation is required here:
@@ -537,181 +514,153 @@ bool GraphFrame::OptimizeDrawing(double precision) {
   if (!StopOpti) {
     EdgeStiffness = sliderEdgeStiffness->GetValue();
     NodeStrength  = sliderNodeStrength->GetValue();
-    node_radius   = spinNodeRadius->GetValue();
-    NaturalLength = 2 * node_radius + sliderNaturalLength->GetValue();
-  }
-  else if (vectNode.size() == 0) {
-    return false;
+    NaturalLength = sliderNaturalLength->GetValue();
+    node_radius  = spinNodeRadius->GetValue();
   }
   else {
     return false;
   }
+	
+  DECL_A(arraySumForceX,double,vectNode.size() << 1);
+  double* arraySumForceY = &arraySumForceX[vectNode.size()];
 
-  // Temporary measure to see whether vectNode is still the same (assuming that vectNode[0] changes in that case)
-  static Node* recogniser  = 0;
+  double WindowWidth  = (double)leftPanel->Get_Width();
+  double WindowHeight = (double)leftPanel->Get_Height();
 
-  // vectNode[i].GetX() == vertices.x && vectNode[i].GetY() == vertices.y
-  static std::vector< vertex_and_forces > vertices;
+  // Reset the forces to 0, to begin with.
+	// Set the nodes' radius value
+  for (size_t i = 0; i<vectNode.size(); i++) {
+    arraySumForceX[i]=0.0;
+    arraySumForceY[i]=0.0;
+    vectNode[i]->SetRadius(node_radius);  
+  
+    //Calculate forces
+    double x1 = vectNode[i]->GetX();
+    double y1 = vectNode[i]->GetY();
 
-  // Copy of node positions that do not need to change for drawing (in so doing
-  // avoiding the numeric instability resulting from scaling to match viewport)
-  if (recogniser != vectNode[0]) {
-    recogniser = vectNode[0];
+    // First calculate the repulsing force for node i with respect to
+    // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
+    for (size_t j = 0; j<vectNode.size(); j++) {
+      if (i != j) {
+        double x2 = vectNode[j]->GetX();
+        double y2 = vectNode[j]->GetY();
+        double x2Minx1 = x1 - x2;
+        double y2Miny1 = y1 - y2;
+        
+        //Euclidean distance
+        double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
 
-    vertices.clear();
-    vertices.reserve(vectNode.size());
+        if (distance > 1) {
+          // below the force is divided by the vectNode.size()^2 to
+          // compensate for the fact that for all nodes a force
+          // is summed. Otherwise the forces would be extremely big.
+          double s = NodeStrength / (distance * distance * distance);
+          
+          arraySumForceX[i] += s * x2Minx1;
+          arraySumForceY[i] += s * y2Miny1;
+        }
+        else {
+          // If the nodes are on top of each other, they must have
+          // a repulsing force, away from each other. The direction
+          // is determined by the node number. We arbitrarily take
+          // 1 as a repulsing force.
 
-    for (std::vector< Node* >::const_iterator i = vectNode.begin(); i != vectNode.end(); ++i) {
-      vertices.push_back(vertex_and_forces((*i)->GetX(), (*i)->GetY()));
-    }
-  }
-
-  // Finally calculate the attracting forces of the edges.  
-  if (EdgeStiffness) {
-    const double saves_division = log(NaturalLength);
-
-    for (std::vector< edge* >::const_iterator i = vectEdge.begin(); i != vectEdge.end(); ++i) { 
-      vertex_and_forces& p1 = vertices[(*i)->get_n1()->Get_num()];
-      vertex_and_forces& p2 = vertices[(*i)->get_n2()->Get_num()];
- 
-      if (&p1 != &p2) {
-        const double xdiff = p2.x - p1.x;
-        const double ydiff = p2.y - p1.y;
-        const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
-      
-        // Linear approach : 
-        // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
-        // Logarithmic approach : 
-        const double force_shared_component = EdgeStiffness * (log(distance) - saves_division) / distance;
-      
-        if (force_shared_component < 1) {
-          const double sx = force_shared_component * xdiff;
-          const double sy = force_shared_component * ydiff;
-      
-          p1.x_force += sx;
-          p1.y_force += sy;
-          p2.x_force -= sx;
-          p2.y_force -= sy;
+          if (i>j) { 
+            arraySumForceX[i] += node_radius / 2;
+            arraySumForceY[i] += node_radius / 2;
+          }
+          else { arraySumForceX[i] += - node_radius / 2;
+            arraySumForceY[i] += - node_radius / 2;
+          }
         }
       }
     }
+
+    // Add a tiny center petal force to center the whole
+    // graph on the screen
+    
+    arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
+    arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
+  } 
+
+  // Finally calculate the attracting forces of the edges.  
+  for (size_t n = 0; n < vectEdge.size(); n++) { 
+    Node* n1=vectEdge[n]->get_n1();
+    Node* n2=vectEdge[n]->get_n2();
+
+    double x1=n1->GetX();
+    double x2=n2->GetX();
+    double y1=n1->GetY();
+    double y2=n2->GetY();
+
+    double x2Minx1 = x2 - x1;
+    double y2Miny1 = y2 - y1;
+    double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
+
+    if (distance>0.1) { 
+      // Linear approach : 
+      // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
+      // Logarithmic approach : 
+      double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
+
+      arraySumForceX[n1->Get_num()] += s * x2Minx1;
+      arraySumForceY[n1->Get_num()] += s * y2Miny1;
+      arraySumForceX[n2->Get_num()] -= s * x2Minx1;
+      arraySumForceY[n2->Get_num()] -= s * y2Miny1;
+    }
   }
 
-  // Replace the nodes & edges according to their new position (sum of forces for all vertices and both components)
+  //Replace the nodes & edges according to their new position
+  for (size_t i = 0; i<vectNode.size(); i++) {
+    double newX = 0;
+    double newY = 0;
+
+    newX = vectNode[i]->GetX() + arraySumForceX[i];
+    newY = vectNode[i]->GetY() + arraySumForceY[i];
+    
+    
+    //Check whether positions are outside of the window
+
+    if (newX + node_radius  > leftPanel->Get_Width()) {
+        newX = leftPanel->Get_Width() - node_radius ;
+    }
+    if (newX < node_radius) {
+        newX = node_radius ;
+    }
+
+    if (newY + node_radius > leftPanel->Get_Height()) {
+        newY = leftPanel->Get_Height() - node_radius ;
+    }
+
+    if (newY < node_radius) {
+        newY = node_radius;
+    }
+    
+    vectNode[i]->SetXY( newX , newY );
+  }
+
+  FREE_A(arraySumForceX);
+
+  //Calculate the just achieved precision of the drawing
   double achieved_precision = 0.0;
 
-  for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
-    // First calculate the repulsing force for node i with respect to
-    // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (std::vector< vertex_and_forces >::iterator j = i + 1; j != vertices.end(); ++j) { 
-      const double xdiff = j->x - i->x;
-      const double ydiff = j->y - i->y;
-      
-      //Euclidean distance
-      const double distance = sqrt((xdiff*xdiff) + (ydiff*ydiff));
-
-      const double force_shared_component = (node_radius < distance) ?
-                      NodeStrength / (distance * distance * distance) : 0.5;
-
-      const double sx = force_shared_component * xdiff;
-      const double sy = force_shared_component * ydiff;
-
-      i->x_force -= sx;
-      i->y_force -= sy;
-      j->x_force += sx;
-      j->y_force += sy;
-    }
-
-    if (!vectNode[i - vertices.begin()]->IsLocked()) {
-      // Calculate the just achieved precision of the drawing
-      achieved_precision += fabs(i->x_force) + fabs(i->y_force);
-
-      i->apply_force();
-    }
-    else {
-      i->x_force = 0;
-      i->y_force = 0;
-    }
+  for (size_t i = 0; i<vectNode.size(); i++) 
+  { 
+    achieved_precision += fabs(arraySumForceX[i])+fabs(arraySumForceY[i]);
   }
-
-  // As of this point the positioning algorithm is finished, however some
-  // viewport specific transformation must be done. In a redesign positioning
-  // and display should be separated.
-  if ((!StopOpti && slider_speedup->GetValue() < ++steps_taken) || !moved_vertices.empty()) {
-    // minimum and maximum of vertex coordinates (only for scaling to viewport)
-    double xmin = std::numeric_limits< double >::max();
-    double xmax = std::numeric_limits< double >::min();
-    double ymin = std::numeric_limits< double >::max();
-    double ymax = std::numeric_limits< double >::min();
-
-    // compute bounding box parameters
-    for (std::vector< vertex_and_forces >::iterator i = vertices.begin(); i != vertices.end(); ++i) { 
-      if (i->x < xmin) {
-        xmin = i->x;
-      }
-      if (xmax < i->x) {
-        xmax = i->x;
-      }
-     
-      if (i->y < ymin) {
-        ymin = i->y;
-      }
-      if (ymax < i->y) {
-        ymax = i->y;
-      }
-    }
-
-    double window_width  = static_cast < double > (leftPanel->Get_Width());
-    double window_height = static_cast < double > (leftPanel->Get_Height());
- 
-    double xcentre = (xmin + xmax) / 2;
-    double ycentre = (ymin + ymax) / 2;
-
-    double xscale = (window_height - 2 * node_radius) / (xmax - xmin);
-    double yscale = (window_height - 2 * node_radius) / (ymax - ymin);
-
-    if (1 < xscale) {
-      xscale = 1;
-    }
-    if (1 < yscale) {
-      yscale = 1;
-    }
-
-    const double half_window_height = window_height / 2;
-    const double half_window_width  = window_width / 2;
-
-    // Replace moved nodes
-    if (!moved_vertices.empty()) {
-      do {
-        size_t moved = moved_vertices.front()->Get_num();
-     
-        vertices[moved].x = (vectNode[moved]->GetX() - half_window_width) / xscale + xcentre;
-        vertices[moved].y = (vectNode[moved]->GetY() - half_window_height) / yscale + ycentre;
-   
-        moved_vertices.pop_front();
-      }
-      while (!moved_vertices.empty());
-    }
-
-    if (slider_speedup->GetValue() < steps_taken) {
-      steps_taken = 0;
-
-      for (size_t i = 0; i != vectNode.size(); ++i) {
-        const double xdiff = vertices[i].x - xcentre;
-        const double ydiff = vertices[i].y - ycentre;
   
-        vectNode[i]->ForceSetXY(xdiff * xscale + half_window_width, ydiff * yscale + half_window_height);
-    
-        vectNode[i]->SetRadius(node_radius);  
-      }
-    }
+  // compensate for the number of nodes
+  achieved_precision=achieved_precision / vectNode.size();
 
+  if (!StopOpti && slider_speedup->GetValue() < ++steps_taken) {
+    steps_taken = 0;
     update_coordinates();
-
     Refresh();
   }
 
-  return achieved_precision < vectNode.size() * precision;
+
+
+  return achieved_precision<precision;
 }
 
 void GraphFrame::Draw(wxAutoBufferedPaintDC * myDC) {
@@ -970,7 +919,6 @@ void GraphFrame::RestoreBackup() {
 
 	LtsgraphBackup bckp(leftPanel->GetSize());
         wxString input_string(inputFileName.c_str(), wxConvLocal);
-std::cerr << inputFileName.c_str() << std::endl;
 	if (bckp.Restore(input_string)) {
 
 		initialStateLabel->SetLabel(bckp.GetInitialState());  
@@ -1065,8 +1013,6 @@ void GraphFrame::ReplaceAfterDrag(wxPoint pt, bool b) {
        if (b) {
          leftPanel->selected_node->Unlock();
        }
-
-       moved_vertices.push_front(leftPanel->selected_node);
        break;
      case (edge_t):
        leftPanel->selected_edge->set_control(pt.x, pt.y);
