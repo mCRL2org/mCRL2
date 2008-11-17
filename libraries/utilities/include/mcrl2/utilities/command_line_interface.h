@@ -87,27 +87,32 @@ namespace mcrl2 {
      * that are shared amongst multiple tools can be predefined in this
      * component and included on demand for individual tools.
      *
-     * The following example illustrates use of the interface description class:
+     * The following examples illustrate use of the interface description
+     * class. Construction of an interface description object.
      * \code
      *  interface_description interface("/path/to/demo-tool",
      *          "demo-tool", "Rincewind", "[OPTIONS]... [PATHS]"
      *          "Serves as demonstration of the features of the interface_description class.");
+     * \endcode
      *
-     *  // Note default options: --help,(-h), --version, --verbose, --debug (-d) and --quiet (-q)
+     * Adding options to an interface description.
+     *
+     * \code
      *  cli.
      *   add_option("recursive", "recursively test all files in directories", 'r').
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with").
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period (default 2 seconds)").
      *   add_rewriting_options().
      *   add_prover_options();
-     *
-     *  std::cerr << cli.textual_description() << std::endl;
-     *
-     *  std::cerr << "VERSION INFORMATION:" << std::endl
-     *            << std::endl
-     *            << cli.version_information() << std::endl;
      * \endcode
-     * The output produced when running the program is something similar to:
+     *
+     * Printing an interface description.
+     *
+     * \code
+     *  std::cerr << cli.textual_description() << std::endl;
+     * \endcode
+     *
+     * Prints:
      * \verbatim
         interface description:
         /path/to/demo-tool [OPTIONS]... [PATHS]
@@ -130,9 +135,17 @@ namespace mcrl2 {
         Report bugs at <http://www.mcrl2.org/issuetracker>.
       
         See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
-      
-        VERSION INFORMATION:
-      
+       \endverbatim
+     * Printing version information.
+     *
+     * \code
+     *
+     *  std::cerr << "VERSION INFORMATION:" << std::endl
+     *            << std::endl
+     *            << cli.version_information() << std::endl;
+     * \endcode
+     * Prints:
+     * \verbatim
         demo-tool July 2008 (development) (revision 4624M-shared)
         Copyright (c) 2008 Technische Universiteit Eindhoven.
         This is free software.  You may redistribute copies of it under the

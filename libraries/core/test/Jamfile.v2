@@ -13,7 +13,7 @@ include $(TOP)/build/testing/header_test.jam ;
 use-project /tools/mcrl22lps : ../../../tools/mcrl22lps ;
 use-project /tools/lpspp : ../../../tools/lpspp ;
 
-for file in [ glob-tree *.mcrl2 ] {
+for file in [ glob-tree *.mcrl2 : .svn ] {
   tests-with-files += [
         run /tools/mcrl22lps//mcrl22lps
               : -D

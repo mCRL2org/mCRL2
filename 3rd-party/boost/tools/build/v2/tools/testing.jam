@@ -277,7 +277,9 @@ rule dump-test ( target )
 
     # Add input files (because the input is essential for the test)
     for local s in [ $(r).get <testing.input-file> ] {
-      source-files += $(s) ;
+ECHO $(s:D=)  [ path.root $(project-root) [ path.pwd ] ] ;
+      source-files += [ path.join [ $(project).get location ]
+                [ MATCH .*//(.*) : $(s) ] ] ;
     }
 
     # If the user requested XML output on the command-line, add the test info to
