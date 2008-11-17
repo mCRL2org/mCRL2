@@ -12,4 +12,5 @@ mcrl2-library lts
          <library>/site-config//BCG
        :
        : <include>../include
+         <library>/site-config//BCG
        ;

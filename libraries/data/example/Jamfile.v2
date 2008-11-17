@@ -1,6 +1,6 @@
 project libraries/data/example
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries//core
        <source>/libraries//data
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
