@@ -18,11 +18,13 @@
 #include <limits>
 #include <map>
 
+#include <boost/config.hpp> // Platform specific workarounds
 #include <boost/any.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_pod.hpp>
+#include <boost/type_traits/is_same.hpp>
 
 #include "tipi/detail/visitors.hpp"
 
@@ -37,7 +39,7 @@ namespace tipi {
     std::string convert(basic_datatype const&, T const&);
 
     template < typename T >
-    T convert(basic_datatype const&, std::string const&);
+    typename boost::disable_if< boost::is_same< T, std::string >, T >::type convert(basic_datatype const&, std::string const&);
     /// \endcond
 
     /** \brief Base class for classes that specify types */
@@ -46,7 +48,8 @@ namespace tipi {
       friend std::string convert(basic_datatype const&, T const&);
 
       template < typename T >
-      friend T convert(basic_datatype const&, std::string const&);
+      friend typename boost::disable_if< boost::is_same< T, std::string >, T >::type
+                                         convert(basic_datatype const&, std::string const&);
 
       private:
 
@@ -111,7 +114,7 @@ namespace tipi {
     }
 
     template < typename T >
-    T convert(basic_datatype const& b, std::string const& s) {
+    typename boost::disable_if< boost::is_same< T, std::string >, T >::type convert(basic_datatype const& b, std::string const& s) {
       return b.evaluate< T >(s);
     }
 
@@ -207,7 +210,7 @@ namespace tipi {
          * \param[in] s the string to convert (value must be in the domain)
          * \return the string representation of the value of the enumerated type
          **/
-        std::string convert(size_t const& s) const {
+        inline std::string convert(size_t const& s) const {
           std::map< size_t, std::string >::const_iterator i =
              m_values.find(s);
 
@@ -264,24 +267,24 @@ namespace tipi {
 
       private:
 
-        enumeration< size_t >& get_single_instance() const {
+        inline enumeration< size_t >& get_single_instance() const {
           static std::auto_ptr< enumeration< size_t > > instance(new enumeration< size_t >);
 
           return *instance;
         }
 
         /** \brief Converts to underlying type */
-        boost::any specialised_evaluate(std::string const& s) const {
+        inline boost::any specialised_evaluate(std::string const& s) const {
           return evaluate(s);
         }
 
         /** \brief Converts from the underlying implementation type */
-        std::string specialised_convert(boost::any const& v) const {
+        inline std::string specialised_convert(boost::any const& v) const {
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
         }
 
         /** \brief Returns an iterator over the values of the enumerated type */
-        basic_enumeration::const_iterator_range values() const {
+        inline basic_enumeration::const_iterator_range values() const {
           return get_single_instance().values();
         }
 
@@ -289,14 +292,14 @@ namespace tipi {
          * \param[in] s the string to convert (value must be in the domain)
          * \return the string representation of the value of the enumerated type
          **/
-        std::string convert(C const& s) const {
+        inline std::string convert(C const& s) const {
           return get_single_instance().convert(static_cast< const size_t > (s));
         }
 
         /** \brief Converts a string to an index representation
          * \param[in] s the string to evaluate
          **/
-        C evaluate(std::string const& s) const {
+        inline C evaluate(std::string const& s) const {
           return static_cast < C > (get_single_instance().evaluate(s));
         }
 
@@ -307,7 +310,7 @@ namespace tipi {
          * \param[in] s any string
          * \return *this
          **/
-        enumeration< C >& add(const size_t v, std::string const& s) {
+        inline enumeration< C >& add(const size_t v, std::string const& s) {
           get_single_instance().add(static_cast< const size_t > (v), s);
 
           return *this;
@@ -316,7 +319,7 @@ namespace tipi {
         /**
          * \brief validates whether a string is a value of the enumerated type
          **/
-        bool validate(std::string const& s) const {
+        inline bool validate(std::string const& s) const {
           return get_single_instance().validate(s);
         }
     };
@@ -367,19 +370,19 @@ namespace tipi {
       private:
 
         /** \brief Converts to underlying type */
-        boost::any specialised_evaluate(std::string const& s) const {
+        inline boost::any specialised_evaluate(std::string const& s) const {
           return evaluate(s);
         }
 
         /** \brief Converts from the underlying implementation type */
-        std::string specialised_convert(boost::any const& v) const {
+        inline std::string specialised_convert(boost::any const& v) const {
           return convert(boost::any_cast< C >(v));
         }
 
         /** \brief Converts a value to a string representation
          * \param[in] v the value to convert
          **/
-        static std::string convert(const C v) {
+        inline static std::string convert(const C v) {
           std::ostringstream temporary;
 
 	  temporary << v;
@@ -390,7 +393,7 @@ namespace tipi {
         /** \brief Converts a string to a value of the chosen numeric type
          * \param[in] s the string to evaluate
          **/
-        static C evaluate(std::string const& s) {
+        inline static C evaluate(std::string const& s) {
           C v;
 
           std::istringstream temporary(s);
@@ -411,7 +414,7 @@ namespace tipi {
          * \param[in] minimum the minimum value that specifies the range
          * \param[in] maximum the maximum value that specifies the range
          **/
-        integer_range(C minimum = boost::integer_traits< C >::const_min, C maximum = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(maximum) {
+        inline integer_range(C minimum = boost::integer_traits< C >::const_min, C maximum = boost::integer_traits< C >::const_max) : m_minimum(minimum), m_maximum(maximum) {
           assert(m_minimum < m_maximum);
         }
 
@@ -425,7 +428,7 @@ namespace tipi {
         }
 
         /// \brief prints range
-        std::ostream& print(std::ostream& o) const {
+        inline std::ostream& print(std::ostream& o) const {
           return o << "[" << m_minimum << "..." << m_maximum << "]";
         }
     };
@@ -527,19 +530,19 @@ namespace tipi {
       private:
 
         /** \brief Converts to underlying type */
-        boost::any specialised_evaluate(std::string const& s) const {
+        inline boost::any specialised_evaluate(std::string const& s) const {
           return evaluate(s);
         }
 
         /** \brief Converts from the underlying implementation type */
-        std::string specialised_convert(boost::any const& v) const {
+        inline std::string specialised_convert(boost::any const& v) const {
           return convert(boost::any_cast< C >(v));
         }
 
         /** \brief Converts a value to a string representation
          * \param[in] v the value to convert
          **/
-        static std::string convert(const C v) {
+        inline static std::string convert(const C v) {
           std::ostringstream temporary;
 
 	  temporary << v;
@@ -550,7 +553,7 @@ namespace tipi {
         /** \brief Converts a string to a value of the chosen type
          * \param[in] s the string to evaluate
          **/
-        static C evaluate(std::string const& s) {
+        inline static C evaluate(std::string const& s) {
           C v;
 
           std::istringstream(s) >> v;
@@ -559,7 +562,7 @@ namespace tipi {
         }
 
         /// \brief prints range
-        std::ostream& print(std::ostream& o) const {
+        inline std::ostream& print(std::ostream& o) const {
           return detail::helper< minimum_included, maximum_included >::print(o, m_minimum, m_maximum);
         }
 
@@ -574,7 +577,7 @@ namespace tipi {
          * \param[in] minimum the minimum value that specifies the range
          * \param[in] maximum the maximum value that specifies the range
          **/
-        real_range(C minimum = (std::numeric_limits< C >::min)(), C maximum = (std::numeric_limits< C >::max)())
+        inline real_range(C minimum = (std::numeric_limits< C >::min)(), C maximum = (std::numeric_limits< C >::max)())
                                                                          : m_minimum(minimum), m_maximum(maximum) {
           assert(m_minimum < m_maximum);
         }
@@ -582,7 +585,7 @@ namespace tipi {
         /** \brief Establishes whether value is valid for an element of this type
          * \param[in] s the string to evaluate
          **/
-        bool validate(std::string const& s) const {
+        inline bool validate(std::string const& s) const {
           C v(evaluate(s));
 
           return detail::helper< minimum_included, maximum_included >::compare(v, m_minimum, m_maximum);
@@ -597,26 +600,26 @@ namespace tipi {
       private:
 
         /** \brief Converts to underlying type */
-        boost::any specialised_evaluate(std::string const& s) const {
+        inline boost::any specialised_evaluate(std::string const& s) const {
           return evaluate(s);
         }
 
         /** \brief Converts from the underlying implementation type */
-        std::string specialised_convert(boost::any const& v) const {
+        inline std::string specialised_convert(boost::any const& v) const {
           return convert(boost::any_cast< bool >(v));
         }
 
         /** \brief Converts a boolean to a string representation
          * \param[in] v the boolean to convert
          **/
-        static std::string convert(const bool v) {
+        inline static std::string convert(const bool v) {
           return ((v) ? "true" : "false");
         }
 
         /** \brief Converts a string to a boolean representation
          * \param[in] s the string to evaluate
          **/
-        static bool evaluate(std::string const& s) {
+        inline static bool evaluate(std::string const& s) {
           return s.compare("true") == 0;
         }
 
@@ -628,13 +631,13 @@ namespace tipi {
       public:
 
         /** \brief Constructor */
-        boolean() {
+        inline boolean() {
         }
 
         /** \brief Establishes whether value is valid for an element of this type
          * \param[in] s the string to evaluate
          **/
-        bool validate(std::string const& s) const {
+        inline bool validate(std::string const& s) const {
           return (s == "true" || s == "false");
         }
     };
@@ -682,13 +685,13 @@ namespace tipi {
       public:
 
         /** \brief Constructor */
-        string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::const_max) :
+        inline string(size_t minimum = 0, size_t maximum = boost::integer_traits< size_t >::const_max) :
                                                 m_minimum_length(minimum), m_maximum_length(maximum) {
           assert(m_minimum_length < m_maximum_length);
         }
 
         /** \brief Establishes whether value is valid for an element of this type */
-        bool validate(std::string const& v) const {
+        inline bool validate(std::string const& v) const {
           return (m_minimum_length <= v.size() && v.size() <= m_maximum_length);
         }
     };

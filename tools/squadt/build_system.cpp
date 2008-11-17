@@ -39,8 +39,8 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
  **/
 namespace squadt {
   void build_system::default_tool_collection(tool_manager& m) const {
-    static char const* default_tools[] = { "diagraphica.app", "lps2pbes",
-      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
+    static char const* default_tools[] = { "chi2mcrl2", "diagraphica.app",
+      "lps2pbes", "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
       "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
       "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
       "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };

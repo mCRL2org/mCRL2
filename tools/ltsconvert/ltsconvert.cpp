@@ -379,17 +379,6 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
   private:
 
-    enum lts_output_format {
-      aldebaran,   ///< Aldebaran format (AUT)
-      svc_mcrl,    ///< SVC file (mCRL specific)
-      svc_mcrl2,   ///< SVC file (mCRL2 specific)
-#ifdef USE_BCG
-      bcg,         ///< BCG
-#endif
-      fsm,         ///< FSM
-      dot          ///< dot
-    };
-
   public:
 
     /** \brief constructor */
@@ -431,18 +420,19 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0, 5, 0, 5));
 
   /* Helper for format selection */
-  mcrl2::utilities::squadt::radio_button_helper < lts_output_format > format_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < mcrl2::lts::lts_type > format_selector(d);
 
   m.append(d.create< horizontal_box >().
                 append(d.create< label >().set_text("Output format : ")).
-                append(format_selector.associate(aldebaran, "Aldebaran",true)).
-                append(format_selector.associate(svc_mcrl, "SVC/mCRL")).
-                append(format_selector.associate(svc_mcrl2, "SVC/mCRL2")).
+                append(format_selector.associate(mcrl2::lts::lts_aut, "Aldebaran",true)).
+                append(format_selector.associate(mcrl2::lts::lts_mcrl, "SVC/mCRL")).
+                append(format_selector.associate(mcrl2::lts::lts_mcrl2, "SVC/mCRL2")).
+                append(format_selector.associate(mcrl2::lts::lts_svc, "SVC")).
 #ifdef USE_BCG
-                append(format_selector.associate(bcg, "BCG")).
+                append(format_selector.associate(mcrl2::lts::lts_bcg, "BCG")).
 #endif
-                append(format_selector.associate(fsm, "FSM")).
-                append(format_selector.associate(dot, "dot")),
+                append(format_selector.associate(mcrl2::lts::lts_fsm, "FSM")).
+                append(format_selector.associate(mcrl2::lts::lts_dot, "dot")),
            margins(0,5,0,5));
 
   text_field& lps_file_field        = d.create< text_field >();
@@ -495,7 +485,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Add some default values for existing options in the current configuration
   if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(c.get_option_argument< lts_output_format >(option_selected_output_format, 0));
+    format_selector.set_selection(c.get_option_argument< mcrl2::lts::lts_type >(option_selected_output_format, 0));
   }
   if (c.option_exists(option_selected_transformation)) {
     transformation_selector.set_selection(c.get_option_argument< lts_equivalence >(option_selected_transformation, 0));
@@ -547,11 +537,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */
-  if ((format_selector.get_selection() == fsm && (
+  if ((format_selector.get_selection() == lts_fsm && (
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl2"))
-   || (format_selector.get_selection() == svc_mcrl2 && (
+   || (format_selector.get_selection() == lts_mcrl2 && (
          c.get_input(lts_file_for_input).type().sub_type() == "aut" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl"))) {
@@ -583,7 +573,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   c.add_option(option_no_reachability_check).set_argument_value< 0 >(check_reachability.get_status());
 
-  if (format_selector.get_selection() == dot) {
+  if (format_selector.get_selection() == lts_dot) {
     c.add_option(option_no_state_information).
        set_argument_value< 0 >(add_state_information.get_status());
   }
