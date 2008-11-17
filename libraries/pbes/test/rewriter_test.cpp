@@ -13,7 +13,9 @@
 
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/rewriter.h"
@@ -24,6 +26,37 @@
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
+
+/// Parse a string of the form "b: Bool := true, n: Nat := 0", and add them
+/// to the substition function sigma.
+template <typename SubstitutionFunction>
+void parse_substitutions(std::string text, SubstitutionFunction& sigma)
+{
+  std::vector<std::string> substitutions = core::split(text, ";");
+  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  {
+    std::vector<std::string> words = core::regex_split(*i, ":=");
+    if (words.size() != 2)
+    {
+      continue;
+    }
+    data::data_variable v = data::parse_data_variable(words[0]);
+    data::data_expression e = data::parse_data_expression(words[1]);
+    sigma[v] = e;
+  }
+}
+
+/// Create a string representation of a substitution map.
+template <typename SubstitutionFunction>
+std::string print_substitution(const SubstitutionFunction& sigma)
+{
+  std::stringstream out;
+  for (typename SubstitutionFunction::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    out << "  " << core::pp(i->first) << " -> " << core::pp(i->second) << std::endl;
+  }
+  return out.str();
+}
 
 const std::string VARIABLE_SPECIFICATION =
   "datavar         \n"
@@ -67,6 +100,25 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2)
     std::cout << "R(expr2) " << core::pp(R(expr(expr2))) << std::endl;
     std::cout << "R(expr1) " << R(expr(expr1)) << std::endl;
     std::cout << "R(expr2) " << R(expr(expr2)) << std::endl;
+  }
+}
+
+template <typename Rewriter>
+void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string var_decl, std::string substitutions)
+{
+  data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
+  parse_substitutions(substitutions, sigma);
+  pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl);
+  pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
+  if (R(d1, sigma) != R(d2))
+  {
+    BOOST_CHECK(R(d1, sigma) != R(d2));
+    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    std::cout << "d1           " << core::pp(d1) << std::endl;
+    std::cout << "d2           " << core::pp(d2) << std::endl;
+    std::cout << "sigma\n      " << print_substitution(sigma) << std::endl;
+    std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
+    std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
   }
 }
 
@@ -236,7 +288,7 @@ void test_substitutions1()
     ;
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
-  BOOST_CHECK(r(d1, sigma) == r(d2)); 
+  BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
 void test_substitutions2()
@@ -247,23 +299,30 @@ void test_substitutions2()
   data::rewriter datar(data_spec);
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
-    
-  data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
-  sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
-  sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));   
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
-  std::string var_decl =
+  std::string var_decl;
+  std::string sigma;
+  
+  var_decl =
     "datavar         \n"
     "  m, n:  Pos;   \n"
     "                \n"
     "predvar         \n"
     "  X: Pos;       \n"
     ;
+  sigma = "m: Pos := 3; n: Pos := 4";
+  test_expressions(R, "X(m+n)", "X(7)", var_decl, sigma);
 
-  pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
-  pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
-  BOOST_CHECK(r(d1, sigma) == r(d2));
+  var_decl =
+    "datavar         \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Nat; \n"
+    ;
+  sigma = "b: Bool := true; n: Nat := 0";
+  test_expressions(R, "forall c: Bool. X(c, n)", "X(true, 0) && X(false, 0)", var_decl, sigma);
 }
 
 void test_substitutions3()

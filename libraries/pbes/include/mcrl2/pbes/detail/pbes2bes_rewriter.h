@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_PBES2BES_REWRITER_H
 #define MCRL2_PBES_DETAIL_PBES2BES_REWRITER_H
 
+#include <iostream>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/rewriter.h"
@@ -61,24 +62,18 @@ namespace detail {
             propvar_name_current += "@";
             propvar_name_current += mcrl2::core::pp(*del_i);
           }
-          else if (data::is_data_variable(*del_i))
-          {
-            core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
-            core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
-            core::gsErrorMsg("Computation aborted.\n");
-            std::cout << "Problematic Term: " << core::pp(*del_i) << std::endl;
-            throw mcrl2::runtime_error("exit!");
-          }
           else if (data::is_data_application(*del_i))
           {
             propvar_name_current += "@";
             propvar_name_current += mcrl2::core::pp(*del_i);
           }
+          // else if (data::is_data_variable(*del_i))
+          // {
+          //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + core::pp(v));
+          // }
           else
           {
-            core::gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
-            std::cout << "Problematic Term: " << core::pp(*del_i) << std::endl;
-            throw mcrl2::runtime_error("exit!");
+            throw mcrl2::runtime_error(std::string("pbes2bes_rewrite_builder: could not rename the variable ") + core::pp(v));
           }
         }
       }   

@@ -9,6 +9,8 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+
 #include <string>
 #include <iostream>
 #include <boost/test/minimal.hpp>
@@ -21,27 +23,27 @@
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 
 using namespace mcrl2;
+using pbes_system::enumerate_quantifiers_rewriter;
+using pbes_system::pbes;
+using pbes_system::pbes2bes_algorithm;
+using pbes_system::txt2pbes;
 
 inline
-pbes<> pbes2bes(const pbes<>& pbes_spec, bool finite = true)
+pbes<> pbes2bes(const pbes<>& p, bool finite = true)
 {
-  data::rewriter datar(pbes_spec.data());
+  data::rewriter datar(p.data());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::number_postfix_generator> datae(pbes_spec.data(), datar, generator);
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
-  if (!pbes_spec.is_closed())
-  {
-    core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-  }
-  pbes<> result = (finite ? do_finite_algorithm(pbes_spec, pbesr) : do_lazy_algorithm(pbes_spec, pbesr));
+  data::data_enumerator<> datae(p.data(), datar, generator);
+  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
+  pbes<> result = (finite ? do_finite_algorithm(p, pbesr) : do_lazy_algorithm(p, pbesr));
   return result;
 }
 
 inline
-pbes<> pbes2bes_new(const pbes<>& pbes_spec)
+pbes<> pbes2bes_new(const pbes<>& p)
 {
-  pbes2bes_algorithm algorithm(pbes_spec.data());
-  algorithm.run(pbes_spec);
+  pbes2bes_algorithm algorithm(p.data());
+  algorithm.run(p);
   return algorithm.get_result();
 }
 
@@ -137,8 +139,6 @@ std::string test8 =
 
 void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
-  using namespace pbes_system;
-
   core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
   std::cout << "------------------------------\n" << core::pp(p) << std::endl;

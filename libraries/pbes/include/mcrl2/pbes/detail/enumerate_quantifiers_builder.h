@@ -184,7 +184,10 @@ namespace detail {
                                   )
   {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
-std::cout << "x, phi, sigma = " << core::pp(x) << "\n" << core::pp(phi) << "\nstop = " << core::pp(stop_value) << std::endl;
+std::cout << "<enumerate quantifiers>\n"
+          << "x    = " << core::pp(x) << "\n"
+          << "phi  = " << core::pp(phi) << "\n"
+          << "stop = " << core::pp(stop_value) << std::endl;
 std::cout << "--- sigma ---" << std::endl;
 for (typename MapSubstitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
 {
