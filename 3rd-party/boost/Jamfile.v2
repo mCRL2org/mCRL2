@@ -16,6 +16,7 @@ constant BOOST_VERSION_TAG : $(version-tag:J="_") ;
 
 project boost
        : requirements
+          <define>BOOST_ALL_NO_LIB=1
           <tag>@$(__name__).tag
        ;
 

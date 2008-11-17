@@ -277,9 +277,7 @@ rule dump-test ( target )
 
     # Add input files (because the input is essential for the test)
     for local s in [ $(r).get <testing.input-file> ] {
-      if [ path.basename $(s) ] != $(s) { # workaround for incorrect (unbound) paths
-        source-files += [ path.relative $(s) [ path.root $(project-root) [ path.pwd ] ] ] ;
-      }
+      source-files += $(s) ;
     }
 
     # If the user requested XML output on the command-line, add the test info to
