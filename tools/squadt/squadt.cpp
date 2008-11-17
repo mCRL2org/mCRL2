@@ -272,15 +272,12 @@ bool SQuADt::OnInit() {
 
         // Perform initialisation
         for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
-          if (!boost::filesystem::exists((*t)->get_location())) {
-            splash_window->set_operation("", (*t)->get_name());
-            splash_window->update();
+          splash_window->set_operation("", (*t)->get_name());
+          splash_window->update();
 
-            if (!path_to_try.empty()) {
-              if (tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf())) {
-                continue;
-              }
-            }
+          if (!boost::filesystem::exists((*t)->get_location()) &&
+                   (!path_to_try.empty() &&
+		 !tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf()))) {
 
             wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
                       wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
@@ -288,7 +285,7 @@ bool SQuADt::OnInit() {
 
             if (file_picker.ShowModal() == wxID_OK) {
               path_to_try = boost::filesystem::path(
-                      std::string(file_picker.GetPath().fn_str())).branch_path();
+                      std::string(file_picker.GetPath().fn_str())).parent_path();
 
               tester::query_with_path(**t, std::string(file_picker.GetPath().fn_str()));
             }

@@ -1,6 +1,7 @@
 project libraries/utilities
        : source-location ..
        : requirements
+          <use>/site-config//boost
           <include>../include
        : usage-requirements
           <use>/site-config//boost

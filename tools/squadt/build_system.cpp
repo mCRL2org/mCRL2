@@ -11,6 +11,7 @@
 #include "boost.hpp" // precompiled headers
 
 #include <boost/version.hpp>
+#include <boost/config.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -40,7 +41,7 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
 namespace squadt {
   void build_system::default_tool_collection(tool_manager& m) const {
     static char const* default_tools[] = { "chi2mcrl2", "diagraphica.app",
-      "lps2pbes", "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
+      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
       "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
       "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
       "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
@@ -51,7 +52,7 @@ namespace squadt {
     const path default_path(m_settings_manager->path_to_default_binaries());
 
     for (char const** t = default_tools; *t != 0; ++t) {
-#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if (BOOST_WINDOWS)
       path path_to_binary(std::string(basename(path(*t))).append(".exe"));
 
       path_to_binary = default_path / path_to_binary;
