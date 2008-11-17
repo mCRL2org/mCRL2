@@ -2690,7 +2690,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".fsm");
+	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
 		s.append(".fsm");
@@ -2721,7 +2721,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".fsm");
+	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
 		s.append(".fsm");
@@ -2778,7 +2778,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".dgc");
+	    size_t found = s.find(".dgc");
 	    if( found == string::npos)
 	    {
 		s.append(".dgc");
@@ -2834,7 +2834,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".dgd");
+	    size_t found = s.find(".dgd");
 	    if( found == string::npos)
 	    {
 		s.append(".dgd");
