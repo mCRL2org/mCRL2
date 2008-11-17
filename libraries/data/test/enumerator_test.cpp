@@ -91,7 +91,7 @@ void test_data_enumerator()
   data_specification data_spec = parse_data_specification(DATA_SPEC1);
   rewriter rewr(data_spec);
   number_postfix_generator generator("x_");
-  data_enumerator<rewriter, number_postfix_generator> e(data_spec, rewr, generator);
+  data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
   data_variable x(identifier_string("x"), sort_expr::pos());
   atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
@@ -152,7 +152,7 @@ void test3()
   data_specification data_spec = parse_data_specification(DATA_SPEC1);
   rewriter rewr(data_spec);
   number_postfix_generator generator("x_");
-  data_enumerator<rewriter, number_postfix_generator> e(data_spec, rewr, generator);
+  data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
   data_variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");

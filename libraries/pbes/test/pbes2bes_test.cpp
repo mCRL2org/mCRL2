@@ -27,7 +27,7 @@ pbes<> pbes2bes(const pbes<>& pbes_spec, bool finite = true)
 {
   data::rewriter datar(pbes_spec.data());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(pbes_spec.data(), datar, generator);
+  data::data_enumerator<data::number_postfix_generator> datae(pbes_spec.data(), datar, generator);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
   if (!pbes_spec.is_closed())
   {
@@ -135,59 +135,78 @@ std::string test8 =
   "init X(true);                                                                     \n"
   ;
 
-void test_pbes(const std::string& pbes_spec, bool finite)
+void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
   using namespace pbes_system;
 
   core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
   std::cout << "------------------------------\n" << core::pp(p) << std::endl;
+  if (!p.is_closed())
+  {
+    std::cout << "ERROR: the pbes is not closed!" << std::endl;
+    return;
+  }
 
-  pbes<> q1 = pbes2bes(p, finite);
-  core::gsSetVerboseMsg();
-  std::cout << "<old version> " << (finite ? "finite\n" : "infinite\n") << core::pp(q1) << std::endl;
-}
+  if (test_finite)
+  {
+    std::cout << "FINITE" << std::endl;
+    try
+    {
+      pbes<> q1 = pbes2bes(p, true);
+      core::gsSetVerboseMsg();
+      std::cout << core::pp(q1) << std::endl;
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      std::cout << "pbes2bes failed: " << e.what() << std::endl;
+    }
+  }
 
-void test_pbes_new(const std::string& pbes_spec)
-{
-  using namespace pbes_system;
+  if (test_lazy)
+  {
+    std::cout << "LAZY" << std::endl;
+    try
+    {
+      pbes<> q1 = pbes2bes(p, false);
+      core::gsSetVerboseMsg();
+      std::cout << core::pp(q1) << std::endl;
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      std::cout << "pbes2bes failed: " << e.what() << std::endl;
+    }
 
-  pbes<> p = txt2pbes(pbes_spec);
-  pbes<> q2 = pbes2bes_new(p);
-  std::cout << "<new version>\n" << core::pp(q2) << std::endl;
+    std::cout << "NEWLAZY" << std::endl;
+    try
+    {
+      using namespace pbes_system;
+      pbes<> q1 = pbes2bes_new(p);
+      std::cout << core::pp(q1) << std::endl;
+    }
+    catch (mcrl2::runtime_error e)
+    {
+      std::cout << "pbes2bes failed: " << e.what() << std::endl;
+    }
+  }
 }
 
 void test_pbes2bes()
 {
-  test_pbes(test1, true);
-  test_pbes(test2, true);
-  test_pbes(test3, true);
-  test_pbes(test4, true);
-  test_pbes(test5, true);
-  test_pbes(test6, true);
-  test_pbes(test7, true);
-  test_pbes(test8, true);
-
-  test_pbes(test2, false);
-  test_pbes_new(test2);
-  test_pbes(test4, false);
-  test_pbes_new(test4);
-  test_pbes(test5, false);
-  test_pbes_new(test5);
-  test_pbes(test6, false);
-  test_pbes_new(test6);
-  test_pbes(test7, false);
-  test_pbes_new(test7);
-  test_pbes(test8, false);
-  test_pbes_new(test8);
+  test_pbes(test1, true, false);
+  test_pbes(test2, true, true);
+  test_pbes(test3, true, false);
+  test_pbes(test4, true, true);
+  test_pbes(test5, true, true);
+  test_pbes(test6, true, true);
+  test_pbes(test7, true, true);
+  test_pbes(test8, true, true);
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
   test_pbes2bes();
-  //BOOST_CHECK(false);
 
   return 0;
 }

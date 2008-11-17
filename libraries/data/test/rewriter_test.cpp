@@ -91,7 +91,7 @@ void test1()
 
 void test2()
 {
-  rewriter r = default_data_rewriter(); 
+  rewriter r; 
   data_expression d1 = parse_data_expression("2+7");
   data_expression d2 = parse_data_expression("4+5");
   assert(r(d1) == r(d2));
@@ -132,9 +132,8 @@ void test3()
 
   std::string var_decl = "m, n: Pos;\n";
   rewriter_map<substitution_map> sigma; 
-  data_variable m = parse_data_expression("m", var_decl);
-  data_variable n = parse_data_expression("n", var_decl);
-  data_variable q = parse_data_variable("q:Nat;");
+  data_variable m = parse_data_variable("m:Pos");
+  data_variable n = parse_data_variable("n:Pos");
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
   sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
@@ -143,6 +142,10 @@ void test3()
   data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
   data_expression_with_variables d2(parse_data_expression("7"));
   BOOST_CHECK(r(d1, sigma) == r(d2));
+  
+  BOOST_CHECK(d1.variables().size() == 0);
+  data_expression_with_variables rd1 = r(d1);
+  BOOST_CHECK(rd1.variables().size() == 2);
 }
 
 int test_main(int argc, char** argv)

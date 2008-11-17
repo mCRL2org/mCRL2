@@ -97,7 +97,10 @@ namespace core {
     typedef core::term_traits<pbes_system::pbes_expression> tr;
 
     static inline
-    bool is_constant(const term_type& t) { return t.variables().empty(); }
+    bool is_constant(const term_type& t)
+    {
+      return t.variables().empty();
+    }
 
     static inline
     bool is_true(term_type t) { return tr::is_true(t); }
@@ -168,10 +171,16 @@ namespace core {
       return term_type(tr::exists(l, p), atermpp::term_list_difference(p.variables(), l));
     }
 
-    static inline
-    propositional_variable_type prop_var(const string_type& name, const data_term_sequence_type& parameters)
+    template <typename Iter>
+    static
+    term_type prop_var(const string_type& name, Iter first, Iter last)
     {
-      return tr::prop_var(name, parameters);
+      std::set<data_term_type> v;
+      for (Iter i = first; i != last; ++i)
+      {
+        v.insert(i->variables().begin(), i->variables().end());
+      }
+      return term_type(tr::prop_var(name, first, last), variable_sequence_type(v.begin(), v.end()));
     }
 
     static inline
@@ -199,6 +208,18 @@ namespace core {
     term_type variable2term(variable_type v)
     {
       return tr::variable2term(v);
+    }
+
+    static inline
+    term_type dataterm2term(data_term_type t)
+    {
+      return term_type(t, t.variables());
+    }    
+   
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t) + " " + core::pp(t.variables());
     }
   };
 

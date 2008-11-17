@@ -160,7 +160,7 @@ void test_pfnf_expression(std::string s)
   pbes_expression t1 = expr(s);
   visitor.visit(t1);
   pbes_expression t2 = visitor.evaluate();
-  data::rewriter datar = data::default_data_rewriter();
+  data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))
   {

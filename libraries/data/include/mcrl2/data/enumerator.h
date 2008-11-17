@@ -90,7 +90,7 @@ namespace detail {
 /// \endcond
 
 /// \brief Class for enumerating data expressions.
-template <typename DataRewriter = data::rewriter, typename IdentifierGenerator = number_postfix_generator>
+template <typename IdentifierGenerator = number_postfix_generator>
 class data_enumerator
 {
   protected:
@@ -101,7 +101,7 @@ class data_enumerator
     const data_specification* m_data;
     
     /// A rewriter.
-    DataRewriter* m_rewriter;
+    data::rewriter* m_rewriter;
     
     /// An identifier generator.
     IdentifierGenerator* m_generator;
@@ -137,7 +137,7 @@ class data_enumerator
     /// \param rewriter A rewriter.
     /// \param generator An identifier generator.
     data_enumerator(const data_specification& data_spec,
-                    DataRewriter& rewriter,
+                    data::rewriter& rewriter,
                     IdentifierGenerator& generator)
      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
     {}

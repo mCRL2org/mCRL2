@@ -73,9 +73,10 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2)
 void test_simplifying_rewriter()
 {
   std::cout << "<test_simplifying_rewriter>" << std::endl;
-  data::rewriter datar = data::default_data_rewriter();
+  data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
 
+  test_expressions(R, "val(n >= 0) || Y(n)"                                             , "val(true)");
   test_expressions(R, "false"                                                           , "val(false)");
   test_expressions(R, "true"                                                            , "val(true)");
   test_expressions(R, "true && true"                                                    , "val(true)");
@@ -107,6 +108,9 @@ void test_simplifying_rewriter()
   // test_expressions(R, "X || (Y(p) && X)"                                                , "X");
   // test_expressions(R, "val(b || !b)"                                                    , "val(true)");
   // test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
+  
+  // pbes_expression p = R(expr("Y(n)"));
+  // BOOST_CHECK(!core::term_traits<pbes_expression>::is_constant(p));
 }
 
 template <typename variable_type, typename data_term_type>
@@ -165,11 +169,12 @@ void test_enumerate_quantifiers_rewriter()
   data::data_specification data_spec = default_data_specification();
   data::rewriter datar(data_spec);
   data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::rewriter_with_variables datarv(data_spec);
 
   data::data_variable   v = data::parse_data_expression("n", "n: Pos;\n");
   data::data_expression d = data::parse_data_expression("n < 10", "n: Pos;\n");
-  data::data_expression_with_variables dv(d, data::data_variable_list());
+  data::data_expression_with_variables dv(d);
   test_enumerate_quantifiers_sequence_assign(v, d);
   test_enumerate_quantifiers_sequence_assign(v, dv);
 
@@ -181,7 +186,7 @@ void test_enumerate_quantifiers_rewriter()
   // test_enumerator_quantifiers(y, datae); This doesn't work because of a mismatch between y and datae
   test_enumerator_quantifiers(yv, datae);
 
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > R(datar, datae);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
   test_expressions(R, "false"                                                           , "val(false)");
   test_expressions(R, "true"                                                            , "val(true)");
@@ -211,16 +216,16 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
 }
 
-void test_substitutions()
+void test_substitutions1()
 {
-  std::cout << "<test_substitutions>" << std::endl;
+  std::cout << "<test_substitutions1>" << std::endl;
 
-  data::rewriter datar = data::default_data_rewriter();
+  data::rewriter  datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
   data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma; 
-  sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
-  sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));
+  sigma[data::parse_data_variable("m: Pos")] = r(data::parse_data_expression("3"));
+  sigma[data::parse_data_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
   std::string var_decl =
     "datavar         \n"
@@ -236,11 +241,13 @@ void test_substitutions()
 
 void test_substitutions2()
 {
+  std::cout << "<test_substitutions2>" << std::endl;
   data::data_specification data_spec = default_data_specification();
-  data::rewriter datar(data_spec);
   data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > r(datar, datae);
+  data::rewriter datar(data_spec);
+  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::rewriter_with_variables datarv(data_spec);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
     
   data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
   sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
@@ -259,14 +266,90 @@ void test_substitutions2()
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
+void test_substitutions3()
+{
+  std::cout << "<test_substitutions3>" << std::endl;
+  std::string DATA_SPEC =
+    "sort D = struct d1 | d2;                                                                                                   \n"
+    "     DBuf = List(D);                                                                                                       \n"
+    "     BBuf = List(Bool);                                                                                                    \n"
+    "                                                                                                                           \n"
+    "map  n: Pos;                                                                                                               \n"
+    "     empty: BBuf;                                                                                                          \n"
+    "     insert: D # Nat # DBuf -> DBuf;                                                                                       \n"
+    "     insert: Bool # Nat # BBuf -> BBuf;                                                                                    \n"
+    "     nextempty_mod: Nat # BBuf # Nat # Pos -> Nat;                                                                         \n"
+    "     q1,q2: DBuf;                                                                                                          \n"
+    "                                                                                                                           \n"
+    "var  d,d': D;                                                                                                              \n"
+    "     i,j,m: Nat;                                                                                                           \n"
+    "     q: DBuf;                                                                                                              \n"
+    "     c,c': Bool;                                                                                                           \n"
+    "     n': Pos;                                                                                                              \n"
+    "     b: BBuf;                                                                                                              \n"
+    "eqn  q1  =  [d1, d1];                                                                                                      \n"
+    "     q2  =  [d1, d1];                                                                                                      \n"
+    "     n  =  2;                                                                                                              \n"
+    "     q1  =  [d1, d1];                                                                                                      \n"
+    "     q2  =  [d1, d1];                                                                                                      \n"
+    "     empty  =  [false, false];                                                                                             \n"
+    "     i == 0  ->  insert(d, i, q)  =  d |> tail(q);                                                                         \n"
+    "     i > 0  ->  insert(d, i, d' |> q)  =  d' |> insert(d, Int2Nat(i - 1), q);                                              \n"
+    "     i == 0  ->  insert(c, i, b)  =  c |> tail(b);                                                                         \n"
+    "     i > 0  ->  insert(c, i, c' |> b)  =  c' |> insert(c, Int2Nat(i - 1), b);                                              \n"
+    "     b . (i mod n') && m > 0  ->  nextempty_mod(i, b, m, n')  =  nextempty_mod((i + 1) mod 2 * n', b, Int2Nat(m - 1), n'); \n"
+    "     !(b . (i mod n') && m > 0)  ->  nextempty_mod(i, b, m, n')  =  i mod 2 * n';                                          \n"
+  ;
+  data::data_specification data_spec = data::parse_data_specification(DATA_SPEC);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::rewriter datar(data_spec);
+  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::rewriter_with_variables datarv(data_spec);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
+    
+  data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
+  sigma[data::parse_data_variable("l_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_data_variable("m_S:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_data_variable("bst_K:Bool")]          = data::parse_data_expression("false");
+  sigma[data::parse_data_variable("bst1_K:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_data_variable("k_K:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_data_variable("bst2_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_data_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
+  sigma[data::parse_data_variable("k_L:Nat")]             = data::parse_data_expression("0");
+  sigma[data::parse_data_variable("l'_R:Nat")]            = data::parse_data_expression("0");
+  sigma[data::parse_data_variable("b_R:BBuf", DATA_SPEC)] = data::parse_data_expression("[false, false]");
+
+  std::string var_decl =
+    "datavar                                                     \n"
+    "  l_S:Nat    ;                                              \n"
+    "  m_S:Nat    ;                                              \n"
+    "  bst_K:Bool ;                                              \n"
+    "  bst1_K:Bool;                                              \n"
+    "  k_K:Nat    ;                                              \n"
+    "  bst2_L:Bool;                                              \n"
+    "  bst3_L:Bool;                                              \n"
+    "  k_L:Nat    ;                                              \n"
+    "  l'_R:Nat   ;                                              \n"
+    "  b_R:BBuf   ;                                              \n"
+    "                                                            \n"
+    "predvar                                                     \n"
+    "  X: Nat, Nat, Bool, Bool, Nat, Bool, Bool, Nat, Nat, BBuf; \n"
+    ;
+
+  // pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("(((((((((((val(bst2_L && !bst3_L) || (exists k_S2_00: Nat. val(k_S2_00 < m_S && !bst_K && !bst1_K))) || val(!bst_K && bst1_K)) || val(!bst_K && bst1_K)) || val(!bst2_L && !bst3_L)) || val(b_R . (l'_R mod 2))) || val(!bst2_L && bst3_L)) || val(!bst2_L && bst3_L)) || val((bst_K && !bst1_K) && (k_K - l'_R) mod 4 < 2)) || val((bst_K && !bst1_K) && !((k_K - l'_R) mod 4 < 2))) || val(m_S < 2)) || val(m_S < 2)) && (((((((((((val(!(bst2_L && !bst3_L)) || X(k_L, (m_S - k_L + l_S) mod 4, bst_K, bst1_K, k_K, false, false, 0, l'_R, b_R)) && (forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R))) && val(!(!bst_K && bst1_K)) || X(l_S, m_S, true, false, k_K, bst2_L, bst3_L, k_L, l'_R, b_R)) && val(!(!bst_K && bst1_K)) || X(l_S, m_S, false, false, 0, bst2_L, bst3_L, k_L, l'_R, b_R)) && val(!(!bst2_L && !bst3_L)) || X(l_S, m_S, bst_K, bst1_K, k_K, false, true, nextempty_mod(l'_R, b_R, 2, 2), l'_R, b_R)) && val(!b_R . (l'_R mod 2)) || X(l_S, m_S, bst_K, bst1_K, k_K, bst2_L, bst3_L, k_L, (l'_R + 1) mod 4, insert(false, l'_R mod 2, b_R))) && val(!(!bst2_L && bst3_L)) || X(l_S, m_S, bst_K, bst1_K, k_K, true, false, k_L, l'_R, b_R)) && val(!(!bst2_L && bst3_L)) || X(l_S, m_S, bst_K, bst1_K, k_K, false, false, 0, l'_R, b_R)) && val(!((bst_K && !bst1_K) && (k_K - l'_R) mod 4 < 2)) || X(l_S, m_S, false, false, 0, bst2_L, bst3_L, k_L, l'_R, insert(true, k_K mod 2, b_R))) && val(!((bst_K && !bst1_K) && !((k_K - l'_R) mod 4 < 2))) || X(l_S, m_S, false, false, 0, bst2_L, bst3_L, k_L, l'_R, b_R)) && val(!(m_S < 2)) || X(l_S, m_S + 1, bst_K, bst1_K, k_K, bst2_L, bst3_L, k_L, l'_R, b_R)) && val(!(m_S < 2)) || X(l_S, m_S + 1, bst_K, bst1_K, k_K, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
+  pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
+  pbes_system::pbes_expression x = r(phi, sigma);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
-  test_substitutions();
+  test_substitutions1();
   test_substitutions2();
+  test_substitutions3();
 
   return 0;
 }

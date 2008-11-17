@@ -136,11 +136,11 @@ struct pbes_expression_builder
   /// value is used for rebuilding the expression.
   term_type visit(term_type e, Arg& arg1)
   {
+    typedef core::term_traits<term_type> tr;
+    
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
+std::cout << "<visit>" << tr::pp(e) << " " << e << std::endl;
 #endif
-
-    typedef core::term_traits<Term> tr;
 
     term_type result;
 
@@ -225,7 +225,7 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << core::pp(result) << " " << result << std::endl;
+std::cout << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;
@@ -340,11 +340,11 @@ struct pbes_expression_builder<Term, void>
   /// value is used for rebuilding the expression.
   term_type visit(term_type e)
   {
-#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
-#endif
+    typedef core::term_traits<term_type> tr;
 
-    typedef core::term_traits<Term> tr;
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+std::cout << "<visit>" << tr::pp(e) << " " << e << std::endl;
+#endif
 
     term_type result;
 
@@ -429,7 +429,7 @@ std::cout << "<visit>" << core::pp(e) << " " << e << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << core::pp(result) << " " << result << std::endl;
+std::cout << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;

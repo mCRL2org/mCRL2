@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   );
   rewriter r(data_spec);
   number_postfix_generator generator("x_");
-  data_enumerator<rewriter, number_postfix_generator> e(data_spec, r, generator);
+  data_enumerator<number_postfix_generator> e(data_spec, r, generator);
 
   data_variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");

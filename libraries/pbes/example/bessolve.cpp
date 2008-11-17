@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   typedef data::rewriter my_data_rewriter;
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+  typedef data::data_enumerator<number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;

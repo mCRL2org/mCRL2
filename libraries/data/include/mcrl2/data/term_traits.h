@@ -79,6 +79,12 @@ namespace core {
     {
       return find_all_data_variables(d).empty();
     }
+
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t);
+    }
   };
 
   template <>
@@ -143,6 +149,12 @@ namespace core {
     bool is_constant(term_type d)
     {
       return d.variables().empty();
+    }
+
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t) + " " + core::pp(t.variables());
     }
   };
   

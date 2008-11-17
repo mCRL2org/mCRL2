@@ -173,13 +173,13 @@ namespace detail {
   }
 
   /// Parses a data variable.
-  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat;".
+  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat".
   /// \param[in] data_spec A data specification
   /// \result The parsed variable
   inline
   data_variable parse_data_variable(std::string var_decl, std::string data_spec = "")
   {
-    std::istringstream in(var_decl);
+    std::istringstream in(var_decl + ";");
     atermpp::aterm_list v = core::parse_data_vars(in);
     assert(v.size() == 1);
     data_variable_list w = core::type_check_data_vars(v, parse_data_specification(data_spec));

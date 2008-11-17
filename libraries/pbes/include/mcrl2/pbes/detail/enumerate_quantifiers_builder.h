@@ -193,6 +193,12 @@ for (typename MapSubstitution::const_iterator i = sigma.begin(); i != sigma.end(
 std::cout << "-------------" << std::endl;
 #endif
 
+    PbesTerm Rphi = pbesr(phi, sigma);
+    if (core::term_traits<PbesTerm>::is_constant(Rphi))
+    {
+      return Rphi;
+    }
+
     typedef typename DataEnumerator::variable_type variable_type;
     typedef typename DataEnumerator::term_type data_term_type;
     typedef PbesTerm pbes_term_type;

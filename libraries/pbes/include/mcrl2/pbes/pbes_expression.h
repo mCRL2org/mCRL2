@@ -528,10 +528,11 @@ namespace core {
     static inline 
     bool is_prop_var(term_type t) { return pbes_system::pbes_expr::is_propositional_variable_instantiation(t); }
 
-    static inline
-    propositional_variable_type prop_var(const string_type& name, const data_term_sequence_type& parameters)
+    template <typename Iter>
+    static
+    term_type prop_var(const string_type& name, Iter first, Iter last)
     {
-      return propositional_variable_type(name, parameters);
+      return propositional_variable_type(name, data_term_sequence_type(first, last));
     }
       
     static inline
@@ -559,6 +560,18 @@ namespace core {
     term_type variable2term(variable_type v)
     {
       return v;
+    }
+
+    static inline
+    term_type dataterm2term(data_term_type t)
+    {
+      return t;
+    }  
+
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t);
     }
   };
 

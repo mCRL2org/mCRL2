@@ -29,7 +29,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
 typedef data::rewriter my_data_rewriter;
-typedef data::data_enumerator<data::rewriter, data::number_postfix_generator> my_enumerator;
+typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
 typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
 
 class pbes_constelm_tool: public core::filter_tool

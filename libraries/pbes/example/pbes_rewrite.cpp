@@ -2,7 +2,7 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
 
 #include <iostream>
 #include <map>
@@ -28,7 +28,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
-typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
+typedef data::data_enumerator<number_postfix_generator> my_enumerator;
 typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_simplify_rewriter;
 typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 

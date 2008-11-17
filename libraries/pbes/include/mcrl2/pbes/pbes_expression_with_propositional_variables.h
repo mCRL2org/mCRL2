@@ -47,7 +47,7 @@ namespace pbes_system {
       ///
       pbes_expression_with_propositional_variables(pbes_expression expression,
                                                    data::data_variable_list variables,
-                                                   propositional_variable_instantiation_list propositional_variables)
+                                                   propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
         : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
       {}
 
@@ -179,10 +179,15 @@ namespace core {
                       );
     }
 
-    static inline
-    propositional_variable_type prop_var(const string_type& name, const data_term_sequence_type& parameters)
+    template <typename Iter>
+    static
+    term_type prop_var(const string_type& name, Iter first, Iter last)
     {
-       return tr::prop_var(name, parameters);
+      pbes_system::pbes_expression_with_variables tmp = tr::prop_var(name, first, last);
+      pbes_system::propositional_variable_instantiation_list v;
+      pbes_system::propositional_variable_instantiation elem = tmp;
+      v = atermpp::push_front(v, elem);
+      return term_type(tmp, tmp.variables(), v);
     }
 
     static inline
@@ -210,6 +215,18 @@ namespace core {
     term_type variable2term(variable_type v)
     {
       return tr::variable2term(v);
+    }
+
+    static inline
+    term_type dataterm2term(data_term_type t)
+    {
+      return term_type(t, t.variables());
+    }    
+   
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t) + " " + core::pp(t.propositional_variables());
     }
   };
 

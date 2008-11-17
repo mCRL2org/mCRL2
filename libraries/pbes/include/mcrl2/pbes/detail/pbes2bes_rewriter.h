@@ -100,7 +100,7 @@ namespace detail {
   {
     public:
       typedef pbes_expression_with_propositional_variables term_type;
-      typedef data::data_enumerator<data::rewriter, data::number_postfix_generator> pbes2bes_enumerator;
+      typedef data::data_enumerator<data::number_postfix_generator> pbes2bes_enumerator;
       typedef data::data_expression_with_variables data_term_type;
       typedef data::data_variable variable_type;
 

@@ -11,6 +11,8 @@
 
 #include "boost.hpp" // precompiled headers
 
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+
 #define NAME "pbes2bes"
 #define AUTHOR "Alexander van Dam, Wieger Wesselink"
 
@@ -238,7 +240,7 @@ class pbes2bes_tool: public core::filter_tool
         data::number_postfix_generator name_generator(prefix);
         
         // data enumerator
-        data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(p.data(), datar, name_generator);
+        data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
         
         // pbes rewriter
         pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);   

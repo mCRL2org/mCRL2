@@ -166,6 +166,8 @@ void test_accessors()
 
 void test_pbes_expression_with_variables()
 {
+  typedef core::term_traits<pbes_expression_with_variables> tr;
+
   const std::string VARSPEC =
     "datavar         \n"
     "  m: Nat;       \n"
@@ -179,10 +181,19 @@ void test_pbes_expression_with_variables()
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1) && Y(m)", VARSPEC);
   pbes_expression_with_variables y(x);
   BOOST_CHECK(y.variables().size() == 0);
+  std::set<data::data_variable> v = find_free_variables(y);
+  y.variables() = data::data_variable_list(v.begin(), v.end());
+  BOOST_CHECK(y.variables().size() == 2);
   
   x = parse_pbes_expression("forall k:Nat.X(true, 2) && Y(n+1) && Y(k)", VARSPEC);
   pbes_expression_with_variables z(x);
   BOOST_CHECK(z.variables().size() == 0);
+  v = find_free_variables(z);
+  z.variables() = data::data_variable_list(v.begin(), v.end());
+  BOOST_CHECK(z.variables().size() == 1);
+  
+  pbes_expression_with_variables yz = tr::and_(y, z);
+  BOOST_CHECK(yz.variables().size() == 2);
 }
 
 void test_pbes_expression_with_propositional_variables()

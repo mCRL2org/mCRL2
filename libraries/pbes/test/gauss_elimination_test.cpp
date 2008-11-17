@@ -73,7 +73,7 @@ void test_gauss_elimination()
   specification spec    = lps::mcrl22lps(ABP_SPECIFICATION);
   modal::state_formula formula = modal::detail::mcf2statefrm(FORMULA, spec);
 
-  typedef data::data_enumerator<data::rewriter, data::number_postfix_generator> my_enumerator;
+  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
   typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_rewriter;
   typedef pbes_system::bes_equation_solver<my_rewriter> bes_solver;
     

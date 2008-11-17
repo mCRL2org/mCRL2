@@ -65,28 +65,6 @@ namespace data {
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
 
-		  /// \brief Rewrites a data expression.
-		  /// \param d The term to be rewritten.
-		  /// \return The normal form of d.
-		  // Question: is this function guaranteed to terminate?
-		  ///
-		  term_type operator()(const term_type& d) const
-		  {
-		    return m_rewriter.get()->rewrite(d);
-		  }
-
-		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-		  /// to data variables.
-		  /// \param d A term.
-		  /// \param sigma A substitution function.
-		  /// \return The normal form of the term.
-		  ///
-		  template <typename SubstitutionFunction>
-		  term_type operator()(const term_type& d, SubstitutionFunction sigma) const
-		  {
-		    return this->operator()(replace_data_variables(d, sigma));
-		  }
-
       /// Adds an equation to the rewrite rules.
       /// \param[in] eq The equation that is added.
       /// \return Returns true if the operation succeeded.
@@ -114,11 +92,78 @@ namespace data {
   };
 
   /// Rewriter that operates on data expressions.
-  typedef basic_rewriter<data_expression> rewriter;
+  class rewriter: public basic_rewriter<data_expression>
+  {
+    public:
+      /// Constructor.
+      ///
+      /// \param d A data specification.
+      /// \param s A rewriter strategy.
+      rewriter(data_specification d = default_data_specification(), strategy s = jitty)
+        : basic_rewriter<data_expression>(d, s)
+      { }
 
-  /// Rewriter that operates on data expressions with variables.
-  typedef basic_rewriter<data_expression_with_variables> rewriter_with_variables;
+		  /// \brief Rewrites a data expression.
+		  /// \param d The term to be rewritten.
+		  /// \return The normal form of d.
+		  ///
+		  data_expression operator()(const data_expression& d) const
+		  {
+		    return m_rewriter.get()->rewrite(d);
+		  }
 
+		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+		  /// to data variables.
+		  /// \param d A term.
+		  /// \param sigma A substitution function.
+		  /// \return The normal form of the term.
+		  ///
+		  template <typename SubstitutionFunction>
+		  data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
+		  {
+		    return this->operator()(replace_data_variables(d, sigma));
+		  }
+  };
+
+  /// Rewriter that operates on data expressions.
+  class rewriter_with_variables: public basic_rewriter<data_expression_with_variables>
+  {
+    public:
+      /// Constructor.
+      ///
+      /// \param d A data specification.
+      /// \param s A rewriter strategy.
+      rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
+        : basic_rewriter<data_expression_with_variables>(d, s)
+      { }
+
+		  /// \brief Rewrites a data expression.
+		  /// \param d The term to be rewritten.
+		  /// \return The normal form of d.
+		  ///
+		  data_expression_with_variables operator()(const data_expression_with_variables& d) const
+		  {
+		    data_expression t = m_rewriter.get()->rewrite(d);
+		    std::set<data_variable> v = find_all_data_variables(t);
+		    return data_expression_with_variables(t, data_variable_list(v.begin(), v.end()));
+		  }
+
+		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+		  /// to data variables.
+		  /// \param d A term.
+		  /// \param sigma A substitution function.
+		  /// \return The normal form of the term.
+		  ///
+		  template <typename SubstitutionFunction>
+		  data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
+		  {
+		    data_expression t = this->operator()(replace_data_variables(d, sigma));
+		    std::set<data_variable> v = find_all_data_variables(t);
+		    data_expression_with_variables result(t, data_variable_list(v.begin(), v.end()));
+		    return result;
+		  }
+  };
+  
   /// Function object that turns a map of substitutions to variables into a substitution function.
   template <typename SubstitutionMap>
   class rewriter_map: public SubstitutionMap
@@ -161,16 +206,6 @@ namespace data {
         return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
       }
   };
-
-  /// Creates a rewriter that contains rewrite rules for the standard data types like
-  /// Pos, Nat and Int.
-  /// \param[in] strategy The rewriter strategy
-  /// \return The created rewriter
-  inline
-  rewriter default_data_rewriter(rewriter::strategy strategy = rewriter::jitty)
-  {
-    return rewriter(default_data_specification(), strategy);
-  }
 
 } // namespace data
 

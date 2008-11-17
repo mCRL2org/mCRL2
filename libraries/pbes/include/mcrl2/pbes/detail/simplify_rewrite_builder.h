@@ -53,31 +53,6 @@ namespace detail {
     {
       return m_data_rewriter(d);
     }
-    
-    // Is called in the case rewriting is done with a substitution function.
-    template <typename T>
-    data_term_sequence_type rewrite(const data_term_sequence_type& v, T& sigma)
-    {
-      std::vector<data_term_type> w;
-      for (typename data_term_sequence_type::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        w.push_back(rewrite(*i, sigma));
-      }
-      return data_term_sequence_type(w.begin(), w.end());
-    }
-    
-    // Is called in the case rewriting is done without a substitution function.
-    template <typename T>
-    data_term_sequence_type rewrite(const data_term_sequence_type& v, no_substitution& n)
-    {
-      std::vector<data_term_type> w;
-      for (typename data_term_sequence_type::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        
-        w.push_back(rewrite(*i, n));
-      }
-      return data_term_sequence_type(w.begin(), w.end());
-    }
 
     /// Constructor.
     ///
@@ -89,7 +64,8 @@ namespace detail {
     ///
     term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
     {
-      data_term_type result = rewrite(d, sigma);
+      typedef core::term_traits<data_term_type> tr1;     
+      term_type result = tr::dataterm2term(rewrite(d, sigma));
       return result;
     }
 
@@ -221,7 +197,14 @@ namespace detail {
     ///
     term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, SubstitutionFunction& sigma)
     {
-      return typename tr::propositional_variable_type(tr::name(v), rewrite(tr::param(v), sigma));
+      std::vector<data_term_type> d;
+      data_term_sequence_type e = tr::param(v);
+      for (typename data_term_sequence_type::const_iterator i = e.begin(); i != e.end(); ++i)
+      {
+        d.push_back(rewrite(*i, sigma));
+      }
+      term_type result = tr::prop_var(tr::name(v), d.begin(), d.end());
+      return result;
     }
    
     /// Applies this builder to the term x.
