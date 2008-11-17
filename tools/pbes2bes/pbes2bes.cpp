@@ -11,7 +11,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 
 #define NAME "pbes2bes"
 #define AUTHOR "Alexander van Dam, Wieger Wesselink"
