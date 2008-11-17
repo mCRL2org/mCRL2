@@ -74,6 +74,20 @@ namespace mcrl2 {
               add(mcrl2::lts::lts_eq_trace, "modulo_trace_equivalence").
               add(mcrl2::lts::lts_eq_weak_trace, "modulo_weak_trace_equivalence").
               add(mcrl2::lts::lts_eq_isomorph, "isomorphism");
+
+            tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
+
+            storage_types.
+              add(mcrl2::lts::lts_none, "none").
+              add(mcrl2::lts::lts_mcrl2, "mCRL2").
+              add(mcrl2::lts::lts_aut, "Aldebaran").
+              add(mcrl2::lts::lts_mcrl, "mCRL").
+              add(mcrl2::lts::lts_svc, "SVC").
+              add(mcrl2::lts::lts_fsm, "FSM").
+#ifdef USE_BCG
+              add(mcrl2::lts::lts_bcg, "BCG").
+#endif
+              add(mcrl2::lts::lts_dot, "DOT");
 #endif
 
               return true;
