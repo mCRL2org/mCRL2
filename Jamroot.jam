@@ -26,6 +26,8 @@
 #
 #    --no-display-notice            configuration notice message are not printed
 #
+#    --install-boost-headers        installs the Boost header files (temporary measure until Boost 1.35 has become mainstream)
+#
 #   Installation:
 #
 #    --prefix                       directory relative to which tools/libraries, documentation and examples
@@ -145,16 +147,26 @@ if [ path.exists ./tools ] {
       alias install : $(targets) ;
     }
     else {
+      local boost-headers = [ MATCH --(install-boost-headers) : [ modules.peek : ARGV ] ] ;
+
       # Complete install
-      alias install : /tools/$(tools)//install /libraries//install examples ;
+      alias install : /tools/$(tools)//install /libraries//install examples $(boost-headers) ;
+
+      local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
+      local header-location   = [ path.join [ get-install-root ] "include" ] ;
+
+      install install-boost-headers : [ set.difference $(all-boost-headers) :
+        [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
+              : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
 
       # General examples
       install-data examples
               : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
-              : <location>$(datadir)
-                <install-source-root>./examples
+              : <install-source-root>./examples
                 <data-sub-location>examples
               ;
+
+      explicit install-boost-headers ;
     }
   }
 }
