@@ -68,7 +68,7 @@ namespace mcrl2 {
       void gsWarningMsg(const char *Format, ...);
       /// \brief Function for printing debug messages.
       void gsDebugMsg(const char *Format, ...);
-
+      /// \brief Function for printing debug messages.
       void gsDebugMsgFunc(const char *FuncName, const char *Format, ...);
 
       /// \brief Function for printing debug messages.
