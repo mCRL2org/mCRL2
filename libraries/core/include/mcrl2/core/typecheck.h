@@ -88,7 +88,10 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
  *  \param[in] spec An ATerm representation of an mCRL2 process specification,
  *             LPS, PBES or data specification that adheres to the
  *             internal ATerm structure after type checking.
- *  \param[in] Vars A table of variables that may occur in the data expression.
+ *  \param[in] Vars A table of variables that may occur in the data expression, where:
+ *             \li each key is an mCRL2 identifier
+ *             \li each value is an mCRL2 sort expression that adheres to
+ *                 the internal ATerm structure after type checking
  *  \post      data_expr is type checked using the declaration from spec
  *             and, if sort_expr is not NULL, it is type checked as
  *             being of type sort_expr.
