@@ -44,6 +44,7 @@
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
+/// \brief The main namespace for the PBES library.
 namespace mcrl2 {
 
 namespace pbes_system {

@@ -79,7 +79,7 @@ class pbes_expression: public atermpp::aterm_appl
 ///
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
-/// Accessor functions and predicates for pbes expressions.
+/// \brief The namespace for predicates on pbes expressions.
 namespace pbes_expr {
 
   /// \brief Returns true if the term t is equal to true
@@ -138,6 +138,7 @@ namespace pbes_expr {
 
 } // namespace pbes_expr
 
+/// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors {
 
   /// Conversion of a pbes expression to a data expression.

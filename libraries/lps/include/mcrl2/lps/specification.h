@@ -33,6 +33,7 @@
 
 namespace mcrl2 {
 
+/// \brief The main namespace for the LPS library.
 namespace lps {
 
 /// \brief Linear process specification.

@@ -18,6 +18,7 @@
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 
+/// \brief The main namespace for the ATerm++ library.
 namespace atermpp
 {
   /// Base class for aterm.
