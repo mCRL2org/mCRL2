@@ -9,6 +9,7 @@ project libraries/pbes/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
+exe paritygame   : paritygame.cpp : ;
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
 exe bessolve     : bessolve.cpp : ;
@@ -19,6 +20,7 @@ exe pbesrewr     : pbesrewr.cpp : ;
 
 install dist
    :
+     paritygame
      bisimulation
      lps2pbes
      bessolve
