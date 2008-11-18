@@ -29,7 +29,7 @@ namespace grape
      */
     struct texture_pool
     {
-      GLunsigned int  *m_textures;
+      GLuint  *m_textures;
     };
 
     /**

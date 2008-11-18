@@ -284,7 +284,7 @@ void grape::grapeapp::init_textures(void)
   }
 
   // create textures
-  g_pool.m_textures = new GLunsigned int[256];
+  g_pool.m_textures = new GLuint[256];
   glGenTextures(256, &g_pool.m_textures[0]);
   unsigned char *src = 0;
   int img_width, img_height;
