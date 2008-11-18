@@ -707,7 +707,6 @@ namespace mcrl2 {
 
         /**
          * \brief Throws standard formatted std::runtime_error exception
-         * \param[in] message the exception message
          *
          * The following example shows the output of this method for a tool named test.
          *
