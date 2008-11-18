@@ -114,24 +114,17 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
-      else if (is_data_variable(*del_i))
-      { // If p is a freevar
-        core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
-        core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
-        core::gsErrorMsg("Computation aborted.\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*del_i) << std::endl;
-        throw mcrl2::runtime_error("exit!");
-      }
       else if (is_data_application(*del_i))
       { // If p is a data application
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
+      // else if (is_data_variable(*del_i))
+      // { // If p is a freevar
+      // }
       else
       {
-        core::gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*del_i) << std::endl;
-        throw mcrl2::runtime_error("exit!");
+        throw mcrl2::runtime_error(std::string("pbes2bes: could not rename the variable ") + core::pp(propositional_variable_instantiation(propvar_name, del)));
       }
     }
   }

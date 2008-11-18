@@ -11,6 +11,7 @@
 
 #include <set>
 #include <iostream>
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbes2bes_rewriter.h"
@@ -56,8 +57,11 @@ namespace pbes_system {
       /// The rewriter.
       pbes2bes_rewriter R;
 
+      /// The number of generated equations.
+      int equation_count;
+
       /// Propositional variable instantiations that need to be handled.
-      atermpp::vector<propositional_variable_instantiation> todo;
+      atermpp::set<propositional_variable_instantiation> todo;
         
       /// Propositional variable instantiations that have been handled.
       atermpp::set<propositional_variable_instantiation> done;
@@ -74,7 +78,7 @@ namespace pbes_system {
 
     public:
       pbes2bes_algorithm(data::data_specification data_spec)
-        : R(data_spec)
+        : R(data_spec), equation_count(0)
       {}
 
       void run(const pbes<>& p)
@@ -89,30 +93,31 @@ namespace pbes_system {
         pbes_expression_with_propositional_variables Xinit = R(p.initial_state());
         assert(Xinit.propositional_variables().size() == 1);
         init = Xinit;
-        todo.push_back(Xinit.propositional_variables().front());
+        todo.insert(Xinit.propositional_variables().front());
         while (!todo.empty())
         {
-          propositional_variable_instantiation X = todo.back();
-std::cout << "todo = " << core::pp(X) << std::endl;
-          todo.pop_back();
+          propositional_variable_instantiation X = *todo.begin();         
+          todo.erase(todo.begin());
           done.insert(X);
           propositional_variable_instantiation X_e = R(X);
           int index = equation_index[X.name()];
           const pbes_equation& eqn = p.equations()[index];
           pbes2bes_substitution_function sigma = make_pbes2bes_substitution(eqn.variable().parameters(), X.parameters());
-std::cout << "sigma = \n" << sigma << std::endl;
           pbes_expression phi = eqn.formula();
-std::cout << "Rewriting phi = " << core::pp(phi) << std::endl;
           pbes_expression_with_propositional_variables psi_e = R(phi, sigma);
           for (propositional_variable_instantiation_list::iterator i = psi_e.propositional_variables().begin(); i != psi_e.propositional_variables().end(); ++i)
           {
             if (done.find(*i) == done.end())
             {
-              todo.push_back(*i);
+              todo.insert(*i);
             }
           }         
           pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::data_variable_list()), psi_e);
           E[index].push_back(new_eqn);
+          if (++equation_count % 1000 == 0)
+          {
+            core::gsVerboseMsg("At equation %d\n", equation_count);
+          }
         }
       }
       

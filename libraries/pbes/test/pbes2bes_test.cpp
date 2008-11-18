@@ -9,6 +9,7 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 #define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
 
 #include <string>
@@ -32,9 +33,10 @@ inline
 pbes<> pbes2bes(const pbes<>& p, bool finite = true)
 {
   data::rewriter datar(p.data());
+  data::rewriter_with_variables datarv(p.data());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<> datae(p.data(), datar, generator);
-  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, data::data_enumerator<> > pbesr(datar, datae);
+  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);
   pbes<> result = (finite ? do_finite_algorithm(p, pbesr) : do_lazy_algorithm(p, pbesr));
   return result;
 }
@@ -192,7 +194,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 }
 
 void test_pbes2bes()
-{
+{ 
   test_pbes(test1, true, false);
   test_pbes(test2, true, true);
   test_pbes(test3, true, false);

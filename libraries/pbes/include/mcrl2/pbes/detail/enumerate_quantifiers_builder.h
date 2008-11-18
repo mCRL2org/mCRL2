@@ -251,14 +251,19 @@ std::cout << "-------------" << std::endl;
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cout << "---\nchoose y = " << core::pp(y) << ", k = " << k << ", xk = " << core::pp(xk) << std::endl;
 #endif
-        bool is_constant = false;
+        bool is_constant = true;
 
         // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
         atermpp::vector<data_term_type> Dk = D[k];
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
-std::cout << "enumerating y: " << core::pp(y) << std::endl;
-#endif
         atermpp::vector<data_term_type> z = datae.enumerate(y);
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+std::cout << "enumerating " << core::pp(y) << " -> [";
+for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+{
+  std::cout << core::pp(*i) << ", ";
+}
+std::cout << "]" << std::endl;
+#endif
         for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
         {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG

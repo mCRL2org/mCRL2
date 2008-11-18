@@ -13,6 +13,7 @@
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_PROPOSITIONAL_VARIABLES_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
+#include "mcrl2/atermpp/make_list.h"
 
 namespace mcrl2 {
 
@@ -183,11 +184,9 @@ namespace core {
     static
     term_type prop_var(const string_type& name, Iter first, Iter last)
     {
-      pbes_system::pbes_expression_with_variables tmp = tr::prop_var(name, first, last);
-      pbes_system::propositional_variable_instantiation_list v;
+      pbes_system::pbes_expression_with_variables tmp = core::term_traits<pbes_system::pbes_expression_with_variables>::prop_var(name, first, last);
       pbes_system::propositional_variable_instantiation elem = tmp;
-      v = atermpp::push_front(v, elem);
-      return term_type(tmp, tmp.variables(), v);
+      return term_type(tmp, tmp.variables(), atermpp::make_list(elem));
     }
 
     static inline
@@ -226,7 +225,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + core::pp(t.propositional_variables());
+      return core::pp(t) + " " + core::pp(t.variables()) + " " + core::pp(t.propositional_variables());
     }
   };
 

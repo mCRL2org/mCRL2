@@ -45,6 +45,8 @@ namespace detail {
     template <typename T>
     data_term_type rewrite(data_term_type d, T& sigma)
     {
+//data_term_type result = m_data_rewriter(d, sigma);
+//std::cout << m_data_rewriter.type() << "<d>" << core::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
       return m_data_rewriter(d, sigma);
     }
     
@@ -64,9 +66,7 @@ namespace detail {
     ///
     term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
     {
-      typedef core::term_traits<data_term_type> tr1;     
-      term_type result = tr::dataterm2term(rewrite(d, sigma));
-      return result;
+      return tr::dataterm2term(rewrite(d, sigma));
     }
 
     /// Visit true node.

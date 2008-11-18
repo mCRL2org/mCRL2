@@ -108,6 +108,28 @@ namespace core {
     return boost::xpressive::regex_replace(text, boost::xpressive::sregex::compile(src), dest);
   }
 
+  /// \brief Split a string using a regular expression separator.
+  std::vector<std::string> regex_split(const std::string& text, const std::string& sep)
+  {
+    std::vector<std::string> result;
+    // find multiple line endings
+    boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile(sep);
+    // the -1 below directs the token iterator to display the parts of
+    // the string that did NOT match the regular expression.
+    boost::xpressive::sregex_token_iterator cur( text.begin(), text.end(), paragraph_split, -1 );
+    boost::xpressive::sregex_token_iterator end;
+    for( ; cur != end; ++cur )
+    {
+      std::string word = *cur;
+      boost::trim(word);
+      if (word.size() > 0)
+      {
+        result.push_back(word);
+      }
+    }
+    return result;
+  }
+
 } // namespace core
 
 } // namespace mcrl2

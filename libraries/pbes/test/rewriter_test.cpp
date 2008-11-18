@@ -240,6 +240,7 @@ void test_enumerate_quantifiers_rewriter()
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
+  test_expressions(R, "forall n: Nat.val(!(n < 1)) || Y(n)"                             , "Y(0)");
   test_expressions(R, "false"                                                           , "val(false)");
   test_expressions(R, "true"                                                            , "val(true)");
   test_expressions(R, "true && true"                                                    , "val(true)");
@@ -323,6 +324,14 @@ void test_substitutions2()
     ;
   sigma = "b: Bool := true; n: Nat := 0";
   test_expressions(R, "forall c: Bool. X(c, n)", "X(true, 0) && X(false, 0)", var_decl, sigma);
+
+  var_decl =
+    "datavar         \n"
+    "  n: Nat;       \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Nat;       \n"
+    ;
 }
 
 void test_substitutions3()
@@ -404,11 +413,11 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_simplifying_rewriter();
+  //test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
-  test_substitutions1();
-  test_substitutions2();
-  test_substitutions3();
+  //test_substitutions1();
+  //test_substitutions2();
+  //test_substitutions3();
 
   return 0;
 }

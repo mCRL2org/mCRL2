@@ -39,6 +39,7 @@ namespace detail {
     typedef enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbes2bes_substitution_function> super;
     typedef typename super::term_type term_type;
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
+    typedef core::term_traits<term_type> tr;
 
     pbes2bes_rewrite_builder(DataRewriter& datar, DataEnumerator& datae)
       : super(datar, datae)
@@ -84,7 +85,9 @@ namespace detail {
     ///
     term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbes2bes_substitution_function& sigma)
     {
+//std::cout << "<visit propvar>" << tr::pp(x) << std::endl;
       term_type y = super::visit_propositional_variable(x, v, sigma);
+//std::cout << "<visit result> " << tr::pp(y) << " is_constant = " << tr::is_constant(y) << std::endl;
       return term_type(rename(y), y.variables(), atermpp::make_list(y));
     }
   };
@@ -103,6 +106,7 @@ namespace detail {
       pbes2bes_rewriter(const data_specification& data_spec)
        :
          datar(data_spec),
+         datarv(data_spec),
          name_generator("UNIQUE_PREFIX"),
          datae(data_spec, datar, name_generator)
       {}     
@@ -114,7 +118,7 @@ namespace detail {
       term_type operator()(const term_type& x)
       {
         pbes2bes_substitution_function sigma;
-        pbes2bes_rewrite_builder<data::rewriter, pbes2bes_enumerator> r(datar, datae);
+        pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
         return r(x, sigma);
       }
       
@@ -125,12 +129,13 @@ namespace detail {
       ///
       term_type operator()(const term_type& x, pbes2bes_substitution_function& sigma)
       {
-        pbes2bes_rewrite_builder<data::rewriter, pbes2bes_enumerator> r(datar, datae);
+        pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
         return r(x, sigma);
       }
 
     protected:      
       data::rewriter datar;
+      data::rewriter_with_variables datarv;
       data::number_postfix_generator name_generator;
       pbes2bes_enumerator datae;     
   };
