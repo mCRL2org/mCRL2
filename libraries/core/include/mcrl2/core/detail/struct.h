@@ -145,18 +145,43 @@ ATermAppl gsMakeSortArrow4(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
 ///\return Internal representation of the sort expression.
 ATermAppl gsMakeSortArrowList(ATermList SortExprs, ATermAppl SortExprResult);
 
-///\pre SortExpr is a sort expression
-///\return the result of the sort expression
+///\pre     SortExpr is a sort expression
+///\return  The result of the sort expression, in the following sense:
+///         \li if SortExpr is not an arrow sort, then the result is SortExpr
+///         \li if SortExpr is an arrow sort, i.e. an expression of the form <tt>SortArrow([S0,...,Sn], S)</tt>,
+///             then the result is the result of <tt>S</tt>
+///
+///\detail Some example arguments and return values,
+///        where <tt>A</tt>,<tt>B</tt>,<tt>C</tt>,<tt>A0</tt>,...,<tt>An</tt> and <tt>B0</tt>,...,<tt>Bm</tt> are all non-arrow sorts:
+///        \li <tt>A</tt>: returns <tt>A</tt>
+///        \li <tt>SortArrow([A0,...An], B)</tt>: returns <tt>B</tt>
+///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>C</tt>
 ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
 
-///\pre SortExpr is a sort expression
-///\return the domain of the sort expression
+///\pre    SortExpr is a sort expression
+///\return The domain of the sort expression, in the following sense:
+///        \li if SortExpr is not an arrow sort, then the domain is the empty list <tt>[]</tt>
+///        \li if SortExpr is an arrow sort, i.e. an expression of the form <tt>SortArrow([S0,....,Sn], S)</tt>,
+///            then the domain is the list <tt>[S0,...,Sn]</tt> concatenated with the domain of <tt>S</tt>
+///
+///\detail Some example arguments and return values,
+///        where <tt>A</tt>,<tt>B</tt>,<tt>C</tt>,<tt>A0</tt>,...,<tt>An</tt> and <tt>B0</tt>,...,<tt>Bm</tt> are all non-arrow sorts:
+///        \li <tt>A</tt>: returns <tt>[]</tt>
+///        \li <tt>SortArrow([A0,...An], B)</tt>: returns <tt>[A0,...,An]</tt>
+///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>[A0,...,An,B0,...,Bm]</tt>
 ATermList gsGetSortExprDomain(ATermAppl SortExpr);
 
-///\pre SortExpr is a sort expression
-///\return A list with the domains of the sort expression,
-///     so if we have a sort expression of the form
-///     AxB->(CxD->E), we return [[A,B],[C,D]]
+///\pre    SortExpr is a sort expression
+///\return The domains of the sort expression, in the following sense:
+///        \li if SortExpr is not an arrow sort, then the domains is the empty list []
+///        \li if SortExpr is an arrow sort, i.e. an expression of the form <tt>SortArrow([S0,...,Sn], S)</tt>,
+///            then the domains is the list <tt>[S0,...,Sn]</tt> inserted at the head of the domains of <tt>S</tt>
+///
+///\detail Some example arguments and return values,
+///        where <tt>A</tt>,<tt>B</tt>,<tt>C</tt>,<tt>A0</tt>,...,<tt>An</tt> and <tt>B0</tt>,...,<tt>Bm</tt> are all non-arrow sorts:
+///        \li <tt>A</tt>: returns <tt>[]</tt>
+///        \li <tt>SortArrow([A0,...An], B)</tt>: returns <tt>[[A0,...,An]]</tt>
+///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>[[A0,...,An],[B0,...,Bm]]</tt>
 ATermList gsGetSortExprDomains(ATermAppl SortExpr);
 
 // Data expressions
