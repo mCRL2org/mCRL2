@@ -284,8 +284,8 @@ bool SQuADt::OnInit() {
                               wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
 
             if (file_picker.ShowModal() == wxID_OK) {
-              path_to_try = boost::filesystem::path(
-                      std::string(file_picker.GetPath().fn_str())).parent_path();
+              path_to_try = parent_path(boost::filesystem::path(
+                              std::string(file_picker.GetPath().fn_str())));
 
               tester::query_with_path(**t, std::string(file_picker.GetPath().fn_str()));
             }
