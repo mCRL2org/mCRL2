@@ -377,6 +377,7 @@ void XSimMain::Unregistered()
 void XSimMain::Initialise(ATermList Pars)
 {
     state_varnames = ATmakeList0();
+    stateview->DeleteAllItems();
     for (int i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
     {
 	    wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(Pars),0)))
