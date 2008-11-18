@@ -556,9 +556,10 @@ def generate_function_code(sorts, functions, function):
         assert s.expr[0] == "sortarrow"
         domain = s.expr[1]
         if domain[0] == "labelled_domain":
-          domain[0] = "domain"
-          for (index,d) in enumerate(domain[1]):
-            domain[1][i] = d[1]
+          new_domain = ["domain", []]
+          for i in domain[1]:
+            new_domain[1] += [i]
+          domain = new_domain
         for d in domain[1]:
           add_sort_args = add_to_comma_sep_string(add_sort_args, "%s()" % add_namespace(get_label(sorts, d[0])))
         code += "        result.push_back(%s(%s));\n" % (function[1].label, add_to_comma_sep_string(sortargs,add_sort_args))
@@ -689,6 +690,7 @@ def generate_functionspec_code(sorts, functionspec):
       label = f[1]
       sortexprs = f[2]
       code += generate_function_constructors(sorts, id, label, sortexprs)
+    
     code += generate_constructors_code(sorts, merge_duplicates(functionspec.constructors))
     code += generate_mappings_code(sorts, merge_duplicates(functionspec.mappings))
     return code
@@ -1044,10 +1046,12 @@ class Result(Parsing.Nonterm):
         # code.
         old_functions = copy.deepcopy(self.spec.functions)
 
+        new_functions = self.spec.functions
+        self.spec.functionspec.functions = copy.deepcopy(self.spec.functionspec.functions) # To prevent undesired sharing with mappings and constructors
         for f in functions_cache:
-          for g in self.spec.functions:
+          for g in self.spec.functionspec.functions:
             if f[0].string == g[0].string and f[1].label == g[1].label:
-              self.spec.functions += [f]
+              self.spec.functionspec.functions += [f]
               break
 
         functions_cache = functions_cache + old_functions
@@ -1055,6 +1059,7 @@ class Result(Parsing.Nonterm):
         current_sort = self.spec.sorts[0][0]
         sorts_cache += self.spec.sorts
         sorts_to_functions[current_sort] = self.spec.functions
+
 
         self.spec.code = generate_sortspec_code(self.spec.sortspec) + \
                     generate_functionspec_code(self.spec.sorts + sorts_cache, self.spec.functionspec) + \

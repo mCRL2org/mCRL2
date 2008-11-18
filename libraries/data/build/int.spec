@@ -13,7 +13,7 @@ map Nat2Int <"nat2int"> : Nat <"arg"> -> Int;
     Int2Pos <"int2pos"> : Int <"arg"> -> Pos;
     <= <"less_equal">:Int <"left"> #Int <"right">->Bool;
     < <"less">:Int <"left"> #Int <"right">->Bool;
-    >= <"geq">:Int <"left"> #Int <"right">->Bool;
+    >= <"greater_equal">:Int <"left"> #Int <"right">->Bool;
     > <"greater">:Int <"left"> #Int <"right">->Bool;
     max <"max">:Pos <"left"> #Int <"right">->Pos;
     max <"max">:Int <"left"> #Pos <"right">->Pos;

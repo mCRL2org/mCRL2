@@ -181,16 +181,16 @@ namespace mcrl2 {
 
       // Function symbol >=
       inline
-      function_symbol geq()
+      function_symbol greater_equal()
       {
-        //static function_symbol geq(">=", function_sort(sort_pos::pos(), sort_pos::pos(), sort_bool_::bool_()));
-        function_symbol geq(">=", function_sort(sort_pos::pos(), sort_pos::pos(), sort_bool_::bool_()));
-        return geq;
+        //static function_symbol greater_equal(">=", function_sort(sort_pos::pos(), sort_pos::pos(), sort_bool_::bool_()));
+        function_symbol greater_equal(">=", function_sort(sort_pos::pos(), sort_pos::pos(), sort_bool_::bool_()));
+        return greater_equal;
       }
 
       // Recogniser for >=
       inline
-      bool is_geq_function_symbol(const data_expression& e)
+      bool is_greater_equal_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
@@ -201,21 +201,21 @@ namespace mcrl2 {
 
       // Application of >=
       inline
-      application geq(const data_expression& arg0, const data_expression& arg1)
+      application greater_equal(const data_expression& arg0, const data_expression& arg1)
       {
         //assert(sort_pos::is_pos(arg0.sort()));
         //assert(sort_pos::is_pos(arg1.sort()));
         
-        return application(geq(),arg0, arg1);
+        return application(greater_equal(),arg0, arg1);
       }
 
       // Recogniser for application of >=
       inline
-      bool is_geq_application(const data_expression& e)
+      bool is_greater_equal_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_geq_function_symbol(static_cast<const application&>(e).head());
+          return is_greater_equal_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
@@ -608,7 +608,7 @@ namespace mcrl2 {
         function_symbol_list result;
         result.push_back(less_equal());
         result.push_back(less());
-        result.push_back(geq());
+        result.push_back(greater_equal());
         result.push_back(greater());
         result.push_back(max());
         result.push_back(min());
@@ -626,7 +626,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -638,7 +638,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_geq_application(e))
+        if (is_greater_equal_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -776,7 +776,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -788,7 +788,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_geq_application(e))
+        if (is_greater_equal_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
@@ -850,7 +850,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()), variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), sort_pos::less(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(variable("c", sort_bool_::bool_()), variable("q", sort_pos::pos()))), if_(sort_bool_::implies(variable("c", sort_bool_::bool_()), variable("b", sort_bool_::bool_())), sort_pos::less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::geq(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::greater_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less_equal(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::greater(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::max(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::min(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(sort_pos::less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));

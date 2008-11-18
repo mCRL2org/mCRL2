@@ -411,10 +411,16 @@ namespace mcrl2 {
 
       // Function symbol >=
       inline
-      function_symbol greater_equal()
+      function_symbol greater_equal(const sort_expression& s0, const sort_expression& s1)
       {
-        //static function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_bool_::bool_()));
-        function_symbol greater_equal(">=", function_sort(sort_real_::real_(), sort_real_::real_(), sort_bool_::bool_()));
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
+               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
+
+        sort_expression target_sort(sort_bool_::bool_());
+        //static function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
+        function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
         return greater_equal;
       }
 
@@ -433,10 +439,8 @@ namespace mcrl2 {
       inline
       application greater_equal(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_real_::is_real_(arg1.sort()));
         
-        return application(greater_equal(),arg0, arg1);
+        return application(greater_equal(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of >=
@@ -1217,66 +1221,19 @@ namespace mcrl2 {
         result.push_back(real2nat());
         result.push_back(real2int());
         result.push_back(less_equal(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(less_equal(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(less_equal(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(less_equal(sort_int_::int_(), sort_int_::int_()));
         result.push_back(less(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(less(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(less(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(less(sort_int_::int_(), sort_int_::int_()));
-        result.push_back(greater_equal());
+        result.push_back(greater_equal(sort_real_::real_(), sort_real_::real_()));
         result.push_back(greater(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(greater(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(greater(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(greater(sort_int_::int_(), sort_int_::int_()));
         result.push_back(max(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(max(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(max(sort_pos::pos(), sort_nat::nat()));
-        result.push_back(max(sort_nat::nat(), sort_pos::pos()));
-        result.push_back(max(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(max(sort_pos::pos(), sort_int_::int_()));
-        result.push_back(max(sort_int_::int_(), sort_pos::pos()));
-        result.push_back(max(sort_nat::nat(), sort_int_::int_()));
-        result.push_back(max(sort_int_::int_(), sort_nat::nat()));
-        result.push_back(max(sort_int_::int_(), sort_int_::int_()));
         result.push_back(min(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(min(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(min(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(min(sort_int_::int_(), sort_int_::int_()));
         result.push_back(abs(sort_real_::real_()));
-        result.push_back(abs(sort_pos::pos()));
-        result.push_back(abs(sort_nat::nat()));
-        result.push_back(abs(sort_int_::int_()));
         result.push_back(negate(sort_real_::real_()));
-        result.push_back(negate(sort_pos::pos()));
-        result.push_back(negate(sort_nat::nat()));
-        result.push_back(negate(sort_int_::int_()));
         result.push_back(succ(sort_real_::real_()));
-        result.push_back(succ(sort_pos::pos()));
-        result.push_back(succ(sort_nat::nat()));
-        result.push_back(succ(sort_int_::int_()));
         result.push_back(pred(sort_real_::real_()));
-        result.push_back(pred(sort_pos::pos()));
-        result.push_back(pred(sort_nat::nat()));
-        result.push_back(pred(sort_int_::int_()));
         result.push_back(plus(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(plus(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(plus(sort_pos::pos(), sort_nat::nat()));
-        result.push_back(plus(sort_nat::nat(), sort_pos::pos()));
-        result.push_back(plus(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(plus(sort_int_::int_(), sort_int_::int_()));
         result.push_back(minus(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(minus(sort_int_::int_(), sort_int_::int_()));
         result.push_back(times(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(times(sort_pos::pos(), sort_pos::pos()));
-        result.push_back(times(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(times(sort_int_::int_(), sort_int_::int_()));
         result.push_back(exp(sort_real_::real_(), sort_nat::nat()));
-        result.push_back(exp(sort_pos::pos(), sort_nat::nat()));
-        result.push_back(exp(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(exp(sort_int_::int_(), sort_nat::nat()));
 
         return result;
       }

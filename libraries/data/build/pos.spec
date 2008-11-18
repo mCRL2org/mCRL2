@@ -7,7 +7,7 @@ cons @c1 <"c1">:Pos;
 
 map <= <"less_equal">:Pos <"left"> #Pos <"right">->Bool;
     < <"less">:Pos <"left"> #Pos <"right">->Bool;
-    >= <"geq">:Pos <"left"> #Pos <"right">->Bool;
+    >= <"greater_equal">:Pos <"left"> #Pos <"right">->Bool;
     > <"greater">:Pos <"left"> #Pos <"right">->Bool;
     max <"max">:Pos <"left"> #Pos <"right">->Pos;
     min <"min">:Pos <"left"> #Pos <"right">->Pos;

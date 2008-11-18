@@ -368,21 +368,21 @@ namespace mcrl2 {
 
       // Function symbol >=
       inline
-      function_symbol geq(const sort_expression& s0, const sort_expression& s1)
+      function_symbol greater_equal(const sort_expression& s0, const sort_expression& s1)
       {
         //assert(//(s0 == sort_int_::int_() && s1 == sort_int_::int_())||
                //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
                //(s0 == sort_nat::nat() && s1 == sort_nat::nat()));
 
         sort_expression target_sort(sort_bool_::bool_());
-        //static function_symbol geq(">=", function_sort(s0, s1, target_sort));
-        function_symbol geq(">=", function_sort(s0, s1, target_sort));
-        return geq;
+        //static function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
+        function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
+        return greater_equal;
       }
 
       // Recogniser for >=
       inline
-      bool is_geq_function_symbol(const data_expression& e)
+      bool is_greater_equal_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
@@ -393,19 +393,19 @@ namespace mcrl2 {
 
       // Application of >=
       inline
-      application geq(const data_expression& arg0, const data_expression& arg1)
+      application greater_equal(const data_expression& arg0, const data_expression& arg1)
       {
         
-        return application(geq(arg0.sort(), arg1.sort()),arg0, arg1);
+        return application(greater_equal(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
       // Recogniser for application of >=
       inline
-      bool is_geq_application(const data_expression& e)
+      bool is_greater_equal_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_geq_function_symbol(static_cast<const application&>(e).head());
+          return is_greater_equal_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
@@ -1253,7 +1253,7 @@ namespace mcrl2 {
         result.push_back(int2pos());
         result.push_back(less_equal(sort_int_::int_(), sort_int_::int_()));
         result.push_back(less(sort_int_::int_(), sort_int_::int_()));
-        result.push_back(geq(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(greater_equal(sort_int_::int_(), sort_int_::int_()));
         result.push_back(greater(sort_int_::int_(), sort_int_::int_()));
         result.push_back(max(sort_pos::pos(), sort_int_::int_()));
         result.push_back(max(sort_int_::int_(), sort_pos::pos()));
@@ -1285,7 +1285,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1297,7 +1297,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_geq_application(e))
+        if (is_greater_equal_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -1480,7 +1480,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_geq_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
+        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e));
         
         if (is_less_equal_application(e))
         {
@@ -1492,7 +1492,7 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_geq_application(e))
+        if (is_greater_equal_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
@@ -1552,7 +1552,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_int_::less(sort_int_::cint(variable("n", sort_nat::nat())), sort_int_::cneg(variable("p", sort_pos::pos()))), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_int_::less(sort_int_::cneg(variable("p", sort_pos::pos())), sort_int_::cint(variable("n", sort_nat::nat()))), sort_bool_::true_()));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_int_::less(sort_int_::cneg(variable("p", sort_pos::pos())), sort_int_::cneg(variable("q", sort_pos::pos()))), sort_int_::less(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::geq(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::less_equal(variable("y", sort_int_::int_()), variable("x", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::greater_equal(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::less_equal(variable("y", sort_int_::int_()), variable("x", sort_int_::int_()))));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::greater(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::less(variable("y", sort_int_::int_()), variable("x", sort_int_::int_()))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), sort_int_::max(variable("p", sort_pos::pos()), sort_int_::cint(variable("n", sort_nat::nat()))), sort_int_::max(variable("p", sort_pos::pos()), variable("n", sort_nat::nat()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_int_::max(variable("p", sort_pos::pos()), sort_int_::cneg(variable("q", sort_pos::pos()))), variable("p", sort_pos::pos())));

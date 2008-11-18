@@ -14,7 +14,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos;
     <= <"less_equal">:Nat <"left"> #Nat <"right">->Bool;
     < <"less">:Nat <"left"> #Nat <"right">->Bool;
-    >= <"geq">:Nat <"left"> #Nat <"right">->Bool;
+    >= <"greater_equal">:Nat <"left"> #Nat <"right">->Bool;
     > <"greater">:Nat <"left"> #Nat <"right">->Bool;
     max <"max">:Pos <"left"> #Nat <"right">->Pos;
     max <"max">:Nat <"left"> #Pos <"right">->Pos;
