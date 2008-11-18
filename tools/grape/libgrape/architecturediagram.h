@@ -71,7 +71,7 @@ namespace grape
          * @param p_def_height The default height of an architecture reference.
          * @return Returns a pointer to the newly created architecture reference.
          */
-        architecture_reference* add_architecture_reference( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height );
+        architecture_reference* add_architecture_reference( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height );
 
         /**
          * Architecture reference removal function.
@@ -85,7 +85,7 @@ namespace grape
          * Architecture reference count function.
          * @return Returns the number of architecture references in the architecture diagram.
          */
-        uint count_architecture_reference( void );
+        unsigned int count_architecture_reference( void );
 
         /**
          * Architecture reference retrieval function.
@@ -109,7 +109,7 @@ namespace grape
          * @param p_def_height The default height of a process reference.
          * @return Returns a pointer to the newly created process reference.
          */
-        process_reference* add_process_reference( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height );
+        process_reference* add_process_reference( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height );
 
         /**
          * Process reference removal function.
@@ -123,7 +123,7 @@ namespace grape
          * Process reference count function.
          * @return Returns the number of process references in the architecture diagram.
          */
-        uint count_process_reference( void );
+        unsigned int count_process_reference( void );
 
         /**
          * Process reference retrieval function.
@@ -148,7 +148,7 @@ namespace grape
          * @param p_ref The reference the channel is attached to.
          * @return Returns a pointer to the newly created channel.
          */
-        channel* add_channel( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, compound_reference* p_ref );
+        channel* add_channel( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, compound_reference* p_ref );
 
         /**
          * Channel removal function.
@@ -162,7 +162,7 @@ namespace grape
          * Channel count function.
          * @return Returns the number of channels in the architecture diagram.
          */
-        uint count_channel( void );
+        unsigned int count_channel( void );
 
         /**
          * Channel retrieval function.
@@ -187,7 +187,7 @@ namespace grape
          * @param p_channel_2 The channel involved in the channel communication.
          * @return Returns a pointer to the newly created channel communication.
          */
-        channel_communication* add_channel_communication( uint p_id, coordinate &p_coord, channel* p_channel_1, channel* p_channel_2 );
+        channel_communication* add_channel_communication( unsigned int p_id, coordinate &p_coord, channel* p_channel_1, channel* p_channel_2 );
 
         /**
          * Channel communication removal function.
@@ -200,7 +200,7 @@ namespace grape
          * Channel communication count function.
          * @return Returns the number of channel communication in the architecture diagram.
          */
-        uint count_channel_communication( void );
+        unsigned int count_channel_communication( void );
 
         /**
          * Blocked retrieval function.
@@ -242,7 +242,7 @@ namespace grape
          * @param p_conn The connection to attach this property to.
          * @return Returns a pointer to the newly created blocked.
          */
-        blocked* add_blocked( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
+        blocked* add_blocked( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
 
         /**
          * Connection property removal function.
@@ -255,7 +255,7 @@ namespace grape
          * Blocked count function.
          * @return Returns the number of blocked in the architecture diagram.
          */
-        uint count_blocked( void );
+        unsigned int count_blocked( void );
 
         /**
          * Blocked retrieval function.
@@ -280,7 +280,7 @@ namespace grape
          * @param p_conn The connection to attach the property to.
          * @return Returns a pointer to the newly created visible.
          */
-        visible* add_visible( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
+        visible* add_visible( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
 
         /**
          * Connection property removal function.
@@ -293,7 +293,7 @@ namespace grape
          * Visible count function.
          * @return Returns the number of visible in the architecture diagram.
          */
-        uint count_visible( void );
+        unsigned int count_visible( void );
 
         /**
          * Visible retrieval function.
@@ -345,7 +345,7 @@ namespace grape
          * @param p_type The type of the object you want to retrieve.
          * @return Returns the object that has the specified id.
         */
-        static object* find_object( architecture_diagram* p_arch_dia, uint p_id, object_type p_type = ANY );
+        static object* find_object( architecture_diagram* p_arch_dia, unsigned int p_id, object_type p_type = ANY );
       private:
         /**
          * Connection property removal function.

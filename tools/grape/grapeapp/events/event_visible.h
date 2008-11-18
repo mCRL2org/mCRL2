@@ -27,12 +27,12 @@ namespace grape
     class grape_event_add_visible : public grape_event_base
     {
       private:
-        uint                  m_vis; /**< Identifier of the to be created visible. */
+        unsigned int                  m_vis; /**< Identifier of the to be created visible. */
         coordinate            m_coord; /**< the coordinate that was clicked. */
-        uint                  m_conn; /**< Identifier of the clicked connection. */
+        unsigned int                  m_conn; /**< Identifier of the clicked connection. */
         float                 m_def_vis_width;  /**< The default width of a visible. */
         float                 m_def_vis_height; /**< The default height of a visible. */
-        uint                  m_in_diagram; /**< Identifier of the diagram the visible is added to. */
+        unsigned int                  m_in_diagram; /**< Identifier of the diagram the visible is added to. */
         grape_event_remove_visible *m_removed_visible; /**< Remove event for the visible the connection already had, if applicable. */
         grape_event_remove_blocked *m_removed_blocked; /**< Remove event for the blocked the connection already had, if applicable. */
         grape_event_detach_channel_communication *m_detached_chan_comm; /**< Detach event for the property the connection already had, if applicable. */
@@ -72,14 +72,14 @@ namespace grape
     class grape_event_remove_visible : public grape_event_base
     {
       private:
-        uint                  m_vis;       /**< Identifier of the to be deleted visible. */
+        unsigned int                  m_vis;       /**< Identifier of the to be deleted visible. */
         wxString              m_name;       /**< The name of the to be deleted visible. */
         int                   m_connection;       /**< Identifier of the connection the visible was attached to. */
         coordinate            m_coordinate;      /**< the coordinate that was clicked. */
         float                 m_width;      /**< The default width of a visible. */
         float                 m_height;     /**< The default height of a visible. */
         wxArrayLong           m_comments;     /**< Identifiers of comments attached to the visible. */
-        uint                  m_in_diagram;  /**< Identifier of the diagram the visible is removed from. */
+        unsigned int                  m_in_diagram;  /**< Identifier of the diagram the visible is removed from. */
       public:
 
         /**
@@ -116,7 +116,7 @@ namespace grape
     class grape_event_change_visible : public grape_event_base
     {
       private:
-        uint        m_visible; /**< A pointer to the visible of which the name is to be changed. */
+        unsigned int        m_visible; /**< A pointer to the visible of which the name is to be changed. */
         wxString    m_old_text; /**< A string containing the previous name of the visible. */
         wxString    m_new_text; /**< A string containing the new name of the visible. */
         bool        m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */

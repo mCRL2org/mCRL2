@@ -23,11 +23,11 @@ namespace grape
     class grape_event_add_comment : public grape_event_base
     {
       private:
-        uint        m_comm;           /**< The id of the to be created comment. */
+        unsigned int        m_comm;           /**< The id of the to be created comment. */
         coordinate  m_coord;           /**< the coordinate that was clicked. */
         float       m_def_comm_width;  /**< The default width of a comment. */
         float       m_def_comm_height; /**< The default height of a comment. */
-        uint        m_in_diagram;     /**< The id of the diagram the comment is added to. */
+        unsigned int        m_in_diagram;     /**< The id of the diagram the comment is added to. */
       public:
 
         /**
@@ -62,14 +62,14 @@ namespace grape
     class grape_event_remove_comment : public grape_event_base
     {
       private:
-        uint                  m_comm;          /**< The identifier of the to be deleted comment. */
+        unsigned int                  m_comm;          /**< The identifier of the to be deleted comment. */
         wxString              m_text;           /**< A backup of the text of the comment. */
         int                   m_object;         /**< The identifier of the object the comment was attached to. -1 if none. */
         coordinate            m_coordinate;     /**< the coordinate of the comment. */
         float                 m_width;          /**< The width of the comment. */
         float                 m_height;         /**< The width of the comment. */
         wxArrayLong           m_comments;       /**< Identifiers of the comments attached to the comment. */
-        uint                  m_in_diagram;     /**< The id of the diagram the comment is removed from. */
+        unsigned int                  m_in_diagram;     /**< The id of the diagram the comment is removed from. */
       public:
 
         /**
@@ -105,7 +105,7 @@ namespace grape
     class grape_event_change_comment_text : public grape_event_base
     {
       private:
-        uint        m_comment_id; /**< A pointer to the comment of which the text is to be changed. */
+        unsigned int        m_comment_id; /**< A pointer to the comment of which the text is to be changed. */
         wxString    m_new_text; /**< A string containing the new contents of the comment. */
         wxString    m_old_text; /**< A string containing the previous contents of the comment. */
         bool        m_ok_pressed; /**< A boolean indicating whether the user pressed OK. */
@@ -148,10 +148,10 @@ namespace grape
     class grape_event_attach_comment : public grape_event_base
     {
       private:
-        uint    m_comment; /**< The identifier of the comment that is to be attached. */
+        unsigned int    m_comment; /**< The identifier of the comment that is to be attached. */
         int     m_connected_to; /**< The identifier of the object that the comment is currently attached to */
-        uint    m_object; /**< The identifier of the object the comment is to be attached to. */
-        uint    m_diagram; /**< The identifier of the diagram in which the event occurs. */
+        unsigned int    m_object; /**< The identifier of the object the comment is to be attached to. */
+        unsigned int    m_diagram; /**< The identifier of the diagram in which the event occurs. */
       public:
 
         /**
@@ -187,9 +187,9 @@ namespace grape
     class grape_event_detach_comment : public grape_event_base
     {
       private:
-        uint    m_comment; /**< The identifier of the comment that is to be detached. */
+        unsigned int    m_comment; /**< The identifier of the comment that is to be detached. */
         int     m_object; /**< The identifier of the object the comment is to be detached from. */
-        uint    m_diagram; /**< The identifier of the diagram in which the event occurs. */
+        unsigned int    m_diagram; /**< The identifier of the diagram in which the event occurs. */
       public:
 
         /**

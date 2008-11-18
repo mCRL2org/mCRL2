@@ -1014,7 +1014,7 @@ bool grape_event_drag::Do( void )
           // Only do something if none of the channels in the communication are on the same reference as this one.
           /* note this check has been disabled because attach DOES allow it.
           bool all_different_references = true;
-          for ( uint i = 0; i < comm_ptr->count_channel(); ++i )
+          for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
           {
             channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
             if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() )
@@ -1040,7 +1040,7 @@ bool grape_event_drag::Do( void )
           // Only do something if none of the channels in the communication are on the same reference as this one.
           /* note this check has been disabled because attach DOES allow it.
           bool all_different_references = true;
-          for ( uint i = 0; i < comm_ptr->count_channel(); ++i )
+          for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
           {
             channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
             if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() )

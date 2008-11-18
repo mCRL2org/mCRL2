@@ -23,7 +23,7 @@ namespace grape
     class grape_event_add_architecture_diagram : public grape_event_base
     {
       private:
-        uint    m_arch; /**< Identifier of the created architecture diagram. */
+        unsigned int    m_arch; /**< Identifier of the created architecture diagram. */
       public:
 
         /**

@@ -34,12 +34,12 @@ diagram::~diagram( void )
   m_selected_objects.Clear();
 }
 
-uint diagram::get_id( void ) const
+unsigned int diagram::get_id( void ) const
 {
   return m_id;
 }
 
-void diagram::set_id( uint p_id )
+void diagram::set_id( unsigned int p_id )
 {
   m_id = p_id;
 }
@@ -54,7 +54,7 @@ void diagram::set_name( const wxString &p_name )
   m_name = p_name;
 }
 
-comment* diagram::add_comment( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height )
+comment* diagram::add_comment( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )
 {
   // deselect all objects
   deselect_all_objects();
@@ -93,7 +93,7 @@ void diagram::remove_comment( comment* p_comment )
   }
 }
 
-uint diagram::count_comment( void )
+unsigned int diagram::count_comment( void )
 {
   return m_comments.GetCount();
 }
@@ -153,7 +153,7 @@ void diagram::deselect_object( object* p_object )
   }
 }
 
-uint diagram::count_selected_objects( void )
+unsigned int diagram::count_selected_objects( void )
 {
   return m_selected_objects.GetCount();
 }

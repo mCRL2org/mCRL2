@@ -37,7 +37,7 @@ channel_communication::channel_communication( const channel_communication &p_cha
 channel_communication::~channel_communication( void )
 {
   // Remove all references to the channel communication
-  for ( uint i = 0; i < m_communication.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_communication.GetCount(); ++i )
   {
     communication &comm = m_communication.Item ( i );
     channel* channel_ptr = comm.get_channel();
@@ -69,7 +69,7 @@ void channel_communication::detach_channel( channel* p_channel )
   } // end for
 }
 
-uint channel_communication::count_channel( void )
+unsigned int channel_communication::count_channel( void )
 {
   return m_communication.GetCount();
 }

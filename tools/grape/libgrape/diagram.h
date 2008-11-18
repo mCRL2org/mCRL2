@@ -30,7 +30,7 @@ namespace grape
     {
       protected:
         wxString               m_name;               /**< name of this diagram. */
-        uint                   m_id;                 /**< unique identifier of this diagram. */
+        unsigned int                   m_id;                 /**< unique identifier of this diagram. */
         arr_comment            m_comments;           /**< comments in this diagram. */
         arr_object_ptr         m_selected_objects;   /**< selected objects in this diagram. */
       public:
@@ -57,14 +57,14 @@ namespace grape
          * Id retrieval function
          * @return The ID of the diagram.
          */
-        uint get_id( void ) const;
+        unsigned int get_id( void ) const;
 
         /**
          * Id assignment function.
          * Assigns the id to the id of the diagram.
          * @param p_id The new id.
          */
-        void set_id( uint p_id );
+        void set_id( unsigned int p_id );
 
         /**
          * Name retrieval function.
@@ -88,7 +88,7 @@ namespace grape
          * @param p_def_height The default height of a comment
          * @return Returns a pointer to the newly created comment.
          */
-        comment* add_comment( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height );
+        comment* add_comment( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height );
 
         /**
          * Comment removal function.
@@ -102,7 +102,7 @@ namespace grape
          * Comment count function.
          * @return Returns the number of comments in the diagram.
          */
-        uint count_comment( void );
+        unsigned int count_comment( void );
 
         /**
          * Comment retrieval function.
@@ -174,7 +174,7 @@ namespace grape
          * Selected object count function.
          * @return Returns the number of selected objects in the diagram.
          */
-        uint count_selected_objects( void );
+        unsigned int count_selected_objects( void );
 
         /**
          * Selected object retrieval function.

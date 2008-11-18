@@ -125,7 +125,7 @@ void grape_glcanvas::init_gl(void)
 
 void grape_glcanvas::draw_visual_objects()
 {
-  for ( uint i = 0; i < m_visual_objects.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
   {
     visual_object* vis_obj_ptr = m_visual_objects.Item( i );
     vis_obj_ptr->draw();
@@ -539,7 +539,7 @@ void grape_glcanvas::set_canvas_state( const canvas_state &p_canvas_state )
   m_canvas_state = p_canvas_state;
 }
 
-uint grape_glcanvas::count_visual_object( void )
+unsigned int grape_glcanvas::count_visual_object( void )
 {
   return m_visual_objects.GetCount();
 }
@@ -551,8 +551,8 @@ visual_object* grape_glcanvas::get_visual_object( int p_i )
 
 visual_object *grape_glcanvas::get_visual_object( object *p_obj )
 {
-  uint count = m_visual_objects.GetCount();
-  for ( uint i = 0; i < count; ++i )
+  unsigned int count = m_visual_objects.GetCount();
+  for ( unsigned int i = 0; i < count; ++i )
   {
     visual_object* vis_obj = m_visual_objects.Item( i );
     if ( vis_obj->get_selectable_object() == p_obj )
@@ -587,8 +587,8 @@ void grape_glcanvas::add_visual_object( visual_object* p_obj )
 
 void grape_glcanvas::clear_visual_objects( void )
 {
-  uint count = m_visual_objects.GetCount();
-  for ( uint i = 0; i < count; ++i )
+  unsigned int count = m_visual_objects.GetCount();
+  for ( unsigned int i = 0; i < count; ++i )
   {
     visual_object* del_obj = m_visual_objects.Item( i );
     delete del_obj;
@@ -599,7 +599,7 @@ void grape_glcanvas::clear_visual_objects( void )
 int grape_glcanvas::count_selected_objects( void )
 {
   int result = 0;
-  for ( uint i = 0; i < m_visual_objects.GetCount(); ++i)
+  for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i)
   {
     visual_object* count_obj = m_visual_objects.Item( i );
     result += count_obj->get_selected() ? 1 : 0;
@@ -620,7 +620,7 @@ void grape_glcanvas::reload_visual_objects( void )
       add_visual_object( new_frame );
 
       // add visuals comment
-      for ( uint i = 0; i < arch_dia->count_comment(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_comment(); ++i )
       {
         comment* comm_ptr = arch_dia->get_comment( i );
         visualcomment* visual_comm = new visualcomment( comm_ptr );
@@ -628,14 +628,14 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals blocked
-      for ( uint i = 0; i < arch_dia->count_blocked(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_blocked(); ++i )
       {
         blocked* block_ptr = arch_dia->get_blocked( i );
         visualblocked* visual_block = new visualblocked( block_ptr );
         add_visual_object( visual_block );
       }
       // add visuals visible
-      for ( uint i = 0; i < arch_dia->count_visible(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_visible(); ++i )
       {
         // pass the coordinate, width and height of the visibility frame to the visibles.
         visible* vis_ptr = arch_dia->get_visible( i );
@@ -645,7 +645,7 @@ void grape_glcanvas::reload_visual_objects( void )
 
       // Draw a reference and its own channels immediately thereafter so that no other objects can be placed between them.
       // add visuals architecture reference
-      for ( uint i = 0; i < arch_dia->count_architecture_reference(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_architecture_reference(); ++i )
       {
         architecture_reference* arch_ref_ptr = arch_dia->get_architecture_reference( i );
         visualarchitecture_reference* vis_arch_ref = new visualarchitecture_reference( arch_ref_ptr );
@@ -653,7 +653,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals process reference
-      for ( uint i = 0; i < arch_dia->count_process_reference(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_process_reference(); ++i )
       {
         process_reference* proc_ref_ptr = arch_dia->get_process_reference( i );
         visualprocess_reference* vis_proc_ref = new visualprocess_reference( proc_ref_ptr );
@@ -661,7 +661,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals channel communication
-      for ( uint i = 0; i < arch_dia->count_channel_communication(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_channel_communication(); ++i )
       {
         channel_communication* c_comm_ptr = arch_dia->get_channel_communication( i );
         visualchannel_communication* visual_c_comm = new visualchannel_communication( c_comm_ptr );
@@ -669,7 +669,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals channel
-      for ( uint i = 0; i < arch_dia->count_channel(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_channel(); ++i )
       {
         channel* chan_ptr = arch_dia->get_channel( i );
         visualchannel* visual_chan = new visualchannel( chan_ptr );
@@ -686,7 +686,7 @@ void grape_glcanvas::reload_visual_objects( void )
       add_visual_object( vis_pre );
 
       // add visuals comment
-      for ( uint i = 0; i < proc_dia->count_comment(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_comment(); ++i )
       {
         comment* comm_ptr = proc_dia->get_comment( i );
         visualcomment* visual_comm = new visualcomment( comm_ptr );
@@ -694,35 +694,35 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals initial designator
-      for ( uint i = 0; i < proc_dia->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = proc_dia->get_initial_designator( i );
         visualinitial_designator* vis_init = new visualinitial_designator( init_ptr );
         add_visual_object( vis_init );
       }
       // add visuals terminating transition
-      for ( uint i = 0; i < proc_dia->count_terminating_transition(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_terminating_transition(); ++i )
       {
         terminating_transition* trans_ptr = proc_dia->get_terminating_transition( i );
         visualterminating_transition* vis_trans = new visualterminating_transition( trans_ptr );
         add_visual_object( vis_trans );
       }
       // add visuals nonterminating transition
-      for ( uint i = 0; i < proc_dia->count_nonterminating_transition(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_nonterminating_transition(); ++i )
       {
         nonterminating_transition* ntt_ptr = proc_dia->get_nonterminating_transition( i );
         visualnonterminating_transition* vis_ntt = new visualnonterminating_transition( ntt_ptr );
         add_visual_object( vis_ntt );
       }
       // add visuals reference state
-      for ( uint i = 0; i < proc_dia->count_reference_state(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_reference_state(); ++i )
       {
         reference_state* ref_state_ptr = proc_dia->get_reference_state( i );
         visualreference_state* vis_ref_state = new visualreference_state( ref_state_ptr );
         add_visual_object( vis_ref_state );
       }
       // add visuals state
-      for ( uint i = 0; i < proc_dia->count_state(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_state(); ++i )
       {
         state* state_ptr = proc_dia->get_state( i );
         visualstate* vis_state = new visualstate( state_ptr );

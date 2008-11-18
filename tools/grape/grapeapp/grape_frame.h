@@ -68,7 +68,7 @@ namespace grape
         wxToggleButton      *m_dataspecbutton;             /**< The button to switch to datatype specification.*/
         wxTextCtrl          *m_datatext;                   /**< The text control for entering the datatype specification. */
         grape_mode            m_mode;                       /**< The frame's mode. */
-        uint                  m_counter;                    /**< The counter for new id's. */
+        unsigned int                  m_counter;                    /**< The counter for new id's. */
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
 
         DECLARE_EVENT_TABLE();                        /**< The event table of this frame. */
@@ -496,7 +496,7 @@ namespace grape
          * Increments it.
          * @return Returns an unsigned integer with the new object id.
          */
-        uint get_new_id( void );
+        unsigned int get_new_id( void );
 
         /**
          * Retrieve a pointer to the help controller.

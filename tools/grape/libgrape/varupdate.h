@@ -29,7 +29,6 @@ namespace grape
     class varupdate
     {
       protected:
-        wxString         m_varupdate;        /**< full string declaration of variable update. */
         dataexpression   m_dataexpression;   /**< data expression declaration of variable update. */
         var              m_var;              /**< variable declaration of variable update. */
       public:
@@ -61,8 +60,9 @@ namespace grape
         /**
          * Variable update text assignment function.
          * @param p_varupdate The text of the variable update.
+         * @return Returns wether the variable update had a correct syntax.
          */
-        void set_varupdate( const wxString &p_varupdate );
+        bool set_varupdate( const wxString &p_varupdate );
 
         /**
          * Left hand side retrieval function.
@@ -70,6 +70,10 @@ namespace grape
          */
         wxString get_lhs( void ) const;
 
+        /**
+         * Left hand side assignment function.
+         * @param p_var The text of the left hand side, a variable
+         */
         void set_lhs( const wxString& p_var );
 
         /**
@@ -78,6 +82,10 @@ namespace grape
          */
         wxString get_rhs( void ) const;
 
+        /**
+         * Right hand side assignment function.
+         * @param p_update The text of the right hand side, a data expression
+         */
         void set_rhs( const wxString& p_update );
     };
 

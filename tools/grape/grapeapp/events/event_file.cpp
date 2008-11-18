@@ -113,11 +113,11 @@ bool grape_event_open::Do( void )
   // load architecture and process diagram lists
   arr_architecture_diagram *arr_arch_dia = new_spec->get_architecture_diagram_list();
   arr_process_diagram *arr_proc_dia = new_spec->get_process_diagram_list();
-  for ( uint i = 0; i < arr_arch_dia->GetCount(); ++i )
+  for ( unsigned int i = 0; i < arr_arch_dia->GetCount(); ++i )
   {
     m_main_frame->get_architecture_diagram_listbox()->Append( arr_arch_dia->Item( i ).get_name() );
   }
-  for ( uint i = 0; i < arr_proc_dia->GetCount(); ++i )
+  for ( unsigned int i = 0; i < arr_proc_dia->GetCount(); ++i )
   {
     m_main_frame->get_process_diagram_listbox()->Append( arr_proc_dia->Item( i ).get_name() );
   }

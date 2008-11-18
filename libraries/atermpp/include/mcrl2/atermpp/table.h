@@ -104,6 +104,11 @@ namespace atermpp
       {
         return aterm_list(ATtableKeys(m_table.get()));
       }
+
+      operator ATermTable()
+      {
+        return m_table.get();
+      }
   };
 
 } // namespace atermpp

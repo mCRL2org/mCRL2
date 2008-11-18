@@ -154,7 +154,7 @@ wxString process_diagram_mcrl2_sort(wxXmlNode *p_process_diagram)
     // structnames now contains the names of all states in this diagram, along with 2 names of all reference states in this diagram
     wxString sort_struct_expr = wxEmptyString;
     sort_struct_expr += _T("sort ") + diagram_name + _T("_state = struct ");
-    for(uint i=0; i<struct_names.GetCount(); ++i)
+    for(unsigned int i=0; i<struct_names.GetCount(); ++i)
     {
       if(i > 0)
       {
@@ -512,11 +512,12 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
  * @param p_doc_root The root node of the XML specification.
  * @param p_diagram_name The name of the diagram that contains the parameters.
  * @param p_inits The parameters (with values) to sort.
+ * @param datatype_spec The datatype specification.
  * @return The list of parameters (with values) sorted in the order in which the parameters appear in the process diagram's preamble.
  * @pre p_doc_root is a valid pointer to an XML node, p_diagram_name is a valid name of a process diagram, p_inits is a valid reference to a list of process diagram parameters.
  * @post The list of parameters (with values) is returned in sorted order or error messages are produced.
  */
-list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_inits)
+list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_inits, ATermAppl &datatype_spec)
 {
   list_of_decl_init decls;
   decls.Empty();
@@ -551,8 +552,7 @@ list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_nam
   // parse preamble of diagram
   list_of_decl preamble_params;
   list_of_decl_init preamble_vars;
-  ATermAppl expr;
-  parse_preamble(proc_diag, preamble_params, preamble_vars, expr);
+  parse_preamble(proc_diag, preamble_params, preamble_vars, datatype_spec);
 
   // sort p_inits
   if(p_inits.GetCount() != preamble_params.GetCount())
@@ -587,6 +587,76 @@ list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_nam
   return decls;
 }
 
+list_of_varupdate sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_varupdate &p_inits, ATermAppl &datatype_spec)
+{
+  list_of_varupdate decls;
+  decls.Empty();
+
+  wxXmlNode *diagram_list = get_child(p_doc_root, _T("processdiagramlist"));
+  if(diagram_list == 0)
+  {
+    // ERROR: XML document does not contain child <processdiagramlist>
+    cerr << "mCRL2 conversion error: the specification does not contain any process diagrams." << endl;
+    throw CONVERSION_ERROR;
+    return decls;
+  }
+  // search appropriate process diagram
+  wxXmlNode *proc_diag;
+  for(proc_diag = diagram_list->GetChildren(); proc_diag != 0; proc_diag = proc_diag->GetNext())
+  {
+    if(get_child_value(proc_diag, _T("name")) == p_diagram_name)
+    {
+      // found appropriate diagram
+      break;
+    }
+  }
+  if(proc_diag == 0)
+  {
+    // ERROR: XML file does not contain process diagram p_diagram_name
+    cerr << "mCRL2 conversion error: the specification does not contain a process diagram for process reference "
+         << p_diagram_name.ToAscii() << "." << endl;
+    throw CONVERSION_ERROR;
+    return decls;
+  }
+
+  // parse preamble of diagram
+  list_of_decl preamble_params;
+  list_of_decl_init preamble_vars;
+  parse_preamble(proc_diag, preamble_params, preamble_vars, datatype_spec);
+
+  // sort p_inits
+  if(p_inits.GetCount() != preamble_params.GetCount())
+  {
+    // ERROR: preamble of p_diagram name does not contain the same parameters as its process reference
+    cerr << "mCRL2 conversion error: the process reference to process diagram " << p_diagram_name.ToAscii()
+         << " does not contain the same parameters." << endl;
+    throw CONVERSION_ERROR;
+    return decls;
+  }
+  for(unsigned int i=0; i<preamble_params.GetCount(); ++i)
+  {
+    bool found = false;
+    for(unsigned int j=0; j<p_inits.GetCount(); ++j)
+    {
+      if(p_inits[j].get_lhs() == preamble_params[i].get_name())
+      {
+        decls.Add(p_inits[j]);
+        found = true;
+        break;
+      }
+    }
+    if(!found)
+    {
+      // ERROR: process reference of diagram_name does not contain parameter preamble_params[i].get_name()
+      cerr << "mCRL2 conversion error: the process reference to process diagram " << p_diagram_name.ToAscii()
+           << " does not contain parameter " << preamble_params[i].get_name().ToAscii() << "." << endl;
+      throw CONVERSION_ERROR;
+      return decls;
+    }
+  }
+  return decls;
+}
+
 /**
  * XML process reference transition parsing function.
  * Parses a transition (which is not visible in the GraPE specification) for a process reference
@@ -601,7 +671,7 @@ list_of_decl_init sort_parameters(wxXmlNode *p_doc_root, wxString &p_diagram_nam
  * @pre p_doc_root is a valid pointer to an XML node, p_reference_state is a valid pointer to an XML reference state, p_diagram name is a valid process diagram name, p_declarations is a valid reference to an mCRL2 process definition, p_preamble_parameter_decls is a valid reference to a parameter declaration, p_preamble_local_var_decls is a valid reference to a loval variable declaration.
  * @post The hidden transition of the process reference is parsed and the results are appended to p_declarations or error messages are produced.
  */
-void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, wxString &p_diagram_name, wxString &p_declaration, bool p_alternative, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls)
+void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, wxString &p_diagram_name, wxString &p_declaration, bool p_alternative, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   wxString ref_name = get_child_value(p_reference_state, _T("name"));
   if(ref_name == wxEmptyString)
@@ -625,20 +695,15 @@ void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_st
     return;
   }
 
-  list_of_decl_init ref_inits;
-  ref_inits.Empty();
-  wxXmlNode *ass_list = get_child(p_reference_state, _T("parameterassignmentlist"));
-  if(ass_list == 0)
+  list_of_varupdate ref_inits;
+  try
   {
-    // ERROR: <referencestate> does not contain <parameterassignmentlist>
-    cerr << "mCRL2 conversion error: process diagram " << p_diagram_name.ToAscii()
-         << " has a process reference " << ref_name.ToAscii()
-         << " that does not contain any parameter assignments." << endl;
-    throw CONVERSION_ERROR;
+    parse_reference_parameters(p_reference_state, p_diagram_name, ref_inits, datatype_spec);
+  }
+  catch(...)
+  {
     return;
   }
-  wxString params = ass_list->GetNodeContent();
-  ref_inits = parse_reference_parameters(params);
 
   // ref_inits contains the parameter initialisation of this process reference
 
@@ -660,7 +725,7 @@ void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_st
   if(ref_inits.GetCount() > 0)
   {
     p_declaration += _T("(");
-    ref_inits = sort_parameters(p_doc_root, ref_name, ref_inits);
+    ref_inits = sort_parameters(p_doc_root, ref_name, ref_inits, datatype_spec);
   }
   for(unsigned int i=0; i<ref_inits.GetCount(); ++i)
   {
@@ -668,7 +733,7 @@ void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_st
     {
       p_declaration += _T(", ");
     }
-    p_declaration += ref_inits[i].get_value();
+    p_declaration += ref_inits[i].get_rhs();
   }
   if(ref_inits.GetCount() > 0)
   {
@@ -705,7 +770,7 @@ void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_st
  * @pre p_doc_root is a valid pointer to an XML node, p_process_diagram is a valid pointer to an XML process diagram, p_preamble_parameter_decls is a valid reference to a parameter declaration and p_preamble_local_var_decls is a valid reference to a local variable declaration.
  * @post The internal process specification is returned or the empty string is returned and error messages are produced.
  */
-wxString process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls)
+wxString process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   if(p_process_diagram->GetName() == _T("processdiagram"))
   {
@@ -810,7 +875,7 @@ wxString process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p
                  << " has no process references." << endl;
             break;
           }
-          parse_transition_reference(p_doc_root,  child_ref, diagram_name, decl_trans, !first_line, p_preamble_parameter_decls, p_preamble_local_var_decls);
+          parse_transition_reference(p_doc_root,  child_ref, diagram_name, decl_trans, !first_line, p_preamble_parameter_decls, p_preamble_local_var_decls, datatype_spec);
           if(first_line)
           {
             first_line = false;
@@ -986,11 +1051,12 @@ wxString process_diagram_mcrl2_proc(wxXmlNode *p_process_diagram, list_of_decl &
  * @param p_doc_root The root of a valid XML specification.
  * @param p_diagram_name The name of the exported process diagram.
  * @param p_parameter_init The parameter initialisation for the exported process diagram.
+ * @param datatype_spec The datatype specification.
  * @return The initial process specification for the exported process diagram.
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_name is a valid reference to a process diagram and p_parameter init is a valid reference to a parameter initialisation.
  * @post The initial process specification is returned or error messages are produced.
  */
-wxString process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_parameter_init)
+wxString process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_parameter_init, ATermAppl &datatype_spec)
 {
   wxString init_decl = wxEmptyString;
   init_decl += _T("init ");
@@ -1000,7 +1066,7 @@ wxString process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_n
     init_decl += _T("(");
 
     // sort parameter initialisation and print to init declaration
-    list_of_decl_init decls = sort_parameters(p_doc_root, p_diagram_name, p_parameter_init);
+    list_of_decl_init decls = sort_parameters(p_doc_root, p_diagram_name, p_parameter_init, datatype_spec);
     for(unsigned int i=0; i<decls.GetCount(); ++i)
     {
       if(i > 0)
@@ -2035,9 +2101,9 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
  * @pre p_doc_root is a valid pointer to an XML specification, p_architecture_diagram is a valid pointer to an XML architecture diagram, p_reference_id is a valid reference to an identifier of a process reference and p_reference_name is a valid reference to a name of a process reference.
  * @post A list containing the parameter declarations and initialisations of the inferred process reference is returned or error messages are produced.
  */
-list_of_decl_init infer_process_reference_initialisation(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxString &p_reference_id, wxString &p_reference_name)
+list_of_varupdate infer_process_reference_initialisation(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxString &p_reference_id, wxString &p_reference_name, ATermAppl &datatype_spec)
 {
-  list_of_decl_init inits;
+  list_of_varupdate inits;
   inits.Empty();
 
   if(p_architecture_diagram->GetName() == _T("architecturediagram"))
@@ -2084,22 +2150,18 @@ list_of_decl_init infer_process_reference_initialisation(wxXmlNode *p_doc_root, 
       return inits;
     }
 
-    wxXmlNode *ass_list = get_child(reference, _T("parameterassignmentlist"));
-    if(ass_list == 0)
+    try
     {
-      // ERROR: <processreference> does not contain <parameterassignmentlist>
-      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-           << " has a process reference"
-           << " that does not contain a list of parameter assignments." << endl;
-      throw CONVERSION_ERROR;
+      parse_reference_parameters(reference, diagram_name, inits, datatype_spec);
+    }
+    catch(...)
+    {
       return inits;
     }
-    wxString params = ass_list->GetNodeContent();
-    inits = parse_reference_parameters(params);
 
     if(inits.GetCount() > 0)
     {
-      inits = sort_parameters(p_doc_root, p_reference_name, inits);
+      inits = sort_parameters(p_doc_root, p_reference_name, inits, datatype_spec);
     }
 
     return inits;
@@ -2128,7 +2190,7 @@ list_of_decl_init infer_process_reference_initialisation(wxXmlNode *p_doc_root, 
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid architecture diagram and p_refs is a valid reference to an array of references (may be empty).
  * @post A string containing the mCRL2 specification for the converted architecture diagram is returned and p_refs, p_renameds and p_channel_comms are updated according to the diagram or error messages are produced and the empty string is returned.
  */
-wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, bool p_verbose, arr_action_reference &p_refs, arr_renamed &p_renameds, arr_channel_comm &p_channel_comms)
+wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, bool p_verbose, arr_action_reference &p_refs, arr_renamed &p_renameds, arr_channel_comm &p_channel_comms, ATermAppl &datatype_spec)
 {
   unsigned int comm_counter = 0;
 
@@ -2474,7 +2536,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
     // append optional parameter initialisation
     if(p_refs[i].m_is_process_reference)
     {
-      list_of_decl_init inits = infer_process_reference_initialisation(p_doc_root, diagram, p_refs[i].m_reference_id, p_refs[i].m_reference);
+      list_of_varupdate inits = infer_process_reference_initialisation(p_doc_root, diagram, p_refs[i].m_reference_id, p_refs[i].m_reference, datatype_spec);
 
       if(inits.GetCount() > 0)
       {
@@ -2485,7 +2547,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
           {
             spec += _T(", ");
           }
-          spec += inits[j].get_value();
+          spec += inits[j].get_rhs();
         }
         spec += _T(")");
       }
@@ -2565,10 +2627,11 @@ void grape::mcrl2gen::test_export(void)
  * @param p_internal_specs An array containing the internal mCRL2 specifications constructed during the convertion process.
  * @param p_specs An array containing the mCRL2 specifications constructed during the convertion process.
  * @param p_verbose Flag to be set for verbose output.
+ * @param datatype_spec The datatype specification.
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid process diagram, p_sort_expressions is a valid reference to an array of sort expressions, p_actions is a valid reference to an array of actions, p_internal_specs is a valid reference to an array of internal specifications and p_specs is a valid reference to an array of specifications.
  * @post The XML process diagram is converted to mCRL2 and p_sort_expressions, p_actions, p_internal_specs and p_specs are updated accordingly or error messages are produced.
  */
-void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArrayString &p_sort_expressions, arr_action_type &p_actions, wxArrayString &p_internal_specs, wxArrayString &p_specs, bool p_verbose)
+void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArrayString &p_sort_expressions, arr_action_type &p_actions, wxArrayString &p_internal_specs, wxArrayString &p_specs, bool p_verbose, ATermAppl &datatype_spec)
 {
   wxString diagram_name = infer_process_diagram_name(p_doc_root, p_diagram_id);
   if(p_verbose)
@@ -2587,8 +2650,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   // get diagrams preamble
   list_of_decl preamble_parameter_decls;
   list_of_decl_init preamble_local_var_decls;
-  ATermAppl expr;
-  parse_preamble(diagram, preamble_parameter_decls, preamble_local_var_decls, expr);
+  parse_preamble(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
   if(p_verbose)
   {
     cerr << "+preamble:" << endl;
@@ -2606,7 +2668,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   }
 
   // determine occuring actions
-  arr_action_type act = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls);
+  arr_action_type act = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
   if(p_verbose)
   {
     cerr << "+actions:" << endl;
@@ -2644,7 +2706,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   p_sort_expressions.Add(diagram_sort);
 
   // construct internal process specification
-  wxString spec_internal = process_diagram_mcrl2_internal_proc(p_doc_root, diagram, preamble_parameter_decls, preamble_local_var_decls);
+  wxString spec_internal = process_diagram_mcrl2_internal_proc(p_doc_root, diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
   if(p_verbose)
   {
     cerr << "+internal process specification:" << endl << " "
@@ -2691,6 +2753,10 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     in_mcrl2.Empty();
 
     doc_root = p_spec.GetRoot();
+
+    ATermAppl datatype_spec;
+    validate_datatype_specification(doc_root, datatype_spec);
+
     sort_expressions.Empty();
     internal_specs.Empty();
     specs.Empty();
@@ -2707,7 +2773,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       in_mcrl2.Add(id, 1);
 
       // Apply steps of algorithm on XML data.
-      process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose);
+      process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose, datatype_spec);
       wxXmlNode *diagram = get_process_diagram(doc_root, id);
 
       // determine recursive process references
@@ -2733,7 +2799,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     // construct general expressions
     wxString dat_spec = datatype_specification_mcrl2(doc_root);
     wxString exp_diagram_name = infer_process_diagram_name(doc_root, p_diagram_id);
-    wxString init_spec = process_diagram_mcrl2_init(doc_root, exp_diagram_name, p_parameters_init);
+    wxString init_spec = process_diagram_mcrl2_init(doc_root, exp_diagram_name, p_parameters_init, datatype_spec);
     if(p_verbose)
     {
       cerr << "+initial process specification:" << endl << " "
@@ -2891,6 +2957,10 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     in_mcrl2.Empty();
 
     doc_root = p_spec.GetRoot();
+
+    ATermAppl datatype_spec;
+    validate_datatype_specification(doc_root, datatype_spec);
+
     sort_expressions.Empty();
     internal_specs.Empty();
     specs.Empty();
@@ -2911,7 +2981,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       if(is_process_diagram(doc_root, id))
       {
         // export process diagram
-        process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose);
+        process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose, datatype_spec);
         wxXmlNode *diagram = get_process_diagram(doc_root, id);
 
         // determine recursive process references
@@ -2939,7 +3009,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
         arr_action_reference refs;
         arr_renamed renameds;
         arr_channel_comm comms;
-        wxString arch_spec = architecture_diagram_mcrl2(doc_root, id, p_verbose, refs, renameds, comms);
+        wxString arch_spec = architecture_diagram_mcrl2(doc_root, id, p_verbose, refs, renameds, comms, datatype_spec);
         arch_specs.Add(arch_spec);
 
         // add renamed new actions to actions

@@ -52,7 +52,7 @@ namespace grape
          * @param p_list_of_varupdate varupdate pointer list
          * @param p_spec The specification containing the diagrams the reference @p p_ref could point to.
          */
-        void init_for_processes( diagram *p_diagram, list_of_varupdate *p_list_of_varupdate, grape_specification *p_spec );
+        void init_for_processes( diagram *p_diagram, list_of_varupdate p_list_of_varupdate, grape_specification *p_spec );
 
         /**
          * Initializes the dialog, using the panel @p p_panel

@@ -47,7 +47,7 @@ bool grape_event_add_process_reference::Do( void )
 
   // Check if a diagram exists that has the same name as the reference.
   grape_specification* spec = m_main_frame->get_grape_specification();
-  for ( uint i = 0; i < spec->count_process_diagram(); ++i)
+  for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i)
   {
     process_diagram* proc_dia = spec->get_process_diagram( i );
     if ( proc_dia->get_name() == new_proc_ref->get_name() )
@@ -81,7 +81,7 @@ grape_event_remove_process_reference::grape_event_remove_process_reference( grap
   m_name = p_proc_ref->get_name();
   m_parameter_assignments.Empty();
   list_of_varupdate param = p_proc_ref->get_parameter_updates();
-  for ( uint i = 0; i < param.GetCount(); ++i )
+  for ( unsigned int i = 0; i < param.GetCount(); ++i )
   {
     varupdate existing_var = param.Item( i );
     varupdate* new_var = new varupdate( existing_var );
@@ -91,7 +91,7 @@ grape_event_remove_process_reference::grape_event_remove_process_reference( grap
   m_width = p_proc_ref->get_width();
   m_height = p_proc_ref->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_proc_ref->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_proc_ref->count_comment(); ++i )
   {
     comment* comm_ptr = p_proc_ref->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -103,7 +103,7 @@ grape_event_remove_process_reference::grape_event_remove_process_reference( grap
   if ( p_normal )
   {
   // Create remove event for all channels that are to be deleted.
-    for ( uint i = 0; i < p_proc_ref->count_channel(); ++i )
+    for ( unsigned int i = 0; i < p_proc_ref->count_channel(); ++i )
     {
       channel* chan_ptr = p_proc_ref->get_channel( i );
       // pass the flag to the channels
@@ -124,7 +124,7 @@ grape_event_remove_process_reference::~grape_event_remove_process_reference( voi
 bool grape_event_remove_process_reference::Do( void )
 {
   // Perform remove event Do for channels
-  for ( uint i = 0; i < m_channels.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
   {
     grape_event_remove_channel event = m_channels.Item( i );
     event.Do();
@@ -152,7 +152,7 @@ bool grape_event_remove_process_reference::Undo( void )
 
   // Restore parameter assignments
   list_of_varupdate param = new_proc_ref->get_parameter_updates();
-  for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
   {
     varupdate existing_var = m_parameter_assignments.Item( i );
     varupdate* new_var = new varupdate( existing_var );
@@ -160,15 +160,15 @@ bool grape_event_remove_process_reference::Undo( void )
   }
 
   // Restore comment connections.
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_proc_ref );
   }
 
   // Perform remove event Undo for channels
-  for ( uint i = 0; i < m_channels.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
   {
     grape_event_remove_channel event = m_channels.Item( i );
     event.Undo();

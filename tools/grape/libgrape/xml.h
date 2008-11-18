@@ -189,7 +189,7 @@ namespace grape
      * @param p_parent The parent node of the element tree.
      * @param p_id The id.
      */
-    void write_id( wxXmlNode *p_parent, uint p_id );
+    void write_id( wxXmlNode *p_parent, unsigned int p_id );
 
     /**
      * Writes an element tree representing a name.

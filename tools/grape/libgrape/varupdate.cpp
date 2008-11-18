@@ -16,12 +16,10 @@ using namespace grape::libgrape;
 
 varupdate::varupdate( void )
 {
-  m_varupdate = wxEmptyString;
 }
 
 varupdate::varupdate( const varupdate &p_varupdate )
 {
-  m_varupdate = p_varupdate.m_varupdate;
   m_dataexpression = p_varupdate.m_dataexpression;
   m_var = p_varupdate.m_var;
 }
@@ -32,20 +30,23 @@ varupdate::~varupdate( void )
 
 wxString varupdate::get_varupdate( void ) const
 {
-  return get_lhs()+_T(":=")+get_rhs()+_T( ";" );
+  return get_lhs()+_T(":=")+get_rhs();
 }
 
-void varupdate::set_varupdate( const wxString &p_varupdate )
+bool varupdate::set_varupdate( const wxString &p_varupdate )
 {                          
   int pos = p_varupdate.Find( _T( ":=" ) );
   wxString variable_update_lhs = p_varupdate.Mid( 0, pos );
   wxString variable_update_rhs = p_varupdate.Mid( pos+2 );
+  variable_update_lhs.Trim(true); variable_update_lhs.Trim(false);
+  variable_update_rhs.Trim(true); variable_update_rhs.Trim(false);
   if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
   {
-    /* invalid */
+    return false;
   }
   set_lhs( variable_update_lhs );
   set_rhs( variable_update_rhs );
+  return true;
 }
 
 wxString varupdate::get_lhs( void ) const

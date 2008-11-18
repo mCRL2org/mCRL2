@@ -27,12 +27,12 @@ namespace grape
     class grape_event_add_blocked : public grape_event_base
     {
       private:
-        uint                  m_block; /**< Identifier of the to be created blocked. */
+        unsigned int                  m_block; /**< Identifier of the to be created blocked. */
         coordinate            m_coord; /**< The coordinate that was clicked. */
-        uint                  m_conn; /**< Identifier of the clicked connection. */
+        unsigned int                  m_conn; /**< Identifier of the clicked connection. */
         float                 m_def_block_width;  /**< The default width of a blocked. */
         float                 m_def_block_height; /**< The default height of a blocked. */
-        uint                  m_in_diagram; /**< Identifier of the diagram the blocked is added to. */
+        unsigned int                  m_in_diagram; /**< Identifier of the diagram the blocked is added to. */
         grape_event_remove_visible *m_removed_visible; /**< Remove event for the visible the connection already had, if applicable. */
         grape_event_remove_blocked *m_removed_blocked; /**< Remove event for the blocked the connection already had, if applicable. */
         grape_event_detach_channel_communication *m_detached_chan_comm; /**< Detach event for the property the connection already had, if applicable. */
@@ -72,13 +72,13 @@ namespace grape
     class grape_event_remove_blocked : public grape_event_base
     {
       private:
-        uint                  m_block;       /**< Identifier of the to be deleted blocked. */
+        unsigned int                  m_block;       /**< Identifier of the to be deleted blocked. */
         int                   m_connection;       /**< Identifier of the connection the blocked was attached to, if applicable. */
         coordinate            m_coordinate;   /**< the coordinate that was clicked. */
         float                 m_width;        /**< The width of the blocked. */
         float                 m_height;       /**< The height of the blocked. */
         wxArrayLong           m_comments;     /**< Identifiers of comments attached to the blocked. */
-        uint                  m_in_diagram;  /**< Identifier of the diagram the blocked is removed from. */
+        unsigned int                  m_in_diagram;  /**< Identifier of the diagram the blocked is removed from. */
       public:
 
         /**

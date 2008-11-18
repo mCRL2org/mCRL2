@@ -79,7 +79,7 @@ grape_event_remove_channel::grape_event_remove_channel( grape_frame *p_main_fram
   m_width = p_chan->get_width();
   m_height = p_chan->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_chan->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_chan->count_comment(); ++i )
   {
     comment* comm_ptr = p_chan->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -131,17 +131,17 @@ grape_event_remove_channel::~grape_event_remove_channel( void )
 bool grape_event_remove_channel::Do( void )
 {
   // Perform remove event Do for visible and blocked.
-  for ( uint i = 0; i < m_visible.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
   {
     grape_event_remove_visible event = m_visible.Item( i );
     event.Do();
   }
-  for ( uint i = 0; i < m_blocked.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
   {
     grape_event_remove_blocked event = m_blocked.Item( i );
     event.Do();
   }
-  for ( uint i = 0; i < m_channel_communication.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
   {
     grape_event_detach_channel_communication event = m_channel_communication.Item( i );
     event.Do();
@@ -168,17 +168,17 @@ bool grape_event_remove_channel::Undo( void )
   new_chan->set_name( m_name );
 
   // Perform remove event Undo for visible and blocked.
-  for ( uint i = 0; i < m_visible.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
   {
     grape_event_remove_visible event = m_visible.Item( i );
     event.Undo();
   }
-  for ( uint i = 0; i < m_blocked.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
   {
     grape_event_remove_blocked event = m_blocked.Item( i );
     event.Undo();
   }
-  for ( uint i = 0; i < m_channel_communication.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
   {
     grape_event_detach_channel_communication event = m_channel_communication.Item( i );
     event.Undo();

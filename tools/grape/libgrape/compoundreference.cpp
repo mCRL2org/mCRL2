@@ -38,7 +38,7 @@ compound_reference::compound_reference( const compound_reference &p_compound_ref
 compound_reference::~compound_reference( void )
 {
   // Remove all references to this object.
-  for ( uint i = 0; i < m_has_channel.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();
@@ -78,7 +78,7 @@ channel* compound_reference::get_channel( int i )
   return m_has_channel.Item( i );
 }
 
-uint compound_reference::count_channel( void )
+unsigned int compound_reference::count_channel( void )
 {
   return m_has_channel.GetCount();
 }

@@ -23,12 +23,12 @@ namespace grape
     class grape_event_move : public grape_event_base
     {
       private:
-        uint        m_obj_id;     /**< The id of the object to be moved. */
+        unsigned int        m_obj_id;     /**< The id of the object to be moved. */
         object_type m_obj_type;   /**< The type of the object. */
         coordinate  m_old_coord; /**< The original coordinate of the object. */
         coordinate  m_new_coord;  /**< The new coordinate of the object. */
         int         m_flag;  /**< Flag params. */
-        uint        m_diagram_id;    /**< The identifier of the diagram the object is in. */
+        unsigned int        m_diagram_id;    /**< The identifier of the diagram the object is in. */
       public:
 
         /**
@@ -68,7 +68,7 @@ namespace grape
     class grape_event_resize: public grape_event_base
     {
       private:
-        uint    m_obj_id;         /**< The id of the object to be resized. */
+        unsigned int    m_obj_id;         /**< The id of the object to be resized. */
         object_type m_obj_type;   /**< The type of the object. */
         grape_geometry m_old_geo; /**< The old geometry of the object. */
         grape_geometry m_new_geo; /**< The new geometry of the object. */

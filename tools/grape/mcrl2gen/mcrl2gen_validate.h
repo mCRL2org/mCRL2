@@ -15,6 +15,7 @@
 #include <wx/xml/xml.h>
 #include "libgrape/preamble.h"
 #include "libgrape/decl.h"
+#include "libgrape/varupdate.h"
 
 #include <aterm2.h>
 
@@ -434,21 +435,23 @@ namespace grape
      * @param p_process_diagram A valid XML process diagram.
      * @param p_preamble_parameter_decls The parameter declarations in the preamble of the process diagram.
      * @param p_preamble_local_var_decls The local variable declaration in the preamble of the process diagram.
+     * @param datatype_spec The datatype specification.
      * @return A list of actions (and their inferred types) present the process diagram.
      * @pre p_process_diagram is a valid XML process diagram.
      * @post A list containing the actions (and their inferred types) present in the process diagram or error messages are produced.
      */
-    arr_action_type process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls);
+    arr_action_type process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
 
     /**
      * Parameter initialisation parsing function.
      * Parses the parameter initialisation as it occurs inside a process reference or reference state.
      * @param p_parameter_initialisation The string containing the parameter initialisation.
+     * @param datatype_spec The datatype specification.
      * @return An array of declarations and initialisations extracted from the parameter initialisation string.
      * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
      * @post An array of declarations and initialisations extracted from the parameter initialisation string is returned.
      */
-    list_of_decl_init parse_reference_parameters(wxString &p_parameter_initialisation);
+    bool parse_reference_parameters(wxXmlNode *p_process_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec);
 
     /**
      * Diagram name validation function.

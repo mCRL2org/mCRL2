@@ -33,7 +33,6 @@ namespace grape
       protected:
         list_of_varupdate m_parameter_assignments; /**< initial parameter values. */
         process_diagram*  m_refers_to_process;     /**< the process this reference refers to; is evaluated upon mCRL2 conversion, is 0 until then. */
-        wxString  m_text;
       public:
         /**
          * Default constructor.

@@ -26,9 +26,9 @@ namespace grape
     class grape_event_attach_property : public grape_event_base
     {
       private:
-        uint                                m_property;       /**< Identifier of the to be attached visible. */
-        uint                                m_connection;       /**< Identifier of the connection the visible is attached to. */
-        uint                                 m_diagram; /**< Identifier of the diagram the channel communication is added to. */
+        unsigned int                                m_property;       /**< Identifier of the to be attached visible. */
+        unsigned int                                m_connection;       /**< Identifier of the connection the visible is attached to. */
+        unsigned int                                 m_diagram; /**< Identifier of the diagram the channel communication is added to. */
         grape_event_detach_property          *m_detach_prop; /**< Detach events for blocked that was attached to the connection. */
         grape_event_detach_channel_communication  *m_channel_communication; /**< Detach events for channel communication that was attached to the connection, if the connection was a channel. */
       public:
@@ -67,9 +67,9 @@ namespace grape
     class grape_event_detach_property : public grape_event_base
     {
       private:
-        uint                  m_property;       /**< Identifier of the to be detached visible. */
+        unsigned int                  m_property;       /**< Identifier of the to be detached visible. */
         int                   m_connection;     /**< Identifier of the connection the visible was attached to. */
-        uint                  m_diagram;        /**< Identifier of the diagram in which the objects reside. */
+        unsigned int                  m_diagram;        /**< Identifier of the diagram in which the objects reside. */
       public:
 
         /**

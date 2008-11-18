@@ -40,7 +40,7 @@ namespace grape
       private:
         wxString            m_diagram_name;           /**< String of the selection for identifiing the right listbox. */
         grape_diagram_type  m_diagram_type;           /**< Identifier of the diagram type. */
-        uint                m_diagram;                /**< Identifier of the the selected diagram. */
+        unsigned int                m_diagram;                /**< Identifier of the the selected diagram. */
       public:
 
         /**
@@ -76,7 +76,7 @@ namespace grape
     class grape_event_rename_diagram : public grape_event_base
     {
       private:
-        uint        m_diagram;        /**< Identifier of the diagram to be renamed */
+        unsigned int        m_diagram;        /**< Identifier of the diagram to be renamed */
         int         m_diagram_type;   /**< Identifier of the diagram type. */
         wxString    m_orig_name;      /**< The old name of the diagram. Also for identifiing the right listbox. */
         wxString    m_new_name;       /**< The new name of the diagram. */
@@ -115,7 +115,7 @@ namespace grape
     class grape_event_dialog_rename_diagram : public grape_event_base
     {
       private:
-        uint        m_diagram;      /**< Identifier of the diagram. */
+        unsigned int        m_diagram;      /**< Identifier of the diagram. */
         wxString    m_old_name;   /**< The old name of the diagram. */
         wxString    m_new_name;    /**< The new name of the diagram. */
       public:
@@ -152,7 +152,7 @@ namespace grape
     class grape_event_remove_diagram : public grape_event_base
     {
       private:
-        uint                        m_diagram;  /**< Identifier of the renamed diagram. */
+        unsigned int                        m_diagram;  /**< Identifier of the renamed diagram. */
         grape_diagram_type          m_type;          /**< Identifier of the diagram type. */
         wxString                    m_name;          /**< Backup of the name of the diagram. */
 

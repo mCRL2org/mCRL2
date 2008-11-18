@@ -84,10 +84,10 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
         wxXmlNode* xml_loc_var_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE,
                                                 _T( "localvariablelist" ) );
         
-	for (uint i = 0; i < local_vars.GetCount(); ++i)
+	for (unsigned int i = 0; i < local_vars.GetCount(); ++i)
         {
           decl_init local_var = local_vars.Item( i );
-          wxString text = local_var.get_name() + _T(":") + local_var.get_type() + _T("=") + local_var.get_value();
+          wxString text = local_var.get_decl_init();
           wxXmlNode* xml_loc_var = new wxXmlNode( xml_loc_var_list, wxXML_ELEMENT_NODE, _T( "var" ) );
           new wxXmlNode( xml_loc_var, wxXML_TEXT_NODE, _T( "value" ), text );
         }
@@ -96,10 +96,10 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
         list_of_decl params = proc_preamble->get_parameter_declarations_list();
         wxXmlNode* xml_parameter_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE, _T( "parameterlist" ) );
 
-        for (uint i = 0; i < params.GetCount(); ++i)
+        for (unsigned int i = 0; i < params.GetCount(); ++i)
         {
           decl param = params.Item( i );
-          wxString text = param.get_name() + _T(":") + param.get_type();
+          wxString text = param.get_decl();
           wxXmlNode* xml_param = new wxXmlNode( xml_parameter_list, wxXML_ELEMENT_NODE, _T( "param" ) );
           new wxXmlNode( xml_param, wxXML_TEXT_NODE, _T( "value" ), text );
         }
@@ -239,10 +239,17 @@ void grape::libgrape::add_reference_state_list( wxXmlNode* p_objectlist, process
 
       /* node <parameterassignmentlist> */
       wxXmlNode* xml_reference_state_parameterlist = new wxXmlNode( xml_reference_state, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
-      wxString text = ref_state_ptr->get_text();
-      new wxXmlNode( xml_reference_state_parameterlist, wxXML_TEXT_NODE, _T( "value"), text );
-      /* Inherited */
+      list_of_varupdate parameter_assignments = ref_state_ptr->get_parameter_updates();
+      for ( unsigned int j = 0; j < parameter_assignments.GetCount(); ++j )
+      {
+        varupdate parameter_assignment = parameter_assignments.Item( j );
+        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
 
+        wxXmlNode* xml_reference_state_parameter = new wxXmlNode( xml_reference_state_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
+        new wxXmlNode( xml_reference_state_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
+      }
+
+      /* Inherited */
       write_object_attributes( xml_reference_state, ref_state_ptr );
     }
 
@@ -314,10 +321,10 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_var_decls = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
 
       list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
-      for ( uint j = 0; j < tt_label_var_decls.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_var_decls.GetCount(); ++j )
       {
         decl tt_label_var_decl = tt_label_var_decls.Item( j );
-        wxString tt_label_var_decl_text = tt_label_var_decl.get_name() + _T( ":" ) + tt_label_var_decl.get_type();
+        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
 
         /* node <variabledeclaration> */
 
@@ -340,7 +347,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_actions = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
 
       list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
-      for ( uint j = 0; j < tt_label_actions.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_actions.GetCount(); ++j )
       {
         action tt_label_action = tt_label_actions.Item( j );
         wxString tt_label_action_name_text = tt_label_action.get_name();
@@ -358,7 +365,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
-          for ( uint k = 0; k < tt_label_action_params.GetCount(); ++k )
+          for ( unsigned int k = 0; k < tt_label_action_params.GetCount(); ++k )
           {
             dataexpression tt_label_action_param = tt_label_action_params.Item( k );
             wxString tt_label_action_param_text = tt_label_action_param.get_expression();
@@ -386,10 +393,10 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_var_updates = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
 
       list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
-      for ( uint j = 0; j < tt_label_var_updates.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_var_updates.GetCount(); ++j )
       {
         varupdate tt_label_var_update = tt_label_var_updates.Item( j );
-        wxString tt_label_var_update_text = tt_label_var_update.get_lhs() + _T( ":=" ) + tt_label_var_update.get_rhs();
+        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
 
         /* node <variableupdate> */
 
@@ -465,10 +472,10 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_var_decls = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
 
       list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
-      for ( uint j = 0; j < tt_label_var_decls.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_var_decls.GetCount(); ++j )
       {
         decl tt_label_var_decl = tt_label_var_decls.Item( j );
-        wxString tt_label_var_decl_text = tt_label_var_decl.get_name() + _T( ":" ) + tt_label_var_decl.get_type();
+        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
 
         /* node <variabledeclaration> */
 
@@ -491,7 +498,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_actions = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
 
       list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
-      for ( uint j = 0; j < tt_label_actions.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_actions.GetCount(); ++j )
       {
         action tt_label_action = tt_label_actions.Item( j );
         wxString tt_label_action_name_text = tt_label_action.get_name();
@@ -509,7 +516,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
-          for ( uint k = 0; k < tt_label_action_params.GetCount(); ++k )
+          for ( unsigned int k = 0; k < tt_label_action_params.GetCount(); ++k )
           {
             dataexpression tt_label_action_param = tt_label_action_params.Item( k );
             wxString tt_label_action_param_text = tt_label_action_param.get_expression();
@@ -537,10 +544,10 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_var_updates = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
 
       list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
-      for ( uint j = 0; j < tt_label_var_updates.GetCount(); ++j )
+      for ( unsigned int j = 0; j < tt_label_var_updates.GetCount(); ++j )
       {
         varupdate tt_label_var_update = tt_label_var_updates.Item( j );
-        wxString tt_label_var_update_text = tt_label_var_update.get_lhs() + _T( ":=" ) + tt_label_var_update.get_rhs();
+        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
 
         /* node <variableupdate> */
 
@@ -885,10 +892,10 @@ void grape::libgrape::add_process_reference_list( wxXmlNode* p_objectlist, archi
       wxXmlNode* xml_process_reference_parameterlist = new wxXmlNode( xml_process_reference, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
 
       list_of_varupdate parameter_assignments = proc_ref_ptr->get_parameter_updates();
-      for ( uint j = 0; j < parameter_assignments.GetCount(); ++j )
+      for ( unsigned int j = 0; j < parameter_assignments.GetCount(); ++j )
       {
         varupdate parameter_assignment = parameter_assignments.Item( j );
-        wxString parameter_assignment_text = parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs();
+        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
 
         wxXmlNode* xml_process_reference_parameter = new wxXmlNode( xml_process_reference_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
         new wxXmlNode( xml_process_reference_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
@@ -954,7 +961,7 @@ void grape::libgrape::write_size( wxXmlNode *p_parent, float p_width, float p_he
     new wxXmlNode( xml_process_reference_height, wxXML_TEXT_NODE, _T( "value" ), height );
 }
 
-void grape::libgrape::write_id( wxXmlNode *p_parent, uint p_id )
+void grape::libgrape::write_id( wxXmlNode *p_parent, unsigned int p_id )
 {
   wxXmlNode* xml_comment_id = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "id" ) );
 

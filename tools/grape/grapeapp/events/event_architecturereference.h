@@ -25,11 +25,11 @@ namespace grape
     class grape_event_add_architecture_reference : public grape_event_base
     {
       private:
-        uint        m_arch_ref; /**< A pointer to the to be created architecture reference. */
+        unsigned int        m_arch_ref; /**< A pointer to the to be created architecture reference. */
         coordinate  m_coord; /**< The coordinate that was clicked. */
         float       m_def_arch_ref_width;  /**< The default width of a reference state. */
         float       m_def_arch_ref_height; /**< The default height of a reference state. */
-        uint        m_in_diagram; /**< A pointer to the diagram the architecture reference will be added to. */
+        unsigned int        m_in_diagram; /**< A pointer to the diagram the architecture reference will be added to. */
       public:
 
         /**
@@ -65,13 +65,13 @@ namespace grape
     class grape_event_remove_architecture_reference : public grape_event_base
     {
       private:
-        uint                            m_arch_ref; /**< Identifier of the to be deleted process reference. */
+        unsigned int                            m_arch_ref; /**< Identifier of the to be deleted process reference. */
         wxString                        m_name;         /**< Backup of the name of the reference state. */
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the reference state. */
         float                           m_width;        /**< Backup of the width of the reference state. */
         float                           m_height;       /**< Backup of the height of the reference state. */
         wxArrayLong                     m_comments;     /**< Identifiers of comments attached to the reference state. */
-        uint                            m_in_diagram;  /**< Backup of the pointer to the diagram the reference state is in. */
+        unsigned int                            m_in_diagram;  /**< Backup of the pointer to the diagram the reference state is in. */
         arr_event_remove_channel                     m_channels; /**< Backup of the channels that the process_reference had. */
       public:
 

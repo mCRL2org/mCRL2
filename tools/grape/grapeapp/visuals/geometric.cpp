@@ -19,7 +19,7 @@
 using namespace grape::grapeapp;
 
 const float DEG2RAD = M_PI/180;
-const uint ELLIPSE_POINTS = 360; //pre: shouldn't be zero
+const unsigned int ELLIPSE_POINTS = 360; //pre: shouldn't be zero
 
 
 coordinate grape::grapeapp::get_coordinate_from_controlpoints(coordinate p_startp, coordinate p_cp, coordinate p_endp, float pos)
@@ -605,7 +605,7 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   // fill ellipse
   glBegin(GL_POLYGON);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {
       float radians = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( radians ) * p_radius_x, sin( radians ) * p_radius_y , 0.0f );
@@ -618,7 +618,7 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   // draw outer line of ellipse
   glBegin(GL_LINE_LOOP);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {      
       float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius_x, sin( degInRad ) * p_radius_y, 0.0f );
@@ -668,7 +668,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   //draw bezier
   coordinate pre_pnt;
   coordinate pnt = p_begin;
-  for(uint i=1;i<=40;++i) 
+  for(unsigned int i=1;i<=40;++i) 
   {
     pre_pnt = pnt;
     if (i <= 20)
@@ -831,7 +831,7 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   // fill ellipse
   glBegin(GL_POLYGON);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {
       float radians = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( radians ) * p_radius, sin( radians ) * p_radius , 0.0f );
@@ -844,7 +844,7 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   // draw outer line of ellipse
   glBegin(GL_LINE_LOOP);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {      
       float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius, sin( degInRad ) * p_radius, 0.0f );
@@ -948,7 +948,7 @@ void grape::grapeapp::draw_process_reference_corner(const coordinate &p_center, 
   glTranslatef( p_center.m_x, p_center.m_y, 0.0f);
   glBegin( GL_POLYGON );
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {
       float degInRad = i * DEG2RAD*( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius_x,sin ( degInRad ) * p_radius_y, 0.0f);
@@ -961,7 +961,7 @@ void grape::grapeapp::draw_process_reference_corner(const coordinate &p_center, 
   // draw line
   glBegin(GL_LINE_LOOP);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {      
       float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius_x, sin( degInRad ) * p_radius_y, 0.0f);

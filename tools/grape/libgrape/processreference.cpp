@@ -26,14 +26,13 @@ process_reference::process_reference( const process_reference &p_process_ref )
 {
   m_parameter_assignments = p_process_ref.m_parameter_assignments;
   m_refers_to_process = p_process_ref.m_refers_to_process;
-  m_text = p_process_ref.m_text;
 }
 
 process_reference::~process_reference( void )
 {
 
   // Remove all references to this object.
-  for ( uint i = 0; i < m_has_channel.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();
@@ -66,29 +65,25 @@ void process_reference::set_parameter_updates( const list_of_varupdate& p_parame
 
 bool process_reference::set_text( const wxString &p_text )
 {
-  m_text = p_text;
-  // Do processing, i.e. make parameter declarations
-
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw(m_text, _T(";"));
-  varupdate p_upd;
-  while(tkw.HasMoreTokens())
+  wxStringTokenizer tkw( p_text, _T(";") );
+  varupdate var_update;
+  while( tkw.HasMoreTokens() )
   {
     wxString token = tkw.GetNextToken();
-    p_upd.set_varupdate(token);
-    m_parameter_assignments.Add(p_upd);
+    var_update.set_varupdate( token );
+    m_parameter_assignments.Add( var_update );
   }
-
   return true;
 }
 
 wxString process_reference::get_text() const
 {
   wxString result;
-  for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
   {
     varupdate parameter_assignment = m_parameter_assignments.Item( i );
-    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";" );
+    result += parameter_assignment.get_varupdate() + _T( ";\n" );
   }
   return result;
 }

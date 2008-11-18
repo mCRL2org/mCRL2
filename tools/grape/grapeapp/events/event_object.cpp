@@ -70,7 +70,7 @@ bool grape_event_move::Do( void )
     {
       obj_ptr->set_coordinate( m_new_coord ); 
       process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
-      for ( uint i = 0; i < proc_ref_ptr->count_channel(); ++i )
+      for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
       {
         channel* chan_ptr = proc_ref_ptr->get_channel( i );
         coordinate chan_coord = chan_ptr->get_coordinate();
@@ -83,7 +83,7 @@ bool grape_event_move::Do( void )
     {
       obj_ptr->set_coordinate( m_new_coord ); 
       architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
-      for ( uint i = 0; i < arch_ref_ptr->count_channel(); ++i )
+      for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
       {
         channel* chan_ptr = arch_ref_ptr->get_channel( i );
         coordinate chan_coord = chan_ptr->get_coordinate();
@@ -97,7 +97,7 @@ bool grape_event_move::Do( void )
     {
       obj_ptr->set_coordinate( m_new_coord ); 
       state* state_ptr = static_cast<state*> ( obj_ptr );
-      for ( uint i = 0; i < state_ptr->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < state_ptr->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = state_ptr->get_initial_designator( i );
         if ( init_ptr )
@@ -107,7 +107,7 @@ bool grape_event_move::Do( void )
           init_ptr->set_coordinate( init_coord );
         }
       }
-      for ( uint i = 0; i < state_ptr->count_transition_beginstate(); ++i )
+      for ( unsigned int i = 0; i < state_ptr->count_transition_beginstate(); ++i )
       {
         transition* trans_ptr = state_ptr->get_transition_beginstate( i );
         terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
@@ -124,7 +124,7 @@ bool grape_event_move::Do( void )
     {
       obj_ptr->set_coordinate( m_new_coord ); 
       reference_state* ref_state_ptr = static_cast<reference_state*> ( obj_ptr );
-      for ( uint i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = ref_state_ptr->get_initial_designator( i );
         if ( init_ptr )
@@ -134,7 +134,7 @@ bool grape_event_move::Do( void )
           init_ptr->set_coordinate( init_coord );
         }
       }
-      for ( uint i = 0; i < ref_state_ptr->count_transition_beginstate(); ++i )
+      for ( unsigned int i = 0; i < ref_state_ptr->count_transition_beginstate(); ++i )
       {
         transition* trans_ptr = ref_state_ptr->get_transition_beginstate( i );
         terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
@@ -221,7 +221,7 @@ bool grape_event_move::Undo( void )
     {
       obj_ptr->set_coordinate( m_old_coord ); 
       process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
-      for ( uint i = 0; i < proc_ref_ptr->count_channel(); ++i )
+      for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
       {
         channel* chan_ptr = proc_ref_ptr->get_channel( i );
         coordinate chan_coord = chan_ptr->get_coordinate();
@@ -234,7 +234,7 @@ bool grape_event_move::Undo( void )
     {
       obj_ptr->set_coordinate( m_old_coord ); 
       architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
-      for ( uint i = 0; i < arch_ref_ptr->count_channel(); ++i )
+      for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
       {
         channel* chan_ptr = arch_ref_ptr->get_channel( i );
         coordinate chan_coord = chan_ptr->get_coordinate();
@@ -248,7 +248,7 @@ bool grape_event_move::Undo( void )
     {
       obj_ptr->set_coordinate( m_old_coord ); 
       state* state_ptr = static_cast<state*> ( obj_ptr );
-      for ( uint i = 0; i < state_ptr->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < state_ptr->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = state_ptr->get_initial_designator( i );
         if ( init_ptr )
@@ -258,7 +258,7 @@ bool grape_event_move::Undo( void )
           init_ptr->set_coordinate( init_coord );
         }
       }
-      for ( uint i = 0; i < state_ptr->count_transition_beginstate(); ++i )
+      for ( unsigned int i = 0; i < state_ptr->count_transition_beginstate(); ++i )
       {
         transition* trans_ptr = state_ptr->get_transition_beginstate( i );
         terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
@@ -275,7 +275,7 @@ bool grape_event_move::Undo( void )
     {
       obj_ptr->set_coordinate( m_old_coord ); 
       reference_state* ref_state_ptr = static_cast<reference_state*> ( obj_ptr );
-      for ( uint i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = ref_state_ptr->get_initial_designator( i );
         if ( init_ptr )
@@ -285,7 +285,7 @@ bool grape_event_move::Undo( void )
           init_ptr->set_coordinate( init_coord );
         }
       }
-      for ( uint i = 0; i < ref_state_ptr->count_transition_beginstate(); ++i )
+      for ( unsigned int i = 0; i < ref_state_ptr->count_transition_beginstate(); ++i )
       {
         transition* trans_ptr = ref_state_ptr->get_transition_beginstate( i );
         terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
@@ -376,7 +376,7 @@ bool grape_event_resize::Do( void )
   if ( obj_ptr->get_type() == ARCHITECTURE_REFERENCE )
   {
     architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
-    for ( uint i = 0; i < arch_ref_ptr->count_channel(); ++i )
+    for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
     {
       channel* chan_ptr = arch_ref_ptr->get_channel( i );
       coordinate new_coord = move_to_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), chan_ptr->get_coordinate() );
@@ -386,7 +386,7 @@ bool grape_event_resize::Do( void )
   else if ( obj_ptr->get_type() == PROCESS_REFERENCE )
   {
     process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
-    for ( uint i = 0; i < proc_ref_ptr->count_channel(); ++i )
+    for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
     {
       channel* chan_ptr = proc_ref_ptr->get_channel( i );
       coordinate new_coord = move_to_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), chan_ptr->get_coordinate() );
@@ -414,7 +414,7 @@ bool grape_event_resize::Undo( void )
   if ( obj_ptr->get_type() == ARCHITECTURE_REFERENCE )
   {
     architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
-    for ( uint i = 0; i < arch_ref_ptr->count_channel(); ++i )
+    for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
     {
       channel* chan_ptr = arch_ref_ptr->get_channel( i );
       coordinate new_coord = move_to_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), chan_ptr->get_coordinate() );
@@ -424,7 +424,7 @@ bool grape_event_resize::Undo( void )
   else if ( obj_ptr->get_type() == PROCESS_REFERENCE )
   {
     process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
-    for ( uint i = 0; i < proc_ref_ptr->count_channel(); ++i )
+    for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
     {
       channel* chan_ptr = proc_ref_ptr->get_channel( i );
       coordinate new_coord = move_to_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), chan_ptr->get_coordinate() );

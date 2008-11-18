@@ -26,7 +26,6 @@ reference_state::reference_state( const reference_state &p_ref_state )
 {
   m_parameter_assignments = p_ref_state.m_parameter_assignments;
   m_refers_to_process = p_ref_state.m_refers_to_process;
-  m_text = p_ref_state.m_text;
 }
 
 reference_state::~reference_state( void )
@@ -78,32 +77,39 @@ void reference_state::set_relationship_refers_to( process_diagram* p_proc_diagra
   m_refers_to_process = p_proc_diagram;
 }
 
-list_of_varupdate* reference_state::get_varupdate( void )
+list_of_varupdate reference_state::get_parameter_updates( void ) const
 {
-  return &m_parameter_assignments;
+  return m_parameter_assignments;
+}
+
+void reference_state::set_parameter_updates( const list_of_varupdate& p_parameter_assignments )
+{
+  m_parameter_assignments = p_parameter_assignments;
 }
 
 bool reference_state::set_text( const wxString &p_text )
 {
-  m_text = p_text;
-  // Do processing, i.e. make parameter declarations
-
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw(m_text, _T(";"));
-  varupdate p_upd;
-  while(tkw.HasMoreTokens())
+  wxStringTokenizer tkw( p_text, _T(";") );
+  varupdate var_update;
+  while( tkw.HasMoreTokens() )
   {
     wxString token = tkw.GetNextToken();
-    p_upd.set_varupdate(token);
-    m_parameter_assignments.Add(p_upd);
+    var_update.set_varupdate( token );
+    m_parameter_assignments.Add( var_update );
   }
-
   return true;
 }
 
 wxString reference_state::get_text() const
 {
-  return m_text;
+  wxString result;
+  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  {
+    varupdate parameter_assignment = m_parameter_assignments.Item( i );
+    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";\n" );
+  }
+  return result;
 }
 
 // WxWidgets dynamic array implementation.

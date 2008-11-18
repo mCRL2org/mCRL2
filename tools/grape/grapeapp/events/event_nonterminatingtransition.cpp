@@ -99,7 +99,7 @@ grape_event_remove_nonterminating_transition::grape_event_remove_nonterminating_
   m_width = p_ntt->get_width();
   m_height = p_ntt->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_ntt->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_ntt->count_comment(); ++i )
   {
     comment* comm_ptr = p_ntt->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -151,9 +151,9 @@ bool grape_event_remove_nonterminating_transition::Undo( void )
   new_ntt->set_width( m_width );
   new_ntt->set_height( m_height );
   new_ntt->set_coordinate( m_coordinate );
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_ntt );
   }

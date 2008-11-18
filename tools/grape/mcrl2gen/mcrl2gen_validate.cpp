@@ -11,8 +11,6 @@
 #include <sstream>
 #include <string>
 
-#include <wx/tokenzr.h>
-
 #include "mcrl2gen.h"
 #include "mcrl2gen_validate.h"
 #include "libgrape/label.h"
@@ -20,6 +18,7 @@
 #include "libgrape/decl.h"
 
 #include <aterm2.h>
+#include "mcrl2/atermpp/table.h"
 
 // mCRL2 core libraries
 #include "mcrl2/core/detail/struct.h"               // ATerm building blocks.
@@ -651,20 +650,14 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
     wxString ref_id = get_child_value(referenced_diagram, _T("id"));
 
     // check parameter initialisation
-    list_of_decl_init ref_inits;
-    ref_inits.Empty();
-    wxXmlNode *ass_list = get_child(ref_state, _T("parameterassignmentlist"));
-    bool has_parameters = true;
-    if(ass_list == 0)
+    list_of_varupdate ref_inits;
+    try
     {
-      // no list of parameter assignments
-      has_parameters = false;
+      parse_reference_parameters(ref_state, diagram_name, ref_inits, datatype_spec);
     }
-
-    if(ass_list != 0)
+    catch(...)
     {
-      wxString params = ass_list->GetNodeContent();
-      ref_inits = parse_reference_parameters(params);
+      return false;
     }
 
     if(is_valid)
@@ -694,7 +687,7 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
         bool found = false;
         for(unsigned int j=0; j<ref_inits.GetCount(); ++j)
         {
-          if(ref_inits[j].get_name() == preamble_params[i].get_name())
+          if(ref_inits[j].get_lhs() == preamble_params[i].get_name())
           {
             found = true;
             break;
@@ -849,15 +842,15 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
 
     wxString trans_label = get_child_value(transition, _T("label"));
     arr_action_type trans_actions;
-    if(trans_label == wxEmptyString)
+/*    if(trans_label == wxEmptyString)
     {
       // an empty label is always correct (translated as tau)
       continue;
     }
-    bool label_valid;
+*/    bool label_valid;
     try
     {
-      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions, datatype_spec);
+      label_valid = parse_transition_label_action(transition, p_preamble_parameters, p_preamble_variables, diagram_name, trans_actions, datatype_spec);
     }
     catch(...)
     {
@@ -892,16 +885,16 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
     }
 
     wxString trans_label = get_child_value(transition, _T("label"));
-    if(trans_label == wxEmptyString)
+/*    if(trans_label == wxEmptyString)
     {
       // an empty transition label is always correct (translated as tau)
       continue;
     }
-    arr_action_type trans_actions;
+*/    arr_action_type trans_actions;
     bool label_valid;
     try
     {
-      label_valid = parse_transition_label_action(p_process_diagram, p_preamble_parameters, p_preamble_variables, trans_label, trans_actions, datatype_spec);
+      label_valid = parse_transition_label_action(transition, p_preamble_parameters, p_preamble_variables, diagram_name, trans_actions, datatype_spec);
     }
     catch(...)
     {
@@ -940,133 +933,96 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
     {
       for(wxXmlNode *local_var = var_list->GetChildren(); local_var != 0; local_var = local_var->GetNext())
       {
-	wxString var = local_var->GetNodeContent();
-	// process local variable declaration
-        wxStringTokenizer tkt( var, _T(":") );
-        if ( tkt.CountTokens() != 2 || var.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString var_name = tkt.GetNextToken();
-        var_name.Trim( true );
-        var_name.Trim( false );
-        wxStringTokenizer tks( var_name );
-        if ( tks.CountTokens() != 1 || var_name.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString var_rest = tkt.GetNextToken();
-        wxStringTokenizer tkr( var_rest, _T("=") );
-        if ( tkr.CountTokens() != 2 || var_rest.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString var_type = tkr.GetNextToken();
-        var_type.Trim( true );
-        var_type.Trim( false );
-        tks.SetString( var_type );
-        if ( tks.CountTokens() != 1 || var_type.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() << " declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString var_val = tkr.GetNextToken();
-        var_val.Trim( true );
-        var_val.Trim( false );
-        tks.SetString( var_val );
-        if ( tks.CountTokens() != 1 || var_val.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var.ToAscii() 
-               << " declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-
-        // parse local variable name (identifier)
-        string local_var_id = string(var_name.mb_str());
-        const char *l_v_id = local_var_id.c_str();
-        istringstream iss(l_v_id);
-        ATermAppl a_parsed_local_var_id = parse_identifier(iss);
-        if ( a_parsed_local_var_id == 0 )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
-               << "> declaration in its preamble. The variable name '" << var_name.ToAscii() << "' could not be parsed." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-
-        // parse local variable type (sortexpression)
-        string local_var_sort = string(var_type.mb_str());
-        const char *l_v_sort = local_var_sort.c_str();
-        istringstream iss1(l_v_sort);
-        ATermAppl a_parsed_local_var_sort = parse_sort_expr(iss1);
-        ATermAppl a_type_checked_local_var_sort;
-        if ( a_parsed_local_var_sort == 0 )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
-               << "> declaration in its preamble. The variable type '" << var_type.ToAscii() << "' could not be parsed." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        else
-        {
-          // parse succeeded: try to type check
-          a_type_checked_local_var_sort = type_check_sort_expr( a_parsed_local_var_sort, datatype_spec );
-          if ( a_type_checked_local_var_sort == 0 )
-          {
-            // ERROR: variable declaration is not valid
-            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
-                 << "> declaration in its preamble. The variable type '" << var_type.ToAscii() << "' could not be type checked." << endl;
-            throw CONVERSION_ERROR;
-            return false;
-          }
-        }
-
-        // parse local variable value (dataexpression)
-        string local_var_expr = string(var_val.mb_str());
-        const char *l_v_expr = local_var_expr.c_str();
-        istringstream iss2(l_v_expr);
-        ATermAppl a_parsed_local_var_expr = parse_data_expr(iss2);
-        if ( a_parsed_local_var_expr == 0 )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
-               << "> declaration in its preamble. The variable value '" << var_val.ToAscii() << "' could not be parsed." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        else
-        {
-          // parse succeeded: try to type check
-          ATermAppl a_type_checked_local_var_expr = type_check_data_expr( a_parsed_local_var_expr, a_type_checked_local_var_sort, datatype_spec );
-          if ( a_type_checked_local_var_expr == 0 )
-          {
-            // ERROR: variable declaration is not valid
-            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var.ToAscii() 
-                 << "> declaration in its preamble. The variable value '" << var_val.ToAscii() << "' could not be type checked." << endl;
-            throw CONVERSION_ERROR;
-            return false;
-          }
-        }
-        // save declaration
         decl_init var_decl;
-        var_decl.set_name( var_name );
-        var_decl.set_type( var_type );
-        var_decl.set_value( var_val );
+        if ( local_var->GetName() == _T("var") )
+        {
+          wxString var_text = local_var->GetNodeContent();
+          bool valid = var_decl.set_decl_init( var_text );
+          if ( !valid )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii() 
+                 << " declaration in its preamble." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+
+          // parse local variable name (identifier)
+          string local_var_id = string(var_decl.get_name().mb_str());
+          const char *l_v_id = local_var_id.c_str();
+          istringstream iss(l_v_id);
+          ATermAppl a_parsed_local_var_id = parse_identifier(iss);
+          if ( a_parsed_local_var_id == 0 )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var_text.ToAscii() 
+                 << "> declaration in its preamble. The variable name '" << var_decl.get_name().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+
+          // parse local variable type (sortexpression)
+          string local_var_sort = string(var_decl.get_type().mb_str());
+          const char *l_v_sort = local_var_sort.c_str();
+          istringstream iss1(l_v_sort);
+          ATermAppl a_parsed_local_var_sort = parse_sort_expr(iss1);
+          ATermAppl a_type_checked_local_var_sort;
+          if ( a_parsed_local_var_sort == 0 )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var_text.ToAscii() 
+                 << "> declaration in its preamble. The variable type '" << var_decl.get_type().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+          else
+          {
+            // parse succeeded: try to type check
+            a_type_checked_local_var_sort = type_check_sort_expr( a_parsed_local_var_sort, datatype_spec );
+            if ( a_type_checked_local_var_sort == 0 )
+            {
+              // ERROR: variable declaration is not valid
+              cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var_text.ToAscii() 
+                   << "> declaration in its preamble. The variable type '" << var_decl.get_type().ToAscii() << "' could not be type checked." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+          }
+
+          // parse local variable value (dataexpression)
+          string local_var_expr = string(var_decl.get_value().mb_str());
+          const char *l_v_expr = local_var_expr.c_str();
+          istringstream iss2(l_v_expr);
+          ATermAppl a_parsed_local_var_expr = parse_data_expr(iss2);
+          if ( a_parsed_local_var_expr == 0 )
+          {
+            // ERROR: variable declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var_text.ToAscii() 
+                 << "> declaration in its preamble. The variable value '" << var_decl.get_value().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+          else
+          {
+            // parse succeeded: try to type check
+            ATermAppl a_type_checked_local_var_expr = type_check_data_expr( a_parsed_local_var_expr, a_type_checked_local_var_sort, datatype_spec );
+            if ( a_type_checked_local_var_expr == 0 )
+            {
+              // ERROR: variable declaration is not valid
+              cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid local variable <" << var_text.ToAscii() 
+                   << "> declaration in its preamble. The variable value '" << var_decl.get_value().ToAscii() << "' could not be type checked." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+          }
+        }
+        else
+        {
+          // ERROR: XML invalid
+          cerr << "mCRL2 conversion error: parse_preamble called without a valid XML process diagram." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }          
         p_preamble_local_var_decls.Add( var_decl );
       }
     }
@@ -1075,254 +1031,346 @@ bool grape::mcrl2gen::parse_preamble(wxXmlNode *p_process_diagram, list_of_decl 
     {
       for(wxXmlNode *parameter = param_list->GetChildren(); parameter != 0; parameter = parameter->GetNext())
       {
-        wxString param = parameter->GetNodeContent();
-	// process parameter declaration
-        wxStringTokenizer tkt( param, _T(":") );
-        if ( tkt.CountTokens() != 2 || param.IsEmpty() )
+        decl param_decl;
+        if ( parameter->GetName() == _T("param") )
         {
-          // ERROR: parameter declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString param_name = tkt.GetNextToken();
-        param_name.Trim( true );
-        param_name.Trim( false );
-        wxStringTokenizer tks( param_name );
-        if ( tks.CountTokens() != 1 || param_name.IsEmpty() )
-        {
-          // ERROR: parameter declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        wxString param_type = tkt.GetNextToken();
-        param_type.Trim( true );
-        param_type.Trim( false );
-        tks.SetString( param_type );
-        if ( tks.CountTokens() != 1 || param_type.IsEmpty() )
-        {
-          // ERROR: variable declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() << "> declaration in its preamble." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-
-        // parse parameter name (identifier)
-        string param_id = string(param_name.mb_str());
-        const char *par_id = param_id.c_str();
-        istringstream iss(par_id);
-        ATermAppl a_parsed_param_id = parse_identifier(iss);
-        if ( a_parsed_param_id == 0 )
-        {
-          // ERROR: parameter declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
-               << "> declaration in its preamble. The parameter name '" << param_name.ToAscii() << "' could not be parsed." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-
-        // parse parameter type (sortexpression)
-        string param_sort = string(param_type.mb_str());
-        const char *par_sort = param_sort.c_str();
-        istringstream iss1(par_sort);
-        ATermAppl a_parsed_param_sort = parse_sort_expr(iss1);
-        if ( a_parsed_param_sort == 0 )
-        {
-          // ERROR: parameter declaration is not valid
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
-               << "> declaration in its preamble. The parameter type '" << param_type.ToAscii() << "' could not be parsed." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        else
-        {
-          // parse succeeded: try to type check
-          ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );
-          if ( a_type_checked_param_sort == 0 )
+          wxString param_text = parameter->GetNodeContent();
+          bool valid = param_decl.set_decl( param_text );
+          if ( !valid )
           {
             // ERROR: parameter declaration is not valid
-            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param.ToAscii() 
-                 << "> declaration in its preamble. The parameter type '" << param_type.ToAscii() << "' could not be type checked." << endl;
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param_text.ToAscii() << "> declaration in its preamble." << endl;
             throw CONVERSION_ERROR;
             return false;
           }
+
+          // parse parameter name (identifier)
+          string param_id = string(param_decl.get_name().mb_str());
+          const char *par_id = param_id.c_str();
+          istringstream iss(par_id);
+          ATermAppl a_parsed_param_id = parse_identifier(iss);
+          if ( a_parsed_param_id == 0 )
+          {
+            // ERROR: parameter declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param_text.ToAscii() 
+                 << "> declaration in its preamble. The parameter name '" << param_decl.get_name().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+
+          // parse parameter type (sortexpression)
+          string param_sort = string(param_decl.get_type().mb_str());
+          const char *par_sort = param_sort.c_str();
+          istringstream iss1(par_sort);
+          ATermAppl a_parsed_param_sort = parse_sort_expr(iss1);
+          if ( a_parsed_param_sort == 0 )
+          {
+            // ERROR: parameter declaration is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param_text.ToAscii() 
+                 << "> declaration in its preamble. The parameter type '" << param_decl.get_type().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+          else
+          {
+            // parse succeeded: try to type check
+            ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );
+            if ( a_type_checked_param_sort == 0 )
+            {
+              // ERROR: parameter declaration is not valid
+              cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid parameter <" << param_text.ToAscii() 
+                   << "> declaration in its preamble. The parameter type '" << param_decl.get_type().ToAscii() << "' could not be type checked." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+          }
         }
-        // save declaration
-        decl param_decl;
-        param_decl.set_name( param_name );
-        param_decl.set_type( param_type );
+        else
+        {
+          // ERROR: XML invalid
+          cerr << "mCRL2 conversion error: parse_preamble called without a valid XML process diagram." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
         p_preamble_parameter_decls.Add( param_decl );
       }
     }
-
     return true;
   }
-
+  // ERROR: XML invalid
   cerr << "mCRL2 conversion error: parse_preamble called without a valid XML process diagram." << endl;
+  throw CONVERSION_ERROR;
   return false;
 }
 
 bool grape::mcrl2gen::parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions, ATermAppl &datatype_spec)
 {
-/*  wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
+  wxString diagram_name = p_label;
+//  cerr << p_process_diagram->GetName().ToAscii() << endl;
 
   // load label
-  label trans_label;
-  if(!trans_label.set_text(p_label))
+  wxXmlNode* transition_label = get_child(p_process_diagram, _T("label"));
+  if (transition_label != 0)
   {
-    // ERROR: transition label is not valid
-    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid transition label: "
-         << p_label.ToAscii() << endl;
-    throw CONVERSION_ERROR;
-    return false;
-  }
-  wxString actions = trans_label.get_actions().get_expression();
-  ATermAppl a_parsed_multi_action, a_type_checked_multi_action;
-  if(actions != wxEmptyString)
-  {
-    // parse label to ATerm
-    string mult_action = std::string(actions.mb_str());
-    const char *str = mult_action.c_str();
-    istringstream iss(str);
-    a_parsed_multi_action = parse_data_expr(iss);
-    if (a_parsed_multi_action == 0)
+    label label;
+    list_of_decl variable_decl_list;
+    // get variable declarations
+    wxXmlNode* trans_label_declarations = get_child(transition_label, _T("variabledeclarations"));
+    if (trans_label_declarations != 0)
     {
-      cerr << "multiaction in transition label: " << p_label.ToAscii()
-           << " in process diagram " << diagram_name.ToAscii()
-           << " could not be parsed. " << endl;
-      throw CONVERSION_ERROR;
-      return false;
+      for (wxXmlNode *trans_label_declaration = trans_label_declarations->GetChildren(); trans_label_declaration != 0; trans_label_declaration = trans_label_declaration->GetNext())
+      {
+        decl variable_decl;
+        if (trans_label_declaration->GetName() == _T("variabledeclaration"))
+        {
+          wxString variable_declaration_text = trans_label_declaration->GetNodeContent();
+          bool valid = variable_decl.set_decl( variable_declaration_text );
+          if ( !valid )
+          {
+            // ERROR: transition label is not valid
+            cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
+                 << " contains a transition label with an invalid variable declaration " 
+                 << variable_declaration_text.ToAscii() << "." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+          variable_decl_list.Add( variable_decl );
+        }
+        else
+        {
+          // ERROR: transition label is not valid
+          cerr << "mCRL2 conversion error: parse_transition_label_action called without a valid XML process diagram." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+      }
     }
     else
     {
-      // parse succeeded: try to type check
-      a_type_checked_multi_action = type_check_data_expr(a_parsed_multi_action, NULL, datatype_spec, NULL);
-      if (a_type_checked_multi_action == 0)
-      {
-        cerr << "multiaction in transition label: " << p_label.ToAscii()
-             << " in process diagram " << diagram_name.ToAscii()
-             << " could not be type checked. " << endl;
-        throw CONVERSION_ERROR;
-        return false;
-      }
-    }
-
-*/
-/*    ATermAppl a_multi_action = parse_mult_act(iss);
-    if(a_multi_action == NULL)
-    {
-      // ERROR: label is not a valid (parameterised) multiaction
-      cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-           << " contains an invalid (parameterised) multiaction in a transition label: " << p_label.ToAscii() << endl;
+      // ERROR: transition label is not valid
+      cerr << "mCRL2 conversion error: parse_transition_label_action called without a valid XML process diagram." << endl;
       throw CONVERSION_ERROR;
       return false;
     }
+        
+    // get actions
+    wxXmlNode* trans_label_actions = get_child(transition_label, _T("actions"));
+    if (trans_label_actions != 0)
+    {
+      list_of_action actions;
+      for (wxXmlNode *trans_label_action = trans_label_actions->GetChildren(); trans_label_action != 0; trans_label_action = trans_label_action->GetNext())
+      {
+        action action;
+        list_of_dataexpression action_params;
+        for (wxXmlNode *action_part = trans_label_action->GetChildren(); action_part != 0; action_part = action_part->GetNext())
+        {
+          if (action_part->GetName() == _T("name"))
+          {
+            wxString action_name = action_part->GetNodeContent();
+
+            // parse action identifier
+            string action_id = string(action_name.mb_str());
+            const char *a_id = action_id.c_str();
+            istringstream iss(a_id);
+            ATermAppl a_parsed_action_identifier = parse_identifier(iss);
+            if ( a_parsed_action_identifier == 0 )
+            {
+              // ERROR: variable declaration is not valid
+              cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The action name <" 
+                   << action_name.ToAscii() << "> could not be parsed." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+
+            action.set_name( action_name );
+          }
+          else if (action_part->GetName() == _T("param"))
+          {
+            wxString action_param = action_part->GetNodeContent();
+            // parse action parameter (dataexpression)
+            string action_param_expr = string(action_param.mb_str());
+            const char *a_p_expr = action_param_expr.c_str();
+            istringstream iss(a_p_expr);
+            ATermAppl a_parsed_action_param_expr = parse_data_expr(iss);
+            if ( a_parsed_action_param_expr == 0 )
+            {
+              // ERROR: variable declaration is not valid
+              cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The action parameter <" 
+                   << action_param.ToAscii() << "> could not be parsed." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+            else
+            {
+              // parse succeeded: try to type check
+              // make variable table
+/*      ATermTable var_table = ATtableCreate(63,50);
+      for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
+        ATermAppl var = ATAgetFirst(vars);
+        ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
+      }
+      f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_lps, var_table);
+      ATtableDestroy(var_table);
+*/              atermpp::table vars;
+              int count = p_preamble_parameter_decls.GetCount() + p_preamble_local_var_decls.GetCount() + variable_decl_list.GetCount();
+//              cerr << "totaal: " << count << endl;
+//              cerr << "variabelen: " << endl;
+              for (unsigned int i = 0; i < p_preamble_parameter_decls.GetCount(); ++i)
+              {
+//                cerr << p_preamble_parameter_decls.Item(i).get_decl().ToAscii() << endl;
+                istringstream iss( string(p_preamble_parameter_decls.Item(i).get_name().mb_str() ) );
+                ATermAppl var_name = parse_identifier( iss );
+                assert( var_name != 0 );
+                istringstream iss1( string(p_preamble_parameter_decls.Item(i).get_type().mb_str() ) );
+                ATermAppl parsed_var_type = parse_sort_expr( iss1 );
+                assert( parsed_var_type != 0 );
+                ATermAppl var_type = type_check_sort_expr( parsed_var_type, datatype_spec );
+                assert( var_type != 0 );
+                vars.put( var_name, var_type );
+              }
+              for (unsigned int i = 0; i < p_preamble_local_var_decls.GetCount(); ++i)
+              {
+//                cerr << p_preamble_local_var_decls.Item(i).get_decl_init().ToAscii() << endl;
+                istringstream iss( string(p_preamble_local_var_decls.Item(i).get_name().mb_str() ) );
+                ATermAppl var_name = parse_identifier( iss );
+                assert( var_name != 0 );
+                istringstream iss1( string(p_preamble_local_var_decls.Item(i).get_type().mb_str() ) );
+                ATermAppl parsed_var_type = parse_sort_expr( iss1 );
+                assert( parsed_var_type != 0 );
+                ATermAppl var_type = type_check_sort_expr( parsed_var_type, datatype_spec );
+                assert( var_type != 0 );
+                vars.put( var_name, var_type );
+              }
+              for (unsigned int i = 0; i < variable_decl_list.GetCount(); ++i)
+              {
+//                cerr << variable_decl_list.Item(i).get_decl().ToAscii() << endl;
+                istringstream iss( string(variable_decl_list.Item(i).get_name().mb_str() ) );
+                ATermAppl var_name = parse_identifier( iss );
+                assert( var_name != 0 );
+                istringstream iss1( string(variable_decl_list.Item(i).get_type().mb_str() ) );
+                ATermAppl parsed_var_type = parse_sort_expr( iss1 );
+                assert( parsed_var_type != 0 );
+                ATermAppl var_type = type_check_sort_expr( parsed_var_type, datatype_spec );
+                assert( var_type != 0 );
+                vars.put( var_name, var_type );
+              }
+
+              atermpp::aterm_list keys = vars.table_keys();
+              for( atermpp::aterm_list::const_iterator pos = keys.begin(); pos != keys.end(); ++pos)
+              {
+//                ATfprintf( stderr, "variabelen: %t : %t\n", ATerm(*pos), ATerm(vars.get( *pos )) );
+              }
+
+              ATermTable vars1 = vars;
+              ATermList keys1 = ATtableKeys(vars1);
+              while (!ATisEmpty(keys1)) {
+                ATerm key = ATgetFirst(keys1);
+//                ATfprintf( stderr, "variabelen: %t : %t\n", key, ATtableGet(vars1,key));
+                keys1 = ATgetNext(keys1);
+              }
+
+                
+              // get type of action parameter
+              wxString action_param_type = infer_action_type( action_param, p_preamble_parameter_decls, p_preamble_local_var_decls, variable_decl_list );
+              if ( action_param_type.IsEmpty() )
+              {
+                ATermAppl a_type_checked_action_param_expr = type_check_data_expr( a_parsed_action_param_expr, NULL, datatype_spec, vars1);
+                if ( a_type_checked_action_param_expr == 0 )
+                {
+                  // ERROR: variable declaration is not valid
+                  cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The action parameter <" 
+                       << action_param.ToAscii() << "> could not be type checked." << endl;
+                  throw CONVERSION_ERROR;
+                  return false;
+                }
+/*                // ERROR: variable declaration is not valid
+                cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The type of action parameter <" 
+                     << action_param.ToAscii() << "> could not be infered." << endl;
+                throw CONVERSION_ERROR;
+                return false;
+              }
 */
-/*
-    // parse transition label variable declarations
-    list_of_decl trans_var_decls;
-    trans_var_decls.Empty();
-    wxString var_decls = trans_label.get_declarations().get_expression();
-    if(var_decls != wxEmptyString)
-    {
-      // parse
-      wxStringTokenizer tkv(var_decls, _T(","));
-      while(tkv.HasMoreTokens())
+              }
+              else
+              {
+                // parse action parameter type (sortexpression)
+                string action_param_sort_expr = string(action_param_type.mb_str());
+                const char *a_p_sort_expr = action_param_sort_expr.c_str();
+                istringstream iss(a_p_sort_expr);
+                ATermAppl a_parsed_action_param_sort_expr = parse_sort_expr(iss);
+                if ( a_parsed_action_param_sort_expr == 0 )
+                {
+                  // ERROR: variable declaration is not valid
+                  cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The type of action parameter <" 
+                       << action_param.ToAscii() << "> could not be parsed." << endl;
+                  throw CONVERSION_ERROR;
+                  return false;
+                }
+                else
+                {
+                  //parse succeeded: try to type check
+                  ATermAppl a_type_checked_action_param_sort_expr = type_check_sort_expr( a_parsed_action_param_sort_expr, datatype_spec );
+                  if ( a_type_checked_action_param_sort_expr == 0 )
+                  {
+                    // ERROR: variable declaration is not valid
+                    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The type of action parameter <" 
+                         << action_param.ToAscii() << "> could not be type checked." << endl;
+                    throw CONVERSION_ERROR;
+                    return false;
+                  }
+                }
+              }
+              dataexpression param;
+              param.set_expression( action_param );
+              action_params.Add( param );
+            }
+          }
+          else
+          {
+            // ERROR: transition label is not valid
+            cerr << "mCRL2 conversion error: parse_transition_label_action called without a valid XML process diagram." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+        }
+        action.set_parameters( action_params );
+        actions.Add( action );
+      }
+      label.set_actions( actions );
+      wxString multiaction_text = label.get_actions_text();
+//      cout << multiaction_text.ToAscii() << endl;
+
+      // parse actions (multiaction)
+      string mult_act = string(multiaction_text.mb_str());
+      const char *m_a = mult_act.c_str();
+      istringstream iss(m_a);
+      ATermAppl a_parsed_multiaction = parse_mult_act(iss);
+      if ( a_parsed_multiaction == 0 )
       {
-        wxString var_decl_token = tkv.GetNextToken();
-        decl v_decl;
-        wxStringTokenizer tkvd(var_decl_token, _T(":"));
-        wxString var_decl_var = tkvd.GetNextToken();
-        if(var_decl_var == wxEmptyString)
-        {
-          // ERROR: no variable here
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-               << " contains an invalid parameter declaration in a transition label: " << var_decls.ToAscii() << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        var_decl_var.Trim(true);
-        var_decl_var.Trim(false);
-        v_decl.set_name(var_decl_var);
-        var_decl_var = tkvd.GetNextToken();
-        if(var_decl_var == wxEmptyString)
-        {
-          // ERROR: no type here
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-               << " contains an invalid parameter declaration in a transition label: " << var_decls.ToAscii() << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-        var_decl_var.Trim(true);
-        var_decl_var.Trim(false);
-        sortexpression var_decl_var_sort;
-        var_decl_var_sort.set_expression(var_decl_var);
-        v_decl.set_type(var_decl_var_sort);
-        trans_var_decls.Add(v_decl);
+        // ERROR: variable declaration is not valid
+        cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii() << " contains an invalid label. The (parameterised) (multi)action <" 
+             << multiaction_text.ToAscii() << "> could not be parsed." << endl;
+        throw CONVERSION_ERROR;
+        return false;
+      } else {
+        // parsing succeeded, try to type check
+        // problem: type_check_mult_act requires something I don's have.
       }
     }
-
-    // get multiactions
-//    ATermList a_actions = (ATermList)ATgetArgument(a_multi_action, 0); // 1st parameter of MultAct is a list of ParamId's
-    ATermList a_actions = (ATermList)ATgetArgument(a_type_checked_multi_action, 0); // 1st parameter of MultAct is a list of ParamId's
-    int list_length = ATgetLength(a_actions);
-    for(int i=0; i<list_length; ++i)
-    {
-      ATermAppl a_param_id = (ATermAppl)ATelementAt(a_actions, i); // get i'th ParamId
-      char *a_action_name = ATwriteToString(ATgetArgument(a_param_id, 0)); // first arg of ParamId is action name
-      wxString act_name(a_action_name, wxConvUTF8);
-      act_name = act_name.Mid(1, act_name.Len()-2); // contains the name of the action
-      ATermList a_param_id_act_type = (ATermList)ATgetArgument(a_param_id, 1); // second arg of ParamId is a list of Ids
-      wxString act_type;
-
-      act_type = wxEmptyString;
-      bool more_params = false;
-
-      while(ATgetLength(a_param_id_act_type) > 0)
-      {
-        ATermAppl a_type_id = (ATermAppl)ATgetFirst(a_param_id_act_type);
-        ATerm a_type_id_name = ATgetArgument(a_type_id, 0);
-        char *a_action_type = ATwriteToString(a_type_id_name);
-        wxString t_act_type(a_action_type, wxConvUTF8);
-        t_act_type = t_act_type.Mid(1, t_act_type.Len()-2);
-        sortexpression typed_act_type = infer_action_type(t_act_type, p_preamble_parameter_decls, p_preamble_local_var_decls, trans_var_decls);
-
-        if(typed_act_type.get_expression() == wxEmptyString)
-        {
-          cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-               << " contains a parameterised action in a transition label of which the type of parameter "
-               << t_act_type.ToAscii() << " could not be inferred." << endl;
-          throw CONVERSION_ERROR;
-          return false;
-        }
-
-        if(more_params)
-        {
-          act_type += _T(" # ");
-        }
-        act_type += typed_act_type.get_expression();
-
-        more_params = true;
-        a_param_id_act_type = (ATermList)ATgetNext(a_param_id_act_type);
-      }
-
-      action_type t_action_type;
-      t_action_type.m_action = act_name;
-      t_action_type.m_type = act_type;
-      p_actions.Add(t_action_type);
-    }
+    return true;    
   }
-*/
-  return true;
+  // ERROR: transition label is not valid
+  cerr << "mCRL2 conversion error: parse_transition_label_action called without a valid XML process diagram." << endl;
+  throw CONVERSION_ERROR;
+  return false;
 }
 
-wxString grape::mcrl2gen::infer_action_type(wxString &p_type, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, list_of_decl &p_trans_var_decls)
+wxString grape::mcrl2gen::infer_action_type(wxString &p_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, list_of_decl &p_trans_var_decls)
 {
   // search in transition variable declaration first
   for(unsigned int i=0; i<p_trans_var_decls.GetCount(); ++i)
   {
-    if(p_trans_var_decls[i].get_name() == p_type)
+    if(p_trans_var_decls[i].get_name() == p_name)
     {
       return p_trans_var_decls[i].get_type();
     }
@@ -1330,20 +1378,20 @@ wxString grape::mcrl2gen::infer_action_type(wxString &p_type, list_of_decl &p_pr
   // search in preamble
   for(unsigned int i=0; i<p_preamble_parameter_decls.GetCount(); ++i)
   {
-    if(p_preamble_parameter_decls[i].get_name() == p_type)
+    if(p_preamble_parameter_decls[i].get_name() == p_name)
     {
       return p_preamble_parameter_decls[i].get_type();
     }
   }
   for(unsigned int i=0; i<p_preamble_local_var_decls.GetCount(); ++i)
   {
-    if(p_preamble_local_var_decls[i].get_name() == p_type)
+    if(p_preamble_local_var_decls[i].get_name() == p_name)
     {
       return p_preamble_local_var_decls[i].get_type();
     }
   }
 
-  return sortexpression().get_expression();
+  return wxEmptyString;
 }
 
 bool grape::mcrl2gen::validate_blocked_list(wxXmlNode *p_architecture_diagram, wxXmlNode *p_blocked_list)
@@ -1852,20 +1900,14 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
     wxString ref_name = get_child_value(referenced_diagram, _T("name"));
 
     // check parameter initialisation
-    list_of_decl_init ref_inits;
-    ref_inits.Empty();
-    wxXmlNode *ass_list = get_child(proc_ref, _T("parameterassignmentlist"));
-    bool has_parameters = true;
-    if(ass_list == 0)
+    list_of_varupdate ref_inits;
+    try
     {
-      // no list of parameter assignments
-      has_parameters = false;
+      parse_reference_parameters(proc_ref, diagram_name, ref_inits, datatype_spec);
     }
-
-    if(ass_list != 0)
+    catch(...)
     {
-      wxString params = ass_list->GetNodeContent();
-      ref_inits = parse_reference_parameters(params);
+      return false;
     }
 
     if(is_valid)
@@ -1886,7 +1928,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
       {
         cerr << "+specification is not valid: architecture diagram " << diagram_name.ToAscii()
              << " contains a process reference to process diagram " << ref_name.ToAscii()
-             << " that does not contain the same number of parameters." << preamble_params.GetCount() << "!=" << ref_inits.GetCount() << endl;
+             << " that does not contain the same number of parameters." << endl;
         is_valid = false;
       }
 
@@ -1895,7 +1937,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
         bool found = false;
         for(unsigned int j=0; j<ref_inits.GetCount(); ++j)
         {
-          if(ref_inits[j].get_name() == preamble_params[i].get_name())
+          if(ref_inits[j].get_lhs() == preamble_params[i].get_name())
           {
             found = true;
             break;
@@ -2019,7 +2061,7 @@ wxArrayString grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxSt
     wxXmlNode *curr_diag = get_process_diagram(p_doc_root, curr);
     wxString diagram_name = get_child_value(curr_diag, _T("name"));
     parse_preamble(curr_diag, preamble_params, preamble_vars, datatype_spec);
-    arr_action_type acts = process_diagram_mcrl2_action(curr_diag, preamble_params, preamble_vars);
+    arr_action_type acts = process_diagram_mcrl2_action(curr_diag, preamble_params, preamble_vars, datatype_spec);
     for(unsigned int i=0; i<acts.GetCount(); ++i)
     {
       actions.Add(acts[i].m_action);
@@ -2062,7 +2104,7 @@ wxArrayString grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxSt
   return actions;
 }
 
-arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls)
+arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   arr_action_type actions;
 
@@ -2105,8 +2147,8 @@ arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_proce
             return actions;
           }
           // child_trans_label = <label>
-          ATermAppl expr;
-          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr);
+//          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr);
+          parse_transition_label_action(child_trans, p_preamble_parameter_decls, p_preamble_local_var_decls, diagram_name, actions, datatype_spec);
         }
       }
       if(child->GetName() == _T("nonterminatingtransitionlist"))
@@ -2128,8 +2170,8 @@ arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_proce
             return actions;
           }
           // child_trans_label = <label>
-          ATermAppl expr1;
-          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr1);
+//          parse_transition_label_action(p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, child_trans_label->GetNodeContent(), actions, expr1);
+          parse_transition_label_action(child_trans, p_preamble_parameter_decls, p_preamble_local_var_decls, diagram_name, actions, datatype_spec);
         }
       }
     }
@@ -2145,35 +2187,99 @@ arr_action_type grape::mcrl2gen::process_diagram_mcrl2_action(wxXmlNode *p_proce
   return actions;
 }
 
-list_of_decl_init grape::mcrl2gen::parse_reference_parameters(wxString &p_parameter_initialisation)
+bool grape::mcrl2gen::parse_reference_parameters(wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec)
 {
-  list_of_decl_init params;
-  params.Empty();
+  p_parameter_initialisation.Empty();
 
-  // the parameter initialisation is of the form: param1 := expression1, ..., paramn := expressionn
-
-  wxStringTokenizer tkp(p_parameter_initialisation, _T(";"));
-  while(tkp.HasMoreTokens())
+  if(p_reference->GetName() == _T("processreference") || p_reference->GetName() == _T("referencestate"))
   {
-    wxString param_text = tkp.GetNextToken();
-    decl_init param_init;
-    wxString param_var, param_expr;
-    int pos1 = param_text.Find(_T(":"));
-    int pos2 = param_text.Find(_T("="));
-    param_var = param_text.Mid(0, pos1);
-    param_var.Trim(true); param_var.Trim(false);
-    param_text = param_text.Mid(pos2+1);
-    param_expr = param_text;
-    param_expr.Trim(true); param_expr.Trim(false);
-    param_init.set_name(param_var);
-    param_init.set_value(param_expr);
-    if(param_var != wxEmptyString && param_expr != wxEmptyString)
-    {
-      params.Add(param_init);
-    }
-  }
+    wxString diagram_name = get_child_value(p_reference, _T("name"));
 
-  return params;
+    wxXmlNode *param_list = get_child(p_reference, _T("parameterassignmentlist"));
+    if(param_list != 0)
+    {
+      for(wxXmlNode *param_assignment = param_list->GetChildren(); param_assignment != 0; param_assignment = param_assignment->GetNext())
+      {
+        varupdate parameter_assignment;
+        if ( param_assignment->GetName() == _T( "parameterassignment" ) )
+        {
+          wxString parameter_assignment_text = param_assignment->GetNodeContent();
+          bool valid = parameter_assignment.set_varupdate( parameter_assignment_text );
+          if ( !valid )
+          {
+            // ERROR: parameter assignment is not valid
+            cerr << "mCRL2 conversion error: process reference to process diagram " << diagram_name.ToAscii() 
+                 << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii() << "." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+ 
+          // parse parameter name (identifier)
+          string parameter_assignment_id = string(parameter_assignment.get_lhs().mb_str());
+          const char *p_a_id = parameter_assignment_id.c_str();
+          istringstream iss(p_a_id);
+          ATermAppl a_parsed_parameter_assignment_id = parse_identifier(iss);
+          if ( a_parsed_parameter_assignment_id == 0 )
+          {
+            // ERROR: parameter assignment is not valid
+            cerr << "mCRL2 conversion error: process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment <" << parameter_assignment_text.ToAscii() 
+                 << ">. The parameter name '" << parameter_assignment.get_lhs().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+
+          // parse parameter assignment value (dataexpression)
+          string parameter_assignment_expr = string(parameter_assignment.get_rhs().mb_str());
+          const char *p_a_expr = parameter_assignment_expr.c_str();
+          istringstream iss2(p_a_expr);
+          ATermAppl a_parsed_parameter_assignment_expr = parse_data_expr(iss2);
+          if ( a_parsed_parameter_assignment_expr == 0 )
+          {
+            // ERROR: parameter assignment is not valid
+            cerr << "mCRL2 conversion error: process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment <" << parameter_assignment_text.ToAscii() 
+                 << ">. The parameter assignment value '" << parameter_assignment.get_rhs().ToAscii() << "' could not be parsed." << endl;
+            throw CONVERSION_ERROR;
+            return false;
+          }
+          else
+          {
+            // parse succeeded: try to type check
+            ATermAppl a_type_checked_parameter_assignment_expr = type_check_data_expr( a_parsed_parameter_assignment_expr, NULL, datatype_spec );
+            if ( a_type_checked_parameter_assignment_expr == 0 )
+            {
+              // ERROR: parameter assignment is not valid
+              cerr << "mCRL2 conversion error: process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment <" << parameter_assignment_text.ToAscii() 
+                   << ">. The parameter assignment value '" << parameter_assignment.get_rhs().ToAscii() << "' could not be type checked." << endl;
+              throw CONVERSION_ERROR;
+              return false;
+            }
+          }
+          p_parameter_initialisation.Add( parameter_assignment );
+        }
+        else
+        {
+          // ERROR: parameter assignment is not valid
+          cerr << "mCRL2 conversion error: process reference to process diagram " << diagram_name.ToAscii() 
+               << " contains an invalid parameter assignment." << endl;
+          throw CONVERSION_ERROR;
+          return false;
+        }
+      }
+    }
+    else
+    {
+      // ERROR: <referencestate> does not contain <parameterassignmentlist>
+      cerr << "mCRL2 conversion error: process diagram " << p_diagram_name.ToAscii()
+           << " has a process reference " << diagram_name.ToAscii()
+           << " that does not contain any parameter assignments." << endl;
+      throw CONVERSION_ERROR;
+      return false;
+    }
+    return true;
+  }
+  cerr << "mCRL2 conversion error: parse_reference_parameters called without a valid XML process reference." << endl;
+  throw CONVERSION_ERROR;
+  return false;
 }
 
 bool grape::mcrl2gen::validate_diagram_names(wxXmlNode *p_doc_root)

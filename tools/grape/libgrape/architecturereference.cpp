@@ -28,7 +28,7 @@ architecture_reference::architecture_reference( const architecture_reference &p_
 architecture_reference::~architecture_reference(void)
 {
   // Remove all references to this object.
-  for ( uint i = 0; i < m_has_channel.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();

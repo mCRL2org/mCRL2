@@ -38,7 +38,7 @@ void grape_event_base::finish_modification( void )
   m_main_frame->get_glcanvas()->reload_visual_objects();
 }
 
-object* grape_event_base::find_object( uint p_obj_id, object_type p_obj_type, int p_dia_id )
+object* grape_event_base::find_object( unsigned int p_obj_id, object_type p_obj_type, int p_dia_id )
 {
   if ( p_dia_id == -1 ) // no diagram id was supplied, search the whole spec
   {
@@ -70,7 +70,7 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
   {
-    for ( uint i = 0; i < spec->count_process_diagram(); ++i )
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
       if ( proc_dia_ptr->get_name() == p_dia_name )
@@ -82,7 +82,7 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   }
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
   {
-    for ( uint i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
     {
       architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
       if ( arch_dia_ptr->get_name() == p_dia_name )
@@ -95,13 +95,13 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   return result;
 }
 
-diagram* grape_event_base::find_diagram( uint p_dia_id, grape_diagram_type p_dia_type )
+diagram* grape_event_base::find_diagram( unsigned int p_dia_id, grape_diagram_type p_dia_type )
 {
   diagram* result = 0;
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
   {
-    for ( uint i = 0; i < spec->count_process_diagram(); ++i )
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
       if ( proc_dia_ptr->get_id() == p_dia_id )
@@ -113,7 +113,7 @@ diagram* grape_event_base::find_diagram( uint p_dia_id, grape_diagram_type p_dia
   }
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
   {
-    for ( uint i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
     {
       architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
       if ( arch_dia_ptr->get_id() == p_dia_id )
@@ -158,13 +158,13 @@ bool grape_event_base::close_specification()
   if ( del_spec )
   {
     // Remove all diagrams
-    for ( uint i = 0; i < del_spec->count_architecture_diagram(); ++i )
+    for ( unsigned int i = 0; i < del_spec->count_architecture_diagram(); ++i )
     {
       architecture_diagram* arch_dia_ptr = del_spec->get_architecture_diagram( i );
       grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, arch_dia_ptr, false );
       m_main_frame->get_event_handler()->Submit( event, false );
     }
-    for ( uint i = 0; i < del_spec->count_process_diagram(); ++i )
+    for ( unsigned int i = 0; i < del_spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = del_spec->get_process_diagram( i );
       grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, proc_dia_ptr, false );

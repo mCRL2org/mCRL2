@@ -8,8 +8,6 @@
 //
 // Implements functions to convert an XML file into a grape specification.
 
-#include <wx/tokenzr.h>
-
 #include "specification.h"
 #include "xmlopen.h"
 
@@ -17,14 +15,14 @@ using namespace grape::libgrape;
 
 long g_max_id = 0;
 
-compound_state* grape::libgrape::find_compound_state( process_diagram* p_proc_dia, uint p_id )
+compound_state* grape::libgrape::find_compound_state( process_diagram* p_proc_dia, unsigned int p_id )
 {
   object *obj_ptr = process_diagram::find_object( p_proc_dia, p_id, STATE );
   obj_ptr = obj_ptr ? obj_ptr : process_diagram::find_object( p_proc_dia, p_id, REFERENCE_STATE );
   return static_cast< compound_state* >( obj_ptr );
 }
 
-compound_reference* grape::libgrape::find_compound_reference( architecture_diagram* p_arch_dia, uint p_id )
+compound_reference* grape::libgrape::find_compound_reference( architecture_diagram* p_arch_dia, unsigned int p_id )
 {
   object *obj_ptr = architecture_diagram::find_object( p_arch_dia, p_id, PROCESS_REFERENCE );
   obj_ptr = obj_ptr ? obj_ptr : architecture_diagram::find_object( p_arch_dia, p_id, ARCHITECTURE_REFERENCE );
@@ -74,6 +72,7 @@ bool grape::libgrape::xml_open( grape_specification* p_spec, const wxString &p_f
     }
     else
     {
+      /* invalid node name! */
       return false;
     }
 
@@ -81,12 +80,12 @@ bool grape::libgrape::xml_open( grape_specification* p_spec, const wxString &p_f
   }
 
   // set the references
-  for ( uint i = 0; i < p_spec->count_process_diagram(); ++i )
+  for ( unsigned int i = 0; i < p_spec->count_process_diagram(); ++i )
   {
     process_diagram* proc_dia_ptr = p_spec->get_process_diagram( i );
     p_spec->check_references( proc_dia_ptr->get_name(), proc_dia_ptr );
   }
-  for ( uint i = 0; i < p_spec->count_architecture_diagram(); ++i )
+  for ( unsigned int i = 0; i < p_spec->count_architecture_diagram(); ++i )
   {
     architecture_diagram* arch_dia_ptr = p_spec->get_architecture_diagram( i );
     p_spec->check_references( arch_dia_ptr->get_name(), arch_dia_ptr );
@@ -120,7 +119,7 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
   {
     list_of_decl preamble_parameters;
     list_of_decl_init preamble_variables;
-    uint proc_dia_id = 0;
+    unsigned int proc_dia_id = 0;
     wxString proc_dia_name = _T( "" );
     wxString node_name = proc_dia_node->GetName();
     if ( node_name == _T( "processdiagram" ) )
@@ -134,7 +133,7 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
           wxString identifier = proc_dia_info_node->GetNodeContent();
           long dummy_id;
           identifier.ToLong( &dummy_id );
-          proc_dia_id = ( uint ) dummy_id;
+          proc_dia_id = ( unsigned int ) dummy_id;
           if ( g_max_id < dummy_id )
           {
              g_max_id = dummy_id;
@@ -152,91 +151,55 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
             if(preamble_node->GetName() == _T("parameterlist"))
             {
               // get the parameterlist
-              decl preamble_parameter_decl;
               for(wxXmlNode *preamble_parameter = preamble_node->GetChildren(); preamble_parameter != 0; preamble_parameter = preamble_parameter->GetNext())
               {
+                decl preamble_parameter_decl;
                 if(preamble_parameter->GetName() == _T("param"))
                 {
                   wxString preamble_param = preamble_parameter->GetNodeContent();
-                  // process parameter declaration
-                  wxStringTokenizer tkt( preamble_param, _T(":") );
-                  if ( tkt.CountTokens() != 2 || preamble_param.IsEmpty() )
+                  bool valid = preamble_parameter_decl.set_decl( preamble_param );
+                  if ( !valid )
                   {
+                    /* invalid syntax! */
                     return false;
                   }
-                  wxString param_name = tkt.GetNextToken();
-                  param_name.Trim( true );
-                  param_name.Trim( false );
-                  wxStringTokenizer tks( param_name );
-                  if ( tks.CountTokens() != 1 || param_name.IsEmpty() )
-                  {
-                    return false;
-                  }
-                  wxString param_type = tkt.GetNextToken();
-                  param_type.Trim( true );
-                  param_type.Trim( false );
-                  tks.SetString( param_type );
-                  if ( tks.CountTokens() != 1 || param_type.IsEmpty() )
-                  {
-                    return false;
-                  }
-		  preamble_parameter_decl.set_name(param_name);
-                  preamble_parameter_decl.set_type( param_type );
                   preamble_parameters.Add( preamble_parameter_decl );
+                }
+                else
+                {
+                  /* invalid node name! */
+                  return false;
                 }
               }
             }
             else if(preamble_node->GetName() == _T("localvariablelist"))
             {
               // get the localvariablelist
-              decl_init preamble_local_var_decl;
               for(wxXmlNode *preamble_local_variable = preamble_node->GetChildren(); preamble_local_variable != 0; preamble_local_variable = preamble_local_variable->GetNext())
               {
+                decl_init preamble_local_var_decl;
                 if(preamble_local_variable->GetName() == _T("var"))
                 {
                   wxString preamble_local_var = preamble_local_variable->GetNodeContent();
-                  // process parameter declaration
-                  wxStringTokenizer tkt( preamble_local_var, _T(":") );
-                  if ( tkt.CountTokens() != 2 || preamble_local_var.IsEmpty() )
+                  bool valid = preamble_local_var_decl.set_decl_init( preamble_local_var );
+                  if ( !valid )
                   {
+                    /* invalid syntax! */
                     return false;
                   }
-                  wxString local_var_name = tkt.GetNextToken();
-                  local_var_name.Trim( true );
-                  local_var_name.Trim( false );
-                  wxStringTokenizer tks( local_var_name );
-                  if ( tks.CountTokens() != 1 || local_var_name.IsEmpty() )
-                  {
-                    return false;
-                  }
-                  wxString local_var_rest = tkt.GetNextToken();
-                  wxStringTokenizer tkr( local_var_rest, _T("=") );
-                  if ( tkr.CountTokens() != 2 || local_var_rest.IsEmpty() )
-                  {
-                    return false;
-                  }
-                  wxString local_var_type = tkr.GetNextToken();
-                  local_var_type.Trim( true );
-                  local_var_type.Trim( false );
-                  tks.SetString( local_var_type );
-                  if ( tks.CountTokens() != 1 || local_var_type.IsEmpty() )
-                  {
-                    return false;
-                  }
-                  wxString local_var_val = tkr.GetNextToken();
-                  local_var_val.Trim( true );
-                  local_var_val.Trim( false );
-                  tks.SetString( local_var_val );
-                  if ( tks.CountTokens() != 1 || local_var_val.IsEmpty() )
-                  {
-                    return false;
-                  }
-		  preamble_local_var_decl.set_name(local_var_name);
-                  preamble_local_var_decl.set_type( local_var_type );
-                  preamble_local_var_decl.set_value( local_var_val );
                   preamble_variables.Add( preamble_local_var_decl );
                 }
+                else
+                {
+                  /* invalid node name! */
+                  return false;
+                }
               }
+            }
+            else
+            {
+              /* invalid node name! */
+              return false;
             }
           }
         }
@@ -259,7 +222,10 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
       result = result && open_comments( p_spec, proc_dia_node, new_process_diagram );
     }
     else
-    { /* invalid! */ }
+    {
+      /* invalid node name! */
+      return false;
+    }
 
     // get next diagram.
     proc_dia_node = proc_dia_node->GetNext();
@@ -290,7 +256,7 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
             wxXmlNode* state_node = object_node->GetChildren();
             while ( state_node )
             {
-              uint state_identifier = 0;
+              unsigned int state_identifier = 0;
               coordinate state_coordinate = { 0.0f, 0.0f };
               float state_height = 0.1f;
               float state_width = 0.1f;
@@ -309,7 +275,7 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
                   wxString identifier = state_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  state_identifier = ( uint ) dummy_id;
+                  state_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -335,7 +301,10 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
                       state_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -359,12 +328,18 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
                       state_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the state
                 state_information = state_information->GetNext();
@@ -387,7 +362,10 @@ bool grape::libgrape::open_states( grape_specification* p_spec, wxXmlNode* p_pro
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -414,12 +392,12 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
             wxXmlNode* ref_state_node = object_node->GetChildren();
             while ( ref_state_node )
             {
-              uint ref_state_identifier = 0;
+              unsigned int ref_state_identifier = 0;
               coordinate ref_state_coordinate = { 0.0f, 0.0f };
               float ref_state_height = 0.1f;
               float ref_state_width = 0.1f;
               wxString ref_state_name = _T( "" );
-              wxString ref_state_parameter_assignments = _T( "" );
+              list_of_varupdate ref_state_parameter_assignments;
 
               wxXmlNode* ref_state_information = ref_state_node->GetChildren();
               while ( ref_state_information )
@@ -434,7 +412,7 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
                   wxString identifier = ref_state_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  ref_state_identifier = ( uint ) dummy_id;
+                  ref_state_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -460,7 +438,10 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
                       ref_state_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -484,16 +465,43 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
                       ref_state_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
                 else if ( what_info == _T( "parameterassignmentlist" ) )
                 {
-                  ref_state_parameter_assignments = ref_state_information->GetNodeContent();
+                  wxXmlNode* parameter_info = ref_state_information->GetChildren();
+                  while ( parameter_info )
+                  {
+                    varupdate parameter_update;
+                    if ( parameter_info->GetName() == _T( "parameterassignment" ) )
+                    {
+                      wxString parameter_update_text = parameter_info->GetNodeContent();
+                      bool valid = parameter_update.set_varupdate( parameter_update_text );
+                      if ( !valid )
+                      {
+                        /* invalid syntax! */
+                        return false;
+                      }
+                      ref_state_parameter_assignments.Add( parameter_update );
+                    }
+                    else
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
+                    parameter_info = parameter_info->GetNext();
+                  }
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the state
                 ref_state_information = ref_state_information->GetNext();
@@ -502,7 +510,7 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
               reference_state* ref_state_ptr = p_proc_dia_ptr->add_reference_state( ref_state_identifier, ref_state_coordinate, ref_state_width, ref_state_height );
               // set the state name
               ref_state_ptr->set_name( ref_state_name );
-              ref_state_ptr->set_text( ref_state_parameter_assignments );
+              ref_state_ptr->set_parameter_updates( ref_state_parameter_assignments );
 
               // set the relationship refers to later
               // retrieve the next state
@@ -518,7 +526,10 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -545,12 +556,12 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
             wxXmlNode* ntt_node = object_node->GetChildren();
             while ( ntt_node )
             {
-              uint ntt_identifier = 0;
+              unsigned int ntt_identifier = 0;
               coordinate ntt_coordinate = { 0.0f, 0.0f };
               float ntt_height = 0.1f;
               float ntt_width = 0.1f;
-              uint ntt_to_id = 0;
-              uint ntt_from_id = 0;
+              unsigned int ntt_to_id = 0;
+              unsigned int ntt_from_id = 0;
               label ntt_label;
 
               wxXmlNode* ntt_information = ntt_node->GetChildren();
@@ -562,7 +573,7 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                   wxString identifier = ntt_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  ntt_identifier = ( uint ) dummy_id;
+                  ntt_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -588,7 +599,10 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                       ntt_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -612,7 +626,10 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                       ntt_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -621,14 +638,14 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                   wxString identifier = ntt_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  ntt_to_id = ( uint ) dummy_id;
+                  ntt_to_id = ( unsigned int ) dummy_id;
                 }
                 else if ( what_info == _T( "from" ) )
                 {
                   wxString identifier = ntt_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  ntt_from_id = ( uint ) dummy_id;
+                  ntt_from_id = ( unsigned int ) dummy_id;
                 }
                 else if ( what_info == _T("label"))
                 {
@@ -645,33 +662,22 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                       wxXmlNode* variable_declarations = label_info->GetChildren();
                       while ( variable_declarations )
                       {
+                        decl variable_decl;
                         if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
                         {
                           wxString variable_declaration = variable_declarations->GetNodeContent();
-                          wxStringTokenizer tkt( variable_declaration, _T(":") );
-                          if ( tkt.CountTokens() == 2 || !variable_declaration.IsEmpty() )
+                          bool valid = variable_decl.set_decl( variable_declaration );
+                          if ( !valid )
                           {
-                            wxString variable_name = tkt.GetNextToken();
-                            variable_name.Trim(true);
-                            variable_name.Trim(false);
-                            wxStringTokenizer tks( variable_name );
-                            if (tks.CountTokens() != 1 || variable_name.IsEmpty() )
-                            {
-                              /* invalid */
-                            }
-                            wxString variable_type = tkt.GetNextToken();
-                            variable_type.Trim(true);
-                            variable_type.Trim(false);
-                            tks.SetString( variable_type );
-                            if (tks.CountTokens() != 1 || variable_type.IsEmpty() )
-                            {
-                              /* invalid */
-                            }
-                            decl variable_decl;
-                            variable_decl.set_name( variable_name );
-                            variable_decl.set_type( variable_type );
-                            variable_decl_list.Add( variable_decl );
+                            /* invalid syntax! */
+                            return false;
                           }
+                          variable_decl_list.Add( variable_decl );
+                        }
+                        else
+                        {
+                          /* invalid node name! */
+                          return false;
                         }
                         variable_declarations = variable_declarations->GetNext();
                       }
@@ -705,7 +711,8 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                             }
                             else
                             {
-                              /* invalid */
+                              /* invalid node name! */
+                              return false;
                             }
 
                             action_info = action_info->GetNext();
@@ -715,7 +722,8 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                         }
                         else
                         {
-                          /* invalid */
+                          /* invalid node name! */
+                          return false;
                         }
                         action_list.Add( action );
 
@@ -729,35 +737,32 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                     else if ( label_info->GetName() == _T( "variableupdates" ) )
                     {
                       wxXmlNode* variable_updates = label_info->GetChildren();
-                      varupdate variable_update;
                       while ( variable_updates )
                       {
-                        
+                        varupdate variable_update;
                         if ( variable_updates->GetName() == _T( "variableupdate" ) )
                         {
                           wxString variable_update_text = variable_updates->GetNodeContent();
-                          int pos = variable_update_text.Find( _T( ":=" ) );
-                          wxString variable_update_lhs = variable_update_text.Mid( 0, pos );
-                          wxString variable_update_rhs = variable_update_text.Mid( pos+2 );
-                          if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
+                          bool valid = variable_update.set_varupdate( variable_update_text );
+                          if ( !valid )
                           {
-                            /* invalid */
+                            /* invalid sytax! */
+                            return false;
                           }
-                          variable_update.set_lhs( variable_update_lhs );
-                          variable_update.set_rhs( variable_update_rhs );
+                          variable_update_list.Add( variable_update );
                         }
                         else
                         {
-                          /* invalid */
+                          /* invalid node name! */
+                          return false;
                         }
-                        variable_update_list.Add( variable_update );
-
                         variable_updates = variable_updates->GetNext();
                       }
                     }
                     else
                     {
-                      /* invalid */
+                      /* invalid node name! */
+                      return false;
                     }
 
                     label_info = label_info->GetNext();
@@ -769,7 +774,10 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                   ntt_label.set_variable_updates( variable_update_list );
                 }
                 else
-                { /* invalid! */ }
+                { 
+                  /* invalid!  NB: breakpointlist + linetype*/
+//                  return false;
+                }
 
                 // find the next piece of information about the nonterminating transition
                 ntt_information = ntt_information->GetNext();
@@ -803,7 +811,10 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -830,11 +841,11 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
             wxXmlNode* tt_node = object_node->GetChildren();
             while ( tt_node )
             {
-              uint tt_identifier = 0;
+              unsigned int tt_identifier = 0;
               coordinate tt_coordinate = { 0.0f, 0.0f };
               float tt_height = 0.1f;
               float tt_width = 0.1f;
-              uint tt_from_id = 0;
+              unsigned int tt_from_id = 0;
               label tt_label;
 
               wxXmlNode* tt_information = tt_node->GetChildren();
@@ -846,7 +857,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                   wxString identifier = tt_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  tt_identifier = ( uint ) dummy_id;
+                  tt_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -872,7 +883,10 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                       tt_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -896,7 +910,10 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                       tt_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -905,7 +922,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                   wxString identifier = tt_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  tt_from_id = ( uint ) dummy_id;
+                  tt_from_id = ( unsigned int ) dummy_id;
                 }
                 else if ( what_info == _T("label"))
                 {
@@ -922,33 +939,22 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                       wxXmlNode* variable_declarations = label_info->GetChildren();
                       while ( variable_declarations )
                       {
+                        decl variable_decl;
                         if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
                         {
                           wxString variable_declaration = variable_declarations->GetNodeContent();
-                          wxStringTokenizer tkt( variable_declaration, _T(":") );
-                          if ( tkt.CountTokens() == 2 || !variable_declaration.IsEmpty() )
+                          bool valid = variable_decl.set_decl( variable_declaration );
+                          if ( !valid )
                           {
-                            wxString variable_name = tkt.GetNextToken();
-                            variable_name.Trim(true);
-                            variable_name.Trim(false);
-                            wxStringTokenizer tks( variable_name );
-                            if (tks.CountTokens() != 1 || variable_name.IsEmpty() )
-                            {
-                              /* invalid */
-                            }
-                            wxString variable_type = tkt.GetNextToken();
-                            variable_type.Trim(true);
-                            variable_type.Trim(false);
-                            tks.SetString( variable_type );
-                            if (tks.CountTokens() != 1 || variable_type.IsEmpty() )
-                            {
-                              /* invalid */
-                            }
-                            decl variable_decl;
-                            variable_decl.set_name( variable_name );
-                            variable_decl.set_type( variable_type );
-                            variable_decl_list.Add( variable_decl );
+                            /* invalid syntax! */
+                            return false;
                           }
+                          variable_decl_list.Add( variable_decl );
+                        }
+                        else
+                        {
+                          /* invalid node name! */
+                          return false;
                         }
                         variable_declarations = variable_declarations->GetNext();
                       }
@@ -982,7 +988,8 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                             }
                             else
                             {
-                              /* invalid */
+                              /* invalid node name! */
+                              return false;
                             }
 
                             action_info = action_info->GetNext();
@@ -992,7 +999,8 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                         }
                         else
                         {
-                          /* invalid */
+                          /* invalid node name! */
+                          return false;
                         }
                         action_list.Add( action );
 
@@ -1006,34 +1014,32 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                     else if ( label_info->GetName() == _T( "variableupdates" ) )
                     {
                       wxXmlNode* variable_updates = label_info->GetChildren();
-                      varupdate variable_update;
                       while ( variable_updates )
                       {
+                        varupdate variable_update;
                         if ( variable_updates->GetName() == _T( "variableupdate" ) )
                         {
                           wxString variable_update_text = variable_updates->GetNodeContent();
-                          int pos = variable_update_text.Find( _T( ":=" ) );
-                          wxString variable_update_lhs = variable_update_text.Mid( 0, pos );
-                          wxString variable_update_rhs = variable_update_text.Mid( pos+2 );
-                          if ( variable_update_lhs.IsEmpty() || variable_update_rhs.IsEmpty() )
+                          bool valid = variable_update.set_varupdate( variable_update_text );
+                          if ( !valid )
                           {
-                            /* invalid */
+                            /* invalid syntax! */
+                            return false;
                           }
-                          variable_update.set_lhs( variable_update_lhs );
-                          variable_update.set_rhs( variable_update_rhs );
+                          variable_update_list.Add( variable_update );
                         }
                         else
                         {
-                          /* invalid */
+                          /* invalid node name! */
+                          return false;
                         }
-                        variable_update_list.Add( variable_update );
-
                         variable_updates = variable_updates->GetNext();
                       }
                     }
                     else
                     {
-                      /* invalid */
+                      /* invalid node name! */
+                      return false;
                     }
 
                     label_info = label_info->GetNext();
@@ -1045,7 +1051,10 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                   tt_label.set_variable_updates( variable_update_list );
                 }
                 else
-                { /* invalid! */ }
+                { 
+                  /* invalid!  NB: breakpointlist + linetype */
+//                  return false;
+                }
 
                 // find the next piece of information about the terminating transition
                 tt_information = tt_information->GetNext();
@@ -1078,7 +1087,10 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
     }
   }
   else
-  { /* invalid! */ }
+  { 
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1105,11 +1117,11 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
             wxXmlNode* init_node = object_node->GetChildren();
             while ( init_node )
             {
-              uint init_identifier = 0;
+              unsigned int init_identifier = 0;
               coordinate init_coordinate = { 0.0f, 0.0f };
               float init_height = 0.1f;
               float init_width = 0.1f;
-              uint init_to_id = 0;
+              unsigned int init_to_id = 0;
 
               wxXmlNode* init_information = init_node->GetChildren();
               while ( init_information )
@@ -1120,7 +1132,7 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
                   wxString identifier = init_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  init_identifier = ( uint ) dummy_id;
+                  init_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1146,7 +1158,10 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
                       init_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1170,7 +1185,10 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
                       init_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1179,10 +1197,13 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
                   wxString identifier = init_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  init_to_id = ( uint ) dummy_id;
+                  init_to_id = ( unsigned int ) dummy_id;
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the initial designator
                 init_information = init_information->GetNext();
@@ -1207,7 +1228,10 @@ bool grape::libgrape::open_initial_designators( grape_specification* p_spec, wxX
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1234,12 +1258,12 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
             wxXmlNode* comment_node = object_node->GetChildren();
             while ( comment_node )
             {
-              uint comment_identifier = 0;
+              unsigned int comment_identifier = 0;
               coordinate comment_coordinate = { 0.0f, 0.0f };
               float comment_height = 0.1f;
               float comment_width = 0.1f;
               wxString comment_text = _T( "" );
-              uint object_id = 0;
+              unsigned int object_id = 0;
 
               wxXmlNode* comment_information = comment_node->GetChildren();
               while ( comment_information )
@@ -1250,7 +1274,7 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
                   wxString identifier = comment_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  comment_identifier = ( uint ) dummy_id;
+                  comment_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1276,7 +1300,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
                       comment_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1300,7 +1327,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
                       comment_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1309,14 +1339,17 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
                   wxString identifier = comment_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  object_id = ( uint ) dummy_id;
+                  object_id = ( unsigned int ) dummy_id;
                 }
                 else if ( what_info == _T( "text" ) )
                 {
                   comment_text = comment_information->GetNodeContent();
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the nonterminating transition
                 comment_information = comment_information->GetNext();
@@ -1346,7 +1379,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_p
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1358,7 +1394,7 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
   wxXmlNode* arch_dia_node = p_arch_list_node->GetChildren();
   while ( arch_dia_node )
   {
-    uint arch_dia_id = 0;
+    unsigned int arch_dia_id = 0;
     wxString arch_dia_name = _T( "" );
     wxString node_name = arch_dia_node->GetName();
     if ( node_name == _T( "architecturediagram" ) )
@@ -1372,7 +1408,7 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
           wxString identifier = arch_dia_info_node->GetNodeContent();
           long dummy_id;
           identifier.ToLong( &dummy_id );
-          arch_dia_id = ( uint ) dummy_id;
+          arch_dia_id = ( unsigned int ) dummy_id;
           if ( g_max_id < dummy_id )
           {
              g_max_id = dummy_id;
@@ -1396,7 +1432,10 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
       result = result && open_comments( p_spec, arch_dia_node, new_architecture_diagram );
     }
     else
-    { /* invalid! */ }
+    {
+      /* invalid node name! */
+      return false;
+    }
 
     // get next diagram.
     arch_dia_node = arch_dia_node->GetNext();
@@ -1426,7 +1465,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
             wxXmlNode* proc_ref_node = object_node->GetChildren();
             while ( proc_ref_node )
             {
-              uint proc_ref_identifier = 0;
+              unsigned int proc_ref_identifier = 0;
               coordinate proc_ref_coordinate = { 0.0f, 0.0f };
               float proc_ref_height = 0.1f;
               float proc_ref_width = 0.1f;
@@ -1446,7 +1485,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                   wxString identifier = proc_ref_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  proc_ref_identifier = ( uint ) dummy_id;
+                  proc_ref_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1472,7 +1511,10 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                       proc_ref_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1496,40 +1538,43 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                       proc_ref_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
                 else if ( what_info == _T( "parameterassignmentlist" ) )
                 {
                   wxXmlNode* parameter_info = proc_ref_information->GetChildren();
-                  varupdate parameter_update;
                   while ( parameter_info )
                   {
+                    varupdate parameter_update;
                     if ( parameter_info->GetName() == _T( "parameterassignment" ) )
                     {
                       wxString parameter_update_text = parameter_info->GetNodeContent();
-                      int pos = parameter_update_text.Find( _T( ":=" ) );
-                      wxString parameter_update_lhs = parameter_update_text.Mid( 0, pos );
-                      wxString parameter_update_rhs = parameter_update_text.Mid( pos+2 );
-                      if ( parameter_update_lhs.IsEmpty() || parameter_update_rhs.IsEmpty() )
+                      bool valid = parameter_update.set_varupdate( parameter_update_text );
+                      if ( !valid )
                       {
-                        /* invalid */
+                        /* invalid syntax! */
+                        return false;
                       }
-                      parameter_update.set_lhs( parameter_update_lhs );
-                      parameter_update.set_rhs( parameter_update_rhs );
+                      proc_ref_parameter_assignments.Add( parameter_update );
                     }
                     else
                     {
-                      /* invalid */
+                      /* invalid node name! */
+                      return false;
                     }
-                    proc_ref_parameter_assignments.Add( parameter_update );
-
                     parameter_info = parameter_info->GetNext();
                   }
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid!  NB: channellist */
+//                  return false;
+                }
 
                 // find the next piece of information about the state
                 proc_ref_information = proc_ref_information->GetNext();
@@ -1554,7 +1599,10 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1581,7 +1629,7 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
             wxXmlNode* arch_ref_node = object_node->GetChildren();
             while ( arch_ref_node )
             {
-              uint arch_ref_identifier = 0;
+              unsigned int arch_ref_identifier = 0;
               coordinate arch_ref_coordinate = { 0.0f, 0.0f };
               float arch_ref_height = 0.1f;
               float arch_ref_width = 0.1f;
@@ -1600,7 +1648,7 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
                   wxString identifier = arch_ref_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  arch_ref_identifier = ( uint ) dummy_id;
+                  arch_ref_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1626,7 +1674,10 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
                       arch_ref_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1650,12 +1701,18 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
                       arch_ref_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid! NB: channellist, propertyof */
+//                return false;
+                }
 
                 // find the next piece of information about the state
                 arch_ref_information = arch_ref_information->GetNext();
@@ -1679,7 +1736,10 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
     }
   }
   else
-  { /* invalid! */ }
+  { 
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1706,12 +1766,12 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
             wxXmlNode* channel_node = object_node->GetChildren();
             while ( channel_node )
             {
-              uint channel_identifier = 0;
+              unsigned int channel_identifier = 0;
               coordinate channel_coordinate = { 0.0f, 0.0f };
               float channel_height = 0.1f;
               float channel_width = 0.1f;
               wxString channel_name = _T( "" );
-              uint channel_reference_id = 0;
+              unsigned int channel_reference_id = 0;
 
               wxXmlNode* channel_information = channel_node->GetChildren();
               while ( channel_information )
@@ -1726,7 +1786,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = channel_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  channel_identifier = ( uint ) dummy_id;
+                  channel_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1752,7 +1812,10 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                       channel_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1776,7 +1839,10 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                       channel_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1785,10 +1851,13 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = channel_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  channel_reference_id = ( uint ) dummy_id;
+                  channel_reference_id = ( unsigned int ) dummy_id;
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid! NB: onchannelcommunication */
+//                  return false;
+                }
 
                 // find the next piece of information about the state
                 channel_information = channel_information->GetNext();
@@ -1796,6 +1865,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               compound_reference* ref_ptr = find_compound_reference( p_arch_dia_ptr, channel_reference_id );
               if( ref_ptr == 0 )
               {
+                /* invalid reference! */
                 return false;
               }
               // create the channel
@@ -1816,7 +1886,10 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1844,7 +1917,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
             wxXmlNode* communication_node = object_node->GetChildren();
             while ( communication_node )
             {
-              uint communication_identifier = 0;
+              unsigned int communication_identifier = 0;
               coordinate communication_coordinate = { 0.0f, 0.0f };
               float communication_height = 0.1f;
               float communication_width = 0.1f;
@@ -1860,7 +1933,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                   wxString identifier = communication_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  communication_identifier = ( uint ) dummy_id;
+                  communication_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -1886,7 +1959,10 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                       communication_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1910,7 +1986,10 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                       communication_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -1924,18 +2003,24 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                       wxString identifier = connected_channel->GetNodeContent();
                       long dummy_id;
                       identifier.ToLong( &dummy_id );
-                      uint channel_identifier = ( uint ) dummy_id;
+                      unsigned int channel_identifier = ( unsigned int ) dummy_id;
                       channel* chan_ptr = dynamic_cast<channel*> ( architecture_diagram::find_object( p_arch_dia_ptr, channel_identifier ) );
                       channels.Add( chan_ptr );
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
 
                     connected_channel = connected_channel->GetNext();
                   }
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the state
                 communication_information = communication_information->GetNext();
@@ -1945,14 +2030,17 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                 channel_communication* comm_ptr = p_arch_dia_ptr->add_channel_communication( communication_identifier, communication_coordinate, channels.Item( 0 ), channels.Item( 1 ) );
                 comm_ptr->set_width( communication_width );
                 comm_ptr->set_height( communication_height );
-                for ( uint i = 2; i < channels.GetCount(); ++i )
+                for ( unsigned int i = 2; i < channels.GetCount(); ++i )
                 {
                   channel* chan_ptr = channels.Item( i );
                   p_arch_dia_ptr->attach_channel_communication_to_channel( comm_ptr,  chan_ptr );
                 }
               }
               else
-              { /* invalid! */ }
+              {
+                /* invalid: channelcommunication is between 2 or more channels! */
+                return false;
+              }
 
               // retrieve the next channel communication
               communication_node = communication_node->GetNext();
@@ -1967,7 +2055,10 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -1994,12 +2085,12 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
             wxXmlNode* visible_node = object_node->GetChildren();
             while ( visible_node )
             {
-              uint visible_identifier = 0;
+              unsigned int visible_identifier = 0;
               coordinate visible_coordinate = { 0.0f, 0.0f };
               float visible_height = 0.1f;
               float visible_width = 0.1f;
               wxString visible_name = _T( "" );
-              uint visible_connection_id = 0;
+              unsigned int visible_connection_id = 0;
 
               wxXmlNode* visible_information = visible_node->GetChildren();
               while ( visible_information )
@@ -2014,7 +2105,7 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = visible_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  visible_identifier = ( uint ) dummy_id;
+                  visible_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -2040,7 +2131,10 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
                       visible_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2064,7 +2158,10 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
                       visible_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2073,10 +2170,13 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = visible_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  visible_connection_id = ( uint ) dummy_id;
+                  visible_connection_id = ( unsigned int ) dummy_id;
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid! NB: linetype */
+//                  return false;
+                }
 
                 // find the next piece of information about the state
                 visible_information = visible_information->GetNext();
@@ -2101,7 +2201,9 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+  }
 
   return true;
 }
@@ -2128,11 +2230,11 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
             wxXmlNode* blocked_node = object_node->GetChildren();
             while ( blocked_node )
             {
-              uint blocked_identifier = 0;
+              unsigned int blocked_identifier = 0;
               coordinate blocked_coordinate = { 0.0f, 0.0f };
               float blocked_height = 0.1f;
               float blocked_width = 0.1f;
-              uint blocked_connection_id = 0;
+              unsigned int blocked_connection_id = 0;
 
               wxXmlNode* blocked_information = blocked_node->GetChildren();
               while ( blocked_information )
@@ -2143,7 +2245,7 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = blocked_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  blocked_identifier = ( uint ) dummy_id;
+                  blocked_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -2169,7 +2271,10 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                       blocked_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2193,7 +2298,10 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                       blocked_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2202,10 +2310,13 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = blocked_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  blocked_connection_id = ( uint ) dummy_id;
+                  blocked_connection_id = ( unsigned int ) dummy_id;
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid! NB: linetype */
+                  return false;
+                }
 
                 // find the next piece of information about the state
                 blocked_information = blocked_information->GetNext();
@@ -2228,7 +2339,10 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }
@@ -2255,12 +2369,12 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
             wxXmlNode* comment_node = object_node->GetChildren();
             while ( comment_node )
             {
-              uint comment_identifier = 0;
+              unsigned int comment_identifier = 0;
               coordinate comment_coordinate = { 0.0f, 0.0f };
               float comment_height = 0.1f;
               float comment_width = 0.1f;
               wxString comment_text = _T( "" );
-              uint object_id = 0;
+              unsigned int object_id = 0;
 
               wxXmlNode* comment_information = comment_node->GetChildren();
               while ( comment_information )
@@ -2271,7 +2385,7 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = comment_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  comment_identifier = ( uint ) dummy_id;
+                  comment_identifier = ( unsigned int ) dummy_id;
                   if ( g_max_id < dummy_id )
                   {
                      g_max_id = dummy_id;
@@ -2297,7 +2411,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
                       comment_height = ( float ) dummy_height;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2321,7 +2438,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
                       comment_coordinate.m_y = ( float ) dummy_y;
                     }
                     else
-                    { /* invalid! */ }
+                    {
+                      /* invalid node name! */
+                      return false;
+                    }
                     size_info = size_info->GetNext();
                   }
                 }
@@ -2330,14 +2450,17 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
                   wxString identifier = comment_information->GetNodeContent();
                   long dummy_id;
                   identifier.ToLong( &dummy_id );
-                  object_id = ( uint ) dummy_id;
+                  object_id = ( unsigned int ) dummy_id;
                 }
                 else if ( what_info == _T( "text" ) )
                 {
                   comment_text = comment_information->GetNodeContent();
                 }
                 else
-                { /* invalid! */ }
+                {
+                  /* invalid node name! */
+                  return false;
+                }
 
                 // find the next piece of information about the nonterminating transition
                 comment_information = comment_information->GetNext();
@@ -2367,7 +2490,10 @@ bool grape::libgrape::open_comments( grape_specification* p_spec, wxXmlNode* p_a
     }
   }
   else
-  { /* invalid! */ }
+  {
+    /* invalid node name! */
+    return false;
+  }
 
   return true;
 }

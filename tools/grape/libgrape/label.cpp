@@ -57,35 +57,11 @@ wxString label::get_text( void ) const
   {
     result += _T( "[" ) + get_condition() + _T( "]" );
   }
-  count = m_actions.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    action action = m_actions.Item( i );
-    result += action.get_name();
-    list_of_dataexpression params = action.get_parameters();
-    int count2 = params.GetCount();
-    if ( count2 > 0 )
-    {
-      result += _T( "(" );
-      for ( int j = 0; j < count2; ++j )
-      {
-        result += params.Item( j ).get_expression();
-        if ( j < count2 - 1 )
-        {
-          result += _T( "," );
-        }
-      }
-      result += _T( ")" );
-    }
-    if ( i < count - 1 )
-    {
-      result += _T( "|" );
-    }
-  }
   if ( !get_timestamp().IsEmpty() )
   {
     result += _T( "@" ) +  get_timestamp();
   }
+  result += get_actions_text();
   count = m_variable_updates.GetCount();
   if ( count > 0 )
   {
@@ -114,6 +90,37 @@ bool label::set_text( const wxString &p_text )
 list_of_action &label::get_actions( void )
 {
   return m_actions;
+}
+
+wxString label::get_actions_text( void ) const
+{
+  wxString result = wxEmptyString;
+  int count = m_actions.GetCount();
+  for ( int i = 0; i < count; ++i )
+  {
+    action action = m_actions.Item( i );
+    result += action.get_name();
+    list_of_dataexpression params = action.get_parameters();
+    int count2 = params.GetCount();
+    if ( count2 > 0 )
+    {
+      result += _T( "(" );
+      for ( int j = 0; j < count2; ++j )
+      {
+        result += params.Item( j ).get_expression();
+        if ( j < count2 - 1 )
+        {
+          result += _T( "," );
+        }
+      }
+      result += _T( ")" );
+    }
+    if ( i < count - 1 )
+    {
+      result += _T( "|" );
+    }
+  }
+  return result;
 }
 
 list_of_decl &label::get_declarations( void )

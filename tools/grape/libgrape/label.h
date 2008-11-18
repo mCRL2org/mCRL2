@@ -85,6 +85,8 @@ namespace grape
          */
         list_of_action &get_actions( void );
 
+        wxString get_actions_text( void ) const;
+
         /**
          * Label declarations retrieval function
          * @return the declarations of the label

@@ -80,7 +80,7 @@ namespace grape
          * @param p_index The index used to eventually make a new unique name if the current suggested name exists already.
          * @return Returns a pointer to the newly created architecture diagram.
          */
-        architecture_diagram* add_architecture_diagram( uint p_id, const wxString &p_name, int p_index = 0 );
+        architecture_diagram* add_architecture_diagram( unsigned int p_id, const wxString &p_name, int p_index = 0 );
 
         /**
          * Architecture diagram removal function.
@@ -93,7 +93,7 @@ namespace grape
          * Architecture diagram count function.
          * @return Returns the number of architecture diagrams in the specification.
          */
-        uint count_architecture_diagram( void );
+        unsigned int count_architecture_diagram( void );
 
         /**
          * Architecture diagram retrieval function.
@@ -109,7 +109,7 @@ namespace grape
          * @param p_index The index used to eventually make a new unique name if the current suggested name exists already.
          * @return Returns a pointer to the newly created process diagram.
          */
-        process_diagram* add_process_diagram( uint p_id, const wxString &p_name, int p_index = 0 );
+        process_diagram* add_process_diagram( unsigned int p_id, const wxString &p_name, int p_index = 0 );
 
         /**
          * Process diagram removal function.
@@ -122,7 +122,7 @@ namespace grape
          * Process diagram count function.
          * @return Returns the number of process diagrams in the specification.
          */
-        uint count_process_diagram( void );
+        unsigned int count_process_diagram( void );
 
         /**
          * Process diagram retrieval function.
@@ -136,7 +136,7 @@ namespace grape
          * @param p_type The type of the object you want to retrieve.
          * @return Returns the object that has the specified id, if it exists (0 if not).
          */
-        static object *find_object( grape_specification *p_spec, uint p_id, object_type p_type = ANY );
+        static object *find_object( grape_specification *p_spec, unsigned int p_id, object_type p_type = ANY );
 
         /**
          * Architecture reference check function.

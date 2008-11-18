@@ -284,7 +284,7 @@ void grape::grapeapp::init_textures(void)
   }
 
   // create textures
-  g_pool.m_textures = new GLuint[256];
+  g_pool.m_textures = new GLunsigned int[256];
   glGenTextures(256, &g_pool.m_textures[0]);
   unsigned char *src = 0;
   int img_width, img_height;
@@ -350,7 +350,7 @@ void grape::grapeapp::render_text(const wxString &p_str, float p_x, float p_y, f
   curr_y = p_y;
 
   // loop over the string
-  for( uint i=0; i<p_str.Len(); ++i )
+  for( unsigned int i=0; i<p_str.Len(); ++i )
   {
     unsigned char chr = p_str[i];
 
@@ -370,7 +370,7 @@ void grape::grapeapp::render_text(const wxString &p_str, float p_x, float p_y, f
     if ((((max_width-3*(g_size - g_space) < curr_x-p_x+g_text_space*1.5)||(chr == '\n'))&&(-max_height+g_size*3 > curr_y-p_y)))
     {
       // loop over the string
-      for( uint j=0; j<3; ++j )
+      for( unsigned int j=0; j<3; ++j )
       {
         // check for newline
         if (max_width < curr_x-p_x+g_text_space*1.5)

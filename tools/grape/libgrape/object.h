@@ -71,7 +71,7 @@ namespace grape
 
       protected:
         coordinate      m_coordinate;   /**< coordinate of object. */
-        uint            m_id;           /**< identifier of object. */
+        unsigned int            m_id;           /**< identifier of object. */
         bool            m_selected;     /**< selection flag of object. */
         float           m_width;        /**< width of object. */
         float           m_height;       /**< height of object. */
@@ -123,7 +123,7 @@ namespace grape
          * Id retrieval function
          * @return The ID of the object.
          */
-        uint get_id( void ) const;
+        unsigned int get_id( void ) const;
 
         /**
          * Id assignment function.
@@ -131,7 +131,7 @@ namespace grape
          * @pre The object is selected.
          * @param p_id The new id.
          */
-        void set_id( uint p_id );
+        void set_id( unsigned int p_id );
 
         /**
          * Select function.
@@ -201,7 +201,7 @@ namespace grape
          * Comment count function.
          * @return Returns the number of comments attached to the object.
          */
-        uint count_comment( void );
+        unsigned int count_comment( void );
 
         /**
          * Comment retrieval function.

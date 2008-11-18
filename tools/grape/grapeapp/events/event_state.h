@@ -23,11 +23,11 @@ namespace grape
     class grape_event_add_state : public grape_event_base
     {
       private:
-        uint            m_state; /**< The id of the to be created state. */
+        unsigned int            m_state; /**< The id of the to be created state. */
         coordinate      m_coord; /**< the coordinate that was clicked */
         float           m_def_state_width;  /**< The default width of a state. */
         float           m_def_state_height; /**< The default height of a state. */
-        uint            m_in_diagram; /**< The id of the diagram the state will have been added to. */
+        unsigned int            m_in_diagram; /**< The id of the diagram the state will have been added to. */
       public:
 
         /**
@@ -63,14 +63,14 @@ namespace grape
     class grape_event_remove_state : public grape_event_base
     {
       private:
-        uint                m_state;        /**< Identifier of the to be deleted state. */
+        unsigned int                m_state;        /**< Identifier of the to be deleted state. */
         bool                m_normal;       /**< Boolean value to indicate whether the state should destroy all transitions and designators attached to it; a normal remove */
         wxString            m_name;         /**< Backup of the name of the state. */
         coordinate          m_coordinate;   /**< Backup of the coordinate of the state. */
         float               m_width;        /**< Backup of the width of the state. */
         float               m_height;       /**< Backup of the height of the state. */
         wxArrayLong         m_comments;     /**< Identifiers of the comments attached to the state. */
-        uint                m_in_diagram;  /**< Identifier of the diagram the state is in. */
+        unsigned int                m_in_diagram;  /**< Identifier of the diagram the state is in. */
         arr_event_remove_tt        m_terminating_transitions; /**< Backup of the terminating transitions that had the state as beginstate. */
         arr_event_remove_ntt     m_nonterminating_transitions_beginstate; /**< Backup of the nonterminating transitions that had the state as beginstate. */
         arr_event_remove_ntt     m_nonterminating_transitions_endstate; /**< Backup of the nonterminating transitions that had the state as endstate. */
@@ -112,7 +112,7 @@ namespace grape
     class grape_event_change_state : public grape_event_base
     {
       private:
-        uint      m_state; /**< A pointer to the state of which the name is to be changed. */
+        unsigned int      m_state; /**< A pointer to the state of which the name is to be changed. */
         wxString  m_old_text; /**< A string containing the previous name of the state. */
         wxString  m_new_text; /**< A string containing the new name of the state. */
         bool      m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */

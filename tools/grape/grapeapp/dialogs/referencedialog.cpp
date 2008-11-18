@@ -21,14 +21,14 @@ grape_reference_dialog::grape_reference_dialog( process_reference *p_ref, grape_
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 {
   list_of_varupdate varupdate_list = p_ref->get_parameter_updates();
-  init_for_processes( p_ref->get_relationship_refers_to(), &varupdate_list, p_spec );
+  init_for_processes( p_ref->get_relationship_refers_to(), varupdate_list, p_spec );
 }
 
 grape_reference_dialog::grape_reference_dialog( reference_state *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 // description != bug
 {
-  init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_varupdate(), p_spec );
+  init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_parameter_updates(), p_spec );
 }
 
 // The following exception is to make grape compile on Apple platforms, where wxWidgets do
@@ -50,9 +50,9 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
 
   // choices
   int selected = wxNOT_FOUND;
-  uint count = p_spec->count_architecture_diagram();
+  unsigned int count = p_spec->count_architecture_diagram();
   wxArrayString choices;
-  for ( uint i = 0; i < count; ++i )
+  for ( unsigned int i = 0; i < count; ++i )
   {
     architecture_diagram *diagram = p_spec->get_architecture_diagram( i );
     int pos = choices.Add( diagram->get_name() );
@@ -74,7 +74,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
   m_combo->SetFocus();
 }
 
-void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_varupdate *p_list_of_varupdate, grape_specification *p_spec )
+void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_varupdate p_list_of_varupdate, grape_specification *p_spec )
 {
   wxPanel *panel = new wxPanel( this );
 
@@ -87,9 +87,9 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   // choices
   int selected = wxNOT_FOUND;
-  uint count = p_spec->count_process_diagram();
+  unsigned int count = p_spec->count_process_diagram();
   wxArrayString choices;
-  for ( uint i = 0; i < count; ++i )
+  for ( unsigned int i = 0; i < count; ++i )
   {
     process_diagram *diagram = p_spec->get_process_diagram( i );
     int pos = choices.Add( diagram->get_name() );
@@ -110,11 +110,11 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( p_list_of_varupdate->GetCount()+1, 2 );
-  for ( uint i = 0; i < p_list_of_varupdate->GetCount(); ++i )
+  m_grid->CreateGrid( p_list_of_varupdate.GetCount()+1, 2 );
+  for ( unsigned int i = 0; i < p_list_of_varupdate.GetCount(); ++i )
   {     
     //fill cells
-    varupdate parameter_assignment = p_list_of_varupdate->Item( i );
+    varupdate parameter_assignment = p_list_of_varupdate.Item( i );
     m_grid->SetCellValue(i, 0, parameter_assignment.get_lhs());
     m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());    
   }

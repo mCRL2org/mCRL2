@@ -31,7 +31,6 @@ namespace grape
       protected:
         list_of_varupdate   m_parameter_assignments;  /**< initial parameter values */
         process_diagram     *m_refers_to_process;     /**< the process this reference refers to; is evaluated upon mCRL2 conversion, is 0 until then. */
-        wxString            m_text;
       public:
         /**
          * Default constructor.
@@ -69,7 +68,9 @@ namespace grape
          * Parameterassignments retrieval function.
          * @return Returns the list of parameterassignments in the form of variable updates.
          */
-        list_of_varupdate* get_varupdate( void );
+        list_of_varupdate get_parameter_updates( void ) const;
+
+        void set_parameter_updates( const list_of_varupdate& p_parameter_assignments );
 
         /**
          * Sets the variable updates with a string. Will process the text;

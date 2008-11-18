@@ -77,7 +77,7 @@ namespace grape
          * Channel count function.
          * @return Returns the number of channels involved in this channel communication.
          */
-        uint count_channel( void );
+        unsigned int count_channel( void );
 
         /**
          * Channel retrieval function.

@@ -45,7 +45,7 @@ architecture_diagram::~architecture_diagram(void)
   m_process_references.Clear();
 }
 
-architecture_reference* architecture_diagram::add_architecture_reference( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height )
+architecture_reference* architecture_diagram::add_architecture_reference( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )
 {
   // deselect all objects
   deselect_all_objects();
@@ -69,7 +69,7 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
   deselect_object( p_arch_ref );
 
   // For each channel on the reference
-  for ( uint i = 0; i < p_arch_ref->count_channel(); ++i )
+  for ( unsigned int i = 0; i < p_arch_ref->count_channel(); ++i )
   {
     channel* channel_ptr = p_arch_ref->get_channel( i );
 
@@ -115,7 +115,7 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
   }
 }
 
-uint architecture_diagram::count_architecture_reference( void )
+unsigned int architecture_diagram::count_architecture_reference( void )
 {
   return m_architecture_references.GetCount();
 }
@@ -130,7 +130,7 @@ arr_architecture_reference* architecture_diagram::get_architecture_reference_lis
   return &m_architecture_references;
 }
 
-process_reference* architecture_diagram::add_process_reference( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height )
+process_reference* architecture_diagram::add_process_reference( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )
 {
   // deselect all objects
   deselect_all_objects();
@@ -154,7 +154,7 @@ void architecture_diagram::remove_process_reference( process_reference* p_proc_r
   deselect_object( p_proc_ref );
 
   // For each channel on the reference
-  for ( uint i = 0; i < p_proc_ref->count_channel(); ++i )
+  for ( unsigned int i = 0; i < p_proc_ref->count_channel(); ++i )
   {
     channel* channel_ptr = p_proc_ref->get_channel( i );
 
@@ -200,7 +200,7 @@ void architecture_diagram::remove_process_reference( process_reference* p_proc_r
   }
 }
 
-uint architecture_diagram::count_process_reference( void )
+unsigned int architecture_diagram::count_process_reference( void )
 {
   return m_process_references.GetCount();
 }
@@ -215,7 +215,7 @@ arr_process_reference* architecture_diagram::get_process_reference_list( void )
   return &m_process_references;
 }
 
-channel* architecture_diagram::add_channel( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, compound_reference* p_ref  )
+channel* architecture_diagram::add_channel( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, compound_reference* p_ref  )
 {
   // deselect all objects
   deselect_all_objects();
@@ -275,7 +275,7 @@ void architecture_diagram::remove_channel( channel* p_channel )
     }
 }
 
-uint architecture_diagram::count_channel( void )
+unsigned int architecture_diagram::count_channel( void )
 {
   return m_channels.GetCount();
 }
@@ -290,7 +290,7 @@ arr_channel* architecture_diagram::get_channel_list( void )
   return &m_channels;
 }
 
-channel_communication* architecture_diagram::add_channel_communication( uint p_id, coordinate &p_coord, channel* p_channel_1, channel* p_channel_2 )
+channel_communication* architecture_diagram::add_channel_communication( unsigned int p_id, coordinate &p_coord, channel* p_channel_1, channel* p_channel_2 )
 {
   // deselect all objects
   deselect_all_objects();
@@ -355,7 +355,7 @@ void architecture_diagram::remove_channel_communication( channel_communication* 
   }
 }
 
-uint architecture_diagram::count_channel_communication( void )
+unsigned int architecture_diagram::count_channel_communication( void )
 {
   return m_channel_communications.GetCount();
 }
@@ -404,7 +404,7 @@ void architecture_diagram::detach_channel_from_channel_communication( channel* p
   }
 }
 
-blocked* architecture_diagram::add_blocked( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
+blocked* architecture_diagram::add_blocked( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
 {
   // deselect all objects
   deselect_all_objects();
@@ -440,7 +440,7 @@ void architecture_diagram::remove_blocked( blocked* p_blocked )
   }
 }
 
-uint architecture_diagram::count_blocked( void )
+unsigned int architecture_diagram::count_blocked( void )
 {
   return m_blocked.GetCount();
 }
@@ -455,7 +455,7 @@ arr_blocked* architecture_diagram::get_blocked_list( void )
   return &m_blocked;
 }
 
-visible* architecture_diagram::add_visible( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
+visible* architecture_diagram::add_visible( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
 {
   // deselect all objects
   deselect_all_objects();
@@ -494,7 +494,7 @@ void architecture_diagram::remove_visible( visible* p_visible )
   }
 }
 
-uint architecture_diagram::count_visible( void )
+unsigned int architecture_diagram::count_visible( void )
 {
   return m_visibles.GetCount();
 }
@@ -678,10 +678,10 @@ void architecture_diagram::delete_property( connection_property* p_prop )
   } // end if p_prop
 }
 
-object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uint p_id, object_type p_type )
+object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, unsigned int p_id, object_type p_type )
 {
   bool b = p_type == ANY || p_type == COMMENT;
-  for ( uint i = 0; b && i < p_arch_dia->count_comment(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_comment(); ++i )
   {
     comment* comm_ptr = p_arch_dia->get_comment( i );
     if ( comm_ptr->get_id() == p_id )
@@ -691,7 +691,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == ARCHITECTURE_REFERENCE;
-  for ( uint i = 0; b && i < p_arch_dia->count_architecture_reference(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_architecture_reference(); ++i )
   {
     architecture_reference* ref_ptr = p_arch_dia->get_architecture_reference( i );
     if ( ref_ptr->get_id() == p_id )
@@ -701,7 +701,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == PROCESS_REFERENCE;
-  for ( uint i = 0; b && i < p_arch_dia->count_process_reference(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_process_reference(); ++i )
   {
     process_reference* ref_ptr = p_arch_dia->get_process_reference( i );
     if ( ref_ptr->get_id() == p_id )
@@ -711,7 +711,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == CHANNEL;
-  for ( uint i = 0; b && i < p_arch_dia->count_channel(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_channel(); ++i )
   {
     channel* chan_ptr = p_arch_dia->get_channel( i );
     if ( chan_ptr->get_id() == p_id )
@@ -721,7 +721,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == CHANNEL_COMMUNICATION;
-  for ( uint i = 0; b && i < p_arch_dia->count_channel_communication(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_channel_communication(); ++i )
   {
     channel_communication* comm_ptr = p_arch_dia->get_channel_communication( i );
     if ( comm_ptr->get_id() == p_id )
@@ -731,7 +731,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == VISIBLE;
-  for ( uint i = 0; b && i < p_arch_dia->count_visible(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_visible(); ++i )
   {
     visible* vis_ptr = p_arch_dia->get_visible( i );
     if ( vis_ptr->get_id() == p_id )
@@ -741,7 +741,7 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uin
   }
 
   b = p_type == ANY || p_type == BLOCKED;
-  for ( uint i = 0; b && i < p_arch_dia->count_blocked(); ++i )
+  for ( unsigned int i = 0; b && i < p_arch_dia->count_blocked(); ++i )
   {
     blocked* block_ptr = p_arch_dia->get_blocked( i );
     if ( block_ptr->get_id() == p_id )

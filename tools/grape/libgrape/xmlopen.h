@@ -24,14 +24,14 @@ namespace grape
      * @param p_id The identifier of the desired compound state.
      * @return Returns the compound state that has the specified id, if it exists (0 if not).
      */
-    compound_state* find_compound_state( process_diagram* p_proc_dia, uint p_id );
+    compound_state* find_compound_state( process_diagram* p_proc_dia, unsigned int p_id );
 
     /**
      * Compound reference retrieval function.
      * @param p_id The identifier of the desired compound reference.
      * @return Returns the compound reference that has the specified id, if it exists (0 if not).
      */
-    compound_reference* find_compound_reference( architecture_diagram* p_arch_dia, uint p_id );
+    compound_reference* find_compound_reference( architecture_diagram* p_arch_dia, unsigned int p_id );
 
     /**
      * XML to GraPE Specification convertor function.

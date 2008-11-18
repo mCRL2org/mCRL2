@@ -96,7 +96,7 @@ namespace grape
          * Channel count function.
          * @return Returns the number of channels associated with the reference.
          */
-        uint count_channel( void );
+        unsigned int count_channel( void );
     };
 
   } // namespace libgrape

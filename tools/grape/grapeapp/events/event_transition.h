@@ -23,9 +23,9 @@ namespace grape
     class grape_event_attach_transition_beginstate : public grape_event_base
     {
       private:
-        uint    m_trans; /**< Identifier of the to be attached transition. */
-        uint    m_state; /**< Identifier of the state the transition is to be attached to. */
-        uint    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_trans; /**< Identifier of the to be attached transition. */
+        unsigned int    m_state; /**< Identifier of the state the transition is to be attached to. */
+        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.
@@ -60,9 +60,9 @@ namespace grape
     class grape_event_detach_transition_beginstate : public grape_event_base
     {
       private:
-        uint    m_trans; /**< Identifier of the to be detached transition. */
+        unsigned int    m_trans; /**< Identifier of the to be detached transition. */
         int     m_state; /**< Identifier of the state the transition is to be detached from. */
-        uint    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.

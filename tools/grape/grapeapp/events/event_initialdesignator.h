@@ -23,12 +23,12 @@ namespace grape
     class grape_event_add_initial_designator : public grape_event_base
     {
       private:
-        uint              m_init; /**< The id of the to be created initial designator */
+        unsigned int              m_init; /**< The id of the to be created initial designator */
         coordinate        m_coord; /**< The coordinate of the initial designator. */
-        uint              m_state; /**< The id of the compound state that is to be the designated state of the new initial designator. */
+        unsigned int              m_state; /**< The id of the compound state that is to be the designated state of the new initial designator. */
         float             m_def_init_width;  /**< The default width of an initial designator. */
         float             m_def_init_height; /**< The default height of an initial designator. */
-        uint              m_in_diagram;     /**< The id of the diagram the initial designator will have been added to. */
+        unsigned int              m_in_diagram;     /**< The id of the diagram the initial designator will have been added to. */
       public:
 
         /**
@@ -65,14 +65,14 @@ namespace grape
     class grape_event_remove_initial_designator : public grape_event_base
     {
       private:
-        uint                m_init;         /**< The id of the to be deleted initial designator. */
+        unsigned int                m_init;         /**< The id of the to be deleted initial designator. */
         coordinate          m_coord;        /**< The coordinate of the identifier. */
         int                 m_designates;   /**< The identifier of the compound state the initial designator designated. */
         coordinate          m_coordinate;   /**< Backup of the coordinate of the initial designator. */
         float               m_width;        /**< Backup of the width of the initial designator. */
         float               m_height;       /**< Backup of the height of the initial designator. */
         wxArrayLong         m_comments;     /**< Identifiers of the comments attached to the initial designator. */
-        uint                m_in_diagram;  /**< Identifier of the diagram the initial designator is in. */
+        unsigned int                m_in_diagram;  /**< Identifier of the diagram the initial designator is in. */
       public:
 
         /**
@@ -114,9 +114,9 @@ namespace grape
     class grape_event_attach_initial_designator : public grape_event_base
     {
       private:
-        uint                m_init;         /**< The id of the to be attached initial designator. */
-        uint                m_state;         /**< The id of the to be attached state. */
-        uint                m_diagram;      /**< The id of the diagram. */
+        unsigned int                m_init;         /**< The id of the to be attached initial designator. */
+        unsigned int                m_state;         /**< The id of the to be attached state. */
+        unsigned int                m_diagram;      /**< The id of the diagram. */
       public:
 
         /**
@@ -154,9 +154,9 @@ namespace grape
     class grape_event_detach_initial_designator : public grape_event_base
     {
       private:
-        uint                m_init;         /**< The id of the to be detached initial designator. */
+        unsigned int                m_init;         /**< The id of the to be detached initial designator. */
         int                 m_state;         /**< The id of the to be detached state. */
-        uint                m_diagram;      /**< The id of the diagram. */
+        unsigned int                m_diagram;      /**< The id of the diagram. */
       public:
 
         /**

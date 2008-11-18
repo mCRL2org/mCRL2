@@ -72,7 +72,7 @@ namespace grape
          * @param p_dia_id The identifier of the diagram the object is to be found in.
          * @return Returns a pointer to the desired object. Or @c 0 if the object couldn't be found.
          */
-        object* find_object( uint p_obj_id, object_type p_obj_type = ANY, int p_dia_id = -1 );
+        object* find_object( unsigned int p_obj_id, object_type p_obj_type = ANY, int p_dia_id = -1 );
 
         /**
          * Diagram retrieval function.
@@ -90,7 +90,7 @@ namespace grape
          * @param p_dia_type The type of the wanted diagram.
          * @return Returns a pointer to the desired diagram. Or @c 0 if the diagram couldn't be found.
          */
-        diagram* find_diagram( uint p_dia_id, grape_diagram_type p_dia_type = GRAPE_NO_DIAGRAM );
+        diagram* find_diagram( unsigned int p_dia_id, grape_diagram_type p_dia_type = GRAPE_NO_DIAGRAM );
       public:
 
         /**

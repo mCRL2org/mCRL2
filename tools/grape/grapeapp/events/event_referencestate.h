@@ -27,11 +27,11 @@ namespace grape
     class grape_event_add_reference_state : public grape_event_base
     {
       private:
-        uint                  m_ref_state; /**< Identifier of the to be created reference state. */
+        unsigned int                  m_ref_state; /**< Identifier of the to be created reference state. */
         coordinate            m_coord; /**< The coordinate that was clicked. */
         float                 m_def_ref_state_width;  /**< The default width of a reference state. */
         float                 m_def_ref_state_height; /**< The default height of a reference state. */
-        uint                  m_in_diagram; /**< Identifier of the diagram the state will have been added to. */
+        unsigned int                  m_in_diagram; /**< Identifier of the diagram the state will have been added to. */
       public:
 
         /**
@@ -67,7 +67,7 @@ namespace grape
     class grape_event_remove_reference_state : public grape_event_base
     {
       private:
-        uint                m_ref_state; /**< Identifier of the to be deleted reference state. */
+        unsigned int                m_ref_state; /**< Identifier of the to be deleted reference state. */
         wxString            m_name;         /**< Backup of the name of the reference state. */
         bool                m_normal;       /**< Boolean value to indicate whether the state should destroy all transitions and designators attached to it; a normal remove */
         list_of_varupdate   m_parameter_assignments;  /**< Backup of the initial parameter values of the reference state. */
@@ -75,7 +75,7 @@ namespace grape
         float               m_width;        /**< Backup of the width of the reference state. */
         float               m_height;       /**< Backup of the height of the reference state. */
         wxArrayLong         m_comments;     /**< Identifiers of the comments attached to the reference state. */
-        uint                m_in_diagram;  /**< Backup of the pointer to the diagram the reference state is in. */
+        unsigned int                m_in_diagram;  /**< Backup of the pointer to the diagram the reference state is in. */
         arr_event_remove_tt        m_terminating_transitions; /**< Backup of the terminating transitions that had the state as beginstate. */
         arr_event_remove_ntt     m_nonterminating_transitions_beginstate; /**< Backup of the nonterminating transitions that had the state as beginstate. */
         arr_event_remove_ntt     m_nonterminating_transitions_endstate; /**< Backup of the nonterminating transitions that had the state as endstate. */

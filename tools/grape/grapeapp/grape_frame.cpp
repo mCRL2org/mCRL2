@@ -299,7 +299,7 @@ void grape_frame::set_id_counter( long p_counter )
   m_counter = p_counter;
 }
 
-uint grape_frame::get_new_id( void )
+unsigned int grape_frame::get_new_id( void )
 {
   return m_counter++;
 }
@@ -391,8 +391,6 @@ void grape_frame::toggle_view( grape_mode p_mode )
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
-//    m_architecture_diagram_list->Disable();
-//    m_process_diagram_list->Disable();
 
     // update statusbar
     m_statusbar->PushStatusText( _T("In the text field you can enter a datatype specification") );
@@ -402,8 +400,6 @@ void grape_frame::toggle_view( grape_mode p_mode )
     save_datatype_specification();
     m_splitter->ReplaceWindow( m_splitter->GetWindow1(), m_glcanvas );
     m_datatext->Hide();
-//    m_process_diagram_list->Enable();
-//    m_architecture_diagram_list->Enable();
     m_glcanvas->Show();
     if ( m_glcanvas->get_diagram() )
     {

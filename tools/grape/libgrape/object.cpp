@@ -51,7 +51,7 @@ object::object( const object &p_object )
 object::~object( void )
 {
   // Detach the object from all comments it was attached to.
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
     comment* comm_ptr = m_comments.Item( i );
     comm_ptr->detach_from_object();
@@ -75,12 +75,12 @@ void object::set_coordinate( coordinate &p_coordinate )
   m_coordinate = p_coordinate;
 }
 
-uint object::get_id( void ) const
+unsigned int object::get_id( void ) const
 {
   return m_id;
 }
 
-void object::set_id( uint p_id )
+void object::set_id( unsigned int p_id )
 {
   m_id = p_id;
 }
@@ -130,7 +130,7 @@ void object::detach_comment( comment *p_comment )
   m_comments.Remove( p_comment );
 }
 
-uint object::count_comment( void )
+unsigned int object::count_comment( void )
 {
   return m_comments.GetCount();
 }

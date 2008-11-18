@@ -135,7 +135,7 @@ grape_event_remove_visible::grape_event_remove_visible( grape_frame *p_main_fram
   m_width = p_vis->get_width();
   m_height = p_vis->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_vis->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_vis->count_comment(); ++i )
   {
     comment* comm_ptr = p_vis->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );

@@ -74,7 +74,7 @@ grape_event_remove_reference_state::grape_event_remove_reference_state( grape_fr
   m_height = p_ref_state->get_height();
 
   m_comments.Empty();
-  for ( uint i = 0; i < p_ref_state->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_ref_state->count_comment(); ++i )
   {
     comment* comm_ptr = p_ref_state->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -127,10 +127,10 @@ grape_event_remove_reference_state::grape_event_remove_reference_state( grape_fr
   }
 
   m_parameter_assignments.Empty();
-  list_of_varupdate* p_param = p_ref_state->get_varupdate();
-  for ( uint i = 0; i < p_param->GetCount(); ++i )
+  list_of_varupdate p_param = p_ref_state->get_parameter_updates();
+  for ( unsigned int i = 0; i < p_param.GetCount(); ++i )
   {
-    varupdate existing_var = p_param->Item( i );
+    varupdate existing_var = p_param.Item( i );
     varupdate* new_var = new varupdate( existing_var );
     m_parameter_assignments.Add( new_var );
   }
@@ -152,22 +152,22 @@ bool grape_event_remove_reference_state::Do( void )
   if ( m_normal )
     {
     // Perform remove event Do for transitions and initial designators
-    for ( uint i = 0; i < m_terminating_transitions.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i )
     {
       grape_event_remove_terminating_transition event = m_terminating_transitions.Item( i );
       event.Do();
     }
-    for ( uint i = 0; i < m_nonterminating_transitions_beginstate.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_nonterminating_transitions_beginstate.GetCount(); ++i )
     {
       grape_event_remove_nonterminating_transition event = m_nonterminating_transitions_beginstate.Item( i );
       event.Do();
     }
-    for ( uint i = 0; i < m_nonterminating_transitions_endstate.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_nonterminating_transitions_endstate.GetCount(); ++i )
     {
       grape_event_remove_nonterminating_transition event = m_nonterminating_transitions_endstate.Item( i );
       event.Do();
     }
-    for ( uint i = 0; i < m_initial_designators.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_initial_designators.GetCount(); ++i )
     {
       grape_event_remove_initial_designator event = m_initial_designators.Item( i );
       event.Do();
@@ -192,18 +192,18 @@ bool grape_event_remove_reference_state::Undo( void )
   reference_state* new_ref_state = dia_ptr->add_reference_state( m_ref_state, m_coordinate, m_width, m_height );
   new_ref_state->set_name( m_name );
   // Restore parameter assignments
-  list_of_varupdate* param = new_ref_state->get_varupdate();
-  for ( uint i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  list_of_varupdate param = new_ref_state->get_parameter_updates();
+  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
   {
     varupdate existing_var = m_parameter_assignments.Item( i );
     varupdate* new_var = new varupdate( existing_var );
-    param->Add( new_var );
+    param.Add( new_var );
   }
 
   // Restore comment connections.
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_ref_state );
   }
@@ -211,22 +211,22 @@ bool grape_event_remove_reference_state::Undo( void )
   if ( m_normal )
   {
     // Perform remove event Undo for transitions and initial designators.
-    for ( uint i = 0; i < m_terminating_transitions.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i )
     {
       grape_event_remove_terminating_transition event = m_terminating_transitions.Item( i );
       event.Undo();
     }
-    for ( uint i = 0; i < m_nonterminating_transitions_beginstate.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_nonterminating_transitions_beginstate.GetCount(); ++i )
     {
       grape_event_remove_nonterminating_transition event = m_nonterminating_transitions_beginstate.Item( i );
       event.Undo();
     }
-    for ( uint i = 0; i < m_nonterminating_transitions_endstate.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_nonterminating_transitions_endstate.GetCount(); ++i )
     {
       grape_event_remove_nonterminating_transition event = m_nonterminating_transitions_endstate.Item( i );
       event.Undo();
     }
-    for ( uint i = 0; i < m_initial_designators.GetCount(); ++i )
+    for ( unsigned int i = 0; i < m_initial_designators.GetCount(); ++i )
     {
       grape_event_remove_initial_designator event = m_initial_designators.Item( i );
       event.Undo();

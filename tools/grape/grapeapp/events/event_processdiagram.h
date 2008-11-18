@@ -25,7 +25,7 @@ namespace grape
     class grape_event_add_process_diagram : public grape_event_base
     {
       private:
-        uint m_proc;  /**< Identifier of the created process diagram. */
+        unsigned int m_proc;  /**< Identifier of the created process diagram. */
       public:
 
         /**
