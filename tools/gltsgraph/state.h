@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include "utils.h"
+#include <wx/colour.h>
+#include <wx/gdicmn.h>
 
 #ifndef TRANSITION_H
   #include "transition.h"
@@ -47,6 +49,7 @@ class State
     Transition* getTransition(size_t i) const;
     Transition* getInTransition(size_t i) const;
     Transition* getSelfLoop(size_t i) const;
+    wxColour getColour() const;
 
     // Setters
     void setInitialState(const bool isInitial);
@@ -54,6 +57,8 @@ class State
     void setPosition(Utils::Vect p);
     void setX(const double x);
     void setY(const double y);
+
+    void setColour(const wxColour colour);
 
     Utils::Vect getImpulse() const;
     int getImpulseX() const;
@@ -75,6 +80,7 @@ class State
 
     bool hasTransitionTo(State* to);
   private:
+    wxColour colour;
     bool isInitial;
     bool selected;
     bool locked;

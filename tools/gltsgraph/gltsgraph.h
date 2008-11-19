@@ -32,6 +32,8 @@ class GLTSGraph : public wxApp
 
     std::string parse_error;
     std::string fileName;
+    bool colouring;
+    wxColour brushColour;
 
   public:
     virtual int OnExit();   
@@ -54,6 +56,8 @@ class GLTSGraph : public wxApp
     void setLTSInfo(int is, int ns, int nt, int nl);
     void setRadius(int radius);
     void setCurves(bool value);
+    void setBrushColour(wxColour colour);
+    void setTool(bool isColour);
     
     // Getters
     Graph* getGraph();

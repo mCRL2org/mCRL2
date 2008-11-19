@@ -94,6 +94,8 @@ void parse_command_line(int argc, wxChar** argv)
 
 bool GLTSGraph::OnInit()
 {
+  colouring = false;
+  brushColour = *wxBLACK;
   selectedState = NULL;
   selectedTransition = NULL;
   graph = NULL;
@@ -350,7 +352,14 @@ void GLTSGraph::deselect()
 
 void GLTSGraph::selectState(size_t selectedObject)
 {
-  selectedState = graph->selectState(selectedObject);
+  if(colouring) {
+    graph->colourState(selectedObject, brushColour);
+  }
+  else {
+    selectedState = graph->selectState(selectedObject);
+  }
+
+
 }
 
 void GLTSGraph::selectTransition(size_t state, size_t transition)
@@ -387,4 +396,13 @@ std::string GLTSGraph::getFileName() const
 double GLTSGraph::getAspectRatio() const
 {
   return glCanvas->getAspectRatio();
+}
+
+
+void GLTSGraph::setBrushColour(wxColour colour) {
+  brushColour = colour;
+}
+
+void GLTSGraph::setTool(bool isColour) {
+  colouring = isColour;
 }

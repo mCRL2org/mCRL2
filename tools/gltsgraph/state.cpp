@@ -18,7 +18,7 @@ State::State(unsigned int _value, bool _isInitialState)
   p.y = 0;
   t  = 10;  // TODO: Determine this
   d  = 0;
-
+  colour = *wxWHITE;
 }
 
 State::~State()
@@ -54,6 +54,14 @@ void State::addInTransition(Transition* it)
 void State::addSelfLoop(Transition* sl)
 {
   selfLoops.push_back(sl);
+}
+
+void State::setColour(const wxColour colour) {
+  this->colour = colour;
+}
+
+wxColour State::getColour() const {
+  return colour;
 }
 
 void State::setPosition(const Utils::Vect p)

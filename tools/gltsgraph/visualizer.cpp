@@ -108,8 +108,9 @@ void Visualizer::drawState(State* s)
 
   else
   {
-    // Draw inside of states in white, for now
-    glColor3ub(255, 255, 255);  // TODO: Parameterisable, background color
+    wxColour c = s->getColour();
+    
+    glColor3ub(c.Red(), c.Green(), c.Blue());  
   }
 
   

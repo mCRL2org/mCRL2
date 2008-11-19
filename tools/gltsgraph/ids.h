@@ -19,7 +19,9 @@ namespace IDS
     myID_START_OPTI,
     myID_STOP_OPTI,
     myID_RADIUS_SPIN,
-    myID_CURVES_CHECK
+    myID_CURVES_CHECK,
+    myID_COLOUR,
+    myID_TOOL_SELECT
   };
 
   enum PickState {TRANSITION, SELF_LOOP, STATE};

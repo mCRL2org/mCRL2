@@ -57,6 +57,14 @@ State* Graph::selectState(size_t s)
   }
 }
 
+void Graph::colourState(size_t s, wxColour colour) {
+  if(s < states.size())
+  {
+    states[s]->setColour(colour);
+  }
+}
+
+
 
 void Graph::setInfo(int is, int ns, int nt, int nl)
 {

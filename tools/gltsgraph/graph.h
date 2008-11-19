@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "state.h"
+#include <wx/colour.h>
 
 class Graph
 {
@@ -17,6 +18,8 @@ class Graph
     void addState(State* n);
     size_t getNumberOfStates();
     State* selectState(size_t s);
+    void colourState(size_t s, wxColour colour);
+
     Transition* selectTransition(size_t s, size_t t);
     Transition* selectSelfLoop(size_t s, size_t t);
 
