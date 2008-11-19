@@ -200,7 +200,8 @@ namespace mcrl2 {
       const Alignment align_horizontal,
       const Alignment align_vertical)
     {
-      // Crop text to fit into bounding box.
+      //TODO: Crop text, insert ellipses
+      draw_text(s, x, y, scale, align_horizontal, align_vertical);
     }
 
     size_t font_renderer::index_from_char(const char & c)
