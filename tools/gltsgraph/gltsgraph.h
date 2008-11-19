@@ -67,6 +67,8 @@ class GLTSGraph : public wxApp
     std::string getFileName() const;
     int getRadius() const;
     double getAspectRatio() const;
+    std::string getVersion();
+    std::string getRevision();
 };
 
 

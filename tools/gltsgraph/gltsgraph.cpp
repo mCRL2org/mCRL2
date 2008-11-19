@@ -11,7 +11,10 @@
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/aterm_ext.h"
+
+#ifndef __MCRL2_UTILITIES_HPP__
 #include "mcrl2/utilities/command_line_interface.h"
+#endif
 
 std::string lts_file_argument;
 
@@ -259,6 +262,14 @@ void GLTSGraph::openFile(std::string const &path)
 Graph* GLTSGraph::getGraph()
 {
   return graph;
+}
+
+std::string GLTSGraph::getVersion() {
+  return mcrl2::utilities::version_tag;
+}
+
+std::string GLTSGraph::getRevision() {
+  return std::string(MCRL2_REVISION);
 }
 
 size_t GLTSGraph::getNumberOfAlgorithms() const
