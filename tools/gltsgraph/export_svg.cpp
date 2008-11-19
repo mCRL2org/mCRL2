@@ -108,10 +108,11 @@ bool ExporterSVG::export_to(wxString filename)
       stroke = "black";
       stroke_width = 1;
     }
-
-    int red = 255;
-    int green = 255;
-    int blue = 255;
+    
+    wxColour c = from->getColour();
+    int red = c.Red();
+    int green = c.Green();
+    int blue = c.Blue();
 
     f%fromX
      %fromY

@@ -28,6 +28,7 @@ bool ExporterXML::export_to(wxString _filename)
     for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
     {
       State* s = graph->getState(i);
+      wxColour c = s->getColour();
       ticpp::Element* state = new ticpp::Element("State");
 
       size_t fromVal = s->getValue();
@@ -36,7 +37,10 @@ bool ExporterXML::export_to(wxString _filename)
       state->SetAttribute("isInitial", s->isInitialState());
       state->SetAttribute("x", s->getX());
       state->SetAttribute("y", s->getY());
-      
+      state->SetAttribute("red", (int)c.Red());
+      state->SetAttribute("green", (int)c.Green());
+      state->SetAttribute("blue", (int)c.Blue());
+
       graphEl->LinkEndChild(state);
       
       for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)

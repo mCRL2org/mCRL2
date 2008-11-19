@@ -192,6 +192,9 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
         startExport = true;
       }
     }
+    else {
+      startExport = true;
+    }
   }
 
   if(exporter->export_to(fileName))

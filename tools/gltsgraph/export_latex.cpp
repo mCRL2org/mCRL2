@@ -34,7 +34,6 @@ bool ExporterLatex::export_to(wxString filename)
   tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
 
 
-  // TODO: Draw states, transitions
   for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
     State* s = graph->getState(i);
@@ -44,18 +43,23 @@ bool ExporterLatex::export_to(wxString filename)
     if(s->isInitialState())
     {
       node = 
-        boost::format("\\node at (%1%pt, %2%pt) [initstate] (state%3%) {%3%};\n");
+        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1%pt, %2%pt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
     }
     else
     {
-      node = boost::format("\\node at (%1%pt, %2%pt) [state] (state%3%) {%3%};\n");
+      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1%pt, %2%pt) [state, fill=currentcolor] (state%3%) {%3%};\n");
     }
     
     double aspect = owner->getAspectRatio();
     double x = s->getX() / 10.0 * aspect;
     double y = s->getY() / 10.0;
     
-    node%x%y%i;
+    wxColour c = s->getColour();
+    double r = static_cast<double>(c.Red()) / 255.0;
+    double g = static_cast<double>(c.Green()) / 255.0;
+    double b = static_cast<double>(c.Blue()) / 255.0;
+
+    node%x%y%i%r%g%b;
 
     tikz_code += boost::str(node);
   }

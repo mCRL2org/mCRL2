@@ -35,9 +35,22 @@ Graph* XMLImporter::importFile(std::string filename)
         double y;
         state->GetAttribute("y", &y);
 
+        int red;
+        state->GetAttribute("red", &red);
+
+        int green;
+        state->GetAttribute("green", &green);
+
+        int blue;
+        state->GetAttribute("blue", &blue);
+
+        wxColour colour(red, green, blue);
+
+
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
+        s->setColour(colour);
 
         g->addState(s);
       }
