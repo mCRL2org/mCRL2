@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
       }
       std::cout << "], priority = " << p << " type = " << (t == parity_game_generator::PGAME_AND ? "AND" : "OR") << std::endl;
     }
+    pgg.print_variable_mapping();
   }
   catch(mcrl2::runtime_error e)
   {

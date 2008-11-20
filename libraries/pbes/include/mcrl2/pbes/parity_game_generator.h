@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PARITY_GAME_GENERATOR_H
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_H
 
+#include <iomanip>
 #include <map>
 #include <set>
 #include "mcrl2/atermpp/map.h"
@@ -92,7 +93,7 @@ namespace pbes_system {
         {
           unsigned int p = m_bes_expression_index.size();
           m_bes_expression_index[t] = p;
-          m_bes.push_back(std::make_pair(t, p));
+          m_bes.push_back(std::make_pair(t, priority));
           return p;
         }
       }
@@ -156,9 +157,8 @@ namespace pbes_system {
         }
 
         // Add BES equations for true and false.
-        // TODO: the priorities below are wrong!!!
         add_bes_equation(tr::true_(), 0);
-        add_bes_equation(tr::false_(), 1);
+        add_bes_equation(tr::false_(), 0);
 
         // Add a BES equation for the initial state.
         propositional_variable_instantiation phi = R(m_pbes.initial_state());
@@ -270,17 +270,37 @@ namespace pbes_system {
         }
         else if (tr::is_true(psi))
         {
-          result.insert(0); // equation 0 corresponds with the value true
+          // no dependencies
         }
         else if (tr::is_false(psi))
         {
-          result.insert(1); // equation 1 corresponds with the value false
+          // no dependencies
         }
         else
         {
           throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi)));
         }
         return result;
+      }
+      
+      /// Prints the mapping from BES variables to the corresponding PBES expressions.
+      void print_variable_mapping()
+      {
+        std::cout << "--- variable mapping ---" << std::endl;
+        std::map<unsigned int, pbes_expression> m;
+        for (atermpp::map<pbes_expression, unsigned int>::iterator i = m_bes_expression_index.begin(); i != m_bes_expression_index.end(); ++i)
+        {
+          m[i->second] = i->first;
+        }
+        for (std::map<unsigned int, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
+        {
+          std::cout << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
+        }
+        std::cout << "--- priorities ---" << std::endl;
+        for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+        {
+          std::cout << core::pp(i->first) << " " << i->second << std::endl;
+        }
       }
   };
 
