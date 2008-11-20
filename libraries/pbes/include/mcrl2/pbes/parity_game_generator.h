@@ -141,8 +141,8 @@ namespace pbes_system {
         }
 
         // Compute priorities of PBES propositional variables.
-        fixpoint_symbol sigma = m_pbes.equations().front().symbol();
-        unsigned int priority = sigma.is_mu() ? 0 : 1;
+        fixpoint_symbol sigma = fixpoint_symbol::nu();
+        unsigned int priority = 0;
         for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
         {
           if (i->symbol() == sigma)
