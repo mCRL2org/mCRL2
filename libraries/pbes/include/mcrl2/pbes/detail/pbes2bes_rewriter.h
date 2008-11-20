@@ -50,10 +50,15 @@ namespace detail {
     /// Implemented by Alexander van Dam.
     /// \param v A propositional variable.
     /// \return A name that uniquely corresponds to the propositional variable.
-    propositional_variable_type rename(const propositional_variable_type& v)
+    term_type rename(const term_type& v)
     {
-      const data::data_expression_list del = v.parameters();
-      std::string propvar_name_current = v.name();
+      assert(tr::is_prop_var(v));
+      if (!tr::is_constant(v))
+      {
+        return v;
+      }
+      const data::data_expression_list del = tr::param(v);
+      std::string propvar_name_current = tr::name(v);
       if (!del.empty())
       {
         for (data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)

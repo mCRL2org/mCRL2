@@ -1,4 +1,4 @@
-// Author(s): Alexander van Dam
+// Author(s): Alexander van Dam, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -54,7 +54,7 @@ enum pbes_output_format {
 enum transformation_strategy {
   ts_lazy,
   ts_finite,
-  ts_newlazy
+  ts_oldlazy
 };
 
 /// The pbes2bes tool.
@@ -69,17 +69,17 @@ class pbes2bes_tool: public core::filter_tool
     /// \param s A transformation strategy.
     void set_transformation_strategy(const std::string& s)
     {
-      if (s == "lazy")
+      if (s == "oldlazy")
       {
-        m_strategy = ts_lazy;
+        m_strategy = ts_oldlazy;
       }
       else if (s == "finite")
       {
         m_strategy = ts_finite;
       }
-      else if (s == "newlazy")
+      else if (s == "lazy")
       {
-        m_strategy = ts_newlazy;
+        m_strategy = ts_lazy;
       }
       else
       {
@@ -141,7 +141,7 @@ class pbes2bes_tool: public core::filter_tool
           "compute the BES using strategy NAME:\n"
           "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
           "  'finite' for computing all possible boolean equations, or\n"
-          "  'newlazy' for an improved version of the lazy algorithm.",
+          "  'oldlazy' for the previous version of the lazy algorithm.",
           's').
         add_option("output",
           make_optional_argument("NAME", "binary"),
@@ -155,17 +155,17 @@ class pbes2bes_tool: public core::filter_tool
     /// \return A string representation of the transformation strategy.
     std::string strategy_string() const
     {
-      if (m_strategy == ts_lazy)
+      if (m_strategy == ts_oldlazy)
       {
-        return "lazy";
+        return "oldlazy";
       }
       else if (m_strategy == ts_finite)
       {
         return "finite";
       }
-      else if (m_strategy == ts_newlazy)
+      else if (m_strategy == ts_lazy)
       {
-        return "newlazy";
+        return "lazy";
       }
       return "unknown";
     }
@@ -224,7 +224,7 @@ class pbes2bes_tool: public core::filter_tool
         return false;
       }
 
-      if (m_strategy == ts_newlazy)
+      if (m_strategy == ts_lazy)
       {
         pbes2bes_algorithm algorithm(p.data());
         algorithm.run(p);
@@ -249,7 +249,7 @@ class pbes2bes_tool: public core::filter_tool
         {
           p = do_finite_algorithm(p, pbesr);
         }
-        else if (m_strategy == ts_lazy)
+        else if (m_strategy == ts_oldlazy)
         {
           p = do_lazy_algorithm(p, pbesr);
         }
@@ -286,7 +286,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
     
       transformation_strategy_enumeration.
-        add(ts_lazy, "lazy").
+        add(ts_oldlazy, "oldlazy").
         add(ts_finite, "finite");
     
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;

@@ -81,8 +81,14 @@ namespace pbes_system {
         : R(data_spec), equation_count(0)
       {}
 
-      void run(const pbes<>& p)
+      void run(pbes<>& p)
       {
+        if (!p.instantiate_free_variables())
+        {
+          core::gsErrorMsg("Instantiatiation of free variables failed!\n");
+          throw mcrl2::runtime_error("exit!");
+        }
+
         // initialize equation_index and E
         int eqn_index = 0;
         for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)

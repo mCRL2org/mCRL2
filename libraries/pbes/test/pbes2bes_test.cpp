@@ -30,7 +30,7 @@ using pbes_system::pbes2bes_algorithm;
 using pbes_system::txt2pbes;
 
 inline
-pbes<> pbes2bes(const pbes<>& p, bool finite = true)
+pbes<> pbes2bes(pbes<>& p, bool finite = true)
 {
   data::rewriter datar(p.data());
   data::rewriter_with_variables datarv(p.data());
@@ -42,7 +42,7 @@ pbes<> pbes2bes(const pbes<>& p, bool finite = true)
 }
 
 inline
-pbes<> pbes2bes_new(const pbes<>& p)
+pbes<> pbes2bes_new(pbes<>& p)
 {
   pbes2bes_algorithm algorithm(p.data());
   algorithm.run(p);
