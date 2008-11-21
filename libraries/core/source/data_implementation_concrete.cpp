@@ -1314,7 +1314,7 @@ ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
 
   //declare operations for sort sort_id
   ATermList new_ops = ATmakeList(9,
-      (ATerm) gsMakeOpIdSetComp(sort_elt, sort_set),
+      (ATerm) gsMakeOpIdSetComp(gsMakeSortArrow1(sort_elt, gsMakeSortExprBool()), sort_set),
       (ATerm) gsMakeOpIdEmptySet(sort_set),
       (ATerm) gsMakeOpIdEltIn(sort_elt, sort_set),
       (ATerm) gsMakeOpIdSubSetEq(sort_set),
@@ -1508,7 +1508,7 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
 
   //declare operations for sort sort_id
   ATermList new_ops = ATmakeList(11,
-      (ATerm) gsMakeOpIdBagComp(sort_elt, sort_bag),
+      (ATerm) gsMakeOpIdBagComp(gsMakeSortArrow1(sort_elt, gsMakeSortExprNat()), sort_bag),
       (ATerm) gsMakeOpIdEmptyBag(sort_bag),
       (ATerm) gsMakeOpIdCount(sort_elt, sort_bag),
       (ATerm) gsMakeOpIdEltIn(sort_elt, sort_bag),

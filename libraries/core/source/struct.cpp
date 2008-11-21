@@ -2020,6 +2020,8 @@ ATermAppl gsMakeOpIdRTail(ATermAppl SortExpr)
 
 ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
 {
+  assert(gsIsSortArrow(SortExprDom));
+  assert(gsGetSortExprResult(SortExprDom) == gsMakeSortExprBool());
   return gsMakeOpId(gsMakeOpIdNameSetComp(), gsMakeSortArrow1(
     SortExprDom, SortExprResult));
 }
@@ -2078,6 +2080,8 @@ ATermAppl gsMakeOpIdSetCompl(ATermAppl SortExpr)
 
 ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
 {
+  assert(gsIsSortArrow(SortExprDom));
+  assert(gsGetSortExprResult(SortExprDom) == gsMakeSortExprNat());
   return gsMakeOpId(gsMakeOpIdNameBagComp(), gsMakeSortArrow1(
     SortExprDom, SortExprResult));
 }
