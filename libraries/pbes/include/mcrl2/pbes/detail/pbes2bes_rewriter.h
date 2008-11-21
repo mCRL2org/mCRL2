@@ -108,7 +108,7 @@ namespace detail {
       typedef data::data_variable variable_type;
 
       /// Constructor.
-      pbes2bes_rewriter(const data_specification& data_spec)
+      pbes2bes_rewriter(const data::data_specification& data_spec)
        :
          datar(data_spec),
          datarv(data_spec),
