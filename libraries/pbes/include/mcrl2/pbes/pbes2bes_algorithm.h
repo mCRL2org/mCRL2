@@ -76,9 +76,12 @@ namespace pbes_system {
       /// A lookup map for PBES equations.
       std::map<core::identifier_string, int> equation_index;
 
+      /// Print the equations to standard out.
+      bool m_print_equations;
+
     public:
-      pbes2bes_algorithm(data::data_specification data_spec)
-        : R(data_spec), equation_count(0)
+      pbes2bes_algorithm(data::data_specification data_spec, bool print_equations = false)
+        : R(data_spec), equation_count(0), m_print_equations(print_equations)
       {}
 
       void run(pbes<>& p)
@@ -119,6 +122,10 @@ namespace pbes_system {
             }
           }         
           pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::data_variable_list()), psi_e);
+          if (m_print_equations)
+          {
+            std::cout << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
+          }
           E[index].push_back(new_eqn);
           if (++equation_count % 1000 == 0)
           {
@@ -136,6 +143,11 @@ namespace pbes_system {
         }
         result.initial_state() = init;
         return result;
+      }
+
+      bool& print_equations()
+      {
+        return m_print_equations;
       }
   };
 
