@@ -39,20 +39,21 @@ namespace mcrl2 {
         inline
         atermpp::aterm_appl string_to_sort_cons_type(const std::string& s) const
         {
-          if (s == "List")
+          if (s == "list")
           {
             return core::detail::gsMakeSortList();
           }
-          else if (s == "Set")
+          else if (s == "set")
           {
             return core::detail::gsMakeSortSet();
           }
-          else if (s == "Bag")
+          else if (s == "bag")
           {
             return core::detail::gsMakeSortBag();
           }
           else
           {
+            std::cerr << "Incorrect sort_cons_type: " << s << std::endl;
             assert(false);
           }
         }
@@ -66,15 +67,15 @@ namespace mcrl2 {
         {
           if (core::detail::gsIsSortList(s))
           {
-            return "List";
+            return "list";
           }
           else if (core::detail::gsIsSortSet(s))
           {
-            return "Set";
+            return "set";
           }
           else if (core::detail::gsIsSortBag(s))
           {
-            return "Bag";
+            return "bag";
           }
           else
           {

@@ -45,6 +45,19 @@ ATermAppl implement_data_spec(ATermAppl spec);
 //     NULL is returned.
 ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
 
+//Pre: part is a part of a specification that adheres to the internal syntax
+//     after type checking
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of part
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Ret: part in which:
+//     - all substitutions of *p_substs are performed on the elements of part
+//     - each substituted element is implemented, where the new data
+//       declarations are stored in *p_data_decls
+ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
+  t_data_decls *p_data_decls);
+
 /** \brief     Implement data types of a type checked mCRL2 action rename
  *             specification with respect to a type checked mCRL2 linear
  *             process specification (LPS).
@@ -166,6 +179,54 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 ///     *p_vars and context)
 ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);
+
+//Pre: term is not NULL
+//Ret: sort identifier for the implementation of a structured sort with prefix
+//     struct_prefix, that does not occur in term
+inline
+ATermAppl make_fresh_struct_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix(), term, false));
+}
+
+//Pre: term is not NULL
+//Ret: fresh sort identifier for the implementation of a list sort with prefix
+//     list_prefix, that does not occur in term
+inline
+ATermAppl make_fresh_list_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix(), term, false));
+}
+
+//Pre: term is not NULL
+//Ret: fresh sort identifier for the implementation of a set sort with prefix
+//     set_prefix, that does not occur in term
+inline
+ATermAppl make_fresh_set_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix(), term, false));
+}
+
+//Pre: term is not NULL
+//Ret: fresh sort identifier for the implementation of a bag sort with prefix
+//     bag_prefix, that does not occur in term
+inline
+ATermAppl make_fresh_bag_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix(), term, false));
+}
+
+//Pre: sort_expr is a sort expression
+//     term is not NULL
+//Ret: operation identifier op_id(n, s) for the implementation of a lambda
+//     abstraction, where s is sort_expr and n is a name with prefix
+//     lambda_prefix, that does not occur in term
+inline
+ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
+{
+  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix(), term, false),
+    sort_expr);
+}
 
     }
   }

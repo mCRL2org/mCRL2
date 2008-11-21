@@ -1329,6 +1329,19 @@ class OpDecl(Parsing.Nonterm):
         if verbose:
           print "Parsed single function declaration: %s" % (self.string)
 
+    # Hack for count on lists
+    def reduceCount(self, hash, label, colon, sortexpr):
+        "%reduce hash Label colon SortExpr"
+        id = TokenID(parser, "#")
+        self.functions = [[id, label, sortexpr]]
+        functions_table["#"] = label.label
+        self.projection_arguments = get_projection_arguments(id, label, sortexpr)
+
+        # Debugging
+        self.string = id.string + label.string + ":" + sortexpr.string
+        if verbose:
+          print "Parsed single function declaration: %s" % (self.string)
+
 class EqnDecls(Parsing.Nonterm):
     "%nonterm"
     def reduceDataEqn(self, eqndecl, semicolon):
@@ -1442,6 +1455,22 @@ class DataExprPrimary(Parsing.Nonterm):
     "%nonterm"
     def reduceID(self, id):
         "%reduce id"
+        self.expr = [id]
+
+        if id.string in functions_table:
+            self.variables = set()
+        else:
+            self.variables = set(id.string)
+
+        # Debugging
+        self.string = id.string
+        if verbose:
+          print "Parsed simple data expression: %s" % (self.string)
+
+    # Hack for allowing application of list count
+    def reduceCount(self, hash):
+        "%reduce hash"
+        id = TokenID(parser, "#")
         self.expr = [id]
 
         if id.string in functions_table:

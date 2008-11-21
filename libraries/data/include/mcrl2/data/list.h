@@ -142,27 +142,27 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol cnt
+      // Function symbol #
       inline
       function_symbol count(const sort_expression& s)
       {
-        //static function_symbol count("cnt", function_sort(sort_list::list(s), sort_nat::nat()));
-        function_symbol count("cnt", function_sort(sort_list::list(s), sort_nat::nat()));
+        //static function_symbol count("#", function_sort(sort_list::list(s), sort_nat::nat()));
+        function_symbol count("#", function_sort(sort_list::list(s), sort_nat::nat()));
         return count;
       }
 
-      // Recogniser for cnt
+      // Recogniser for #
       inline
       bool is_count_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "cnt";
+          return static_cast<const function_symbol&>(e).name() == "#";
         }
         return false;
       }
 
-      // Application of cnt
+      // Application of #
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
@@ -171,7 +171,7 @@ namespace mcrl2 {
         return application(count(s),arg0);
       }
 
-      // Recogniser for application of cnt
+      // Recogniser for application of #
       inline
       bool is_count_application(const data_expression& e)
       {

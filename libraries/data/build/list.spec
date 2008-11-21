@@ -8,8 +8,7 @@ cons [] <"nil"> : List(S);
      |> <"cons_"> : S <"head"> # List(S) <"tail"> -> List(S);
 
 map in <"in"> : S <"arg1"> # List(S) <"arg2"> -> Bool;
-% For reasons of ambiguity, we use cnt as internal symbol for # for now
-    cnt <"count"> : List(S) <"list"> -> Nat;
+    # <"count"> : List(S) <"list"> -> Nat;
     <| <"snoc"> : List(S) <"rtail"> # S <"rhead"> -> List(S);
     ++ <"concat"> : List(S) <"left"> # List(S) <"right"> -> List(S);
     . <"element_at"> : List(S) <"list"> # Nat <"position"> -> S;
@@ -28,8 +27,8 @@ eqn ==([], |>(d,s)) = false;
     ==(|>(d,s), |>(e,t)) = &&(==(d,e), ==(s,t));
     in(d,[]) = false;
     in(d,|>(e,s)) = ||(==(d,e), in(d,s));
-    cnt([]) = @c0;
-    cnt(|>(d,s)) = @cNat(succ(cnt(s)));
+    #([]) = @c0;
+    #(|>(d,s)) = @cNat(succ(#(s)));
     <|([],d) = |>(d,[]);
     <|(|>(d,s), e) = |>(d, <|(s,e));
     ++([],s) = s;

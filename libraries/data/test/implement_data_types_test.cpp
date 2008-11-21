@@ -13,16 +13,22 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/detail/implement_data_types.h"
 #include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
 
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/list.h"
+
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::utilities;
 
 /* Old data implementation functions, plainly copied over */
 void old_impl_sort_bool(t_data_decls *p_data_decls)
@@ -254,6 +260,7 @@ void old_impl_sort_pos(t_data_decls *p_data_decls)
 
 void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
 {
+  std::cerr << "impl_sort_natpair" << std::endl;
   //Declare sort NatPair
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair());
   //Declare constructors for sort NatPair
@@ -328,10 +335,12 @@ void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
          gsMakeDataExprGGDivMod(gsMakeDataExprCNat(p), n, q),
          gsMakeDataExprCPair(gsMakeDataExprDub(t, n), gsMakeDataExprGTESubtB(f, p, q)))
     ), p_data_decls->data_eqns);
+  std::cerr << "end impl_sort_natpair" << std::endl;
 }
 
 void old_impl_sort_nat(t_data_decls *p_data_decls)
 {
+  std::cerr << "impl_sort_nat" << std::endl;
   //add implementation of sort NatPair, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
     old_impl_sort_nat_pair(p_data_decls);
@@ -664,10 +673,12 @@ void old_impl_sort_nat(t_data_decls *p_data_decls)
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
          gsMakeDataExprMod(p, q))
     ), p_data_decls->data_eqns);
+  std::cerr << "end impl_sort_nat" << std::endl;
 }
 
 void old_impl_sort_int(t_data_decls *p_data_decls)
 {
+  std::cerr << "impl_sort_int" << std::endl;
   //Declare sort Int
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdInt());
   //Declare constructors for sort Int
@@ -952,6 +963,7 @@ void old_impl_sort_int(t_data_decls *p_data_decls)
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     old_impl_sort_nat(p_data_decls);
   }
+  std::cerr << "end impl_sort_int" << std::endl;
 }
 
 void old_impl_sort_real(t_data_decls *p_data_decls)
@@ -1087,6 +1099,57 @@ void old_impl_sort_real(t_data_decls *p_data_decls)
   }
 }
 
+ATermAppl old_impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
+  t_data_decls *p_data_decls)
+{
+  assert(gsIsSortExprList(sort_list));
+  ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
+
+  //declare constructors for sort sort_id
+  ATermList new_cons_ops = ATmakeList2(
+      (ATerm) gsMakeOpIdEmptyList(sort_list),
+      (ATerm) gsMakeOpIdCons(sort_elt, sort_list));
+
+  //Declare operations for sort sort_id
+  ATermList new_ops = ATmakeList(9,
+      (ATerm) gsMakeOpIdEltIn(sort_elt, sort_list),
+      (ATerm) gsMakeOpIdListSize(sort_list),
+      (ATerm) gsMakeOpIdSnoc(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdConcat(sort_list),
+      (ATerm) gsMakeOpIdEltAt(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdHead(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdTail(sort_list),
+      (ATerm) gsMakeOpIdRHead(sort_list, sort_elt),
+      (ATerm) gsMakeOpIdRTail(sort_list));
+
+  ATermList new_data_eqns = build_list_equations(sort_elt, sort_list);
+
+  //declare fresh sort identifier for sort_list
+  ATermAppl sort_id = make_fresh_list_sort_id((ATerm) p_data_decls->sorts);
+  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
+  //implement sort_elt
+  //this needs to be done first in order to keep the substitutions sound!
+  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
+  //add substitution for sort_list
+  ATermAppl subst = gsMakeSubst_Appl(sort_list, sort_id);
+  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
+
+  //perform substitutions
+  new_cons_ops = gsSubstValues_List(*p_substs, new_cons_ops, true);
+  p_data_decls->cons_ops = ATconcat(new_cons_ops, p_data_decls->cons_ops);
+  new_ops = gsSubstValues_List(*p_substs, new_ops, true);
+  p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
+  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    impl_sort_nat(p_data_decls);
+  }
+  return sort_id;
+}
+
+
 void implement_bool_test()
 {
   t_data_decls data_decls_old;
@@ -1095,15 +1158,6 @@ void implement_bool_test()
   initialize_data_decls(&data_decls_new);
   old_impl_sort_bool(&data_decls_old);
   impl_sort_bool(&data_decls_new);
-
-  std::cerr << "old sorts: " << aterm_list(data_decls_old.sorts) << std::endl;
-  std::cerr << "new sorts: " << aterm_list(data_decls_new.sorts) << std::endl;
-  std::cerr << "old constructors: " << aterm_list(data_decls_old.cons_ops) << std::endl;
-  std::cerr << "new constructors: " << aterm_list(data_decls_new.cons_ops) << std::endl;
-  std::cerr << "old functions: " << aterm_list(data_decls_old.ops) << std::endl;
-  std::cerr << "new functions: " << aterm_list(data_decls_new.ops) << std::endl;
-  std::cerr << "old equations: " << aterm_list(data_decls_old.data_eqns) << std::endl;
-  std::cerr << "new equations: " << aterm_list(data_decls_new.data_eqns) << std::endl;
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -1120,23 +1174,6 @@ void implement_pos_test()
   old_impl_sort_pos(&data_decls_old);
   impl_sort_pos(&data_decls_new);
 
-  std::cerr << "old sorts: " << aterm_list(data_decls_old.sorts) << std::endl;
-  std::cerr << "new sorts: " << aterm_list(data_decls_new.sorts) << std::endl;
-  std::cerr << "old constructors: " << aterm_list(data_decls_old.cons_ops) << std::endl;
-  std::cerr << "new constructors: " << aterm_list(data_decls_new.cons_ops) << std::endl;
-  std::cerr << "old functions: " << aterm_list(data_decls_old.ops) << std::endl;
-  std::cerr << "new functions: " << aterm_list(data_decls_new.ops) << std::endl;
-  std::cerr << "old equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
@@ -1151,31 +1188,6 @@ void implement_nat_test()
   initialize_data_decls(&data_decls_new);
   old_impl_sort_nat(&data_decls_old);
   impl_sort_nat(&data_decls_new);
-
-  std::cerr << "old sorts: " << aterm_list(data_decls_old.sorts) << std::endl;
-  std::cerr << "new sorts: " << aterm_list(data_decls_new.sorts) << std::endl;
-  std::cerr << "old constructors: " << aterm_list(data_decls_old.cons_ops) << std::endl;
-  std::cerr << "new constructors: " << aterm_list(data_decls_new.cons_ops) << std::endl;
-  std::cerr << "old functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.ops).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.ops).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "old equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -1192,31 +1204,6 @@ void implement_int_test()
   old_impl_sort_int(&data_decls_old);
   impl_sort_int(&data_decls_new);
 
-  std::cerr << "old sorts: " << aterm_list(data_decls_old.sorts) << std::endl;
-  std::cerr << "new sorts: " << aterm_list(data_decls_new.sorts) << std::endl;
-  std::cerr << "old constructors: " << aterm_list(data_decls_old.cons_ops) << std::endl;
-  std::cerr << "new constructors: " << aterm_list(data_decls_new.cons_ops) << std::endl;
-  std::cerr << "old functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.ops).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.ops).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "old equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
@@ -1232,30 +1219,25 @@ void implement_real_test()
   old_impl_sort_real(&data_decls_old);
   impl_sort_real(&data_decls_new);
 
-  std::cerr << "old sorts: " << aterm_list(data_decls_old.sorts) << std::endl;
-  std::cerr << "new sorts: " << aterm_list(data_decls_new.sorts) << std::endl;
-  std::cerr << "old constructors: " << aterm_list(data_decls_old.cons_ops) << std::endl;
-  std::cerr << "new constructors: " << aterm_list(data_decls_new.cons_ops) << std::endl;
-  std::cerr << "old functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.ops).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new functions:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.ops).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "old equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
-  std::cerr << "new equations:" << std::endl;
-  for (aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::cerr << *i << std::endl;
-  }
+  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
+  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
+  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+}
+
+void implement_list_test()
+{
+  t_data_decls data_decls_old;
+  t_data_decls data_decls_new;
+  initialize_data_decls(&data_decls_old);
+  initialize_data_decls(&data_decls_new);
+  // TODO: Clean up
+  ATermList old_substs = ATmakeList0();
+  ATermList new_substs = ATmakeList0();
+  basic_sort s("S");
+  container_sort ls(data::sort_list::list(s));
+  old_impl_sort_list(ls, &old_substs, &data_decls_old);
+  impl_sort_list(ls, &new_substs, &data_decls_new);
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -1287,6 +1269,7 @@ int test_main(int argc, char** argv)
   implement_nat_test();
   implement_int_test();
   implement_real_test();
+  implement_list_test();
   implement_data_specification_test();
 
   return EXIT_SUCCESS;

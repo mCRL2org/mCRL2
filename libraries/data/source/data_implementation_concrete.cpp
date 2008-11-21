@@ -18,6 +18,7 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/list.h"
 #include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
@@ -90,19 +91,6 @@ static ATermAppl impl_numerical_pattern_matching_expr(ATermAppl data_expr,
 //Ret: data_expr in which numerical patterns can be matched if they do not occur
 //     at top level
 
-static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
-  t_data_decls *p_data_decls);
-//Pre: part is a part of a specification that adheres to the internal syntax
-//     after type checking
-//     p_substs is a pointer to a list of substitutions induced by the context
-//     of part
-//     p_data_decls represents a pointer to new data declarations, induced by
-//     the context of part
-//Ret: part in which:
-//     - all substitutions of *p_substs are performed on the elements of part
-//     - each substituted element is implemented, where the new data
-//       declarations are stored in *p_data_decls
-
 static ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
   t_data_decls *p_data_decls);
 //Pre: parts consists of parts of a specification that adheres to the internal
@@ -146,33 +134,6 @@ static void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
 //Pre: sort_decls is a list of sort_id's and sort_ref's
 //Post:*p_sort_ids and *p_sort_refs contain the sort_id's and sort_ref's from
 //     sort_decls, in the same order
-
-static ATermAppl make_fresh_struct_sort_id(ATerm term);
-//Pre: term is not NULL
-//Ret: sort identifier for the implementation of a structured sort with prefix
-//     struct_prefix, that does not occur in term
-
-static ATermAppl make_fresh_list_sort_id(ATerm term);
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a list sort with prefix
-//     list_prefix, that does not occur in term
-
-static ATermAppl make_fresh_set_sort_id(ATerm term);
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a set sort with prefix
-//     set_prefix, that does not occur in term
-
-static ATermAppl make_fresh_bag_sort_id(ATerm term);
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a bag sort with prefix
-//     bag_prefix, that does not occur in term
-
-static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
-//Pre: sort_expr is a sort expression
-//     term is not NULL
-//Ret: operation identifier op_id(n, s) for the implementation of a lambda
-//     abstraction, where s is sort_expr and n is a name with prefix
-//     lambda_prefix, that does not occur in term
 
 //implementation
 //--------------
@@ -1040,6 +1001,9 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
 
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
 {
+  data_equation_list equations = sort_list::list_generate_equations_code(sort_expression(sort_elt));
+  return atermpp::term_list<data_equation>(equations.begin(), equations.end());
+  /*
   //Declare data equations for sort sort_id
   ATermList el = ATmakeList0();
   ATermAppl el_sort_id = gsMakeDataExprEmptyList(sort_list);
@@ -1144,6 +1108,7 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
           gsMakeDataExprRTail(gsMakeDataExprCons(e_sort_elt, s_sort_id)))));
 
   return new_data_eqns;
+  */
 }
 
 ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
@@ -1152,6 +1117,36 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
   assert(gsIsSortExprList(sort_list));
   ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
 
+  ATermAppl sort_id = make_fresh_list_sort_id((ATerm) p_data_decls->sorts);
+  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
+
+  //implement sort_elt
+  //this needs to be done first in order to keep the substitutions sound!
+  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
+  sort_expression element_sort(sort_elt);
+  //add substitution for sort_list
+  ATermAppl subst = gsMakeSubst_Appl(sort_list, sort_id);
+  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
+  function_symbol_list constructors = sort_list::list_generate_constructors_code(element_sort);
+  function_symbol_list functions = sort_list::list_generate_functions_code(element_sort);
+  data_equation_list equations = sort_list::list_generate_equations_code(element_sort);
+
+  //perform substitutions
+//  constructors = gsSubstValues_List(*p_substs, constructors, true);
+//  functions = gsSubstValues_List(*p_substs, functions, true);
+//  equations = gsSubstValues_List(*p_substs, equations, true);
+
+  p_data_decls->cons_ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true), p_data_decls->cons_ops);
+  p_data_decls->ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true), p_data_decls->ops);
+  p_data_decls->data_eqns = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<data_equation>(equations.begin(), equations.end()), true), p_data_decls->data_eqns);
+
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    impl_sort_nat(p_data_decls);
+  }
+  return sort_id;
+
+/*
   //declare constructors for sort sort_id
   ATermList new_cons_ops = ATmakeList2(
       (ATerm) gsMakeOpIdEmptyList(sort_list),
@@ -1188,12 +1183,12 @@ ATermAppl impl_sort_list(ATermAppl sort_list, ATermList *p_substs,
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
   new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
   p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
-
   //add implementation of sort Nat, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     impl_sort_nat(p_data_decls);
   }
   return sort_id;
+*/
 }
 
 ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set)
@@ -1554,10 +1549,6 @@ void impl_sort_bool(t_data_decls *p_data_decls)
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
-  gsVerboseMsg("sorts: %T\n", p_data_decls->sorts);
-  gsVerboseMsg("constructors: %T\n", p_data_decls->cons_ops);
-  gsVerboseMsg("functions: %T\n", p_data_decls->ops);
-  gsVerboseMsg("equations: %T\n", p_data_decls->data_eqns);
 }
 
 void impl_sort_pos(t_data_decls *p_data_decls)
@@ -1656,32 +1647,6 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
         gsMakeDataExprIf(b, x, x),
         x)
     ), p_data_decls->data_eqns);
-}
-
-ATermAppl make_fresh_struct_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix(), term, false));
-}
- 
-ATermAppl make_fresh_list_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix(), term, false));
-}
-
-ATermAppl make_fresh_set_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix(), term, false));
-}
-
-ATermAppl make_fresh_bag_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix(), term, false));
-}
-
-ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
-{
-  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix(), term, false),
-    sort_expr);
 }
 
 void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
