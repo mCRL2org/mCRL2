@@ -1060,7 +1060,7 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
     (ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dspl = ATmakeList3((ATerm) d_sort_elt, (ATerm) s_sort_id, (ATerm) p);
 
-  ATermList new_data_eqns = ATmakeList(21,
+  ATermList new_data_eqns = ATmakeList(20,
       //equality (sort_id -> sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(el_sort_id, ds), f),
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(ds, el_sort_id), f),
@@ -1069,7 +1069,6 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
         gsMakeDataExprAnd(
           gsMakeDataExprEq(d_sort_elt, e_sort_elt),
           gsMakeDataExprEq(s_sort_id, t_sort_id))),
-      (ATerm) gsMakeDataEqn(sl, nil, gsMakeDataExprEq(s_sort_id, s_sort_id), t),
       //element test (sort_elt -> sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dl, nil,
         gsMakeDataExprEltIn(d_sort_elt, el_sort_id),
