@@ -31,25 +31,25 @@ class python_parity_game_generator: public parity_game_generator
 {
   protected:
     /// Returns the quoted name of the vertex, for example "X1"
-    std::string vertex(unsigned int i)
+    std::string vertex(unsigned int i) const
     {
       return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
     }
 
     /// Returns a tuple representing an edge, for example ("X1", "X2")
-    std::string edge(std::pair<unsigned int, unsigned int> e)
+    std::string edge(std::pair<unsigned int, unsigned int> e) const
     {
       return "(" + vertex(e.first) + ", " + vertex(e.second) + ")";
     }
 
     /// Returns a string representing a priority, for example "X1":0
-    std::string priority(std::pair<unsigned int, unsigned int> p)
+    std::string priority(std::pair<unsigned int, unsigned int> p) const
     {
       return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
     }
 
     template <typename Container, typename Function>
-    std::vector<std::string> apply(const Container& c, Function f)
+    std::vector<std::string> apply(const Container& c, Function f) const
     {
       std::vector<std::string> result;
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
@@ -60,7 +60,7 @@ class python_parity_game_generator: public parity_game_generator
     }
 
     /// Wraps the elements in a set.
-    std::string python_set(const std::vector<std::string>& elements)
+    std::string python_set(const std::vector<std::string>& elements) const
     {
       return "set([" + boost::algorithm::join(elements, ", ") +  "])";
     }
@@ -75,8 +75,8 @@ class python_parity_game_generator: public parity_game_generator
     }
 
   public:
-    python_parity_game_generator(pbes<>& p)
-      : parity_game_generator(p)
+    python_parity_game_generator(pbes<>& p, bool true_false_dependencies)
+      : parity_game_generator(p, true_false_dependencies)
     {}
     
     /// Generate python code for the python parity game solver.
@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   std::string infile;            // location of pbes
+  bool true_false_dependencies;
 
   try {
     //--- paritygame options ---------
@@ -159,6 +160,7 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
+      ("true-false-dependencies,t", po::value<bool>(&true_false_dependencies)->default_value(false), "generate dependencies for true and false")
       ;
 
     //--- hidden options ---------
@@ -200,7 +202,7 @@ int main(int argc, char* argv[])
 
     pbes<> p;
     p.load(infile);
-    python_parity_game_generator pgg(p);
+    python_parity_game_generator pgg(p, true_false_dependencies);
     std::string text = pgg.run();
     std::ofstream to("paritygame.pg");
     to << text;

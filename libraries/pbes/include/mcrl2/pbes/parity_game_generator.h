@@ -69,13 +69,16 @@ namespace pbes_system {
       std::map<core::identifier_string, unsigned int> m_priorities;
       
       /// Maps PBES closed expressions to corresponding BES variables.
-      atermpp::map<pbes_expression, unsigned int> m_bes_expression_index;
+      atermpp::map<pbes_expression, unsigned int> m_pbes_expression_index;
         
       /// Contains intermediate results of the BES that is being generated.
       /// m_bes[i] represents a BES equation corresponding to BES variable i.
       /// m_bes[i].first is the right hand side of the BES equation
       /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
       std::vector<std::pair<pbes_expression, unsigned int> > m_bes;
+
+      /// Determines what kind of BES equations are generated for true and false.
+      bool m_true_false_dependencies;
 
       /// Adds a BES equation for a given PBES expression, if it not already exists.
       /// \param p A closed PBES expression.
@@ -84,15 +87,15 @@ namespace pbes_system {
       unsigned int add_bes_equation(pbes_expression t, unsigned int priority)
       {
         // TODO: can this insertion be done more efficiently?
-        atermpp::map<pbes_expression, unsigned int>::iterator i = m_bes_expression_index.find(t);
-        if (i != m_bes_expression_index.end())
+        atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(t);
+        if (i != m_pbes_expression_index.end())
         {
           return i->second;
         }
         else
         {
-          unsigned int p = m_bes_expression_index.size();
-          m_bes_expression_index[t] = p;
+          unsigned int p = m_pbes_expression_index.size();
+          m_pbes_expression_index[t] = p;
           m_bes.push_back(std::make_pair(t, priority));
           return p;
         }
@@ -120,13 +123,14 @@ namespace pbes_system {
       enum operation_type { PGAME_OR, PGAME_AND };
       
       /// Constructor.
-      parity_game_generator(const pbes<>& p)
+      parity_game_generator(const pbes<>& p, bool true_false_dependencies = false)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),
           datar(p.data()),
           datae(p.data(), datar, generator),
           datarv(p.data()),
-          R(datarv, datae)          
+          R(datarv, datae),
+          m_true_false_dependencies(true_false_dependencies)
       {
         // Nothing to be done for an empty PBES.
         if (m_pbes.equations().empty())
@@ -156,9 +160,9 @@ namespace pbes_system {
           }
         }
 
-        // Add BES equations for true and false.
+        // Add BES equations for true and false with priorities 0 and 1.
         add_bes_equation(tr::true_(), 0);
-        add_bes_equation(tr::false_(), 0);
+        add_bes_equation(tr::false_(), 1);
 
         // Add a BES equation for the initial state.
         propositional_variable_instantiation phi = R(m_pbes.initial_state());
@@ -270,11 +274,21 @@ namespace pbes_system {
         }
         else if (tr::is_true(psi))
         {
-          // no dependencies
+          if (m_true_false_dependencies)
+          {
+            atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(tr::true_());
+            assert(i != m_pbes_expression_index.end());
+            result.insert(i->second);
+          }
         }
         else if (tr::is_false(psi))
         {
-          // no dependencies
+          if (m_true_false_dependencies)
+          {
+            atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.find(tr::false_());
+            assert(i != m_pbes_expression_index.end());
+            result.insert(i->second);
+          }
         }
         else
         {
@@ -288,7 +302,7 @@ namespace pbes_system {
       {
         std::cout << "--- variable mapping ---" << std::endl;
         std::map<unsigned int, pbes_expression> m;
-        for (atermpp::map<pbes_expression, unsigned int>::iterator i = m_bes_expression_index.begin(); i != m_bes_expression_index.end(); ++i)
+        for (atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
         {
           m[i->second] = i->first;
         }
