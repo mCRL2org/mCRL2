@@ -1576,7 +1576,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
   }
   else if ( gsIsHide(a) ){
     ATermAppl p = ATAgetArgument(a,1);
-    l=gsaGetAlpha(p,length);
+    l=gsaGetAlpha(p);
     
     l=filter_hide_list(l,ATLgetArgument(a,0)); 
   } 
