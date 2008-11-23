@@ -10,8 +10,6 @@ project libraries/pbes/test
 
 include $(TOP)/build/testing/header_test.jam ;
 
-#exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
-
 test-suite pbes
     :
       [ run pbes2bes_test.cpp ]
@@ -32,12 +30,3 @@ test-suite pbes
       [ run normalize_test.cpp ]
       [ compile-headers ../include ]
     ;
-
-install dist
-    :
-      generate_lps2pbes_result
-    :
-      <location>dist
-    ;
-
-explicit dist ;

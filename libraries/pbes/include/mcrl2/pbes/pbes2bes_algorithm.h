@@ -43,8 +43,14 @@ namespace pbes_system {
     pbes2bes_substitution_function sigma;
     data::data_variable_list::iterator i = v.begin();
     data::data_expression_list::iterator j = e.begin();
+
     for (; i != v.end(); ++i, ++j)
     {
+std::set<data::data_variable> w = find_free_variables(*j);
+if (!w.empty())
+{
+  std::cout << "ERROR: ILLEGAL SUBSTITUTION " << core::pp(v) << " -> " << core::pp(e) << std::endl;
+}
       sigma[*i] = *j;
     }
     return sigma;
@@ -80,8 +86,8 @@ namespace pbes_system {
       bool m_print_equations;
 
     public:
-      pbes2bes_algorithm(data::data_specification data_spec, bool print_equations = false)
-        : R(data_spec), equation_count(0), m_print_equations(print_equations)
+      pbes2bes_algorithm(data::data_specification data_spec, bool print_equations = false, bool print_rewriter_output = false)
+        : R(data_spec, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
       void run(pbes<>& p)
@@ -108,7 +114,7 @@ namespace pbes_system {
           propositional_variable_instantiation X = *todo.begin();         
           todo.erase(todo.begin());
           done.insert(X);
-          propositional_variable_instantiation X_e = R(X);
+          propositional_variable_instantiation X_e = R.rename(X);
           int index = equation_index[X.name()];
           const pbes_equation& eqn = p.equations()[index];
           pbes2bes_substitution_function sigma = make_pbes2bes_substitution(eqn.variable().parameters(), X.parameters());
@@ -149,10 +155,15 @@ namespace pbes_system {
       {
         return m_print_equations;
       }
-  };
-
+      
+      pbes2bes_rewriter& rewriter()
+      {
+        return R;
+      }
+  };  
+      
 } // namespace pbes_system
-
+      
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES2BES_ALGORITHM_H

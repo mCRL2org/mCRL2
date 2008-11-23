@@ -7,6 +7,8 @@
 /// \file paritygame.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+
 #include <iterator>
 #include <cstdlib>
 #include <iostream>

@@ -97,7 +97,11 @@ namespace pbes_system {
         typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
         substitution_map sigma;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator);
-        return r(x, sigma);
+        term_type result = r(x, sigma);
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
+#endif
+        return result;  
       }
       
       /// \brief Rewrites a pbes expression.
@@ -109,7 +113,11 @@ namespace pbes_system {
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
       {
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator);
-        return r(x, sigma);
+        term_type result = r(x, sigma);
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
+#endif
+        return result;
       }
   };
  

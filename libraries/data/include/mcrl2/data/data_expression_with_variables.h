@@ -85,7 +85,18 @@ namespace data {
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_expression_with_variables)
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::data::data_expression_with_variables >
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::data::data_expression_with_variables t)   { t.protect(); t.variables().protect(); }
+  static void unprotect(mcrl2::data::data_expression_with_variables t) { t.unprotect(); t.variables().unprotect(); }
+  static void mark(mcrl2::data::data_expression_with_variables t)      { t.mark(); t.variables().mark(); }
+  static ATerm term(mcrl2::data::data_expression_with_variables t)     { return t.term(); }
+  static ATerm* ptr(mcrl2::data::data_expression_with_variables& t)    { return &t.term(); }
+};
+}
 /// \endcond
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H

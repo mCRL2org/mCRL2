@@ -14,6 +14,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <sstream>
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/data/term_traits.h"
 #include "mcrl2/data/data_expression_with_variables.h"
@@ -204,6 +205,19 @@ namespace data {
       {
         typename SubstitutionMap::const_iterator i = this->find(v);
         return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
+      }
+      
+      /// \return A string representation of the map, for example [a := 3, b := true].
+      std::string to_string() const
+      {
+        std::stringstream result;
+        result << "[";
+        for (typename SubstitutionMap::const_iterator i = this->begin(); i != this->end(); ++i)
+        {
+          result << (i == this->begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
+        }
+        result << "]";
+        return result.str();        
       }
   };
 

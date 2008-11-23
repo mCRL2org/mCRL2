@@ -78,6 +78,7 @@ const std::string VARIABLE_SPECIFICATION =
   "predvar         \n"
   "  X;            \n"
   "  Y: Nat;       \n"
+  "  W: Bool;      \n"
   "  Z: Bool, Pos; \n"
   ;
 
@@ -240,6 +241,7 @@ void test_enumerate_quantifiers_rewriter()
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
+  test_expressions(R, "exists b: Bool. W(b)"                                            , "W(true) || W(false)");
   test_expressions(R, "forall n: Nat.val(!(n < 1)) || Y(n)"                             , "Y(0)");
   test_expressions(R, "false"                                                           , "val(false)");
   test_expressions(R, "true"                                                            , "val(true)");

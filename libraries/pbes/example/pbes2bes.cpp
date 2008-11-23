@@ -9,6 +9,8 @@
 
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+//#define MCRL2_PBES2BES_REWRITER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
 
 #include <cstdlib>
 #include <iostream>
@@ -29,6 +31,7 @@ int main(int argc, char* argv[])
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
   bool print_equations;          // print the generated equations to standard out
+  bool print_rewriter_output;    // print rewriter output
 
   try {
     //---pbes2bes options ---------
@@ -43,7 +46,8 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
-      ("print-equations,p", po::value<bool>(&print_equations)->default_value(false), "print generated equations")
+      ("print-equations,e", po::value<bool>(&print_equations)->default_value(false), "print generated equations")
+      ("print-rewriter,r", po::value<bool>(&print_rewriter_output)->default_value(false), "print rewriter output")
       ;
 
     //--- hidden options ---------
@@ -87,7 +91,7 @@ int main(int argc, char* argv[])
 
     pbes<> p;
     p.load(infile);
-    pbes2bes_algorithm algorithm(p.data(), print_equations);
+    pbes2bes_algorithm algorithm(p.data(), print_equations, print_rewriter_output);
     algorithm.run(p);
     p = algorithm.get_result();
     p.save(outfile);
