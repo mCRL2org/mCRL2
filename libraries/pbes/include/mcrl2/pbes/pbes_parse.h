@@ -220,7 +220,7 @@ namespace pbes_system {
   /// \param[in] data_spec A data specification
   /// \param[in] sigma A substitution function
   template <typename SubstitutionFunction>
-  void parse_substitutions(std::string text, data_specification data_spec, SubstitutionFunction& sigma)
+  void parse_substitutions(std::string text, data::data_specification data_spec, SubstitutionFunction& sigma)
   {
     std::vector<std::string> substitutions = core::split(text, ";");
     for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
