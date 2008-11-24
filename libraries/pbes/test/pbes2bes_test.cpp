@@ -9,8 +9,9 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
 
 #include <string>
 #include <iostream>

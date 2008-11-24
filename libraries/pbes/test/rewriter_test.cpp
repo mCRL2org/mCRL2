@@ -113,11 +113,20 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
   if (R(d1, sigma) != R(d2))
   {
-    BOOST_CHECK(R(d1, sigma) != R(d2));
+    BOOST_CHECK(R(d1, sigma) == R(d2));
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     std::cout << "d1           " << core::pp(d1) << std::endl;
     std::cout << "d2           " << core::pp(d2) << std::endl;
-    std::cout << "sigma\n      " << print_substitution(sigma) << std::endl;
+    std::cout << "sigma        " << substitutions << std::endl;
+    std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
+    std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
+  }
+  else {
+    BOOST_CHECK(R(d1, sigma) == R(d2));
+    std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
+    std::cout << "d1           " << core::pp(d1) << std::endl;
+    std::cout << "d2           " << core::pp(d2) << std::endl;
+    std::cout << "sigma        " << substitutions << std::endl;
     std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
     std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
   }
@@ -241,6 +250,8 @@ void test_enumerate_quantifiers_rewriter()
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
+  test_expressions(R, "exists b: Bool. val(if(b, false, b))"                            , "val(false)");
+  // test_expressions(R, "val(!(b && n < 10)) || Z(!b, n + 1)"                             , "true");
   test_expressions(R, "exists b: Bool. W(b)"                                            , "W(true) || W(false)");
   test_expressions(R, "forall n: Nat.val(!(n < 1)) || Y(n)"                             , "Y(0)");
   test_expressions(R, "false"                                                           , "val(false)");
@@ -306,7 +317,10 @@ void test_substitutions2()
 
   std::string var_decl;
   std::string sigma;
+  std::string expr1;
+  std::string expr2;
   
+  //------------------------//
   var_decl =
     "datavar         \n"
     "  m, n:  Pos;   \n"
@@ -314,9 +328,12 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Pos;       \n"
     ;
-  sigma = "m: Pos := 3; n: Pos := 4";
-  test_expressions(R, "X(m+n)", "X(7)", var_decl, sigma);
+	expr1 = "X(m+n)";
+	expr2 = "X(7)";
+  sigma = "m: Pos := 3; n: Pos := 4"; 
+  test_expressions(R, expr1, expr2, var_decl, sigma); 
 
+  //------------------------//
   var_decl =
     "datavar         \n"
     "  n: Nat;       \n"
@@ -324,16 +341,54 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Bool, Nat; \n"
     ;
+	expr1 = "forall c: Bool. X(c, n)";
+	expr2 = "X(true, 0) && X(false, 0)";
   sigma = "b: Bool := true; n: Nat := 0";
-  test_expressions(R, "forall c: Bool. X(c, n)", "X(true, 0) && X(false, 0)", var_decl, sigma);
+  test_expressions(R, expr1, expr2, var_decl, sigma); 
 
+//  //------------------------//
+//  var_decl =
+//    "datavar         \n"
+//    "predvar         \n"
+//    "  X: Nat;       \n"
+//    ;
+//	expr1 = "exists b: Bool, c: Bool. val(if(b, c, b))";
+//	expr2 = "val(false)";
+//  sigma = "c: Bool := false";
+//  test_expressions(R, expr1, expr2, var_decl, sigma); 
+//
+//  //------------------------//
+//  var_decl =
+//    "datavar         \n"
+//    "predvar         \n"
+//    "  X: Nat;       \n"
+//    ;
+//	expr1 = "exists b: Bool, c: Bool. val(if(b, false, b))";
+//	expr2 = "val(false)";
+//  sigma = "d: Bool := false";
+//  test_expressions(R, expr1, expr2, var_decl, sigma); 
+
+  //------------------------//
   var_decl =
     "datavar         \n"
-    "  n: Nat;       \n"
-    "                \n"
     "predvar         \n"
     "  X: Nat;       \n"
     ;
+	expr1 = "exists b: Bool, c: Bool. val(b && c)";
+	expr2 = "val(true)";
+  sigma = "";
+  test_expressions(R, expr1, expr2, var_decl, sigma); 
+
+  //------------------------//
+  var_decl =
+    "datavar         \n"
+    "predvar         \n"
+    "  X: Nat;       \n"
+    ;
+	expr1 = "exists b: Bool.exists c:Bool. val(b && c)";
+	expr2 = "val(true)";
+  sigma = "";
+  test_expressions(R, expr1, expr2, var_decl, sigma);
 }
 
 void test_substitutions3()
@@ -415,11 +470,11 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  //test_simplifying_rewriter();
+  test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
-  //test_substitutions1();
-  //test_substitutions2();
-  //test_substitutions3();
+  test_substitutions1();
+  test_substitutions2();
+  test_substitutions3();
 
   return 0;
 }

@@ -92,6 +92,11 @@ namespace detail {
     /// Check if the intermediate result is constant.
     void check_result(term_type x, term_type result, pbes2bes_substitution_function& sigma)
     {
+      if (result == term_type())
+      {
+        return;
+      }
+std::cout << "<pbes2bes rewriter result>" << std::flush << core::pp(result) << std::endl;
       std::set<data::data_variable> v = find_free_variables(result);
       for (std::set<data::data_variable>::iterator j = v.begin(); j != v.end(); ++j)
       {

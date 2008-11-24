@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/data_operation.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parser.h"
@@ -148,12 +149,62 @@ void test3()
   BOOST_CHECK(rd1.variables().size() == 2);
 }
 
+/// Parse a string of the form "b: Bool := true, n: Nat := 0", and add them
+/// to the substition function sigma.
+template <typename SubstitutionFunction>
+void parse_substitutions(std::string text, std::string data_spec, SubstitutionFunction& sigma)
+{
+  std::vector<std::string> substitutions = core::split(text, ";");
+  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  {
+    std::vector<std::string> words = core::regex_split(*i, ":=");
+    if (words.size() != 2)
+    {
+      continue;
+    }
+    data::data_variable v = data::parse_data_variable(words[0], data_spec);
+    data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
+    sigma[v] = e;
+  }
+}
+
+template <typename Rewriter>
+void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string data_spec, std::string substitutions)
+{
+  rewriter_map<std::map<data_variable, data_expression> > sigma;
+  parse_substitutions(substitutions, data_spec, sigma);
+  data_expression d1 = parse_data_expression(expr1, "", data_spec);
+  data_expression d2 = parse_data_expression(expr2, "", data_spec);
+  if (R(d1, sigma) != R(d2))
+  {
+    BOOST_CHECK(R(d1, sigma) != R(d2));
+    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    std::cout << "d1           " << core::pp(d1) << std::endl;
+    std::cout << "d2           " << core::pp(d2) << std::endl;
+    std::cout << "sigma\n      " << sigma.to_string() << std::endl;
+    std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
+    std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
+  }
+}
+
+void test4()
+{
+	data_specification data_spec = default_data_specification();
+	data::rewriter R(data_spec);
+
+	std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
+	std::string expr2 = "true";
+  std::string sigma = "c: Bool := false";
+  test_expressions(R, expr1, expr2, core::pp(data_spec), sigma); 
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv) 
   test1();
   test2();
   test3();
+  test4();
 
   return 0;
 }
