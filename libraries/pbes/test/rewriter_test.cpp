@@ -10,6 +10,7 @@
 /// \brief Test for the pbes rewriters.
 
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 
 #include <iostream>
 #include <set>
@@ -175,55 +176,6 @@ void test_simplifying_rewriter()
   // BOOST_CHECK(!core::term_traits<pbes_expression>::is_constant(p));
 }
 
-template <typename variable_type, typename data_term_type>
-void test_enumerate_quantifiers_sequence_assign(variable_type v, data_term_type t)
-{
-  typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
-  substitution_map sigma;
-  pbes_system::detail::enumerate_quantifiers_sequence_assign<substitution_map> assign(sigma);
-  assign(v, t);
-}
-
-template <typename PbesTerm>
-void test_enumerate_quantifiers_sequence_action(PbesTerm phi)
-{
-  typedef typename core::term_traits<PbesTerm>::variable_type variable_type;
-  typedef typename core::term_traits<PbesTerm>::data_term_type data_term_type;
-  typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
-  data::rewriter datar = data::default_data_specification();
-  std::set<PbesTerm> A;
-  pbes_system::simplifying_rewriter<PbesTerm, data::rewriter> r(datar);
-  substitution_map sigma;
-  bool is_constant;
-  data::data_variable_list v;
-  pbes_system::detail::make_enumerate_quantifiers_sequence_action(A, r, phi, sigma, v, is_constant, core::term_traits<PbesTerm>::is_false)();
-}
-
-template <typename PbesTerm, typename DataEnumerator>
-void test_enumerator_quantifiers(PbesTerm phi, DataEnumerator datae)
-{
-  typedef typename core::term_traits<PbesTerm>::variable_type variable_type;
-  typedef typename core::term_traits<PbesTerm>::variable_sequence_type variable_sequence_type;
-  typedef typename core::term_traits<PbesTerm>::data_term_type data_term_type;
-  typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
-  data::rewriter datar = data::default_data_specification();
-  pbes_system::simplifying_rewriter<PbesTerm, data::rewriter> r(datar);
-  substitution_map sigma;
-
-  variable_sequence_type variables;
-
-  PbesTerm result =
-  pbes_system::detail::enumerate_quantifiers(variables,
-                                             phi,
-                                             sigma,
-                                             datae,
-                                             r,
-                                             core::term_traits<PbesTerm>::is_true,
-                                             core::term_traits<PbesTerm>::true_(),
-                                             pbes_system::detail::enumerate_quantifiers_join_or<PbesTerm>()
-                                          );
-}
-
 void test_enumerate_quantifiers_rewriter()
 {
   std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
@@ -237,16 +189,9 @@ void test_enumerate_quantifiers_rewriter()
   data::data_variable   v = data::parse_data_expression("n", "n: Pos;\n");
   data::data_expression d = data::parse_data_expression("n < 10", "n: Pos;\n");
   data::data_expression_with_variables dv(d);
-  test_enumerate_quantifiers_sequence_assign(v, d);
-  test_enumerate_quantifiers_sequence_assign(v, dv);
 
   pbes_system::pbes_expression y = expr("Y(n)");
   pbes_system::pbes_expression_with_variables yv(y, data::data_variable_list()); 
-  // test_enumerate_quantifiers_sequence_action(y);
-  test_enumerate_quantifiers_sequence_action(yv);
-
-  // test_enumerator_quantifiers(y, datae); This doesn't work because of a mismatch between y and datae
-  test_enumerator_quantifiers(yv, datae);
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
