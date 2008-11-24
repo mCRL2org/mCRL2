@@ -215,6 +215,88 @@ namespace pbes_system {
     return parse_pbes_expressions(var_decl + "\nexpressions\n" + text, data_spec).first.front();
   }
 
+  /// Parses a string with substitutions and adds them to a substition function
+  /// \param[in] txt A string with substitutions, for example "b: Bool := true, n: Nat := 0"
+  /// \param[in] data_spec A data specification
+  /// \param[in] sigma A substitution function
+  template <typename SubstitutionFunction>
+  void parse_substitutions(std::string text, data_specification data_spec, SubstitutionFunction& sigma)
+  {
+    std::vector<std::string> substitutions = core::split(text, ";");
+    for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+    {
+      std::vector<std::string> words = core::regex_split(*i, ":=");
+      if (words.size() != 2)
+      {
+        continue;
+      }
+      std::string spec = core::pp(data_spec);
+      data::data_variable v = data::parse_data_variable(words[0], spec);
+      data::data_expression e = data::parse_data_expression(words[1], "", spec);
+      sigma[v] = e;
+    }
+  }
+
+  /// Parses a pbes expression.
+  /// \param[in] expr The text that is parsed.
+  /// \param[in] subst A string with substitutions, for example "b: Bool := true, n: Nat := 0"
+  /// \param[in] p A pbes that provides the declarations used for parsing
+  /// \param[in] sigma A substitution function
+  /// \result the parsed expression
+  template <typename SubstitutionFunction>
+  pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes<>& p, SubstitutionFunction& sigma)
+  {
+    typedef core::term_traits<pbes_expression> tr;
+  
+    parse_substitutions(subst, p.data(), sigma);
+    
+    std::string datavar_text;
+    for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
+    {
+      data::data_variable v = i->first;
+      datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + core::pp(v) + ": " + core::pp(v.sort());
+    } 
+    
+    pbes<> q = p;
+    q.initial_state() == tr::true_();
+    std::string pbesspec = core::pp(q);
+    std::string init("init");
+    // remove the init declaration
+    pbesspec = pbesspec.substr(0, std::find_end(pbesspec.begin(), pbesspec.end(), init.begin(), init.end()) - pbesspec.begin());
+  
+    // add an equation mu dummy1(vars) = (expr = expr)
+    pbesspec = pbesspec
+      + "\nmu "
+      + "dummy1"
+      + (datavar_text.empty() ? "" : "(")
+      + datavar_text
+      + (datavar_text.empty() ? "" : ")")
+      + " = "
+      + boost::trim_copy(expr) + ";";
+  
+    // add a dummy propositional variable to the pbes, that is used for the initialization
+    pbesspec = pbesspec + "\nmu dummy2 = true;";
+    
+    // add an initialization section to the pbes
+    pbesspec = pbesspec + "\ninit dummy2;";
+  
+    std::stringstream in(pbesspec);
+    try
+    {
+      in >> q;
+    }
+    catch (std::runtime_error e)
+    {
+      std::cerr << "parse_pbes_expression: parse error detected in the generated specification\n"
+                << pbesspec
+                << std::endl;
+      throw e;
+    }
+  
+    pbes_expression result = q.equations()[q.equations().size() - 2].formula();
+    return result;
+  }
+
 } // namespace pbes_system
 
 } // namespace mcrl2
