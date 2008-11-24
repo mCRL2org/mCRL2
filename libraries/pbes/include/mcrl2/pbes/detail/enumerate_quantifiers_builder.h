@@ -47,6 +47,7 @@ namespace detail {
     return result.str();
   }
 
+  /// Determines if the unordered sequences s1 and s2 have an empty intersection
   template <typename Sequence>
   bool empty_intersection(Sequence s1, Sequence s2)
   {
@@ -58,270 +59,256 @@ namespace detail {
       }
     }
     return true;
-  }
+  } 
 
-  /// Exception that is used as an early escape of the foreach_sequence algorithm.
-  struct enumerate_quantifier_stop_early
-  {};
-
-  template <typename Term>
-  struct enumerate_quantifiers_join_and
+  template <typename PbesRewriter, typename DataEnumerator>
+  class quantifier_enumerator
   {
-    template <typename FwdIt>
-    Term operator()(FwdIt first, FwdIt last) const
-    {
-      return std::accumulate(first, last, core::term_traits<Term>::true_(), &core::optimized_and<Term>);
-    }
-  };
+    protected:
+      PbesRewriter pbesr;
+      DataEnumerator datae;
 
-  template <typename Term>
-  struct enumerate_quantifiers_join_or
-  {
-    template <typename FwdIt>
-    Term operator()(FwdIt first, FwdIt last) const
-    {
-      return std::accumulate(first, last, core::term_traits<Term>::false_(), &core::optimized_or<Term>);
-    }
-  };
+      typedef typename PbesRewriter::term_type term_type;
+      typedef typename core::term_traits<term_type> tr;
+      typedef typename tr::variable_sequence_type variable_sequence_type;
+      typedef typename tr::variable_type variable_type;
+      typedef typename tr::data_term_type data_term_type;
 
-  template <typename MapSubstitution>
-  struct enumerate_quantifiers_sequence_assign
-  {
-    typedef typename MapSubstitution::variable_type variable_type;
-    typedef typename MapSubstitution::term_type     term_type;
+      /// Exception that is used as an early escape of the foreach_sequence algorithm.
+      struct stop_early
+      {};
 
-    MapSubstitution& sigma_;
-
-    enumerate_quantifiers_sequence_assign(MapSubstitution& sigma)
-      : sigma_(sigma)
-    {}
-
-    void operator()(variable_type v, term_type t)
-    {
-      sigma_[v] = t;
-    }
-  };
-
-  /// This function object is passed to the foreach_sequence algorithm.
-  /// It is invoked for every sequence of substitutions of the set Z in
-  /// the algorithm.
-  template <typename PbesTermSet,
-            typename PbesRewriter,
-            typename PbesTerm,
-            typename SubstitutionFunction,
-            typename VariableSequence,
-            typename StopCriterion
-           >
-  struct enumerate_quantifiers_sequence_action
-  {
-    PbesTermSet&         A_;
-    PbesRewriter&        r_;
-    const PbesTerm&      phi_;
-    SubstitutionFunction sigma_;
-    VariableSequence     v_;
-    bool&                is_constant_;
-    StopCriterion        stop_;
-
-    enumerate_quantifiers_sequence_action(PbesTermSet& A,
-                                 PbesRewriter &r,
-                                 const PbesTerm& phi,
-                                 SubstitutionFunction sigma,
-                                 VariableSequence v,
-                                 bool& is_constant,
-                                 StopCriterion stop
-                                )
-      : A_(A), r_(r), phi_(phi), sigma_(sigma), v_(v), is_constant_(is_constant), stop_(stop)
-    {}
-
-    void operator()()
-    {
-      PbesTerm c = r_(phi_, sigma_);
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "r(sigma(phi)) = " << core::pp(c) << " is " << (core::term_traits<PbesTerm>::is_constant(c) ? "" : "not ") << "constant" << std::endl;
-#endif
-      if (stop_(c))
+      /// Joins a sequence of pbes expressions with operator and
+      template <typename Term>
+      struct join_and
       {
-        throw enumerate_quantifier_stop_early();
-      }
-      else if (empty_intersection(v_, c.variables()))
-      {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "<A.insert> " << core::pp(c) << std::endl;
-#endif
-        A_.insert(c);
-      }
-      else
-      {
-        is_constant_ = false;
-      }
-    }
-  };
-
-  template <typename PbesTermSet,
-            typename PbesRewriter,
-            typename PbesTerm,
-            typename SubstitutionFunction,
-            typename VariableSequence,
-            typename StopCriterion
-           >
-  enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>
-  make_enumerate_quantifiers_sequence_action(PbesTermSet& A,
-                                 PbesRewriter &r,
-                                 const PbesTerm& phi,
-                                 SubstitutionFunction sigma,
-                                 VariableSequence v,
-                                 bool& is_constant,
-                                 StopCriterion stop
-                                )
-  {
-    return enumerate_quantifiers_sequence_action<PbesTermSet, PbesRewriter, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>(A, r, phi, sigma, v, is_constant, stop);
-  }
-
-  /// Eliminate quantifiers from the expression 'forall x.sigma(phi)'
-  /// This algorithm is documented in the 'PBES implementation notes' document.
-  template <typename DataVariableSequence,
-            typename PbesTerm,
-            typename MapSubstitution,
-            typename DataEnumerator,
-            typename PbesRewriter,
-            typename StopCriterion,
-            typename PbesTermJoinFunction
-           >
-    PbesTerm enumerate_quantifiers(DataVariableSequence x,
-                                   const PbesTerm& phi,
-                                   MapSubstitution& sigma,
-                                   DataEnumerator& datae,
-                                   PbesRewriter& pbesr,
-                                   StopCriterion stop,
-                                   PbesTerm stop_value,
-                                   PbesTermJoinFunction join
-                                  )
-  {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
-std::cout << "<enumerate quantifiers>\n"
-          << "x     = " << core::pp(x) << "\n"
-          << "phi   = " << core::pp(phi) << "\n"
-          << "stop  = " << core::pp(stop_value) << "\n"
-          << "sigma = " << sigma.to_string() << std::endl;
-#endif
-
-    PbesTerm Rphi = pbesr(phi, sigma);
-    if (core::term_traits<PbesTerm>::is_constant(Rphi))
-    {
-      return Rphi;
-    }
-
-    typedef typename DataEnumerator::variable_type variable_type;
-    typedef typename DataEnumerator::term_type data_term_type;
-    typedef PbesTerm pbes_term_type;
-    typedef std::pair<variable_type, data_term_type> data_assignment;
-
-    atermpp::set<pbes_term_type> A;
-    std::vector<atermpp::vector<data_term_type> > D;
-
-    // For an element (v, t, k) of todo, we have the invariant v == x[k].
-    // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
-    std::deque<boost::tuple<variable_type, data_term_type, unsigned int> > todo;
-
-    // initialize D and todo
-    unsigned int j = 0;
-    for (typename DataVariableSequence::const_iterator i = x.begin(); i != x.end(); ++i)
-    {
-      data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
-      D.push_back(atermpp::vector<data_term_type>(1, t));
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "D[" << j << "] = {" << core::pp(t) << "}" << std::endl;
-  std::cout << "todo = todo + (" << core::pp(*i) << ", " << j << ")" << std::endl;
-#endif
-      todo.push_back(boost::make_tuple(*i, t, j++));
-    }
-
-//AT_collect();
-
-    try
-    {
-      while (!todo.empty())
-      {
-        boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
-        todo.pop_front();
-        const variable_type& xk = boost::get<0>(front);
-        const data_term_type& y = boost::get<1>(front);
-        unsigned int k          = boost::get<2>(front);
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "---\nchoose y = " << core::pp(y) << ", k = " << k << ", xk = " << core::pp(xk) << std::endl;
-#endif
-        bool is_constant = true;
-
-        // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
-        atermpp::vector<data_term_type> Dk = D[k];
-        atermpp::vector<data_term_type> z = datae.enumerate(y);
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
-  std::cout << "enumerating " << core::pp(y) << " -> " << print_term_list(z) << std::endl;
-#endif
-        for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+        template <typename FwdIt>
+        Term operator()(FwdIt first, FwdIt last) const
         {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "e = " << core::pp(*i) << std::endl;
-#endif
-          sigma[xk] = *i;
-          D[k].clear();
-          D[k].push_back(*i);
-          core::foreach_sequence(D,
-                                 x.begin(),
-                                 make_enumerate_quantifiers_sequence_action(A, pbesr, phi, sigma, i->variables(), is_constant, stop),
-                                 enumerate_quantifiers_sequence_assign<MapSubstitution>(sigma)
-                                );
+          return std::accumulate(first, last, core::term_traits<Term>::true_(), &core::optimized_and<Term>);
+        }
+      };
+      
+      /// Joins a sequence of pbes expressions with operator or
+      template <typename Term>
+      struct join_or
+      {
+        template <typename FwdIt>
+        Term operator()(FwdIt first, FwdIt last) const
+        {
+          return std::accumulate(first, last, core::term_traits<Term>::false_(), &core::optimized_or<Term>);
+        }
+      };
 
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "|A| = " << A.size() << std::endl;
-  std::cout << "Z is " << (is_constant ? "" : "not ") << "constant" << std::endl;
-#endif
-          if (!is_constant)
+      /// The assign operation used to create sequences in the foreach_sequence algorithm
+      template <typename SubstitutionFunction>
+      struct sequence_assign
+      {
+        typedef typename SubstitutionFunction::variable_type variable_type;
+        typedef typename SubstitutionFunction::term_type     term_type;
+      
+        SubstitutionFunction& sigma_;
+      
+        sequence_assign(SubstitutionFunction& sigma)
+          : sigma_(sigma)
+        {}
+      
+        void operator()(variable_type v, term_type t)
+        {
+          sigma_[v] = t;
+        }
+      };
+
+      /// The action that is triggered for each sequence generated by the
+      /// foreach_sequence algorithm. It is invoked for every sequence of
+      /// substitutions of the set Z in the algorithm.
+      template <typename PbesTermSet, 
+                typename PbesTerm,
+                typename SubstitutionFunction,
+                typename VariableSequence,
+                typename StopCriterion
+               >
+      struct sequence_action
+      {
+        PbesTermSet&         A_;
+        PbesRewriter&        r_;
+        const term_type&     phi_;
+        SubstitutionFunction sigma_;
+        VariableSequence     v_;
+        bool&                is_constant_;
+        StopCriterion        stop_;
+    
+        sequence_action(PbesTermSet& A,
+                        PbesRewriter &r,
+                        const PbesTerm& phi,
+                        SubstitutionFunction sigma,
+                        VariableSequence v,
+                        bool& is_constant,
+                        StopCriterion stop
+                       )
+          : A_(A), r_(r), phi_(phi), sigma_(sigma), v_(v), is_constant_(is_constant), stop_(stop)
+        {}
+    
+        void operator()()
+        {
+          PbesTerm c = r_(phi_, sigma_);
+          if (stop_(c))
           {
-            Dk.push_back(*i);
-            if (!core::term_traits<data_term_type>::is_constant(*i))
-            {
-#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "todo = todo + (" << core::pp(*i) << ", " << k << ")" << std::endl;
-#endif
-              todo.push_back(boost::make_tuple(xk, *i, k));
-            }
+            throw stop_early();
+          }
+          else if (empty_intersection(v_, c.variables()))
+          {
+            A_.insert(c);
+          }
+          else
+          {
+            is_constant_ = false;
           }
         }
+      };
 
-        // restore D[k]
-        D[k] = Dk;
-      }
-    }
-    catch (enumerate_quantifier_stop_early /* a */)
-    {
-      // remove the added substitutions from sigma
-      for (typename DataVariableSequence::const_iterator j = x.begin(); j != x.end(); ++j)
+      /// Convenience function for generating a sequence action
+      template <typename PbesTermSet,
+                typename PbesTerm,
+                typename SubstitutionFunction,
+                typename VariableSequence,
+                typename StopCriterion
+               >
+      sequence_action<PbesTermSet, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>
+      make_sequence_action(PbesTermSet& A,
+                           PbesRewriter &r,
+                           const PbesTerm& phi,
+                           SubstitutionFunction sigma,
+                           VariableSequence v,
+                           bool& is_constant,
+                           StopCriterion stop
+                          )
       {
-        sigma.erase(*j);
+        return sequence_action<PbesTermSet, PbesTerm, SubstitutionFunction, VariableSequence, StopCriterion>(A, r, phi, sigma, v, is_constant, stop);
       }
-      return stop_value;
-    }
 
-    // remove the added substitutions from sigma
-    for (typename DataVariableSequence::const_iterator i = x.begin(); i != x.end(); ++i)
-    {
-      sigma.erase(*i);
-    }
-    return join(A.begin(), A.end());
-  }
+      template <typename SubstitutionFunction,
+                typename StopCriterion,
+                typename PbesTermJoinFunction
+               >
+      term_type enumerate(variable_sequence_type x,
+                          const term_type& phi,
+                          SubstitutionFunction& sigma,
+                          StopCriterion stop,
+                          term_type stop_value,
+                          PbesTermJoinFunction join
+                         )
+      {
+        term_type Rphi = pbesr(phi, sigma);
+        if (tr::is_constant(Rphi))
+        {
+          return Rphi;
+        }
+      
+        typedef std::pair<variable_type, data_term_type> data_assignment;
+      
+        atermpp::set<term_type> A;
+        std::vector<atermpp::vector<data_term_type> > D;
+      
+        // For an element (v, t, k) of todo, we have the invariant v == x[k].
+        // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
+        std::deque<boost::tuple<variable_type, data_term_type, unsigned int> > todo;
+      
+        // initialize D and todo
+        unsigned int j = 0;
+        for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+          data_term_type t = core::term_traits<data_term_type>::variable2term(*i);
+          D.push_back(atermpp::vector<data_term_type>(1, t));
+          todo.push_back(boost::make_tuple(*i, t, j++));
+        }
+      
+        try
+        {
+          while (!todo.empty())
+          {
+            boost::tuple<variable_type, data_term_type, unsigned int> front = todo.front();
+            todo.pop_front();
+            const variable_type& xk = boost::get<0>(front);
+            const data_term_type& y = boost::get<1>(front);
+            unsigned int k          = boost::get<2>(front);
+            bool is_constant = true;
+      
+            // save D[k] in variable Dk, as a preparation for the foreach_sequence algorithm
+            atermpp::vector<data_term_type> Dk = D[k];
+            atermpp::vector<data_term_type> z = datae.enumerate(y);
+            for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
+            {
+              sigma[xk] = *i;
+              D[k].clear();
+              D[k].push_back(*i);
+              core::foreach_sequence(D,
+                                     x.begin(),
+                                     make_sequence_action(A, pbesr, phi, sigma, i->variables(), is_constant, stop),
+                                     sequence_assign<SubstitutionFunction>(sigma)
+                                    );
+              if (!is_constant)
+              {
+                Dk.push_back(*i);
+                if (!core::term_traits<data_term_type>::is_constant(*i))
+                {
+                  todo.push_back(boost::make_tuple(xk, *i, k));
+                }
+              }
+            }
+      
+            // restore D[k]
+            D[k] = Dk;
+          }
+        }
+        catch (stop_early /* a */)
+        {
+          // remove the added substitutions from sigma
+          for (typename variable_sequence_type::const_iterator j = x.begin(); j != x.end(); ++j)
+          {
+            sigma.erase(*j);
+          }
+          return stop_value;
+        }
+      
+        // remove the added substitutions from sigma
+        for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
+        {
+          sigma.erase(*i);
+        }
+        return join(A.begin(), A.end());
+      }
+
+    public:
+      quantifier_enumerator(PbesRewriter r, DataEnumerator e)
+        : pbesr(r), datae(e)
+      {}
+      
+      template <typename SubstitutionFunction>
+      term_type enumerate_universal_quantification(variable_sequence_type x, term_type phi, SubstitutionFunction sigma)
+      {
+        return enumerate(x, phi, sigma, tr::is_false, tr::false_(), join_and<term_type>());
+      }
+
+      template <typename SubstitutionFunction>
+      term_type enumerate_existential_quantification(variable_sequence_type x, term_type phi, SubstitutionFunction sigma)
+      {
+        return enumerate(x, phi, sigma, tr::is_true, tr::true_(), join_or<term_type>());
+      }
+  };
 
   // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// \param[in] SubstitutionFunction This must be a MapSubstitution.
   template <typename Term, typename DataRewriter, typename DataEnumerator, typename SubstitutionFunction>
   struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction>
   {
+    typedef enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> self;
     typedef simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction> super;
     typedef SubstitutionFunction                                               argument_type;
     typedef typename super::term_type                                          term_type;
     typedef typename core::term_traits<term_type>::data_term_type              data_term_type;
     typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;
-    typedef typename core::term_traits<term_type>::variable_sequence_type variable_sequence_type;
+    typedef typename core::term_traits<term_type>::variable_sequence_type      variable_sequence_type;
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
@@ -338,20 +325,8 @@ std::cout << "<enumerate quantifiers>\n"
     ///
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      unsigned int sz = sigma.size();
-      term_type result = detail::enumerate_quantifiers(variables,
-                                           phi,
-                                           sigma,
-                                           m_data_enumerator,
-                                           *this,
-                                           tr::is_false,
-                                           tr::false_(),
-                                           enumerate_quantifiers_join_and<Term>()
-                                          );
-      if (sz != sigma.size())
-      {
-        std::cout << "SIGMA ERROR " << sigma.to_string() << std::endl;
-      }
+      term_type result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).
+        enumerate_universal_quantification(variables, phi, sigma);
       return result;
     }
 
@@ -359,20 +334,8 @@ std::cout << "<enumerate quantifiers>\n"
     ///
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      unsigned int sz = sigma.size();
-      term_type result = detail::enumerate_quantifiers(variables,
-                                           phi,
-                                           sigma,
-                                           m_data_enumerator,
-                                           *this,
-                                           tr::is_true,
-                                           tr::true_(),
-                                           enumerate_quantifiers_join_or<Term>()
-                                          );
-      if (sz != sigma.size())
-      {
-        std::cout << "SIGMA ERROR " << sigma.to_string() << std::endl;
-      }
+      term_type result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).
+        enumerate_existential_quantification(variables, phi, sigma);
       return result;
     }
   };
