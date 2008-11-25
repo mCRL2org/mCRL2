@@ -121,6 +121,15 @@ namespace mcrl2 {
             m_arguments(make_vector(arg1, arg2, arg3, arg4))
         { }
 
+        /// \brief Returns the application of this application to an argument.
+        /// \pre this->sort() is a function sort.
+        /// \param[in] e The data expression to which the application is applied
+        application operator()(const data_expression& e) const
+        {
+          assert(this->sort().is_function_sort());
+          return application(*this, e);
+        }
+
         /* Should be enabled when the implementation in data_expression is
          * removed
         /// \overload

@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/application.h"
 
 namespace mcrl2 {
   
@@ -56,6 +57,15 @@ namespace mcrl2 {
             m_variables(variables.begin(), variables.end())
         {
           assert(!variables.empty());
+        }
+
+        /// \brief Returns the application of this lambda abstraction to an argument.
+        /// \pre this->sort() is a function sort.
+        /// \param[in] e The data expression to which the function symbol is applied
+        application operator()(const data_expression& e) const
+        {
+          assert(this->sort().is_function_sort());
+          return application(*this, e);
         }
 
         /*  Should be enabled when the implementation in data_expression is
