@@ -132,11 +132,11 @@ namespace mcrl2 {
       variable b("b", sort_bool_::bool_());
       variable x("x", s);
       variable y("y", s);
-      result.push_back(data_equation(make_vector(x), sort_bool_::true_(), equal_to(x, x), sort_bool_::true_()));
-      result.push_back(data_equation(make_vector(x, y), sort_bool_::true_(), not_equal_to(x, y), sort_bool_::not_(equal_to(x, y))));
-      result.push_back(data_equation(make_vector(x, y), sort_bool_::true_(), if_(sort_bool_::true_(), x, y), x));
-      result.push_back(data_equation(make_vector(x, y), sort_bool_::true_(), if_(sort_bool_::false_(), x, y), y));
-      result.push_back(data_equation(make_vector(b, x), sort_bool_::true_(), if_(b, x, x), x));
+      result.push_back(data_equation(make_vector(x), equal_to(x, x), sort_bool_::true_()));
+      result.push_back(data_equation(make_vector(x, y), not_equal_to(x, y), sort_bool_::not_(equal_to(x, y))));
+      result.push_back(data_equation(make_vector(x, y), if_(sort_bool_::true_(), x, y), x));
+      result.push_back(data_equation(make_vector(x, y), if_(sort_bool_::false_(), x, y), y));
+      result.push_back(data_equation(make_vector(b, x), if_(b, x, x), x));
 
       return result;
     }

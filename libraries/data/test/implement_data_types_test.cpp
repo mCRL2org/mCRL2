@@ -1622,6 +1622,45 @@ ATermAppl old_impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
   return sort_id;
 }
 
+void old_impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
+{
+  assert(gsIsSortExpr(sort));
+  //Declare operations for sort
+  p_data_decls->ops = ATconcat(ATmakeList(3,
+      (ATerm) gsMakeOpIdEq(sort),
+      (ATerm) gsMakeOpIdNeq(sort),
+      (ATerm) gsMakeOpIdIf(sort)
+    ), p_data_decls->ops);
+  //Declare data equations for sort sort
+  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort);
+  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort);
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermList xl = ATmakeList1((ATerm) x);
+  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
+  ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
+  p_data_decls->data_eqns = ATconcat(ATmakeList(5,
+      //equality (sort_arrow -> sort_arrow -> Bool)
+      (ATerm) gsMakeDataEqn(xl, nil,
+        gsMakeDataExprEq(x, x), t),
+      //inequality (sort_arrow -> sort_arrow -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil,
+        gsMakeDataExprNeq(x, y),
+        gsMakeDataExprNot(gsMakeDataExprEq(x, y))),
+      //conditional (Bool -> sort_arrow -> sort_arrow -> sort_arrow)
+      (ATerm) gsMakeDataEqn(xyl,nil,
+        gsMakeDataExprIf(t, x, y),
+        x),
+      (ATerm) gsMakeDataEqn(xyl,nil,
+        gsMakeDataExprIf(f, x, y),
+        y),
+      (ATerm) gsMakeDataEqn(bxl,nil,
+        gsMakeDataExprIf(b, x, x),
+        x)
+    ), p_data_decls->data_eqns);
+}
 
 void implement_bool_test()
 {
@@ -1752,6 +1791,22 @@ void implement_bag_test()
   old_impl_sort_bag(bs, &old_substs, &data_decls_old);
   impl_sort_bag(bs, &new_substs, &data_decls_new);
 
+  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
+  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
+  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+}
+
+void implement_standard_functions_test()
+{
+  basic_sort s("S");
+  t_data_decls data_decls_old;
+  t_data_decls data_decls_new;
+  initialize_data_decls(&data_decls_old);
+  initialize_data_decls(&data_decls_new);
+  old_impl_standard_functions_sort(s, &data_decls_old);
+  impl_standard_functions_sort(s, &data_decls_new);
+
   std::cerr << "old constructors:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_old.cons_ops).begin(); i != aterm_list(data_decls_old.cons_ops).end(); ++i)
   {
@@ -1787,6 +1842,7 @@ void implement_bag_test()
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+
 }
 
 void implement_data_specification_test()
@@ -1816,6 +1872,7 @@ int test_main(int argc, char** argv)
   implement_list_test();
   implement_set_test();
   implement_bag_test();
+  implement_standard_functions_test();
   implement_data_specification_test();
 
   return EXIT_SUCCESS;

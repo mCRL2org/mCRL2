@@ -45,14 +45,11 @@ namespace mcrl2 {
     // Recogniser for application of if
     bool is_if__application(const data_expression& e);
 
-    // Give all system defined constructors for Bool
-    function_symbol_list standard_generate_constructors_code();
+    // Give all standard system defined functions for sort s
+    function_symbol_list standard_generate_functions_code(const sort_expression& s);
 
-    // Give all system defined constructors for Bool
-    function_symbol_list standard_generate_functions_code();
-
-    // Give all system defined equations for Bool
-    data_equation_list standard_generate_equations_code();
+    // Give all standard system defined equations for sort s
+    data_equation_list standard_generate_equations_code(const sort_expression& s);
 
   } // namespace data
 } // namespace mcrl2
