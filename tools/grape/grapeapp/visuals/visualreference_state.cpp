@@ -8,12 +8,16 @@
 //
 // Implements the visualreference_state class.
 
+#include <string>
+
+#include "grape_glcanvas.h"
 #include "referencestate.h"
 #include "visualreference_state.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 visualreference_state::visualreference_state( reference_state* p_reference_state )
 {
@@ -43,10 +47,12 @@ void visualreference_state::draw( void )
   draw_process_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 
   // draw reference state name 
-  render_text(ref_state->get_name(), x + width*0.5, y + height - g_text_space, width, height*0.25 + g_text_space, true);
+//  render_text(ref_state->get_name(), x + width*0.5, y + height - g_text_space, width, height*0.25 + g_text_space, true);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_name().fn_str()), x, x+width, y+height, y+height*0.75, 0.0015f, al_center, al_bottom );
 
   // draw reference state text
-  render_text(ref_state->get_text(), x, y + height*0.75 - g_text_space, width, height*0.75 + g_text_space);
+//  render_text(ref_state->get_text(), x, y + height*0.75 - g_text_space, width, height*0.75 + g_text_space);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_text().fn_str()), x, x+width, y+height*0.75, y, 0.0015f, al_left, al_bottom );
 
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );

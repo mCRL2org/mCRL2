@@ -8,13 +8,17 @@
 //
 // Implements the visualchannel class.
 
+#include <string>
+
+#include "grape_glcanvas.h"
 #include "channel.h"
 #include "visualchannel.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "compoundreference.h"
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 visualchannel::visualchannel( channel* p_channel )
 {
@@ -46,31 +50,38 @@ void visualchannel::draw( void )
 
   float ox = cref->get_coordinate().m_x;
   float oy = cref->get_coordinate().m_y;
-  float textx;
-  float texty;
+  Alignment horizontal_align;
+  Alignment vertical_align;
+//  float textx;
+//  float texty;
   if (ox > x)
   {
     // set text left
-    textx = x-g_text_space*2 - name.Len() * (g_size - g_space);
+//    textx = x-g_text_space*2 - name.Len() * (g_text_space);
+    horizontal_align = al_left;
   } 
   else
   {
     // set text right
-    textx = x+g_text_space;
+//    textx = x+g_text_space;
+    horizontal_align = al_right;
   }
 
   if (oy > y)
   {
     // set text down
-    texty = y-g_text_space*2;
+//    texty = y-g_text_space*2;
+    vertical_align = al_bottom;
   } 
   else
   {
     // set text up
-    texty = y+g_text_space;
+//    texty = y+g_text_space;
+    vertical_align = al_top;
   }
   //draw text
-  render_text(name, textx, texty, 999, 999);
+//  render_text(name, textx, texty, 999, 999);
+  grape_glcanvas::get_font_renderer()->draw_text( std::string(name.fn_str()), x, y, 0.0015f, horizontal_align, vertical_align);
 }
 
 bool visualchannel::is_inside( libgrape::coordinate &p_coord )

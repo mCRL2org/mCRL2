@@ -8,12 +8,16 @@
 //
 // Implements the visualcomment class.
 
+#include <string>
+
+#include "grape_glcanvas.h"
 #include "comment.h"
 #include "visualcomment.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 visualcomment::visualcomment( comment* p_comment )
 {
@@ -51,7 +55,8 @@ void visualcomment::draw( void )
   draw_filled_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), selected, g_color_comment);
 
   // draw comment text
-  render_text(text, x, y+height-g_text_space, width, height+g_text_space);
+//  render_text(text, x, y+height-g_text_space, width, height+g_text_space);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(text.fn_str()), x, x+width, y+height, y, 0.0015f, al_left, al_top );
 
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );

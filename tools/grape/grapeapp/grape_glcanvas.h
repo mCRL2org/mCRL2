@@ -13,12 +13,15 @@
 
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
+#include "mcrl2/utilities/font_renderer.h"
 #include "visuals/visualobject.h"
 
 namespace grape
 {
   namespace grapeapp
   {
+
+    using namespace mcrl2::utilities;
 
     class grape_frame;
 
@@ -352,6 +355,14 @@ namespace grape
          * @return Returns whether the coordinate is inside the visibility frame.
          */
         bool is_inside_visibility_frame( coordinate &p_coord );
+
+        /**
+         * Font renderer retrieval function.
+         * Returns the font renderer.
+         */
+        static font_renderer* get_font_renderer( void );
+
+
     };
 
   } // namespace grapeapp

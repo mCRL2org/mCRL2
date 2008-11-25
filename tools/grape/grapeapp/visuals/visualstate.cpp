@@ -8,10 +8,13 @@
 //
 // Implements the visualstate class.
 
+#include <string>
+
+#include "grape_glcanvas.h"
 #include "state.h"
 #include "visualstate.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 
 using namespace grape::grapeapp;
 
@@ -43,7 +46,8 @@ void visualstate::draw( void )
   draw_state( m_object->get_coordinate(), 0.5f * m_object->get_width(), 0.5f * m_object->get_height(), m_object->get_selected());
 
   // draw state name
-  render_text(name, x+dwidth, y+dheight, dwidth*2, dheight, true);
+//  render_text(name, x+dwidth, y+dheight, dwidth*2, dheight, true);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(name.fn_str()), x, x+m_object->get_width(), y+m_object->get_height(), y, 0.0015f, al_center, al_center );
 
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );

@@ -8,10 +8,13 @@
 //
 // Implements the visualpreamble class.
 
+#include <string>
+
+#include "grape_glcanvas.h"
 #include "preamble.h"
 #include "visualpreamble.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 
 const float preamble_x_coordinate = 0.51f;
 const float preamble_y_coordinate = -0.16f;
@@ -19,6 +22,7 @@ const float preamble_width = 1.0f;
 const float preamble_height = 0.3f;
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 visualpreamble::visualpreamble( preamble* p_preamble )
 {
@@ -47,12 +51,16 @@ void visualpreamble::draw( void )
   draw_filled_rectangle( center, preamble_width, preamble_height, false, g_color_preamble );
 
   // draw preamble variable declarations
-  render_text(_T("Parameters"), x, y+preamble_height-g_text_space, preamble_width*0.5, preamble_height);
-  render_text(par, x+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
+//  render_text(_T("Parameters"), x, y+preamble_height-g_text_space, preamble_width*0.5, preamble_height);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( "Parameters", x, x+preamble_width*0.5, y+preamble_height, y, 0.0015f, al_left, al_center );
+//  render_text(par, x+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(par.fn_str()), x, x+preamble_width*0.5, y+preamble_height, y, 0.0015f, al_left, al_center );
 
   // draw preamble parameter declarations
-  render_text(_T("Local Variables"), x+preamble_width*0.5, y+preamble_height-g_text_space*1, preamble_width*0.5, preamble_height);
-  render_text(var, x+preamble_width*0.5+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
+//  render_text(_T("Local Variables"), x+preamble_width*0.5, y+preamble_height-g_text_space*1, preamble_width*0.5, preamble_height);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( "Local Variables", x+preamble_width*0.5, x+preamble_width, y+preamble_height, y, 0.0015f, al_left, al_center );
+//  render_text(var, x+preamble_width*0.5+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(var.fn_str()), x+preamble_width*0.5, x+preamble_width, y+preamble_height, y, 0.0015f, al_left, al_center );
 
   // draw horizontal line
   coordinate p_middle_top = {preamble_x_coordinate, y+0.025f};
@@ -60,8 +68,10 @@ void visualpreamble::draw( void )
   draw_line( p_middle_top, p_middle_bottom, false);
  
   // draw vertical line
-  coordinate p_top_top = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-g_text_space*2};
-  coordinate p_top_bottom = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-g_text_space*2};
+//  coordinate p_top_top = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-g_text_space*2};
+//  coordinate p_top_bottom = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-g_text_space*2};
+  coordinate p_top_top = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-CHARWIDTH*2};
+  coordinate p_top_bottom = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-CHARWIDTH*2};
   draw_line( p_top_top, p_top_bottom, false);
 }
 

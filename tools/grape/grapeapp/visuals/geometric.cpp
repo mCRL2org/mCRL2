@@ -9,14 +9,17 @@
 // Implements the visualcomment class.
 
 #include <algorithm>
+#include <string>
 
+#include "grape_glcanvas.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
 #include <cmath>
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 const float DEG2RAD = M_PI/180;
 const unsigned int ELLIPSE_POINTS = 360; //pre: shouldn't be zero
@@ -707,11 +710,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   // render text based on the calculated angle
   if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-    render_text(p_label_text, p_control.m_x - 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, p_control.m_x - 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x - 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-    render_text(p_label_text, p_control.m_x + 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, p_control.m_x + 0.05f, p_control.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
   //draw control point
@@ -758,11 +763,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-    render_text(p_label_text, p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-    render_text(p_label_text, p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
@@ -809,11 +816,13 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-    render_text(p_label_text, midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-    render_text(p_label_text, midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+//    render_text(p_label_text, midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
@@ -1114,5 +1123,5 @@ float grape::grapeapp::get_width_hint( const wxString &p_string )
   int length = p_string.Length();
   int num_chars = length < 20 ? length : 20;
   wxString truncated = p_string.Left( num_chars );
-  return g_size * num_chars;
+  return CHARWIDTH * num_chars;
 }

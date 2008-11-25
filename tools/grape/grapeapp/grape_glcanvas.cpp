@@ -14,7 +14,7 @@
 #include "grape_glcanvas.h"
 #include "grape_frame.h"
 #include "architecturereference.h"
-#include "visuals/font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "visuals/visualobject.h"
 #include "visuals/visualblocked.h"
 #include "visuals/visualchannel_communication.h"
@@ -32,6 +32,7 @@
 #include "visuals/visualvisibilityframe.h"
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 const float g_frame_border_space = 0.4f;
 
@@ -92,7 +93,7 @@ void grape_glcanvas::update_scrollbars(void)
 grape_glcanvas::~grape_glcanvas(void)
 {
   // free textures in video memory
-  glDeleteTextures(256, &g_pool.m_textures[0]);
+//  glDeleteTextures(256, &g_pool.m_textures[0]);
 
   m_visual_objects.Clear();
 }
@@ -118,7 +119,7 @@ void grape_glcanvas::init_gl(void)
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   // load used textures
-  init_textures();
+//  init_textures();
 
   m_initialized = true;
 }
@@ -763,6 +764,12 @@ wxImage grape_glcanvas::get_image( void )
 bool grape_glcanvas::is_inside_visibility_frame( coordinate &p_coord )
 {
   return is_inside_rectangle( m_visibility_frame_coordinate, m_visibility_frame_width, m_visibility_frame_height, p_coord );
+}
+
+font_renderer* grape_glcanvas::get_font_renderer( void )
+{
+  static font_renderer  font_renderer;           /**< A pointer to the font renderer for the text on the visual objects. */
+  return &font_renderer;
 }
 
 BEGIN_EVENT_TABLE(grape_glcanvas, wxGLCanvas)
