@@ -214,18 +214,36 @@ def get_namespace(sorts, functions, function):
   for f in sorts_to_functions[current_sort]:
     if f[1].label == function:
       return "sort_%s" % (get_label(sorts, current_sort))
+  possible_sorts = []
   for s in sorts_to_functions:
     for f in sorts_to_functions[s]:
       if f[1].label == function:
-        return "sort_%s" % (get_label(sorts, s))
-  return ""
+        possible_sorts += [s]
+  # Prefer the last namespace in the list
+  if possible_sorts <> []:
+    return "sort_%s" % (get_label(sorts, possible_sorts[len(possible_sorts)-1]))
+  else:
+    return ""
 
 def lookup_function_symbol(functions, function):
   for f in functions:
     if f[0].string == function[0].string:
       return f
   return function
-  assert(False)
+
+# Used for workaround for set complement
+def lookup_function_symbol_with_sort(functions, function, sort):
+  for f in functions:
+    if f[0].string == function[0].string and len(f[2].expr) >= 2:
+      domain = f[2].expr[1]
+      if domain[0] == "labelled_domain":
+        domsort = domain[1]
+      else:
+        domsort = domain[1]
+      if len(domsort) >= 1 and len(domsort[0]) >= 1 and domsort[0][0] <> "param_expr":
+        if domsort[0][0].string == sort[0].string:
+          return f
+  return lookup_function_symbol(functions, function)
 
 #
 # get_projection_arguments
@@ -334,6 +352,20 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
+      # Work around for set complement
+      if data_expression[1].expr[0].string == "!" and len(data_expression[2].expr[1]) == 1:
+        argument = data_expression[2].expr[1]
+        if len(argument) >= 1:
+          argument_zero = argument[0]
+          if argument_zero[0] == "application":
+            for v in variable_declarations:
+              if v[0].string == argument_zero[1].expr[0].string:
+                sort = v[1].expr[2]
+                f = lookup_function_symbol_with_sort(functions + variable_declarations, data_expression[1].expr, v[1].expr[2])
+                head_code = f[1].label
+                if f[1].label == "not_":
+                  head_code = "sort_bool_::%s" % (head_code)
+
       if f[0].string == "if" or f[0].string == "==" or f[0].string == "!=":
         sort_args = ""
       else:
@@ -760,6 +792,8 @@ def generate_function_constructors(sorts, id, label, sortexprs):
           if a[0] == "param_expr":
             l = get_label(sorts, a[1])
             assertion = "//assert(sort_%s::is_%s(arg%s.sort()));\n        " % (sorts_to_namespaces[l], l, index)
+          elif a[0] == "sortarrow":
+            assertion = ""
           elif a[0].string in sort_params:
             assertion = "//assert(arg%s.sort() == %s);\n        " % (index, a[0].string.lower())
           else:

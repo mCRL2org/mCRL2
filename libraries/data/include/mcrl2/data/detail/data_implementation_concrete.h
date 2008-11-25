@@ -58,6 +58,19 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
 
+//Pre: parts consists of parts of a specification that adheres to the internal
+//     syntax after type checking
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of parts
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Ret: parts in which:
+//     - all substitutions of *p_substs are performed on the elements of parts
+//     - each substituted element is implemented, where the new data
+//       declarations are stored in *p_data_decls
+ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
+  t_data_decls *p_data_decls);
+
 /** \brief     Implement data types of a type checked mCRL2 action rename
  *             specification with respect to a type checked mCRL2 linear
  *             process specification (LPS).
