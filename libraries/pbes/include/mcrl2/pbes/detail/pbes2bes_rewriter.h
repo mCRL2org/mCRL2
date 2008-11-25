@@ -121,10 +121,10 @@ namespace detail {
     {
       term_type y = super::visit_propositional_variable(x, v, sigma);
       term_type result = term_type(rename(y), y.variables(), atermpp::make_list(y));
-      check_result(x, result, sigma);
+      // check_result(x, result, sigma);
       return result;
     }
-
+/*
     /// Visit data expression node.
     ///
     term_type visit_data_expression(const term_type& x, const data_term_type& d, pbes2bes_substitution_function& sigma)
@@ -214,6 +214,7 @@ namespace detail {
     //   check_result(x, result, sigma);
     //   return result;
     // }
+*/    
   };
 
   /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
@@ -252,23 +253,6 @@ namespace detail {
         return result;
       }
 
-      void check_sigma(pbes2bes_substitution_function& sigma)
-      {
-/*        
-        std::cout << "sigma = ";
-        for (pbes2bes_substitution_function::iterator i = sigma.begin(); i != sigma.end(); ++i)
-        {
-          std::cout << core::pp(i->second) << " ";
-          std::set<data::data_variable> w = find_free_variables(i->second);
-          if (!w.empty())
-          {
-            std::cout << "ERROR: ILLEGAL SUBSTITUTION " << core::pp(i->first) << " := " << core::pp(i->second) << std::endl;
-          }
-        }
-        std::cout << std::endl;
-*/
-      }
-      
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
@@ -276,7 +260,6 @@ namespace detail {
       ///
       term_type operator()(const term_type& x, pbes2bes_substitution_function& sigma)
       {
-        check_sigma(sigma);        
         pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
