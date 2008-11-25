@@ -707,6 +707,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
 
+  set_color(g_color_black, true);
   // render text based on the calculated angle
   if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
@@ -760,6 +761,8 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+
+  set_color(g_color_black, true);
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
@@ -813,6 +816,8 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+
+  set_color(g_color_black, true);
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {

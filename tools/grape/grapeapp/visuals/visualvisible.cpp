@@ -71,12 +71,14 @@ void visualvisible::draw( void )
   if ( on_visibility_frame.m_x <= m_coord.m_x )
   {
 //    text_coordinate.m_x = on_visibility_frame.m_x - 3 * g_text_space;
+    text_coordinate.m_x = on_visibility_frame.m_x - CHARWIDTH*0.0015f;
 //    draw_on_side = true;
     horizontal_alignment = al_left;
   }
   else 
   {
 //    text_coordinate.m_x = on_visibility_frame.m_x + 3 * g_text_space;
+    text_coordinate.m_x = on_visibility_frame.m_x;
 //    draw_on_side = true;
     horizontal_alignment = al_right;
   }
@@ -86,15 +88,18 @@ void visualvisible::draw( void )
   if ( on_visibility_frame.m_y <= m_coord.m_y )
   {
 //    text_coordinate.m_y = on_visibility_frame.m_y - g_text_space;
+    text_coordinate.m_y = on_visibility_frame.m_y;
     vertical_alignment = al_bottom;
   }
   else
   {
 //    text_coordinate.m_y = on_visibility_frame.m_y + g_text_space;
+    text_coordinate.m_y = on_visibility_frame.m_y + CHARHEIGHT*0.0015f;
     vertical_alignment = al_top;
   }
 
 //  render_text( vis_ptr->get_name(), text_coordinate.m_x, text_coordinate.m_y, 999, 999, draw_on_side );
+  set_color(g_color_black, true);
   grape_glcanvas::get_font_renderer()->draw_text( std::string(vis_ptr->get_name().fn_str()), text_coordinate.m_x, text_coordinate.m_y, 0.0015f, horizontal_alignment, vertical_alignment );
 
   // do not draw a bounding box, visibles cannot be resized (they're always attached to the visibility frame and use their coordinate for the other endpoint, that's why)
