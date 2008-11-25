@@ -52,18 +52,20 @@ void visualchannel::draw( void )
   float oy = cref->get_coordinate().m_y;
   Alignment horizontal_align;
   Alignment vertical_align;
-//  float textx;
-//  float texty;
+  float textx;
+  float texty;
   if (ox > x)
   {
     // set text left
 //    textx = x-g_text_space*2 - name.Len() * (g_text_space);
+    textx = x - 0.5 * m_object->get_width();
     horizontal_align = al_left;
   } 
   else
   {
     // set text right
 //    textx = x+g_text_space;
+    textx = x + 0.5 * m_object->get_width();
     horizontal_align = al_right;
   }
 
@@ -71,17 +73,19 @@ void visualchannel::draw( void )
   {
     // set text down
 //    texty = y-g_text_space*2;
+    texty = y;
     vertical_align = al_bottom;
   } 
   else
   {
     // set text up
 //    texty = y+g_text_space;
+    texty = y + m_object->get_width();
     vertical_align = al_top;
   }
   //draw text
 //  render_text(name, textx, texty, 999, 999);
-  grape_glcanvas::get_font_renderer()->draw_text( std::string(name.fn_str()), x, y, 0.0015f, horizontal_align, vertical_align);
+  grape_glcanvas::get_font_renderer()->draw_text( std::string(name.fn_str()), textx, texty, 0.0015f, horizontal_align, vertical_align);
 }
 
 bool visualchannel::is_inside( libgrape::coordinate &p_coord )
