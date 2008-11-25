@@ -143,6 +143,34 @@ namespace mcrl2
           const Alignment align_horizontal,
           const Alignment align_vertical
         );
+       
+        /// \brief Renders the string s wrapped into a bounding box.
+        /// \param[in] s The string to be drawn.
+        /// \param[in] xLft The left side of the bounding box.
+        /// \param[in] xRgt The right side of the bounding box.
+        /// \param[in] yBot The bottom of the bounding box.
+        /// \param[in] yTop The top of the bounding box.
+        /// \param[in] scale The scale factor for the text.
+        /// \param[in] align_horizontal The horizontal alignment of the text.
+        /// \param[in] align_vertical The vertical alignment of the text.
+        ///
+        /// \pre There is an initialized canvas, text color is initialized and
+        ///      any necessary rotation has been done.
+        ///
+        /// \post The text is rendered at the specified location, with the 
+        ///       specified alignments and at the specified scale. It is cropped
+        ///       To fit within the bounding box defined by xLft, xRgt, yBot and
+        ///       yTop.
+        void draw_wrapped_text(
+          const std::string s,
+          const double xLft, 
+          const double xRgt,
+          const double yTop, 
+          const double yBot,
+          const double scale,
+          const Alignment align_horizontal,
+          const Alignment align_vertical
+        );
 
 
         private:
