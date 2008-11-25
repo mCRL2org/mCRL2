@@ -46,11 +46,6 @@ namespace pbes_system {
 
     for (; i != v.end(); ++i, ++j)
     {
-std::set<data::data_variable> w = find_free_variables(*j);
-if (!w.empty())
-{
-  std::cout << "ERROR: ILLEGAL SUBSTITUTION " << core::pp(v) << " -> " << core::pp(e) << std::endl;
-}
       sigma[*i] = *j;
     }
     return sigma;

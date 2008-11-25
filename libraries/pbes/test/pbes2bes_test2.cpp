@@ -137,7 +137,7 @@ void test1()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test1();
 
   return 0;

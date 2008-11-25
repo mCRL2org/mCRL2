@@ -183,7 +183,7 @@ void test_pfnf_visitor()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_normalize1(); 
   test_normalize2();

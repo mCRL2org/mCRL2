@@ -208,7 +208,7 @@ void test_pbes2bes()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test_pbes2bes();
 
   return 0;

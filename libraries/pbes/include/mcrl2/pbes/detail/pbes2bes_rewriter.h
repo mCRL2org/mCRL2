@@ -96,7 +96,6 @@ namespace detail {
       {
         return;
       }
-std::cout << "<pbes2bes rewriter result>" << std::flush << core::pp(result) << std::endl;
       std::set<data::data_variable> v = find_free_variables(result);
       for (std::set<data::data_variable>::iterator j = v.begin(); j != v.end(); ++j)
       {
