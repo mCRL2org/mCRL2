@@ -187,7 +187,7 @@ namespace pbes_system {
         }
         else if (tr::is_prop_var(phi))
         {
-          return PGAME_AND;
+          return PGAME_OR;
         }
         else if (tr::is_true(phi))
         {

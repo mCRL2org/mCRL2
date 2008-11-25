@@ -116,8 +116,8 @@ class python_parity_game_generator: public parity_game_generator
         std::set<unsigned int> dep_i = get_dependencies(i);
 
         switch (get_operation(i)) {
-           case PGAME_AND: even_vertices.insert(i); break;
-           case PGAME_OR:  odd_vertices.insert(i); break;
+           case PGAME_AND: odd_vertices.insert(i); break;
+           case PGAME_OR:  even_vertices.insert(i); break;
            default: assert(false);
         }
        
@@ -147,12 +147,13 @@ int main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   std::string infile;            // location of pbes
+  std::string outfile;           // location of result
   bool true_false_dependencies;
 
   try {
     //--- paritygame options ---------
     boost::program_options::options_description paritygame_options(
-      "Usage: paritygame [OPTION]... INFILE\n"
+      "Usage: paritygame [OPTION]... INFILE OUTFILE\n"
       "\n"
       "Reads a file containing a pbes, and generates a bes.\n"
       "\n"
@@ -169,6 +170,7 @@ int main(int argc, char* argv[])
     po::options_description hidden_options;
     hidden_options.add_options()
       ("input-file", po::value<std::string>(&infile), "input file")
+      ("output-file", po::value<std::string>(&outfile), "output file")
     ;
 
     //--- positional options ---------
@@ -200,13 +202,14 @@ int main(int argc, char* argv[])
     {
       std::cout << "paritygame parameters:" << std::endl;
       std::cout << "  input file:         " << infile << std::endl;
+      std::cout << "  output file:        " << outfile << std::endl;
     }
 
     pbes<> p;
     p.load(infile);
     python_parity_game_generator pgg(p, true_false_dependencies);
     std::string text = pgg.run();
-    std::ofstream to("paritygame.pg");
+    std::ofstream to(outfile.c_str());
     to << text;
 /*
     parity_game_generator pgg(p);
