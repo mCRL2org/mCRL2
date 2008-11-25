@@ -226,10 +226,12 @@ def get_namespace(sorts, functions, function):
     return ""
 
 def lookup_function_symbol(functions, function):
-  for f in functions:
-    if f[0].string == function[0].string:
-      return f
-  return function
+    if function[0] == "lambda" or function[0] == "application":
+      return function
+    for f in functions:
+      if f[0].string == function[0].string:
+        return f
+    return function
 
 # Used for workaround for set complement
 def lookup_function_symbol_with_sort(functions, function, sort):
@@ -352,21 +354,49 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
     if data_expression[0] == "application":
       head_code = generate_data_expression_code(sorts, functions, variable_declarations, data_expression[1].expr, data_expression[2].count)
       f = lookup_function_symbol(functions + variable_declarations, data_expression[1].expr)
-      # Work around for set complement
-      if data_expression[1].expr[0].string == "!" and len(data_expression[2].expr[1]) == 1:
-        argument = data_expression[2].expr[1]
-        if len(argument) >= 1:
-          argument_zero = argument[0]
-          if argument_zero[0] == "application":
-            for v in variable_declarations:
-              if v[0].string == argument_zero[1].expr[0].string:
-                sort = v[1].expr[2]
-                f = lookup_function_symbol_with_sort(functions + variable_declarations, data_expression[1].expr, v[1].expr[2])
-                head_code = f[1].label
-                if f[1].label == "not_":
-                  head_code = "sort_bool_::%s" % (head_code)
 
-      if f[0].string == "if" or f[0].string == "==" or f[0].string == "!=":
+      # Work around for set complement
+      if data_expression[1].expr[0] <> "lambda" and data_expression[1].expr[0] <> "application":
+        if data_expression[1].expr[0].string == "!" and len(data_expression[2].expr[1]) == 1:
+          argument = data_expression[2].expr[1]
+          if len(argument) >= 1:
+            argument_zero = argument[0]
+            if argument_zero[0] == "application":
+              for v in variable_declarations:
+                if v[0].string == argument_zero[1].expr[0].string:
+                  f = lookup_function_symbol_with_sort(functions + variable_declarations, data_expression[1].expr, v[1].expr[2])
+                  head_code = f[1].label
+                  if f[1].label == "not_":
+                    head_code = "sort_bool_::%s" % (head_code)
+        # Work around for subbag or equal
+        if (data_expression[1].expr[0].string == "<=" or data_expression[1].expr[0].string == "+") and len(data_expression[2].expr[1]) == 2:
+          argument = data_expression[2].expr[1]
+          if len(argument) >= 1:
+            argument_zero = argument[0]
+            if argument_zero[0] == "application":
+              for v in variable_declarations:
+                if v[0].string == argument_zero[1].expr[0].string:
+                  f = lookup_function_symbol_with_sort(functions + variable_declarations, data_expression[1].expr, v[1].expr[2])
+                  head_code = f[1].label
+                  if f[1].label == "less_equal":
+                    head_code = "sort_nat::%s" % (head_code)
+                  if f[1].label == "plus":
+                    head_code = "sort_nat::%s" % (head_code)
+        # Work around for in (element test of set/bag)
+        if data_expression[1].expr[0].string == "in" and len(data_expression[2].expr[1]) == 2:
+          argument = data_expression[2].expr[1]
+          if len(argument[1]) == 1:
+            argument_one_zero = argument[1][0]
+            for v in variable_declarations:
+              if v[0].string == argument_one_zero.string:
+                if v[1].expr[0] == "param_expr":
+                  if v[1].expr[1].string == "Set":
+                    head_code = "sort_set::setin"
+                  elif v[1].expr[1].string == "Bag":
+                    head_code = "sort_bag::bagin"
+        # end work around          
+
+      if f[0] <> "lambda" and f[0] <> "application" and (f[0].string == "if" or f[0].string == "==" or f[0].string == "!="):
         sort_args = ""
       else:
         sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
@@ -376,7 +406,10 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
         sort_args_code = add_to_comma_sep_string(sort_args_code, "%s" % (a.lower())) 
       if sort_args_code <> "":
         args_code = sort_args_code + ", " + args_code
-      return "%s(%s)" % (head_code, args_code)
+      code = "%s(%s)" % (head_code, args_code)
+      if code[0:min(6, len(code))] == "lambda":
+        code = "(%s)" % (code)
+      return code
     elif data_expression[0] == "lambda" or data_expression[0] == "forall" or data_expression[0] == "exists":
       vardecl = data_expression[1]
       var = vardecl.vars[0]
@@ -394,6 +427,7 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
       id = lookup_identifier(functions, data_expression[0], arity)
       if id == "":
         return generate_variable_code(sorts, variable_declarations, data_expression[0].string)
+
       namespace = get_namespace(sorts, functions, id)
       if namespace <> "":
         namespace += "::"

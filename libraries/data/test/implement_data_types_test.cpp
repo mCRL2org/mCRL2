@@ -22,6 +22,7 @@
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -1406,6 +1407,222 @@ ATermAppl old_impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
   return sort_id;
 }
 
+ATermList old_build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl sort_set)
+{
+  //declare data equations for sort sort_id
+  ATermAppl sort_func = gsMakeSortArrow1(sort_elt, gsMakeSortExprNat());
+  ATermList el = ATmakeList0();
+  ATermAppl s_sort_id = gsMakeDataVarId(gsString2ATermAppl("s"), sort_bag);
+  ATermAppl t_sort_id = gsMakeDataVarId(gsString2ATermAppl("t"), sort_bag);
+  ATermAppl f_sort_func = gsMakeDataVarId(gsString2ATermAppl("f"), sort_func);
+  ATermAppl g_sort_func = gsMakeDataVarId(gsString2ATermAppl("g"), sort_func);
+  ATermAppl d_sort_elt = gsMakeDataVarId(gsString2ATermAppl("d"), sort_elt);
+  ATermAppl x_sort_elt = gsMakeDataVarId(gsString2ATermAppl("x"), sort_elt);
+  ATermAppl y_sort_elt = gsMakeDataVarId(gsString2ATermAppl("y"), sort_elt);
+  ATermAppl u_sort_set = gsMakeDataVarId(gsString2ATermAppl("u"), sort_set);
+  ATermAppl m = gsMakeDataVarId(gsString2ATermAppl("m"), gsMakeSortExprNat());
+  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl zero = gsMakeDataExprC0();
+  ATermList sl = ATmakeList1((ATerm) s_sort_id);
+  ATermList stl = ATmakeList2((ATerm) t_sort_id, (ATerm) s_sort_id);
+  ATermList dsl = ATmakeList2((ATerm) d_sort_elt, (ATerm) s_sort_id);
+  ATermList ul = ATmakeList1((ATerm) u_sort_set);
+  ATermList dfl = ATmakeList2((ATerm) f_sort_func, (ATerm) d_sort_elt);
+  ATermList fgl = ATmakeList2((ATerm) f_sort_func, (ATerm) g_sort_func);
+  ATermAppl zero_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt), zero);
+  ATermAppl lte_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprLTE(
+        gsMakeDataAppl1(f_sort_func, x_sort_elt),
+        gsMakeDataAppl1(g_sort_func, x_sort_elt)
+      )
+    );
+  ATermAppl add_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprAdd(
+        gsMakeDataAppl1(f_sort_func, x_sort_elt),
+        gsMakeDataAppl1(g_sort_func, x_sort_elt)
+      )
+    );
+  ATermAppl subt_max0_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) y_sort_elt),
+      gsMakeDataAppl1(
+        gsMakeDataAppl1(
+          gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) m),
+            gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) n),
+              gsMakeDataExprIf(
+                gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
+              )
+            )
+          ),
+        gsMakeDataAppl1(f_sort_func, y_sort_elt)),
+      gsMakeDataAppl1(g_sort_func, y_sort_elt)));
+    /*
+  ATermAppl subt_max0_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) y_sort_elt),
+      gsMakeDataAppl2(
+        gsMakeBinder(gsMakeLambda(), ATmakeList2((ATerm) m, (ATerm) n),
+          gsMakeDataExprIf(
+            gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
+          )
+        ),
+        gsMakeDataAppl1(f_sort_func, y_sort_elt),
+        gsMakeDataAppl1(g_sort_func, y_sort_elt)));
+    */
+  /*
+  ATermAppl subt_max0_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeWhr(
+        gsMakeDataExprIf(
+          gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
+        ), ATmakeList2(
+          (ATerm) gsMakeDataVarIdInit(m, gsMakeDataAppl1(f_sort_func, x_sort_elt)),
+          (ATerm) gsMakeDataVarIdInit(n, gsMakeDataAppl1(g_sort_func, x_sort_elt))
+        )
+      )
+    );
+  */
+  ATermAppl min_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprMin(
+        gsMakeDataAppl1(f_sort_func, x_sort_elt),
+        gsMakeDataAppl1(g_sort_func, x_sort_elt)
+      )
+    );
+  ATermAppl bag2set_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprEltIn(x_sort_elt, s_sort_id)
+    );
+  ATermAppl set2bag_func =
+    gsMakeBinder(gsMakeLambda(), ATmakeList1((ATerm) x_sort_elt),
+      gsMakeDataExprIf(
+        gsMakeDataExprEltIn(x_sort_elt, u_sort_set),
+        gsMakeDataExprNat_int(1),
+        gsMakeDataExprNat_int(0)
+      )
+    );
+
+  ATermList new_data_eqns = ATmakeList(11,
+      //equality (sort_id -> sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprEq(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprEq(f_sort_func, g_sort_func)),
+      //empty bag (sort_id)
+      (ATerm) gsMakeDataEqn(el, nil,
+        gsMakeDataExprEmptyBag(sort_bag),
+        gsMakeDataExprBagComp(zero_func, sort_bag)),
+      //count (sort_elt -> sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(dfl, nil,
+        gsMakeDataExprCount(d_sort_elt, gsMakeDataExprBagComp(f_sort_func, sort_bag)),
+        gsMakeDataAppl1(f_sort_func, d_sort_elt)),
+      //element test (sort_elt -> sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(dsl, nil,
+        gsMakeDataExprEltIn(d_sort_elt, s_sort_id),
+        gsMakeDataExprGT(gsMakeDataExprCount(d_sort_elt, s_sort_id), zero)),
+      //subbag or equal (sort_id -> sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprSubBagEq(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprForall(lte_func)),
+      //proper subbag (sort_id -> sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprSubBag(s_sort_id, t_sort_id),
+        gsMakeDataExprAnd(
+          gsMakeDataExprSubBagEq(s_sort_id, t_sort_id), 
+          gsMakeDataExprNeq(s_sort_id, t_sort_id)
+        )),
+      //union (sort_id -> sort_id -> sort_id)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagUnion(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprBagComp(add_func, sort_bag)),
+      //difference (sort_id -> sort_id -> sort_id)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagDiff(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprBagComp(subt_max0_func, sort_bag)),
+      //intersection (sort_id -> sort_id -> sort_id)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagInterSect(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprBagComp(min_func, sort_bag)),
+      //Bag2Set (sort_id -> sort_set)
+      (ATerm) gsMakeDataEqn(sl, nil,
+        gsMakeDataExprBag2Set(s_sort_id, sort_set),
+        gsMakeDataExprSetComp(bag2set_func, sort_set)),
+      //Set2Bag (sort_set -> sort_id)
+      (ATerm) gsMakeDataEqn(ul, nil,
+        gsMakeDataExprSet2Bag(u_sort_set, sort_bag),
+        gsMakeDataExprBagComp(set2bag_func, sort_bag)));
+
+  return new_data_eqns;
+}
+
+ATermAppl old_impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
+  t_data_decls *p_data_decls)
+{
+  assert(gsIsSortExprBag(sort_bag));
+  ATermAppl sort_elt = ATAgetArgument(sort_bag, 1);
+  ATermAppl sort_set = gsMakeSortExprSet(sort_elt);
+
+  //implement expressions in the target sort of sort_bag
+  //this needs to be done first in order to keep the substitutions sound!
+  impl_exprs_appl(sort_elt, p_substs, p_data_decls);
+  //add implementation of sort Set(sort_elt), if necessary
+  ATermAppl sort_set_impl =
+    (ATermAppl) gsSubstValues(*p_substs, (ATerm) sort_set, false);
+  if (ATisEqual(sort_set_impl, sort_set)) {
+    //Set(sort_elt) is not implemented yet, because it does not occur as an lhs
+    //in the list of substitutions in *p_substs
+    sort_set_impl = impl_sort_set(sort_set, p_substs, p_data_decls);
+  }
+  //declare fresh sort identifier for sort_bag
+  ATermAppl sort_id = make_fresh_bag_sort_id((ATerm) p_data_decls->sorts);
+  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
+  //add substitution for this identifier
+  ATermAppl subst = gsMakeSubst_Appl(sort_bag, sort_id);
+  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
+
+  //declare operations for sort sort_id
+  ATermList new_ops = ATmakeList(11,
+      (ATerm) gsMakeOpIdBagComp(gsMakeSortArrow1(sort_elt, gsMakeSortExprNat()), sort_bag),
+      (ATerm) gsMakeOpIdEmptyBag(sort_bag),
+      (ATerm) gsMakeOpIdCount(sort_elt, sort_bag),
+      (ATerm) gsMakeOpIdEltIn(sort_elt, sort_bag),
+      (ATerm) gsMakeOpIdSubBagEq(sort_bag),
+      (ATerm) gsMakeOpIdSubBag(sort_bag),
+      (ATerm) gsMakeOpIdBagUnion(sort_bag),
+      (ATerm) gsMakeOpIdBagDiff(sort_bag),
+      (ATerm) gsMakeOpIdBagIntersect(sort_bag),
+      (ATerm) gsMakeOpIdBag2Set(sort_bag, sort_set),
+      (ATerm) gsMakeOpIdSet2Bag(sort_set, sort_bag));
+
+  ATermList new_data_eqns = old_build_bag_equations(sort_elt, sort_bag, sort_set);
+
+  new_data_eqns = impl_exprs_list(new_data_eqns, p_substs, p_data_decls);
+
+  //perform substitutions
+  new_ops = gsSubstValues_List(*p_substs, new_ops, true);
+  p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
+  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    impl_sort_nat(p_data_decls);
+  }
+  return sort_id;
+}
+
+
 void implement_bool_test()
 {
   t_data_decls data_decls_old;
@@ -1515,6 +1732,26 @@ void implement_set_test()
   old_impl_sort_set(ss, &old_substs, &data_decls_old);
   impl_sort_set(ss, &new_substs, &data_decls_new);
 
+  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
+  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
+  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+}
+
+void implement_bag_test()
+{
+  t_data_decls data_decls_old;
+  t_data_decls data_decls_new;
+  initialize_data_decls(&data_decls_old);
+  initialize_data_decls(&data_decls_new);
+  // TODO: Clean up
+  ATermList old_substs = ATmakeList0();
+  ATermList new_substs = ATmakeList0();
+  basic_sort s("S");
+  container_sort bs(data::sort_bag::bag(s));
+  old_impl_sort_bag(bs, &old_substs, &data_decls_old);
+  impl_sort_bag(bs, &new_substs, &data_decls_new);
+
   std::cerr << "old constructors:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_old.cons_ops).begin(); i != aterm_list(data_decls_old.cons_ops).end(); ++i)
   {
@@ -1578,6 +1815,7 @@ int test_main(int argc, char** argv)
   implement_real_test();
   implement_list_test();
   implement_set_test();
+  implement_bag_test();
   implement_data_specification_test();
 
   return EXIT_SUCCESS;

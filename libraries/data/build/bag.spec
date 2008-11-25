@@ -4,7 +4,7 @@
 
 sort Bag(S) <"bag">;
 
-map @bag <"bag_comprehension"> : S <"arg"> -> Bag(S);
+map @bag <"bag_comprehension"> : (S -> Nat) <"arg"> -> Bag(S);
     {} <"emptybag"> : Bag(S);
     count <"count"> : S <"left"> # Bag(S) <"right"> -> Nat;
     in <"bagin"> : S <"left"> # Bag(S) <"right"> -> Bool;
@@ -29,7 +29,7 @@ eqn ==(@bag(f), @bag(g)) = ==(f, g);
     <=(@bag(f), @bag(g)) = forall(x:S, <=(f(x), g(x)));
     <(s,t) = &&(<=(s,t), !=(s,t));
     +(@bag(f),@bag(g)) = @bag(lambda(x:S, +(f(x),g(x))));
-    -(@bag(f),@bag(g)) = @bag(lambda(x:S, if(>(f(x),g(x)), @gtesubt(f(x),g(x)),@c0)));
+    -(@bag(f),@bag(g)) = @bag(lambda(y:S, (lambda(m:Nat, lambda(n:Nat, if(>(m,n), @gtesubt(m,n),@c0)))(f(y)))(g(y))));
     *(@bag(f),@bag(g)) = @bag(lambda(x:S, min(f(x),g(x))));
     Bag2Set(s) = @set(lambda(x:S, in(x,s)));
     Set2Bag(u) = @bag(lambda(x:S, if(in(x,u), @cNat(@c1), @c0)));
