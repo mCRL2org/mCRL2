@@ -214,6 +214,7 @@ namespace mcrl2 {
       const Alignment align_vertical)
     {
       // Wrapped text to fit into bounding box.
+      draw_text(s, xLft, yTop, scale, align_horizontal, align_vertical);
     }
 
     size_t font_renderer::index_from_char(const char & c)
@@ -234,7 +235,7 @@ namespace mcrl2 {
       }
       
       // Numers 0 ... 9
-      else if ( 48 <= ascii && ascii <= 58)
+      else if ( 48 <= ascii && ascii <= 57)
       {
         result = ascii - 48 + 52;
       }
