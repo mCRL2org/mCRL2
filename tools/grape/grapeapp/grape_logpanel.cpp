@@ -9,42 +9,104 @@
 // Implements the logpanel class used to display log messages.
 
 
-#include "grape_logpanel.h"
+#include <memory>
+#include <streambuf>
 
-#include <wx/wfstream.h>
-#include <wx/txtstrm.h>
+#include "grape_logpanel.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace grape::grapeapp;
 
-grape_logpanel::grape_logpanel(void) : wxTextCtrl()
-{
+class message_relay;
+
+static void relay_message(const ::mcrl2::core::messageType t, const char* data);
+
+class text_control_buf : public std::streambuf {
+
+  private:
+
+    wxTextCtrl&    m_control;
+
+  public:
+
+   text_control_buf(wxTextCtrl& control) : std::streambuf(), m_control(control) {
+   }
+
+   int overflow(int c) {
+     m_control.AppendText(wxString(static_cast< wxChar >(c)));
+
+     return 1;
+   }
+
+   std::streamsize xsputn(const char * s, std::streamsize n) {
+     m_control.AppendText(wxString(s, wxConvLocal, n));
+
+     pbump(n);
+
+     return n;
+   }
+};
+
+class message_relay;
+
+std::auto_ptr < message_relay > communicator;
+
+class message_relay {
+  friend void relay_message(const ::mcrl2::core::messageType, const char* data);
+
+  private:
+
+    wxTextCtrl&      m_control;
+    std::streambuf*  m_error_stream;
+
+  private:
+
+    static bool initialise_once(wxTextCtrl& control) {
+      communicator.reset(new message_relay(control));
+
+      return true;
+    }
+
+    message_relay(wxTextCtrl& control) : m_control(control) {
+      m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
+
+      mcrl2::core::gsSetCustomMessageHandler(relay_message);
+    }
+
+    void message(const char* data) {
+      m_control.AppendText(wxString(data, wxConvLocal));
+    }
+
+  public:
+
+    static bool initialise(wxTextCtrl& control) {
+      static bool initialised = initialise_once(control);
+ 
+      return initialised;
+    }
+
+    ~message_relay() {
+      mcrl2::core::gsSetCustomMessageHandler(0);
+
+      delete std::cerr.rdbuf(m_error_stream);
+    }
+};
+
+static void relay_message(const ::mcrl2::core::messageType t, const char* data) {
+  switch (t) {
+    case mcrl2::core::gs_notice:
+      break;
+    case mcrl2::core::gs_warning:
+      break;
+    case mcrl2::core::gs_error:
+    default:
+      communicator->message(data);
+      break;
+  }
 }
 
 grape_logpanel::grape_logpanel(wxWindow *p_parent)
 : wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY)
 {
-#ifndef __APPLE__
-// Currently the std_iostreams are not included in wxwidgets on apple by default.
-// If this is the case, this ifndef can be removed.
-  m_cerr_catcher = new wxStreamToTextRedirector( this, &std::cerr );
-#endif
-}
-
-grape_logpanel::~grape_logpanel(void)
-{
-#ifndef __APPLE__
-// Currently the std_iostreams are not included in wxwidgets on apple by default.
-// If this is the case, this ifndef can be removed.
-  delete m_cerr_catcher;
-#endif
-}
-
-void grape_logpanel::enable_catch_cout(void)
-{
-  // TODO
-}
-
-void grape_logpanel::disable_catch_cout(void)
-{
-  // TODO
+  message_relay::initialise(*this);
 }
