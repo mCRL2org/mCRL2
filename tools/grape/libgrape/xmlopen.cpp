@@ -499,8 +499,8 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
                 }
                 else
                 {
-                  /* invalid node name! */
-                  return false;
+                  /* invalid! NB: propertyof */
+//                  return false;
                 }
 
                 // find the next piece of information about the state
@@ -1572,7 +1572,7 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                 }
                 else
                 {
-                  /* invalid!  NB: channellist */
+                  /* invalid!  NB: channellist, propertyof */
 //                  return false;
                 }
 
