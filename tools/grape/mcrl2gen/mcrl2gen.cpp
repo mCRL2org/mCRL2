@@ -1282,8 +1282,7 @@ void compact_arr_action_reference(arr_action_reference &p_reference_actions)
 {
   for(unsigned int i=0; i<p_reference_actions.GetCount(); ++i)
   {
-    wxArrayString new_actions;
-    new_actions.Empty();
+    list_of_action new_actions;
 
     // compact members
     for(unsigned int j=0; j<p_reference_actions[i].m_actions.GetCount(); ++j)
@@ -1291,7 +1290,7 @@ void compact_arr_action_reference(arr_action_reference &p_reference_actions)
       bool found = false;
       for(unsigned int k=0; k<new_actions.GetCount(); ++k)
       {
-        if(new_actions[k] == p_reference_actions[i].m_actions[j])
+        if(new_actions[k].get_name() == p_reference_actions[i].m_actions[j].get_name())
         {
           found = true;
           break;
@@ -1562,10 +1561,9 @@ wxArrayString infer_reference_blocked_channels(wxXmlNode *p_architecture_diagram
  * @pre p_actions is a valid reference to an array of actions, p_channels is a valid reference to an array of channels and p_blockeds is a valid reference to an array of blocked channels.
  * @post An array containing all hidden actions of this reference is returned.
  */
-wxArrayString infer_reference_hidden_actions(wxArrayString &p_actions, arr_channel_id &p_channels, wxArrayString &p_blockeds)
+list_of_action infer_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_blockeds)
 {
-  wxArrayString hidden;
-  hidden.Empty();
+  list_of_action hidden;
 
   // for each action in p_actions, if it is not in p_channels or p_blockeds, it is hidden
   for(unsigned int i=0; i<p_actions.GetCount(); ++i)
@@ -1573,7 +1571,7 @@ wxArrayString infer_reference_hidden_actions(wxArrayString &p_actions, arr_chann
     bool is_hidden = true;
     for(unsigned int j=0; j<p_channels.GetCount(); ++j)
     {
-      if(p_channels[j].m_channel == p_actions[i])
+      if(p_channels[j].m_channel == p_actions[i].get_name())
       {
         is_hidden = false;
         break;
@@ -1582,7 +1580,7 @@ wxArrayString infer_reference_hidden_actions(wxArrayString &p_actions, arr_chann
 
     for(unsigned int j=0; j<p_blockeds.GetCount(); ++j)
     {
-      if(p_blockeds[j] == p_actions[i])
+      if(p_blockeds[j] == p_actions[i].get_name())
       {
         is_hidden = false;
         break;
@@ -1944,7 +1942,7 @@ void fix_architecture_references(wxXmlNode *p_doc_root, arr_action_reference &p_
       }
       for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
       {
-        wxString channel_name = p_refs[i].m_hidden[j];
+        wxString channel_name = p_refs[i].m_hidden[j].get_name();
         for(wxXmlNode *vis = visibles->GetChildren(); vis != 0; vis = vis->GetNext())
         {
           wxString vis_name = get_child_value(vis, _T("name"));
@@ -1952,7 +1950,7 @@ void fix_architecture_references(wxXmlNode *p_doc_root, arr_action_reference &p_
           if(vis_name == channel_name)
           {
             // found match, save new name
-            p_refs[i].m_hidden[j] = channel_name + vis_id;
+            p_refs[i].m_hidden[j].get_name() = channel_name + vis_id;
             break;
           }
         }
@@ -2225,7 +2223,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
       cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
       for(unsigned int j=0; j<p_refs[i].m_actions.GetCount(); ++j)
       {
-        cerr << "  " << p_refs[i].m_actions[j].ToAscii() << endl;
+        cerr << "  " << p_refs[i].m_actions[j].get_name().ToAscii() << endl;
       }
     }
   }
@@ -2288,7 +2286,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
       cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
       for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
       {
-        cerr << "  " << p_refs[i].m_hidden[j].ToAscii() << endl;
+        cerr << "  " << p_refs[i].m_hidden[j].get_name().ToAscii() << endl;
       }
     }
   }
@@ -2512,7 +2510,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
         {
           spec += _T(", ");
         }
-        spec += p_refs[i].m_hidden[j];
+        spec += p_refs[i].m_hidden[j].get_name();
       }
       spec += _T("}, ");
     }
@@ -2631,7 +2629,7 @@ void grape::mcrl2gen::test_export(void)
  * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid process diagram, p_sort_expressions is a valid reference to an array of sort expressions, p_actions is a valid reference to an array of actions, p_internal_specs is a valid reference to an array of internal specifications and p_specs is a valid reference to an array of specifications.
  * @post The XML process diagram is converted to mCRL2 and p_sort_expressions, p_actions, p_internal_specs and p_specs are updated accordingly or error messages are produced.
  */
-void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArrayString &p_sort_expressions, arr_action_type &p_actions, wxArrayString &p_internal_specs, wxArrayString &p_specs, bool p_verbose, ATermAppl &datatype_spec)
+void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArrayString &p_sort_expressions, list_of_action &p_actions, wxArrayString &p_internal_specs, wxArrayString &p_specs, bool p_verbose, ATermAppl &datatype_spec)
 {
   wxString diagram_name = infer_process_diagram_name(p_doc_root, p_diagram_id);
   if(p_verbose)
@@ -2668,14 +2666,15 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   }
 
   // determine occuring actions
-  arr_action_type act = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
+  list_of_action act = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
   if(p_verbose)
   {
     cerr << "+actions:" << endl;
     for(unsigned int i=0; i<act.GetCount(); ++i)
     {
-      cerr << " action: " << act[i].m_action.ToAscii()
-           << " type: " << act[i].m_type.ToAscii() << endl;
+      cerr << " action: " << act[i].get_name().ToAscii()
+//TODO           << " type: " << act[i].m_type.ToAscii() << endl;
+           << endl;
     }
   }
   for(unsigned int i=0; i<act.GetCount(); ++i)
@@ -2683,8 +2682,9 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     bool found = false;
     for(unsigned int j=0; j<p_actions.GetCount(); ++j)
     {
-      if((p_actions[j].m_action == act[i].m_action) &&
-         (p_actions[j].m_type == act[i].m_type))
+      if((p_actions[j].get_name() == act[i].get_name()) &&
+//TODO         (p_actions[j].m_type == act[i].m_type))
+         true)
       {
         found = true;
       }
@@ -2741,7 +2741,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       throw CONVERSION_ERROR;
     }
 
-    arr_action_type actions;                    // all occuring actions
+    list_of_action actions;                     // all occuring actions
     wxXmlNode       *doc_root;                  // stores the root node of the document
     wxArrayString   sort_expressions;           // stores all state sort expressions
     wxArrayString   internal_specs;             // stores all internal process specifications
@@ -2821,11 +2821,12 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     for(unsigned int i=0; i<actions.GetCount(); ++i)
     {
       specification += _T(" ");
-      specification += actions[i].m_action;
-      if(actions[i].m_type != wxEmptyString)
+      specification += actions[i].get_name();
+/*TODO      if(actions[i].m_type != wxEmptyString)
       {
         specification += _T(": ") + actions[i].m_type;
       }
+*/
       specification += _T(";\n");
     }
     specification += _T("\n");
@@ -2944,7 +2945,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     // an architecture diagram can contain both architecture references and process references,
     // this has to be taken into account in the main loop
 
-    arr_action_type actions;                    // all occuring actions
+    list_of_action actions;                     // all occuring actions
     wxXmlNode       *doc_root;                  // stores the root node of the document
     wxArrayString   sort_expressions;           // stores all state sort expressions
     wxArrayString   internal_specs;             // stores all internal process specifications
@@ -3015,9 +3016,8 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
         // add renamed new actions to actions
         for(unsigned int i=0; i<renameds.GetCount(); ++i)
         {
-          action_type ren;
-          ren.m_action = renameds[i].m_new_name;
-          ren.m_type = wxEmptyString;
+          action ren;
+          ren.set_name(renameds[i].m_new_name);
           actions.Add(ren);
         }
         for(unsigned int i=0; i<refs.GetCount(); ++i)
@@ -3025,17 +3025,15 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
           for(unsigned int j=0; j<refs[i].m_renamed.GetCount(); ++j)
           {
             wxString ren = refs[i].m_renamed[j].m_channel + refs[i].m_renamed[j].m_channel_id;
-            action_type ren_decl;
-            ren_decl.m_action = ren;
-            ren_decl.m_type = wxEmptyString;
+            action ren_decl;
+            ren_decl.set_name( ren );
             actions.Add(ren_decl);
           }
         }
         for(unsigned int i=0; i<comms.GetCount(); ++i)
         {
-          action_type ren;
-          ren.m_action = comms[i].m_name;
-          ren.m_type = wxEmptyString;
+          action ren;
+          ren.set_name( comms[i].m_name );
           actions.Add(ren);
         }
 
@@ -3084,11 +3082,12 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     for(unsigned int i=0; i<actions.GetCount(); ++i)
     {
       specification += _T(" ");
-      specification += actions[i].m_action;
-      if(actions[i].m_type != wxEmptyString)
+      specification += actions[i].get_name();
+/*TODO      if(actions[i].m_type != wxEmptyString)
       {
         specification += _T(": ") + actions[i].m_type;
       }
+*/
       specification += _T(";\n");
     }
     specification += _T("\n");

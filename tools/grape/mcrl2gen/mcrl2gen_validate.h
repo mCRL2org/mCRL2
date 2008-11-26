@@ -14,6 +14,7 @@
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
 #include "libgrape/preamble.h"
+#include "libgrape/action.h"
 #include "libgrape/decl.h"
 #include "libgrape/varupdate.h"
 
@@ -65,11 +66,11 @@ namespace grape
       wxString m_reference_id;      /**< The identifier of the reference. */
       wxString m_diagram_id;        /**< The identifier of the diagram belonging to the reference. */
       bool m_is_process_reference;  /**< A flag indicating whether this represents a process reference or architecture reference. */
-      wxArrayString m_actions;      /**< An array of actions associated with this reference. */
+      list_of_action m_actions;      /**< An array of actions associated with this reference. */
 
       arr_channel_id m_channels;    /**< An array of channels associated with this reference. */
       wxArrayString m_blockeds;     /**< An array of blocked channels associated with this reference. */
-      wxArrayString m_hidden;       /**< An array of hidden channels associated with this reference. */
+      list_of_action m_hidden;      /**< An array of hidden channels associated with this reference. */
       arr_channel_id m_renamed;     /**< An array of renamed channels associated with this reference. */
     };
 
@@ -301,13 +302,13 @@ namespace grape
      * @param p_preamble_parameter_decls The parameter declarations in the preamble.
      * @param p_preamble_local_var_decls The local variable declarations in the preamble.
      * @param p_label The multiaction of the transition label.
-     * @param p_actions List of actions (with type) present in the multiaction.
+     * @param p_actions List of actions with parameters present in the multiaction.
      * @param datatype_spec The datatype specification
      * @return True if parsing went successfully, false otherwise.
      * @pre p_label is a valid multiaction and p_process_diagram is a valid XML process diagram.
      * @post p_actions contains the actions present in the multiaction, together with their associated type or error messages are produced.
      */
-    bool parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, arr_action_type &p_actions, ATermAppl &datatype_spec);
+    list_of_action parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, ATermAppl &datatype_spec);
 
     /**
      * Action type inference function.
@@ -414,7 +415,7 @@ namespace grape
      * @pre p_architecture_diagram is a valid XML architecture diagram.
      * @post An array of strings containing the names of the inferred visibles.
      */
-    wxArrayString infer_architecture_visibles(wxXmlNode *p_architecture_diagram);
+    list_of_action infer_architecture_visibles(wxXmlNode *p_architecture_diagram);
 
     /**
      * Process diagram actions inference function.
@@ -426,7 +427,7 @@ namespace grape
      * @pre p_doc_root is a valid pointer to an XML specification and p_diagram_id is a valid reference to a diagram identifier.
      * @post The actions occuring in this diagram and any contained process references are returned or the empty string is returned and error messages are produced.
      */
-    wxArrayString infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
+    list_of_action infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
 
     /**
      * XML process diagram to mCRL2 action convertor function.
@@ -440,7 +441,7 @@ namespace grape
      * @pre p_process_diagram is a valid XML process diagram.
      * @post A list containing the actions (and their inferred types) present in the process diagram or error messages are produced.
      */
-    arr_action_type process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
+    list_of_action process_diagram_mcrl2_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
 
     /**
      * Parameter initialisation parsing function.
