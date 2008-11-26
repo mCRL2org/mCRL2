@@ -14,6 +14,7 @@
 #include "font_renderer.h"
 #include "font/character_set.xpm"
 #include <wx/image.h>
+#include <algorithm>
 
 #ifdef __APPLE__
   #include <OpenGL/glu.h>
@@ -140,10 +141,8 @@ namespace mcrl2 {
       if(s.size() > 0)
       {
         // Enable texture mapping
-        glEnable( GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
         
-
-
         for( size_t i = 0; i < s.length(); ++i)
         {
           double xLft = xSLft + i * scale * CHARWIDTH;
@@ -153,7 +152,7 @@ namespace mcrl2 {
           
           size_t index = index_from_char(s[i]);
           glBindTexture(GL_TEXTURE_2D, tex_char_id[index]);
-
+        
           // Setup texture parameters
           glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
           glTexParameterf(GL_TEXTURE_2D, 
@@ -161,10 +160,9 @@ namespace mcrl2 {
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
           glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        
+            
           glEnable(GL_BLEND);
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
           glBegin(GL_QUADS);
             glTexCoord2f(0.0, 0.0); glVertex3f(xLft, yTop, 0.5);
             glTexCoord2f(0.0, 1.0); glVertex3f(xLft, yBot, 0.5);
@@ -213,10 +211,140 @@ namespace mcrl2 {
       const Alignment align_horizontal,
       const Alignment align_vertical)
     {
-      // Wrapped text to fit into bounding box.
-      draw_text(s, xLft, yTop, scale, align_horizontal, align_vertical);
-    }
+      // Wrapped text to fit into bounding box. 
+      
+      const size_t addpos = (xRgt-xLft)/(CHARWIDTH*scale);
+      double transx = 0;
+      double transy = 0;
+      int findid;
+      std::string subs;
+      std::string temps;
+            
+      double maxwidth = 0;
+      double maxheight = 0;
+      size_t startpos = 0;
+      double y = 0;
+      temps = s;
+      // caluclate the maximum width and height of the text
+      while (startpos < temps.length())
+      {
+        findid = temps.find_first_of('\n');
+      
+        if ((findid < 0) || (findid > startpos + addpos))
+        {
+           // if there is not a new line character 
+           // just take the next part of the string
+           subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+           startpos = startpos + addpos;
+        } 
+        else
+        {
+          if (findid <= startpos + addpos) 
+          {
+            // if we found a new line character 
+            // cut the string at the new line position
+            subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+            startpos = 0;
+            temps = temps.substr(findid+1);
+          }
+        }               
+        y = y - CHARHEIGHT*scale;
+        
+        //update maximum width and height
+        maxheight = maxheight + CHARHEIGHT * scale;
+        maxwidth = std::max(maxwidth, subs.length() * CHARWIDTH * scale);
+        
+        // break if we are outside the boundingbox
+        if (not ((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
+      }
+      
+      startpos = 0;
+      temps = s;
+      y = 0;
+      // print text
+      while (startpos < s.length())
+      {
+        findid = temps.find_first_of('\n');
+      
+        if ((findid < 0) || (findid > startpos + addpos))
+        {
+           // if there is not a new line character 
+           // just take the next part of the string
+           subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+           startpos = startpos + addpos;
+        } 
+        else
+        {
+          if (findid <= startpos + addpos) 
+          {
+            // if we found a new line character 
+            // cut the string at the new line position
+            subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+            startpos = 0;
+            temps = temps.substr(findid+1);
+          }
+        }
+            
+        // print dots if there are more lines and we are at the bottem of our bounding box
+        if (((not ((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && (subs.length() >= 3)) && (startpos + addpos > s.length()))
+        {
+          subs = subs.substr(0, subs.length()-3);
+          subs = subs.append("...");
+        }
+        
+        // set correct horizontal alignment        
+        switch(align_horizontal)
+        {
+          case al_left: 
+          {
+            transx = xLft;
+            break;
+          }
+          case al_center:
+          {
+            transx = xLft + .5 * (maxwidth - CHARWIDTH * scale * subs.length());
+            break;
+          }
 
+          case al_right: // Fall through to default case
+          default: 
+          {
+            transx = xRgt - CHARWIDTH * scale * subs.length();
+            break;
+          }
+        }
+
+        // set correct vertical alignment
+        switch(align_vertical)
+        {
+          case al_top:
+          {
+            transy = yTop + y;
+            break;
+          }
+          case al_center:
+          {
+            transy = yTop + y + .5*(maxheight + yBot-yTop);
+            break;
+          }
+          case al_bottom: // Fall through to default case
+          default:
+          {
+            transy = yBot + maxheight + y + (CHARHEIGHT * scale);
+            break;
+          }
+        }
+            
+        draw_text(subs, transx, transy , scale, al_right, al_center);  
+            
+        // calculate new y position
+        y = y - CHARHEIGHT*scale;
+        
+        // break if we are outside the boundingbox
+        if (not ((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
+      }
+    }
+    
     size_t font_renderer::index_from_char(const char & c)
     {
       size_t result = 80; // Question mark
