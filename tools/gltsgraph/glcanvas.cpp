@@ -399,6 +399,12 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
         owner->selectState(selectedObject);
         break;
       }
+      case IDS::LABEL:
+      {
+        ++ptr; // Second ID, transitions
+        size_t selectedLabel = *ptr;
+        owner->selectLabel(selectedObject, selectedLabel);
+      }
       default: break;
     }
   }

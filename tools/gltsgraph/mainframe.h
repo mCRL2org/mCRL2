@@ -56,6 +56,7 @@ class MainFrame : public wxFrame
     void onInfo(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
     void onAbout(wxCommandEvent& event);
+    void onImport(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()
 };

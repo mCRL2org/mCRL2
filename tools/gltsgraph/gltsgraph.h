@@ -29,6 +29,7 @@ class GLTSGraph : public wxApp
 
     State* selectedState;
     Transition* selectedTransition;
+    Transition* selectedLabel; // Label of transition selected should be moved
 
     std::string parse_error;
     std::string fileName;
@@ -51,6 +52,7 @@ class GLTSGraph : public wxApp
     void selectState(size_t state);
     void selectTransition(size_t state, size_t trans);
     void selectSelfLoop(size_t state, size_t trans);
+    void selectLabel(size_t state, size_t trans);
 
     // Setters
     void setLTSInfo(int is, int ns, int nt, int nl);

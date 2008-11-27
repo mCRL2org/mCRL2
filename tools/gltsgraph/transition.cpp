@@ -11,7 +11,8 @@ Transition::Transition(State* from, State* to, std::string lbl)
   
   controlAlpha = 0;
   controlDist = 0.5;
-
+  labelX = 0.0;
+  labelY = 0.025;
   selected = false;
 }
 
@@ -24,6 +25,15 @@ State* Transition::getFrom() const
 State* Transition::getTo() const
 {
   return toState;
+}
+
+void Transition::getLabelPos(double& x, double& y) {
+  // Get control point of transition
+  getControl(x, y);
+
+  // labelX and labelY are relative to the control point
+  x = x + labelX;
+  y = y + labelY;
 }
 
 void Transition::getControl(double& x, double& y)
@@ -62,6 +72,14 @@ double Transition::getControlDist() const
   return controlDist;
 }
 
+void Transition::setLabelPos(const double x, const double y) {
+  // Get transition control points;
+  double controlX, controlY;
+  getControl(controlX, controlY);
+  // Calculate reklative position of label to control points
+  labelX = x - controlX;
+  labelY = y - controlY;
+}
 void Transition::setControl(const double x, const double y)
 {
   double newX = x;

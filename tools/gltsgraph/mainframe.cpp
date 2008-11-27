@@ -22,6 +22,7 @@ using namespace IDS;
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MainFrame::onOpen)
+  EVT_MENU(myID_IMPORT, MainFrame::onImport)
   EVT_MENU(myID_MENU_EXPORT, MainFrame::onExport)
   EVT_MENU(wxID_EXIT, MainFrame::onQuit)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
@@ -56,6 +57,8 @@ void MainFrame::setupMenuBar()
   wxMenu* fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"), 
                wxT("Read an LTS from a file."));
+  fileMenu->Append(myID_IMPORT, wxT("&Import...\tCTRL-i"), 
+      wxT("Read an LTS Layout from a file."));
   fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"), 
                wxT("Export this LTS to file."));
 
@@ -101,7 +104,22 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats(*.xml;*.aut;*.svc)|*.xml;*.aut;*.svc|XML layout file (*.xml)|*.xml|LTS format (*.aut; *.svc)|*.aut;*.svc|All files (*.*)|*.*"),
+    wxT("All supported formats(*.fsm;*.aut;*.svc)|*.fsm;*.aut;*.svc|LTS format (*.fsm;*.aut;*.svc)|*.fsm;*.aut;*.svc|All files (*.*)|*.*"),
+    wxFD_OPEN|wxFD_CHANGE_DIR);
+  
+  if (dialog.ShowModal() == wxID_OK)
+  {
+    wxString path = dialog.GetPath();
+    std::string stPath(path.fn_str()); 
+
+    app->openFile(stPath);
+  }
+}
+
+void MainFrame::onImport(wxCommandEvent& /*event*/)
+{
+  wxFileDialog dialog(this, wxT("Select a layout file"), wxEmptyString, wxEmptyString,
+    wxT("XML layout file (*.xml)*.xml||All files (*.*)|*.*"),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)

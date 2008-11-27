@@ -18,6 +18,7 @@ class Transition
     // Setters
     void setControl(const double x, const double y);
     void setControlAlpha(const double alpha);
+    void setLabelPos(const double x, const double y);
     
     // Getters
     State* getFrom() const;
@@ -27,6 +28,7 @@ class Transition
     void getControl(double &x, double &y);
     double getControlAlpha() const;
     double getControlDist() const;
+    void getLabelPos(double &x, double &y);
     
     void select();
     void deselect();
@@ -40,6 +42,8 @@ class Transition
     // The position of the control point relative to fromState
     double controlAlpha;  
     double controlDist;
+    double labelX;
+    double labelY;
 
     bool selected;
 

@@ -6,6 +6,7 @@ namespace IDS
 {
   enum { 
     myID_MENU_EXPORT = wxID_HIGHEST + 1,
+    myID_IMPORT,
     myID_DISPLAY_STATE_LBL,
     myID_DISPLAY_TRANS_LBL,
     myID_DLG_INFO,
@@ -24,7 +25,7 @@ namespace IDS
     myID_TOOL_SELECT
   };
 
-  enum PickState {TRANSITION, SELF_LOOP, STATE};
+  enum PickState {TRANSITION, SELF_LOOP, STATE, LABEL};
 }
 
 #endif //IDS_H

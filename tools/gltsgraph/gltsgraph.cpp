@@ -305,6 +305,8 @@ void GLTSGraph::moveObject(double x, double y)
     selectedState->setX(selectedState->getX() + x);
     selectedState->setY(selectedState->getY() + y);
   }
+  
+
 
   if(selectedTransition != NULL)
   {
@@ -312,6 +314,13 @@ void GLTSGraph::moveObject(double x, double y)
     selectedTransition->getControl(prevX, prevY);
 
     selectedTransition->setControl(prevX + x, prevY + y);
+  }
+  if(selectedLabel != NULL)
+  {
+    double prevX, prevY;
+    selectedLabel->getLabelPos(prevX, prevY);
+
+    selectedLabel->setLabelPos(prevX + x, prevY + y);
   }
 }
 
@@ -381,6 +390,11 @@ void GLTSGraph::selectTransition(size_t state, size_t transition)
 void GLTSGraph::selectSelfLoop(size_t state, size_t transition)
 {
   selectedTransition = graph->selectSelfLoop(state, transition);
+}
+
+void GLTSGraph::selectLabel(size_t state, size_t transition) 
+{
+  selectedLabel = graph->selectTransition(state, transition);
 }
 
 void GLTSGraph::setRadius(int radius)

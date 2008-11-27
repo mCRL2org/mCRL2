@@ -184,6 +184,75 @@ namespace mcrl2 {
       const bool draw_border)
     {
       // Render text's bb at the specified location
+      double xSLft;
+      double ySBot;
+
+      switch(align_horizontal)
+      {
+        case al_left: 
+        {
+          xSLft = x - (s.length() * CHARWIDTH * scale);
+          break;
+        }
+        case al_center:
+        {
+          xSLft = x - (0.5 * s.length() * CHARWIDTH * scale);
+          break;
+        }
+
+        case al_right: // Fall through to default case
+        default: 
+        {
+          xSLft = x;
+          break;
+        }
+      }
+
+      switch(align_vertical)
+      {
+        case al_top:
+        {
+          ySBot = y;
+          break;
+        }
+        case al_bottom:
+        {
+          ySBot = y - (CHARHEIGHT * scale);
+          break;
+        }
+
+        case al_center: // Fall through to default case
+        default:
+        {
+          ySBot = y - (.5 * CHARHEIGHT * scale);
+          break;
+        }
+      }
+      
+      // The bounding box has width CHARWIDTH * scale * s.length()...
+      double xSRgt = xSLft + CHARWIDTH * scale * s.length();
+      // ... and height CHARHEIGHT * scale
+      ySBot = ySBot - 0.5 * scale * CHARHEIGHT;
+      double ySTop = ySBot + CHARHEIGHT * scale;
+      
+      // Draw the bounding box
+      glBegin(GL_QUADS); {
+        glVertex2d(xSRgt, ySBot);
+        glVertex2d(xSRgt, ySTop);
+        glVertex2d(xSLft, ySTop);
+        glVertex2d(xSLft, ySBot);
+      }
+      glEnd();
+      
+      if(draw_border) {
+        glBegin(GL_LINE_STRIP); {
+          glVertex2d(xSRgt, ySBot);
+          glVertex2d(xSRgt, ySTop);
+          glVertex2d(xSLft, ySTop);
+          glVertex2d(xSLft, ySBot);     
+        }
+        glEnd();
+      }
     }
        
     void font_renderer::draw_cropped_text(

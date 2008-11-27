@@ -52,7 +52,7 @@ void Visualizer::drawStates(bool inSelectMode)
       for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
       {
         Transition* t = s->getTransition(j);
-        drawTransition(t, j);
+        drawTransition(t, j, inSelectMode);
       }
 
       for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
@@ -172,7 +172,7 @@ void Visualizer::drawState(State* s)
   glPopName();
 }
 
-void Visualizer::drawTransition(Transition* tr, size_t trid)
+void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
 {
   State* from = tr->getFrom();
   State* to = tr->getTo();
@@ -278,7 +278,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
       glVertex2d(xVirtual + .015, yVirtual);
     glEnd();
      
-     if(tr->isSelected())
+    if(tr->isSelected())
     {
       glColor3ub(255, 0, 0);
     }
@@ -298,12 +298,38 @@ void Visualizer::drawTransition(Transition* tr, size_t trid)
     glPopName();
     glPopName();  
   }
+
   // Draw label near the control point (for the moment, fixed above the control 
   // point
-  fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
+  double labelX, labelY;
+  tr->getLabelPos(labelX, labelY);
+  labelX = (labelX / 2000.0) * (width - rad * 2);
+  labelY = (labelY / 2000.0) * (height - rad * 2);
+  if(selecting) {
+    glPushName(IDS::LABEL);
+    glPushName(from->getValue());
+    glPushName(trid);
+    fr->draw_bounding_box(tr->getLabel(), labelX, labelY,
+                  8 * pixelSize / 20.0f, 
+                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
+    glPopName();
+    glPopName();
+    glPopName();
+  }
+  
+  if(tr->isSelected())
+  {
+    glColor3ub(255, 0, 0);
+  }
+  else
+  {
+    glColor3ub(0, 0, 0);
+  }
+    
+
+  fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
- 
   
   glColor3ub(0, 0, 0); 
 

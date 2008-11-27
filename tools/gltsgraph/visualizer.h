@@ -42,7 +42,7 @@ class Visualizer
     void drawState(State* s);
 
     // Draws a single transition, from its in to its out transition
-    void drawTransition(Transition* t, size_t trid);
+    void drawTransition(Transition* t, size_t trid, bool inSelectMode);
 
     // Draws an arrow head
     void drawArrowHead(double baseLength);
