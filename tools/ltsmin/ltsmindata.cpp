@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Bert Lisser
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ltsmindata.cpp
-/// \brief Based on bsimdata.c (revision 1.1.1.1) from the muCRL toolset
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
