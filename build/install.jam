@@ -82,7 +82,7 @@ rule install-libraries ( names * : requirements * ) {
 
   module $(m) {
     rule install-headers ( sources * : requirements * ) {
-      install install-headers : $(short-headers) : <install-dependencies>off <install-type>H ;
+      install install-headers : $(sources) : $(requirements) <install-dependencies>off <install-type>H ;
     }
 
     rule install-libraries ( name headers ? : sources * : requirements * ) {
@@ -101,7 +101,7 @@ rule install-libraries ( names * : requirements * ) {
   }
 
   if [ feature.defaults <install> ] = <install>yes {
-    local project-root = [ $(project).get source-location ] ;
+    local project-source = [ $(project).get source-location ] ;
 
     # Get install location information
     if ! [ property.select location : $(requirements) ] {
@@ -127,18 +127,19 @@ rule install-libraries ( names * : requirements * ) {
     }
 
     local short-headers ;
- 
+
     for local header in $(headers) {
-      short-headers += [ path.relative-to $(project-root) $(header) ] ;
+      short-headers += [ path.relative-to $(project-source) $(header) ] ;
     }
- 
-    local header-root = [ path.parent [ path.relative-to [ $(project).get location ] $(headers[1]) ] ] ;
- 
+
+    local header-root = [ path.relative-to [ $(project).get location ]
+                [ path.join $(project-source) [ path.parent $(short-headers[1]) ] ] ] ;
+
     while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
       header-root = [ path.parent $(header-root) ] ;
     }
- 
-    if $(headers) { 
+
+    if $(headers) {
       modules.call-in $(m) : install-headers $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
       modules.call-in $(m) : install-libraries install install-headers : $(names) : $(requirements) ;
     }

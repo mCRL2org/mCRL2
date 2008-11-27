@@ -29,6 +29,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/exception.h"
 
 #include "workarounds.h" // for DECL_A
 

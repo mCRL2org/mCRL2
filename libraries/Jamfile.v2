@@ -34,7 +34,7 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
 
       for local source in $(sources) {
         local additional-requirements = [ MATCH .*/(<[^>]*>.*)?$ : $(source) ] ;
-         
+
         if $(additional-requirements) {
           source = [ MATCH (.*)/<?[^>]*>?.*$ : $(source) ] ;
         }
@@ -105,7 +105,7 @@ rule mcrl2-library-targets ( properties * ) {
   return $(targets) ;
 }
 
-local libraries = [ MATCH .*/libraries/(.*)/build/.* : [ glob-tree Jamfile.v2 ] ] ;
+local libraries = [ MATCH (.*)/build/.* : [ glob-tree Jamfile.v2 : .svn ] ] ;
 
 # Shared build large large mcrl2 library
 lib mcrl2
@@ -121,7 +121,7 @@ install-mcrl2-library
         ;
 
 IMPORT $(__name__) : mcrl2-library-components
-                     mcrl2-library-targets  
+                     mcrl2-library-targets
                      mcrl2-library
                  : : mcrl2-library-components
                      mcrl2-library-targets
