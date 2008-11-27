@@ -41,7 +41,7 @@ std::string BES2 =
   ;
   
 std::string BES3 =
-  "pbes nu X = Y;                                           \n"
+  "pbes mu X = Y;                                           \n"
   "     nu Y = X;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
@@ -49,7 +49,7 @@ std::string BES3 =
   
 std::string BES4 =
   "pbes nu Y = X;                                           \n"
-  "     nu X = Y;                                           \n"
+  "     mu X = Y;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
@@ -106,7 +106,7 @@ void test_bes_examples()
 {
   test_bes(BES1, false);
   test_bes(BES2, true);
-  test_bes(BES3, true);
+  test_bes(BES3, false);
   test_bes(BES4, true);
   test_bes(BES5, false);
   test_bes(BES6, true);

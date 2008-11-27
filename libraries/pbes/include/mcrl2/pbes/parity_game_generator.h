@@ -132,6 +132,7 @@ namespace pbes_system {
           R(datarv, datae),
           m_true_false_dependencies(true_false_dependencies)
       {
+std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
         // Nothing to be done for an empty PBES.
         if (m_pbes.equations().empty())
         {

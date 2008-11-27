@@ -7,140 +7,20 @@
 /// \file paritygame.cpp
 /// \brief Add your file description here.
 
-// #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-
-#include <iterator>
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/detail/python_parity_game_generator.h"
 
+using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
-
-/// A class that generates python code for a parity game, such
-/// that it can be solved with a parity game solver written in
-/// python.
-class python_parity_game_generator: public parity_game_generator
-{
-  protected:
-    /// Returns the quoted name of the vertex, for example "X1"
-    std::string vertex(unsigned int i) const
-    {
-      return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
-    }
-
-    /// Returns a tuple representing an edge, for example ("X1", "X2")
-    std::string edge(std::pair<unsigned int, unsigned int> e) const
-    {
-      return "(" + vertex(e.first) + ", " + vertex(e.second) + ")";
-    }
-
-    /// Returns a string representing a priority, for example "X1":0
-    std::string priority(std::pair<unsigned int, unsigned int> p) const
-    {
-      return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
-    }
-
-    template <typename Container, typename Function>
-    std::vector<std::string> apply(const Container& c, Function f) const
-    {
-      std::vector<std::string> result;
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        result.push_back(f(*i));
-      }
-      return result;
-    }
-
-    /// Wraps the elements in a set.
-    std::string python_set(const std::vector<std::string>& elements) const
-    {
-      return "set([" + boost::algorithm::join(elements, ", ") +  "])";
-    }
-
-    template <class Iter, class T>
-    void iota(Iter first, Iter last, T value) const
-    {
-      while (first != last)
-      {
-        *first++ = value++;
-      }
-    }
-
-  public:
-    python_parity_game_generator(pbes<>& p, bool true_false_dependencies)
-      : parity_game_generator(p, true_false_dependencies)
-    {}
-    
-    /// Generate python code for the python parity game solver.
-    // Example:
-    // set(["X1", "X2", "X3", "X4", "X5"])
-    // set([("X1", "X2"), ("X2", "X1"), ("X2", "X3"), ("X3", "X4"), ("X3", "X5"), ("X4", "X1"), ("X5", "X3"), ("X5", "X1")])
-    // {"X1":0, "X2":1, "X3":2, "X4":1, "X5":3}
-    // set(["X3", "X4"])
-    // set(["X1", "X2", "X5"])
-    //
-    // Line 1: set of vertices                   
-    // Line 2: set of edges                      
-    // Line 3: dictionary of priorities
-    // Line 4: set of vertices for player even  
-    // Line 5: set of vertices for player oneven
-    std::string run()
-    {
-      std::set<unsigned int> V;
-      std::set<std::pair<unsigned int, unsigned int> > E;
-      std::map<unsigned int, unsigned int> priorities;
-      std::set<unsigned int> even_vertices;
-      std::set<unsigned int> odd_vertices;
-      
-      std::set<unsigned int> todo = get_initial_values();
-      std::set<unsigned int> done;
-      while (!todo.empty())
-      {
-        // handle vertex i
-        unsigned int i = *todo.begin();
-        todo.erase(i);
-        done.insert(i);
-        V.insert(i);    
-        unsigned int p = get_priority(i);
-        priorities[i] = p;
-        std::set<unsigned int> dep_i = get_dependencies(i);
-
-        switch (get_operation(i)) {
-           case PGAME_AND: odd_vertices.insert(i); break;
-           case PGAME_OR:  even_vertices.insert(i); break;
-           default: assert(false);
-        }
-       
-        for (std::set<unsigned int>::iterator j = dep_i.begin(); j != dep_i.end(); ++j)
-        {
-          // handle edge (i, *j)
-          E.insert(std::make_pair(i, *j));
-          if (done.find(*j) == done.end())
-          {
-            todo.insert(*j);
-          }
-        }
-      }
-
-      std::string result;
-      result = result + python_set(apply(V, boost::bind(&python_parity_game_generator::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(E, boost::bind(&python_parity_game_generator::edge, *this, _1))) + "\n";
-      result = result + "{" + boost::algorithm::join(apply(priorities, boost::bind(&python_parity_game_generator::priority, *this, _1)), ", ") + "}\n";
-      result = result + python_set(apply(even_vertices, boost::bind(&python_parity_game_generator::vertex, *this, _1))) + "\n";
-      result = result + python_set(apply(odd_vertices, boost::bind(&python_parity_game_generator::vertex, *this, _1)));
-      return result;
-    }
-};
 
 int main(int argc, char* argv[])
 {
@@ -148,7 +28,7 @@ int main(int argc, char* argv[])
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
-  bool true_false_dependencies;
+  bool true_false_dependencies;  // determines how the vertices true and false are handled
 
   try {
     //--- paritygame options ---------
@@ -205,9 +85,9 @@ int main(int argc, char* argv[])
       std::cout << "  output file:        " << outfile << std::endl;
     }
 
-    pbes<> p;
+    pbes_system::pbes<> p;
     p.load(infile);
-    python_parity_game_generator pgg(p, true_false_dependencies);
+    pbes_system::detail::python_parity_game_generator pgg(p, true_false_dependencies);
     std::string text = pgg.run();
     std::ofstream to(outfile.c_str());
     to << text;
