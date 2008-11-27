@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file paritygame.cpp
-/// \brief Add your file description here.
+/// \brief Example program for the parity_game_generator class.
 
 #include <cstdlib>
 #include <iostream>
@@ -22,13 +22,52 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
+// Example usage of the parity_game_generator class.
+void run1(const pbes<>& p)
+{
+  parity_game_generator pgg(p);
+  std::set<unsigned int> todo = pgg.get_initial_values();
+  std::set<unsigned int> done;
+  while (!todo.empty())
+  {
+    unsigned int i = *todo.begin();
+    todo.erase(i);
+    done.insert(i);
+
+    parity_game_generator::operation_type t = pgg.get_operation(i);
+    unsigned int p = pgg.get_priority(i);
+    std::set<unsigned int> v = pgg.get_dependencies(i);
+    std::cout << "adding equation " << i << ", dependencies = [";
+    for (std::set<unsigned int>::iterator j = v.begin(); j != v.end(); ++j)
+    {
+      if (done.find(*j) == done.end())
+      {
+        todo.insert(*j);
+      }
+      std::cout << (j == v.begin() ? "" : ", ") << *j;
+    }
+    std::cout << "], priority = " << p << " type = " << (t == parity_game_generator::PGAME_AND ? "AND" : "OR") << std::endl;
+  }
+  pgg.print_variable_mapping();
+}
+
+// Create a parity game graph, and write it to outfile. The graph
+// is in a format that can be processed by a python script made by
+// Jeroen Keiren.
+void run2(const pbes<>& p, std::string outfile)
+{
+  pbes_system::detail::python_parity_game_generator pgg(p);
+  std::string text = pgg.run();
+  std::ofstream to(outfile.c_str());
+  to << text;
+}
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
-  bool true_false_dependencies;  // determines how the vertices true and false are handled
 
   try {
     //--- paritygame options ---------
@@ -43,7 +82,6 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
-      ("true-false-dependencies,t", po::value<bool>(&true_false_dependencies)->default_value(false), "generate dependencies for true and false")
       ;
 
     //--- hidden options ---------
@@ -86,49 +124,12 @@ int main(int argc, char* argv[])
     }
 
     pbes_system::pbes<> p;
-    p.load(infile);
-    pbes_system::detail::python_parity_game_generator pgg(p, true_false_dependencies);
-    std::string text = pgg.run();
-    std::ofstream to(outfile.c_str());
-    to << text;
-/*
-    parity_game_generator pgg(p);
-    std::set<unsigned int> todo = pgg.get_initial_values();
-    std::set<unsigned int> done;
-    while (!todo.empty())
-    {
-      unsigned int i = *todo.begin();
-      todo.erase(i);
-      done.insert(i);
-
-      parity_game_generator::operation_type t = pgg.get_operation(i);
-      unsigned int p = pgg.get_priority(i);
-      std::set<unsigned int> v = pgg.get_dependencies(i);
-      std::cout << "adding equation " << i << ", dependencies = [";
-      for (std::set<unsigned int>::iterator j = v.begin(); j != v.end(); ++j)
-      {
-        if (done.find(*j) == done.end())
-        {
-          todo.insert(*j);
-        }
-        std::cout << (j == v.begin() ? "" : ", ") << *j;
-      }
-      std::cout << "], priority = " << p << " type = " << (t == parity_game_generator::PGAME_AND ? "AND" : "OR") << std::endl;
-    }
-    pgg.print_variable_mapping();
-*/    
-  }
-  catch(mcrl2::runtime_error e)
-  {
-    std::cerr << "runtime error: " << e.what() << std::endl;
-    std::exit(1);
+    p.load(infile);   
+    run1(p);
+    run2(p, outfile);
   }
   catch(std::exception& e) {
     std::cerr << "error: " << e.what() << "\n";
-    return 1;
-  }
-  catch(...) {
-    std::cerr << "exception of unknown type!\n";
   }
 
   return 0;

@@ -101,8 +101,8 @@ namespace detail {
       }
 
     public:
-      python_parity_game_generator(pbes<>& p, bool true_false_dependencies)
-        : parity_game_generator(p, true_false_dependencies)
+      python_parity_game_generator(const pbes<>& p)
+        : parity_game_generator(p, true)
       {}
 
       /// Generate python code for the python parity game solver.

@@ -27,14 +27,14 @@ namespace mcrl2 {
 namespace pbes_system {
 
   /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
-  /// a graph corresponding to a parity game problem. The predicate variables
+  /// a graph corresponding to a parity game problem. The proposition variables
   /// of the BES correspond to the vertices of the graph.
   ///
   /// An interface to the graph is provided in which the vertices correspond to
   /// integer values. The values are in the range [0, 1, ..., n], i.e. there are
   /// no holes in the sequence.
   /// Each vertex is labeled with a priority value, which is the
-  /// block nesting depth of the predicate variable in the BES.
+  /// block nesting depth of the proposition variable in the BES.
   class parity_game_generator
   {
     protected:
@@ -132,7 +132,6 @@ namespace pbes_system {
           R(datarv, datae),
           m_true_false_dependencies(true_false_dependencies)
       {
-std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
         // Nothing to be done for an empty PBES.
         if (m_pbes.equations().empty())
         {
@@ -171,7 +170,7 @@ std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
       }
       
       /// Returns the vertex type.
-      /// \param index The index of a predicate variable of the generated BES.
+      /// \param index The index of a proposition variable of the generated BES.
       /// \return PGAME_AND if the corresponding BES equation is a conjunction,
       /// PGAME_OR if it is a disjunction.
       operation_type get_operation(unsigned int index) const
@@ -206,7 +205,7 @@ std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
       /// The priority of the first equation is 0 if it is a maximal fixpoint,
       /// and 1 if it is a minimal fixpoint.
       /// 
-      /// \param index The index of a predicate variable of the generated BES.
+      /// \param index The index of a proposition variable of the generated BES.
       /// \return The block nesting depth of the variable in the BES.
       unsigned int get_priority(unsigned int index) const
       {
@@ -215,9 +214,9 @@ std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
       }
 
       /// Returns the vertices for which a solution is requested.
-      /// For a PBES this is a set of precisely one index that corresponds to
-      /// its initial value.
-      /// \return A set of indices corresponding to predicate variables of the generated BES.
+      /// By default a set containing the values 0, 1 and 2 is returned, corresponding
+      /// to the expressions true, false and the initial state of the PBES.
+      /// \return A set of indices corresponding to proposition variables of the generated BES.
       std::set<unsigned int> get_initial_values()
       {
         std::set<unsigned int> result;
@@ -231,8 +230,8 @@ std::cout << "PARITY GAME\n" << core::pp(m_pbes) << std::endl;
       }
 
       /// Returns the successors of a vertex in the graph.
-      /// \param index The index of a predicate variable of the generated BES.
-      /// \return The indices of the predicate variables that appear in the
+      /// \param index The index of a proposition variable of the generated BES.
+      /// \return The indices of the proposition variables that appear in the
       /// right hand side of the BES equation of the given index.
       std::set<unsigned int> get_dependencies(unsigned int index)
       {
