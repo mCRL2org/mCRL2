@@ -57,6 +57,25 @@ class gauss_elimination_algorithm
   protected:
     PbesRewriter& m_rewriter;
     EquationSolver& m_equation_solver;
+
+    /// pretty print an equation without generating a newline after the equal sign
+    /// \param eq A pbes equation
+    /// \return A pretty printed string
+    std::string pp(pbes_equation eq)
+    {
+      return core::pp(eq.symbol()) + " " + core::pp(eq.variable()) + " = " + core::pp(eq.formula());
+    }
+
+    /// Prints the sequence of pbes equations [first, last[ to standard out.
+    template <typename Iter>
+    void print(Iter first, Iter last)
+    {
+      std::cout << "pbes\n";
+      for (Iter i = first; i != last; ++i)
+      {
+        std::cout << "  " << pp(*i) << std::endl;
+      }
+    }
   
   public:
     gauss_elimination_algorithm(PbesRewriter& rewriter, EquationSolver& equation_solver)
@@ -67,6 +86,9 @@ class gauss_elimination_algorithm
     template <typename Iter>
     void run(Iter first, Iter last)
     {
+#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+  print(first, last);
+#endif
       if (first == last)
       {
         return;
@@ -76,10 +98,20 @@ class gauss_elimination_algorithm
       while (i != first)
       {
         --i;
-        *i = m_equation_solver(*i);
+#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+  std::cout << "solving equation\n";
+  std::cout << "  before: " << pp(*i) << std::endl;
+#endif
+        *i = m_equation_solver(*i); 
+#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+  std::cout << "   after: " << pp(*i) << std::endl;
+#endif
         gauss::substitute(first, i, i->variable(), i->formula());
       }
       *i = m_equation_solver(*i); // TODO: clean the logic of this algorithm up
+#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+  print(first, last);
+#endif
     }
 };
 

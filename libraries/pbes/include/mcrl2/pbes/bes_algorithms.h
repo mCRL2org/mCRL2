@@ -52,6 +52,7 @@ int bes_gauss_elimination(pbes<Container>& p)
   typedef data::data_enumerator<number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
+  typedef typename core::term_traits<pbes_expression> tr;
     
   data::rewriter datar(p.data());
   number_postfix_generator name_generator;
@@ -62,11 +63,11 @@ int bes_gauss_elimination(pbes<Container>& p)
   gauss_elimination_algorithm<my_rewriter, bes_solver> algorithm(pbesr, solver);
   algorithm.run(p.equations().begin(), p.equations().end());
 
-  if (p.equations().front().formula() == pbes_expr::false_())
+  if (tr::is_false(p.equations().front().formula()))
   {
     return 0;
   }
-  else if (p.equations().front().formula() == pbes_expr::true_())
+  else if (tr::is_true(p.equations().front().formula()))
   {
     return 1;
   }
