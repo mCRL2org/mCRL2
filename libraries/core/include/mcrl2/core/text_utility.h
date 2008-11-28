@@ -49,7 +49,7 @@ namespace core {
     return result;
   }
 
-  /// Split the text.
+  /// \brief Split the text.
   inline
   std::vector<std::string> split(const std::string& line, const std::string& separators)
   {

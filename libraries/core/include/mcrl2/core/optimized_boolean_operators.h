@@ -17,10 +17,9 @@
 
 namespace mcrl2 {
 
-namespace core { 
+namespace core {
 
-  /// Operator not.
-  ///
+  /// \brief Operator not.
   /// \param arg A term.
   /// \return The application of not to the argument.
   template <typename Term>
@@ -30,8 +29,7 @@ namespace core {
     return detail::optimized_not(arg, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// Operator and.
-  ///
+  /// \brief Operator and.
   /// \param left A term.
   /// \param right A term.
   /// \return The application of and to the arguments.
@@ -42,8 +40,7 @@ namespace core {
     return detail::optimized_and(left, right, tr::and_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// Operator or.
-  ///
+  /// \brief Operator or.
   /// \param left A term.
   /// \param right A term.
   /// \return The application of or to the arguments.
@@ -54,8 +51,7 @@ namespace core {
     return detail::optimized_or(left, right, tr::or_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// Implication.
-  ///
+  /// \brief Implication.
   /// \param left A term.
   /// \param right A term.
   /// \return The application of implication to the arguments.
@@ -66,8 +62,7 @@ namespace core {
     return detail::optimized_imp(left, right, tr::imp, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// Universal quantification.
-  ///
+  /// \brief Universal quantification.
   /// \param v A sequence of variables.
   /// \param arg A term.
   /// \return The application of universal quantification to the arguments.
@@ -78,8 +73,7 @@ namespace core {
     return detail::optimized_forall(v, arg, tr::forall, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// Existential quantification.
-  ///
+  /// \brief Existential quantification.
   /// \param v A sequence of variables.
   /// \param arg A term.
   /// \return The application of existential quantification to the arguments.

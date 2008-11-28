@@ -17,7 +17,7 @@
 namespace mcrl2 {
   namespace core {
 
-  /// String type of the LPS library.
+  /// \brief String type of the LPS library.
   /// Identifier strings are represented internally as ATerms.
   typedef atermpp::aterm_string identifier_string;
   

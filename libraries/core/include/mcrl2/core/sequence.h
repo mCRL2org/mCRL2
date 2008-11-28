@@ -52,6 +52,8 @@ namespace detail {
 
 } // namespace detail
 
+/// \brief Algorithm for generating sequences.
+///
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
@@ -75,6 +77,8 @@ void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f,
                                );
 }
 
+/// \brief Algorithm for generating sequences.
+///
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences

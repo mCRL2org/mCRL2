@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/term_traits.h
-/// \brief add your file description here.
+/// \brief Traits class for (boolean) terms.
 
 #ifndef MCRL2_CORE_TERM_TRAITS_H
 #define MCRL2_CORE_TERM_TRAITS_H
@@ -16,7 +16,7 @@ namespace mcrl2 {
 
 namespace core {
 
-  /// Contains type information for terms.
+  /// \brief Contains type information for terms.
   template <typename T>
   struct term_traits
   {

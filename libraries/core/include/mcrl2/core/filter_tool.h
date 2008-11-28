@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/filter_tool.h
-/// \brief add your file description here.
+/// \brief A class that provides common functionality for filter tools.
 
 #ifndef MCRL2_CORE_FILTER_TOOL_H
 #define MCRL2_CORE_FILTER_TOOL_H
@@ -22,23 +22,39 @@ namespace mcrl2 {
 
 namespace core {
 
+  /// \brief Base class for filter tools that take a file as input and produces a file
+  /// as result.
   class filter_tool
   {
     protected:
+      /// The name of the tool
       std::string m_name;
+
+      /// The name of the developer(s)
       std::string m_author;
+
+      /// The description of the tool
       std::string m_tool_description;
+        
+      /// The input file name
       std::string m_input_filename;
+
+      /// The output file name
       std::string m_output_filename;
 
-      /// add additional options
+      /// \brief Add options to an interface description.
+      /// \param desc An interface description
       virtual void add_options(utilities::interface_description& desc)
       {}
 
-      /// parse non-standard options
+      /// \brief Parse non-standard options
+      /// \param desc An interface description
       virtual void parse_options(const utilities::command_line_parser& parser)
       {}
 
+      /// \brief Parse command line options
+      /// \param argc Number of command line arguments
+      /// \param argv Command line arguments
       void parse_options(int argc, char* argv[])
       {
         utilities::interface_description clinterface(argv[0], m_name, m_author, "[OPTION]... [INFILE [OUTFILE]]\n", m_tool_description);
@@ -60,7 +76,7 @@ namespace core {
       }
 
     public:
-      /// Constructor.
+      /// \brief Constructor.
       filter_tool(const std::string& name,
                   const std::string& author,
                   const std::string& tool_description
@@ -71,13 +87,18 @@ namespace core {
       {
       }
 
+      /// \brief Destructor.
       virtual ~filter_tool()
       {}
 
-      /// Run the tool. The options must be set manually.
+      /// \brief Run the tool. The options must be set manually.
+      /// \return True if the tool execution was successful.
       virtual bool run() = 0;
 
-      /// Run the tool with the given command line options.
+      /// \brief Run the tool with the given command line options.
+      /// \param argc Number of command line arguments
+      /// \param argv Command line arguments
+      /// \return The execution result
       int execute(int argc, char* argv[])
       {
         try {
@@ -97,14 +118,14 @@ namespace core {
         }
       }
 
-      /// Sets the input filename.
+      /// \brief Sets the input filename.
       /// \param filename The name of a file.
       void set_input_filename(const std::string& filename)
       {
         m_input_filename = filename;
       }
 
-      /// Sets the output filename.
+      /// \brief Sets the output filename.
       /// \param filename The name of a file.
       void set_output_filename(const std::string& filename)
       {
