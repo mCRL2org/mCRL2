@@ -66,9 +66,9 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = data::data_variable("x:X");
-  y = data::data_variable("y:Y");
-  z = data::data_variable("z:Z");
+  x = data::data_variable("x", data::sort_expr::bool_());
+  y = data::data_variable("y", data::sort_expr::bool_());
+  z = data::data_variable("z", data::sort_expr::bool_());
 
   f  = not_(x);
   f1 = normalize(f);
