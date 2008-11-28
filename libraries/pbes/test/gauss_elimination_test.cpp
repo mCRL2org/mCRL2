@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/pbes/pbes2bool.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -99,7 +100,10 @@ void test_bes(std::string bes_spec, bool expected_result)
     case 1: std::cout << "TRUE" << std::endl; break;
     case 2: std::cout << "UNKNOWN" << std::endl; break;
   }
-  BOOST_CHECK( (expected_result == false && result == 0) || (expected_result == true && result == 1) );
+  BOOST_CHECK( (expected_result == false && result == 0) || (expected_result == true && result == 1) );  
+
+  // BOOST_CHECK(pbes2bool(p) == expected_result);
+  // this gives assertion failures in pbes2bool
 }
 
 void test_bes_examples()
