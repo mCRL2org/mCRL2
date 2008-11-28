@@ -69,6 +69,8 @@ class t_tool_options {
 
     inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
                        print_dot_state(true), determinise(false), check_reach(true) {
+
+      eq_opts.reduce.add_class_to_state = false;
     }
 
     inline std::string source_string() const {
@@ -563,7 +565,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
 
   if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
-
     c.add_option(option_add_bisimulation_equivalence_class).
         set_argument_value< 0 >(bisimulation_add_eq_classes.get_status());
   }
@@ -629,11 +630,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
 
   if (method != lts_eq_none) {
+    tool_options.equivalence = method;
+
     if (method == mcrl2::lts::lts_eq_isomorph) {
       tool_options.determinise = true;
-    }
-    else {
-      tool_options.equivalence = method;
     }
 
     if (c.option_exists(option_add_bisimulation_equivalence_class)) {

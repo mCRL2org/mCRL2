@@ -160,11 +160,11 @@ namespace utility {
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                     << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
- 
+
     BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.get_tools()) {
       do_visit(*t);
     }
- 
+
     /* Write footer */
     out << "</tool-catalog>\n";
   }

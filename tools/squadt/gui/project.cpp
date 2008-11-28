@@ -310,10 +310,10 @@ namespace squadt {
       s->Layout();
 
       display->set_title(wxString(t.c_str(), wxConvLocal));
-       
+
       return display;
     }
-            
+
     /**
      * \param e a reference to a tree event object
      **/
@@ -368,19 +368,26 @@ namespace squadt {
       dialog::add_to_project dialog(this, manager->get_project_store().string());
 
       if (dialog.ShowModal()) {
-        /* File does not exist in project directory */
-        processor* p = manager->import_file(
-                              boost::filesystem::path(dialog.get_source()), 
-                              boost::filesystem::path(dialog.get_destination()).leaf()).get();
+        try {
+          /* File does not exist in project directory */
+          processor& p(*manager->import_file(
+                                boost::filesystem::path(dialog.get_source()),
+                                boost::filesystem::path(dialog.get_destination()).leaf()));
 
-        /* Add to the new project */
-        wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
-                wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
+          /* Add to the new project */
+          wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
+                  wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
 
-        object_view->SetItemData(i, new tool_data(*this, *p->get_output_iterators().begin()));
-        object_view->EnsureVisible(i);
+          object_view->SetItemData(i, new tool_data(*this, *p.get_output_iterators().begin()));
+          object_view->EnsureVisible(i);
 
-        manager->store();
+          manager->store();
+        }
+        catch (std::exception& e) {
+          wxMessageDialog(0, wxT("Failed to add `") + wxString(dialog.get_name().c_str(), wxConvLocal) +
+                wxT("' to project, please try again.\n\n Details: ") +
+                wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
+        }
       }
     }
 
@@ -389,7 +396,7 @@ namespace squadt {
 
       while (file_name_dialog.ShowModal() == wxID_OK) {
         boost::filesystem::path  name(file_name_dialog.GetValue().fn_str());
-        
+
         try {
           boost::shared_ptr < processor > new_processor(manager->construct());
 

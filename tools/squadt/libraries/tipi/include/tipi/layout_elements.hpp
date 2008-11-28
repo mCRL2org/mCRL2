@@ -265,7 +265,7 @@ namespace tipi {
         private:
 
           /** \brief Default constructor */
-          inline checkbox() {}
+          inline checkbox() : m_status(false) {}
 
         public:
 
