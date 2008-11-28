@@ -276,8 +276,8 @@ void test_complement_method_builder()
   using namespace pbes_system::pbes_expr;
   namespace d = data::data_expr;
 
-  data_variable X("x:X");
-  data_variable Y("y:Y");
+  data_variable X("x", data::sort_expr::bool_());
+  data_variable Y("y", data::sort_expr::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));

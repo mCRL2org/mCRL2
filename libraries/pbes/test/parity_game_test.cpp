@@ -87,7 +87,7 @@ std::string BES8 =
 void test_bes(std::string bes_spec, std::string output_file, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  pbes_system::detail::python_parity_game_generator pgg(p, true);
+  pbes_system::detail::python_parity_game_generator pgg(p);
   std::string text = pgg.run();
   std::ofstream to(output_file.c_str());
   to << text << std::endl;

@@ -141,10 +141,10 @@ void test_data_variable_replace()
   variables = push_front(variables, d2);
   variables = push_front(variables, d3);
 
-  data_variable x("x:X");
-  data_variable y("y:X");
-  data_variable z("z:X");
-  data_expression e1 = equal_to(x, y);
+  data_variable x("x:D");
+  data_variable y("y:D");
+  data_variable z("z:D");
+  data_expression e1 = x;
   data_expression e2 = z;
   data_expression e3 = y;
   data_expression_list replacements;

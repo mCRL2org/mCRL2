@@ -9,16 +9,22 @@
 /// \file mcrl2/data/data_expression.h
 /// \brief The class data_expression.
 
+#define MCRL2_DATA_EXPRESSION_DEBUG
+
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
+#include <iostream>
 #include <string>
 #include <cassert>
+#include <stdexcept>
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/sort_arrow.h"
 
 namespace mcrl2 {
 
@@ -27,6 +33,12 @@ namespace data {
 
 // prototypes
 class data_expression;
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  bool check_data_application_sorts(atermpp::aterm_appl t);
+}
+/// \endcond
 
 /// \brief singly linked list of data expressions
 ///
@@ -40,6 +52,24 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// expression is not nil before using it.
 class data_expression: public atermpp::aterm_appl
 {
+  protected:   
+    /// This function checks if the data applications contained in this term
+    /// are well defined, using the function data_application::check_sorts.
+    void check_data_applications() const
+    {
+#ifdef MCRL2_DATA_EXPRESSION_DEBUG
+      try
+      {
+        atermpp::for_each(*this, detail::check_data_application_sorts);
+      }
+      catch(std::runtime_error e)
+      {
+        std::cerr << e.what() << std::endl;
+        assert(false);
+      }
+#endif
+    }
+
   public:
     /// Constructor.
     ///             
@@ -54,6 +84,7 @@ class data_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
+      check_data_applications();
     }
 
     /// Constructor.
@@ -63,6 +94,7 @@ class data_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
+      check_data_applications();
     }
 
     /// Returns the sort of the data expression.
@@ -489,6 +521,58 @@ namespace data_expr {
   } // namespace optimized
 
 } // namespace data_expr
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  /// Checks if the sorts of the arguments of a data application match
+  /// with the head.
+  /// \return True if the sorts match.
+  //
+  // Comments by Aad:
+  // Bij het checken van een data expressie van de vorm
+  // 
+  //   DataAppl(e, [e_0,...,e_n])
+  // 
+  // dient te worden nagegaan of de sort van e matcht met die van 
+  // e_0,...,e_n. Dat wil zeggen dat als e_0,...,e_n sorts s_0,...,s_n 
+  // hebben, dan dient data expressie e sort
+  // 
+  //   SortArrow([s_0,...,s_n], s)
+  //
+  inline
+  bool check_data_application_sorts(atermpp::aterm_appl t)
+  {
+    if (core::detail::gsIsDataAppl(t))
+    {
+      data_expression f = atermpp::arg1(t);
+      data_expression_list x = atermpp::list_arg2(t);
+      if (!data::is_sort_arrow(f.sort()))
+      {
+        std::cerr << "f.sort() = " << core::pp(f.sort()) << std::endl;
+        throw std::runtime_error("Error: ill-formed data_application detected (1): " + core::pp(t) + " " + core::pp(f.sort()));
+      }
+      sort_arrow fsort = f.sort();
+      sort_expression_list s = fsort.argument_sorts();
+      if (s.size() != x.size())
+      {
+        std::cerr << "s = " << core::pp(s) << " x = " << core::pp(x) << std::endl;
+        throw std::runtime_error("Error: ill-formed data_application detected (2): " + core::pp(t) + " " + core::pp(fsort));
+      }
+      sort_expression_list::iterator i = s.begin();
+      data_expression_list::iterator j = x.begin();
+      for (; i != s.end(); ++i, ++j)
+      {
+        if (*i != j->sort())
+        {
+          std::cerr << "*i = " << core::pp(*i) << " j->sort() = " << core::pp(j->sort()) << std::endl;
+          throw std::runtime_error("Error: ill-formed data_application detected (3): " + core::pp(t) + " " + core::pp(fsort));
+        }
+      }
+    }
+    return true;
+  }
+} // namespace detail
+/// \endcond
 
 } // namespace data
 

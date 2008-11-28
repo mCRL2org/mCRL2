@@ -56,8 +56,8 @@ int test_main(int argc, char** argv)
   /* This illustrates that the constructor for a data application does not
    * check type correctness of the resulting term!
    */
-  data_application e1(f, make_list(ex,ex));
-  data_application e2(f, make_list(ex,ex,ey));
+  //data_application e1(f, make_list(ex,ex));
+  //data_application e2(f, make_list(ex,ex,ey));
 
   return 0;
 }
