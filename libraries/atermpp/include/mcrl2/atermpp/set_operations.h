@@ -17,7 +17,7 @@
 
 namespace atermpp {
 
-  /// Returns the union of v and w.
+  /// \brief Returns the union of v and w.
   /// \param v A term list.
   /// \param w A term list.
   /// \return The union of the term lists, interpreted as sets.
@@ -38,7 +38,7 @@ namespace atermpp {
     return term_list<Term>(result.begin(), result.end());
   }
 
-  /// Returns v minus w.
+  /// \brief Returns v minus w.
   /// \param v A term list.
   /// \param w A term list.
   /// \return The difference of the term lists, interpreted as sets.

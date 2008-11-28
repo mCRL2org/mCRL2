@@ -17,7 +17,7 @@
 
 namespace atermpp
 {
-  /// Term containing a binary object.
+  /// \brief Term containing a binary object.
   ///
   class aterm_blob: public aterm_base
   {

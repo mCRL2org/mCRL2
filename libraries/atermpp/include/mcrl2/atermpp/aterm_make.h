@@ -39,7 +39,7 @@
 #  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 #  define TEXT3(z, n, _) aterm_traits<T ## n>::term(t ## n)
 
-/// Make a term with a fixed number of arguments.
+/// \brief Make a term with a fixed number of arguments.
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 aterm make_term(const std::string& format, BOOST_PP_ENUM(n, TEXT1, nil))
 {

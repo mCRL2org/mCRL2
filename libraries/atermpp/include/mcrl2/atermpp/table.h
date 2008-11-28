@@ -28,7 +28,7 @@ namespace atermpp
   };
   /// \endcond
 
-  /// Table containing ATerms. N.B. Copies of a table refer to the same object.
+  /// \brief Table containing ATerms. N.B. Copies of a table refer to the same object.
   ///
   class table
   {

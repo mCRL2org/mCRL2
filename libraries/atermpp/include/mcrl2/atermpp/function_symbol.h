@@ -17,7 +17,7 @@
 
 namespace atermpp
 {
-  /// Function symbol.
+  /// \brief Function symbol.
   ///
   class function_symbol
   {

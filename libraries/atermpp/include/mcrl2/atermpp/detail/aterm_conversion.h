@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/detail/aterm_conversion.h
-/// \brief Add your file description here.
+/// \brief Conversion functions for aterms.
 
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H

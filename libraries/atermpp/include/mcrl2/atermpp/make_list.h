@@ -17,7 +17,7 @@
 
 namespace atermpp
 {
-  /// Makes a list with a fixed number of arguments.
+  /// \brief Makes a list with a fixed number of arguments.
   ///
   /// \param t0 A list element.
   /// \return The generated list.
@@ -26,8 +26,8 @@ namespace atermpp
   {
     return aterm_list(ATmakeList1(aterm_traits<T0>::term(t0)));
   }
-  
-  /// Makes a list with a fixed number of arguments.
+
+  /// \brief Makes a list with a fixed number of arguments.
   ///
   /// \param t0 A list element.
   /// \param t1 A list element.
@@ -37,8 +37,8 @@ namespace atermpp
   {
     return aterm_list(ATmakeList2(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1)));
   }
-  
-  /// Makes a list with a fixed number of arguments.
+
+  /// \brief Makes a list with a fixed number of arguments.
   ///
   /// \param t0 A list element.
   /// \param t1 A list element.
@@ -50,7 +50,7 @@ namespace atermpp
     return aterm_list(ATmakeList3(aterm_traits<T0>::term(t0), aterm_traits<T1>::term(t1), aterm_traits<T2>::term(t2)));
   }
 
-  /// Makes a list with a fixed number of arguments.
+  /// \brief Makes a list with a fixed number of arguments.
   ///
   /// \param t0 A list element.
   /// \param t1 A list element.

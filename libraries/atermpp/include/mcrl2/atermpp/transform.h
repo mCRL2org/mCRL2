@@ -17,7 +17,7 @@
 namespace atermpp
 {
 
-  /// Applies the function f to the list l. If l = [x0, x1, ..., xn] then
+  /// \brief Applies the function f to the list l. If l = [x0, x1, ..., xn] then
   /// the list [f(x0), f(x1), ..., f(xn)] is returned.
   ///
   /// \param l A list.

@@ -16,11 +16,11 @@
 
 namespace atermpp
 {
-  /// Initialize the ATerm++ Library. The specified argument t is used to mark the
+  /// \brief Initialize the ATerm++ Library. The specified argument t is used to mark the
   /// the bottom of the program stack.
   /// \param bottom_of_stack The bottom of stack (or a good approximation of it).
-  /// All aterms in the range [bottom_of_stack,...[ will not be garbage collected.  
-  /// 
+  /// All aterms in the range [bottom_of_stack,...[ will not be garbage collected.
+  ///
   inline
   void aterm_init(const aterm& bottom_of_stack)
   {
@@ -30,7 +30,7 @@ namespace atermpp
 
 } // namespace atermpp
 
-/// MCRL2_ATERMPP_INIT(argc, argv) initialises the ATerm library using
+/// \brief MCRL2_ATERMPP_INIT(argc, argv) initialises the ATerm library using
 /// one of the parameters as the bottom of the stack. The parameter that is
 /// actually depends on the platform:
 /// - &argv on Windows platforms
@@ -43,7 +43,7 @@ namespace atermpp
   ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 
-/// MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
+/// \brief MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
 /// debugging information enabled, using one of the parameters as the bottom
 /// of the stack. The parameter that is actually depends on the platform:
 /// - &argv on Windows platforms

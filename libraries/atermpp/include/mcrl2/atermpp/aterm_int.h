@@ -16,7 +16,7 @@
 
 namespace atermpp
 {
-  /// Term containing an integer.
+  /// \brief Term containing an integer.
   ///
   class aterm_int: public aterm_base
   {

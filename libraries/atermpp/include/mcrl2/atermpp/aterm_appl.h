@@ -21,8 +21,7 @@
 
 namespace atermpp
 {
-  /// A term that models function application. The template argument
-  /// denotes the type of the arguments.
+  /// \brief A term that represents a function application.
   ///
   template <typename Term>
   class term_appl: public aterm_base
@@ -62,19 +61,19 @@ namespace atermpp
       ///
       typedef const Term const_reference;
 
-      /// An unsigned integral type.                                      
+      /// An unsigned integral type.
       ///
       typedef size_t size_type;
 
-      /// A signed integral type.                                         
+      /// A signed integral type.
       ///
       typedef ptrdiff_t difference_type;
 
-      /// Iterator used to iterate through an term_appl.                      
+      /// Iterator used to iterate through an term_appl.
       ///
       typedef term_appl_iterator<Term> iterator;
 
-      /// Const iterator used to iterate through an term_appl.                
+      /// Const iterator used to iterate through an term_appl.
       ///
       typedef term_appl_iterator<Term> const_iterator;
 
@@ -174,13 +173,13 @@ namespace atermpp
       size_type size() const
       { return ATgetArity(ATgetAFun(appl())); }
 
-      /// Returns an iterator pointing to the beginning of the list.     
+      /// Returns an iterator pointing to the beginning of the list.
       ///
       /// \return An iterator pointing to the beginning of the list.
       const_iterator begin() const
       {
         return const_iterator(((ATerm *)(m_term) + ARG_OFFSET));
-      } 
+      }
 
       /// Returns a const_iterator pointing to the beginning of the list.
       ///
@@ -189,7 +188,7 @@ namespace atermpp
       {
         return const_iterator(((ATerm *)(m_term) + ARG_OFFSET + size()));
       }
-  
+
       /// Returns the largest possible size of the list.
       ///
       /// \return The largest possible size of the list.
@@ -209,9 +208,9 @@ namespace atermpp
       {
         return function_symbol(ATgetAFun(appl()));
       }
- 
+
       /// Returns true if the term is quoted.
-      /// 
+      ///
       /// \return True if the term is quoted.
       bool is_quoted() const
       {
@@ -219,14 +218,14 @@ namespace atermpp
       }
 
       /// Returns the i-th argument.
-      /// 
+      ///
       /// \param i A positive number.
       /// \return The argument with the given index.
       Term operator()(unsigned int i) const
       {
         return Term(ATgetArgument(appl(), i));
       }
-  
+
       /// Returns a copy of the term with the i-th child replaced by t.
       /// \deprecated
       ///
@@ -258,7 +257,7 @@ namespace atermpp
       }
   };
 
-  /// A term_appl with children of type aterm.
+  /// \brief A term_appl with children of type aterm.
   ///
   typedef term_appl<aterm> aterm_appl;
 
@@ -275,7 +274,7 @@ namespace atermpp
   };
   /// \endcond
 
-  /// Equality operator.
+  /// \brief Equality operator.
   ///
   /// \param x A term.
   /// \param y A term.
@@ -285,8 +284,8 @@ namespace atermpp
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
   }
-  
-  /// Equality operator.
+
+  /// \brief Equality operator.
   ///
   /// \param x A term.
   /// \param y A term.
@@ -296,8 +295,8 @@ namespace atermpp
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
   }
-  
-  /// Equality operator.
+
+  /// \brief Equality operator.
   ///
   /// \param x A term.
   /// \param y A term.
@@ -308,7 +307,7 @@ namespace atermpp
     return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
   }
 
-  /// Inequality operator.
+  /// \brief Inequality operator.
   ///
   /// \param x A term.
   /// \param y A term.
@@ -318,8 +317,8 @@ namespace atermpp
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
   }
-  
-  /// Inequality operator.
+
+  /// \brief Inequality operator.
   ///
   /// \param x A term.
   /// \param y A term.
@@ -329,8 +328,8 @@ namespace atermpp
   {
     return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATfalse;
   }
-  
-  /// Inequality operator.
+
+  /// \brief Inequality operator.
   ///
   /// \param x A term.
   /// \param y A term.

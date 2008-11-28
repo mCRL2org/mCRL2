@@ -19,7 +19,7 @@
 
 namespace atermpp {
 
-/// Protected list container.
+/// \brief Protected list container.
 ///
 template <class T, class Allocator = std::allocator<T> >
 class list: public std::list<T, Allocator>, IProtectedATerm

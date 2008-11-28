@@ -17,7 +17,7 @@
 
 namespace atermpp {
 
-/// Iterator for term_appl.
+/// \brief Iterator for term_appl.
 ///
 template <typename Value>
 class term_appl_iterator: public boost::iterator_facade<

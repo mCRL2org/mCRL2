@@ -28,7 +28,7 @@ namespace atermpp
   }; 
   /// \endcond
   
-  /// Indexed set. N.B. Copies of an indexed_set refer to the same object.
+  /// \brief Indexed set. N.B. Copies of an indexed_set refer to the same object.
   ///
   class indexed_set
   {

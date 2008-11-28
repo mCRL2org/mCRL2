@@ -31,7 +31,7 @@ namespace atermpp
     return detail::for_each_impl(aterm_traits<Term>::term(t), op);
   }
 
-  /// Finds a subterm of t that matches a given predicate.
+  /// \brief Finds a subterm of t that matches a given predicate.
   /// \param t The term that is being searched 
   /// \param match The predicate that determines if a subterm is a match
   /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
@@ -47,7 +47,7 @@ namespace atermpp
     return aterm_appl();
   }
 
-  /// Finds a subterm of t that matches a given predicate.
+  /// \brief Finds a subterm of t that matches a given predicate.
   /// The term is only partially traversed. If the stop predicate
   /// returns true in a subterm, the recursion is not continued.
   /// \param t The term that is being searched
@@ -66,7 +66,7 @@ namespace atermpp
     return aterm_appl();
   }
 
-  /// Finds all subterms of t that match a given predicate, and writes the found terms
+  /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
   /// to the destination range starting with destBegin.
   /// \param t The term that is being searched.
   /// \param match The predicate that determines if a subterm is a match
@@ -78,7 +78,7 @@ namespace atermpp
     detail::find_all_if_impl(aterm_traits<Term>::term(t), match, i);
   }
 
-  /// Finds all subterms of t that match a given predicate, and writes the found terms
+  /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
   /// to the destination range starting with destBegin.
   /// The term is only partially traversed. If the stop predicate
   /// returns true in a subterm, the recursion is not continued.
@@ -93,7 +93,7 @@ namespace atermpp
     detail::partial_find_all_if_impl(aterm_traits<Term>::term(t), match, stop, i);
   }
 
-  /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
+  /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
   ///
   /// aterm_appl x;
@@ -110,7 +110,7 @@ namespace atermpp
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
 
-  /// Replaces each subterm in t that is equal to old_value with new_value.
+  /// \brief Replaces each subterm in t that is equal to old_value with new_value.
   /// The replacements are performed in top down order. For example,
   /// replace(f(f(x)), f(x), x) returns f(x) and not x.
   /// \param t A term.
@@ -123,7 +123,7 @@ namespace atermpp
     return replace(t, detail::default_replace(old_value, new_value));
   }
 
-  /// Replaces each subterm x of t by r(x). The ReplaceFunction r has
+  /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
   ///
   /// aterm_appl x;
@@ -141,7 +141,7 @@ namespace atermpp
     return Term(reinterpret_cast<ATermAppl>(x));   
   }
 
-  /// Replaces each subterm in t that is equal to old_value with new_value.
+  /// \brief Replaces each subterm in t that is equal to old_value with new_value.
   /// The replacements are performed in top down order. For example,
   /// replace(f(f(x)), f(x), x) returns f(x) and not x.
   /// \param t The term to which a replacement is applied.
@@ -154,7 +154,7 @@ namespace atermpp
     return bottom_up_replace(t, detail::default_replace(old_value, new_value));
   }
 
-  /// Replaces subterms x of t by r(x). The replace function r returns an
+  /// \brief Replaces subterms x of t by r(x). The replace function r returns an
   /// additional boolean value. This value is used to prevent further recursion.
   /// The ReplaceFunction r has the following signature:
   ///

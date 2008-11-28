@@ -19,7 +19,7 @@
 
 namespace atermpp {
 
-/// Protected vector container.
+/// \brief Protected vector container.
 ///
 template <class T, class Allocator = std::allocator<T> >
 class vector: public std::vector<T, Allocator>, IProtectedATerm

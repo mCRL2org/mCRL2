@@ -20,15 +20,15 @@
 namespace atermpp
 {
 
-/// Utility class for applying a substitution to a term.
+/// \brief Utility class for applying a substitution to a term.
 struct substitution
 {
   /// A value.
   aterm m_src;
-  
+
   /// A replacement.
   aterm m_dest;
-  
+
   /// Constructor.
   ///
   /// \param src A value.
@@ -36,7 +36,7 @@ struct substitution
   substitution(aterm src, aterm dest)
     : m_src(src), m_dest(dest)
   {}
-  
+
   /// Function call operator.
   ///
   /// \param t A term.
@@ -61,10 +61,10 @@ struct list_substitution
 {
   /// A sequence of values.
   Src m_src;
-  
+
   /// A sequence of replacements.
   Dest m_dest;
-  
+
   /// Constructor.
   ///
   /// \param src A sequence of values.
@@ -74,7 +74,7 @@ struct list_substitution
   {
     assert(src.size() == dest.size());
   }
-  
+
   /// Function call operator.
   ///
   /// \param t A term.
@@ -91,7 +91,7 @@ struct list_substitution
   }
 };
 
-/// Creation function for a list of substitutions.
+/// \brief Creation function for a list of substitutions.
 /// \param src A sequence of values.
 /// \param dest A sequence of replacements.
 /// \return The corresponding list substitution.

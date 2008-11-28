@@ -19,7 +19,7 @@
 
 namespace atermpp {
 
-/// Protected deque container.
+/// \brief Protected deque container.
 ///
 template <class T, class Allocator = std::allocator<T> >
 class deque: public std::deque<T, Allocator>, IProtectedATerm

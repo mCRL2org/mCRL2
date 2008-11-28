@@ -20,7 +20,7 @@
 
 namespace atermpp {
 
-/// Protected map container.
+/// \brief Protected map container.
 ///
 template<class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key,T> > >
 class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
@@ -119,7 +119,7 @@ std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, C
     }
 };
 
-/// Protected multimap container.
+/// \brief Protected multimap container.
 ///
 template<class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key,T> > >
 class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATerm

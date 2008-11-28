@@ -28,12 +28,12 @@ namespace {
   // #define   ATgetFirst(l) ((l)->head)
   //
   // So we need to turn them into proper functions.
-  
+
   inline ATermList aterm_get_next(ATermList l)
   {
     return ATgetNext(l);
   }
-  
+
   inline ATerm aterm_get_first(ATermList l)
   {
     return ATgetFirst(l);
@@ -49,7 +49,7 @@ namespace {
 
 namespace atermpp {
 
-  /// Singly linked list of terms. The template argument denotes the type of the elements.
+  /// \brief Singly linked list of terms.
   ///
   template <typename Term>
   class term_list: public aterm_base
@@ -58,7 +58,7 @@ namespace atermpp {
       /// \return The wrapped ATermList.
       const ATermList list() const
       { return reinterpret_cast<const ATermList>(m_term); }
-  
+
       /// \return The wrapped ATermList.
       ATermList list()
       { return reinterpret_cast<ATermList>(m_term); }
@@ -80,19 +80,19 @@ namespace atermpp {
       ///
       typedef const Term const_reference;
 
-      /// An unsigned integral type.                                      
+      /// An unsigned integral type.
       ///
       typedef size_t size_type;
 
-      /// A signed integral type.                                         
+      /// A signed integral type.
       ///
       typedef ptrdiff_t difference_type;
 
-      /// Iterator used to iterate through an term_list.                      
+      /// Iterator used to iterate through an term_list.
       ///
       typedef term_list_iterator<Term> iterator;
 
-      /// Const iterator used to iterate through an term_list.                
+      /// Const iterator used to iterate through an term_list.
       ///
       typedef term_list_iterator<Term> const_iterator;
 
@@ -159,20 +159,20 @@ namespace atermpp {
       ///
       /// \return The beginning of the list.
       const_iterator begin() const
-      { return const_iterator(list()); } 
+      { return const_iterator(list()); }
 
-      /// Returns a const_iterator pointing to the end of the term_list.     
+      /// Returns a const_iterator pointing to the end of the term_list.
       ///
       /// \return The end of the list.
       const_iterator end() const
       { return const_iterator(ATmakeList0()); }
-  
+
       ///
       /// Returns the size of the term_list.
       ///
       /// \return The size of the list.
       size_type size() const
-      { return aterm_get_length(list()); }     
+      { return aterm_get_length(list()); }
 
       ///
       /// Returns the largest possible size of the term_list.
@@ -224,14 +224,14 @@ namespace atermpp {
       term_list<Term> substitute(Substitution f) const
       {
         return term_list<Term>(f(*this));
-      }     
+      }
   };
 
-  /// A term_list with elements of type aterm.
+  /// \brief A term_list with elements of type aterm.
   ///
   typedef term_list<aterm> aterm_list;
 
-  /// Returns the first element of the list l.
+  /// \brief Returns the first element of the list l.
   /// \param l A list
   /// \return The first element of the list.
   template <typename Term>
@@ -241,7 +241,7 @@ namespace atermpp {
     return *l.begin();
   }
 
-  /// Returns the list obtained by inserting a new element at the beginning.
+  /// \brief Returns the list obtained by inserting a new element at the beginning.
   /// \param l A list.
   /// \param elem A list element.
   /// \return The list with an element inserted in front of it.
@@ -252,7 +252,7 @@ namespace atermpp {
     return term_list<Term>(ATinsert(l, aterm_traits<Term>::term(elem)));
   }
 
-  /// Returns the list obtained by inserting a new element at the end. Note
+  /// \brief Returns the list obtained by inserting a new element at the end. Note
   /// that the complexity of this function is O(n), with n the number of
   /// elements in the list!!!
   ///
@@ -266,8 +266,7 @@ namespace atermpp {
     return term_list<Term>(ATappend(l, aterm_traits<Term>::term(elem)));
   }
 
-  /// Returns the list obtained by removing the first element.
-  ///
+  /// \brief Returns the list obtained by removing the first element.
   /// \param l A list.
   /// \return The list with the first element removed.
   template <typename Term>
@@ -277,8 +276,7 @@ namespace atermpp {
     return term_list<Term>(aterm_get_next(l));
   }
 
-  /// Returns the list with the elements in reversed order.
-  ///
+  /// \brief Returns the list with the elements in reversed order.
   /// \param l A list.
   /// \return The reversed list.
   template <typename Term>
@@ -288,7 +286,7 @@ namespace atermpp {
     return term_list<Term>(ATreverse(l));
   }
 
-  /// Applies a function to all elements of the list and returns the result.
+  /// \brief Applies a function to all elements of the list and returns the result.
   /// \param l The list that is transformed.
   /// \param f The function that is applied to the elements of the list.
   /// \return The transformed list.
@@ -304,7 +302,7 @@ namespace atermpp {
     return reverse(result);
   }
 
-  /// Returns the concatenation of two lists.
+  /// \brief Returns the concatenation of two lists.
   /// \param l A list.
   /// \param m A list.
   /// \return The concatenation of the lists.
@@ -314,7 +312,7 @@ namespace atermpp {
   term_list<Term> operator+(term_list<Term> l, term_list<Term> m)
   { return term_list<Term>(ATconcat(l, m)); }
 
-  /// Appends an element to a list.
+  /// \brief Appends an element to a list.
   /// \param l A list.
   /// \param t A list element.
   /// \return The list with an element appended to it.
@@ -324,7 +322,7 @@ namespace atermpp {
   term_list<Term> operator+(term_list<Term> l, Term t)
   { return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); }
 
-  /// Appends an element to a list.
+  /// \brief Appends an element to a list.
   /// \param t A list element.
   /// \param l A list.
   /// \return The list with one element appended to it.
@@ -347,7 +345,7 @@ namespace atermpp {
   };
   /// \endcond
 
-  /// Equality operator.
+  /// \brief Equality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are equal.
@@ -357,8 +355,8 @@ namespace atermpp {
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
-  
-  /// Equality operator.
+
+  /// \brief Equality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are equal.
@@ -368,8 +366,8 @@ namespace atermpp {
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATtrue;
   }
-  
-  /// Equality operator.
+
+  /// \brief Equality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are equal.
@@ -380,7 +378,7 @@ namespace atermpp {
     return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATtrue;
   }
 
-  /// Inequality operator.
+  /// \brief Inequality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are not equal.
@@ -390,8 +388,8 @@ namespace atermpp {
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATfalse;
   }
-  
-  /// Inequality operator.
+
+  /// \brief Inequality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are not equal.
@@ -401,8 +399,8 @@ namespace atermpp {
   {
     return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATfalse;
   }
-  
-  /// Inequality operator.
+
+  /// \brief Inequality operator.
   /// \param x A list.
   /// \param y A list.
   /// \return True if the arguments are not equal.

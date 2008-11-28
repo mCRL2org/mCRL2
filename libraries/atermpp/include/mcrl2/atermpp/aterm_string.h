@@ -21,7 +21,7 @@ namespace atermpp
 {
   using detail::str2appl;
   
-  /// Term containing a string.
+  /// \brief Term containing a string.
   ///
   class aterm_string: public aterm_appl
   {

@@ -20,7 +20,7 @@
 
 namespace atermpp {
 
-/// Protected set container.
+/// \brief Protected set container.
 ///
 template<class T, class Compare = std::less<T>, class Allocator = std::allocator<T> >
 class set: public std::set<T, Compare, Allocator>, IProtectedATerm
@@ -127,7 +127,7 @@ std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << 
     }
 };
 
-/// Protected multiset container.
+/// \brief Protected multiset container.
 ///
 template<class T, class Compare = std::less<T>, class Allocator = std::allocator<T> >
 class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
