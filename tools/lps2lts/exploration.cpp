@@ -33,6 +33,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
 
+
+static ATerm get_repr(ATerm state);
+
+
 exploration_strategy str_to_expl_strat(const char *s)
 {
   if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
@@ -268,7 +272,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
     nsgen = nstate->getNextStates(ns,nsgen);
     while ( nsgen->next(&trans,&t,&priority) )
     {
-      if ( !priority && ATisEqual(s,t) )
+      if ( !priority && ATisEqual(s,get_repr(t)) )
       {
         break;
       }
