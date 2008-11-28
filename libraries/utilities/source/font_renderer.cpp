@@ -324,7 +324,7 @@ namespace mcrl2 {
         maxwidth = std::max(maxwidth, subs.length() * CHARWIDTH * scale);
         
         // break if we are outside the boundingbox
-        if (not ((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
+        if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
       }
       
       startpos = 0;
@@ -355,7 +355,7 @@ namespace mcrl2 {
         }
             
         // print dots if there are more lines and we are at the bottem of our bounding box
-        if (((not ((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && (subs.length() >= 3)) && (startpos + addpos > s.length()))
+        if (((!((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && (subs.length() >= 3)) && (startpos + addpos > s.length()))
         {
           subs = subs.substr(0, subs.length()-3);
           subs = subs.append("...");
@@ -410,7 +410,7 @@ namespace mcrl2 {
         y = y - CHARHEIGHT*scale;
         
         // break if we are outside the boundingbox
-        if (not ((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
+        if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
       }
     }
     
