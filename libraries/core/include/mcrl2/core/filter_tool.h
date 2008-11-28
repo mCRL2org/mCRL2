@@ -48,7 +48,7 @@ namespace core {
       {}
 
       /// \brief Parse non-standard options
-      /// \param desc An interface description
+      /// \param parser A command line parser
       virtual void parse_options(const utilities::command_line_parser& parser)
       {}
 

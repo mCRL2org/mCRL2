@@ -37,7 +37,7 @@ namespace detail {
   {
     const VariableContainer& variables_;
     const ExpressionContainer& replacements_;
-    
+
     data_enumerator_replace_helper(const VariableContainer& variables,
                                    const ExpressionContainer& replacements
                                   )
@@ -45,7 +45,7 @@ namespace detail {
     {
       assert(variables.size() == replacements.size());
     }
-    
+
     data_expression operator()(data_variable t) const
     {
       typename VariableContainer::const_iterator i = variables_.begin();
@@ -73,7 +73,7 @@ namespace detail {
                           )
      : e_(e), values_(values), result_(result)
     {}
-    
+
     void operator()()
     {
       data_expression d = replace_data_variables(e_, data_enumerator_replace_helper<data_variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_));
@@ -81,7 +81,7 @@ namespace detail {
       for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
       {
         v.insert(v.end(), i->variables().begin(), i->variables().end());
-      }       
+      }
       result_.push_back(data_expression_with_variables(d, data_variable_list(v.begin(), v.end())));
     }
   };
@@ -94,22 +94,23 @@ template <typename IdentifierGenerator = number_postfix_generator>
 class data_enumerator
 {
   protected:
-    /// A map that caches the constructors corresponding to sort expressions.
+
+    /// \brief A map that caches the constructors corresponding to sort expressions.
     typedef std::map<sort_expression, std::vector<data_operation> > constructor_map;
 
-    /// A data specification.
+    /// \brief A data specification.
     const data_specification* m_data;
-    
-    /// A rewriter.
+
+    /// \brief A rewriter.
     data::rewriter* m_rewriter;
-    
-    /// An identifier generator.
+
+    /// \brief An identifier generator.
     IdentifierGenerator* m_generator;
-    
-    /// A mapping with constructors.
+
+    /// \brief A mapping with constructors.
     constructor_map m_constructors;
 
-    /// Returns the constructors with target s.
+    /// \brief Returns the constructors with target s.
     /// \param s A sort expression.
     /// \return The constructors corresponding to the sort expression.
     const std::vector<data_operation>& constructors(sort_expression s)
@@ -126,13 +127,14 @@ class data_enumerator
     }
 
   public:
-    /// The variable type of the enumerator.
+
+    /// \brief The variable type of the enumerator.
     typedef data_variable variable_type;
-    
-    /// The term type of the enumerator.
+
+    /// \brief The term type of the enumerator.
     typedef data_expression_with_variables term_type;
-    
-    /// Constructor.
+
+    /// \brief Constructor.
     /// \param data_spec A data specification.
     /// \param rewriter A rewriter.
     /// \param generator An identifier generator.
@@ -142,7 +144,7 @@ class data_enumerator
      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
     {}
 
-    /// Enumerates a data variable.
+    /// \brief Enumerates a data variable.
     /// \param v A data variable.
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
     atermpp::vector<data_expression_with_variables> enumerate(const data_variable& v)
@@ -166,7 +168,7 @@ class data_enumerator
       return result;
     }
 
-    /// Enumerates a data expression. Only the variables of the enumerator
+    /// \brief Enumerates a data expression. Only the variables of the enumerator
     /// expression are expanded. Fresh variables are created using the
     /// identifier generator that was passed in the constructor.
     /// \param e A data expression.
@@ -179,9 +181,9 @@ class data_enumerator
       std::vector<atermpp::vector<data_expression_with_variables> > enumerated_values;
       for (data_variable_list::iterator i = e.variables().begin(); i != e.variables().end(); ++i)
       {
-        enumerated_values.push_back(enumerate(*i));     
+        enumerated_values.push_back(enumerate(*i));
       }
-      
+
       atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
       core::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;

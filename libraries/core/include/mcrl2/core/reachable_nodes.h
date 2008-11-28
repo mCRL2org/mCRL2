@@ -22,6 +22,7 @@ namespace mcrl2 {
   
 namespace core {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
   template <typename Graph>
@@ -39,8 +40,8 @@ namespace detail {
       m_result.push_back(boost::get(boost::vertex_index, g)[u]);
     }
   };
-
 } // namespace detail
+/// \endcond
 
   /// \brief Compute reachable nodes in a graph.
   /// \param[in] g A graph.
