@@ -18,7 +18,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/python_parity_game_generator.h"
+#include "mcrl2/pbes/detail/parity_game_output.h"
 
 using namespace mcrl2;
 
@@ -87,10 +87,18 @@ std::string BES8 =
 void test_bes(std::string bes_spec, std::string output_file, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  pbes_system::detail::python_parity_game_generator pgg(p);
-  std::string text = pgg.run();
-  std::ofstream to(output_file.c_str());
-  to << text << std::endl;
+  pbes_system::detail::parity_game_output pgg(p);
+  pgg.run();
+  {
+    std::string text = pgg.python_graph();
+    std::ofstream to(output_file.c_str());
+    to << text << std::endl;
+  }
+  {
+    std::string text = pgg.pgsolver_graph();
+    std::ofstream to((output_file + "1").c_str());
+    to << text << std::endl;
+  }
 }
 
 void test_bes_examples()

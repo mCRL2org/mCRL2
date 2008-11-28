@@ -16,7 +16,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
-#include "mcrl2/pbes/detail/python_parity_game_generator.h"
+#include "mcrl2/pbes/detail/parity_game_output.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -52,12 +52,12 @@ void run1(const pbes<>& p)
 }
 
 // Create a parity game graph, and write it to outfile. The graph
-// is in a format that can be processed by a python script made by
-// Jeroen Keiren.
+// is in pgsolver format, see http://www.tcs.ifi.lmu.de/~mlange/pgsolver/index.html.
 void run2(const pbes<>& p, std::string outfile)
 {
-  pbes_system::detail::python_parity_game_generator pgg(p);
-  std::string text = pgg.run();
+  pbes_system::detail::parity_game_output pgg(p);
+  pgg.run();
+  std::string text = pgg.pgsolver_graph();
   std::ofstream to(outfile.c_str());
   to << text;
 }

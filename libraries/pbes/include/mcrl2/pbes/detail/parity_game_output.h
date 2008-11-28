@@ -6,11 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/python_parity_game_generator.h
+/// \file mcrl2/pbes/detail/parity_game_output.h
 /// \brief add your file description here.
-
-#ifndef MCRL2_PBES_DETAIL_PYTHON_PARITY_GAME_GENERATOR_H
-#define MCRL2_PBES_DETAIL_PYTHON_PARITY_GAME_GENERATOR_H
 
 #include <set>
 #include <string>
@@ -22,6 +19,9 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 
+#ifndef MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
+#define MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -31,9 +31,24 @@ namespace detail {
   /// A class that generates python code for a parity game, such
   /// that it can be solved with a parity game solver written in
   /// python.
-  class python_parity_game_generator: public parity_game_generator
+  class parity_game_output: public parity_game_generator
   {
     protected:
+      /// The vertices of the parity game graph.
+      std::set<unsigned int> V;
+
+      /// The edges of the parity game graph.
+      std::set<std::pair<unsigned int, unsigned int> > E;
+
+      /// The vertex priorities of the parity game graph.
+      std::map<unsigned int, unsigned int> priorities;
+
+      /// The even vertices of the parity game graph.
+      std::set<unsigned int> even_vertices;
+
+      /// The odd vertices of the parity game graph.
+      std::set<unsigned int> odd_vertices;
+
       /// Returns the quoted name of the vertex, for example "X1"
       std::string vertex(unsigned int i) const
       {
@@ -101,7 +116,7 @@ namespace detail {
       }
 
     public:
-      python_parity_game_generator(const pbes<>& p)
+      parity_game_output(const pbes<>& p)
         : parity_game_generator(p, true)
       {}
 
@@ -118,21 +133,42 @@ namespace detail {
       // Line 3: dictionary of priorities
       // Line 4: set of vertices for player even
       // Line 5: set of vertices for player oneven
-      std::string run()
+      std::string python_graph()
       {
-        std::set<unsigned int> V;
-        std::set<std::pair<unsigned int, unsigned int> > E;
-        std::map<unsigned int, unsigned int> priorities;
-        std::set<unsigned int> even_vertices;
-        std::set<unsigned int> odd_vertices;
+        std::string result;
+        result = result + python_set(apply(V, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
+        result = result + python_set(apply(E, boost::bind(&parity_game_output::edge, *this, _1))) + "\n";
+        result = result + "{" + join(apply(priorities, boost::bind(&parity_game_output::priority, *this, _1)), ", ") + "}\n";
+        result = result + python_set(apply(even_vertices, boost::bind(&parity_game_output::vertex, *this, _1))) + "\n";
+        result = result + python_set(apply(odd_vertices, boost::bind(&parity_game_output::vertex, *this, _1)));
+        return result;
+      }
 
+      /// Generate output in Alpaga format
+      std::string pgsolver_graph()
+      {
+        std::vector<std::string> lines(V.size());
+        for (std::set<unsigned int>::const_iterator i = V.begin(); i != V.end(); ++i)
+        {
+          unsigned int k = *i;
+          lines[k] = boost::lexical_cast<std::string>(k) + " " + boost::lexical_cast<std::string>(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
+        }
+        for (std::set<std::pair<unsigned int, unsigned int> >::const_iterator i = E.begin(); i != E.end(); ++i)
+        {
+          unsigned int k = i->first;
+          unsigned int m = i->second;
+          std::string& line = lines[k];
+          line += ((line[line.size()-1] == ' ' ? "" : ", ") + boost::lexical_cast<std::string>(m));
+        }
+        return join(lines, ";\n") + ";";
+      }
+
+      void run()
+      {
         std::set<unsigned int> todo = get_initial_values();
         std::set<unsigned int> done;
         while (!todo.empty())
         {
-#ifdef MCRL2_PARITY_GAME_DEBUG
-  print_set("todo", todo);
-#endif
           // handle vertex i
           unsigned int i = *todo.begin();
           todo.erase(i);
@@ -141,9 +177,6 @@ namespace detail {
           unsigned int p = get_priority(i);
           priorities[i] = p;
           std::set<unsigned int> dep_i = get_dependencies(i);
-#ifdef MCRL2_PARITY_GAME_DEBUG
-  print_set("  dependencies vertex " + boost::lexical_cast<std::string>(i), dep_i);
-#endif
           switch (get_operation(i)) {
              case PGAME_AND: odd_vertices.insert(i); break;
              case PGAME_OR:  even_vertices.insert(i); break;
@@ -159,18 +192,7 @@ namespace detail {
               todo.insert(*j);
             }
           }
-#ifdef MCRL2_PARITY_GAME_DEBUG
-  print_set("V", V);
-#endif
         }
-
-        std::string result;
-        result = result + python_set(apply(V, boost::bind(&python_parity_game_generator::vertex, *this, _1))) + "\n";
-        result = result + python_set(apply(E, boost::bind(&python_parity_game_generator::edge, *this, _1))) + "\n";
-        result = result + "{" + join(apply(priorities, boost::bind(&python_parity_game_generator::priority, *this, _1)), ", ") + "}\n";
-        result = result + python_set(apply(even_vertices, boost::bind(&python_parity_game_generator::vertex, *this, _1))) + "\n";
-        result = result + python_set(apply(odd_vertices, boost::bind(&python_parity_game_generator::vertex, *this, _1)));
-		return result;
       }
   };
 
@@ -180,4 +202,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PYTHON_PARITY_GAME_GENERATOR_H
+#endif // MCRL2_PBES_DETAIL_PARITY_GAME_OUTPUT_H
