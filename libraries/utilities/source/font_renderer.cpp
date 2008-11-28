@@ -25,8 +25,7 @@
 namespace mcrl2 {
   namespace utilities {
 
-    font_renderer::font_renderer()
-    {
+    bool font_renderer::initialise() {
       // Create textures.
       //
       int red = 0;
@@ -73,8 +72,14 @@ namespace mcrl2 {
           GL_ALPHA,
           GL_UNSIGNED_BYTE,
           tex_char[i] );
-        
       }
+    }
+
+    font_renderer::font_renderer()
+    {
+      static initialised = initialise();
+
+      static_cast< void >(initialised); // prevent unused variable warnings
     };
 
 

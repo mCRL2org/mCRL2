@@ -63,7 +63,7 @@ namespace mcrl2
 
         /// \brief Destructor
         ~font_renderer();
-        
+
         /// \brief Renders the string s.
         /// \param[in] s The string to be drawn.
         /// \param[in] x The x coordinate of the string.
@@ -88,7 +88,7 @@ namespace mcrl2
           const Alignment align_horizontal,
           const Alignment align_vertical
         );
-        
+
         /// \brief Renders a bounding box for string s.
         /// \param[in] s The string to be drawn.
         /// \param[in] x The x coordinate of the string.
@@ -111,7 +111,7 @@ namespace mcrl2
           const Alignment align_vertical,
           const bool draw_border
         );
-       
+
         /// \brief Renders the string s.
         /// \param[in] s The string to be drawn.
         /// \param[in] x The x coordinate of the string.
@@ -133,11 +133,11 @@ namespace mcrl2
         ///       yTop.
         void draw_cropped_text(
           const std::string s,
-          const double x, 
+          const double x,
           const double y,
-          const double xLft, 
+          const double xLft,
           const double xRgt,
-          const double yTop, 
+          const double yTop,
           const double yBot,
           const double scale,
           const Alignment align_horizontal,
@@ -172,12 +172,13 @@ namespace mcrl2
           const Alignment align_vertical
         );
 
-
         private:
-          GLuint tex_char_id[CHARSETSIZE];
-          GLubyte tex_char[CHARSETSIZE][CHARHEIGHT * CHARWIDTH];
+          static GLuint  tex_char_id[CHARSETSIZE];
+          static GLubyte tex_char[CHARSETSIZE][CHARHEIGHT * CHARWIDTH];
 
           size_t index_from_char(const char & c);
+
+          bool initialise();
     }; // class font_renderer
   } // namespace utilities
 } // namespace mcrl2

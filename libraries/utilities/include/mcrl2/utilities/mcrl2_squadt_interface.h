@@ -84,9 +84,9 @@ namespace mcrl2 {
               add(mcrl2::lts::lts_mcrl, "mCRL").
               add(mcrl2::lts::lts_svc, "SVC").
               add(mcrl2::lts::lts_fsm, "FSM").
-#ifdef USE_BCG
+# ifdef USE_BCG
               add(mcrl2::lts::lts_bcg, "BCG").
-#endif
+# endif
               add(mcrl2::lts::lts_dot, "DOT");
 #endif
 

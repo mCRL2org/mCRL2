@@ -215,7 +215,7 @@ namespace squadt {
     visitors::store(*m_tool_manager, tool_manager_file_name);
 
     store_visitor preferences(miscellaneous_file_name);
-   
+
     preferences.store(*m_executor);
     preferences.store(*m_type_registry);
   }

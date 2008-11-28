@@ -77,11 +77,11 @@ namespace squadt {
       /** \brief Get capabilities object for this tool */
       inline boost::shared_ptr < tipi::tool::capabilities > get_capabilities() const;
 
-      /** \brief Get the location to for this tool */
-      inline boost::filesystem::path get_location() const;
+      /** \brief Set the location to for this tool */
+      inline void set_location(boost::filesystem::path const& p);
 
       /** \brief Get the location to for this tool */
-      inline void set_location(boost::filesystem::path const& p);
+      inline boost::filesystem::path get_location() const;
 
       /** \brief Get the name of this tool */
       inline std::string get_name() const;

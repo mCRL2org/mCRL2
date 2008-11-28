@@ -125,18 +125,18 @@ namespace transport {
 
       if (!w.expired()) {
         boost::mutex::scoped_lock s(m_send_lock);
-       
+
         /* Wait until send operations complete */
         if (0 < m_send_count) {
           m_send_monitor.wait(s);
         }
-        
+
         boost::mutex::scoped_lock ll(m_operation_lock);
-       
+
         boost::system::error_code e;
-       
+
         m_socket.close(e);
-       
+
         if (e) { // An error occurred.
           throw boost::system::system_error(e.value(), boost::system::get_system_category());
         }
@@ -193,7 +193,7 @@ namespace transport {
 
           m_socket.async_receive(asio::buffer(m_buffer.get(), input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));
-       
+
           /* Make sure the scheduler is running */
           m_scheduler->run();
         }
