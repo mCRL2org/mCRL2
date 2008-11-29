@@ -149,8 +149,12 @@ namespace utility {
   void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
 
+    std::string location;
+
     tree->GetAttribute("name", &t.m_name);
-    tree->GetAttribute("location", &t.m_location);
+    tree->GetAttribute("location", &location);
+
+    t.set_location(location);
 
     if (!tree->NoChildren()) {
       t.m_capabilities.reset(new tipi::tool::capabilities);
