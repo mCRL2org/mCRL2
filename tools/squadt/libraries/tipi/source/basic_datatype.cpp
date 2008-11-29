@@ -39,13 +39,7 @@ namespace tipi {
     template class real_range< long double, true, false >;
     template class real_range< long double, true, true >;
 
-    /*
-     * \param[in] v value of the chosen carrier type
-     * \param[in] s any string
-     * \return *this
-     * \throws std::runtime_error if s contains characters other than those in [0-9a-zA-Z_\\-]
-     **/
-    enumeration< size_t >& enumeration< size_t >::add(const size_t v, std::string const& s) {
+    enumeration< size_t >& enumeration< size_t >::do_add(const size_t v, std::string const& s) {
       using namespace boost::xpressive;
 
       if (!regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\'])))) {
@@ -60,11 +54,7 @@ namespace tipi {
       return *this;
     }
 
-    /**
-     * \param[in] s the string to evaluate
-     * \return the associated value of the enumerated type
-     **/
-    size_t enumeration< size_t >::evaluate(std::string const& s) const {
+    size_t enumeration< size_t >::do_evaluate(std::string const& s) const {
       for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
         if (i->second == s) {
           return i->first;
@@ -74,11 +64,7 @@ namespace tipi {
       return m_values.end()->first;
     }
 
-    /**
-     * \param[in] s any string to be checked as a valid instance of this type
-     * \return whether s represents a string associated to a value of the enumerated type
-     **/
-    bool enumeration< size_t >::validate(std::string const& s) const {
+    bool enumeration< size_t >::do_validate(std::string const& s) const {
       for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
         if (i->second == s) {
           return true;

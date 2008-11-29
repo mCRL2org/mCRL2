@@ -126,7 +126,7 @@ namespace tipi {
     }
     /// \endcond
 
-    template < typename T >
+    template < typename C = size_t >
     class enumeration;
 
     /// \cond INTERNAL_DOCS
@@ -156,8 +156,8 @@ namespace tipi {
         /** \brief Gets an iterator over the possible elements of the type */
         virtual const_iterator_range values() const = 0;
 
-        /** \brief Constructor */
-        virtual ~basic_enumeration() { }
+        /** \brief Destructor */
+        virtual inline ~basic_enumeration() { }
     };
 
     /**
@@ -221,10 +221,17 @@ namespace tipi {
           return i->second;
         }
 
+        size_t do_evaluate(std::string const& s) const;
+        bool   do_validate(std::string const& s) const;
+        enumeration< size_t >& do_add(const size_t v, std::string const& s);
+
         /** \brief Converts a string to an index representation
          * \param[in] s the string to evaluate
+         * \return the associated value of the enumerated type
          **/
-        size_t evaluate(std::string const& s) const;
+        size_t evaluate(std::string const& s) const {
+          return do_evaluate(s);
+        }
 
       public:
 
@@ -232,16 +239,24 @@ namespace tipi {
          * \param[in] v value of the chosen carrier type
          * \param[in] s any string
          * \return *this
+         * \throws std::runtime_error if s contains characters other than those in [0-9a-zA-Z_\\-]
          **/
-        enumeration< size_t >& add(const size_t v, std::string const& s);
+        inline enumeration< size_t >& add(const size_t v, std::string const& s) {
+          return do_add(v, s);
+        }
 
-        /// \brief validates whether a string is a value of the enumerated type
-        bool validate(std::string const& s) const;
+        /** \brief validates whether a string is a value of the enumerated type
+         * \param[in] s any string to be checked as a valid instance of this type
+         * \return whether s represents a string associated to a value of the enumerated type
+         **/
+        inline bool validate(std::string const& s) const {
+          return do_validate(s);
+        }
+
+        /** \brief Destructor */
+        inline ~enumeration() { }
     };
     /// \endcond
-
-    template < typename C = size_t >
-    class enumeration;
 
     /**
      * \brief Derived data type specifier for enumerations
@@ -267,10 +282,10 @@ namespace tipi {
 
       private:
 
-        inline enumeration< size_t >& get_single_instance() const {
-          static std::auto_ptr< enumeration< size_t > > instance(new enumeration< size_t >);
+        inline static enumeration< size_t >& get_single_instance() {
+          static enumeration< size_t > instance;
 
-          return *instance;
+          return instance;
         }
 
         /** \brief Converts to underlying type */
@@ -322,6 +337,9 @@ namespace tipi {
         inline bool validate(std::string const& s) const {
           return get_single_instance().validate(s);
         }
+
+        /** \brief Destructor */
+        inline ~enumeration() { }
     };
 
     /// \cond INTERNAL_DOCS
