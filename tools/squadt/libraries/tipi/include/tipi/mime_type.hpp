@@ -39,7 +39,11 @@ namespace tipi {
     private:
 
       /** \brief Strings for conversion of main types */
-      static const char* const main_type_as_string[];
+      static const char* const (&main_type_as_string())[9] {
+        static const char* const main_type_strings[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };
+
+        return main_type_strings;
+      }
 
     private:
 
@@ -91,15 +95,15 @@ namespace tipi {
   }
 
   inline std::string mime_type::main_type() const {
-    return (main_type_as_string[m_main]);
+    return main_type_as_string()[m_main];
   }
 
   inline std::string mime_type::sub_type() const {
-    return (m_sub);
+    return m_sub;
   }
 
   inline std::string mime_type::string() const {
-    return (std::string(main_type_as_string[m_main]) + "/" + m_sub);
+    return (std::string(main_type_as_string()[m_main]) + "/" + m_sub);
   }
 
   inline bool mime_type::operator==(mime_type const& r) const {

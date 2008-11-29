@@ -98,12 +98,12 @@ namespace tipi {
     tree = in.FirstChildElement(false);
   }
 
-  std::istream& operator >> (std::istream& s, tipi::message::type_identifier_t& id) {
+  std::istream& operator >> (std::istream& s, tipi::message::message_type & id) {
     size_t t;
 
     s >> t;
 
-    id = static_cast < tipi::message::type_identifier_t > (t);
+    id = static_cast < tipi::message::message_type > (t);
 
     return (s);
   }
@@ -144,7 +144,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::message& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message");
 
-    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::message_unknown);
+    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::unknown());
 
     o.m_content.clear();
 

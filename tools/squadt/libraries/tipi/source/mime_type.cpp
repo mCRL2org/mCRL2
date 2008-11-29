@@ -8,14 +8,11 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <boost/foreach.hpp>
 #include <boost/xpressive/xpressive_static.hpp>
 
 #include "tipi/mime_type.hpp"
 
 namespace tipi {
-  const char* const       mime_type::main_type_as_string[] = { "application", "audio", "image", "message", "multipart", "text", "video", "unknown", 0 };
-
   /**
    * \param[in] s a string that represents a mime type
    **/
@@ -32,11 +29,11 @@ namespace tipi {
       if (matches.size() == 3 && (matches[2].length() != 0)) {
         m_sub = matches[2].str();
 
-        const char* const* x = &main_type_as_string[0];
+        const char* const* x = &main_type_as_string()[0];
 
         while (*x != 0) {
           if (*x == matches[1]) {
-            m_main = static_cast < category_type > (x - &main_type_as_string[0]);
+            m_main = static_cast < category_type > (x - &main_type_as_string()[0]);
 
             break;
           }

@@ -303,8 +303,8 @@ namespace squadt {
         }
 
         if (p.get()) {
-          logger->log(1, boost::format("process ended `%s' (process id %u)\n")
-                    % p->get_executable_name() % p->get_identifier());
+          logger->log(1, boost::format("process ended `%s' (process id %u, exit status %u)\n")
+                    % p->get_executable_name() % p->get_identifier() % s);
         }
 
         /* Signal completion to waiters */

@@ -8,8 +8,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define TIPI_IMPORT_STATIC_DEFINITIONS
-
 #include "tipi/configuration.hpp"
 #include "tipi/tool/category.hpp"
 #include "tipi/common.hpp"
@@ -19,14 +17,22 @@ namespace tipi {
   /// \cond INTERNAL_DOCS
   namespace messaging {
 
-    /** The type identifier for messages of which the type is not known */
-    template < >
-    const tipi::message_identifier_t message< tipi::message_identifier_t, tipi::message_unknown, tipi::message_any >::message_unknown = tipi::message_unknown;
+    /* Explicit instantiations for tipi::message */
+    template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c);
+    template utility::logger& basic_messenger< tipi::message >::get_logger();
+    template utility::logger& basic_messenger< tipi::message >::get_default_logger();
+    template void basic_messenger< tipi::message >::disconnect();
+    template void basic_messenger< tipi::message >::send_message(tipi::message const& m);
+    template void basic_messenger< tipi::message >::add_handler(const tipi::message::message_type t, handler_type h);
+    template void basic_messenger< tipi::message >::clear_handlers(const tipi::message::message_type t);
+    template void basic_messenger< tipi::message >::remove_handler(const tipi::message::message_type t, handler_type h);
+    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::message_type t);
+    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::message_type t, long const& ts);
+  }
 
-    /** The type identifier for messages of any type */
-    template < >
-    const tipi::message_identifier_t message< tipi::message_identifier_t, tipi::message_unknown, tipi::message_any >::message_any     = tipi::message_any;
-
+  /** \brief textual identifiers for each element of message_identifier_t */
+  template < >
+  std::string as_string(message_identifier_t const& t) {
     static char const* message_identifier_strings[] = {
       "any",
       "capabilities",
@@ -40,23 +46,7 @@ namespace tipi {
       "unknown"
     };
 
-    /* Explicit instantiations for tipi::message */
-    template basic_messenger< tipi::message >::basic_messenger(boost::shared_ptr < basic_messenger_impl< tipi::message > > const& c);
-    template utility::logger& basic_messenger< tipi::message >::get_logger();
-    template utility::logger& basic_messenger< tipi::message >::get_default_logger();
-    template void basic_messenger< tipi::message >::disconnect();
-    template void basic_messenger< tipi::message >::send_message(tipi::message const& m);
-    template void basic_messenger< tipi::message >::add_handler(const tipi::message::type_identifier_t t, handler_type h);
-    template void basic_messenger< tipi::message >::clear_handlers(const tipi::message::type_identifier_t t);
-    template void basic_messenger< tipi::message >::remove_handler(const tipi::message::type_identifier_t t, handler_type h);
-    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t);
-    template boost::shared_ptr< const tipi::message > basic_messenger< tipi::message >::await_message(tipi::message::type_identifier_t t, long const& ts);
-  }
-
-  /** \brief textual identifiers for each element of message_identifier_t */
-  template < >
-  std::string as_string(message_identifier_t const& t) {
-    return (messaging::message_identifier_strings[t]);
+    return message_identifier_strings[t];
   }
   /// \endcond
 }
