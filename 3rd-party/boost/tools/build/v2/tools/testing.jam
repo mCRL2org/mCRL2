@@ -277,7 +277,6 @@ rule dump-test ( target )
 
     # Add input files (because the input is essential for the test)
     for local s in [ $(r).get <testing.input-file> ] {
-ECHO $(s:D=)  [ path.root $(project-root) [ path.pwd ] ] ;
       source-files += [ path.join [ $(project).get location ]
                 [ MATCH .*//(.*) : $(s) ] ] ;
     }

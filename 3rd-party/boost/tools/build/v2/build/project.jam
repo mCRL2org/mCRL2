@@ -286,7 +286,13 @@ local rule load-jamfile (
     {
         jamfile-to-load = [ find-jamfile $(dir) ] ;
     }
-
+    
+    if $(jamfile-to-load[2])
+    {
+        errors.error "Multiple Jamfiles found at '$(dir)'" 
+          :  "Filenames are: " $(jamfile-to-load:D=) ;
+    }
+    
     # The module of the Jamfile.
     #
     local jamfile-module = [ module-name [ path.parent $(jamfile-to-load) ] ] ;
@@ -1046,4 +1052,15 @@ module project-rules
             return $(condition):$(requirements) ;
         }
     }
+    
+    rule option ( name : value )
+    {
+        if $(__name__) != site-config && $(__name__) != user-config
+        {
+            import errors ;
+            errors.error "The 'option' rule may be used only in site-config or user-config" ;
+        }        
+        import option ;
+        option.set $(name) : $(value) ;
+    }    
 }
