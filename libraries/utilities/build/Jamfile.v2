@@ -29,7 +29,7 @@ obj squadt_interface
       ;
 
 obj command_line_interfacing
-      : source/command_line.cpp
+      : source/command_line_interface.cpp
       : <use>/site-config//boost
       :
       : <include>../include
@@ -39,7 +39,7 @@ mcrl2-library utilities
       : source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
-        source/command_line.cpp
+        source/command_line_interface.cpp
       : <use>/site-config//boost
         <library>/libraries//atermpp
         <include>../../core/include      # Circular dependency

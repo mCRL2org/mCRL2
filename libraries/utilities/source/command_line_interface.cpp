@@ -15,6 +15,7 @@
 #include <memory>
 #include <locale>
 
+#include "boost/xpressive/xpressive_static.hpp"
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/compare.hpp"
 #include "boost/algorithm/string/std/string_traits.hpp"
@@ -26,7 +27,9 @@
 #define __COMMAND_LINE_INTERFACE__
 /// \endcond
 
-#include <mcrl2/utilities/command_line_interface.h>
+#include "mcrl2/utilities/command_line_interface.h"
+
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
   namespace utilities {
@@ -116,7 +119,7 @@ namespace mcrl2 {
 
       if (m_short != '\0') {
         options = "  -" + std::string(1, m_short);
-        
+
         if (m_argument.get() != 0) {
           options += (m_argument->is_optional()) ?
                 "[" + m_argument->get_name() + "]" : m_argument->get_name();
@@ -149,7 +152,7 @@ namespace mcrl2 {
 
     std::string interface_description::option_descriptor::man_page_description() const {
       std::ostringstream s;
-      
+
       s << ".TP" << std::endl;
 
       if (m_short != '\0') {
@@ -183,6 +186,59 @@ namespace mcrl2 {
 
       return s.str();
     }
+
+    std::string interface_description::option_descriptor::wiki_page_description() const {
+      using namespace boost::xpressive;
+
+      std::ostringstream s;
+
+      s << "; ";
+
+      if (m_short != '\0') {
+        s << "<tt>-" << std::string(1, m_short) << "</tt>";
+
+        if (m_argument.get() != 0) {
+          if (m_argument->is_optional()) {
+            s << "[''" << m_argument->get_name() << "'']";
+          }
+          else {
+            s << "''" << m_argument->get_name() << "''";
+          }
+        }
+
+        s << ", ";
+      }
+
+      s << "<tt>--" << m_long << "</tt>";
+
+      std::string description(m_description);
+
+      if (m_argument.get() != 0) {
+        s << ((m_argument->is_optional()) ?
+              "[=''" + m_argument->get_name() + "'']" :
+              "=''" + m_argument->get_name() + "''");
+
+        boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
+      }
+
+      mark_tag option(1);
+
+      description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), "<tt>$1</tt>");
+
+      s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
+
+      return s.str();
+    }
+
+    interface_description::option_descriptor const& interface_description::find_option(std::string const& long_identifier) const {
+      option_map::const_iterator i(m_options.find(long_identifier));
+
+      if (i == m_options.end()) {
+        throw std::logic_error("Find operation for invalid option `" +  long_identifier + "'\n");
+      }
+
+      return i->second;
+    }
     /// \endcond
 
     /**
@@ -208,9 +264,10 @@ namespace mcrl2 {
     interface_description::interface_description(std::string const& path,
           std::string const& name, std::string const& authors, std::string const& synopsis,
           std::string const& description, std::string const& known_issues) :
-                                    m_path(path), m_name(name), m_authors(authors),
-                                    m_usage(synopsis), m_description(description),
-                                    m_known_issues(known_issues) {
+                          m_path(path), m_name(name), m_authors(authors),
+                          m_usage(synopsis), m_description(description),
+                          m_known_issues(known_issues), m_options(get_standard_description().m_options),
+                          m_short_to_long(get_standard_description().m_short_to_long) {
 
       m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
 
@@ -248,33 +305,6 @@ namespace mcrl2 {
       add_option(long_identifier, description, short_identifier);
 
       m_options.find(long_identifier)->second.m_show = false;
-    }
-
-    interface_description& interface_description::add_rewriting_options() {
-      add_option(
-        "rewriter", make_mandatory_argument("NAME"),
-        "use rewrite strategy NAME:\n"
-        "  'jitty' for jitty rewriting (default),\n"
-        "  'jittyp' for jitty rewriting with prover,\n"
-        "  'jittyc' for compiled jitty rewriting,\n"
-        "  'inner' for innermost rewriting,\n"
-        "  'innerp' for innermost rewriting with prover, or\n"
-        "  'innerc' for compiled innermost rewriting",
-        'r'
-      );
-
-      return *this;
-    }
-
-    interface_description& interface_description::add_prover_options() {
-      add_option("smt-solver", make_mandatory_argument("SOLVER"),
-        "use SOLVER to remove inconsistent paths from the internally used "
-        "BDDs (by default, no path elimination is applied):\n"
-        "  'ario' for the SMT solver Ario, or\n"
-        "  'cvc' for the SMT solver CVC3"
-        , 'z');
-
-      return *this;
     }
 
     interface_description& interface_description::add_option(std::string const& l, std::string const& d, const char s) {
@@ -332,7 +362,7 @@ namespace mcrl2 {
                 if (i->first == j->second) {
                   ++i;
                 }
-             
+
                 option = &m_options.find((j++)->second)->second;
               }
             }
@@ -346,7 +376,7 @@ namespace mcrl2 {
           else {
             break;
           }
-           
+
           if (option->m_show) {
             s << option->textual_description(27, 53);
           }
@@ -402,29 +432,29 @@ namespace mcrl2 {
       return result;
     }
 
-    std::string interface_description::man_page(std::string const& revision) const {
+    std::string interface_description::man_page() const {
       std::ostringstream s;
 
       s.imbue(std::locale(s.getloc(), new boost::gregorian::date_facet("%B %Y")));
 
-      s << ".\" " << "Manual page for " << m_name << " revision " << revision << "." << std::endl
+      s << ".\" " << "Manual page for " << m_name << " revision " << revision() << "." << std::endl
         << ".\" " << "Generated from " << m_name << " --generate-man-page." << std::endl;
 
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
-                  << boost::gregorian::day_clock::local_day() << "\" \"" 
+                  << boost::gregorian::day_clock::local_day() << "\" \""
                   << m_name << " mCRL2 toolset " << version_tag
         << "\" \"User Commands\"" << std::endl;
 
-      s << ".SH NAME" << std::endl 
+      s << ".SH NAME" << std::endl
         << m_name << " - manual page for " << m_name << " mCRL2 toolset " << version_tag << std::endl;
 
-      s << ".SH SYNOPSIS" << std::endl 
+      s << ".SH SYNOPSIS" << std::endl
         << ".B " << m_name << std::endl
         << mark_name_in_usage(m_usage) << std::endl;
 
       s << ".SH DESCRIPTION" << std::endl
         << word_wrap(m_description, 80) << std::endl;
-      
+
       if (0 < m_options.size()) {
         s << ".SH OPTIONS" << std::endl
           << ".TP" << std::endl
@@ -461,7 +491,7 @@ namespace mcrl2 {
 
       s << ".SH AUTHOR" << std::endl
         << "Written by " << m_authors << "." << std::endl;
-      s << ".SH \"REPORTING BUGS\"" << std::endl 
+      s << ".SH \"REPORTING BUGS\"" << std::endl
         << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
       s << ".SH COPYRIGHT" << std::endl
         << "Copyright \\(co " + copyright_period +
@@ -472,6 +502,62 @@ namespace mcrl2 {
            "There is NO WARRANTY, to the extent permitted by law.\n";
       s << ".SH \"SEE ALSO\"" << std::endl
         << "See also the manual at <http://www.mcrl2.org/wiki/index.php/User_manual/" << m_name << ">.\n";
+
+      return s.str();
+    }
+
+    std::string interface_description::wiki_page() const {
+      std::ostringstream s;
+
+      s << "{{Hierarchy header}}" << std::endl
+        << word_wrap(m_description, 80) << std::endl;
+
+      s << "== Synopsis ==" << std::endl
+        << "<tt>'''" << m_name << "'''"
+        << mark_name_in_usage(m_usage) << "</tt>" << std::endl;
+      s << "== Short Description ==" << std::endl
+        << word_wrap(m_description, 80) << std::endl;
+
+      if (0 < m_options.size()) {
+        s << "== Options ==" << std::endl
+          << std::endl
+          << "''OPTION'' can be any of the following:" << std::endl;
+
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+          option_descriptor const& option(i->second);
+
+          if (option.m_show) {
+            s << option.wiki_page_description();
+          }
+        }
+      }
+
+      if (0 < m_options.size()) {
+        s << "Standard options:" << std::endl
+          << std::endl;
+      }
+      else {
+        s << "''OPTION'' can be any of the following standard options:" << std::endl;
+      }
+      s << m_options.find("quiet")->second.wiki_page_description()
+        << m_options.find("verbose")->second.wiki_page_description()
+        << m_options.find("debug")->second.wiki_page_description()
+        << m_options.find("help")->second.wiki_page_description()
+        << m_options.find("version")->second.wiki_page_description();
+
+      if (!m_known_issues.empty()) {
+        s << "== Kown Issues" << std::endl
+          << word_wrap(m_known_issues, 80) << std::endl;
+      }
+
+      s << "== Author ==" << std::endl
+        << std::endl
+        << "Written by " << m_authors << "." << std::endl
+        << std::endl;
+      s << "== Reporting bugs ==" << std::endl
+        << std::endl
+        << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
+        << "{{Hierarchy footer}}" << std::endl;
 
       return s.str();
     }
@@ -515,9 +601,9 @@ namespace mcrl2 {
               // remove argument to single out the long option
               option.resize(option.find_first_of('='));
             }
-        
+
             if (d.m_options.find(option) == d.m_options.end()) {
-              if (argument == "--generate-man-page") {
+              if (argument == "--generate-man-page" || argument == "--generate-wiki-page") {
                 // Special option
                 m_options.insert(std::make_pair(argument.substr(2), ""));
               }
@@ -532,7 +618,7 @@ namespace mcrl2 {
                                             (d.m_options.find(long_option))->second;
 
               if (argument.size() == option.size() + 2) { // no argument
-        
+
                 if (descriptor.needs_argument()) {
                   error("expected argument to option `--" + option + "'!");
                 }
@@ -551,7 +637,7 @@ namespace mcrl2 {
                   error("did not expect argument to option `--" + option + "'");
                 }
                 else if (!descriptor.m_argument->validate(option_argument)) {
-                  error("argument to option `--" + option + "' is invalid");
+                  error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
                 }
 
                 m_options.insert(std::make_pair(long_option, option_argument));
@@ -564,7 +650,7 @@ namespace mcrl2 {
             try {
               for (std::string::size_type j = 1; j < argument.size(); ++j) {
                 std::string option(1, argument[j]);
-             
+
                 // Assume that the argument is a short option
                 if (d.m_short_to_long.find(argument[j]) == d.m_short_to_long.end()) {
                   error("command line argument `-" + option + "' not recognised");
@@ -572,10 +658,10 @@ namespace mcrl2 {
                 else {
                   std::string const& long_option =
                       d.m_options.find(d.m_short_to_long[argument[j]])->first;
-             
+
                   interface_description::option_descriptor const& descriptor =
                                               (d.m_options.find(long_option))->second;
-               
+
                   if (argument.size() - j == 1) { // the last option without argument
                     if (!descriptor.accepts_argument()) { // no argument needed
                       m_options.insert(std::make_pair(long_option, ""));
@@ -595,17 +681,17 @@ namespace mcrl2 {
                   else { // intermediate option or option with argument
                     if (d.m_options.find(long_option)->second.accepts_argument()) {
                       std::string option_argument(argument, j + 1);
-             
+
                       if (!descriptor.accepts_argument()) {
                         error("did not expect argument to option `-" + option + "'");
                       }
                       else if (!descriptor.m_argument->validate(option_argument)) {
-                        error("argument to option `-" + option + "' is invalid");
+                        error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
                       }
-             
+
                       // must be the last option, so take the remainder as option argument
                       m_options.insert(std::make_pair(long_option, option_argument));
-             
+
                       break;
                     }
                     else {
@@ -622,7 +708,7 @@ namespace mcrl2 {
 
               throw;
             }
-            
+
             continue;
           }
         }
@@ -674,7 +760,7 @@ namespace mcrl2 {
 
         for (wchar_t const* const* i = &arguments[count - 1]; i != &arguments[0]; --i) {
           std::wstring argument(*i);
-          
+
           *(j++) = std::string(argument.begin(), argument.end());
         }
       }
@@ -724,16 +810,16 @@ namespace mcrl2 {
 
       if (arguments != 0) {
         char const* current = arguments;
-       
+
         while (*current != '\0') {
           // skip initial white space
           while (*current == '\0' || *current == ' ') {
             ++current;
           }
-       
+
           if (*current != '\0') {
             char const* current_argument = current;
-           
+
             do {
               if (*current == '\'') {
                 do {
@@ -767,6 +853,68 @@ namespace mcrl2 {
       }
 
       return result;
+    }
+
+    std::string const& command_line_parser::option_argument(std::string const& long_identifier) const {
+      if (options.count(long_identifier) == 0) {
+        interface_description::option_descriptor const& option(m_interface.find_option(long_identifier));
+
+        if (option.needs_argument() || option.argument().has_default()) { // mandatory argument with default value
+          return option.get_default();
+        }
+        else {
+          throw std::logic_error("Fatal error: argument requested of unspecified option!");
+        }
+      }
+      else if (!m_interface.m_options.find(long_identifier)->second.accepts_argument()) {
+        throw std::logic_error("Fatal error: argument requested of option that does not take an argument!");
+      }
+
+      return options.find(long_identifier)->second;
+    }
+
+    /**
+     * \param[in] d the interface description
+     **/
+    void command_line_parser::process_default_options(interface_description& d) {
+      if (d.m_options.find("cli-testing-no-duplicate-option-checking") == d.m_options.end()) {
+        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
+          if (1 < m_options.count(i->first)) {
+            error("option -" + (d.long_to_short(i->first) != '\0' ?
+                   std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+          }
+        }
+      }
+
+      m_continue = false;
+
+      if (m_options.count("help")) {
+        std::cout << d.textual_description();
+      }
+      else if (m_options.count("version")) {
+        std::cout << d.version_information();
+      }
+      else if (m_options.count("generate-man-page")) {
+        std::cout << d.man_page();
+      }
+      else if (m_options.count("generate-wiki-page")) {
+        std::cout << d.wiki_page();
+      }
+      else {
+        typedef std::vector< bool (*)(command_line_parser&) > action_list;
+
+        action_list& actions(get_registered_actions());
+
+        m_continue = true;
+
+        for (action_list::const_iterator i = actions.begin(); i != actions.end(); ++i) {
+          m_continue &= (*i)(*this);
+        }
+      }
+
+      if (!m_continue) {
+        exit(0);
+      }
     }
   }
 }
