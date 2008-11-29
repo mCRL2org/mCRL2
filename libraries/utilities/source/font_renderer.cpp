@@ -25,6 +25,18 @@
 namespace mcrl2 {
   namespace utilities {
 
+    inline GLubyte (&font_renderer::character_textures())[CHARSETSIZE][CHARHEIGHT * CHARWIDTH] {
+      static GLubyte textures[CHARSETSIZE][CHARHEIGHT * CHARWIDTH];
+
+      return textures;
+    }
+
+    inline GLuint (&font_renderer::character_texture_id())[CHARSETSIZE] {
+      static GLuint textures[CHARSETSIZE];
+
+      return textures;
+    }
+
     bool font_renderer::initialise() {
       // Create textures.
       //
@@ -33,13 +45,13 @@ namespace mcrl2 {
       int blue = 0;
 
       // Allocate texture memory
-      glGenTextures(CHARSETSIZE, tex_char_id);
+      glGenTextures(CHARSETSIZE, character_texture_id());
 
       // Create the textures from the character set
       for(size_t i = 0; i < CHARSETSIZE; ++i)
       {
         // Bind texture
-        glBindTexture(GL_TEXTURE_2D, tex_char_id[i]);
+        glBindTexture(GL_TEXTURE_2D, character_texture_id()[i]);
 
         // Create image from xpm
         wxImage image(characters[i]);
@@ -54,7 +66,7 @@ namespace mcrl2 {
             green = (GLubyte)image.GetGreen(w, h);
             blue  = (GLubyte)image.GetBlue(w, h);
 
-            tex_char[i][count] = (GLubyte)(255.0 - (red + green + blue) / 3.0);
+            character_textures()[i][count] = (GLubyte)(255.0 - (red + green + blue) / 3.0);
 
             ++count;
           }
@@ -71,13 +83,15 @@ namespace mcrl2 {
           CHARHEIGHT,
           GL_ALPHA,
           GL_UNSIGNED_BYTE,
-          tex_char[i] );
+          character_textures()[i] );
       }
+
+      return true;
     }
 
     font_renderer::font_renderer()
     {
-      static initialised = initialise();
+      static bool initialised = initialise();
 
       static_cast< void >(initialised); // prevent unused variable warnings
     };
@@ -156,7 +170,7 @@ namespace mcrl2 {
           double yBot = ySBot - .5 * scale * CHARHEIGHT;
           
           size_t index = index_from_char(s[i]);
-          glBindTexture(GL_TEXTURE_2D, tex_char_id[index]);
+          glBindTexture(GL_TEXTURE_2D, character_texture_id()[index]);
         
           // Setup texture parameters
           glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -290,19 +304,18 @@ namespace mcrl2 {
       const size_t addpos = (xRgt-xLft)/(CHARWIDTH*scale);
       double transx = 0;
       double transy = 0;
-      int findid;
       std::string subs;
       std::string temps;
             
       double maxwidth = 0;
       double maxheight = 0;
-      size_t startpos = 0;
+      std::string::size_type startpos = 0;
       double y = 0;
       temps = s;
       // caluclate the maximum width and height of the text
       while (startpos < temps.length())
       {
-        findid = temps.find_first_of('\n');
+        std::string::size_type findid = temps.find_first_of('\n');
       
         if ((findid < 0) || (findid > startpos + addpos))
         {
@@ -338,7 +351,7 @@ namespace mcrl2 {
       // print text
       while (startpos < s.length())
       {
-        findid = temps.find_first_of('\n');
+        std::string::size_type findid = temps.find_first_of('\n');
       
         if ((findid < 0) || (findid > startpos + addpos))
         {
@@ -447,11 +460,11 @@ namespace mcrl2 {
       {
         switch (c)
         {
-          case ' ': result = 62; break;
+          case ' ':  result = 62; break;
           case '_':  result = 63; break;
           case '-':  result = 64; break;
           case '|':  result = 65; break;
-          case '/': result = 66; break;
+          case '/':  result = 66; break;
           case '\\': result = 67; break;
           case '"':  result = 68; break;
           case '\'': result = 69; break;

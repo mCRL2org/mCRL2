@@ -261,8 +261,8 @@ else {
 
 if $(WX_CPPFLAGS) {
   local wx-requirements = [ requirements-from-string $(WX_CPPFLAGS) ]
-                           <toolset-intel:platform>win:<user-interface>gui
-                           <toolset>msvc:<user-interface>gui ;
+           <user-interface>gui
+           <toolset>gcc,<target-os>windows:<linkflags>-mwindows ;
 #                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_MAP
 #                           <stdlib>stlport:<define>HAVE_STD_UNORDERED_SET ;
 

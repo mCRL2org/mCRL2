@@ -342,7 +342,7 @@ namespace squadt {
   inline void processor_impl::reconfigure(interface_ptr const& t, boost::shared_ptr < tipi::configuration > const& c, std::string const& w) {
     assert(selected_input_configuration.get());
 
-    c->fresh();
+    c->fresh(true);
 
     configure(t, c, w);
   }

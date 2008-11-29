@@ -40,19 +40,33 @@ namespace tipi {
         /** \brief Name of the category */
         std::string m_name;
 
-        /** \brief unknown, for everything that does not map to one of the public categories */
-        static const category unknown;
-
       public:
 
-        static const category editing;        ///< show edit
-        static const category reporting;      ///< show properties of objects
-        static const category conversion;     ///< transformations of objects between different storage formats
-        static const category transformation; ///< changing objects but retaining the storage format: e.g. optimisation, editing
-        static const category visualisation;  ///< visualisation of objects
-        static const category simulation;     ///< simulation
+        enum standard_category_type {
+          editing,        ///< show edit
+          reporting,      ///< show properties of objects
+          conversion,     ///< transformations of objects between different storage formats
+          transformation, ///< changing objects but retaining the storage format: e.g. optimisation, editing
+          visualisation,  ///< visualisation of objects
+          simulation,     ///< simulation
+          unknown         ///< for internal use only
+        };
 
       private:
+
+        static boost::array< const category, 7 > const& standard_categories() {
+          static const boost::array< const category, 7 > categories = { {
+            category("editing"),
+            category("reporting"),
+            category("conversion"),
+            category("transformation"),
+            category("visualisation"),
+            category("simulation"),
+            category("unknown"),
+          } };
+
+          return categories;
+        }
 
       public:
 
@@ -67,24 +81,16 @@ namespace tipi {
          * \return the best matching category object
          **/
         inline static category const& match(std::string const& n) {
-          static const boost::array < category const*, 7 > categories = { {
-            &category::unknown,
-            &category::editing,
-            &category::reporting,
-            &category::conversion,
-            &category::transformation,
-            &category::visualisation,
-            &category::simulation,
-          } };
 
-          boost::array < category const*, 7 >::const_iterator i = std::find_if(categories.begin(), categories.end(),
-                      boost::bind(std::equal_to< std::string const >(), n, boost::bind(&category::m_name, _1)));
+          for (boost::array < const category, 7 >::const_iterator i =
+                 standard_categories().begin(); i != standard_categories().end(); ++i) {
 
-          if (i != categories.end()) {
-            return (**i);
+            if (i->get_name() == n) {
+              return (*i);
+            }
           }
 
-          return (unknown);
+          return standard_categories()[unknown];
         }
 
         /** \brief Gets the name of the category */
@@ -94,12 +100,22 @@ namespace tipi {
 
         /** \brief Whether or not the category is unknown */
         inline bool is_unknown() const {
-          return (&unknown == this);
+          return (&standard_categories()[unknown] == this);
+        }
+
+        /** \brief Compare for smaller */
+        inline bool operator <(const standard_category_type c) const {
+          return m_name < standard_categories()[c].m_name;
         }
 
         /** \brief Compare for smaller */
         inline bool operator <(category const& c) const {
           return (m_name < c.m_name);
+        }
+
+        /** \brief Compare for equality */
+        inline bool operator ==(const standard_category_type c) const {
+          return m_name == standard_categories()[c].m_name;
         }
 
         /** \brief Compare for equality */
@@ -112,16 +128,6 @@ namespace tipi {
           return m_name;
         }
     };
-
-#ifdef TIPI_IMPORT_STATIC_DEFINITIONS
-    const category category::unknown("unknown");
-    const category category::editing("editing");
-    const category category::reporting("reporting");
-    const category category::conversion("conversion");
-    const category category::transformation("transformation");
-    const category category::visualisation("visualisation");
-    const category category::simulation("simulation");
-#endif
 
     /** \brief Conversion to print category to a standard stream */
     inline std::ostream& operator <<(std::ostream& s, category const& c) {

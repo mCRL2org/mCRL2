@@ -173,8 +173,8 @@ namespace mcrl2
         );
 
         private:
-          static GLuint  tex_char_id[CHARSETSIZE];
-          static GLubyte tex_char[CHARSETSIZE][CHARHEIGHT * CHARWIDTH];
+          static GLuint  (&character_texture_id())[CHARSETSIZE];
+          static GLubyte (&character_textures())[CHARSETSIZE][CHARHEIGHT * CHARWIDTH];
 
           size_t index_from_char(const char & c);
 

@@ -184,7 +184,10 @@ namespace tipi {
         capabilities(const version = default_protocol_version);
 
         /** \brief Add an input configuration */
-        void add_input_configuration(std::string const&, mime_type const&, tool::category const& = category::unknown);
+        void add_input_configuration(std::string const&, mime_type const&, tool::category::standard_category_type const = category::unknown);
+
+        /** \brief Add an input configuration */
+        void add_input_configuration(std::string const&, mime_type const&, tool::category const&);
 
         /** \brief Add an output configuration */
         void add_output_configuration(std::string const&, mime_type const&);
@@ -197,6 +200,11 @@ namespace tipi {
 
         /** \brief Returns a reference to the list of output combinations */
         output_configuration_range get_output_configurations() const;
+
+        /** \brief Find a specific input combination of this tool, if it exists */
+        inline boost::shared_ptr< const input_configuration > find_input_configuration(const mime_type& m, const tool::category::standard_category_type c) const {
+          return find_input_configuration(m, tool::category::standard_categories()[c]);
+        }
 
         /** \brief Find a specific input combination of this tool, if it exists */
         boost::shared_ptr< const input_configuration > find_input_configuration(const mime_type&, const tool::category&) const;

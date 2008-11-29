@@ -145,33 +145,36 @@ namespace tipi {
     private:
 
       /** \brief The list of configuration options */
-      position_list_partition m_options;
+      position_list_partition     m_options;
 
       /** \brief The list of input objects */
-      position_list_partition m_input_objects;
+      position_list_partition     m_input_objects;
 
       /** \brief The list of output objects */
-      position_list_partition m_output_objects;
+      position_list_partition     m_output_objects;
 
       /** \brief Mapping of id to option objects */
-      id_parameter_map        m_parameter_by_id;
+      id_parameter_map            m_parameter_by_id;
 
       /** \brief Sequence of identifiers of options and objects */
-      position_list           m_positions;
+      position_list               m_positions;
 
       /** \brief The selected category in which the tool operates */
-      tipi::tool::category    m_category;
+      tipi::tool::category        m_category;
 
       /** \brief Whether or not the tool accepted this configuration in the past */
-      bool                    m_fresh;
+      bool                        m_fresh;
 
       /** \brief Prefix for output objects (TODO replace when naming component is added) */
-      std::string             m_output_prefix;
+      std::string                 m_output_prefix;
 
     public:
 
       /** \brief Constructor */
-      inline configuration(tool::category const& = tool::category::unknown);
+      inline configuration(const tool::category::standard_category_type = tool::category::unknown);
+
+      /** \brief Constructor */
+      inline configuration(tool::category const&);
 
       /** \brief Returns whether the configuration is empty or not */
       bool empty() const;
@@ -318,7 +321,12 @@ namespace tipi {
 
 namespace tipi {
 
-  inline configuration::configuration(tool::category const& c) : m_category(c), m_fresh(true) {
+  inline configuration::configuration(tool::category const& c) :
+                 m_category(c), m_fresh(true) {
+  }
+
+  inline configuration::configuration(const tool::category::standard_category_type c) :
+                 m_category(tool::category::standard_categories()[c]), m_fresh(true) {
   }
 
   inline bool configuration::empty() const {

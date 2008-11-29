@@ -43,7 +43,18 @@ namespace tipi {
      * \param[in] f mime-type for the object
      * \param[in] c category to which the functionality of the tool must be counted
      **/
-    void capabilities::add_input_configuration(std::string const& id, mime_type const& f, tool::category const& c) {
+    void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category::standard_category_type c) {
+      boost::shared_ptr< const input_configuration > ic(new input_configuration(tool::category::standard_categories()[c], f, id));
+ 
+      m_input_configurations.insert(ic);
+    }
+ 
+    /**
+     * \param[in] id a unique identifier for the input object
+     * \param[in] f mime-type for the object
+     * \param[in] c category to which the functionality of the tool must be counted
+     **/
+    void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category& c) {
       boost::shared_ptr< const input_configuration > ic(new input_configuration(c, f, id));
  
       m_input_configurations.insert(ic);
@@ -70,14 +81,13 @@ namespace tipi {
     capabilities::output_configuration_range capabilities::get_output_configurations() const {
       return (boost::make_iterator_range(m_output_configurations));
     }
-
+ 
     /**
      * \param[in] f the storage format
      * \param[in] t the category in which the tool operates
      **/
     boost::shared_ptr< const capabilities::input_configuration >
               capabilities::find_input_configuration(const mime_type& f, const tool::category& t) const {
- 
       for (input_configuration_list::const_iterator i = m_input_configurations.begin(); i != m_input_configurations.end(); ++i) {
         if ((*i)->get_category() == t && (*i)->get_primary_object_descriptor().second == f) {
           return *i;
