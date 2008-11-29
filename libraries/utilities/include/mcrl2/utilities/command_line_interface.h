@@ -18,9 +18,9 @@
 #include <cassert>
 #include <cstdlib>
 #include <sstream>
-#include <memory>
 
 #include "boost/algorithm/string.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace mcrl2 {
   namespace utilities {
@@ -66,6 +66,7 @@ namespace mcrl2 {
      *  cli.
      *   add_option("recursive", "recursively test all files in directories", 'r').
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with").
+     *   add_option("language", make_mandatory_argument("LANG", "english"), "language for output").
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period (default 2 seconds)").
      *   add_rewriting_options().
      *   add_prover_options();
@@ -204,19 +205,19 @@ namespace mcrl2 {
           private:
 
             /// Long representation for the option
-            std::string                       m_long;
+            std::string                         m_long;
 
             /// Description for the option
-            std::string                       m_description;
+            std::string                         m_description;
 
             /// Option argument
-            std::auto_ptr < basic_argument >  m_argument;
+            boost::shared_ptr< basic_argument > m_argument;
 
             /// Short representation for the option or 0
-            char                              m_short;
+            char                                m_short;
 
             /// whether the option is printed as part of the tool-specific interface
-            bool                              m_show;
+            bool                                m_show;
 
           protected:
 
@@ -247,9 +248,7 @@ namespace mcrl2 {
 
             /// copy constructor
             option_descriptor(option_descriptor const& o) : m_long(o.m_long),
-                    m_description(o.m_description), m_short(o.m_short), m_show(true) {
-
-              m_argument.reset(const_cast< std::auto_ptr< basic_argument >& > (o.m_argument).release());
+                    m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short), m_show(true) {
             }
 
             option_descriptor operator=(option_descriptor const& o) {
@@ -308,6 +307,7 @@ namespace mcrl2 {
 
       friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
+      friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
 
         typedef std::map< std::string, option_descriptor > option_map;
 
@@ -391,7 +391,12 @@ namespace mcrl2 {
           T::add_options(get_standard_description());
         }
 
-        std::string revision() const;
+        /// \brief Returns the revision number
+        inline static std::string const& revision() {
+          static std::string revision;
+
+          return revision;
+        }
 
         /// \brief Internal use only
         inline interface_description() {
@@ -449,11 +454,7 @@ namespace mcrl2 {
          * Where toolset version, revision and copyright year are constants
          * supplied internally at compile time.
          **/
-        inline std::string version_information() const {
-          return m_name + " mCRL2 toolset " + version_tag + " (revision " + revision() + ")\n" +
-                 copyright_message() +
-                 "\nWritten by " + m_authors + ".\n";
-        }
+        std::string version_information() const;
 
         /**
          * \brief Adds an option with argument identified by a long-identifier to the interface
@@ -608,25 +609,29 @@ namespace mcrl2 {
      *  cli.
      *   add_option("recursive", "recursively test all files in directories", 'r').
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with", 't').
+     *   add_option("language", make_mandatory_argument("LANG", "english"), "language for output").
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period");
      *
      *  try {
      *    // parse command line
      *    command_line_parser parser(cli, "test -v --verbose -r --timeout --tool=foo bar1 bar2");
      * 
-     *    std::cerr << parser.options.count("recursive");        // prints: "1"
-     *    std::cerr << parser.options.count("verbose");          // prints: "2"
-     *    std::cerr << parser.options.count("tool");             // prints: "1"
-     *    std::cerr << parser.options.count("timeout");          // prints: "1"
-     *    std::cerr << parser.options.count("bar1");             // prints: "0"
+     *    std::cerr << parser.options.count("recursive");        // prints: 1
+     *    std::cerr << parser.options.count("verbose");          // prints: 2
+     *    std::cerr << parser.options.count("tool");             // prints: 1
+     *    std::cerr << parser.options.count("timeout");          // prints: 1
+     *    std::cerr << parser.options.count("bar1");             // prints: 0
      * 
      *    std::cerr << parser.option_argument("tool");           // prints: "foo"
-     *    std::cerr << parser.option_argument_as< int >("tool"); // prints: "2"
+     *    std::cerr << parser.option_argument_as< int >("tool"); // prints: 2
      *    std::cerr << parser.option_argument("recursive");      // prints: ""
      * 
-     *    std::cerr << parser.arguments.size();                  // prints: "2"
+     *    std::cerr << parser.arguments.size();                  // prints: 2
      *    std::cerr << parser.arguments[0];                      // prints: "bar1"
      *    std::cerr << parser.arguments[1];                      // prints: "bar2"
+     *
+     *    std::cerr << parser.options.count("language");         // prints: 0
+     *    std::cerr << parser.option_argument("language");       // prints: "english"
      *  }
      *  catch (std::exception& e) {
      *    std::cerr << e.what() << std::endl;
@@ -666,7 +671,7 @@ namespace mcrl2 {
 
       public:
 
-        /// \brief The list of options found on the command line
+        /// \brief Maps options found on the command line to their argument or the empty string
         option_map const&       options;
 
         /// \brief The list of arguments that have not been matched with an option
@@ -755,12 +760,18 @@ namespace mcrl2 {
         /**
          * \brief Returns the argument of the first option matching a name
          * \param[in] long_identifier the long identifier for the option
+         * Finds and returns the argument of an option with long identifier
+         * matching long_identifier in this.options. There may be more than one
+         * occurence of the option in this.options, if so the first argument
+         * to the option will be returned. A default value is returned when a
+         * user did not specify the option matching long_identifier on the
+         * command line. A default value is only returned when the option
+         * matching long_identifier is either an option with optional argument
+         * or when it is an option with mandatory argument and a standard value.
          * \return options.find(long_identifier)->second
          * \pre 0 < options.count(long_identifier)
-         * \throw std::logic_error containing a message that the option
-         * was not part of the command
-         * \throw std::logic_error containing a message that the option
-         * does not take argument
+         * \throw std::logic_error containing a message that the option was not part of the command
+         * \throw std::logic_error containing a message that the option does not take argument
          **/
         std::string const& option_argument(std::string const& long_identifier) const;
 
@@ -796,6 +807,9 @@ namespace mcrl2 {
 
     /// Creates a mandatory option argument specification object
     interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name);
+
+    /// Creates a mandatory option argument specification object
+    interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name, std::string const& standard_value);
 
     /// \cond INTERNAL
 
@@ -940,8 +954,17 @@ namespace mcrl2 {
     };
 
 #if !defined(__COMMAND_LINE_INTERFACE__)
-    std::string interface_description::revision() const {
-      return std::string(MCRL2_REVISION);
+    namespace detail {
+      template <>
+      struct initialiser< void > {
+        static bool set_revision(std::string const& r) {
+          const_cast< std::string& > (interface_description::revision()) = r;
+
+          return true;
+        }
+      };
+
+      bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
     }
 
     template <>

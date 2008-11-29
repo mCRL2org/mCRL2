@@ -287,6 +287,11 @@ namespace mcrl2 {
         "There is NO WARRANTY, to the extent permitted by law.\n";
     }
 
+    std::string interface_description::version_information() const {
+      return m_name + " mCRL2 toolset " + version_tag + " (revision " + revision() + ")\n" +
+         copyright_message() + "\nWritten by " + m_authors + ".\n";
+    }
+
     inline void interface_description::add_hidden_option(
                 std::string const& long_identifier,
                 basic_argument const& argument_specification,
@@ -510,7 +515,7 @@ namespace mcrl2 {
       std::ostringstream s;
 
       s << "{{Hierarchy header}}" << std::endl
-        << word_wrap(m_description, 80) << std::endl;
+        << std::endl;
 
       s << "== Synopsis ==" << std::endl
         << "<tt>'''" << m_name << "'''"
@@ -618,7 +623,6 @@ namespace mcrl2 {
                                             (d.m_options.find(long_option))->second;
 
               if (argument.size() == option.size() + 2) { // no argument
-
                 if (descriptor.needs_argument()) {
                   error("expected argument to option `--" + option + "'!");
                 }

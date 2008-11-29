@@ -31,7 +31,7 @@ namespace mcrl2 {
       template <>
       struct initialiser< SMT_Solver_Type > {
         static void add_options(interface_description& standard) {
-          standard.add_option("smt-solver", make_mandatory_argument("SOLVER"),
+          standard.add_option("smt-solver", interface_description::mandatory_argument< SMT_Solver_Type >("SOLVER"),
             "use SOLVER to remove inconsistent paths from the internally used "
             "BDDs (by default, no path elimination is applied):\n"
             "  'ario' for the SMT solver Ario, or\n"
