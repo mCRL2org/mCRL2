@@ -97,6 +97,24 @@ bool check_assignment_variables(data_assignment_list assignments, data_variable_
   return true;
 }
 
+/// Function object for checking if an operator has a sort equal to a given sort.
+struct is_operation_with_given_sort
+{
+  atermpp::aterm_appl sort_to_compare_with;
+
+  is_operation_with_given_sort(atermpp::aterm_appl u):sort_to_compare_with(u)
+  { assert(is_sort_expression(u));
+  }
+
+  bool operator()(atermpp::aterm_appl t) const
+  { data_operation op=t;
+    assert(is_sort_expression(op.sort())); // Most likely already subsumed by previous
+                                           // call. Maybe, Wieger can have a look at this,
+                                           // and remove this line if superfluous.
+    return op.sort()==sort_to_compare_with;
+  }
+};
+
 /// Function object for checking if a term is a constant sort.
 struct is_constant_sort
 {

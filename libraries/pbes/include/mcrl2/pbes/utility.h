@@ -553,7 +553,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=domain_sorts(f->sort());
+                  data::sort_expression_list dsorts=source(f->sort());
+                  assert(!target(f->sort()).is_arrow()); // In case the function f has a sort A->(B->C),
+                                                          // then the function below does not work correctly.
+                                                          // This code must be replaced by enumerator code,
+                                                          // developed by Wieger.
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; s++ )
@@ -652,7 +656,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=domain_sorts(f->sort());
+                  data::sort_expression_list dsorts=source(f->sort());
+                  assert(!target(f->sort()).is_arrow()); // In case the function f has a sort A->(B->C),
+                                                          // then the function below does not work correctly.
+                                                          // This code must be replaced by enumerator code,
+                                                          // developed by Wieger.
                   // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
