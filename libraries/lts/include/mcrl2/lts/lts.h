@@ -23,6 +23,7 @@
 #include <iostream>
 #include <aterm2.h>
 #include <mcrl2/atermpp/set.h>
+#include <mcrl2/data/data_specification.h>
 #include <mcrl2/lps/specification.h>
 
 #ifdef USE_BCG
@@ -176,6 +177,19 @@ namespace lts
    * \param[in] time The time part of the timed action that will be created.
    * \return A timed action with label \a action and time \a time. */
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
+
+  /** \brief Add an mCRL2 data specification, parameter list and action
+   *         specification to a mCRL2 LTS in SVC format.
+   * \param[in] filename   The file name of the mCRL2 LTS.
+   * \param[in] data_spec  The data specification to add in mCRL2 internal
+   *                       format (or NULL for none).
+   * \param[in] params     The list of state(/process) parameters in mCRL2
+   *                       internal format (or NULL for none).
+   * \param[in] act_spec   The action specification to add in mCRL2 internal
+   *                       format (or NULL for none).
+   * \pre                  The LTS in filename is a mCRL2 SVC without extra
+   *                       information. */
+  void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec);
   
   /** \cond */
   #include "detail/liblts_private.h"
@@ -720,6 +734,32 @@ namespace lts
        * \return           The pretty-printed representation of value.
        * \pre              value occurs as state parameter value in this LTS. */
       std::string pretty_print_state_parameter_value(ATerm value);
+
+
+      /** \brief Return the extra information stored in this LTS.
+       * \return The extra information stored in this LTS or NULL if there
+       *         is none. */
+      ATerm get_extra_data();
+      
+      /** \brief Set (or remove) the extra information for this LTS.
+       * \param[in] data  The extra information for this LTS or NULL to
+       *                  remove any possible extra information. */
+      void set_extra_data(ATerm data);
+      
+      /** \brief Check whether this LTS has an mCRL2 data specification.
+       * \return A boolean indicating whether this LTS has an mCRL2 data
+       *         specification. */
+      bool has_data_specification();
+      
+      /** \brief Return the mCRL2 data specification of this LTS.
+       * \return The mCRL2 data specification of this LTS.
+       * \pre    This LTS has an mCRL2 data specification. */
+      data::data_specification get_data_specification();
+      
+      /** \brief Set the mCRL2 data specification of this LTS.
+       * \param[in] spec  The mCRL2 data specification for this LTS.
+       * \pre             This is an mCRL2 LTS. */
+      void set_data_specification(data::data_specification spec);
 
       /** \brief Sorts the transitions using a sort style.
        * \param[in] ts The sort style to use. */

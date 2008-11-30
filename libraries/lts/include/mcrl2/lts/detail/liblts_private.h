@@ -83,6 +83,7 @@
       ATerm *label_values;
       transition *transitions;
       unsigned int init_state;
+      ATerm extra_data;
 
       p_lts(lts *l);
 

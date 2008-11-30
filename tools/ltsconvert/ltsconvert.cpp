@@ -155,8 +155,6 @@ class t_tool_options {
             gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
             outtype = lts_mcrl2;
           }
-        } else if ( (outtype == lts_fsm) && lpsfile.empty() ) {
-          gsWarningMsg("parameter names are unknown (use -l/--lps option)\n");
         }
       }
     }
@@ -222,8 +220,9 @@ t_tool_options parse_command_line(int ac, char** av) {
 #endif
     "  'dot' for the GraphViz format (output only),\n"
     "  'fsm' for the Finite State Machine format,\n"
-    "  'mcrl' for the mCRL SVC format, or\n"
-    "  'mcrl2' for the mCRL2 SVC format (default)"
+    "  'mcrl' for the mCRL SVC format,\n"
+    "  'mcrl2' for the mCRL2 format (default), or"
+    "  'svc' for the (generic) SVC format\n"
   );
 
   clinterface.add_option("no-reach",
@@ -375,7 +374,7 @@ static const char* option_selected_output_format             = "selected_output_
 static const char* option_no_reachability_check              = "no_reachability_check";                 ///< do not check reachability of input LTS
 static const char* option_no_state_information               = "no_state_information";                  ///< dot format output specific option to not save state information
 static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
-static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 SVC specific]
+static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
@@ -402,7 +401,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl2", tipi::mime_type::application), tipi::tool::category::conversion);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::conversion);
@@ -428,7 +427,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
                 append(d.create< label >().set_text("Output format : ")).
                 append(format_selector.associate(mcrl2::lts::lts_aut, "Aldebaran",true)).
                 append(format_selector.associate(mcrl2::lts::lts_mcrl, "SVC/mCRL")).
-                append(format_selector.associate(mcrl2::lts::lts_mcrl2, "SVC/mCRL2")).
+                append(format_selector.associate(mcrl2::lts::lts_mcrl2, "mCRL2")).
                 append(format_selector.associate(mcrl2::lts::lts_svc, "SVC")).
 #ifdef USE_BCG
                 append(format_selector.associate(mcrl2::lts::lts_bcg, "BCG")).
@@ -542,7 +541,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   if ((format_selector.get_selection() == lts_fsm && (
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl" ||
-         c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl2"))
+         c.get_input(lts_file_for_input).type().sub_type() == "mcrl2-lts"))
    || (format_selector.get_selection() == lts_mcrl2 && (
          c.get_input(lts_file_for_input).type().sub_type() == "aut" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||

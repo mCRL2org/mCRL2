@@ -156,7 +156,7 @@ class squadt_interactor::storage_configuration {
             mt = tipi::mime_type("application/svc+mcrl");
             break;
           case mcrl2::lts::lts_mcrl2:
-            mt = tipi::mime_type("application/svc+mcrl2");
+            mt = tipi::mime_type("application/mcrl2-lts");
             break;
 #ifdef USE_BCG
           case mcrl2::lts::lts_bcg:
@@ -174,7 +174,7 @@ class squadt_interactor::storage_configuration {
             throw mcrl2::runtime_error("unsupported LTS format used for output");
         }
       } else {
-        outfile = c.get_output_name(".svc");
+        outfile = c.get_output_name(".lts");
       }
 
       if (c.output_exists(squadt_interactor::lts_file_for_output)) {
@@ -275,7 +275,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
                     append(lts_type_selector.associate(mcrl2::lts::lts_fsm, "FSM")).
                     append(lts_type_selector.associate(mcrl2::lts::lts_svc, "SVC")).
                     append(lts_type_selector.associate(mcrl2::lts::lts_mcrl, "SVC/mCRL")).
-                    append(lts_type_selector.associate(mcrl2::lts::lts_mcrl2, "SVC/mCRL2", true)));
+                    append(lts_type_selector.associate(mcrl2::lts::lts_mcrl2, "mCRL2", true)));
     }
 
     boost::shared_ptr < storage_configuration > storage_controls(new storage_configuration(c, d, m));

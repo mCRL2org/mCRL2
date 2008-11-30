@@ -16,6 +16,7 @@
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

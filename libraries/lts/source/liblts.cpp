@@ -172,6 +172,7 @@ lts::~lts()
   {
     ATunprotectArray(label_values);
   }
+  ATunprotect(&extra_data);
 
   free(state_values);
   free(taus);
@@ -198,6 +199,9 @@ void p_lts::init(bool state_info, bool label_info)
   transitions_size = 0;
   ntransitions = 0;
   transitions = NULL;
+
+  extra_data = NULL;
+  ATprotect(&extra_data);
   
   this->type = lts_none;
   this->state_info = state_info;
@@ -220,6 +224,9 @@ void p_lts::init(p_lts const &l)
   type = l.type;
   state_info = l.state_info;
   label_info = l.label_info;
+
+  extra_data = l.extra_data;
+  ATprotect(&extra_data);
  
   if ( state_info )
   {
@@ -270,6 +277,7 @@ void p_lts::clear(bool state_info, bool label_info)
   clear_labels();
   clear_transitions();
   clear_type();
+  extra_data = NULL;
 
   this->state_info = state_info;
   this->label_info = label_info;
@@ -953,7 +961,12 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl2:
           return write_to_fsm(filename,*extra.get_mcrl2_spec());
         default:
-          return write_to_fsm(filename);
+          if ( this->type == lts_mcrl2 && extra_data != NULL )
+          {
+            return write_to_fsm(filename,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } else {
+            return write_to_fsm(filename);
+          }
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
@@ -996,7 +1009,12 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         case le_mcrl2:
           return write_to_fsm(os,*extra.get_mcrl2_spec());
         default:
-          return write_to_fsm(os);
+          if ( this->type == lts_mcrl2 && extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+          {
+            return write_to_fsm(os,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } else {
+            return write_to_fsm(os);
+          }
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
@@ -1293,7 +1311,7 @@ string p_lts::p_state_value_str(unsigned int state)
   if ( state_info )
   {
     ATerm value = state_values[state];
-    if ( ATisAppl(value) ) // XXX better check for mCRL2
+    if ( ATisAppl(value) && !strcmp(ATgetName(ATgetAFun((ATermAppl) value)),"STATE") )
     {
       s = "(";
       ATermList args = ATgetArguments((ATermAppl) value);
@@ -1480,9 +1498,14 @@ ATerm lts::state_parameter_name(unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    char s[2+sizeof(unsigned int)*3];
-    sprintf(s,"p%u",idx);
-    return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_sort(idx));
+    if ( extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+    {
+      return ATelementAt(ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0),idx);
+    } else {
+      char s[2+sizeof(unsigned int)*3];
+      sprintf(s,"p%u",idx);
+      return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_sort(idx));
+    }
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
@@ -1501,9 +1524,14 @@ std::string lts::state_parameter_name_str(unsigned int idx)
 {
   if ( type == lts_mcrl2 || type == lts_mcrl )
   {
-    char s[2+sizeof(unsigned int)*3];
-    sprintf(s,"p%u",idx);
-    return s;
+    if ( extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+    {
+      return ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0),idx),0)));
+    } else {
+      char s[2+sizeof(unsigned int)*3];
+      sprintf(s,"p%u",idx);
+      return s;
+    }
   } else if ( type == lts_fsm )
   {
     return ATgetName(ATgetAFun((ATermAppl) state_parameter_name(idx)));
@@ -1678,6 +1706,43 @@ std::string lts::pretty_print_state_parameter_value(ATerm value)
   return "";
 }
 
+ATerm lts::get_extra_data()
+{
+  return extra_data;
+}
+
+void lts::set_extra_data(ATerm data)
+{
+  extra_data = data;
+}
+
+bool lts::has_data_specification()
+{
+  return extra_data != NULL &&
+         ATisAppl(extra_data) &&
+         !strcmp("mCRL2LTS1",ATgetName(ATgetAFun((ATermAppl) extra_data))) &&
+         !gsIsNil(ATAgetArgument((ATermAppl) extra_data,0));
+}
+
+data::data_specification lts::get_data_specification()
+{
+  assert(has_data_specification());
+
+  return data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
+}
+
+void lts::set_data_specification(data::data_specification spec)
+{
+  assert( type == lts_mcrl2 );
+
+  if ( extra_data == NULL )
+  {
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) spec, (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+  } else {
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) spec,0);
+  }
+}
+
 void p_lts::p_remove_state_values()
 {
   state_info = false;
@@ -1686,6 +1751,10 @@ void p_lts::p_remove_state_values()
     ATunprotectArray(state_values);
     free(state_values);
     state_values = NULL;
+  }
+  if ( type == lts_mcrl2 && extra_data != NULL )
+  {
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm) gsMakeNil(),1);
   }
 }
 
@@ -2062,24 +2131,28 @@ lts_type lts::guess_format(string const& s) {
 
     if ( ext == "aut" )
     {
-      gsVerboseMsg("detected AUT extension\n");
+      gsVerboseMsg("detected Aldebaran extension\n");
       return lts_aut;
+    } else if ( ext == "lts" )
+    {
+      gsVerboseMsg("detected mCRL2 extension\n");
+      return lts_mcrl2;
     } else if ( ext == "svc" )
     {
-      gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
-      return lts_mcrl2;
+      gsVerboseMsg("detected SVC extension; assuming mCRL format\n");
+      return lts_mcrl;
     } else if ( ext == "fsm" )
     {
-      gsVerboseMsg("detected FSM extension\n");
+      gsVerboseMsg("detected Finite State Machine extension\n");
       return lts_fsm;
     } else if ( ext == "dot" )
     {
-      gsVerboseMsg("detected dot extension\n");
+      gsVerboseMsg("detected GraphViz extension\n");
       return lts_dot;
 #ifdef USE_BCG
     } else if ( ext == "bcg" )
     {
-      gsVerboseMsg("detected BCG extension\n");
+      gsVerboseMsg("detected Binary Coded Graph extension\n");
       return lts_bcg;
 #endif
     }
@@ -2095,7 +2168,7 @@ lts_type lts::parse_format(std::string const& s) {
   } else if ( s == "mcrl" || s == "svc+mcrl")
   {
     return lts_mcrl;
-  } else if ( s == "mcrl2" || s == "svc+mcrl2")
+  } else if ( s == "mcrl2" || s == "mcrl2-lts")
   {
     return lts_mcrl2;
   } else if ( s == "svc" )
@@ -2119,7 +2192,7 @@ lts_type lts::parse_format(std::string const& s) {
 
 std::string p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
                                                                                                       
-std::string p_lts::extension_strings[] = { "", "svc", "aut", "svc", "svc", "fsm", "dot", "bcg" };
+std::string p_lts::extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
 
 std::string lts::string_for_type(const lts_type type) {
   return (type_strings[type]);
@@ -2190,6 +2263,51 @@ std::string lts::string_for_preorder(const lts_preorder pre)
 std::string lts::name_of_preorder(const lts_preorder pre)
 {
   return preorder_desc_strings[pre];
+}
+
+void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec)
+{
+  FILE *f = fopen(filename.c_str(),"ab");
+  if ( f == NULL )
+  {
+    gsErrorMsg("could not open file '%s' to add extra LTS information\n",filename.c_str());
+    return;
+  }
+
+  ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
+  ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
+  ATerm arg3 = (ATerm) ((act_spec == NULL)?gsMakeNil():act_spec);
+  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
+
+  long position;
+  if ( (position = ftell(f)) == -1 )
+  {
+    gsErrorMsg("could not determine file size of '%s'; not adding extra information\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  if ( ATwriteToBinaryFile(data,f) == ATfalse )
+  {
+    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
+  for (unsigned int i=0; i<8; i++)
+  {
+    buf[i] = position % 0x100;
+    position /= 0x100;
+  }
+  if ( fwrite(buf,1,8+12,f) != 8+12 )
+  {
+    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  fclose(f);
 }
 
 }

@@ -12,7 +12,7 @@
 #include <fstream>
 #include <aterm2.h>
 #include <mcrl2/lps/specification.h>
-#include "svc/svc.h" //XXX
+#include "svc/svc.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "lps2lts.h"
@@ -205,6 +205,7 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         {
           gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
         }
+        add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,2),1),(ATermAppl) ATgetArgument(lts_opts.spec,1));
       }
       break;
     case lts_none:

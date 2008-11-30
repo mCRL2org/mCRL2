@@ -140,25 +140,39 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
           return false;
         }
       }
-      for (unsigned int i=0; i<nstates; i++)
+      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-        state_values[i] = parse_mcrl2_state(state_values[i],*spec);
-        if ( state_values[i] == NULL )
+        p_remove_state_values();
+      } else {
+        for (unsigned int i=0; i<nstates; i++)
         {
-          return false;
+          state_values[i] = parse_mcrl2_state(state_values[i],*spec);
+          if ( state_values[i] == NULL )
+          {
+            return false;
+          }
         }
       }
+      extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
+              (ATerm)(ATermAppl) spec->data(),
+              (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm)(ATermList) spec->process().process_parameters()),
+              ATgetArgument((ATermAppl) *spec,1));
       this->type = lts_mcrl2;
     } else if ( type == lts_mcrl ) {
-      for (unsigned int i=0; i<nstates; i++)
+      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-        ATermList m = ATmakeList0();
-        for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
+        p_remove_state_values();
+      } else {
+        for (unsigned int i=0; i<nstates; i++)
         {
-          ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
-          m = ATinsert(m,a);
+          ATermList m = ATmakeList0();
+          for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
+          {
+            ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
+            m = ATinsert(m,a);
+          }
+          state_values[i] = (ATerm) m;
         }
-        state_values[i] = (ATerm) m;
       }
       this->type = lts_mcrl;
     } else {
@@ -197,6 +211,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
   } else {
     num_params = 0;
+    gsWarningMsg("parameter names are unknown (use LTS with extra information or supply the source LPS)\n");
   }
 
   // create set per parameter containing all used values
@@ -263,9 +278,9 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
         s = s.substr(1,s.size()-2);
         os << s << " ";
       } else { // type == lts_mcrl2
-        PrintPart_CXX(os,ATgetFirst(ATLgetFirst(params)),ppDefault);
+        PrintPart_CXX(os,ATgetFirst(params),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
-        PrintPart_CXX(os,ATgetFirst(ATgetNext(ATLgetFirst(params))),ppDefault);
+        PrintPart_CXX(os,ATgetArgument(ATAgetFirst(params),1),ppDefault);
         os << " ";
       }
 
@@ -394,19 +409,13 @@ static ATermList get_lps_params(ATerm lps)
 
   if ( lps != NULL )
   {
-    params = ATmakeList0();
-
     if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
     {
-      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,5),1);
-      for (; !ATisEmpty(pars); pars=ATgetNext(pars))
-      {
-        params = ATinsert(params,(ATerm) ATmakeList2(ATgetFirst(pars),(ATerm) gsGetSort(ATAgetFirst(pars))));
-      }
-      params = ATreverse(params);
+      params = ATLgetArgument(ATAgetArgument((ATermAppl) lps,3),1);
     } else if ( ATisAppl(lps) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lps)),"spec2gen") )
     {
       ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,1),1);
+      params = ATmakeList0();
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetArgument(ATAgetFirst(pars),0),ATgetArgument(ATAgetFirst(pars),1)));
@@ -422,18 +431,7 @@ static ATermList get_lps_params(ATerm lps)
 
 static ATermList get_lps_params(lps::linear_process &lps)
 {
-  ATermList params = ATmakeList0();
-
-  data::data_variable_list pars = lps.process_parameters();
-  data::data_variable_list::iterator pb = pars.begin();
-  data::data_variable_list::iterator pe = pars.end();
-  for (; pb != pe; pb++)
-  {
-    ATermAppl p = *pb;
-    params = ATinsert(params,(ATerm) ATmakeList2((ATerm) p,(ATerm) gsGetSort(p)));
-  }
-
-  return ATreverse(params);
+  return lps.process_parameters();
 }
 
 static bool isATermString(ATerm a)

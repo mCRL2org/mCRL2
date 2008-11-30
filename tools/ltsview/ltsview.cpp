@@ -121,7 +121,7 @@ void parse_command_line(int argc, wxChar** argv) {
 #endif
     "  Finite State Machine format (*.fsm);\n"
     "  mCRL SVC format (*.svc);\n"
-    "  mCRL2 SVC format (*.svc).");
+    "  mCRL2 format (*.lts).");
 
   command_line_parser parser(clinterface, argc, argv);
 

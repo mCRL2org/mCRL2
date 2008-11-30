@@ -677,5 +677,14 @@ int WriteDataAddParam(lts &l, bool is_branching)
     set_new_state(l,i);
   }
 
+  ATermAppl extra = (ATermAppl) l.get_extra_data();
+  if ( extra != NULL && !gsIsNil(ATAgetArgument(extra,1)) )
+  {
+    ATermList params = ATLgetArgument(ATAgetArgument(extra,1),0);
+    params = ATappend(params,(ATerm) gsMakeDataVarId(gsString2ATermAppl("bb_class"),gsMakeSortIdNat()));
+    extra = ATsetArgument(extra,(ATerm) ATsetArgument(ATAgetArgument(extra,1),(ATerm) params,0),1);
+    l.set_extra_data((ATerm) extra);
+  }
+
   return 1;
 }
