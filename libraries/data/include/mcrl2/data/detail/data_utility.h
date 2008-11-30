@@ -102,15 +102,13 @@ struct is_operation_with_given_sort
 {
   atermpp::aterm_appl sort_to_compare_with;
 
-  is_operation_with_given_sort(atermpp::aterm_appl u):sort_to_compare_with(u)
-  { assert(is_sort_expression(u));
-  }
+  is_operation_with_given_sort(sort_expression u):sort_to_compare_with(u)
+  // is_operation_with_given_sort(atermpp::aterm_appl u):sort_to_compare_with(u)
+  {}
 
-  bool operator()(atermpp::aterm_appl t) const
+  // bool operator()(atermpp::aterm_appl t) const
+  bool operator()(data_operation t) const
   { data_operation op=t;
-    assert(is_sort_expression(op.sort())); // Most likely already subsumed by previous
-                                           // call. Maybe, Wieger can have a look at this,
-                                           // and remove this line if superfluous.
     return op.sort()==sort_to_compare_with;
   }
 };
