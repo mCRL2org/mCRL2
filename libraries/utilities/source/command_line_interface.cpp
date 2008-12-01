@@ -223,7 +223,7 @@ namespace mcrl2 {
 
       mark_tag option(1);
 
-      description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), "<tt>$1</tt>");
+      description = regex_replace(description, sregex(~_w >> (option= '-' >> -*as_xpr('-') >> +_w)), std::string("<tt>$1</tt>"));
 
       s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 
