@@ -379,11 +379,7 @@ namespace mcrl2 {
                                char const short_identifier = '\0');
 
         /// \brief Stores a sequence of actions that automatically add options (used in constructor)
-        inline static interface_description& get_standard_description() {
-          static interface_description d;
-
-          return d;
-        }
+        static interface_description& get_standard_description();
 
         /// \brief Registers option that should be added to every interface
         template < typename T >

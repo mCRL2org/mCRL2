@@ -261,6 +261,12 @@ namespace mcrl2 {
       return interface_description::mandatory_argument< std::string >(name);
     }
 
+    interface_description& interface_description::get_standard_description() {
+      static interface_description d;
+
+      return d;
+    }
+
     interface_description::interface_description(std::string const& path,
           std::string const& name, std::string const& authors, std::string const& synopsis,
           std::string const& description, std::string const& known_issues) :
