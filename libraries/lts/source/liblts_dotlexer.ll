@@ -68,7 +68,7 @@ extern void dotyyerror(const char* s);
 %option nounput
 Quoted	   \"[^\"]*\"
 Name	   [a-zA-Z_][a-zA-Z0-9_]*
-Number     [-]?((\.[0-9]+])|([0-9]+(\.[0-9]+)?)) 
+Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?)) 
 
 %x COMMENT
 %%
@@ -79,16 +79,19 @@ Number     [-]?((\.[0-9]+])|([0-9]+(\.[0-9]+)?))
 \r?\n     { lineNo++; posNo=1; }
 .         { posNo++; }
 }
-"//"[^\n]*\n { lineNo++; posNo=1; }
+"//"[^\n]*\n                     { lineNo++; posNo=1; }
 #[^\n]*\n { lineNo++; posNo=1; }
 
 [ \t]	  { posNo += YYLeng(); }
 \r?\n     { lineNo++; posNo=1; }
-"digraph" { posNo += YYLeng(); return DIGRAPH; } 
-"graph"   { posNo += YYLeng(); return GRAPH; } 
-"node"    { posNo += YYLeng(); return NODE; } 
-"edge"    { posNo += YYLeng(); return EDGE; } 
+[dD][iI][gG][rR][aA][pP][hH]     { posNo += YYLeng(); return DIGRAPH; } 
+[gG][rR][aA][pP][hH]             { posNo += YYLeng(); return GRAPH; } 
+[sS][tT][rR][iI][cC][tT]         { posNo += YYLeng(); return STRICT; } 
+[sS][uU][bB][gG][rR][aA][pP][hH] { posNo += YYLeng(); return SUBGRAPH; } 
+[nN][oO][dD][eE]                 { posNo += YYLeng(); return NODE; } 
+[eE][dD][gG][eE]                 { posNo += YYLeng(); return EDGE; } 
 ","	  { posNo += YYLeng(); return COMMA; }
+":"	  { posNo += YYLeng(); return COLON; }
 ";"	  { posNo += YYLeng(); return SEMICOLON; }
 "="	  { posNo += YYLeng(); return IS; }
 "{"	  { posNo += YYLeng(); return LBRACE; }
@@ -96,6 +99,7 @@ Number     [-]?((\.[0-9]+])|([0-9]+(\.[0-9]+)?))
 "["	  { posNo += YYLeng(); return LBRACK; }
 "]"	  { posNo += YYLeng(); return RBRACK; }
 "->"	  { posNo += YYLeng(); return ARROW; }
+"--"	  { posNo += YYLeng(); return ARROW; }
 {Name}	  { processId(); return ID; }
 {Quoted}  { processQuoted(); return ID; }
 {Number}  { processId(); return ID; }

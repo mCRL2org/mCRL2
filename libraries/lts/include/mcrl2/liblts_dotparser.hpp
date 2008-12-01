@@ -41,33 +41,39 @@
    enum yytokentype {
      DIGRAPH = 258,
      GRAPH = 259,
-     NODE = 260,
-     EDGE = 261,
-     IS = 262,
-     COMMA = 263,
-     SEMICOLON = 264,
-     LBRACE = 265,
-     RBRACE = 266,
-     LBRACK = 267,
-     RBRACK = 268,
-     ARROW = 269,
-     ID = 270
+     STRICT = 260,
+     SUBGRAPH = 261,
+     NODE = 262,
+     EDGE = 263,
+     IS = 264,
+     COMMA = 265,
+     COLON = 266,
+     SEMICOLON = 267,
+     LBRACE = 268,
+     RBRACE = 269,
+     LBRACK = 270,
+     RBRACK = 271,
+     ARROW = 272,
+     ID = 273
    };
 #endif
 /* Tokens.  */
 #define DIGRAPH 258
 #define GRAPH 259
-#define NODE 260
-#define EDGE 261
-#define IS 262
-#define COMMA 263
-#define SEMICOLON 264
-#define LBRACE 265
-#define RBRACE 266
-#define LBRACK 267
-#define RBRACK 268
-#define ARROW 269
-#define ID 270
+#define STRICT 260
+#define SUBGRAPH 261
+#define NODE 262
+#define EDGE 263
+#define IS 264
+#define COMMA 265
+#define COLON 266
+#define SEMICOLON 267
+#define LBRACE 268
+#define RBRACE 269
+#define LBRACK 270
+#define RBRACK 271
+#define ARROW 272
+#define ID 273
 
 
 
@@ -79,7 +85,7 @@ typedef union YYSTYPE
   ATermAppl aterm;
 }
 /* Line 1489 of yacc.c.  */
-#line 83 "liblts_dotparser.hpp"
+#line 89 "liblts_dotparser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
