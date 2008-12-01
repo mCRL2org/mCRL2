@@ -442,7 +442,6 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bool opt_precompile_pbes,
                    Rewriter *rewriter) 
 { 
-  
   if (is_propositional_variable_instantiation(p))
   { 
     pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?store_as_tree(p):p);
@@ -557,6 +556,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
   else
   { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
+    abort();
   }
   exit(1);
   return bes::false_();

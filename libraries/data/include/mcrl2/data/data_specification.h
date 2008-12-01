@@ -276,8 +276,9 @@ class data_specification: public atermpp::aterm_appl
               i!=constructors(s).end(); i++)
           { assert(i->sort().is_arrow()); // If a basic constructor of this sort
                                           // exists, a situation as mentioned above applies.
-            sort_expression_list argument_sorts=source(i->sort());
-            sort_expression target_sort=target(i->sort());
+            sort_arrow sa=i->sort();
+            sort_expression_list argument_sorts=sa.argument_sorts();
+            sort_expression target_sort=sa.result_sort();
             if (target_sort==s)
             { // We only deal with operators of the form
               // f:s1#...#sn->s. Operators of the form 
@@ -296,7 +297,7 @@ class data_specification: public atermpp::aterm_appl
               if (j==argument_sorts.end())
               { // a suitable set of arguments is found
                 arguments=reverse(arguments);
-                // The target sort can be equal to s, in which case
+                // The result sort can be equal to s, in which case
                 // we are ready, or it can have a more complex structure.
                 result=data_application((atermpp::aterm_appl)*i,arguments);
                 default_expression_map.insert(std::make_pair(s,result));
@@ -310,8 +311,11 @@ class data_specification: public atermpp::aterm_appl
               i!=mappings(s).end(); i++)
           { assert(i->sort().is_arrow()); // if a basic mapping of sort s would exist
                                           // we cannot end up here.
-            sort_expression_list argument_sorts=source(i->sort());
-            sort_expression target_sort=target(i->sort());
+            sort_arrow sa=i->sort();
+            sort_expression_list argument_sorts=sa.argument_sorts();
+            sort_expression target_sort=sa.result_sort();
+            // sort_expression_list argument_sorts=source(i->sort());
+            // sort_expression target_sort=target(i->sort());
             if (target_sort==s)
             { // See comments for similar code for constructors. 
               data_expression_list arguments;

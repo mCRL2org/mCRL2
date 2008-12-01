@@ -553,11 +553,19 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=source(f->sort());
-                  assert(!target(f->sort()).is_arrow()); // In case the function f has a sort A->(B->C),
-                                                          // then the function below does not work correctly.
-                                                          // This code must be replaced by enumerator code,
-                                                          // developed by Wieger.
+                  data::sort_expression_list dsorts;
+                  if (f->sort().is_arrow())
+                  { 
+                    data::sort_arrow sa=f->sort();
+                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                                                           // then the function below does not work correctly.
+                                                           // This code must be replaced by enumerator code,
+                                                           // developed by Wieger.
+                    dsorts=sa.argument_sorts();
+                  }
+                  // else dsorts is empty.
+                    
+                  // XXXXXXXXXXXXXX argument_sorts(), result_sort()  =source(f->sort());
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; s++ )
@@ -656,11 +664,18 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=source(f->sort());
-                  assert(!target(f->sort()).is_arrow()); // In case the function f has a sort A->(B->C),
-                                                          // then the function below does not work correctly.
-                                                          // This code must be replaced by enumerator code,
-                                                          // developed by Wieger.
+                  data::sort_expression_list dsorts;
+                  if (f->sort().is_arrow())
+                  { 
+                    data::sort_arrow sa=f->sort();
+                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                                                           // then the function below does not work correctly.
+                                                           // This code must be replaced by enumerator code,
+                                                           // developed by Wieger.
+                    dsorts=sa.argument_sorts();
+                  }
+                  // else dsorts is empty.
+                    
                   // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
@@ -748,6 +763,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     { 
       data::data_expression d = rewriter->rewrite(p);
       // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
+      // ATfprintf(stderr,"FORMAT: %t\n",(ATermAppl)(d));
       if (data::data_expr::is_true(d))
       { result = pbes_expr::true_();
       }
