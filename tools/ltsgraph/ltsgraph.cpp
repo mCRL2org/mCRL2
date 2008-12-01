@@ -57,6 +57,10 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
                  tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
       c.add_input_configuration(lts_file_for_input,
                  tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::visualisation);
 #ifdef USE_BCG
       c.add_input_configuration(lts_file_for_input,
                  tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);
@@ -97,7 +101,7 @@ void parse_command_line(int argc, wxChar** argv) {
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
         NAME, AUTHOR, "[OPTION]... [INFILE]\n",
     "Draw graphs and optimize their layout in a graphical environment. "
-    "If INFILE (LTS file: *.aut or *.svc) is supplied, the tool will use this file as input for drawing.");
+    "If INFILE is supplied, the tool will use this file as input for drawing.");
 
   command_line_parser parser(clinterface, argc, argv);
 

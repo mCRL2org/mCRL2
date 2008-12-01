@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -35,7 +35,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -89,6 +88,8 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#endif /* ! C99 */
+
 #endif /* ! FLEXINT_H */
 
 /* begin standard C++ headers. */
@@ -105,11 +106,12 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif	/* __STDC__ */
+#endif	/* defined (__STDC__) */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -187,14 +189,9 @@ extern int yyleng;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -530,11 +527,6 @@ static yyconst flex_int16_t yy_chk[248] =
 #include <set>
 #include <utility>
 
-//fix for newer versions of flex (>= 2.5.31)
-#ifndef yywrap
-#define yywrap chiyywrap
-#endif
-
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
@@ -571,8 +563,6 @@ extern YYSTYPE chiyylval;      /* declared in parser.cpp */
 int  chiyylex(void);           /* lexer function */
 void chiyyerror(const char *s);/* error function */
 void chigetposition();
-extern "C" int chiyywrap(void);/* wrap function */
-//Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
 ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
@@ -582,7 +572,6 @@ public:
   chiLexer(void);                /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
-  int yywrap(void);              /* wrap function */
   ATermAppl parse_stream(std::istream &stream );
   void getposition();
 protected:
@@ -599,7 +588,7 @@ int chiyyFlexLexer::yylex(void) { return 1; }
 chiLexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 
-#line 603 "chilexer.cpp"
+#line 592 "chilexer.cpp"
 
 #define INITIAL 0
 
@@ -629,7 +618,12 @@ static int yy_flex_strlen (yyconst char * );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -699,9 +693,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 95 "chilexer.ll"
+#line 87 "chilexer.ll"
 
-#line 705 "chilexer.cpp"
+#line 699 "chilexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -786,461 +780,461 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 96 "chilexer.ll"
+#line 88 "chilexer.ll"
 { col_nr += YYLeng(); /* whitespace */ }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 97 "chilexer.ll"
+#line 89 "chilexer.ll"
 { col_nr = 1; ++line_nr; /* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 98 "chilexer.ll"
+#line 90 "chilexer.ll"
 { col_nr += YYLeng(); /* comment */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 100 "chilexer.ll"
+#line 92 "chilexer.ll"
 { process_string(); return BP; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 101 "chilexer.ll"
+#line 93 "chilexer.ll"
 { process_string(); return EP; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 102 "chilexer.ll"
+#line 94 "chilexer.ll"
 { process_string(); return BARS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 103 "chilexer.ll"
+#line 95 "chilexer.ll"
 { process_string(); return ALT; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 104 "chilexer.ll"
+#line 96 "chilexer.ll"
 { process_string(); return SEP; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 105 "chilexer.ll"
+#line 97 "chilexer.ll"
 { process_string(); return STAR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 106 "chilexer.ll"
+#line 98 "chilexer.ll"
 { process_string(); return GUARD_REP; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 108 "chilexer.ll"
+#line 100 "chilexer.ll"
 { process_string(); return GG; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 109 "chilexer.ll"
+#line 101 "chilexer.ll"
 { process_string(); return PROC_SEP; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 110 "chilexer.ll"
+#line 102 "chilexer.ll"
 { process_string(); return COMMA; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 111 "chilexer.ll"
+#line 103 "chilexer.ll"
 { process_string(); return COLON; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 112 "chilexer.ll"
+#line 104 "chilexer.ll"
 { process_string(); return IS; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 113 "chilexer.ll"
+#line 105 "chilexer.ll"
 { process_string(); return ASSIGNMENT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 114 "chilexer.ll"
+#line 106 "chilexer.ll"
 { process_string(); return MINUS; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 115 "chilexer.ll"
+#line 107 "chilexer.ll"
 { process_string(); return PLUS; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 116 "chilexer.ll"
+#line 108 "chilexer.ll"
 { process_string(); return NOTEQUAL; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 117 "chilexer.ll"
+#line 109 "chilexer.ll"
 { process_string(); return LEQ; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 118 "chilexer.ll"
+#line 110 "chilexer.ll"
 { process_string(); return GEQ; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 119 "chilexer.ll"
+#line 111 "chilexer.ll"
 { process_string(); return GREATER; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 120 "chilexer.ll"
+#line 112 "chilexer.ll"
 { process_string(); return LESS; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 121 "chilexer.ll"
+#line 113 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 122 "chilexer.ll"
+#line 114 "chilexer.ll"
 { process_string(); return AND; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 123 "chilexer.ll"
+#line 115 "chilexer.ll"
 { process_string(); return OR; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 124 "chilexer.ll"
+#line 116 "chilexer.ll"
 { process_string(); return GUARD; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 125 "chilexer.ll"
+#line 117 "chilexer.ll"
 { process_string(); return IMPLIES; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 126 "chilexer.ll"
+#line 118 "chilexer.ll"
 { process_string(); return NOT;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 127 "chilexer.ll"
+#line 119 "chilexer.ll"
 { process_string(); return EXCLAMATION;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 128 "chilexer.ll"
+#line 120 "chilexer.ll"
 { process_string(); return LBRACE; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 129 "chilexer.ll"
+#line 121 "chilexer.ll"
 { process_string(); return RBRACE; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 130 "chilexer.ll"
+#line 122 "chilexer.ll"
 { process_string(); return LBRACKET; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 131 "chilexer.ll"
+#line 123 "chilexer.ll"
 { process_string(); return RBRACKET; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 132 "chilexer.ll"
+#line 124 "chilexer.ll"
 { process_string(); return DOT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 133 "chilexer.ll"
+#line 125 "chilexer.ll"
 { process_string(); return RECV; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 134 "chilexer.ll"
+#line 126 "chilexer.ll"
 { process_string(); return RECVSEND; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 135 "chilexer.ll"
+#line 127 "chilexer.ll"
 { process_string(); return SENDRECV; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 136 "chilexer.ll"
+#line 128 "chilexer.ll"
 { process_string(); return SSEND; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 137 "chilexer.ll"
+#line 129 "chilexer.ll"
 { process_string(); return RRECV; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 138 "chilexer.ll"
+#line 130 "chilexer.ll"
 { process_string(); return DERIVATIVE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 139 "chilexer.ll"
+#line 131 "chilexer.ll"
 { process_string(); return POWER; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 140 "chilexer.ll"
+#line 132 "chilexer.ll"
 { process_string(); return MOD; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 141 "chilexer.ll"
+#line 133 "chilexer.ll"
 { process_string(); return DIV; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 142 "chilexer.ll"
+#line 134 "chilexer.ll"
 { process_string(); return DIVIDE; } 
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 143 "chilexer.ll"
+#line 135 "chilexer.ll"
 { process_string(); return SQLBRACKET; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 144 "chilexer.ll"
+#line 136 "chilexer.ll"
 { process_string(); return SQRBRACKET; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 145 "chilexer.ll"
+#line 137 "chilexer.ll"
 { process_string(); return HASH; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 147 "chilexer.ll"
+#line 139 "chilexer.ll"
 { process_string(); return PROC; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 148 "chilexer.ll"
+#line 140 "chilexer.ll"
 { process_string(); return MODEL; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 149 "chilexer.ll"
+#line 141 "chilexer.ll"
 { process_string(); return VAR; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 150 "chilexer.ll"
+#line 142 "chilexer.ll"
 { process_string(); return ENUM; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 151 "chilexer.ll"
+#line 143 "chilexer.ll"
 { process_string(); return SKIP; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 152 "chilexer.ll"
+#line 144 "chilexer.ll"
 { process_string(); return TRUE; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 153 "chilexer.ll"
+#line 145 "chilexer.ll"
 { process_string(); return FALSE; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 154 "chilexer.ll"
+#line 146 "chilexer.ll"
 { process_string(); return CHAN; }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 155 "chilexer.ll"
+#line 147 "chilexer.ll"
 { process_string(); return MIN; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 156 "chilexer.ll"
+#line 148 "chilexer.ll"
 { process_string(); return MAX; }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 158 "chilexer.ll"
+#line 150 "chilexer.ll"
 { process_string(); return CONST; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 159 "chilexer.ll"
+#line 151 "chilexer.ll"
 { process_string(); return TIME; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 160 "chilexer.ll"
+#line 152 "chilexer.ll"
 { process_string(); return DELAY; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 162 "chilexer.ll"
+#line 154 "chilexer.ll"
 { process_string(); return IN; }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 163 "chilexer.ll"
+#line 155 "chilexer.ll"
 { process_string(); return CONCAT; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 164 "chilexer.ll"
+#line 156 "chilexer.ll"
 { process_string(); return LSUBTRACT; }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 166 "chilexer.ll"
+#line 158 "chilexer.ll"
 { process_string(); return LENGTH; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 167 "chilexer.ll"
+#line 159 "chilexer.ll"
 { process_string(); return HEAD; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 168 "chilexer.ll"
+#line 160 "chilexer.ll"
 { process_string(); return TAIL; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 169 "chilexer.ll"
+#line 161 "chilexer.ll"
 { process_string(); return RHEAD; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 170 "chilexer.ll"
+#line 162 "chilexer.ll"
 { process_string(); return RTAIL; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 171 "chilexer.ll"
+#line 163 "chilexer.ll"
 { process_string(); return TAKE; }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 172 "chilexer.ll"
+#line 164 "chilexer.ll"
 { process_string(); return DROP; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 173 "chilexer.ll"
+#line 165 "chilexer.ll"
 { process_string(); return SORT; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 174 "chilexer.ll"
+#line 166 "chilexer.ll"
 { process_string(); return INSERT; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 176 "chilexer.ll"
+#line 168 "chilexer.ll"
 { process_string(); return PICK;}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 177 "chilexer.ll"
+#line 169 "chilexer.ll"
 { process_string(); return INTERSECTION; }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 178 "chilexer.ll"
+#line 170 "chilexer.ll"
 { process_string(); return UNION; }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 179 "chilexer.ll"
+#line 171 "chilexer.ll"
 { process_string(); return SUB; }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 181 "chilexer.ll"
+#line 173 "chilexer.ll"
 { process_string(); return BOOL; }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 182 "chilexer.ll"
+#line 174 "chilexer.ll"
 { process_string(); return NAT; }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 183 "chilexer.ll"
+#line 175 "chilexer.ll"
 { process_string(); return VOID; }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 184 "chilexer.ll"
+#line 176 "chilexer.ll"
 { process_string(); return TYPE; }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 186 "chilexer.ll"
+#line 178 "chilexer.ll"
 { process_string();return DEADLOCK; }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 187 "chilexer.ll"
+#line 179 "chilexer.ll"
 { process_string();return DEADLOCK; }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 188 "chilexer.ll"
+#line 180 "chilexer.ll"
 { process_string(); return OLD;}
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 190 "chilexer.ll"
+#line 182 "chilexer.ll"
 { process_string(); yyerror("The \"val\" operator is not supported\n");}
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 191 "chilexer.ll"
+#line 183 "chilexer.ll"
 { process_string(); yyerror("The \"real\" operator is not supported\n");}
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 194 "chilexer.ll"
+#line 186 "chilexer.ll"
 { process_string(); return ID; }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 195 "chilexer.ll"
+#line 187 "chilexer.ll"
 { process_string(); return NUMBER; }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 196 "chilexer.ll"
+#line 188 "chilexer.ll"
 { process_string(); return REALNUMBER; }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 197 "chilexer.ll"
+#line 189 "chilexer.ll"
 { col_nr += YYLeng(); yyerror("unknown character"); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 200 "chilexer.ll"
+#line 192 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1244 "chilexer.cpp"
+#line 1238 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1373,6 +1367,8 @@ case YY_STATE_EOF(INITIAL):
 		} /* end of scanning one token */
 } /* end of yylex */
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 {
 	yyin = arg_yyin;
@@ -1393,14 +1389,26 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 	yy_start_stack_ptr = yy_start_stack_depth = 0;
 	yy_start_stack = NULL;
 
-    (yy_buffer_stack) = 0;
-    (yy_buffer_stack_top) = 0;
-    (yy_buffer_stack_max) = 0;
+	yy_buffer_stack = 0;
+	yy_buffer_stack_top = 0;
+	yy_buffer_stack_max = 0;
 
 	yy_state_buf = 0;
 
 }
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
+yyFlexLexer::~yyFlexLexer()
+{
+	delete [] yy_state_buf;
+	chiyyfree(yy_start_stack  );
+	yy_delete_buffer( YY_CURRENT_BUFFER );
+	chiyyfree(yy_buffer_stack  );
+}
+
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1569,6 +1577,14 @@ int yyFlexLexer::yy_get_next_buffer()
 
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
+
+	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) chiyyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
 	(yy_n_chars) += number_to_move;
 	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
@@ -1975,7 +1991,9 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		(yy_buffer_stack) = (struct yy_buffer_state**)chiyyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
-		
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+								  
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
 		(yy_buffer_stack_max) = num_to_alloc;
@@ -1993,6 +2011,8 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -2016,8 +2036,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 			(yy_start_stack) = (int *) chiyyrealloc((void *) (yy_start_stack),new_size  );
 
 		if ( ! (yy_start_stack) )
-			YY_FATAL_ERROR(
-			"out of memory expanding start-condition stack" );
+			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
 		}
 
 	(yy_start_stack)[(yy_start_stack_ptr)++] = YY_START;
@@ -2067,25 +2086,6 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-yyFlexLexer::~yyFlexLexer()
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_delete_buffer( YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yypop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	chiyyfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-	delete [] (yy_state_buf);
-	chiyyfree((yy_start_stack)  );
-
-}
-
 /*
  * Internal utility routines.
  */
@@ -2134,7 +2134,7 @@ void chiyyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 200 "chilexer.ll"
+#line 192 "chilexer.ll"
 
 
 
@@ -2161,8 +2161,8 @@ void chigetposition() {
   return lexer->getposition();
 }
 
-int chiyywrap(void) {
-  return lexer->yywrap();
+int chiyyFlexLexer::yywrap(void) {
+  return 1;
 }
 
 
@@ -2194,16 +2194,6 @@ void chiLexer::getposition()
     "Near position Line: %d, Column: %d:\n", 
     line_nr, oldcol_nr 
   ); 
-}
-
-int chiLexer::yywrap(void) {
-/** 
-  * When the scanner receives an end-of-file indication from YY_INPUT, it  
-  * checks the `yywrap()' function. Because we only have one input stream,
-  * we need to terminate the parser, by returning the 1.
-  *
-  **/
-  return 1;
 }
 
 void chiLexer::process_string(void) {

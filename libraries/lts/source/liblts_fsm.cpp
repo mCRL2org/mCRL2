@@ -203,7 +203,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   unsigned int num_params;
   if ( (type != lts_none) && state_info && (nstates > 0) )
   {
-    if ( (type == lts_mcrl) || (type == lts_fsm) )
+    if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
     {
       num_params = ATgetLength((ATermList) state_values[0]);
     } else { // type == lts_mcrl2
@@ -230,7 +230,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     for (unsigned int i=0; i<nstates; i++)
     {
       ATermList state_pars;
-      if ( (type == lts_mcrl) || (type == lts_fsm) )
+      if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
         state_pars = (ATermList) state_values[i];
       } else { // type == mcrl2
@@ -260,7 +260,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 
     if ( (params == NULL) || ATisEmpty(params) )
     {
-      if ( type == lts_fsm )
+      if ( type == lts_fsm || type == lts_dot )
       {
         ATermAppl type = (ATermAppl) ATgetArgument(ATAgetFirst(vals),1);
         os << ATgetName(ATgetAFun(ATgetArgument(type,0))) << "(" << ATgetLength(vals) << ") " << ATgetName(ATgetAFun(ATgetArgument(type,1))) << " ";
@@ -295,7 +295,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
         PrintPart_CXX(os,ATgetFirst(vals),ppDefault);
         os << "\"";
       }
-    } else if ( type == lts_fsm )
+    } else if ( type == lts_fsm || type == lts_dot )
     {
       for(; !ATisEmpty(vals); vals=ATgetNext(vals))
       {
@@ -329,7 +329,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     {
       state_pars = ATmakeList0();
     } else {
-      if ( (type == lts_mcrl) || (type == lts_fsm) )
+      if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
         state_pars = (ATermList) state_values[idx];
       } else { // type == lts_mcrl2

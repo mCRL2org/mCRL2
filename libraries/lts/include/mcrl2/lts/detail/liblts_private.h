@@ -134,6 +134,8 @@
       bool write_to_fsm(std::ostream& os, ATerm lps = NULL);
       bool write_to_fsm(std::ostream& os, lps::specification &spec);
 
+      bool read_from_dot(std::string const& filename);
+      bool read_from_dot(std::istream &is);
       bool write_to_dot(std::ostream& os, lts_dot_options opts);
       bool write_to_dot(std::string const& filename, lts_dot_options opts);
 

@@ -729,6 +729,25 @@ lts_type p_lts::detect_type(istream &is)
       }
     }
   }
+
+  // detect lts_dot
+  if ( r >= 7 )
+  {
+    // we assume that "digraph" is completely in buf in case this is a dot file
+    int i = 0;
+    // skip any spaces or tabs
+    while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
+    {
+      i++;
+    }
+    // at least need to start with digraph
+    if ( (i+7 <= r) && !memcmp(buf+i,"digraph",7) )
+    {
+      i = i + 7;
+      gsVerboseMsg("detected DOT input file\n");
+      return lts_dot;
+    }
+  }
   
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
@@ -875,8 +894,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
           return read_from_fsm(filename);
       }
     case lts_dot:
-      gsVerboseMsg("cannot read dot files\n");
-      return false;
+      return read_from_dot(filename);
 #ifdef USE_BCG
     case lts_bcg:
       return read_from_bcg(filename);
@@ -921,8 +939,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
           return read_from_fsm(is);
       }
     case lts_dot:
-      gsVerboseMsg("cannot read dot files\n");
-      return false;
+      return read_from_dot(is);
 #ifdef USE_BCG
     case lts_bcg:
       gsVerboseMsg("cannot read BCG files from streams\n");
@@ -1472,6 +1489,7 @@ bool lts::has_state_parameters()
 {
   return state_info && ( ( type == lts_mcrl2 ) ||
                          ( type == lts_mcrl ) ||
+                         ( type == lts_dot ) ||
                          ( type == lts_fsm ) );
 }
 
@@ -1485,7 +1503,7 @@ unsigned int lts::num_state_parameters()
     } else {
       return ATgetArity(ATgetAFun((ATermAppl) state_values[0]));
     }
-  } else if ( type == lts_mcrl || type == lts_fsm )
+  } else if ( type == lts_mcrl || type == lts_fsm || type == lts_dot )
   {
     return ATgetLength((ATermList) state_values[0]);
   }
@@ -1511,7 +1529,7 @@ ATerm lts::state_parameter_name(unsigned int idx)
     char s[2+sizeof(unsigned int)*3];
     sprintf(s,"p%u",idx);
     return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),0);
   }
@@ -1532,7 +1550,7 @@ std::string lts::state_parameter_name_str(unsigned int idx)
       sprintf(s,"p%u",idx);
       return s;
     }
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     return ATgetName(ATgetAFun((ATermAppl) state_parameter_name(idx)));
   }
@@ -1551,7 +1569,7 @@ ATerm lts::state_parameter_sort(unsigned int idx)
     char s[2+sizeof(unsigned int)*3];
     sprintf(s,"D%u",idx);
     return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),1);
   }
@@ -1570,7 +1588,7 @@ std::string lts::state_parameter_sort_str(unsigned int idx)
     char s[2+sizeof(unsigned int)*3];
     sprintf(s,"D%u",idx);
     return s;
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     return ATgetName(ATgetAFun((ATermAppl) state_parameter_sort(idx)));
   }
@@ -1587,7 +1605,7 @@ ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx)
   } else if ( type == lts_mcrl )
   {
     return ATelementAt((ATermList) state_values[state],idx);
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     return ATgetArgument(ATAelementAt((ATermList) state_values[state],idx),0);
   }
@@ -1604,7 +1622,7 @@ std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int 
   } else if ( type == lts_mcrl )
   {
     return ATwriteToString(get_state_parameter_value(state,idx));
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     std::string s = ATwriteToString(get_state_parameter_value(state,idx));
     return s.substr(1,s.size()-2);
@@ -1655,14 +1673,13 @@ std::string lts::pretty_print_label_value(ATerm value)
   if ( type == lts_mcrl2 )
   {
     return PrintPart_CXX(value,ppDefault);
-  } else if ( type == lts_mcrl || type == lts_fsm )
+  } else if ( type == lts_mcrl || type == lts_fsm || type == lts_dot )
   {
     std::string s = ATwriteToString(value);
     return s.substr(1,s.size()-2);
   }
 
-  assert(0);
-  return "";
+  return ATwriteToString(value);
 }
 
 std::string lts::pretty_print_state_value(ATerm value)
@@ -1679,13 +1696,9 @@ std::string lts::pretty_print_state_value(ATerm value)
       s += PrintPart_CXX(ATgetArgument(value,i),ppDefault);
     }
     return s+"]";
-  } else if ( type == lts_mcrl || type == lts_fsm )
-  {
-    return ATwriteToString(value);
   }
 
-  assert(0);
-  return "";
+  return ATwriteToString(value);
 }
 
 std::string lts::pretty_print_state_parameter_value(ATerm value)
@@ -1693,17 +1706,13 @@ std::string lts::pretty_print_state_parameter_value(ATerm value)
   if ( type == lts_mcrl2 )
   {
     return PrintPart_CXX(value,ppDefault);
-  } else if ( type == lts_mcrl )
-  {
-    return ATwriteToString(value);
-  } else if ( type == lts_fsm )
+  } else if ( type == lts_fsm || type == lts_dot )
   {
     std::string s = ATwriteToString(value);
     return s.substr(1,s.size()-2);
   }
 
-  assert(0);
-  return "";
+  return ATwriteToString(value);
 }
 
 ATerm lts::get_extra_data()

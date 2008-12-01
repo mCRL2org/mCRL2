@@ -93,6 +93,7 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
 #endif
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::reporting);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::reporting);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::reporting);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::reporting);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::reporting);
 }
@@ -255,6 +256,7 @@ tool_options parse_command_line(int argc, char** argv) {
 #ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
+    "  'dot' for the GraphViz format,\n"
     "  'fsm' for the Finite State Machine format,\n"
     "  'mcrl' for the mCRL SVC format,\n"
     "  'mcrl2' for the mCRL2 format (default), or"

@@ -11,11 +11,6 @@
 #include <set>
 #include <utility>
 
-//fix for newer versions of flex (>= 2.5.31)
-#ifndef yywrap
-#define yywrap chiyywrap
-#endif
-
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
@@ -52,8 +47,6 @@ extern YYSTYPE chiyylval;      /* declared in parser.cpp */
 int  chiyylex(void);           /* lexer function */
 void chiyyerror(const char *s);/* error function */
 void chigetposition();
-extern "C" int chiyywrap(void);/* wrap function */
-//Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
 ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
@@ -63,7 +56,6 @@ public:
   chiLexer(void);                /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
-  int yywrap(void);              /* wrap function */
   ATermAppl parse_stream(std::istream &stream );
   void getposition();
 protected:
@@ -222,8 +214,8 @@ void chigetposition() {
   return lexer->getposition();
 }
 
-int chiyywrap(void) {
-  return lexer->yywrap();
+int chiyyFlexLexer::yywrap(void) {
+  return 1;
 }
 
 
@@ -255,16 +247,6 @@ void chiLexer::getposition()
     "Near position Line: %d, Column: %d:\n", 
     line_nr, oldcol_nr 
   ); 
-}
-
-int chiLexer::yywrap(void) {
-/** 
-  * When the scanner receives an end-of-file indication from YY_INPUT, it  
-  * checks the `yywrap()' function. Because we only have one input stream,
-  * we need to terminate the parser, by returning the 1.
-  *
-  **/
-  return 1;
 }
 
 void chiLexer::process_string(void) {

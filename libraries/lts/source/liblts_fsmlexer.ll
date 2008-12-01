@@ -29,11 +29,6 @@ using std::cout;
 
 using namespace mcrl2::lts;
 
-//fix for newer versions of flex (>= 2.5.31)
-#ifndef yywrap
-#define yywrap fsmyywrap
-#endif
-
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
@@ -43,8 +38,6 @@ extern YYSTYPE fsmyylval;      /* declared in fsmparser.cpp */
 //global declarations, used by fsmparser.cpp
 int  fsmyylex(void);           /* lexer function */
 void fsmyyerror(const char *s);/* error function */
-extern "C" int fsmyywrap(void);/* wrap function */
-//Note: C linkage is needed for older versions of flex (2.5.4)
 
 //local declarations
 class concrete_fsm_lexer : public fsm_lexer, public fsmyyFlexLexer {
@@ -52,7 +45,6 @@ public:
   concrete_fsm_lexer(void);               /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
-  int yywrap(void);              /* wrap function */
   bool parse_stream(std::istream &stream, lts &l);
 
 protected:
@@ -140,8 +132,8 @@ void fsmyyerror(const char *s) {
   return clexer->yyerror(s);
 }
 
-int fsmyywrap(void) {
-  return clexer->yywrap();
+int fsmyyFlexLexer::yywrap(void) {
+  return 1;
 }
 
 
@@ -156,10 +148,6 @@ void concrete_fsm_lexer::yyerror(const char *s) {
     "token '%s' at position %d,%d caused the following error: %s\n", 
     YYText(), lineNo, posNo, s
   ); 
-}
-
-int concrete_fsm_lexer::yywrap(void) {
-  return 1;
 }
 
 bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)

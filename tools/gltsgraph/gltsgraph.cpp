@@ -42,6 +42,10 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
                  tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::visualisation);
       c.add_input_configuration(lts_file_for_input,
                  tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+      c.add_input_configuration(lts_file_for_input,
+                 tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::visualisation);
 #ifdef MCRL2_BCG
       c.add_input_configuration(lts_file_for_input,
                  tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::visualisation);

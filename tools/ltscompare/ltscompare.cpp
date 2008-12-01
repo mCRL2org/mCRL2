@@ -76,6 +76,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 #ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
+    "  'dot' for the GraphViz format,\n"
     "  'fsm' for the Finite State Machine format,\n"
     "  'mcrl' for the mCRL SVC format,\n"
     "  'mcrl2' for the mCRL2 format (default), or\n"

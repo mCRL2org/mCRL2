@@ -25,11 +25,6 @@ using std::cout;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-//fix for newer versions of flex (>= 2.5.31)
-#ifndef yywrap
-#define yywrap mcrl2yywrap
-#endif
-
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
@@ -40,8 +35,6 @@ extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
-extern "C" int mcrl2yywrap(void);/* wrap function */
-//Note: C linkage is needed for older versions of flex (2.5.4)
 ATerm spec_tree = NULL;      /* the parse tree */
 ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
 
@@ -212,8 +205,8 @@ void mcrl2yyerror(const char *s) {
   return lexer->yyerror(s);
 }
 
-int mcrl2yywrap(void) {
-  return lexer->yywrap();
+int mcrl2yyFlexLexer::yywrap(void) {
+  return 1;
 }
 
 

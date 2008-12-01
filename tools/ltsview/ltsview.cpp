@@ -119,6 +119,7 @@ void parse_command_line(int argc, wxChar** argv) {
 #ifdef USE_BCG
     "  Binary Coded Graph format (CADP; *.bcg);\n"
 #endif
+    "  GraphViz format (*.dot);\n"
     "  Finite State Machine format (*.fsm);\n"
     "  mCRL SVC format (*.svc);\n"
     "  mCRL2 format (*.lts).");

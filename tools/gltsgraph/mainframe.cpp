@@ -104,7 +104,7 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats|*.fsm;*.aut;*.svc;*.lts"
+    wxT("All supported formats|*.dot;*.fsm;*.aut;*.svc;*.lts"
 #ifdef USE_BCG
         ";*.bcg"
 #endif
@@ -112,7 +112,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 #ifdef USE_BCG
         ",*.bcg"
 #endif
-        ",*.fsm,*.lts,*.svc)|*.fsm;*.aut;*.svc;*.lts"
+        ",*.dot,*.fsm,*.lts,*.svc)|*.dot;*.fsm;*.aut;*.svc;*.lts"
 #ifdef USE_BCG
         ";*.bcg"
 #endif

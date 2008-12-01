@@ -24,7 +24,7 @@ ifeq (${MAKECMDGOALS},)
   include build/Makefile
 endif
 
-parsers: mcrl2parser chiparser liblts_fsmparser
+parsers: mcrl2parser chiparser liblts_fsmparser liblts_dotparser
 	cp /usr/include/FlexLexer.h build/workarounds
 
 liblts_fsmparser:
@@ -32,6 +32,12 @@ liblts_fsmparser:
 	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
 	bison -p fsm -d -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
 	mv liblts_fsmparser.hpp ../include/mcrl2
+
+liblts_dotparser:
+	cd libraries/lts/source; \
+	flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll; \
+	bison -p dot -d -o liblts_dotparser.cpp liblts_dotparser.yy; \
+	mv liblts_dotparser.hpp ../include/mcrl2
 
 mcrl2parser:
 	cd libraries/core/source; \

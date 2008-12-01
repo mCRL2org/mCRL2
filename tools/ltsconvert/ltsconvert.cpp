@@ -218,7 +218,7 @@ t_tool_options parse_command_line(int ac, char** av) {
 #ifdef USE_BCG
     "  'bcg' for the Binary Coded Graph format (CADP),\n"
 #endif
-    "  'dot' for the GraphViz format (output only),\n"
+    "  'dot' for the GraphViz format,\n"
     "  'fsm' for the Finite State Machine format,\n"
     "  'mcrl' for the mCRL SVC format,\n"
     "  'mcrl2' for the mCRL2 format (default), or"
@@ -339,6 +339,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     }
     else {
       if ( tool_options.intype == lts_none ) {
+        gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
         tool_options.intype = lts_aut;
       }
     }
@@ -405,6 +406,7 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::conversion);
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::conversion);
+  c.add_input_configuration(lts_file_for_input, tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::conversion);
 #ifdef USE_BCG
   c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::conversion);
 #endif

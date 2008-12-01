@@ -16,6 +16,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lts/lts.h"
+#include "liblts_dotparser.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -29,6 +30,63 @@ namespace mcrl2
 {
 namespace lts
 {
+
+bool p_lts::read_from_dot(string const& filename)
+{
+  ifstream is(filename.c_str());
+
+  if ( !is.is_open() )
+  {
+    gsVerboseMsg("cannot open DOT file '%s' for reading\n",filename.c_str());
+    return false;
+  }
+
+  bool r = read_from_dot(is);
+
+  is.close();
+
+  return r;
+}
+
+bool p_lts::read_from_dot(istream &is)
+{
+  state_info = true;
+  label_info = true;
+  if ( parse_dot(is,*lts_object) )
+  {
+    if ( nstates > 0 )
+    {
+      gsWarningMsg("input file has no initial state; taking first (%s) as initial\n",ATgetName(ATgetAFun((ATermAppl)state_values[0])));
+    }
+    init_state = 0;
+
+    ATermAppl empty_value = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+    AFun value_fun = ATmakeAFun("Value",2,ATfalse);
+    ATermAppl id = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),(ATerm) ATmakeAppl0(ATmakeAFun("id",0,ATtrue)),(ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
+    ATermAppl label = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),(ATerm) ATmakeAppl0(ATmakeAFun("label",0,ATtrue)),(ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
+    for (unsigned int i=0; i<nstates; i++)
+    {
+      ATermAppl name;
+      ATermAppl val;
+      if ( ATgetArity(ATgetAFun((ATermAppl) state_values[i])) == 0 )
+      {
+        name = (ATermAppl) state_values[i];
+        val = empty_value;
+      } else { // == 1
+        name = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun((ATermAppl) state_values[i])),0,ATtrue));
+        val = ATAgetArgument((ATermAppl) state_values[i],0); 
+      }
+      state_values[i] = (ATerm) ATmakeList2((ATerm) ATmakeAppl2(value_fun,(ATerm) name,(ATerm) id),(ATerm) ATmakeAppl2(value_fun,(ATerm) val,(ATerm) label));
+    }
+
+    type = lts_dot;
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 bool p_lts::write_to_dot(string const& filename, lts_dot_options opts)
 {
@@ -48,7 +106,7 @@ bool p_lts::write_to_dot(string const& filename, lts_dot_options opts)
 
 bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
 {
-  os << "digraph \"" << *opts.name << "\" {" << endl;
+  os << "digraph \"" << *opts.name << "\" {" << endl; // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   // os << "size=\"7,10.5\";" << endl;
   os << "center=TRUE;" << endl;
   os << "mclimit=10.0;" << endl;
@@ -56,18 +114,37 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
   os << "node[width=0.25,height=0.25,label=\"\"];" << endl;
   if ( nstates > 0 )
   {
-    os << init_state << "[peripheries=2];" << endl;
+    if ( type == lts_dot )
+    {
+      os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[init_state]),0));
+    } else {
+      os << init_state;
+    }
+    os << " [peripheries=2];" << endl;
     if ( opts.print_states && state_info )
     {
       for (unsigned int i=0; i<nstates; i++)
       {
-        os << i << "[label=\"" << p_state_value_str(i) << "\"];" << endl;
+        if ( type == lts_dot )
+        {
+          os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[i]),0));
+          os << " [label=\"" << ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(ATgetNext((ATermList) state_values[i])),0))) << "\"];" << endl;
+        } else {
+          os << i << " [label=\"" << p_state_value_str(i) << "\"];" << endl;
+        }
       }
     }
   }
   for (unsigned int i=0; i<ntransitions; i++)
   {
-    os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
+    if ( type == lts_dot )
+    {
+      os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].from]),0));
+      os << "->" << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].to]),0));
+      os << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
+    } else {
+      os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
+    }
   }
 
   os << "}" << endl;

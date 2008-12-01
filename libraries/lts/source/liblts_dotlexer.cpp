@@ -1,6 +1,6 @@
-#line 2 "liblts_fsmlexer.cpp"
+#line 2 "liblts_dotlexer.cpp"
 
-#line 4 "liblts_fsmlexer.cpp"
+#line 4 "liblts_dotlexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -20,7 +20,7 @@
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer fsmyyFlexLexer
+    #define yyFlexLexer dotyyFlexLexer
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
@@ -275,9 +275,9 @@ struct yy_buffer_state
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-void *fsmyyalloc (yy_size_t  );
-void *fsmyyrealloc (void *,yy_size_t  );
-void fsmyyfree (void *  );
+void *dotyyalloc (yy_size_t  );
+void *dotyyrealloc (void *,yy_size_t  );
+void dotyyfree (void *  );
 
 #define yy_new_buffer yy_create_buffer
 
@@ -322,8 +322,8 @@ typedef unsigned char YY_CHAR;
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 11
-#define YY_END_OF_BUFFER 12
+#define YY_NUM_RULES 25
+#define YY_END_OF_BUFFER 26
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -331,11 +331,15 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[24] =
+static yyconst flex_int16_t yy_accept[68] =
     {   0,
-        0,    0,   12,   10,    1,    2,   10,   10,    4,    5,
-       10,    9,    9,    7,    2,    0,    8,    0,    6,    9,
-        7,    3,    0
+        0,    0,    0,    0,   26,   24,    7,    8,   24,   24,
+       24,   13,   24,   24,   24,   23,   14,   15,   21,   18,
+       19,   21,   21,   21,   21,   16,   17,    4,    3,    4,
+        4,    8,    0,   22,    0,    6,    0,   23,   20,    0,
+        1,    0,    0,   21,   21,   21,   21,   21,    3,    2,
+       23,    0,    5,   23,   21,   21,   21,   21,   21,   12,
+       21,   11,   21,   10,   21,    9,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -343,17 +347,17 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    1,    5,    1,    1,    1,    1,    6,    7,
-        8,    1,    1,    1,    9,    1,    1,   10,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,    1,    1,    1,
-        1,   12,    1,    6,   13,   13,   13,   13,   13,   13,
-       13,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-       13,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-        1,    1,    1,    1,   13,    1,   13,   13,   13,   13,
+        1,    2,    1,    5,    6,    1,    1,    1,    1,    1,
+        1,    7,    1,    8,    9,   10,   11,   12,   12,   12,
+       12,   12,   12,   12,   12,   12,   12,    1,   13,    1,
+       14,   15,    1,    1,   16,   16,   16,   16,   16,   16,
+       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
+       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
+       17,    1,   18,    1,   16,    1,   19,   16,   16,   20,
 
-       13,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-       13,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-       13,   13,    1,    1,    1,    1,    1,    1,    1,    1,
+       21,   16,   22,   23,   24,   16,   16,   16,   16,   25,
+       26,   27,   16,   28,   16,   16,   16,   16,   16,   16,
+       16,   16,   29,    1,   30,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -370,40 +374,69 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[14] =
-    {   0,
-        1,    1,    1,    1,    1,    2,    1,    1,    1,    3,
-        3,    1,    2
-    } ;
-
-static yyconst flex_int16_t yy_base[27] =
-    {   0,
-        0,    0,   26,   27,   27,   27,   22,   19,   27,   27,
-        5,   27,    0,    0,   27,   18,   27,    7,   27,    0,
-        0,   27,   27,   17,   12,   19
-    } ;
-
-static yyconst flex_int16_t yy_def[27] =
-    {   0,
-       23,    1,   23,   23,   23,   23,   23,   24,   23,   23,
-       23,   23,   25,   26,   23,   24,   23,   23,   23,   25,
-       26,   23,    0,   23,   23,   23
-    } ;
-
-static yyconst flex_int16_t yy_nxt[41] =
-    {   0,
-        4,    5,    6,    7,    8,    4,    9,   10,   11,   12,
-       13,    4,   14,   18,   20,   22,   19,   16,   16,   16,
-       21,   21,   17,   17,   15,   23,    3,   23,   23,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23
-    } ;
-
-static yyconst flex_int16_t yy_chk[41] =
+static yyconst flex_int32_t yy_meta[31] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,   11,   25,   18,   11,   24,   24,   24,
-       26,   26,   16,    8,    7,    3,   23,   23,   23,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23
+        1,    2,    1,    1,    1,    2,    1,    1,    2,    2,
+        2,    2,    2,    2,    2,    2,    2,    2,    1,    1
+    } ;
+
+static yyconst flex_int16_t yy_base[73] =
+    {   0,
+        0,    0,   28,   30,   86,   87,   87,   87,   82,   79,
+       80,   87,   26,   70,   32,   30,   87,   87,    0,   87,
+       87,   57,   60,   51,   52,   87,   87,   87,   87,   74,
+       65,   87,   70,   87,   71,   87,   61,   34,   87,   33,
+       87,   69,   59,    0,   48,   47,   49,   47,   87,   87,
+       87,   63,   87,   53,   36,   42,   35,   40,   41,    0,
+       27,    0,   22,    0,   25,    0,   87,   51,   53,   55,
+       45,   57
+    } ;
+
+static yyconst flex_int16_t yy_def[73] =
+    {   0,
+       67,    1,   68,   68,   67,   67,   67,   67,   67,   69,
+       70,   67,   67,   67,   67,   67,   67,   67,   71,   67,
+       67,   71,   71,   71,   71,   67,   67,   67,   67,   67,
+       67,   67,   69,   67,   70,   67,   67,   67,   67,   67,
+       67,   72,   67,   71,   71,   71,   71,   71,   67,   67,
+       67,   72,   67,   67,   71,   71,   71,   71,   71,   71,
+       71,   71,   71,   71,   71,   71,    0,   67,   67,   67,
+       67,   67
+    } ;
+
+static yyconst flex_int16_t yy_nxt[118] =
+    {   0,
+        6,    7,    8,    9,   10,   11,    6,   12,   13,   14,
+       15,   16,   17,   18,    6,   19,   20,   21,   19,   22,
+       23,   24,   19,   19,   25,   19,   19,   19,   26,   27,
+       29,   30,   29,   30,   31,   37,   31,   38,   41,   43,
+       39,   38,   42,   43,   40,   38,   44,   66,   65,   64,
+       51,   28,   28,   33,   33,   35,   35,   52,   52,   63,
+       62,   61,   60,   59,   54,   53,   58,   57,   56,   55,
+       54,   53,   40,   36,   34,   50,   49,   48,   47,   46,
+       45,   40,   36,   34,   32,   67,    5,   67,   67,   67,
+       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+
+       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+       67,   67,   67,   67,   67,   67,   67
+    } ;
+
+static yyconst flex_int16_t yy_chk[118] =
+    {   0,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        3,    3,    4,    4,    3,   13,    4,   13,   15,   16,
+       13,   16,   15,   38,   40,   38,   71,   65,   63,   61,
+       40,   68,   68,   69,   69,   70,   70,   72,   72,   59,
+       58,   57,   56,   55,   54,   52,   48,   47,   46,   45,
+       43,   42,   37,   35,   33,   31,   30,   25,   24,   23,
+       22,   14,   11,   10,    9,    5,   67,   67,   67,   67,
+       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+
+       67,   67,   67,   67,   67,   67,   67,   67,   67,   67,
+       67,   67,   67,   67,   67,   67,   67
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -413,23 +446,23 @@ static yyconst flex_int16_t yy_chk[41] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "liblts_fsmlexer.ll"
-#line 2 "liblts_fsmlexer.ll"
+#line 1 "liblts_dotlexer.ll"
+#line 2 "liblts_dotlexer.ll"
 // Author(s): Muck van Weerdenburg
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file fsmlexer.ll
+/// \file dotlexer.ll
 
 #include <string>
 #include <cstdio>
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
-#include "liblts_fsmlexer.h"
-#include "mcrl2/liblts_fsmparser.hpp"
+#include "liblts_dotlexer.h"
+#include "mcrl2/liblts_dotparser.hpp"
 
 using namespace mcrl2::core;
 
@@ -448,17 +481,17 @@ using namespace mcrl2::lts;
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
-int fsmyyparse(void);          /* declared in fsmparser.cpp */
-extern YYSTYPE fsmyylval;      /* declared in fsmparser.cpp */
+int dotyyparse(void);          /* declared in dotparser.cpp */
+extern YYSTYPE dotyylval;      /* declared in dotparser.cpp */
 
-//global declarations, used by fsmparser.cpp
-int  fsmyylex(void);           /* lexer function */
-void fsmyyerror(const char *s);/* error function */
+//global declarations, used by dotparser.cpp
+int  dotyylex(void);           /* lexer function */
+void dotyyerror(const char *s);/* error function */
 
 //local declarations
-class concrete_fsm_lexer : public fsm_lexer, public fsmyyFlexLexer {
+class concrete_dot_lexer : public dot_lexer, public dotyyFlexLexer {
 public:
-  concrete_fsm_lexer(void);               /* constructor */
+  concrete_dot_lexer(void);               /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   bool parse_stream(std::istream &stream, lts &l);
@@ -466,25 +499,23 @@ public:
 protected:
   void processId();
   void processQuoted();
-  void processNumber();
 };
 
-//implement yylex in concrete_fsm_lexer instead of fsmyyFlexLexer
+//implement yylex in concrete_dot_lexer instead of dotyyFlexLexer
 //(this gets rid of global variables but is ugly in its own right)
-#define YY_DECL int concrete_fsm_lexer::yylex()
-int fsmyyFlexLexer::yylex(void) { return 1; }
+#define YY_DECL int concrete_dot_lexer::yylex()
+int dotyyFlexLexer::yylex(void) { return 1; }
 
-concrete_fsm_lexer *clexer = NULL;  /* lexer object, used by parse_stream */
-fsm_lexer *fsm_lexer_obj = NULL;    /* lexer object, used by fsmparser */
+static concrete_dot_lexer *clexer = NULL;  /* lexer object, used by parse_stream */
+dot_lexer *dot_lexer_obj = NULL;    /* lexer object, used by dotparser */
 
-int lineNo=1, posNo=1;
-extern void fsmyyerror(const char* s);
-void processId();
-void processQuoted();
-void processNumber();
-#line 486 "liblts_fsmlexer.cpp"
+static int lineNo=1, posNo=1;
+extern void dotyyerror(const char* s);
+
+#line 516 "liblts_dotlexer.cpp"
 
 #define INITIAL 0
+#define COMMENT 1
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -587,10 +618,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 77 "liblts_fsmlexer.ll"
+#line 74 "liblts_dotlexer.ll"
 
 
-#line 594 "liblts_fsmlexer.cpp"
+#line 625 "liblts_dotlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -643,13 +674,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 24 )
+				if ( yy_current_state >= 68 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 27 );
+		while ( yy_base[yy_current_state] != 87 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -675,63 +706,139 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 79 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); }
+#line 76 "liblts_dotlexer.ll"
+{ posNo += 2; BEGIN(COMMENT); }
 	YY_BREAK
+
 case 2:
-/* rule 2 can match eol */
 YY_RULE_SETUP
-#line 80 "liblts_fsmlexer.ll"
-{ lineNo++; posNo=1; return EOLN; }
+#line 78 "liblts_dotlexer.ll"
+{ posNo += 2;  BEGIN(INITIAL); }
 	YY_BREAK
 case 3:
+/* rule 3 can match eol */
 YY_RULE_SETUP
-#line 81 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); return SECSEP; }
+#line 79 "liblts_dotlexer.ll"
+{ lineNo++; posNo=1; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 82 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); return LPAR; }
+#line 80 "liblts_dotlexer.ll"
+{ posNo++; }
 	YY_BREAK
+
 case 5:
+/* rule 5 can match eol */
 YY_RULE_SETUP
-#line 83 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); return RPAR; }
+#line 82 "liblts_dotlexer.ll"
+{ lineNo++; posNo=1; }
 	YY_BREAK
 case 6:
+/* rule 6 can match eol */
 YY_RULE_SETUP
-#line 84 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); return ARROW; }
+#line 83 "liblts_dotlexer.ll"
+{ lineNo++; posNo=1; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 85 "liblts_fsmlexer.ll"
-{ processId(); return ID; }
+#line 85 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 86 "liblts_fsmlexer.ll"
-{ processQuoted(); return QUOTED; }
+#line 86 "liblts_dotlexer.ll"
+{ lineNo++; posNo=1; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 87 "liblts_fsmlexer.ll"
-{ processNumber(); return NUMBER; }
+#line 87 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return DIGRAPH; } 
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 88 "liblts_fsmlexer.ll"
-{ posNo += YYLeng(); fsmyyerror("unknown character"); }
+#line 88 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return GRAPH; } 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 90 "liblts_fsmlexer.ll"
+#line 89 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return NODE; } 
+	YY_BREAK
+case 12:
+YY_RULE_SETUP
+#line 90 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return EDGE; } 
+	YY_BREAK
+case 13:
+YY_RULE_SETUP
+#line 91 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return COMMA; }
+	YY_BREAK
+case 14:
+YY_RULE_SETUP
+#line 92 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return SEMICOLON; }
+	YY_BREAK
+case 15:
+YY_RULE_SETUP
+#line 93 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return IS; }
+	YY_BREAK
+case 16:
+YY_RULE_SETUP
+#line 94 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return LBRACE; }
+	YY_BREAK
+case 17:
+YY_RULE_SETUP
+#line 95 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return RBRACE; }
+	YY_BREAK
+case 18:
+YY_RULE_SETUP
+#line 96 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return LBRACK; }
+	YY_BREAK
+case 19:
+YY_RULE_SETUP
+#line 97 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return RBRACK; }
+	YY_BREAK
+case 20:
+YY_RULE_SETUP
+#line 98 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); return ARROW; }
+	YY_BREAK
+case 21:
+YY_RULE_SETUP
+#line 99 "liblts_dotlexer.ll"
+{ processId(); return ID; }
+	YY_BREAK
+case 22:
+/* rule 22 can match eol */
+YY_RULE_SETUP
+#line 100 "liblts_dotlexer.ll"
+{ processQuoted(); return ID; }
+	YY_BREAK
+case 23:
+YY_RULE_SETUP
+#line 101 "liblts_dotlexer.ll"
+{ processId(); return ID; }
+	YY_BREAK
+case 24:
+YY_RULE_SETUP
+#line 102 "liblts_dotlexer.ll"
+{ posNo += YYLeng(); dotyyerror("unknown character"); }
+	YY_BREAK
+case 25:
+YY_RULE_SETUP
+#line 104 "liblts_dotlexer.ll"
 ECHO;
 	YY_BREAK
-#line 734 "liblts_fsmlexer.cpp"
+#line 840 "liblts_dotlexer.cpp"
 case YY_STATE_EOF(INITIAL):
+case YY_STATE_EOF(COMMENT):
 	yyterminate();
 
 	case YY_END_OF_BUFFER:
@@ -898,9 +1005,9 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 yyFlexLexer::~yyFlexLexer()
 {
 	delete [] yy_state_buf;
-	fsmyyfree(yy_start_stack  );
+	dotyyfree(yy_start_stack  );
 	yy_delete_buffer( YY_CURRENT_BUFFER );
-	fsmyyfree(yy_buffer_stack  );
+	dotyyfree(yy_buffer_stack  );
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
@@ -1028,7 +1135,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					fsmyyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					dotyyrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1077,7 +1184,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
 		/* Extend the array by 50%, plus the number we really need. */
 		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) fsmyyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) dotyyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
 		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
 			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
 	}
@@ -1111,7 +1218,7 @@ int yyFlexLexer::yy_get_next_buffer()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 24 )
+			if ( yy_current_state >= 68 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1139,11 +1246,11 @@ int yyFlexLexer::yy_get_next_buffer()
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 24 )
+		if ( yy_current_state >= 68 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 23);
+	yy_is_jam = (yy_current_state == 67);
 
 	return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1323,7 +1430,7 @@ int yyFlexLexer::yy_get_next_buffer()
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) fsmyyalloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) dotyyalloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -1332,7 +1439,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) fsmyyalloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) dotyyalloc(b->yy_buf_size + 2  );
 	if ( ! b->yy_ch_buf )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -1357,9 +1464,9 @@ int yyFlexLexer::yy_get_next_buffer()
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		fsmyyfree((void *) b->yy_ch_buf  );
+		dotyyfree((void *) b->yy_ch_buf  );
 
-	fsmyyfree((void *) b  );
+	dotyyfree((void *) b  );
 }
 
 extern "C" int isatty (int );
@@ -1484,7 +1591,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)fsmyyalloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)dotyyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 		if ( ! (yy_buffer_stack) )
@@ -1503,7 +1610,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		int grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)fsmyyrealloc
+		(yy_buffer_stack) = (struct yy_buffer_state**)dotyyrealloc
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
@@ -1526,10 +1633,10 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		new_size = (yy_start_stack_depth) * sizeof( int );
 
 		if ( ! (yy_start_stack) )
-			(yy_start_stack) = (int *) fsmyyalloc(new_size  );
+			(yy_start_stack) = (int *) dotyyalloc(new_size  );
 
 		else
-			(yy_start_stack) = (int *) fsmyyrealloc((void *) (yy_start_stack),new_size  );
+			(yy_start_stack) = (int *) dotyyrealloc((void *) (yy_start_stack),new_size  );
 
 		if ( ! (yy_start_stack) )
 			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
@@ -1606,12 +1713,12 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *fsmyyalloc (yy_size_t  size )
+void *dotyyalloc (yy_size_t  size )
 {
 	return (void *) malloc( size );
 }
 
-void *fsmyyrealloc  (void * ptr, yy_size_t  size )
+void *dotyyrealloc  (void * ptr, yy_size_t  size )
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -1623,45 +1730,39 @@ void *fsmyyrealloc  (void * ptr, yy_size_t  size )
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void fsmyyfree (void * ptr )
+void dotyyfree (void * ptr )
 {
-	free( (char *) ptr );	/* see fsmyyrealloc() for (char *) cast */
+	free( (char *) ptr );	/* see dotyyrealloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 90 "liblts_fsmlexer.ll"
+#line 104 "liblts_dotlexer.ll"
 
 
 
-void concrete_fsm_lexer::processId()
+void concrete_dot_lexer::processId()
 {
   posNo += YYLeng();
-  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) ); 
+  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) ); 
 }
 
-void concrete_fsm_lexer::processQuoted()
+void concrete_dot_lexer::processQuoted()
 {
   posNo += YYLeng();
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
-  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
+  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
 } 
 
-void concrete_fsm_lexer::processNumber()
-{
-  posNo += YYLeng();
-  fsmyylval.number = atoi( YYText() );
-}
+//Implementation of parse_dot
 
-//Implementation of parse_fsm
-
-bool parse_fsm(std::istream &stream, lts &l) {
-  clexer = new concrete_fsm_lexer();
-  fsm_lexer_obj = clexer;
+bool parse_dot(std::istream &stream, lts &l) {
+  clexer = new concrete_dot_lexer();
+  dot_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
   delete clexer;
-  fsm_lexer_obj = NULL;
+  dot_lexer_obj = NULL;
   clexer = NULL;
   return result;
 }
@@ -1669,25 +1770,25 @@ bool parse_fsm(std::istream &stream, lts &l) {
 
 //Implementation of global functions
 
-int fsmyylex(void) {
+int dotyylex(void) {
   return clexer->yylex();
 }
 
-void fsmyyerror(const char *s) {
+void dotyyerror(const char *s) {
   return clexer->yyerror(s);
 }
 
-int fsmyyFlexLexer::yywrap(void) {
+int dotyyFlexLexer::yywrap(void) {
   return 1;
 }
 
 
-//Implementation of concrete_fsm_lexer
+//Implementation of concrete_dot_lexer
 
-concrete_fsm_lexer::concrete_fsm_lexer(void) : fsmyyFlexLexer(NULL, NULL) {
+concrete_dot_lexer::concrete_dot_lexer(void) : dotyyFlexLexer(NULL, NULL) {
 }
 
-void concrete_fsm_lexer::yyerror(const char *s) {
+void concrete_dot_lexer::yyerror(const char *s) {
   fprintf(
     stderr,
     "token '%s' at position %d,%d caused the following error: %s\n", 
@@ -1695,7 +1796,7 @@ void concrete_fsm_lexer::yyerror(const char *s) {
   ); 
 }
 
-bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
+bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
 {
   switch_streams(&stream, NULL);
 
@@ -1703,48 +1804,22 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   posNo=1;
 
   // INITIALISE
-  fsm_lts = &l;
+  dot_lts = &l;
   
   protect_table = ATindexedSetCreate(10000,50);
 
-  const_ATtype = ATmakeAFun( "Type", 2, ATfalse );
-  ATprotectAFun( const_ATtype );
-  const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
-  ATprotectAFun( const_ATvalue );
-  stateVector = ATempty;
-  ATprotectList( &stateVector );
-  valueTable = ATempty;
-  ATprotectList( &valueTable );
-  stateId = ATempty;
-  ATprotectList( &stateId );
-  typeValues = NULL;
-  ATprotectList( &typeValues );
-  typeId = NULL;
-  ATprotectAppl( &typeId );
-  labelTable = ATtableCreate(100,50);
-  
-
   // PARSE
   bool result;
-  if (fsmyyparse() != 0) {
+  if (dotyyparse() != 0) {
     result = false;
   } else {
     result = true;
   }
     
   // CLEAN UP
-  ATunprotectAFun( const_ATtype );
-  ATunprotectAFun( const_ATvalue );
-  ATunprotectList( &stateVector );
-  ATunprotectList( &valueTable );
-  ATunprotectList( &stateId );
-  ATunprotectList( &typeValues );
-  ATunprotectAppl( &typeId );
-  ATtableDestroy( labelTable );
-  
   ATindexedSetDestroy( protect_table );
 
-  fsm_lts = NULL;
+  dot_lts = NULL;
 
   return result;
 }
