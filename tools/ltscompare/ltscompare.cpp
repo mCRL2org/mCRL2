@@ -78,8 +78,8 @@ t_tool_options parse_command_line(int ac, char** av) {
 #endif
     "  'fsm' for the Finite State Machine format,\n"
     "  'mcrl' for the mCRL SVC format,\n"
-    "  'mcrl2' for the mCRL2 format (default), or"
-    "  'svc' for the (generic) SVC format\n"
+    "  'mcrl2' for the mCRL2 format (default), or\n"
+    "  'svc' for the (generic) SVC format."
   );
 
   clinterface.
@@ -93,6 +93,8 @@ t_tool_options parse_command_line(int ac, char** av) {
             + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
       "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
             + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
+      "  '" + lts::string_for_equivalence(lts_eq_sim) + "' for "
+            + lts::name_of_equivalence(lts_eq_sim) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
             + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
