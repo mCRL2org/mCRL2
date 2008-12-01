@@ -9,7 +9,7 @@
 /// \file mcrl2/data/data_expression.h
 /// \brief The class data_expression.
 
-#define MCRL2_DATA_EXPRESSION_DEBUG
+//#define MCRL2_DATA_EXPRESSION_DEBUG
 
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
