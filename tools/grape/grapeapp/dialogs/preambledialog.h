@@ -12,6 +12,8 @@
 #define GRAPE_PREAMBLE_DIALOG_H
 
 #include <wx/dialog.h>
+#include <wx/grid.h>
+#include <wx/event.h>
 
 #include "preamble.h"
 
@@ -29,11 +31,15 @@ namespace grape
     class grape_preamble_dialog : public wxDialog
     {
       private:
-        wxTextCtrl *m_parameters; /**< A text control containing the parameter initializations.*/
-        wxTextCtrl *m_localvars; /** A text control containing the local variable declarations. */
+        //wxTextCtrl *m_parameters; /**< A text control containing the parameter initializations.*/
+        //wxTextCtrl *m_localvars; /** A text control containing the local variable declarations. */
+        wxGrid        *m_parameter_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
+        wxGrid        *m_localvar_grid; /**< Grid shown in the dialog, used for localvar declarations.*/
 
         /** Default constructor. */
         grape_preamble_dialog();
+        
+        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
       public:
         /**
         * Constructor.
@@ -49,6 +55,20 @@ namespace grape
 
         /** @return The value of the local variable declaration input box. */
         wxString get_local_variable_declarations() const;
+        
+	      /**
+	      * Change parameter grid event handler.
+	      * Appending grid rows.
+	      * @param p_event The generated event.
+    	  */
+        void event_change_parameter_text( wxGridEvent &p_event );
+        
+	      /**
+	      * Change localvar grid event handler.
+	      * Appending grid rows.
+	      * @param p_event The generated event.
+    	  */
+        void event_change_localvar_text( wxGridEvent &p_event );
     };
   }
 }

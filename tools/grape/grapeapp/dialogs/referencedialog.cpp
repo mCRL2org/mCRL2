@@ -119,10 +119,10 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
     m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());    
   }
   
-  m_grid->SetColSize( 0, 100 );
-  m_grid->SetColSize( 1, 170 );
+  m_grid->SetColSize( 0, 170 );
+  m_grid->SetColSize( 1, 100 );
   m_grid->SetColLabelValue(0, _T("Name"));
-  m_grid->SetColLabelValue(1, _T("Type"));
+  m_grid->SetColLabelValue(1, _T("Value"));
   m_grid->SetRowLabelSize(30);
 
   vsizer->Add(m_grid, 1, wxEXPAND );

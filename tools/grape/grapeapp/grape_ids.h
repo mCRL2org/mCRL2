@@ -84,6 +84,8 @@ namespace grape
   
       // dialog events 
       GRAPE_GRID_TEXT, 
+      GRAPE_PARAMETER_GRID_TEXT,
+      GRAPE_LOCALVAR_GRID_TEXT,
     };
 
   }
