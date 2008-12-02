@@ -244,6 +244,11 @@ rule get-build-tag ( ) {
   # Build tag
   if ! $(BUILD_TAG) {
     local revision = [ SHELL "svnversion -n \".\"" ] ;
+
+    if $(REVISION) {
+      revision = $(REVISION) ;
+    }
+
     local link-variant = [ get-option link : shared ] ;
 
     if ! $(revision) {

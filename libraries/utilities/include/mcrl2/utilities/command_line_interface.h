@@ -124,7 +124,7 @@ namespace mcrl2 {
       friend class command_line_parser;
 
       template < typename T >
-      friend class detail::initialiser;
+      friend struct detail::initialiser;
 
       private:
 
@@ -641,7 +641,7 @@ namespace mcrl2 {
      **/
     class command_line_parser {
       template < typename T >
-      friend class detail::initialiser;
+      friend struct detail::initialiser;
 
       public:
 
