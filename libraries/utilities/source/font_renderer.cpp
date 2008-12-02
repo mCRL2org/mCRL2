@@ -371,7 +371,7 @@ namespace mcrl2 {
         }
             
         // print dots if there are more lines and we are at the bottem of our bounding box
-        if (((!((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && (subs.length() >= 3)) && (startpos + addpos > s.length()))
+        if (((!((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && ((subs.length() >= 3) || (subs.find_first_of('\n') >= 0))))
         {
           subs = subs.substr(0, subs.length()-3);
           subs = subs.append("...");
