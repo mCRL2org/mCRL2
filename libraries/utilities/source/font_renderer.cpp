@@ -307,12 +307,11 @@ namespace mcrl2 {
       std::string subs;
       std::string temps;
             
-      double maxwidth = 0;
       double maxheight = 0;
       std::string::size_type startpos = 0;
       double y = 0;
       temps = s;
-      // caluclate the maximum width and height of the text
+      // caluclate the maximum height of the text
       while (startpos < temps.length())
       {
         std::string::size_type findid = temps.find_first_of('\n');
@@ -339,7 +338,6 @@ namespace mcrl2 {
         
         //update maximum width and height
         maxheight = maxheight + CHARHEIGHT * scale;
-        maxwidth = std::max(maxwidth, subs.length() * CHARWIDTH * scale);
         
         // break if we are outside the boundingbox
         if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
@@ -389,7 +387,7 @@ namespace mcrl2 {
           }
           case al_center:
           {
-            transx = xLft + .5 * (maxwidth - CHARWIDTH * scale * subs.length());
+            transx = xLft + .5 * (xRgt - xLft - CHARWIDTH * scale * subs.length());
             break;
           }
 
@@ -411,13 +409,13 @@ namespace mcrl2 {
           }
           case al_center:
           {
-            transy = yTop + y + .5*(maxheight + yBot-yTop);
+            transy = yTop + y + .5*(yBot - yTop + maxheight);
             break;
           }
           case al_bottom: // Fall through to default case
           default:
           {
-            transy = yBot + maxheight + y + (CHARHEIGHT * scale);
+            transy = yBot + maxheight + y;
             break;
           }
         }
@@ -429,7 +427,7 @@ namespace mcrl2 {
         
         // break if we are outside the boundingbox
         if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
-      }
+      }      
     }
     
     size_t font_renderer::index_from_char(const char & c)

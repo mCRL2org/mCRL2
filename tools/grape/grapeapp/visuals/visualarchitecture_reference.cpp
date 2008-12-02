@@ -48,8 +48,7 @@ void visualarchitecture_reference::draw( void )
   draw_filled_rectangle( m_object->get_coordinate(), width, height, selected, g_color_architecture_reference);
 
   //draw architecture reference name
-//  render_text(name, x, y+height-g_text_space, width, height+g_text_space);
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(name.fn_str()), x, x+width, y+height, y, 0.0015f, al_right, al_center );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(name.fn_str()), x, x+width, y+height, y, 0.0015f, al_center, al_center );
 
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), width, height, selected);

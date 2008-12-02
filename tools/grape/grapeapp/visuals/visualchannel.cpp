@@ -84,7 +84,6 @@ void visualchannel::draw( void )
     vertical_align = al_top;
   }
   //draw text
-//  render_text(name, textx, texty, 999, 999);
   grape_glcanvas::get_font_renderer()->draw_text( std::string(name.fn_str()), textx, texty, 0.0015f, horizontal_align, vertical_align);
 }
 
