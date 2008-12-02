@@ -96,7 +96,7 @@ namespace atermpp {
       ///
       typedef term_list_iterator<Term> const_iterator;
 
-      /// Default constructor.
+      /// Default constructor. Creates an empty list.
       ///
       term_list()
         : aterm_base(ATmakeList0())

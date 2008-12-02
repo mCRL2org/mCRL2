@@ -141,7 +141,7 @@ sort_expression_list source(sort_expression s)
   if (s.is_arrow())
     return atermpp::list_arg1(s);
   else
-    return atermpp::make_list(s);
+    return sort_expression_list();
 }
 
 /// Returns the target of the sort.
