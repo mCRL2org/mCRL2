@@ -444,7 +444,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 { 
   if (is_propositional_variable_instantiation(p))
   { 
-    pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?store_as_tree(p):p);
+    pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
     
     if (pr.second) /* p is added to the indexed set, so it is a new variable */
     { nr_of_generated_variables++;
@@ -611,7 +611,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
                      rewriter,
                      tool_options.opt_precompile_pbes);
-  variable_index.put((tool_options.opt_store_as_tree)?store_as_tree(p):p);
+  variable_index.put((tool_options.opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
   if (tool_options.opt_strategy>=on_the_fly)
   { bes_equations.store_variable_occurrences();
