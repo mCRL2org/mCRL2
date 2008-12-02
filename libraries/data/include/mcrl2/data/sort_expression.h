@@ -127,40 +127,6 @@ sort_expression result_sort(sort_expression s)
   return core::detail::gsGetSortExprResult(s);
 }
 
-/// Returns the source of the sort.
-/// <ul>
-/// <li>source(A) = []</li>
-/// <li>source(A->B) = [A]</li>
-/// </ul>
-/// \deprecated
-/// \param s A sort.
-/// \return The source of the sort.
-inline
-sort_expression_list source(sort_expression s)
-{
-  if (s.is_arrow())
-    return atermpp::list_arg1(s);
-  else
-    return sort_expression_list();
-}
-
-/// Returns the target of the sort.
-/// <ul>
-/// <li>target(A) = A</li>
-/// <li>target(A->B) = B</li>
-/// </ul>
-/// \deprecated
-/// \param s A sort.
-/// \return The target of the sort.
-inline
-sort_expression target(sort_expression s)
-{
-  if (s.is_arrow())
-    return atermpp::arg2(s);
-  else
-    return s;
-}
-
 /// Accessor functions and predicates for sort expressions.
 namespace sort_expr {
 

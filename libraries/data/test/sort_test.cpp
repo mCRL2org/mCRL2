@@ -59,50 +59,31 @@ void test_sort()
   sort_expression s;
   sort_expression_list domain;
   sort_expression range;
-  sort_expression_list src;
-  sort_expression tgt;
   
   s      = arrow(lA, BC);   // A->(B->C)
   domain = domain_sorts(s); // [A,B]
   range  = result_sort(s);   // C
-  src    = source(s);       // [A]
-  tgt    = target(s);      // B->C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
-  BOOST_CHECK(src.size() == 1);
-  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
-  BOOST_CHECK(tgt == BC);
 
   s      = arrow(lAB, C);   // (AxB)->C
   domain = domain_sorts(s); // [A,B]
   range  = result_sort(s);   // C
-  src    = source(s);       // [A,B]
-  tgt    = target(s);      // C
   BOOST_CHECK(domain.size() == 2);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(range == C);
-  BOOST_CHECK(src.size() == 2);
-  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
-  BOOST_CHECK(std::find(src.begin(), src.end(), B) != src.end());
-  BOOST_CHECK(tgt == C);
 
   s      = arrow(lAB, CD);  // (AxB)->(C->D)
   domain = domain_sorts(s); // [A,B,C]
   range  = result_sort(s);   // D
-  src    = source(s);       // [A,B]
-  tgt    = target(s);      // C->D
   BOOST_CHECK(domain.size() == 3);
   BOOST_CHECK(std::find(domain.begin(), domain.end(), A) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), B) != domain.end());
   BOOST_CHECK(std::find(domain.begin(), domain.end(), C) != domain.end());
   BOOST_CHECK(range == D);
-  BOOST_CHECK(src.size() == 2);
-  BOOST_CHECK(std::find(src.begin(), src.end(), A) != src.end());
-  BOOST_CHECK(std::find(src.begin(), src.end(), B) != src.end());
-  BOOST_CHECK(tgt == CD);
 
   // check if (A x B) -> C != A -> (B x C)
   sort_expression s1 = sort_arrow(lAB, C);
