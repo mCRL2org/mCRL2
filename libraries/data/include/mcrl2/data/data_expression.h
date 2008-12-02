@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/join.h"
+#include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/sort_arrow.h"

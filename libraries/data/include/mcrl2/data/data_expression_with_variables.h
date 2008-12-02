@@ -99,4 +99,137 @@ struct aterm_traits<mcrl2::data::data_expression_with_variables >
 }
 /// \endcond
 
+namespace mcrl2 {
+
+namespace core {
+
+  /// \brief Contains type information for data expressions with variables.
+  template <>
+  struct term_traits<data::data_expression_with_variables>
+  {
+    /// \brief The term type
+    typedef data::data_expression_with_variables term_type;
+
+    /// \brief The variable type
+    typedef data::data_variable variable_type;
+
+    /// \brief The variable sequence type
+    typedef data::data_variable_list variable_sequence_type;
+    
+    /// \brief The value true
+    /// \return The value true
+    static inline
+    term_type true_() { return data::data_expr::true_(); }
+    
+    /// \brief The value false
+    /// \return The value false
+    static inline
+    term_type false_() { return data::data_expr::false_(); }
+
+    /// \brief Operator not
+    /// \param p A term
+    /// \return Operator not applied to p
+    static inline
+    term_type not_(term_type p) { return term_type(data::data_expr::not_(p), p.variables()); }
+    
+    /// \brief Operator and
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator and applied to p and q
+    static inline
+    term_type and_(term_type p, term_type q)
+    {
+      return term_type(data::data_expr::and_(p, q), data::data_variable_list_union(p.variables(), q.variables()));
+    }
+    
+    /// \brief Operator or
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator or applied to p and q
+    static inline
+    term_type or_(term_type p, term_type q)
+    {
+      return term_type(data::data_expr::or_(p, q), data::data_variable_list_union(p.variables(), q.variables()));
+    }
+    
+    /// \brief Test for value true
+    /// \param t A term
+    /// \return True if the term has the value true
+    static inline
+    bool is_true(term_type t) { return data::data_expr::is_true(t); }
+    
+    /// \brief Test for value false
+    /// \param t A term
+    /// \return True if the term has the value false
+    static inline 
+    bool is_false(term_type t) { return data::data_expr::is_false(t); }
+    
+    /// \brief Test for operator not
+    /// \param t A term
+    /// \return True if the term is of type not
+    static inline 
+    bool is_not(term_type t) { return data::data_expr::is_not(t); }
+    
+    /// \brief Test for operator and
+    /// \param t A term
+    /// \return True if the term is of type and
+    static inline 
+    bool is_and(term_type t) { return data::data_expr::is_and(t); }
+    
+    /// \brief Test for operator or
+    /// \param t A term
+    /// \return True if the term is of type or
+    static inline 
+    bool is_or(term_type t) { return data::data_expr::is_or(t); }
+    
+    /// \brief Test for implication
+    /// \param t A term
+    /// \return True if the term is an implication
+    static inline 
+    bool is_imp(term_type t) { return data::data_expr::is_imp(t); }
+    
+    /// \brief Test for universal quantification
+    /// \param t A term
+    /// \return True if the term is an universal quantification
+    static inline 
+    bool is_forall(term_type t) { return data::data_expr::is_forall(t); }
+    
+    /// \brief Test for existential quantification
+    /// \param t A term
+    /// \return True if the term is an existential quantification
+    static inline 
+    bool is_exists(term_type t) { return data::data_expr::is_exists(t); }
+
+    /// \brief Conversion from variable to term
+    /// \param v A variable
+    /// \returns The converted variable
+    static inline
+    term_type variable2term(variable_type v)
+    {
+      return term_type(v, atermpp::make_list(v));
+    }
+
+    /// \brief Test if a term is constant
+    /// \param t A term
+    /// \return True if the term is constant
+    static inline
+    bool is_constant(term_type t)
+    {
+      return t.variables().empty();
+    }
+
+    /// \brief Pretty print function
+    /// \param t A term
+    /// \brief Returns a pretty print representation of the term
+    static inline
+    std::string pp(term_type t)
+    {
+      return core::pp(t) + " " + core::pp(t.variables());
+    }
+  };
+  
+} // namespace core
+
+} // namespace mcrl2
+
 #endif // MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H

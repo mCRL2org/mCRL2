@@ -15,10 +15,11 @@
 #include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/data_variable.h"
-#include "mcrl2/data/term_traits.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
@@ -53,6 +54,15 @@ class pbes_expression: public atermpp::aterm_appl
     /// Constructor.
     ///
     pbes_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_PBExpr(m_term));
+    }
+
+    /// Constructor.
+    ///             
+    /// \param term A term.
+    pbes_expression(ATermAppl term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(m_term));
@@ -458,77 +468,132 @@ namespace pbes_expr_optimized {
 
 } // namespace pbes_system
 
+} // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_expression)
+/// \endcond
+
+namespace mcrl2 {
+
 namespace core {
 
+  /// \brief Contains type information for pbes expressions.
   template <>
   struct term_traits<pbes_system::pbes_expression>
   {
+    /// \brief The term type
     typedef pbes_system::pbes_expression term_type;
+
+    /// \brief The data term type
     typedef data::data_expression data_term_type;
+
+    /// \brief The data term sequence type
     typedef data::data_expression_list data_term_sequence_type;
+
+    /// \brief The variable type
     typedef data::data_variable variable_type;
+
+    /// \brief The variable sequence type
     typedef data::data_variable_list variable_sequence_type;
+
+    /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;   
+
+    /// \brief The propositional variable instantiation type
     typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
+
+    /// \brief The string type
     typedef core::identifier_string string_type;
    
+    /// \brief The value true
+    /// \return The value true
     static inline
-    term_type true_() { return pbes_system::pbes_expr_optimized::true_(); }
+    term_type true_()
+    {
+      return core::detail::gsMakePBESTrue();
+    }
     
+    /// \brief The value false
+    /// \return The value false
     static inline
-    term_type false_() { return pbes_system::pbes_expr_optimized::false_(); }
+    term_type false_()
+    {
+      return core::detail::gsMakePBESFalse();
+    }
     
+    /// \brief Operator not
+    /// \param p A term
+    /// \return Operator not applied to p
     static inline
-    term_type not_(term_type p) { return pbes_system::pbes_expr_optimized::not_(p); }
+    term_type not_(term_type p)
+    {
+      return core::detail::gsMakePBESNot(p);
+    }
     
+    /// \brief Operator and
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator and applied to p and q
     static inline
-    term_type and_(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::and_(p, q); }
+    term_type and_(term_type p, term_type q)
+    {
+      return core::detail::gsMakePBESAnd(p,q);
+    }
     
+    /// \brief Operator or
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator or applied to p and q
     static inline
-    term_type or_(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::or_(p, q); }
+    term_type or_(term_type p, term_type q)
+    {
+      return core::detail::gsMakePBESOr(p,q);
+    }
     
+    /// \brief Implication
+    /// \param p A term
+    /// \param q A term
+    /// \return Implication applied to p and q
     static inline
-    term_type imp(term_type p, term_type q) { return pbes_system::pbes_expr_optimized::imp(p, q); }
+    term_type imp(term_type p, term_type q)
+    {
+      return core::detail::gsMakePBESImp(p,q);
+    }
     
+    /// \brief Universal quantification
+    /// \param l A sequence of variables
+    /// \param p A term
+    /// \return Universal quantification of p over the variables l
     static inline
-    term_type forall(variable_sequence_type l, term_type p) { return pbes_system::pbes_expr_optimized::forall(l, p); }
+    term_type forall(variable_sequence_type l, term_type p)
+    {
+      if (l.empty())
+      {
+        return p;
+      }
+      return core::detail::gsMakePBESForall(l, p);
+    }
     
+    /// \brief Existential quantification
+    /// \param l A sequence of variables
+    /// \param p A term
+    /// \return Existential quantification of p over the variables l
     static inline
-    term_type exists(variable_sequence_type l, term_type p) { return pbes_system::pbes_expr_optimized::exists(l, p); }
+    term_type exists(variable_sequence_type l, term_type p)
+    {
+      if (l.empty())
+      {
+        return p;
+      }
+      return core::detail::gsMakePBESExists(l, p);
+    }
 
-    static inline
-    bool is_constant(term_type t) { return false; }
-
-    static inline
-    bool is_true(term_type t) { return pbes_system::pbes_expr::is_true(t); }
-    
-    static inline 
-    bool is_false(term_type t) { return pbes_system::pbes_expr::is_false(t); }
-    
-    static inline 
-    bool is_not(term_type t) { return pbes_system::pbes_expr::is_not(t); }
-    
-    static inline 
-    bool is_and(term_type t) { return pbes_system::pbes_expr::is_and(t); }
-    
-    static inline 
-    bool is_or(term_type t) { return pbes_system::pbes_expr::is_or(t); }
-    
-    static inline 
-    bool is_imp(term_type t) { return pbes_system::pbes_expr::is_imp(t); }
-    
-    static inline 
-    bool is_forall(term_type t) { return pbes_system::pbes_expr::is_forall(t); }
-    
-    static inline 
-    bool is_exists(term_type t) { return pbes_system::pbes_expr::is_exists(t); }
-    
-    static inline 
-    bool is_data(term_type t) { return pbes_system::pbes_expr::is_data(t); }
-    
-    static inline 
-    bool is_prop_var(term_type t) { return pbes_system::pbes_expr::is_propositional_variable_instantiation(t); }
-
+    /// \brief Propositional variable instantiation
+    /// \param name A string
+    /// \param first Start of a sequence of data terms
+    /// \param last End of a sequence of data terms
+    /// \return Propositional variable instantiation with the given name, and the range [first, last) as data parameters
     template <typename Iter>
     static
     term_type prop_var(const string_type& name, Iter first, Iter last)
@@ -536,39 +601,205 @@ namespace core {
       return propositional_variable_type(name, data_term_sequence_type(first, last));
     }
       
+    /// \brief Test for value true
+    /// \param t A term
+    /// \return True if the term has the value true. Also works for data terms
     static inline
-    data_term_type val(term_type t) { return pbes_system::accessors::val(t); }
+    bool is_true(term_type t)
+    {
+      return core::detail::gsIsPBESTrue(t) || core::detail::gsIsDataExprTrue(t);
+    }
     
-    static inline
-    term_type arg(term_type t) { return pbes_system::accessors::arg(t); }
+    /// \brief Test for value false
+    /// \param t A term
+    /// \return True if the term has the value false. Also works for data terms
+    static inline 
+    bool is_false(term_type t)
+    {
+      return core::detail::gsIsPBESFalse(t) || core::detail::gsIsDataExprFalse(t);
+    }
     
-    static inline
-    term_type left(term_type t) { return pbes_system::accessors::left(t); }
-    
-    static inline
-    term_type right(term_type t) { return pbes_system::accessors::right(t); }
-    
-    static inline
-    variable_sequence_type var(term_type t) { return pbes_system::accessors::var(t); }
-    
-    static inline
-    string_type name(term_type t) { return pbes_system::accessors::name(t); }
-    
-    static inline
-    data_term_sequence_type param(term_type t) { return pbes_system::accessors::param(t); }
+    /// \brief Test for operator not
+    /// \param t A term
+    /// \return True if the term is of type and. Also works for data terms
+    static inline 
+    bool is_not(term_type t)
+    {
+      return core::detail::gsIsPBESNot(t) || core::detail::gsIsDataExprNot(t);
+    }
 
+    /// \brief Test for operator and
+    /// \param t A term
+    /// \return True if the term is of type and. Also works for data terms
+    static inline 
+    bool is_and(term_type t)
+    {
+      return core::detail::gsIsPBESAnd(t) || core::detail::gsIsDataExprAnd(t);
+    }
+    
+    /// \brief Test for operator or
+    /// \param t A term
+    /// \return True if the term is of type or. Also works for data terms
+    static inline 
+    bool is_or(term_type t)
+    {
+      return core::detail::gsIsPBESOr(t) || core::detail::gsIsDataExprOr(t);
+    }
+    
+    /// \brief Test for implication
+    /// \param t A term
+    /// \return True if the term is an implication. Also works for data terms
+    static inline 
+    bool is_imp(term_type t)
+    {
+      return core::detail::gsIsPBESImp(t) || core::detail::gsIsDataExprImp(t);
+    }
+    
+    /// \brief Test for universal quantification
+    /// \param t A term
+    /// \return True if the term is an universal quantification. Also works for data terms
+    static inline 
+    bool is_forall(term_type t)
+    {
+      return core::detail::gsIsPBESForall(t) || core::detail::gsIsDataExprForall(t);
+    }
+    
+    /// \brief Test for existential quantification
+    /// \param t A term
+    /// \return True if the term is an existential quantification. Also works for data terms
+    static inline 
+    bool is_exists(term_type t)
+    {
+      return core::detail::gsIsPBESExists(t) || core::detail::gsIsDataExprExists(t);
+    }
+    
+    /// \brief Test for data term
+    /// \param t A term
+    /// \return True if the term is a data term
+    static inline 
+    bool is_data(term_type t)
+    {
+      return core::detail::gsIsDataExpr(t);
+    }
+    
+    /// \brief Test for propositional variable instantiation
+    /// \param t A term
+    /// \return True if the term is a propositional variable instantiation
+    static inline 
+    bool is_prop_var(term_type t)
+    {
+      return core::detail::gsIsPropVarInst(t);
+    }
+
+    /// \brief Returns the argument of a term of type not, exists or forall
+    /// \param t A term
+    /// \return The requested argument. Partially works for data terms
+    static inline
+    term_type arg(term_type t)
+    {
+      // Forall and exists are not fully supported by the data library
+      assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
+      assert(is_not(t) || is_exists(t) || is_forall(t));
+      
+      if (core::detail::gsIsPBESNot(t))
+      {
+        return atermpp::arg1(t);
+      }
+      else
+      {
+        return atermpp::arg2(t);
+      }
+    }
+    
+    /// \brief Returns the left argument of a term of type and, or or imp
+    /// \param t A term
+    /// \return The left argument of the term. Also works for data terms
+    static inline
+    term_type left(term_type t)
+    {
+      assert(is_and(t) || is_or(t) || is_imp(t));
+      return atermpp::arg1(t);
+    }
+    
+    /// \brief Returns the right argument of a term of type and, or or imp
+    /// \param t A term
+    /// \return The right argument of the term. Also works for data terms
+    static inline
+    term_type right(term_type t)
+    {
+      assert(is_and(t) || is_or(t) || is_imp(t));
+      return atermpp::arg2(t);
+    }
+    
+    /// \brief Returns the quantifier variables of a quantifier expression
+    /// \param t A term
+    /// \return The requested argument. Doesn't work for data terms
+    static inline
+    variable_sequence_type var(term_type t)
+    {
+      // Forall and exists are not fully supported by the data library
+      assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
+      assert(is_exists(t) || is_forall(t));
+
+      return atermpp::list_arg1(t);
+    }
+    
+    /// \brief Returns the name of a propositional variable instantiation
+    /// \param t A term
+    /// \return The name of the propositional variable instantiation
+    static inline
+    string_type name(term_type t)
+    {
+      assert(is_prop_var(t));
+      return atermpp::arg1(t);
+    }      
+    
+    /// \brief Returns the parameter list of a propositional variable instantiation
+    /// \param t A term
+    /// \return The parameter list of the propositional variable instantiation
+    static inline
+    data_term_sequence_type param(term_type t)
+    {
+      assert(is_prop_var(t));
+      return atermpp::list_arg2(t);
+    }
+
+    /// \brief Conversion from variable to term
+    /// \param v A variable
+    /// \returns The converted variable
     static inline
     term_type variable2term(variable_type v)
     {
       return v;
     }
 
+    /// \brief Conversion from data term to term
+    /// \param t A data term
+    /// \returns The converted term
     static inline
     term_type dataterm2term(data_term_type t)
     {
       return t;
     }  
 
+    /// \brief Conversion from term to data term
+    /// \param t A term
+    /// \returns The converted term
+    static inline
+    data_term_type term2dataterm(term_type t)
+    {
+      return t;
+    }
+
+    /// \brief Test if a term is constant
+    /// \param t A term
+    /// \return True if the term is constant
+    static inline
+    bool is_constant(term_type t) { return false; }
+
+    /// \brief Pretty print function
+    /// \param t A term
+    /// \brief Returns a pretty print representation of the term
     static inline
     std::string pp(term_type t)
     {
@@ -579,9 +810,5 @@ namespace core {
 } // namespace core
 
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_expression)
-/// \endcond
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

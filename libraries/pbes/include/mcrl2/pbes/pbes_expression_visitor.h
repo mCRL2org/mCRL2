@@ -173,7 +173,7 @@ struct pbes_expression_visitor
     typedef core::term_traits<Term> tr;
 
     if (tr::is_data(e)) {
-      visit_data_expression(e, tr::val(e), a);
+      visit_data_expression(e, tr::term2dataterm(e), a);
       leave_data_expression();
     } else if (tr::is_true(e)) {
       visit_true(e, a);
@@ -393,7 +393,7 @@ struct pbes_expression_visitor<Term, void>
     typedef core::term_traits<Term> tr;
 
     if (tr::is_data(e)) {
-      visit_data_expression(e, tr::val(e));
+      visit_data_expression(e, tr::term2dataterm(e));
       leave_data_expression();
     } else if (tr::is_true(e)) {
       visit_true(e);

@@ -145,7 +145,7 @@ std::cout << "<visit>" << tr::pp(e) << std::endl;
     term_type result;
 
     if (tr::is_data(e)) {
-      result = visit_data_expression(e, tr::val(e), arg1);
+      result = visit_data_expression(e, tr::term2dataterm(e), arg1);
       if (!is_finished(result)) {
         result = e;
       }
@@ -349,7 +349,7 @@ std::cout << "<visit>" << tr::pp(e) << " " << e << std::endl;
     term_type result;
 
     if (tr::is_data(e)) {
-      result = visit_data_expression(e, tr::val(e));
+      result = visit_data_expression(e, tr::term2dataterm(e));
       if (!is_finished(result)) {
         result = e;
       }

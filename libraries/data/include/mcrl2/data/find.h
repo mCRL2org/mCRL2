@@ -60,18 +60,6 @@ std::set<data_variable> find_all_data_variables(Term t)
 {
   std::set<data_variable> result;
   atermpp::find_all_if(t, is_data_variable, std::inserter(result, result.end()));
-
-#ifndef MCRL2_NO_ALTERNATIVE_FIND_ALL_IF
-  std::set<data_variable> result2 = find_all_data_variables2(t);
-  if (result != result2)
-  {
-    std::cout << "Error in find_all_data_variables!" << std::endl;
-    std::cout << "<find_all_data_variables>" << mcrl2::core::pp(t) << " " << t << std::endl;
-    std::cout << "<result>" << mcrl2::core::pp(data_variable_list(result.begin(), result.end())) << std::endl;
-    std::cout << "<result2>" << mcrl2::core::pp(data_variable_list(result2.begin(), result2.end())) << std::endl;
-  }
-#endif
-
   return result;
 }
 

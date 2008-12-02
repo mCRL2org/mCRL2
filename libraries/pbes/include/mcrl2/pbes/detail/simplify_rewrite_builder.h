@@ -14,6 +14,7 @@
 
 #include <set>
 #include <utility>
+#include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
 namespace mcrl2 {
@@ -183,14 +184,14 @@ namespace detail {
     ///
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      return tr::forall(variables, visit(phi, sigma));
+      return core::optimized_forall(variables, visit(phi, sigma));
     }
 
     /// Visit exists node.
     ///
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      return tr::exists(variables, visit(phi, sigma));
+      return core::optimized_exists(variables, visit(phi, sigma));
     }
 
     /// Visit propositional variable node.
