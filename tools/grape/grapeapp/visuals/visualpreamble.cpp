@@ -51,28 +51,22 @@ void visualpreamble::draw( void )
   draw_filled_rectangle( center, preamble_width, preamble_height, false, g_color_preamble );
 
   // draw preamble variable declarations
-//  render_text(_T("Parameters"), x, y+preamble_height-g_text_space, preamble_width*0.5, preamble_height);
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( "Parameters", x, x+preamble_width*0.5, y+preamble_height, y, 0.0015f, al_left, al_center );
-//  render_text(par, x+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(par.fn_str()), x, x+preamble_width*0.5, y+preamble_height, y, 0.0015f, al_left, al_center );
+  grape_glcanvas::get_font_renderer()->draw_text( "Parameters", x, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(par.fn_str()), x, x+preamble_width*0.5, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
 
   // draw preamble parameter declarations
-//  render_text(_T("Local Variables"), x+preamble_width*0.5, y+preamble_height-g_text_space*1, preamble_width*0.5, preamble_height);
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( "Local Variables", x+preamble_width*0.5, x+preamble_width, y+preamble_height, y, 0.0015f, al_left, al_center );
-//  render_text(var, x+preamble_width*0.5+0.05f, y+preamble_height-g_text_space*3, preamble_width*0.5-0.05f, preamble_height+g_text_space);
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(var.fn_str()), x+preamble_width*0.5, x+preamble_width, y+preamble_height, y, 0.0015f, al_left, al_center );
+  grape_glcanvas::get_font_renderer()->draw_text( "Local Variables", x+preamble_width*0.5, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(var.fn_str()), x+preamble_width*0.5, x+preamble_width, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
 
-  // draw horizontal line
+  // draw vertical line
   coordinate p_middle_top = {preamble_x_coordinate, y+0.025f};
   coordinate p_middle_bottom = {preamble_x_coordinate, y+preamble_height-0.025f};
   draw_line( p_middle_top, p_middle_bottom, false);
  
-  // draw vertical line
-//  coordinate p_top_top = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-g_text_space*2};
-//  coordinate p_top_bottom = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-g_text_space*2};
-  coordinate p_top_top = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-CHARWIDTH*2};
-  coordinate p_top_bottom = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-CHARWIDTH*2};
-  draw_line( p_top_top, p_top_bottom, false);
+  // draw horizontal line
+  coordinate p_top_left = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-0.05f};
+  coordinate p_top_right = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-0.05f};
+  draw_line( p_top_left, p_top_right, false);
 }
 
 bool visualpreamble::get_selected( void ) const
