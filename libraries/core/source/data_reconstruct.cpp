@@ -1759,7 +1759,10 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
                 if (p_ctx->num_map_equations[map] == 1)
                 {
                   ATermAppl eqn = ATAgetFirst(p_ctx->map_equations[map].elements());
-                  if (is_recogniser_equation(eqn))
+                  if (is_recogniser_equation(eqn) &&
+                      ATAgetArgument(eqn, 3) == gsMakeDataExprTrue() &&
+                      (p_ctx->is_recognised_by.find(p_ctx->recognises[map]) ==
+                      p_ctx->is_recognised_by.end()))
                   {
                     p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
                   }
@@ -1773,12 +1776,19 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
                   // Check that indeed all equations satisfy recogniser properties
                   ATermList l = p_ctx->map_equations[map].elements();
                   bool r = true;
+                  int true_count = 0;
                   while (!ATisEmpty(l) && r)
                   {
                     r = r && is_recogniser_equation(ATAgetFirst(l));
+                    if(ATAgetArgument(ATAgetFirst(l), 3) == gsMakeDataExprTrue())
+                    {
+                      ++true_count;
+                    }
                     l = ATgetNext(l);
                   }
-                  if(r)
+                  if(r && true_count == 1 &&
+                     (p_ctx->is_recognised_by.find(p_ctx->recognises[map]) ==
+                     p_ctx->is_recognised_by.end()))
                   {
                     p_ctx->is_recognised_by[p_ctx->recognises[map]] = map;
                   }
