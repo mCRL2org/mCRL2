@@ -12,6 +12,8 @@
 #include "grape_frame.h"
 #include "specification.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
@@ -34,4 +36,6 @@ void grape_clipboard::add( libgrape::arr_object_ptr p_objects )
 arr_object_ptr grape_clipboard::get( void )
 {
   return m_objects;
+}
+
 }

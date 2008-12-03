@@ -53,12 +53,14 @@ namespace grape
 	 */
 	void event_delete( wxKeyEvent &p_event );
 
+#ifndef __WINDOWS__
 	/**
 	 * select diagram event handler.
 	 * Processes the select listbox event.
 	 * @param p_event The generated event.
 	 */
 	void event_click( wxMouseEvent &p_event );
+#endif
 
 	/**
 	 * Enter listbox event handler.

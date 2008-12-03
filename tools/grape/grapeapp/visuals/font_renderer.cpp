@@ -8,8 +8,10 @@
 //
 // Implements the text rendering function.
 
+#include "boost/shared_array.hpp"
 #include "font_renderer.h"
 #include "font/fonts.h"
+#include "workarounds.h"
 
 using namespace grape::grapeapp;
 
@@ -294,7 +296,7 @@ void grape::grapeapp::init_textures(void)
     img_height = images[i].GetHeight();
 
     // expand image to alpha
-    unsigned char target[img_width * img_height * 4];
+    boost::shared_array<unsigned char> target(new unsigned char[img_width * img_height * 4]);
     src = images[i].GetData();
     for(int j=0; j<img_width*img_height; ++j)
     {

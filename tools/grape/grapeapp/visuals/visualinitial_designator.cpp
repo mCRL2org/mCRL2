@@ -13,6 +13,8 @@
 #include "geometric.h"
 #include "compoundstate.h" 
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualinitial_designator::visualinitial_designator( initial_designator* p_initial_designator )
@@ -74,4 +76,6 @@ grape_direction visualinitial_designator::is_on_border( libgrape::coordinate &p_
 {
   // test if a coordinate is on the border of an arrow
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+}
+
 }

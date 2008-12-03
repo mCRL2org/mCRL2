@@ -47,9 +47,18 @@ inline double round(double d) {
   return (std::floor(d));
 }
 
+# ifndef GL_CLAMP_TO_EDGE
+#  define GL_CLAMP_TO_EDGE 0x812F
+# endif
 # ifndef M_PI
 #  define M_PI 3.141592653589793238462643383280
 # endif
+# ifndef M_PI_2
+#  define M_PI_2 2*M_PI
+# endif 
+# ifndef M_PI_4
+#  define M_PI_4 4*M_PI
+# endif 
 #elif defined(__CYGWIN__) || defined(__MINGW32__)
 # include <cassert>
 # include <cerrno>

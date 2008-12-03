@@ -16,6 +16,8 @@
 #include "font_renderer.h"
 #include "label.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualnonterminating_transition::visualnonterminating_transition( nonterminating_transition* p_nonterminating_transition )
@@ -120,4 +122,6 @@ bool visualnonterminating_transition::is_nearest_head( libgrape::coordinate &p_c
     result = is_nearest_beginpoint( m_arrow_head + m_object->get_coordinate(), m_arrow_base + m_object->get_coordinate(), p_coord );
   }
   return result;
+}
+
 }

@@ -9,6 +9,8 @@
 // Main file of the GraPE application
 
 #include <wx/wx.h>
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/messaging.h"
 #include "mcrl2gen/mcrl2gen.h"
 #include <wx/aboutdlg.h>
 #include "grape_frame.h"
@@ -25,6 +27,7 @@
  **/
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
+using namespace mcrl2::core;
 
 wxAboutDialogInfo get_about_info() {
   using mcrl2::utilities::interface_description;
@@ -129,6 +132,18 @@ bool grape_app::Initialize(int& argc, wxChar** argv) {
   return wxApp::Initialize(argc, argv);
 }
 
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow) {                                                                     
+
+  MCRL2_ATERM_INIT(0, lpCmdLine);
+  gsSetVerboseMsg();
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);  
+}
+#endif
+ 
 int main(int argc, char** argv)
 {
   init_mcrl2libs(argc, argv);

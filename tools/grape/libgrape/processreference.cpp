@@ -65,16 +65,20 @@ void process_reference::set_parameter_updates( const list_of_varupdate& p_parame
 
 bool process_reference::set_text( const wxString &p_text )
 {
+  bool valid = true;
   m_parameter_assignments.Empty();
   wxStringTokenizer tkw( p_text, _T(";") );
   varupdate var_update;
   while( tkw.HasMoreTokens() )
   {
     wxString token = tkw.GetNextToken();
-    var_update.set_varupdate( token );
-    m_parameter_assignments.Add( var_update );
+    valid &= var_update.set_varupdate( token );
+    if (valid)
+    {
+      m_parameter_assignments.Add( var_update );
+    }
   }
-  return true;
+  return valid;
 }
 
 wxString process_reference::get_text() const

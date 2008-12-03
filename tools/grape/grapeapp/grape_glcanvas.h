@@ -145,6 +145,11 @@ namespace grape
          */
         ~grape_glcanvas(void);
 
+		/**
+		 * Reset function
+		 * Resets the scrollbars
+		 */
+		void reset();
         /**
          * Drawing function.
          * (Re-)draws the canvas.
@@ -228,7 +233,7 @@ namespace grape
          * @param p_event The generated event.
          */
         void event_scroll_thumbtrack(wxScrollWinEvent &p_event);
-
+        void event_scroll_thumbrelease(wxScrollWinEvent &p_event);
         /**
          * Scroll pageup event handler.
          * Processes the scroll pageup events.

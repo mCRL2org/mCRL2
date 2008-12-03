@@ -16,6 +16,8 @@
 #include "geometric.h"
 #include "mcrl2/utilities/font_renderer.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
 
@@ -71,4 +73,6 @@ grape_direction visualcomment::is_on_border( libgrape::coordinate &p_coord )
 {
   // test if a coordinate is on the border of a architecture refernece
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+}
+
 }

@@ -59,7 +59,7 @@ void visualblocked::draw( void )
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }
 
-bool visualblocked::is_inside( libgrape::coordinate &p_coord )
+bool visualblocked::is_inside( coordinate &p_coord )
 {
   blocked *block_ptr = static_cast<blocked *>(m_object);
   connection *conn_ptr = block_ptr->get_attached_connection();
@@ -79,7 +79,7 @@ bool visualblocked::is_inside( libgrape::coordinate &p_coord )
   return result || is_inside_line( m_object->get_coordinate(), line_end_coordinate, p_coord)  || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
 }
 
-grape_direction visualblocked::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualblocked::is_on_border( coordinate &p_coord )
 {
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }

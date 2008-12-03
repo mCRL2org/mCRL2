@@ -38,7 +38,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
 : wxDialog( 0, wxID_ANY, _T("Edit architecture reference") , wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 #else
 grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
-: wxDialog( 0, wxID_ANY, _T("Edit architecture reference") )
+: wxDialog( 0, wxID_ANY, _T("Edit architecture reference"), wxDefaultPosition )
 #endif
 {  
   wxPanel *panel = new wxPanel( this );
@@ -132,6 +132,8 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   init( panel );
 
   m_combo->SetFocus();
+  Centre();
+  check_text();
 }
 
 grape_reference_dialog::grape_reference_dialog()
@@ -192,14 +194,27 @@ wxString grape_reference_dialog::get_initializations() const
   wxString result;
   for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
   {
-    if (m_grid->GetCellValue(i, 0).IsEmpty() == false) result += m_grid->GetCellValue(i, 0) + _T( ":=" ) + m_grid->GetCellValue(i, 1) + _T( ";" );
+    if (!m_grid->GetCellValue(i, 0).IsEmpty() || !m_grid->GetCellValue(i, 1).IsEmpty())
+    {
+	  result += m_grid->GetCellValue(i, 0) + _T( ":=" ) + m_grid->GetCellValue(i, 1) + _T( ";" );
+    }
   }
   return result;  
+}
+
+void grape_reference_dialog::check_text()
+{
+  bool valid = true;
+  static grape::libgrape::process_reference tmp_reference;
+  valid = tmp_reference.set_text( get_initializations() );
+	
+  FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
  
 void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
 {
+  check_text();
   int rows_count = m_grid->GetNumberRows();
 
   while ( (m_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_grid->GetCellValue(rows_count-1, 1) != _T(""))) {

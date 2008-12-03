@@ -16,6 +16,8 @@
 #include "label.h"
 #include "geometric.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualterminating_transition::visualterminating_transition( terminating_transition* p_terminating_transition )
@@ -121,4 +123,6 @@ bool visualterminating_transition::is_inside( libgrape::coordinate &p_coord )
 grape_direction visualterminating_transition::is_on_border( libgrape::coordinate &p_coord )
 {
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+}
+
 }

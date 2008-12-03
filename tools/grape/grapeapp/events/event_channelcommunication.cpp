@@ -329,7 +329,7 @@ grape_event_attach_channel_communication::~grape_event_attach_channel_communicat
 {
 }
 
-bool grape_event_attach_channel_communication::grape_event_attach_channel_communication::Do(  void  )
+bool grape_event_attach_channel_communication::Do(  void  )
 {
   if ( m_remove_channel_visible )
   {
@@ -356,7 +356,7 @@ bool grape_event_attach_channel_communication::grape_event_attach_channel_commun
   return true;
 }
 
-bool grape_event_attach_channel_communication::grape_event_attach_channel_communication::Undo(  void  )
+bool grape_event_attach_channel_communication::Undo(  void  )
 {
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
   channel* chan_ptr = static_cast<channel*> ( find_object( m_channel ) );

@@ -11,7 +11,7 @@
 #include <wx/cmdproc.h>
 #include <wx/filesys.h>
 #include <wx/fs_arc.h>
-#include <wx/help.h>
+#include <wx/html/helpctrl.h>
 #include <wx/statusbr.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
@@ -48,6 +48,7 @@ grape_frame::grape_frame( const wxString &p_filename )
   m_timer = new wxTimer( this, GRAPE_TIMER );
   m_timer->Start( 2000, true );
 
+
   int gl_args[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
   m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
   m_glcanvas = new grape_glcanvas(m_splitter, gl_args, this);
@@ -57,10 +58,12 @@ grape_frame::grape_frame( const wxString &p_filename )
   show_log_panel();
   m_statusbar = new wxStatusBar(this);
   m_menubar = new grape_menubar();
-
+  
+  SetBackgroundColour(m_menubar->GetBackgroundColour());
+  
   // place widgets in sizers
   wxBoxSizer *main_box = new wxBoxSizer(wxHORIZONTAL);
-  main_box->Add(m_splitter, 1, wxEXPAND | wxTOP | wxBOTTOM, 5);
+  main_box->Add(m_splitter, 1, wxEXPAND | wxBOTTOM, 5);
 
   wxBoxSizer *process_box = new wxBoxSizer(wxVERTICAL);
   wxStaticText *proc_text = new wxStaticText( this, -1, _T("Processes"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
@@ -127,7 +130,7 @@ grape_frame::grape_frame( const wxString &p_filename )
 
   wxFileSystem fs;
   wxFileSystem::AddHandler(new wxArchiveFSHandler);
-  m_help_controller = new wxHelpController(wxHF_DEFAULT_STYLE, this);
+  m_help_controller = new wxHtmlHelpController(wxHF_DEFAULT_STYLE, this);
   wxString filename = wxEmptyString;
   if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
   {
@@ -376,7 +379,7 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
 
 END_EVENT_TABLE()
 
-wxHelpController* grape_frame::get_help_controller( void )
+wxHtmlHelpController* grape_frame::get_help_controller( void )
 {
   return m_help_controller;
 }
@@ -423,7 +426,6 @@ void grape_frame::toggle_view( grape_mode p_mode )
       {
         if ( m_mode != GRAPE_MODE_SPEC )
         {
-          m_statusbar->PopStatusText();
           m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
         }
       }
@@ -564,9 +566,9 @@ void grape_frame::update_toolbar( void )
 {
   // update UNDO and REDO right for the toolbar
   GetToolBar()->EnableTool( wxID_UNDO, m_menubar->IsEnabled( wxID_UNDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ).Mid(1) );
+  GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ) );
   GetToolBar()->EnableTool( wxID_REDO, m_menubar->IsEnabled( wxID_REDO ) );
-  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelFromText( m_menubar->FindItem( wxID_REDO )->GetLabel() ).Mid(1) );
+  GetToolBar()->SetToolShortHelp( wxID_REDO, m_menubar->FindItem( wxID_REDO )->GetLabelFromText( m_menubar->FindItem( wxID_REDO )->GetLabel() ) );
 
   // update DELETE and PROPERTIES right for the toolbar
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
@@ -659,7 +661,9 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
         }
         if ( ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_glcanvas == FindFocus() ) )
         {
-          m_statusbar->PopStatusText();
+	      if (!m_statusbar->GetStatusText().IsEmpty()) {
+		    m_statusbar->PopStatusText();
+	      }
           if ( m_statusbar->GetStatusText() != wxEmptyString ) {
             m_statusbar->PopStatusText();
             m_statusbar->PushStatusText( status_text );

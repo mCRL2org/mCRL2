@@ -185,6 +185,7 @@ bool grape_event_base::close_specification()
 
   // reset canvas
   m_main_frame->get_glcanvas()->set_diagram( 0 );
+  m_main_frame->get_glcanvas()->reset();
 
   // reset frame (variables)
   m_main_frame->set_filename( wxFileName( wxEmptyString ) );

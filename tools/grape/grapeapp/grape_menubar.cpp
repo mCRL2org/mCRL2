@@ -66,6 +66,10 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetBitmap( g_icons[ _T("text") ] );
   m_menu_file->Append( item );
 
+  item = new wxMenuItem( m_menu_file, wxID_PRINT );
+  m_menu_file->Append( item );
+  m_menu_file->Enable(wxID_PRINT, false);
+  
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_EXIT );
@@ -129,6 +133,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // diagram menu
   m_menu_diagram = new wxMenu;
+  
   item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add &Architecture diagram"), _T("Add Architecture diagram") );
   item->SetBitmap( g_icons[ _T("newarch") ] );
   m_menu_diagram->Append( item );
@@ -162,6 +167,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // tools menu
   m_menu_tools = new wxMenu;
+  
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_SELECT, _T("Selection"), _T("Select objects in current diagram") );
   item->SetBitmap( g_icons[ _T("toolselect") ] );
   m_menu_tools->Append( item );
@@ -232,6 +238,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // help menu
   m_menu_help = new wxMenu;
+  
   item = new wxMenuItem( m_menu_help, wxID_HELP, _T("&Help\tF1"), _T("Show Help") );
   item->SetBitmap( g_icons[ _T("helpcontents") ] );
   m_menu_help->Append( item );
@@ -266,15 +273,16 @@ wxMenu* grape_menubar::get_menu( grape_main_menu p_which )
 
 void grape_menubar::set_mode( int p_mode )
 {
-  bool in_spec = p_mode & ( GRAPE_MENUMODE_SPEC + GRAPE_MENUMODE_DATASPEC );
-  bool in_diagram = p_mode & ( GRAPE_MENUMODE_ARCH + GRAPE_MENUMODE_PROC );
+  bool in_spec = (p_mode & ( GRAPE_MENUMODE_SPEC + GRAPE_MENUMODE_DATASPEC )) != 0;
+  bool in_diagram = (p_mode & ( GRAPE_MENUMODE_ARCH + GRAPE_MENUMODE_PROC )) != 0;
 
   // update menubar
   Enable(wxID_CLOSE, in_spec);
   Enable(wxID_SAVEAS, in_spec);
   Enable(GRAPE_MENU_VALIDATE, in_diagram);
   Enable(GRAPE_MENU_EXPORTTEXT, in_spec);
-  Enable(wxID_PRINT, in_spec);
+// Low prioritiy, not implemented; disabled
+  Enable(wxID_PRINT, false );
   Enable(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, in_spec);
   Enable(GRAPE_MENU_ADD_PROCESS_DIAGRAM, in_spec);
 
@@ -285,11 +293,11 @@ void grape_menubar::set_mode( int p_mode )
 // Low priority, not implemented; disabled
   Enable(wxID_PASTE, false );
 
-  Enable(GRAPE_MENU_DELETE, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
-  Enable(GRAPE_MENU_PROPERTIES, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
+  Enable(wxID_DELETE, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
+  Enable(GRAPE_MENU_PROPERTIES, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
   Enable(GRAPE_MENU_SELECT_ALL, false );
-  Enable(GRAPE_MENU_DESELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
+  Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );
@@ -304,21 +312,21 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_EXPORTIMAGE, in_diagram);
 
   // architecture diagram specific items
-  Enable(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, p_mode & GRAPE_MENUMODE_ARCH);
-  Enable(GRAPE_TOOL_ADD_PROCESS_REFERENCE, p_mode & GRAPE_MENUMODE_ARCH);
-  Enable(GRAPE_TOOL_ADD_CHANNEL, p_mode & GRAPE_MENUMODE_ARCH);
-  Enable(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, p_mode & GRAPE_MENUMODE_ARCH);
-  Enable(GRAPE_TOOL_ADD_BLOCKED, p_mode & GRAPE_MENUMODE_ARCH);
-  Enable(GRAPE_TOOL_ADD_VISIBLE, p_mode & GRAPE_MENUMODE_ARCH);
+  Enable(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
+  Enable(GRAPE_TOOL_ADD_PROCESS_REFERENCE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
+  Enable(GRAPE_TOOL_ADD_CHANNEL, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
+  Enable(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
+  Enable(GRAPE_TOOL_ADD_BLOCKED, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
+  Enable(GRAPE_TOOL_ADD_VISIBLE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
 
   // process diagram specific items
-  Enable(GRAPE_TOOL_ADD_STATE, p_mode & GRAPE_MENUMODE_PROC);
-  Enable(GRAPE_TOOL_ADD_REFERENCE_STATE, p_mode & GRAPE_MENUMODE_PROC);
-  Enable(GRAPE_TOOL_ADD_NONTERMINATING_TRANSITION, p_mode & GRAPE_MENUMODE_PROC);
-  Enable(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, p_mode & GRAPE_MENUMODE_PROC);
-  Enable(GRAPE_TOOL_ADD_TERMINATING_TRANSITION, p_mode & GRAPE_MENUMODE_PROC);
+  Enable(GRAPE_TOOL_ADD_STATE, (p_mode & GRAPE_MENUMODE_PROC) != 0 );
+  Enable(GRAPE_TOOL_ADD_REFERENCE_STATE, (p_mode & GRAPE_MENUMODE_PROC) != 0 );
+  Enable(GRAPE_TOOL_ADD_NONTERMINATING_TRANSITION, (p_mode & GRAPE_MENUMODE_PROC) != 0 );
+  Enable(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, (p_mode & GRAPE_MENUMODE_PROC) != 0 );
+  Enable(GRAPE_TOOL_ADD_TERMINATING_TRANSITION, (p_mode & GRAPE_MENUMODE_PROC) != 0 );
 
-  Check(GRAPE_MENU_DATATYPESPEC, p_mode & GRAPE_MENUMODE_DATASPEC );
+  Check(GRAPE_MENU_DATATYPESPEC, (p_mode & GRAPE_MENUMODE_DATASPEC) != 0 );
 
   Refresh();
 }

@@ -12,6 +12,8 @@
 #include "visualchannel_communication.h"
 #include "geometric.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualchannel_communication::visualchannel_communication( channel_communication* p_channel_communication )
@@ -66,4 +68,6 @@ bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
 grape_direction visualchannel_communication::is_on_border( libgrape::coordinate &p_coord )
 {
   return GRAPE_DIR_NONE;
+}
+
 }

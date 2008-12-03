@@ -245,7 +245,7 @@ void label::process_text( void )
     m_variable_updates.Empty();
     while(var_updates.Len() > 0)
     {
-      varupdate::varupdate var_update;
+      varupdate var_update;
       wxString curr_update = var_updates;
       if(curr_update.Find(_T(",")) != wxNOT_FOUND)
       {

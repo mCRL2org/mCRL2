@@ -32,6 +32,7 @@ void grape_listbox::event_delete( wxKeyEvent &p_event )
   }
 }
 
+#ifndef __WINDOWS__
 void grape_listbox::event_click( wxMouseEvent &p_event )
 {
   if ( m_main_frame->get_mode() != GRAPE_MODE_DATASPEC )
@@ -60,6 +61,7 @@ void grape_listbox::event_click( wxMouseEvent &p_event )
     }
   }
 }
+#endif
 
 void grape_listbox::event_select( wxCommandEvent &p_event )
 {
@@ -67,7 +69,7 @@ void grape_listbox::event_select( wxCommandEvent &p_event )
   {
     if ( m_main_frame->get_statusbar()->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
     {
-      if ( m_main_frame->get_statusbar()->GetStatusText() == wxEmptyString )
+      if ( m_main_frame->get_statusbar()->GetStatusText() != wxEmptyString )
       {
         m_main_frame->get_statusbar()->PopStatusText();
       }
@@ -94,5 +96,7 @@ BEGIN_EVENT_TABLE(grape_listbox, wxListBox)
   EVT_LISTBOX( GRAPE_ARCHITECTURE_DIAGRAM_LIST, grape_listbox::event_select )
   EVT_LISTBOX( GRAPE_PROCESS_DIAGRAM_LIST, grape_listbox::event_select ) 
   EVT_KEY_UP( grape_listbox::event_delete )
+#ifndef __WINDOWS__
   EVT_LEFT_UP( grape_listbox::event_click )
+#endif
 END_EVENT_TABLE()

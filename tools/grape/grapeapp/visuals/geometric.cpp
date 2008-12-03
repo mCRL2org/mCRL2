@@ -16,12 +16,13 @@
 #include "mcrl2/utilities/font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
+#include "workarounds.h" // for M_PI{_X}
 #include <cmath>
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
 
-const float DEG2RAD = M_PI/180;
+const float DEG2RAD = static_cast<float> ( M_PI/180 );
 const unsigned int ELLIPSE_POINTS = 360; //pre: shouldn't be zero
 
 
@@ -723,15 +724,15 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   //draw control point
   if (p_selected)
   {
-    draw_line_rectangle(p_control, 0.03, 0.03, false, g_color_black);
+    draw_line_rectangle(p_control, static_cast<float>(0.03), static_cast<float>(0.03), false, g_color_black);
   } 
   else
   {
-    draw_filled_rectangle(p_control, 0.015, 0.015, false, g_color_black);
+    draw_filled_rectangle(p_control, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
   };
 
-  draw_filled_rectangle(p_begin, 0.015, 0.015, false, g_color_black);
-  draw_filled_rectangle(p_end, 0.015, 0.015, false, g_color_black);
+  draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
 }
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text )

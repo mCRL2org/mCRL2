@@ -21,6 +21,8 @@ const float preamble_y_coordinate = -0.16f;
 const float preamble_width = 1.0f;
 const float preamble_height = 0.3f;
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
 
@@ -95,4 +97,6 @@ grape_direction visualpreamble::is_on_border( libgrape::coordinate &p_coord )
 {
   // it doesn't matter for a preamble where it was clicked
   return GRAPE_DIR_NONE;
+}
+
 }

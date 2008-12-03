@@ -59,8 +59,9 @@ namespace grape
          * Parameter declarations assignment function.
          * Assigns the text to the parameter declarations of the object.
          * @param p_parameter_declarations The new parameter declarations
+         * @return wheter input is correct or not
          */
-        void set_parameter_declarations( const wxString &p_parameter_declarations );
+        bool set_parameter_declarations( const wxString &p_parameter_declarations );
 
          /**
          * Parameter declarations retrieval function
@@ -86,8 +87,9 @@ namespace grape
          * Local variable declarations assignment function.
          * Assigns the text to the local variable declarations of the object.
          * @param p_local_variable_declarations The new local variable declarations
+         * @return whether input is correct or not
          */
-        void set_local_variable_declarations( const wxString &p_local_variable_declarations );
+        bool set_local_variable_declarations( const wxString &p_local_variable_declarations );
 
          /**
          * Local variable declarations retrieval function

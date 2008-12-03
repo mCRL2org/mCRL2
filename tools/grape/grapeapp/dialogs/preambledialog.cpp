@@ -25,7 +25,6 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Parameter declarations:") );
   vsizer->Add( text, 0, wxEXPAND );
 
-
   // create grid
   m_parameter_grid = new wxGrid( this, GRAPE_PARAMETER_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
   m_parameter_grid->CreateGrid( p_preamble->get_parameter_declarations_list().GetCount()+1, 2 );  
@@ -81,6 +80,8 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   vsizer->SetSizeHints(this);
 
   m_parameter_grid->SetFocus();
+  Centre();
+  check_text();
 }
 
 grape_preamble_dialog::grape_preamble_dialog()
@@ -98,7 +99,10 @@ wxString grape_preamble_dialog::get_parameter_declarations() const
   wxString result;
   for ( int i = 0; i < m_parameter_grid->GetNumberRows(); ++i )
   {
-    if (m_parameter_grid->GetCellValue(i, 0).IsEmpty() == false) result += m_parameter_grid->GetCellValue(i, 0) + _T( ":" ) + m_parameter_grid->GetCellValue(i, 1) + _T( ";" );
+	if (!m_parameter_grid->GetCellValue(i,0).IsEmpty() || !m_parameter_grid->GetCellValue(i,1).IsEmpty())
+	{
+      result += m_parameter_grid->GetCellValue(i, 0) + _T( ":" ) + m_parameter_grid->GetCellValue(i, 1) + _T( ";" );
+    }
   }
   return result;  
   
@@ -109,14 +113,28 @@ wxString grape_preamble_dialog::get_local_variable_declarations() const
   wxString result;
   for ( int i = 0; i < m_localvar_grid->GetNumberRows(); ++i )
   {
-    if (m_localvar_grid->GetCellValue(i, 0).IsEmpty() == false) result += m_localvar_grid->GetCellValue(i, 0) + _T( ":" ) + m_localvar_grid->GetCellValue(i, 1) + _T( "=" ) + m_localvar_grid->GetCellValue(i, 2) + _T( ";" );
+	if (!m_localvar_grid->GetCellValue(i,0).IsEmpty() || !m_localvar_grid->GetCellValue(i,1).IsEmpty() || !m_localvar_grid->GetCellValue(i,2).IsEmpty())
+	{
+	  result += m_localvar_grid->GetCellValue(i, 0) + _T( ":" ) + m_localvar_grid->GetCellValue(i, 1) + _T( "=" ) + m_localvar_grid->GetCellValue(i, 2) + _T( ";" );
+    }
   }
   return result;  
   
 }
 
+void grape_preamble_dialog::check_text()
+{
+  bool valid = true;
+  static grape::libgrape::preamble tmp_preamble;
+  valid = tmp_preamble.set_parameter_declarations( get_parameter_declarations() );
+  valid &= tmp_preamble.set_local_variable_declarations( get_local_variable_declarations() );
+	
+  FindWindow(GetAffirmativeId())->Enable(valid);
+}
+	
 void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
 {
+  check_text();
   int rows_count = m_parameter_grid->GetNumberRows();
 
   while ( (m_parameter_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_parameter_grid->GetCellValue(rows_count-1, 1) != _T(""))) {
@@ -127,6 +145,7 @@ void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
   
 void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &p_event )
 {
+  check_text();
   int rows_count = m_localvar_grid->GetNumberRows();
 
   while ( (m_localvar_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_localvar_grid->GetCellValue(rows_count-1, 1) != _T("")) || (m_localvar_grid->GetCellValue(rows_count-1, 2) != _T(""))) {

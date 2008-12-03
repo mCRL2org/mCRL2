@@ -81,8 +81,8 @@ void grape_glcanvas::update_scrollbars(void)
   int v_thumb = m_viewport_height;
   int h_pos = int(((float)m_h_scroll_pos / (float)m_h_scroll_range) * h_range);
   int v_pos = int(((float)m_v_scroll_pos / (float)m_v_scroll_range) * v_range);
-  SetScrollbar(wxHORIZONTAL, h_pos, h_thumb, h_range);
-  SetScrollbar(wxVERTICAL, v_pos, v_thumb, v_range);
+  SetScrollbar(wxHORIZONTAL, h_pos, h_thumb, h_range, true);
+  SetScrollbar(wxVERTICAL, v_pos, v_thumb, v_range, true);
 
   m_h_scroll_range = h_range;
   m_v_scroll_range = v_range;
@@ -124,6 +124,40 @@ void grape_glcanvas::init_gl(void)
   m_initialized = true;
 }
 
+void grape_glcanvas::reset()
+{
+  // initialize glcanvas
+  m_viewport_width = 1;
+  m_viewport_height = 1;
+  m_canvas_state = IDLE;
+  m_initialized = false;
+  m_scroll_x = 0.0f;
+  m_scroll_y = 0.0f;
+
+  // 1.0f GL coords correspond to 300 viewport pixels
+  // initial diagram dimensions: [0.0f, 10.0f] x [0.0f, -10.0f]
+  m_min_size_x = 0.0f;
+  m_max_size_x = 10.0f;
+  m_min_size_y = 0.0f;
+  m_max_size_y = 10.0f;
+
+  m_h_scroll_range = 1;
+  m_v_scroll_range = 1;
+  m_h_scroll_pos = 0;
+  m_v_scroll_pos = 0;
+
+  update_scrollbars();
+  m_visual_objects.Empty();
+  m_touched_visual_object = 0;
+  m_dragging = false;
+  m_mousedown = false;
+  m_diagram = 0;
+
+  m_visibility_frame_height = m_max_size_y - 0.5 * g_frame_border_space;
+  m_visibility_frame_width = m_max_size_x - 2 * g_frame_border_space;
+  m_visibility_frame_coordinate.m_x = m_min_size_x + g_frame_border_space + 0.5 * m_visibility_frame_width;
+  m_visibility_frame_coordinate.m_y = -1 * ( m_min_size_y + 0.1f + 0.5 * m_visibility_frame_height );
+}
 void grape_glcanvas::draw_visual_objects()
 {
   for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
@@ -359,6 +393,11 @@ void grape_glcanvas::event_scroll_thumbtrack(wxScrollWinEvent &p_event)
   Refresh();
 }
 
+void grape_glcanvas::event_scroll_thumbrelease(wxScrollWinEvent &p_event)
+{
+  SetScrollPos(p_event.GetOrientation(), p_event.GetPosition(), true);
+}
+
 void grape_glcanvas::event_scroll_pageup(wxScrollWinEvent &p_event)
 {
   if(p_event.GetOrientation() == wxHORIZONTAL)
@@ -463,7 +502,7 @@ void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
 {
   // update statusbar
-  if ( ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_main_frame->get_statusbar()->GetStatusText() == wxEmptyString ) ) {
+  if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) {
     if ( ( m_main_frame->get_mode() == GRAPE_MODE_ARCH ) || ( m_main_frame->get_mode() == GRAPE_MODE_PROC ) )
     {
       m_main_frame->get_statusbar()->PopStatusText();
@@ -780,6 +819,7 @@ BEGIN_EVENT_TABLE(grape_glcanvas, wxGLCanvas)
   EVT_SCROLLWIN_LINEUP(grape_glcanvas::event_scroll_lineup)
   EVT_SCROLLWIN_LINEDOWN(grape_glcanvas::event_scroll_linedown)
   EVT_SCROLLWIN_THUMBTRACK(grape_glcanvas::event_scroll_thumbtrack)
+  EVT_SCROLLWIN_THUMBRELEASE(grape_glcanvas::event_scroll_thumbrelease)
   EVT_SCROLLWIN_PAGEUP(grape_glcanvas::event_scroll_pageup)
   EVT_SCROLLWIN_PAGEDOWN(grape_glcanvas::event_scroll_pagedown)
   EVT_MOTION(grape_glcanvas::event_mouse_move)

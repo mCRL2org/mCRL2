@@ -44,20 +44,22 @@ wxString preamble::get_parameter_declarations( void ) const
   return result;
 }
 
-void preamble::set_parameter_declarations( const wxString &p_parameter_declarations )
+bool preamble::set_parameter_declarations( const wxString &p_parameter_declarations )
 {
+  bool valid = true;
   m_parameter_declarations_list.Empty();
   wxStringTokenizer tkw( p_parameter_declarations, _T(";") );
   while ( tkw.HasMoreTokens() )
   {
     decl param_decl;
     wxString token = tkw.GetNextToken();
-    bool valid = param_decl.set_decl( token );
+    valid &= param_decl.set_decl( token );
     if ( valid )
     {
       m_parameter_declarations_list.Add( param_decl );
     }
   }
+  return valid;
 }
 
 list_of_decl preamble::get_parameter_declarations_list( void ) const
@@ -81,20 +83,22 @@ wxString preamble::get_local_variable_declarations( void ) const
   return result;
 }
 
-void preamble::set_local_variable_declarations( const wxString &p_local_variable_declarations )
+bool preamble::set_local_variable_declarations( const wxString &p_local_variable_declarations )
 {
+  bool valid = true;
   m_local_variable_declarations_list.Empty();
   wxStringTokenizer tkw( p_local_variable_declarations, _T(";") );
   while ( tkw.HasMoreTokens() )
   {
     decl_init var_decl_init;
     wxString token = tkw.GetNextToken();
-    bool valid = var_decl_init.set_decl_init( token );
+    valid &= var_decl_init.set_decl_init( token );
     if ( valid )
     {
       m_local_variable_declarations_list.Add( var_decl_init );
     }
   }
+  return valid;
 }
 
 list_of_decl_init preamble::get_local_variable_declarations_list( void ) const

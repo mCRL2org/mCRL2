@@ -55,19 +55,26 @@ namespace grape
 
         /** @return The value of the local variable declaration input box. */
         wxString get_local_variable_declarations() const;
-        
-	      /**
-	      * Change parameter grid event handler.
-	      * Appending grid rows.
-	      * @param p_event The generated event.
-    	  */
+
+
+        /**
+         * Check wether the text is valid.
+         * If not, the OK button is disabled
+         */
+        void check_text();
+
+        /**
+         * Change parameter grid event handler.
+         * Appending grid rows.
+         * @param p_event The generated event.
+         */
         void event_change_parameter_text( wxGridEvent &p_event );
         
-	      /**
-	      * Change localvar grid event handler.
-	      * Appending grid rows.
-	      * @param p_event The generated event.
-    	  */
+        /**
+         * Change localvar grid event handler.
+         * Appending grid rows.
+         * @param p_event The generated event.
+         */
         void event_change_localvar_text( wxGridEvent &p_event );
     };
   }

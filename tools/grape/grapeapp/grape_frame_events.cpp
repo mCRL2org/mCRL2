@@ -289,6 +289,8 @@ void grape_frame::event_menu_about(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_select_diagram( wxCommandEvent &p_event )
 {
+  m_architecture_diagram_list->SetStringSelection(p_event.GetString());
+  m_process_diagram_list->SetStringSelection(p_event.GetString());
   grape_event_select_diagram *event = new grape_event_select_diagram(this, p_event.GetString());
   m_event_handler->Submit(event, false);
   update_bars();

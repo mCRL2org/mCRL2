@@ -19,7 +19,7 @@
 
 class wxCommandProcessor;
 class wxToggleButton;
-class wxHelpController;
+class wxHtmlHelpController;
 
 namespace grape
 {
@@ -64,7 +64,7 @@ namespace grape
         wxFileName          m_filename;                   /**< full path to the file containing this specification. */
         bool                m_modified;                   /**< The flag to point if the file is modified */
         libgrape::grape_specification *m_specification; /**< The GraPE specification that is being modified */
-        wxHelpController    *m_help_controller;            /**< The help controller. */
+        wxHtmlHelpController    *m_help_controller;            /**< The help controller. */
         wxToggleButton      *m_dataspecbutton;             /**< The button to switch to datatype specification.*/
         wxTextCtrl          *m_datatext;                   /**< The text control for entering the datatype specification. */
         grape_mode            m_mode;                       /**< The frame's mode. */
@@ -502,7 +502,7 @@ namespace grape
          * Retrieve a pointer to the help controller.
          * @return A pointer to the help controller.
          */
-        wxHelpController *get_help_controller( void );
+        wxHtmlHelpController *get_help_controller( void );
 
         /**
          * Whenever the data specification was changed, grab the contents

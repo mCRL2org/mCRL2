@@ -9,6 +9,7 @@
 // Defines GraPE events for diagrams
 
 #include <wx/xml/xml.h>
+#include <iostream>
 #include <sstream>
 
 #include "grape_frame.h"
@@ -528,7 +529,10 @@ bool grape_event_remove_diagram::Do( void )
         else
         {
           // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
-          m_main_frame->get_process_diagram_listbox()->Select( 0 );
+          if (!m_main_frame->get_process_diagram_listbox()->IsEmpty())
+          {
+          	m_main_frame->get_process_diagram_listbox()->Select( 0 );
+      	  }
         }
       }
     }
@@ -603,7 +607,10 @@ bool grape_event_remove_diagram::Do( void )
       else
       {
         // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
-        m_main_frame->get_architecture_diagram_listbox()->Select( 0 );
+        if (!m_main_frame->get_architecture_diagram_listbox()->IsEmpty())
+        {
+	      m_main_frame->get_architecture_diagram_listbox()->Select( 0 );
+        }
       }
     }
 

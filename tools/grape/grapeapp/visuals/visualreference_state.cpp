@@ -56,13 +56,13 @@ void visualreference_state::draw( void )
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }
 
-bool visualreference_state::is_inside( libgrape::coordinate &p_coord )
+bool visualreference_state::is_inside( coordinate &p_coord )
 {
   return is_inside_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
 
 }
 
-grape_direction visualreference_state::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualreference_state::is_on_border( coordinate &p_coord )
 {
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }

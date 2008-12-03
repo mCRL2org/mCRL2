@@ -18,6 +18,8 @@
 #include "math.h"
 #include "mcrl2/utilities/font_renderer.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
 
@@ -132,4 +134,6 @@ bool visualvisible::is_inside( libgrape::coordinate &p_coord )
 grape_direction visualvisible::is_on_border( libgrape::coordinate &p_coord )
 {
   return GRAPE_DIR_NONE;
+}
+
 }

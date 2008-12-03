@@ -104,12 +104,18 @@ namespace grape
 
         /** @return The variable initializations entered in the input field. */
         wxString get_initializations() const;
+        
+        /**
+         * Check wether the text is valid.
+         * If not, the OK button is disabled
+         */
+        void check_text();         
 
-	      /**
-	      * Change grid event handler.
-	      * Appending grid rows.
-	      * @param p_event The generated event.
-    	  */
+	    /**
+	     * Change grid event handler.
+	     * Appending grid rows.
+	     * @param p_event The generated event.
+    	 */
         void event_change_text( wxGridEvent &p_event );
     };
   }

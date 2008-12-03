@@ -9,13 +9,15 @@
 // Defines GraPE events for help actions.
 
 #include <wx/aboutdlg.h>
-#include <wx/help.h>
+#include <wx/html/helpctrl.h>
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
 #include "event_help.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 grape_event_help::grape_event_help( grape_frame *p_main_frame )
@@ -38,6 +40,10 @@ bool grape_event_help::Undo( void )
   // cannot be undone
   return true;
 }
+
+}
+
+using namespace grape::grapeapp;
 
 grape_event_about::grape_event_about( grape_frame *p_main_frame )
 : grape_event_base( p_main_frame, false, _T( "show about box" ) )

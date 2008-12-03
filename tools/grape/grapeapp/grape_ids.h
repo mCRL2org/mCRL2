@@ -81,7 +81,7 @@ namespace grape
       GRAPE_MENU_DATATYPESPEC,
 
       GRAPE_DATASPEC_TEXT,
-  
+
       // dialog events 
       GRAPE_GRID_TEXT, 
       GRAPE_PARAMETER_GRID_TEXT,

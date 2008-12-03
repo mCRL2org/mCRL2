@@ -16,6 +16,7 @@
 #include "geometric.h"
 #include "mcrl2/utilities/font_renderer.h"
 
+namespace grape {
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
 
@@ -55,17 +56,18 @@ void visualprocess_reference::draw( void )
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }
 
-bool visualprocess_reference::is_inside( libgrape::coordinate &p_coord )
+bool visualprocess_reference::is_inside( coordinate &p_coord )
 {
   return is_inside_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
 }
 
-grape_direction visualprocess_reference::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualprocess_reference::is_on_border( coordinate &p_coord )
 {
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
 
-coordinate visualprocess_reference::move_to_border( libgrape::coordinate &p_coord )
+coordinate visualprocess_reference::move_to_border( coordinate &p_coord )
 {
   return move_to_border_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord );
+}
 }
