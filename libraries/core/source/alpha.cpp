@@ -1094,12 +1094,14 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
   }
   else if ( gsIsProcess(a) ){
     ATermAppl pn=ATAgetArgument(a,0);
+    ATbool full_alpha_know=ATtrue;
     ATermList l = ATLtableGet(alphas,(ATerm)pn);
     if(!l){
       unsigned max_len=get_max_allowed_length(V);
       //l = ATLtableGet(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(max_len)),(ATerm)pn));
       //if(!l)
       l = gsaGetAlpha(a,max_len,get_allow_list(V));
+      full_alpha_know=ATfalse;
     }
     else
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
@@ -1107,7 +1109,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     
     ATermList ll=l;
     l = filter_allow_list(ll,V);
-    if(ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
+    if(full_alpha_know && ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
       ATtablePut(alphas,(ATerm) a,(ATerm) l); // not to forget: put the list in the table!!!
       return a; 
     }
@@ -1138,6 +1140,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 	p=PushAllow(V,p);
 	
 	ATtablePut(procs,(ATerm)new_pn,(ATerm)p);
+        ATtablePut(props,(ATerm)new_pn,(ATerm)ATAtableGet(props,(ATerm)pn));
 	l=ATLtableGet(alphas,(ATerm)p);
 	ATtablePut(alphas,(ATerm)new_pn,(ATerm)l);
 	
