@@ -117,12 +117,13 @@ a_list : ID                     { safe_assign($$,NULL); }
        | ID IS ID COMMA         { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
        | ID IS ID COMMA a_list  { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,$5); } }
 
-edge_stmt : node_id edge_rhs                 { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($2),pair_fun)?(ATermAppl) ATgetArgument($2,1):NULL,dot_state((ATermAppl) ATgetArgument($2,0),NULL)); }
+edge_stmt : node_id ARROW     { dot_state($1,NULL); /* This is to ensure that the first node of the file gets id 0. */ }
+            edge_rhs          { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($4),pair_fun)?(ATermAppl) ATgetArgument($4,1):NULL,dot_state((ATermAppl) ATgetArgument($4,0),NULL)); }
           ;
 
-edge_rhs : ARROW node_id                 { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $2)); }
-         | ARROW node_id attr_list       { if ( $3 == NULL ) { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $2)); } else { safe_assign($$,ATmakeAppl2(pair_fun,(ATerm) $2,(ATerm) $3)); } }
-         | ARROW node_id edge_rhs        { dot_add_transition(dot_state($2,NULL),ATisEqualAFun(ATgetAFun($3),pair_fun)?(ATermAppl) ATgetArgument($3,1):NULL,dot_state((ATermAppl) ATgetArgument($3,0),NULL)); safe_assign($$,ATsetArgument($3,(ATerm) $2,0)); }
+edge_rhs : node_id                 { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $1)); }
+         | node_id attr_list       { if ( $2 == NULL ) { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $1)); } else { safe_assign($$,ATmakeAppl2(pair_fun,(ATerm) $1,(ATerm) $2)); } }
+         | node_id ARROW edge_rhs        { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($3),pair_fun)?(ATermAppl) ATgetArgument($3,1):NULL,dot_state((ATermAppl) ATgetArgument($3,0),NULL)); safe_assign($$,ATsetArgument($3,(ATerm) $1,0)); }
          ;
 
 node_stmt : node_id                  { dot_state($1,NULL); }

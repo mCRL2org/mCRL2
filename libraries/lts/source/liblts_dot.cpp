@@ -118,10 +118,10 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
 {
   os << "digraph \"" << *opts.name << "\" {" << endl; // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   // os << "size=\"7,10.5\";" << endl;
-  os << "center=TRUE;" << endl;
-  os << "mclimit=10.0;" << endl;
-  os << "nodesep=0.05;" << endl;
-  os << "node[width=0.25,height=0.25,label=\"\"];" << endl;
+  os << "center = TRUE;" << endl;
+  os << "mclimit = 10.0;" << endl;
+  os << "nodesep = 0.05;" << endl;
+  os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
   if ( nstates > 0 )
   {
     if ( type == lts_dot )
@@ -130,7 +130,7 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
     } else {
       os << init_state;
     }
-    os << " [peripheries=2];" << endl;
+    os << " [ peripheries=2 ];" << endl;
     if ( opts.print_states && state_info )
     {
       for (unsigned int i=0; i<nstates; i++)
@@ -138,9 +138,9 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
         if ( type == lts_dot )
         {
           os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[i]),0));
-          os << " [label=\"" << ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(ATgetNext((ATermList) state_values[i])),0))) << "\"];" << endl;
+          os << " [ label=\"" << ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(ATgetNext((ATermList) state_values[i])),0))) << "\" ];" << endl;
         } else {
-          os << i << " [label=\"" << p_state_value_str(i) << "\"];" << endl;
+          os << i << " [ label=\"" << p_state_value_str(i) << "\" ];" << endl;
         }
       }
     }
@@ -150,8 +150,8 @@ bool p_lts::write_to_dot(ostream &os, lts_dot_options opts)
     if ( type == lts_dot )
     {
       os << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].from]),0));
-      os << "->" << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].to]),0));
-      os << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
+      os << " -> " << ATwriteToString(ATgetArgument(ATAgetFirst((ATermList) state_values[transitions[i].to]),0));
+      os << " [ label=\"" << p_label_value_str(transitions[i].label) << "\" ];" << endl;
     } else {
       os << transitions[i].from << "->" << transitions[i].to << "[label=\"" << p_label_value_str(transitions[i].label) << "\"];" << endl;
     }
