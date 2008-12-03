@@ -50,33 +50,43 @@ bool p_lts::read_from_dot(string const& filename)
 
 bool p_lts::read_from_dot(istream &is)
 {
-  state_info = true;
-  label_info = true;
   if ( parse_dot(is,*lts_object) )
   {
-    if ( nstates > 0 )
-    {
-      gsWarningMsg("input file has no initial state; taking first (%s) as initial\n",ATgetName(ATgetAFun((ATermAppl)state_values[0])));
-    }
-    init_state = 0;
-
-    ATermAppl empty_value = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+    unsigned int possible_inits = 0;
+    AFun no_incoming_fun = ATmakeAFun("no_incoming",2,ATfalse);
     AFun value_fun = ATmakeAFun("Value",2,ATfalse);
-    ATermAppl id = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),(ATerm) ATmakeAppl0(ATmakeAFun("id",0,ATtrue)),(ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
-    ATermAppl label = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),(ATerm) ATmakeAppl0(ATmakeAFun("label",0,ATtrue)),(ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
+    ATermAppl id = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),
+                        (ATerm) ATmakeAppl0(ATmakeAFun("id",0,ATtrue)),
+                        (ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
+    ATermAppl label = ATmakeAppl2(ATmakeAFun("Type",2,ATfalse),
+                        (ATerm) ATmakeAppl0(ATmakeAFun("label",0,ATtrue)),
+                        (ATerm) ATmakeAppl0(ATmakeAFun("String",0,ATtrue)));
     for (unsigned int i=0; i<nstates; i++)
     {
-      ATermAppl name;
-      ATermAppl val;
-      if ( ATgetArity(ATgetAFun((ATermAppl) state_values[i])) == 0 )
+      if ( ATisEqualAFun(no_incoming_fun,ATgetAFun((ATermAppl) state_values[i])) )
       {
-        name = (ATermAppl) state_values[i];
-        val = empty_value;
-      } else { // == 1
-        name = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun((ATermAppl) state_values[i])),0,ATtrue));
-        val = ATAgetArgument((ATermAppl) state_values[i],0); 
+        if ( possible_inits == 0 )
+        {
+          init_state = i;
+        }
+        possible_inits++;
       }
+
+      ATermAppl name = ATAgetArgument((ATermAppl) state_values[i],0);
+      ATermAppl val = ATAgetArgument((ATermAppl) state_values[i],1);
       state_values[i] = (ATerm) ATmakeList2((ATerm) ATmakeAppl2(value_fun,(ATerm) name,(ATerm) id),(ATerm) ATmakeAppl2(value_fun,(ATerm) val,(ATerm) label));
+    }
+
+    if ( possible_inits == 0 )
+    {
+      init_state = 0;
+      if ( nstates > 0 )
+      {
+        gsWarningMsg("could not find suitable initial state; taking first state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[0],0),0))));
+      }
+    } else if ( possible_inits > 1 )
+    {
+      gsWarningMsg("multiple suitable initial states; taking first suitable state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[init_state],0),0))));
     }
 
     type = lts_dot;

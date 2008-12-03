@@ -14,10 +14,14 @@
 
 // Local variables
 ATermIndexedSet state2id, label2id;
+ATermAppl emptystring;
+AFun singleton_fun, pair_fun, no_incoming_fun, has_incoming_fun;
+
 
 // Function declarations
 static void dot_add_transition(int from, ATermAppl label, int to);
 static int dot_state(ATermAppl id, ATermAppl label);
+static void set_has_incoming(int state);
 
 #define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(dot_lexer_obj->protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
@@ -41,19 +45,35 @@ int dotyylex(void);
 
 %%
 
-dot_file : { state2id = ATindexedSetCreate(10000,50); label2id = ATindexedSetCreate(100,50); }
+dot_file : { state2id = ATindexedSetCreate(10000,50);
+             label2id = ATindexedSetCreate(100,50);
+             emptystring = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+             ATprotectAppl(&emptystring);
+             singleton_fun = ATmakeAFun("singleton",1,ATfalse);
+             ATprotectAFun(singleton_fun);
+             pair_fun = ATmakeAFun("pair",2,ATfalse);
+             ATprotectAFun(pair_fun);
+             no_incoming_fun = ATmakeAFun("no_incoming",2,ATfalse);
+             ATprotectAFun(no_incoming_fun);
+             has_incoming_fun = ATmakeAFun("has_incoming",2,ATfalse);
+             ATprotectAFun(has_incoming_fun);
+           }
            digraph
+           { ATindexedSetDestroy(state2id);
+             ATindexedSetDestroy(label2id);
+             ATunprotectAppl(&emptystring);
+             ATunprotectAFun(singleton_fun);
+             ATunprotectAFun(pair_fun);
+             ATunprotectAFun(no_incoming_fun);
+             ATunprotectAFun(has_incoming_fun);
+           }
            ;
 
 digraph :  DIGRAPH id_or_empty LBRACE stmt_list_or_empty RBRACE
-           { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); }
         |  STRICT DIGRAPH id_or_empty LBRACE stmt_list_or_empty RBRACE
-           { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); }
         |  GRAPH id_or_empty LBRACE stmt_list_or_empty RBRACE
-           { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); }
         |  STRICT GRAPH id_or_empty LBRACE stmt_list_or_empty RBRACE
-           { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); }
-           ;
+        ;
 
 id_or_empty : ID
             |
@@ -97,12 +117,12 @@ a_list : ID                     { safe_assign($$,NULL); }
        | ID IS ID COMMA         { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
        | ID IS ID COMMA a_list  { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,$5); } }
 
-edge_stmt : node_id edge_rhs                 { dot_add_transition(dot_state($1,NULL),ATgetArity(ATgetAFun($2))>1?(ATermAppl) ATgetArgument($2,1):NULL,dot_state((ATermAppl) ATgetArgument($2,0),NULL)); }
+edge_stmt : node_id edge_rhs                 { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($2),pair_fun)?(ATermAppl) ATgetArgument($2,1):NULL,dot_state((ATermAppl) ATgetArgument($2,0),NULL)); }
           ;
 
-edge_rhs : ARROW node_id                 { safe_assign($$,ATmakeAppl1(ATmakeAFun("singleton",1,ATfalse),(ATerm) $2)); }
-         | ARROW node_id attr_list       { if ( $3 == NULL ) { safe_assign($$,ATmakeAppl1(ATmakeAFun("singleton",1,ATfalse),(ATerm) $2)); } else { safe_assign($$,ATmakeAppl2(ATmakeAFun("pair",2,ATfalse),(ATerm) $2,(ATerm) $3)); } }
-         | ARROW node_id edge_rhs        { dot_add_transition(dot_state($2,NULL),ATgetArity(ATgetAFun($3))>1?(ATermAppl) ATgetArgument($3,1):NULL,dot_state((ATermAppl) ATgetArgument($3,0),NULL)); safe_assign($$,ATsetArgument($3,(ATerm) $2,0)); }
+edge_rhs : ARROW node_id                 { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $2)); }
+         | ARROW node_id attr_list       { if ( $3 == NULL ) { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $2)); } else { safe_assign($$,ATmakeAppl2(pair_fun,(ATerm) $2,(ATerm) $3)); } }
+         | ARROW node_id edge_rhs        { dot_add_transition(dot_state($2,NULL),ATisEqualAFun(ATgetAFun($3),pair_fun)?(ATermAppl) ATgetArgument($3,1):NULL,dot_state((ATermAppl) ATgetArgument($3,0),NULL)); safe_assign($$,ATsetArgument($3,(ATerm) $2,0)); }
          ;
 
 node_stmt : node_id                  { dot_state($1,NULL); }
@@ -119,7 +139,7 @@ static void dot_add_transition(int from, ATermAppl label, int to)
 {
   if ( label == NULL )
   {
-    label = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+    label = emptystring;
   }
 
   ATbool b;
@@ -130,6 +150,7 @@ static void dot_add_transition(int from, ATermAppl label, int to)
     dot_lexer_obj->dot_lts->add_label((ATerm) label,!strcmp(ATgetName(ATgetAFun(label)),"tau"));
   }
 
+  set_has_incoming(to);
   dot_lexer_obj->dot_lts->add_transition(from,idx,to);
 }
 
@@ -140,12 +161,22 @@ static int dot_state(ATermAppl id, ATermAppl label)
 
   if ( b == ATtrue )
   {
-    dot_lexer_obj->dot_lts->add_state((ATerm) id);
+    dot_lexer_obj->dot_lts->add_state((ATerm) ATmakeAppl2(no_incoming_fun,(ATerm) id,(ATerm) emptystring));
   }
-  if ( label != NULL && ATisEqual(dot_lexer_obj->dot_lts->state_value(idx),id) )
+  if ( label != NULL )
   {
-    dot_lexer_obj->dot_lts->set_state(idx,(ATerm) ATmakeAppl1(ATmakeAFun(ATgetName(ATgetAFun(id)),1,ATtrue),(ATerm) label));
+    ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(idx);
+    dot_lexer_obj->dot_lts->set_state(idx,(ATerm) ATsetArgument(oldval,(ATerm) label,1));
   }
 
   return idx;
+}
+
+static void set_has_incoming(int state)
+{
+  ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(state);
+  if ( ATisEqualAFun(no_incoming_fun,ATgetAFun(oldval)) )
+  {
+    dot_lexer_obj->dot_lts->set_state(state,(ATerm) ATmakeAppl2(has_incoming_fun,ATgetArgument(oldval,0),ATgetArgument(oldval,1)));
+  }
 }

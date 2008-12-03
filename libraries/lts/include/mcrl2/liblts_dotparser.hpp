@@ -80,7 +80,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 29 "liblts_dotparser.yy"
+#line 33 "liblts_dotparser.yy"
 {
   ATermAppl aterm;
 }

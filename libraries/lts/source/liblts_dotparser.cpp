@@ -123,10 +123,14 @@
 
 // Local variables
 ATermIndexedSet state2id, label2id;
+ATermAppl emptystring;
+AFun singleton_fun, pair_fun, no_incoming_fun, has_incoming_fun;
+
 
 // Function declarations
 static void dot_add_transition(int from, ATermAppl label, int to);
 static int dot_state(ATermAppl id, ATermAppl label);
+static void set_has_incoming(int state);
 
 #define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(dot_lexer_obj->protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
@@ -155,12 +159,12 @@ int dotyylex(void);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 29 "liblts_dotparser.yy"
+#line 33 "liblts_dotparser.yy"
 {
   ATermAppl aterm;
 }
 /* Line 187 of yacc.c.  */
-#line 164 "liblts_dotparser.cpp"
+#line 168 "liblts_dotparser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -173,7 +177,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 177 "liblts_dotparser.cpp"
+#line 181 "liblts_dotparser.cpp"
 
 #ifdef short
 # undef short
@@ -475,11 +479,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    44,    44,    44,    48,    50,    52,    54,    58,    59,
-      62,    63,    66,    67,    68,    69,    72,    73,    74,    75,
-      76,    77,    80,    81,    82,    85,    86,    87,    88,    91,
-      92,    93,    94,    95,    96,    97,    98,   100,   103,   104,
-     105,   108,   109,   112,   113,   114
+       0,    48,    48,    48,    72,    73,    74,    75,    78,    79,
+      82,    83,    86,    87,    88,    89,    92,    93,    94,    95,
+      96,    97,   100,   101,   102,   105,   106,   107,   108,   111,
+     112,   113,   114,   115,   116,   117,   118,   120,   123,   124,
+     125,   128,   129,   132,   133,   134
 };
 #endif
 
@@ -1426,138 +1430,142 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 44 "liblts_dotparser.yy"
-    { state2id = ATindexedSetCreate(10000,50); label2id = ATindexedSetCreate(100,50); ;}
+#line 48 "liblts_dotparser.yy"
+    { state2id = ATindexedSetCreate(10000,50);
+             label2id = ATindexedSetCreate(100,50);
+             emptystring = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+             ATprotectAppl(&emptystring);
+             singleton_fun = ATmakeAFun("singleton",1,ATfalse);
+             ATprotectAFun(singleton_fun);
+             pair_fun = ATmakeAFun("pair",2,ATfalse);
+             ATprotectAFun(pair_fun);
+             no_incoming_fun = ATmakeAFun("no_incoming",2,ATfalse);
+             ATprotectAFun(no_incoming_fun);
+             has_incoming_fun = ATmakeAFun("has_incoming",2,ATfalse);
+             ATprotectAFun(has_incoming_fun);
+           ;}
     break;
 
-  case 4:
-#line 49 "liblts_dotparser.yy"
-    { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); ;}
-    break;
-
-  case 5:
-#line 51 "liblts_dotparser.yy"
-    { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); ;}
-    break;
-
-  case 6:
-#line 53 "liblts_dotparser.yy"
-    { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); ;}
-    break;
-
-  case 7:
-#line 55 "liblts_dotparser.yy"
-    { ATindexedSetDestroy(state2id); ATindexedSetDestroy(label2id); ;}
+  case 3:
+#line 62 "liblts_dotparser.yy"
+    { ATindexedSetDestroy(state2id);
+             ATindexedSetDestroy(label2id);
+             ATunprotectAppl(&emptystring);
+             ATunprotectAFun(singleton_fun);
+             ATunprotectAFun(pair_fun);
+             ATunprotectAFun(no_incoming_fun);
+             ATunprotectAFun(has_incoming_fun);
+           ;}
     break;
 
   case 25:
-#line 85 "liblts_dotparser.yy"
+#line 105 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),NULL); ;}
     break;
 
   case 26:
-#line 86 "liblts_dotparser.yy"
+#line 106 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(3) - (3)].aterm)); ;}
     break;
 
   case 27:
-#line 87 "liblts_dotparser.yy"
+#line 107 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(2) - (3)].aterm)); ;}
     break;
 
   case 28:
-#line 88 "liblts_dotparser.yy"
+#line 108 "liblts_dotparser.yy"
     { if ( (yyvsp[(2) - (4)].aterm) != NULL ) { safe_assign((yyval.aterm),(yyvsp[(2) - (4)].aterm)); } else { safe_assign((yyval.aterm),(yyvsp[(4) - (4)].aterm)); } ;}
     break;
 
   case 29:
-#line 91 "liblts_dotparser.yy"
+#line 111 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),NULL); ;}
     break;
 
   case 30:
-#line 92 "liblts_dotparser.yy"
+#line 112 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(2) - (2)].aterm)); ;}
     break;
 
   case 31:
-#line 93 "liblts_dotparser.yy"
+#line 113 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),NULL); ;}
     break;
 
   case 32:
-#line 94 "liblts_dotparser.yy"
+#line 114 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(3) - (3)].aterm)); ;}
     break;
 
   case 33:
-#line 95 "liblts_dotparser.yy"
+#line 115 "liblts_dotparser.yy"
     { if ( !strcmp(ATgetName(ATgetAFun((yyval.aterm))),"label") ) { safe_assign((yyval.aterm),(yyvsp[(3) - (3)].aterm)); } else { safe_assign((yyval.aterm),NULL); } ;}
     break;
 
   case 34:
-#line 96 "liblts_dotparser.yy"
+#line 116 "liblts_dotparser.yy"
     { if ( !strcmp(ATgetName(ATgetAFun((yyval.aterm))),"label") ) { safe_assign((yyval.aterm),(yyvsp[(3) - (4)].aterm)); } else { safe_assign((yyval.aterm),(yyvsp[(4) - (4)].aterm)); } ;}
     break;
 
   case 35:
-#line 97 "liblts_dotparser.yy"
+#line 117 "liblts_dotparser.yy"
     { if ( !strcmp(ATgetName(ATgetAFun((yyval.aterm))),"label") ) { safe_assign((yyval.aterm),(yyvsp[(3) - (4)].aterm)); } else { safe_assign((yyval.aterm),NULL); } ;}
     break;
 
   case 36:
-#line 98 "liblts_dotparser.yy"
+#line 118 "liblts_dotparser.yy"
     { if ( !strcmp(ATgetName(ATgetAFun((yyval.aterm))),"label") ) { safe_assign((yyval.aterm),(yyvsp[(3) - (5)].aterm)); } else { safe_assign((yyval.aterm),(yyvsp[(5) - (5)].aterm)); } ;}
     break;
 
   case 37:
-#line 100 "liblts_dotparser.yy"
-    { dot_add_transition(dot_state((yyvsp[(1) - (2)].aterm),NULL),ATgetArity(ATgetAFun((yyvsp[(2) - (2)].aterm)))>1?(ATermAppl) ATgetArgument((yyvsp[(2) - (2)].aterm),1):NULL,dot_state((ATermAppl) ATgetArgument((yyvsp[(2) - (2)].aterm),0),NULL)); ;}
+#line 120 "liblts_dotparser.yy"
+    { dot_add_transition(dot_state((yyvsp[(1) - (2)].aterm),NULL),ATisEqualAFun(ATgetAFun((yyvsp[(2) - (2)].aterm)),pair_fun)?(ATermAppl) ATgetArgument((yyvsp[(2) - (2)].aterm),1):NULL,dot_state((ATermAppl) ATgetArgument((yyvsp[(2) - (2)].aterm),0),NULL)); ;}
     break;
 
   case 38:
-#line 103 "liblts_dotparser.yy"
-    { safe_assign((yyval.aterm),ATmakeAppl1(ATmakeAFun("singleton",1,ATfalse),(ATerm) (yyvsp[(2) - (2)].aterm))); ;}
+#line 123 "liblts_dotparser.yy"
+    { safe_assign((yyval.aterm),ATmakeAppl1(singleton_fun,(ATerm) (yyvsp[(2) - (2)].aterm))); ;}
     break;
 
   case 39:
-#line 104 "liblts_dotparser.yy"
-    { if ( (yyvsp[(3) - (3)].aterm) == NULL ) { safe_assign((yyval.aterm),ATmakeAppl1(ATmakeAFun("singleton",1,ATfalse),(ATerm) (yyvsp[(2) - (3)].aterm))); } else { safe_assign((yyval.aterm),ATmakeAppl2(ATmakeAFun("pair",2,ATfalse),(ATerm) (yyvsp[(2) - (3)].aterm),(ATerm) (yyvsp[(3) - (3)].aterm))); } ;}
+#line 124 "liblts_dotparser.yy"
+    { if ( (yyvsp[(3) - (3)].aterm) == NULL ) { safe_assign((yyval.aterm),ATmakeAppl1(singleton_fun,(ATerm) (yyvsp[(2) - (3)].aterm))); } else { safe_assign((yyval.aterm),ATmakeAppl2(pair_fun,(ATerm) (yyvsp[(2) - (3)].aterm),(ATerm) (yyvsp[(3) - (3)].aterm))); } ;}
     break;
 
   case 40:
-#line 105 "liblts_dotparser.yy"
-    { dot_add_transition(dot_state((yyvsp[(2) - (3)].aterm),NULL),ATgetArity(ATgetAFun((yyvsp[(3) - (3)].aterm)))>1?(ATermAppl) ATgetArgument((yyvsp[(3) - (3)].aterm),1):NULL,dot_state((ATermAppl) ATgetArgument((yyvsp[(3) - (3)].aterm),0),NULL)); safe_assign((yyval.aterm),ATsetArgument((yyvsp[(3) - (3)].aterm),(ATerm) (yyvsp[(2) - (3)].aterm),0)); ;}
+#line 125 "liblts_dotparser.yy"
+    { dot_add_transition(dot_state((yyvsp[(2) - (3)].aterm),NULL),ATisEqualAFun(ATgetAFun((yyvsp[(3) - (3)].aterm)),pair_fun)?(ATermAppl) ATgetArgument((yyvsp[(3) - (3)].aterm),1):NULL,dot_state((ATermAppl) ATgetArgument((yyvsp[(3) - (3)].aterm),0),NULL)); safe_assign((yyval.aterm),ATsetArgument((yyvsp[(3) - (3)].aterm),(ATerm) (yyvsp[(2) - (3)].aterm),0)); ;}
     break;
 
   case 41:
-#line 108 "liblts_dotparser.yy"
+#line 128 "liblts_dotparser.yy"
     { dot_state((yyvsp[(1) - (1)].aterm),NULL); ;}
     break;
 
   case 42:
-#line 109 "liblts_dotparser.yy"
+#line 129 "liblts_dotparser.yy"
     { dot_state((yyvsp[(1) - (2)].aterm),(yyvsp[(2) - (2)].aterm)); ;}
     break;
 
   case 43:
-#line 112 "liblts_dotparser.yy"
+#line 132 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(1) - (1)].aterm)); ;}
     break;
 
   case 44:
-#line 113 "liblts_dotparser.yy"
+#line 133 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(1) - (3)].aterm)); ;}
     break;
 
   case 45:
-#line 114 "liblts_dotparser.yy"
+#line 134 "liblts_dotparser.yy"
     { safe_assign((yyval.aterm),(yyvsp[(1) - (5)].aterm)); ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1561 "liblts_dotparser.cpp"
+#line 1569 "liblts_dotparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1771,14 +1779,14 @@ yyreturn:
 }
 
 
-#line 116 "liblts_dotparser.yy"
+#line 136 "liblts_dotparser.yy"
 
 
 static void dot_add_transition(int from, ATermAppl label, int to)
 {
   if ( label == NULL )
   {
-    label = ATmakeAppl0(ATmakeAFun("",0,ATtrue));
+    label = emptystring;
   }
 
   ATbool b;
@@ -1789,6 +1797,7 @@ static void dot_add_transition(int from, ATermAppl label, int to)
     dot_lexer_obj->dot_lts->add_label((ATerm) label,!strcmp(ATgetName(ATgetAFun(label)),"tau"));
   }
 
+  set_has_incoming(to);
   dot_lexer_obj->dot_lts->add_transition(from,idx,to);
 }
 
@@ -1799,13 +1808,23 @@ static int dot_state(ATermAppl id, ATermAppl label)
 
   if ( b == ATtrue )
   {
-    dot_lexer_obj->dot_lts->add_state((ATerm) id);
+    dot_lexer_obj->dot_lts->add_state((ATerm) ATmakeAppl2(no_incoming_fun,(ATerm) id,(ATerm) emptystring));
   }
-  if ( label != NULL && ATisEqual(dot_lexer_obj->dot_lts->state_value(idx),id) )
+  if ( label != NULL )
   {
-    dot_lexer_obj->dot_lts->set_state(idx,(ATerm) ATmakeAppl1(ATmakeAFun(ATgetName(ATgetAFun(id)),1,ATtrue),(ATerm) label));
+    ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(idx);
+    dot_lexer_obj->dot_lts->set_state(idx,(ATerm) ATsetArgument(oldval,(ATerm) label,1));
   }
 
   return idx;
+}
+
+static void set_has_incoming(int state)
+{
+  ATermAppl oldval = (ATermAppl) dot_lexer_obj->dot_lts->state_value(state);
+  if ( ATisEqualAFun(no_incoming_fun,ATgetAFun(oldval)) )
+  {
+    dot_lexer_obj->dot_lts->set_state(state,(ATerm) ATmakeAppl2(has_incoming_fun,ATgetArgument(oldval,0),ATgetArgument(oldval,1)));
+  }
 }
 
