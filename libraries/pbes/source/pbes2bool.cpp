@@ -1181,6 +1181,7 @@ bool solve_bes(const t_tool_options &tool_options,
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
+    // std::cerr << "Solve equations of rank " << current_rank << "\n";
 
     /* Calculate the stable solution for the current rank */
 
@@ -1190,6 +1191,7 @@ bool solve_bes(const t_tool_options &tool_options,
     { 
       if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
       { 
+        // std::cerr << "Evaluate variable" << v << "\n";
         bes_expression t=evaluate_bex(
                              bes_equations.get_rhs(v),
                              approximation,
@@ -1231,6 +1233,7 @@ bool solve_bes(const t_tool_options &tool_options,
   
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
+      // std::cerr << "Evaluate variable from TODO list" << *w << "\n";
       bes::variable_type w_value=*w;
       todo.erase(w);
 
@@ -1282,14 +1285,19 @@ bool solve_bes(const t_tool_options &tool_options,
 
     /* substitute the stable solution for the current rank in all other
        equations. */
+
+    
     if (tool_options.opt_use_hashtables)
     { bex_hashtable.reset();  
     }
  
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v))
-      { if (bes_equations.get_rank(v)==current_rank)
-        { if (tool_options.opt_construct_counter_example)
+      { 
+        // std::cerr << "Substitute values in lower rank" << v << "\n";
+        if (bes_equations.get_rank(v)==current_rank)
+        { 
+          if (tool_options.opt_construct_counter_example)
           { bes_equations.set_rhs(
                          v,
                          substitute_rank(

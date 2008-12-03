@@ -1024,8 +1024,9 @@ namespace bes
                       bes_expression b)
       { static atermpp::indexed_set indexed_set1(10,50);
 
-        add_variables_to_occurrence_sets(v,b,bes_global_variables<int>::opt_use_hashtables,indexed_set1);
-        if (bes_global_variables<int>::opt_use_hashtables)
+        add_variables_to_occurrence_sets(v,b,true,indexed_set1);
+        // add_variables_to_occurrence_sets(v,b,bes_global_variables<int>::opt_use_hashtables,indexed_set1);
+        // if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set1.reset();
         }
       }
@@ -1084,8 +1085,9 @@ namespace bes
       {
         static atermpp::indexed_set indexed_set2(10,50);
 
-        remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables<int>::opt_use_hashtables,indexed_set2);
-        if (bes_global_variables<int>::opt_use_hashtables)
+        remove_variables_from_occurrence_sets(v,b,v_except,true,indexed_set2);
+        // remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables<int>::opt_use_hashtables,indexed_set2);
+        // if (bes_global_variables<int>::opt_use_hashtables)
         { indexed_set2.reset();
         }
       }
