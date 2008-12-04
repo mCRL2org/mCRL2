@@ -251,7 +251,7 @@ namespace mcrl2 {
       // The bounding box has width CHARWIDTH * scale * s.length()...
       double xSRgt = xSLft + CHARWIDTH * scale * s.length();
       // ... and height CHARHEIGHT * scale
-      ySBot = ySBot - 0.5 * scale * CHARHEIGHT;
+      //ySBot = ySBot - scale * CHARHEIGHT;
       double ySTop = ySBot + CHARHEIGHT * scale;
       
       // Draw the bounding box
