@@ -23,58 +23,52 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// A pbes expression that stores a list of variables. The
+  /// \brief A pbes expression that stores a list of variables. The
   /// intended use case is to store the free variables of the
   /// expression.
   class pbes_expression_with_variables: public pbes_expression
   {
     protected:
       data::data_variable_list m_variables;
-      
+
     public:
-      /// Constructor.
-      ///             
+      /// \brief Constructor.
       pbes_expression_with_variables()
       {}
-  
-      /// Constructor. Creates a data expression with an empty sequence of variables.
-      ///             
+
+      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       pbes_expression_with_variables(atermpp::aterm_appl term)
         : pbes_expression(term)
       {}
-  
-      /// Constructor. Creates a data expression with an empty sequence of variables.
-      ///             
+
+      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       pbes_expression_with_variables(ATermAppl term)
         : pbes_expression(term)
       {}
 
-      /// Constructor.
-      ///             
+      /// \brief Constructor.
       pbes_expression_with_variables(pbes_expression expression, data::data_variable_list variables)
         : pbes_expression(expression), m_variables(variables)
       {}
-      
+
       /// Return the variables.
-      ///
       data::data_variable_list variables() const
       {
         return m_variables;
       }
-      
+
       /// Return the variables.
-      ///
       data::data_variable_list& variables()
       {
         return m_variables;
       }
-      
-      /// Returns true if the expression has no free variables.
+
+      /// \brief Returns true if the expression has no free variables.
       bool is_closed() const
       {
         return m_variables.empty();
       }
-  }; 
+  };
 
 } // namespace pbes_system
 
@@ -119,10 +113,10 @@ namespace core {
     typedef data::data_variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
-    typedef pbes_system::propositional_variable propositional_variable_decl_type;   
+    typedef pbes_system::propositional_variable propositional_variable_decl_type;
 
     /// \brief The propositional variable instantiation type
-    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
+    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;
 
     /// \brief The string type
     typedef core::identifier_string string_type;
@@ -133,18 +127,18 @@ namespace core {
     /// \return The value true
     static inline
     term_type true_() { return tr::true_(); }
-    
+
     /// \brief The value false
     /// \return The value false
     static inline
     term_type false_() { return tr::false_(); }
-    
+
     /// \brief Operator not
     /// \param p A term
     /// \return Operator not applied to p
     static inline
     term_type not_(term_type p) { return term_type(tr::not_(p), p.variables()); }
-    
+
     /// \brief Operator and
     /// \param p A term
     /// \param q A term
@@ -154,7 +148,7 @@ namespace core {
     {
       return term_type(tr::and_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
-    
+
     /// \brief Operator or
     /// \param p A term
     /// \param q A term
@@ -164,7 +158,7 @@ namespace core {
     {
       return term_type(tr::or_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
-    
+
     /// \brief Implication
     /// \param p A term
     /// \param q A term
@@ -174,7 +168,7 @@ namespace core {
     {
       return term_type(tr::imp(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
-    
+
     /// \brief Universal quantification
     /// \param l A sequence of variables
     /// \param p A term
@@ -184,7 +178,7 @@ namespace core {
     {
       return term_type(tr::forall(l, p), atermpp::term_list_difference(p.variables(), l));
     }
-    
+
     /// \brief Existential quantification
     /// \param l A sequence of variables
     /// \param p A term
@@ -217,59 +211,59 @@ namespace core {
     /// \return True if the term has the value true. Also works for data terms
     static inline
     bool is_true(term_type t) { return tr::is_true(t); }
-    
+
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false. Also works for data terms
-    static inline 
+    static inline
     bool is_false(term_type t) { return tr::is_false(t); }
-    
+
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type and. Also works for data terms
-    static inline 
+    static inline
     bool is_not(term_type t) { return tr::is_not(t); }
-    
+
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and. Also works for data terms
-    static inline 
+    static inline
     bool is_and(term_type t) { return tr::is_and(t); }
-    
+
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or. Also works for data terms
-    static inline 
+    static inline
     bool is_or(term_type t) { return tr::is_or(t); }
-    
+
     /// \brief Test for implication
     /// \param t A term
     /// \return True if the term is an implication. Also works for data terms
-    static inline 
+    static inline
     bool is_imp(term_type t) { return tr::is_imp(t); }
-    
+
     /// \brief Test for universal quantification
     /// \param t A term
     /// \return True if the term is an universal quantification. Also works for data terms
-    static inline 
+    static inline
     bool is_forall(term_type t) { return tr::is_forall(t); }
-    
+
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification. Also works for data terms
-    static inline 
+    static inline
     bool is_exists(term_type t) { return tr::is_exists(t); }
-    
+
     /// \brief Test for data term
     /// \param t A term
     /// \return True if the term is a data term
-    static inline 
+    static inline
     bool is_data(term_type t) { return tr::is_data(t); }
-    
+
     /// \brief Test for propositional variable instantiation
     /// \param t A term
     /// \return True if the term is a propositional variable instantiation
-    static inline 
+    static inline
     bool is_prop_var(term_type t) { return tr::is_prop_var(t); }
 
     /// \brief Returns the argument of a term of type not, exists or forall
@@ -277,31 +271,31 @@ namespace core {
     /// \return The requested argument. Partially works for data terms
     static inline
     term_type arg(term_type t) { return tr::arg(t); }
-    
+
     /// \brief Returns the right argument of a term of type and, or or imp
     /// \param t A term
     /// \return The right argument of the term. Also works for data terms
     static inline
     term_type left(term_type t) { return tr::left(t); }
-    
+
     /// \brief Returns the right argument of a term of type and, or or imp
     /// \param t A term
     /// \return The right argument of the term. Also works for data terms
     static inline
     term_type right(term_type t) { return tr::right(t); }
-    
+
     /// \brief Returns the quantifier variables of a quantifier expression
     /// \param t A term
     /// \return The requested argument. Doesn't work for data terms
     static inline
     variable_sequence_type var(term_type t) { return tr::var(t); }
-    
+
     /// \brief Returns the name of a propositional variable instantiation
     /// \param t A term
     /// \return The name of the propositional variable instantiation
     static inline
     string_type name(term_type t) { return tr::name(t); }
-    
+
     /// \brief Returns the parameter list of a propositional variable instantiation
     /// \param t A term
     /// \return The parameter list of the propositional variable instantiation
@@ -324,14 +318,14 @@ namespace core {
     term_type dataterm2term(data_term_type t)
     {
       return term_type(t, t.variables());
-    }    
+    }
 
     /// \brief Conversion from term to data term
     /// \param t A term
     /// \returns The converted term
     static inline
-    data_term_type term2dataterm(term_type t) { return tr::term2dataterm(t); }  
-   
+    data_term_type term2dataterm(term_type t) { return tr::term2dataterm(t); }
+
     /// \brief Test if a term is constant
     /// \param t A term
     /// \return True if the term is constant

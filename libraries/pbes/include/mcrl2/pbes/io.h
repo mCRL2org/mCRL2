@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_io.h
+/// \file mcrl2/pbes/io.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_IO_H

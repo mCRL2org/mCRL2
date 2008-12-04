@@ -32,7 +32,7 @@ namespace pbes_system {
 
 namespace detail {
     /// Precondition: The range [first, last[ contains sorted arrays.
-    /// Visits all permutations of the arrays, and calls f for
+    /// \brief Visits all permutations of the arrays, and calls f for
     /// each instance.
     template <typename Iter, typename Function>
     void forall_permutations(Iter first, Iter last, Function f)
@@ -50,8 +50,8 @@ namespace detail {
         forall_permutations(next, last, f);
       }
     }
-    
-    /// Returns true if the actions in a and b have the same names, and the same sorts.
+
+    /// \brief Returns true if the actions in a and b have the same names, and the same sorts.
     /// \pre a and b are sorted w.r.t. to the names of the actions.
     inline bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
     {
@@ -67,21 +67,21 @@ namespace detail {
       }
       return true;
     }
-    
+
     // compare names and sorts of two actions
     struct compare_actions
     {
       bool operator()(const lps::action& a, const lps::action& b) const
       {
-        return a.label() < b.label();        
+        return a.label() < b.label();
       }
     };
-    
+
     struct compare_actions2
     {
       bool operator()(const lps::action& a, const lps::action& b) const
       {
-        return a.label() < b.label();        
+        return a.label() < b.label();
         if (a.label().name() != b.label().name())
         {
           return a.label().name() ==  b.label().name();
@@ -89,14 +89,14 @@ namespace detail {
         return a.label().sorts() < b.label().sorts();
       }
     };
-    
-    /// Used for building an expression for the comparison of data parameters.
+
+    /// \brief Used for building an expression for the comparison of data parameters.
     struct equal_data_parameters_builder
     {
       const std::vector<lps::action>& a;
       const std::vector<lps::action>& b;
       atermpp::set<data::data_expression>& result;
-    
+
       equal_data_parameters_builder(const std::vector<lps::action>& a_,
                                     const std::vector<lps::action>& b_,
                                     atermpp::set<data::data_expression>& result_
@@ -105,13 +105,13 @@ namespace detail {
           b(b_),
           result(result_)
       {}
-    
+
       /// Adds the expression 'a == b' to result.
       void operator()()
       {
         using namespace data::data_expr::optimized;
         namespace d = data::data_expr;
-    
+
         atermpp::vector<data::data_expression> v;
         std::vector<lps::action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
@@ -133,13 +133,13 @@ std::cout << "  <and-term> " << pp(expr) << std::endl;
       }
     };
 
-    /// Used for building an expression for the comparison of data parameters.
+    /// \brief Used for building an expression for the comparison of data parameters.
     struct not_equal_multi_actions_builder
     {
       const std::vector<lps::action>& a;
       const std::vector<lps::action>& b;
       atermpp::vector<data::data_expression>& result;
-    
+
       not_equal_multi_actions_builder(const std::vector<lps::action>& a_,
                                       const std::vector<lps::action>& b_,
                                       atermpp::vector<data::data_expression>& result_
@@ -148,13 +148,13 @@ std::cout << "  <and-term> " << pp(expr) << std::endl;
           b(b_),
           result(result_)
       {}
-    
+
       /// Adds the expression 'a == b' to result.
       void operator()()
       {
         using namespace data::data_expr::optimized;
         namespace d = data::data_expr;
-    
+
         atermpp::vector<data::data_expression> v;
         std::vector<lps::action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
@@ -173,8 +173,8 @@ std::cout << "  <and-term> " << pp(expr) << std::endl;
     };
 
 } // namespace detail
-    
-    /// Returns a pbes expression that expresses under which conditions the
+
+    /// \brief Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are equal.
     inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
@@ -184,7 +184,7 @@ std::cout << "a = " << pp(a) << std::endl;
 std::cout << "b = " << pp(b) << std::endl;
 #endif
       using namespace data::data_expr::optimized;
-    
+
       // make copies of a and b and sort them
       std::vector<lps::action> va(a.begin(), a.end()); // protection not needed
       std::vector<lps::action> vb(b.begin(), b.end()); // protection not needed
@@ -200,7 +200,7 @@ std::cout << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
 #endif
         return data::data_expr::false_();
       }
-    
+
       // compute the intervals of a with equal names
       typedef std::vector<lps::action>::iterator action_iterator;
       std::vector<std::pair<action_iterator, action_iterator> > intervals;
@@ -218,24 +218,24 @@ std::cout << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
       data::data_expression result = join_or(z.begin(), z.end());
       return result;
     }
-    
-    /// Returns a pbes expression that expresses under which conditions the
+
+    /// \brief Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are not equal.
     inline data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
     {
       using namespace data::data_expr::optimized;
-    
+
       // make copies of a and b and sort them
       std::vector<lps::action> va(a.begin(), a.end());
       std::vector<lps::action> vb(b.begin(), b.end());
       std::sort(va.begin(), va.end(), detail::compare_actions());
       std::sort(vb.begin(), vb.end(), detail::compare_actions());
-    
+
       if (!detail::equal_action_signatures(va, vb))
       {
         return data::data_expr::true_();
-      }   
-    
+      }
+
       // compute the intervals of a with equal names
       typedef std::vector<lps::action>::iterator action_iterator;
       std::vector<std::pair<action_iterator, action_iterator> > intervals;

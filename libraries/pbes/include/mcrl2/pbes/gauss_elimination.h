@@ -21,23 +21,23 @@ namespace pbes_system {
 
 namespace gauss {
 
-  /// Returns true if e.symbol() == nu(), else false.
+  /// \brief Returns true if e.symbol() == nu(), else false.
   inline
   pbes_expression sigma(const pbes_equation& e)
   {
     using namespace pbes_expr;
     return e.symbol().is_nu() ? true_() : false_();
-  }  
+  }
 
-  /// Applies the substitution X := phi to the pbes equation eq.
+  /// \brief Applies the substitution X := phi to the pbes equation eq.
   inline
   pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi)
   {
     pbes_expression formula = substitute_propositional_variable(eq.formula(), X, phi);
     return pbes_equation(eq.symbol(), eq.variable(), formula);
   }
-  
-  /// Applies the substitution X := phi to the sequence of pbes equations [first, last[.
+
+  /// \brief Applies the substitution X := phi to the sequence of pbes equations [first, last[.
   template <typename Iter>
   void substitute(Iter first, Iter last, propositional_variable X, pbes_expression phi)
   {
@@ -76,13 +76,13 @@ class gauss_elimination_algorithm
         std::cout << "  " << pp(*i) << std::endl;
       }
     }
-  
+
   public:
     gauss_elimination_algorithm(PbesRewriter& rewriter, EquationSolver& equation_solver)
       : m_rewriter(rewriter), m_equation_solver(equation_solver)
     {}
 
-    /// Applies Gauss elimination to the sequence of pbes equations [first, last[.
+    /// \brief Applies Gauss elimination to the sequence of pbes equations [first, last[.
     template <typename Iter>
     void run(Iter first, Iter last)
     {
@@ -93,7 +93,7 @@ class gauss_elimination_algorithm
       {
         return;
       }
-    
+
       Iter i = last;
       while (i != first)
       {
@@ -102,7 +102,7 @@ class gauss_elimination_algorithm
   std::cout << "solving equation\n";
   std::cout << "  before: " << pp(*i) << std::endl;
 #endif
-        *i = m_equation_solver(*i); 
+        *i = m_equation_solver(*i);
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
   std::cout << "   after: " << pp(*i) << std::endl;
 #endif

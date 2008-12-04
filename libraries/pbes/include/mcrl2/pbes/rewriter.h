@@ -31,26 +31,24 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// A rewriter that simplifies expressions.
-  ///
+  /// \brief A rewriter that simplifies expressions.
   template <typename Term, typename DataRewriter>
   class simplifying_rewriter
   {
     protected:
       DataRewriter m_rewriter;
-    
+
     public:
       typedef typename core::term_traits<Term>::term_type term_type;
       typedef typename core::term_traits<Term>::variable_type variable_type;
-      
+
       simplifying_rewriter(const DataRewriter& rewriter)
         : m_rewriter(rewriter)
       {}
-      
+
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \return The rewrite result.
-      ///
       term_type operator()(const term_type& x)
       {
         detail::simplify_rewrite_builder<Term, DataRewriter> r(m_rewriter);
@@ -61,7 +59,6 @@ namespace pbes_system {
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
       /// \return The rewrite result.
-      ///
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
@@ -70,8 +67,7 @@ namespace pbes_system {
       }
   };
 
-  /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
-  ///
+  /// \brief A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
   template <typename Term, typename DataRewriter, typename DataEnumerator>
   class enumerate_quantifiers_rewriter
   {
@@ -87,11 +83,10 @@ namespace pbes_system {
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r), m_enumerator(e)
       {}
-      
+
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \return The rewrite result.
-      ///
       term_type operator()(const term_type& x)
       {
         typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
@@ -101,14 +96,13 @@ namespace pbes_system {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
-        return result;  
+        return result;
       }
-      
+
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
       /// \return The rewrite result.
-      ///
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
       {
@@ -120,9 +114,8 @@ std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
         return result;
       }
   };
- 
-  /// A specialization for pbes_expression. It uses pbes_expression_with_variables internally.
-  ///
+
+  /// \brief A specialization for pbes_expression. It uses pbes_expression_with_variables internally.
   template <typename DataRewriter, typename DataEnumerator>
   class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerator>
   {
@@ -137,64 +130,62 @@ std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r, e)
       {}
-      
+
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \return The rewrite result.
-      ///
       term_type operator()(const term_type& x)
       {
         return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()));
       }
-      
+
       /// \brief Rewrites a pbes expression.
       /// \param[in] x The pbes expression that is rewritten to normal form.
       /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
       /// \return The rewrite result.
-      ///
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
       {
         return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()), sigma);
       }
   };
- 
-  /// The simplifying pbes rewriter used in pbes2bool.
+
+  /// \brief The simplifying pbes rewriter used in pbes2bool.
   class simplify_rewriter_jfg
   {
     data::rewriter datar;
-    
+
     public:
       simplify_rewriter_jfg(const data::data_specification& data)
         : datar(data)
       { }
-      
-      /// Rewrites a pbes expression.
+
+      /// \brief Rewrites a pbes expression.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_rewrite_and_simplify(p, datar.get_rewriter());
       }
   };
-  
-  /// The substituting pbes rewriter used in pbes2bool.
+
+  /// \brief The substituting pbes rewriter used in pbes2bool.
   class substitute_rewriter_jfg
   {
     data::rewriter& datar_;
     const data::data_specification& data_spec;
-   
+
     public:
       substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
         : datar_(datar), data_spec(data)
       { }
-      
-      /// Rewrites a pbes expression.
+
+      /// \brief Rewrites a pbes expression.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
-      }   
+      }
   };
-  
-  /// A pbes rewriter that uses a bdd based prover internally.
+
+  /// \brief A pbes rewriter that uses a bdd based prover internally.
   class pbessolve_rewriter
   {
     data::rewriter datar_;
@@ -202,7 +193,7 @@ std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
     int n;
     data_variable_list fv;
     boost::shared_ptr<BDD_Prover> prover;
-   
+
     public:
       pbessolve_rewriter(const data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
         : datar_(datar),
@@ -210,12 +201,12 @@ std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
           n(0),
           prover(new BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
       { }
-  
-      /// Rewrites a pbes expression.
+
+      /// \brief Rewrites a pbes expression.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_simplify(p, &n, &fv, prover.get());
-      }   
+      }
   };
 
 } // namespace pbes_system

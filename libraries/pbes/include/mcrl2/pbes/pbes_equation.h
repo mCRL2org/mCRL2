@@ -34,13 +34,13 @@ class pbes_equation: public atermpp::aterm_appl
     pbes_expression        m_formula;  // the right hand side
 
   public:
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_equation()
       : atermpp::aterm_appl(core::detail::constructPBEqn())
     {}
 
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_equation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
@@ -52,7 +52,7 @@ class pbes_equation: public atermpp::aterm_appl
       m_formula  = pbes_expression(*i);
     }
 
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
       : atermpp::aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
@@ -62,7 +62,7 @@ class pbes_equation: public atermpp::aterm_appl
     {
     }
 
-    /// Assignment operator.
+    /// \brief Assignment operator.
     ///
     pbes_equation& operator=(atermpp::aterm t)
     {
@@ -70,28 +70,28 @@ class pbes_equation: public atermpp::aterm_appl
       return *this;
     }
 
-    /// Returns the fixpoint symbol of the equation.
+    /// \brief Returns the fixpoint symbol of the equation.
     ///
     fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
-    /// Returns the pbes variable of the equation.
+    /// \brief Returns the pbes variable of the equation.
     ///
     propositional_variable variable() const
     {
       return m_variable;
     }
 
-    /// Returns the predicate formula on the right hand side of the equation.
+    /// \brief Returns the predicate formula on the right hand side of the equation.
     ///
     pbes_expression formula() const
     {
       return m_formula;
     }
-    
-    /// Returns true if the predicate formula on the right hand side contains no predicate variables.
+
+    /// \brief Returns true if the predicate formula on the right hand side contains no predicate variables.
     // (Comment Wieger: is_const would be a better name)
     ///
     bool is_solved() const
@@ -100,14 +100,14 @@ class pbes_equation: public atermpp::aterm_appl
       return t == atermpp::aterm(); // true if nothing was found
     }
 
-    /// Returns true if the equation is a BES (boolean equation system).
+    /// \brief Returns true if the equation is a BES (boolean equation system).
     ///
     bool is_bes() const
     {
       return variable().parameters().empty() && formula().is_bes();
     }
 
-    /// Returns true if
+    /// \brief Returns true if
     /// <ul>
     /// <li>the binding variable parameters have unique names</li>
     /// <li>the names of the quantifier variables in the equation are disjoint with the binding variable parameter names</li>

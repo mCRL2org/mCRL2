@@ -19,7 +19,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// A pbes expression that stores a sequence of data variables and a sequence of propositional
+  /// \brief A pbes expression that stores a sequence of data variables and a sequence of propositional
   /// variable instantiations.
   class pbes_expression_with_propositional_variables: public pbes_expression_with_variables
   {
@@ -27,47 +27,40 @@ namespace pbes_system {
       propositional_variable_instantiation_list m_propositional_variables;
 
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       pbes_expression_with_propositional_variables()
       {}
 
-      /// Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
-      ///
+      /// \brief Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
       pbes_expression_with_propositional_variables(atermpp::aterm_appl term)
         : pbes_expression_with_variables(term)
       {}
 
-      /// Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
-      ///
+      /// \brief Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
       pbes_expression_with_propositional_variables(ATermAppl term)
         : pbes_expression_with_variables(term)
       {}
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       pbes_expression_with_propositional_variables(pbes_expression expression,
                                                    data::data_variable_list variables,
                                                    propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
         : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
       {}
 
-      /// Constructor. Creates a pbes expression with an empty sequences of propositional variables.
-      ///
+      /// \brief Constructor. Creates a pbes expression with an empty sequences of propositional variables.
       pbes_expression_with_propositional_variables(pbes_expression_with_variables expression,
                                                    propositional_variable_instantiation_list propositional_variables)
         : pbes_expression_with_variables(expression), m_propositional_variables(propositional_variables)
       {}
 
       /// Return the propositional variables.
-      ///
       propositional_variable_instantiation_list propositional_variables() const
       {
         return m_propositional_variables;
       }
 
       /// Return the propositional variables.
-      ///
       propositional_variable_instantiation_list& propositional_variables()
       {
         return m_propositional_variables;
@@ -117,14 +110,14 @@ namespace core {
     typedef data::data_variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
-    typedef pbes_system::propositional_variable propositional_variable_decl_type;   
+    typedef pbes_system::propositional_variable propositional_variable_decl_type;
 
     /// \brief The propositional variable instantiation type
-    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
+    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;
 
     /// \brief The string type
     typedef core::identifier_string string_type;
-    
+
     typedef core::term_traits<pbes_system::pbes_expression> tr;
 
     /// \brief The value true
@@ -334,14 +327,14 @@ namespace core {
     term_type dataterm2term(data_term_type t)
     {
       return term_type(t, t.variables());
-    }    
+    }
 
     /// \brief Conversion from term to data term
     /// \param t A term
     /// \returns The converted term
     static inline
-    data_term_type term2dataterm(term_type t) { return tr::term2dataterm(t); }  
-   
+    data_term_type term2dataterm(term_type t) { return tr::term2dataterm(t); }
+
     /// \brief Test if a term is constant
     /// \param t A term
     /// \return True if the term is constant

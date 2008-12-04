@@ -24,16 +24,22 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Function to solve a bes equation.
+/// \brief Function object for solving a bes equation.
 template <typename PbesRewriter>
 struct bes_equation_solver
 {
+  /// \brief A pbes rewriter
   PbesRewriter& m_rewriter;
-  
+
+  /// \brief Constructor
+  /// \param rewriter A pbes rewriter
   bes_equation_solver(PbesRewriter& rewriter)
     : m_rewriter(rewriter)
   {}
-   
+
+  /// \brief Solves the equation
+  /// \param e A pbes equation
+  /// \return The solved equation
   pbes_equation operator()(pbes_equation e)
   {
     pbes_equation result = gauss::substitute(e, e.variable(), gauss::sigma(e));
@@ -43,9 +49,9 @@ struct bes_equation_solver
   }
 };
 
-/// Solves a boolean equation system using Gauss elimination.
+/// \brief Solves a boolean equation system using Gauss elimination.
 /// \precondition The pbes p is a bes.
-/// \return 0 if false, 1 if true, 2 if unknown
+/// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
 template <typename Container>
 int bes_gauss_elimination(pbes<Container>& p)
 {
@@ -53,11 +59,11 @@ int bes_gauss_elimination(pbes<Container>& p)
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef bes_equation_solver<my_rewriter> bes_solver;
   typedef typename core::term_traits<pbes_expression> tr;
-    
+
   data::rewriter datar(p.data());
   number_postfix_generator name_generator;
   my_enumerator datae(p.data(), datar, name_generator);
-  my_rewriter pbesr(datar, datae);    
+  my_rewriter pbesr(datar, datae);
   bes_solver solver(pbesr);
 
   gauss_elimination_algorithm<my_rewriter, bes_solver> algorithm(pbesr, solver);
@@ -77,6 +83,9 @@ int bes_gauss_elimination(pbes<Container>& p)
   }
 }
 
+/// \brief Instantiates a pbes.
+/// \param lazy If true, the lazy instantiation algorithm is used, otherwise the finite instantiation algorithm.
+/// \return A bes.
 pbes<> pbes2bes(const pbes<>& pbes_spec, bool lazy = false)
 {
   typedef data::data_enumerator<number_postfix_generator> my_enumerator;
@@ -84,7 +93,7 @@ pbes<> pbes2bes(const pbes<>& pbes_spec, bool lazy = false)
   data::rewriter datar(pbes_spec.data());
   number_postfix_generator name_generator;
   my_enumerator datae(pbes_spec.data(), datar, name_generator);
-  my_rewriter pbesr(datar, datae);    
+  my_rewriter pbesr(datar, datae);
   if (lazy)
   {
     return do_lazy_algorithm(pbes_spec, pbesr);

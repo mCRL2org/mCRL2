@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink and Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //

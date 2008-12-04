@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
+/// \brief A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
 /// must be overridden to add behavior. If the visit_<node> function returns true,
 /// the recursion is continued in the children of the node.
@@ -30,8 +30,8 @@ struct pbes_expression_visitor
   typedef typename core::term_traits<Term>::data_term_type data_term_type;
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-  
-  /// These names can be used as return types of the visit functions, to make
+
+  /// \brief These names can be used as return types of the visit functions, to make
   /// the code more readible.
   ///
   enum return_type
@@ -39,13 +39,13 @@ struct pbes_expression_visitor
     stop_recursion = false,
     continue_recursion = true
   };
-  
-  /// Destructor.
+
+  /// \brief Destructor.
   ///
   virtual ~pbes_expression_visitor()
   { }
-  
-  /// Visit data expression node.
+
+  /// \brief Visit data expression node.
   ///
   virtual bool visit_data_expression(const term_type& e, const data_term_type& d, Arg& /* a */)
   {
@@ -57,7 +57,7 @@ struct pbes_expression_visitor
   virtual void leave_data_expression()
   {}
 
-  /// Visit true node.
+  /// \brief Visit true node.
   ///
   virtual bool visit_true(const term_type& e, Arg& /* a */)
   {
@@ -69,7 +69,7 @@ struct pbes_expression_visitor
   virtual void leave_true()
   {}
 
-  /// Visit false node.
+  /// \brief Visit false node.
   ///
   virtual bool visit_false(const term_type& e, Arg& /* a */)
   {
@@ -81,7 +81,7 @@ struct pbes_expression_visitor
   virtual void leave_false()
   {}
 
-  /// Visit not node.
+  /// \brief Visit not node.
   ///
   virtual bool visit_not(const term_type& e, const term_type& /* arg */, Arg& /* a */)
   {
@@ -93,7 +93,7 @@ struct pbes_expression_visitor
   virtual void leave_not()
   {}
 
-  /// Visit and node.
+  /// \brief Visit and node.
   ///
   virtual bool visit_and(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
@@ -105,19 +105,19 @@ struct pbes_expression_visitor
   virtual void leave_and()
   {}
 
-  /// Visit or node.
+  /// \brief Visit or node.
   ///
   virtual bool visit_or(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
     return continue_recursion;
-  }    
+  }
 
   /// Leave or node.
   ///
   virtual void leave_or()
   {}
 
-  /// Visit imp node.
+  /// \brief Visit imp node.
   ///
   virtual bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
@@ -129,7 +129,7 @@ struct pbes_expression_visitor
   virtual void leave_imp()
   {}
 
-  /// Visit forall node.
+  /// \brief Visit forall node.
   ///
   virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
@@ -141,7 +141,7 @@ struct pbes_expression_visitor
   virtual void leave_forall()
   {}
 
-  /// Visit exists node.
+  /// \brief Visit exists node.
   ///
   virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
@@ -153,19 +153,19 @@ struct pbes_expression_visitor
   virtual void leave_exists()
   {}
 
-  /// Visit propositional variable node.
+  /// \brief Visit propositional variable node.
   ///
   virtual bool visit_propositional_variable(const term_type& e, const propositional_variable_type& /* v */, Arg& /* a */)
   {
     return continue_recursion;
   }
-  
+
   /// Leave propositional variable node.
   ///
   virtual void leave_propositional_variable()
   {}
 
-  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   void visit(const term_type& e, Arg& a)
@@ -239,7 +239,7 @@ struct pbes_expression_visitor
   }
 };
 
-/// Visitor class for visiting the nodes of a pbes expression.
+/// \brief Visitor class for visiting the nodes of a pbes expression.
 /// If a visit_<node> function returns term_type(), the recursion is continued
 /// in the children of this node, otherwise not.
 template <typename Term>
@@ -251,7 +251,7 @@ struct pbes_expression_visitor<Term, void>
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
-  /// These names can be used as return types of the visit functions, to make
+  /// \brief These names can be used as return types of the visit functions, to make
   /// the code more readible.
   ///
   enum return_type
@@ -260,12 +260,12 @@ struct pbes_expression_visitor<Term, void>
     continue_recursion = true
   };
 
-  /// Destructor.
+  /// \brief Destructor.
   ///
   virtual ~pbes_expression_visitor()
   { }
-  
-  /// Visit data expression node.
+
+  /// \brief Visit data expression node.
   ///
   virtual bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
@@ -277,7 +277,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_data_expression()
   {}
 
-  /// Visit true node.
+  /// \brief Visit true node.
   ///
   virtual bool visit_true(const term_type& e)
   {
@@ -289,7 +289,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_true()
   {}
 
-  /// Visit false node.
+  /// \brief Visit false node.
   ///
   virtual bool visit_false(const term_type& e)
   {
@@ -301,7 +301,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_false()
   {}
 
-  /// Visit not node.
+  /// \brief Visit not node.
   ///
   virtual bool visit_not(const term_type& e, const term_type& /* arg */)
   {
@@ -313,7 +313,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_not()
   {}
 
-  /// Visit and node.
+  /// \brief Visit and node.
   ///
   virtual bool visit_and(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
@@ -325,19 +325,19 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_and()
   {}
 
-  /// Visit or node.
+  /// \brief Visit or node.
   ///
   virtual bool visit_or(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
     return continue_recursion;
-  }    
+  }
 
   /// Leave or node.
   ///
   virtual void leave_or()
   {}
 
-  /// Visit imp node.
+  /// \brief Visit imp node.
   ///
   virtual bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
@@ -349,7 +349,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_imp()
   {}
 
-  /// Visit forall node.
+  /// \brief Visit forall node.
   ///
   virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -361,7 +361,7 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_forall()
   {}
 
-  /// Visit exists node.
+  /// \brief Visit exists node.
   ///
   virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
@@ -373,19 +373,19 @@ struct pbes_expression_visitor<Term, void>
   virtual void leave_exists()
   {}
 
-  /// Visit propositional variable node.
+  /// \brief Visit propositional variable node.
   ///
   virtual bool visit_propositional_variable(const term_type& e, const propositional_variable_type& /* v */)
   {
     return continue_recursion;
   }
-  
+
   /// Leave propositional variable node.
   ///
   virtual void leave_propositional_variable()
   {}
 
-  /// Visits the nodes of the pbes expressionnd calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the pbes expressionnd calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   void visit(const term_type& e)

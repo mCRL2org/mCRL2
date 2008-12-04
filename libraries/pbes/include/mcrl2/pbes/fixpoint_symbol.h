@@ -31,51 +31,44 @@ namespace pbes_system {
 class fixpoint_symbol: public atermpp::aterm_appl
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     fixpoint_symbol()
       : atermpp::aterm_appl(core::detail::constructFixPoint())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     fixpoint_symbol(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_FixPoint(m_term));
     }
-    
-    /// Assignment operator.
-    ///
+
+    /// \brief Assignment operator.
     fixpoint_symbol& operator=(atermpp::aterm t)
     {
       m_term = t;
       return *this;
     }
 
-    /// Returns the mu symbol.
-    ///
+    /// \brief Returns the mu symbol.
     static fixpoint_symbol mu()
     {
       return fixpoint_symbol(core::detail::gsMakeMu());
     }
 
-    /// Returns the nu symbol.
-    ///
+    /// \brief Returns the nu symbol.
     static fixpoint_symbol nu()
     {
       return fixpoint_symbol(core::detail::gsMakeNu());
     }
 
-    /// Returns true if the symbol is mu.
-    ///
+    /// \brief Returns true if the symbol is mu.
     bool is_mu() const
     {
       return core::detail::gsIsMu(*this);
     }
 
-    /// Returns true if the symbol is nu.
-    ///
+    /// \brief Returns true if the symbol is nu.
     bool is_nu() const
     {
       return core::detail::gsIsNu(*this);

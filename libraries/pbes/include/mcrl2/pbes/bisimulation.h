@@ -48,16 +48,16 @@ class bisimulation_algorithm
   protected:
     typedef std::map<ATermAppl, std::string> name_map;
 
-    /// Maps summands to strings.
+    /// \brief Maps summands to strings.
     name_map summand_names;
 
-    /// Store the ATerm of the model.
+    /// \brief Store the ATerm of the model.
     ATermAppl model_ptr;
 
-    /// Store a ATerm of the specification.
+    /// \brief Store a ATerm of the specification.
     ATermAppl spec_ptr;
 
-    /// Returns a name of an action_list.
+    /// \brief Returns a name of an action_list.
     std::string action_list_name(action_list l) const
     {
       std::ostringstream out;
@@ -73,7 +73,7 @@ class bisimulation_algorithm
       return result;
     }
 
-    /// Returns the name associated with i.
+    /// \brief Returns the name associated with i.
     std::string summand_name(my_iterator i) const
     {
       ATermAppl t = *i;
@@ -82,13 +82,13 @@ class bisimulation_algorithm
       return j->second;
     }
 
-    /// Returns true if p is the linear process of the model.
+    /// \brief Returns true if p is the linear process of the model.
     bool is_from_model(const linear_process& p) const
     {
       return ATermAppl(p) == model_ptr;
     }
 
-    /// Returns a name of a linear process.
+    /// \brief Returns a name of a linear process.
     std::string process_name(const linear_process& p) const
     {
       if (is_from_model(p))
@@ -101,7 +101,7 @@ class bisimulation_algorithm
       }
     }
 
-    /// Used for initializing summand names.
+    /// \brief Used for initializing summand names.
     void set_summand_names(const linear_process& p)
     {
       set_identifier_generator generator;
@@ -113,8 +113,7 @@ class bisimulation_algorithm
       }
     }
 
-    /// Used for debugging.
-    ///
+    /// \brief Used for debugging.
     void check_expression(pbes_expression expr, const linear_process& p, const linear_process& q, std::string msg) const
     {
       detail::free_variable_visitor<pbes_expression> visitor;
@@ -136,80 +135,70 @@ class bisimulation_algorithm
     }
 
 public:
-    /// Creates an identifier string.
-    ///
+    /// \brief Creates an identifier string.
     core::identifier_string X(const linear_process& p, const linear_process& q) const
     {
       std::string s = "X" + process_name(p) + process_name(q);
       return core::identifier_string(s);
     }
 
-    /// Creates an identifier string.
-    ///
+    /// \brief Creates an identifier string.
     core::identifier_string Y(const linear_process& p, const linear_process& q) const
     {
       std::string s = "Y" + process_name(p) + process_name(q);
       return core::identifier_string(s);
     }
 
-    /// Creates an identifier string.
+    /// \brief Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
-    ///
     core::identifier_string Y(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y" + process_name(p) + process_name(q) + "_" + summand_name(i);
       return core::identifier_string(s);
     }
 
-    /// Creates an identifier string.
+    /// \brief Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
-    ///
     core::identifier_string Y1(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y1" + process_name(p) + process_name(q) + "_" + summand_name(i);
       return core::identifier_string(s);
     }
 
-    /// Creates an identifier string.
+    /// \brief Creates an identifier string.
     /// \pre The iterator i must be in p.non_delta_summands().
-    ///
     core::identifier_string Y2(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       std::string s = "Y2" + process_name(p) + process_name(q) + "_" + summand_name(i);
       return core::identifier_string(s);
     }
 
-    /// Returns a propositional variable.
-    ///
+    /// \brief Returns a propositional variable.
     propositional_variable_instantiation var(core::identifier_string name, data_variable_list parameters) const
     {
       return propositional_variable_instantiation(name, make_data_expression_list(parameters));
     }
 
-    /// Returns a pbes expression that expresses equality of the multi actions a and b.
-    ///
+    /// \brief Returns a pbes expression that expresses equality of the multi actions a and b.
     pbes_expression equals(action_list a, action_list b) const
     {
       return equal_multi_actions(a, b);
     }
 
-    /// Returns mu.
-    ///
+    /// \brief Returns mu.
     fixpoint_symbol mu() const
     {
       return fixpoint_symbol::mu();
     }
 
-    /// Returns nu.
-    ///
+    /// \brief Returns nu.
     fixpoint_symbol nu() const
     {
       return fixpoint_symbol::nu();
     }
 
-    /// Renames variables in q such that there are no name clashes.
+    /// \brief Renames variables in q such that there are no name clashes.
     /// \return The process q after renaming.
-    ///
     linear_process resolve_name_clashes(const linear_process& p, const linear_process& q)
     {
       std::set<core::identifier_string> used_names;
@@ -232,8 +221,7 @@ public:
       return result;
     }
 
-    /// Initializes the name lookup table.
-    ///
+    /// \brief Initializes the name lookup table.
     void init(const linear_process& model, const linear_process& spec)
     {
       summand_names.clear();
@@ -245,8 +233,7 @@ public:
       assert(!is_from_model(spec));
     }
 
-    /// Builds a pbes from the given equations.
-    ///
+    /// \brief Builds a pbes from the given equations.
     pbes<> build_pbes(const atermpp::vector<pbes_equation>& equations,
                       const specification& M,
                       const specification& S
@@ -273,8 +260,7 @@ public:
 class branching_bisimulation_algorithm : public bisimulation_algorithm
 {
   public:
-    /// The match function.
-    ///
+    /// \brief The match function.
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       using namespace pbes_expr_optimized;
@@ -291,8 +277,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       return join_and(result.begin(), result.end());
     }
 
-    /// The step function.
-    ///
+    /// \brief The step function.
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
@@ -334,8 +319,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       }
     }
 
-    /// The close function.
-    ///
+    /// \brief The close function.
     pbes_expression close(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
@@ -358,7 +342,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       return or_(join_or(v.begin(), v.end()), and_(var(X(p, q), d + d1), step(p, q, i)));
     }
 
-    /// Returns a pbes that expresses branching bisimulation between
+    /// \brief Returns a pbes that expresses branching bisimulation between
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
@@ -394,7 +378,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     }
 };
 
-/// Returns a pbes that expresses branching bisimulation between two specifications.
+/// \brief Returns a pbes that expresses branching bisimulation between two specifications.
 pbes<> branching_bisimulation(const specification& model, const specification& spec)
 {
   return branching_bisimulation_algorithm().run(model, spec);
@@ -408,8 +392,7 @@ pbes<> branching_bisimulation(const specification& model, const specification& s
 class strong_bisimulation_algorithm : public bisimulation_algorithm
 {
   public:
-    /// The match function.
-    ///
+    /// \brief The match function.
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       using namespace pbes_expr_optimized;
@@ -424,8 +407,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       return join_and(result.begin(), result.end());
     }
 
-    /// The step function.
-    ///
+    /// \brief The step function.
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
@@ -445,7 +427,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       return join_or(result.begin(), result.end());
     }
 
-    /// Returns a pbes that expresses strong bisimulation between
+    /// \brief Returns a pbes that expresses strong bisimulation between
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
@@ -467,7 +449,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     }
 };
 
-/// Returns a pbes that expresses strong bisimulation between two specifications.
+/// \brief Returns a pbes that expresses strong bisimulation between two specifications.
 pbes<> strong_bisimulation(const specification& model, const specification& spec)
 {
   return strong_bisimulation_algorithm().run(model, spec);
@@ -481,8 +463,7 @@ pbes<> strong_bisimulation(const specification& model, const specification& spec
 class weak_bisimulation_algorithm : public bisimulation_algorithm
 {
   public:
-    /// The match function.
-    ///
+    /// \brief The match function.
     pbes_expression match(const linear_process& p, const linear_process& q) const
     {
       using namespace pbes_expr_optimized;
@@ -499,8 +480,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       return join_and(result.begin(), result.end());
     }
 
-    /// The step function.
-    ///
+    /// \brief The step function.
     pbes_expression step(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
@@ -527,8 +507,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       }
     }
 
-    /// The close1 function.
-    ///
+    /// \brief The close1 function.
     pbes_expression close1(const linear_process& p, const linear_process& q, my_iterator i) const
     {
       using namespace pbes_expr_optimized;
@@ -549,8 +528,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       return or_(join_or(v.begin(), v.end()), step(p, q, i));
     }
 
-    /// The close2 function.
-    ///
+    /// \brief The close2 function.
     pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i,
                            data_variable_list d, data_variable_list d1) const
     {
@@ -592,7 +570,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       return or_(var(X(p, q), d + d1), join_or(v.begin(), v.end()));
     }
 
-    /// Returns a pbes that expresses weak bisimulation between
+    /// \brief Returns a pbes that expresses weak bisimulation between
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
@@ -632,7 +610,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     }
 };
 
-/// Returns a pbes that expresses weak bisimulation between two specifications.
+/// \brief Returns a pbes that expresses weak bisimulation between two specifications.
 pbes<> weak_bisimulation(const specification& model, const specification& spec)
 {
   return weak_bisimulation_algorithm().run(model, spec);
@@ -646,7 +624,7 @@ pbes<> weak_bisimulation(const specification& model, const specification& spec)
 class branching_simulation_equivalence_algorithm : public branching_bisimulation_algorithm
 {
   public:
-    /// Returns a pbes that expresses branching simulation equivalence between
+    /// \brief Returns a pbes that expresses branching simulation equivalence between
     /// two specifications.
     pbes<> run(const specification& model, const specification& spec)
     {
@@ -682,7 +660,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     }
 };
 
-/// Returns a pbes that expresses branching simulation equivalence between two specifications.
+/// \brief Returns a pbes that expresses branching simulation equivalence between two specifications.
 pbes<> branching_simulation_equivalence(const specification& model, const specification& spec)
 {
   return branching_simulation_equivalence_algorithm().run(model, spec);

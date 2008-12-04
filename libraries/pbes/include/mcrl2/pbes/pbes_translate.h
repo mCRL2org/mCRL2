@@ -60,7 +60,7 @@ namespace detail {
     propositional_variable_negator(const propositional_variable& v)
       : v_(v)
     {}
-        
+
     pbes_expression operator()(propositional_variable_instantiation t) const
     {
       if (t.name() == v_.name())
@@ -83,7 +83,6 @@ class pbes_translate_algorithm
     ///////////////////////////////////////////////////////////////////////////////
     // timed_action
     /// \brief multi-action with time
-    ///
     class timed_action
     {
       protected:
@@ -95,43 +94,38 @@ class pbes_translate_algorithm
           : m_actions(actions), m_time(time)
         {}
 
-        /// Returns true if time is available.
-        ///
+        /// \brief Returns true if time is available.
         bool has_time() const
         {
           return !data::data_expr::is_nil(m_time);
         }
 
-        /// Returns the sequence of actions. Returns an empty list if is_delta() holds.
-        ///
+        /// \brief Returns the sequence of actions. Returns an empty list if is_delta() holds.
         lps::action_list actions() const
         {
           return m_actions;
         }
 
-        /// Returns the time expression.
-        ///
+        /// \brief Returns the time expression.
         data::data_expression time() const
         {
           return m_time;
         }
 
-        /// Returns a term representing the name of the first lps::action.
-        ///
+        /// \brief Returns a term representing the name of the first lps::action.
         core::identifier_string name() const
         {
           return front(m_actions).label().name();
         }
 
-        /// Returns the argument of the multi lps::action.
+        /// \brief Returns the argument of the multi lps::action.
         data::data_expression_list arguments() const
         {
           return front(m_actions).arguments();
         }
 
-        /// Applies a substitution to this lps::action and returns the result.
-        /// The Substitution object must supply the method aterm operator()(aterm).
-        ///
+        /// \brief Applies a substitution to this lps::action and returns the result.
+        /// \brief The Substitution object must supply the method aterm operator()(aterm).
         template <typename Substitution>
         timed_action substitute(Substitution f)
         {
@@ -244,12 +238,12 @@ class pbes_translate_algorithm
     }
 
   public:
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_translate_algorithm()
     {}
 
-    /// Destructor.
+    /// \brief Destructor.
     ///
     virtual ~pbes_translate_algorithm()
     {}
@@ -630,7 +624,7 @@ std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     }
 
   public:
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_translate_algorithm_timed()
     {}
@@ -789,7 +783,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             data::data_assignment_list gi = i->assignments();
             data::data_variable_list xp(lps.process_parameters());
             data::data_variable_list yi(i->summation_variables());
-        
+
             pbes_expression rhs = RHS(f0, phi, lps, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
@@ -800,7 +794,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(data::assignment_list_substitution(gi));
-        
+
             pbes_expression p = forall(y, imp(and_(p1, p2), rhs));
             v.push_back(p);
           }
@@ -818,7 +812,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             data::data_assignment_list gi = i->assignments();
             data::data_variable_list xp(lps.process_parameters());
             data::data_variable_list yi(i->summation_variables());
-        
+
             pbes_expression rhs = RHS(f0, phi, lps, context);
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
@@ -829,7 +823,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(data::assignment_list_substitution(gi));
-        
+
             pbes_expression p = exists(y, and_(and_(p1, p2), rhs));
             v.push_back(p);
           }
@@ -1017,7 +1011,7 @@ std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     }
 
   public:
-    /// Constructor.
+    /// \brief Constructor.
     ///
     pbes_translate_algorithm_untimed()
     {}

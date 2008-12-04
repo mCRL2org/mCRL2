@@ -26,7 +26,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Returns true if the term has a given variable as subterm.
+/// \brief Returns true if the term has a given variable as subterm.
 template <typename Term>
 bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
 {
@@ -43,14 +43,14 @@ std::set<propositional_variable_instantiation> find_all_propositional_variable_i
   std::set<propositional_variable_instantiation> variables;
   atermpp::find_all_if(t, is_propositional_variable_instantiation, std::inserter(variables, variables.end()));
   return variables;
-/*  
+/*
   std::set<propositional_variable_instantiation> variables;
   atermpp::partial_find_all_if(t,
                                is_propositional_variable_instantiation,
                                boost::bind(std::logical_or<bool>(), boost::bind(data::is_data_expression, _1), boost::bind(is_propositional_variable_instantiation, _1)),
                                std::inserter(variables, variables.end())
                               );
-*/                              
+*/
   return variables;
 }
 

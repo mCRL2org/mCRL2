@@ -10,17 +10,17 @@
 /// \brief The complement function for pbes expressions.
 //
 // Comp ( val(b) ) = val (! b)
-// 
+//
 // Comp ( X(d) ) = "ABORT, should not happen"
-// 
+//
 // Comp ( PbesAnd (f, g) ) = PbesOr (Comp (f), Comp (g) )
-// 
+//
 // Comp ( PbesOr (f, g) ) = PbesAnd (Comp (f), Comp (g) )
-// 
+//
 // Comp (PbesForAll (f) ) = PbesExists (Comp (f) )
-// 
+//
 // Comp (PbesExists (f) ) = PbesForall (Comp (f) )
-// 
+//
 // Comp (Comp (f) ) = f
 
 #ifndef MCRL2_PBES_COMPLEMENT_H
@@ -44,7 +44,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Visitor that pushes a negation in a PBES expression as far as possible
+/// \brief Visitor that pushes a negation in a PBES expression as far as possible
 /// inwards towards a data expression.
 struct complement_builder: public pbes_expression_builder<pbes_expression>
 {
@@ -85,7 +85,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   {
     using namespace pbes_expr_optimized;
     return and_(visit(left), visit(right));
-  }    
+  }
 
   /// \overload
   ///
@@ -112,7 +112,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   }
 };
 
-/// Returns the expression obtained by pushing the negations in the pbes
+/// \brief Returns the expression obtained by pushing the negations in the pbes
 /// expression as far as possible inwards towards a data expression.
 inline
 pbes_expression complement(const pbes_expression p)

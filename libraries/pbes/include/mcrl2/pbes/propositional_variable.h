@@ -37,14 +37,12 @@ class propositional_variable: public atermpp::aterm_appl
     data::data_variable_list m_parameters;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable()
       : atermpp::aterm_appl(core::detail::constructPropVarDecl())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable(std::string s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
@@ -53,8 +51,7 @@ class propositional_variable: public atermpp::aterm_appl
       m_term      = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -64,8 +61,7 @@ class propositional_variable: public atermpp::aterm_appl
       m_parameters = *i;
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable(core::identifier_string name, data::data_variable_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
@@ -73,15 +69,13 @@ class propositional_variable: public atermpp::aterm_appl
     {
     }
 
-    /// Returns the name of the propositional variable.
-    ///
+    /// \brief Returns the name of the propositional variable.
     core::identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the parameters of the propositional variable.
-    ///
+    /// \brief Returns the parameters of the propositional variable.
     data::data_variable_list parameters() const
     {
       return m_parameters;
@@ -109,14 +103,12 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     data::data_expression_list m_parameters;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable_instantiation()
       : atermpp::aterm_appl(core::detail::constructPropVarInst())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable_instantiation(std::string s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
@@ -125,8 +117,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
       m_term        = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable_instantiation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -136,8 +127,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
       m_parameters = *i;
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     propositional_variable_instantiation(core::identifier_string name, data::data_expression_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
@@ -145,22 +135,19 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {
     }
 
-    /// Returns the term containing the name of the propositional variable.
-    ///
+    /// \brief Returns the term containing the name of the propositional variable.
     core::identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the parameters of the propositional variable.
-    ///
+    /// \brief Returns the parameters of the propositional variable.
     data::data_expression_list parameters() const
     {
       return m_parameters;
     }
-    
-    /// Returns the unbound variables appearing in the parameters.
-    ///
+
+    /// \brief Returns the unbound variables appearing in the parameters.
     std::set<data::data_variable> unbound_variables() const
     {
       std::set<data::data_variable> result;

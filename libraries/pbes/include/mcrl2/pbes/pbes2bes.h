@@ -256,7 +256,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
     // Create resulting pbes_equation and add it to equation system
     new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
-    
+
     if (++nr_of_equations % 1000 == 0)
       core::gsVerboseMsg("At equation %d\n", nr_of_equations);
   }

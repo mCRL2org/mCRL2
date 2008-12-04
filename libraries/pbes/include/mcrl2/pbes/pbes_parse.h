@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/parse.h
+/// \file mcrl2/pbes/pbes_parse.h
 /// \brief Parser for pbes expressions.
 
 #ifndef MCRL2_PBES_PARSER_H
@@ -82,7 +82,7 @@ namespace pbes_system {
   {
     std::string unique_prefix("UNIQUE_PREFIX");
     int unique_prefix_index = 0;
-    
+
     text = core::remove_comments(text);
     const std::string separator1 = "datavar";
     const std::string separator2 = "predvar";
@@ -167,7 +167,7 @@ namespace pbes_system {
         + " = "
         + boost::trim_copy(*i) + ";";
     }
-    
+
     // add an initialization section to the pbes
     pbesspec = data_spec + (data_spec.empty() ? "" : "\n") + pbesspec + "\ninit dummy1;";
 
@@ -247,23 +247,23 @@ namespace pbes_system {
   pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes<>& p, SubstitutionFunction& sigma)
   {
     typedef core::term_traits<pbes_expression> tr;
-  
+
     parse_substitutions(subst, p.data(), sigma);
-    
+
     std::string datavar_text;
     for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
     {
       data::data_variable v = i->first;
       datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + core::pp(v) + ": " + core::pp(v.sort());
-    } 
-    
+    }
+
     pbes<> q = p;
     q.initial_state() == tr::true_();
     std::string pbesspec = core::pp(q);
     std::string init("init");
     // remove the init declaration
     pbesspec = pbesspec.substr(0, std::find_end(pbesspec.begin(), pbesspec.end(), init.begin(), init.end()) - pbesspec.begin());
-  
+
     // add an equation mu dummy1(vars) = (expr = expr)
     pbesspec = pbesspec
       + "\nmu "
@@ -273,13 +273,13 @@ namespace pbes_system {
       + (datavar_text.empty() ? "" : ")")
       + " = "
       + boost::trim_copy(expr) + ";";
-  
+
     // add a dummy propositional variable to the pbes, that is used for the initialization
     pbesspec = pbesspec + "\nmu dummy2 = true;";
-    
+
     // add an initialization section to the pbes
     pbesspec = pbesspec + "\ninit dummy2;";
-  
+
     std::stringstream in(pbesspec);
     try
     {
@@ -292,7 +292,7 @@ namespace pbes_system {
                 << std::endl;
       throw e;
     }
-  
+
     pbes_expression result = q.equations()[q.equations().size() - 2].formula();
     return result;
   }

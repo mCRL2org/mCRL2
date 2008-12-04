@@ -24,7 +24,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Visitor class for visiting the nodes of a pbes expression. During traversal
+/// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns term_type(), the recursion is continued
 /// in the children of this node, otherwise not.
@@ -45,83 +45,83 @@ struct pbes_expression_builder
   {
     return x != term_type();
   }
-  
-  /// Destructor.
+
+  /// \brief Destructor.
   ///
   virtual ~pbes_expression_builder()
   { }
 
-  /// Visit data expression node.
+  /// \brief Visit data expression node.
   ///
   virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit true node.
+  /// \brief Visit true node.
   ///
   virtual term_type visit_true(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit false node.
+  /// \brief Visit false node.
   ///
   virtual term_type visit_false(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit not node.
+  /// \brief Visit not node.
   ///
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit and node.
+  /// \brief Visit and node.
   ///
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit or node.
+  /// \brief Visit or node.
   ///
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
-  }    
+  }
 
-  /// Visit imp node.
+  /// \brief Visit imp node.
   ///
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit forall node.
+  /// \brief Visit forall node.
   ///
   virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit exists node.
+  /// \brief Visit exists node.
   ///
   virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit propositional variable node.
+  /// \brief Visit propositional variable node.
   ///
   virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */, Arg& /* arg */)
   {
     return term_type();
   }
-  
-  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+
+  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
   /// By default a mcrl2::runtime_error exception will be generated.
   ///
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
@@ -130,14 +130,14 @@ struct pbes_expression_builder
     return term_type();
   }
 
-  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
   term_type visit(term_type e, Arg& arg1)
   {
     typedef core::term_traits<term_type> tr;
-    
+
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 std::cout << "<visit>" << tr::pp(e) << std::endl;
 #endif
@@ -232,7 +232,7 @@ std::cout << "<visit result>" << tr::pp(result) << std::endl;
   }
 };
 
-/// Visitor class for visiting the nodes of a pbes expression. During traversal
+/// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns term_type(), the recursion is continued
 /// in the children of this node, otherwise not.
@@ -249,83 +249,83 @@ struct pbes_expression_builder<Term, void>
   {
     return x != term_type();
   }
-  
-  /// Destructor.
+
+  /// \brief Destructor.
   ///
   virtual ~pbes_expression_builder()
   { }
 
-  /// Visit data expression node.
+  /// \brief Visit data expression node.
   ///
   virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */)
   {
     return term_type();
   }
 
-  /// Visit true node.
+  /// \brief Visit true node.
   ///
   virtual term_type visit_true(const term_type& x)
   {
     return term_type();
   }
 
-  /// Visit false node.
+  /// \brief Visit false node.
   ///
   virtual term_type visit_false(const term_type& x)
   {
     return term_type();
   }
 
-  /// Visit not node.
+  /// \brief Visit not node.
   ///
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
   {
     return term_type();
   }
 
-  /// Visit and node.
+  /// \brief Visit and node.
   ///
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// Visit or node.
+  /// \brief Visit or node.
   ///
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
-  }    
+  }
 
-  /// Visit imp node.
+  /// \brief Visit imp node.
   ///
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// Visit forall node.
+  /// \brief Visit forall node.
   ///
   virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
 
-  /// Visit exists node.
+  /// \brief Visit exists node.
   ///
   virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
 
-  /// Visit propositional variable node.
+  /// \brief Visit propositional variable node.
   ///
   virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */)
   {
     return term_type();
   }
-  
-  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+
+  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
   /// By default a mcrl2::runtime_error exception will be generated.
   ///
   virtual term_type visit_unknown(const term_type& e)
@@ -334,7 +334,7 @@ struct pbes_expression_builder<Term, void>
     return term_type();
   }
 
-  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.

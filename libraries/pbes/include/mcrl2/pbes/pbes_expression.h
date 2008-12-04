@@ -45,22 +45,20 @@ bool is_bes(atermpp::aterm_appl t);
 class pbes_expression: public atermpp::aterm_appl
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_expression()
       : atermpp::aterm_appl(core::detail::constructPBExpr())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param term A term.
     pbes_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_PBExpr(m_term));
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param term A term.
     pbes_expression(ATermAppl term)
       : atermpp::aterm_appl(term)
@@ -68,21 +66,21 @@ class pbes_expression: public atermpp::aterm_appl
       assert(core::detail::check_rule_PBExpr(m_term));
     }
 
-    /// Applies a substitution to this pbes expression and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a substitution to this pbes expression and returns the result.
+    /// \param f A substitution function.
+    /// The Substitution function must supply the method aterm operator()(aterm).
+    /// \return The result of applying the substitution.
     template <typename Substitution>
     pbes_expression substitute(Substitution f) const
     {
       return pbes_expression(f(*this));
-    }     
+    }
 
-    /// Returns true if the expression is a boolean expression.
-    ///
+    /// \brief Returns true if the expression is a boolean expression.
     bool is_bes() const
     {
       return mcrl2::pbes_system::is_bes(*this);
-    }   
+    }
 };
 
 /// \brief singly linked list of data expressions
@@ -151,7 +149,7 @@ namespace pbes_expr {
 /// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors {
 
-  /// Conversion of a pbes expression to a data expression.
+  /// \brief Conversion of a pbes expression to a data expression.
   /// \pre The pbes expression must be of the form val(d) for
   /// some data variable d.
   inline
@@ -174,7 +172,7 @@ namespace accessors {
            pbes_expr::is_forall(t)    ||
            pbes_expr::is_exists(t)
           );
-    return atermpp::arg2(t); 
+    return atermpp::arg2(t);
   }
 
   /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -184,7 +182,7 @@ namespace accessors {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the right hand side of an expression of type and, or or imp.
   inline
   pbes_expression right(pbes_expression t)
@@ -192,7 +190,7 @@ namespace accessors {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
     return atermpp::arg2(t);
   }
-  
+
   /// \brief Returns the variables of a quantification expression
   inline
   data::data_variable_list var(pbes_expression t)
@@ -200,7 +198,7 @@ namespace accessors {
     assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
     return atermpp::list_arg1(t);
   }
-  
+
   /// \brief Returns the name of a propositional variable expression
   inline
   core::identifier_string name(pbes_expression t)
@@ -208,7 +206,7 @@ namespace accessors {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the parameters of a propositional variable instantiation.
   inline
   data::data_expression_list param(pbes_expression t)
@@ -241,28 +239,28 @@ namespace pbes_expr {
   {
     return pbes_expression(core::detail::gsMakePBESNot(p));
   }
-  
+
   /// \brief Returns and applied to p and q
   inline
   pbes_expression and_(pbes_expression p, pbes_expression q)
   {
     return pbes_expression(core::detail::gsMakePBESAnd(p,q));
   }
-  
+
   /// \brief Returns or applied to p and q
   inline
   pbes_expression or_(pbes_expression p, pbes_expression q)
   {
     return pbes_expression(core::detail::gsMakePBESOr(p,q));
   }
-  
+
   /// \brief Returns imp applied to p and q
   inline
   pbes_expression imp(pbes_expression p, pbes_expression q)
   {
     return pbes_expression(core::detail::gsMakePBESImp(p,q));
-  } 
-  
+  }
+
   /// \brief Returns the universal quantification of the expression p over the variables in l.
   inline
   pbes_expression forall(data::data_variable_list l, pbes_expression p)
@@ -273,7 +271,7 @@ namespace pbes_expr {
     }
     return pbes_expression(core::detail::gsMakePBESForall(l, p));
   }
-  
+
   /// \brief Returns the existential quantification of the expression p over the variables in l.
   inline
   pbes_expression exists(data::data_variable_list l, pbes_expression p)
@@ -291,7 +289,7 @@ namespace pbes_expr {
   {
     return core::detail::join(first, last, or_, false_());
   }
-  
+
   /// \brief Returns and applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
   pbes_expression join_and(FwdIt first, FwdIt last)
@@ -299,8 +297,8 @@ namespace pbes_expr {
     return core::detail::join(first, last, and_, true_());
   }
 
-  /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a 
-  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main 
+  /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
   /// function symbol.
   inline
   atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
@@ -310,9 +308,9 @@ namespace pbes_expr {
     core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
     return result;
   }
-  
-  /// Given a pbes expression of the form p1 && p2 && .... && pn, this will yield a 
-  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main 
+
+  /// Given a pbes expression of the form p1 && p2 && .... && pn, this will yield a
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
   /// function symbol.
   inline
   atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
@@ -354,21 +352,21 @@ namespace pbes_expr_optimized {
   {
     return core::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
   }
-  
+
   /// \brief Returns and applied to p and q, and simplifies the result.
   inline
   pbes_expression and_(pbes_expression p, pbes_expression q)
   {
     return core::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
   }
-  
+
   /// \brief Returns or applied to p and q, and simplifies the result.
   inline
   pbes_expression or_(pbes_expression p, pbes_expression q)
   {
     return core::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
   }
-  
+
   /// \brief Returns imp applied to p and q, and simplifies the result.
   inline
   pbes_expression imp(pbes_expression p, pbes_expression q)
@@ -382,7 +380,7 @@ namespace pbes_expr_optimized {
   {
     return core::detail::join(first, last, or_, false_());
   }
-  
+
   /// \brief Returns and applied to the sequence of pbes expressions [first, last[
   template <typename FwdIt>
   inline pbes_expression join_and(FwdIt first, FwdIt last)
@@ -410,7 +408,7 @@ namespace pbes_expr_optimized {
     }
     return pbes_expr::forall(l, p);
   }
-  
+
   /// \brief Returns the existential quantification of the expression p over the variables in l.
   /// If l is empty, p is returned.
   inline
@@ -440,7 +438,7 @@ namespace pbes_expr_optimized {
   {
     using namespace pbes_expr;
     using namespace accessors;
-  
+
     if(is_pbes_and(t)) {
       return is_bes(left(t)) && is_bes(right(t));
     }
@@ -462,7 +460,7 @@ namespace pbes_expr_optimized {
     else if(is_pbes_false(t)) {
       return true;
     }
-  
+
     return false;
   }
 
@@ -498,14 +496,14 @@ namespace core {
     typedef data::data_variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
-    typedef pbes_system::propositional_variable propositional_variable_decl_type;   
+    typedef pbes_system::propositional_variable propositional_variable_decl_type;
 
     /// \brief The propositional variable instantiation type
-    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;   
+    typedef pbes_system::propositional_variable_instantiation propositional_variable_type;
 
     /// \brief The string type
     typedef core::identifier_string string_type;
-   
+
     /// \brief The value true
     /// \return The value true
     static inline
@@ -513,7 +511,7 @@ namespace core {
     {
       return core::detail::gsMakePBESTrue();
     }
-    
+
     /// \brief The value false
     /// \return The value false
     static inline
@@ -521,7 +519,7 @@ namespace core {
     {
       return core::detail::gsMakePBESFalse();
     }
-    
+
     /// \brief Operator not
     /// \param p A term
     /// \return Operator not applied to p
@@ -530,7 +528,7 @@ namespace core {
     {
       return core::detail::gsMakePBESNot(p);
     }
-    
+
     /// \brief Operator and
     /// \param p A term
     /// \param q A term
@@ -540,7 +538,7 @@ namespace core {
     {
       return core::detail::gsMakePBESAnd(p,q);
     }
-    
+
     /// \brief Operator or
     /// \param p A term
     /// \param q A term
@@ -550,7 +548,7 @@ namespace core {
     {
       return core::detail::gsMakePBESOr(p,q);
     }
-    
+
     /// \brief Implication
     /// \param p A term
     /// \param q A term
@@ -560,7 +558,7 @@ namespace core {
     {
       return core::detail::gsMakePBESImp(p,q);
     }
-    
+
     /// \brief Universal quantification
     /// \param l A sequence of variables
     /// \param p A term
@@ -574,7 +572,7 @@ namespace core {
       }
       return core::detail::gsMakePBESForall(l, p);
     }
-    
+
     /// \brief Existential quantification
     /// \param l A sequence of variables
     /// \param p A term
@@ -600,7 +598,7 @@ namespace core {
     {
       return propositional_variable_type(name, data_term_sequence_type(first, last));
     }
-      
+
     /// \brief Test for value true
     /// \param t A term
     /// \return True if the term has the value true. Also works for data terms
@@ -609,20 +607,20 @@ namespace core {
     {
       return core::detail::gsIsPBESTrue(t) || core::detail::gsIsDataExprTrue(t);
     }
-    
+
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false. Also works for data terms
-    static inline 
+    static inline
     bool is_false(term_type t)
     {
       return core::detail::gsIsPBESFalse(t) || core::detail::gsIsDataExprFalse(t);
     }
-    
+
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type and. Also works for data terms
-    static inline 
+    static inline
     bool is_not(term_type t)
     {
       return core::detail::gsIsPBESNot(t) || core::detail::gsIsDataExprNot(t);
@@ -631,61 +629,61 @@ namespace core {
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and. Also works for data terms
-    static inline 
+    static inline
     bool is_and(term_type t)
     {
       return core::detail::gsIsPBESAnd(t) || core::detail::gsIsDataExprAnd(t);
     }
-    
+
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or. Also works for data terms
-    static inline 
+    static inline
     bool is_or(term_type t)
     {
       return core::detail::gsIsPBESOr(t) || core::detail::gsIsDataExprOr(t);
     }
-    
+
     /// \brief Test for implication
     /// \param t A term
     /// \return True if the term is an implication. Also works for data terms
-    static inline 
+    static inline
     bool is_imp(term_type t)
     {
       return core::detail::gsIsPBESImp(t) || core::detail::gsIsDataExprImp(t);
     }
-    
+
     /// \brief Test for universal quantification
     /// \param t A term
     /// \return True if the term is an universal quantification. Also works for data terms
-    static inline 
+    static inline
     bool is_forall(term_type t)
     {
       return core::detail::gsIsPBESForall(t) || core::detail::gsIsDataExprForall(t);
     }
-    
+
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification. Also works for data terms
-    static inline 
+    static inline
     bool is_exists(term_type t)
     {
       return core::detail::gsIsPBESExists(t) || core::detail::gsIsDataExprExists(t);
     }
-    
+
     /// \brief Test for data term
     /// \param t A term
     /// \return True if the term is a data term
-    static inline 
+    static inline
     bool is_data(term_type t)
     {
       return core::detail::gsIsDataExpr(t);
     }
-    
+
     /// \brief Test for propositional variable instantiation
     /// \param t A term
     /// \return True if the term is a propositional variable instantiation
-    static inline 
+    static inline
     bool is_prop_var(term_type t)
     {
       return core::detail::gsIsPropVarInst(t);
@@ -700,7 +698,7 @@ namespace core {
       // Forall and exists are not fully supported by the data library
       assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
       assert(is_not(t) || is_exists(t) || is_forall(t));
-      
+
       if (core::detail::gsIsPBESNot(t))
       {
         return atermpp::arg1(t);
@@ -710,7 +708,7 @@ namespace core {
         return atermpp::arg2(t);
       }
     }
-    
+
     /// \brief Returns the left argument of a term of type and, or or imp
     /// \param t A term
     /// \return The left argument of the term. Also works for data terms
@@ -720,7 +718,7 @@ namespace core {
       assert(is_and(t) || is_or(t) || is_imp(t));
       return atermpp::arg1(t);
     }
-    
+
     /// \brief Returns the right argument of a term of type and, or or imp
     /// \param t A term
     /// \return The right argument of the term. Also works for data terms
@@ -730,7 +728,7 @@ namespace core {
       assert(is_and(t) || is_or(t) || is_imp(t));
       return atermpp::arg2(t);
     }
-    
+
     /// \brief Returns the quantifier variables of a quantifier expression
     /// \param t A term
     /// \return The requested argument. Doesn't work for data terms
@@ -743,7 +741,7 @@ namespace core {
 
       return atermpp::list_arg1(t);
     }
-    
+
     /// \brief Returns the name of a propositional variable instantiation
     /// \param t A term
     /// \return The name of the propositional variable instantiation
@@ -752,8 +750,8 @@ namespace core {
     {
       assert(is_prop_var(t));
       return atermpp::arg1(t);
-    }      
-    
+    }
+
     /// \brief Returns the parameter list of a propositional variable instantiation
     /// \param t A term
     /// \return The parameter list of the propositional variable instantiation
@@ -780,7 +778,7 @@ namespace core {
     term_type dataterm2term(data_term_type t)
     {
       return t;
-    }  
+    }
 
     /// \brief Conversion from term to data term
     /// \param t A term

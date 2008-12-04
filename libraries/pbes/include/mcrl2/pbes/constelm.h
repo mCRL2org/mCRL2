@@ -153,8 +153,7 @@ namespace detail {
       }
     }
 
-    /// Visit data expression node.
-    ///
+    /// \brief Visit data expression node.
     bool visit_data_expression(const term_type& e, const data_term_type& d, edge_condition& ec)
     {
       ec.TC = d;
@@ -162,8 +161,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit true node.
-    ///
+    /// \brief Visit true node.
     bool visit_true(const term_type& e, edge_condition& ec)
     {
       ec.TC = tr::true_();
@@ -171,8 +169,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit false node.
-    ///
+    /// \brief Visit false node.
     bool visit_false(const term_type& e, edge_condition& ec)
     {
       ec.TC = tr::false_();
@@ -180,8 +177,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit not node.
-    ///
+    /// \brief Visit not node.
     bool visit_not(const term_type& e, const term_type& arg, edge_condition& ec)
     {
       edge_condition ec_arg;
@@ -192,8 +188,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit and node.
-    ///
+    /// \brief Visit and node.
     bool visit_and(const term_type& e, const term_type& left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -206,8 +201,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit or node.
-    ///
+    /// \brief Visit or node.
     bool visit_or(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -220,8 +214,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit imp node.
-    ///
+    /// \brief Visit imp node.
     bool visit_imp(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -234,8 +227,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit forall node.
-    ///
+    /// \brief Visit forall node.
     bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
@@ -247,8 +239,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit exists node.
-    ///
+    /// \brief Visit exists node.
     bool visit_exists(const term_type& e, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
@@ -260,8 +251,7 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// Visit propositional variable node.
-    ///
+    /// \brief Visit propositional variable node.
     bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v, edge_condition& ec)
     {
       ec.TC = tr::false_();
@@ -684,7 +674,7 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
           }
         }
       }
-      
+
       const std::map<propositional_variable_decl_type, std::set<variable_type> >& removed_variables() const
       {
         return m_removed;

@@ -42,7 +42,7 @@ class pbes_parelm_algorithm
     typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
     typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
     typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
-    
+
     template <class Iter, class T>
     void iota(Iter first, Iter last, T value) const
     {
@@ -57,9 +57,9 @@ class pbes_parelm_algorithm
       bool search_propositional_variables = false;
       detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
       visitor.visit(t);
-      return visitor.result;      
+      return visitor.result;
     }
-    
+
     int variable_index(data::data_variable_list v, data::data_variable d) const
     {
       int index = 0;
@@ -137,7 +137,7 @@ class pbes_parelm_algorithm
     {
       data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
       std::vector<data::data_variable> predicate_variables;
-      
+
       // compute a mapping from propositional variable names to offsets
       int offset = 0;
       std::map<core::identifier_string, int> propvar_offsets;
@@ -242,7 +242,7 @@ class pbes_parelm_algorithm
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
-        edge_iterator last  = e.second;       
+        edge_iterator last  = e.second;
         for( ; first != last; ++first)
         {
           edge_descriptor e = *first;

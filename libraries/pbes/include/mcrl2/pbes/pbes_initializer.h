@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/pbes_initializer.h
+/// \file mcrl2/pbes/pbes_initializer.h
 /// \brief The class pbes_initializer.
 
 #ifndef MCRL2_PBES_PBES_INITIALIZER_H
@@ -34,14 +34,12 @@ class pbes_initializer: public atermpp::aterm_appl
     propositional_variable_instantiation m_variable;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_initializer()
       : atermpp::aterm_appl(core::detail::constructPBInit())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_initializer(data::data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
@@ -51,8 +49,7 @@ class pbes_initializer: public atermpp::aterm_appl
     {
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_initializer(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -62,31 +59,27 @@ class pbes_initializer: public atermpp::aterm_appl
       m_variable = propositional_variable_instantiation(*i);
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables.
     data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of variables.
-    ///
+    /// \brief Returns the sequence of variables.
     propositional_variable_instantiation variable() const
     {
       return m_variable;
     }
 
-    /// Applies a substitution to this pbes initializer and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a substitution to this pbes initializer and returns the result.
+    /// \brief The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
     template <typename Substitution>
     pbes_initializer substitute(Substitution f)
     {
       return pbes_initializer(f(atermpp::aterm(*this)));
-    }     
+    }
 
-    /// Returns true (there are no well typedness checks defined yet).
-    ///
+    /// \brief Returns true (there are no well typedness checks defined yet).
     bool is_well_typed() const
     {
       return true;

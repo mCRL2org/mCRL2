@@ -23,18 +23,18 @@ namespace pbes_system {
   struct rewrite_equation
   {
     PbesRewriter& pbesr;
-    
+
     rewrite_equation(PbesRewriter& r)
       : pbesr(r)
     {}
-    
+
     pbes_equation operator()(const pbes_equation& eq)
     {
       return pbes_equation(eq.symbol(), eq.variable(), pbesr(eq.formula()));
     }
   };
 
-  /// Applies a rewriter to a pbes.
+  /// \brief Applies a rewriter to a pbes.
   template <typename Container, typename PbesRewriter>
   void pbesrewr(pbes<Container>& p, PbesRewriter pbesr)
   {

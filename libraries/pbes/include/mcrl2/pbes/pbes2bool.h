@@ -45,7 +45,7 @@ struct t_tool_options
    std::string infilename;
    std::string outfilename;
    std::string opt_counter_example_file;
-    
+
    t_tool_options()
      : opt_outputformat("none"),
        opt_strategy(lazy),
@@ -71,7 +71,7 @@ bool pbes2bool(const mcrl2::pbes_system::pbes<>& p, t_tool_options options = t_t
   options.infilename = "pbes2bool.in";
   options.outfilename = "pbes2bool.out";
   q.save(options.infilename);
-  process(options); 
+  process(options);
   return true;
 }
 

@@ -44,7 +44,7 @@ namespace detail {
     }
     return atermpp::term_list<Term>(result.begin(), result.end());
   }
-  
+
 } // namespace detail
 
 /// Removes the parameters with the given indices from the parameter list.
@@ -95,7 +95,7 @@ struct pbes_remove_parameters_builder: public pbes_expression_builder<pbes_expre
     : to_be_removed_(to_be_removed)
   {}
 
-  /// Visit propositional variable node.
+  /// \brief Visit propositional variable node.
   ///
   pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v)
   {
@@ -127,7 +127,7 @@ pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier
   return pbes_equation(e.symbol(),
                        remove_parameters(e.variable(), to_be_removed),
                        remove_parameters(e.formula(), to_be_removed)
-                      );                     
+                      );
 }
 
 /// Removes parameters from propositional variables in the given pbes

@@ -55,26 +55,26 @@ namespace pbes_system {
   class pbes2bes_algorithm
   {
     protected:
-      /// The rewriter.
+      /// \brief The rewriter.
       pbes2bes_rewriter R;
 
-      /// The number of generated equations.
+      /// \brief The number of generated equations.
       int equation_count;
 
       /// Propositional variable instantiations that need to be handled.
       atermpp::set<propositional_variable_instantiation> todo;
-        
+
       /// Propositional variable instantiations that have been handled.
       atermpp::set<propositional_variable_instantiation> done;
-        
+
       /// Data structure for storing the result. E[i] corresponds to the equations
       /// generated from the i-th PBES equation.
       std::vector<atermpp::vector<pbes_equation> > E;
 
-      /// The initial value.
+      /// \brief The initial value.
       propositional_variable_instantiation init;
 
-      /// A lookup map for PBES equations.
+      /// \brief A lookup map for PBES equations.
       std::map<core::identifier_string, int> equation_index;
 
       /// Print the equations to standard out.
@@ -106,7 +106,7 @@ namespace pbes_system {
         todo.insert(Xinit.propositional_variables().front());
         while (!todo.empty())
         {
-          propositional_variable_instantiation X = *todo.begin();         
+          propositional_variable_instantiation X = *todo.begin();
           todo.erase(todo.begin());
           done.insert(X);
           propositional_variable_instantiation X_e = R.rename(X);
@@ -121,7 +121,7 @@ namespace pbes_system {
             {
               todo.insert(*i);
             }
-          }         
+          }
           pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::data_variable_list()), psi_e);
           if (m_print_equations)
           {
@@ -134,7 +134,7 @@ namespace pbes_system {
           }
         }
       }
-      
+
       pbes<> get_result()
       {
         pbes<> result;
@@ -150,15 +150,15 @@ namespace pbes_system {
       {
         return m_print_equations;
       }
-      
+
       pbes2bes_rewriter& rewriter()
       {
         return R;
       }
-  };  
-      
+  };
+
 } // namespace pbes_system
-      
+
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES2BES_ALGORITHM_H

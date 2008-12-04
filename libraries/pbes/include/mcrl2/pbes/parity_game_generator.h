@@ -38,13 +38,13 @@ namespace pbes_system {
   class parity_game_generator
   {
     protected:
-      /// The traits class of the expression type.
+      /// \brief The traits class of the expression type.
       typedef core::term_traits<pbes_expression> tr;
 
       /// Substitution function type used by the PBES rewriter.
       typedef data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > substitution_function;
-      
-      /// The PBES that is being solved.
+
+      /// \brief The PBES that is being solved.
       const pbes<>& m_pbes;
 
       /// Identifier generator for the enumerator. (TODO: this needs to be improved!)
@@ -62,15 +62,15 @@ namespace pbes_system {
       /// PBES rewriter.
       pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R;
 
-      /// Maps propositional variables to corresponding PBES equations.
+      /// \brief Maps propositional variables to corresponding PBES equations.
       std::map<core::identifier_string, atermpp::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
-      
-      /// Maps propositional variables to corresponding priorities.
+
+      /// \brief Maps propositional variables to corresponding priorities.
       std::map<core::identifier_string, unsigned int> m_priorities;
-      
-      /// Maps PBES closed expressions to corresponding BES variables.
+
+      /// \brief Maps PBES closed expressions to corresponding BES variables.
       atermpp::map<pbes_expression, unsigned int> m_pbes_expression_index;
-        
+
       /// Contains intermediate results of the BES that is being generated.
       /// m_bes[i] represents a BES equation corresponding to BES variable i.
       /// m_bes[i].first is the right hand side of the BES equation
@@ -119,10 +119,10 @@ namespace pbes_system {
       }
 
     public:
-      /// The operation type of the vertices.
+      /// \brief The operation type of the vertices.
       enum operation_type { PGAME_OR, PGAME_AND };
-      
-      /// Constructor.
+
+      /// \brief Constructor.
       parity_game_generator(const pbes<>& p, bool true_false_dependencies = false)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),
@@ -168,8 +168,8 @@ namespace pbes_system {
         propositional_variable_instantiation phi = R(m_pbes.initial_state());
         add_bes_equation(phi, m_priorities[phi.name()]);
       }
-      
-      /// Returns the vertex type.
+
+      /// \brief Returns the vertex type.
       /// \param index The index of a proposition variable of the generated BES.
       /// \return PGAME_AND if the corresponding BES equation is a conjunction,
       /// PGAME_OR if it is a disjunction.
@@ -201,10 +201,8 @@ namespace pbes_system {
       }
 
       /// \brief Returns the priority of a vertex.
-      ///
       /// The priority of the first equation is 0 if it is a maximal fixpoint,
       /// and 1 if it is a minimal fixpoint.
-      /// 
       /// \param index The index of a proposition variable of the generated BES.
       /// \return The block nesting depth of the variable in the BES.
       unsigned int get_priority(unsigned int index) const
@@ -213,7 +211,7 @@ namespace pbes_system {
         return m_bes[index].second;
       }
 
-      /// Returns the vertices for which a solution is requested.
+      /// \brief Returns the vertices for which a solution is requested.
       /// By default a set containing the values 0, 1 and 2 is returned, corresponding
       /// to the expressions true, false and the initial state of the PBES.
       /// \return A set of indices corresponding to proposition variables of the generated BES.
@@ -229,7 +227,7 @@ namespace pbes_system {
         return result;
       }
 
-      /// Returns the successors of a vertex in the graph.
+      /// \brief Returns the successors of a vertex in the graph.
       /// \param index The index of a proposition variable of the generated BES.
       /// \return The indices of the proposition variables that appear in the
       /// right hand side of the BES equation of the given index.
@@ -296,7 +294,7 @@ namespace pbes_system {
         }
         return result;
       }
-      
+
       /// Prints the mapping from BES variables to the corresponding PBES expressions.
       void print_variable_mapping()
       {

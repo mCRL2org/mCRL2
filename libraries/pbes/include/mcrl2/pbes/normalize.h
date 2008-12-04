@@ -20,22 +20,22 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Visitor for checking if a pbes expression is normalized.
+/// \brief Visitor for checking if a pbes expression is normalized.
 struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 {
   bool result;
-  
+
   is_normalized_visitor()
     : result(true)
   {}
-  
+
   bool visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
   {
     result = false;
     return stop_recursion;
   }
 
-  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */) 
+  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     result = false;
     return stop_recursion;
@@ -43,7 +43,7 @@ struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 };
 
 
-/// The function normalize brings a pbes expression into positive normal form,
+/// \brief The function normalize brings a pbes expression into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \return The result of the normalization.
 inline
@@ -105,9 +105,9 @@ pbes_expression normalize(pbes_expression f)
   return pbes_expression();
 }
 
-/// Applies normalization to the right hand side of the equation.
+/// \brief Applies normalization to the right hand side of the equation.
 /// \return The result of the normalization.
-/// 
+///
 inline
 pbes_equation normalize(const pbes_equation& e)
 {

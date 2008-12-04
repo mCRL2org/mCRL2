@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/boolean_equation_system/boolean_equation_system.h
+/// \file mcrl2/bes/bes.h
 /// \brief Boolean expressions.
 
 #ifndef MCRL2_PBES_BES_H
@@ -38,67 +38,68 @@
 //                    boolean variable
 //--------------------------------------------------------------------//
 namespace mcrl2 {
+  
+/// \brief The main namespace for boolean equation systems.
 namespace bes {
 
   typedef pbes_system::fixpoint_symbol fixpoint_symbol;
 
   /// \brief boolean variable
-  ///
   class boolean_variable: public atermpp::aterm_appl
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       boolean_variable()
         : atermpp::aterm_appl(core::detail::constructBooleanVariable())
       {}
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
+      /// \param term A term
       boolean_variable(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_rule_BooleanVariable(m_term));
       }
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
+      /// \param name A string
       explicit boolean_variable(core::identifier_string name)
         : atermpp::aterm_appl(core::detail::gsMakeBooleanVariable(name))
       {
         assert(core::detail::check_rule_BooleanVariable(m_term));
       }
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
+      /// \param name A string
       boolean_variable(const std::string& name)
         : atermpp::aterm_appl(core::detail::gsMakeBooleanVariable(core::detail::gsString2ATermAppl(name.c_str())))
       {
         assert(core::detail::check_rule_BooleanVariable(m_term));
       }
-  
-      /// Returns the name of the boolean variable.
-      ///
+
+      /// \brief Returns the name of the boolean variable.
+      /// \return The name of the boolean variable.
       core::identifier_string name() const
       {
         return atermpp::arg1(*this);
       }
-  
-      /// Applies a substitution to this boolean variable and returns the result.
-      /// The Substitution object must supply the method aterm operator()(aterm).
-      ///
+
+      /// \brief Applies a substitution to this boolean variable and returns the result.
+      /// \param f A substitution function.
+      /// The Substitution function must supply the method aterm operator()(aterm).
+      /// \return The result of applying the substitution.
       template <typename Substitution>
       boolean_variable substitute(Substitution f) const
       {
         return boolean_variable(f(*this));
       }
   };
-  
-  /// \brief singly linked list of data variables
+
+  /// \brief Singly linked list of boolean variables
   ///
   typedef atermpp::term_list<boolean_variable> boolean_variable_list;
-  
-  /// pretty print function
+
+  /// \brief Pretty print function
   inline
   std::string pp(boolean_variable v)
   {
@@ -123,40 +124,39 @@ namespace bes {
   class boolean_expression: public atermpp::aterm_appl
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       boolean_expression()
         : atermpp::aterm_appl(core::detail::constructBooleanExpression())
       {}
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
+      /// \param term A term
       boolean_expression(ATermAppl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_rule_BooleanExpression(m_term));
       }
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
+      /// \param term A term
       boolean_expression(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_rule_BooleanExpression(m_term));
       }
-  
-      /// Applies a substitution to this boolean expression and returns the result.
-      /// The Substitution object must supply the method aterm operator()(aterm).
-      ///
+
+      /// \brief Applies a substitution to this boolean expression and returns the result.
+      /// \param f A substitution function.
+      /// The Substitution function must supply the method aterm operator()(aterm).
+      /// \return The result of applying the substitution.
       template <typename Substitution>
       boolean_expression substitute(Substitution f) const
       {
         return boolean_expression(f(*this));
       }
   };
-  
-  /// \brief singly linked list of data expressions
-  ///
+
+  /// \brief singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
 } // namespace bes
@@ -168,6 +168,7 @@ namespace core {
   template <>
   struct term_traits<bes::boolean_expression>
   {
+    /// The term type
     typedef bes::boolean_expression term_type;
     typedef bes::boolean_variable variable_type;
     typedef core::identifier_string string_type;
@@ -264,7 +265,7 @@ namespace mcrl2 {
 namespace bes {
 
   /// pretty print function (N.B. the implementation is not very efficient)
-  inline                            
+  inline
   std::string pp(boolean_expression e, bool add_parens = false)
   {
     typedef core::term_traits<boolean_expression> tr;
@@ -299,8 +300,8 @@ namespace bes {
     }
     throw mcrl2::runtime_error("error in mcrl2::bes::pp: encountered unknown boolean expression " + e.to_string());
     return "";
-  }                                 
-                                  
+  }
+
 } // namespace bes
 } // namespace mcrl2
 
@@ -323,14 +324,12 @@ class boolean_equation: public atermpp::aterm_appl
     boolean_expression m_formula;  // the right hand side
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     boolean_equation()
       : atermpp::aterm_appl(core::detail::constructBooleanEquation())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     boolean_equation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -342,8 +341,7 @@ class boolean_equation: public atermpp::aterm_appl
       m_formula  = boolean_expression(*i);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     boolean_equation(fixpoint_symbol symbol, boolean_variable variable, boolean_expression expr)
       : atermpp::aterm_appl(core::detail::gsMakeBooleanEquation(symbol, variable, expr)),
         m_symbol(symbol),
@@ -352,22 +350,19 @@ class boolean_equation: public atermpp::aterm_appl
     {
     }
 
-    /// Returns the fixpoint symbol of the equation.
-    ///
+    /// \brief Returns the fixpoint symbol of the equation.
     fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
-    /// Returns the boolean_equation_system variable of the equation.
-    ///
+    /// \brief Returns the boolean_equation_system variable of the equation.
     boolean_variable variable() const
     {
       return m_variable;
     }
 
-    /// Returns the predicate formula on the right hand side of the equation.
-    ///
+    /// \brief Returns the predicate formula on the right hand side of the equation.
     boolean_expression formula() const
     {
       return m_formula;
@@ -378,8 +373,8 @@ class boolean_equation: public atermpp::aterm_appl
 ///
 typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
-  /// pretty print function
-  inline                            
+  /// \brief Pretty print function
+  inline
   std::string pp(boolean_equation e)
   {
     return core::pp(e.symbol()) + " " + pp(e.variable()) + " = " + pp(e.formula());
@@ -404,18 +399,17 @@ namespace bes {
   class boolean_equation_system
   {
     friend struct atermpp::aterm_traits<boolean_equation_system>;
-  
+
     protected:
       Container m_equations;
       boolean_expression m_initial_state;
-  
+
       ATerm term() const
       {
         return reinterpret_cast<ATerm>(ATermAppl(*this));
       }
-  
-      /// Initialize the boolean_equation_system with an atermpp::aterm_appl.
-      ///
+
+      /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
       void init_term(atermpp::aterm_appl t)
       {
         atermpp::aterm_appl::iterator i = t.begin();
@@ -423,16 +417,14 @@ namespace bes {
         m_initial_state = boolean_expression(*i);
         m_equations = Container(eqn.begin(), eqn.end());
       }
-  
+
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       boolean_equation_system()
         : m_initial_state(core::term_traits<boolean_expression>::true_())
       {}
-  
-      /// Constructor.
-      ///
+
+      /// \brief Constructor.
       boolean_equation_system(
           const Container& equations,
           boolean_expression initial_state)
@@ -442,46 +434,41 @@ namespace bes {
       {
         assert(core::detail::check_rule_BES(term()));
       }
-  
-      /// Returns the equations.
-      ///
+
+      /// \brief Returns the equations.
       const Container& equations() const
       {
         return m_equations;
       }
-  
-      /// Returns the equations.
-      ///
+
+      /// \brief Returns the equations.
       Container& equations()
       {
         return m_equations;
       }
-  
-      /// Returns the initial state.
-      ///
+
+      /// \brief Returns the initial state.
       const boolean_expression& initial_state() const
       {
         return m_initial_state;
       }
 
-      /// Returns the initial state.
-      ///
+      /// \brief Returns the initial state.
       boolean_expression& initial_state()
       {
         return m_initial_state;
-      } 
-  
-      /// Returns true.
+      }
+
+      /// \brief Returns true.
       bool is_well_typed() const
       {
         return true;
       }
-  
+
       /// \brief Reads the boolean equation system from file.
       /// \param[in] filename
       /// If filename is nonempty, input is read from the file named filename.
       /// If filename is empty, input is read from standard input.
-      ///
       void load(const std::string& filename)
       {
         atermpp::aterm t = core::detail::load_aterm(filename);
@@ -495,12 +482,11 @@ namespace bes {
           throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::load())");
         }
       }
-  
-      /// Writes the boolean equation system to file.
+
+      /// \brief Writes the boolean equation system to file.
       /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
       /// Otherwise an ascii representation is saved. In general the binary format is
       /// much more compact than the ascii representation.
-      ///
       void save(const std::string& filename, bool binary = true) // const
       {
         if (!is_well_typed())
@@ -510,18 +496,16 @@ namespace bes {
         atermpp::aterm t = ATermAppl(*this);
         core::detail::save_aterm(t, filename, binary);
       }
-  
-      /// Conversion to ATermAppl.
-      ///
+
+      /// \brief Conversion to ATermAppl.
       operator ATermAppl() const
       {
         boolean_equation_list equations(m_equations.begin(), m_equations.end());
         return core::detail::gsMakeBES(equations, m_initial_state);
       }
-  
-      /// Returns the set of binding variables of the boolean_equation_system, i.e. the
+
+      /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
       /// variables that occur on the left hand side of an equation.
-      ///
       atermpp::set<boolean_variable> binding_variables() const
       {
         atermpp::set<boolean_variable> result;
@@ -531,11 +515,10 @@ namespace bes {
         }
         return result;
       }
-  
-      /// Returns the set of occurring variables of the boolean_equation_system, i.e.
+
+      /// \brief Returns the set of occurring variables of the boolean_equation_system, i.e.
       /// the variables that occur in the right hand side of an equation or in the
       /// initial state.
-      ///
       atermpp::set<boolean_variable> occurring_variables() const
       {
         atermpp::set<boolean_variable> result;
@@ -546,52 +529,49 @@ namespace bes {
         atermpp::find_all_if(m_initial_state, &core::term_traits<boolean_expression>::is_variable, std::inserter(result, result.end()));
         return result;
       }
-  
-      /// Returns true if all occurring variables are binding variables.
-      ///
+
+      /// \brief Returns true if all occurring variables are binding variables.
       bool is_closed() const
       {
         atermpp::set<boolean_variable> bnd = binding_variables();
         atermpp::set<boolean_variable> occ = occurring_variables();
         return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
       }
-  
-      /// Applies a substitution to the boolean_equation_system equations.
-      /// The Substitution object must supply the method aterm operator()(aterm).
-      ///
+
+      /// \brief Applies a substitution to this boolean equation system and returns the result.
+      /// \param f A substitution function.
+      /// The Substitution function must supply the method aterm operator()(aterm).
+      /// \return The result of applying the substitution.
       template <typename Substitution>
       void substitute(Substitution f)
       {
         std::transform(equations().begin(), equations().end(), equations().begin(), f);
       }
-  
+
       /// Protects the term from being freed during garbage collection.
-      ///
       void protect()
       {
         m_initial_state.protect();
       }
-  
-      /// Unprotect the term.
+
+      /// \brief Unprotect the term.
       /// Releases protection of the term which has previously been protected through a
       /// call to protect.
-      ///
       void unprotect()
       {
         m_initial_state.unprotect();
       }
-  
-      /// Mark the term for not being garbage collected.
-      ///
+
+      /// \brief Mark the term for not being garbage collected.
       void mark()
       {
         m_initial_state.mark();
       }
   };
 
-  /// pretty print function                                                        
+  /// \brief Pretty print function
   template <typename Container>
-  std::string pp(const boolean_equation_system<Container>& p)                                               
+  std::string pp(const boolean_equation_system<Container>& p)
   {
     std::ostringstream out;
     BOOST_FOREACH(const boolean_equation& eq, p.equations())
