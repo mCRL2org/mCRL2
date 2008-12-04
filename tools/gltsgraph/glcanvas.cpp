@@ -359,10 +359,11 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
   size_t selectedObject;
 
   ptr = (GLuint*) buffer;
+  int toProcess = hits;
 
-  if (hits > 0)
+  while (toProcess > 0)
   {
-    while(number == 0)
+    while(number <= 0)
     {
 
       number = *ptr;
@@ -372,44 +373,48 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
       // There are no names on the stack, so skip over them.
     }
     // Number != 0 => *ptr is the first name on the stack.
-    selectedType = *ptr;
+    
+    if (number <= 3) {
+      selectedType = *ptr;
 
-    ++ptr; // ID;
-    selectedObject = *ptr;
+      ++ptr; // ID;
+      selectedObject = *ptr;
 
     
-    switch(selectedType)
-    {
-      case IDS::TRANSITION: 
-      { 
-        ++ptr; // Second ID, for transitions
-        size_t selectedTrans = *ptr;
-        owner->selectTransition(selectedObject, selectedTrans); 
-        break;
-      }
-      case IDS::SELF_LOOP:
+
+
+      switch(selectedType)
       {
-        ++ptr; // Second ID, for transitions
-        size_t selectedTrans = *ptr;
-        owner->selectSelfLoop(selectedObject, selectedTrans);
-        break;
+        case IDS::TRANSITION: 
+        { 
+          ++ptr; // Second ID, for transitions
+          size_t selectedTrans = *ptr;
+          owner->selectTransition(selectedObject, selectedTrans); 
+          break;
+        }
+        case IDS::SELF_LOOP:
+        {
+          ++ptr; // Second ID, for transitions
+          size_t selectedTrans = *ptr;
+          owner->selectSelfLoop(selectedObject, selectedTrans);
+          break;
+        }
+        case IDS::STATE:
+        {
+          owner->selectState(selectedObject);
+          break;
+        }
+        case IDS::LABEL:
+        {
+          ++ptr; // Second ID, transitions
+          size_t selectedLabel = *ptr;
+          owner->selectLabel(selectedObject, selectedLabel);
+          break;
+        }
+        default: break;
       }
-      case IDS::STATE:
-      {
-        owner->selectState(selectedObject);
-        break;
-      }
-      case IDS::LABEL:
-      {
-        ++ptr; // Second ID, transitions
-        size_t selectedLabel = *ptr;
-        owner->selectLabel(selectedObject, selectedLabel);
-      }
-      default: break;
     }
-  }
-  else
-  {
+    --toProcess;
   }
 
   ptr = NULL; 
