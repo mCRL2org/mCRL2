@@ -309,7 +309,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     glPushName(IDS::LABEL);
     glPushName(from->getValue());
     glPushName(trid);
-    fr->draw_bounding_box(tr->getLabel(), labelX, labelY,
+    fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
                   8 * pixelSize / 20.0f, 
                   mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
     glPopName();
@@ -326,7 +326,6 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     glColor3ub(0, 0, 0);
   }
     
-
   fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
