@@ -327,7 +327,7 @@ void test_large_specification()
   "init                                                                                                                                                                                   \n"
   "  allow({                                                                                                                                                                              \n"
   "      cUQ,                                                                                                                                                                             \n"
-  "      sUR,                                                                                                                                                                             \n"
+  "      cUR,                                                                                                                                                                             \n"
   "      cSend,                                                                                                                                                                           \n"
   "      cReceive,                                                                                                                                                                        \n"
   "      cLockResultWS,                                                                                                                                                                   \n"
