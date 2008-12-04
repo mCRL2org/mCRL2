@@ -80,7 +80,7 @@ void dunion(data_variable_list *x, data_variable_list y);
 inline
 data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 {
-  return core::detail::gsGetDataExprHead(t);
+  return mcrl2::core::detail::gsGetDataExprHead(t);
 }
 
 /// \brief Returns the arguments of the data expression t.
@@ -91,7 +91,7 @@ data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
 inline
 data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
 {
-  return core::detail::gsGetDataExprArgs(t);
+  return mcrl2::core::detail::gsGetDataExprArgs(t);
 }
 
 // Implementation of pbes_solver  
