@@ -23,14 +23,13 @@ namespace data {
 class xyz_identifier_generator: public multiset_identifier_generator
 {
   protected:
-    /// The index of the last generated identifier.
+    /// \brief The index of the last generated identifier.
     int m_index;
-    
-    /// The character of the last generated identifier.
-    char m_char; 
+
+    /// \brief The character of the last generated identifier.
+    char m_char;
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
-    ///
     std::string next()
     {
       switch (m_char) {
@@ -52,14 +51,12 @@ class xyz_identifier_generator: public multiset_identifier_generator
     }
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     xyz_identifier_generator()
      : m_index(-2), m_char('Z')
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param t A context.
     template <typename Term>
     xyz_identifier_generator(Term t)
@@ -67,11 +64,10 @@ class xyz_identifier_generator: public multiset_identifier_generator
     {
       add_to_context(t);
     }
-    
+
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
-    ///
     /// \param hint A hint for the name of generated identifiers.
     /// \return A fresh identifier.
     core::identifier_string operator()(const std::string& hint)

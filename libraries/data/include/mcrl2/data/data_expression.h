@@ -53,8 +53,8 @@ typedef atermpp::term_list<data_expression> data_expression_list;
 /// expression is not nil before using it.
 class data_expression: public atermpp::aterm_appl
 {
-  protected:   
-    /// This function checks if the data applications contained in this term
+  protected:
+    /// \brief This function checks if the data applications contained in this term
     /// are well defined, using the function data_application::check_sorts.
     void check_data_applications() const
     {
@@ -72,14 +72,13 @@ class data_expression: public atermpp::aterm_appl
     }
 
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_expression()
       : atermpp::aterm_appl(core::detail::constructDataExpr())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param term A term.
     data_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
@@ -88,8 +87,7 @@ class data_expression: public atermpp::aterm_appl
       check_data_applications();
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param term A term.
     data_expression(ATermAppl term)
       : atermpp::aterm_appl(term)
@@ -98,8 +96,7 @@ class data_expression: public atermpp::aterm_appl
       check_data_applications();
     }
 
-    /// Returns the sort of the data expression.
-    ///
+    /// \brief Returns the sort of the data expression.
     /// \return The sort of the data expression.
     sort_expression sort() const
     {
@@ -108,9 +105,8 @@ class data_expression: public atermpp::aterm_appl
       return sort_expression(result);
     }
 
-    /// Applies a substitution to this data expression and returns the result.
+    /// \brief Applies a substitution to this data expression and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
     /// \param f A substitution function.
     /// \return The application of the substitution to the expression.
     template <typename Substitution>
@@ -129,25 +125,7 @@ bool is_data_expression(atermpp::aterm_appl t)
   return core::detail::gsIsDataExpr(t);
 }
 
-/// Returns the head of the data expression t.
-/// \return The head of the data expression.
-/// \deprecated
-inline
-data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
-{
-  return core::detail::gsGetDataExprHead(t);
-}
-
-/// Returns the arguments of the data expression t.
-/// \return The arguments of the data expression.
-/// \deprecated
-inline
-data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
-{
-  return core::detail::gsGetDataExprArgs(t);
-}
-
-/// Accessor functions and predicates for data expressions.
+/// \brief Accessor functions and predicates for data expressions.
 namespace data_expr {
   // //data expression
   // <DataExpr>     ::= Id(<String>)                                          (- tc)
@@ -292,7 +270,7 @@ namespace data_expr {
   {
     return core::detail::join(first, last, or_, false_());
   }
-  
+
   /// \brief Returns and applied to the sequence of data expressions [first, last[
   template <typename FwdIt>
   data_expression join_and(FwdIt first, FwdIt last)
@@ -465,7 +443,7 @@ namespace data_expr {
       namespace d = data_expr;
       return core::detail::optimized_not(p, d::not_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
-    
+
     /// \brief Returns and applied to p and q, and simplifies the result.
     inline
     data_expression and_(data_expression p, data_expression q)
@@ -473,7 +451,7 @@ namespace data_expr {
       namespace d = data_expr;
       return core::detail::optimized_and(p, q, d::and_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
-    
+
     /// \brief Returns or applied to p and q, and simplifies the result.
     inline
     data_expression or_(data_expression p, data_expression q)
@@ -492,7 +470,7 @@ namespace data_expr {
       }
       return core::detail::gsMakeDataExprEq(d, e);
     }
-    
+
     /// \brief Returns the expression d != e
     inline
     data_expression not_equal_to(data_expression d, data_expression e)
@@ -503,7 +481,7 @@ namespace data_expr {
       }
       return core::detail::gsMakeDataExprNeq(d, e);
     }
-    
+
     /// \brief Returns or applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
     data_expression join_or(FwdIt first, FwdIt last)
@@ -511,7 +489,7 @@ namespace data_expr {
       namespace d = data_expr;
       return core::detail::join(first, last, optimized::or_, d::false_());
     }
-    
+
     /// \brief Returns and applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
     data_expression join_and(FwdIt first, FwdIt last)
@@ -525,19 +503,19 @@ namespace data_expr {
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-  /// Checks if the sorts of the arguments of a data application match
+  /// \brief Checks if the sorts of the arguments of a data application match
   /// with the head.
   /// \return True if the sorts match.
   //
   // Comments by Aad:
   // Bij het checken van een data expressie van de vorm
-  // 
+  //
   //   DataAppl(e, [e_0,...,e_n])
-  // 
-  // dient te worden nagegaan of de sort van e matcht met die van 
-  // e_0,...,e_n. Dat wil zeggen dat als e_0,...,e_n sorts s_0,...,s_n 
+  //
+  // dient te worden nagegaan of de sort van e matcht met die van
+  // e_0,...,e_n. Dat wil zeggen dat als e_0,...,e_n sorts s_0,...,s_n
   // hebben, dan dient data expressie e sort
-  // 
+  //
   //   SortArrow([s_0,...,s_n], s)
   //
   inline

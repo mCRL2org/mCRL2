@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 #define MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 
+#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_variable.h"
 
@@ -20,59 +21,54 @@ namespace mcrl2 {
 namespace data {
 
   /// \brief Data expression with a sequence of variables attached to it
-  ///
   /// The intended use case is to store the free variables of the expression.
   class data_expression_with_variables: public data_expression
   {
     protected:
-      /// The attached variables.
+
+      /// \brief The attached variables.
       data_variable_list m_variables;
-      
+
     public:
-      /// Constructor.
-      ///             
+
+      /// \brief Constructor.
       data_expression_with_variables()
       {}
-  
-      /// Constructor. Creates a data expression with an empty sequence of variables.
-      ///             
+
+      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       /// \param term A term.
       data_expression_with_variables(atermpp::aterm_appl term)
         : data_expression(term)
       {}
-  
-      /// Constructor. Creates a data expression with an empty sequence of variables.
-      ///             
+
+      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       /// \param term A term.
       data_expression_with_variables(ATermAppl term)
         : data_expression(term)
       {}
 
-      /// Constructor.
-      ///             
+      /// \brief Constructor.
       /// \param expression A data expression.
       /// \param variables A sequence of variables.
       data_expression_with_variables(data_expression expression, data_variable_list variables)
         : data_expression(expression), m_variables(variables)
       {}
-      
-      /// Return the variables.
-      ///
+
+      /// \brief Return the variables.
       /// \return The variables of the data expression.
       data_variable_list variables() const
       {
         return m_variables;
       }
-      
-      /// Return the variables.
-      ///
+
+      /// \brief Return the variables.
       /// \return The variables of the data expression.
       data_variable_list& variables()
       {
         return m_variables;
       }
-      
-      /// Returns true if the sequence of variables is empty.
+
+      /// \brief Returns true if the sequence of variables is empty.
       /// \return True if the sequence of variables is empty.
       bool is_constant() const
       {
@@ -115,12 +111,12 @@ namespace core {
 
     /// \brief The variable sequence type
     typedef data::data_variable_list variable_sequence_type;
-    
+
     /// \brief The value true
     /// \return The value true
     static inline
     term_type true_() { return data::data_expr::true_(); }
-    
+
     /// \brief The value false
     /// \return The value false
     static inline
@@ -131,7 +127,7 @@ namespace core {
     /// \return Operator not applied to p
     static inline
     term_type not_(term_type p) { return term_type(data::data_expr::not_(p), p.variables()); }
-    
+
     /// \brief Operator and
     /// \param p A term
     /// \param q A term
@@ -139,9 +135,9 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return term_type(data::data_expr::and_(p, q), data::data_variable_list_union(p.variables(), q.variables()));
+      return term_type(data::data_expr::and_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
-    
+
     /// \brief Operator or
     /// \param p A term
     /// \param q A term
@@ -149,55 +145,55 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return term_type(data::data_expr::or_(p, q), data::data_variable_list_union(p.variables(), q.variables()));
+      return term_type(data::data_expr::or_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
-    
+
     /// \brief Test for value true
     /// \param t A term
     /// \return True if the term has the value true
     static inline
     bool is_true(term_type t) { return data::data_expr::is_true(t); }
-    
+
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false
-    static inline 
+    static inline
     bool is_false(term_type t) { return data::data_expr::is_false(t); }
-    
+
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type not
-    static inline 
+    static inline
     bool is_not(term_type t) { return data::data_expr::is_not(t); }
-    
+
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and
-    static inline 
+    static inline
     bool is_and(term_type t) { return data::data_expr::is_and(t); }
-    
+
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or
-    static inline 
+    static inline
     bool is_or(term_type t) { return data::data_expr::is_or(t); }
-    
+
     /// \brief Test for implication
     /// \param t A term
     /// \return True if the term is an implication
-    static inline 
+    static inline
     bool is_imp(term_type t) { return data::data_expr::is_imp(t); }
-    
+
     /// \brief Test for universal quantification
     /// \param t A term
     /// \return True if the term is an universal quantification
-    static inline 
+    static inline
     bool is_forall(term_type t) { return data::data_expr::is_forall(t); }
-    
+
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification
-    static inline 
+    static inline
     bool is_exists(term_type t) { return data::data_expr::is_exists(t); }
 
     /// \brief Conversion from variable to term
@@ -227,7 +223,7 @@ namespace core {
       return core::pp(t) + " " + core::pp(t.variables());
     }
   };
-  
+
 } // namespace core
 
 } // namespace mcrl2

@@ -47,7 +47,7 @@ namespace detail {
       throw mcrl2::runtime_error("parse error");
     return result;
   }
-  
+
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
@@ -56,7 +56,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error");
     return result;
   }
-  
+
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
@@ -65,7 +65,7 @@ namespace detail {
       throw mcrl2::runtime_error("alpha reduction error");
     return result;
   }
-  
+
   inline
   ATermAppl implement_process_specification(ATermAppl spec)
   {
@@ -83,7 +83,7 @@ namespace detail {
       throw mcrl2::runtime_error("parse error");
     return result;
   }
-  
+
   inline
   ATermAppl type_check_data_specification(ATermAppl spec)
   {
@@ -105,7 +105,9 @@ namespace detail {
 } // namespace detail
 /// \endcond
 
-  /// Parses a data specification.
+  /// \brief Parses a data specification.
+  /// \param text A string
+  /// \return A data specification
   inline
   data_specification parse_data_specification(const std::string& text)
   {
@@ -121,12 +123,12 @@ namespace detail {
     result           = data::detail::type_check_specification(result);
     result           = data::detail::alpha_reduce(result);
     result           = data::detail::implement_process_specification(result);
-   
+
     atermpp::aterm_appl lps(result);
     return data_specification(lps(0));
   }
 
-  /// Parses a single data expression.
+  /// \brief Parses a single data expression.
   /// \param[in] text The text that is parsed.
   /// \param[in] var_decl An optional declaration of data variables
   /// with their types.<br>
@@ -135,7 +137,8 @@ namespace detail {
   ///   m, n: Nat;
   ///   b: Bool;
   /// \endcode
-  /// \result the parsed expression
+  /// \param[in] data_spec An optional data specification containing user defined types
+  /// \return The parsed expression
   inline
   data_expression parse_data_expression(std::string text, std::string var_decl = "", std::string data_spec = "")
   {
@@ -172,10 +175,10 @@ namespace detail {
     return result;
   }
 
-  /// Parses a data variable.
+  /// \brief Parses a data variable.
   /// \param[in] var_decl A declaration of a data variable, for example "n: Nat".
   /// \param[in] data_spec A data specification
-  /// \result The parsed variable
+  /// \return The parsed variable
   inline
   data_variable parse_data_variable(std::string var_decl, std::string data_spec = "")
   {
@@ -186,7 +189,7 @@ namespace detail {
     return w.front();
   }
 
-  /// Creates a data specification that contains rewrite rules for the standard data types like
+  /// \brief Creates a data specification that contains rewrite rules for the standard data types like
   /// Pos, Nat and Int.
   /// \return The created data specification
   inline

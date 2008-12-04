@@ -35,14 +35,13 @@ namespace data {
 class data_variable: public data_expression
 {
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_variable()
       : data_expression(core::detail::constructDataVarId())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param t A term.
     data_variable(atermpp::aterm_appl t)
      : data_expression(t)
@@ -50,9 +49,8 @@ class data_variable: public data_expression
       assert(core::detail::check_rule_DataVarId(m_term));
     }
 
-    /// Constructor for strings like "d:D".
+    /// \brief Constructor for strings like "d:D".
     /// Only works for constant sorts.
-    ///
     /// \param s A string representation of a variable.
     data_variable(const std::string& s)
     {
@@ -63,43 +61,39 @@ class data_variable: public data_expression
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), mcrl2::data::sort_expression(type)));
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param name The name of a variable.
     /// \param s A sort.
     data_variable(core::identifier_string name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(name, s))
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param name The name of a variable.
     /// \param s A sort.
     data_variable(const std::string& name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), s))
     {}
 
-    /// Returns the name of the data_variable.
-    ///
+    /// \brief Returns the name of the data_variable.
     /// \return The name of the data variable.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
 
-    /// Returns the sort of the data_variable.
-    ///
+    /// \brief Returns the sort of the data_variable.
     /// \return The sort of the data variable.
     data::sort_expression sort() const
     {
       return atermpp::arg2(*this);
     }
   };
-                                                            
+
   /// \brief singly linked list of data variables
   ///
   typedef atermpp::term_list<data_variable> data_variable_list;
-  
+
   /// \brief Returns true if the term t is a data variable
   /// \param t A term.
   /// \return True if the term is a data variable.
@@ -108,7 +102,7 @@ class data_variable: public data_expression
   {
     return core::detail::gsIsDataVarId(t);
   }
-  
+
   /// \brief Converts a data_variable_list to a data_expression_list.
   /// \param l A sequence of data variables.
   /// \return The conversion of the sequence to data expressions.
@@ -116,28 +110,6 @@ class data_variable: public data_expression
   data_expression_list make_data_expression_list(data_variable_list l)
   {
     return ATermList(l);
-  }
-
-  /// Returns the union of v and w.
-  /// \param v A sequence of data variables.
-  /// \param w A sequence of data variables.
-  /// \return The union of the sequences.
-  /// \deprecated Use atermpp::term_list_union instead.
-  inline
-  data_variable_list data_variable_list_union(data_variable_list v, data_variable_list w)
-  {
-    return atermpp::term_list_union(v, w);
-  }
-
-  /// Returns v minus w.
-  /// \param v A sequence of data variables.
-  /// \param w A sequence of data variables.
-  /// \return The difference of the sequences.
-  /// \deprecated Use atermpp::term_list_difference instead.
-  inline
-  data_variable_list data_variable_list_difference(data_variable_list v, data_variable_list w)
-  {
-    return atermpp::term_list_difference(v, w);
   }
 
 } // namespace data

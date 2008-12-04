@@ -19,16 +19,25 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Returns the concatenation of the lists l and m
+/// \param l A list of data expressions
+/// \param m A list of data variables
+/// \return The concatenation of the lists l and m
 inline
 data_expression_list operator+(data_expression_list l, data_variable_list m)
 { return data_expression_list(ATconcat(l, m)); }
 
 /// \brief Returns the concatenation of the lists l and m.
+/// \param l A list of data variables
+/// \param m A list of data expressions
+/// \return The concatenation of the lists l and m
 inline
 data_expression_list operator+(data_variable_list l, data_expression_list m)
 { return data_expression_list(ATconcat(l, m)); }
 
 /// \brief Returns the concatenation of [v] and the list l.
+/// \param v A data variable
+/// \param l A list of data expressions
+/// \return The concatenation of [v] and the list l.
 inline
 data_expression_list operator+(data_variable v, data_expression_list l)
 {
@@ -36,6 +45,9 @@ data_expression_list operator+(data_variable v, data_expression_list l)
 }
 
 /// \brief Returns the concatenation of the list l and [v].
+/// \param l A list of data expressions
+/// \param v A data variable
+/// \return The concatenation of the list l and [v].
 inline
 data_expression_list operator+(data_expression_list l, data_variable v)
 {

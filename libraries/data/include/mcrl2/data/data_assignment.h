@@ -30,21 +30,21 @@ namespace data {
 class data_assignment: public atermpp::aterm_appl
 {
   protected:
-    /// Left hand side of the assignment
+
+    /// \brief Left hand side of the assignment
     data_variable   m_lhs;
-    
-    /// Right hand side of the assignment
+
+    /// \brief Right hand side of the assignment
     data_expression m_rhs;
 
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_assignment()
       : atermpp::aterm_appl(core::detail::constructPBExpr())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param t A term
     data_assignment(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
@@ -55,20 +55,18 @@ class data_assignment: public atermpp::aterm_appl
       m_rhs = data_expression(*i);
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param lhs Left hand side of the assignment.
     /// \param rhs Right hand side of the assignment.
     data_assignment(data_variable lhs, data_expression rhs)
-     : 
+     :
        atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
     }
 
-    /// Returns true if the sorts of the left and right hand side are equal.
-    ///
+    /// \brief Returns true if the sorts of the left and right hand side are equal.
     /// \return True if the assignement is well typed.
     bool is_well_typed() const
     {
@@ -81,8 +79,7 @@ class data_assignment: public atermpp::aterm_appl
       return true;
     }
 
-    /// Applies the assignment to t and returns the result.
-    ///
+    /// \brief Applies the assignment to t and returns the result.
     /// \param t A term.
     /// \return The application of the assignment to the term.
     atermpp::aterm operator()(atermpp::aterm t) const
@@ -90,16 +87,14 @@ class data_assignment: public atermpp::aterm_appl
       return atermpp::replace(t, atermpp::aterm(m_lhs), atermpp::aterm(m_rhs));
     }
 
-    /// Returns the left hand side of the assignment.
-    ///
+    /// \brief Returns the left hand side of the assignment.
     /// \return The left hand side of the assignment.
     data_variable lhs() const
     {
       return m_lhs;
     }
 
-    /// Returns the right hand side of the assignment.
-    ///
+    /// \brief Returns the right hand side of the assignment.
     /// \return The right hand side of the assignment.
     data_expression rhs() const
     {
@@ -163,18 +158,18 @@ data_expression_list data_assignment_expressions(data_assignment_list l)
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
 struct assignment_list_substitution
 {
-  /// An assignment list.
+  /// \brief An assignment list.
   const data_assignment_list& m_assignments;
 
   /// \cond INTERNAL_DOCS
   struct compare_assignment_lhs
   {
     data_variable m_variable;
-  
+
     compare_assignment_lhs(const data_variable& variable)
       : m_variable(variable)
     {}
-    
+
     bool operator()(const data_assignment& a) const
     {
       return m_variable == a.lhs();
@@ -184,11 +179,11 @@ struct assignment_list_substitution
   struct assignment_list_substitution_helper
   {
     const data_assignment_list& l;
-    
+
     assignment_list_substitution_helper(const data_assignment_list& l_)
       : l(l_)
     {}
-    
+
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
@@ -207,16 +202,14 @@ struct assignment_list_substitution
     }
   };
   /// \endcond
-  
-  /// Constructor.
-  ///
+
+  /// \brief Constructor.
   /// \param assignments An assignment list.
   assignment_list_substitution(const data_assignment_list& assignments)
     : m_assignments(assignments)
   {}
-  
-  /// Applies the assignments to the term t and returns the result.
-  ///
+
+  /// \brief Applies the assignments to the term t and returns the result.
   /// \param t A term.
   /// \return The application of the assignments to the term.
   atermpp::aterm operator()(atermpp::aterm t) const

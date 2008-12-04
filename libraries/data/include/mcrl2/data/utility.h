@@ -32,8 +32,14 @@ namespace mcrl2 {
 
 namespace data {
 
-/// Returns a copy of t, but with a common postfix added to each variable name,
+/// \brief Returns a copy of t, but with a common postfix added to each variable name,
 /// and such that the new names do not appear in context.
+/// \param t A sequence of variables
+/// \param context A set of strings
+/// \param postfix_format A format string
+/// \return A sequence of variables with names that do not appear in \p context. The
+/// string \p postfix_format is used to generate new names. It should contain one
+/// occurrence of "%d", that will be replaced with an integer.
 inline
 data_variable_list fresh_variables(data_variable_list t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
 {
@@ -81,10 +87,10 @@ core::identifier_string fresh_identifier(Term context, const std::string& hint, 
   return fresh_identifier(find_identifiers(context), hint, id_creator);
 }
 
-/// Creates an identifier built from name and index.
+/// \brief Creates an identifier built from name and index.
 struct default_identifier_creator
 {
-  /// Constructor.
+  /// \brief Constructor.
   /// \param name A name.
   /// \param index A positive number.
   /// \return An identifier.
@@ -115,24 +121,22 @@ data_variable fresh_variable(Term context, sort_expression s, std::string hint)
 class fresh_variable_generator
 {
   protected:
-    /// The identifiers of the context.
+    /// \brief The identifiers of the context.
     atermpp::set<core::identifier_string> m_identifiers;
-    
-    /// A sort for the generated variables.
+
+    /// \brief A sort for the generated variables.
     sort_expression m_sort;
-    
-    /// A hint for the name of generated variables.
+
+    /// \brief A hint for the name of generated variables.
     std::string m_hint;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     fresh_variable_generator()
      : m_sort(sort_expr::real()), m_hint("t")
     { }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param context The context.
     /// \param s The sort of the generated variables.
     /// \param hint A hint for the name of generated variables.
@@ -144,24 +148,21 @@ class fresh_variable_generator
       m_sort = s;
     }
 
-    /// Set a new hint.
-    ///
+    /// \brief Set a new hint.
     /// \param hint A hint for the name of generated variables.
     void set_hint(std::string hint)
     {
       m_hint = hint;
     }
 
-    /// Returns the current hint.
-    ///
+    /// \brief Returns the current hint.
     /// \return The current hint.
     std::string hint() const
     {
       return m_hint;
     }
 
-    /// Set a new context.
-    ///
+    /// \brief Set a new context.
     /// \param context A context.
     template <typename Term>
     void set_context(Term context)
@@ -169,24 +170,21 @@ class fresh_variable_generator
       m_identifiers = find_identifiers(context);
     }
 
-    /// Set a new sort.
-    ///
+    /// \brief Set a new sort.
     /// \param s A sort.
     void set_sort(sort_expression s)
     {
       m_sort = s;
     }
 
-    /// Returns the current sort.
-    ///
+    /// \brief Returns the current sort.
     /// \return The current sort.
     sort_expression sort() const
     {
       return m_sort;
     }
 
-    /// Add term t to the context.
-    ///
+    /// \brief Add term t to the context.
     /// \param t A term.
     template <typename Term>
     void add_to_context(Term t)
@@ -195,16 +193,15 @@ class fresh_variable_generator
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 
-    /// Returns a unique variable of the given sort, with the given hint as prefix.
+    /// \brief Returns a unique variable of the given sort, with the given hint as prefix.
     /// The returned variable is added to the context.
-    ///
     /// \return A fresh variable that does not appear in the current context.
     data_variable operator()()
     {
       core::identifier_string id(m_hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
-      {   
+      {
         std::string name = str(boost::format(m_hint + "%02d") % index++);
         id = core::identifier_string(name);
       }
@@ -212,9 +209,8 @@ class fresh_variable_generator
       return data_variable(id, m_sort);
     }
 
-    /// Returns a unique variable with the same sort as the variable v, and with
+    /// \brief Returns a unique variable with the same sort as the variable v, and with
     /// the same prefix. The returned variable is added to the context.
-    ///
     /// \param v A data variable.
     /// \return A fresh variable with the same sort as the given variable, and with the name of
     /// the variable as prefix.
@@ -224,7 +220,7 @@ class fresh_variable_generator
       core::identifier_string id(hint);
       int index = 0;
       while (m_identifiers.find(id) != m_identifiers.end())
-      {   
+      {
         std::string name = str(boost::format(hint + "%02d") % index++);
         id = core::identifier_string(name);
       }

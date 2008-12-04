@@ -31,14 +31,12 @@ typedef atermpp::term_list<sort_identifier> sort_identifier_list;
 class sort_identifier: public sort_expression
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     sort_identifier()
       : sort_expression(core::detail::constructSortId())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param t A term containing a sort identifier.
     sort_identifier(ATermAppl t)
       : sort_expression(t)
@@ -46,8 +44,7 @@ class sort_identifier: public sort_expression
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param t A term containing a sort identifier.
     sort_identifier(atermpp::aterm_appl t)
       : sort_expression(t)
@@ -55,8 +52,7 @@ class sort_identifier: public sort_expression
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param name The name of a sort identifier.
     sort_identifier(core::identifier_string name)
       : sort_expression(core::detail::gsMakeSortId(name))
@@ -64,23 +60,20 @@ class sort_identifier: public sort_expression
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param s A string representation of a sort identifier.
     sort_identifier(std::string s)
       : sort_expression(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
 
-    /// Returns the name of the sort identifier.
-    ///
+    /// \brief Returns the name of the sort identifier.
     /// \return The name of the sort identifier.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
-    
+
     /// \overload
-    ///
     /// \return Always returns false.
     bool is_arrow() const
     {

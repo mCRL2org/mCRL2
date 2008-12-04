@@ -29,17 +29,15 @@ namespace data {
 class set_identifier_generator: public identifier_generator
 {
   protected:
-    /// The context of the identifier generator.
+    /// \brief The context of the identifier generator.
     atermpp::set<core::identifier_string> m_identifiers;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     set_identifier_generator()
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param t A context.
     template <typename Term>
     set_identifier_generator(Term t)
@@ -47,31 +45,31 @@ class set_identifier_generator: public identifier_generator
       add_to_context(t);
     }
 
-    /// Clears the context.
+    /// \brief Clears the context.
     void clear_context()
     {
       m_identifiers.clear();
     }
 
-    /// Adds the identifier s to the context.
+    /// \brief Adds the identifier s to the context.
     void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
-    /// Removes one occurrence of the identifier s from the context.
+    /// \brief Removes one occurrence of the identifier s from the context.
     void remove_identifier(core::identifier_string s)
     {
       m_identifiers.erase(s);
     }
 
-    /// Returns true if the identifier s appears in the context.
+    /// \brief Returns true if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
-    /// Returns the context.
+    /// \brief Returns the context.
     const atermpp::set<core::identifier_string>& context() const
     {
       return m_identifiers;
@@ -90,17 +88,15 @@ class set_identifier_generator: public identifier_generator
 class multiset_identifier_generator: public identifier_generator
 {
   protected:
-    /// The context of the identifier generator.
+    /// \brief The context of the identifier generator.
     atermpp::multiset<core::identifier_string> m_identifiers;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     multiset_identifier_generator()
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param t A context.
     template <typename Term>
     multiset_identifier_generator(Term t)
@@ -108,19 +104,19 @@ class multiset_identifier_generator: public identifier_generator
       add_to_context(t);
     }
 
-    /// Clears the context.
+    /// \brief Clears the context.
     void clear_context()
     {
       m_identifiers.clear();
     }
 
-    /// Adds the identifier s to the context.
+    /// \brief Adds the identifier s to the context.
     void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
-    /// Removes one occurrence of the identifier s from the context.
+    /// \brief Removes one occurrence of the identifier s from the context.
     void remove_identifier(core::identifier_string s)
     {
       atermpp::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
@@ -130,13 +126,13 @@ class multiset_identifier_generator: public identifier_generator
       }
     }
 
-    /// Returns true if the identifier s appears in the context.
+    /// \brief Returns true if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
-    /// Returns the context.
+    /// \brief Returns the context.
     const atermpp::multiset<core::identifier_string>& context() const
     {
       return m_identifiers;

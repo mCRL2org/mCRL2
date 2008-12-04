@@ -72,9 +72,27 @@ data_variable_list substract(data_variable_list x, data_variable_list y);
 data_variable_list dunion(data_variable_list x, data_variable_list y);
 void dunion(data_variable_list *x, data_variable_list y);
 
+/// \brief Returns the head of the data expression t.
+/// \return The head of the data expression.
+/// \deprecated
+/// \param t A data expression
+/// \return The head of the expression, if it is a function application
+inline
+data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
+{
+  return core::detail::gsGetDataExprHead(t);
+}
 
-
-
+/// \brief Returns the arguments of the data expression t.
+/// \return The arguments of the data expression.
+/// \deprecated
+/// \param t A data expression
+/// \return The arguments of the expression, if it is a function application
+inline
+data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
+{
+  return core::detail::gsGetDataExprArgs(t);
+}
 
 // Implementation of pbes_solver  
 //*********************************

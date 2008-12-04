@@ -56,44 +56,44 @@ class data_specification: public atermpp::aterm_appl
 {
 
   protected:
-    /// The sorts of the data specification.
+
+    /// \brief The sorts of the data specification.
     sort_expression_list m_sorts;
 
-    /// The constructors of the data specification.
+    /// \brief The constructors of the data specification.
     data_operation_list  m_constructors;
 
-    /// The operations of the data specification.
+    /// \brief The operations of the data specification.
     data_operation_list  m_mappings;
 
-    /// The equations of the data specification.
+    /// \brief The equations of the data specification.
     data_equation_list   m_equations;
 
-    /// The following map contains for each sort a default term of that particular
+    /// \brief The following map contains for each sort a default term of that particular
     /// sort. Each default term remains valid, as long as no constructors or mappings
     /// are removed from the specification.
     atermpp::map < sort_expression, data_expression > default_expression_map;
 
-    /// Caches if a sort is finite or not.
+    /// \brief Caches if a sort is finite or not.
     std::map<data::sort_expression, bool> m_finite_sorts;
 
   public:
-    /// Iterator for the sequence of sorts.
+
+    /// \brief Iterator for the sequence of sorts.
     typedef sort_expression_list::iterator sort_iterator;
 
-    /// Iterator for the sequences of constructors and mappings.
+    /// \brief Iterator for the sequences of constructors and mappings.
     typedef data_operation_list::iterator  function_iterator;
 
-    /// Iterator for the sequence of equations.
+    /// \brief Iterator for the sequence of equations.
     typedef data_equation_list::iterator   equation_iterator;
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     data_specification()
       : atermpp::aterm_appl(core::detail::constructDataSpec())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param t A term.
     data_specification(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
@@ -106,8 +106,7 @@ class data_specification: public atermpp::aterm_appl
       m_equations    = data_equation_list(atermpp::aterm_appl(*i++).argument(0));
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param sorts The sorts of the data specification.
     /// \param constructors The constructors of the data specification.
     /// \param mappings The mappings of the data specification.
@@ -126,23 +125,21 @@ class data_specification: public atermpp::aterm_appl
         m_equations(equations)
     {}
 
-    /// Returns the sorts of the data specification.
-    ///
+    /// \brief Returns the sorts of the data specification.
     /// \return The sorts of the data specification.
     sort_expression_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Returns the constructors of the data specification.
-    ///
+    /// \brief Returns the constructors of the data specification.
     /// \return The constructors of the data specification.
     data_operation_list constructors() const
     {
       return m_constructors;
     }
 
-    /// Returns the constructors of the data specification that have s as their target.
+    /// \brief Returns the constructors of the data specification that have s as their target.
     /// \param s A sort expression.
     /// \return The constructors of the data specification that have s as their target.
     data_operation_list constructors(sort_expression s) const
@@ -157,16 +154,14 @@ class data_specification: public atermpp::aterm_appl
       return data_operation_list(result.begin(), result.end());
     }
 
-    /// Returns the mappings of the data specification.
-    ///
+    /// \brief Returns the mappings of the data specification.
     /// \return The mappings of the data specification.
     data_operation_list mappings() const
     {
       return m_mappings;
     }
 
-    /// Returns the mappings of the data specification that have s as their target.
-    ///
+    /// \brief Returns the mappings of the data specification that have s as their target.
     /// \param s A sort expression.
     /// \return The mappings of the data specification that have s as their target.
     data_operation_list mappings(sort_expression s) const
@@ -180,8 +175,7 @@ class data_specification: public atermpp::aterm_appl
       return data_operation_list(result.begin(), result.end());
     }
 
-    /// Returns the equations of the data specification.
-    ///
+    /// \brief Returns the equations of the data specification.
     /// \return The equations of the data specification.
     data_equation_list equations() const
     {
@@ -189,7 +183,7 @@ class data_specification: public atermpp::aterm_appl
     }
 
     /// \brief Returns a default expression that has the sort s.
-    /// Returns a valid data expression according to this data specification
+    /// \brief Returns a valid data expression according to this data specification
     /// of the given sort s. If no valid expression can be found, data_expression()
     /// is returned. If s is a basic sort, it returns a minimal term with by default at most three nested function
     /// symbols. When selecting function symbols, constructor symbols have a
@@ -197,7 +191,7 @@ class data_specification: public atermpp::aterm_appl
     /// target sorts (e.g. f:A->(B->C)) are not used to construct default terms.
     /// <P>
     /// For each sort, the same term is returned.
-    /// For function sorts a mapping with that sort is returned provided it exists, or otherwise 
+    /// For function sorts a mapping with that sort is returned provided it exists, or otherwise
     /// data_expression() is returned.
     /// <P>
     /// Terms that are generated are stored in a map such that they do not have to be
@@ -206,8 +200,8 @@ class data_specification: public atermpp::aterm_appl
     /// So, generating a term with nesting depth 10, and subsequentely with nesting depth
     /// 1 can still yield a term of nesting depth larger than 1, because the earlier
     /// generated term is returned.
-    /// <P> 
-    /// It can be expected that this function will evolve through time, in the sense that 
+    /// <P>
+    /// It can be expected that this function will evolve through time, in the sense that
     /// more complex terms will be generated over time to act as default terms of a certain
     /// sort, for instance containing fucntion symbols with complex target sorts, containing
     /// explicit function constructors (lambda's). So, no reliance is possible on the particular
@@ -232,11 +226,11 @@ class data_specification: public atermpp::aterm_appl
       { // s is a function sort. We search for a constructor of mapping of this sort
         // Although in principle possible, we do not do a lot of effort to construct
         // a term of this sort. We just look whether a term of exactly this sort is
-        // present. 
+        // present.
 
         // check if there is a mapping with sort s (constructors with sort s cannot exist).
-        data_operation_list::iterator i = 
-                     std::find_if(mappings().begin(), mappings().end(), 
+        data_operation_list::iterator i =
+                     std::find_if(mappings().begin(), mappings().end(),
                                  detail::is_operation_with_given_sort(s));
         if (i != mappings().end())
         {
@@ -281,7 +275,7 @@ class data_specification: public atermpp::aterm_appl
             sort_expression target_sort=sa.result_sort();
             if (target_sort==s)
             { // We only deal with operators of the form
-              // f:s1#...#sn->s. Operators of the form 
+              // f:s1#...#sn->s. Operators of the form
               // f:s1#...#sn->G where G is a complex sort expression
               // are ignored.
               data_expression_list arguments;
@@ -305,7 +299,7 @@ class data_specification: public atermpp::aterm_appl
               }
             }
           }
-  
+
           // recursively traverse mappings
           for(data_operation_list::iterator i=mappings(s).begin();
               i!=mappings(s).end(); i++)
@@ -317,7 +311,7 @@ class data_specification: public atermpp::aterm_appl
             // sort_expression_list argument_sorts=source(i->sort());
             // sort_expression target_sort=target(i->sort());
             if (target_sort==s)
-            { // See comments for similar code for constructors. 
+            { // See comments for similar code for constructors.
               data_expression_list arguments;
               sort_expression_list::iterator j;
               for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
@@ -338,11 +332,11 @@ class data_specification: public atermpp::aterm_appl
           }
         }
       }
-  
+
       return data_expression();
     }
-  
-    /// Returns true if the sort s has a finite number of values.
+
+    /// \brief Returns true if the sort s has a finite number of values.
     /// For efficiency, the results of this function are cached.
     /// \param s A sort expression.
     /// \return True if the sort is finite.
@@ -358,12 +352,11 @@ class data_specification: public atermpp::aterm_appl
       return m_finite_sorts[s];
     }
 
-    /// Returns true if
+    /// \brief Returns true if
     /// <ul>
     /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
     /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
     /// </ul>
-    ///
     /// \return True if the data specification is well typed.
     bool is_well_typed() const
     {

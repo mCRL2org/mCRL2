@@ -29,11 +29,11 @@ template <typename ReplaceFunction>
 struct replace_data_variables_helper
 {
   const ReplaceFunction& r_;
-  
+
   replace_data_variables_helper(const ReplaceFunction& r)
     : r_(r)
   {}
-  
+
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_variable(t))
@@ -48,12 +48,15 @@ struct replace_data_variables_helper
 };
 /// \endcond
 
-/// Recursively traverses the given term, and applies the replace function to
+/// \brief Recursively traverses the given term, and applies the replace function to
 /// each data variable that is encountered during the traversal.
+/// \param t A term
+/// \param r A replace function
+/// \return The replacement result
 template <typename Term, typename ReplaceFunction>
 Term replace_data_variables(Term t, ReplaceFunction r)
 {
-  return atermpp::partial_replace(t, replace_data_variables_helper<ReplaceFunction>(r)); 
+  return atermpp::partial_replace(t, replace_data_variables_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
@@ -62,7 +65,7 @@ struct data_variable_sequence_replace_helper
 {
   const VariableContainer& variables_;
   const ExpressionContainer& replacements_;
-  
+
   data_variable_sequence_replace_helper(const VariableContainer& variables,
                                         const ExpressionContainer& replacements
                                        )
@@ -70,7 +73,7 @@ struct data_variable_sequence_replace_helper
   {
     assert(variables.size() == replacements.size());
   }
-  
+
   data_expression operator()(data_variable t) const
   {
     typename VariableContainer::const_iterator i = variables_.begin();
@@ -87,9 +90,13 @@ struct data_variable_sequence_replace_helper
 };
 /// \endcond
 
-/// Replaces all data_variables in the term t using the specified sequence of replacements.
-/// \param variables The sequence of variables that need to be replaced.
-/// \param replacements The corresponding replacements.
+/// \brief Replaces variables in the term t using the specified sequence of replacements.
+/// \param t A term
+/// \param variables A sequence of variables
+/// \param replacements A sequence of expressions
+/// \return The replacement result. Each variable in \p t that occurs as the i-th element
+/// of variables is replaced by the i-th element of \p expressions. If the sequence
+/// \p variables contains duplicates, the first match is selected.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
 Term data_variable_sequence_replace(Term t,
                                     const VariableContainer& variables,
@@ -104,14 +111,14 @@ template <typename MapContainer>
 struct data_variable_map_replace_helper
 {
   const MapContainer& replacements_;
-  
-  /// Constructor.
+
+  /// \brief Constructor.
   ///
   data_variable_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
-  
-  /// Returns s if a substitution of the form t := s is present in the replacement map,
+
+  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
   /// otherwise t.
   ///
   data_expression operator()(const data_variable& t) const
@@ -129,7 +136,11 @@ struct data_variable_map_replace_helper
 };
 /// \endcond
 
-/// Replaces all data_variables in the term t using the specified map of replacements.
+/// \brief Replaces all data_variables in the term t using the specified map of replacements.
+/// \param t A term
+/// \param replacements A map of replacements
+/// \return The replacement result. Each variable \p v in t that occurs as key in the map
+/// \p replacements is replaced by \p replacements[\p v].
 template <typename Term, typename MapContainer>
 Term data_variable_map_replace(Term t, const MapContainer& replacements)
 {
@@ -145,11 +156,11 @@ template <typename ReplaceFunction>
 struct replace_data_expressions_helper
 {
   const ReplaceFunction& r_;
-  
+
   replace_data_expressions_helper(const ReplaceFunction& r)
     : r_(r)
   {}
-  
+
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_expression(t))
@@ -164,12 +175,15 @@ struct replace_data_expressions_helper
 };
 /// \endcond
 
-/// Recursively traverses the given term, and applies the replace function to
+/// \brief Recursively traverses the given term, and applies the replace function to
 /// each data expression that is encountered during the traversal.
+/// \param t A term
+/// \param r A replace function
+/// \return The replacement result
 template <typename Term, typename ReplaceFunction>
 Term replace_data_expressions(Term t, ReplaceFunction r)
 {
-  return atermpp::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r)); 
+  return atermpp::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
@@ -178,7 +192,7 @@ struct data_expression_sequence_replace_helper
 {
   const VariableContainer& expressions_;
   const ExpressionContainer& replacements_;
-  
+
   data_expression_sequence_replace_helper(const VariableContainer& expressions,
                                         const ExpressionContainer& replacements
                                        )
@@ -186,7 +200,7 @@ struct data_expression_sequence_replace_helper
   {
     assert(expressions.size() == replacements.size());
   }
-  
+
   data_expression operator()(data_expression t) const
   {
     typename VariableContainer::const_iterator i = expressions_.begin();
@@ -203,9 +217,13 @@ struct data_expression_sequence_replace_helper
 };
 /// \endcond
 
-/// Replaces all data_expressions in the term t using the specified sequence of replacements.
-/// \param expressions The sequence of expressions that need to be replaced.
-/// \param replacements The corresponding replacements.
+/// \brief Replaces data expressions in the term t using the specified sequence of replacements.
+/// \param t A term
+/// \param expressions A sequence of data expressions
+/// \param replacements A sequence of data expressions
+/// \return The replacement result. Each data expression in \p t that occurs as the i-th element
+/// of \p expressions is replaced by the i-th element of \p replacements. If the sequence
+/// \p expressions contains duplicates, the first match is selected.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
 Term data_expression_sequence_replace(Term t,
                                     const VariableContainer& expressions,
@@ -220,14 +238,14 @@ template <typename MapContainer>
 struct data_expression_map_replace_helper
 {
   const MapContainer& replacements_;
-  
-  /// Constructor.
+
+  /// \brief Constructor.
   ///
   data_expression_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
-  
-  /// Returns s if a substitution of the form t := s is present in the replacement map,
+
+  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
   /// otherwise t.
   ///
   data_expression operator()(const data_expression& t) const
@@ -245,8 +263,11 @@ struct data_expression_map_replace_helper
 };
 /// \endcond
 
-/// Replaces all data_expressions in the term t using the specified map of replacements.
-///
+/// \brief Replaces all data_expressions in the term t using the specified map of replacements.
+/// \param t A term
+/// \param replacements A map of replacements
+/// \return The replacement result. Each data expression \p e in t that occurs as key in the map
+/// \p replacements is replaced by \p replacements[\p e].
 template <typename Term, typename MapContainer>
 Term data_expression_map_replace(Term t, const MapContainer& replacements)
 {

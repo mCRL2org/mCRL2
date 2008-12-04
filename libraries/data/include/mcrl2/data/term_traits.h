@@ -32,30 +32,30 @@ namespace core {
 
     /// \brief The variable sequence type
     typedef data::data_variable_list variable_sequence_type;
-    
+
     /// \brief The value true
     /// \return The value true
     static inline
     term_type true_() { return core::detail::gsMakeDataExprTrue(); }
-    
+
     /// \brief The value false
     /// \return The value false
     static inline
     term_type false_() { return core::detail::gsMakeDataExprFalse(); }
-    
+
     /// \brief Operator not
     /// \param p A term
     /// \return Operator not applied to p
     static inline
     term_type not_(term_type p) { return core::detail::gsMakeDataExprNot(p); }
-    
+
     /// \brief Operator and
     /// \param p A term
     /// \param q A term
     /// \return Operator and applied to p and q
     static inline
     term_type and_(term_type p, term_type q) { return core::detail::gsMakeDataExprAnd(p,q); }
-    
+
     /// \brief Operator or
     /// \param p A term
     /// \param q A term
@@ -68,47 +68,47 @@ namespace core {
     /// \return True if the term has the value true
     static inline
     bool is_true(term_type t) { return core::detail::gsIsDataExprTrue(t); }
-    
+
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false
-    static inline 
+    static inline
     bool is_false(term_type t) { return core::detail::gsIsDataExprFalse(t); }
-    
+
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type not
-    static inline 
+    static inline
     bool is_not(term_type t) { return core::detail::gsIsDataExprNot(t); }
-    
+
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and
-    static inline 
+    static inline
     bool is_and(term_type t) { return core::detail::gsIsDataExprAnd(t); }
-    
+
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or
-    static inline 
+    static inline
     bool is_or(term_type t) { return core::detail::gsIsDataExprOr(t); }
-    
+
     /// \brief Test for implication
     /// \param t A term
     /// \return True if the term is an implication
-    static inline 
+    static inline
     bool is_imp(term_type t) { return core::detail::gsIsDataExprImp(t);; }
-    
+
     /// \brief Test for universal quantification
     /// \param t A term
     /// \return True if the term is an universal quantification
-    static inline 
+    static inline
     bool is_forall(term_type t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(atermpp::aterm_appl(t(0))); }
-    
+
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification
-    static inline 
+    static inline
     bool is_exists(term_type t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
 
     /// \brief Conversion from variable to term
@@ -139,7 +139,7 @@ namespace core {
       return core::pp(t);
     }
   };
-  
+
 } // namespace core
 
 } // namespace mcrl2

@@ -34,32 +34,27 @@ namespace data {
 class identifier_generator
 {
   public:
-    /// Constructor.
-    ///
+
+    /// \brief Constructor.
     identifier_generator()
     {}
 
-    /// Destructor.
-    ///
+    /// \brief Destructor.
     virtual ~identifier_generator()
     {}
 
-    /// Clears the context.
-    ///
+    /// \brief Clears the context.
     virtual void clear_context() = 0;
 
-    /// Adds the identifier s to the context.
-    ///
+    /// \brief Adds the identifier s to the context.
     /// \param s An identifier.
     virtual void add_identifier(core::identifier_string s) = 0;
 
-    /// Removes the identifier s from the context.
-    ///
+    /// \brief Removes the identifier s from the context.
     /// \param s An identifier.
     virtual void remove_identifier(core::identifier_string s) = 0;
 
-    /// Adds identifiers of term t to the context.
-    ///
+    /// \brief Adds identifiers of term t to the context.
     /// \param t A term.
     template <typename Term>
     void add_to_context(Term t)
@@ -71,8 +66,7 @@ class identifier_generator
       }
     }
 
-    /// Adds identifiers to the context.
-    ///
+    /// \brief Adds identifiers to the context.
     /// \param c A sequence of identifiers.
     template <typename Container>
     void add_identifiers(const Container& c)
@@ -83,8 +77,7 @@ class identifier_generator
       }
     }
 
-    /// Removes identifiers appearing in term t from the context.
-    ///
+    /// \brief Removes identifiers appearing in term t from the context.
     /// \param t A term.
     template <typename Term>
     void remove_from_context(Term t)
@@ -96,15 +89,13 @@ class identifier_generator
       }
     }
 
-    /// Returns true if the identifier s appears in the context.
-    ///
+    /// \brief Returns true if the identifier s appears in the context.
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
     virtual bool has_identifier(core::identifier_string s) const = 0;
-   
-    /// Returns a fresh identifier, with the given hint as prefix.
+
+    /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
-    ///
     /// \param hint A hint for the name of an identifier.
     /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint)
@@ -116,7 +107,7 @@ class identifier_generator
         std::ostringstream out;
         out << hint << index++;
         std::string name = out.str();
-// TODO: why doesn't this work???        
+// TODO: why doesn't this work???
 //        std::string name = str(boost::format(hint + "%02d") % index++);
         id = core::identifier_string(name);
       }
@@ -130,26 +121,26 @@ class identifier_generator
 class number_postfix_generator
 {
   protected:
-    /// A prefix.
+    /// \brief A prefix.
     std::string m_prefix;
-      
-    /// An index.
+
+    /// \brief An index.
     unsigned int m_index;
-  
+
   public:
-    /// Constructor.
+    /// \brief Constructor.
     number_postfix_generator()
       : m_prefix("x"), m_index(0)
     {}
-    
-    /// Constructor.
+
+    /// \brief Constructor.
     /// \param prefix A prefix.
     /// \param index A positive number.
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
      : m_prefix(prefix), m_index(index)
     {}
 
-    /// Generates a fresh identifier that doesn't appear in the context.
+    /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
     core::identifier_string operator()()
     {

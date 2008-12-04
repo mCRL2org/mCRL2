@@ -36,30 +36,30 @@ namespace data {
 class data_equation: public atermpp::aterm_appl
 {
   protected:
-    /// The variables that are used in the equation.
+
+    /// \brief The variables that are used in the equation.
     data_variable_list m_variables;
-    
-    /// The condition of the equation.
+
+    /// \brief The condition of the equation.
     data_expression m_condition;
-    
-    /// The left hand side of the equation.
+
+    /// \brief The left hand side of the equation.
     data_expression m_lhs;
-    
-    /// The right hand side of the equation.
+
+    /// \brief The right hand side of the equation.
     data_expression m_rhs;
 
   public:
-    /// An iterator for the variable sequence.
+
+    /// \brief An iterator for the variable sequence.
     typedef data_variable_list::iterator variable_iterator;
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     data_equation()
       : atermpp::aterm_appl(core::detail::constructDataEqn())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param t A term.
     data_equation(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
@@ -71,10 +71,9 @@ class data_equation: public atermpp::aterm_appl
       m_lhs       = data_expression(*i++);
       m_rhs       = data_expression(*i);
       assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
-    } 
+    }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param variables The variables that are used in the equation.
     /// \param condition The condition of the equation.
     /// \param lhs The left hand side of the equation.
@@ -88,46 +87,41 @@ class data_equation: public atermpp::aterm_appl
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
-       m_rhs(rhs)     
+       m_rhs(rhs)
     {
       assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
     }
 
-    /// Returns the variables of the equation.
-    ///
+    /// \brief Returns the variables of the equation.
     /// \return The variables of the equation.
     data_variable_list variables() const
     {
       return m_variables;
     }
 
-    /// Returns the condition of the equation.
-    ///
+    /// \brief Returns the condition of the equation.
     /// \return The condition of the equation.
     data_expression condition() const
     {
       return m_condition;
     }
 
-    /// Returns the left hand side of the equation.
-    ///
+    /// \brief Returns the left hand side of the equation.
     /// \return The left hand side of the equation.
     data_expression lhs() const
     {
       return m_lhs;
     }
 
-    /// Returns the right hand side of the equation.
-    ///
+    /// \brief Returns the right hand side of the equation.
     /// \return The right hand side of the equation.
     data_expression rhs() const
     {
       return m_rhs;
     }
 
-    /// Applies a substitution to this data equation and returns the result.
+    /// \brief Applies a substitution to this data equation and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
     /// \param f A substitution function.
     /// \return The application of the substitution to the equation.
     template <typename Substitution>
@@ -135,12 +129,11 @@ class data_equation: public atermpp::aterm_appl
     {
       return data_equation(f(atermpp::aterm(*this)));
     }
-    
-    /// Returns true if
+
+    /// \brief Returns true if
     /// <ul>
     /// <li>the types of the left and right hand side are equal</li>
     /// </ul>
-    ///
     /// \return True if the equation is well typed.
     bool is_well_typed() const
     {
@@ -150,9 +143,9 @@ class data_equation: public atermpp::aterm_appl
         std::cerr << "data_equation::is_well_typed() failed: the left and right hand sides " << mcrl2::core::pp(m_lhs) << " and " << mcrl2::core::pp(m_rhs) << " have different types." << std::endl;
         return false;
       }
-      
+
       return true;
-    }   
+    }
 };
 
 /// \brief singly linked list of data equations

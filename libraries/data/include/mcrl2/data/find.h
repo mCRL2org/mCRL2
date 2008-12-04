@@ -33,7 +33,7 @@ std::set<core::identifier_string> find_identifiers(Term t)
   return result;
 }
  
-/// Returns true if the term has a given variable as subterm.
+/// \brief Returns true if the term has a given variable as subterm.
 template <typename Term>
 bool find_data_variable(Term t, const data_variable& d)
 {
@@ -63,7 +63,7 @@ std::set<data_variable> find_all_data_variables(Term t)
   return result;
 }
 
-/// Returns true if the term has a given sort identifier as subterm.
+/// \brief Returns true if the term has a given sort identifier as subterm.
 template <typename Term>
 bool find_sort_identifier(Term t, const sort_identifier& s)
 {
@@ -79,7 +79,7 @@ std::set<sort_identifier> find_all_sort_identifiers(Term t)
   return result;
 }
 
-/// Returns true if the term has a given sort expression as subterm.
+/// \brief Returns true if the term has a given sort expression as subterm.
 template <typename Term>
 bool find_sort_expression(Term t, const sort_expression& s)
 {
@@ -95,7 +95,7 @@ std::set<sort_expression> find_all_sort_expressions(Term t)
   return result;
 }
 
-/// Returns true if the term has a given data expression as subterm.
+/// \brief Returns true if the term has a given data expression as subterm.
 template <typename Term>
 bool find_data_expression(Term t, const data_expression& s)
 {

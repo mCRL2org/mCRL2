@@ -29,14 +29,13 @@ namespace data {
 class data_operation: public data_expression
 {
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_operation()
       : data_expression(core::detail::constructOpId())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param t A term.
     data_operation(atermpp::aterm_appl t)
      : data_expression(t)
@@ -44,32 +43,28 @@ class data_operation: public data_expression
       assert(core::detail::check_rule_OpId(m_term));
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
     /// \param name A name.
     /// \param s A sort expression.
     data_operation(core::identifier_string name, sort_expression s)
      : data_expression(core::detail::gsMakeOpId(name, s))
     {}
 
-    /// Returns the name of the data_operation.
-    ///
+    /// \brief Returns the name of the data_operation.
     /// \return The name of the data operation.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
-    
-    /// Returns the sort of the data_operation.
-    ///
+
+    /// \brief Returns the sort of the data_operation.
     /// \return The sort of the data operation.
     sort_expression sort() const
     {
       return atermpp::arg2(*this);
     }
 
-    /// Apply the data_operation to a list of arguments.
-    ///
+    /// \brief Apply the data_operation to a list of arguments.
     /// \param args A sequence of arguments.
     /// \return The application of the operation to the arguments.
     data_expression operator()(data_expression_list args) const
@@ -84,7 +79,7 @@ class data_operation: public data_expression
       }
     }
   };
-                                                            
+
 /// \brief singly linked list of data operations
 ///
 typedef atermpp::term_list<data_operation> data_operation_list;

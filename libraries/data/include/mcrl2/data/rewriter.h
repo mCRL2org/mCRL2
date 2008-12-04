@@ -35,17 +35,17 @@ namespace data {
     friend class enumerator;
 
     protected:
-      /// The wrapped Rewriter.
+      /// \brief The wrapped Rewriter.
       boost::shared_ptr<Rewriter> m_rewriter;
 
     public:
-      /// The variable type of the rewriter.
+      /// \brief The variable type of the rewriter.
       typedef typename core::term_traits<Term>::variable_type variable_type;
 
-      /// The term type of the rewriter.
+      /// \brief The term type of the rewriter.
       typedef Term term_type;
 
-      /// The strategy of the rewriter.
+      /// \brief The strategy of the rewriter.
       enum strategy
       {
         innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
@@ -58,32 +58,29 @@ namespace data {
   	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
       };
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
 
-      /// Adds an equation to the rewrite rules.
+      /// \brief Adds an equation to the rewrite rules.
       /// \param[in] eq The equation that is added.
       /// \return Returns true if the operation succeeded.
-      ///
       bool add_rule(const data_equation& eq)
       {
         return m_rewriter.get()->addRewriteRule(eq);
       }
 
-      /// Removes an equation from the rewrite rules.
+      /// \brief Removes an equation from the rewrite rules.
       /// \param[in] eq The equation that is removed.
-      ///
       void remove_rule(const data_equation& eq)
       {
         m_rewriter.get()->removeRewriteRule(eq);
       }
 
-      /// Returns a pointer to the Rewriter object that is used for the implementation.
+      /// \brief Returns a pointer to the Rewriter object that is used for the implementation.
       /// \return A pointer to the wrapped Rewriter object.
       /// \deprecated
       Rewriter* get_rewriter()
@@ -92,12 +89,11 @@ namespace data {
       }
   };
 
-  /// Rewriter that operates on data expressions.
+  /// \brief Rewriter that operates on data expressions.
   class rewriter: public basic_rewriter<data_expression>
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
       rewriter(data_specification d = default_data_specification(), strategy s = jitty)
@@ -126,12 +122,11 @@ namespace data {
 		  }
   };
 
-  /// Rewriter that operates on data expressions.
+  /// \brief Rewriter that operates on data expressions.
   class rewriter_with_variables: public basic_rewriter<data_expression_with_variables>
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
       rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
@@ -164,41 +159,37 @@ namespace data {
 		    return result;
 		  }
   };
-  
-  /// Function object that turns a map of substitutions to variables into a substitution function.
+
+  /// \brief Function object that turns a map of substitutions to variables into a substitution function.
   template <typename SubstitutionMap>
   class rewriter_map: public SubstitutionMap
   {
     public:
-      /// The mapped type.
+      /// \brief The mapped type.
       typedef typename SubstitutionMap::mapped_type term_type;
-        
-      /// The key type.
+
+      /// \brief The key type.
       typedef typename SubstitutionMap::key_type variable_type;
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       rewriter_map()
       {}
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param m A rewriter map.
       rewriter_map(const rewriter_map<SubstitutionMap>& m)
         : SubstitutionMap(m)
       {}
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param start The start of a range of substitutions.
-      /// \param end The end of a range of substitutions.     
+      /// \param end The end of a range of substitutions.
       template <typename Iter>
       rewriter_map(Iter start, Iter end)
         : SubstitutionMap(start, end)
       {}
 
-      /// Function application.
-      ///
+      /// \brief Function application.
       /// \param v A variable.
       /// \return The corresponding value.
       term_type operator()(const variable_type& v) const
@@ -206,7 +197,7 @@ namespace data {
         typename SubstitutionMap::const_iterator i = this->find(v);
         return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
       }
-      
+
       /// \return A string representation of the map, for example [a := 3, b := true].
       std::string to_string() const
       {
@@ -217,7 +208,7 @@ namespace data {
           result << (i == this->begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
         }
         result << "]";
-        return result.str();        
+        return result.str();
       }
   };
 
