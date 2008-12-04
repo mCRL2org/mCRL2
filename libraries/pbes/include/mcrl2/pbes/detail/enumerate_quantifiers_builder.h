@@ -168,7 +168,7 @@ namespace detail {
         {
           PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << sigma_.to_string() << " dependencies = " << print_term_container(v_) << std::endl;
+  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << sigma_.to_string() << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
           if (stop_(c))
           {
@@ -177,7 +177,7 @@ namespace detail {
           else if (empty_intersection(c.variables(), v_))
           {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "        A = A + " << core::pp(c) << std::endl;
+  std::cerr << "        A = A + " << core::pp(c) << std::endl;
 #endif
             A_.insert(c);
           }
@@ -211,7 +211,7 @@ namespace detail {
       template <typename SubstitutionFunction>
       void print_arguments(variable_sequence_type x, const term_type& phi, SubstitutionFunction& sigma, term_type stop_value) const
       {
-        std::cout << "<enumerate>"
+        std::cerr << "<enumerate>"
                   << (tr::is_false(stop_value) ? "forall " : "exists ")
                   << core::pp(x) << ". "
                   << core::pp(phi)
@@ -229,7 +229,7 @@ namespace detail {
       {
         for (unsigned int i = 0; i < D.size(); i++)
         {         
-          std::cout << "  " << print_D_element(D[i], i);
+          std::cerr << "  " << print_D_element(D[i], i);
         }
       }
       
@@ -243,12 +243,12 @@ namespace detail {
 
       void print_todo_list(const std::deque<boost::tuple<variable_type, data_term_type, unsigned int> >& todo) const
       {
-        std::cout << "  todo = [";
+        std::cerr << "  todo = [";
         for (typename std::deque<boost::tuple<variable_type, data_term_type, unsigned int> >::const_iterator i = todo.begin(); i != todo.end(); ++i)
         {
-          std::cout << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
+          std::cerr << (i == todo.begin() ? "" : ", ") << print_todo_list_element(*i);
         }
-        std::cout << "]" << std::endl;
+        std::cerr << "]" << std::endl;
       }
 
       template <typename SubstitutionFunction,
@@ -300,7 +300,7 @@ namespace detail {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   print_D(D);
   print_todo_list(todo);
-  std::cout << "    (y, k) = " << print_todo_list_element(front) << std::endl;
+  std::cerr << "    (y, k) = " << print_todo_list_element(front) << std::endl;
 #endif     
             todo.pop_front();
             const variable_type& xk = boost::get<0>(front);
@@ -320,7 +320,7 @@ namespace detail {
             for (typename atermpp::vector<data_term_type>::iterator i = z.begin(); i != z.end(); ++i)
             {
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "      e = " << core::pp(*i) << std::endl;
+  std::cerr << "      e = " << core::pp(*i) << std::endl;
 #endif
               dependencies.insert(i->variables().begin(), i->variables().end());
               sigma[xk] = *i;
@@ -335,7 +335,7 @@ namespace detail {
               {
                 Dk.push_back(*i);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "        " << print_D_element(Dk, k) << std::endl;
+  std::cerr << "        " << print_D_element(Dk, k) << std::endl;
 #endif
                 if (!core::term_traits<data_term_type>::is_constant(*i))
                 {
@@ -363,7 +363,7 @@ namespace detail {
             sigma.erase(*j);
           }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "<return>stop early: " << core::pp(stop_value) << std::endl;
+  std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
 #endif
           return stop_value;
         }
@@ -375,7 +375,7 @@ namespace detail {
         }
         term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cout << "<return> " << core::pp(result) << std::endl;
+  std::cerr << "<return> " << core::pp(result) << std::endl;
 #endif
         return result;
       }

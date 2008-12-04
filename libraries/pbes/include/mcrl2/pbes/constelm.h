@@ -479,7 +479,7 @@ namespace detail {
       {
         for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
-          std::cout << i->second.to_string() << std::endl;
+          std::cerr << i->second.to_string() << std::endl;
         }
       }
 
@@ -490,7 +490,7 @@ namespace detail {
         {
           for (typename std::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            std::cout << j->to_string() << std::endl;
+            std::cerr << j->to_string() << std::endl;
           }
         }
       }
@@ -554,9 +554,9 @@ namespace detail {
 
         if (mcrl2::core::gsDebug)
         {
-          std::cout << "\n--- initial vertices ---" << std::endl;
+          std::cerr << "\n--- initial vertices ---" << std::endl;
           print_vertices();
-          std::cout << "\n--- edges ---" << std::endl;
+          std::cerr << "\n--- edges ---" << std::endl;
           print_edges();
         }
 
@@ -564,7 +564,7 @@ namespace detail {
         while (!todo.empty())
         {
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cout << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(), todo.end())) << std::endl;
+std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(), todo.end())) << std::endl;
 #endif
           propositional_variable_decl_type var = todo.front();
 
@@ -580,19 +580,19 @@ std::cout << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
             const edge& e = *ei;
             vertex& v = m_vertices[e.right.name()];
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cout << "\n<updating edge>" << e.to_string() << std::endl;
-std::cout << "  <source vertex       >" << u.to_string() << std::endl;
-std::cout << "  <target vertex before>" << v.to_string() << std::endl;
+std::cerr << "\n<updating edge>" << e.to_string() << std::endl;
+std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
+std::cerr << "  <target vertex before>" << v.to_string() << std::endl;
 #endif
 
             term_type value = m_pbes_rewriter(data::data_variable_map_replace(e.condition, u.constraints));
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cout << "\nEvaluated condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
+std::cerr << "\nEvaluated condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
 #endif
             if (!tr::is_false(value) && !tr::is_true(value))
             {
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cout << "\nCould not evaluate condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to true or false";
+std::cerr << "\nCould not evaluate condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to true or false";
 #endif
             }
             if (!tr::is_false(value))
@@ -604,27 +604,27 @@ std::cout << "\nCould not evaluate condition " << core::pp(data::data_variable_m
               }
             }
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cout << "  <target vertex after >" << v.to_string() << std::endl;
+std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
 #endif
           }
         }
 
         if (mcrl2::core::gsDebug)
         {
-          std::cout << "\n--- final vertices ---" << std::endl;
+          std::cerr << "\n--- final vertices ---" << std::endl;
           print_vertices();
         }
 
         // print the parameters that will be removed
         if (mcrl2::core::gsVerbose)
         {
-          std::cout << "\nremoving the following constant parameters and equations:" << std::endl;
+          std::cerr << "\nremoving the following constant parameters and equations:" << std::endl;
           for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
           {
             const vertex& u = i->second;
             if (u.constraints.empty())
             {
-              std::cout << "  equation " << core::pp(u.variable) << std::endl;
+              std::cerr << "  equation " << core::pp(u.variable) << std::endl;
               m_removed[u.variable].insert(u.variable.parameters().begin(), u.variable.parameters().end());
             }
             else
@@ -632,7 +632,7 @@ std::cout << "  <target vertex after >" << v.to_string() << std::endl;
               std::vector<variable_type> removed = u.constant_parameters();
               for (typename std::vector<variable_type>::iterator j = removed.begin(); j != removed.end(); ++j)
               {
-                std::cout << "  parameter (" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
+                std::cerr << "  parameter (" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
                 m_removed[u.variable].insert(*j);
               }
             }

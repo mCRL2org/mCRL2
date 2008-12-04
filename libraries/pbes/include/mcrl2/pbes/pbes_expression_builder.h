@@ -139,7 +139,7 @@ struct pbes_expression_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << tr::pp(e) << std::endl;
+std::cerr << "<visit>" << tr::pp(e) << std::endl;
 #endif
 
     term_type result;
@@ -225,7 +225,7 @@ std::cout << "<visit>" << tr::pp(e) << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << tr::pp(result) << std::endl;
+std::cerr << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -343,7 +343,7 @@ struct pbes_expression_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << tr::pp(e) << " " << e << std::endl;
+std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
 #endif
 
     term_type result;
@@ -429,7 +429,7 @@ std::cout << "<visit>" << tr::pp(e) << " " << e << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;

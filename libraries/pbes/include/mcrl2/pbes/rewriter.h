@@ -94,7 +94,7 @@ namespace pbes_system {
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
+std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
         return result;
       }
@@ -109,7 +109,7 @@ std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
+std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
         return result;
       }

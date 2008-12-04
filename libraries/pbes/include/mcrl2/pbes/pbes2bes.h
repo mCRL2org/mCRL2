@@ -153,7 +153,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
         core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
         core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
         core::gsErrorMsg("Computation aborted.\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*p) << std::endl;
+        std::cerr << "Problematic Term: " << mcrl2::core::pp(*p) << std::endl;
         throw mcrl2::runtime_error("exit!");
       }
     }

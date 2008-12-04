@@ -70,10 +70,10 @@ class gauss_elimination_algorithm
     template <typename Iter>
     void print(Iter first, Iter last)
     {
-      std::cout << "pbes\n";
+      std::cerr << "pbes\n";
       for (Iter i = first; i != last; ++i)
       {
-        std::cout << "  " << pp(*i) << std::endl;
+        std::cerr << "  " << pp(*i) << std::endl;
       }
     }
 
@@ -99,12 +99,12 @@ class gauss_elimination_algorithm
       {
         --i;
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  std::cout << "solving equation\n";
-  std::cout << "  before: " << pp(*i) << std::endl;
+  std::cerr << "solving equation\n";
+  std::cerr << "  before: " << pp(*i) << std::endl;
 #endif
         *i = m_equation_solver(*i);
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  std::cout << "   after: " << pp(*i) << std::endl;
+  std::cerr << "   after: " << pp(*i) << std::endl;
 #endif
         gauss::substitute(first, i, i->variable(), i->formula());
       }

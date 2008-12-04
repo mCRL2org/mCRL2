@@ -77,42 +77,42 @@ class pbes_parelm_algorithm
     template <typename Container>
     void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       int index = 0;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
         if (print_index)
         {
-          std::cout << index++ << " " << mcrl2::core::pp(*i) << std::endl;
+          std::cerr << index++ << " " << mcrl2::core::pp(*i) << std::endl;
         }
         else
         {
-          std::cout << mcrl2::core::pp(*i) << " ";
+          std::cerr << mcrl2::core::pp(*i) << " ";
         }
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cout << *i << " ";
+        std::cerr << *i << " ";
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cout << i->first << " -> " << i->second << std::endl;
+        std::cerr << i->first << " -> " << i->second << std::endl;
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
     template <typename Container>
@@ -231,14 +231,14 @@ class pbes_parelm_algorithm
       // print debug output
       if (mcrl2::core::gsDebug)
       {
-        std::cout << "\ninfluential parameters:" << std::endl;
+        std::cerr << "\ninfluential parameters:" << std::endl;
         for(std::set<int>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::data_variable v1 = predicate_variables[*i];
-          std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+          std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
-        std::cout << "\ndependencies:" << std::endl;
+        std::cerr << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
@@ -254,14 +254,14 @@ class pbes_parelm_algorithm
           data::data_variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
           std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
-          std::cout << left << " -> " << right << std::endl;
+          std::cerr << left << " -> " << right << std::endl;
         }
       }
 
       // print verbose output
       if (mcrl2::core::gsVerbose)
       {
-        std::cout << "\nremoving the following parameters:" << std::endl;
+        std::cerr << "\nremoving the following parameters:" << std::endl;
         for (std::map<core::identifier_string, std::vector<int> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
@@ -269,7 +269,7 @@ class pbes_parelm_algorithm
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::data_variable v1 = predicate_variables[*j + propvar_offsets[X1]];
-            std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+            std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
       }

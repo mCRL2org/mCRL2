@@ -298,7 +298,7 @@ namespace pbes_system {
       /// Prints the mapping from BES variables to the corresponding PBES expressions.
       void print_variable_mapping()
       {
-        std::cout << "--- variable mapping ---" << std::endl;
+        std::cerr << "--- variable mapping ---" << std::endl;
         std::map<unsigned int, pbes_expression> m;
         for (atermpp::map<pbes_expression, unsigned int>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
         {
@@ -306,12 +306,12 @@ namespace pbes_system {
         }
         for (std::map<unsigned int, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
         {
-          std::cout << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
+          std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
         }
-        std::cout << "--- priorities ---" << std::endl;
+        std::cerr << "--- priorities ---" << std::endl;
         for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
         {
-          std::cout << core::pp(i->first) << " " << i->second << std::endl;
+          std::cerr << core::pp(i->first) << " " << i->second << std::endl;
         }
       }
   };

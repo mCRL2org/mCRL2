@@ -259,7 +259,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression sat_top(timed_action a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
+std::cerr << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
 #endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
@@ -306,7 +306,7 @@ std::cout << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
         throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<satresult>" << pp(result) << std::flush;
+std::cerr << "\n<satresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -315,7 +315,7 @@ std::cout << "\n<satresult>" << pp(result) << std::flush;
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<RHS>" << pp(f) << std::flush;
+std::cerr << "\n<RHS>" << pp(f) << std::flush;
 #endif
       using namespace pbes_expr_optimized;
       using namespace pbes_system::accessors;
@@ -513,7 +513,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<RHSresult>" << pp(result) << std::flush;
+std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -522,7 +522,7 @@ std::cout << "\n<RHSresult>" << pp(result) << std::flush;
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<E>" << pp(f) << std::flush;
+std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal::state_frm;
       using namespace modal::accessors;
@@ -618,7 +618,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }
@@ -678,7 +678,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     pbes_expression sat_top(lps::action_list a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
+std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
 #endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
@@ -727,7 +727,7 @@ std::cout << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
         throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<satresult>" << pp(result) << std::flush;
+std::cerr << "\n<satresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -736,7 +736,7 @@ std::cout << "\n<satresult>" << pp(result) << std::flush;
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<RHS>" << pp(f) << std::flush;
+std::cerr << "\n<RHS>" << pp(f) << std::flush;
 #endif
       using namespace pbes_expr_optimized;
       using namespace accessors;
@@ -898,7 +898,7 @@ std::cout << "\n<RHS>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<RHSresult>" << pp(result) << std::flush;
+std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
 #endif
       return result;
     }
@@ -907,7 +907,7 @@ std::cout << "\n<RHSresult>" << pp(result) << std::flush;
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<E>" << pp(f) << std::flush;
+std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal::state_frm;
       using namespace modal::accessors;
@@ -1005,7 +1005,7 @@ std::cout << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cout << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }

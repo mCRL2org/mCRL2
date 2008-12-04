@@ -125,7 +125,7 @@ namespace pbes_system {
           pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::data_variable_list()), psi_e);
           if (m_print_equations)
           {
-            std::cout << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
+            std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
           }
           E[index].push_back(new_eqn);
           if (++equation_count % 1000 == 0)

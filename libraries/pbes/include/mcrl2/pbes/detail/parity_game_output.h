@@ -107,12 +107,12 @@ namespace detail {
 
       void print_set(std::string name, const std::set<unsigned int>& todo) const
       {
-        std::cout << name << " = {";
+        std::cerr << name << " = {";
         for (std::set<unsigned int>::const_iterator i = todo.begin(); i != todo.end(); ++i)
         {
-          std::cout << (i == todo.begin() ? "" : ", ") << *i;
+          std::cerr << (i == todo.begin() ? "" : ", ") << *i;
         }
-        std::cout << "}" << std::endl;
+        std::cerr << "}" << std::endl;
       }
 
     public:

@@ -127,7 +127,7 @@ namespace detail {
         }
         data::data_expression expr = join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-std::cout << "  <and-term> " << pp(expr) << std::endl;
+std::cerr << "  <and-term> " << pp(expr) << std::endl;
 #endif
         result.insert(expr);
       }
@@ -179,9 +179,9 @@ std::cout << "  <and-term> " << pp(expr) << std::endl;
     inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-std::cout << "\n<equal multi actions>" << std::endl;
-std::cout << "a = " << pp(a) << std::endl;
-std::cout << "b = " << pp(b) << std::endl;
+std::cerr << "\n<equal multi actions>" << std::endl;
+std::cerr << "a = " << pp(a) << std::endl;
+std::cerr << "b = " << pp(b) << std::endl;
 #endif
       using namespace data::data_expr::optimized;
 
@@ -194,9 +194,9 @@ std::cout << "b = " << pp(b) << std::endl;
       if (!detail::equal_action_signatures(va, vb))
       {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-std::cout << "different action signatures detected!" << std::endl;
-std::cout << "a = " << lps::action_list(va.begin(), va.end()) << std::endl;
-std::cout << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
+std::cerr << "different action signatures detected!" << std::endl;
+std::cerr << "a = " << lps::action_list(va.begin(), va.end()) << std::endl;
+std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
 #endif
         return data::data_expr::false_();
       }

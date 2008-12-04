@@ -101,15 +101,15 @@ namespace detail {
       {
         if (sigma.find(*j) != sigma.end())
         {
-          std::cout << "OFFENDING VARIABLE: " << core::pp(*j) << std::endl;
-          std::cout << "x = " << core::pp(x) << std::endl;
-          std::cout << "sigma = [";
+          std::cerr << "OFFENDING VARIABLE: " << core::pp(*j) << std::endl;
+          std::cerr << "x = " << core::pp(x) << std::endl;
+          std::cerr << "sigma = [";
           for (pbes2bes_substitution_function::iterator i = sigma.begin(); i != sigma.end(); ++i)
           {
-            std::cout << (i == sigma.begin() ? "" : ", ") << core::pp(i->first) << " := " << core::pp(i->second);
+            std::cerr << (i == sigma.begin() ? "" : ", ") << core::pp(i->first) << " := " << core::pp(i->second);
           }
-          std::cout << "]" << std::endl;
-          std::cout << "result = " << core::pp(result) << std::endl;
+          std::cerr << "]" << std::endl;
+          std::cerr << "result = " << core::pp(result) << std::endl;
           break;
         }
       }
@@ -248,7 +248,7 @@ namespace detail {
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
         {
-          std::cout << core::pp(x) << " -> " << core::pp(result) << std::endl;
+          std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
         }
         return result;
       }
@@ -264,7 +264,7 @@ namespace detail {
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
         {
-          std::cout << core::pp(x) << "   " << sigma.to_string() << " -> " << core::pp(result) << std::endl;
+          std::cerr << core::pp(x) << "   " << sigma.to_string() << " -> " << core::pp(result) << std::endl;
         }
         return result;
       }
