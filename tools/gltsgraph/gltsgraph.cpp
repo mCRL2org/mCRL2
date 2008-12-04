@@ -105,6 +105,7 @@ bool GLTSGraph::OnInit()
   brushColour = *wxBLACK;
   selectedState = NULL;
   selectedTransition = NULL;
+  selectedLabel = NULL;
   graph = NULL;
   SpringLayout* springLayout = new SpringLayout(this);
   algorithms.push_back(springLayout);
