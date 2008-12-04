@@ -48,17 +48,15 @@ namespace atermpp
 /// of the stack. The parameter that is actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#ifdef NDEBUG
 #define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
-  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
-  ATinit(3, debug_args, reinterpret_cast<ATerm*>(&argv)); \
-  ATsetChecking(ATtrue);
+  MCRL2_ATERMPP_INIT(argc,argc)
 #else
-#define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
+#define MCRL2_ATERMPP_INIT_DEBUG(argc,argc)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
-  ATinit(3, debug_args, reinterpret_cast<ATerm*>(argv)); \
+  MCRL2_ATERMPP_INIT(argc,argc)\
   ATsetChecking(ATtrue);
-#endif //defined(_MSC_VER) || defined(__MINGW32__)
+#endif
 
 #include "mcrl2/atermpp/aterm_make_match.h"
 
