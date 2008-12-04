@@ -52,8 +52,8 @@ namespace atermpp
 #define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
   MCRL2_ATERMPP_INIT(argc,argc)
 #else
-#define MCRL2_ATERMPP_INIT_DEBUG(argc,argc)\
-  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" };\
+#define MCRL2_ATERMPP_INIT_DEBUG(argc,argv)\
+  /* char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; */ \
   MCRL2_ATERMPP_INIT(argc,argc)\
   ATsetChecking(ATtrue);
 #endif
