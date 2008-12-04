@@ -245,20 +245,21 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
 
   info.AddDeveloper(wxT("Carst Tankink"));
   info.SetName(wxT("LTSGraph"));
-  info.SetDescription(wxT("Tool for visualizing labelled transition systems as graphs, and optimizing graph layout."));
-  info.SetCopyright(
+ info.SetCopyright(
     wxT("Copyright (C) 2008 Technische Universiteit Eindhoven."));
   
   info.SetLicense(wxT("This is free software.\nYou may redistribute copies of it under the terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\nThere is NO WARRANTY, to the extent permitted by law."));
 
-  info.SetWebSite(wxT("http://www.mcrl2.org"));
+  info.SetWebSite(wxT("http://www.mcrl2.org"), wxT("mCRL2 home page"));
   
   wxString version(app->getVersion().c_str(), wxConvLocal);
   wxString revision(app->getRevision().c_str(), wxConvLocal);
   
-  wxString versionString = wxT("mCRL2 toolset ") + version + wxT("\nrevision ") 
-                  + revision + wxT(")");
-  info.SetVersion(versionString);
+  wxString versionString = wxT("mCRL2 toolset ") + version + wxT(" revision ") 
+                  + revision + wxT("\n\n");
+  info.SetDescription(versionString + wxT("Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout."));
+ 
+//  info.SetVersion(versionString);
 
   ::wxAboutBox(info);
 }

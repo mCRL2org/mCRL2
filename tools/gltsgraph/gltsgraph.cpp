@@ -369,9 +369,14 @@ void GLTSGraph::deselect()
   {
     selectedTransition->deselect();
   }
+
+  if(selectedLabel != NULL) {
+    selectedLabel->deselect();
+  }
   
   selectedState = NULL;
   selectedTransition = NULL;
+  selectedLabel = NULL;
 }
 
 void GLTSGraph::selectState(size_t selectedObject)
