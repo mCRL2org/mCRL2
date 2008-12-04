@@ -34,7 +34,9 @@ END_EVENT_TABLE()
 
 
 MainFrame::MainFrame(GLTSGraph* owner)
-  : wxFrame(NULL, wxID_ANY, wxT("GLTSGraph"))
+  : wxFrame(NULL, wxID_ANY, wxT("GLTSGraph"),
+    wxDefaultPosition, wxDefaultSize, 
+    wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
   app = owner;
 

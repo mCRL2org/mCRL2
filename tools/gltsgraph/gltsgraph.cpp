@@ -380,6 +380,12 @@ void GLTSGraph::deselect()
   selectedLabel = NULL;
 }
 
+void GLTSGraph::colourState(size_t selectedObject) {
+  colouring = !colouring;
+  selectState(selectedObject);
+  colouring = !colouring;
+}
+
 void GLTSGraph::selectState(size_t selectedObject)
 {
   if(colouring) {

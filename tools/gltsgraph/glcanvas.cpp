@@ -226,7 +226,7 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
 {
   oldX = event.GetX();
   oldY = event.GetY();
-  pickObjects(oldX, oldY);
+  pickObjects(oldX, oldY, event.CmdDown());
   owner->dragObject();
   display();
 }
@@ -242,7 +242,7 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldX = event.GetX();
   oldY = event.GetY();
 
-  pickObjects(oldX, oldY);
+  pickObjects(oldX, oldY, event.CmdDown());
   owner->lockObject(); 
   display();
 }
@@ -273,7 +273,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 }
 
 
-void GLCanvas::pickObjects(int x, int y)
+void GLCanvas::pickObjects(int x, int y, bool ctrl)
 {
   owner->deselect(); 
 
@@ -335,13 +335,13 @@ void GLCanvas::pickObjects(int x, int y)
 
     hits = glRenderMode(GL_RENDER);
     
-    processHits(hits, selectBuf);
+    processHits(hits, selectBuf, ctrl);
     reshape();
     display();
   }
 }
 
-void GLCanvas::processHits(const GLint hits, GLuint *buffer)
+void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
 {
   // This method selects the object clicked.
   //
@@ -401,7 +401,12 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer)
         }
         case IDS::STATE:
         {
-          owner->selectState(selectedObject);
+          if(!ctrl) {
+            owner->selectState(selectedObject);
+          }
+          else {
+            owner->colourState(selectedObject);
+          }
           break;
         }
         case IDS::LABEL:

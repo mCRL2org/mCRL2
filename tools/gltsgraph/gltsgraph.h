@@ -50,6 +50,7 @@ class GLTSGraph : public wxApp
     void stopDrag();
     void deselect();
     void selectState(size_t state);
+    void colourState(size_t state);
     void selectTransition(size_t state, size_t trans);
     void selectSelfLoop(size_t state, size_t trans);
     void selectLabel(size_t state, size_t trans);
