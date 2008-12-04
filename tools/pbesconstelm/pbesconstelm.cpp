@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/core/filter_tool.h"
+#include "mcrl2/utilities/filter_tool_with_rewriter.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -28,11 +28,10 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
-typedef data::rewriter my_data_rewriter;
 typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
 typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
 
-class pbes_constelm_tool: public core::filter_tool
+class pbes_constelm_tool: public utilities::filter_tool_with_rewriter
 {
   protected:
     bool m_compute_conditions;
@@ -49,7 +48,7 @@ class pbes_constelm_tool: public core::filter_tool
 
   public:
     pbes_constelm_tool()
-      : filter_tool(
+      : filter_tool_with_rewriter(
           "pbesconstelm",
           "Wieger Wesselink",
           "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "
@@ -72,7 +71,7 @@ class pbes_constelm_tool: public core::filter_tool
       p.load(m_input_filename);
       
       // data rewriter
-      my_data_rewriter datar(p.data());
+      data::rewriter datar = create_rewriter(p.data());
       
       // name generator
       std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix

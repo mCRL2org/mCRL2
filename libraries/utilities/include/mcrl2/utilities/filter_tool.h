@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/filter_tool.h
+/// \file mcrl2/utilities/filter_tool.h
 /// \brief A class that provides common functionality for filter tools.
 
-#ifndef MCRL2_CORE_FILTER_TOOL_H
-#define MCRL2_CORE_FILTER_TOOL_H
+#ifndef MCRL2_UTILITIES_FILTER_TOOL_H
+#define MCRL2_UTILITIES_FILTER_TOOL_H
 
 #include <cstdlib>
 #include <string>
@@ -20,7 +20,7 @@
 
 namespace mcrl2 {
 
-namespace core {
+namespace utilities {
 
   /// \brief Base class for filter tools that take a file as input and produces a file
   /// as result.
@@ -133,8 +133,8 @@ namespace core {
       }
   };
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_FILTER_TOOL_H
+#endif // MCRL2_UTILITIES_FILTER_TOOL_H

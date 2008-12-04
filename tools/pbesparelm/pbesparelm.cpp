@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/core/filter_tool.h"
+#include "mcrl2/utilities/filter_tool.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
@@ -25,7 +25,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
-class pbes_parelm_tool: public core::filter_tool
+class pbes_parelm_tool: public utilities::filter_tool
 {
   protected:
     void add_options(interface_description& clinterface)

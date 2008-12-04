@@ -34,7 +34,7 @@
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/filter_tool.h"
+#include "mcrl2/utilities/filter_tool_with_rewriter.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -58,7 +58,7 @@ enum transformation_strategy {
 };
 
 /// The pbes2bes tool.
-class pbes2bes_tool: public core::filter_tool
+class pbes2bes_tool: public utilities::filter_tool_with_rewriter
 {
   protected:
     transformation_strategy m_strategy;
@@ -134,7 +134,6 @@ class pbes2bes_tool: public core::filter_tool
 
     void add_options(interface_description& clinterface)
     {
-      clinterface.add_rewriting_options();
       clinterface.
         add_option("strategy",
           make_optional_argument("NAME", "lazy"),
@@ -191,7 +190,7 @@ class pbes2bes_tool: public core::filter_tool
   public:
     /// Constructor.
     pbes2bes_tool()
-      : filter_tool(
+      : filter_tool_with_rewriter(
           "pbes2bes",
           "Alexander van Dam, Wieger Wesselink",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
@@ -226,14 +225,14 @@ class pbes2bes_tool: public core::filter_tool
 
       if (m_strategy == ts_lazy)
       {
-        pbes2bes_algorithm algorithm(p.data());
+        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy());
         algorithm.run(p);
         p = algorithm.get_result();
       }
       else
       {
         // data rewriter
-        data::rewriter datar(p.data());
+        data::rewriter datar = create_rewriter(p.data());
         
         // name generator
         std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix

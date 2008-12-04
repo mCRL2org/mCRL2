@@ -228,9 +228,9 @@ namespace detail {
       typedef data::data_variable variable_type;
 
       /// Constructor.
-      pbes2bes_rewriter(const data::data_specification& data_spec, bool print_rewriter_output)
+      pbes2bes_rewriter(const data::data_specification& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
        :
-         datar(data_spec),
+         datar(data_spec, rewriter_strategy),
          datarv(data_spec),
          name_generator("UNIQUE_PREFIX"),
          datae(data_spec, datar, name_generator),

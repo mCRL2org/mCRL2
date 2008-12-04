@@ -81,8 +81,8 @@ namespace pbes_system {
       bool m_print_equations;
 
     public:
-      pbes2bes_algorithm(data::data_specification data_spec, bool print_equations = false, bool print_rewriter_output = false)
-        : R(data_spec, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
+      pbes2bes_algorithm(data::data_specification data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
+        : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
       void run(pbes<>& p)
