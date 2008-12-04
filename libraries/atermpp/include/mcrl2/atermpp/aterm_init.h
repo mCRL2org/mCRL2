@@ -30,33 +30,41 @@ namespace atermpp
 
 } // namespace atermpp
 
+// \cond INTERNAL_DOCS
+#define MCRL2_ATERMPP_INIT_(argc, argv, bottom) \
+  ATinit(argc, argv, reinterpret_cast< ATerm* >(bottom));
+// \endcond
+
 /// \brief MCRL2_ATERMPP_INIT(argc, argv) initialises the ATerm library using
 /// one of the parameters as the bottom of the stack. The parameter that is
 /// actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
 #if defined(_MSC_VER) || defined(__MINGW32__)
-#define MCRL2_ATERMPP_INIT(argc, argv)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(&argv));
+# define MCRL2_ATERMPP_INIT(argc, argv) \
+  MCRL2_ATERMPP_INIT_(0, 0, &argv);
 #else
-#define MCRL2_ATERMPP_INIT(argc, argv)\
-  ATinit(0, 0, reinterpret_cast<ATerm*>(argv));
+# define MCRL2_ATERMPP_INIT(argc, argv)\
+  MCRL2_ATERMPP_INIT_(argc, argv, argv);
 #endif //defined(_MSC_VER) || defined(__MINGW32__)
 
-/// \brief MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
-/// debugging information enabled, using one of the parameters as the bottom
-/// of the stack. The parameter that is actually depends on the platform:
-/// - &argv on Windows platforms
-/// - argv on non-Windows platforms
-#ifdef NDEBUG
-#define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
-  MCRL2_ATERMPP_INIT(argc,argc)
+/// MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
+///  MCRL2_ATERMPP_INIT(argc,argv) and activates debugging checks
+/// \see MCRL2_ATERMPP_INIT(argc, argv)
+#if defined(NDEBUG)
+# define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
+  MCRL2_ATERMPP_INIT_(argc, argv, argv)
 #else
-#define MCRL2_ATERMPP_INIT_DEBUG(argc,argv)\
-  /* char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; */ \
-  MCRL2_ATERMPP_INIT(argc,argc)\
+# define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
+  MCRL2_ATERMPP_INIT_(argc, argv, argv)\
   ATsetChecking(ATtrue);
 #endif
+/// MCRL2_ATERMPP_INIT_VERBOSE(argc, argv) initialises the ATerm library with
+/// MCRL2_ATERMPP_INIT(argc,argv) and activates additional messages
+/// \see MCRL2_ATERMPP_INIT(argc, argv)
+#define MCRL2_ATERMPP_INIT_VERBOSE(argc, argv)\
+  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; \
+  MCRL2_ATERMPP_INIT_(3, debug_args, argv)\
 
 #include "mcrl2/atermpp/aterm_make_match.h"
 
