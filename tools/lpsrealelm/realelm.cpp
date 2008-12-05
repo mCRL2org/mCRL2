@@ -617,12 +617,72 @@ data_expression remove_variable(const data_variable& variable, const data_expres
   assert(false);
 }
 
+// Group inequalities by positive, 0 and negative occurrences of *i
+static
+void group_inequalities(const data_variable& v, const data_expression_list& inequalities,
+                        data_expression_list& positive_occurrences,
+                        data_expression_list& zero_occurrences,
+                        data_expression_list& negative_occurrences) 
+{
+  for(data_expression_list::iterator j = inequalities.begin(); j != inequalities.end(); ++j)
+  {
+    if(find_data_variable(*j, v))
+    {
+      if(find_data_expression(*j, negate(static_cast<const data_expression&>(v))))
+      {
+        negative_occurrences = push_front(negative_occurrences, *j);
+      }
+      else
+      {
+        positive_occurrences = push_front(positive_occurrences, *j);
+      }
+    }
+    else
+    {
+      zero_occurrences = push_front(zero_occurrences, *j);
+    }
+  }
+}
+
+// prototype
+static
+void add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator);
+
+static
+void add_inequalities_to_context(const data_expression_list& l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+{
+  for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  {
+    add_inequality_to_context(*i, context, r, variable_generator);
+  }
+}
+
+// Add variable for inequality to context
+static
+void add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+{
+  assert(is_inequality(e));
+  data_expression left = lhs(e);
+  data_expression right = rhs(e);
+  if(is_negative(right))
+  {
+    left = r(negate(left));
+    right = r(negate(right));
+  }
+  if(context.find(std::make_pair(left, right)) == context.end())
+  {
+    data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
+    context[std::make_pair(left, right)] = xi;
+    gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(left).c_str(), pp(right).c_str());
+  }
+}
+
 static
 maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list variables, rewriter& r,  atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
 {
   inequalities = gauss_elimination(inequalities, variables, r);
 
-  gsDebugMsg("Starting Fourrier-Motzkin elimination on system produced by Gauss elimination, with variables %s\n", pp(variables).c_str());
+  gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination, with variables %s\n", pp(variables).c_str());
 
   if(variables.size() != 0)
   {
@@ -635,33 +695,17 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
       data_expression_list zero_variables;
       data_expression_list negative_variables;
 
-      // Group inequalities by positive, 0 and negative occurrences of *i
-      for(data_expression_list::iterator j = inequalities.begin(); j != inequalities.end(); ++j)
-      {
-        if(find_data_variable(*j, *i))
-        {
-          if(find_data_expression(*j, negate(static_cast<const data_expression&>(*i))))
-          {
-            negative_variables = push_front(negative_variables, *j);
-          }
-          else
-          {
-            positive_variables = push_front(positive_variables, *j); // TODO: Divide
-          }
-        }
-        else
-        {
-          zero_variables = push_front(zero_variables, *j);
-        }
-      }
+      group_inequalities(*i, inequalities, positive_variables, zero_variables, negative_variables);
 
-      data_expression_list new_inequalities = normalize_inequalities(zero_variables, r);
       positive_variables = normalize_inequalities(positive_variables, r);
+      zero_variables = normalize_inequalities(zero_variables, r);
       negative_variables = normalize_inequalities(negative_variables, r);
 
-      gsDebugMsg("equations with zero occurrance %s\n", pp(new_inequalities).c_str());
+      gsDebugMsg("equations with zero occurrance %s\n", pp(zero_variables).c_str());
       gsDebugMsg("equations with positive occurrance %s\n", pp(positive_variables).c_str());
       gsDebugMsg("equations with negative occurrance %s\n", pp(negative_variables).c_str());
+
+      data_expression_list new_inequalities = zero_variables;
 
       // Variables are grouped, now construct new inequalities as follows:
       // Keep the zero occurrences
@@ -672,18 +716,19 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
       for(data_expression_list::iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
       {
         data_expression positive_inequality = normalize_inequality(remove_variable(*i, *j), r);
-        if(is_less(positive_inequality) || is_equal_to(positive_inequality) || is_greater(positive_inequality))
+        if(is_inequality(positive_inequality))
         {
+          assert(!is_greater(positive_inequality) && !is_greater_equal(positive_inequality));
           for(data_expression_list::iterator k = negative_variables.begin(); k != negative_variables.end(); ++k)
           {
             gsDebugMsg("combining %s and %s into new inequality\n", pp(*j).c_str(), pp(*k).c_str());
             data_expression negative_inequality = normalize_inequality(remove_variable(*i, *k), r);
             // Results may not be inequalities any more
-            if((is_less(positive_inequality) || is_equal_to(positive_inequality) || is_greater(positive_inequality)) &&
-               (is_less(negative_inequality) || is_equal_to(negative_inequality) || is_greater(negative_inequality)))
+            if(is_inequality(negative_inequality))
             {
+              assert(!is_greater(negative_inequality) && !is_greater_equal(negative_inequality));
               data_expression new_inequality;
-              if(is_less(*j) && is_less(*k))
+              if(is_less(positive_inequality) && is_less(negative_inequality))
               {
                 new_inequality = less(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
               }
@@ -692,7 +737,7 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
                 new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
               }
 
-              new_inequalities = push_front(new_inequalities, r(new_inequality));
+              new_inequalities = push_front(new_inequalities, new_inequality);
             }
             else
             {
@@ -710,7 +755,7 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
 
     inequalities = normalize_inequalities(inequalities, r);
 
-    gsDebugMsg("Inequalties after eliminating variables using Fourrier-Motzkin: %s\n", pp(inequalities).c_str());
+    gsDebugMsg("Inequalities after eliminating variables using Fourier-Motzkin: %s\n", pp(inequalities).c_str());
 
 
     data_expression_list new_inequalities;
@@ -745,25 +790,15 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
       }
     }
 
-    for(data_expression_list::const_iterator i = new_inequalities.begin(); i != new_inequalities.end(); ++i)
-    {
-      data_expression left = lhs(*i);
-      data_expression right = rhs(*i);
-      data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
-      if(is_negative(right))
-      {
-        left = r(negate(left));
-        right = r(negate(right));
-      }
-      context[std::make_pair(left, right)] = xi;
-      gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(left).c_str(), pp(right).c_str());
-    }
+    add_inequalities_to_context(new_inequalities, context, r, variable_generator);
+    inequalities = new_inequalities;
   }
 
+  // TODO: Check that the criterium for true, false, or unknown is correct
   gsDebugMsg("Remaining system: %s\n", pp(inequalities).c_str());
   if(inequalities.size() == 1)
   {
-    return maybe_false;
+    return maybe_true;
   }
   else if(inequalities.size() == 0)
   {
@@ -788,19 +823,7 @@ void compute_condition(const summand& s, const data_expression_list& inequalitie
   data_expression_list simplified_inequalities = inequalities;
   fourrier_motzkin(simplified_inequalities, s.summation_variables(), r, variables, variable_generator);
 
-  for(data_expression_list::iterator i = simplified_inequalities.begin(); i != simplified_inequalities.end(); ++i)
-  {
-    data_expression left = lhs(*i);
-    data_expression right = rhs(*i);
-    if(variables.find(std::make_pair(left, right)) == variables.end())
-    {
-      assert(is_data_expression(left));
-      assert(is_data_expression(right));
-
-      data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
-      gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(left).c_str(), pp(right).c_str());
-    }
-  }
+  add_inequalities_to_context(simplified_inequalities, variables, r, variable_generator);
 }
 
 static inline
@@ -929,6 +952,7 @@ specification realelm(specification s)
             if(res == maybe_unknown)
             {
               done = res;
+
             }
           }
         }
@@ -998,10 +1022,9 @@ specification realelm(specification s)
 
           next_state = reverse(next_state);
 
-          // Compute whether condition is consistent
           data_expression_list inequalities;
           determine_inequalities(condition, inequalities);
-          maybe res = fourrier_motzkin(inequalities, real_parameters + i->summation_variables(), r, variables, variable_generator);
+          maybe res = fourrier_motzkin(inequalities, pop_front(real_parameters) + i->summation_variables(), r, variables, variable_generator);
           if(res == maybe_true)// || res == maybe_unknown)
           {
             gsVerboseMsg("computed nextstate %s\n", pp(next_state).c_str());
