@@ -1047,7 +1047,6 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
   ATermAppl et = gsMakeDataExprCons(e_sort_elt, t_sort_id);
   ATermAppl nil = gsMakeNil();
   ATermAppl zero = gsMakeDataExprC0();
-  ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   ATermList dl = ATmakeList1((ATerm) d_sort_elt);
   ATermList sl = ATmakeList1((ATerm) s_sort_id);
