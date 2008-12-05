@@ -803,6 +803,25 @@ void compute_condition(const summand& s, const data_expression_list& inequalitie
   }
 }
 
+static inline
+data_expression compute_inequality(unsigned long i, const std::pair<data_expression, data_expression>& e)
+{
+  if(i == 0)
+  {
+    return less(e.first, e.second);
+  }
+  else if(i == 1)
+  {
+    return equal_to(e.first, e.second);
+  }
+  else
+  {
+    assert(i == 2);
+    return less(negate(e.first), negate(e.second));
+  }
+}
+
+
 specification realelm(specification s)
 {
   gsDebugMsg("Performing real time abstraction\n");
@@ -814,18 +833,35 @@ specification realelm(specification s)
   linear_process lps = s.process();
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(lps);
-  atermpp::map<std::pair<data_expression, data_expression>, data_variable> variables;
+
+  atermpp::map<std::pair<data_expression, data_expression>, data_variable> variables; // Contains introduced variables
+  data_variable_list real_parameters = get_real_variables(lps.process_parameters());
+  data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
 
   int iteration = 0;
   int max_iterations = 2;
   gsDebugMsg("Maximum number of iterations is %d\n", max_iterations);
 
   // Compute initial set of variables
+  // and store the real part of the summand in a mapping
+  atermpp::map<summand, data_expression_list> summand_real_conditions;
+  atermpp::map<summand, atermpp::map<data_variable, data_expression> > summand_real_nextstate_map;
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
   {
     data_expression_list inequalities;
     determine_inequalities(i->condition(), inequalities);
+    summand_real_conditions[*i] = inequalities;
     compute_condition(*i, inequalities, variables, r, variable_generator);
+    // Replacements is the nextstate vector in a map
+    atermpp::map<data_variable, data_expression> replacements;
+    for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+    {
+      if(j->lhs().sort() == sort_expr::real())
+      {
+        replacements[j->lhs()] = j->rhs();
+      }
+    }
+    summand_real_nextstate_map[*i] = replacements;
   }
 
   gsDebugMsg("Initial set of variables:\n");
@@ -842,30 +878,20 @@ specification realelm(specification s)
     done = maybe_true;
     gsDebugMsg("Iteration %d\n", ++iteration);
 
+    // Calculate Cond_i(x, zeta) and simplify give &&(compare(u_j(x), v_j(x)))
+    // for all j
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
-      // Compute the inequalities in the condition of summand i, ranging of Real
-      // numbers, store them in inequalities
-      data_expression_list inequalities;
-      determine_inequalities(i->condition(), inequalities);
-      data_variable_list real_parameters = get_real_variables(lps.process_parameters());
-
-      // Replacements is the nextstate vector in a map
-      atermpp::map<data_variable, data_expression> replacements;
-      for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
-      {
-        if(j->lhs().sort() == sort_expr::real())
-        {
-          replacements[j->lhs()] = j->rhs();
-        }
-      }
-
       // Consider all combinations of current values for the context
       unsigned long context_combinations = pow(3, variables.size());
       for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
       {
         // Accumulate all inequalities for this valuation of context in context_case_inequalities
-        data_expression_list context_case_inequalities = inequalities;
+        // We need to consider the system of inequalities consisting of
+        // the original inequalities of the condition, the inequalities
+        // induced by the context, and the inequalities of the nextstate
+        // The resulting system needs to be consistent.
+        data_expression_list context_case_inequalities = summand_real_conditions[*i];
         unsigned long remaining_context_combination = context_combination;
         for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = variables.begin(); j != variables.end(); ++j)
         {
@@ -875,19 +901,7 @@ specification realelm(specification s)
           div_t q_context = div(remaining_context_combination, 3);
           remaining_context_combination = q_context.quot;
 
-          if(q_context.rem == 0)
-          {
-            context_case_inequalities = push_front(context_case_inequalities, less(j->first.first, j->first.second));
-          }
-          else if(q_context.rem == 1)
-          {
-            context_case_inequalities = push_front(context_case_inequalities, equal_to(j->first.first, j->first.second));
-          }
-          else
-          {
-            assert(q_context.rem == 2);
-            context_case_inequalities = push_front(context_case_inequalities, less(negate(j->first.first), negate(j->first.second)));
-          }
+          context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
 
           // Consider all combinations of values for nextstate for the context
           unsigned long nextstate_combinations = pow(3, variables.size());
@@ -899,35 +913,17 @@ specification realelm(specification s)
             unsigned long remaining_nextstate_combination = nextstate_combination;
             for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
             {
-              assert(is_data_expression(k->first.first));
-              assert(is_data_expression(k->first.second));
-              data_expression left = k->first.first;
-              data_expression right = k->first.second;
-
               div_t q_nextstate = div(remaining_nextstate_combination, 3);
               remaining_nextstate_combination = q_nextstate.quot;
-              if(q_nextstate.rem == 0)
-              {
-                data_expression inequality = data_variable_map_replace(less(left, right), replacements);
-                nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
-              }
-              else if(q_nextstate.rem == 1)
-              {
-                data_expression inequality = data_variable_map_replace(equal_to(left, right), replacements);
-                nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
-              }
-              else
-              {
-                assert(q_nextstate.rem == 2);
-                data_expression inequality = data_variable_map_replace(less(negate(left), negate(right)), replacements);
-                nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
-              }
+
+              data_expression inequality = compute_inequality(q_nextstate.rem, k->first);
+              inequality = data_variable_map_replace(inequality, summand_real_nextstate_map[*i]);
+              nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
             }
 
             // nextstate_case_inequalities contains exactly one case we need to
             // compute using Fourrier-Motzkin elimination.
             nextstate_case_inequalities = normalize_inequalities(nextstate_case_inequalities, r);
-            data_expression_list tmp_inequalities = nextstate_case_inequalities;
 
             maybe res = fourrier_motzkin(nextstate_case_inequalities, i->summation_variables(), r, variables, variable_generator);
             if(res == maybe_unknown)
@@ -947,9 +943,6 @@ specification realelm(specification s)
   }
 
   // Generate all new summands
-  data_variable_list real_parameters = get_real_variables(lps.process_parameters());
-  data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
-
   summand_list summands;
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
   {
@@ -969,21 +962,7 @@ specification realelm(specification s)
 
         div_t q_context = div(remaining_context_combination, 3);
         remaining_context_combination = q_context.quot;
-
-        if(q_context.rem == 0)
-        {
-          context_case_inequalities = push_front(context_case_inequalities, less(j->first.first, j->first.second));
-        }
-        else if(q_context.rem == 1)
-        {
-          context_case_inequalities = push_front(context_case_inequalities, equal_to(j->first.first, j->first.second));
-        }
-        else
-        {
-          assert(q_context.rem == 2);
-          context_case_inequalities = push_front(context_case_inequalities, less(negate(j->first.first), negate(j->first.second)));
-        }
-
+        context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
 
         unsigned long nextstate_combinations = pow(3, variables.size());
         for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
