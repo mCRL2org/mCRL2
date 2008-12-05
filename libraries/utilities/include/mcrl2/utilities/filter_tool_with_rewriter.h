@@ -49,7 +49,8 @@ namespace utilities {
                                 const std::string& author,
                                 const std::string& tool_description
                                )
-        : filter_tool(name, author, tool_description)
+        : filter_tool(name, author, tool_description),
+          m_rewrite_strategy(GS_REWR_JITTY)
       {}
 
       /// \brief Returns the rewrite strategy

@@ -61,6 +61,13 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
+      basic_rewriter(Rewriter* r)
+        : m_rewriter(r)
+      { }
+
+      /// \brief Constructor.
+      /// \param d A data specification.
+      /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
@@ -131,6 +138,12 @@ namespace data {
       /// \param s A rewriter strategy.
       rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression_with_variables>(d, s)
+      { }
+
+      /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
+      /// \param r A data rewriter.
+      rewriter_with_variables(rewriter r)
+        : basic_rewriter<data_expression_with_variables>(r.get_rewriter())
       { }
 
 		  /// \brief Rewrites a data expression.

@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/filter_tool_with_rewriter.h"
+#include "mcrl2/utilities/filter_tool_with_pbes_rewriter.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -25,11 +25,11 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
-class pbes_rewr_tool: public utilities::filter_tool_with_rewriter
+class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
 {
   public:
     pbes_rewr_tool()
-      : filter_tool_with_rewriter(
+      : filter_tool_with_pbes_rewriter(
           "pbesrewr",
           "Jan friso Groote, Wieger Wesselink",
           "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
@@ -44,6 +44,7 @@ class pbes_rewr_tool: public utilities::filter_tool_with_rewriter
         std::cout << "pbesrewr parameters:" << std::endl;
         std::cout << "  input file:         " << m_input_filename << std::endl;
         std::cout << "  output file:        " << m_output_filename << std::endl;
+        std::cout << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
     
       // load the pbes
@@ -52,12 +53,31 @@ class pbes_rewr_tool: public utilities::filter_tool_with_rewriter
       
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());
-     
+
       // pbes rewriter
-      simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> pbesr(datar);    
-      
-      // apply the rewriter
-      pbesrewr(p, pbesr);
+      switch (rewriter_type())
+      {
+        case simplify:
+        {
+          simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> pbesr(datar);    
+          pbesrewr(p, pbesr);
+          break;
+        }
+        case quantifier_all:
+        {
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
+          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);
+          pbesrewr(p, pbesr);
+          break;
+        }
+        case quantifier_finite:
+        {
+          std::cerr << "The quantifier_finite option has not been implemented yet!" << std::endl;
+          break;
+        }
+      }
       
       // save the result
       p.save(m_output_filename);
