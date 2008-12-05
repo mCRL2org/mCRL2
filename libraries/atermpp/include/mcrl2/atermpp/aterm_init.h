@@ -31,8 +31,13 @@ namespace atermpp
 } // namespace atermpp
 
 // \cond INTERNAL_DOCS
+#if defined(_MSC_VER) || defined(__MINGW32__)
+# define MCRL2_ATERMPP_INIT_(argc, argv, bottom) \
+  ATinit(0, 0, reinterpret_cast< ATerm* >(&bottom));
+#else
 #define MCRL2_ATERMPP_INIT_(argc, argv, bottom) \
   ATinit(argc, argv, reinterpret_cast< ATerm* >(bottom));
+#endif //defined(_MSC_VER) || defined(__MINGW32__)
 // \endcond
 
 /// \brief MCRL2_ATERMPP_INIT(argc, argv) initialises the ATerm library using
@@ -40,13 +45,8 @@ namespace atermpp
 /// actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
-#if defined(_MSC_VER) || defined(__MINGW32__)
 # define MCRL2_ATERMPP_INIT(argc, argv) \
-  MCRL2_ATERMPP_INIT_(0, 0, &argv);
-#else
-# define MCRL2_ATERMPP_INIT(argc, argv)\
   MCRL2_ATERMPP_INIT_(argc, argv, argv);
-#endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 /// MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
 ///  MCRL2_ATERMPP_INIT(argc,argv) and activates debugging checks

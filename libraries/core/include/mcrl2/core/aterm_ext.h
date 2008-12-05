@@ -28,8 +28,13 @@ namespace mcrl2 {
 //is started.
 
 // \cond INTERNAL_DOCS
-#define MCRL2_ATERM_INIT_(argc, argv, bottom) \
+#if defined(_MSC_VER) || defined(__MINGW32__)
+# define MCRL2_ATERM_INIT_(argc, argv, bottom) \
+  ATinit(0, 0, reinterpret_cast< ATerm* >(&bottom));
+#else
+# define MCRL2_ATERM_INIT_(argc, argv, bottom) \
   ATinit(argc, argv, reinterpret_cast< ATerm* >(bottom));
+#endif
 // \endcond
 
 /// MCRL2_ATERM_INIT(argc, argv) initialises the ATerm library using
@@ -37,13 +42,8 @@ namespace mcrl2 {
 /// actually depends on the platform:
 /// - &argv on Windows platforms
 /// - argv on non-Windows platforms
-#if defined(_MSC_VER) || defined(__MINGW32__)
 # define MCRL2_ATERM_INIT(argc, argv) \
-  MCRL2_ATERM_INIT_(0, 0, &argv);
-#else
-# define MCRL2_ATERM_INIT(argc, argv)\
   MCRL2_ATERM_INIT_(argc, argv, argv);
-#endif //defined(_MSC_VER) || defined(__MINGW32__)
 
 /// MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
 ///  MCRL2_ATERM_INIT(argc,argv) and activates debugging checks
