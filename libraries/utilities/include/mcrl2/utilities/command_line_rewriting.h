@@ -41,12 +41,13 @@ namespace mcrl2 {
 
           return true;
         }
-
-        static bool initialised;
       };
 
-      bool initialiser< RewriteStrategy >::initialised =
-          initialiser< RewriteStrategy >::register_rewriting_actions();
+      void register_rewriting_options() {
+        static bool initialised = initialiser< RewriteStrategy >::register_rewriting_actions();
+
+        static_cast< void >(initialised);
+      };
     }
   }
 }

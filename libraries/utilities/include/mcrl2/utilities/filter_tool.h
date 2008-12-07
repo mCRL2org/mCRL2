@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 namespace mcrl2 {
 

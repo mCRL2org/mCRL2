@@ -39,7 +39,9 @@
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
 using namespace atermpp;
 using namespace mcrl2::utilities;

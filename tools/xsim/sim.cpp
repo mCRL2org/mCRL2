@@ -29,7 +29,9 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h, rewrite.h and bdd_path_eliminator.h
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/exception.h"
 
 #include "simulator.h"

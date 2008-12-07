@@ -31,7 +31,9 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"

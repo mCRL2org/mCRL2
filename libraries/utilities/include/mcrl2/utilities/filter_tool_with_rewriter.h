@@ -13,6 +13,7 @@
 #define MCRL2_UTILITIES_FILTER_TOOL_WITH_REWRITER_H
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/filter_tool.h"
 
 namespace mcrl2 {

@@ -53,7 +53,9 @@
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
 //Tool-specific
 // #include "pbes_rewrite_jfg.h"

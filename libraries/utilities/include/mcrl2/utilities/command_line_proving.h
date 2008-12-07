@@ -45,11 +45,13 @@ namespace mcrl2 {
 
           return true;
         }
-
-        static bool initialised;
       };
 
-      bool initialiser< SMT_Solver_Type >::initialised = initialiser< SMT_Solver_Type >::register_proving_actions();
+      void register_proving_options() {
+        static bool initialised = initialiser< SMT_Solver_Type >::register_proving_actions();
+
+        static_cast< void >(initialised);
+      }
     }
   }
 }

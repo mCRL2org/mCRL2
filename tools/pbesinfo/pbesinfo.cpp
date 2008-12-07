@@ -32,7 +32,8 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 using namespace std;
 using namespace mcrl2::utilities;

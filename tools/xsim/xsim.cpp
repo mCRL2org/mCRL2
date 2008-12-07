@@ -32,6 +32,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 std::string get_about_message() {
   static const std::string version_information =

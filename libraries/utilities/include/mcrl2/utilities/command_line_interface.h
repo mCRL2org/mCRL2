@@ -552,18 +552,14 @@ namespace mcrl2 {
          * Adds a single option called `rewrite' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_rewriting_options() {
-          return *this;
-        }
+        interface_description& add_rewriting_options();
 
         /**
          * \brief Adds options for the prover
          * Adds a single option called `smt-solver' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_prover_options() {
-          return *this;
-        }
+        interface_description& add_prover_options();
 
         /**
          * \brief Generates a human readable interface description (used for -h,--help)
@@ -985,15 +981,5 @@ namespace mcrl2 {
     /// \endcond
   }
 }
-
-#if defined(BDD_PATH_ELIMINATOR_H)
-# include "mcrl2/utilities/command_proving.h"
-#endif
-#if defined(__LIBREWRITE_H)
-# include "mcrl2/utilities/command_rewriting.h"
-#endif
-#if defined(__MCRL2_MESSAGING_H__)
-# include "mcrl2/utilities/command_messaging.h"
-#endif
 
 #endif

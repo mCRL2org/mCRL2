@@ -10,126 +10,89 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lpsparelm"
-#define AUTHOR "Jeroen van der Wulp and Wieger Wesselink"
-
 #include <stdexcept>
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parelm.h"
 
-#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/filter_tool.h"
 
-struct tool_configuration {
-  std::string input;  ///< Name of the file to read input from
-  std::string output; ///< Name of the file to write output to (or stdout)
-
-  tool_configuration(std::string const& in, std::string const& out) : input(in), output(out) {
-  }
-
-  bool execute() {
-    mcrl2::lps::specification lps_specification;
-    lps_specification.load(input);
-    mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
-    r.save(output);
-    return true;
-  }
-
-  tool_configuration(int ac, char** av) {
-    using namespace mcrl2::utilities;
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-                             "Remove unused parameters from the linear process specification (LPS) in INFILE\n"
-                             "and write the result to OUTFILE. If INFILE is not present, stdin is used. If\n"
-                             "OUTFILE is not present, stdout is used.\n");
-
-    command_line_parser parser(clinterface, ac, av);
-
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        input  = parser.arguments[0];
-      }
-      if (1 < parser.arguments.size()) {
-        output = parser.arguments[1];
-      }
-    }
-  }
-};
-
-// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
+#endif
 
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
-  private:
-
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
-    static const char*  lps_file_for_output; ///< file used to write the output to
+class lps_parelm_tool : public mcrl2::utilities::filter_tool
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+                      , public mcrl2::utilities::squadt::mcrl2_tool_interface
+#endif
+{
 
   public:
 
+    lps_parelm_tool() : filter_tool (
+             "lpsparelm",
+             "Jeroen van der Wulp and Wieger Wesselink",
+             "Remove unused parameters from the linear process specification (LPS) in INFILE "
+             "and write the result to OUTFILE. If INFILE is not present, stdin is used. If "
+             "OUTFILE is not present, stdout is used.") {
+    }
+
+    int execute(int argc, char** argv) {
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+      if (try_interaction(argc, argv)) {
+        return EXIT_SUCCESS;
+      }
+#endif
+
+      return filter_tool::execute(argc, argv);
+    }
+
+    bool run() {
+      mcrl2::lps::specification lps_specification;
+      lps_specification.load(m_input_filename);
+      mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
+      r.save(m_output_filename);
+      return true;
+    }
+
+// Squadt protocol interface and utility pseudo-library
+#ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration("lps_in",
+                 tipi::mime_type("lps", tipi::mime_type::application),
+                                         tipi::tool::category::transformation);
+    }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
+    void user_interactive_configuration(tipi::configuration& c) {
+      if (!c.output_exists("lps_out")) {
+        c.add_output("lps_out",
+                 tipi::mime_type("lps", tipi::mime_type::application),
+                                                 c.get_output_name(".lps"));
+      }
+    }
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+    bool check_configuration(tipi::configuration const& c) const {
+      return c.input_exists("lps_in") && c.output_exists("lps_out");
+    }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-};
+    bool perform_task(tipi::configuration& c) {
+      m_input_filename  = c.get_input("lps_in").location();
+      m_output_filename = c.get_output("lps_out").location();
 
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-const char* squadt_interactor::lps_file_for_output = "lps_out";
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-  if (!c.output_exists(lps_file_for_output)) {
-    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
-  }
-}
-
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  bool result = true;
-
-  result &= c.input_exists(lps_file_for_input);
-  result &= c.output_exists(lps_file_for_output);
-
-  return (result);
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& c) {
-  tool_configuration tc(c.get_input(lps_file_for_input).location(),
-                        c.get_output(lps_file_for_output).location());
-
-  return tc.execute();
-}
+      return run();
+    }
 #endif
+};
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
+  lps_parelm_tool tool;
 
-    return tool_configuration(argc, argv).execute();
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-  }
-
-  return EXIT_FAILURE;
+  return tool.execute(argc, argv);
 }

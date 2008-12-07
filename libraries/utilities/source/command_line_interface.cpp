@@ -35,6 +35,11 @@ namespace mcrl2 {
   namespace utilities {
 
     /// \cond INTERNAL
+    namespace detail {
+      void register_rewriting_options();
+      void register_proving_options();
+    }
+
     /**
      * Inserts newline characters while reading the input from left to right.
      * When a newline is inserted the next read newline is discarded.
@@ -343,6 +348,18 @@ namespace mcrl2 {
 
       return *this;
     };
+
+    interface_description& interface_description::add_rewriting_options() {
+      detail::register_rewriting_options();
+
+      return *this;
+    }
+
+    interface_description& interface_description::add_prover_options() {
+      detail::register_proving_options();
+
+      return *this;
+    }
 
     std::string interface_description::textual_description() const {
       std::ostringstream s;

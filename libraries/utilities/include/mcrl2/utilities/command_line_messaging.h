@@ -36,8 +36,7 @@ namespace mcrl2 {
         static bool initialised;
       };
 
-      bool initialiser< mcrl2::core::messageType >::initialised =
-         initialiser< mcrl2::core::messageType >::register_messaging_actions();
+      bool initialiser< mcrl2::core::messageType >::initialised = register_messaging_actions();
     }
   }
 }
