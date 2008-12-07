@@ -27,6 +27,7 @@ namespace mcrl2 {
       return is;
     }
 
+    /// \cond INTERNAL_DOCS
     namespace detail {
       template <>
       struct initialiser< SMT_Solver_Type > {
@@ -38,21 +39,13 @@ namespace mcrl2 {
             "  'cvc' for the SMT solver CVC3",
             'z');
         }
-
-        static bool register_proving_actions() {
-          interface_description::register_initialiser
-                        < initialiser< SMT_Solver_Type > >();
-
-          return true;
-        }
       };
 
-      void register_proving_options() {
-        static bool initialised = initialiser< SMT_Solver_Type >::register_proving_actions();
-
-        static_cast< void >(initialised);
+      void register_proving_options(interface_description& d) {
+        initialiser< SMT_Solver_Type >::add_options(d);
       }
     }
+    /// \endcond
   }
 }
 

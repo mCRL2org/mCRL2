@@ -36,8 +36,8 @@ namespace mcrl2 {
 
     /// \cond INTERNAL
     namespace detail {
-      void register_rewriting_options();
-      void register_proving_options();
+      void register_rewriting_options(interface_description&);
+      void register_proving_options(interface_description&);
     }
 
     /**
@@ -350,13 +350,13 @@ namespace mcrl2 {
     };
 
     interface_description& interface_description::add_rewriting_options() {
-      detail::register_rewriting_options();
+      detail::register_rewriting_options(*this);
 
       return *this;
     }
 
     interface_description& interface_description::add_prover_options() {
-      detail::register_proving_options();
+      detail::register_proving_options(*this);
 
       return *this;
     }

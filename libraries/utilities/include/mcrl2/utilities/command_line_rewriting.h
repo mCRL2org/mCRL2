@@ -18,6 +18,7 @@ namespace mcrl2 {
       return is;
     }
 
+    /// \cond INTERNAL_DOCS
     namespace detail {
       template <>
       struct initialiser< RewriteStrategy > {
@@ -34,21 +35,13 @@ namespace mcrl2 {
             'r'
           );
         }
-
-        static bool register_rewriting_actions() {
-          interface_description::register_initialiser<
-                                    initialiser< RewriteStrategy > >();
-
-          return true;
-        }
       };
 
-      void register_rewriting_options() {
-        static bool initialised = initialiser< RewriteStrategy >::register_rewriting_actions();
-
-        static_cast< void >(initialised);
+      void register_rewriting_options(interface_description& d) {
+        initialiser< RewriteStrategy >::add_options(d);
       };
     }
+  /// \endcond
   }
 }
 
