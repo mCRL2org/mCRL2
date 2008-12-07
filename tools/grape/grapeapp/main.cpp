@@ -38,7 +38,7 @@ wxAboutDialogInfo get_about_info() {
   wxAboutDialogInfo info;
 
   info.SetName(wxT(NAME));
-  info.SetVersion(wxString(mcrl2::utilities::version_tag.c_str(), wxConvLocal));
+  info.SetVersion(wxString(mcrl2::utilities::version_tag().c_str(), wxConvLocal));
   info.SetDescription(wxT("This is a Graphical Process Editor for the mCRL2 language.\nThis program is part of the mCRL2 toolkit"));
   info.SetCopyright(wxString(copyright_message.c_str(), wxConvLocal));
   info.SetWebSite(wxT("http://www.mcrl2.org/" ));
