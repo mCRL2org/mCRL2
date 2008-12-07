@@ -19,6 +19,9 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_proving.h"
 
 using namespace ::mcrl2::utilities;
 
