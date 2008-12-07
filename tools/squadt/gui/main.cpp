@@ -12,13 +12,13 @@
 #include "wx.hpp" // precompiled headers
 
 #include "gui/main.hpp"
-#include "gui/about.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
 #include "gui/dialog/project_settings.hpp"
 #include "gui/dialog/preferences.hpp"
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
+#include "mcrl2/utilities/about_box.h"
 
 #include <wx/menu.h>
 #include <wx/utils.h>
@@ -36,9 +36,9 @@ namespace squadt {
     wxString main::default_title = wxT("SQuADT");
 
     void main::about() {
-      squadt::GUI::about about_dialog(this);
-      
-      about_dialog.ShowModal();
+      mcrl2::utilities::wx::about_box box("SQuADT", "Jeroen van der Wulp",
+        "Graphical environment that provides a uniform interface for using all kinds of "
+        "other connected tools.");
     }
 
     void main::manual() {

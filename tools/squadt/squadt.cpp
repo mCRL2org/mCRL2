@@ -48,20 +48,6 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
 
 using namespace squadt::GUI;
 
-std::string get_about_message() {
-  static const std::string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-           std::string("\n"
-           "This tool is part of the mCRL2 toolset.\n"
-           "For information see http://www.mcrl2.org\n"
-           "\n"
-           "For feature requests or bug reports,\n"
-           "please visit http://www.mcrl2.org/issuetracker");
-
-  return version_information;
-}
-
 /* SQuADt class declaration */
 class SQuADt : public wxApp {
 

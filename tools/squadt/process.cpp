@@ -124,19 +124,19 @@ namespace squadt {
 
         /** \brief Constructor with listener */
         process_impl(boost::shared_ptr < process >&);
- 
+
         /** \brief Start the process by executing a command */
         void execute(const command&);
-     
+
         /** \brief Start the process by executing a command */
         void execute(const command&, process::termination_handler const& h);
-     
+
         /** \brief Returns the process id */
         pid_t get_identifier() const;
- 
+
         /** \brief Terminates the process */
         void terminate();
- 
+
         /** \brief Destructor */
         ~process_impl();
     };
@@ -148,14 +148,14 @@ namespace squadt {
     process_impl::process_impl(boost::shared_ptr < process >& p) :
         m_status(process::stopped), m_interface(p) {
     }
- 
+
     process_impl::~process_impl() {
       /* Inform listener */
       if (m_status != process::running && m_status != process::stopped) {
         terminate();
       }
     }
- 
+
     inline pid_t process_impl::get_identifier() const {
       return m_information.get_identifier();
     }
@@ -315,7 +315,7 @@ namespace squadt {
         CFURLRef bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
             CFStringCreateWithCString(kCFAllocatorDefault, c.executable.c_str(), kCFStringEncodingASCII),
                                                                                         kCFURLPOSIXPathStyle, true);
-         
+
         CFBundleRef bundle  = CFBundleCreate(kCFAllocatorDefault, bundle_url);
 
         // Assume that bundle is unusable
@@ -371,14 +371,14 @@ namespace squadt {
                     GetProcessPID(&serial_number, &m_information.process_identifier);
 
                     // Register termination handler
-                    if (termination_handling) { 
+                    if (termination_handling) {
                       termination_handlers[serial_number] = h;
                     }
 
                     m_status = process::running;
                   }
                 }
-             
+
                 CFRelease(executable_url);
               }
 
@@ -483,7 +483,7 @@ namespace squadt {
 
       create_process(c, boost::bind(&process_impl::termination_handler, this, m_interface, h, _1));
     }
- 
+
     process::process() {
     }
 
@@ -494,7 +494,7 @@ namespace squadt {
 
       return p;
     }
- 
+
     pid_t process::get_identifier() const {
       return (impl->get_identifier());
     }
