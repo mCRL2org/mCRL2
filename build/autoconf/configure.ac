@@ -549,11 +549,11 @@ if test "$WX_CONFIG"; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
-    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base)"
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,adv)"
     WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
     WX_TYPE="shared"
   else
-    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base)"
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,adv)"
     WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
     WX_TYPE="static"
   fi

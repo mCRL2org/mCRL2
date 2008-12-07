@@ -6,5 +6,6 @@ tool ltsmin
          ltsminkernel.cpp
          /libraries//core
          /libraries//svc
+         /libraries/utilities//command_line_interfacing
        : <status>deprecated
        ;
