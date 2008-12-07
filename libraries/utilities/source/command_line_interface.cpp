@@ -23,7 +23,6 @@
 
 /// \cond DUMMY
 // dummy necessary for compiling
-#define MCRL2_REVISION "0"
 #define __COMMAND_LINE_INTERFACE__
 /// \endcond
 
@@ -35,11 +34,6 @@ namespace mcrl2 {
   namespace utilities {
 
     /// \cond INTERNAL
-    namespace detail {
-      void register_rewriting_options(interface_description&);
-      void register_proving_options(interface_description&);
-    }
-
     /**
      * Inserts newline characters while reading the input from left to right.
      * When a newline is inserted the next read newline is discarded.
@@ -290,8 +284,8 @@ namespace mcrl2 {
       add_hidden_option("debug", "display detailed intermediate messages", 'd');
     }
 
-    std::string interface_description::copyright_message() const {
-      return "Copyright (c) " + copyright_period +
+    std::string interface_description::copyright_message() {
+      return "Copyright (c) " + copyright_period() +
                                         " Technische Universiteit Eindhoven.\n"
         "This is free software.  You may redistribute copies of it under the\n"
         "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
@@ -299,7 +293,7 @@ namespace mcrl2 {
     }
 
     std::string interface_description::version_information() const {
-      return m_name + " mCRL2 toolset " + version_tag + " (revision " + revision() + ")\n" +
+      return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
          copyright_message() + "\nWritten by " + m_authors + ".\n";
     }
 
@@ -348,18 +342,6 @@ namespace mcrl2 {
 
       return *this;
     };
-
-    interface_description& interface_description::add_rewriting_options() {
-      detail::register_rewriting_options(*this);
-
-      return *this;
-    }
-
-    interface_description& interface_description::add_prover_options() {
-      detail::register_proving_options(*this);
-
-      return *this;
-    }
 
     std::string interface_description::textual_description() const {
       std::ostringstream s;
@@ -522,7 +504,7 @@ namespace mcrl2 {
       s << ".SH \"REPORTING BUGS\"" << std::endl
         << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
       s << ".SH COPYRIGHT" << std::endl
-        << "Copyright \\(co " + copyright_period +
+        << "Copyright \\(co " + copyright_period() +
                                         " Technische Universiteit Eindhoven.\n"
         << ".br" << std::endl
         << "This is free software.  You may redistribute copies of it under the\n"

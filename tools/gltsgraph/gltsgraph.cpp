@@ -270,7 +270,7 @@ Graph* GLTSGraph::getGraph()
 }
 
 std::string GLTSGraph::getVersion() {
-  return mcrl2::utilities::version_tag;
+  return mcrl2::utilities::version_tag();
 }
 
 std::string GLTSGraph::getRevision() {

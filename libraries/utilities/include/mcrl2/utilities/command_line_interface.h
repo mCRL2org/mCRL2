@@ -26,17 +26,25 @@ namespace mcrl2 {
   namespace utilities {
 
     /** \brief toolset version tag */
-    const std::string version_tag("January 2009 (development)");
+    inline std::string version_tag() {
+      return "January 2009 (development)";
+    }
 
     /** \brief toolset copyright period description */
-    const std::string copyright_period("2008");
+    inline std::string copyright_period() {
+      return "2008";
+    }
 
+    class interface_description;
     class command_line_parser;
 
     // \cond INTERNAL
     namespace detail {
       template < typename T >
       struct initialiser;
+
+      void register_rewriting_options(interface_description&);
+      void register_proving_options(interface_description&);
     }
     // \endcond
 
@@ -424,7 +432,7 @@ namespace mcrl2 {
          * \brief Composes a copyright message
          * \return formatted string that represents the copyright message
          **/
-        std::string copyright_message() const;
+        static std::string copyright_message();
 
         /**
          * \brief Composes a version information message
@@ -552,14 +560,22 @@ namespace mcrl2 {
          * Adds a single option called `rewrite' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_rewriting_options();
+        interface_description& add_rewriting_options() {
+          detail::register_rewriting_options(*this);
+
+          return *this;
+        }
 
         /**
          * \brief Adds options for the prover
          * Adds a single option called `smt-solver' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_prover_options();
+        interface_description& add_prover_options() {
+          detail::register_proving_options(*this);
+
+          return *this;
+        }
 
         /**
          * \brief Generates a human readable interface description (used for -h,--help)
@@ -956,11 +972,11 @@ namespace mcrl2 {
         }
       };
 
-      bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
+      static bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
     }
 
     template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
+    inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
                                          m_interface(d), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
@@ -969,7 +985,7 @@ namespace mcrl2 {
     }
 # ifndef __CYGWIN__ // std::wstring is not available for Cygwin
     template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
+    inline command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
                                          m_interface(d), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
