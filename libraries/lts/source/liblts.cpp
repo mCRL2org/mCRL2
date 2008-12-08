@@ -2236,9 +2236,25 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   }
 }
 
-std::string p_lts::equivalence_strings[]      = { "unknown", "bisim", "branching-bisim", "sim", "trace", "weak-trace", "isomorph" };
+std::string p_lts::equivalence_strings[] = {
+  "unknown",
+  "bisim",
+  "branching-bisim",
+  "sim",
+  "trace",
+  "weak-trace",
+  "isomorph"
+};
 
-std::string p_lts::equivalence_desc_strings[] = { "unknown equivalence", "strong bisimilarity", "branching bisimilarity", "strong simulation equivalence", "trace equivalence", "weak trace equivalence", "isomorphism" };
+std::string p_lts::equivalence_desc_strings[] = {
+  "unknown equivalence",
+  "strong bisimilarity",
+  "branching bisimilarity",
+  "strong simulation equivalence",
+  "strong trace equivalence",
+  "weak trace equivalence",
+  "isomorphism"
+};
 
 std::string lts::string_for_equivalence(const lts_equivalence eq)
 {
@@ -2255,14 +2271,28 @@ lts_preorder lts::parse_preorder(std::string const& s)
   if ( s == "sim" )
   {
     return lts_pre_sim;
+  } else if ( s == "trace" ) {
+    return lts_pre_trace;
+  } else if ( s == "weak-trace" ) {
+    return lts_pre_weak_trace;
   } else {
     return lts_pre_none;
   }
 }
 
-std::string p_lts::preorder_strings[]      = { "unknown", "sim" };
+std::string p_lts::preorder_strings[] = {
+  "unknown",
+  "sim",
+  "trace",
+  "weak-trace"
+};
 
-std::string p_lts::preorder_desc_strings[] = { "unknown preorder", "strong simulation preorder" };
+std::string p_lts::preorder_desc_strings[] = {
+  "unknown preorder",
+  "strong simulation preorder",
+  "strong trace preorder",
+  "weak trace preorder"
+};
 
 std::string lts::string_for_preorder(const lts_preorder pre)
 {

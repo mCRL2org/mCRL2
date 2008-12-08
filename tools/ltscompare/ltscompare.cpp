@@ -36,7 +36,7 @@ static const char *equivalent_string(lts_equivalence eq)
     case lts_eq_sim:
       return "strongly simulation equivalent";
     case lts_eq_trace:
-      return "trace equivalent";
+      return "strongly trace equivalent";
     case lts_eq_weak_trace:
       return "weak trace equivalent";
     default:
@@ -50,6 +50,10 @@ static const char *preorder_string(lts_preorder pre)
   {
     case lts_pre_sim:
       return "strongly simulated by";
+    case lts_pre_trace:
+      return "strongly trace-included in";
+    case lts_pre_weak_trace:
+      return "weakly trace-included in";
     default:
       return "included in";
   }
@@ -107,6 +111,10 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use preorder NAME:\n"
       "  '" + lts::string_for_preorder(lts_pre_sim) + "' for "
             + lts::name_of_preorder(lts_pre_sim) + "\n"
+      "  '" + lts::string_for_preorder(lts_pre_trace) + "' for "
+            + lts::name_of_preorder(lts_pre_trace) + "\n"
+      "  '" + lts::string_for_preorder(lts_pre_weak_trace) + "' for "
+            + lts::name_of_preorder(lts_pre_weak_trace) + "\n"
       "(not allowed in combination with -e/--equivalence)"
       , 'p').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
@@ -158,7 +166,9 @@ t_tool_options parse_command_line(int ac, char** av) {
     tool_options.preorder = lts::parse_preorder(
         parser.option_argument("preorder"));
     
-    if (tool_options.preorder != lts_pre_sim)
+    if (tool_options.preorder != lts_pre_sim &&
+        tool_options.preorder != lts_pre_trace &&
+        tool_options.preorder != lts_pre_weak_trace)
     {
       parser.error("option -p/--preorder has illegal argument '" + 
           parser.option_argument("preorder") + "'");
@@ -258,7 +268,7 @@ int process(t_tool_options const & tool_options) {
     gsVerboseMsg("comparing LTSs using %s...\n",
         lts::name_of_preorder(tool_options.preorder).c_str());
 
-    result = l1.compare(l2,tool_options.preorder);
+    result = l1.compare(l2,tool_options.preorder,tool_options.eq_opts);
 
     gsMessage("LTS in %s is %s%s LTS in %s\n", 
         tool_options.name_for_first.c_str(),

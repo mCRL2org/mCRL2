@@ -67,7 +67,7 @@ namespace lts
     lts_eq_bisim,            /**< Strong bisimulation equivalence */
     lts_eq_branching_bisim,  /**< Branching bisimulation equivalence */
     lts_eq_sim,              /**< Strong simulation equivalence */
-    lts_eq_trace,            /**< Trace equivalence*/
+    lts_eq_trace,            /**< Strong trace equivalence*/
     lts_eq_weak_trace,       /**< Weak trace equivalence */
     lts_eq_isomorph          /**< Isomorphism */
   };
@@ -78,8 +78,10 @@ namespace lts
    * contained in another LTS. */
   enum lts_preorder
   {
-    lts_pre_none,  /**< Unknown or no preorder */
-    lts_pre_sim    /**< Strong simulation preorder */
+    lts_pre_none,   /**< Unknown or no preorder */
+    lts_pre_sim,    /**< Strong simulation preorder */
+    lts_pre_trace,  /**< Strong trace preorder */
+    lts_pre_weak_trace   /**< Weak trace preorder */
   };
 
   /** \brief Transition sort styles.
@@ -374,7 +376,7 @@ namespace lts
        * \li "bisim" for strong bisimilarity;
        * \li "branching-bisim" for branching bisimilarity;
        * \li "sim" for strong simulation equivalence;
-       * \li "trace" for trace equivalence;
+       * \li "trace" for strong trace equivalence;
        * \li "weak-trace" for weak trace equivalence;
        * \li "isomorph" for isomorphism.
        *
@@ -397,7 +399,9 @@ namespace lts
 
       /** \brief Determines the preorder from a string.
        * \details The following strings may be used:
-       * \li "sim" for strong simulation preorder.
+       * \li "sim" for strong simulation preorder;
+       * \li "trace" for strong trace preorder;
+       * \li "weak-trace" for weak trace preorder.
        *
        * \param[in] s The string specifying the preorder.
        * \return The preorder type specified by \a s.
@@ -800,7 +804,12 @@ namespace lts
        * compared.
        * \param[in] opts The options that will be used for the comparison.
        * \retval true if the LTSs are found to be equivalent.
-       * \retval false otherwise. */
+       * \retval false otherwise.
+       * \warning This function alters the internal data structure of
+       * both LTSs for efficiency reasons. After comparison, this LTS is
+       * equivalent to the original LTS by equivalence \a eq, and
+       * similarly for the LTS \a l.
+       */
       bool compare(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
       
       /** \brief Checks whether this LTS is smaller than another LTS according
@@ -808,10 +817,18 @@ namespace lts
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] pre The preorder with respect to which the LTSs will be
        * compared.
+       * \param[in] opts The options that will be used for the comparison.
        * \retval true if this LTS is smaller than LTS \a l according to
        * preorder \a pre.
-       * \retval false otherwise. */
-      bool compare(lts &l, lts_preorder pre);
+       * \retval false otherwise.
+       * \warning This function alters the internal data structure of
+       * both LTSs for efficiency reasons. After comparison, this LTS is
+       * equivalent to the original LTS by equivalence \a eq, and
+       * similarly for the LTS \a l, where \a eq is the equivalence
+       * induced by the preorder \a pre (i.e. \f$eq = pre \cap
+       * pre^{-1}\f$).
+       */
+      bool compare(lts &l, lts_preorder pre, lts_eq_options const&opts = lts_eq_no_options);
 
       /** \brief Determinises this LTS. */
       void determinise();

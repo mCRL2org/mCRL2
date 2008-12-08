@@ -122,41 +122,33 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
       }
     case lts_eq_trace:
       {
-        // Copy LTSs
-        lts l1(*this);
-        lts l2(l);
-
         // Determinise first LTS
-        bisimulation_reduce(l1,false);
-        l1.determinise();
+        bisimulation_reduce(*this,false);
+        this->determinise();
         
         // Determinise second LTS
-        bisimulation_reduce(l2,false);
-        l2.determinise();
+        bisimulation_reduce(l,false);
+        l.determinise();
 
         // Trace equivalence now corresponds to bisimilarity
-        return bisimulation_compare(l1,l2,false);
+        return bisimulation_compare(*this,l,false);
       }
     case lts_eq_weak_trace:
       {
-        // Copy LTSs
-        lts l1(*this);
-        lts l2(l);
-
         // Eliminate silent steps and determinise first LTS
-        bisimulation_reduce(l1,true,false,&opts.reduce.tau_actions);
-        l1.tau_star_reduce();
-        bisimulation_reduce(l1,false);
-        l1.determinise();
+        bisimulation_reduce(*this,true,false,&opts.reduce.tau_actions);
+        this->tau_star_reduce();
+        bisimulation_reduce(*this,false);
+        this->determinise();
         
         // Eliminate silent steps and determinise second LTS
-        bisimulation_reduce(l2,true,false,&opts.reduce.tau_actions);
-        l2.tau_star_reduce();
-        bisimulation_reduce(l2,false);
-        l2.determinise();
+        bisimulation_reduce(l,true,false,&opts.reduce.tau_actions);
+        l.tau_star_reduce();
+        bisimulation_reduce(l,false);
+        l.determinise();
 
         // Weak trace equivalence now corresponds to bisimilarity
-        return bisimulation_compare(l1,l2,false);
+        return bisimulation_compare(*this,l,false);
       }
     case lts_eq_isomorph:
     default:
@@ -165,7 +157,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
   }
 }
  
-bool lts::compare(lts &l, lts_preorder pre)
+bool lts::compare(lts &l, lts_preorder pre, lts_eq_options const&opts)
 {
   switch ( pre )
   {
@@ -186,6 +178,40 @@ bool lts::compare(lts &l, lts_preorder pre)
         sp.partitioning_algorithm();
 
         return sp.in_preorder(init_state,init_l);
+      }
+    case lts_pre_trace:
+      {
+        // Preprocessing: reduce modulo strong bisimulation equivalence.
+        // This is not strictly necessary, but may reduce time/memory
+        // needed for determinisation.
+        bisimulation_reduce(*this,false);
+        bisimulation_reduce(l,false);
+
+        // Determinise both LTSes. As postprocessing, reduce modulo
+        // strong bisimulation equivalence. This is not strictly
+        // necessary, but may reduce time/memory needed for simulation
+        // preorder checking.
+        this->determinise();
+        bisimulation_reduce(*this,false);
+
+        l.determinise();
+        bisimulation_reduce(l,false);
+
+        // Trace preorder now corresponds to simulation preorder
+        return this->compare(l,lts_pre_sim);
+      }
+    case lts_pre_weak_trace:
+      {
+        // Eliminate silent steps of first LTS
+        bisimulation_reduce(*this,true,false,&opts.reduce.tau_actions);
+        this->tau_star_reduce();
+        
+        // Eliminate silent steps of second LTS
+        bisimulation_reduce(l,true,false,&opts.reduce.tau_actions);
+        l.tau_star_reduce();
+
+        // Weak trace preorder now corresponds to strong trace preorder
+        return this->compare(l,lts_pre_trace);
       }
     default:
       gsErrorMsg("comparison for this preorder is not available\n");
