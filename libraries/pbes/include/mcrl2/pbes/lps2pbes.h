@@ -23,12 +23,22 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+  /// \brief Applies the lps2pbes algorithm
+  /// \param spec A specification
+  /// \param formula A state formula
+  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+  /// \return The result of the algorithm
   inline
   pbes<> lps2pbes(const lps::specification& spec, const modal::state_formula& formula, bool timed)
   {
     return pbes_translate(formula, spec, timed);
   }
 
+  /// \brief Applies the lps2pbes algorithm
+  /// \param spec_text A specification
+  /// \param formula_text A state formula
+  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+  /// \return The result of the algorithm
   inline
   pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {

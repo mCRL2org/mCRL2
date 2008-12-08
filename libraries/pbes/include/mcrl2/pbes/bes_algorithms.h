@@ -50,7 +50,8 @@ struct bes_equation_solver
 };
 
 /// \brief Solves a boolean equation system using Gauss elimination.
-/// \precondition The pbes p is a bes.
+/// \pre The pbes \p p is a bes.
+/// \param p A pbes
 /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
 template <typename Container>
 int bes_gauss_elimination(pbes<Container>& p)
@@ -84,23 +85,24 @@ int bes_gauss_elimination(pbes<Container>& p)
 }
 
 /// \brief Instantiates a pbes.
+/// \param p A pbes
 /// \param lazy If true, the lazy instantiation algorithm is used, otherwise the finite instantiation algorithm.
 /// \return A bes.
-pbes<> pbes2bes(const pbes<>& pbes_spec, bool lazy = false)
+pbes<> pbes2bes(const pbes<>& p, bool lazy = false)
 {
   typedef data::data_enumerator<number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
-  data::rewriter datar(pbes_spec.data());
+  data::rewriter datar(p.data());
   number_postfix_generator name_generator;
-  my_enumerator datae(pbes_spec.data(), datar, name_generator);
+  my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
   if (lazy)
   {
-    return do_lazy_algorithm(pbes_spec, pbesr);
+    return do_lazy_algorithm(p, pbesr);
   }
   else
   {
-    return do_finite_algorithm(pbes_spec, pbesr);
+    return do_finite_algorithm(p, pbesr);
   }
 }
 

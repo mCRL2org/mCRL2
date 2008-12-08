@@ -83,7 +83,7 @@ class pbes_expression: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of data expressions
+/// \brief Read-only singly linked list of data expressions
 ///
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 

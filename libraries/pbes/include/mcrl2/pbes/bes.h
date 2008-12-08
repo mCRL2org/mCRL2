@@ -4,7 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/bes.h
+/// \file mcrl2/pbes/bes.h
 /// \brief Boolean expressions.
 
 #ifndef MCRL2_PBES_BES_H
@@ -42,6 +42,7 @@ namespace mcrl2 {
 /// \brief The main namespace for boolean equation systems.
 namespace bes {
 
+  /// \brief The fixpoint symbol type
   typedef pbes_system::fixpoint_symbol fixpoint_symbol;
 
   /// \brief boolean variable
@@ -95,11 +96,13 @@ namespace bes {
       }
   };
 
-  /// \brief Singly linked list of boolean variables
+  /// \brief Read-only singly linked list of boolean variables
   ///
   typedef atermpp::term_list<boolean_variable> boolean_variable_list;
 
   /// \brief Pretty print function
+  /// \param v A boolean variable
+  /// \return A pretty printed representation of the boolean variable
   inline
   std::string pp(boolean_variable v)
   {
@@ -120,7 +123,6 @@ namespace mcrl2 {
 namespace bes {
 
   /// \brief boolean expression
-  ///
   class boolean_expression: public atermpp::aterm_appl
   {
     public:
@@ -156,7 +158,7 @@ namespace bes {
       }
   };
 
-  /// \brief singly linked list of boolean expressions
+  /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
 
 } // namespace bes
@@ -165,53 +167,101 @@ namespace bes {
 namespace mcrl2 {
 namespace core {
 
+  /// \brief Contains type information for boolean expressions 
   template <>
   struct term_traits<bes::boolean_expression>
   {
     /// The term type
     typedef bes::boolean_expression term_type;
+
+    /// \brief The variable type
     typedef bes::boolean_variable variable_type;
+
+    /// \brief The string type
     typedef core::identifier_string string_type;
 
+    /// \brief The value true
+    /// \return The value true
     static inline
     term_type true_() { return core::detail::gsMakeBooleanTrue(); }
 
+    /// \brief The value false
+    /// \return The value false
     static inline
     term_type false_() { return core::detail::gsMakeBooleanFalse(); }
 
+    /// \brief Operator not
+    /// \param p A term
+    /// \return Operator not applied to p
     static inline
     term_type not_(term_type p) { return core::detail::gsMakeBooleanNot(p); }
 
+    /// \brief Operator and
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator and applied to p and q
     static inline
     term_type and_(term_type p, term_type q) { return core::detail::gsMakeBooleanAnd(p, q); }
 
+    /// \brief Operator or
+    /// \param p A term
+    /// \param q A term
+    /// \return Operator or applied to p and q
     static inline
     term_type or_(term_type p, term_type q) { return core::detail::gsMakeBooleanOr(p, q); }
 
+    /// \brief Implication
+    /// \param p A term
+    /// \param q A term
+    /// \return Implication applied to p and q
     static inline
     term_type imp(term_type p, term_type q) { return core::detail::gsMakeBooleanImp(p, q); }
 
+    /// \brief Test for value true
+    /// \param t A term
+    /// \return True if the term has the value true
     static inline
     bool is_true(term_type t) { return core::detail::gsIsBooleanTrue(t); }
 
+    /// \brief Test for value false
+    /// \param t A term
+    /// \return True if the term has the value false
     static inline
     bool is_false(term_type t) { return core::detail::gsIsBooleanFalse(t); }
 
+    /// \brief Test for operator not
+    /// \param t A term
+    /// \return True if the term is of type and
     static inline
     bool is_not(term_type t) { return core::detail::gsIsBooleanNot(t); }
 
+    /// \brief Test for operator and
+    /// \param t A term
+    /// \return True if the term is of type and
     static inline
     bool is_and(term_type t) { return core::detail::gsIsBooleanAnd(t); }
 
+    /// \brief Test for operator or
+    /// \param t A term
+    /// \return True if the term is of type or
     static inline
     bool is_or(term_type t) { return core::detail::gsIsBooleanOr(t); }
 
+    /// \brief Test for implication
+    /// \param t A term
+    /// \return True if the term is an implication
     static inline
     bool is_imp(term_type t) { return core::detail::gsIsBooleanImp(t); }
 
+    /// \brief Test for boolean variable
+    /// \param t A term
+    /// \return True if the term is a boolean variable
     static inline
     bool is_variable(term_type t) { return core::detail::gsIsBooleanVariable(t); }
 
+    /// \brief Returns the argument of a term of type not
+    /// \param t A term
+    /// \return The requested argument
     static inline
     term_type arg(term_type t)
     {
@@ -219,6 +269,9 @@ namespace core {
       return atermpp::arg1(t);
     }
 
+    /// \brief Returns the left argument of a term of type and, or or imp
+    /// \param t A term
+    /// \return The left argument of the term
     static inline
     term_type left(term_type t)
     {
@@ -226,6 +279,9 @@ namespace core {
       return atermpp::arg1(t);
     }
 
+    /// \brief Returns the right argument of a term of type and, or or imp
+    /// \param t A term
+    /// \return The right argument of the term
     static inline
     term_type right(term_type t)
     {
@@ -233,6 +289,9 @@ namespace core {
       return atermpp::arg2(t);
     }
 
+    /// \brief Returns the name of a boolean variable
+    /// \param t A term
+    /// \return The name of the boolean variable
     static inline
     string_type name(term_type t)
     {
@@ -240,17 +299,35 @@ namespace core {
       return atermpp::arg1(t);
     }
 
+    /// \brief Conversion from variable to term
+    /// \param v A variable
+    /// \returns The converted variable
+    static inline
+    term_type variable2term(variable_type v) { return v; }
+
+    /// \brief Conversion from term to variable
+    /// \param t a term
+    /// \returns The converted term
+    static inline
+    variable_type term2variable(term_type t) { return t; }
+
+    /// \brief Test if a term is constant
+    /// \param t A term
+    /// \return True if the term is constant
     static inline
     bool is_constant(term_type t)
     {
       return atermpp::find_if(t, is_variable) != atermpp::aterm_appl();
     }
 
+    /// \brief Pretty print function
+    /// \param t A term
+    /// \brief Returns a pretty print representation of the term
     static inline
-    term_type variable2term(variable_type v) { return v; }
-
-    static inline
-    variable_type term2variable(term_type v) { return v; }
+    std::string pp(term_type t)
+    {
+      return mcrl2::bes::pp(t);
+    }
   };
 
 } // namespace core
@@ -264,7 +341,11 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::bes::boolean_expression)
 namespace mcrl2 {
 namespace bes {
 
-  /// pretty print function (N.B. the implementation is not very efficient)
+  /// \brief Pretty print function
+  /// \param e A boolean expression
+  /// \param add_parens If true, parentheses are put around sub-expressions.
+  /// \return A pretty printed representation of the boolean expression.
+  // TODO: the implementation is not very efficient
   inline
   std::string pp(boolean_expression e, bool add_parens = false)
   {
@@ -313,15 +394,18 @@ namespace mcrl2 {
 namespace bes {
 
 /// \brief boolean equation.
-///
-// boolean equation
 // <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
 class boolean_equation: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
+    
+    /// \brief The predicate variable of the equation
     boolean_variable   m_variable;
-    boolean_expression m_formula;  // the right hand side
+    
+    /// \brief The formula of the equation
+    boolean_expression m_formula;
 
   public:
     /// \brief Constructor.
@@ -369,11 +453,12 @@ class boolean_equation: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of data expressions
-///
+/// \brief Read-only singly linked list of boolean equations
 typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
   /// \brief Pretty print function
+  /// \param e A boolean equation
+  /// \return A pretty printed representation of the boolean equation
   inline
   std::string pp(boolean_equation e)
   {
@@ -394,6 +479,7 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::bes::boolean_equation)
 namespace mcrl2 {
 namespace bes {
 
+/// \brief boolean equation system
   // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
   template <typename Container = atermpp::vector<boolean_equation> >
   class boolean_equation_system
@@ -401,15 +487,20 @@ namespace bes {
     friend struct atermpp::aterm_traits<boolean_equation_system>;
 
     protected:
+      /// \brief The equations
       Container m_equations;
+
+      /// \brief The initial state
       boolean_expression m_initial_state;
 
+      /// \brief Conversion to ATerm
       ATerm term() const
       {
         return reinterpret_cast<ATerm>(ATermAppl(*this));
       }
 
       /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
+      /// \param t A term
       void init_term(atermpp::aterm_appl t)
       {
         atermpp::aterm_appl::iterator i = t.begin();
@@ -425,6 +516,8 @@ namespace bes {
       {}
 
       /// \brief Constructor.
+      /// \param equations A sequence of boolean equations
+      /// \param initial_state An initial state
       boolean_equation_system(
           const Container& equations,
           boolean_expression initial_state)
@@ -436,30 +529,35 @@ namespace bes {
       }
 
       /// \brief Returns the equations.
+      /// \return The equations
       const Container& equations() const
       {
         return m_equations;
       }
 
       /// \brief Returns the equations.
+      /// \return The equations
       Container& equations()
       {
         return m_equations;
       }
 
       /// \brief Returns the initial state.
+      /// \return The initial state.
       const boolean_expression& initial_state() const
       {
         return m_initial_state;
       }
 
       /// \brief Returns the initial state.
+      /// \return The initial state.
       boolean_expression& initial_state()
       {
         return m_initial_state;
       }
 
       /// \brief Returns true.
+      /// Some checks will be added later.
       bool is_well_typed() const
       {
         return true;
@@ -487,6 +585,8 @@ namespace bes {
       /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
       /// Otherwise an ascii representation is saved. In general the binary format is
       /// much more compact than the ascii representation.
+      /// \param filename The name of a file
+      /// \param binary If true, the file is saved in binary format
       void save(const std::string& filename, bool binary = true) // const
       {
         if (!is_well_typed())
@@ -506,6 +606,7 @@ namespace bes {
 
       /// \brief Returns the set of binding variables of the boolean_equation_system, i.e. the
       /// variables that occur on the left hand side of an equation.
+      /// \return The binding variables of the equation system
       atermpp::set<boolean_variable> binding_variables() const
       {
         atermpp::set<boolean_variable> result;
@@ -519,6 +620,7 @@ namespace bes {
       /// \brief Returns the set of occurring variables of the boolean_equation_system, i.e.
       /// the variables that occur in the right hand side of an equation or in the
       /// initial state.
+      /// \return The occurring variables of the equation system
       atermpp::set<boolean_variable> occurring_variables() const
       {
         atermpp::set<boolean_variable> result;
@@ -531,6 +633,7 @@ namespace bes {
       }
 
       /// \brief Returns true if all occurring variables are binding variables.
+      /// \return True if the equation system is closed
       bool is_closed() const
       {
         atermpp::set<boolean_variable> bnd = binding_variables();
@@ -548,7 +651,7 @@ namespace bes {
         std::transform(equations().begin(), equations().end(), equations().begin(), f);
       }
 
-      /// Protects the term from being freed during garbage collection.
+      /// \brief Protects the term from being freed during garbage collection.
       void protect()
       {
         m_initial_state.protect();
@@ -570,6 +673,8 @@ namespace bes {
   };
 
   /// \brief Pretty print function
+  /// \param p A boolean equation system
+  /// \return A pretty printed representation of the boolean equation system
   template <typename Container>
   std::string pp(const boolean_equation_system<Container>& p)
   {

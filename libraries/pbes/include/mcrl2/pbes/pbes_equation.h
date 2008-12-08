@@ -155,7 +155,7 @@ class pbes_equation: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of data expressions
+/// \brief Read-only singly linked list of data expressions
 ///
 typedef atermpp::term_list<pbes_equation> pbes_equation_list;
 

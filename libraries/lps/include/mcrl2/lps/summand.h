@@ -351,7 +351,7 @@ summand set_assignments(summand s, data::data_assignment_list assignments)
                 );
 }
 
-/// \brief singly linked list of summands
+/// \brief Read-only singly linked list of summands
 typedef atermpp::term_list<summand> summand_list;
 
 } // namespace lps

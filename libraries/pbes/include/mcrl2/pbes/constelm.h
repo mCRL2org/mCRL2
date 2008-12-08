@@ -31,6 +31,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
   inline
   bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
@@ -264,7 +265,9 @@ namespace detail {
   };
 
 } // namespace detail
+/// \endcond
 
+  /// \brief Algorithm class for the constelm algorithm
   template <typename Term, typename DataRewriter, typename PbesRewriter>
   class pbes_constelm_algorithm
   {
@@ -283,12 +286,13 @@ namespace detail {
       typedef typename core::term_traits<Term> tr;
 
     protected:
+      /// \brief A map with constraints on the vertices of the graph
       typedef std::map<variable_type, data_term_type> constraint_map;
 
-      // Represents an edge of the dependency graph. The assignments are stored
-      // implicitly using the 'right' parameter. The condition determines under
-      // what circumstances the influence of the edge is propagated to its target
-      // vertex.
+      /// \brief Represents an edge of the dependency graph. The assignments are stored
+      /// implicitly using the 'right' parameter. The condition determines under
+      /// what circumstances the influence of the edge is propagated to its target
+      /// vertex.
       struct edge
       {
         propositional_variable_decl_type left;
@@ -306,7 +310,7 @@ namespace detail {
          : left(l), right(r), condition(c)
         {}
 
-        // Returns a string representation of the edge.
+        /// \brief Returns a string representation of the edge.
         std::string to_string() const
         {
           std::ostringstream out;
@@ -315,15 +319,15 @@ namespace detail {
         }
       };
 
-      // Represents a vertex of the dependency graph.
+      /// \brief Represents a vertex of the dependency graph.
       struct vertex
       {
         propositional_variable_decl_type variable;
 
-        // Maps data variables to data expressions. If the right hand side is a data
-        // variable, it means that it represents NaC ("not a constant"). In such case,
-        // a fresh variable is chosen, that does not appear anywhere else in the pbes
-        // that is under consideration.
+        /// \brief Maps data variables to data expressions. If the right hand side is a data
+        /// variable, it means that it represents NaC ("not a constant"). In such case,
+        /// a fresh variable is chosen, that does not appear anywhere else in the pbes
+        /// that is under consideration.
         constraint_map constraints;
 
         vertex()
@@ -333,14 +337,14 @@ namespace detail {
           : variable(v)
         {}
 
-        // Return true if the data variable v has been assigned a constant expression.
+        /// \brief Return true if the data variable v has been assigned a constant expression.
         bool is_constant(variable_type v) const
         {
           typename constraint_map::const_iterator i = constraints.find(v);
           return i != constraints.end() && !data::is_data_variable(i->second);
         }
 
-        // Returns the constant parameters of this vertex.
+        /// \brief Returns the constant parameters of this vertex.
         std::vector<variable_type> constant_parameters() const
         {
           std::vector<variable_type> result;
@@ -354,7 +358,7 @@ namespace detail {
           return result;
         }
 
-        // Returns the indices of the constant parameters of this vertex.
+        /// \brief Returns the indices of the constant parameters of this vertex.
         std::vector<int> constant_parameter_indices() const
         {
           std::vector<int> result;
@@ -369,7 +373,7 @@ namespace detail {
           return result;
         }
 
-        // Returns a string representation of the vertex.
+        /// \brief Returns a string representation of the vertex.
         std::string to_string() const
         {
           std::ostringstream out;
@@ -383,8 +387,8 @@ namespace detail {
           return out.str();
         }
 
-        // Assign new values to the parameters of this vertex, and update the constraints accordingly.
-        // The new values have a number of constraints.
+        /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
+        /// The new values have a number of constraints.
         template <typename IdentifierGenerator>
         bool update(data_term_sequence_type new_values,
                     const constraint_map& new_value_constraints,
@@ -435,7 +439,7 @@ namespace detail {
           return changed;
         }
 
-        // Removes NaC constraints.
+        /// \brief Removes NaC constraints.
         void remove_nac_constraints()
         {
           // See [Josuttis, "The C++ Standard Library" page 205]
@@ -496,12 +500,23 @@ namespace detail {
       }
 
     public:
+      
+      /// \brief Constructor.
+      /// \param datar A data rewriter
+      /// \param pbesr A pbes rewriter
       pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
         : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
       {}
 
+      /// \brief Runs the constelm algorithm
+      /// \param p A pbes
+      /// \param name_generator A class that generates fresh identifiers.
+      /// The call \p name_generator() should return an identifier that doesn't appear
+      /// in the pbes \p p
+      /// \param compute_conditions If true, propagation conditions are computed. Note
+      /// that the currently implementation has exponential behavior.
       template <typename Container, typename IdentifierGenerator>
-      void run(pbes<Container>& p, term_type kappa, IdentifierGenerator name_generator, bool compute_conditions = false)
+      void run(pbes<Container>& p, IdentifierGenerator name_generator, bool compute_conditions = false)
       {
         // compute the vertices and edges of the dependency graph
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -543,7 +558,7 @@ namespace detail {
 
         // initialize the todo list of vertices that need to be processed
         std::deque<propositional_variable_decl_type> todo;
-        std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(kappa);
+        std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(p.initial_state());
         for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
         {
           data_term_sequence_type new_values = i->parameters();
@@ -675,6 +690,8 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
         }
       }
 
+      //// \brief Returns the propositional variables that have been removed by the constelm algorithm
+      /// \return The removed variables
       const std::map<propositional_variable_decl_type, std::set<variable_type> >& removed_variables() const
       {
         return m_removed;

@@ -19,9 +19,12 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \brief Namespace for Gauss elimination
 namespace gauss {
 
   /// \brief Returns true if e.symbol() == nu(), else false.
+  /// \param e A pbes equation
+  /// \return True if e.symbol() == nu(), else false.
   inline
   pbes_expression sigma(const pbes_equation& e)
   {
@@ -30,6 +33,10 @@ namespace gauss {
   }
 
   /// \brief Applies the substitution X := phi to the pbes equation eq.
+  /// \param eq A pbes equation
+  /// \param X A propositional variable
+  /// \param phi A pbes expression
+  /// \return The substition result
   inline
   pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi)
   {
@@ -37,7 +44,11 @@ namespace gauss {
     return pbes_equation(eq.symbol(), eq.variable(), formula);
   }
 
-  /// \brief Applies the substitution X := phi to the sequence of pbes equations [first, last[.
+  /// \brief Applies the substitution X := phi to the sequence of pbes equations [first, last).
+  /// \param first Start of a range of pbes equations
+  /// \param last End of a range of pbes equations
+  /// \param X A propositional variable
+  /// \param phi A pbes expression
   template <typename Iter>
   void substitute(Iter first, Iter last, propositional_variable X, pbes_expression phi)
   {
@@ -49,16 +60,19 @@ namespace gauss {
 
 } // namespace gauss
 
-/// Contains an implementation of the Gauss elimination algorithm for solving
+/// \brief Algorithm class for the Gauss elimination algorithm for solving
 /// systems of pbes equations.
 template <typename PbesRewriter, typename EquationSolver>
 class gauss_elimination_algorithm
 {
   protected:
+    /// \brief A pbes rewriter
     PbesRewriter& m_rewriter;
+    
+    /// \brief An equation solver
     EquationSolver& m_equation_solver;
 
-    /// pretty print an equation without generating a newline after the equal sign
+    /// \brief Pretty print an equation without generating a newline after the equal sign
     /// \param eq A pbes equation
     /// \return A pretty printed string
     std::string pp(pbes_equation eq)
@@ -66,7 +80,9 @@ class gauss_elimination_algorithm
       return core::pp(eq.symbol()) + " " + core::pp(eq.variable()) + " = " + core::pp(eq.formula());
     }
 
-    /// Prints the sequence of pbes equations [first, last[ to standard out.
+    /// \brief Prints the sequence of pbes equations [first, last) to standard out.
+    /// \param first Start of a range of pbes equations
+    /// \param last End of a range of pbes equations
     template <typename Iter>
     void print(Iter first, Iter last)
     {
@@ -78,11 +94,17 @@ class gauss_elimination_algorithm
     }
 
   public:
+    
+    /// \brief Constructor
+    /// \param rewriter A pbes rewriter
+    /// \param equation_solver An equation solver   
     gauss_elimination_algorithm(PbesRewriter& rewriter, EquationSolver& equation_solver)
       : m_rewriter(rewriter), m_equation_solver(equation_solver)
     {}
 
-    /// \brief Applies Gauss elimination to the sequence of pbes equations [first, last[.
+    /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
+    /// \param first Start of a range of pbes equations
+    /// \param last End of a range of pbes equations
     template <typename Iter>
     void run(Iter first, Iter last)
     {

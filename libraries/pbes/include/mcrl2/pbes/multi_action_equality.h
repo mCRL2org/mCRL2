@@ -30,6 +30,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
     /// Precondition: The range [first, last[ contains sorted arrays.
     /// \brief Visits all permutations of the arrays, and calls f for
@@ -173,9 +174,13 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     };
 
 } // namespace detail
+/// \endcond
 
-    /// \brief Returns a pbes expression that expresses under which conditions the
-    /// multi actions a and b are equal.
+    /// \brief Returns a data expression that expresses under which conditions the
+    /// multi actions a and b are equal. The multi actions may contain free variables.
+    /// \param a A multi action
+    /// \param b A multi action
+    /// \return Necessary conditions for the equality of a and b
     inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
@@ -220,7 +225,10 @@ std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
     }
 
     /// \brief Returns a pbes expression that expresses under which conditions the
-    /// multi actions a and b are not equal.
+    /// multi actions a and b are not equal. The multi actions may contain free variables.
+    /// \param a A multi action
+    /// \param b A multi action
+    /// \return Necessary conditions for the inequality of a and b
     inline data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
     {
       using namespace data::data_expr::optimized;

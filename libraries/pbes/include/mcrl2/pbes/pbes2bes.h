@@ -31,6 +31,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 struct t_instantiations {
   data::data_variable_list finite_var;     // List of all finite variables
   data::data_variable_list infinite_var;   // List of all infinite variables
@@ -60,9 +61,8 @@ struct t_instantiations {
     infinite_exp.mark();
   }
 };
+/// \endcond
 
-//function sort_names
-//-------------------
 /// \brief Sort the equation system with respect to the order of predicate variables in the original equation system
 inline
 atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string > names_order, atermpp::vector<pbes_equation> to_sort)
@@ -98,8 +98,6 @@ atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string >
   return result;
 }
 
-//function create_propvar_name
-//----------------------------
 /// \brief Create a new propositional variable name
 inline
 core::identifier_string create_propvar_name(core::identifier_string propvar_name, data::data_expression_list del)
@@ -132,8 +130,6 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
   return propvar_name_current;
 }
 
-//function create_naive_propositional_variable_instantiation
-//----------------------------------------------------------
 /// \brief Create a new propositional variable instantiation with instantiated values and infinite variables
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
 {
@@ -166,8 +162,6 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
   return propositional_variable_instantiation(create_propvar_name(propvarinst.name(), finite_expression), infinite_expression);
 }
 
-//function do_lazy_algorithm
-//--------------------------
 /// \brief Create a BES, using the lazy approach
 template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
@@ -272,9 +266,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   return result;
 }
 
-//function do_finite_algorithm
-//---------------------------
-// \brief Create a PBES without finite data sorts, using the finite approach
+/// \brief Create a PBES without finite data sorts, using the finite approach
 template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
@@ -417,7 +409,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
 } // namespace mcrl2
 
-// Specify how the ATerms in t_instantiations need to be protected using a traits class
+/// \cond INTERNAL_DOCS
 namespace atermpp {
   using mcrl2::pbes_system::t_instantiations;
 
@@ -429,5 +421,6 @@ namespace atermpp {
     static void mark(t_instantiations t) { t.mark(); }
   };
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES2BES_H

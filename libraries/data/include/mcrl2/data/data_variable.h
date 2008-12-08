@@ -90,7 +90,7 @@ class data_variable: public data_expression
     }
   };
 
-  /// \brief singly linked list of data variables
+  /// \brief Read-only singly linked list of data variables
   ///
   typedef atermpp::term_list<data_variable> data_variable_list;
 

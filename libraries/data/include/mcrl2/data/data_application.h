@@ -75,7 +75,7 @@ class data_application: public data_expression
 
   };
 
-/// \brief singly linked list of data applications
+/// \brief Read-only singly linked list of data applications
 typedef atermpp::term_list<data_application> data_application_list;
 
 /// \brief Returns true if the term t is a data application

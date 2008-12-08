@@ -41,7 +41,7 @@ namespace detail {
 }
 /// \endcond
 
-/// \brief singly linked list of data expressions
+/// \brief Read-only singly linked list of data expressions
 ///
 typedef atermpp::term_list<data_expression> data_expression_list;
 

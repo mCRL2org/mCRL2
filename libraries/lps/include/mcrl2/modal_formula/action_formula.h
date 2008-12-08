@@ -71,7 +71,7 @@ class action_formula: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula_list
-/// \brief singly linked list of data expressions
+/// \brief Read-only singly linked list of data expressions
 ///
 typedef atermpp::term_list<action_formula> action_formula_list;
 

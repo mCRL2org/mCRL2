@@ -7,6 +7,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/data/rewrite.h"
 
+/// \brief Strategies for the pbes2bool algorithm.
 enum transformation_strategy {
      lazy,          // generate equations but do not optimize on the fly
      optimize,      // optimize by substituting true and false for already
@@ -29,23 +30,43 @@ enum transformation_strategy {
                     // for each variable, which can take a lot of time.
 };
 
-
-
+/// \brief Options for the pbes2bool algorithm.
 struct t_tool_options
 {
+   /// \brief The output format
    std::string opt_outputformat;
-//   std::string opt_strategy;
+
+   /// \brief The strategy
    transformation_strategy opt_strategy;
+
+   /// \brief The precompile option
    bool opt_precompile_pbes;
+
+   /// \brief The rewrite strategy
    RewriteStrategy rewrite_strategy;
+
+   /// \brief The hashtable option
    bool opt_use_hashtables;
+
+   /// \brief The counter example option
    bool opt_construct_counter_example;
+
+   /// \brief The tree storage option
    bool opt_store_as_tree;
+
+   /// \brief The data elimination option
    bool opt_data_elm;
+
+   /// \brief The input file name
    std::string infilename;
+
+   /// \brief The output file name
    std::string outfilename;
+
+   /// \brief The counter example file name
    std::string opt_counter_example_file;
 
+   /// \brief Constructor
    t_tool_options()
      : opt_outputformat("none"),
        opt_strategy(lazy),
@@ -61,7 +82,10 @@ struct t_tool_options
 /// Solve a pbes
 void process(t_tool_options const& tool_options);
 
-/// Solve a pbes.
+/// Algorithm for solving a pbes, using instantiation.
+/// \param p A pbes
+/// \param options Options for the algorithm
+/// \return The solution of the pbes
 // TODO: currently the pbes2bool algorithm expects input from a file, and
 // writes the result to a file. That should be changed.
 inline

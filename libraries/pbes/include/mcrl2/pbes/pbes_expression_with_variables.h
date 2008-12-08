@@ -121,7 +121,9 @@ namespace core {
     /// \brief The string type
     typedef core::identifier_string string_type;
 
+    /// \cond INTERNAL_DOCS
     typedef core::term_traits<pbes_system::pbes_expression> tr;
+    /// \endcond
 
     /// \brief The value true
     /// \return The value true

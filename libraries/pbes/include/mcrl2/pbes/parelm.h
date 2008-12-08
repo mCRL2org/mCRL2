@@ -36,13 +36,10 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
 {
-  protected:
-    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
-    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
-    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
-
+  private:
     template <class Iter, class T>
     void iota(Iter first, Iter last, T value) const
     {
@@ -52,6 +49,20 @@ class pbes_parelm_algorithm
       }
     }
 
+  protected:
+    /// \brief The graph type of the dependency graph
+    typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
+
+    /// \brief The vertex type of the dependency graph
+    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+
+    /// \brief The edge type of the dependency graph
+    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
+
+    /// \brief Finds unbound variables in a pbes expression
+    /// \param t A pbes expression
+    /// \param bound_variables A sequence of variables
+    /// \return The unbound variables in \p t that are not contained in \p bound_variables
     std::set<data::data_variable> unbound_variables(pbes_expression t, data::data_variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
@@ -60,6 +71,10 @@ class pbes_parelm_algorithm
       return visitor.result;
     }
 
+    /// Finds the index of a variable in a sequence
+    /// \param v A sequence of variables
+    /// \param d A variable
+    /// \return The index of \p d in \p v, or -1 if the variable wasn't found
     int variable_index(data::data_variable_list v, data::data_variable d) const
     {
       int index = 0;
@@ -74,6 +89,8 @@ class pbes_parelm_algorithm
       return -1;
     }
 
+/// \cond INTERNAL_DOCS
+    /// \brief For debugging
     template <typename Container>
     void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
     {
@@ -93,6 +110,7 @@ class pbes_parelm_algorithm
       std::cerr << std::endl;
     }
 
+    /// \brief For debugging
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
@@ -104,6 +122,7 @@ class pbes_parelm_algorithm
       std::cerr << std::endl;
     }
 
+    /// \brief For debugging
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
@@ -114,7 +133,14 @@ class pbes_parelm_algorithm
       }
       std::cerr << std::endl;
     }
+/// \endcond
 
+    /// \brief Finds the predicate variable to which the data parameter with the given index belongs.
+    /// Here index refers to the cumulative index in the array obtained by concatening all parameters
+    /// of the predicate variables in the pbes \p p.
+    /// \param p A pbes
+    /// \param index A positive number
+    /// \return The name of the predicate variable that corresponds with \p index
     template <typename Container>
     core::identifier_string find_predicate_variable(const pbes<Container>& p, int index) const
     {
@@ -132,6 +158,9 @@ class pbes_parelm_algorithm
     }
 
   public:
+    
+    /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
+    /// \param p A pbes
     template <typename Container>
     void run(pbes<Container>& p) const
     {

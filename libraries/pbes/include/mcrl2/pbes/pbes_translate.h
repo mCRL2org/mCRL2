@@ -36,6 +36,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 inline
 atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
 {
@@ -74,14 +75,13 @@ namespace detail {
     }
   };
 } // namespace detail
+/// \endcond
 
 /// \brief Abstract algorithm class for translating a state formula and a specification to a pbes.
 class pbes_translate_algorithm
 {
   protected:
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // timed_action
     /// \brief multi-action with time
     class timed_action
     {
@@ -95,43 +95,53 @@ class pbes_translate_algorithm
         {}
 
         /// \brief Returns true if time is available.
+        /// \return True if time is available.
         bool has_time() const
         {
           return !data::data_expr::is_nil(m_time);
         }
 
-        /// \brief Returns the sequence of actions. Returns an empty list if is_delta() holds.
+        /// \brief Returns the sequence of actions. Returns an empty list if \p is_delta() holds.
+        /// \return The sequence of actions
         lps::action_list actions() const
         {
           return m_actions;
         }
 
-        /// \brief Returns the time expression.
+        /// \brief Returns the time of the multi-action
+        /// \return The time of the multi-action
         data::data_expression time() const
         {
           return m_time;
         }
 
-        /// \brief Returns a term representing the name of the first lps::action.
+        /// \brief Returns the name of the first action.
+        /// \return The name of the first action.
         core::identifier_string name() const
         {
           return front(m_actions).label().name();
         }
 
-        /// \brief Returns the argument of the multi lps::action.
+        /// \brief Returns the arguments of the multi action.
+        /// \return The arguments of the multi action.
         data::data_expression_list arguments() const
         {
           return front(m_actions).arguments();
         }
 
-        /// \brief Applies a substitution to this lps::action and returns the result.
-        /// \brief The Substitution object must supply the method aterm operator()(aterm).
+        /// \brief Applies a substitution to this multi-action and returns the result.
+        /// \param f A substitution function.
+        /// The Substitution function must supply the method aterm operator()(aterm).
+        /// \return The result of applying the substitution.
         template <typename Substitution>
         timed_action substitute(Substitution f)
         {
           return timed_action(m_actions.substitute(f), m_time.substitute(f));
         }
 
+        /// \brief Stream operator. Writes a pretty printed representation of the multi-action to a stream
+        /// \param to An output stream
+        /// \return The output stream
         std::ostream& operator<<(std::ostream& to) const
         {
           to << "TimedAction(" << actions();
@@ -142,13 +152,11 @@ class pbes_translate_algorithm
         }
     };
 
-//    std::string pp(timed_action a)
-//    {
-//      std::ostringstream out;
-//      out << pp(actions);
-//      return out.str();
-//    }
-
+    /// \brief The Par function of the translation
+    /// \param x A string
+    /// \param l A sequence of variables
+    /// \param f A state formula
+    /// \return The function result
     data::data_variable_list Par(core::identifier_string x, data::data_variable_list l, modal::state_formula f)
     {
       using namespace modal::state_frm;
@@ -197,6 +205,12 @@ class pbes_translate_algorithm
       return data::data_variable_list();
     }
 
+    /// \brief Renames data variables and predicate variables in the formula \p f, and
+    /// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
+    /// step for the algorithm.
+    /// \param formula A state formula
+    /// \param spec A specification
+    /// \return The preprocessed formula
     modal::state_formula preprocess_formula(const modal::state_formula& formula, const lps::specification& spec)
     {
       using namespace detail;
@@ -229,6 +243,8 @@ class pbes_translate_algorithm
       return f;
     }
 
+    /// \brief Returns the set of all free variables of the given specification
+    /// \return The set of all free variables of the given specification
     atermpp::set<data::data_variable> free_variables(const lps::specification& spec) const
     {
       atermpp::set<data::data_variable> result;
@@ -239,15 +255,17 @@ class pbes_translate_algorithm
 
   public:
     /// \brief Constructor.
-    ///
     pbes_translate_algorithm()
     {}
 
     /// \brief Destructor.
-    ///
     virtual ~pbes_translate_algorithm()
     {}
 
+    /// \brief Runs the algorithm
+    /// \param formula A state formula
+    /// \param spec A specification
+    /// \return The result of the translation
     virtual pbes<> run(const modal::state_formula& formula, const lps::specification& spec) = 0;
 };
 
@@ -256,6 +274,10 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 {
   protected:
 
+    /// \brief The \p sat_top function of the translation
+    /// \param a A timed multi-action
+    /// \param b An action formula
+    /// \return The function result
     pbes_expression sat_top(timed_action a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -311,7 +333,13 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
       return result;
     }
 
-    /// f0 is the original formula
+    /// \brief The \p RHS function of the translation
+    /// \param f0 The original formula
+    /// \param f The current formula
+    /// \param lps A specification
+    /// \param T The time
+    /// \param context A set of strings that may not be used for naming a fresh variable
+    /// \return The function result
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -518,7 +546,12 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
       return result;
     }
 
-    /// f0 is the original formula
+    /// \brief The \p E function of the translation
+    /// \param f0 The original formula
+    /// \param f The current formula
+    /// \param lps A specification
+    /// \param T The time
+    /// \return The function result
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -625,10 +658,13 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 
   public:
     /// \brief Constructor.
-    ///
     pbes_translate_algorithm_timed()
     {}
 
+    /// \brief Runs the translation algorithm
+    /// \param formula A state formula
+    /// \param spec A specification
+    /// \return The result of the translation
     pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
     {
       using namespace modal::state_frm;
@@ -675,6 +711,11 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
 {
   protected:
+
+    /// \brief The \p sat_top function of the translation
+    /// \param a A timed multi-action
+    /// \param b An action formula
+    /// \return The function result
     pbes_expression sat_top(lps::action_list a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -732,7 +773,12 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
       return result;
     }
 
-    /// f0 is the original formula
+    /// \brief The \p RHS function of the translation
+    /// \param f0 The original formula
+    /// \param f The current formula
+    /// \param lps A specification
+    /// \param context A set of strings that may not be used for naming a fresh variable
+    /// \return The function result
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -1012,10 +1058,13 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 
   public:
     /// \brief Constructor.
-    ///
     pbes_translate_algorithm_untimed()
     {}
 
+    /// \brief Runs the translation algorithm
+    /// \param formula A state formula
+    /// \param spec A specification
+    /// \return The result of the translation
     pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
     {
       using namespace modal::state_frm;
@@ -1049,7 +1098,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 /// to true, the formula holds for the lps::specification.
 /// \param formula the state formula
 /// \param spec the lps::specification
-/// \param determines whether the timed or untimed variant of the algorithm is chosen
+/// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \return The resulting pbes
 inline pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)
 {

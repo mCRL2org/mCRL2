@@ -104,7 +104,7 @@ class data_assignment: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_assignment_list
-/// \brief singly linked list of data assignments
+/// \brief Read-only singly linked list of data assignments
 ///
 typedef atermpp::term_list<data_assignment> data_assignment_list;
 

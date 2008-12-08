@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
     // run the algorithm
-    algorithm.run(p, p.initial_state(), name_generator, compute_conditions);
+    algorithm.run(p, name_generator, compute_conditions);
     
     // save the result
     p.save(outfile);

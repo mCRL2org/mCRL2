@@ -81,7 +81,8 @@ namespace pbes_system {
       bool m_true_false_dependencies;
 
       /// Adds a BES equation for a given PBES expression, if it not already exists.
-      /// \param p A closed PBES expression.
+      /// \param t A closed PBES expression.
+      /// \param priority The priority of the equation.
       /// \return The index of a BES equation corresponding to the given PBES expression.
       /// If no equation exists for the expression, a new one is added.
       unsigned int add_bes_equation(pbes_expression t, unsigned int priority)

@@ -82,7 +82,7 @@ class propositional_variable: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of propositional variable declarations
+/// \brief Read-only singly linked list of propositional variable declarations
 ///
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
@@ -160,7 +160,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of propositional variables instantiations
+/// \brief Read-only singly linked list of propositional variables instantiations
 ///
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 

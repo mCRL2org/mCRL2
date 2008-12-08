@@ -28,7 +28,7 @@ namespace data {
 
 class sort_expression;
 
-/// \brief singly linked list of sort expressions
+/// \brief Read-only singly linked list of sort expressions
 ///
 typedef atermpp::term_list<sort_expression> sort_expression_list;
 

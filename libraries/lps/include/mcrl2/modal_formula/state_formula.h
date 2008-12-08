@@ -84,7 +84,7 @@ class state_formula: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula_list
-/// \brief singly linked list of state formulas
+/// \brief Read-only singly linked list of state formulas
 ///
 typedef atermpp::term_list<state_formula> state_formula_list;
 

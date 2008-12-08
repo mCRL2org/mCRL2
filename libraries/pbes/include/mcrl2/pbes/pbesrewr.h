@@ -19,6 +19,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+  /// \cond INTERNAL_DOCS
   template <typename PbesRewriter>
   struct rewrite_equation
   {
@@ -33,8 +34,12 @@ namespace pbes_system {
       return pbes_equation(eq.symbol(), eq.variable(), pbesr(eq.formula()));
     }
   };
+  /// \endcond
 
   /// \brief Applies a rewriter to a pbes.
+  /// \param p A pbes
+  /// \param pbesr A pbes rewriter
+  /// \return The pbes obtained from \p p by applying the rewriter on all pbes expressions in \p p
   template <typename Container, typename PbesRewriter>
   void pbesrewr(pbes<Container>& p, PbesRewriter pbesr)
   {

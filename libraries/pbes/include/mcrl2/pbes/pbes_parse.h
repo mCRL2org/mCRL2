@@ -196,7 +196,7 @@ namespace pbes_system {
 
   /// Parses a single pbes expression.
   /// \param[in] text The text that is parsed.
-  /// \param[in] var_spec An optional declaration of data variables and predicate variables
+  /// \param[in] var_decl An optional declaration of data variables and predicate variables
   /// with their types.<br>
   /// An example of this is:
   /// \code
@@ -208,7 +208,8 @@ namespace pbes_system {
   ///   Y: Nat, Bool;
   ///
   /// \endcode
-  /// \result the parsed expression
+  /// \param data_spec An optional data specification
+  /// \return the parsed expression
   inline
   pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n", std::string data_spec = "")
   {
@@ -216,7 +217,7 @@ namespace pbes_system {
   }
 
   /// Parses a string with substitutions and adds them to a substition function
-  /// \param[in] txt A string with substitutions, for example "b: Bool := true, n: Nat := 0"
+  /// \param[in] text A string with substitutions, for example "b: Bool := true, n: Nat := 0"
   /// \param[in] data_spec A data specification
   /// \param[in] sigma A substitution function
   template <typename SubstitutionFunction>

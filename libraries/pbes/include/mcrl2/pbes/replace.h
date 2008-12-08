@@ -45,9 +45,11 @@ struct replace_propositional_variables_helper
 };
 /// \endcond
 
-/// Recursively traverses the given term, and applies the replace function to
-/// each propositional variable instantiation that is encountered during the
-/// traversal.
+/// \brief Recursively traverses the given term, and applies the replace function to
+/// each propositional variable instantiation that is encountered during the traversal.
+/// \param t A term
+/// \param r A replace function
+/// \return The replacement result
 template <typename Term, typename ReplaceFunction>
 Term replace_propositional_variables(Term t, ReplaceFunction r)
 {
@@ -85,9 +87,13 @@ struct propositional_variable_sequence_replace_helper
 };
 /// \endcond
 
-/// Replaces all propositional_variables in the term t using the specified sequence of replacements.
-/// \param variables The sequence of variables that need to be replaced.
-/// \param replacements The corresponding replacements.
+/// \brief Replaces propositional variable instantiations in the term \p t using the specified sequence of replacements.
+/// \param t A term
+/// \param variables A sequence of propositional variable instantiations
+/// \param replacements A sequence of expressions
+/// \return The replacement result. Each propositional variable in \p t that occurs as the i-th element
+/// of \p variables is replaced by the i-th element of \p expressions. If the sequence
+/// \p variables contains duplicates, the first match is selected.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
 Term propositional_variable_sequence_replace(Term t,
                                     const VariableContainer& variables,
@@ -125,7 +131,11 @@ struct propositional_variable_map_replace_helper
 };
 /// \endcond
 
-/// Replaces all propositional_variable_instantiations in the term t using the specified map of replacements.
+/// \brief Replaces all propositional variable instantiations in the term \p t using the specified map of replacements.
+/// \param t A term
+/// \param replacements A map of replacements
+/// \return The replacement result. Each propositional variable \p v in t that occurs as key in the map
+/// \p replacements is replaced by \p replacements[\p v].
 template <typename Term, typename MapContainer>
 Term propositional_variable_map_replace(Term t, const MapContainer& replacements)
 {
@@ -158,7 +168,10 @@ struct substitute_propositional_variable_helper
 };
 /// \endcond
 
-/// \brief Applies the substitution X := phi to the pbes expression t.
+/// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
+/// \param t A pbes expression
+/// \param X A propositional variable
+/// \param phi A pbes expression
 /// \return The result of the substitution.
 inline
 pbes_expression substitute_propositional_variable(pbes_expression t,

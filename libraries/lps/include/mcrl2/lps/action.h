@@ -80,7 +80,7 @@ class action: public atermpp::aterm_appl
     }     
 };
 
-/// singly linked list of actions
+/// Read-only singly linked list of actions
 typedef atermpp::term_list<action> action_list;
 
 /// Returns true if the term t is an action

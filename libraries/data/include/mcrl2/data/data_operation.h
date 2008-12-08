@@ -80,7 +80,7 @@ class data_operation: public data_expression
     }
   };
 
-/// \brief singly linked list of data operations
+/// \brief Read-only singly linked list of data operations
 ///
 typedef atermpp::term_list<data_operation> data_operation_list;
 

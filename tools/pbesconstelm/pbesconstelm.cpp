@@ -84,7 +84,7 @@ class pbes_constelm_tool: public utilities::filter_tool_with_rewriter
       pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
       
       // run the algorithm
-      algorithm.run(p, p.initial_state(), name_generator, m_compute_conditions);
+      algorithm.run(p, name_generator, m_compute_conditions);
       
       // save the result
       p.save(m_output_filename);

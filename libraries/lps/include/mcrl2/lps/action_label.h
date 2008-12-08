@@ -83,7 +83,7 @@ class action_label: public atermpp::aterm_appl
     }     
 };
 
-/// \brief singly linked list of action labels
+/// \brief Read-only singly linked list of action labels
 typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label

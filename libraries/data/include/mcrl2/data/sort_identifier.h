@@ -21,7 +21,7 @@ namespace data {
 
 class sort_identifier;
 
-/// \brief singly linked list of sorts
+/// \brief Read-only singly linked list of sorts
 ///
 typedef atermpp::term_list<sort_identifier> sort_identifier_list;
 

@@ -39,9 +39,14 @@ namespace pbes_system {
       DataRewriter m_rewriter;
 
     public:
+      /// \brief The term type
       typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The variable type
       typedef typename core::term_traits<Term>::variable_type variable_type;
 
+      /// \brief Constructor
+      /// \param rewriter A data rewriter
       simplifying_rewriter(const DataRewriter& rewriter)
         : m_rewriter(rewriter)
       {}
@@ -72,14 +77,25 @@ namespace pbes_system {
   class enumerate_quantifiers_rewriter
   {
     protected:
+      /// \brief A data rewriter
       DataRewriter m_rewriter;
+
+      /// \brief A data enumerator
       DataEnumerator m_enumerator;
 
     public:
+      /// \brief The term type
       typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The data term type
       typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+      /// \brief The variable type
       typedef typename core::term_traits<Term>::variable_type variable_type;
 
+      /// \brief Constructor
+      /// \param r A data rewriter
+      /// \param e A data enumerator
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r), m_enumerator(e)
       {}
@@ -120,13 +136,22 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
   class enumerate_quantifiers_rewriter<pbes_expression, DataRewriter, DataEnumerator>
   {
     protected:
+      /// \brief Rewriter with term type pbes_expression_with_variables
       enumerate_quantifiers_rewriter<pbes_expression_with_variables, DataRewriter, DataEnumerator> m_rewriter;
 
     public:
+      /// \brief The term type
       typedef pbes_expression term_type;
+
+      /// \brief The data term type
       typedef typename core::term_traits<term_type>::data_term_type data_term_type;
+
+      /// \brief The variable type
       typedef typename core::term_traits<term_type>::variable_type variable_type;
 
+      /// \brief Constructor
+      /// \param r A data rewriter
+      /// \param e A data enumerator
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
         : m_rewriter(r, e)
       {}
@@ -156,11 +181,15 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
     data::rewriter datar;
 
     public:
+      /// \brief Constructor
+      /// \param data A data specification
       simplify_rewriter_jfg(const data::data_specification& data)
         : datar(data)
       { }
 
       /// \brief Rewrites a pbes expression.
+      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_rewrite_and_simplify(p, datar.get_rewriter());
@@ -174,11 +203,16 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
     const data::data_specification& data_spec;
 
     public:
+      /// \brief Constructor
+      /// \param datar A data rewriter
+      /// \param data A data specification
       substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
         : datar_(datar), data_spec(data)
       { }
 
       /// \brief Rewrites a pbes expression.
+      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
@@ -195,6 +229,11 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
     boost::shared_ptr<BDD_Prover> prover;
 
     public:
+      /// \brief Constructor
+      /// \param datar A data rewriter
+      /// \param data A data specification
+      /// \param rewrite_strategy A rewrite strategy
+      /// \param solver_type An SMT solver type
       pbessolve_rewriter(const data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
         : datar_(datar),
           data_spec(data),
@@ -203,6 +242,8 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       { }
 
       /// \brief Rewrites a pbes expression.
+      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {
         return pbes_expression_simplify(p, &n, &fv, prover.get());

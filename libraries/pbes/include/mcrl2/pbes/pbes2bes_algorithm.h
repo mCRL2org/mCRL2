@@ -26,6 +26,10 @@ namespace pbes_system {
   using detail::pbes2bes_substitution_function;
   using detail::pbes2bes_rewriter;
 
+  /// \brief Stream operator
+  /// \param out An output stream
+  /// \param sigma A pbes2bes substitution function
+  /// \return The output stream
   std::ostream& operator<<(std::ostream& out, const pbes2bes_substitution_function& sigma)
   {
     for (pbes2bes_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
@@ -35,7 +39,10 @@ namespace pbes_system {
     return out;
   }
 
-  /// Substitution function for the pbes2bes rewriter.
+  /// \brief Creates a substitution function for the pbes2bes rewriter.
+  /// \param v A sequence of data variables
+  /// \param e A sequence of data expressions
+  /// \return The substitution that maps the i-th element of \p v to the i-th element of \p e
   inline
   pbes2bes_substitution_function make_pbes2bes_substitution(data::data_variable_list v, data::data_expression_list e)
   {
@@ -51,7 +58,7 @@ namespace pbes_system {
     return sigma;
   }
 
-  /// Class for instantiating a pbes.
+  /// \brief Algorithm class for the pbes2bes instantiation algorithm.
   class pbes2bes_algorithm
   {
     protected:
@@ -61,13 +68,13 @@ namespace pbes_system {
       /// \brief The number of generated equations.
       int equation_count;
 
-      /// Propositional variable instantiations that need to be handled.
+      /// \brief Propositional variable instantiations that need to be handled.
       atermpp::set<propositional_variable_instantiation> todo;
 
-      /// Propositional variable instantiations that have been handled.
+      /// \brief Propositional variable instantiations that have been handled.
       atermpp::set<propositional_variable_instantiation> done;
 
-      /// Data structure for storing the result. E[i] corresponds to the equations
+      /// \brief Data structure for storing the result. E[i] corresponds to the equations
       /// generated from the i-th PBES equation.
       std::vector<atermpp::vector<pbes_equation> > E;
 
@@ -77,14 +84,22 @@ namespace pbes_system {
       /// \brief A lookup map for PBES equations.
       std::map<core::identifier_string, int> equation_index;
 
-      /// Print the equations to standard out.
+      /// \brief Print the equations to standard out.
       bool m_print_equations;
 
     public:
+      
+      /// \brief Constructor.
+      /// \param data_spec A data specification
+      /// \param rewriter_strategy A strategy for the data rewriter
+      /// \param print_equations If true, the generated equations are printed
+      /// \param print_rewriter_output If true, invocations of the rewriter are printed
       pbes2bes_algorithm(data::data_specification data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
         : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
+      /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
+      /// \param p A pbes
       void run(pbes<>& p)
       {
         if (!p.instantiate_free_variables())
@@ -135,6 +150,8 @@ namespace pbes_system {
         }
       }
 
+      /// \brief Returns the computed bes in pbes format
+      /// \return The computed bes in pbes format
       pbes<> get_result()
       {
         pbes<> result;
@@ -146,11 +163,15 @@ namespace pbes_system {
         return result;
       }
 
+      /// \brief Returns the flag for printing the generated bes equations
+      /// \return The flag for printing the generated bes equations
       bool& print_equations()
       {
         return m_print_equations;
       }
 
+      /// \brief Returns the flag for printing rewriter invocations
+      /// \return The flag for printing rewriter invocations
       pbes2bes_rewriter& rewriter()
       {
         return R;

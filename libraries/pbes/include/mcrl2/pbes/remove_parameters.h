@@ -23,6 +23,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
   template <typename Term>
@@ -46,16 +47,22 @@ namespace detail {
   }
 
 } // namespace detail
+/// \endcond
 
-/// Removes the parameters with the given indices from the parameter list.
+/// Removes parameters from a propositional variable
+/// \param v A propositional variable
+/// \param to_be_removed A set of indices
+/// \return The variable \p v without the parameters that have an index in \p to_be_removed
 inline
 propositional_variable remove_parameters(propositional_variable v, const std::vector<int>& to_be_removed)
 {
   return propositional_variable(v.name(), detail::remove_elements(v.parameters(), to_be_removed));
 }
 
-/// Removes parameters from the parameter list
-/// according to the given mapping that specifies the removals.
+/// Removes parameters from a propositional variable
+/// \param v A propositional variable
+/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \return The variable \p v without the parameters that have an index in \code to_be_removed(v.name()) \endcode
 inline
 propositional_variable remove_parameters(propositional_variable v, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
 {
@@ -67,15 +74,20 @@ propositional_variable remove_parameters(propositional_variable v, const std::ma
   return remove_parameters(v, i->second);
 }
 
-/// Removes the parameters with the given indices from the parameter list.
+/// Removes parameters from a propositional variable instantiation
+/// \param v A propositional variable instantiation
+/// \param to_be_removed A set of indices
+/// \return The variable \p v without the parameters that have an index in \p to_be_removed
 inline
 propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::vector<int>& to_be_removed)
 {
   return propositional_variable_instantiation(v.name(), detail::remove_elements(v.parameters(), to_be_removed));
 }
 
-/// Removes parameters from the parameter list
-/// according to the given mapping that specifies the removals.
+/// Removes parameters from a propositional variable instantiation
+/// \param v A propositional variable
+/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \return The variable \p v without the parameters that have an index in \code to_be_removed(v.name()) \endcode
 inline
 propositional_variable_instantiation remove_parameters(propositional_variable_instantiation v, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
 {
@@ -87,6 +99,8 @@ propositional_variable_instantiation remove_parameters(propositional_variable_in
   return remove_parameters(v, i->second);
 }
 
+/// \cond INTERNAL_DOCS
+namespace detail {
 struct pbes_remove_parameters_builder: public pbes_expression_builder<pbes_expression>
 {
   const std::map<core::identifier_string, std::vector<int> >& to_be_removed_;
@@ -110,17 +124,23 @@ struct pbes_remove_parameters_builder: public pbes_expression_builder<pbes_expre
     }
   }
 };
+} // namespace detail
+/// \endcond
 
-/// Removes parameters from all propositional variable instantiations in the given expression
-/// according to the mapping that specifies the removals.
+/// Removes parameters from propositional variable instantiations in a pbes expression
+/// \param p A pbes expression
+/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \return The expression \p p with parameters removed according to the mapping \p to_be_removed
 inline
 pbes_expression remove_parameters(pbes_expression p, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
 {
-  return pbes_remove_parameters_builder(to_be_removed).visit(p);
+  return detail::pbes_remove_parameters_builder(to_be_removed).visit(p);
 }
 
-/// Removes parameters from propositional variables in the given equation
-/// according to the mapping that specifies the removals.
+/// Removes parameters from propositional variables in a pbes equation
+/// \param e A pbes equation
+/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \return The equation \p e with parameters removed according to the mapping \p to_be_removed
 inline
 pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
 {
@@ -130,8 +150,10 @@ pbes_equation remove_parameters(pbes_equation e, const std::map<core::identifier
                       );
 }
 
-/// Removes parameters from propositional variables in the given pbes
-/// according to the mapping that specifies the removals.
+/// Removes parameters from propositional variables in a pbes
+/// \param p A pbes
+/// \param to_be_removed A mapping that maps propositional variable names to indices of parameters that are removed
+/// \return The pbes \p p with parameters removed according to the mapping \p to_be_removed
 template <typename Container>
 void remove_parameters(pbes<Container>& p, const std::map<core::identifier_string, std::vector<int> >& to_be_removed)
 {

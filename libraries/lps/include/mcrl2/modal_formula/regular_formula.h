@@ -60,7 +60,7 @@ class regular_formula: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula_list
-/// \brief singly linked list of regular expressions
+/// \brief Read-only singly linked list of regular expressions
 ///
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 

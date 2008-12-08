@@ -49,7 +49,7 @@ namespace {
 
 namespace atermpp {
 
-  /// \brief Singly linked list of terms.
+  /// \brief Read-only singly linked list of terms.
   ///
   template <typename Term>
   class term_list: public aterm_base

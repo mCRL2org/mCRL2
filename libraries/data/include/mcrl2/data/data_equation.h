@@ -148,7 +148,7 @@ class data_equation: public atermpp::aterm_appl
     }
 };
 
-/// \brief singly linked list of data equations
+/// \brief Read-only singly linked list of data equations
 ///
 typedef atermpp::term_list<data_equation> data_equation_list;
 
