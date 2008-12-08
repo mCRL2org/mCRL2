@@ -83,9 +83,9 @@ void RewriterProver::setSubstitution(ATermAppl Var, ATermAppl Expr)
   return rewr_obj->setSubstitution(Var,Expr);
 }
 
-void RewriterProver::setSubstitutionList(ATermList Exprs)
+void RewriterProver::setSubstitutionList(ATermList Substs)
 {
-  return rewr_obj->setSubstitutionList(Exprs);
+  return rewr_obj->setSubstitutionList(Substs);
 }
 
 void RewriterProver::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
@@ -93,9 +93,9 @@ void RewriterProver::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
   return rewr_obj->setSubstitutionInternal(Var,Expr);
 }
 
-void RewriterProver::setSubstitutionInternalList(ATermList Exprs)
+void RewriterProver::setSubstitutionInternalList(ATermList Substs)
 {
-  return rewr_obj->setSubstitutionInternalList(Exprs);
+  return rewr_obj->setSubstitutionInternalList(Substs);
 }
 
 ATermAppl RewriterProver::getSubstitution(ATermAppl Var)

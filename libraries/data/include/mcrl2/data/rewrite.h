@@ -172,10 +172,10 @@ class Rewriter
 		/**
 		 * \brief Link variables to a values for on-the-fly
 		 *        substitution. (Replacing any previous linked value.)
-		 * \param Exprs A lists of substitutions of mCRL2 data variables
-                 *              to mCRL2 data expressions.
+		 * \param Substs A lists of substitutions of mCRL2 data
+                 *               variables to mCRL2 data expressions.
 		 **/
-		virtual void setSubstitutionList(ATermList Exprs);
+		virtual void setSubstitutionList(ATermList Substs);
 		/**
 		 * \brief Link a variable to a value for on-the-fly
 		 *        substitution. (Replacing any previous linked value.)
@@ -186,10 +186,11 @@ class Rewriter
 		/**
 		 * \brief Link variables to a values for on-the-fly
 		 *        substitution. (Replacing any previous linked value.)
-		 * \param Exprs A lists of substitutions of mCRL2 data variables
-                 *              to terms in the internal rewriter format.
+		 * \param Substs A lists of substitutions of mCRL2 data
+                 *               variables to terms in the internal rewriter
+                 *               format.
 		 **/
-		virtual void setSubstitutionInternalList(ATermList Exprs);
+		virtual void setSubstitutionInternalList(ATermList Substs);
 		/**
 		 * \brief Get the value linked to a variable for on-the-fly
 		 *        substitution.

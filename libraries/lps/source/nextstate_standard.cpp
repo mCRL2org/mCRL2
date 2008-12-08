@@ -937,7 +937,10 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 		{
 			*prioritised = (sum_idx <= info.num_prioritised);
 		}
-		info.rewr_obj->clearSubstitutions(sol);
+		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
+		{
+			info.rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));
+		} 
 		return true;
 	} else {
 		*Transition = NULL;

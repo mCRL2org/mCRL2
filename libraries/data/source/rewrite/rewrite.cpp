@@ -99,11 +99,11 @@ void Rewriter::setSubstitution(ATermAppl Var, ATermAppl Expr)
 	setSubstitutionInternal(Var,toRewriteFormat(Expr));
 }
 
-void Rewriter::setSubstitutionList(ATermList Exprs)
+void Rewriter::setSubstitutionList(ATermList Substs)
 {
-	for (; !ATisEmpty(Exprs); Exprs=ATgetNext(Exprs))
+	for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
 	{
-		ATermAppl h = (ATermAppl) ATgetFirst(Exprs);
+		ATermAppl h = (ATermAppl) ATgetFirst(Substs);
 		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
 	}
 }
@@ -152,11 +152,11 @@ void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 	substs[n] = Expr;
 }
 
-void Rewriter::setSubstitutionInternalList(ATermList Exprs)
+void Rewriter::setSubstitutionInternalList(ATermList Substs)
 {
-	for (; !ATisEmpty(Exprs); Exprs=ATgetNext(Exprs))
+	for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
 	{
-		ATermAppl h = (ATermAppl) ATgetFirst(Exprs);
+		ATermAppl h = (ATermAppl) ATgetFirst(Substs);
 		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
 	}
 }
