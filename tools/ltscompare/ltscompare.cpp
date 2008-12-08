@@ -96,7 +96,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
       "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
+            + lts::name_of_equivalence(lts_eq_bisim) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
             + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
       "  '" + lts::string_for_equivalence(lts_eq_sim) + "' for "
@@ -110,9 +110,9 @@ t_tool_options parse_command_line(int ac, char** av) {
     add_option("preorder", make_mandatory_argument("NAME"),
       "use preorder NAME:\n"
       "  '" + lts::string_for_preorder(lts_pre_sim) + "' for "
-            + lts::name_of_preorder(lts_pre_sim) + "\n"
+            + lts::name_of_preorder(lts_pre_sim) + ", or\n"
       "  '" + lts::string_for_preorder(lts_pre_trace) + "' for "
-            + lts::name_of_preorder(lts_pre_trace) + "\n"
+            + lts::name_of_preorder(lts_pre_trace) + ", or\n"
       "  '" + lts::string_for_preorder(lts_pre_weak_trace) + "' for "
             + lts::name_of_preorder(lts_pre_weak_trace) + "\n"
       "(not allowed in combination with -e/--equivalence)"
@@ -141,7 +141,12 @@ t_tool_options parse_command_line(int ac, char** av) {
     parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
   }
 
-  tool_options.equivalence = lts_eq_bisim;
+  if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
+  {
+    parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
+  }
+
+  tool_options.equivalence = lts_eq_none;
 
   if (parser.options.count("equivalence")) {
 
@@ -252,7 +257,7 @@ int process(t_tool_options const & tool_options) {
   }
 
   bool result;
-  if ( tool_options.preorder == lts_pre_none )
+  if ( tool_options.equivalence != lts_eq_none )
   {
     gsVerboseMsg("comparing LTSs using %s...\n",
         lts::name_of_equivalence(tool_options.equivalence).c_str());
@@ -263,7 +268,8 @@ int process(t_tool_options const & tool_options) {
         ((result) ? "" : "not "),
         equivalent_string(tool_options.equivalence));
   }
-  else
+
+  if ( tool_options.preorder != lts_pre_none )
   {
     gsVerboseMsg("comparing LTSs using %s...\n",
         lts::name_of_preorder(tool_options.preorder).c_str());
