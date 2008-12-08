@@ -20,8 +20,12 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/detail/rewrite/inner.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
+#ifdef MCRL2_INNERC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/innerc.h"
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/jittyc.h"
+#endif
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::utilities;
@@ -90,7 +94,21 @@ bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
 	return false;
 }
 
-void Rewriter::setSubstitution(ATermAppl Var, ATerm Expr)
+void Rewriter::setSubstitution(ATermAppl Var, ATermAppl Expr)
+{
+	setSubstitutionInternal(Var,toRewriteFormat(Expr));
+}
+
+void Rewriter::setSubstitutionList(ATermList Exprs)
+{
+	for (; !ATisEmpty(Exprs); Exprs=ATgetNext(Exprs))
+	{
+		ATermAppl h = (ATermAppl) ATgetFirst(Exprs);
+		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
+	}
+}
+
+void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
 	long n = ATgetAFun(ATgetArgument(Var,0));
 	
@@ -134,7 +152,21 @@ void Rewriter::setSubstitution(ATermAppl Var, ATerm Expr)
 	substs[n] = Expr;
 }
 
-ATerm Rewriter::getSubstitution(ATermAppl Var)
+void Rewriter::setSubstitutionInternalList(ATermList Exprs)
+{
+	for (; !ATisEmpty(Exprs); Exprs=ATgetNext(Exprs))
+	{
+		ATermAppl h = (ATermAppl) ATgetFirst(Exprs);
+		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
+	}
+}
+
+ATermAppl Rewriter::getSubstitution(ATermAppl Var)
+{
+	return fromRewriteFormat(lookupSubstitution(Var));
+}
+
+ATerm Rewriter::getSubstitutionInternal(ATermAppl Var)
 {
 	return lookupSubstitution(Var);
 }
@@ -154,6 +186,14 @@ void Rewriter::clearSubstitutions()
 	for (long i=0; i<substs_size; i++)
 	{
 		substs[i] = NULL;
+	}
+}
+
+void Rewriter::clearSubstitutions(ATermList Vars)
+{
+	for (; !ATisEmpty(Vars); Vars=ATgetNext(Vars))
+	{
+		clearSubstitution((ATermAppl) ATgetFirst(Vars));
 	}
 }
 
@@ -185,18 +225,26 @@ Rewriter *createRewriter(data_specification DataSpec, RewriteStrategy Strategy)
 			return new RewriterInnermost(DataSpec);
 		case GS_REWR_JITTY:
 			return new RewriterJitty(DataSpec);
+#ifdef MCRL2_INNERC_AVAILABLE
 		case GS_REWR_INNERC:
 			return new RewriterCompilingInnermost(DataSpec);
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
 		case GS_REWR_JITTYC:
 			return new RewriterCompilingJitty(DataSpec);
+#endif
 		case GS_REWR_INNER_P:
 			return new RewriterProver(DataSpec,GS_REWR_INNER);
 		case GS_REWR_JITTY_P:
 			return new RewriterProver(DataSpec,GS_REWR_JITTY);
+#ifdef MCRL2_INNERC_AVAILABLE
 		case GS_REWR_INNERC_P:
 			return new RewriterProver(DataSpec,GS_REWR_INNERC);
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
 		case GS_REWR_JITTYC_P:
 			return new RewriterProver(DataSpec,GS_REWR_JITTYC);
+#endif
 		default:
 			return NULL;
 	}
@@ -279,7 +327,7 @@ void CheckRewriteRule(ATermAppl DataEqn)
 		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
 	}
 
-	// check that variables from the rhs are occur in the lhs
+	// check that variables from the condition occur in the lhs
 	try
 	{
 		checkVars(ATAgetArgument(DataEqn,1),lhs_vars);
@@ -288,7 +336,7 @@ void CheckRewriteRule(ATermAppl DataEqn)
 		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in condition of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
 	}
 
-	// check that variables from the condition occur in the lhs
+	// check that variables from the rhs are occur in the lhs
 	try
 	{
 		checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
@@ -298,6 +346,10 @@ void CheckRewriteRule(ATermAppl DataEqn)
 	}
 
 	// check that the lhs is a supported pattern
+	if ( gsIsDataVarId(ATAgetArgument(DataEqn,2)) )
+	{
+		throw runtime_error("left-hand side of equation is a variable; this is not allowed for rewriting");
+	}
 	try
 	{
 		checkPattern(ATAgetArgument(DataEqn,2));
@@ -323,20 +375,28 @@ void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
 {
   if (strat == GS_REWR_INNER) {
     fprintf(stream, "inner");
+#ifdef MCRL2_INNERC_AVAILABLE
   } else if (strat == GS_REWR_INNERC) {
     fprintf(stream, "innerc");
+#endif
   } else if (strat == GS_REWR_JITTY) {
     fprintf(stream, "jitty");
+#ifdef MCRL2_JITTYC_AVAILABLE
   } else if (strat == GS_REWR_JITTYC) {
     fprintf(stream, "jittyc");
+#endif
   } else if (strat == GS_REWR_INNER_P) {
     fprintf(stream, "innerp");
+#ifdef MCRL2_INNERC_AVAILABLE
   } else if (strat == GS_REWR_INNERC_P) {
     fprintf(stream, "innercp");
+#endif
   } else if (strat == GS_REWR_JITTY_P) {
     fprintf(stream, "jittyp");
+#ifdef MCRL2_JITTYC_AVAILABLE
   } else if (strat == GS_REWR_JITTYC_P) {
     fprintf(stream, "jittycp");
+#endif
   } else {
     fprintf(stream, "invalid");
   }
@@ -345,8 +405,16 @@ void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
 RewriteStrategy RewriteStrategyFromString(const char *s)
 {
   static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
+#ifdef MCRL2_INNERC_AVAILABLE
           GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_INNER_P, GS_REWR_INNERC_P,
+#else
+          GS_REWR_INNER, GS_REWR_INVALID, GS_REWR_INNER_P, GS_REWR_INVALID,
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
           GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P };
+#else
+          GS_REWR_JITTY, GS_REWR_INVALID, GS_REWR_JITTY_P, GS_REWR_INVALID };
+#endif
 
   size_t main_strategy = 0; // default invalid
 

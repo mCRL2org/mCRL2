@@ -10,70 +10,6 @@
 
 #include "workarounds.h" // DECL_A
 
-#ifdef NO_DYNLOAD
-
-#include "mcrl2/data/detail/rewrite/innerc.h"
-
-#include <cstdlib>
-#include "mcrl2/core/messaging.h"
-
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-
-RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
-{
-	gsErrorMsg("compiling Innermost rewriter is not available\n");
-	exit(1);
-}
-
-RewriterCompilingInnermost::~RewriterCompilingInnermost()
-{
-}
-
-ATermAppl RewriterCompilingInnermost::rewrite(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingInnermost::toRewriteFormat(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
-{
-	return NULL;
-}
-
-ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList Terms)
-{
-	return NULL;
-}
-
-void RewriterCompilingInnermost::setSubstitution(ATermAppl Var, ATerm Expr)
-{
-}
-
-ATerm RewriterCompilingInnermost::getSubstitution(ATermAppl Var)
-{
-	return NULL;
-}
-
-void RewriterCompilingInnermost::clearSubstitution(ATermAppl Var)
-{
-}
-
-void RewriterCompilingInnermost::clearSubstitutions()
-{
-}
-
-#else
-
 #define NAME "rewr_innerc"
 
 #include <cstdio>
@@ -93,6 +29,8 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/innerc.h"
+
+#ifdef MCRL2_INNERC_AVAILABLE
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -2319,12 +2257,12 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
   return (ATerm) so_rewr((ATermAppl) Term);
 }
 
-void RewriterCompilingInnermost::setSubstitution(ATermAppl Var, ATerm Expr)
+void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
 }
 
-ATerm RewriterCompilingInnermost::getSubstitution(ATermAppl Var)
+ATerm RewriterCompilingInnermost::getSubstitutionInternal(ATermAppl Var)
 {
   return so_get_subst(Var);
 }
@@ -2339,9 +2277,9 @@ void RewriterCompilingInnermost::clearSubstitutions()
   so_clear_substs();
 }
 
-#endif
-
 RewriteStrategy RewriterCompilingInnermost::getStrategy()
 {
 	return GS_REWR_INNERC;
 }
+
+#endif

@@ -20,70 +20,6 @@
 
 #include "workarounds.h" // DECL_A
 
-#ifdef NO_DYNLOAD
-
-#include "mcrl2/data/detail/rewrite/jittyc.h"
-
-#include <cstdlib>
-#include "mcrl2/core/messaging.h"
-
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-
-RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
-{
-	gsErrorMsg("compiling JITty rewriter is not available\n");
-	exit(1);
-}
-
-RewriterCompilingJitty::~RewriterCompilingJitty()
-{
-}
-
-ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
-{
-	return NULL;
-}
-
-ATermList RewriterCompilingJitty::rewriteInternalList(ATermList Terms)
-{
-	return NULL;
-}
-
-void RewriterCompilingJitty::setSubstitution(ATermAppl Var, ATerm Expr)
-{
-}
-
-ATerm RewriterCompilingJitty::getSubstitution(ATermAppl Var)
-{
-	return NULL;
-}
-
-void RewriterCompilingJitty::clearSubstitution(ATermAppl Var)
-{
-}
-
-void RewriterCompilingJitty::clearSubstitutions()
-{
-}
-
-#else
-
 #define NAME "rewr_jittyc"
 
 #include <utility>
@@ -106,6 +42,8 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
+
+#ifdef MCRL2_JITTYC_AVAILABLE
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -3763,12 +3701,12 @@ gsfprintf(stderr,"out: %P\n",fromRewriteFormat(a));*/
   return a;
 }
 
-void RewriterCompilingJitty::setSubstitution(ATermAppl Var, ATerm Expr)
+void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
 }
 
-ATerm RewriterCompilingJitty::getSubstitution(ATermAppl Var)
+ATerm RewriterCompilingJitty::getSubstitutionInternal(ATermAppl Var)
 {
   return so_get_subst(Var);
 }
@@ -3783,9 +3721,9 @@ void RewriterCompilingJitty::clearSubstitutions()
   so_clear_substs();
 }
 
-#endif
-
 RewriteStrategy RewriterCompilingJitty::getStrategy()
 {
 	return GS_REWR_JITTYC;
 }
+
+#endif

@@ -372,10 +372,10 @@ static void assign_variables_in_tree(
   else
   { 
     if (opt_precompile_pbes)
-    { rewriter->setSubstitution(*var_iter,t);
+    { rewriter->setSubstitutionInternal(*var_iter,t);
     }
     else
-    { rewriter->setSubstitution(*var_iter,rewriter->toRewriteFormat((ATermAppl)t));
+    { rewriter->setSubstitution(*var_iter,(ATermAppl)t);
     }
     var_iter++;
   }
@@ -722,11 +722,11 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
           assert(elist!=current_variable_instantiation.parameters().end());
           
           if (tool_options.opt_precompile_pbes)
-          { rewriter->setSubstitution(*vlist,(atermpp::aterm)*elist);
+          { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
           }
           else
           { 
-            rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+            rewriter->setSubstitution(*vlist,*elist);
           }
           elist++;
         }

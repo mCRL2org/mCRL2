@@ -121,9 +121,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
                 append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
                 append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
                 append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+#else
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+#endif
 
   /* Prepare user interaction */
   checkbox& tau_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_tau_only));

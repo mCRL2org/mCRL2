@@ -93,10 +93,7 @@ static void clear_rewr_substs(ATermList vars)
   {
     vars = ATtableKeys(assignments);
   }
-  for (; !ATisEmpty(vars); vars=ATgetNext(vars))
-  {
-    rewr->clearSubstitution(ATAgetFirst(vars));
-  }
+  rewr->clearSubstitutions(vars);
 }
 
 static void reset_rewr_substs()
@@ -105,7 +102,7 @@ static void reset_rewr_substs()
   for (; !ATisEmpty(vars); vars=ATgetNext(vars))
   {
     ATermAppl var = ATAgetFirst(vars);
-    rewr->setSubstitution(var,ATtableGet(assignments,(ATerm) var));
+    rewr->setSubstitutionInternal(var,ATtableGet(assignments,(ATerm) var));
   }
 }
 
@@ -232,7 +229,7 @@ static ATermAppl parse_term(string &term_string, data_specification &spec, ATerm
       ATermAppl var = ATAgetFirst(l);
       if ( ATtableGet(variables,ATgetArgument(var,0)) != NULL )
       {
-        ATerm old_val = rewr->getSubstitution(var);
+        ATerm old_val = rewr->getSubstitutionInternal(var);
         rewr->clearSubstitution(var);
         save_assignments = ATinsert(save_assignments,(ATerm) gsMakeSubst((ATerm) var,old_val));
       }
@@ -254,7 +251,7 @@ static ATermAppl parse_term(string &term_string, data_specification &spec, ATerm
     {
       ATermAppl subst = ATAgetFirst(save_assignments);
       ATermAppl var = ATAgetArgument(subst,0);
-      rewr->setSubstitution(var,ATgetArgument(subst,1));
+      rewr->setSubstitutionInternal(var,ATgetArgument(subst,1));
       ATtablePut(variables,ATgetArgument(var,0),ATgetArgument(var,1));
     }
   }
@@ -445,7 +442,7 @@ int main(int argc, char **argv)
                 for (; !ATisEmpty(sol); sol=ATgetNext(sol))
                 {
                   ATermAppl subst = ATAgetFirst(sol);
-                  rewr->setSubstitution(ATAgetArgument(subst,0),ATgetArgument(subst,1));
+                  rewr->setSubstitutionInternal(ATAgetArgument(subst,0),ATgetArgument(subst,1));
                   gsprintf("%P := %P",ATAgetArgument(subst,0),rewr->fromRewriteFormat(ATgetArgument(subst,1)));
                   if ( !ATisEmpty(ATgetNext(sol)) )
                   {
@@ -454,10 +451,7 @@ int main(int argc, char **argv)
                 }
                 gsprintf("] gives %P\n",rewr->rewrite(term));
               }
-              for (; !ATisEmpty(vars); vars=ATgetNext(vars))
-              {
-                rewr->clearSubstitution(ATAgetFirst(vars));
-              }
+              rewr->clearSubstitutions(vars);
               reset_rewr_substs();
             }
           } else {
@@ -486,7 +480,7 @@ int main(int argc, char **argv)
             {
               gsprintf("%P\n",term);
             } else {
-              rewr->setSubstitution(var,rewr->toRewriteFormat(term));
+              rewr->setSubstitution(var,term);
               ATtablePut(assignments,(ATerm) var,rewr->toRewriteFormat(term));
             }
           }

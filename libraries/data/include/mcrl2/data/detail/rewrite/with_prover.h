@@ -34,10 +34,15 @@ class RewriterProver: public Rewriter
 		bool addRewriteRule(ATermAppl Rule);
 		bool removeRewriteRule(ATermAppl Rule);
 		
-		void setSubstitution(ATermAppl Var, ATerm Expr);
-		ATerm getSubstitution(ATermAppl Var);
+		void setSubstitution(ATermAppl Var, ATermAppl Expr);
+		void setSubstitutionList(ATermList Exprs);
+		void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+		void setSubstitutionInternalList(ATermList Exprs);
+		ATermAppl getSubstitution(ATermAppl Var);
+		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
+		void clearSubstitutions(ATermList Vars);
 
 	public:
 		BDD_Prover *prover_obj;

@@ -204,9 +204,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
                 append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
                 append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")),
+#else
+                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")),
+#endif
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().

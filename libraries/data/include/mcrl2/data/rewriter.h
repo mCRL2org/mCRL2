@@ -49,13 +49,23 @@ namespace data {
       enum strategy
       {
         innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
+#ifdef MCRL2_INNERC_AVAILABLE
   	    innermost_compiling        = GS_REWR_INNERC  ,  /** \brief Compiling innermost */
+#endif
   	    jitty                      = GS_REWR_JITTY   ,  /** \brief JITty */
+#ifdef MCRL2_JITTYC_AVAILABLE
   	    jitty_compiling            = GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
+#endif
   	    innermost_prover           = GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
+#ifdef MCRL2_INNERC_AVAILABLE
   	    innermost_compiling_prover = GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
   	    jitty_prover               = GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
   	    jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
+#else
+  	    jitty_prover               = GS_REWR_JITTY_P    /** \brief JITty + Prover */
+#endif
       };
 
       /// \brief Constructor.

@@ -14,15 +14,30 @@
 #include <mcrl2/data/data_specification.h>
 #include <aterm2.h>
 
+#ifndef NO_DYNLOAD
+#define MCRL2_INNERC_AVAILABLE /** \brief If defined the compiling innermost
+                                          rewriter is available */
+#define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
+                                          rewriter is available */
+#endif
+
 /** \brief Rewrite strategies. */
 typedef enum { GS_REWR_INNER     /** \brief Innermost */
+#ifdef MCRL2_INNERC_AVAILABLE
 	     , GS_REWR_INNERC    /** \brief Compiling innermost */
+#endif
 	     , GS_REWR_JITTY     /** \brief JITty */
+#ifdef MCRL2_JITTYC_AVAILABLE
 	     , GS_REWR_JITTYC    /** \brief Compiling JITty */
+#endif
 	     , GS_REWR_INNER_P   /** \brief Innermost + Prover */
+#ifdef MCRL2_INNERC_AVAILABLE
 	     , GS_REWR_INNERC_P  /** \brief Compiling innermost + Prover*/
+#endif
 	     , GS_REWR_JITTY_P   /** \brief JITty + Prover */
+#ifdef MCRL2_JITTYC_AVAILABLE
 	     , GS_REWR_JITTYC_P  /** \brief Compiling JITty + Prover*/
+#endif
 	     , GS_REWR_INVALID   /** \brief Invalid strategy */
 	     } RewriteStrategy;
 
@@ -50,16 +65,15 @@ typedef enum { GS_REWR_INNER     /** \brief Innermost */
  * Instead of first substituting specific values for variables before rewriting
  * a term, one can tell the rewriter to do this substitution during rewriting.
  * Typical usage would be as follows (with t an mCRL2 data term, var an mCRL2
- * data variable and values a list of terms in the internal rewriter format):
+ * data variable and values a list of mCRL2 data terms):
  *
  * \code
  *   Rewriter *r = createRewriter(equations);
- *   ATerm u = r->toRewriteFormat(t);
  *   for (iterator i = values.begin(); i != values.end(); i++)
  *   {
  *     r->setSubstitution(var,*i);
- *     ATerm v = t->rewriteInternal(u);
- *     // v is the normal form in internal rewriter format of t[var:=*i]
+ *     ATerm v = t->rewrite(t);
+ *     // v is the normal form in of t[var:=*i]
  *     ...
  *   }
  *   delete r;
@@ -152,17 +166,47 @@ class Rewriter
 		 * \brief Link a variable to a value for on-the-fly
 		 *        substitution. (Replacing any previous linked value.)
 		 * \param Var  A mCRL2 data variable.
+		 * \param Expr A mCRL2 data expression.
+		 **/
+		virtual void setSubstitution(ATermAppl Var, ATermAppl Expr);
+		/**
+		 * \brief Link variables to a values for on-the-fly
+		 *        substitution. (Replacing any previous linked value.)
+		 * \param Exprs A lists of substitutions of mCRL2 data variables
+                 *              to mCRL2 data expressions.
+		 **/
+		virtual void setSubstitutionList(ATermList Exprs);
+		/**
+		 * \brief Link a variable to a value for on-the-fly
+		 *        substitution. (Replacing any previous linked value.)
+		 * \param Var  A mCRL2 data variable.
 		 * \param Expr A term in the internal rewriter format.
 		 **/
-		virtual void setSubstitution(ATermAppl Var, ATerm Expr);
+		virtual void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+		/**
+		 * \brief Link variables to a values for on-the-fly
+		 *        substitution. (Replacing any previous linked value.)
+		 * \param Exprs A lists of substitutions of mCRL2 data variables
+                 *              to terms in the internal rewriter format.
+		 **/
+		virtual void setSubstitutionInternalList(ATermList Exprs);
 		/**
 		 * \brief Get the value linked to a variable for on-the-fly
 		 *        substitution.
 		 * \param Var A mCRL2 data variable.
-		 * \return The value linked to Var. If no value is linked to
-		 *         Var, then NULL is returned.
+		 * \return The value linked to Var as an mCRL2 data expression.
+                 *         If no value is linked to Var, then NULL is returned.
 		 **/
-		virtual ATerm getSubstitution(ATermAppl Var);
+		virtual ATermAppl getSubstitution(ATermAppl Var);
+		/**
+		 * \brief Get the value linked to a variable for on-the-fly
+		 *        substitution.
+		 * \param Var A mCRL2 data variable.
+		 * \return The value linked to Var as a term in the internal
+                 *         rewriter format. If no value is linked to Var,
+		 *         then NULL is returned.
+		 **/
+		virtual ATerm getSubstitutionInternal(ATermAppl Var);
 		/**
 		 * \brief Remove the value linked to a variable for on-the-fly
 		 *        substitution. (I.e. make sure that no value is
@@ -176,6 +220,13 @@ class Rewriter
 		 *        done during rewriting.)
 		 **/
 		virtual void clearSubstitutions();
+		/**
+		 * \brief Remove the values linked to variables for on-the-fly
+		 *        substitution. (I.e. make sure that no value is
+		 *        substituted for this variable during rewriting.)
+		 * \param Vars A list of mCRL2 data variable.
+		 **/
+		virtual void clearSubstitutions(ATermList Vars);
 
 	protected:
 		ATerm lookupSubstitution(ATermAppl Var);

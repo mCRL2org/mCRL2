@@ -12,6 +12,9 @@
 #define __REWR_INNERC_H
 
 #include "mcrl2/data/rewrite.h"
+
+#ifdef MCRL2_INNERC_AVAILABLE
+
 #include "mcrl2/data/data_specification.h"
 
 //#define _INNERC_STORE_TREES
@@ -31,12 +34,11 @@ class RewriterCompilingInnermost: public Rewriter
 		ATerm rewriteInternal(ATerm Term);
 		ATermList rewriteInternalList(ATermList Terms);
 
-		void setSubstitution(ATermAppl Var, ATerm Expr);
-		ATerm getSubstitution(ATermAppl Var);
+		void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
 
-#ifndef NO_DYNLOAD
 	private:
 		int num_opids;
 
@@ -71,7 +73,8 @@ class RewriterCompilingInnermost: public Rewriter
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);
 		ATermAppl fromInner(ATerm Term);
-#endif
 };
+
+#endif
 
 #endif

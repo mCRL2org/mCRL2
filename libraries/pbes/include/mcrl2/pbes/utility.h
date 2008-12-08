@@ -326,11 +326,11 @@ inline pbes_expression give_the_instantiated_rhs(
     assert(elist!=current_variable_instantiation.parameters().end());
 
     if (use_internal_rewriter_format)
-    { rewriter->setSubstitution(*vlist,(atermpp::aterm)*elist);
+    { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
     }
     else
     { 
-      rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+      rewriter->setSubstitution(*vlist,*elist);
     }
     elist++;
   }
@@ -583,7 +583,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  rewriter->setSubstitution(*i,d);
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_false(r)) /* the resulting expression is false, so we can terminate */
@@ -694,7 +694,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  rewriter->setSubstitution(*i,d);
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);

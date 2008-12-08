@@ -755,11 +755,11 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 					break;
 				case GS_STATE_TREE:
 //					stateargs[i] = getTreeElement(old,i);
-					stateargs[i] = info.rewr_obj->getSubstitution((ATermAppl) ATgetFirst(l));
+					stateargs[i] = info.rewr_obj->getSubstitutionInternal((ATermAppl) ATgetFirst(l));
 					if ( ATisEqual(stateargs[i], ATgetFirst(l)) ) // Make sure substitutions where not reset by enumerator
 					{
 						set_substitutions();
-						stateargs[i] = info.rewr_obj->getSubstitution((ATermAppl) ATgetFirst(l));
+						stateargs[i] = info.rewr_obj->getSubstitutionInternal((ATermAppl) ATgetFirst(l));
 					}
 					break;
 			}
@@ -811,7 +811,7 @@ void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
 		}
 	}
 
-	info.rewr_obj->setSubstitution((ATermAppl) ATgetFirst(*vars),tree);
+	info.rewr_obj->setSubstitutionInternal((ATermAppl) ATgetFirst(*vars),tree);
 	*vars = ATgetNext(*vars);
 }
 
@@ -865,7 +865,7 @@ void NextStateGeneratorStandard::set_substitutions()
 
 				if ( !ATisEqual(a,info.nil) )
 				{
-					info.rewr_obj->setSubstitution((ATermAppl) ATgetFirst(l),a);
+					info.rewr_obj->setSubstitutionInternal((ATermAppl) ATgetFirst(l),a);
 				}
 			}
 			break;
@@ -930,20 +930,14 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 		{
 			set_substitutions();
 		}
-		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
-		{
-			info.rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
-		}
+		info.rewr_obj->setSubstitutionInternalList(sol);
 		*Transition = rewrActionArgs((ATermAppl) cur_act);
 		*State = (ATerm) makeNewState(cur_state,cur_nextstate);
 		if ( prioritised != NULL )
 		{
 			*prioritised = (sum_idx <= info.num_prioritised);
 		}
-		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
-		{
-			info.rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));
-		}
+		info.rewr_obj->clearSubstitutions(sol);
 		return true;
 	} else {
 		*Transition = NULL;

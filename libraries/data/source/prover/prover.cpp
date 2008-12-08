@@ -57,30 +57,38 @@ using namespace mcrl2::core;
           );
           break;
         }
+#ifdef MCRL2_INNERC_AVAILABLE
         case (GS_REWR_INNERC): {
           throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover.");
           break;
         }
+#endif
         case (GS_REWR_INNER_P): {
           throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover.");
           break;
         }
+#ifdef MCRL2_INNERC_AVAILABLE
         case (GS_REWR_INNERC_P): {
           mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
           break;
         }
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
         case (GS_REWR_JITTYC): {
           throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover.");
           break;
         }
+#endif
         case (GS_REWR_JITTY_P): {
           throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover.");
           break;
         }
+#ifdef MCRL2_JITTYC_AVAILABLE
         case (GS_REWR_JITTYC_P): {
           throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
           break;
         }
+#endif
         default: {
           mcrl2::runtime_error("Unknown type of rewriter.");
           break;

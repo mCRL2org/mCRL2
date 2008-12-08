@@ -217,9 +217,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
                 append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
                 append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
                 append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+#else
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+#endif
 
   checkbox& remove_single_element_sorts = d.create< checkbox >().
                         set_status(c.get_option_argument< bool >(option_remove_single_element_sorts));
@@ -375,7 +381,7 @@ inline ATermAppl lpsConstElm::rewrite(ATermAppl t) {
 //
 inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, atermpp::vector< mcrl2::data::data_assignment > &y ) {
   for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
-    rewr->setSubstitution(i->lhs() ,rewr->toRewriteFormat(i->rhs()));
+    rewr->setSubstitution(i->lhs() ,i->rhs());
   }
   ATermAppl result = rewr->rewrite(t);
   for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){

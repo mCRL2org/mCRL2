@@ -242,7 +242,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr *e)
 	while ( !ATisEmpty(vars) && (this->*info.FindEquality)(expr,vars,&var,&val) )
 	{
 		vars = ATremoveElement(vars, var);
-		info.rewr_obj->setSubstitution((ATermAppl) var,val);
+		info.rewr_obj->setSubstitutionInternal((ATermAppl) var,val);
 		vals = ATinsert(vals,(ATerm) ATmakeAppl2(info.tupAFun,var,val));		
 		expr = info.rewr_obj->rewriteInternal(expr);
 		info.rewr_obj->clearSubstitution((ATermAppl) var);
@@ -435,7 +435,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 				}
 				ATerm term_rf = info.rewr_obj->rewriteInternal(info.rewr_obj->toRewriteFormat(cons_term));
 			
-				info.rewr_obj->setSubstitution(var,term_rf);
+				info.rewr_obj->setSubstitutionInternal(var,term_rf);
 				ATerm new_expr = info.rewr_obj->rewriteInternal(e.expr);
 				if ( !ATisEqual(new_expr,info.rewr_false) )
 				{

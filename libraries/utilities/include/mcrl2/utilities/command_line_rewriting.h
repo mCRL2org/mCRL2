@@ -28,11 +28,15 @@ namespace mcrl2 {
             "use rewrite strategy NAME:\n"
             "  'jitty' for jitty rewriting (default),\n"
             "  'jittyp' for jitty rewriting with prover,\n"
+#ifdef MCRL2_JITTYC_AVAILABLE
             "  'jittyc' for compiled jitty rewriting,\n"
+#endif
             "  'inner' for innermost rewriting,\n"
             "  'innerp' for innermost rewriting with prover, or\n"
-            "  'innerc' for compiled innermost rewriting",
-            'r'
+#ifdef MCRL2_JITTYC_AVAILABLE
+            "  'innerc' for compiled innermost rewriting"
+#endif
+            ,'r'
           );
         }
       };

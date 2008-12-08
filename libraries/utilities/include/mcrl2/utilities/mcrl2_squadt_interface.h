@@ -58,9 +58,15 @@ namespace mcrl2 {
 
             strategy_enumeration.
               add(GS_REWR_INNER, "inner").
+# ifdef MCRL2_INNERC_AVAILABLE
               add(GS_REWR_INNERC, "innerc").
+# endif
+# ifdef MCRL2_JITTYC_AVAILABLE
               add(GS_REWR_JITTY, "jitty").
               add(GS_REWR_JITTYC, "jittyc");
+# else
+              add(GS_REWR_JITTY, "jitty");
+# endif
 #endif
 
 #ifdef __LIBLTS_H
