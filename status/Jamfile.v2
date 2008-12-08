@@ -2,7 +2,7 @@
 
 project status
     : source-location .
-    : requirements <hardcode-dll-paths>false
+    : requirements <hardcode-dll-paths>true
       <dependency>/site-config//boost
       <define>"MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\""
     ;
