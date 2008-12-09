@@ -260,19 +260,19 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StoppedOpti = true;
 	btnOptiStop->SetLabel(wxT("&Neaten"));
 	wxFileDialog dialog( this, wxT("Select a LTS file or a position file..."), wxT(""), wxT(""), 
-											wxT("All supported formats|*.ltsgraph;*.aut;*.svc;*.lts;*.fsm;*.dot"
+            wxT("All supported formats|*.ltsgraph;*.aut;*.svc;*.lts;*.fsm;*.dot")
 #ifdef USE_BCG
-            ";*.bcg"
+            wxT(";*.bcg")
 #endif
-            "|Position data (*.ltsgraph)|*.ltsgraph|LTS format (*.aut"
+            wxT("|Position data (*.ltsgraph)|*.ltsgraph|LTS format (*.aut")
 #ifdef USE_BCG
-            ",*.bcg"
+            wxT(",*.bcg")
 #endif
-            ",*.dot,*.fsm,*.lts,*.svc)|*.aut;*.svc;*.lts;*.fsm;*.dot"
+            wxT(",*.dot,*.fsm,*.lts,*.svc)|*.aut;*.svc;*.lts;*.fsm;*.dot")
 #ifdef USE_BCG
-            ";*.bcg"
+            wxT(";*.bcg")
 #endif
-            "|All files (*.*)|*.*"));
+            wxT("|All files (*.*)|*.*"));
 
         dialog.SetDefaultItem(NULL);
 

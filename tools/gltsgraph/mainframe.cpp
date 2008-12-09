@@ -106,19 +106,19 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats|*.dot;*.fsm;*.aut;*.svc;*.lts"
+    wxT("All supported formats|*.dot;*.fsm;*.aut;*.svc;*.lts")
 #ifdef USE_BCG
-        ";*.bcg"
+        wxT(";*.bcg")
 #endif
-        "|LTS format (*.aut"
+        wxT("|LTS format (*.aut")
 #ifdef USE_BCG
-        ",*.bcg"
+        wxT(",*.bcg")
 #endif
-        ",*.dot,*.fsm,*.lts,*.svc)|*.dot;*.fsm;*.aut;*.svc;*.lts"
+        wxT(",*.dot,*.fsm,*.lts,*.svc)|*.dot;*.fsm;*.aut;*.svc;*.lts")
 #ifdef USE_BCG
-        ";*.bcg"
+        wxT(";*.bcg")
 #endif
-        "|All files (*.*)|*.*"),
+        wxT("|All files (*.*)|*.*"),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)

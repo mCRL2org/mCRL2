@@ -16,9 +16,9 @@ rule import_user_config {
 BUILD_OPTIONS  = pch=off embed-manifest=on link=static --prefix=c:/mcrl2 ;
 
 # Library specific variables
-WX_PREFIX          = "C:/wxWidgets/wxMSW-2.8.9" ;
+WX_PREFIX          = "C:/wxMSW-2.8.9" ;
 WX_CPPFLAGS        = /I$(WX_PREFIX)/lib/vc_lib/mswd /I$(WX_PREFIX)/include /D__WXDEBUG__ ;
-WX_BASE_LDFLAGS    = rpcrt4 kernel32 user32 gdi32 ole32 oleaut32 comctl32 comdlg32 uuid advapi32 shell32 /LIBPATH:$(WX_PREFIX)/lib/vc_lib wxmsw28d_core wxbase28d wxtiffd wxpngd wxzlibd wxjpegd ;
+WX_BASE_LDFLAGS    = rpcrt4 kernel32 user32 gdi32 ole32 oleaut32 comctl32 comdlg32 uuid advapi32 shell32 /LIBPATH:$(WX_PREFIX)/lib/vc_lib wxmsw28d_core wxbase28d wxmsw28d_adv wxtiffd wxpngd wxzlibd wxjpegd ;
 WX_GL_LDFLAGS      = $(WX_BASE_LDFLAGS) wxmsw28d_gl ;
 
 OPENGL_NAME        = opengl32 ;
