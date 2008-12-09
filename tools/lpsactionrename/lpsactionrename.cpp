@@ -149,7 +149,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 };
 
 const char* lps_file_for_input    = "lps_in";
-const char* rename_file_for_input = "renamefile_in";
+const char* rename_file           = "renamefile_in";
 const char* lps_file_for_output   = "lps_out";
 const char* option_no_rewrite     = "no_rewrites";
 const char* option_no_sumelm      = "no_sumelm";
@@ -177,10 +177,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /* Create and add the top layout manager */
   text_field& rename_file_field = d.create< text_field >();
-  checkbox&   rewrite            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_rewrite));
+  checkbox&   rewrite           = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_rewrite));
   checkbox&   sumelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
   button&     okay_button       = d.create< button >().set_label("OK");
-
 
   m.append(d.create< horizontal_box >().
         append(d.create< label >().set_text("Rename file name : ")).
@@ -192,8 +191,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
      append(okay_button, layout::right);
 
   // Set default values if the configuration specifies them
-  if (c.input_exists(rename_file_for_input)) {
-    rename_file_field.set_text(c.get_input(rename_file_for_input).location());
+  if (c.input_exists(rename_file)) {
+    rename_file_field.set_text(c.get_input(rename_file).location());
   }
 
   send_display_layout(d.manager(m));
@@ -201,7 +200,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button.await_change();
 
-  c.add_input(rename_file_for_input, tipi::mime_type("mf", tipi::mime_type::text), rename_file_field.get_text());
+  c.add_input(rename_file, tipi::mime_type("mf", tipi::mime_type::text), rename_file_field.get_text());
 
   /* Add output file to the configuration */
   if (c.output_exists(lps_file_for_output)) {
@@ -223,7 +222,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
   bool result = true;
 
   result &= c.input_exists(lps_file_for_input);
-  result &= c.input_exists(rename_file_for_input);
+  result &= c.input_exists(rename_file);
   result &= c.output_exists(lps_file_for_output);
 
   return (result);
@@ -232,11 +231,13 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
-  tool_options.action_rename_filename = c.get_input(rename_file_for_input).location();
+  tool_options.action_rename_filename = c.get_input(rename_file).location();
   tool_options.infilename             = c.get_input(lps_file_for_input).location();
   tool_options.outfilename            = c.get_output(lps_file_for_output).location();
+  tool_options.no_sumelm              = c.get_option_argument< bool >(option_no_sumelm);
+  tool_options.no_rewrite             = c.get_option_argument< bool >(option_no_rewrite);
 
-  bool result = process(tool_options);
+  bool result = process(tool_options) == 0;
 
   if (result) {
     send_clear_display();
