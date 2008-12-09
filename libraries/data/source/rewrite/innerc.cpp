@@ -8,6 +8,10 @@
 
 #include "boost.hpp" // precompiled headers
 
+#include "mcrl2/data/rewrite.h"
+
+#ifdef MCRL2_INNERC_AVAILABLE
+
 #include "workarounds.h" // DECL_A
 
 #define NAME "rewr_innerc"
@@ -29,8 +33,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/innerc.h"
-
-#ifdef MCRL2_INNERC_AVAILABLE
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
