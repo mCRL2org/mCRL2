@@ -278,7 +278,7 @@ namespace squadt {
         if (project_view != 0) {
           remove_project_view(project_view);
         }
-       
+
         global_build_system.shutdown();
       }
       catch (std::exception&) {

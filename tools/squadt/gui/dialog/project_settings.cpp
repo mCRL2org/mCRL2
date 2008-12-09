@@ -47,7 +47,7 @@ namespace squadt {
        * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
-        
+
         try {
           boost::shared_ptr < project_manager > m = project_manager::create(std::string(p.fn_str()), false); 
 
@@ -117,7 +117,7 @@ namespace squadt {
         screen0->Add(open_project_instead);
 
         screen0->Show(open_project_instead, false);
-         
+
         /* Add sizers to the main sizer */
         s->AddSpacer(10);
         s->Add(screen0, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
@@ -137,7 +137,7 @@ namespace squadt {
             break;
           case cmID_BROWSE: {
             wxDirDialog dialog(0, wxT("Select a directory"), default_directory);
-           
+
             if (dialog.ShowModal() == wxID_OK) {
               location->SetValue(dialog.GetPath());
             }
@@ -148,7 +148,7 @@ namespace squadt {
             break;
           default: { /* wxID_OK */
               using namespace boost::filesystem;
-             
+
               try {
                 path target(std::string(location->GetValue().fn_str()));
 
@@ -187,9 +187,9 @@ namespace squadt {
         try {
           if (!location->GetValue().IsEmpty()) {
             using namespace boost::filesystem;
-  
+
             path target(std::string(location->GetValue().fn_str()));
-  
+
             if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
               /* Directory contains a directory with the name of this project */
               screen0->Show(open_project_instead, true);
@@ -200,7 +200,7 @@ namespace squadt {
         }
         catch (...) {
         }
-         
+
         screen0->Layout();
       }
 
@@ -410,7 +410,7 @@ namespace squadt {
             break;
           default: { /* wxID_OK */
               wxSizer* sizer = main_panel->GetSizer();
-             
+
               using namespace boost::filesystem;
 
               try {

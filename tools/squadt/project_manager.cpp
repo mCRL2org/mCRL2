@@ -96,27 +96,24 @@ namespace squadt {
           throw std::runtime_error("Unable to load project file `"+project_file.string()+"'.");
         }
       }
-      else {
-        try {
-          visitors::restore(*this, project_file);
-        }
-        catch (std::exception&) {
-          if (b) {
-            filesystem::remove(project_file);
+      else if (b) {
+        /* Project description file is probably broken */
+        filesystem::remove(project_file);
 
-            /* Project description file is probably broken */
-            import_directory(l);
-          
-            /* Create initial project description file */
-            visitors::store(*this, project_file);
-          }
-          else {
-            throw;
-          }
-        }
+        import_directory(store);
+
+        /* Create initial project description file */
+        visitors::store(*this, project_file);
+      }
+      else {
+        visitors::restore(*this, project_file);
       }
     }
     else if (b) {
+      if (!exists(store.root_path())) { // root path need not exist on Windows
+        throw std::runtime_error("Unable to create project store, " + store.root_path().string() + " does not exist.");
+      }
+
       filesystem::create_directories(store);
 
       /* Create initial project description file */
@@ -157,7 +154,7 @@ namespace squadt {
       write();
     }
   }
-  
+
   /**
    * \param p a reference to the processor to add
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
@@ -693,7 +690,7 @@ namespace squadt {
   void project_manager_impl::write() const {
     boost::filesystem::path project_file(settings_manager::path_concatenate(store,
              settings_manager::project_definition_base_name));
- 
+
     visitors::store(*this, project_file);
   }
 
