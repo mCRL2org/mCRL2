@@ -408,6 +408,9 @@ class boolean_equation: public atermpp::aterm_appl
     boolean_expression m_formula;
 
   public:
+    /// \brief The expression type of the equation.
+    typedef boolean_expression term_type;
+
     /// \brief Constructor.
     boolean_equation()
       : atermpp::aterm_appl(core::detail::constructBooleanEquation())
@@ -460,9 +463,9 @@ typedef atermpp::term_list<boolean_equation> boolean_equation_list;
   /// \param e A boolean equation
   /// \return A pretty printed representation of the boolean equation
   inline
-  std::string pp(boolean_equation e)
+  std::string pp(const boolean_equation& eq)
   {
-    return core::pp(e.symbol()) + " " + pp(e.variable()) + " = " + pp(e.formula());
+    return core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula());
   }
 
 } // namespace bes

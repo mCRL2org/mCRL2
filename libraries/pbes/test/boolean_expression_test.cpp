@@ -26,8 +26,8 @@ void test_boolean_expressions()
   boolean_expression t1 = tr::and_(X1, X2);
   boolean_equation e1(fixpoint_symbol::mu(), X1, tr::imp(X1, X2));
   boolean_equation e2(fixpoint_symbol::nu(), X2, tr::or_(X1, X2));
-  std::cout << pp(e1) << std::endl;
-  std::cout << pp(e2) << std::endl;
+  std::cout << bes::pp(e1) << std::endl;
+  std::cout << bes::pp(e2) << std::endl;
 
   boolean_equation_system<> p;
   p.equations().push_back(e1);

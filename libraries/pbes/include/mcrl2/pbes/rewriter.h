@@ -24,12 +24,34 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/gauss.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
+#include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+  /// \brief A rewriter that simplifies boolean expressions.
+  template <typename Term>
+  class boolean_expression_rewriter
+  {
+    public:
+      /// \brief The term type
+      typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The variable type
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+
+      /// \brief Rewrites a boolean expression.
+      /// \param x The boolean expression that is rewritten to normal form.
+      /// \return The rewrite result.
+      term_type operator()(const term_type& x)
+      {
+        bes::detail::boolean_simplify_builder<Term> r;
+        return r(x);
+      }
+  };
 
   /// \brief A rewriter that simplifies expressions.
   template <typename Term, typename DataRewriter>

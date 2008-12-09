@@ -19,65 +19,20 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \brief Namespace for Gauss elimination
-namespace gauss {
-
-  /// \brief Returns true if e.symbol() == nu(), else false.
-  /// \param e A pbes equation
-  /// \return True if e.symbol() == nu(), else false.
-  inline
-  pbes_expression sigma(const pbes_equation& e)
-  {
-    using namespace pbes_expr;
-    return e.symbol().is_nu() ? true_() : false_();
-  }
-
-  /// \brief Applies the substitution X := phi to the pbes equation eq.
-  /// \param eq A pbes equation
-  /// \param X A propositional variable
-  /// \param phi A pbes expression
-  /// \return The substition result
-  inline
-  pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi)
-  {
-    pbes_expression formula = substitute_propositional_variable(eq.formula(), X, phi);
-    return pbes_equation(eq.symbol(), eq.variable(), formula);
-  }
-
-  /// \brief Applies the substitution X := phi to the sequence of pbes equations [first, last).
-  /// \param first Start of a range of pbes equations
-  /// \param last End of a range of pbes equations
-  /// \param X A propositional variable
-  /// \param phi A pbes expression
-  template <typename Iter>
-  void substitute(Iter first, Iter last, propositional_variable X, pbes_expression phi)
-  {
-    for (Iter i = first; i != last; ++i)
-    {
-      *i = substitute(*i, X, phi);
-    }
-  }
-
-} // namespace gauss
-
 /// \brief Algorithm class for the Gauss elimination algorithm for solving
 /// systems of pbes equations.
-template <typename PbesRewriter, typename EquationSolver>
 class gauss_elimination_algorithm
 {
   protected:
-    /// \brief A pbes rewriter
-    PbesRewriter& m_rewriter;
-    
-    /// \brief An equation solver
-    EquationSolver& m_equation_solver;
-
     /// \brief Pretty print an equation without generating a newline after the equal sign
-    /// \param eq A pbes equation
+    /// \param eq A bes/pbes equation
     /// \return A pretty printed string
-    std::string pp(pbes_equation eq)
+    template <typename Equation>
+    std::string mypp(Equation eq)
     {
-      return core::pp(eq.symbol()) + " " + core::pp(eq.variable()) + " = " + core::pp(eq.formula());
+      typedef core::term_traits<typename Equation::term_type> tr;
+      //return core::pp(eq.symbol()) + " " + tr::pp(eq.variable()) + " = " + tr::pp(eq.formula());
+      return core::pp(eq.symbol()) + " " + eq.variable().to_string() + " = " + eq.formula().to_string();
     }
 
     /// \brief Prints the sequence of pbes equations [first, last) to standard out.
@@ -89,24 +44,17 @@ class gauss_elimination_algorithm
       std::cerr << "pbes\n";
       for (Iter i = first; i != last; ++i)
       {
-        std::cerr << "  " << pp(*i) << std::endl;
+        std::cerr << "  " << mypp(*i) << std::endl;
       }
     }
 
   public:
     
-    /// \brief Constructor
-    /// \param rewriter A pbes rewriter
-    /// \param equation_solver An equation solver   
-    gauss_elimination_algorithm(PbesRewriter& rewriter, EquationSolver& equation_solver)
-      : m_rewriter(rewriter), m_equation_solver(equation_solver)
-    {}
-
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
     /// \param last End of a range of pbes equations
-    template <typename Iter>
-    void run(Iter first, Iter last)
+    template <typename Iter, typename EquationSolver>
+    void run(Iter first, Iter last, EquationSolver solver)
     {
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
   print(first, last);
@@ -122,15 +70,19 @@ class gauss_elimination_algorithm
         --i;
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
   std::cerr << "solving equation\n";
-  std::cerr << "  before: " << pp(*i) << std::endl;
+  std::cerr << "  before: " << mypp(*i) << std::endl;
 #endif
-        *i = m_equation_solver(*i);
+        solver.solve(*i);
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  std::cerr << "   after: " << pp(*i) << std::endl;
+  std::cerr << "   after: " << mypp(*i) << std::endl;
 #endif
-        gauss::substitute(first, i, i->variable(), i->formula());
+        // propagate the substitutions
+        for (Iter j = first; j != i; ++j)
+        {
+          solver.substitute(*j, *i);
+        }
       }
-      *i = m_equation_solver(*i); // TODO: clean the logic of this algorithm up
+      solver.solve(*i); // TODO: clean the logic of this algorithm up
 #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
   print(first, last);
 #endif

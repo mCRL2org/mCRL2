@@ -94,7 +94,7 @@ std::string BES8 =
 void test_bes(std::string bes_spec, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  int result = pbes_system::bes_gauss_elimination(p);
+  int result = pbes_system::pbes_gauss_elimination(p);
   switch (result) {
     case 0: std::cout << "FALSE" << std::endl; break;
     case 1: std::cout << "TRUE" << std::endl; break;
@@ -166,17 +166,8 @@ void test_abp()
   specification spec    = lps::mcrl22lps(ABP_SPECIFICATION);
   modal::state_formula formula = modal::detail::mcf2statefrm(FORMULA, spec);
 
-  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
-  typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_rewriter;
-  typedef pbes_system::bes_equation_solver<my_rewriter> bes_solver;
-    
-  data::rewriter datar(spec.data());
-  data::number_postfix_generator name_generator;
-  my_enumerator datae(spec.data(), datar, name_generator);
-  my_rewriter pbesr(datar, datae);    
-
   pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
-  int result = pbes_system::bes_gauss_elimination(p);
+  int result = pbes_system::pbes_gauss_elimination(p);
   switch (result) {
     case 0: std::cout << "FALSE" << std::endl; break;
     case 1: std::cout << "TRUE" << std::endl; break;
@@ -184,11 +175,65 @@ void test_abp()
   }
 }
 
+void test_bes()
+{
+  using namespace bes;
+
+  typedef core::term_traits<boolean_expression> tr;
+
+  boolean_variable X("X");
+  boolean_variable Y("Y");
+
+  // empty boolean equation system
+  atermpp::vector<boolean_equation> empty;
+    
+  pbes_system::fixpoint_symbol mu = pbes_system::fixpoint_symbol::mu();
+  pbes_system::fixpoint_symbol nu = pbes_system::fixpoint_symbol::nu();
+
+  // pbes mu X = X;
+  //               
+  // init X;       
+  boolean_equation e1(mu, X, X);
+  boolean_equation_system<> bes1(empty , X);
+  bes1.equations().push_back(e1);
+
+  // pbes nu X = X;
+  //               
+  // init X;       
+  boolean_equation e2(nu, X, X);
+  boolean_equation_system<> bes2(empty , X);
+  bes2.equations().push_back(e2);
+
+  // pbes mu X = Y;
+  //      nu Y = X;
+  //               
+  // init X;       
+  boolean_equation e3(mu, X, Y);
+  boolean_equation e4(nu, Y, X);
+  boolean_equation_system<> bes3(empty, X);
+  bes3.equations().push_back(e3);
+  bes3.equations().push_back(e4);
+
+  // pbes nu Y = X;
+  //      mu X = Y;
+  //               
+  // init X;       
+  boolean_equation_system<> bes4(empty, X);
+  bes4.equations().push_back(e4);
+  bes4.equations().push_back(e3);
+
+  BOOST_CHECK(gauss_elimination(bes1) == false);
+  BOOST_CHECK(gauss_elimination(bes2) == true);
+  BOOST_CHECK(gauss_elimination(bes3) == false);
+  BOOST_CHECK(gauss_elimination(bes4) == true);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  // test_abp();
+  test_bes();
+  test_abp();
   test_bes_examples();
 
   return 0;

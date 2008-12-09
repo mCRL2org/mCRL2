@@ -34,6 +34,9 @@ class pbes_equation: public atermpp::aterm_appl
     pbes_expression        m_formula;  // the right hand side
 
   public:
+    /// \brief The expression type of the equation.
+    typedef pbes_expression term_type;
+    
     /// \brief Constructor.
     ///
     pbes_equation()
