@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/find.h"
 #include "mcrl2/old_data/data.h"
 #include "mcrl2/old_data/find.h"
 #include "mcrl2/old_data/utility.h"
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   linear_process lps = spec.process();
-  std::set<identifier_string> ids = find_identifiers(aterm(lps));
+  std::set<identifier_string> ids = core::find_identifiers(aterm(lps));
   for (std::set<identifier_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
     cout << "- " << *i << endl;

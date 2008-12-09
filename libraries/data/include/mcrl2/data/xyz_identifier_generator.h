@@ -6,17 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/old_data/xyz_identifier_generator.h
+/// \file mcrl2/data/xyz_identifier_generator.h
 /// \brief Class that generates identifiers in the range X, Y, Z, X0, Y0, Z0, X1, ...
 
-#ifndef MCRL2_OLD_DATA_XYZ_IDENTIFIER_GENERATOR_H
-#define MCRL2_OLD_DATA_XYZ_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
+#define MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
-namespace old_data {
+namespace data {
 
 /// A class that generates identifiers. A context is maintained
 /// containing already used identifiers. The context is stored
@@ -93,8 +93,8 @@ class xyz_identifier_generator: public multiset_identifier_generator
     }
 };
 
-} // namespace old_data
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_XYZ_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H

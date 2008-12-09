@@ -6,17 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/old_data/postfix_identifier_generator.h
+/// \file mcrl2/data/postfix_identifier_generator.h
 /// \brief The class postfix_identifier_generator.
 
-#ifndef MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
-#define MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#define MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
 
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
-namespace old_data {
+namespace data {
 
 /// Uses the given postfix as a hint for generating identifiers.
 class postfix_identifier_generator: public set_identifier_generator
@@ -47,8 +47,8 @@ class postfix_identifier_generator: public set_identifier_generator
     }   
 };
 
-} // namespace old_data
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_POSTFIX_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_DATA_POSTFIX_IDENTIFIER_GENERATOR_H

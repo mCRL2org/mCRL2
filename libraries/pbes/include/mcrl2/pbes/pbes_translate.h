@@ -20,6 +20,7 @@
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/free_variables.h"
+#include "mcrl2/core/find.h"
 #include "mcrl2/old_data/find.h"
 #include "mcrl2/old_data/utility.h"
 #include "mcrl2/old_data/detail/find.h"
@@ -28,8 +29,8 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/multi_action_equality.h"
-#include "mcrl2/old_data/xyz_identifier_generator.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/xyz_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
@@ -187,15 +188,15 @@ class pbes_translate_algorithm
       modal::state_formula f = formula;
       std::set<core::identifier_string> formula_variable_names = old_data::detail::find_variable_names(formula);
       std::set<core::identifier_string> spec_variable_names = old_data::detail::find_variable_names(spec);
-      std::set<core::identifier_string> spec_names = old_data::find_identifiers(spec);
+      std::set<core::identifier_string> spec_names = core::find_identifiers(spec);
 
       // rename data variables in f, to prevent name clashes with data variables in spec
-      old_data::set_identifier_generator generator;
+      data::set_identifier_generator generator;
       generator.add_identifiers(spec_variable_names);
       f = modal::rename_data_variables(f, generator);
 
       // rename predicate variables in f, to prevent name clashes
-      old_data::xyz_identifier_generator xyz_generator;
+      data::xyz_identifier_generator xyz_generator;
       xyz_generator.add_identifiers(spec_names);
       xyz_generator.add_identifiers(formula_variable_names);
       f = rename_predicate_variables(f, xyz_generator);

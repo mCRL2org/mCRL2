@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/old_data/data.h"
 #include "mcrl2/old_data/utility.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace mcrl2 {

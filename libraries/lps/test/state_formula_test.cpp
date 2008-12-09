@@ -16,7 +16,8 @@
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/core/find.h"
 #include "mcrl2/old_data/find.h"
 #include "mcrl2/old_data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
@@ -330,13 +331,13 @@ void test_rename()
   specification spec    = mcrl22lps(SPECIFICATION);
 
   state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
-  set_identifier_generator generator;
-  generator.add_identifiers(find_identifiers(spec));
+  data::set_identifier_generator generator;
+  generator.add_identifiers(core::find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
   BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)");
 
-  generator = set_identifier_generator();
-  generator.add_identifiers(find_identifiers(spec));
+  generator = data::set_identifier_generator();
+  generator.add_identifiers(core::find_identifiers(spec));
   formula = mcf2statefrm("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);

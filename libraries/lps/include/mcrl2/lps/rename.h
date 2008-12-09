@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/old_data/detail/data_functional.h"
-#include "mcrl2/old_data/postfix_identifier_generator.h"
+#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/detail/linear_process_utility.h"
@@ -76,7 +76,7 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
 inline
 linear_process rename_process_parameters(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
-  old_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(p, generator);
 }
@@ -101,7 +101,7 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
 inline
 specification rename_process_parameters(const specification& spec, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
-  old_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(spec, generator);
 }
@@ -137,7 +137,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
 inline
 linear_process rename_free_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
-  old_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_free_variables(p, generator);
 }
@@ -180,7 +180,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 inline
 linear_process rename_summation_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
-  old_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_summation_variables(p, generator);
 }

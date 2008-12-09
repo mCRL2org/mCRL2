@@ -446,7 +446,7 @@ ATermAppl rename(
   action_list lps_new_actions = action_list();;
 
   std::set<identifier_string> s;
-  postfix_identifier_generator generator("");
+  mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers(s);
 
   bool to_tau=false;

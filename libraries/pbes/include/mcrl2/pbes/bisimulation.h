@@ -22,7 +22,7 @@
 #include "mcrl2/old_data/utility.h"
 #include "mcrl2/old_data/detail/data_functional.h"
 #include "mcrl2/old_data/data_operators.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -104,7 +104,7 @@ class bisimulation_algorithm
     /// Used for initializing summand names.
     void set_summand_names(const linear_process& p)
     {
-      set_identifier_generator generator;
+      data::set_identifier_generator generator;
       for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
       {
         std::string name = generator(action_list_name(i->actions()));

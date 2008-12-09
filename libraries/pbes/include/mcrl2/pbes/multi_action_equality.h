@@ -23,8 +23,6 @@
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/old_data/xyz_identifier_generator.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
 
 namespace mcrl2 {
 

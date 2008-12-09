@@ -37,7 +37,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/old_data/detail/data_functional.h"
 #include "mcrl2/old_data/detail/sequence_substitution.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
 
 namespace mcrl2 {
 

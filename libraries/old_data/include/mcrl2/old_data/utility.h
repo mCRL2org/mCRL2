@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "boost/format.hpp"
+#include "mcrl2/core/find.h"
 #include "mcrl2/old_data/data.h"
 #include "mcrl2/old_data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
@@ -106,7 +107,7 @@ core::identifier_string fresh_identifier(const std::set<core::identifier_string>
 template <typename Term, class IdentifierCreator>
 core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
-  return fresh_identifier(find_identifiers(context), hint, id_creator);
+  return fresh_identifier(core::find_identifiers(context), hint, id_creator);
 }
 
 /// \brief Returns an identifier that doesn't appear in the term context
@@ -145,7 +146,7 @@ class fresh_variable_generator
     template <typename Term>
     fresh_variable_generator(Term context, sort_expression s = sort_expr::real(), std::string hint = "t")
     {
-      m_identifiers = find_identifiers(context);
+      m_identifiers = core::find_identifiers(context);
       m_hint = hint;
       m_sort = s;
     }
@@ -169,7 +170,7 @@ class fresh_variable_generator
     template <typename Term>
     void set_context(Term context)
     {
-      m_identifiers = find_identifiers(context);
+      m_identifiers = core::find_identifiers(context);
     }
 
     /// Set a new sort.
@@ -191,7 +192,7 @@ class fresh_variable_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<core::identifier_string> ids = find_identifiers(t);
+      std::set<core::identifier_string> ids = core::find_identifiers(t);
       std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
     }
 

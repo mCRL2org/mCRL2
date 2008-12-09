@@ -21,7 +21,7 @@
 #include "mcrl2/old_data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/old_data/detail/sequence_substitution.h"
-#include "mcrl2/old_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 

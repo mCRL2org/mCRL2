@@ -6,23 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/old_data/identifier_generator.h
+/// \file mcrl2/data/identifier_generator.h
 /// \brief The class identifier_generator.
 
-#ifndef MCRL2_OLD_DATA_IDENTIFIER_GENERATOR_H
-#define MCRL2_OLD_DATA_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_DATA_IDENTIFIER_GENERATOR_H
+#define MCRL2_DATA_IDENTIFIER_GENERATOR_H
 
 #include <set>
 #include <string>
 #include <sstream>
 #include <boost/format.hpp>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/old_data/find.h"
-#include "mcrl2/old_data/utility.h"
+#include "mcrl2/core/find.h"
 
 namespace mcrl2 {
 
-namespace old_data {
+namespace data {
 
 /// A class that generates identifiers. A context is maintained
 /// containing already used identifiers. This class is useful for
@@ -60,7 +59,7 @@ class identifier_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         add_identifier(*i);
@@ -83,7 +82,7 @@ class identifier_generator
     template <typename Term>
     void remove_from_context(Term t)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         remove_identifier(*i);
@@ -140,8 +139,8 @@ class number_postfix_generator
     }
 };
 
-} // namespace old_data
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_DATA_IDENTIFIER_GENERATOR_H
