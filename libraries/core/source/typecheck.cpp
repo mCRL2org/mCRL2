@@ -74,7 +74,7 @@ static void gstcDataInit(void);
 static void gstcDataDestroy(void);
 static ATbool gstcReadInSorts (ATermList, bool high_level=true);
 static ATbool gstcReadInConstructors(ATermList NewSorts=NULL);
-static ATbool gstcReadInFuncs(ATermList, bool high_level=true);
+static ATbool gstcReadInFuncs(ATermList, ATermList, bool high_level=true);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 static ATbool gstcReadInPBESAndInit(ATermAppl, ATermAppl);
@@ -236,8 +236,8 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
   if(gstcReadInConstructors()) {
-  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-			       ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  if(gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+		     ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
   gsDebugMsg ("type checking read-in phase finished\n");
   
@@ -275,8 +275,8 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
   if(gstcReadInConstructors()) {
-  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-			       ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  if(gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+		     ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
   if(gstcReadInActs(ATLgetArgument(ATAgetArgument(proc_spec,1),0))) {
   if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(proc_spec,2),0),
@@ -384,7 +384,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
   //XXX read-in from spec (not finished)
   if (gstcReadInSorts(sorts,false) &&
       gstcReadInConstructors() &&
-      gstcReadInFuncs(ATconcat(constructors,mappings),false))
+      gstcReadInFuncs(constructors,mappings,false))
   {
     gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
@@ -428,7 +428,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
   //XXX read-in from spec (not finished)
     if(gstcReadInSorts(sorts,false)
        && gstcReadInConstructors()
-       && gstcReadInFuncs(ATconcat(constructors,mappings),false)
+       && gstcReadInFuncs(constructors,mappings,false)
        && gstcReadInActs(action_labels)
       ){
     gsDebugMsg ("type checking of multiactions read-in phase finished\n");
@@ -497,7 +497,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
   //XXX read-in from spec (not finished)
   if(gstcReadInSorts(sorts,false)){
     if(gstcReadInConstructors()){
-       if(gstcReadInFuncs(ATconcat(constructors,mappings),false)){
+       if(gstcReadInFuncs(constructors,mappings,false)){
          if (action_labels != NULL)
          {
            if(!gstcReadInActs(action_labels))
@@ -556,7 +556,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
   //XXX read-in from LPS (not finished)
   if(gstcReadInSorts((ATermList) lps_sorts,false)){
     if(gstcReadInConstructors()){
-       if(gstcReadInFuncs(ATconcat(lps_constructors, lps_mappings),false)){
+       if(gstcReadInFuncs(lps_constructors, lps_mappings,false)){
          if(!gstcReadInActs(lps_action_labels))
            gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
          gsDebugMsg ("type checking of action rename specification read-in phase of LPS finished\n");
@@ -576,8 +576,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
          }
          gsDebugMsg ("type checking of action rename specification read-in phase of rename file constructors finished\n");
 
-         if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                                     ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+         if(!gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                             ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
            goto finally;
          }
          gsDebugMsg ("type checking of action rename specification read-in phase of rename file functions finished\n");
@@ -704,8 +704,8 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   }
   gsDebugMsg ("type checking of PBES specification read-in phase of constructors finished\n");
 
-  if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(data_spec,1),0),
-                               ATLgetArgument(ATAgetArgument(data_spec,2),0)))) {
+  if(!gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
+                      ATLgetArgument(ATAgetArgument(data_spec,2),0))) {
     goto finally;
   }
   gsDebugMsg ("type checking of PBES specification read-in phase of functions finished\n");
@@ -1240,29 +1240,56 @@ static ATbool gstcReadInConstructors(ATermList NewSorts){
   return ATtrue;
 } 
 
-static ATbool gstcReadInFuncs(ATermList Funcs, bool high_level){
+static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps, bool high_level){
   gsDebugMsg("Start Read-in Func\n");    
   ATbool Result=ATtrue;
-  for(;!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
+
+  unsigned constr_number=ATgetLength(Cons);
+  for(ATermList Funcs=ATconcat(Cons,Maps);!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
     ATermAppl Func=ATAgetFirst(Funcs);
     ATermAppl FuncName=ATAgetArgument(Func,0);
     ATermAppl FuncType=ATAgetArgument(Func,1);
     
     if(!gstcIsSortExprDeclared(FuncType,high_level)) { return ATfalse; }
-    //if FuncType is a defined function sort, unwind it
-    { ATermAppl NewFuncType;
-      if(gsIsSortId(FuncType) 
-	 && (NewFuncType=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(FuncType,0))) 
-	 && gsIsSortArrow(NewFuncType))
-	FuncType=NewFuncType;
-    }
+
+//if FuncType is a defined function sort, unwind it 
+//{ ATermAppl NewFuncType;
+//  if(gsIsSortId(FuncType) 
+//	 && (NewFuncType=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(FuncType,0))) 
+//	 && gsIsSortArrow(NewFuncType))
+//	FuncType=NewFuncType;
+//  }
     
+    //if FuncType is a defined function sort, unwind it
+    if(gsIsSortId(FuncType)){
+      ATermAppl NewFuncType=gstcUnwindType(FuncType);
+      if(gsIsSortArrow(NewFuncType)) FuncType=NewFuncType;
+    }
+
     if((gsIsSortArrow(FuncType))){
       if(!gstcAddFunction(gsMakeOpId(FuncName,FuncType),"function",high_level)) { return ATfalse; }
     }
     else{
       if(!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant",high_level)) { gsErrorMsg("could not add constant\n"); return ATfalse; }
     }
+
+    if(constr_number){
+      constr_number--;
+
+      if(high_level){
+        //Here checks for the constructors
+        ATermAppl ConstructorType=FuncType;
+        if(gsIsSortArrow(ConstructorType)) ConstructorType=ATAgetArgument(ConstructorType,1);
+	ConstructorType=gstcUnwindType(ConstructorType);
+	if(!gsIsSortId(ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdBool(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdPos(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdNat(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdInt(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdReal(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+      }
+    }
+
     gsDebugMsg("Read-in Func %T, Types %T\n",FuncName,FuncType);    
   }
   
