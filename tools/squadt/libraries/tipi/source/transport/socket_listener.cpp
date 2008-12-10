@@ -36,6 +36,12 @@ namespace transport {
 
       try {
         acceptor.open(endpoint.protocol());
+
+        if ((a.is_v4() && endpoint.address() == ip::address_v4::loopback()) ||
+            (a.is_v6() && endpoint.address() == ip::address_v6::loopback())) {
+          acceptor.set_option(socket_base::do_not_route(true));
+        }
+
         acceptor.set_option(socket_base::reuse_address(true));
         acceptor.bind(endpoint);
         acceptor.listen();
