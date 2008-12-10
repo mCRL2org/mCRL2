@@ -5,6 +5,7 @@ project libraries/core/test
       <use>/libraries//atermpp
       <use>/libraries//core
       <use>/site-config//boost
+      <toolset>msvc:<asynch-exceptions>on
       <library>/libraries//core
    ;
 

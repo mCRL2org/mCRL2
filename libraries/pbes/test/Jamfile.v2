@@ -1,6 +1,7 @@
 project libraries/pbes/test
    : requirements
        <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lps
        <source>/libraries//pbes
        <source>/site-config//boost_program_options

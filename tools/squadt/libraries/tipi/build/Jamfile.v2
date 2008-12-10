@@ -4,6 +4,7 @@ project squadt/libraries/tipi
     : requirements
        <use>/site-config//boost
        <include>../include
+       <toolset>msvc:<asynch-exceptions>on
        <c++-template-depth>512
        <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
     : usage-requirements

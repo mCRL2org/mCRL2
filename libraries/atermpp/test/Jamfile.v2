@@ -2,8 +2,9 @@ import testing ;
 
 project libraries/aterm/test
    : requirements
-       <dependency>/site-config//boost
-       <dependency>/libraries//atermpp
+       <use>/site-config//boost
+       <use>/libraries//atermpp
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//aterm
    ;
 

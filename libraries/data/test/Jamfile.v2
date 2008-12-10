@@ -1,6 +1,7 @@
 project libraries/data/test
    : requirements
        <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//data
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
