@@ -365,7 +365,7 @@ bool isValidRewriteRule(ATermAppl DataEqn)
   {
     CheckRewriteRule(DataEqn);
     return true;
-  } catch ( runtime_error &e )
+  } catch ( runtime_error& )
   {
     return false;
   }

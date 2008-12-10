@@ -108,7 +108,7 @@ int main(int argc, char** argv)
       //TODO replace by a more sophisticated check
       p.normalize();
     }
-    catch (std::exception& e) {
+    catch (std::exception&) {
       throw mcrl2::runtime_error("PBES is not monotonic");
     }
     //store the result

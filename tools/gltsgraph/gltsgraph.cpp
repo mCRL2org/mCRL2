@@ -187,20 +187,19 @@ IMPLEMENT_APP_NO_MAIN(GLTSGraph)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
 
-  int local_var;
-  MCRL2_ATERM_INIT(local_var, lpCmdLine)
+  MCRL2_ATERM_INIT(0, lpCmdLine)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   using namespace mcrl2::utilities::squadt;
 
   if(!interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
 #endif
-      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+      return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     }
 

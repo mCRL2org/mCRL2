@@ -1,7 +1,7 @@
 #include "utils.h"
 #include <math.h>
 
-namespace Utils 
+namespace Utils
 {
 
 Utils::Vect operator+(Vect v1, Vect v2)
@@ -32,7 +32,7 @@ Utils::Vect operator/(Vect v, double s)
 
 float vecLength(Vect v)
 {
-  return sqrt(v.x * v.x + v.y * v.y);
+  return static_cast< float >(sqrt(v.x * v.x + v.y * v.y));
 }
 
 float angDiff(Vect v1, Vect v2)
@@ -45,7 +45,7 @@ float angDiff(Vect v1, Vect v2)
 }
 
 float signum(float v)
-{ 
+{
   if (v < 0)
   {
     return -1.0f;

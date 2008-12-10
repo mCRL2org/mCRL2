@@ -7,13 +7,13 @@ rule import_user_config {
   # For C/C++ programs
   toolset.using msvc ;
 
-  toolset.using stlport : 5.1.6 : "C:/Program Files/STLport/stlport"
+  toolset.using stlport : 5.2.1 : "C:/Program Files/STLport/stlport"
                                   "C:/Program Files/STLport/bin"
                                   "C:/Program Files/STLport/lib" ;
 }
 
 # Build specific settings (default command line options to bjam)
-BUILD_OPTIONS  = pch=off embed-manifest=on link=static --prefix=c:/mcrl2 ;
+BUILD_OPTIONS  = pch=off link=static --prefix=c:/mcrl2 ;
 
 # Library specific variables
 WX_PREFIX          = "C:/wxMSW-2.8.9" ;
