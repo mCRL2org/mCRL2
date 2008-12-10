@@ -1,6 +1,7 @@
 project libraries/tipi/test
     : requirements
        <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <use>/libraries/tipi//tool
     ;
 

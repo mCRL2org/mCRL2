@@ -81,7 +81,7 @@ namespace squadt {
           input_objects->InsertColumn(0, wxT("Name"));
           input_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
           input_objects->InsertColumn(2, wxT("Date"));
-        
+
           long row = 0;
 
           boost::iterator_range < squadt::processor::input_object_iterator > input_range(target_processor->get_input_iterators()); 
@@ -89,26 +89,26 @@ namespace squadt {
           BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > i, input_range) {
             if (i.get() != 0) {
               path path_to_file(i->get_location());
-              
+
               input_objects->InsertItem(row, wxString(path_to_file.leaf().c_str(), wxConvLocal));
 
               if (exists(path_to_file)) {
                 unsigned long size       = file_size(path_to_file);
                 wxDateTime    write_time(last_write_time(path_to_file));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
-        
+
                 size = (unsigned long) (size / pow(1024, magnitude));
-        
+
                 input_objects->SetItem(row, 1, wxString(str((size_format % size %
                            prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
-        
+
                 input_objects->SetItem(row, 2, write_time.Format(wxT("%x %X")));
               }
-        
+
               ++row;
             }
           }
-        
+
           input_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
           input_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
           input_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
@@ -122,34 +122,34 @@ namespace squadt {
           output_objects->InsertColumn(0, wxT("Name"));
           output_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
           output_objects->InsertColumn(2, wxT("Date"));
-         
+
           long row = 0;
-         
+
           boost::iterator_range < squadt::processor::output_object_iterator > output_range(target_processor->get_output_iterators()); 
 
           BOOST_FOREACH(boost::shared_ptr < squadt::processor::object_descriptor > o, output_range) {
             if (o.get() != 0) {
               path path_to_file(o->get_location());
-              
+
               output_objects->InsertItem(row, wxString(path_to_file.leaf().c_str(), wxConvLocal));
-         
+
               if (exists(path_to_file)) {
                 unsigned long size       = file_size(path_to_file);
                 wxDateTime    write_time(last_write_time(path_to_file));
                 unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
-         
+
                 size = (unsigned long) (size / pow(1024, magnitude));
-         
+
                 output_objects->SetItem(row, 1, wxString(str((size_format % size %
                           prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
-         
+
                 output_objects->SetItem(row, 2, write_time.Format(wxT("%x %X")));
               }
-         
+
               ++row;
             }
           }
-         
+
           output_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
           output_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
           output_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
@@ -255,21 +255,21 @@ namespace squadt {
         BOOST_FOREACH(type_registry::tool_sequence::value_type i, range) {
           wxString     current_category_name = wxString(i.first.get_name().c_str(), wxConvLocal);
           wxTreeItemId root                  = tool_selector->GetRootItem();
-         
+
           /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */
           if (tool_selector->GetLastChild(root).IsOk()) {
             wxTreeItemId last_category = tool_selector->GetLastChild(root);
-           
+
             if (tool_selector->GetItemText(last_category) != current_category_name) {
               /* Add category */
               last_category = tool_selector->AppendItem(root, current_category_name);
             }
-           
+
             tool_selector->AppendItem(last_category, wxString(i.second->get_name().c_str(), wxConvLocal));
           }
           else {
             wxTreeItemId last_category = tool_selector->AppendItem(root, current_category_name);
-         
+
             tool_selector->AppendItem(last_category, wxString(i.second->get_name().c_str(), wxConvLocal));
           }
         }
