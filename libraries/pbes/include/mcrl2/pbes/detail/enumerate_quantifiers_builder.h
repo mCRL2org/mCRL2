@@ -17,6 +17,7 @@
 #include <utility>
 #include <deque>
 #include <sstream>
+#include <vector>
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
@@ -25,15 +26,30 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/core/sequence.h"
 #include "mcrl2/core/detail/join.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/find.h"
-#include "gc.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
 namespace detail {
+
+  /// Returns the subset with variables of finite sort.
+  /// TODO: this should be done more efficiently, by avoiding aterm lists
+  data::data_variable_list finite_variables(data::data_variable_list variables, data::data_specification& data)
+  {
+    std::vector<data::data_variable> result;
+    for (data::data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+    {
+      if (data.is_finite(i->sort()))
+      {
+        result.push_back(*i);
+      }
+    }
+    return data::data_variable_list(result.begin(), result.end());
+  }
 
   template <typename Container>
   std::string print_term_container(const Container& c)
@@ -414,11 +430,14 @@ namespace detail {
     typedef core::term_traits<Term> tr;
 
     DataEnumerator& m_data_enumerator;
+
+    /// If true, quantifier variables of infinite sort are enumerated.
+    bool m_enumerate_infinite_sorts;
     
     /// Constructor.
     ///
-    enumerate_quantifiers_builder(DataRewriter& r, DataEnumerator& enumerator)
-      : super(r), m_data_enumerator(enumerator)
+    enumerate_quantifiers_builder(DataRewriter& r, DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
+      : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
     { }
 
 
@@ -426,18 +445,28 @@ namespace detail {
     ///
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      term_type result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).
-        enumerate_universal_quantification(variables, phi, sigma);
-      return result;
+      if (m_enumerate_infinite_sorts)
+      {
+        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(variables, phi, sigma);
+      }
+      else
+      {
+        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite_variables(variables, m_data_enumerator.data()), phi, sigma);
+      }
     }
 
     /// Visit exists node.
     ///
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      term_type result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).
-        enumerate_existential_quantification(variables, phi, sigma);
-      return result;
+      if (m_enumerate_infinite_sorts)
+      {
+        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(variables, phi, sigma);
+      }
+      else
+      {
+        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite_variables(variables, m_data_enumerator.data()), phi, sigma);
+      }
     }
   };
 

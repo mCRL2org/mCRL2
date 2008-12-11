@@ -68,13 +68,19 @@ class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
           data::number_postfix_generator generator("UNIQUE_PREFIX");
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
-          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);
+          bool enumerate_infinite_sorts = true;
+          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
         case quantifier_finite:
         {
-          std::cerr << "The quantifier_finite option has not been implemented yet!" << std::endl;
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
+          bool enumerate_infinite_sorts = false;
+          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          pbesrewr(p, pbesr);
           break;
         }
       }

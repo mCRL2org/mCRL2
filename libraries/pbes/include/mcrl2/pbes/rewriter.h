@@ -105,6 +105,9 @@ namespace pbes_system {
       /// \brief A data enumerator
       DataEnumerator m_enumerator;
 
+      /// If true, quantifier variables of infinite sort are enumerated.
+      bool m_enumerate_infinite_sorts;
+
     public:
       /// \brief The term type
       typedef typename core::term_traits<Term>::term_type term_type;
@@ -118,8 +121,9 @@ namespace pbes_system {
       /// \brief Constructor
       /// \param r A data rewriter
       /// \param e A data enumerator
-      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
-        : m_rewriter(r), m_enumerator(e)
+      /// \param enumerate_infinite_sorts Determines if quantifier variables of infinte sorts are enumerated
+      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true)
+        : m_rewriter(r), m_enumerator(e), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
       {}
 
       /// \brief Rewrites a pbes expression.
@@ -129,7 +133,7 @@ namespace pbes_system {
       {
         typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
         substitution_map sigma;
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator);
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
@@ -144,7 +148,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
       {
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator);
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
@@ -174,8 +178,8 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       /// \brief Constructor
       /// \param r A data rewriter
       /// \param e A data enumerator
-      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e)
-        : m_rewriter(r, e)
+      enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true)
+        : m_rewriter(r, e, enumerate_infinite_sorts)
       {}
 
       /// \brief Rewrites a pbes expression.

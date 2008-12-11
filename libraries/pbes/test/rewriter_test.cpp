@@ -80,7 +80,7 @@ const std::string VARIABLE_SPECIFICATION =
   "  X;            \n"
   "  Y: Nat;       \n"
   "  W: Bool;      \n"
-  "  Z: Bool, Pos; \n"
+  "  Z: Bool, Nat; \n"
   ;
 
 inline
@@ -229,6 +229,19 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
+}
+
+void test_enumerate_quantifiers_rewriter_finite()
+{
+  std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
+
+  data::data_specification data_spec = default_data_specification();
+  data::rewriter datar(data_spec);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::rewriter_with_variables datarv(data_spec);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae, false);
+  test_expressions(R, "forall n:Nat, b:Bool.Z(b,n)", "Z(false,n) && Z(true,n)");
 }
 
 void test_substitutions1()
@@ -421,6 +434,7 @@ int test_main(int argc, char* argv[])
 
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
+  test_enumerate_quantifiers_rewriter_finite();
   test_substitutions1();
   test_substitutions2();
   test_substitutions3();

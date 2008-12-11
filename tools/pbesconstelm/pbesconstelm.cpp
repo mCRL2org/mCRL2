@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/filter_tool_with_rewriter.h"
+#include "mcrl2/utilities/filter_tool_with_pbes_rewriter.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -28,10 +28,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
-typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
-typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
-
-class pbes_constelm_tool: public utilities::filter_tool_with_rewriter
+class pbes_constelm_tool: public utilities::filter_tool_with_pbes_rewriter
 {
   protected:
     bool m_compute_conditions;
@@ -48,7 +45,7 @@ class pbes_constelm_tool: public utilities::filter_tool_with_rewriter
 
   public:
     pbes_constelm_tool()
-      : filter_tool_with_rewriter(
+      : filter_tool_with_pbes_rewriter(
           "pbesconstelm",
           "Wieger Wesselink",
           "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "
@@ -72,19 +69,35 @@ class pbes_constelm_tool: public utilities::filter_tool_with_rewriter
       
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());
-      
-      // name generator
-      std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-      data::number_postfix_generator name_generator(prefix);
-      
+
       // pbes rewriter
-      my_pbes_rewriter pbesr(datar);    
-      
-      // constelm algorithm
-      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-      
-      // run the algorithm
-      algorithm.run(p, name_generator, m_compute_conditions);
+      switch (rewriter_type())
+      {
+        case simplify:
+        {
+          typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
+          my_pbes_rewriter pbesr(datar);    
+          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          algorithm.run(p, name_generator, m_compute_conditions);
+          break;
+        }
+        case quantifier_all:
+        case quantifier_finite:
+        {
+          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+          bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
+          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, name_generator);
+          data::rewriter_with_variables datarv(datar);
+          my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
+          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          algorithm.run(p, name_generator, m_compute_conditions);
+          break;
+        }
+        default:
+        { }
+      }     
       
       // save the result
       p.save(m_output_filename);

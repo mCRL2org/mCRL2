@@ -42,6 +42,7 @@ namespace utilities {
       case quantifier_finite : return "  'quantifier-finite' for eliminating finite quantifier variables";
       case prover            : return "  'prover' for rewriting using a prover";
     }
+    return "  unknown pbes rewriter";
   }
 
   /// \brief Returns the string corresponding to a pbes rewriter type
