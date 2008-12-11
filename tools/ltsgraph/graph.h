@@ -37,7 +37,7 @@ class Graph
     // Setters
     void setInitialState(State* i);
     void setInfo(int is, int ns, int nt, int nl);
-    
+    void setParameters(std::vector<std::string>& params);
     // Getters
     State* getInitialState() const;
     State* getState(size_t i) const;
@@ -46,10 +46,11 @@ class Graph
     int getNumTrans() const;
     int getNumLabels() const;
     
-
-
+    
+  
   private:
     std::vector<State*> states;
+    std::vector<std::string> parameters;
     State* initialState;
 
     int initial;

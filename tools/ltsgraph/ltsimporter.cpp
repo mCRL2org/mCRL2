@@ -23,16 +23,27 @@ Graph* LTSImporter::importFile(std::string fn)
   if(fileLTS.read_from(fn))
   {
     unsigned int initialState = fileLTS.initial_state(); 
-   
-    std::map<unsigned int, State*> numsToStates;
     
+    std::map<unsigned int, State*> numsToStates;
+    bool hasParams = fileLTS.has_state_parameters();
+    std::vector<std::string> parameters;
+    if(hasParams) {
+      for(size_t i = 0; i < fileLTS.num_state_parameters(); ++i) {
+        parameters.push_back(fileLTS.state_parameter_name_str(i));
+      }
+      result->setParameters(parameters);
+    }
+  
+
     for(state_iterator si = fileLTS.get_states(); si.more(); ++si)
     {
+      std::map<std::string, std::string> stateValues;
+
       unsigned int stNum = *si;
       State* s = new State(stNum,
                         stNum == initialState);
       result->addState(s);
-
+      
       std::pair<unsigned int, State*> pNumToState(stNum, s);
       numsToStates.insert(pNumToState);
 
@@ -41,6 +52,16 @@ Graph* LTSImporter::importFile(std::string fn)
         result->setInitialState(s);
       }
       
+      if(hasParams) {
+        for(size_t i = 0; i < parameters.size(); ++i) {
+          std::pair<std::string, std::string> stateValue(
+              parameters[i], 
+              fileLTS.get_state_parameter_value_str(stNum, i));
+          stateValues.insert(stateValue);
+        }
+        s->setParameters(stateValues);
+      }
+
       // Generate a random position (x, y) for this state
       int x = static_cast<int> (
                 (rand() / static_cast<float>(RAND_MAX) - .5) * 2000

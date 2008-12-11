@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "utils.h"
 #include <wx/colour.h>
 #include <wx/gdicmn.h>
@@ -68,25 +69,10 @@ class State
     void setPosition(Utils::Vect p);
     void setX(const double x);
     void setY(const double y);
+    void setParameters(std::map<std::string, std::string>& params);
 
     void setColour(const wxColour colour);
 
-    Utils::Vect getImpulse() const;
-    int getImpulseX() const;
-    int getImpulseY() const;
-
-    float getSkew() const;
-    
-    void setImpulse(const Utils::Vect p);
-    void setImpulseX(const int x);
-    void setImpulseY(const int y);
-
-    void setSkew(const float s);
-    void setTemperature(const float t);
-
-
-    float getTemperature() const;
-   
     void setLabel(std::string label);
 
     bool hasTransitionTo(State* to);
@@ -101,15 +87,12 @@ class State
 
     unsigned int value;
     Utils::Vect pos;  // Current position, Y
-    Utils::Vect p; // X factor of previous movement
-    float t;  // Local temperature
-    float d;  // Skew gauge
     std::string label;
 
     std::vector<Transition*> outTransitions;
     std::vector<Transition*> inTransitions;
     std::vector<Transition*> selfLoops;
-
+    std::map<std::string, std::string> parameterValues;
 
 };
 

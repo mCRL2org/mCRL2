@@ -25,10 +25,6 @@ State::State(unsigned int _value, bool _isInitialState)
   pos.x = 0;
   pos.y = 0;
 
-  p.x = 0;
-  p.y = 0;
-  t  = 10;  // TODO: Determine this
-  d  = 0;
   colour = *wxWHITE;
 }
 
@@ -65,6 +61,10 @@ void State::addInTransition(Transition* it)
 void State::addSelfLoop(Transition* sl)
 {
   selfLoops.push_back(sl);
+}
+
+void State::setParameters(std::map<std::string, std::string>& params) {
+  parameterValues = params;
 }
 
 void State::setColour(const wxColour colour) {
@@ -168,57 +168,6 @@ size_t State::getNumberOfSelfLoops() const
 {
   return selfLoops.size();
 }
-
-float State::getTemperature() const
-{
-  return t;
-}
-
-Utils::Vect State::getImpulse() const
-{
-  return p;
-}
-
-int State::getImpulseX() const
-{
-  return p.x;
-}
-
-int State::getImpulseY() const
-{
-  return p.y;
-}
-
-float State::getSkew() const
-{
-  return d;
-}
-
-void State::setSkew(const float skew)
-{
-  d = skew;
-}
-
-void State::setTemperature(const float temp)
-{
-  t = temp;
-}
-
-void State::setImpulse(const Utils::Vect v)
-{
-  p = v;
-}
-
-void State::setImpulseX(const int x)
-{
-  p.x = x;
-}
-
-void State::setImpulseY(const int y)
-{
-  p.y = y;
-}
-
 
 size_t State::getValue() const
 {

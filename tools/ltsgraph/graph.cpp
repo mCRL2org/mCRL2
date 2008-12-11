@@ -10,7 +10,6 @@
 /// \brief Implementation of graph class
 
 #include "graph.h"
-
 Graph::Graph()
 {
   initialState = NULL;
@@ -76,6 +75,9 @@ void Graph::colourState(size_t s, wxColour colour) {
 }
 
 
+void Graph::setParameters(std::vector<std::string>& params) {
+  parameters = params;
+}
 
 void Graph::setInfo(int is, int ns, int nt, int nl)
 {
