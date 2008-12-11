@@ -113,7 +113,7 @@ void parse_command_line(int argc, wxChar** argv)
 bool LTSGraph::OnInit()
 {
   colouring = false;
-  brushColour = *wxBLACK;
+  brushColour = *wxRED;
   selectedState = NULL;
   selectedTransition = NULL;
   selectedLabel = NULL;

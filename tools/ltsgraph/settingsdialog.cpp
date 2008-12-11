@@ -20,7 +20,6 @@ BEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
   EVT_SPINCTRL(myID_RADIUS_SPIN, SettingsDialog::onRadius)
   EVT_CHECKBOX(myID_CURVES_CHECK, SettingsDialog::onCurves)
   EVT_COLOURPICKER_CHANGED(myID_COLOUR, SettingsDialog::onColour)
-  EVT_RADIOBOX(myID_TOOL_SELECT, SettingsDialog::onTool)
 END_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
@@ -51,17 +50,13 @@ SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
 
   wxString choices[2] = {wxT("Selection"), wxT("State colouring")};
 
-  wxRadioBox* toolSelect = new wxRadioBox(this, myID_TOOL_SELECT,
-    wxT("Tool"), wxDefaultPosition, wxDefaultSize, 2, 
-    choices );
-  
-  sizer->Add(toolSelect, wxEXPAND|wxALL);
   
   wxFlexGridSizer* colourSizer = new wxFlexGridSizer(0, 2, 0, 0);
   colourSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Brush colour")), 0, 
               lflags, 4);
   
-  wxColourPickerCtrl* colourControl = new wxColourPickerCtrl(this, myID_COLOUR);
+  wxColourPickerCtrl* colourControl = new wxColourPickerCtrl(this, myID_COLOUR,
+  *wxRED);
   colourSizer->Add(colourControl, 0, rflags, 3);
   
   sizer->Add(colourSizer);
@@ -88,9 +83,4 @@ void SettingsDialog::onCurves(wxCommandEvent& evt)
 void SettingsDialog::onColour(wxColourPickerEvent& evt)
 {
   app->setBrushColour(evt.GetColour());
-}
-
-void SettingsDialog::onTool(wxCommandEvent &evt)
-{
-  app->setTool(evt.GetInt() == 1);
 }

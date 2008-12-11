@@ -27,7 +27,6 @@ class SettingsDialog: public wxDialog {
     void onRadius(wxSpinEvent& evt);
     void onCurves(wxCommandEvent& evt);
     void onColour(wxColourPickerEvent& evt);
-    void onTool(wxCommandEvent& evt);
   
   DECLARE_EVENT_TABLE()
 };

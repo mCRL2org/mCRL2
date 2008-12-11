@@ -68,6 +68,8 @@ class MainFrame : public wxFrame
     void onExport(wxCommandEvent& event);
     void onAbout(wxCommandEvent& event);
     void onImport(wxCommandEvent& event);
+    void onSelect(wxCommandEvent& event);
+    void onColour(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()
 };

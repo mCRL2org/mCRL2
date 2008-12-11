@@ -41,6 +41,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_ABOUT, MainFrame::onAbout)
+  EVT_MENU(myID_TOOL_SELECT, MainFrame::onSelect)
+  EVT_MENU(myID_COLOUR, MainFrame::onColour)
 END_EVENT_TABLE()
 
 
@@ -79,6 +81,11 @@ void MainFrame::setupMenuBar()
 
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
+  toolsMenu->AppendRadioItem(
+    myID_TOOL_SELECT,wxT("&Select\tS"),wxT("Select tool"));
+  toolsMenu->AppendRadioItem(myID_COLOUR,
+    wxT("&Colour\tC"),wxT("Colouring tool"));
+  toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
   toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."), 
@@ -139,6 +146,13 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
     app->openFile(stPath);
   }
+}
+void MainFrame::onSelect(wxCommandEvent& /*event*/) {
+  app->setTool(false);
+}
+
+void MainFrame::onColour(wxCommandEvent& /*event*/) {
+  app->setTool(true);
 }
 
 void MainFrame::onImport(wxCommandEvent& /*event*/)
