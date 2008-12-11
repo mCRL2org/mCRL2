@@ -21,7 +21,7 @@ END_EVENT_TABLE()
 SpringLayout::SpringLayout(GLTSGraph* owner)
 {
   app = owner;
-  edgeStiffness = 1;
+  edgeStiffness = 3;
   nodeStrength = 100000;
   naturalLength = 20;
   stopOpti = true;
@@ -39,17 +39,17 @@ void SpringLayout::setupPane(wxPanel* pane)
                                         pane, myID_NS_SLIDER, 
                                         nodeStrength,10000, 1000000, 
                                         wxDefaultPosition, wxDefaultSize, 
-                                        wxSL_HORIZONTAL | wxSL_LABELS);
+                                        wxSL_HORIZONTAL);
   wxSlider* sliderEdgeStiffness = new wxSlider(
                                         pane, myID_ES_SLIDER,
                                         edgeStiffness, 0, 15, 
                                         wxDefaultPosition, wxDefaultSize,
-                                        wxSL_HORIZONTAL | wxSL_LABELS);
+                                        wxSL_HORIZONTAL);
   wxSlider* sliderNaturalLength = new wxSlider(
                                         pane, myID_NL_SLIDER,
                                         naturalLength, 1, 500, 
                                         wxDefaultPosition, wxDefaultSize,
-                                        wxSL_HORIZONTAL|wxSL_LABELS);
+                                        wxSL_HORIZONTAL);
 
   optimizeBtn = new wxButton(pane, myID_START_OPTI, wxT("Start"));
   stopBtn = new wxButton(pane, myID_STOP_OPTI, wxT("Stop")); 
