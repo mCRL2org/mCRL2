@@ -23,8 +23,12 @@ feature bundle : no yes : incidental ;
 
 ## The MacOSX versions we can target.
 .macosx-versions =
-    10.5 10.4 10.3 10.2 10.1
-    iphone-2.0 iphone-1.x iphonesim-2.0
+    10.6 10.5 10.4 10.3 10.2 10.1
+    iphone-2.3 iphonesim-2.3
+    iphone-2.2 iphonesim-2.2
+    iphone-2.1 iphonesim-2.1
+    iphone-2.0 iphonesim-2.0
+    iphone-1.x
     ;
 
 ## The MacOSX version to compile for, which maps to the SDK to use (sysroot).
@@ -299,12 +303,15 @@ local rule arch-addr-flags ( toolset variable
 
 arch-addr-flags darwin OPTIONS : combined : 32 : -arch i386 -arch ppc : default ;
 arch-addr-flags darwin OPTIONS : combined : 64 : -arch x86_64 -arch ppc64 ;
+arch-addr-flags darwin OPTIONS : combined : 32_64 : -arch i386 -arch ppc -arch x86_64 -arch ppc64 ;
 
 arch-addr-flags darwin OPTIONS : x86 : 32 : -arch i386 : default ;
 arch-addr-flags darwin OPTIONS : x86 : 64 : -arch x86_64 ;
+arch-addr-flags darwin OPTIONS : x86 : 32_64 : -arch i386 -arch x86_64 ;
 
 arch-addr-flags darwin OPTIONS : power : 32 : -arch ppc : default ;
 arch-addr-flags darwin OPTIONS : power : 64 : -arch ppc64 ;
+arch-addr-flags darwin OPTIONS : power : 32_64 : -arch ppc -arch ppc64 ;
 
 arch-addr-flags darwin OPTIONS : arm : 32 : -arch arm : default ;
 
