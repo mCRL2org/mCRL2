@@ -78,6 +78,13 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
+      basic_rewriter(boost::shared_ptr<Rewriter>& r)
+      	: m_rewriter(r)
+      { }
+
+      /// \brief Constructor.
+      /// \param d A data specification.
+      /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
@@ -109,6 +116,8 @@ namespace data {
   /// \brief Rewriter that operates on data expressions.
   class rewriter: public basic_rewriter<data_expression>
   {
+    friend class rewriter_with_variables;
+
     public:
       /// \brief Constructor.
       /// \param d A data specification.
@@ -153,8 +162,8 @@ namespace data {
       /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
       /// \param r A data rewriter.
       rewriter_with_variables(rewriter r)
-        : basic_rewriter<data_expression_with_variables>(r.get_rewriter())
-      { }
+        : basic_rewriter<data_expression_with_variables>(r.m_rewriter)
+      {}
 
 		  /// \brief Rewrites a data expression.
 		  /// \param d The term to be rewritten.

@@ -52,8 +52,8 @@ namespace utilities {
   pbes_rewriter_type parse_pbes_rewriter_type(std::string type)
   {
     if (type == "simplify"         ) { return simplify         ; }
-    if (type == "quantifier_all"   ) { return quantifier_all   ; }
-    if (type == "quantifier_finite") { return quantifier_finite; }
+    if (type == "quantifier-all"   ) { return quantifier_all   ; }
+    if (type == "quantifier-finite") { return quantifier_finite; }
     if (type == "prover"           ) { return prover           ; }
     throw std::runtime_error("Error: unknown pbes rewriter option " + type);
   }

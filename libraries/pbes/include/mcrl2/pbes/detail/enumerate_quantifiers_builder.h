@@ -451,7 +451,15 @@ namespace detail {
       }
       else
       {
-        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite_variables(variables, m_data_enumerator.data()), phi, sigma);
+        data::data_variable_list fvars = finite_variables(variables, m_data_enumerator.data());
+        if (fvars.empty())
+        {
+          return x;
+        }
+        else
+        {
+          return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(fvars, phi, sigma);
+        }
       }
     }
 
@@ -465,7 +473,15 @@ namespace detail {
       }
       else
       {
-        return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite_variables(variables, m_data_enumerator.data()), phi, sigma);
+        data::data_variable_list fvars = finite_variables(variables, m_data_enumerator.data());
+        if (fvars.empty())
+        {
+          return x;
+        }
+        else
+        {
+          return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(fvars, phi, sigma);
+        }
       }
     }
   };
