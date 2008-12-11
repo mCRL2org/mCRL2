@@ -100,26 +100,27 @@ void SpringLayout::setupPane(wxPanel* pane)
 void SpringLayout::onStart(wxCommandEvent& /* event */)
 {
   Graph* g = app->getGraph();
-  optimizeBtn->Enable(false);
-  stopBtn->Enable(true);
-  stopOpti = false;
-  stopped = false;
+  if (g) {
+    optimizeBtn->Enable(false);
+    stopBtn->Enable(true);
+    stopOpti = false;
+    stopped = false;
 
-  while(!stopOpti)
-  {
-    layoutGraph(g);
-
-    if(app)
+    while(!stopOpti)
     {
-      app->display(); 
+      layoutGraph(g);
+
+      if(app)
+      {
+        app->display(); 
+      }
+
+      wxYield();
     }
-
-    wxYield();
+    
+    stopped = true;
+    
   }
-  
-  stopped = true;
-  
-
 }
 
 
