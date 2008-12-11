@@ -26,6 +26,8 @@ class SettingsDialog: public wxDialog {
     LTSGraph* app;
     void onRadius(wxSpinEvent& evt);
     void onCurves(wxCommandEvent& evt);
+    void onTransLabels(wxCommandEvent& evt);
+    void onStateLabels(wxCommandEvent& evt);
     void onColour(wxColourPickerEvent& evt);
   
   DECLARE_EVENT_TABLE()

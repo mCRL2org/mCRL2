@@ -32,6 +32,8 @@ namespace IDS
     myID_STOP_OPTI,
     myID_RADIUS_SPIN,
     myID_CURVES_CHECK,
+    myID_TRANS_CHECK,
+    myID_STATE_CHECK,
     myID_COLOUR,
     myID_TOOL_SELECT
   };

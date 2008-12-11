@@ -36,7 +36,8 @@ class Visualizer
     void setPixelSize(double size);
     void setRadius(int radius);
     void setCurves(bool value);
-
+    void setTransLabels(bool value);
+    void setStateLabels(bool value);
     // Getters
     int getRadius() const;
   private:
@@ -46,6 +47,8 @@ class Visualizer
     double height; // Canvas height
     int radius;
     bool showHandles;
+    bool showTransLabels;
+    bool showStateLabels;
 
 
     void drawStates(bool inSelectMode);

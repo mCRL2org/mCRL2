@@ -19,6 +19,8 @@ using namespace IDS;
 BEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
   EVT_SPINCTRL(myID_RADIUS_SPIN, SettingsDialog::onRadius)
   EVT_CHECKBOX(myID_CURVES_CHECK, SettingsDialog::onCurves)
+  EVT_CHECKBOX(myID_TRANS_CHECK, SettingsDialog::onTransLabels)
+  EVT_CHECKBOX(myID_STATE_CHECK, SettingsDialog::onStateLabels)
   EVT_COLOURPICKER_CHANGED(myID_COLOUR, SettingsDialog::onColour)
 END_EVENT_TABLE()
 
@@ -48,7 +50,6 @@ SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
   
   sizer->Add(radiusSizer, wxEXPAND|wxALL);
 
-  wxString choices[2] = {wxT("Selection"), wxT("State colouring")};
 
   
   wxFlexGridSizer* colourSizer = new wxFlexGridSizer(0, 2, 0, 0);
@@ -60,6 +61,16 @@ SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
   colourSizer->Add(colourControl, 0, rflags, 3);
   
   sizer->Add(colourSizer);
+  wxCheckBox* showTransLabels = new wxCheckBox(this, myID_TRANS_CHECK, 
+    wxT("Show transition labels"));
+  showTransLabels->SetValue(true);
+  wxCheckBox* showStateLabels = new wxCheckBox(this, myID_STATE_CHECK,
+    wxT("Show state labels"));
+  showStateLabels->SetValue(true);
+  
+  sizer->Add(showTransLabels);
+  sizer->Add(showStateLabels);
+
   wxCheckBox* allowCurves = new wxCheckBox(this, myID_CURVES_CHECK, 
     wxT("Edit transition curves"));
   
@@ -78,6 +89,14 @@ void SettingsDialog::onRadius(wxSpinEvent& evt)
 void SettingsDialog::onCurves(wxCommandEvent& evt)
 {
   app->setCurves(evt.IsChecked());
+}
+
+void SettingsDialog::onTransLabels(wxCommandEvent& evt) {
+  app->setTransLabels(evt.IsChecked());
+}
+
+void SettingsDialog::onStateLabels(wxCommandEvent& evt) {
+  app->setStateLabels(evt.IsChecked());
 }
 
 void SettingsDialog::onColour(wxColourPickerEvent& evt)

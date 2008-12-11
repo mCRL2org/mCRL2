@@ -433,6 +433,16 @@ int LTSGraph::getRadius() const {
   return visualizer->getRadius();
 }
 
+void LTSGraph::setTransLabels(bool value) {
+  visualizer->setTransLabels(value);
+  display();
+}
+
+void LTSGraph::setStateLabels(bool value) {
+  visualizer->setStateLabels(value);
+  display();
+}
+
 void LTSGraph::setCurves(bool value)
 {
   visualizer->setCurves(value);

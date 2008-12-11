@@ -24,6 +24,8 @@ Visualizer::Visualizer(LTSGraph* app)
   pixelSize = 1;
   radius = 10;
   showHandles = false;
+  showTransLabels = true;
+  showStateLabels = true;
   fr = NULL;
 }
 
@@ -175,9 +177,11 @@ void Visualizer::drawState(State* s)
   // Draw label
   std::stringstream labelstr;
   labelstr << s->getValue();
-  
-  fr->draw_text(labelstr.str(), x, y, (rad - 2 * pixelSize) / 24.0f,  
+ 
+  if(showStateLabels) {
+    fr->draw_text(labelstr.str(), x, y, (rad - 2 * pixelSize) / 24.0f,  
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+  }
   
   glPopName();
   glPopName();
@@ -336,10 +340,12 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   {
     glColor3ub(0, 0, 0);
   }
-    
-  fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
+  
+  if(showTransLabels) {
+    fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+  }
   
   glColor3ub(0, 0, 0); 
 
@@ -507,9 +513,11 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
     glPopName();
   } 
   // Draw label.
-  fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
+  if(showTransLabels) {
+    fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+  }
  
 
   glColor3ub(0, 0, 0); 
@@ -553,4 +561,12 @@ int Visualizer::getRadius() const {
 void Visualizer::setCurves(bool value)
 {
   showHandles = value;
+}
+
+void Visualizer::setTransLabels(bool value) {
+  showTransLabels = value;
+}
+
+void Visualizer::setStateLabels(bool value) {
+  showStateLabels = value;
 }

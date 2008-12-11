@@ -69,6 +69,8 @@ class LTSGraph : public wxApp
     // Setters
     void setLTSInfo(int is, int ns, int nt, int nl);
     void setRadius(int radius);
+    void setTransLabels(bool value);
+    void setStateLabels(bool value);
     void setCurves(bool value);
     void setBrushColour(wxColour colour);
     void setTool(bool isColour);
