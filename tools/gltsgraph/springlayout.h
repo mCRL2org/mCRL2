@@ -1,13 +1,24 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file springlayout.h
+/// \brief Spring embedder algorithm declaration.
+
 #ifndef SPRING_LAYOUT_H
 #define SPRING_LAYOUT_H
 #include "layoutalgo.h"
-#include "gltsgraph.h"
+#include "ltsgraph.h"
 
 // This class defines the "spring layout" algorithm of the original LTSgraph
 class SpringLayout : public LayoutAlgorithm 
 {
   public:
-    SpringLayout(GLTSGraph* owner);
+    SpringLayout(LTSGraph* owner);
     void setupPane(wxPanel* pane);
     void stop();
 
@@ -23,7 +34,7 @@ class SpringLayout : public LayoutAlgorithm
     wxPanel* pane;
     wxButton* optimizeBtn;
     wxButton* stopBtn;
-    GLTSGraph* app;
+    LTSGraph* app;
 
     void layoutGraph(Graph* g);
 

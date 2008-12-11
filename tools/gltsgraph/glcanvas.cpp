@@ -1,3 +1,14 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file glcanvas.cpp
+/// \brief Implementation of OpenGL rendering canvas.
+
 #include "wx.hpp" // precompiled headers
 
 #include "glcanvas.h"
@@ -25,7 +36,7 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_MOTION(GLCanvas::onMouseMove)
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(GLTSGraph* app, wxWindow* parent,
+GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
                    const wxSize &size, int* attribList)
   : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER,
                wxEmptyString, attribList)

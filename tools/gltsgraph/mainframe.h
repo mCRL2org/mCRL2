@@ -1,3 +1,14 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mainframe.h
+/// \brief Main window declaration
+
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
@@ -5,9 +16,9 @@
 #include <wx/frame.h>
 
 #ifndef LTSGRAPH_H
-  #include "gltsgraph.h"
+  #include "ltsgraph.h"
 #else
-  class GLTSGraph; // Forward declaration
+  class LTSGraph; // Forward declaration
 #endif
 
 #ifndef GLCANVAS_H
@@ -33,13 +44,13 @@
 class MainFrame : public wxFrame
 {
   public:
-    MainFrame(GLTSGraph *owner);
+    MainFrame(LTSGraph *owner);
     GLCanvas* getGLCanvas(); 
     
     void setLTSInfo(int is, int ns, int nt, int nl);
 
   private:
-    GLTSGraph *app;
+    LTSGraph *app;
     GLCanvas *glCanvas;
     AlgoDialog *algoDlg;
     SettingsDialog *settingsDlg;

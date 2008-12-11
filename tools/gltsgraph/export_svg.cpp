@@ -1,8 +1,13 @@
-//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file ./export_svg.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file export_svg.cpp
+/// \brief Implementation of SVG exporter.
 
 #include "wx.hpp" // precompiled headers
 
@@ -12,11 +17,11 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include "gltsgraph.h"
+#include "ltsgraph.h"
 
 #include "workarounds.h" // for M_PI on Windows with MSVC
 
-ExporterSVG::ExporterSVG(Graph* g, GLTSGraph* app) : Exporter(g) {
+ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g) {
   owner = app;
 }
 

@@ -1,21 +1,26 @@
-//  Copyright 2007 Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file ./export_latex.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file export_latex.cpp
+/// \brief Implementation of LaTeX exporter.
 
 #include "wx.hpp" // precompiled headers
 
 #include "export_latex.h"
 #include <iostream>
-#include "gltsgraph.h"
+#include "ltsgraph.h"
 #include <boost/format.hpp>
 #include <cmath>
 #include <wx/textfile.h>
 
 #include <workarounds.h> // for M_PI
 
-ExporterLatex::ExporterLatex(Graph* g, GLTSGraph* owner) : Exporter(g)
+ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
 {
   this->owner = owner;
 };

@@ -1,3 +1,14 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file springlayout.cpp
+/// \brief Implementation of the "spring embedder" optimization algorithm.
+
 #include "wx.hpp" // precompiled headers
 
 #include "springlayout.h"
@@ -18,7 +29,7 @@ BEGIN_EVENT_TABLE(SpringLayout, wxEvtHandler)
 END_EVENT_TABLE()
 
 
-SpringLayout::SpringLayout(GLTSGraph* owner)
+SpringLayout::SpringLayout(LTSGraph* owner)
 {
   app = owner;
   edgeStiffness = 3;

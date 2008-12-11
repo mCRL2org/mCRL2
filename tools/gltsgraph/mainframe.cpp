@@ -1,3 +1,14 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mainframe.cpp
+/// \brief Main window implementation.
+
 #include "wx.hpp" // precompiled headers
 
 #include <memory>
@@ -33,8 +44,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-MainFrame::MainFrame(GLTSGraph* owner)
-  : wxFrame(NULL, wxID_ANY, wxT("GLTSGraph"),
+MainFrame::MainFrame(LTSGraph* owner)
+  : wxFrame(NULL, wxID_ANY, wxT("LTSGraph"),
     wxDefaultPosition, wxDefaultSize, 
     wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
@@ -64,7 +75,7 @@ void MainFrame::setupMenuBar()
   fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"), 
                wxT("Export this LTS to file."));
 
-  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit GLTSGraph."));
+  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph."));
 
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
@@ -296,7 +307,7 @@ void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
   infoDlg->setLTSInfo(is, ns, nt, nl);
   
   wxString title(app->getFileName().c_str(), wxConvLocal);
-  title = wxT("GLTSGraph - ") + title;
+  title = wxT("LTSGraph - ") + title;
   SetTitle(title);
 }
 

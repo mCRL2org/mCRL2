@@ -1,9 +1,20 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file ltsgraph.cpp
+/// \brief Implementation of application base class.
+
 #include "wx.hpp" // precompiled headers
 
 #define NAME "ltsgraph"
 #define AUTHOR "Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp"
 
-#include "gltsgraph.h"
+#include "ltsgraph.h"
 #include "ltsimporter.h"
 #include "xmlimporter.h"
 
@@ -99,7 +110,7 @@ void parse_command_line(int argc, wxChar** argv)
 }
 
 
-bool GLTSGraph::OnInit()
+bool LTSGraph::OnInit()
 {
   colouring = false;
   brushColour = *wxBLACK;
@@ -132,7 +143,7 @@ bool GLTSGraph::OnInit()
   return true;
 }
 
-bool GLTSGraph::Initialize(int& argc, wxChar** argv) 
+bool LTSGraph::Initialize(int& argc, wxChar** argv) 
 {
   try {
     parse_command_line(argc, argv);
@@ -158,12 +169,12 @@ bool GLTSGraph::Initialize(int& argc, wxChar** argv)
 }
 
 
-int GLTSGraph::OnExit() {
+int LTSGraph::OnExit() {
  
   return (wxApp::OnExit());
 }
 
-void GLTSGraph::printHelp(std::string const &name) {
+void LTSGraph::printHelp(std::string const &name) {
   std::cout << "Usage: " << name << " [INFILE]" << std::endl 
        << "Draw graphs and optimize their layout in a graphical environment."
        << "If INFILE is supplied," 
@@ -183,7 +194,7 @@ void GLTSGraph::printHelp(std::string const &name) {
        << std::endl;
 }
 
-IMPLEMENT_APP_NO_MAIN(GLTSGraph)
+IMPLEMENT_APP_NO_MAIN(LTSGraph)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
@@ -225,7 +236,7 @@ int main(int argc, char **argv)
 }
 #endif
 
-void GLTSGraph::openFile(std::string const &path)
+void LTSGraph::openFile(std::string const &path)
 {
   // Set fileName
   fileName = path;
@@ -263,30 +274,30 @@ void GLTSGraph::openFile(std::string const &path)
   // Setup graph in rest of tool.
 }
 
-Graph* GLTSGraph::getGraph()
+Graph* LTSGraph::getGraph()
 {
   return graph;
 }
 
-std::string GLTSGraph::getVersion() {
+std::string LTSGraph::getVersion() {
   return mcrl2::utilities::version_tag();
 }
 
-std::string GLTSGraph::getRevision() {
+std::string LTSGraph::getRevision() {
   return std::string(MCRL2_REVISION);
 }
 
-size_t GLTSGraph::getNumberOfAlgorithms() const
+size_t LTSGraph::getNumberOfAlgorithms() const
 {
   return algorithms.size();
 }
 
-LayoutAlgorithm* GLTSGraph::getAlgorithm(size_t i) const
+LayoutAlgorithm* LTSGraph::getAlgorithm(size_t i) const
 {
   return algorithms[i];
 }
 
-void GLTSGraph::display()
+void LTSGraph::display()
 {
   if(glCanvas)
   {
@@ -302,7 +313,7 @@ void GLTSGraph::display()
   }
 }
 
-void GLTSGraph::moveObject(double x, double y)
+void LTSGraph::moveObject(double x, double y)
 {
   if(selectedState != NULL)
   {
@@ -328,7 +339,7 @@ void GLTSGraph::moveObject(double x, double y)
   }
 }
 
-void GLTSGraph::lockObject()
+void LTSGraph::lockObject()
 {
   if(selectedState != NULL)
   {
@@ -336,7 +347,7 @@ void GLTSGraph::lockObject()
   }
 }
 
-void GLTSGraph::dragObject()
+void LTSGraph::dragObject()
 {
   if(selectedState != NULL)
   {
@@ -344,7 +355,7 @@ void GLTSGraph::dragObject()
   }
 }
 
-void GLTSGraph::stopDrag()
+void LTSGraph::stopDrag()
 {
   if(selectedState != NULL)
   {
@@ -352,13 +363,13 @@ void GLTSGraph::stopDrag()
   }
 }
 
-size_t GLTSGraph::getNumberOfObjects()
+size_t LTSGraph::getNumberOfObjects()
 {
   // TODO: needs to be adapted when new types of selectable objects are added
   return graph->getNumberOfStates();
 }
 
-void GLTSGraph::deselect()
+void LTSGraph::deselect()
 {
   if(selectedState != NULL)
   {
@@ -379,13 +390,13 @@ void GLTSGraph::deselect()
   selectedLabel = NULL;
 }
 
-void GLTSGraph::colourState(size_t selectedObject) {
+void LTSGraph::colourState(size_t selectedObject) {
   colouring = !colouring;
   selectState(selectedObject);
   colouring = !colouring;
 }
 
-void GLTSGraph::selectState(size_t selectedObject)
+void LTSGraph::selectState(size_t selectedObject)
 {
   if(colouring) {
     graph->colourState(selectedObject, brushColour);
@@ -397,52 +408,52 @@ void GLTSGraph::selectState(size_t selectedObject)
 
 }
 
-void GLTSGraph::selectTransition(size_t state, size_t transition)
+void LTSGraph::selectTransition(size_t state, size_t transition)
 {
   selectedTransition = graph->selectTransition(state, transition);
 }
 
-void GLTSGraph::selectSelfLoop(size_t state, size_t transition)
+void LTSGraph::selectSelfLoop(size_t state, size_t transition)
 {
   selectedTransition = graph->selectSelfLoop(state, transition);
 }
 
-void GLTSGraph::selectLabel(size_t state, size_t transition) 
+void LTSGraph::selectLabel(size_t state, size_t transition) 
 {
   selectedLabel = graph->selectTransition(state, transition);
 }
 
-void GLTSGraph::setRadius(int radius)
+void LTSGraph::setRadius(int radius)
 {
   visualizer->setRadius(radius);
   display();
 }
 
-int GLTSGraph::getRadius() const {
+int LTSGraph::getRadius() const {
   return visualizer->getRadius();
 }
 
-void GLTSGraph::setCurves(bool value)
+void LTSGraph::setCurves(bool value)
 {
   visualizer->setCurves(value);
   display();
 }
 
-std::string GLTSGraph::getFileName() const
+std::string LTSGraph::getFileName() const
 {
   return fileName;
 }
 
-double GLTSGraph::getAspectRatio() const
+double LTSGraph::getAspectRatio() const
 {
   return glCanvas->getAspectRatio();
 }
 
 
-void GLTSGraph::setBrushColour(wxColour colour) {
+void LTSGraph::setBrushColour(wxColour colour) {
   brushColour = colour;
 }
 
-void GLTSGraph::setTool(bool isColour) {
+void LTSGraph::setTool(bool isColour) {
   colouring = isColour;
 }

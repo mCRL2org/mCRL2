@@ -1,20 +1,31 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file export_svg.h
+/// \brief SVG exporter.
+
 #ifndef SVG_EXPORT_H
 #define SVG_EXPORT_H
 
 #include "exporter.h"
 
-class GLTSGraph;
+class LTSGraph;
 
 class ExporterSVG : public Exporter
 {
   public:
-    ExporterSVG(Graph* g, GLTSGraph* app);
+    ExporterSVG(Graph* g, LTSGraph* app);
     ~ExporterSVG();
     bool export_to(wxString _filename);
 
   private:
     std::string svg_code;
-    GLTSGraph* owner;
+    LTSGraph* owner;
 
     void drawBezier(Transition* tr);
     void drawSelfLoop(Transition* tr);

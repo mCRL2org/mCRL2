@@ -1,17 +1,28 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file visualizer.h
+/// \brief Visualization functions.
+
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
 #ifndef LTSGRAPH_H
-  #include "gltsgraph.h"
+  #include "ltsgraph.h"
 #else
-  class GLTSGraph;
+  class LTSGraph;
 #endif
 #include "state.h"
 #include "mcrl2/utilities/font_renderer.h"
 class Visualizer
 {
   public:
-    Visualizer(GLTSGraph* app);
+    Visualizer(LTSGraph* app);
     ~Visualizer();
     
     void visualize(double width, double height, double pixelSize, 
@@ -29,7 +40,7 @@ class Visualizer
     // Getters
     int getRadius() const;
   private:
-    GLTSGraph* owner;
+    LTSGraph* owner;
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height

@@ -1,3 +1,14 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file settingsdialog.cpp
+/// \brief Settings dialog.
+
 #include "wx.hpp" // precompiled headers
 
 #include "settingsdialog.h"
@@ -12,7 +23,7 @@ BEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
   EVT_RADIOBOX(myID_TOOL_SELECT, SettingsDialog::onTool)
 END_EVENT_TABLE()
 
-SettingsDialog::SettingsDialog(GLTSGraph* owner, wxWindow* parent)
+SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
   : wxDialog(parent, wxID_ANY, wxT("Visualization settings"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {

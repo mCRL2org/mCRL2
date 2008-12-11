@@ -1,12 +1,23 @@
+// Author(s): Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file glcanvas.h
+/// \brief OpenGL rendering canvas
+
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
 #include <wx/glcanvas.h>
 
 #ifndef LTSGRAPH_H
-  #include "gltsgraph.h"
+  #include "ltsgraph.h"
 #else
-  class GLTSGraph;
+  class LTSGraph;
 #endif
 
 #ifndef VISUALIZER_H
@@ -19,7 +30,7 @@ class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          GLTSGraph* app, 
+          LTSGraph* app, 
           wxWindow* parent, 
           const wxSize &size = wxDefaultSize, 
           int* attribList = NULL);
@@ -47,7 +58,7 @@ class GLCanvas : public wxGLCanvas
     double getPixelSize();
     double getAspectRatio() const;
   private:
-    GLTSGraph* owner;
+    LTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
     double scaleFactor; 
