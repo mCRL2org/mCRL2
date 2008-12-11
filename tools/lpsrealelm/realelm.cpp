@@ -682,10 +682,10 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
 {
   inequalities = gauss_elimination(inequalities, variables, r);
 
-  gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination, with variables %s\n", pp(variables).c_str());
-
   if(variables.size() != 0)
   {
+    gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination, with variables %s\n", pp(variables).c_str());
+
     // At this stage, the variables that should be eliminated only occur in
     // inequalities. Group the inequalities into positive, 0, and negative
     // occurrences of each variable, and create a new system.
@@ -757,13 +757,12 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
 
     gsDebugMsg("Inequalities after eliminating variables using Fourier-Motzkin: %s\n", pp(inequalities).c_str());
 
-
     data_expression_list new_inequalities;
     for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
     {
       data_expression left = lhs(*i);
       data_expression right = rhs(*i);
-      gsVerboseMsg("left = %s, right = %s\n", pp(left).c_str(), pp(right).c_str());
+      gsDebugMsg("left = %s, right = %s\n", pp(left).c_str(), pp(right).c_str());
       data_expression head = static_cast<const data_application&>(*i).head();
 
       atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j;
@@ -844,6 +843,71 @@ data_expression compute_inequality(unsigned long i, const std::pair<data_express
   }
 }
 
+data_expression compute_condition_from_inequalities(data_expression_list inequalities, const data_variable_list& variables, rewriter& r, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
+{
+  // Compute new condition
+  maybe res = fourrier_motzkin(inequalities, variables, r, context, variable_generator);
+  gsVerboseMsg("condition inequalities: %s\n", pp(inequalities).c_str());
+  data_expression condition = true_();
+  for(data_expression_list::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
+  {
+    data_expression left = lhs(*j);
+    data_expression right = rhs(*j);
+    if(is_negative(right))
+    {
+      left = r(negate(left));
+      right = r(negate(right));
+      data_expression variable = context[std::make_pair(left, right)];
+      if(is_less(*j))
+      {
+        condition = and_(condition, is_larger(variable));
+      }
+      else if(is_less_equal(*j))
+      {
+        condition = and_(condition, or_(is_larger(variable), is_equal(variable)));
+      }
+      else
+      {
+        assert(is_equal_to(*j));
+        condition = and_(condition, is_equal(variable));
+      }
+    }
+    else
+    {
+      data_expression variable = context[std::make_pair(left, right)];
+      if(is_less(*j))
+      {
+        condition = and_(condition, is_smaller(variable));
+      }
+      else if(is_less_equal(*j))
+      {
+        condition = and_(condition, or_(is_smaller(variable), is_equal(variable)));
+      }
+      else
+      {
+        assert(is_equal_to(*j));
+        condition = and_(condition, is_equal(variable));
+      }
+    }
+  }
+  return condition;
+}
+
+data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
+{
+  for(atermpp::map<data_expression, data_expression>::const_iterator i = replacements.begin(); i != replacements.end(); ++i)
+  {
+    gsDebugMsg("%s := %s\n", pp(i->first).c_str(), pp(i->second).c_str());
+  }
+
+  data_expression_list result;
+  for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
+  {
+    result = push_front(result, data_expression_map_replace(*i, replacements));
+  }
+  gsDebugMsg("done\n");
+  return result;
+}
 
 specification realelm(specification s)
 {
@@ -868,7 +932,7 @@ specification realelm(specification s)
   // Compute initial set of variables
   // and store the real part of the summand in a mapping
   atermpp::map<summand, data_expression_list> summand_real_conditions;
-  atermpp::map<summand, atermpp::map<data_variable, data_expression> > summand_real_nextstate_map;
+  atermpp::map<summand, atermpp::map<data_expression, data_expression> > summand_real_nextstate_map;
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
   {
     data_expression_list inequalities;
@@ -876,7 +940,7 @@ specification realelm(specification s)
     summand_real_conditions[*i] = inequalities;
     compute_condition(*i, inequalities, variables, r, variable_generator);
     // Replacements is the nextstate vector in a map
-    atermpp::map<data_variable, data_expression> replacements;
+    atermpp::map<data_expression, data_expression> replacements;
     for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
     {
       if(j->lhs().sort() == sort_expr::real())
@@ -901,8 +965,6 @@ specification realelm(specification s)
     done = maybe_true;
     gsDebugMsg("Iteration %d\n", ++iteration);
 
-    // Calculate Cond_i(x, zeta) and simplify give &&(compare(u_j(x), v_j(x)))
-    // for all j
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
       // Consider all combinations of current values for the context
@@ -925,35 +987,38 @@ specification realelm(specification s)
           remaining_context_combination = q_context.quot;
 
           context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
+        }
 
-          // Consider all combinations of values for nextstate for the context
-          unsigned long nextstate_combinations = pow(3, variables.size());
-          for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
+        // context_case_inequalities contains the real part of the original
+        // condition, and the condition induced by the variables.
+        // Determine whether this is consistent.
+        maybe res = fourrier_motzkin(context_case_inequalities, i->summation_variables() + pop_front(real_parameters), r, variables, variable_generator);
+
+        // Consider all combinations of values for nextstate for the context
+        unsigned long nextstate_combinations = pow(3, variables.size());
+        for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
+        {
+          // Accumulate all inequalities for this valuation of nextstate in
+          // nextstate_case_inequalities
+          data_expression_list nextstate_case_inequalities;
+          unsigned long remaining_nextstate_combination = nextstate_combination;
+          for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
           {
-            // Accumulate all inequalities for this valuation of nextstate in
-            // nextstate_case_inequalities
-            data_expression_list nextstate_case_inequalities = context_case_inequalities;
-            unsigned long remaining_nextstate_combination = nextstate_combination;
-            for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
-            {
-              div_t q_nextstate = div(remaining_nextstate_combination, 3);
-              remaining_nextstate_combination = q_nextstate.quot;
+            div_t q_nextstate = div(remaining_nextstate_combination, 3);
+            remaining_nextstate_combination = q_nextstate.quot;
 
-              data_expression inequality = compute_inequality(q_nextstate.rem, k->first);
-              inequality = data_variable_map_replace(inequality, summand_real_nextstate_map[*i]);
-              nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
-            }
+            data_expression inequality = compute_inequality(q_nextstate.rem, k->first);
+            inequality = data_variable_map_replace(inequality, summand_real_nextstate_map[*i]);
+            nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
+          }
 
-            // nextstate_case_inequalities contains exactly one case we need to
-            // compute using Fourrier-Motzkin elimination.
-            nextstate_case_inequalities = normalize_inequalities(nextstate_case_inequalities, r);
+          nextstate_case_inequalities = nextstate_case_inequalities + summand_real_conditions[*i];
+          nextstate_case_inequalities = normalize_inequalities(nextstate_case_inequalities, r);
 
-            maybe res = fourrier_motzkin(nextstate_case_inequalities, i->summation_variables(), r, variables, variable_generator);
-            if(res == maybe_unknown)
-            {
-              done = res;
-
-            }
+          maybe res = fourrier_motzkin(nextstate_case_inequalities, i->summation_variables(), r, variables, variable_generator);
+          if(res == maybe_unknown)
+          {
+            done = res;
           }
         }
       }
@@ -977,7 +1042,8 @@ specification realelm(specification s)
     for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
     {
       // Accumulate all inequalities for this valuation of context in context_case_inequalities
-      data_expression_list context_case_inequalities;
+      data_expression_list context_case_inequalities = summand_real_conditions[*i];
+
       unsigned long remaining_context_combination = context_combination;
       for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = variables.begin(); j != variables.end(); ++j)
       {
@@ -986,14 +1052,27 @@ specification realelm(specification s)
 
         div_t q_context = div(remaining_context_combination, 3);
         remaining_context_combination = q_context.quot;
-        context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
 
+        context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
+      }
+
+      data_expression condition = compute_condition_from_inequalities(context_case_inequalities, i->summation_variables(), r, variables, variable_generator);
+
+      gsVerboseMsg("condition: %s\n", pp(condition).c_str());
+
+      maybe res = fourrier_motzkin(context_case_inequalities, i->summation_variables() + pop_front(real_parameters), r, variables, variable_generator);
+
+      if(res == maybe_false)
+      {
+        gsVerboseMsg("condition inconsistent\n");
+      }
+      else
+      {
         unsigned long nextstate_combinations = pow(3, variables.size());
         for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
         {
-          data_expression real_condition = true_();
-          data_expression condition = true_();
           data_assignment_list next_state = reverse(nonreal_assignments);
+          data_expression_list nextstate_case_inequalities;
           unsigned long remaining_nextstate_combination = nextstate_combination;
           for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
           {
@@ -1002,33 +1081,29 @@ specification realelm(specification s)
             if(q.rem == 0)
             {
               next_state = push_front(next_state, data_assignment(k->second, data_expression(smaller())));
-              real_condition = and_(real_condition, is_smaller(variables[std::make_pair(k->first.first, k->first.second)]));
-              condition = and_(condition, less(k->first.first, k->first.second));
             }
             else if(q.rem == 1)
             {
               next_state = push_front(next_state, data_assignment(k->second, data_expression(equal())));
-              real_condition = and_(real_condition, is_equal(variables[std::make_pair(k->first.first, k->first.second)]));
-              condition = and_(condition, equal_to(k->first.first, k->first.second));
             }
-            else 
+            else
             {
               assert(q.rem == 2);
               next_state = push_front(next_state, data_assignment(k->second, data_expression(larger())));
-              real_condition = and_(real_condition, is_larger(variables[std::make_pair(k->first.first, k->first.second)]));
-              condition = and_(condition, less(negate(k->first.first), negate(k->first.second)));
             }
+            nextstate_case_inequalities = push_front(nextstate_case_inequalities, compute_inequality(q.rem, k->first));
           }
 
           next_state = reverse(next_state);
 
-          data_expression_list inequalities;
-          determine_inequalities(condition, inequalities);
-          maybe res = fourrier_motzkin(inequalities, pop_front(real_parameters) + i->summation_variables(), r, variables, variable_generator);
+          nextstate_case_inequalities = data_expression_map_replace_list(nextstate_case_inequalities, summand_real_nextstate_map[*i]);
+          nextstate_case_inequalities = nextstate_case_inequalities + summand_real_conditions[*i];
+          maybe res = fourrier_motzkin(nextstate_case_inequalities, pop_front(real_parameters) + i->summation_variables(), r, variables, variable_generator);
+
           if(res == maybe_true)// || res == maybe_unknown)
           {
             gsVerboseMsg("computed nextstate %s\n", pp(next_state).c_str());
-            data_expression c = and_(join_and(split_conjunct(i->condition()).second.begin(), split_conjunct(i->condition()).second.end()), real_condition);
+            data_expression c = and_(join_and(split_conjunct(i->condition()).second.begin(), split_conjunct(i->condition()).second.end()), condition);
             summand s = summand(get_nonreal_variables(i->summation_variables()), r(c), i->is_delta(), i->actions(), next_state);
             if(std::find(summands.begin(), summands.end(), s) == summands.end())
             {
@@ -1044,7 +1119,7 @@ specification realelm(specification s)
     }
   }
   summands = reverse(summands);
-  
+
   gsVerboseMsg("Computed %d summands %s\n", summands.size(), pp(summands).c_str());
 
   data_variable_list process_parameters = reverse(nonreal_parameters);
