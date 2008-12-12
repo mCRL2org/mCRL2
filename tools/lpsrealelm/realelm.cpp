@@ -646,22 +646,25 @@ void group_inequalities(const data_variable& v, const data_expression_list& ineq
 
 // prototype
 static
-void add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator);
+bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator);
 
 static
-void add_inequalities_to_context(const data_expression_list& l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+bool add_inequalities_to_context(const data_expression_list& l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
+  bool result = false;
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    add_inequality_to_context(*i, context, r, variable_generator);
+    result = result || add_inequality_to_context(*i, context, r, variable_generator);
   }
+  return result;
 }
 
 // Add variable for inequality to context
 static
-void add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
   assert(is_inequality(e));
+  bool result = false;
   data_expression left = lhs(e);
   data_expression right = rhs(e);
   if(is_negative(right))
@@ -674,11 +677,13 @@ void add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<
     data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
     context[std::make_pair(left, right)] = xi;
     gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(left).c_str(), pp(right).c_str());
+    result = true;
   }
+  return result;
 }
 
 static
-maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list variables, rewriter& r,  atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
+void fourrier_motzkin(data_expression_list& inequalities, data_variable_list variables, rewriter& r)
 {
   inequalities = gauss_elimination(inequalities, variables, r);
 
@@ -754,75 +759,7 @@ maybe fourrier_motzkin(data_expression_list& inequalities, data_variable_list va
     }
 
     inequalities = normalize_inequalities(inequalities, r);
-
-    gsDebugMsg("Inequalities after eliminating variables using Fourier-Motzkin: %s\n", pp(inequalities).c_str());
-
-    data_expression_list new_inequalities;
-    for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
-    {
-      data_expression left = lhs(*i);
-      data_expression right = rhs(*i);
-      gsDebugMsg("left = %s, right = %s\n", pp(left).c_str(), pp(right).c_str());
-      data_expression head = static_cast<const data_application&>(*i).head();
-
-      atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j;
-      if(is_negative(right))
-      {
-        j = context.find(std::make_pair(r(negate(left)), r(negate(right))));
-      }
-      else
-      {
-        j = context.find(std::make_pair(left, right));
-      }
-
-      if(j == context.end())
-      {
-        // inequality not known, add it
-        gsVerboseMsg("Adding inequality for %s\n", pp(*i).c_str());
-        new_inequalities = push_front(new_inequalities, *i);
-      }
-      else
-      {
-        // inequality known, check the result for consistency
-        // result can be obtained from context
-        //std::cerr << "checking inequality: " << pp(*i) << std::endl;
-      }
-    }
-
-    add_inequalities_to_context(new_inequalities, context, r, variable_generator);
-    inequalities = new_inequalities;
   }
-
-  // TODO: Check that the criterium for true, false, or unknown is correct
-  gsDebugMsg("Remaining system: %s\n", pp(inequalities).c_str());
-  if(inequalities.size() == 1)
-  {
-    return maybe_true;
-  }
-  else if(inequalities.size() == 0)
-  {
-    //return maybe_false;
-    return maybe_true;
-  }
-  else
-  {
-    gsVerboseMsg("Left with the following system of %d inequalities: %s\n", inequalities.size(), pp(inequalities).c_str());
-    return maybe_unknown;
-  }
-}
-
-static
-void compute_condition(const summand& s, const data_expression_list& inequalities, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& variables, rewriter& r, identifier_generator& variable_generator)
-{
-  // Compute condition for summand s
-  // that is, assuming a context given by variables, determine
-  // exists y:Real.&&(inequalities) &&nextstate
-  gsDebugMsg("Computing initial condition for summand\n");
-  data_expression_list ordered_ineqs = order_inequalities(inequalities, r);
-  data_expression_list simplified_inequalities = inequalities;
-  fourrier_motzkin(simplified_inequalities, s.summation_variables(), r, variables, variable_generator);
-
-  add_inequalities_to_context(simplified_inequalities, variables, r, variable_generator);
 }
 
 static inline
@@ -843,10 +780,23 @@ data_expression compute_inequality(unsigned long i, const std::pair<data_express
   }
 }
 
+static inline
+data_expression_list compute_inequalities(unsigned long i, const atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context)
+{
+  data_expression_list result;
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = context.begin(); j != context.end(); ++j)
+  {
+    div_t q = div(i, 3);
+    i = q.quot;
+    result = push_front(result, compute_inequality(q.rem, j->first));
+  }
+  return result;
+}
+
 data_expression compute_condition_from_inequalities(data_expression_list inequalities, const data_variable_list& variables, rewriter& r, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
 {
   // Compute new condition
-  maybe res = fourrier_motzkin(inequalities, variables, r, context, variable_generator);
+  fourrier_motzkin(inequalities, variables, r);
   gsVerboseMsg("condition inequalities: %s\n", pp(inequalities).c_str());
   data_expression condition = true_();
   for(data_expression_list::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
@@ -895,17 +845,140 @@ data_expression compute_condition_from_inequalities(data_expression_list inequal
 
 data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
 {
-  for(atermpp::map<data_expression, data_expression>::const_iterator i = replacements.begin(); i != replacements.end(); ++i)
-  {
-    gsDebugMsg("%s := %s\n", pp(i->first).c_str(), pp(i->second).c_str());
-  }
-
   data_expression_list result;
   for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
   {
     result = push_front(result, data_expression_map_replace(*i, replacements));
   }
-  gsDebugMsg("done\n");
+  return result;
+}
+
+static
+data_expression_list simplify_cond(const data_expression_list& cond, const data_expression_list& context)
+{
+  data_expression_list result;
+  for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
+  {
+    // Only unique elements in cond
+    if(std::find(result.begin(), result.end(), *i) == result.end())
+    {
+      result = push_front(result, *i);
+    }
+  }
+  return result;
+}
+
+static
+data_expression_list transform_real_to_cond(const data_expression_list& cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
+{
+  data_expression_list result;
+  for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
+  {
+    data_expression left = lhs(*i);
+    data_expression right = rhs(*i);
+    if(is_negative(right))
+    {
+      left = r(negate(left));
+      right = r(negate(right));
+    }
+    atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j;
+    j = context.find(std::make_pair(left, right));
+    if(j == context.end())
+    {
+      result = push_front(result, *i);
+    }
+    else
+    {
+      if(is_negative(rhs(*i)))
+      {
+        if(is_less(*i))
+        {
+          result = push_front(result, static_cast<const data_expression&>(is_larger(j->second)));
+        }
+        else if(is_less_equal(*i))
+        {
+          result = push_front(result, or_(static_cast<const data_expression&>(is_larger(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
+        }
+        else if(is_equal_to(*i))
+        {
+          result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
+        }
+        else
+        {
+          assert(false);
+        }
+      }
+      else
+      {
+        if(is_less(*i))
+        {
+          result = push_front(result,static_cast<const data_expression&>(is_smaller(j->second)));
+        }
+        else if(is_less_equal(*i))
+        {
+          result = push_front(result, or_(static_cast<const data_expression&>(is_smaller(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
+        }
+        else if(is_equal_to(*i))
+        {
+          result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
+        }
+        else
+        {
+          assert(false);
+        }
+      }
+    }
+  }
+  return result;
+}
+
+static
+summand generate_summand(const summand& s, unsigned long i, data_expression_list cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, const data_expression_list& nextstate_inequalities, rewriter& r)
+{
+  gsDebugMsg("generating new summand from summand %s, with cond %s and nextstate inequalities %s\n", pp(s).c_str(), pp(cond).c_str(), pp(nextstate_inequalities).c_str());
+
+  std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
+  data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
+  cond = transform_real_to_cond(cond, context,r);
+  condition = and_(condition, join_and(cond.begin(), cond.end()));
+
+  gsDebugMsg("condition: %s\n", pp(condition).c_str());
+
+  gsVerboseMsg("context: ");
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j = context.begin(); j != context.end(); ++j)
+  {
+    gsVerboseMsg("< %s, %s > %s, ", pp(j->first.first).c_str(), pp(j->first.second).c_str(), pp(j->second).c_str());
+  }
+  gsVerboseMsg("\n");
+
+  data_assignment_list nextstate;
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = context.begin(); j != context.end(); ++j)
+  {
+    div_t q = div(i, 3);
+    i = q.quot;
+    if(q.rem == 0)
+    {
+      nextstate = push_front(nextstate, data_assignment(j->second, data_expression(smaller())));
+    }
+    else if(q.rem == 1)
+    {
+      nextstate = push_front(nextstate, data_assignment(j->second, data_expression(equal())));
+    }
+    else
+    {
+      assert(q.rem == 2);
+      nextstate = push_front(nextstate, data_assignment(j->second, data_expression(larger())));
+    }
+  }
+  nextstate = reverse(nextstate);
+  assert(nextstate.size() == context.size());
+
+  gsDebugMsg("nextstate: %s\n", pp(nextstate).c_str());
+
+  summand result = summand(get_nonreal_variables(s.summation_variables()), r(condition), s.is_delta(), s.actions(), nextstate);
+
+  gsVerboseMsg("Generated summand %s\n", pp(result).c_str());
+
   return result;
 }
 
@@ -921,16 +994,15 @@ specification realelm(specification s)
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(lps);
 
-  atermpp::map<std::pair<data_expression, data_expression>, data_variable> variables; // Contains introduced variables
+  atermpp::map<std::pair<data_expression, data_expression>, data_variable> context; // Contains introduced variables
   data_variable_list real_parameters = get_real_variables(lps.process_parameters());
   data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
 
-  int iteration = 0;
-  int max_iterations = 2;
+  int iteration = 1;
+  int max_iterations = 5;
   gsDebugMsg("Maximum number of iterations is %d\n", max_iterations);
 
-  // Compute initial set of variables
-  // and store the real part of the summand in a mapping
+  // Compute some context information for each summand.
   atermpp::map<summand, data_expression_list> summand_real_conditions;
   atermpp::map<summand, atermpp::map<data_expression, data_expression> > summand_real_nextstate_map;
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
@@ -938,7 +1010,6 @@ specification realelm(specification s)
     data_expression_list inequalities;
     determine_inequalities(i->condition(), inequalities);
     summand_real_conditions[*i] = inequalities;
-    compute_condition(*i, inequalities, variables, r, variable_generator);
     // Replacements is the nextstate vector in a map
     atermpp::map<data_expression, data_expression> replacements;
     for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
@@ -951,179 +1022,63 @@ specification realelm(specification s)
     summand_real_nextstate_map[*i] = replacements;
   }
 
-  gsDebugMsg("Initial set of variables:\n");
-  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    gsDebugMsg("%s for < %s, %s >\n", pp(i->second).c_str(), pp(i->first.first).c_str(), pp(i->first.second).c_str());
-    assert(is_data_expression(i->first.first));
-    assert(is_data_expression(i->first.second));
-  }
-
-  maybe done = maybe_true;
+  bool changed = false;
+  summand_list summands;
   do
   {
-    done = maybe_true;
+    changed = false;
+    summands = summand_list();
+    assert(summands.empty());
     gsDebugMsg("Iteration %d\n", ++iteration);
 
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
-      // Consider all combinations of current values for the context
-      unsigned long context_combinations = pow(3, variables.size());
+      unsigned long context_combinations = pow(3, context.size()); //Combinations to be considered
+
       for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
       {
-        // Accumulate all inequalities for this valuation of context in context_case_inequalities
-        // We need to consider the system of inequalities consisting of
-        // the original inequalities of the condition, the inequalities
-        // induced by the context, and the inequalities of the nextstate
-        // The resulting system needs to be consistent.
-        data_expression_list context_case_inequalities = summand_real_conditions[*i];
-        unsigned long remaining_context_combination = context_combination;
-        for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = variables.begin(); j != variables.end(); ++j)
+        data_expression_list context_inequalities = compute_inequalities(context_combination, context);
+
+        gsDebugMsg("inequalites from context: %s\n", pp(context_inequalities).c_str());
+
+        for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
-          assert(is_data_expression(j->first.first));
-          assert(is_data_expression(j->first.second));
+          data_expression_list nextstate_inequalities = compute_inequalities(nextstate_combination, context);
+          nextstate_inequalities = data_expression_map_replace_list(nextstate_inequalities, summand_real_nextstate_map[*i]);
 
-          div_t q_context = div(remaining_context_combination, 3);
-          remaining_context_combination = q_context.quot;
+          data_expression_list cond = nextstate_inequalities + summand_real_conditions[*i];
+          cond = simplify_cond(cond, context_inequalities);
+          cond = normalize_inequalities(cond, r);
 
-          context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
-        }
-
-        // context_case_inequalities contains the real part of the original
-        // condition, and the condition induced by the variables.
-        // Determine whether this is consistent.
-        maybe res = fourrier_motzkin(context_case_inequalities, i->summation_variables() + pop_front(real_parameters), r, variables, variable_generator);
-
-        // Consider all combinations of values for nextstate for the context
-        unsigned long nextstate_combinations = pow(3, variables.size());
-        for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
-        {
-          // Accumulate all inequalities for this valuation of nextstate in
-          // nextstate_case_inequalities
-          data_expression_list nextstate_case_inequalities;
-          unsigned long remaining_nextstate_combination = nextstate_combination;
-          for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
+          // Eliminate sum bound variables, resulting in inequalities over
+          // process parameters of sort Real. Of this, we add the inequalities
+          // that are not yet in the context.
+          gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
+          fourrier_motzkin(cond, i->summation_variables(), r);
+          gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
+          // cond contains the inequalities over the process parameters
+          changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
+          summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
+          if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
           {
-            div_t q_nextstate = div(remaining_nextstate_combination, 3);
-            remaining_nextstate_combination = q_nextstate.quot;
-
-            data_expression inequality = compute_inequality(q_nextstate.rem, k->first);
-            inequality = data_variable_map_replace(inequality, summand_real_nextstate_map[*i]);
-            nextstate_case_inequalities = push_front(nextstate_case_inequalities, inequality);
-          }
-
-          nextstate_case_inequalities = nextstate_case_inequalities + summand_real_conditions[*i];
-          nextstate_case_inequalities = normalize_inequalities(nextstate_case_inequalities, r);
-
-          maybe res = fourrier_motzkin(nextstate_case_inequalities, i->summation_variables(), r, variables, variable_generator);
-          if(res == maybe_unknown)
-          {
-            done = res;
+            summands = push_front(summands, s);
           }
         }
       }
     }
-  } while (iteration < max_iterations && done == maybe_unknown);
-
-  gsVerboseMsg("generated the following variables:\n");
-  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+  } while ((iteration <= max_iterations) && changed);
+  
+  gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = context.begin(); i != context.end(); ++i)
   {
     gsVerboseMsg("< %s, %s > %s\n", pp(i->first.first).c_str(), pp(i->first.second).c_str(), pp(i->second).c_str());
   }
 
-  // Generate all new summands
-  summand_list summands;
-  for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
-  {
-    data_assignment_list nonreal_assignments = get_nonreal_assignments(i->assignments());
-
-    // Consider all combinations of current values for the context
-    unsigned long context_combinations = pow(3, variables.size());
-    for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
-    {
-      // Accumulate all inequalities for this valuation of context in context_case_inequalities
-      data_expression_list context_case_inequalities = summand_real_conditions[*i];
-
-      unsigned long remaining_context_combination = context_combination;
-      for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = variables.begin(); j != variables.end(); ++j)
-      {
-        assert(is_data_expression(j->first.first));
-        assert(is_data_expression(j->first.second));
-
-        div_t q_context = div(remaining_context_combination, 3);
-        remaining_context_combination = q_context.quot;
-
-        context_case_inequalities = push_front(context_case_inequalities, compute_inequality(q_context.rem, j->first));
-      }
-
-      data_expression condition = compute_condition_from_inequalities(context_case_inequalities, i->summation_variables(), r, variables, variable_generator);
-
-      gsVerboseMsg("condition: %s\n", pp(condition).c_str());
-
-      maybe res = fourrier_motzkin(context_case_inequalities, i->summation_variables() + pop_front(real_parameters), r, variables, variable_generator);
-
-      if(res == maybe_false)
-      {
-        gsVerboseMsg("condition inconsistent\n");
-      }
-      else
-      {
-        unsigned long nextstate_combinations = pow(3, variables.size());
-        for(unsigned long nextstate_combination = 0; nextstate_combination < nextstate_combinations; ++nextstate_combination)
-        {
-          data_assignment_list next_state = reverse(nonreal_assignments);
-          data_expression_list nextstate_case_inequalities;
-          unsigned long remaining_nextstate_combination = nextstate_combination;
-          for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator k = variables.begin(); k != variables.end(); ++k)
-          {
-            div_t q = div(remaining_nextstate_combination, 3);
-            remaining_nextstate_combination = q.quot;
-            if(q.rem == 0)
-            {
-              next_state = push_front(next_state, data_assignment(k->second, data_expression(smaller())));
-            }
-            else if(q.rem == 1)
-            {
-              next_state = push_front(next_state, data_assignment(k->second, data_expression(equal())));
-            }
-            else
-            {
-              assert(q.rem == 2);
-              next_state = push_front(next_state, data_assignment(k->second, data_expression(larger())));
-            }
-            nextstate_case_inequalities = push_front(nextstate_case_inequalities, compute_inequality(q.rem, k->first));
-          }
-
-          next_state = reverse(next_state);
-
-          nextstate_case_inequalities = data_expression_map_replace_list(nextstate_case_inequalities, summand_real_nextstate_map[*i]);
-          nextstate_case_inequalities = nextstate_case_inequalities + summand_real_conditions[*i];
-          maybe res = fourrier_motzkin(nextstate_case_inequalities, pop_front(real_parameters) + i->summation_variables(), r, variables, variable_generator);
-
-          if(res == maybe_true)// || res == maybe_unknown)
-          {
-            gsVerboseMsg("computed nextstate %s\n", pp(next_state).c_str());
-            data_expression c = and_(join_and(split_conjunct(i->condition()).second.begin(), split_conjunct(i->condition()).second.end()), condition);
-            summand s = summand(get_nonreal_variables(i->summation_variables()), r(c), i->is_delta(), i->actions(), next_state);
-            if(std::find(summands.begin(), summands.end(), s) == summands.end())
-            {
-              summands = push_front(summands, s);
-            }
-          }
-          else
-          {
-            gsVerboseMsg("nextstate not consistent %s\n", pp(next_state).c_str());
-          }
-        }
-      }
-    }
-  }
   summands = reverse(summands);
-
   gsVerboseMsg("Computed %d summands %s\n", summands.size(), pp(summands).c_str());
 
   data_variable_list process_parameters = reverse(nonreal_parameters);
-  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = context.begin(); i != context.end(); ++i)
   {
     process_parameters = push_front(process_parameters, i->second);
   }
