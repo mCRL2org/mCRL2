@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
@@ -325,7 +326,6 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
 
   data_expression new_left = plus(left.first, negate(right.first));
   data_expression new_right = r(minus(right.second, left.second));
-  //TODO add cneg, and see how to cope with missing >
   d = data_application(d.head(), make_list(new_left, new_right));
   
   data_expression res = r(d);
@@ -391,11 +391,48 @@ std::pair<data_expression_list, data_expression_list> split_conjunct(data_expres
   return std::make_pair(real_conjuncts, nonreal_conjuncts);
 }
 
+static
+specification remove_real_constants_from_nextstate(specification s, identifier_generator& variable_generator)
+{
+  linear_process lps = s.process();
+  summand_list sl;
+  for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+  {
+    data_assignment_list nextstate;
+    data_expression condition = i->condition();
+    data_variable_list sum_variables = i->summation_variables();
+    for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+    {
+      if(j->rhs().sort() == sort_expr::real() && is_number(j->rhs()))
+      {
+        data_expression right = j->rhs();
+        data_variable var(variable_generator("y"), sort_expr::real());
+        condition = and_(condition, equal_to(var, right));
+        nextstate = push_front(nextstate, data_assignment(j->lhs(), var));
+        sum_variables = push_front(sum_variables, var);
+      }
+      else
+      {
+        nextstate = push_front(nextstate, *j);
+      }
+    }
+    nextstate = reverse(nextstate);
+    summand s(sum_variables, condition, i->is_delta(), i->actions(), nextstate);
+    sl = push_front(sl, s);
+  }
+  sl = reverse(sl);
+  lps = set_summands(lps, sl);
+  s = set_lps(s, lps);
+  return s;
+
+}
+
 // Transform all inequalities in the summands of the specification to be
 // normalized
 static
-specification normalize_specification(specification s, rewriter& r)
+specification normalize_specification(specification s, rewriter& r, identifier_generator& variable_generator)
 {
+  s = remove_real_constants_from_nextstate(s, variable_generator);
   linear_process lps = s.process();
   summand_list sl;
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
@@ -439,28 +476,6 @@ void determine_inequalities(const data_expression& e, data_expression_list& ineq
     }
     assert(is_true(e));
   }
-}
-
-static
-data_expression_list order_inequalities(const data_expression_list& inequalities, rewriter& r)
-{
-  data_expression_list result;
-  for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
-  {
-    data_expression left = lhs(*i);
-    if (!is_number(left) && !is_data_variable(left))
-    {
-      data_expression_list sorted = sort(left);
-      left = real_zero();
-      for(data_expression_list::iterator j = sorted.begin(); j != sorted.end(); ++j)
-      {
-        left = plus(left, *j);
-      }
-    }
-    result = push_front(result, r(data_expression(data_application(static_cast<const data_application&>(*i).head(), make_list(left, rhs(*i))))));
-  }
-  result = reverse(result);
-  return result;
 }
 
 // post: variables contains the list of variables that have not been eliminated
@@ -548,23 +563,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
   }
 
   // Remove the variables that we have eliminated from the list of variables
-  data_variable_list new_variables;
-  for(data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
-  {
-    bool found = false;
-    for(data_variable_list::iterator j = eliminated_variables.begin(); j != eliminated_variables.end() && !found; ++j)
-    {
-      if(*i == *j)
-      {
-        found = true;
-      }
-    }
-    if(!found)
-    {
-      new_variables = push_front(new_variables, *i);
-    }
-  }
-  variables = new_variables;
+  variables = term_list_difference(variables, eliminated_variables);
 
   gsDebugMsg("Gauss elimination eliminated variables %s, resulting in the system %s\n", pp(eliminated_variables).c_str(), pp(inequalities).c_str());
 
@@ -988,11 +987,11 @@ specification realelm(specification s)
   s = set_data_specification(s, replace_real_implementation(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
   rewriter r(s.data());
-  s = normalize_specification(s, r);
+  postfix_identifier_generator variable_generator("");
+  variable_generator.add_to_context(s);
+  s = normalize_specification(s, r, variable_generator);
 
   linear_process lps = s.process();
-  postfix_identifier_generator variable_generator("");
-  variable_generator.add_to_context(lps);
 
   atermpp::map<std::pair<data_expression, data_expression>, data_variable> context; // Contains introduced variables
   data_variable_list real_parameters = get_real_variables(lps.process_parameters());
@@ -1067,7 +1066,7 @@ specification realelm(specification s)
       }
     }
   } while ((iteration <= max_iterations) && changed);
-  
+
   gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = context.begin(); i != context.end(); ++i)
   {
@@ -1084,7 +1083,7 @@ specification realelm(specification s)
   }
   process_parameters = reverse(process_parameters);
 
-  lps = linear_process(lps.free_variables(), process_parameters, summands); 
+  lps = linear_process(lps.free_variables(), process_parameters, summands);
   s = set_lps(s, lps);
 
   return s;
