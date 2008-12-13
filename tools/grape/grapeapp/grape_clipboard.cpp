@@ -39,3 +39,4 @@ arr_object_ptr grape_clipboard::get( void )
 }
 
 }
+
