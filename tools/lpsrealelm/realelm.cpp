@@ -32,6 +32,83 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
 
+// Custom replace functions
+template <typename ReplaceFunction>
+struct realelm_replace_data_expressions_helper
+{
+  const ReplaceFunction& r_;
+
+  realelm_replace_data_expressions_helper(const ReplaceFunction& r)
+    : r_(r)
+  {}
+
+  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
+  {
+    if (is_sort_expression(t))
+    {
+      return std::pair<atermpp::aterm_appl, bool>(t, false); // do not continue the recursion
+    }
+    else if (is_data_expression(t))
+    {
+      data_expression new_t = r_(t);
+      if(t == new_t)
+      {
+        return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
+      }
+      else
+      {
+        return std::pair<atermpp::aterm_appl, bool>(new_t, false); // do not continue the recursion
+      }
+    }
+    else
+    {
+      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
+    }
+  }
+};
+
+/// \cond INTERNAL_DOCS
+template <typename MapContainer>
+struct realelm_map_replace_helper
+{
+  const MapContainer& replacements_;
+
+  /// \brief Constructor.
+  ///
+  realelm_map_replace_helper(const MapContainer& replacements)
+    : replacements_(replacements)
+  {}
+
+  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
+  /// otherwise t.
+  ///
+  data_expression operator()(const data_expression& t) const
+  {
+    typename MapContainer::const_iterator i = replacements_.find(t);
+    if (i == replacements_.end())
+    {
+      return atermpp::aterm_appl(t);
+    }
+    else
+    {
+      return i->second;
+    }
+  }
+};
+
+template <typename Term, typename ReplaceFunction>
+Term realelm_replace_data_expressions(Term t, ReplaceFunction r)
+{
+  return atermpp::partial_replace(t, realelm_replace_data_expressions_helper<ReplaceFunction>(r));
+}
+
+template <typename Term, typename MapContainer>
+Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements)
+{
+  return realelm_replace_data_expressions(t, realelm_map_replace_helper<MapContainer>(replacements));
+}
+// End of replace substitute
+
 // Implementation of integer exponentiation
 static
 unsigned long pow(unsigned long base, unsigned long exponent)
@@ -552,7 +629,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
         {
           if(*k != *j)
           {
-            new_inequalities = push_front(new_inequalities, r(data_expression_map_replace(*k, replacements)));
+            new_inequalities = push_front(new_inequalities, r(realelm_data_expression_map_replace(*k, replacements)));
           }
         }
         inequalities = new_inequalities;
@@ -648,7 +725,7 @@ static
 bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator);
 
 static
-bool add_inequalities_to_context(const data_expression_list& l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+bool add_inequalities_to_context(data_expression_list l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
   bool result = false;
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
@@ -662,6 +739,10 @@ bool add_inequalities_to_context(const data_expression_list& l, atermpp::map<std
 static
 bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
+  if(!is_inequality(e))
+  {
+    return false;
+  }
   assert(is_inequality(e));
   bool result = false;
   data_expression left = lhs(e);
@@ -844,11 +925,21 @@ data_expression compute_condition_from_inequalities(data_expression_list inequal
 
 data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
 {
+  gsVerboseMsg("Performing the following replacements: ");
+  for(atermpp::map<data_expression, data_expression>::const_iterator j = replacements.begin(); j != replacements.end(); ++j)
+  {
+    gsVerboseMsg("%s := %s, ", pp(j->first).c_str(), pp(j->second).c_str());
+    gsVerboseMsg("%s := %s, ", j->first.to_string().c_str(), j->second.to_string().c_str());
+  }
+  gsVerboseMsg("\n"); 
+  gsVerboseMsg("in inequalities %s\n", pp(inequalities).c_str());
   data_expression_list result;
   for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
   {
-    result = push_front(result, data_expression_map_replace(*i, replacements));
+    gsVerboseMsg("*i = %s\n", i->to_string().c_str());
+    result = push_front(result, realelm_data_expression_map_replace(*i, replacements));
   }
+  gsVerboseMsg("resulting in %s\n", pp(result).c_str());
   return result;
 }
 
@@ -873,57 +964,60 @@ data_expression_list transform_real_to_cond(const data_expression_list& cond, at
   data_expression_list result;
   for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
   {
-    data_expression left = lhs(*i);
-    data_expression right = rhs(*i);
-    if(is_negative(right))
+    if(is_inequality(*i))
     {
-      left = r(negate(left));
-      right = r(negate(right));
-    }
-    atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j;
-    j = context.find(std::make_pair(left, right));
-    if(j == context.end())
-    {
-      result = push_front(result, *i);
-    }
-    else
-    {
-      if(is_negative(rhs(*i)))
+      data_expression left = lhs(*i);
+      data_expression right = rhs(*i);
+      if(is_negative(right))
       {
-        if(is_less(*i))
-        {
-          result = push_front(result, static_cast<const data_expression&>(is_larger(j->second)));
-        }
-        else if(is_less_equal(*i))
-        {
-          result = push_front(result, or_(static_cast<const data_expression&>(is_larger(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
-        }
-        else if(is_equal_to(*i))
-        {
-          result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
-        }
-        else
-        {
-          assert(false);
-        }
+        left = r(negate(left));
+        right = r(negate(right));
+      }
+      atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j;
+      j = context.find(std::make_pair(left, right));
+      if(j == context.end())
+      {
+        result = push_front(result, *i);
       }
       else
       {
-        if(is_less(*i))
+        if(is_negative(rhs(*i)))
         {
-          result = push_front(result,static_cast<const data_expression&>(is_smaller(j->second)));
-        }
-        else if(is_less_equal(*i))
-        {
-          result = push_front(result, or_(static_cast<const data_expression&>(is_smaller(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
-        }
-        else if(is_equal_to(*i))
-        {
-          result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
+          if(is_less(*i))
+          {
+            result = push_front(result, static_cast<const data_expression&>(is_larger(j->second)));
+          }
+          else if(is_less_equal(*i))
+          {
+            result = push_front(result, or_(static_cast<const data_expression&>(is_larger(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
+          }
+          else if(is_equal_to(*i))
+          {
+            result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
+          }
+          else
+          {
+            assert(false);
+          }
         }
         else
         {
-          assert(false);
+          if(is_less(*i))
+          {
+            result = push_front(result,static_cast<const data_expression&>(is_smaller(j->second)));
+          }
+          else if(is_less_equal(*i))
+          {
+            result = push_front(result, or_(static_cast<const data_expression&>(is_smaller(j->second)), static_cast<const data_expression&>(is_equal(j->second))));
+          }
+          else if(is_equal_to(*i))
+          {
+            result = push_front(result, static_cast<const data_expression&>(is_equal(j->second)));
+          }
+          else
+          {
+            assert(false);
+          }
         }
       }
     }
@@ -993,8 +1087,8 @@ data_assignment_list determine_process_initialization(const data_assignment_list
 
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = context.begin(); i != context.end(); ++i)
   {
-    data_expression left = data_expression_map_replace(i->first.first, replacements);
-    data_expression right = data_expression_map_replace(i->first.second, replacements);
+    data_expression left = realelm_data_expression_map_replace(i->first.first, replacements);
+    data_expression right = realelm_data_expression_map_replace(i->first.second, replacements);
     data_assignment assignment;
     if(r(less(left, right)) == true_())
     {
@@ -1052,6 +1146,12 @@ specification realelm(specification s)
       }
     }
     summand_real_nextstate_map[*i] = replacements;
+    gsDebugMsg("replacements for summand %s:\n", pp(*i).c_str());
+    for(atermpp::map<data_expression, data_expression>::const_iterator j = replacements.begin(); j != replacements.end(); ++j)
+    {
+      gsDebugMsg("%s := %s, ", pp(j->first).c_str(), pp(j->second).c_str());
+    }
+    gsDebugMsg("\n");
   }
 
   bool changed = false;
@@ -1061,7 +1161,7 @@ specification realelm(specification s)
     changed = false;
     summands = summand_list();
     assert(summands.empty());
-    gsDebugMsg("Iteration %d\n", ++iteration);
+    gsDebugMsg("Iteration %d\n", iteration++);
 
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
@@ -1076,7 +1176,10 @@ specification realelm(specification s)
         for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
           data_expression_list nextstate_inequalities = compute_inequalities(nextstate_combination, context);
+          gsDebugMsg("inequalities for nextstate before substitution: %s\n", pp(nextstate_inequalities).c_str());
           nextstate_inequalities = data_expression_map_replace_list(nextstate_inequalities, summand_real_nextstate_map[*i]);
+
+          gsDebugMsg("inequalities for nextstate: %s\n", pp(nextstate_inequalities).c_str());
 
           data_expression_list cond = nextstate_inequalities + summand_real_conditions[*i];
           cond = simplify_cond(cond, context_inequalities);
@@ -1087,6 +1190,7 @@ specification realelm(specification s)
           // that are not yet in the context.
           gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
           fourrier_motzkin(cond, i->summation_variables(), r);
+          cond = normalize_inequalities(cond, r);
           gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
           // cond contains the inequalities over the process parameters
           changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
