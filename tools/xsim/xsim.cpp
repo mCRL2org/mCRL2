@@ -34,6 +34,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_wx.h"
 
 std::string get_about_message() {
   static const std::string version_information =
@@ -103,43 +104,19 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
-class XSim: public wxApp
+class XSim: public mcrl2::utilities::wx::tool< XSim >
 {
 private:
     RewriteStrategy rewrite_strategy;
     bool            dummies;
-    std::string     parse_error;
 
 public:
-    virtual bool OnInit();
+    bool DoInit();
 
-    void parse_command_line(int argc, wxChar** argv);
-
-    bool Initialize(int& argc, wxChar** argv) {
-      try {
-        parse_command_line(argc, argv);
-      }
-      catch (std::exception& e) {
-        if (wxApp::Initialize(argc, argv)) {
-          parse_error = std::string(e.what()).
-            append("\n\nNote that other command line options may have been ignored because of this error.");
-        }
-        else {
-          std::cerr << e.what() << std::endl;
-
-          return false;
-        }
-
-        return true;
-      }
-
-      return wxApp::Initialize(argc, argv);
-    }
-
-    virtual int OnExit();
+    bool parse_command_line(int argc, wxChar** argv);
 };
 
-void XSim::parse_command_line(int argc, wxChar** argv) {
+bool XSim::parse_command_line(int argc, wxChar** argv) {
 
   using namespace ::mcrl2::utilities;
 
@@ -155,16 +132,20 @@ void XSim::parse_command_line(int argc, wxChar** argv) {
 
   command_line_parser parser(clinterface, argc, argv);
 
-  dummies = 0 < parser.options.count("dummy");
+  if (parser.continue_execution()) {
+    dummies = 0 < parser.options.count("dummy");
 
-  rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+    rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (0 < parser.arguments.size()) {
-    lps_file_argument = parser.arguments[0];
+    if (0 < parser.arguments.size()) {
+      lps_file_argument = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
   }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
+
+  return parser.continue_execution();
 }
 
 static XSim *this_xsim = NULL;
@@ -206,48 +187,28 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
   }
 }
 
-
-bool XSim::OnInit()
+bool XSim::DoInit()
 {
-
-  this_xsim = this;
-
-  /* Whether to replace free variables in the LPS with dummies */
-  dummies = false;
- 
-  /* The rewrite strategy that will be used */
-  rewrite_strategy = GS_REWR_JITTY;
- 
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
   frame->simulator->use_dummies = dummies;
   frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
-
-  if (!parse_error.empty()) {
-    wxMessageDialog(frame, wxString(parse_error.c_str(), wxConvLocal),
-         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
-  }
-
+ 
   if (!lps_file_argument.empty()) {
     frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
   }
- 
-  return true;
-}
 
-int XSim::OnExit()
-{
-    return 0;
+  return true;
 }
 
 IMPLEMENT_APP_NO_MAIN(XSim)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
 
   MCRL2_ATERM_INIT(0, lpCmdLine)
 

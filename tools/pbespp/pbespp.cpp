@@ -42,6 +42,48 @@ struct t_tool_options {
   std::string  specification_file_name;
   std::string  output_file_name;
   t_pp_format  format;
+
+  bool parse_command_line(int ac, char** av) {
+    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+      "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
+      "is not present, stdout is used. If INFILE is not present, stdin is used.");
+
+    clinterface.
+      add_option("format", make_mandatory_argument("FORMAT"),
+        "print the PBES in the specified FORMAT:\n"
+        "  'internal' for a textual ATerm representation of the internal format,\n"
+        "  'default' for an PBES specification (default), or\n"
+        "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section", 'f');
+
+    command_line_parser parser(clinterface, ac, av);
+
+    if (parser.continue_execution()) {
+      format = ppDefault;
+
+      if (parser.options.count("format")) {
+        std::string str_format(parser.option_argument("format"));
+        if (str_format == "internal") {
+          format = ppInternal;
+        } else if (str_format == "debug") {
+          format = ppDebug;
+        } else if (str_format != "default") {
+          parser.error("option -f/--format has illegal argument '" + str_format + "'");
+        }
+      } 
+
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
+      }
+      if (0 < parser.arguments.size()) {
+        specification_file_name = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        output_file_name = parser.arguments[1];
+      }
+    }
+
+    return parser.continue_execution();
+  }
 };
 
 static void print_specification_file_name(t_tool_options const& tool_options);
@@ -50,60 +92,23 @@ static std::string pp_format_to_string(t_pp_format pp_format);
 
 //implementation
 
-t_tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-    "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
-    "is not present, stdout is used. If INFILE is not present, stdin is used.");
-
-  clinterface.
-    add_option("format", make_mandatory_argument("FORMAT"),
-      "print the PBES in the specified FORMAT:\n"
-      "  'internal' for a textual ATerm representation of the internal format,\n"
-      "  'default' for an PBES specification (default), or\n"
-      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section", 'f');
-
-  command_line_parser parser(clinterface, ac, av);
-
-  t_tool_options tool_options;
-
-  tool_options.format = ppDefault;
-
-  if (parser.options.count("format")) {
-    std::string str_format(parser.option_argument("format"));
-    if (str_format == "internal") {
-      tool_options.format = ppInternal;
-    } else if (str_format == "debug") {
-      tool_options.format = ppDebug;
-    } else if (str_format != "default") {
-      parser.error("option -f/--format has illegal argument '" + str_format + "'");
-    }
-  } 
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  if (0 < parser.arguments.size()) {
-    tool_options.specification_file_name = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    tool_options.output_file_name = parser.arguments[1];
-  }
-
-  return tool_options;
-}
-
 int main(int argc, char* argv[]) {
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-    //print specification  
-    print_specification_file_name(parse_command_line(argc, argv));
-    return EXIT_SUCCESS;
+    t_tool_options options;
+
+    if (options.parse_command_line(argc, argv)) {
+      //print specification  
+      print_specification_file_name(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  return EXIT_SUCCESS;
 }
 
 void print_specification_file_name(t_tool_options const& tool_options)

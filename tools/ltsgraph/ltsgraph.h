@@ -26,8 +26,12 @@
 
 #include <wx/app.h>
 
-class LTSGraph : public wxApp
+#include "mcrl2/utilities/command_line_wx.h"
+
+class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
 {
+  friend class mcrl2::utilities::wx::tool< LTSGraph >;
+
   private:
     Graph *graph; // The labeled transition system (graph) that we work on
 
@@ -36,21 +40,18 @@ class LTSGraph : public wxApp
     MainFrame *mainFrame;  // Mainframe/central GUI.
     std::vector<LayoutAlgorithm*> algorithms; // The layout algorithms loaded.
 
-    void printHelp(std::string const &appName);
-
     State* selectedState;
     Transition* selectedTransition;
     Transition* selectedLabel; // Label of transition selected should be moved
 
-    std::string parse_error;
     std::string fileName;
     bool colouring;
     wxColour brushColour;
 
+    bool parse_command_line(int argc, wxChar** argv);
+
   public:
-    virtual int OnExit();   
-    virtual bool OnInit();
-    bool Initialize(int& argc, wxChar** argv);
+    bool DoInit();
     
     void openFile(std::string const &path);
     void display();

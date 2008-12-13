@@ -102,7 +102,7 @@ std::string get_about_message() {
   return version_information;
 }
 
-void parse_command_line(int argc, wxChar** argv) {
+bool LTSView::parse_command_line(int argc, wxChar** argv) {
 
   using namespace mcrl2::utilities;
 
@@ -126,14 +126,21 @@ void parse_command_line(int argc, wxChar** argv) {
 
   command_line_parser parser(clinterface, argc, argv);
 
-  if (parser.arguments.size() > 1)
-  {
-    parser.error("too many file arguments");
+  // Used to guard destruction in OnExit()
+  lts = 0;
+
+  if (parser.continue_execution()) {
+    if (parser.arguments.size() > 1)
+    {
+      parser.error("too many file arguments");
+    }
+    else if (parser.arguments.size() == 1)
+    {
+      lts_file_argument = parser.arguments[0];
+    }
   }
-  else if (parser.arguments.size() == 1)
-  {
-    lts_file_argument = parser.arguments[0];
-  }
+
+  return parser.continue_execution();
 }
 
 IMPLEMENT_APP_NO_MAIN(LTSView)
@@ -141,7 +148,7 @@ IMPLEMENT_APP_NO_MAIN(LTSView)
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
-bool LTSView::OnInit()
+bool LTSView::DoInit()
 {
   lts = NULL;
   rankStyle = ITERATIVE;
@@ -161,13 +168,7 @@ bool LTSView::OnInit()
 
   wxInitAllImageHandlers();
 
-  if ( !parse_error.empty() )
-  {
-    wxMessageDialog msg_dlg(mainFrame, wxString(parse_error.c_str(), wxConvLocal),
-        wxT("Command line error"), wxOK | wxICON_ERROR);
-    msg_dlg.ShowModal();
-  }
-  else if (!lts_file_argument.empty())
+  if (!lts_file_argument.empty())
   {
     wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
     fileName.Normalize();
@@ -176,28 +177,6 @@ bool LTSView::OnInit()
   }
   return true;
 }
-
-bool LTSView::Initialize(int& argc, wxChar** argv) {
-  try {
-    parse_command_line(argc, argv);
-  }
-  catch (std::exception& e) {
-    if (wxApp::Initialize(argc, argv)) {
-      parse_error = std::string(e.what()).
-        append("\n\nNote that other command line options may have been ignored because of this error.");
-    }
-    else {
-      std::cerr << e.what() << std::endl;
-
-      return false;
-    }
-
-    return true;
-  }
-
-  return wxApp::Initialize(argc, argv);
-}
-
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
@@ -231,10 +210,12 @@ int main(int argc, char **argv) {
 #endif
 
 int LTSView::OnExit() {
-  if (lts != NULL) delete lts;
-  delete settings;
-  delete visualizer;
-  delete markManager;
+  if (lts != 0) {
+    delete lts;
+    delete settings;
+    delete visualizer;
+    delete markManager;
+  }
   return 0;
 }
 

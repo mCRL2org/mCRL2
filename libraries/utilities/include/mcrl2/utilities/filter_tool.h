@@ -36,7 +36,7 @@ namespace utilities {
 
       /// The description of the tool
       std::string m_tool_description;
-        
+
       /// The input file name
       std::string m_input_filename;
 
@@ -56,24 +56,29 @@ namespace utilities {
       /// \brief Parse command line options
       /// \param argc Number of command line arguments
       /// \param argv Command line arguments
-      void parse_options(int argc, char* argv[])
+      bool parse_options(int argc, char* argv[])
       {
         utilities::interface_description clinterface(argv[0], m_name, m_author, "[OPTION]... [INFILE [OUTFILE]]\n", m_tool_description);
         add_options(clinterface);
         utilities::command_line_parser parser(clinterface, argc, argv);
-        if (0 < parser.arguments.size())
+        if (parser.continue_execution())
         {
-          m_input_filename = parser.arguments[0];
+          if (0 < parser.arguments.size())
+          {
+            m_input_filename = parser.arguments[0];
+          }
+          if (1 < parser.arguments.size())
+          {
+            m_output_filename = parser.arguments[1];
+          }
+          if (2 < parser.arguments.size())
+          {
+            parser.error("too many file arguments");
+          }
+          parse_options(parser);
         }
-        if (1 < parser.arguments.size())
-        {
-          m_output_filename = parser.arguments[1];
-        }
-        if (2 < parser.arguments.size())
-        {
-          parser.error("too many file arguments");
-        }
-        parse_options(parser);
+
+        return parser.continue_execution();
       }
 
     public:
@@ -103,20 +108,20 @@ namespace utilities {
       int execute(int argc, char* argv[])
       {
         try {
-          parse_options(argc, argv);
-          if (run())
+          if (parse_options(argc, argv))
           {
-            return EXIT_SUCCESS;
-          }
-          else
-          {
-            return EXIT_FAILURE;
+            if (!run())
+            {
+              return EXIT_FAILURE;
+            }
           }
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
           return EXIT_FAILURE;
         }
+
+        return EXIT_SUCCESS;
       }
 
       /// \brief Sets the input filename.

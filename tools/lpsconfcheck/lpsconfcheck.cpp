@@ -115,7 +115,7 @@ using namespace mcrl2::lps;
       LPS_Conf_Check();
 
       /// \brief Parses command line options
-      void get_options(int argc, char* argv[]);
+      bool get_options(int argc, char* argv[]);
 
       /// \brief Reads an LPS and an invariant from the specified input sources.
       void read_input();
@@ -434,7 +434,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     /// \param argc is the number of arguments passed on the command line
     /// \param argv is an array of all arguments passed on the command line
 
-    void LPS_Conf_Check::get_options(int argc, char* argv[]) {
+    bool LPS_Conf_Check::get_options(int argc, char* argv[]) {
       interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
         "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
         "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
@@ -472,52 +472,56 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
       command_line_parser parser(clinterface, argc, argv);
 
-      f_no_check            = 0 < parser.options.count("no-check");
-      f_no_marking          = 0 < parser.options.count("no-marking");
-      f_generate_invariants = 0 < parser.options.count("generate-invariants");
-      f_check_all           = 0 < parser.options.count("check-all");
-      f_counter_example     = 0 < parser.options.count("counter-example");
-      f_apply_induction     = 0 < parser.options.count("induction");
+      if (parser.continue_execution()) {
+        f_no_check            = 0 < parser.options.count("no-check");
+        f_no_marking          = 0 < parser.options.count("no-marking");
+        f_generate_invariants = 0 < parser.options.count("generate-invariants");
+        f_check_all           = 0 < parser.options.count("check-all");
+        f_counter_example     = 0 < parser.options.count("counter-example");
+        f_apply_induction     = 0 < parser.options.count("induction");
 
-      if (parser.options.count("invariant")) {
-        f_invariant_file_name = parser.option_argument_as< std::string >("invariant");
-      }
+        if (parser.options.count("invariant")) {
+          f_invariant_file_name = parser.option_argument_as< std::string >("invariant");
+        }
 
-      if (parser.options.count("print-dot")) {
-        f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
-      }
-      if (parser.options.count("summand")) {
-        f_summand_number = parser.option_argument_as< size_t >("summand");
+        if (parser.options.count("print-dot")) {
+          f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
+        }
+        if (parser.options.count("summand")) {
+          f_summand_number = parser.option_argument_as< size_t >("summand");
+      
+          if (f_summand_number < 1) {
+            parser.error("The summand number must be greater than or equal to 1.\n");
+          }
+          else {
+            gsVerboseMsg("Checking confluence of summand number %u.\n", f_summand_number);
+          }
+        }
+        if (parser.options.count("time-limit")) {
+          f_time_limit = parser.option_argument_as< size_t >("time-limit");
+        }
 
-        if (f_summand_number < 1) {
-          parser.error("The summand number must be greater than or equal to 1.\n");
+        f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+        if (parser.options.count("smt-solver")) {
+          f_path_eliminator = true;
+          f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
+        }
+
+        if (2 < parser.arguments.size()) {
+          parser.error("too many file arguments");
         }
         else {
-          gsVerboseMsg("Checking confluence of summand number %u.\n", f_summand_number);
+          if (0 < parser.arguments.size()) {
+            f_input_file_name = parser.arguments[0];
+          }
+          if (1 < parser.arguments.size()) {
+            f_output_file_name = parser.arguments[1];
+          }
         }
       }
-      if (parser.options.count("time-limit")) {
-        f_time_limit = parser.option_argument_as< size_t >("time-limit");
-      }
 
-      f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-      if (parser.options.count("smt-solver")) {
-        f_path_eliminator = true;
-        f_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
-      }
-
-      if (2 < parser.arguments.size()) {
-        parser.error("too many file arguments");
-      }
-      else {
-        if (0 < parser.arguments.size()) {
-          f_input_file_name = parser.arguments[0];
-        }
-        if (1 < parser.arguments.size()) {
-          f_output_file_name = parser.arguments[1];
-        }
-      }
+      return parser.continue_execution();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -648,19 +652,19 @@ int main(int argc, char* argv[]) {
   try {
     LPS_Conf_Check v_lps_conf_check;
 
-    v_lps_conf_check.get_options(argc, argv);
-    v_lps_conf_check.read_input();
+    if (v_lps_conf_check.get_options(argc, argv)) {
+      v_lps_conf_check.read_input();
 
-    if (v_lps_conf_check.check_invariant()) {
-      v_lps_conf_check.check_confluence_and_mark();
-      v_lps_conf_check.write_result();
+      if (v_lps_conf_check.check_invariant()) {
+        v_lps_conf_check.check_confluence_and_mark();
+        v_lps_conf_check.write_result();
+      }
     }
-
-    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

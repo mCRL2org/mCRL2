@@ -200,7 +200,7 @@ int do_binary(const tool_options& options)
 }
 
 ///Parses command line and sets settings from command line switches
-tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, tool_options& t_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
                             "Replace finite sort variables by vectors of boolean variables in the LPS in\n"
                             "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used.\n"
@@ -210,21 +210,23 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options = { "", "", RewriteStrategyFromString(parser.option_argument("rewriter").c_str()) };
+  if (parser.continue_execution()) {
+    t_options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      t_options.input_file = parser.arguments[0];
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      t_options.output_file = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        t_options.input_file = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        t_options.output_file = parser.arguments[1];
+      }
     }
   }
 
-  return t_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv)
@@ -237,12 +239,16 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
     }
 #endif
+    tool_options options;
 
-    return do_binary(parse_command_line(argc,argv));
+    if (parse_command_line(argc,argv, options)) {
+      return do_binary(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

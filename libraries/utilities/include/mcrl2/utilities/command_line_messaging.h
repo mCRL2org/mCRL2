@@ -1,3 +1,6 @@
+#ifndef __MCRL2_COMMAND_LINE_REWRITING_HPP_
+#define __MCRL2_COMMAND_LINE_REWRITING_HPP_
+
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/core/messaging.h"
 
@@ -40,4 +43,6 @@ namespace mcrl2 {
     }
   }
 }
+
+#endif
 

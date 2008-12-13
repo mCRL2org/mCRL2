@@ -22,10 +22,7 @@
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/aterm_ext.h"
-
-#ifndef __MCRL2_UTILITIES_HPP__
 #include "mcrl2/utilities/command_line_interface.h"
-#endif
 
 std::string lts_file_argument;
 
@@ -90,7 +87,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 };
 #endif
 
-void parse_command_line(int argc, wxChar** argv)
+bool LTSGraph::parse_command_line(int argc, wxChar** argv)
 {
   using namespace ::mcrl2::utilities;
 
@@ -101,16 +98,20 @@ void parse_command_line(int argc, wxChar** argv)
 
   command_line_parser parser(clinterface, argc, argv);
 
-  if (0 < parser.arguments.size()) {
-    lts_file_argument = parser.arguments[0];
+  if (parser.continue_execution()) {
+    if (0 < parser.arguments.size()) {
+      lts_file_argument = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
   }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
+
+  return parser.continue_execution();
 }
 
 
-bool LTSGraph::OnInit()
+bool LTSGraph::DoInit()
 {
   colouring = false;
   brushColour = *wxRED;
@@ -141,57 +142,6 @@ bool LTSGraph::OnInit()
   mainFrame->Layout();
 
   return true;
-}
-
-bool LTSGraph::Initialize(int& argc, wxChar** argv) 
-{
-  try {
-    parse_command_line(argc, argv);
-  }
-  catch (std::exception &e)
-  {
-    if(wxApp::Initialize(argc, argv)) 
-    {
-      parse_error = std::string(e.what()).
-        append("\n\nNote that other command line options may have been ignored because of this error.");
-    }
-    else
-    {
-      std::cerr << e.what() <<std::endl;
-
-      return false;
-    }
-
-    return true;
-  }
-
-  return wxApp::Initialize(argc, argv);
-}
-
-
-int LTSGraph::OnExit() {
- 
-  return (wxApp::OnExit());
-}
-
-void LTSGraph::printHelp(std::string const &name) {
-  std::cout << "Usage: " << name << " [INFILE]" << std::endl 
-       << "Draw graphs and optimize their layout in a graphical environment."
-       << "If INFILE is supplied," 
-       << "the tool will use this file" << std::endl
-       << "as input for drawing." << std::endl << std::endl
-       << "Use left click to drag the nodes and right click to fix the nodes."
-       << std::endl
-       << std::endl 
-       << "Options:" << std::endl 
-       << "  -h, --help            display this help message and terminate"
-       << std::endl 
-
-       << "      --version         displays version information and terminate"
-       << std::endl
-       << std::endl 
-       << "Report bugs at <http://www.mcrl2.org/issuetracker>."
-       << std::endl;
 }
 
 IMPLEMENT_APP_NO_MAIN(LTSGraph)

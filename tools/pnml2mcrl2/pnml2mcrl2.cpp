@@ -2382,7 +2382,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
-  tool_options_type parse_command_line(int ac, char** av) {
+  bool parse_command_line(int ac, char** av, tool_options_type& tool_options) {
     interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
       "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
       "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
@@ -2406,31 +2406,31 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     command_line_parser parser(clinterface, ac, av);
 
-    tool_options_type tool_options;
-
-    if (parser.options.count("error")) {
-      error = parser.option_argument_as< unsigned long >("error");
-    }
-    if (parser.options.count("hide")) {
-      hide = ATtrue;
-    }
-    if (parser.options.count("no-rec-par")) {
-      rec_par = ATfalse;
-    }
-
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        tool_options.infilename = parser.arguments[0];
+    if (parser.continue_execution()) {
+      if (parser.options.count("error")) {
+        error = parser.option_argument_as< unsigned long >("error");
       }
-      if (1 < parser.arguments.size()) {
-        tool_options.outfilename = parser.arguments[1];
+      if (parser.options.count("hide")) {
+        hide = ATtrue;
+      }
+      if (parser.options.count("no-rec-par")) {
+        rec_par = ATfalse;
+      }
+
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
+      }
+      else {
+        if (0 < parser.arguments.size()) {
+          tool_options.infilename = parser.arguments[0];
+        }
+        if (1 < parser.arguments.size()) {
+          tool_options.outfilename = parser.arguments[1];
+        }
       }
     }
 
-    return tool_options;
+    return parser.continue_execution();
   }
 
   //==================================================
@@ -2446,13 +2446,19 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
         return EXIT_SUCCESS;
       }
 #endif
-      return perform_task(parse_command_line(argc, argv));
+
+      tool_options_type options;
+
+      if (parse_command_line(argc, argv, options)) {
+        return perform_task(options);
+      }
     }
     catch (std::exception& e) {
       std::cerr << e.what() << std::endl;
+      return EXIT_FAILURE;
     }
 
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
   }
 
 // Added by Yarick: alternative generation of Places:

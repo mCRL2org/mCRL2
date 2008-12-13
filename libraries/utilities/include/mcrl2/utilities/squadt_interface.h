@@ -204,18 +204,23 @@ namespace mcrl2 {
 
         public:
 
-#if !(defined(__WINDOWS__) && defined(__WXWINDOWS__))
-          /**
-           * \brief builds a connection with SQuADT
-           **/
-          inline static bool free_activation(int& ac, char**& av) {
-            T communicator;
+#if defined(__WINDOWS__)
+          inline static bool free_activation(T& instance, HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
+# ifdef __WXWINDOWS__
+            wxCmdLineArgType dummy_lpCmdLine = const_cast< char* >("squadt-tool");
 
-#if defined(__WXWINDOWS__)
-            communicator.m_starter.reset(new entry_wrapper(ac, av));
-#endif
+            instance.m_starter.reset(new entry_wrapper(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow));
+# endif
 
-            return (communicator.try_interaction(ac, av));
+            return instance.try_interaction(lpCmdLine);
+          }
+#else
+          inline static bool free_activation(T& instance, int& ac, char** av) {
+# if defined(__WXWINDOWS__)
+            instance.m_starter.reset(new entry_wrapper(ac, av));
+# endif
+
+            return instance.try_interaction(ac, av);
           }
 #endif
 
@@ -223,16 +228,28 @@ namespace mcrl2 {
           inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
             T communicator;
 
-# ifdef __WXWINDOWS__
-            wxCmdLineArgType dummy_lpCmdLine = const_cast< char* >("squadt-tool");
+            return free_activation(communicator, hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+          }
+#else 
+          inline static bool free_activation(int& ac, char** av) {
+            T communicator;
 
-            communicator.m_starter.reset(new entry_wrapper(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow));
-# endif
-
-            return (communicator.try_interaction(lpCmdLine));
+            return free_activation(communicator, ac, av);
           }
 #endif
       };
+
+#if defined(__WINDOWS__)
+      template < typename T >
+      inline bool free_activation(T& instance, HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
+        return interactor< T >::free_activation(instance, hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+      }
+#else 
+      template < typename T >
+      inline bool free_activation(T& instance, int& ac, char** av) {
+        return interactor< T >::free_activation(instance, ac, av);
+      }
+#endif
 
       /// \brief Helper function for unsigned long to string conversion
       inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {

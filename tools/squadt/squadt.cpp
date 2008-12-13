@@ -22,6 +22,7 @@
 #include "boost/filesystem/convenience.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_wx.h"
 
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
@@ -49,7 +50,8 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
 using namespace squadt::GUI;
 
 /* SQuADt class declaration */
-class SQuADt : public wxApp {
+class SQuADt : public mcrl2::utilities::wx::tool< SQuADt > {
+  friend class mcrl2::utilities::wx::tool< SQuADt >;
 
   private:
 
@@ -59,45 +61,16 @@ class SQuADt : public wxApp {
     // Port number to listen on for incoming TCP connections
     tipi::tcp_port                                tcp_port_number;
 
-    std::string                                   parse_error;
-
   private:
 
-    void parse_command_line(int& argc, wxChar** argv);
+    bool parse_command_line(int& argc, wxChar** argv);
 
-  public:
-
-    bool OnInit();
-
-    bool Initialize(int& argc, wxChar** argv) {
-      try {
-        parse_command_line(argc, argv);
-      }
-      catch (std::exception& e) {
-        if (wxApp::Initialize(argc, argv)) {
-          parse_error = std::string(e.what()).
-            append("\n\nNote that other command line options may have been ignored because of this error.");
-        }
-        else {
-          std::cerr << e.what() << std::endl;
-
-          return false;
-        }
-
-        return true;
-      }
-
-      return wxApp::Initialize(argc, argv);
-    }
-
-    int OnExit() {
-      return wxApp::OnExit();
-    }
+    bool DoInit();
 };
 
 IMPLEMENT_APP(SQuADt)
 
-void SQuADt::parse_command_line(int& argc, wxChar** argv) {
+bool SQuADt::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
   if (0 < argc) {
@@ -114,50 +87,56 @@ void SQuADt::parse_command_line(int& argc, wxChar** argv) {
 
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
 
-    // default log level
-    tipi::utility::logger::log_level default_log_level = 1;
-
-    if (0 < parser.options.count("create")) {
-      if (parser.arguments.size() != 1) {
-        parser.error("create option requires that a path is provided.");
-      }
-    }
-    if (0 < parser.options.count("port")) {
-      tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
-    }
-
-    if (parser.arguments.size() == 1) {
-      boost::filesystem::path target(parser.arguments[0]);
-
-      if (!target.has_root_path()) {
-        target = boost::filesystem::initial_path() / target;
-      }
+    if (parser.continue_execution()) {
+      // default log level
+      tipi::utility::logger::log_level default_log_level = 1;
 
       if (0 < parser.options.count("create")) {
-        action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
+        if (parser.arguments.size() != 1) {
+          parser.error("create option requires that a path is provided.");
+        }
       }
-      else {
-        action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
+      if (0 < parser.options.count("port")) {
+        tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
       }
+
+      if (parser.arguments.size() == 1) {
+        boost::filesystem::path target(parser.arguments[0]);
+
+        if (!target.has_root_path()) {
+          target = boost::filesystem::initial_path() / target;
+        }
+
+        if (0 < parser.options.count("create")) {
+          action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
+        }
+        else {
+          action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
+        }
+      }
+
+      if (1 < parser.arguments.size()) {
+        parser.error("too many file arguments!");
+      }
+
+      if (parser.options.count("quiet")) {
+        default_log_level = 0;
+      }
+      if (parser.options.count("verbose")) {
+        default_log_level = 2;
+      }
+      if (parser.options.count("debug")) {
+        default_log_level = 3;
+      }
+
+      tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
+      tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
     }
 
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments!");
-    }
-
-    if (parser.options.count("quiet")) {
-      default_log_level = 0;
-    }
-    if (parser.options.count("verbose")) {
-      default_log_level = 2;
-    }
-    if (parser.options.count("debug")) {
-      default_log_level = 3;
-    }
-
-    tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
-    tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
+    return parser.continue_execution();
   }
+
+  return true;
 }
 
 /*
@@ -165,7 +144,7 @@ void SQuADt::parse_command_line(int& argc, wxChar** argv) {
  *
  * Must return true because static initialisation might not have completed
  */
-bool SQuADt::OnInit() {
+bool SQuADt::DoInit() {
   using namespace squadt;
   using namespace squadt::GUI;
 
@@ -290,11 +269,7 @@ bool SQuADt::OnInit() {
     /* Initialise main application window */
     SetTopWindow(new squadt::GUI::main());
 
-    if (!parse_error.empty()) {
-      wxMessageDialog(GetTopWindow(), wxString(parse_error.c_str(), wxConvLocal),
-                         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
-    }
-    else if (action) {
+    if (action) {
       action(static_cast < squadt::GUI::main* > (GetTopWindow()));
     }
 

@@ -42,7 +42,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 //Functions used by the main program
-static t_lin_options parse_command_line(int argc, char *argv[]);
+static bool parse_command_line(int argc, char *argv[], t_lin_options& options);
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
 
@@ -307,7 +307,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
     send_error("Configuration does not contain a linearisation method\n");
 
     result = false;
-  } 
+  }
 
   task_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
   task_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
@@ -320,7 +320,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   task_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
   task_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
   task_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
-  
+
   task_options.end_phase = c.get_option_argument< t_phase >(option_end_phase, 0);
 
   task_options.check_only = (task_options.end_phase != phNone);
@@ -356,7 +356,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   ATermAppl linearisation_result = linearise_file(task_options);
 
   if (linearisation_result == 0) {
-    message.set_text("Linearisation in failed");
+    message.set_text("Linearisation failed");
 
     result = false;
   }
@@ -390,7 +390,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 #endif
 
-static t_lin_options parse_command_line(int argc, char *argv[])
+static bool parse_command_line(int argc, char *argv[], t_lin_options& options)
 { 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
@@ -453,86 +453,86 @@ static t_lin_options parse_command_line(int argc, char *argv[])
 
   command_line_parser parser(clinterface, argc, argv);
 
-  t_lin_options options;
+  if (parser.continue_execution()) {
+    options.final_cluster           = 0 < parser.options.count("cluster");
+    options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
+    options.noalpha                 = 0 < parser.options.count("no-alpha");
+    options.newstate                = 0 < parser.options.count("newstate");
+    options.binary                  = 0 < parser.options.count("binary");
+    options.statenames              = 0 < parser.options.count("statenames");
+    options.norewrite               = 0 < parser.options.count("no-rewrite");
+    options.nofreevars              = 0 < parser.options.count("no-freevars");
+    options.nosumelm                = 0 < parser.options.count("no-sumelm");
+    options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
+    options.add_delta               = 0 < parser.options.count("delta");
+    options.pretty                  = 0 < parser.options.count("pretty");
+    options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
+    options.lin_method = lmRegular;
 
-  options.final_cluster           = 0 < parser.options.count("cluster");
-  options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
-  options.noalpha                 = 0 < parser.options.count("no-alpha");
-  options.newstate                = 0 < parser.options.count("newstate");
-  options.binary                  = 0 < parser.options.count("binary");
-  options.statenames              = 0 < parser.options.count("statenames");
-  options.norewrite               = 0 < parser.options.count("no-rewrite");
-  options.nofreevars              = 0 < parser.options.count("no-freevars");
-  options.nosumelm                = 0 < parser.options.count("no-sumelm");
-  options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
-  options.add_delta               = 0 < parser.options.count("delta");
-  options.pretty                  = 0 < parser.options.count("pretty");
-  options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
-  options.lin_method = lmRegular;
-
-  if (0 < parser.options.count("check-only")) {
-    options.check_only = true;
-    options.end_phase  = phTypeCheck;
-  }
-
-  if (0 < parser.options.count("lin-method")) {
-    if (1 < parser.options.count("lin-method")) {
-      parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
+    if (0 < parser.options.count("check-only")) {
+      options.check_only = true;
+      options.end_phase  = phTypeCheck;
     }
-    std::string lin_method_str(parser.option_argument("lin-method"));
-    if (lin_method_str == "stack") {
-      options.lin_method = lmStack;
-    } else if (lin_method_str == "regular") {
-      options.lin_method = lmRegular;
-    } else if (lin_method_str == "regular2") {
-      options.lin_method = lmRegular2;
-    } else {
-      parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
+
+    if (0 < parser.options.count("lin-method")) {
+      if (1 < parser.options.count("lin-method")) {
+        parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
+      }
+      std::string lin_method_str(parser.option_argument("lin-method"));
+      if (lin_method_str == "stack") {
+        options.lin_method = lmStack;
+      } else if (lin_method_str == "regular") {
+        options.lin_method = lmRegular;
+      } else if (lin_method_str == "regular2") {
+        options.lin_method = lmRegular2;
+      } else {
+        parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
+      }
+    }
+
+    if (parser.options.count("end-phase")) {
+      if (1 < parser.options.count("end-phase")) {
+        parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
+      }
+      std::string phase(parser.option_argument("end-phase"));
+      if (phase == "pa") {
+        options.end_phase = phParse;
+      } else if (phase == "tc") {
+        options.end_phase = phTypeCheck;
+      } else if (phase == "ar") {
+        options.end_phase = phAlphaRed;
+      } else if (phase == "di") {
+        options.end_phase = phDataImpl;
+      } else {
+        parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
+      }
+    }
+
+    //check for dangerous and illegal option combinations
+    if (options.newstate && options.lin_method == lmStack) {
+      parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
+    }
+    if (options.check_only && options.end_phase != phTypeCheck) {
+      parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
+    }
+    if (options.noalpha && options.end_phase == phAlphaRed) {
+      parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
+    }
+
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        options.outfilename = parser.arguments[1];
+      }
     }
   }
 
-  if (parser.options.count("end-phase")) {
-    if (1 < parser.options.count("end-phase")) {
-      parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
-    }
-    std::string phase(parser.option_argument("end-phase"));
-    if (phase == "pa") {
-      options.end_phase = phParse;
-    } else if (phase == "tc") {
-      options.end_phase = phTypeCheck;
-    } else if (phase == "ar") {
-      options.end_phase = phAlphaRed;
-    } else if (phase == "di") {
-      options.end_phase = phDataImpl;
-    } else {
-      parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
-    }
-  }
-
-  //check for dangerous and illegal option combinations
-  if (options.newstate && options.lin_method == lmStack) {
-    parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
-  }
-  if (options.check_only && options.end_phase != phTypeCheck) {
-    parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
-  }
-  if (options.noalpha && options.end_phase == phAlphaRed) {
-    parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      options.outfilename = parser.arguments[1];
-    }
-  }
-
-  return options;
+  return parser.continue_execution();
 }
 
 ATermAppl linearise_file(t_lin_options &lin_options)
@@ -630,49 +630,53 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    t_lin_options lin_options = parse_command_line(argc, argv);
+    t_lin_options lin_options;
+   
+    if (parse_command_line(argc, argv, lin_options)) {
 
-    //linearise infilename with options lin_options
-    ATermAppl result = linearise_file(lin_options);
-    if (result == NULL) {
-      return EXIT_FAILURE;
-    }
-    //report on well-formedness (if needed)
-    if (lin_options.check_only) {
-      if (lin_options.infilename == "") {
-        fprintf(stdout, "stdin");
-      } else {
-        fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
+      //linearise infilename with options lin_options
+      ATermAppl result = linearise_file(lin_options);
+      if (result == NULL) {
+        return EXIT_FAILURE;
       }
-      fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
-      return EXIT_SUCCESS;
-    }
-    //store the result
-    if (lin_options.outfilename.empty()) {
-      gsVerboseMsg("saving result to stdout...\n");
-    } else {
-      gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-    }
-    if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
-      mcrl2::lps::specification spec(result);
-      spec.save(lin_options.outfilename);
-    } else {
-      if (lin_options.outfilename.empty()) {
-        PrintPart_CXX(std::cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
-        std::cout << std::endl;
-      } else {
-        std::ofstream outstream(lin_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
-        if (!outstream.is_open()) {
-          throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
+      //report on well-formedness (if needed)
+      if (lin_options.check_only) {
+        if (lin_options.infilename == "") {
+          fprintf(stdout, "stdin");
+        } else {
+          fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
         }
-        PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
-        outstream.close();
-      }     
+        fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+        return EXIT_SUCCESS;
+      }
+      //store the result
+      if (lin_options.outfilename.empty()) {
+        gsVerboseMsg("saving result to stdout...\n");
+      } else {
+        gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+      }
+      if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
+        mcrl2::lps::specification spec(result);
+        spec.save(lin_options.outfilename);
+      } else {
+        if (lin_options.outfilename.empty()) {
+          PrintPart_CXX(std::cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
+          std::cout << std::endl;
+        } else {
+          std::ofstream outstream(lin_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
+          if (!outstream.is_open()) {
+            throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
+          }
+          PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
+          outstream.close();
+        }     
+      }
     }
-    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  return EXIT_SUCCESS;
 }

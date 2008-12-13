@@ -107,7 +107,7 @@ int do_untime(const tool_options& options)
   return 0;
 }
 
-tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, tool_options& t_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
                               "Remove time from the linear process specification (LPS) in INFILE and write the\n"
                               "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not\n"
@@ -115,21 +115,21 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      t_options.input_file = parser.arguments[0];
+  if (parser.continue_execution()) {
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      t_options.output_file = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        t_options.input_file = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        t_options.output_file = parser.arguments[1];
+      }
     }
   }
 
-  return t_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv)
@@ -142,12 +142,16 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
     }
 #endif
+    tool_options options;
 
-    return do_untime(parse_command_line(argc, argv));
+    if (parse_command_line(argc, argv, options)) {
+      return do_untime(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

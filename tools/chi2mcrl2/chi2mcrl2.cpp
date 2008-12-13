@@ -178,7 +178,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-t_options parse_command_line(int argc, char *argv[])
+bool parse_command_line(int argc, char *argv[], t_options& options)
 { 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Translates the Chi specifiation in INFILE and writes the resulting mCRL2 "
@@ -189,23 +189,23 @@ t_options parse_command_line(int argc, char *argv[])
 
   command_line_parser parser(clinterface, argc, argv);
 
-  t_options options;
+  if (parser.continue_execution()) {
+    options.no_statepar = false;
 
-  options.no_statepar = false;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      options.outfilename = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        options.outfilename = parser.arguments[1];
+      }
     }
   }
 
-  return options;  // main continues
+  return parser.continue_execution();  // main continues
 }
 
 ATermAppl translate_file(t_options &options)
@@ -250,35 +250,38 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    t_options options = parse_command_line(argc,argv);
+    t_options options;
 
-    std::string mcrl2spec; 
-    CAsttransform asttransform;
+    if (parse_command_line(argc,argv, options)) {
 
-    ATermAppl result = translate_file(options);
+      std::string mcrl2spec; 
+      CAsttransform asttransform;
 
-    gsDebugMsg("Set options");
-    asttransform.set_options(options);
+      ATermAppl result = translate_file(options);
+
+      gsDebugMsg("Set options");
+      asttransform.set_options(options);
  
-    gsDebugMsg("Transforming AST to mcrl2 specification\n");
-    if (asttransform.translator(result))
-      {
-        mcrl2spec = asttransform.getResult();
-      }
+      gsDebugMsg("Transforming AST to mcrl2 specification\n");
+      if (asttransform.translator(result))
+        {
+          mcrl2spec = asttransform.getResult();
+        }
         
-    //store the result
-    if (options.outfilename == "") {
-      gsVerboseMsg("saving result to stdout...\n");
-      printf("%s",mcrl2spec.c_str());
-    } else { //outfilename != NULL
-      //open output filename
-      FILE *outstream = fopen(options.outfilename.c_str(), "w");
-      if (outstream == NULL) {
-        throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
+      //store the result
+      if (options.outfilename == "") {
+        gsVerboseMsg("saving result to stdout...\n");
+        printf("%s",mcrl2spec.c_str());
+      } else { //outfilename != NULL
+        //open output filename
+        FILE *outstream = fopen(options.outfilename.c_str(), "w");
+        if (outstream == NULL) {
+          throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
+        }
+        gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
+        fputs (mcrl2spec.c_str(), outstream); 
+        fclose(outstream);
       }
-      gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
-      fputs (mcrl2spec.c_str(), outstream); 
-      fclose(outstream);
     }
 
     return EXIT_SUCCESS;

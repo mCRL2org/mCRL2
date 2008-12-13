@@ -197,7 +197,7 @@ void process(t_tool_options const& tool_options) {
   }
 }
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [[INFILE] OUTFILE]\n",
     "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
@@ -215,36 +215,36 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
+  if (parser.continue_execution()) {
+    tool_options.format_for_output = otPlain;
 
-  tool_options.format_for_output = otPlain;
+    if (parser.options.count("format")) {
+      std::string eq_name(parser.option_argument("format"));
+      if (eq_name == "plain") {
+        tool_options.format_for_output = otPlain;
+      } else if (eq_name == "mcrl2") {
+        tool_options.format_for_output = otMcrl2;
+      } else if (eq_name == "dot") {
+        tool_options.format_for_output = otDot;
+      } else if (eq_name == "aut") {
+        tool_options.format_for_output = otAut;
+      } else {
+        parser.error("option -f/--format has illegal argument '" + eq_name + "'");
+      }
+    }
 
-  if (parser.options.count("format")) {
-    std::string eq_name(parser.option_argument("format"));
-    if (eq_name == "plain") {
-      tool_options.format_for_output = otPlain;
-    } else if (eq_name == "mcrl2") {
-      tool_options.format_for_output = otMcrl2;
-    } else if (eq_name == "dot") {
-      tool_options.format_for_output = otDot;
-    } else if (eq_name == "aut") {
-      tool_options.format_for_output = otAut;
-    } else {
-      parser.error("option -f/--format has illegal argument '" + eq_name + "'");
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    if (0 < parser.arguments.size()) {
+      tool_options.name_for_input = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.name_for_output = parser.arguments[1];
     }
   }
 
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  if (0 < parser.arguments.size()) {
-    tool_options.name_for_input = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    tool_options.name_for_output = parser.arguments[1];
-  }
-
-  return tool_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char **argv)
@@ -252,13 +252,16 @@ int main(int argc, char **argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-    process(parse_command_line(argc, argv));
-
-    return EXIT_SUCCESS;
+    t_tool_options options;
+    
+    if (parse_command_line(argc, argv, options)) {
+       process(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

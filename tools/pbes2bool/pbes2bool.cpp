@@ -72,7 +72,7 @@ using atermpp::make_substitution;
 
 //Function declarations used by main program
 //------------------------------------------
-static t_tool_options parse_command_line(int argc, char** argv);
+static bool parse_command_line(int argc, char** argv, t_tool_options&);
 //Post: The command line options are parsed.
 //      The program has aborted with a suitable error code, if:
 //    - errors were encounterd
@@ -343,7 +343,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 //function parse_command_line
 //---------------------------
-t_tool_options parse_command_line(int ac, char** av)
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
 {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
       "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is "
@@ -409,64 +409,64 @@ t_tool_options parse_command_line(int ac, char** av)
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
-
-  tool_options.opt_precompile_pbes           = 0 < parser.options.count("precompile");
-  tool_options.opt_use_hashtables            = 0 < parser.options.count("hashtables");
-  tool_options.opt_construct_counter_example = 0 < parser.options.count("counter");
-  tool_options.opt_store_as_tree             = 0 < parser.options.count("tree");
-  tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
-  tool_options.opt_outputformat              = "none";
-  tool_options.opt_strategy                  = lazy;
-  tool_options.infilename                    = "";
-  tool_options.outfilename                   = "";
-  
-  if (parser.options.count("output")) { // Output format
-    std::string format = parser.option_argument("output");
-
-    if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
-      parser.error("unknown output format specified (got `" + format + "')");
+  if (parser.continue_execution()) {
+    tool_options.opt_precompile_pbes           = 0 < parser.options.count("precompile");
+    tool_options.opt_use_hashtables            = 0 < parser.options.count("hashtables");
+    tool_options.opt_construct_counter_example = 0 < parser.options.count("counter");
+    tool_options.opt_store_as_tree             = 0 < parser.options.count("tree");
+    tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
+    tool_options.opt_outputformat              = "none";
+    tool_options.opt_strategy                  = lazy;
+    tool_options.infilename                    = "";
+    tool_options.outfilename                   = "";
+    
+    if (parser.options.count("output")) { // Output format
+      std::string format = parser.option_argument("output");
+ 
+      if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
+        parser.error("unknown output format specified (got `" + format + "')");
+      }
+ 
+      tool_options.opt_outputformat = format;
     }
-
-    tool_options.opt_outputformat = format;
+    
+    if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
+      int strategy = parser.option_argument_as< int >("strategy");
+ 
+      switch (strategy) {
+        case 0:
+         tool_options.opt_strategy = lazy;
+         break;
+        case 1:
+         tool_options.opt_strategy = optimize;
+         break;
+        case 2:
+         tool_options.opt_strategy = on_the_fly;
+         break;
+        case 3:
+         tool_options.opt_strategy = on_the_fly_with_fixed_points;
+         break;
+        default:
+          parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+      }
+    }
+    
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.outfilename = parser.arguments[1];
+      }
+    }
+    
+    tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   }
   
-  if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
-    int strategy = parser.option_argument_as< int >("strategy");
-
-    switch (strategy) {
-      case 0:
-       tool_options.opt_strategy = lazy;
-       break;
-      case 1:
-       tool_options.opt_strategy = optimize;
-       break;
-      case 2:
-       tool_options.opt_strategy = on_the_fly;
-       break;
-      case 3:
-       tool_options.opt_strategy = on_the_fly_with_fixed_points;
-       break;
-      default:
-        parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
-    }
-  }
-  
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[1];
-    }
-  }
-  
-  tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-  
-  return tool_options;
+  return parser.continue_execution();
 }
 
 //Main Program
@@ -482,14 +482,17 @@ int main(int argc, char** argv)
     }
 #endif
 
-    process(parse_command_line(argc, argv));
+    t_tool_options options;
 
-    return EXIT_SUCCESS;
+    if (parse_command_line(argc, argv, options)) {
+      process(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 

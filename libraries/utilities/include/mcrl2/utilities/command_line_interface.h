@@ -724,7 +724,7 @@ namespace mcrl2 {
          * \throws std::runtime_error
          **/
         inline command_line_parser(interface_description& interface_specification, char const* const command_line) :
-                                         m_interface(interface_specification), options(m_options), arguments(m_arguments) {
+                     m_interface(interface_specification), m_continue(true), options(m_options), arguments(m_arguments) {
           collect(interface_specification, parse_command_line(command_line));
 
           process_default_options(interface_specification);
@@ -782,6 +782,13 @@ namespace mcrl2 {
          * \throw std::logic_error containing a message that the option does not take argument
          **/
         std::string const& option_argument(std::string const& long_identifier) const;
+
+        /**
+         * \brief Whether main program execution should continue
+         **/
+        inline bool continue_execution() const {
+          return m_continue;
+        }
 
         /**
          * \brief Returns the converted argument of the first option matching a name
@@ -977,7 +984,7 @@ namespace mcrl2 {
 
     template <>
     inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
-                                         m_interface(d), options(m_options), arguments(m_arguments) {
+                                         m_interface(d), m_continue(true), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
 
@@ -986,7 +993,7 @@ namespace mcrl2 {
 # ifndef __CYGWIN__ // std::wstring is not available for Cygwin
     template <>
     inline command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
-                                         m_interface(d), options(m_options), arguments(m_arguments) {
+                                         m_interface(d), m_continue(true), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
 

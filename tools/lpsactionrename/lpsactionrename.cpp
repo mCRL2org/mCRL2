@@ -76,7 +76,7 @@ struct t_tool_options {
 //Functions used by the main program
 //----------------------------------
 
-static t_tool_options parse_command_line(int argc, char **argv);
+static bool parse_command_line(int argc, char **argv, t_tool_options&);
 //Post: The command line options are parsed.
 //      The program has aborted with a suitable error code, if:
 //      - errors were encountered
@@ -247,7 +247,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
-static t_tool_options parse_command_line(int argc, char **argv)
+static bool parse_command_line(int argc, char **argv, t_tool_options& tool_options)
 {
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... --file=RENAMEFILE [INFILE [OUTFILE]]\n",
     "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
@@ -273,48 +273,48 @@ static t_tool_options parse_command_line(int argc, char **argv)
 
   command_line_parser parser(clinterface, argc, argv);
 
-  t_tool_options tool_options;
+  if (parser.continue_execution()) {
+    tool_options.no_rewrite = 0 < parser.options.count("no-rewrite"); 
+    tool_options.no_sumelm  = 0 < parser.options.count("no-sumelm"); 
+    tool_options.pretty     = 0 < parser.options.count("pretty"); 
 
-  tool_options.no_rewrite = 0 < parser.options.count("no-rewrite"); 
-  tool_options.no_sumelm  = 0 < parser.options.count("no-sumelm"); 
-  tool_options.pretty     = 0 < parser.options.count("pretty"); 
+    if (parser.options.count("end-phase")) {
+      std::string phase = parser.option_argument("end-phase");
 
-  if (parser.options.count("end-phase")) {
-    std::string phase = parser.option_argument("end-phase");
+      if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
+        tool_options.end_phase = PH_PARSE;
+      } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
+        tool_options.end_phase = PH_TYPE_CHECK;
+      } else if (std::strncmp(phase.c_str(), "di", 3) == 0) {
+        tool_options.end_phase = PH_DATA_IMPL;
+      } else {
+        parser.error("option -p has illegal argument '" + phase + "'");
+      }
+    }
 
-    if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
-      tool_options.end_phase = PH_PARSE;
-    } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
-      tool_options.end_phase = PH_TYPE_CHECK;
-    } else if (std::strncmp(phase.c_str(), "di", 3) == 0) {
-      tool_options.end_phase = PH_DATA_IMPL;
-    } else {
-      parser.error("option -p has illegal argument '" + phase + "'");
+    tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
+    if (parser.options.count("file")) {
+      tool_options.action_rename_filename = parser.option_argument("file");
+    }
+    else {
+      parser.error("option -f is not specified");
+    }
+
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.outfilename = parser.arguments[1];
+      }
     }
   }
 
-  tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-  if (parser.options.count("file")) {
-    tool_options.action_rename_filename = parser.option_argument("file");
-  }
-  else {
-    parser.error("option -f is not specified");
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[1];
-    }
-  }
-
-  return tool_options;
+  return parser.continue_execution();
 }
 
 //Main program
@@ -328,18 +328,24 @@ int main(int argc, char **argv)
   {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) 
-    { return EXIT_SUCCESS;
+    {
+      return EXIT_SUCCESS;
     }
 #endif
 
-    return process(parse_command_line(argc, argv));
+    t_tool_options options;
+
+    if (parse_command_line(argc, argv, options)) {
+      return process(options);
+    }
   }
   catch (std::exception& e) 
   { 
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 
 template <typename IdentifierGenerator>

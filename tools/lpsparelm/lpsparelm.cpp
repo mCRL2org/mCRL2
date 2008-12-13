@@ -39,7 +39,7 @@ class lps_parelm_tool : public mcrl2::utilities::filter_tool
 
     int execute(int argc, char** argv) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-      if (try_interaction(argc, argv)) {
+      if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
         return EXIT_SUCCESS;
       }
 #endif

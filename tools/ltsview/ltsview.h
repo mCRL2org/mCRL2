@@ -15,6 +15,7 @@
 #include <string>
 #include "mediator.h"
 #include "utils.h"
+#include "mcrl2/utilities/command_line_wx.h"
 
 class MainFrame;
 class GLCanvas;
@@ -23,7 +24,7 @@ class Visualizer;
 class MarkManager;
 class Settings;
 
-class LTSView : public wxApp, public Mediator {
+class LTSView : public mcrl2::utilities::wx::tool< LTSView >, public Mediator {
   private:
     LTS *lts;
     unsigned int colourCounter;
@@ -38,8 +39,8 @@ class LTSView : public wxApp, public Mediator {
 
   public:
     virtual int OnExit();
-    virtual bool OnInit();
-    bool Initialize(int& argc, wxChar** argv);
+    virtual bool DoInit();
+    bool parse_command_line(int argc, wxChar** argv);
     void activateMarkRule(int index,bool activate);
     void addMarkRule();
     void editMarkRule(int index);

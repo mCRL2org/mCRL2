@@ -16,6 +16,7 @@
 #include "grape_frame.h"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_wx.h"
 
 #include <iostream>
 
@@ -54,8 +55,10 @@ wxAboutDialogInfo get_about_info() {
   return info;
 }
 
-class grape_app: public wxApp
+class grape_app: public mcrl2::utilities::wx::tool< grape_app >
 {
+  friend class mcrl2::utilities::wx::tool< grape_app >;
+
   private:
 
     std::string parse_error;
@@ -63,11 +66,12 @@ class grape_app: public wxApp
     // the filename is the first parameter
     wxString    filename;
 
+    bool parse_command_line(int& argc, wxChar** argv);
+
   public:
 
-  virtual bool OnInit();
-  bool Initialize(int& argc, wxChar** argv);
-  void show_window();
+    bool DoInit();
+    void show_window();
 };
 
 void grape_app::show_window()
@@ -75,7 +79,7 @@ void grape_app::show_window()
 
 }
 
-bool grape_app::OnInit()
+bool grape_app::DoInit()
 {
   try
   {
@@ -97,17 +101,17 @@ bool grape_app::OnInit()
   return true;
 }
 
-bool grape_app::Initialize(int& argc, wxChar** argv) {
+bool grape_app::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
-  try {
-    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
-        NAME, AUTHOR, "[OPTION]... [INFILE]",
-        "Graphical editing environment for mCRL2 process specifications. "
-        "If INFILE is supplied, it is loaded as a GraPE specification."); 
+  interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
+      NAME, AUTHOR, "[OPTION]... [INFILE]",
+      "Graphical editing environment for mCRL2 process specifications. "
+      "If INFILE is supplied, it is loaded as a GraPE specification."); 
 
-    command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
+  command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
  
+  if (parser.continue_execution()) {
     if (0 < parser.arguments.size()) {
       filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
     }
@@ -115,21 +119,8 @@ bool grape_app::Initialize(int& argc, wxChar** argv) {
       parser.error("too many file arguments");
     }
   }
-  catch (std::exception& e) {
-    if (wxApp::Initialize(argc, argv)) {
-      parse_error = std::string(e.what()).
-        append("\n\nNote that other command line options may have been ignored because of this error.");
-    }
-    else {
-      std::cerr << e.what() << std::endl;
 
-      return false;
-    }
-
-    return true;
-  }
-
-  return wxApp::Initialize(argc, argv);
+  return parser.continue_execution();
 }
 
 #ifdef __WINDOWS__

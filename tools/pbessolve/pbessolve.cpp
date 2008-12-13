@@ -92,7 +92,7 @@ struct t_tool_options {
  
  
 //Local functions ======================== 
-static t_tool_options parse_command_line(int argc, char** argv); 
+static bool parse_command_line(int argc, char** argv, t_tool_options& options); 
 
 pbes_expression interpret_solution(pbes<> pbes_spec, 
 				   atermpp::vector<pbes_equation> es_solution, 
@@ -113,38 +113,39 @@ int main(int argc, char** argv)
    
   try {
     //Parse command line 
-    t_tool_options tool_options = parse_command_line(argc, argv); 
-     
-    //Load the pbes 
-    pbes<> pbes_spec;
-    pbes_spec.load(tool_options.infilename); 
-     
-    //Solve the pbes. 
-    //The solution will be returned as an equation system,  
-    //in order to allow partial solutions. 
-    //Every equation is the result of a  
-    //(possibly interactive and/or bounded)  
-    //approximation process 
-    pbes_solver* ps = new pbes_solver
-      (pbes_spec, tool_options.solver, tool_options.rewrite_strategy,
-       tool_options.bound, tool_options.pnf, tool_options.interactive);
-    
-    atermpp::vector<pbes_equation> es_solution = ps->solve(); 
-     
-    //Interpret the solution in the initial state
-    pbes_expression sol_initial_state = 
-      interpret_solution(pbes_spec, es_solution, 
-          	       tool_options.solver, tool_options.rewrite_strategy); 
-     
-    cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
-    
-    return EXIT_SUCCESS; 
+    t_tool_options tool_options;
+   
+    if (parse_command_line(argc, argv, tool_options)) { 
+      //Load the pbes 
+      pbes<> pbes_spec;
+      pbes_spec.load(tool_options.infilename); 
+
+      //Solve the pbes. 
+      //The solution will be returned as an equation system,  
+      //in order to allow partial solutions. 
+      //Every equation is the result of a  
+      //(possibly interactive and/or bounded)  
+      //approximation process 
+      pbes_solver* ps = new pbes_solver
+        (pbes_spec, tool_options.solver, tool_options.rewrite_strategy,
+         tool_options.bound, tool_options.pnf, tool_options.interactive);
+
+      atermpp::vector<pbes_equation> es_solution = ps->solve(); 
+
+      //Interpret the solution in the initial state
+      pbes_expression sol_initial_state = 
+        interpret_solution(pbes_spec, es_solution, 
+            	       tool_options.solver, tool_options.rewrite_strategy); 
+
+      cout << "\nPBES solution: " << pp(sol_initial_state).c_str() << "\n";
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
-
-  return EXIT_FAILURE;
+    
+  return EXIT_SUCCESS; 
 } 
 //======================================== 
  
@@ -157,7 +158,7 @@ int main(int argc, char** argv)
  
  
 //======================================== 
-t_tool_options parse_command_line(int ac, char** av) 
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) 
 { 
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
                           "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not\n"
@@ -182,46 +183,46 @@ t_tool_options parse_command_line(int ac, char** av)
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options; 
-
-  if (parser.options.count("interactive")) {
-    tool_options.interactive = true;
-  }
-
-  if (parser.options.count("bound")) {
-    tool_options.bound = parser.option_argument_as< unsigned int >("bound"); 
-  }
-
-  if (parser.options.count("pnf")) {
-    tool_options.pnf = true;
-  }
-
-  if (parser.options.count("solver")) {
-    string s = parser.option_argument("solver");
-    if (s == "cvc") {
-      tool_options.solver = solver_type_cvc;
+  if (parser.continue_execution()) {
+    if (parser.options.count("interactive")) {
+      tool_options.interactive = true;
+    }
+ 
+    if (parser.options.count("bound")) {
+      tool_options.bound = parser.option_argument_as< unsigned int >("bound"); 
+    }
+ 
+    if (parser.options.count("pnf")) {
+      tool_options.pnf = true;
+    }
+ 
+    if (parser.options.count("solver")) {
+      string s = parser.option_argument("solver");
+      if (s == "cvc") {
+        tool_options.solver = solver_type_cvc;
 #if defined(HAVE_CVC)
-    } else if (s == "cvc-fast") {
-      tool_options.solver = solver_type_cvc_fast;
+      } else if (s == "cvc-fast") {
+        tool_options.solver = solver_type_cvc_fast;
 #endif
-    } else if (s == "ario") {
-      tool_options.solver = solver_type_ario;
-    } else {
-      parser.error("argument '" + s + "' to option --solver or -s is invalid");
+      } else if (s == "ario") {
+        tool_options.solver = solver_type_ario;
+      } else {
+        parser.error("argument '" + s + "' to option --solver or -s is invalid");
+      }
+    }
+ 
+    tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+ 
+    if (0 < parser.arguments.size()) {
+      tool_options.infilename = parser.arguments[0];
+    }
+ 
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
   }
 
-  tool_options.rewrite_strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
-
-  if (0 < parser.arguments.size()) {
-    tool_options.infilename = parser.arguments[0];
-  }
-
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-
-  return tool_options; 
+  return parser.continue_execution(); 
 }
 //======================================== 
  

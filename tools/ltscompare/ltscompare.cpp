@@ -69,7 +69,7 @@ struct t_tool_options {
   lts_eq_options  eq_opts;
 };
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE1] INFILE2\n",
     "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some equivalence or preorder. "
     "If INFILE1 is not supplied, stdin is used.\n"
@@ -124,113 +124,113 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
-
-  if (parser.options.count("equivalence") > 1)
-  {
-    parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
-  }
+  if (parser.continue_execution()) {
+    if (parser.options.count("equivalence") > 1)
+    {
+      parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
+    }
   
-  if (parser.options.count("preorder") > 1)
-  {
-    parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
-  }
-
-  if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
-  {
-    parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
-  }
-
-  if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
-  {
-    parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
-  }
-
-  tool_options.equivalence = lts_eq_none;
-
-  if (parser.options.count("equivalence")) {
-
-    tool_options.equivalence = lts::parse_equivalence(
-        parser.option_argument("equivalence"));
-    
-    if (tool_options.equivalence != lts_eq_bisim &&
-        tool_options.equivalence != lts_eq_branching_bisim &&
-        tool_options.equivalence != lts_eq_sim &&
-        tool_options.equivalence != lts_eq_trace &&
-        tool_options.equivalence != lts_eq_weak_trace)
+    if (parser.options.count("preorder") > 1)
     {
-      parser.error("option -e/--equivalence has illegal argument '" + 
-          parser.option_argument("equivalence") + "'");
+      parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
     }
-  }
 
-  tool_options.preorder = lts_pre_none;
-
-  if (parser.options.count("preorder")) {
-
-    tool_options.preorder = lts::parse_preorder(
-        parser.option_argument("preorder"));
-    
-    if (tool_options.preorder != lts_pre_sim &&
-        tool_options.preorder != lts_pre_trace &&
-        tool_options.preorder != lts_pre_weak_trace)
+    if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
     {
-      parser.error("option -p/--preorder has illegal argument '" + 
-          parser.option_argument("preorder") + "'");
+      parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
+    }
+
+    if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
+    {
+      parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
+    }
+
+    tool_options.equivalence = lts_eq_none;
+
+    if (parser.options.count("equivalence")) {
+
+      tool_options.equivalence = lts::parse_equivalence(
+          parser.option_argument("equivalence"));
+    
+      if (tool_options.equivalence != lts_eq_bisim &&
+          tool_options.equivalence != lts_eq_branching_bisim &&
+          tool_options.equivalence != lts_eq_sim &&
+          tool_options.equivalence != lts_eq_trace &&
+          tool_options.equivalence != lts_eq_weak_trace)
+      {
+        parser.error("option -e/--equivalence has illegal argument '" + 
+            parser.option_argument("equivalence") + "'");
+      }
+    }
+
+    tool_options.preorder = lts_pre_none;
+
+    if (parser.options.count("preorder")) {
+
+      tool_options.preorder = lts::parse_preorder(
+          parser.option_argument("preorder"));
+    
+      if (tool_options.preorder != lts_pre_sim &&
+          tool_options.preorder != lts_pre_trace &&
+          tool_options.preorder != lts_pre_weak_trace)
+      {
+        parser.error("option -p/--preorder has illegal argument '" + 
+            parser.option_argument("preorder") + "'");
+      }
+    }
+
+    if (parser.options.count("tau")) {
+      lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+    }
+
+    if (parser.arguments.size() == 0) {
+      parser.error("need at least one file argument");
+    }
+    else if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.name_for_first  = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.name_for_second  = parser.arguments[1];
+      }
+    }
+
+    if (parser.options.count("in1")) {
+      if (1 < parser.options.count("in1")) {
+        std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
+      }
+
+      tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
+
+      if (tool_options.format_for_first == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("in1") <<
+                     "' is not recognised; option ignored" << std::endl;
+      }
+    }
+    else if (!tool_options.name_for_first.empty()) {
+      tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
+    }
+    if (parser.options.count("in2")) {
+      if (1 < parser.options.count("in2")) {
+        std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
+      }
+
+      tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
+
+      if (tool_options.format_for_second == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("in2") <<
+                     "' is not recognised; option ignored" << std::endl;
+      }
+    }
+    else {
+      tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
     }
   }
 
-  if (parser.options.count("tau")) {
-    lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
-  }
-
-  if (parser.arguments.size() == 0) {
-    parser.error("need at least one file argument");
-  }
-  else if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.name_for_first  = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.name_for_second  = parser.arguments[1];
-    }
-  }
-
-  if (parser.options.count("in1")) {
-    if (1 < parser.options.count("in1")) {
-      std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
-    }
-
-    tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
-
-    if (tool_options.format_for_first == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("in1") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-  else if (!tool_options.name_for_first.empty()) {
-    tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
-  }
-  if (parser.options.count("in2")) {
-    if (1 < parser.options.count("in2")) {
-      std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
-    }
-
-    tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
-
-    if (tool_options.format_for_second == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("in2") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-  else {
-    tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
-  }
-
-  return tool_options;
+  return parser.continue_execution();
 }
 
 int process(t_tool_options const & tool_options) {
@@ -296,11 +296,16 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    return process(parse_command_line(argc, argv));
+    t_tool_options options;
+
+    if (parse_command_line(argc, argv, options)) {
+      return (process(options));
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

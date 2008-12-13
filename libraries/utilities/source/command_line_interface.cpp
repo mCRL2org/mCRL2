@@ -452,11 +452,11 @@ namespace mcrl2 {
 
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
                   << boost::gregorian::day_clock::local_day() << "\" \""
-                  << m_name << " mCRL2 toolset " << version_tag
+                  << m_name << " mCRL2 toolset " << version_tag()
         << "\" \"User Commands\"" << std::endl;
 
       s << ".SH NAME" << std::endl
-        << m_name << " - manual page for " << m_name << " mCRL2 toolset " << version_tag << std::endl;
+        << m_name << " - manual page for " << m_name << " mCRL2 toolset " << version_tag() << std::endl;
 
       s << ".SH SYNOPSIS" << std::endl
         << ".B " << m_name << std::endl
@@ -916,13 +916,9 @@ namespace mcrl2 {
 
         m_continue = true;
 
-        for (action_list::const_iterator i = actions.begin(); i != actions.end(); ++i) {
+        for (action_list::const_iterator i = actions.begin(); m_continue && i != actions.end(); ++i) {
           m_continue &= (*i)(*this);
         }
-      }
-
-      if (!m_continue) {
-        exit(0);
       }
     }
   }

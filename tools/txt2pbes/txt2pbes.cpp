@@ -36,13 +36,11 @@ struct t_tool_options
   std::string infilename;
   std::string outfilename;
 
-  t_tool_options() :
-    infilename(""),
-    outfilename("")
+  t_tool_options()
   {}
 };
 
-t_tool_options parse_command_line(int ac, char **av)
+bool parse_command_line(int ac, char **av, t_tool_options& tool_options)
 {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
@@ -51,17 +49,20 @@ t_tool_options parse_command_line(int ac, char **av)
     "<http://mcrl2.org/wiki/index.php/PBES_syntax>."
   );
   command_line_parser parser(clinterface, ac, av);
-  t_tool_options tool_options;
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
+
+  if (parser.continue_execution()) {
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    if (0 < parser.arguments.size()) {
+      tool_options.infilename = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.outfilename = parser.arguments[1];
+    }
   }
-  if (0 < parser.arguments.size()) {
-    tool_options.infilename = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    tool_options.outfilename = parser.arguments[1];
-  }
-  return tool_options;
+
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv)
@@ -70,54 +71,58 @@ int main(int argc, char** argv)
 
   try {
     //parse command line
-    t_tool_options tool_options = parse_command_line(argc, argv);
-    ATermAppl result = NULL;
-    //parse specification
-    if (tool_options.infilename.empty()) {
-      //parse specification from stdin
-      gsVerboseMsg("parsing input from stdin...\n");
-      result = parse_pbes_spec(std::cin);
-    } else {
-      //parse specification from infilename
-      std::ifstream instream(tool_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-      if (!instream.is_open()) {
-        throw mcrl2::runtime_error("cannot open input file '" + tool_options.infilename + "'");
+    t_tool_options tool_options;
+
+    if (parse_command_line(argc, argv, tool_options)) {
+      ATermAppl result = NULL;
+      //parse specification
+      if (tool_options.infilename.empty()) {
+        //parse specification from stdin
+        gsVerboseMsg("parsing input from stdin...\n");
+        result = parse_pbes_spec(std::cin);
+      } else {
+        //parse specification from infilename
+        std::ifstream instream(tool_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+        if (!instream.is_open()) {
+          throw mcrl2::runtime_error("cannot open input file '" + tool_options.infilename + "'");
+        }
+        gsVerboseMsg("parsing input file '%s'...\n", tool_options.infilename.c_str());
+        result = parse_pbes_spec(instream);
+        instream.close();
       }
-      gsVerboseMsg("parsing input file '%s'...\n", tool_options.infilename.c_str());
-      result = parse_pbes_spec(instream);
-      instream.close();
-    }
-    if (result == NULL) {
-      throw mcrl2::runtime_error("parsing failed");
-    }
-    //type check the result
-    gsVerboseMsg("type checking...\n");
-    result = type_check_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("type checking failed");
-    }
-    //implement standard data types and type constructors on the result
-    gsVerboseMsg("implementing standard data types and type constructors...\n");
-    result = implement_data_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("data implementation failed");
-    }
-    //check if PBES is monotonic
-    try {
+      if (result == NULL) {
+        throw mcrl2::runtime_error("parsing failed");
+      }
+      //type check the result
+      gsVerboseMsg("type checking...\n");
+      result = type_check_pbes_spec(result);
+      if (result == NULL) {
+        throw mcrl2::runtime_error("type checking failed");
+      }
+      //implement standard data types and type constructors on the result
+      gsVerboseMsg("implementing standard data types and type constructors...\n");
+      result = implement_data_pbes_spec(result);
+      if (result == NULL) {
+        throw mcrl2::runtime_error("data implementation failed");
+      }
+      //check if PBES is monotonic
+      try {
+        mcrl2::pbes_system::pbes<> p(result);
+        //TODO replace by a more sophisticated check
+        p.normalize();
+      }
+      catch (std::exception&) {
+        throw mcrl2::runtime_error("PBES is not monotonic");
+      }
+      //store the result
       mcrl2::pbes_system::pbes<> p(result);
-      //TODO replace by a more sophisticated check
-      p.normalize();
+      p.save(tool_options.outfilename);
     }
-    catch (std::exception&) {
-      throw mcrl2::runtime_error("PBES is not monotonic");
-    }
-    //store the result
-    mcrl2::pbes_system::pbes<> p(result);
-    p.save(tool_options.outfilename);
-    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  return EXIT_SUCCESS;
 }

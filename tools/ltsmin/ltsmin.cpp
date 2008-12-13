@@ -30,7 +30,7 @@ struct t_tool_options {
   int         task;
 };
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& options) {
 
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE OUTFILE\n",
     "Minimise the LTS in the SVC format from INFILE using bisimulation reduction and save the resulting LTS to OUTFILE.\n"
@@ -51,42 +51,42 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options options;
+  if (parser.continue_execution()) {
+    options.task = CMD_REDUCE;
 
-  options.task = CMD_REDUCE;
+    if (0 < parser.options.count("verbose") + parser.options.count("debug")) {
+      traceLevel=1;
+    }
 
-  if (0 < parser.options.count("verbose") + parser.options.count("debug")) {
-    traceLevel=1;
-  }
+    if (parser.options.count("equivalence")) {
+      std::string eq_name(parser.option_argument("equivalence"));
+      if (eq_name == "strong") {
+        options.task = CMD_REDUCE;
+      } else if (eq_name == "branching") {
+        options.task = CMD_BRANCH_REDUCE;
+      } else {
+        parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+      }
+    }
 
-  if (parser.options.count("equivalence")) {
-    std::string eq_name(parser.option_argument("equivalence"));
-    if (eq_name == "strong") {
-      options.task = CMD_REDUCE;
-    } else if (eq_name == "branching") {
-      options.task = CMD_BRANCH_REDUCE;
-    } else {
-      parser.error("option -e/--equivalence has illegal argument '" + eq_name + "'");
+    if (0 < parser.options.count("add")) {
+      add_state_parameter = 1;
+    }
+    if (0 < parser.options.count("tau")) {
+      add_tau_action(strdup(parser.option_argument("tau").c_str()));
+    }
+
+    if (parser.arguments.size() != 2) {
+      parser.error("incorrect number of arguments");
+    }
+    options.inputname = parser.arguments[0];
+    options.outputname = parser.arguments[1];
+    if (options.inputname == options.outputname) {
+      parser.error("input file and output file are not allowed to be the same");
     }
   }
 
-  if (0 < parser.options.count("add")) {
-    add_state_parameter = 1;
-  }
-  if (0 < parser.options.count("tau")) {
-    add_tau_action(strdup(parser.option_argument("tau").c_str()));
-  }
-
-  if (parser.arguments.size() != 2) {
-    parser.error("incorrect number of arguments");
-  }
-  options.inputname = parser.arguments[0];
-  options.outputname = parser.arguments[1];
-  if (options.inputname == options.outputname) {
-    parser.error("input file and output file are not allowed to be the same");
-  }
-
-  return options;
+  return parser.continue_execution();
 }
 
 int doReduce(t_tool_options const& options);
@@ -99,31 +99,34 @@ int main(int argc, char *argv[])
   gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 
   try {
-    t_tool_options options(parse_command_line(argc, argv));
+    t_tool_options options;
 
-    SVCbool indexed = SVCfalse;
+    if (parse_command_line(argc, argv, options)) {
+      SVCbool indexed = SVCfalse;
 
-    if ( SVCopen(inFile, const_cast < char* > (options.inputname.c_str()), SVCread, readIndex) )
-    {
-      throw mcrl2::runtime_error(options.inputname + ": " + std::string(SVCerror(SVCerrno)));
-    } else {
-      if ( SVCopen(outFile, const_cast < char* > (options.outputname.c_str()), SVCwrite, &indexed) )
+      if ( SVCopen(inFile, const_cast < char* > (options.inputname.c_str()), SVCread, readIndex) )
       {
-        throw mcrl2::runtime_error(options.outputname + ": " + std::string(SVCerror(SVCerrno)));
+        throw mcrl2::runtime_error(options.inputname + ": " + std::string(SVCerror(SVCerrno)));
+      } else {
+        if ( SVCopen(outFile, const_cast < char* > (options.outputname.c_str()), SVCwrite, &indexed) )
+        {
+          throw mcrl2::runtime_error(options.outputname + ": " + std::string(SVCerror(SVCerrno)));
+        }
       }
-    }
 
-    if (options.task == CMD_BRANCH_REDUCE) {
-      return doBranchReduce(options);
+      if (options.task == CMD_BRANCH_REDUCE) {
+        return doBranchReduce(options);
+      }
+ 
+      return doReduce(options);
     }
-
-    return doReduce(options);
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 } /* main */
 
 int doReduce(t_tool_options const& options) 

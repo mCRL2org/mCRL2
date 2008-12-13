@@ -77,7 +77,7 @@ ATermAppl *parse_action_list(const char *s, int *len)
   return r;
 }
 
-lts_generation_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, lts_generation_options& options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. "
     "If INFILE is not supplied, stdin is used. "
@@ -144,109 +144,109 @@ lts_generation_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  lts_generation_options options;
+  if (parser.continue_execution()) {
+    options.removeunused    = parser.options.count("unused-data") == 0;
+    options.detect_deadlock = parser.options.count("deadlock");
+    options.outinfo         = parser.options.count("no-info") == 0;
+    options.strat           = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  options.removeunused    = parser.options.count("unused-data") == 0;
-  options.detect_deadlock = parser.options.count("deadlock");
-  options.outinfo         = parser.options.count("no-info") == 0;
-  options.strat           = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-  if (parser.options.count("dummy")) {
-    if (parser.options.count("dummy") > 1) {
-      parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
+    if (parser.options.count("dummy")) {
+      if (parser.options.count("dummy") > 1) {
+        parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
+      }
+      std::string dummy_str(parser.option_argument("dummy"));
+      if (dummy_str == "yes") {
+        options.usedummies = true;
+      } else if (dummy_str == "no") {
+        options.usedummies = false;
+      } else {
+        parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
+      }
     }
-    std::string dummy_str(parser.option_argument("dummy"));
-    if (dummy_str == "yes") {
-      options.usedummies = true;
-    } else if (dummy_str == "no") {
-      options.usedummies = false;
-    } else {
-      parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
+
+    if (parser.options.count("state-format")) {
+      if (parser.options.count("state-format") > 1) {
+        parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
+      }
+      std::string state_format_str(parser.option_argument("state-format"));
+      if (state_format_str == "vector") {
+        options.stateformat = GS_STATE_VECTOR;
+      } else if (state_format_str == "tree") {
+        options.stateformat = GS_STATE_TREE;
+      } else {
+        parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
+      }
     }
-  }
 
-  if (parser.options.count("state-format")) {
-    if (parser.options.count("state-format") > 1) {
-      parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
+    if (parser.options.count("bit-hash")) {
+      options.bithashing  = true;
+      options.bithashsize = parser.option_argument_as< unsigned long long > ("bit-hash");
     }
-    std::string state_format_str(parser.option_argument("state-format"));
-    if (state_format_str == "vector") {
-      options.stateformat = GS_STATE_VECTOR;
-    } else if (state_format_str == "tree") {
-      options.stateformat = GS_STATE_TREE;
-    } else {
-      parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
+    if (parser.options.count("max")) {
+      options.max_states = parser.option_argument_as< unsigned long long > ("max");
     }
-  }
-
-  if (parser.options.count("bit-hash")) {
-    options.bithashing  = true;
-    options.bithashsize = parser.option_argument_as< unsigned long long > ("bit-hash");
-  }
-  if (parser.options.count("max")) {
-    options.max_states = parser.option_argument_as< unsigned long long > ("max");
-  }
-  if (parser.options.count("action")) {
-    options.detect_action = true;
-    options.trace_actions = parse_action_list(parser.option_argument("action").c_str(), &options.num_trace_actions);
-  }
-  if (parser.options.count("trace")) {
-    options.trace      = true;
-    options.max_traces = parser.option_argument_as< unsigned long > ("trace");
-  }
-  if (parser.options.count("confluence")) {
-    options.priority_action = parser.option_argument("confluence");
-  }
-  if (parser.options.count("strategy")) {
-    options.expl_strat = str_to_expl_strat(parser.option_argument("strategy").c_str());
-
-    if ( options.expl_strat == es_none ) {
-      parser.error("invalid exploration strategy '" + parser.option_argument("strategy") + "'");
+    if (parser.options.count("action")) {
+      options.detect_action = true;
+      options.trace_actions = parse_action_list(parser.option_argument("action").c_str(), &options.num_trace_actions);
     }
-  }
-  if (parser.options.count("out")) {
-    options.outformat = lts::parse_format(parser.option_argument("out"));
-
-    if (options.outformat == lts_none) {
-      parser.error("format '" + parser.option_argument("out") + "' is not recognised");
+    if (parser.options.count("trace")) {
+      options.trace      = true;
+      options.max_traces = parser.option_argument_as< unsigned long > ("trace");
     }
-  }
-  if (parser.options.count("init-tsize")) {
-    options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
-  }
-  if (parser.options.count("todo-max")) {
-    options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
-  }
-  if (parser.options.count("error-trace")) {
-    options.save_error_trace = true;
-  }
+    if (parser.options.count("confluence")) {
+      options.priority_action = parser.option_argument("confluence");
+    }
+    if (parser.options.count("strategy")) {
+      options.expl_strat = str_to_expl_strat(parser.option_argument("strategy").c_str());
+ 
+      if ( options.expl_strat == es_none ) {
+        parser.error("invalid exploration strategy '" + parser.option_argument("strategy") + "'");
+      }
+    }
+    if (parser.options.count("out")) {
+      options.outformat = lts::parse_format(parser.option_argument("out"));
+ 
+      if (options.outformat == lts_none) {
+        parser.error("format '" + parser.option_argument("out") + "' is not recognised");
+      }
+    }
+    if (parser.options.count("init-tsize")) {
+      options.initial_table_size = parser.option_argument_as< unsigned long >("init-tsize");
+    }
+    if (parser.options.count("todo-max")) {
+      options.todo_max = parser.option_argument_as< unsigned long >("todo-max");
+    }
+    if (parser.options.count("error-trace")) {
+      options.save_error_trace = true;
+    }
 
-  if ( options.bithashing && options.trace ) {
-    parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
-  }
+    if ( options.bithashing && options.trace ) {
+      parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
+    }
 
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  if (0 < parser.arguments.size()) {
-    options.specification = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    options.lts = parser.arguments[1];
-  }
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    if (0 < parser.arguments.size()) {
+      options.specification = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      options.lts = parser.arguments[1];
+    }
 
-  if (!options.lts.empty()) {
-    if ( options.outformat == lts_none ) {
-      options.outformat = lts::guess_format(options.lts);
-
+    if (!options.lts.empty()) {
       if ( options.outformat == lts_none ) {
-        gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
-        options.outformat = lts_mcrl2;
+        options.outformat = lts::guess_format(options.lts);
+ 
+        if ( options.outformat == lts_none ) {
+          gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+          options.outformat = lts_mcrl2;
+        }
       }
     }
   }
 
-  return options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char **argv)
@@ -261,22 +261,24 @@ int main(int argc, char **argv)
     }
 #endif
 
-    lts_generation_options lgopts(parse_command_line(argc, argv));
-
-    if ( !initialise_lts_generation(&lgopts) )
-    {
-      return 1;
-    }
+    lts_generation_options lgopts;
     
-    generate_lts();
- 
-    finalise_lts_generation();
+    if (parse_command_line(argc, argv, lgopts)) {
 
-    return EXIT_SUCCESS;
+      if ( !initialise_lts_generation(&lgopts) )
+      {
+        return 1;
+      }
+    
+      generate_lts();
+ 
+      finalise_lts_generation();
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

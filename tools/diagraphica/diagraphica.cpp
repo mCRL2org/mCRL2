@@ -18,6 +18,7 @@
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_wx.h"
 
 // windows debug libraries
 #ifdef _MSC_VER
@@ -133,7 +134,7 @@ int main(int argc, char **argv) {
 // -- command line --------------------------------------------------
 
 // parse command line 
-bool parse_command_line(int argc, wxChar** argv) {
+bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
 
   using namespace ::mcrl2::utilities;
 
@@ -145,14 +146,19 @@ bool parse_command_line(int argc, wxChar** argv) {
 
   command_line_parser parser(clinterface, argc, argv);
 
-  if (0 < parser.arguments.size()) {
-    fsm_file_argument = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
+  // needed as guard for clearColleagues() in OnExit()
+  graph = 0;
+
+  if (parser.continue_execution()) {
+    if (0 < parser.arguments.size()) {
+      fsm_file_argument = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
   }
 
-  return (true);
+  return parser.continue_execution();
 }
 // -- * -------------------------------------------------------------
 
@@ -161,7 +167,7 @@ bool parse_command_line(int argc, wxChar** argv) {
 
 
 // --------------------
-bool DiaGraph::OnInit()
+bool DiaGraph::DoInit()
 // --------------------
 {
     // windows debugging
@@ -181,14 +187,9 @@ bool DiaGraph::OnInit()
     // init colleagues
     initColleagues();
 
-	clustered = false;
+    clustered = false;
     critSect = false;
 
-    if ( !parse_error.empty() )
-    {
-      wxMessageDialog(frame, wxString(parse_error.c_str(), wxConvLocal), wxT("Command line error"), wxOK | wxICON_ERROR).ShowModal();
-    }
-   
     if (!fsm_file_argument.empty()) {
       openFile(fsm_file_argument);
     }
@@ -197,33 +198,14 @@ bool DiaGraph::OnInit()
     return true;
 }
 
-bool DiaGraph::Initialize(int& argc, wxChar** argv) {
-  try {
-    parse_command_line(argc, argv);
-  }
-  catch (std::exception& e) {
-    if (wxApp::Initialize(argc, argv)) {
-      parse_error = std::string(e.what()).
-        append("\n\nNote that other command line options may have been ignored because of this error.");
-    }
-    else {
-      std::cerr << e.what() << std::endl;
-
-      return false;
-    }
-
-    return true;
-  }
-
-  return wxApp::Initialize(argc, argv);
-}
-
 // -------------------
 int DiaGraph::OnExit()
 // -------------------
 {
-    // clear colleagues
-    clearColleagues();
+    if (graph != 0) {
+      // clear colleagues
+      clearColleagues();
+    }
     
     // normal exit
     return 0;

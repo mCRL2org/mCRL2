@@ -110,48 +110,52 @@ struct tool_options_type {
     lps_file_argument(""),
     use_dummies(false)
   {}
-};
 
-tool_options_type parse_command_line(int argc, char** argv) {
-  using namespace ::mcrl2::utilities;
+  bool parse_command_line(int argc, char** argv) {
+    using namespace ::mcrl2::utilities;
 
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... INFILE\n",
-    "Simulate the LPS in INFILE via a text-based interface.");
+    interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... INFILE\n",
+      "Simulate the LPS in INFILE via a text-based interface.");
 
-  clinterface.add_rewriting_options();
+    clinterface.add_rewriting_options();
 
-  clinterface.
-    add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
+    clinterface.
+      add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
 
-  command_line_parser parser(clinterface, argc, argv);
+    command_line_parser parser(clinterface, argc, argv);
 
-  tool_options_type options;
+    if (parser.continue_execution()) {
+      use_dummies = 0 < parser.options.count("dummy");
 
-  options.use_dummies = 0 < parser.options.count("dummy");
+      rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+      if (parser.arguments.size() == 0) {
+        parser.error("no INFILE specified");
+      } else if (parser.arguments.size() == 1) {
+        lps_file_argument = parser.arguments[0];
+      } else {
+        //parser.arguments.size() > 1
+        parser.error("too many file arguments");
+      }
+    }
 
-  if (parser.arguments.size() == 0) {
-    parser.error("no INFILE specified");
-  } else if (parser.arguments.size() == 1) {
-    options.lps_file_argument = parser.arguments[0];
-  } else {
-    //parser.arguments.size() > 1
-    parser.error("too many file arguments");
+    return parser.continue_execution();
   }
-
-  return options;
-}
+};
 
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-    tool_options_type options(parse_command_line(argc, argv));
+    tool_options_type options;
+
+    if (!options.parse_command_line(argc, argv)) {
+      return EXIT_SUCCESS;
+    }
 
     FILE *SpecStream = fopen(options.lps_file_argument.c_str(), "rb");
-  
+
     if ( SpecStream == NULL )
     {
       throw mcrl2::runtime_error("could not open input file '" +

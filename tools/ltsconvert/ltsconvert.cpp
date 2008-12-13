@@ -205,7 +205,7 @@ void process(t_tool_options const& tool_options) {
   tool_options.write_lts(l);
 }
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
     "requested format after applying the selected minimisation method (default is\n"
@@ -268,99 +268,99 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
+  if (parser.continue_execution()) {
+    if (parser.options.count("lps")) {
+      if (1 < parser.options.count("lps")) {
+        std::cerr << "warning: multiple LPS files specified; can only use one\n";
+      }
 
-  if (parser.options.count("lps")) {
-    if (1 < parser.options.count("lps")) {
-      std::cerr << "warning: multiple LPS files specified; can only use one\n";
+      tool_options.lpsfile = parser.option_argument("lps");
     }
+    if (parser.options.count("in")) {
+      if (1 < parser.options.count("in")) {
+        std::cerr << "warning: multiple input formats specified; can only use one\n";
+      }
 
-    tool_options.lpsfile = parser.option_argument("lps");
-  }
-  if (parser.options.count("in")) {
-    if (1 < parser.options.count("in")) {
-      std::cerr << "warning: multiple input formats specified; can only use one\n";
-    }
+      tool_options.intype = lts::parse_format(parser.option_argument("in"));
 
-    tool_options.intype = lts::parse_format(parser.option_argument("in"));
-
-    if (tool_options.intype == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("in") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-  if (parser.options.count("out")) {
-    if (1 < parser.options.count("out")) {
-      std::cerr << "warning: multiple output formats specified; can only use one\n";
-    }
-
-    tool_options.outtype = lts::parse_format(parser.option_argument("out"));
-
-    if (tool_options.outtype == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("out") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-
-  if (parser.options.count("equivalence")) {
-
-    tool_options.equivalence = lts::parse_equivalence(
-        parser.option_argument("equivalence"));
-
-    if (tool_options.equivalence != lts_eq_bisim &&
-        tool_options.equivalence != lts_eq_branching_bisim &&
-        tool_options.equivalence != lts_eq_sim &&
-        tool_options.equivalence != lts_eq_trace &&
-        tool_options.equivalence != lts_eq_weak_trace)
-    {
-      parser.error("option -e/--equivalence has illegal argument '" + 
-          parser.option_argument("equivalence") + "'");
-    }
-  }
-
-  if (parser.options.count("tau")) {
-    lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
-  }
-
-  tool_options.determinise                       = 0 < parser.options.count("determinise");
-  tool_options.check_reach                       = parser.options.count("no-reach") == 0;
-  tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
-  tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
-
-  if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
-    parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.set_source(parser.arguments[0]);
-    }
-    else {
-      if ( tool_options.intype == lts_none ) {
-        gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
-        tool_options.intype = lts_aut;
+      if (tool_options.intype == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("in") <<
+                     "' is not recognised; option ignored" << std::endl;
       }
     }
-    if (1 < parser.arguments.size()) {
-      tool_options.set_target(parser.arguments[1]);
+    if (parser.options.count("out")) {
+      if (1 < parser.options.count("out")) {
+        std::cerr << "warning: multiple output formats specified; can only use one\n";
+      }
+
+      tool_options.outtype = lts::parse_format(parser.option_argument("out"));
+
+      if (tool_options.outtype == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("out") <<
+                     "' is not recognised; option ignored" << std::endl;
+      }
+    }
+
+    if (parser.options.count("equivalence")) {
+
+      tool_options.equivalence = lts::parse_equivalence(
+          parser.option_argument("equivalence"));
+
+      if (tool_options.equivalence != lts_eq_bisim &&
+          tool_options.equivalence != lts_eq_branching_bisim &&
+          tool_options.equivalence != lts_eq_sim &&
+          tool_options.equivalence != lts_eq_trace &&
+          tool_options.equivalence != lts_eq_weak_trace)
+      {
+        parser.error("option -e/--equivalence has illegal argument '" + 
+            parser.option_argument("equivalence") + "'");
+      }
+    }
+
+    if (parser.options.count("tau")) {
+      lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+    }
+
+    tool_options.determinise                       = 0 < parser.options.count("determinise");
+    tool_options.check_reach                       = parser.options.count("no-reach") == 0;
+    tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
+    tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
+
+    if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
+      parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+    }
+
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
     else {
-      if ( tool_options.outtype == lts_none ) {
-        if ( !tool_options.lpsfile.empty() ) {
-          gsWarningMsg("no output format set; using fsm because --lps was used\n");
-          tool_options.outtype = lts_fsm;
-        } else {
-          gsWarningMsg("no output format set or detected; using default (aut)\n");
-          tool_options.outtype = lts_aut;
+      if (0 < parser.arguments.size()) {
+        tool_options.set_source(parser.arguments[0]);
+      }
+      else {
+        if ( tool_options.intype == lts_none ) {
+          gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+          tool_options.intype = lts_aut;
+        }
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.set_target(parser.arguments[1]);
+      }
+      else {
+        if ( tool_options.outtype == lts_none ) {
+          if ( !tool_options.lpsfile.empty() ) {
+            gsWarningMsg("no output format set; using fsm because --lps was used\n");
+            tool_options.outtype = lts_fsm;
+          } else {
+            gsWarningMsg("no output format set or detected; using default (aut)\n");
+            tool_options.outtype = lts_aut;
+          }
         }
       }
     }
   }
 
-  return tool_options;
+  return parser.continue_execution();
 }
 
 // SQuADT protocol interface
@@ -666,13 +666,16 @@ int main(int argc, char **argv)
     }
 #endif
 
-    process(parse_command_line(argc, argv));
+    t_tool_options options;
 
-    return EXIT_SUCCESS;
+    if (parse_command_line(argc, argv, options)) {
+      process(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
