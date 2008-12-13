@@ -981,6 +981,39 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
   return result;
 }
 
+data_assignment_list determine_process_initialization(const data_assignment_list& initialization, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
+{
+  data_assignment_list init = get_nonreal_assignments(initialization);
+  data_assignment_list real_assignments = get_real_assignments(initialization);
+  atermpp::map<data_expression, data_expression> replacements;
+  for(data_assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
+  {
+    replacements[i->lhs()] = i->rhs();
+  }
+
+  for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = context.begin(); i != context.end(); ++i)
+  {
+    data_expression left = data_expression_map_replace(i->first.first, replacements);
+    data_expression right = data_expression_map_replace(i->first.second, replacements);
+    data_assignment assignment;
+    if(r(less(left, right)) == true_())
+    {
+      assignment = data_assignment(i->second, smaller());
+    }
+    else if(r(equal_to(left, right)) == true_())
+    {
+      assignment = data_assignment(i->second, equal());
+    }
+    else
+    {
+      assert(r(greater(left, right)) == true_());
+      assignment = data_assignment(i->second, larger());
+    }
+    init = push_front(init, assignment);
+  }
+  return reverse(init);
+}
+
 specification realelm(specification s)
 {
   gsDebugMsg("Performing real time abstraction\n");
@@ -1076,6 +1109,7 @@ specification realelm(specification s)
   summands = reverse(summands);
   gsVerboseMsg("Computed %d summands %s\n", summands.size(), pp(summands).c_str());
 
+  // Process parameters
   data_variable_list process_parameters = reverse(nonreal_parameters);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator i = context.begin(); i != context.end(); ++i)
   {
@@ -1083,8 +1117,14 @@ specification realelm(specification s)
   }
   process_parameters = reverse(process_parameters);
 
+  // New lps
   lps = linear_process(lps.free_variables(), process_parameters, summands);
   s = set_lps(s, lps);
+
+  // New process initializer
+  data_assignment_list initialization(determine_process_initialization(s.initial_process().assignments(), context, r));
+  process_initializer init(s.initial_process().free_variables(), initialization);
+  s = set_initial_process(s, init);
 
   return s;
 }
