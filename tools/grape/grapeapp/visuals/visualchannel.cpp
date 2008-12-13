@@ -102,3 +102,4 @@ grape_direction visualchannel::is_on_border( libgrape::coordinate &p_coord )
 }
 
 }
+

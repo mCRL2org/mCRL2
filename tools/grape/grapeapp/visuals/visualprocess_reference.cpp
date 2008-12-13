@@ -71,3 +71,4 @@ coordinate visualprocess_reference::move_to_border( coordinate &p_coord )
   return move_to_border_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord );
 }
 }
+

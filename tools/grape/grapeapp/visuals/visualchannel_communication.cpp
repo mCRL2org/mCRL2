@@ -71,3 +71,4 @@ grape_direction visualchannel_communication::is_on_border( libgrape::coordinate 
 }
 
 }
+

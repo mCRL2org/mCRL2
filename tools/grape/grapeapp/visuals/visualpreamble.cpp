@@ -100,3 +100,4 @@ grape_direction visualpreamble::is_on_border( libgrape::coordinate &p_coord )
 }
 
 }
+

@@ -74,3 +74,4 @@ bool grape_event_about::Undo( void )
   // cannot be undone
   return true;
 }
+

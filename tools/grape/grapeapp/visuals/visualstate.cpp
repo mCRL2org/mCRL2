@@ -67,3 +67,4 @@ grape_direction visualstate::is_on_border( libgrape::coordinate &p_coord )
 }
 
 }
+

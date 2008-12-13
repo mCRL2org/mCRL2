@@ -79,3 +79,4 @@ grape_direction visualinitial_designator::is_on_border( libgrape::coordinate &p_
 }
 
 }
+

@@ -125,3 +125,4 @@ bool visualnonterminating_transition::is_nearest_head( libgrape::coordinate &p_c
 }
 
 }
+

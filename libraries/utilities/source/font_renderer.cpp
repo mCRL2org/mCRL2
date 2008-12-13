@@ -301,7 +301,7 @@ namespace mcrl2 {
     {
       // Wrapped text to fit into bounding box. 
       
-      const size_t addpos = (xRgt-xLft)/(CHARWIDTH*scale);
+      const size_t addpos = static_cast< size_t >((xRgt-xLft)/(CHARWIDTH*scale));
       double transx = 0;
       double transy = 0;
       std::string subs;

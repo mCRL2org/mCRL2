@@ -72,3 +72,4 @@ coordinate visualarchitecture_reference::move_to_border( libgrape::coordinate &p
 }
 
 }
+

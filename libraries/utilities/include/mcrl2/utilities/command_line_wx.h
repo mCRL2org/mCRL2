@@ -94,7 +94,11 @@ namespace mcrl2 {
               return true;
             }
          
-            return wxApp::Initialize(argc, argv);
+            if (m_execute) {
+              return wxApp::Initialize(argc, argv);
+            }
+
+            return true;
           }
       };
     }

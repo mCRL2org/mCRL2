@@ -137,3 +137,4 @@ grape_direction visualvisible::is_on_border( libgrape::coordinate &p_coord )
 }
 
 }
+

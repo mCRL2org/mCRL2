@@ -126,3 +126,4 @@ grape_direction visualterminating_transition::is_on_border( libgrape::coordinate
 }
 
 }
+
