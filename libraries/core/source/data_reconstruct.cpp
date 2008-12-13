@@ -1595,9 +1595,10 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
           arg0 = ATAgetArgument(arg0, 0);
         }
         assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
-        assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
+        //assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
         //assert(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0);
-        if(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0)
+        if(p_ctx->sort_constructors[get_linked_sort(head)].index(arg0) >= 0 &&
+           p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0)
         {
           if (p_ctx->num_map_equations[head] > 0) {
             // there can be only one data equation for a projection function,
