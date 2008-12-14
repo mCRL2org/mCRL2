@@ -1189,14 +1189,21 @@ specification realelm(specification s)
           // that are not yet in the context.
           gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
           fourrier_motzkin(cond, i->summation_variables(), r);
-          cond = normalize_inequalities(cond, r);
-          gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
-          // cond contains the inequalities over the process parameters
-          changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
-          summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
-          if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
+          if(std::find(cond.begin(), cond.end(), false_()) == cond.end())
           {
-            summands = push_front(summands, s);
+            cond = normalize_inequalities(cond, r);
+            gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
+            // cond contains the inequalities over the process parameters
+            changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
+            summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
+            if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
+            {
+              summands = push_front(summands, s);
+            }
+          }
+          else
+          {
+            gsVerboseMsg("System is inconsistent\n");
           }
         }
       }
