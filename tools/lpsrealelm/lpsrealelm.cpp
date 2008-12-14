@@ -36,6 +36,7 @@ using namespace mcrl2::lps;
 struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
+  int max_iterations;
 };
 
 //Squadt connectivity
@@ -102,6 +103,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).location();
   options.output_file = configuration.get_output(lps_file_for_output).location();
+  options.max_iterations = 5;
 
   gsDebugMsg("Calling do_realelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_realelm(options)==0);
@@ -118,7 +120,7 @@ int do_realelm(const tool_options& options)
   lps_specification.load(options.input_file);
 
   // Untime lps_specification and save the output to a binary file
-  specification new_spec = realelm(lps_specification);
+  specification new_spec = realelm(lps_specification, options.max_iterations);
 
   gsDebugMsg("Real time abstraction completed, saving to %s\n", options.output_file.c_str());
   new_spec.save(options.output_file);
@@ -133,9 +135,20 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
                              "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
                              "If OUTFILE is not present, stdout is used.");
 
+  //clinterface.add_rewriting_options();
+  clinterface.add_option("max", make_mandatory_argument("NUM"),
+    "perform at most NUM iterations");
+
   command_line_parser parser(clinterface, ac, av);
 
   if (parser.continue_execution()) {
+    if (parser.options.count("max")) {
+      t_options.max_iterations = parser.option_argument_as< int > ("max");
+    }
+    else
+    {
+      t_options.max_iterations = 5;
+    }
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
     }

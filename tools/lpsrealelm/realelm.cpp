@@ -1099,9 +1099,9 @@ data_assignment_list determine_process_initialization(const data_assignment_list
   return reverse(init);
 }
 
-specification realelm(specification s)
+specification realelm(specification s, int max_iterations)
 {
-  gsDebugMsg("Performing real time abstraction\n");
+  gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
   s = set_data_specification(s, replace_real_implementation(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
   rewriter r(s.data());
@@ -1115,9 +1115,6 @@ specification realelm(specification s)
   data_variable_list real_parameters = get_real_variables(lps.process_parameters());
   data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
 
-  int iteration = 1;
-  int max_iterations = 5;
-  gsDebugMsg("Maximum number of iterations is %d\n", max_iterations);
 
   // Compute some context information for each summand.
   atermpp::map<summand, data_expression_list> summand_real_conditions;
@@ -1146,6 +1143,7 @@ specification realelm(specification s)
   }
 
   bool changed = false;
+  int iteration = 0;
   summand_list summands;
   do
   {
@@ -1200,7 +1198,7 @@ specification realelm(specification s)
         }
       }
     }
-  } while ((iteration <= max_iterations) && changed);
+  } while ((iteration < max_iterations) && changed);
 
   gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = context.begin(); i != context.end(); ++i)

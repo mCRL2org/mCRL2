@@ -14,6 +14,6 @@
 
 #include "mcrl2/lps/specification.h"
 
-  mcrl2::lps::specification realelm(mcrl2::lps::specification s);
+  mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5);
 
 #endif // MCRL2_LPSREALELM_REALELM_H
