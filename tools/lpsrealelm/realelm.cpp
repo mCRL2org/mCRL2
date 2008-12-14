@@ -526,24 +526,16 @@ specification normalize_specification(specification s, rewriter& r, identifier_g
 // Determine the inequalities ranging over real numbers in data expression e,
 // and store them in inequalities
 static
-void determine_inequalities(const data_expression& e, data_expression_list& inequalities)
+void determine_real_inequalities(const data_expression& e, data_expression_list& inequalities)
 {
   if (is_and(e))
   {
-    determine_inequalities(lhs(e), inequalities);
-    determine_inequalities(rhs(e), inequalities);
+    determine_real_inequalities(lhs(e), inequalities);
+    determine_real_inequalities(rhs(e), inequalities);
   }
-  else if (is_equal_to(e) || is_less(e) || is_less_equal(e))
+  else if ((is_equal_to(e) || is_less(e) || is_less_equal(e)) && rhs(e).sort() == sort_expr::real())
   {
     inequalities = push_front(inequalities, e);
-  }
-  else
-  {
-    if(!is_true(e))
-    {
-      gsErrorMsg("Unexpected conjunct %s\n", pp(e).c_str());
-    }
-    assert(is_true(e));
   }
 }
 
@@ -1133,7 +1125,7 @@ specification realelm(specification s)
   for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
   {
     data_expression_list inequalities;
-    determine_inequalities(i->condition(), inequalities);
+    determine_real_inequalities(i->condition(), inequalities);
     summand_real_conditions[*i] = inequalities;
     // Replacements is the nextstate vector in a map
     atermpp::map<data_expression, data_expression> replacements;
