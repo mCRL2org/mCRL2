@@ -244,8 +244,9 @@ data_equation_list additional_real_equations()
   //res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r,multiplies(pos(2),p)), multiplies(gsMakeDataExprExp(r,p), gsMakeDataExprExp(r,p))));
 
   res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), numerator(rational(x,p)), x));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), denominator(rational(x,p)), p));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), denominator(rational(x,p)), gsMakeDataExprPos2Int(p)));
   res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,negate(p)), normalize_rational(negate(x), gsMakeDataExprPos2Int(p))));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), normalize_rational(x, int_(1)), rational(x, pos(1)))); // workaround
   res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,gsMakeDataExprPos2Int(p)), if_(equal_to(modulus(x,p), nat(0)), rational(divides(x,p), pos(1)), rational(plus(denominator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))), multiplies(divides(x,p), numerator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))))), gsMakeDataExprInt2Pos(numerator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))))))));
 
   return res;

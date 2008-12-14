@@ -398,16 +398,12 @@ static
 data_expression normalize_inequality(const data_expression& e, rewriter& r)
 {
   data_application d = static_cast<const data_application&>(e);
-  std::pair<data_expression, data_expression> left = split_constants_and_variables(lhs(d));
-  std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(d));
+  std::pair<data_expression, data_expression> left = split_constants_and_variables(r(lhs(d)));
+  std::pair<data_expression, data_expression> right = split_constants_and_variables(r(rhs(d)));
 
-  data_expression new_left = plus(left.first, negate(right.first));
+  data_expression new_left = r(plus(left.first, negate(right.first)));
   data_expression new_right = r(minus(right.second, left.second));
-  d = data_application(d.head(), make_list(new_left, new_right));
-  
-  data_expression res = r(d);
-
-  return res;
+  return data_application(d.head(), make_list(new_left, new_right));
 }
 
 // Normalize the inequalities in l, that is, make sure that for each of the
@@ -428,10 +424,6 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
       {
         result = push_front(result,normalize_inequality(inequality, r));
       }
-    }
-    else
-    {
-      gsDebugMsg("Unexpected inequality %s occurred\n", pp(inequality).c_str());
     }
   }
   return result;
@@ -652,6 +644,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
 static
 data_expression remove_variable(const data_variable& variable, const data_expression& inequality)
 {
+  gsDebugMsg("Removing variable %s from inequality %s\n", pp(variable).c_str(), pp(inequality).c_str());
   data_expression left = lhs(inequality);
   data_expression new_left = real_zero();
   while(is_plus(left))
@@ -662,7 +655,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
       new_left = divide(plus(new_left, rhs(left)), factor);
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, divide(rhs(inequality), factor)));
     }
-    else if (find_data_variable(left, variable))
+    else if (lhs(left) == variable)
     {
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(plus(new_left, rhs(left)), rhs(inequality)));
     }
@@ -678,8 +671,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
     data_expression p = plus(negate(lhs(lhs(left))), negate(rhs(lhs(left))));
     return remove_variable(variable, data_application(static_cast<const data_application&>(inequality).head(), make_list(p, rhs(inequality))));
   }
-
-  if (left == variable)
+  else if (left == variable)
   {
     return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, rhs(inequality)));
   }
@@ -800,15 +792,23 @@ void fourrier_motzkin(data_expression_list& inequalities, data_variable_list var
       // This is equivalent to bj * x + bi * x <= ci + cj
       for(data_expression_list::iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
       {
-        data_expression positive_inequality = normalize_inequality(remove_variable(*i, *j), r);
+        data_expression positive_inequality = remove_variable(*i, *j);
+        gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
+        positive_inequality = normalize_inequality(positive_inequality,r);
+        gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
+        assert(is_inequality(positive_inequality));
         if(is_inequality(positive_inequality))
         {
           assert(!is_greater(positive_inequality) && !is_greater_equal(positive_inequality));
           for(data_expression_list::iterator k = negative_variables.begin(); k != negative_variables.end(); ++k)
           {
             gsDebugMsg("combining %s and %s into new inequality\n", pp(*j).c_str(), pp(*k).c_str());
-            data_expression negative_inequality = normalize_inequality(remove_variable(*i, *k), r);
+            data_expression negative_inequality = remove_variable(*i, *k);
+            gsDebugMsg("negative inequality: %s\n", pp(negative_inequality).c_str());
+            negative_inequality = normalize_inequality(negative_inequality, r);
+            gsDebugMsg("negative inequality after normalization: %s\n", pp(negative_inequality).c_str());
             // Results may not be inequalities any more
+            assert(is_inequality(negative_inequality));
             if(is_inequality(negative_inequality))
             {
               assert(!is_greater(negative_inequality) && !is_greater_equal(negative_inequality));
@@ -929,7 +929,6 @@ data_expression_list data_expression_map_replace_list(const data_expression_list
   for(atermpp::map<data_expression, data_expression>::const_iterator j = replacements.begin(); j != replacements.end(); ++j)
   {
     gsVerboseMsg("%s := %s, ", pp(j->first).c_str(), pp(j->second).c_str());
-    gsVerboseMsg("%s := %s, ", j->first.to_string().c_str(), j->second.to_string().c_str());
   }
   gsVerboseMsg("\n"); 
   gsVerboseMsg("in inequalities %s\n", pp(inequalities).c_str());
@@ -1161,7 +1160,7 @@ specification realelm(specification s)
     changed = false;
     summands = summand_list();
     assert(summands.empty());
-    gsDebugMsg("Iteration %d\n", iteration++);
+    gsVerboseMsg("Iteration %d\n", iteration++);
 
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
