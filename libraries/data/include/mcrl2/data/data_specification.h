@@ -75,7 +75,7 @@ class data_specification: public atermpp::aterm_appl
     atermpp::map < sort_expression, data_expression > default_expression_map;
 
     /// \brief Caches if a sort is finite or not.
-    std::map<data::sort_expression, bool> m_finite_sorts;
+    mutable std::map<data::sort_expression, bool> m_finite_sorts;
 
   public:
 
@@ -340,7 +340,7 @@ class data_specification: public atermpp::aterm_appl
     /// For efficiency, the results of this function are cached.
     /// \param s A sort expression.
     /// \return True if the sort is finite.
-    bool is_finite(sort_expression s)
+    bool is_finite(sort_expression s) const
     {
       std::map<sort_expression, bool>::const_iterator i = m_finite_sorts.find(s);
       if (i != m_finite_sorts.end())

@@ -38,17 +38,23 @@ namespace detail {
 
   /// Returns the subset with variables of finite sort.
   /// TODO: this should be done more efficiently, by avoiding aterm lists
-  data::data_variable_list finite_variables(data::data_variable_list variables, data::data_specification& data)
+  void split_finite_variables(data::data_variable_list variables, const data::data_specification& data, data::data_variable_list& finite_variables, data::data_variable_list& infinite_variables)
   {
-    std::vector<data::data_variable> result;
+    std::vector<data::data_variable> finite;
+    std::vector<data::data_variable> infinite;
     for (data::data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (data.is_finite(i->sort()))
       {
-        result.push_back(*i);
+        finite.push_back(*i);
+      }
+      else
+      {
+        infinite.push_back(*i);
       }
     }
-    return data::data_variable_list(result.begin(), result.end());
+    finite_variables = data::data_variable_list(finite.begin(), finite.end());
+    infinite_variables = data::data_variable_list(infinite.begin(), infinite.end());
   }
 
   template <typename Container>
@@ -451,14 +457,16 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list fvars = finite_variables(variables, m_data_enumerator.data());
-        if (fvars.empty())
+        data::data_variable_list finite;
+        data::data_variable_list infinite;
+        split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
+        if (finite.empty())
         {
           return x;
         }
         else
         {
-          return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(fvars, phi, sigma);
+          return core::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
         }
       }
     }
@@ -473,14 +481,16 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list fvars = finite_variables(variables, m_data_enumerator.data());
-        if (fvars.empty())
+        data::data_variable_list finite;
+        data::data_variable_list infinite;
+        split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
+        if (finite.empty())
         {
           return x;
         }
         else
         {
-          return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(fvars, phi, sigma);
+          return core::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
         }
       }
     }

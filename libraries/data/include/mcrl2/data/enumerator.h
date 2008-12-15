@@ -99,10 +99,10 @@ class data_enumerator
     typedef std::map<sort_expression, std::vector<data_operation> > constructor_map;
 
     /// \brief A data specification.
-    data_specification* m_data;
+    const data_specification* m_data;
 
     /// \brief A rewriter.
-    data::rewriter* m_rewriter;
+    const data::rewriter* m_rewriter;
 
     /// \brief An identifier generator.
     IdentifierGenerator* m_generator;
@@ -138,15 +138,15 @@ class data_enumerator
     /// \param data_spec A data specification.
     /// \param rewriter A rewriter.
     /// \param generator An identifier generator.
-    data_enumerator(data_specification& data_spec,
-                    data::rewriter& rewriter,
+    data_enumerator(const data_specification& data_spec,
+                    const data::rewriter& rewriter,
                     IdentifierGenerator& generator)
      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
     {}
 
     /// \brief The data specification.
     /// \return The data specification.
-    data_specification& data()
+    const data_specification& data()
     {
       return *m_data;
     }

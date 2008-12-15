@@ -89,20 +89,26 @@ pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2)
+template <typename Rewriter1, typename Rewriter2>
+void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2)
 {
-  if (R(expr(expr1)) != R(expr(expr2)))
+  if (R1(expr(expr1)) != R2(expr(expr2)))
   {
-    BOOST_CHECK(R(expr(expr1)) == R(expr(expr2)));
+    BOOST_CHECK(R1(expr(expr1)) == R2(expr(expr2)));
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     std::cout << "expr1    " << core::pp(expr(expr1)) << std::endl;
     std::cout << "expr2    " << core::pp(expr(expr2)) << std::endl;
-    std::cout << "R(expr1) " << core::pp(R(expr(expr1))) << std::endl;
-    std::cout << "R(expr2) " << core::pp(R(expr(expr2))) << std::endl;
-    std::cout << "R(expr1) " << R(expr(expr1)) << std::endl;
-    std::cout << "R(expr2) " << R(expr(expr2)) << std::endl;
+    std::cout << "R(expr1) " << core::pp(R1(expr(expr1))) << std::endl;
+    std::cout << "R(expr2) " << core::pp(R2(expr(expr2))) << std::endl;
+    std::cout << "R(expr1) " << R1(expr(expr1)) << std::endl;
+    std::cout << "R(expr2) " << R2(expr(expr2)) << std::endl;
   }
+}
+
+template <typename Rewriter>
+void test_expressions(Rewriter R, std::string expr1, std::string expr2)
+{
+  test_expressions(R, expr1, R, expr2);
 }
 
 template <typename Rewriter>
@@ -241,8 +247,11 @@ void test_enumerate_quantifiers_rewriter_finite()
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae, false);
-  test_expressions(R, "forall n:Nat, b:Bool.Z(b,n)", "Z(false,n) && Z(true,n)");
-  test_expressions(R, "forall n:Nat. Y(n)", "forall n:Nat. Y(n)");
+
+  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> S(datar);
+
+  test_expressions(R, "forall n:Nat, b:Bool.Z(b,n)", S, "forall n:Nat.Z(false,n) && Z(true,n)");
+  test_expressions(R, "forall n:Nat. Y(n)", S, "forall n:Nat. Y(n)");
 }
 
 void test_substitutions1()
