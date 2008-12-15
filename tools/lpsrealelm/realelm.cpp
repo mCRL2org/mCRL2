@@ -617,11 +617,6 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
         atermpp::map<data_expression, data_expression> replacements;
         replacements[left] = right;
 
-        for(atermpp::map<data_expression, data_expression>::const_iterator l = replacements.begin(); l != replacements.end(); ++l)
-        {
-          gsVerboseMsg("substitution %s := %s\n", pp(l->first).c_str(), pp(l->second).c_str());
-        }
-
         data_expression_list new_inequalities;
         for(data_expression_list::const_iterator k = inequalities.begin(); k != inequalities.end(); ++k)
         {
@@ -896,7 +891,7 @@ data_expression compute_condition_from_inequalities(data_expression_list inequal
 {
   // Compute new condition
   fourier_motzkin(inequalities, variables, r);
-  gsVerboseMsg("condition inequalities: %s\n", pp(inequalities).c_str());
+  gsDebugMsg("condition inequalities: %s\n", pp(inequalities).c_str());
   data_expression condition = true_();
   for(data_expression_list::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
   {
@@ -944,19 +939,11 @@ data_expression compute_condition_from_inequalities(data_expression_list inequal
 
 data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
 {
-  gsVerboseMsg("Performing the following replacements: ");
-  for(atermpp::map<data_expression, data_expression>::const_iterator j = replacements.begin(); j != replacements.end(); ++j)
-  {
-    gsVerboseMsg("%s := %s, ", pp(j->first).c_str(), pp(j->second).c_str());
-  }
-  gsVerboseMsg("\n"); 
-  gsVerboseMsg("in inequalities %s\n", pp(inequalities).c_str());
   data_expression_list result;
   for(data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
   {
     result = push_front(result, realelm_data_expression_map_replace(*i, replacements));
   }
-  gsVerboseMsg("resulting in %s\n", pp(result).c_str());
   return result;
 }
 
@@ -1054,12 +1041,12 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
 
   gsDebugMsg("condition: %s\n", pp(condition).c_str());
 
-  gsVerboseMsg("context: ");
+  gsDebugMsg("context: ");
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j = context.begin(); j != context.end(); ++j)
   {
-    gsVerboseMsg("< %s, %s > %s, ", pp(j->first.first).c_str(), pp(j->first.second).c_str(), pp(j->second).c_str());
+    gsDebugMsg("< %s, %s > %s, ", pp(j->first.first).c_str(), pp(j->first.second).c_str(), pp(j->second).c_str());
   }
-  gsVerboseMsg("\n");
+  gsDebugMsg("\n");
 
   data_assignment_list nextstate;
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = context.begin(); j != context.end(); ++j)
@@ -1087,7 +1074,7 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
 
   summand result = summand(get_nonreal_variables(s.summation_variables()), r(condition), s.is_delta(), s.actions(), nextstate);
 
-  gsVerboseMsg("Generated summand %s\n", pp(result).c_str());
+  gsDebugMsg("Generated summand %s\n", pp(result).c_str());
 
   return result;
 }
@@ -1203,12 +1190,12 @@ specification realelm(specification s, int max_iterations)
           // Eliminate sum bound variables, resulting in inequalities over
           // process parameters of sort Real. Of this, we add the inequalities
           // that are not yet in the context.
-          gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
+          gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
           fourier_motzkin(cond, i->summation_variables(), r);
           if(std::find(cond.begin(), cond.end(), false_()) == cond.end())
           {
             cond = normalize_inequalities(cond, r);
-            gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
+            gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
             // cond contains the inequalities over the process parameters
             changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
             summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
@@ -1219,7 +1206,7 @@ specification realelm(specification s, int max_iterations)
           }
           else
           {
-            gsVerboseMsg("System is inconsistent\n");
+            gsDebugMsg("System is inconsistent\n");
           }
         }
       }
