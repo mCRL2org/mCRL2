@@ -3330,7 +3330,7 @@ bool gsIsDataExprNeg(ATermAppl DataExpr)
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameNeg();
+      return ATAgetArgument(t,0) == gsMakeOpIdNameNeg() && ATgetLength(ATLgetArgument(DataExpr,1)) == 1;
   }
   return false;
 }
@@ -3390,7 +3390,7 @@ bool gsIsDataExprSubt(ATermAppl DataExpr)
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameSubt();
+      return ATAgetArgument(t,0) == gsMakeOpIdNameSubt() && ATgetLength(ATLgetArgument(DataExpr,1)) == 2;
   }
   return false;
 }
