@@ -131,6 +131,16 @@ namespace mcrl2 {
           }
       };
 
+#ifdef __LIBLTS_H
+      inline tipi::mime_type lts_type_to_mime_type(const mcrl2::lts::lts_type f) {
+        std::string type_strings[] = { "unknown", "mcrl2-lts", "aut", "svc+mcrl", "svc", "fsm", "dot", "bcg", "" };
+  
+        return tipi::mime_type(type_strings[f],
+            ((f == mcrl2::lts::lts_aut || f == mcrl2::lts::lts_fsm || f == mcrl2::lts::lts_dot) ?
+          	 tipi::mime_type::text : tipi::mime_type::application));
+      }
+#endif
+
       /** \brief Used to relay messages generated using core::print */
       inline void relay_message(const ::mcrl2::core::messageType t, const char* data) {
         tipi::report::type report_type;

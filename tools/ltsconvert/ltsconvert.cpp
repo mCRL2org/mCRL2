@@ -515,29 +515,19 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Wait until the ok button was pressed */
   okay_button.await_change();
 
-  static std::string extensions[6] = {
-    lts::extension_for_type(lts_aut),
-    lts::extension_for_type(lts_mcrl),
-    lts::extension_for_type(lts_mcrl2),
-#ifdef USE_BCG
-    lts::extension_for_type(lts_bcg),
-#endif
-    lts::extension_for_type(lts_fsm),
-    lts::extension_for_type(lts_dot)
-  };
-
   /* Add output file to the configuration */
+  std::string     output_name(c.get_output_name("." +
+                    lts::extension_for_type(format_selector.get_selection())));
+  tipi::mime_type output_type(mcrl2::utilities::squadt::lts_type_to_mime_type(format_selector.get_selection()));
+
   if (c.output_exists(lts_file_for_output)) {
-    std::string  extension(extensions[format_selector.get_selection()]);
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
 
-    output_file.type(tipi::mime_type(extension));
-    output_file.location(c.get_output_name("." + extension));
+    output_file.type(output_type);
+    output_file.location(output_name);
   }
   else {
-    std::string  extension(extensions[format_selector.get_selection()]);
-
-    c.add_output(lts_file_for_output, tipi::mime_type(extension), c.get_output_name("." + extension));
+    c.add_output(lts_file_for_output, output_type, output_name);
   }
 
   /* Add lps file when output is FSM format or when the output is mCRL2 and the input is Aldebaran or mCRL */

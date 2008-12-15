@@ -137,54 +137,21 @@ class squadt_interactor::storage_configuration {
     }
 
     void update_configuration(boost::shared_ptr< squadt_interactor::storage_configuration >, tipi::configuration& c) {
+      using namespace mcrl2::lts;
+
       /* Add output file to the configuration */
-      std::string outfile;
-      tipi::mime_type mt("application/unknown");
+      std::string     output_name(c.get_output_name("." +
+          lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
+      tipi::mime_type output_type(mcrl2::utilities::squadt::lts_type_to_mime_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type)));
 
-      if ( c.option_exists(option_lts_type) )
-      {
-        outfile = c.get_output_name("."+mcrl2::lts::lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type)));
-        switch ( c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type) )
-        {
-          case mcrl2::lts::lts_aut:
-            mt = tipi::mime_type("text/aut");
-            break;
-          case mcrl2::lts::lts_svc:
-            mt = tipi::mime_type("application/svc");
-            break;
-          case mcrl2::lts::lts_mcrl:
-            mt = tipi::mime_type("application/svc+mcrl");
-            break;
-          case mcrl2::lts::lts_mcrl2:
-            mt = tipi::mime_type("application/mcrl2-lts");
-            break;
-#ifdef USE_BCG
-          case mcrl2::lts::lts_bcg:
-            mt = tipi::mime_type("application/bcg");
-            break;
-#endif
-          case mcrl2::lts::lts_fsm:
-            mt = tipi::mime_type("text/fsm");
-            break;
-          case mcrl2::lts::lts_dot:
-            mt = tipi::mime_type("text/dot");
-            break;
-          default:
-            assert(0);
-            throw mcrl2::runtime_error("unsupported LTS format used for output");
-        }
-      } else {
-        outfile = c.get_output_name(".lts");
-      }
+      if (c.output_exists(lts_file_for_output)) {
+        tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
 
-      if (c.output_exists(squadt_interactor::lts_file_for_output)) {
-        tipi::configuration::object& o = c.get_output(lts_file_for_output);
-
-        o.type(mt);
-        o.location(outfile);
+        output_file.type(output_type);
+        output_file.location(output_name);
       }
       else {
-        c.add_output(lts_file_for_output, mt, outfile);
+        c.add_output(lts_file_for_output, output_type, output_name);
       }
 
       c.add_option(option_out_info).set_argument_value< 0 >(cb_out_info.get_status());
