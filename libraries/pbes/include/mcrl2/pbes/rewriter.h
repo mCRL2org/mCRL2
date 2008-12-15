@@ -151,7 +151,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
+std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << std::endl;
 #endif
         return result;
       }
