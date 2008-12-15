@@ -12,7 +12,7 @@
 #include "boost.hpp" // precompiled headers
 
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
 #define NAME "pbes2bes"
 #define AUTHOR "Alexander van Dam, Wieger Wesselink"
@@ -244,7 +244,7 @@ class pbes2bes_tool: public utilities::filter_tool_with_rewriter
         
         // pbes rewriter
         data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);   
+        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);   
         
         if (m_strategy == ts_finite)
         {
