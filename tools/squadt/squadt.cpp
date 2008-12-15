@@ -157,7 +157,7 @@ bool SQuADt::DoInit() {
 
   try {
     struct local {
-      static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< tool > >& retry_list) {
+      static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< squadt::tool > >& retry_list) {
         tool_manager& local_tool_manager(squadt::global_build_system.get_tool_manager());
 
         tool_manager::const_tool_sequence tools(local_tool_manager.get_tools());
@@ -217,8 +217,8 @@ bool SQuADt::DoInit() {
 
       if (retry.ShowModal() == wxID_YES) {
         struct tester {
-          inline static bool query_with_path(tool& t, boost::filesystem::path const& p) {
-            boost::shared_ptr< tool > dummy(new tool(t));
+          inline static bool query_with_path(squadt::tool& t, boost::filesystem::path const& p) {
+            boost::shared_ptr< squadt::tool > dummy(new squadt::tool(t));
 
             dummy->set_location(p);
 
@@ -236,7 +236,7 @@ bool SQuADt::DoInit() {
         boost::filesystem::path path_to_try(parent_path(retry_list[0]->get_location()));
 
         // Perform initialisation
-        for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
+        for (std::vector< boost::shared_ptr< squadt::tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
           splash_window->set_operation("", (*t)->get_name());
           splash_window->update();
 
