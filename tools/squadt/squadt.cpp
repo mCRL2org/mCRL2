@@ -197,7 +197,7 @@ bool SQuADt::DoInit() {
 
     /* Perform initialisation */
     bool finished = false;
-    std::vector< boost::shared_ptr < tool > > retry_list;
+    std::vector< boost::shared_ptr < squadt::tool > > retry_list;
 
     boost::thread initialisation_thread(boost::bind(&local::initialise_tools,
                       boost::ref(*splash_window), boost::ref(finished), boost::ref(retry_list)));
