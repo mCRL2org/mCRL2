@@ -126,20 +126,20 @@ data_specification add_comp_sort(const data_specification& s)
   equations = push_front(equations, data_equation(make_list(x,y), nil, if_(true_(),x,y),x));
   equations = push_front(equations, data_equation(make_list(x,y), nil, if_(false_(),x,y),y));
   equations = push_front(equations, data_equation(make_list(b,x), nil, if_(b,x,x),x));
-  for(data_operation_list::iterator i = new_constructors.begin(); i != new_constructors.end(); ++i)
+  for(data_operation_list::const_iterator i = new_constructors.begin(); i != new_constructors.end(); ++i)
   {
-    for(data_operation_list::iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
+    for(data_operation_list::const_iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
     {
       data_expression right = (*i == *j)?true_():false_();
       equations = push_front(equations, data_equation(data_variable_list(), nil, equal_to(aterm_appl(*i),aterm_appl(*j)), right));
     }
   }
 
-  for(data_operation_list::iterator i = new_mappings.begin(); i != new_mappings.end(); ++i)
+  for(data_operation_list::const_iterator i = new_mappings.begin(); i != new_mappings.end(); ++i)
   {
-    for(data_operation_list::iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
+    for(data_operation_list::const_iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
     {
-      data_expression right = (i->name() == j->name())?true_():false_();
+      data_expression right = (std::string(i->name()).find(std::string(j->name()))!=std::string::npos)?true_():false_();
       equations = push_front(equations, data_equation(data_variable_list(), nil, data_application(aterm_appl(*i),make_list(aterm_appl(*j))), right));
     }
   }
