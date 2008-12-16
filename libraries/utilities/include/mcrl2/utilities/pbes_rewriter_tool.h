@@ -6,16 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/filter_tool_with_pbes_rewriter.h
-/// \brief add your file description here.
+/// \file mcrl2/utilities/pbes_rewriter_tool.h
+/// \brief Base class for tools that use a pbes rewriter.
 
-#ifndef MCRL2_UTILITIES_FILTER_TOOL_WITH_PBES_REWRITER_H
-#define MCRL2_UTILITIES_FILTER_TOOL_WITH_PBES_REWRITER_H
+#ifndef MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
+#define MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
 
 #include <iostream>
 #include <stdexcept>
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/utilities/filter_tool_with_rewriter.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 
 namespace mcrl2 {
 
@@ -29,10 +29,11 @@ namespace utilities {
     quantifier_finite,
     prover
   };
-
+  
   /// \brief Returns a description of a pbes rewriter
   /// \param type A rewriter type
   /// \return A description of the rewriter type
+  inline
   std::string pbes_rewriter_description(pbes_rewriter_type type)
   {
     switch(type)
@@ -44,7 +45,7 @@ namespace utilities {
     }
     return "  unknown pbes rewriter";
   }
-
+  
   /// \brief Returns the string corresponding to a pbes rewriter type
   /// \param type A pbes rewriter type
   /// \return A string corresponding to the pbes rewriter type
@@ -57,9 +58,10 @@ namespace utilities {
     if (type == "prover"           ) { return prover           ; }
     throw std::runtime_error("Error: unknown pbes rewriter option " + type);
   }
+      
 
   /// \brief Stream operator for pbes_rewriter_type
-  inline
+  static inline
   std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
   {
     std::string s;
@@ -76,9 +78,10 @@ namespace utilities {
   }
 
   /// \brief Base class for filter tools that use a pbes rewriter.
-  class filter_tool_with_pbes_rewriter: public filter_tool_with_rewriter
+  class pbes_rewriter_tool: public rewriter_tool
   {
     protected:
+
       /// \brief The type of the pbes rewriter
       pbes_rewriter_type m_pbes_rewriter_type;
 
@@ -105,7 +108,7 @@ namespace utilities {
       /// \brief Add options to an interface description. Also includes
       /// rewriter options.
       /// \param desc An interface description
-      void add_options(utilities::interface_description& desc)
+      void add_options(interface_description& desc)
       {
         std::string text = "use pbes rewrite strategy NAME:\n";
         std::set<pbes_rewriter_type> types = available_rewriters();
@@ -113,7 +116,7 @@ namespace utilities {
         {
           text = text + (i == types.begin() ? "" : "\n") + pbes_rewriter_description(*i);
         }
-        filter_tool_with_rewriter::add_options(desc);
+        rewriter_tool::add_options(desc);
         desc.add_option(
           "pbes-rewriter",
           make_optional_argument("NAME", default_rewriter()),
@@ -134,11 +137,11 @@ namespace utilities {
       /// \param name The name of the tool
       /// \param author The author(s) of the tool
       /// \param tool_description The description of the tool
-      filter_tool_with_pbes_rewriter(const std::string& name,
-                                     const std::string& author,
-                                     const std::string& tool_description
-                                    )
-        : filter_tool_with_rewriter(name, author, tool_description)
+      pbes_rewriter_tool(const std::string& name,
+                         const std::string& author,
+                         const std::string& tool_description
+                        )
+        : rewriter_tool(name, author, tool_description)
       {}
       
       /// \brief Returns the rewriter type
@@ -153,4 +156,4 @@ namespace utilities {
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_FILTER_TOOL_WITH_PBES_REWRITER_H
+#endif // MCRL2_UTILITIES_PBES_REWRITER_TOOL_H

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/filter_tool.h
-/// \brief A class that provides common functionality for filter tools.
+/// \file mcrl2/utilities/command_line_tool.h
+/// \brief Base class for command line tools.
 
-#ifndef MCRL2_UTILITIES_FILTER_TOOL_H
-#define MCRL2_UTILITIES_FILTER_TOOL_H
+#ifndef MCRL2_UTILITIES_COMMAND_LINE_TOOL_H
+#define MCRL2_UTILITIES_COMMAND_LINE_TOOL_H
 
 #include <cstdlib>
 #include <string>
@@ -23,9 +23,9 @@ namespace mcrl2 {
 
 namespace utilities {
 
-  /// \brief Base class for filter tools that take a file as input and produces a file
+  /// \brief Base class for command line tools.
   /// as result.
-  class filter_tool
+  class command_line_tool
   {
     protected:
       /// The name of the tool
@@ -37,53 +37,37 @@ namespace utilities {
       /// The description of the tool
       std::string m_tool_description;
 
-      /// The input file name
-      std::string m_input_filename;
-
-      /// The output file name
-      std::string m_output_filename;
-
       /// \brief Add options to an interface description.
       /// \param desc An interface description
-      virtual void add_options(utilities::interface_description& desc)
+      virtual void add_options(interface_description& desc)
       {}
 
       /// \brief Parse non-standard options
       /// \param parser A command line parser
-      virtual void parse_options(const utilities::command_line_parser& parser)
+      virtual void parse_options(const command_line_parser& parser)
       {}
+
+      /// Returns the synopsis of the tool
+      /// \return The synopsis of the tool
+      virtual std::string synopsis() const
+      {
+        return "[OPTION]...\n";
+      }
 
       /// \brief Parse command line options
       /// \param argc Number of command line arguments
       /// \param argv Command line arguments
       bool parse_options(int argc, char* argv[])
       {
-        utilities::interface_description clinterface(argv[0], m_name, m_author, "[OPTION]... [INFILE [OUTFILE]]\n", m_tool_description);
+        interface_description clinterface(argv[0], m_name, m_author, synopsis(), m_tool_description);
         add_options(clinterface);
-        utilities::command_line_parser parser(clinterface, argc, argv);
-        if (parser.continue_execution())
-        {
-          if (0 < parser.arguments.size())
-          {
-            m_input_filename = parser.arguments[0];
-          }
-          if (1 < parser.arguments.size())
-          {
-            m_output_filename = parser.arguments[1];
-          }
-          if (2 < parser.arguments.size())
-          {
-            parser.error("too many file arguments");
-          }
-          parse_options(parser);
-        }
-
+        command_line_parser parser(clinterface, argc, argv);
         return parser.continue_execution();
       }
 
     public:
       /// \brief Constructor.
-      filter_tool(const std::string& name,
+      command_line_tool(const std::string& name,
                   const std::string& author,
                   const std::string& tool_description
                  )
@@ -94,7 +78,7 @@ namespace utilities {
       }
 
       /// \brief Destructor.
-      virtual ~filter_tool()
+      virtual ~command_line_tool()
       {}
 
       /// \brief Run the tool. The options must be set manually.
@@ -123,24 +107,10 @@ namespace utilities {
 
         return EXIT_SUCCESS;
       }
-
-      /// \brief Sets the input filename.
-      /// \param filename The name of a file.
-      void set_input_filename(const std::string& filename)
-      {
-        m_input_filename = filename;
-      }
-
-      /// \brief Sets the output filename.
-      /// \param filename The name of a file.
-      void set_output_filename(const std::string& filename)
-      {
-        m_output_filename = filename;
-      }
   };
 
 } // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_FILTER_TOOL_H
+#endif // MCRL2_UTILITIES_COMMAND_LINE_TOOL_H

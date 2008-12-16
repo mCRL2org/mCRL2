@@ -15,17 +15,16 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/filter_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
 
 using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::core;
-using namespace mcrl2::utilities;
+using utilities::interface_description;
+using utilities::input_output_tool;
 
-class pbes_parelm_tool: public utilities::filter_tool
+class pbes_parelm_tool: public input_output_tool
 {
   protected:
     void add_options(interface_description& clinterface)
@@ -35,7 +34,7 @@ class pbes_parelm_tool: public utilities::filter_tool
 
   public:
     pbes_parelm_tool()
-      : filter_tool(
+      : input_output_tool(
           "pbesparelm",
           "Wieger Wesselink",
           "Reads a file containing a pbes, and applies parameter elimination to it. If OUTFILE "
@@ -45,7 +44,7 @@ class pbes_parelm_tool: public utilities::filter_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
+      if (core::gsVerbose)
       {
         std::clog << "pbesparelm parameters:" << std::endl;
         std::clog << "  input file:         " << m_input_filename << std::endl;
@@ -53,10 +52,10 @@ class pbes_parelm_tool: public utilities::filter_tool
       }
     
       // load the pbes
-      pbes<> p;
+      pbes_system::pbes<> p;
       p.load(m_input_filename);
 
-      pbes_parelm_algorithm algorithm;
+      pbes_system::pbes_parelm_algorithm algorithm;
       algorithm.run(p);
       
       // save the result

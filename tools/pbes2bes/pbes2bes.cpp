@@ -34,7 +34,7 @@
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/utilities/filter_tool_with_rewriter.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -43,12 +43,12 @@
 
 using namespace mcrl2;
 using utilities::command_line_parser;
-using utilities::filter_tool_with_rewriter;
+using utilities::rewriter_tool;
 using utilities::interface_description;
 using utilities::make_optional_argument;
   
 /// The pbes2bes tool.
-class pbes2bes_tool: public filter_tool_with_rewriter
+class pbes2bes_tool: public rewriter_tool
 {
   protected:
     /// The output formats of the tool.
@@ -192,7 +192,7 @@ class pbes2bes_tool: public filter_tool_with_rewriter
   public:
     /// Constructor.
     pbes2bes_tool()
-      : filter_tool_with_rewriter(
+      : rewriter_tool(
           "pbes2bes",
           "Alexander van Dam, Wieger Wesselink",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
@@ -327,7 +327,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
         return EXIT_SUCCESS;
       }
-      return filter_tool::execute(argc, argv);
+      return rewriter_tool::execute(argc, argv);
     }     
 };
 
@@ -432,7 +432,7 @@ bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
 //Main Program
 //------------
 /// \brief Main program for pbes2bes
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

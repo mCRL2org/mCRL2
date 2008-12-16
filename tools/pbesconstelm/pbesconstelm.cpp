@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/filter_tool_with_pbes_rewriter.h"
+#include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -28,7 +28,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 
-class pbes_constelm_tool: public utilities::filter_tool_with_pbes_rewriter
+class pbes_constelm_tool: public utilities::pbes_rewriter_tool
 {
   protected:
     bool m_compute_conditions;
@@ -45,7 +45,7 @@ class pbes_constelm_tool: public utilities::filter_tool_with_pbes_rewriter
 
   public:
     pbes_constelm_tool()
-      : filter_tool_with_pbes_rewriter(
+      : pbes_rewriter_tool(
           "pbesconstelm",
           "Wieger Wesselink",
           "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "

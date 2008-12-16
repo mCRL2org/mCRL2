@@ -15,13 +15,13 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parelm.h"
 
-#include "mcrl2/utilities/filter_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include "mcrl2/utilities/mcrl2_squadt_interface.h"
 #endif
 
-class lps_parelm_tool : public mcrl2::utilities::filter_tool
+class lps_parelm_tool : public mcrl2::utilities::input_output_tool
 #ifdef ENABLE_SQUADT_CONNECTIVITY
                       , public mcrl2::utilities::squadt::mcrl2_tool_interface
 #endif
@@ -29,7 +29,7 @@ class lps_parelm_tool : public mcrl2::utilities::filter_tool
 
   public:
 
-    lps_parelm_tool() : filter_tool (
+    lps_parelm_tool() : input_output_tool (
              "lpsparelm",
              "Jeroen van der Wulp and Wieger Wesselink",
              "Remove unused parameters from the linear process specification (LPS) in INFILE "
@@ -44,7 +44,7 @@ class lps_parelm_tool : public mcrl2::utilities::filter_tool
       }
 #endif
 
-      return filter_tool::execute(argc, argv);
+      return input_output_tool::execute(argc, argv);
     }
 
     bool run() {

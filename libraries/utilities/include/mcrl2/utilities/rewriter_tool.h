@@ -6,22 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/filter_tool_with_rewriter.h
-/// \brief add your file description here.
+/// \file mcrl2/utilities/rewriter_tool.h
+/// \brief Base class for tools that use a data rewriter.
 
-#ifndef MCRL2_UTILITIES_FILTER_TOOL_WITH_REWRITER_H
-#define MCRL2_UTILITIES_FILTER_TOOL_WITH_REWRITER_H
+#ifndef MCRL2_UTILITIES_REWRITER_TOOL_H
+#define MCRL2_UTILITIES_REWRITER_TOOL_H
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
-#include "mcrl2/utilities/filter_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 
 namespace mcrl2 {
 
 namespace utilities {
 
-  /// \brief Base class for filter tools that use a rewriter.
-  class filter_tool_with_rewriter: public filter_tool
+  /// \brief Base class for tools that use a rewriter.
+  class rewriter_tool: public input_output_tool
   {
     protected:
       /// The data rewriter strategy
@@ -30,9 +30,9 @@ namespace utilities {
       /// \brief Add options to an interface description. Also includes
       /// rewriter options.
       /// \param desc An interface description
-      void add_options(utilities::interface_description& desc)
+      void add_options(interface_description& desc)
       {
-        filter_tool::add_options(desc);
+        input_output_tool::add_options(desc);
         desc.add_rewriting_options();
       }
 
@@ -46,11 +46,11 @@ namespace utilities {
     public:
 
       /// \brief Constructor.
-      filter_tool_with_rewriter(const std::string& name,
+      rewriter_tool(const std::string& name,
                                 const std::string& author,
                                 const std::string& tool_description
                                )
-        : filter_tool(name, author, tool_description),
+        : input_output_tool(name, author, tool_description),
           m_rewrite_strategy(GS_REWR_JITTY)
       {}
 
@@ -74,4 +74,4 @@ namespace utilities {
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_FILTER_TOOL_WITH_REWRITER_H
+#endif // MCRL2_UTILITIES_REWRITER_TOOL_H

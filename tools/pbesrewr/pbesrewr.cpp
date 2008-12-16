@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/filter_tool_with_pbes_rewriter.h"
+#include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
@@ -21,15 +21,13 @@
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::core;
-using namespace mcrl2::utilities;
+using utilities::pbes_rewriter_tool;
 
-class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
+class pbes_rewr_tool: public pbes_rewriter_tool
 {
   public:
     pbes_rewr_tool()
-      : filter_tool_with_pbes_rewriter(
+      : pbes_rewriter_tool(
           "pbesrewr",
           "Jan friso Groote, Wieger Wesselink",
           "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
@@ -39,7 +37,10 @@ class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
+      using namespace pbes_system;
+      using namespace utilities;
+      
+      if (core::gsVerbose)
       {
         std::cout << "pbesrewr parameters:" << std::endl;
         std::cout << "  input file:         " << m_input_filename << std::endl;
@@ -59,7 +60,7 @@ class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
       {
         case simplify:
         {
-          simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> pbesr(datar);    
+          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);    
           pbesrewr(p, pbesr);
           break;
         }
@@ -69,7 +70,7 @@ class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
-          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
@@ -79,7 +80,7 @@ class pbes_rewr_tool: public utilities::filter_tool_with_pbes_rewriter
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
