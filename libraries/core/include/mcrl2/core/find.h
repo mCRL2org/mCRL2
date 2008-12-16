@@ -17,6 +17,7 @@
 #include <functional>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/vector.h"
 
 namespace mcrl2 {
 
@@ -27,7 +28,23 @@ template <typename Term>
 std::set<core::identifier_string> find_identifiers(Term t)
 {
   std::set<core::identifier_string> result;
-  find_all_if(atermpp::aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
+  atermpp::find_all_if(atermpp::aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \brief Returns the set of all identifier strings occurring in the vector v
+template <typename Term>
+std::set<core::identifier_string> find_identifiers(atermpp::vector<Term> v)
+{
+  std::set<core::identifier_string> result;
+  for(typename atermpp::vector<Term>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    std::set<core::identifier_string> intermediate = find_identifiers(*i);
+    for(std::set<core::identifier_string>::const_iterator j = intermediate.begin(); j != intermediate.end(); ++j)
+    {
+      result.insert(*j);
+    }
+  }
   return result;
 }
 

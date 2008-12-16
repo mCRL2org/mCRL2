@@ -56,8 +56,9 @@ namespace mcrl2 {
         /// \param[in] arguments The data expressions that head is applied to.
         /// \pre head.sort() is a function sort.
         /// \pre arguments is not empty.
+        template <typename Iter>
         application(const data_expression& head, 
-                    const boost::iterator_range<data_expression_list::const_iterator>& arguments)
+                    const boost::iterator_range<Iter>& arguments)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end()))),
             m_arguments(arguments.begin(), arguments.end())
         {

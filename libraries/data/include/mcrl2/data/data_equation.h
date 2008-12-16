@@ -70,8 +70,6 @@ namespace mcrl2 {
         /// \param[in] rhs The right hand side of the data_equation.
         /// \post this is the data equation representing the input, with
         //        condition true
-        //
-        //TODO: Fix true
         data_equation(const boost::iterator_range<variable_list::const_iterator>& variables,
                       const data_expression& lhs,
                       const data_expression& rhs)
@@ -79,6 +77,18 @@ namespace mcrl2 {
               atermpp::term_list<variable>(variables.begin(), variables.end()),
               core::detail::gsMakeNil(), lhs, rhs)),
             m_variables(variables.begin(), variables.end())
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] lhs The left hand side of the data equation.
+        /// \param[in] rhs The right hand side of the data equation.
+        /// \post this is the data equations representing the input, without
+        ///       variables, and condition true
+        data_equation(const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+              atermpp::term_list<variable>(), core::detail::gsMakeNil(), lhs, rhs))
         {}
 
         /// \brief Returns the variables of the data equation.
