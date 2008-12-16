@@ -36,16 +36,16 @@ const std::string DATA_SPEC1 =
   "sort D;                     \n"
   "sort S1 = A # B -> C;       \n"
   "sort S2 = (A -> B) -> C;    \n"
-  "sort S3 = A -> (B -> C);    \n"
-  "sort S4 = A # (A -> B) -> C;\n"
-  "sort S5 = A # A -> B -> C;  \n"
   "                            \n"
   "cons s1: S1;                \n"
   "cons s2: S2;                \n"
-  "cons s3: S3;                \n"
-  "cons s4: S4;                \n"
-  "cons s5: S5;                \n" 
 ;  
+
+// This is no longer allowed:
+// sort S3 = A -> (B -> C);    
+// sort S4 = A # (A -> B) -> C;
+// sort S5 = A # A -> B -> C;  
+
 
 /*
 enumerator make_enumerator(rewriter& datar, const data_specification& data_spec)
