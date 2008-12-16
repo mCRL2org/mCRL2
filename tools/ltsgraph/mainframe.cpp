@@ -125,12 +125,11 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxString(("All supported formats|"+
-             mcrl2::lts::lts::lts_extensions_as_string(";")+
-             "|LTS formats ("+
+    wxString(("All supported formats ("+
              mcrl2::lts::lts::lts_extensions_as_string()+
              ")|"+
-             mcrl2::lts::lts::lts_extensions_as_string(";")).c_str(),
+             mcrl2::lts::lts::lts_extensions_as_string(";")+
+             "All files (*.*)|*.*").c_str(),
              wxConvLocal),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   

@@ -240,8 +240,8 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       "leave out state information when saving in dot format", 'n');
   clinterface.add_option("determinise", "determinise LTS", 'D');
   clinterface.add_option("lps", make_mandatory_argument("FILE"),
-      "use FILE as the LPS from which the input LTS was generated; this is "
-      "might be needed to store the correct parameter names of states when saving "
+      "use FILE as the LPS from which the input LTS was generated; this might"
+      "be needed to store the correct parameter names of states when saving "
       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
   clinterface.add_option("in", make_mandatory_argument("FORMAT"),
       "use FORMAT as the input format", 'i').
