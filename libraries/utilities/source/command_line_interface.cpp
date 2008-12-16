@@ -415,7 +415,7 @@ namespace mcrl2 {
       return s.str();
     }
 
-    inline static std::string mark_name_in_usage(std::string const& usage) {
+    inline static std::string mark_name_in_usage(std::string const& usage, std::string begin, std::string end) {
       std::string result;
       bool        name_character = false;
 
@@ -424,11 +424,11 @@ namespace mcrl2 {
       for (std::string::const_iterator i = usage.begin(); i != usage.end(); ++i) {
         if (*i == '[') {
           name_character = true;
-          result.append("[\\fI");
+          result.append("[" + begin);
         }
         else if ((*i == ' ') || (*i == ']')) {
           if (name_character) {
-            result.append("\\fR");
+            result.append(end);
 
             name_character = false;
           }
@@ -460,7 +460,7 @@ namespace mcrl2 {
 
       s << ".SH SYNOPSIS" << std::endl
         << ".B " << m_name << std::endl
-        << mark_name_in_usage(m_usage) << std::endl;
+        << mark_name_in_usage(m_usage, "\\fI", "\\fR") << std::endl;
 
       s << ".SH DESCRIPTION" << std::endl
         << word_wrap(m_description, 80) << std::endl;
@@ -524,7 +524,7 @@ namespace mcrl2 {
 
       s << "== Synopsis ==" << std::endl
         << "<tt>'''" << m_name << "'''"
-        << mark_name_in_usage(m_usage) << "</tt>" << std::endl;
+        << mark_name_in_usage(m_usage, "''", "''") << "</tt>" << std::endl;
       s << "== Short Description ==" << std::endl
         << word_wrap(m_description, 80) << std::endl;
 
