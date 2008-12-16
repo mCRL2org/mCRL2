@@ -85,14 +85,7 @@ bool parse_command_line(int ac, char** av, lts_generation_options& options) {
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified "
     "by an option). The supported formats are:\n"
-    "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef USE_BCG
-    "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-    "  'dot' for the GraphViz format,\n"
-    "  'fsm' for the Finite State Machine format,\n"
-    "  'mcrl' for the mCRL SVC format, or\n"
-    "  'mcrl2' for the mCRL2 SVC format (default)"
+    +lts::supported_lts_formats_text()
   );
 
   clinterface.add_rewriting_options();

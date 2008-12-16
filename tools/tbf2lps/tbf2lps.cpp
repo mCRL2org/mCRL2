@@ -131,7 +131,7 @@ int main(int argc, char **argv)
       if (options.outfilename.empty()) {
         gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
  
-        ATwriteToSAFFile((ATerm) mcrl_spec, stdout);
+        ATwriteToSAFFile((ATerm) spec, stdout);
       }
       else {
         gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", options.outfilename.c_str());

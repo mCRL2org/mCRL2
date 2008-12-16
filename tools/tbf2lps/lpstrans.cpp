@@ -145,21 +145,47 @@ static ATermList get_lps_acts(ATermAppl lps, ATermList *ids)
 
 static ATermList get_substs(ATermList ids)
 {
-	// XXX check identifier syntax!
-
+	ATermIndexedSet used = ATindexedSetCreate(1000,50);
 	ATermList substs = ATmakeList0();
 
 	for (; !ATisEmpty(ids); ids=ATgetNext(ids))
 	{
 		char s[100], *t;
 
-		strncpy(s,ATgetName(ATgetAFun(ATAgetFirst(ids))),100);
+		t = ATgetName(ATgetAFun(ATAgetFirst(ids)));
+		if ( t[0] >= '0' && t[0] <= '9' )
+		{
+			s[0] = '_';
+			strncpy(s+1,t,100);
+		} else {
+			strncpy(s,t,100);
+		}
 
 		s[99] = '#';
-		for (t=s; (*t)!='#'; t++);
+		for (t=s; *t && (*t)!='#'; t++)
+		{
+			if ( !( (*t >= 'A' && *t <= 'Z') ||
+				(*t >= 'a' && *t <= 'z') ||
+				(*t >= '0' && *t <= '9') ||
+				*t == '_' ) )
+			{
+			  *t = '_';
+			}
+		}
 		*t = 0;
 
-		substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue))));
+		unsigned int i = 0;
+		ATermAppl new_id;
+		while ( ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
+		{
+			sprintf(t,"%i",i);
+			i++;
+		}
+
+		ATbool b;
+		ATindexedSetPut(used,(ATerm) new_id,&b);
+
+		substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
 	}
 
 	return substs;
@@ -391,11 +417,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, lps, init);
 
-	ATermList substs = get_substs(ids);
-
-	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
-
-	substs = ATmakeList0();
+	ATermList substs = ATmakeList0();
 
 	if ( convert_bools )
 	{
@@ -445,5 +467,11 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
 
+
+	substs = get_substs(ids);
+
+	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
+
+	
 	return r;
 }

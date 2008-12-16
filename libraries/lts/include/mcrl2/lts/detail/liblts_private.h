@@ -55,18 +55,6 @@
   class p_lts
   {
     protected:
-      /** \brief String representations for lts_type */
-      static std::string type_strings[];
-
-      /** \brief Extensions associated with elements of lts_type (except lts_none) */
-      static std::string extension_strings[];
-      
-      static std::string equivalence_strings[];
-      static std::string equivalence_desc_strings[];
-
-      static std::string preorder_strings[];
-      static std::string preorder_desc_strings[];
-
       lts *lts_object;
       lts_type type;
       std::string creator;

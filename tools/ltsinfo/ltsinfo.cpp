@@ -28,6 +28,21 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
+static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
+{
+  using namespace mcrl2::lts;
+  static std::set<lts_equivalence> s;
+  s.insert(lts_eq_bisim);
+  s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_isomorph);
+  return s;
+}
+static const std::set<mcrl2::lts::lts_equivalence> &allowed_eqs()
+{
+  static const std::set<mcrl2::lts::lts_equivalence> &s = initialise_allowed_eqs();
+  return s;
+}
+
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/mcrl2_squadt_interface.h>
@@ -84,15 +99,7 @@ class info_tool
         "The format of INFILE is determined by its contents. "
         "The option --in can be used to force the format for INFILE. "
         "The supported formats are:\n"
-        "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef USE_BCG
-        "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-        "  'dot' for the GraphViz format,\n"
-        "  'fsm' for the Finite State Machine format,\n"
-        "  'mcrl' for the mCRL SVC format,\n"
-        "  'mcrl2' for the mCRL2 format (default), or"
-        "  'svc' for the (generic) SVC format\n"
+        +lts::supported_lts_formats_text()
       );
 
       clinterface.
@@ -114,11 +121,8 @@ class info_tool
       if (parser.continue_execution()) {
         if (parser.options.count("equivalence")) {
           determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
-          if (determinism_equivalence != lts_eq_isomorph &&
-              determinism_equivalence != lts_eq_bisim &&
-              determinism_equivalence != lts_eq_branching_bisim &&
-              (determinism_equivalence != lts_eq_none ||
-              parser.option_argument("equivalence") == "none"))
+          if (allowed_eqs().count(determinism_equivalence) == 0 ||
+              parser.option_argument("equivalence") == "none")
           {
             parser.error("option -e/--equivalence has illegal argument '" +
                 parser.option_argument("equivalence") + "'");

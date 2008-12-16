@@ -80,7 +80,10 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
   }
 
   for tool in $(lts-tools) {
-    if $(tool) in ltscompare ltsmin {
+    if $(tool) in ltscompare {
+      tests += [ run /tools/$(tool)//$(tool) : --equivalence=bisim : test.lts test2.lts : <testing.preserve>true ] ;
+    }
+    else if $(tool) in ltsmin {
       tests += [ run /tools/$(tool)//$(tool) : : test.lts test2.lts : <testing.preserve>true ] ;
     }
     else {

@@ -24,6 +24,22 @@ using namespace mcrl2::lts;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
+static const std::set<lts_equivalence> &initialise_allowed_eqs()
+{
+  static std::set<lts_equivalence> s;
+  s.insert(lts_eq_bisim);
+  s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_sim);
+  s.insert(lts_eq_trace);
+  s.insert(lts_eq_weak_trace);
+  return s;
+}
+static const std::set<lts_equivalence> &allowed_eqs()
+{
+  static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
+  return s;
+}
+
 static inline std::string get_base(std::string const& s) {
   return s.substr(0, s.find_last_of('.'));
 }
@@ -215,15 +231,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
     "The output format is determined by the extension of OUTFILE, whereas the input\n"
     "format is determined by the content of INFILE. Options --in and --out can be\n"
     "used to force the input and output formats. The supported formats are:\n"
-    "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef USE_BCG
-    "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-    "  'dot' for the GraphViz format,\n"
-    "  'fsm' for the Finite State Machine format,\n"
-    "  'mcrl' for the mCRL SVC format,\n"
-    "  'mcrl2' for the mCRL2 format (default), or"
-    "  'svc' for the (generic) SVC format\n"
+    + lts::supported_lts_formats_text(lts_mcrl2)
   );
 
   clinterface.add_option("no-reach",
@@ -233,7 +241,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   clinterface.add_option("determinise", "determinise LTS", 'D');
   clinterface.add_option("lps", make_mandatory_argument("FILE"),
       "use FILE as the LPS from which the input LTS was generated; this is "
-      "needed to store the correct parameter names of states when saving "
+      "might be needed to store the correct parameter names of states when saving "
       "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
   clinterface.add_option("in", make_mandatory_argument("FORMAT"),
       "use FORMAT as the input format", 'i').
@@ -241,21 +249,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       "use FORMAT as the output format", 'o');
   clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
       "generate an equivalent LTS, preserving equivalence NAME:\n"
-      "  '" + lts::string_for_equivalence(lts_eq_bisim)
-            + "' minimise modulo "
-            + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
-      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim)
-            + "' minimise modulo "
-            + lts::name_of_equivalence(lts_eq_branching_bisim) + ",\n"
-      "  '" + lts::string_for_equivalence(lts_eq_sim)
-            + "' minimise modulo "
-            + lts::name_of_equivalence(lts_eq_sim) + ",\n"
-      "  '" + lts::string_for_equivalence(lts_eq_trace)
-            + "' determinise and then minimise modulo "
-            + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_weak_trace)
-            + "' determinise and then minimise modulo "
-            + lts::name_of_equivalence(lts_eq_weak_trace)
+      +lts::supported_lts_equivalences_text(allowed_eqs())
       , 'e');
   clinterface.add_option("add",
       "do not minimise but save a copy of the original LTS extended with a "
@@ -306,11 +300,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       tool_options.equivalence = lts::parse_equivalence(
           parser.option_argument("equivalence"));
 
-      if (tool_options.equivalence != lts_eq_bisim &&
-          tool_options.equivalence != lts_eq_branching_bisim &&
-          tool_options.equivalence != lts_eq_sim &&
-          tool_options.equivalence != lts_eq_trace &&
-          tool_options.equivalence != lts_eq_weak_trace)
+      if ( allowed_eqs().count(tool_options.equivalence) == 0 )
       {
         parser.error("option -e/--equivalence has illegal argument '" + 
             parser.option_argument("equivalence") + "'");

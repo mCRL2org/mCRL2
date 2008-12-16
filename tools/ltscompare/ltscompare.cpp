@@ -59,6 +59,22 @@ static const char *preorder_string(lts_preorder pre)
   }
 }
 
+static const std::set<lts_equivalence> &initialise_allowed_eqs()
+{
+  static std::set<lts_equivalence> s;
+  s.insert(lts_eq_bisim);
+  s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_sim);
+  s.insert(lts_eq_trace);
+  s.insert(lts_eq_weak_trace);
+  return s;
+}
+static const std::set<lts_equivalence> &allowed_eqs()
+{
+  static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
+  return s;
+}
+
 struct t_tool_options {
   std::string     name_for_first;
   std::string     name_for_second;
@@ -77,15 +93,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
     "The input formats are determined by the contents of INFILE1 and INFILE2. "
     "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
     "The supported formats are:\n"
-    "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef USE_BCG
-    "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-    "  'dot' for the GraphViz format,\n"
-    "  'fsm' for the Finite State Machine format,\n"
-    "  'mcrl' for the mCRL SVC format,\n"
-    "  'mcrl2' for the mCRL2 format (default), or\n"
-    "  'svc' for the (generic) SVC format."
+    +lts::supported_lts_formats_text()
   );
 
   clinterface.
@@ -95,26 +103,12 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       "use FORMAT as the format for INFILE2", 'j').
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
-      "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_bisim) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_sim) + "' for "
-            + lts::name_of_equivalence(lts_eq_sim) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
-            + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
-            + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
+      +lts::supported_lts_equivalences_text(allowed_eqs())+"\n"
       "(not allowed in combination with -p/--preorder)"
       , 'e').
     add_option("preorder", make_mandatory_argument("NAME"),
       "use preorder NAME:\n"
-      "  '" + lts::string_for_preorder(lts_pre_sim) + "' for "
-            + lts::name_of_preorder(lts_pre_sim) + ", or\n"
-      "  '" + lts::string_for_preorder(lts_pre_trace) + "' for "
-            + lts::name_of_preorder(lts_pre_trace) + ", or\n"
-      "  '" + lts::string_for_preorder(lts_pre_weak_trace) + "' for "
-            + lts::name_of_preorder(lts_pre_weak_trace) + "\n"
+      +lts::supported_lts_preorders_text()+"\n"
       "(not allowed in combination with -e/--equivalence)"
       , 'p').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
@@ -152,11 +146,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       tool_options.equivalence = lts::parse_equivalence(
           parser.option_argument("equivalence"));
     
-      if (tool_options.equivalence != lts_eq_bisim &&
-          tool_options.equivalence != lts_eq_branching_bisim &&
-          tool_options.equivalence != lts_eq_sim &&
-          tool_options.equivalence != lts_eq_trace &&
-          tool_options.equivalence != lts_eq_weak_trace)
+      if ( allowed_eqs().count(tool_options.equivalence) == 0 )
       {
         parser.error("option -e/--equivalence has illegal argument '" + 
             parser.option_argument("equivalence") + "'");
@@ -170,9 +160,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
       tool_options.preorder = lts::parse_preorder(
           parser.option_argument("preorder"));
     
-      if (tool_options.preorder != lts_pre_sim &&
-          tool_options.preorder != lts_pre_trace &&
-          tool_options.preorder != lts_pre_weak_trace)
+      if (tool_options.preorder == lts_pre_none)
       {
         parser.error("option -p/--preorder has illegal argument '" + 
             parser.option_argument("preorder") + "'");

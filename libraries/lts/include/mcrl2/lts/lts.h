@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <iostream>
 #include <aterm2.h>
 #include <mcrl2/atermpp/set.h>
@@ -49,11 +50,17 @@ namespace lts
     lts_mcrl,  /**< muCRL SVC format */
     lts_svc,   /**< SVC format */
     lts_fsm,   /**< FSM format */
-    lts_dot    /**< GraphViz format */
+    lts_dot,   /**< GraphViz format */
 #ifdef USE_BCG
-   ,lts_bcg /**< BCG format
-              * \note Only available if the LTS library is built with BCG
-              * support.*/
+    lts_bcg,   /**< BCG format
+                * \note Only available if the LTS library is built with BCG
+                * support.*/
+#endif
+    lts_type_min = lts_none,
+#ifdef USE_BCG
+    lts_type_max = lts_bcg
+#else
+    lts_type_max = lts_dot
 #endif
   };
 
@@ -69,7 +76,9 @@ namespace lts
     lts_eq_sim,              /**< Strong simulation equivalence */
     lts_eq_trace,            /**< Strong trace equivalence*/
     lts_eq_weak_trace,       /**< Weak trace equivalence */
-    lts_eq_isomorph          /**< Isomorphism */
+    lts_eq_isomorph,         /**< Isomorphism */
+    lts_equivalence_min = lts_eq_none,
+    lts_equivalence_max = lts_eq_isomorph
   };
 
   /** \brief LTS preorder relations.
@@ -81,7 +90,9 @@ namespace lts
     lts_pre_none,   /**< Unknown or no preorder */
     lts_pre_sim,    /**< Strong simulation preorder */
     lts_pre_trace,  /**< Strong trace preorder */
-    lts_pre_weak_trace   /**< Weak trace preorder */
+    lts_pre_weak_trace,   /**< Weak trace preorder */
+    lts_preorder_min = lts_pre_none,
+    lts_preorder_max = lts_pre_weak_trace,
   };
 
   /** \brief Transition sort styles.
@@ -371,6 +382,12 @@ namespace lts
        */
       static std::string extension_for_type(const lts_type type);
 
+      /** \brief Gives the MIME type associated with an LTS format.
+       * \param[in] type The LTS format.
+       * \return The MIME type of the LTS format specified by \a type.
+       */
+      static std::string mime_type_for_type(const lts_type type);
+
       /** \brief Determines the equivalence from a string.
        * \details The following strings may be used:
        * \li "bisim" for strong bisimilarity;
@@ -419,6 +436,93 @@ namespace lts
        * \param[in] pre The preorder type.
        * \return The full, descriptive name of the preorder specified by \a pre. */
       static std::string name_of_preorder(const lts_preorder pre);
+
+      /** \brief Gives the set of all supported LTS formats.
+       * \return The set of all supported LTS formats. */
+      static const std::set<lts_type> &supported_lts_formats();
+
+      /** \brief Gives the set of all supported equivalence on LTSs.
+       * \return The set of all supported equivalences on LTSs. */
+      static const std::set<lts_equivalence> &supported_lts_equivalences();
+
+      /** \brief Gives the set of all supported preorders on LTSs.
+       * \return The set of all supported preorders on LTSs. */
+      static const std::set<lts_preorder> &supported_lts_preorders();
+
+      /** \brief Gives a textual list describing supported LTS formats.
+       * \param[in] default_format The format that should be marked as default
+       *                           (or \a lts_none for no default).
+       * \param[in] supported      The formats that should be considered
+       *                           supported.
+       * \return                   A string containing lines of the form
+       *                           "  'name' for the ... format". Every line
+       *                           except the last is terminated with '\n'. */
+      static std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type> &supported = supported_lts_formats());
+
+      /** \brief Gives a textual list describing supported LTS formats.
+       * \param[in] supported      The formats that should be considered
+       *                           supported.
+       * \return                   A string containing lines of the form
+       *                           "  'name' for the ... format". Every line
+       *                           except the last is terminated with '\n'. */
+      static std::string supported_lts_formats_text(const std::set<lts_type> &supported);
+
+      /** \brief Gives a list of extensions for supported LTS formats.
+       * \param[in] sep       The separator to use between each extension.
+       * \param[in] supported The formats that should be considered supported.
+       * \return              A string containing a list of extensions of the
+       *                      formats in \a supported, separated by \a sep.
+       *                      E.g. "*.aut,*.lts" */
+      static std::string lts_extensions_as_string(const std::string &sep = ",", const std::set<lts_type> &supported = supported_lts_formats());
+
+      /** \brief Gives a list of extensions for supported LTS formats.
+       * \param[in] supported The formats that should be considered supported.
+       * \return              A string containing a list of extensions of the
+       *                      formats in \a supported, separated by \a ','.
+       *                      E.g. "*.aut,*.lts" */
+      static std::string lts_extensions_as_string(const std::set<lts_type> &supported);
+     
+      /** \brief Gives a textual list describing supported equivalences on LTSs.
+       * \param[in] default_equivalence The equivalence that should be marked
+       *                                as default (or \a lts_eq_none for no
+       *                                default).
+       * \param[in] supported           The equivalences that should be
+       *                                considered supported.
+       * \return                        A string containing lines of the form
+       *                                "  'name' for <equivalence>". Every line
+       *                                except the last is terminated with '\n'.
+       */
+      static std::string supported_lts_equivalences_text(lts_equivalence default_equivalence = lts_eq_none, const std::set<lts_equivalence> &supported = supported_lts_equivalences());
+
+      /** \brief Gives a textual list describing supported equivalences on LTSs.
+       * \param[in] supported           The equivalences that should be
+       *                                considered supported.
+       * \return                        A string containing lines of the form
+       *                                "  'name' for <equivalence>". Every line
+       *                                except the last is terminated with '\n'.
+       */
+      static std::string supported_lts_equivalences_text(const std::set<lts_equivalence> &supported);
+
+      /** \brief Gives a textual list describing supported preorders on LTSs.
+       * \param[in] default_preorder    The preorder that should be marked
+       *                                as default (or \a lts_pre_none for no
+       *                                default).
+       * \param[in] supported           The preorders that should be
+       *                                considered supported.
+       * \return                        A string containing lines of the form
+       *                                "  'name' for <preorder>". Every line
+       *                                except the last is terminated with '\n'.
+       */
+      static std::string supported_lts_preorders_text(lts_preorder default_preorder = lts_pre_none, const std::set<lts_preorder> &supported = supported_lts_preorders());
+
+      /** \brief Gives a textual list describing supported preorders on LTSs.
+       * \param[in] supported           The preorders that should be
+       *                                considered supported.
+       * \return                        A string containing lines of the form
+       *                                "  'name' for <preorder>". Every line
+       *                                except the last is terminated with '\n'.
+       */
+      static std::string supported_lts_preorders_text(const std::set<lts_preorder> &supported);
 
     public:
 

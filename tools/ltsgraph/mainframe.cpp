@@ -20,6 +20,7 @@
 #include "export_xml.h"
 #include "export_latex.h"
 #include <wx/aboutdlg.h>
+#include <mcrl2/lts/lts.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -124,19 +125,13 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxT("All supported formats|*.dot;*.fsm;*.aut;*.svc;*.lts")
-#ifdef USE_BCG
-        wxT(";*.bcg")
-#endif
-        wxT("|LTS format (*.aut")
-#ifdef USE_BCG
-        wxT(",*.bcg")
-#endif
-        wxT(",*.dot,*.fsm,*.lts,*.svc)|*.dot;*.fsm;*.aut;*.svc;*.lts")
-#ifdef USE_BCG
-        wxT(";*.bcg")
-#endif
-        wxT("|All files (*.*)|*.*"),
+    wxString(("All supported formats|"+
+             mcrl2::lts::lts::lts_extensions_as_string(";")+
+             "|LTS formats ("+
+             mcrl2::lts::lts::lts_extensions_as_string()+
+             ")|"+
+             mcrl2::lts::lts::lts_extensions_as_string(";")).c_str(),
+             wxConvLocal),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)

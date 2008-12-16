@@ -9,11 +9,13 @@
 /// \file liblts.cpp
 
 #include <string>
+#include <set>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
+#include <boost/bind.hpp>
 #include <aterm2.h>
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -2170,6 +2172,21 @@ lts_type lts::guess_format(string const& s) {
   return lts_none;
 }
 
+static std::string type_strings[] = { "unknown", "mcrl2", "aut", "mcrl", "svc", "fsm", "dot", "bcg" };
+
+static std::string type_desc_strings[] = { "unknown LTS format",
+                                           "mCRL2 LTS format",
+                                           "Aldebaran format (CADP)",
+                                           "mCRL SVC format",
+                                           "(generic) SVC format",
+                                           "Finite State Machine format",
+                                           "GraphViz format",
+                                           "Binary Coded Graph format (CADP)" };
+
+static std::string extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
+
+static std::string mime_type_strings[] = { "", "application/mcrl2-lts", "text/aut", "application/svc+mcrl", "application/svc", "text/fsm", "text/dot", "application/bcg" };
+
 lts_type lts::parse_format(std::string const& s) {
   if ( s == "aut" )
   {
@@ -2199,16 +2216,16 @@ lts_type lts::parse_format(std::string const& s) {
   return lts_none;
 }
 
-std::string p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
-                                                                                                      
-std::string p_lts::extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
-
 std::string lts::string_for_type(const lts_type type) {
   return (type_strings[type]);
 }
 
 std::string lts::extension_for_type(const lts_type type) {
   return (extension_strings[type]);
+}
+
+std::string lts::mime_type_for_type(const lts_type type) {
+  return (mime_type_strings[type]);
 }
 
 lts_equivalence lts::parse_equivalence(std::string const& s)
@@ -2236,7 +2253,7 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   }
 }
 
-std::string p_lts::equivalence_strings[] = {
+static std::string equivalence_strings[] = {
   "unknown",
   "bisim",
   "branching-bisim",
@@ -2246,7 +2263,7 @@ std::string p_lts::equivalence_strings[] = {
   "isomorph"
 };
 
-std::string p_lts::equivalence_desc_strings[] = {
+static std::string equivalence_desc_strings[] = {
   "unknown equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
@@ -2280,14 +2297,14 @@ lts_preorder lts::parse_preorder(std::string const& s)
   }
 }
 
-std::string p_lts::preorder_strings[] = {
+static std::string preorder_strings[] = {
   "unknown",
   "sim",
   "trace",
   "weak-trace"
 };
 
-std::string p_lts::preorder_desc_strings[] = {
+static std::string preorder_desc_strings[] = {
   "unknown preorder",
   "strong simulation preorder",
   "strong trace preorder",
@@ -2347,6 +2364,196 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   }
 
   fclose(f);
+}
+
+static const std::set<lts_type> &initialise_supported_lts_formats()
+{
+  static std::set<lts_type> s;
+  for (unsigned int i = lts_type_min; i<1+(unsigned int)lts_type_max; ++i)
+  {
+    if ( lts_none != (lts_type) i )
+    {
+      s.insert((lts_type) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_type> &lts::supported_lts_formats()
+{
+  static const std::set<lts_type> &s = initialise_supported_lts_formats();
+  return s;
+}
+
+static const std::set<lts_equivalence> &initialise_supported_lts_equivalences()
+{
+  static std::set<lts_equivalence> s;
+  for (unsigned int i = lts_equivalence_min; i<1+(unsigned int)lts_equivalence_max; ++i)
+  {
+    if ( lts_eq_none != (lts_equivalence) i )
+    {
+      s.insert((lts_equivalence) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_equivalence> &lts::supported_lts_equivalences()
+{
+  static const std::set<lts_equivalence> &s = initialise_supported_lts_equivalences();
+  return s;
+}
+
+static const std::set<lts_preorder> &initialise_supported_lts_preorders()
+{
+  static std::set<lts_preorder> s;
+  for (unsigned int i = lts_preorder_min; i<1+(unsigned int)lts_preorder_max; ++i)
+  {
+    if ( lts_pre_none != (lts_preorder) i )
+    {
+      s.insert((lts_preorder) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_preorder> &lts::supported_lts_preorders()
+{
+  static const std::set<lts_preorder> &s = initialise_supported_lts_preorders();
+  return s;
+}
+
+template<typename T>
+static bool lts_named_cmp(std::string N[], T a, T b)
+{
+  return N[a] < N[b];
+}
+
+std::string lts::supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
+{
+  vector<lts_type> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
+
+  string r;
+  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + type_strings[*i] + "' for the " + type_desc_strings[*i];
+
+    if ( *i == default_format )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 != types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_formats_text(const std::set<lts_type> &supported)
+{
+  return supported_lts_formats_text(lts_none,supported);
+}
+
+std::string lts::lts_extensions_as_string(const std::string &sep, const std::set<lts_type> &supported)
+{
+  vector<lts_type> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
+
+  string r, prev;
+  bool first = true;
+  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    if ( extension_strings[*i] == prev ) // avoid mentioning extensions more than once
+    {
+      continue;
+    }
+    if ( first )
+    {
+      first = false;
+    } else {
+      r += sep;
+    }
+    r += "*." + extension_strings[*i];
+    prev = extension_strings[*i];
+  }
+
+  return r;
+}
+
+std::string lts::lts_extensions_as_string(const std::set<lts_type> &supported)
+{
+  return lts_extensions_as_string(",",supported);
+}
+
+std::string lts::supported_lts_equivalences_text(lts_equivalence default_equivalence, const std::set<lts_equivalence> &supported)
+{
+  vector<lts_equivalence> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
+
+  string r;
+  for (vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + equivalence_strings[*i] + "' for " + equivalence_desc_strings[*i];
+
+    if ( *i == default_equivalence )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 != types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
+{
+  return supported_lts_equivalences_text(lts_eq_none,supported);
+}
+
+std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, const std::set<lts_preorder> &supported)
+{
+  vector<lts_preorder> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_preorder>,preorder_strings,_1,_2));
+
+  string r;
+  for (vector<lts_preorder>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + preorder_strings[*i] + "' for " + preorder_desc_strings[*i];
+
+    if ( *i == default_preorder )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 == types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_preorders_text(const std::set<lts_preorder> &supported)
+{
+  return supported_lts_preorders_text(lts_pre_none,supported);
 }
 
 }
