@@ -34,38 +34,40 @@
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/filter_tool_with_rewriter.h"
 
-using namespace std;
+// SQuADT protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+#endif
+
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::utilities;
-
-/// The output formats of the tool.
-enum pbes_output_format {
-  of_binary,
-  of_internal,
-  of_cwi
-};
-
-/// The transformation strategies of the tool.
-enum transformation_strategy {
-  ts_lazy,
-  ts_finite,
-  ts_oldlazy
-};
-
+using utilities::command_line_parser;
+using utilities::filter_tool_with_rewriter;
+using utilities::interface_description;
+using utilities::make_optional_argument;
+  
 /// The pbes2bes tool.
-class pbes2bes_tool: public utilities::filter_tool_with_rewriter
+class pbes2bes_tool: public filter_tool_with_rewriter
 {
   protected:
+    /// The output formats of the tool.
+    enum pbes_output_format {
+      of_binary,
+      of_internal,
+      of_cwi
+    };
+    
+    /// The transformation strategies of the tool.
+    enum transformation_strategy {
+      ts_lazy,
+      ts_finite,
+      ts_oldlazy
+    };
+
     transformation_strategy m_strategy;
     pbes_output_format m_output_format;
 
-  public:
     /// Sets the transformation strategy.
     /// \param s A transformation strategy.
     void set_transformation_strategy(const std::string& s)
@@ -110,7 +112,6 @@ class pbes2bes_tool: public utilities::filter_tool_with_rewriter
       }
     }
 
-  protected:   
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
@@ -205,7 +206,7 @@ class pbes2bes_tool: public utilities::filter_tool_with_rewriter
     /// Runs the algorithm.
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
+      if (core::gsVerbose)
       {
         std::cout << "pbes2bes parameters:" << std::endl;
         std::cout << "  input file:         " << m_input_filename << std::endl;
@@ -220,7 +221,7 @@ class pbes2bes_tool: public utilities::filter_tool_with_rewriter
 
       if (!p.is_closed())
       {
-        gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+        core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
         return false;
       }
 
@@ -270,14 +271,10 @@ class pbes2bes_tool: public utilities::filter_tool_with_rewriter
     }
 };
 
-// SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
+class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcrl2_tool_interface
+{
   private:
-
     static const char*  pbes_file_for_input;  ///< file containing an LPS
     static const char*  pbes_file_for_output; ///< file used to write the output to
     static const char* option_transformation_strategy;
@@ -303,7 +300,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
   public:
 
     /** \brief constructor */
-    squadt_interactor() {
+    squadt_pbes2bes_tool() {
       static bool initialised = initialise_types();
 
       static_cast< void > (initialised); // harmless, and prevents unused variable warnings
@@ -320,19 +317,30 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration&);
+
+    /// \brief Run the tool with the given command line options.
+    /// \param argc Number of command line arguments
+    /// \param argv Command line arguments
+    /// \return The execution result
+    int execute(int argc, char** argv)
+    {
+      if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
+        return EXIT_SUCCESS;
+      }
+      return filter_tool::execute(argc, argv);
+    }     
 };
 
-const char* squadt_interactor::pbes_file_for_input  = "pbes_in";
-const char* squadt_interactor::pbes_file_for_output = "pbes_out";
+const char* squadt_pbes2bes_tool::pbes_file_for_input  = "pbes_in";
+const char* squadt_pbes2bes_tool::pbes_file_for_output = "pbes_out";
+const char* squadt_pbes2bes_tool::option_transformation_strategy = "transformation_strategy";
+const char* squadt_pbes2bes_tool::option_selected_output_format  = "selected_output_format";
 
-const char* squadt_interactor::option_transformation_strategy = "transformation_strategy";
-const char* squadt_interactor::option_selected_output_format  = "selected_output_format";
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+void squadt_pbes2bes_tool::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(pbes_file_for_input, tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+void squadt_pbes2bes_tool::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
@@ -341,10 +349,10 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   tipi::tool_display d;
 
   // Helper for format selection
-  mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
+  utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
 
   // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
+  utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >();
 
@@ -394,7 +402,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+bool squadt_pbes2bes_tool::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(pbes_file_for_input);
@@ -405,39 +413,35 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
   return (result);
 }
 
-bool squadt_interactor::perform_task(tipi::configuration& c) {
+bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
   static std::string strategies[] = { "lazy", "finite" };
   static std::string formats[]    = { "binary", "internal", "cwi" };
 
-  pbes2bes_tool tool;
-  tool.set_input_filename(c.get_input(pbes_file_for_input).location());
-  tool.set_output_filename(c.get_output(pbes_file_for_output).location());
-  tool.set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
-  tool.set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
-  bool result = tool.run();
+  m_input_filename = c.get_input(pbes_file_for_input).location();
+  m_output_filename = c.get_output(pbes_file_for_output).location();
+  set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
+  set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
+  bool result = run();
 
   send_clear_display();
 
   return result;
 }
-#endif
+#endif // ENABLE_SQUADT_CONNECTIVITY
 
 //Main Program
 //------------
 /// \brief Main program for pbes2bes
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv))
-    {
-      return EXIT_SUCCESS;
-    }
-#endif
+    squadt_pbes2bes_tool tool;
+#else
     pbes2bes_tool tool;
-
+#endif
     return tool.execute(argc, argv);
   }
   catch (std::exception& e) {
