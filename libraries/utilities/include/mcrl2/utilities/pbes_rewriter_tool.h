@@ -117,7 +117,6 @@ namespace utilities {
         {
           text = text + (i == types.begin() ? "" : "\n") + pbes_rewriter_description(*i);
         }
-        rewriter_tool::add_options(desc);
         desc.add_option(
           "pbes-rewriter",
           make_optional_argument("NAME", default_rewriter()),

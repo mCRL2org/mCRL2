@@ -35,12 +35,14 @@ class pbes_constelm_tool: public utilities::pbes_rewriter_tool
 
     void parse_options(const command_line_parser& parser)
     {
+    	pbes_rewriter_tool::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
     }
 
-    void add_options(interface_description& clinterface)
+    void add_options(interface_description& desc)
     {
-      clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
+    	pbes_rewriter_tool::add_options(desc);
+      desc.add_option("compute-conditions", "compute propagation conditions", 'c');
     }
 
   public:
