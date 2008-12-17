@@ -793,13 +793,13 @@ bool grape_event_export_current_diagram_image::Do( void )
     for ( unsigned int i = 0; i < count; ++i )
     {
       visual_object* vis_obj = m_main_frame->get_glcanvas()->get_visual_object(i);
-      if (vis_obj != 0)  
+      if (vis_obj != 0)
       {
         object* obj = vis_obj->get_selectable_object();
         if (obj != 0) 
         {
-          int coordx = int (obj->get_coordinate().m_x+obj->get_width())*300;
-          int coordy = int (-obj->get_coordinate().m_y+obj->get_height())*300;
+          int coordx = int ((obj->get_coordinate().m_x+obj->get_width())*300);
+          int coordy = int ((-obj->get_coordinate().m_y+obj->get_height())*300);
           if (maxx < coordx) 
           {
             maxx = coordx;
@@ -819,7 +819,6 @@ bool grape_event_export_current_diagram_image::Do( void )
     int sub_image_width = m_main_frame->get_glcanvas()->get_image().GetWidth();
     //get height of sub image
     int sub_image_height = m_main_frame->get_glcanvas()->get_image().GetHeight();
-
     //don't export if the opengl canvas size is zero
     if ((sub_image_width == 0) || (sub_image_height == 0))
     {

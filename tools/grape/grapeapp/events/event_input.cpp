@@ -499,7 +499,7 @@ bool grape_event_drag::Do( void )
           //detach or attach begin state
           if (s_flag == 1) 
           {    
-            if ((v_obj != 0) && (v_obj->get_type() == STATE))
+            if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
             {
               if (ntt_ptr->get_beginstate() == 0)
               {
@@ -527,7 +527,7 @@ bool grape_event_drag::Do( void )
           if (s_flag == 0) 
           {
             visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
-            if ((v_obj != 0) && (v_obj->get_type() == STATE))
+            if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
             {
               if ( ntt_ptr->get_endstate() == 0 ) 
               {

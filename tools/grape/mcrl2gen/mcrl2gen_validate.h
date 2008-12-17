@@ -14,6 +14,7 @@
 #include <wx/wx.h>
 #include <wx/xml/xml.h>
 #include "libgrape/preamble.h"
+#include "libgrape/label.h"
 #include "libgrape/action.h"
 #include "libgrape/decl.h"
 #include "libgrape/varupdate.h"
@@ -296,23 +297,21 @@ namespace grape
     bool parse_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
 
     /**
-     * Transition label multiaction parsing function.
-     * Parses the actions present in the transition label and infers their type.
+     * Transition label parsing function.
+     * Parses the transition label.
      * @param p_process_diagram The XML process diagram containing the transition to be parsed.
      * @param p_preamble_parameter_decls The parameter declarations in the preamble.
      * @param p_preamble_local_var_decls The local variable declarations in the preamble.
-     * @param p_label The multiaction of the transition label.
+     * @param p_diagram_name The name of the process diagram.
      * @param p_actions List of actions with parameters present in the multiaction.
      * @param datatype_spec The datatype specification
-     * @return True if parsing went successfully, false otherwise.
-     * @pre p_label is a valid multiaction and p_process_diagram is a valid XML process diagram.
-     * @post p_actions contains the actions present in the multiaction, together with their associated type or error messages are produced.
+     * @return label.
      */
-    list_of_action parse_transition_label_action(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_label, ATermAppl &datatype_spec);
+    label parse_transition_label(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, wxString p_diagram_name, ATermAppl &datatype_spec);
 
     /**
-     * Action type inference function.
-     * Returns the type associated with an action, based on the transition's
+     * Type inference function.
+     * Returns the type associated with an action or identifier, based on the transition's
      * parameter declarations and the parameter declarations and local variable
      * declarations in the preamble.
      * @param p_type The variable to be inferred.
@@ -323,7 +322,7 @@ namespace grape
      * @pre True.
      * @post True.
      */
-    wxString infer_action_type(wxString &p_type, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, list_of_decl &p_trans_var_decls);
+    wxString infer_type(wxString &p_type, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, list_of_decl &p_trans_var_decls);
 
     /**
      * Blocked list validation function.
