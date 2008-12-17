@@ -40,7 +40,8 @@ namespace utilities {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-        m_rewrite_strategy = parser.option_argument_as<RewriteStrategy>("tool");
+      	input_output_tool::parse_options(parser);
+        m_rewrite_strategy = parser.option_argument_as<RewriteStrategy>("rewriter");
       }
 
     public:

@@ -110,6 +110,7 @@ namespace utilities {
       /// \param desc An interface description
       void add_options(interface_description& desc)
       {
+      	rewriter_tool::add_options(desc);
         std::string text = "use pbes rewrite strategy NAME:\n";
         std::set<pbes_rewriter_type> types = available_rewriters();
         for (std::set<pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
@@ -129,6 +130,7 @@ namespace utilities {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
+      	rewriter_tool::parse_options(parser);
         m_pbes_rewriter_type = parser.option_argument_as<pbes_rewriter_type>("pbes-rewriter");
       }
 

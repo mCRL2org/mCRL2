@@ -45,6 +45,12 @@ namespace utilities {
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       virtual void parse_options(const command_line_parser& parser)
+      {
+      }
+
+      /// \brief Checks if the number of positional options is OK.
+      /// By default this function does nothing.
+      virtual void check_positional_options(const command_line_parser& parser)
       {}
 
       /// Returns the synopsis of the tool
@@ -52,17 +58,6 @@ namespace utilities {
       virtual std::string synopsis() const
       {
         return "[OPTION]...\n";
-      }
-
-      /// \brief Parse command line options
-      /// \param argc Number of command line arguments
-      /// \param argv Command line arguments
-      bool parse_options(int argc, char* argv[])
-      {
-        interface_description clinterface(argv[0], m_name, m_author, synopsis(), m_tool_description);
-        add_options(clinterface);
-        command_line_parser parser(clinterface, argc, argv);
-        return parser.continue_execution();
       }
 
     public:
@@ -92,8 +87,13 @@ namespace utilities {
       int execute(int argc, char* argv[])
       {
         try {
-          if (parse_options(argc, argv))
-          {
+          interface_description clinterface(argv[0], m_name, m_author, synopsis(), m_tool_description);
+          add_options(clinterface);
+          command_line_parser parser(clinterface, argc, argv);
+          check_positional_options(parser);
+          parse_options(parser);
+	        if (parser.continue_execution())
+	        {
             if (!run())
             {
               return EXIT_FAILURE;
@@ -104,7 +104,6 @@ namespace utilities {
           std::cerr << e.what() << std::endl;
           return EXIT_FAILURE;
         }
-
         return EXIT_SUCCESS;
       }
   };

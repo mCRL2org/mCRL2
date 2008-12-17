@@ -115,6 +115,7 @@ class pbes2bes_tool: public rewriter_tool
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
+    	rewriter_tool::parse_options(parser);
       try
       {
         set_output_format(parser.option_argument("output"));
@@ -134,9 +135,10 @@ class pbes2bes_tool: public rewriter_tool
       }
     }
 
-    void add_options(interface_description& clinterface)
+    void add_options(interface_description& desc)
     {
-      clinterface.
+    	rewriter_tool::add_options(desc);
+      desc.
         add_option("strategy",
           make_optional_argument("NAME", "lazy"),
           "compute the BES using strategy NAME:\n"

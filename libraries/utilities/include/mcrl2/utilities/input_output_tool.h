@@ -26,6 +26,16 @@ namespace utilities {
       /// The output file name
       std::string m_output_filename;
 
+      /// \brief Checks if the number of positional options is OK.
+      /// \param parser A command line parser
+      void check_positional_options(const command_line_parser& parser)
+      {
+        if (2 < parser.arguments.size())
+        {
+          parser.error("too many file arguments");
+        }
+      }
+
       /// Returns the synopsis of the tool
       /// \return The synopsis of the tool
       std::string synopsis() const
@@ -33,32 +43,15 @@ namespace utilities {
         return "[OPTION]... [INFILE [OUTFILE]]\n";
       }
 
-      /// \brief Parse command line options
-      /// \param argc Number of command line arguments
-      /// \param argv Command line arguments
-      bool parse_options(int argc, char* argv[])
+      /// \brief Parse non-standard options
+      /// \param parser A command line parser
+      void parse_options(const command_line_parser& parser)
       {
-        interface_description clinterface(argv[0], m_name, m_author, synopsis(), m_tool_description);
-        add_options(clinterface);
-        command_line_parser parser(clinterface, argc, argv);
-        if (parser.continue_execution())
+      	input_tool::parse_options(parser);
+        if (1 < parser.arguments.size())
         {
-          if (0 < parser.arguments.size())
-          {
-            m_input_filename = parser.arguments[0];
-          }
-          if (1 < parser.arguments.size())
-          {
-            m_output_filename = parser.arguments[1];
-          }
-          if (2 < parser.arguments.size())
-          {
-            parser.error("too many file arguments");
-          }
-          command_line_tool::parse_options(parser);
+          m_output_filename = parser.arguments[1];
         }
-
-        return parser.continue_execution();
       }
 
     public:
