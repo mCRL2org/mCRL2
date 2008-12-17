@@ -34,7 +34,7 @@ wxString action::get_name( void )
   return m_name;
 }
 
-void action::set_name( wxString &p_name )
+void action::set_name( const wxString &p_name )
 {
   m_name = p_name;
 }

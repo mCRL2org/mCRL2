@@ -59,7 +59,7 @@ namespace grape
          * Name assignment function.
          * @param p_name The new name of the action.
          */
-        void set_name( wxString &p_name );
+        void set_name( const wxString &p_name );
 
         /**
          * Parameter retrieval function.
