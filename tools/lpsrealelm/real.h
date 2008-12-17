@@ -54,16 +54,17 @@ data_application trunc(const data_expression& r)
 }
 
 inline
-data_operation divide()
+data_operation divide(const sort_expression& s)
 {
-  sort_expression rrr = sort_arrow(make_list(sort_expr::real(), sort_expr::real()), sort_expr::real());
-  return data_operation(identifier_string("@divide"), rrr);
+  sort_expression fs = sort_arrow(make_list(s, s), sort_expr::real());
+  return data_operation(identifier_string("@divide"), fs);
 }
 
 inline
 data_application divide(const data_expression& r1, const data_expression& r2)
 {
-  return data_application(divide(), make_list(r1,r2));
+  assert(r1.sort() == r2.sort());
+  return data_application(divide(r1.sort()), make_list(r1,r2));
 }
 
 inline
@@ -112,19 +113,6 @@ data_application normalize_rational(const data_expression& i1, const data_expres
 }
 
 inline
-data_operation gcd()
-{
-  sort_expression rrr = sort_arrow(make_list(sort_expr::real(), sort_expr::real()), sort_expr::real());
-  return data_operation(identifier_string("@gcd"), rrr);
-}
-
-inline
-data_application gcd(const data_expression& r1, const data_expression& r2)
-{
-  return data_application(gcd(), make_list(r1,r2));
-}
-
-inline
 data_operation numerator()
 {
   sort_expression ri = sort_arrow(make_list(sort_expr::real()), sort_expr::int_());
@@ -165,11 +153,13 @@ data_operation_list additional_real_mappings()
 
   r = push_front(r,round());
   r = push_front(r,trunc());
-  r = push_front(r,divide());
+  r = push_front(r,divide(sort_expr::pos()));
+  r = push_front(r,divide(sort_expr::nat()));
+  r = push_front(r,divide(sort_expr::int_()));
+  r = push_front(r,divide(sort_expr::real()));
   r = push_front(r,invert());
   r = push_front(r,rational());
   r = push_front(r,normalize_rational());
-  r = push_front(r,gcd());
   //r = push_front(r,data_operation(core::detail::gsMakeOpId(core::detail::gsMakeOpIdNameExp(), rpr)));
   r = push_front(r,numerator());
   r = push_front(r, denominator());
@@ -183,6 +173,7 @@ data_equation_list additional_real_equations()
   data_variable b("b", sort_expr::bool_());
   data_variable p("p", sort_expr::pos());
   data_variable q("q", sort_expr::pos());
+  data_variable m("m", sort_expr::nat());
   data_variable n("n", sort_expr::nat());
   data_variable x("x", sort_expr::int_());
   data_variable y("y", sort_expr::int_());
@@ -231,6 +222,9 @@ data_equation_list additional_real_equations()
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), multiplies(rational(int_(1), pos(1)), r), r));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), multiplies(r, rational(int_(1), pos(1))), r));
   res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), multiplies(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,y), gsMakeDataExprPos2Int(multiplies(p,q)))));
+  res = push_front(res, data_equation(make_list(p,q), gsMakeNil(), divide(p,q), normalize_rational(gsMakeDataExprPos2Int(p), gsMakeDataExprPos2Int(q))));
+  res = push_front(res, data_equation(make_list(m,n), gsMakeNil(), divide(m,n), normalize_rational(gsMakeDataExprNat2Int(m), gsMakeDataExprNat2Int(n))));
+  res = push_front(res, data_equation(make_list(x,y), gsMakeNil(), divide(x,y), normalize_rational(x,y)));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), divide(rational(int_(0), p), r), real_zero()));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), divide(r, rational(int_(1), pos(1))), r));
   res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), divide(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,gsMakeDataExprPos2Int(q)), multiplies(y,gsMakeDataExprPos2Int(p)))));
