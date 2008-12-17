@@ -328,7 +328,7 @@ rule get-boost-path {
 }
 
 rule platform-configuration ( properties * ) {
-  local requirements = <dll-path>$(libdir) ;
+  local requirements = <dll-path>$(libdir) ; # dll-path required for rpath-linking
   local pch-path     = $(build-root)/precompile ;
 
   if <toolset>gcc in $(properties) { # GCC
