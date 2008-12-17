@@ -409,15 +409,15 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
     throw CONVERSION_ERROR;
     return;
   }
-//TODO  wxString variables = trans_label.get_declarations().get_expression();
+  wxString variables = trans_label.get_declarations_text();
   wxString condition = trans_label.get_condition();
-//TODO  wxString actions = trans_label.get_actions().get_expression();
-/*TODO  if(actions == wxEmptyString)
+  wxString actions = trans_label.get_actions_text();
+  if(actions == wxEmptyString)
   {
     // an empty multiaction is translated as a tau
     actions = _T("tau");
   }
-*/  wxString timestamp = trans_label.get_timestamp();
+  wxString timestamp = trans_label.get_timestamp();
   list_of_varupdate updates = trans_label.get_variable_updates();
 
   p_declaration += _T("\n");
@@ -441,11 +441,10 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   }
 
   // add optional variables
-/*TODO  if(variables != wxEmptyString)
+  if(variables != wxEmptyString)
   {
-    p_declaration += _T("sum ") + variables + _T(".");
+    p_declaration += _T("sum ") + variables;
   }
-*/
   // add optional condition
   if(condition != wxEmptyString)
   {
@@ -453,11 +452,10 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   }
 
   // add multiaction
-/*TODO  if(actions != wxEmptyString)
+  if(actions != wxEmptyString)
   {
     p_declaration += actions;
   }
-*/
   if(!p_is_terminating)
   {
     p_declaration += _T(".");
@@ -2673,7 +2671,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     for(unsigned int i=0; i<act.GetCount(); ++i)
     {
       cerr << " action: " << act[i].get_name().ToAscii()
-//TODO           << " type: " << act[i].m_type.ToAscii() << endl;
+//TODO           << " type: " << act[i].get_type().ToAscii() << endl;
            << endl;
     }
   }
@@ -2683,7 +2681,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     for(unsigned int j=0; j<p_actions.GetCount(); ++j)
     {
       if((p_actions[j].get_name() == act[i].get_name()) &&
-//TODO         (p_actions[j].m_type == act[i].m_type))
+//TODO         (p_actions[j].get_type() == act[i].get_type()))
          true)
       {
         found = true;
@@ -2822,11 +2820,10 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     {
       specification += _T(" ");
       specification += actions[i].get_name();
-/*TODO      if(actions[i].m_type != wxEmptyString)
-      {
-        specification += _T(": ") + actions[i].m_type;
-      }
-*/
+//TODO      if(actions[i].get_type() != wxEmptyString)
+//      {
+//        specification += _T(": ") + actions[i].get_type();
+//      }
       specification += _T(";\n");
     }
     specification += _T("\n");
@@ -3083,11 +3080,10 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     {
       specification += _T(" ");
       specification += actions[i].get_name();
-/*TODO      if(actions[i].m_type != wxEmptyString)
-      {
-        specification += _T(": ") + actions[i].m_type;
-      }
-*/
+//TODO      if(actions[i].get_type() != wxEmptyString)
+//      {
+//        specification += _T(": ") + actions[i].get_type();
+//      }
       specification += _T(";\n");
     }
     specification += _T("\n");

@@ -93,6 +93,8 @@ namespace grape
          */
         list_of_decl &get_declarations( void );
 
+        wxString get_declarations_text( void ) const;
+
         /**
          * Label timestamp retrieval function
          * @return the timestamp of the label
@@ -104,6 +106,8 @@ namespace grape
          * @return the list of variable updates
          */
         list_of_varupdate &get_variable_updates( void );
+
+        wxString get_variable_updates_text( void ) const;
 
         /**
          * Label donditions retrieval function

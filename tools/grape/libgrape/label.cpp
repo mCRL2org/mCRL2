@@ -39,43 +39,17 @@ label::~label( void )
 wxString label::get_text( void ) const
 {
   wxString result;
-  int count = m_declarations.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    decl declaration = m_declarations.Item( i );
-    result += declaration.get_name() + _T( ":" ) + declaration.get_type();
-    if ( i < count - 1 )
-    {
-      result += _T( "," );
-    }
-  }
-  if ( count > 0 )
-  {
-    result += _T( "." );
-  }
+  result = get_declarations_text();
   if ( !get_condition().IsEmpty() )
   {
     result += _T( "[" ) + get_condition() + _T( "]" );
   }
+  result += get_actions_text();
   if ( !get_timestamp().IsEmpty() )
   {
     result += _T( "@" ) +  get_timestamp();
   }
-  result += get_actions_text();
-  count = m_variable_updates.GetCount();
-  if ( count > 0 )
-  {
-    result += _T( "/" );
-    for ( int i = 0; i < count; ++i )
-    {
-      varupdate var_upd = m_variable_updates.Item( i );
-      result += var_upd.get_lhs() + _T( ":=" ) + var_upd.get_rhs();
-      if ( i < count - 1 )
-      {
-        result += _T( "," );
-      }
-    }
-  }
+  result += get_variable_updates_text();
 
   return result;
 }
@@ -128,6 +102,26 @@ list_of_decl &label::get_declarations( void )
   return m_declarations;
 }
 
+wxString label::get_declarations_text( void ) const
+{
+  wxString result = wxEmptyString;
+  int count = m_declarations.GetCount();
+  for ( int i = 0; i < count; ++i )
+  {
+    decl declaration = m_declarations.Item( i );
+    result += declaration.get_name() + _T( ":" ) + declaration.get_type();
+    if ( i < count - 1 )
+    {
+      result += _T( "," );
+    }
+  }
+  if ( count > 0 )
+  {
+    result += _T( "." );
+  }
+  return result;
+}
+
 wxString label::get_timestamp( void ) const
 {
   return m_timestamp.get_expression();
@@ -136,6 +130,26 @@ wxString label::get_timestamp( void ) const
 list_of_varupdate &label::get_variable_updates( void )
 {
   return m_variable_updates;
+}
+
+wxString label::get_variable_updates_text( void ) const
+{
+  wxString result = wxEmptyString;
+  int count = m_variable_updates.GetCount();
+  if ( count > 0 )
+  {
+    result += _T( "/" );
+    for ( int i = 0; i < count; ++i )
+    {
+      varupdate var_upd = m_variable_updates.Item( i );
+      result += var_upd.get_lhs() + _T( ":=" ) + var_upd.get_rhs();
+      if ( i < count - 1 )
+      {
+        result += _T( "," );
+      }
+    }
+  }
+  return result;
 }
 
 wxString label::get_condition( void ) const
@@ -219,22 +233,23 @@ void label::process_text( void )
   if(text.Find(_T("@")) != wxNOT_FOUND)
   {
     // remove timestamp
-    pos = text.Find(_T("@"));
-    wxString timest = text.Mid(pos+1);
+    wxString timestamp_text = text.Mid(text.Find(_T("@"))+1);
+    pos = timestamp_text.Find(_T("/"));
+    if(pos == wxNOT_FOUND)
+    {
+      // niets aan de hand
+    }
+    m_timestamp.set_expression(timestamp_text.Mid(0, pos));
+    wxString timest = timestamp_text.Mid(0, pos);
+    text = text.Mid(0,text.Find(_T("@")))+text.Mid(text.Find(_T("/")));
+
+    // check
     timest.Trim(true); timest.Trim(false);
     if(timest.IsEmpty())
     {
       // not valid
       return;
     }
-    wxStringTokenizer tkt(timest, _T(" "));
-    if(tkt.CountTokens() > 1)
-    {
-      // not valid
-      return;
-    }
-    m_timestamp.set_expression(timest);
-    text = text.Mid(0, pos);
   }
   if(text.Find(_T("/")) != wxNOT_FOUND)
   {
