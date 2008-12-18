@@ -92,19 +92,20 @@ namespace utilities {
           command_line_parser parser(clinterface, argc, argv);
           check_positional_options(parser);
           parse_options(parser);
-	        if (parser.continue_execution())
+	        if (!parser.continue_execution())
 	        {
-            if (!run())
-            {
-              return EXIT_FAILURE;
-            }
+	          return EXIT_SUCCESS;
           }
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
           return EXIT_FAILURE;
         }
-        return EXIT_SUCCESS;
+        if (run())
+        {
+          return EXIT_SUCCESS;
+        }
+        return EXIT_FAILURE;
       }
   };
 

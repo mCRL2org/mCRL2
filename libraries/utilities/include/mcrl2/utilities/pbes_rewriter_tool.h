@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
 #define MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
 
+#include <set>
+#include <string>
 #include <iostream>
 #include <stdexcept>
 #include "mcrl2/pbes/rewriter.h"
@@ -21,65 +23,48 @@ namespace mcrl2 {
 
 namespace utilities {
 
-  /// An enumerated type for the available pbes rewriters
-  enum pbes_rewriter_type
-  {
-    simplify,
-    quantifier_all,
-    quantifier_finite,
-    prover
-  };
-  
-  /// \brief Returns a description of a pbes rewriter
-  /// \param type A rewriter type
-  /// \return A description of the rewriter type
-  inline
-  std::string pbes_rewriter_description(pbes_rewriter_type type)
-  {
-    switch(type)
-    {
-      case simplify          : return "  'simplify' for simplification";
-      case quantifier_all    : return "  'quantifier-all' for eliminating all quantifiers";
-      case quantifier_finite : return "  'quantifier-finite' for eliminating finite quantifier variables";
-      case prover            : return "  'prover' for rewriting using a prover";
-    }
-    return "  unknown pbes rewriter";
-  }
-  
-  /// \brief Returns the string corresponding to a pbes rewriter type
-  /// \param type A pbes rewriter type
-  /// \return A string corresponding to the pbes rewriter type
-  inline
-  pbes_rewriter_type parse_pbes_rewriter_type(std::string type)
-  {
-    if (type == "simplify"         ) { return simplify         ; }
-    if (type == "quantifier-all"   ) { return quantifier_all   ; }
-    if (type == "quantifier-finite") { return quantifier_finite; }
-    if (type == "prover"           ) { return prover           ; }
-    throw std::runtime_error("Error: unknown pbes rewriter option " + type);
-  }
-      
-
-  /// \brief Stream operator for pbes_rewriter_type
-  static inline
-  std::istream& operator>>(std::istream& is, pbes_rewriter_type& t)
-  {
-    std::string s;
-    is >> s;
-    try
-    {
-      t = parse_pbes_rewriter_type(s);
-    }
-    catch (std::runtime_error)
-    {
-      is.setstate(std::ios_base::failbit);
-    }
-    return is;
-  }
-
   /// \brief Base class for filter tools that use a pbes rewriter.
   class pbes_rewriter_tool: public rewriter_tool
   {
+    public:
+       /// An enumerated type for the available pbes rewriters
+       enum pbes_rewriter_type
+       {
+         simplify,
+         quantifier_all,
+         quantifier_finite,
+         prover
+       };
+       
+       /// \brief Returns a description of a pbes rewriter
+       /// \param type A rewriter type
+       /// \return A description of the rewriter type
+       static
+       std::string rewriter_description(pbes_rewriter_type type)
+       {
+         switch(type)
+         {
+           case simplify          : return "  'simplify' for simplification";
+           case quantifier_all    : return "  'quantifier-all' for eliminating all quantifiers";
+           case quantifier_finite : return "  'quantifier-finite' for eliminating finite quantifier variables";
+           case prover            : return "  'prover' for rewriting using a prover";
+         }
+         return "  unknown pbes rewriter";
+       }
+       
+       /// \brief Returns the string corresponding to a pbes rewriter type
+       /// \param type A pbes rewriter type
+       /// \return A string corresponding to the pbes rewriter type
+       static
+       pbes_rewriter_type parse_pbes_rewriter_type(std::string type)
+       {
+         if (type == "simplify"         ) { return simplify         ; }
+         if (type == "quantifier-all"   ) { return quantifier_all   ; }
+         if (type == "quantifier-finite") { return quantifier_finite; }
+         if (type == "prover"           ) { return prover           ; }
+         throw std::runtime_error("Error: unknown pbes rewriter option " + type);
+       }
+
     protected:
 
       /// \brief The type of the pbes rewriter
@@ -88,9 +73,9 @@ namespace utilities {
       /// \brief Returns the types of rewriters that are available for this tool.
       /// Override this method to change the standard behavior.
       /// \return The set { simplify, quantifier_all, quantifier_finite }
-      virtual std::set<pbes_rewriter_type> available_rewriters() const
+      virtual std::set<pbes_rewriter_tool::pbes_rewriter_type> available_rewriters() const
       {
-        std::set<pbes_rewriter_type> result;
+        std::set<pbes_rewriter_tool::pbes_rewriter_type> result;
         result.insert(simplify);
         result.insert(quantifier_all);
         result.insert(quantifier_finite);
@@ -115,7 +100,7 @@ namespace utilities {
         std::set<pbes_rewriter_type> types = available_rewriters();
         for (std::set<pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
         {
-          text = text + (i == types.begin() ? "" : "\n") + pbes_rewriter_description(*i);
+          text = text + (i == types.begin() ? "" : "\n") + rewriter_description(*i);
         }
         desc.add_option(
           "pbes-rewriter",
@@ -152,6 +137,23 @@ namespace utilities {
         return m_pbes_rewriter_type;
       }
   };
+
+  /// \brief Stream operator for rewriter type
+  inline
+  std::istream& operator>>(std::istream& is, pbes_rewriter_tool::pbes_rewriter_type& t)
+  {
+    std::string s;
+    is >> s;
+    try
+    {
+      t = pbes_rewriter_tool::parse_pbes_rewriter_type(s);
+    }
+    catch (std::runtime_error)
+    {
+      is.setstate(std::ios_base::failbit);
+    }
+    return is;
+  }
 
 } // namespace utilities
 
