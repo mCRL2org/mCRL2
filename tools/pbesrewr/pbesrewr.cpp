@@ -86,6 +86,8 @@ class pbes_rewr_tool: public pbes_rewriter_tool
         }
         case prover:
         { // Just ignore.
+          assert(0);  // The PBES rewriter cannot be activated through
+                      // the commandline or squadt. So, we cannot end up here.
           break;
         }
       }
