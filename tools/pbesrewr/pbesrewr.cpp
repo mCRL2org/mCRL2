@@ -84,7 +84,7 @@ class pbes_rewr_tool: public pbes_rewriter_tool
           pbesrewr(p, pbesr);
           break;
         }
-        case utilities::prover:
+        case prover:
         { // Just ignore.
           break;
         }
