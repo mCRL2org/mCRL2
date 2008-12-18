@@ -59,6 +59,25 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
   return detail::implement_data_spec(spec);
 }
 
+/** \brief     Implement data types of a type checked mCRL2 linear process
+ *             specification.
+ *  \param[in] spec An ATerm representation of an mCRL2 linear process
+ *             specification that adheres to the internal ATerm structure
+ *             after the type checking phase.
+ *  \post      The datatypes of spec are implemented as higher-order
+ *             abstract data types.
+ *  \return    If the data implementation went well, an equivalent
+ *             version of spec is returned that adheres to the internal
+ *             ATerm structure after data implementation.  If something
+ *             went wrong, an appropriate error message is printed and
+ *             NULL is returned.
+**/
+inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
+{
+  assert(detail::gsIsLinProcSpec(spec));
+  return detail::implement_data_spec(spec);
+}
+
 /** \brief     Implement data types of a type checked mCRL2 parameterised
  *             boolean equation system (PBES) specification.
  *  \param[in] spec An ATerm representation of an mCRL2 PBES

@@ -18,8 +18,9 @@ namespace mcrl2 {
   namespace core {
     namespace detail {
 
-//\pre spec represents an mCRL2 data, process or PBES specification that
-//     adheres to the internal ATerm structure after the type checking phase.
+//\pre spec represents an mCRL2 data, linear process, process or PBES
+//     specification that adheres to the internal ATerm structure after the
+//     type checking phase.
 //\post The datatypes of spec are implemented as higher-order abstract data
 //     types.
 //\return if the data implementation went well, an equivalent version of spec is
