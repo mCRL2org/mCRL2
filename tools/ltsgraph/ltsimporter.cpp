@@ -31,7 +31,6 @@ Graph* LTSImporter::importFile(std::string fn)
       for(size_t i = 0; i < fileLTS.num_state_parameters(); ++i) {
         parameters.push_back(fileLTS.state_parameter_name_str(i));
       }
-      result->setParameters(parameters);
     }
   
 

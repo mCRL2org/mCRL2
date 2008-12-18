@@ -58,6 +58,7 @@ class State
     size_t getNumberOfTransitions() const;
     size_t getNumberOfInTransitions() const;
     size_t getNumberOfSelfLoops() const;
+
     Transition* getTransition(size_t i) const;
     Transition* getInTransition(size_t i) const;
     Transition* getSelfLoop(size_t i) const;
@@ -76,6 +77,7 @@ class State
     void setLabel(std::string label);
 
     bool hasTransitionTo(State* to);
+    const std::map<std::string, std::string>& getParameters() const;
   private:
     wxColour colour;
     bool isInitial;

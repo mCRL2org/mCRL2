@@ -215,6 +215,10 @@ bool State::isDragged() const
   return dragged;
 }
 
+const std::map<std::string, std::string>& State::getParameters() const {
+  return parameterValues;
+}
+
 bool State::hasTransitionTo(State* to)
 {
   bool result = false;

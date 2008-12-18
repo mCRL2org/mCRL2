@@ -91,7 +91,7 @@ void MainFrame::setupMenuBar()
                     wxT("Display dialog for layout optimization algorithm."));
   toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."), 
                    wxT("Display the visualization settings dialog."));
-  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-i"), 
+  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"), 
                     wxT("Display dialog with information about this LTS."));
 
   // Help menu
@@ -152,7 +152,7 @@ void MainFrame::onColour(wxCommandEvent& /*event*/) {
 void MainFrame::onImport(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a layout file"), wxEmptyString, wxEmptyString,
-    wxT("XML layout file (*.xml)*.xml||All files (*.*)|*.*"),
+    wxT("XML layout file (*.xml)|*.xml|All files (*.*)|*.*"),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   
   if (dialog.ShowModal() == wxID_OK)

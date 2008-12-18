@@ -57,13 +57,28 @@ Graph* XMLImporter::importFile(std::string filename)
         state->GetAttribute("blue", &blue);
 
         wxColour colour(red, green, blue);
+        
+        std::map<std::string, std::string> parameters;
+
+        ticpp::Iterator<ticpp::Element> param("Parameter");
+        for(param  = param.begin(state.Get());
+            param != param.end(); ++param)
+        {
+          std::string name;
+          param->GetAttribute("name", &name);
+          
+          std::string parValue;
+          param->GetText(&parValue);
+          std::pair<std::string, std::string> p(name, parValue);
+          parameters.insert(p);
+        }
 
 
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
         s->setColour(colour);
-
+        s->setParameters(parameters);
         g->addState(s);
       }
 

@@ -48,6 +48,7 @@ size_t Graph::getNumberOfStates()
   return states.size();
 }
 
+
 State* Graph::getState(size_t i) const
 {
   return states[i];
@@ -74,10 +75,6 @@ void Graph::colourState(size_t s, wxColour colour) {
   }
 }
 
-
-void Graph::setParameters(std::vector<std::string>& params) {
-  parameters = params;
-}
 
 void Graph::setInfo(int is, int ns, int nt, int nl)
 {
