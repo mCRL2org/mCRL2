@@ -178,7 +178,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
 
   if (!c.option_exists(option_pbes_rewrite_strategy)) 
-  { c.add_option(option_pbes_rewrite_strategy).set_argument_value< 0 >(utilities::simplify); 
+  { c.add_option(option_pbes_rewrite_strategy).set_argument_value< 0 >(simplify); 
   }
 
 
