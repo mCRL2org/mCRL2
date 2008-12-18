@@ -27,18 +27,54 @@
 #include <string.h>
 #include <aterm2.h>
 #include <assert.h>
+#include <string>
+#include <sstream>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/data_implementation.h"
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
+
+static bool remove_bools = true;
+static bool remove_standard_functions = true;
+static bool has_func_T = false;
+static ATermList typelist = NULL;
+
 bool is_mCRL_spec(ATermAppl spec)
 {
   return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, ATfalse);
 }
+
+
+static bool remove_sort_decl(ATermAppl sort)
+{
+	return remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(sort)));
+}
+
+static bool remove_func_decl(ATermAppl func)
+{
+	const char *name = ATgetName(ATgetAFun(ATAgetArgument(func,0)));
+	return  (remove_bools && (!strcmp("T#",name) ||
+				  !strcmp("F#",name))) ||
+		(remove_standard_functions && (
+			!strcmp("and#Bool#Bool",name) ||
+			!strcmp("or#Bool#Bool",name) ||
+			!strncmp("eq#",name,3)));
+}
+
+
+static bool is_valid_identifier(const char *s)
+{
+	std::stringstream ss(s);
+	ATermAppl id = parse_identifier(ss);
+        return id != NULL;
+}
+
 
 static void add_id(ATermList *ids, ATermAppl id)
 {
@@ -75,15 +111,19 @@ static ATbool is_domain(ATermList args, ATermAppl sort)
 	}
 }
 
-static ATermAppl find_type(ATermAppl a, ATermList args, ATermList typelist)
+static ATermAppl find_type(ATermAppl a, ATermList args, ATermList types = NULL)
 {
-	for (; !ATisEmpty(typelist); typelist=ATgetNext(typelist))
+	if ( types == NULL )
 	{
-		if ( !strcmp(ATgetName(ATgetAFun(a)),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(typelist),0)))) )
+		types = typelist;
+	}
+	for (ATermList l=types; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		if ( !strcmp(ATgetName(ATgetAFun(a)),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))) )
 		{
-			if ( is_domain(args,ATAgetArgument(ATAgetFirst(typelist),1)) )
+			if ( is_domain(args,ATAgetArgument(ATAgetFirst(l),1)) )
 			{
-				return ATAgetArgument(ATAgetFirst(typelist),1);
+				return ATAgetArgument(ATAgetFirst(l),1);
 			}
 		}
 	}
@@ -91,7 +131,7 @@ static ATermAppl find_type(ATermAppl a, ATermList args, ATermList typelist)
 	return NULL;
 }
 
-static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typelist)
+static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 {
 	ATermList l = ATgetArguments(t);
 	ATermList m;
@@ -104,7 +144,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 		r = find_type(t,ATmakeList0(),args);
 		if ( r == NULL )
 		{
-			r = gsMakeOpId(t2,find_type(t,ATmakeList0(),typelist));
+			r = gsMakeOpId(t2,find_type(t,ATmakeList0()));
 		} else {
 			r = gsMakeDataVarId(t2,r);
 		}
@@ -112,9 +152,9 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 		m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args,typelist));
+			m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
 		}
-		r = gsMakeOpId(t2,find_type(t,m,typelist));
+		r = gsMakeOpId(t2,find_type(t,m));
 
                 r = gsMakeDataAppl(r,m);
 	}
@@ -153,7 +193,7 @@ static ATermList get_substs(ATermList ids)
 		char s[100], *t;
 
 		t = ATgetName(ATgetAFun(ATAgetFirst(ids)));
-		if ( t[0] >= '0' && t[0] <= '9' )
+		if ( (t[0] >= '0' && t[0] <= '9') || t[0] == '\'' )
 		{
 			s[0] = '_';
 			strncpy(s+1,t,100);
@@ -167,7 +207,7 @@ static ATermList get_substs(ATermList ids)
 			if ( !( (*t >= 'A' && *t <= 'Z') ||
 				(*t >= 'a' && *t <= 'z') ||
 				(*t >= '0' && *t <= '9') ||
-				*t == '_' ) )
+				*t == '_' || *t == '\'' ) )
 			{
 			  *t = '_';
 			}
@@ -176,7 +216,7 @@ static ATermList get_substs(ATermList ids)
 
 		unsigned int i = 0;
 		ATermAppl new_id;
-		while ( ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
+		while ( !is_valid_identifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
 		{
 			sprintf(t,"%i",i);
 			i++;
@@ -193,6 +233,7 @@ static ATermList get_substs(ATermList ids)
 
 
 
+
 /*****************************************************
  ************* Main conversion functions *************
  *****************************************************/
@@ -205,11 +246,14 @@ static ATermList convert_sorts(ATermAppl spec, ATermList *ids)
 	r = ATmakeList0();
 	for (; !ATisEmpty(sorts); sorts=ATgetNext(sorts))
 	{
-		add_id(ids,ATAgetFirst(sorts));
-		r = ATappend(r,(ATerm) gsMakeSortId(ATAgetFirst(sorts)));
+		if ( !remove_sort_decl(ATAgetFirst(sorts)) )
+		{
+			add_id(ids,ATAgetFirst(sorts));
+			r = ATinsert(r,(ATerm) gsMakeSortId(ATAgetFirst(sorts)));
+		}
 	}
 
-	return r;
+	return ATreverse(r);
 }
 
 static ATermList convert_funcs(ATermList funcs, ATermList *ids)
@@ -220,7 +264,10 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 	r = ATmakeList0();
 	for (; !ATisEmpty(funcs); funcs=ATgetNext(funcs))
 	{
-		add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
+		if ( !strcmp("T#",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0)))) )
+		{
+			has_func_T = true;
+		}
 
 		m = ATmakeList0();
 		l = ATreverse(ATLgetArgument(ATAgetFirst(funcs),1));
@@ -235,10 +282,18 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 			sort = gsMakeSortArrow(sorts, sort);
 		}
 
-		r = ATappend(r,(ATerm) gsMakeOpId(ATAgetArgument(ATAgetFirst(funcs),0),sort));
+		ATerm f = (ATerm) gsMakeOpId(ATAgetArgument(ATAgetFirst(funcs),0),sort);
+
+		if ( !remove_func_decl(ATAgetFirst(funcs)) )
+		{
+			add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
+			r = ATinsert(r,f);
+		}
+
+		typelist = ATinsert(typelist,f);
 	}
 
-	return r;
+	return ATreverse(r);
 }
 
 static ATermList convert_cons(ATermAppl spec, ATermList *ids)
@@ -251,7 +306,7 @@ static ATermList convert_maps(ATermAppl spec, ATermList *ids)
 	return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),2),ids);
 }
 
-static ATermList convert_datas(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermList convert_datas(ATermAppl spec, ATermList *ids)
 {
 	ATermList eqns = ATLgetArgument(ATAgetArgument(spec,0),1);
 	ATermList l,args,r;
@@ -267,15 +322,15 @@ static ATermList convert_datas(ATermAppl spec, ATermList typelist, ATermList *id
 			args = ATappend(args,(ATerm) gsMakeDataVarId(ATAgetArgument(ATAgetFirst(l),0),gsMakeSortId(ATAgetArgument(ATAgetFirst(l),1))));
 			add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
 		}
-		lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args,typelist);
-		rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args,typelist);
+		lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args);
+		rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
 		r = ATappend(r,(ATerm) gsMakeDataEqn(args,gsMakeNil(),lhs,rhs));
 	}
 
 	return r;
 }
 
-static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
 {
 	ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
 	ATermList sums = ATLgetArgument(ATAgetArgument(spec,1),2);
@@ -314,7 +369,17 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 				(ATerm) gsMakeDataVarId(ATAgetArgument(ATAgetFirst(l),0),gsMakeSortId(ATAgetArgument(ATAgetFirst(l),1)))
 			);
 		}
-		ATermAppl c = dataterm2ATermAppl(ATAgetArgument(s,4),o,typelist);
+		ATermAppl c = dataterm2ATermAppl(ATAgetArgument(s,4),o);
+		if ( ! remove_bools )
+		{
+			assert( has_func_T );
+			if ( !has_func_T )
+			{
+				gsErrorMsg("cannot convert summand condition due to the absence of boolean constructor T\n");
+				exit(1);
+			}
+			c = gsMakeDataExprEq(c,gsMakeOpId(gsString2ATermAppl("T"),gsMakeSortIdBool()));
+		}
 
 		l = ATreverse(ATLgetArgument(s,2));
 		ATermList al = ATmakeList0();
@@ -322,7 +387,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			al = ATinsert(al,
-				(ATerm) dataterm2ATermAppl(ATAgetFirst(l),o,typelist)
+				(ATerm) dataterm2ATermAppl(ATAgetFirst(l),o)
 			);
 			as = ATinsert(as,(ATerm) gsGetSort(ATAgetFirst(al)));
 		}
@@ -340,7 +405,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 		for (; !ATisEmpty(l); l=ATgetNext(l),o2=ATgetNext(o2))
 		{
 			ATermAppl par = ATAgetFirst(o2);
-			ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o,typelist);
+			ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o);
 			if ( !ATisEqual(par,val) )
 			{
 				n = ATinsert(n,(ATerm) gsMakeDataVarIdInit(par,val));
@@ -356,7 +421,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList typelist, ATermList *ids)
 	return gsMakeLinearProcess(ATmakeList0(),pars,ATreverse(smds));
 }
 
-static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*ids*/)
+static ATermList convert_init(ATermAppl spec, ATermList * /*ids*/)
 {
 	ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
 	ATermList vals = ATLgetArgument(ATAgetArgument(spec,1),0);
@@ -368,7 +433,7 @@ static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*
 		l = ATinsert(l,
 			(ATerm) gsMakeDataVarIdInit(
 				gsMakeDataVarId(ATAgetArgument(v,0),gsMakeSortId(ATAgetArgument(v,1))),
-				dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0(),typelist)
+				dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0())
 			)
 		);
 	}
@@ -386,9 +451,14 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 {
         assert(is_mCRL_spec(spec));
 	ATermAppl sort_spec,cons_spec,map_spec,data_eqn_spec,data_spec,act_spec,lps,init;
-	ATermList typelist, ids;
+	ATermList ids;
 
 	ids = ATmakeList0();
+	remove_bools = convert_bools;
+	remove_standard_functions = convert_funcs;
+	has_func_T = false;
+	typelist = ATmakeList0();
+	ATprotectList(&typelist);
 
 	gsVerboseMsg("converting sort declarations...\n");
 	sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
@@ -399,18 +469,16 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 	gsVerboseMsg("converting mapping declarations...\n");
 	map_spec = gsMakeMapSpec(convert_maps(spec,&ids));
 
-	typelist = ATconcat(ATLgetArgument(cons_spec,0),ATLgetArgument(map_spec,0));
-
 	gsVerboseMsg("converting data equations...\n");
-	data_eqn_spec = gsMakeDataEqnSpec(convert_datas(spec,typelist,&ids));
+	data_eqn_spec = gsMakeDataEqnSpec(convert_datas(spec,&ids));
 
         data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
 	gsVerboseMsg("converting initial LPE state...\n");
-	init = gsMakeLinearProcessInit(ATmakeList0(),convert_init(spec,typelist,&ids));
+	init = gsMakeLinearProcessInit(ATmakeList0(),convert_init(spec,&ids));
 	
 	gsVerboseMsg("converting LPE...\n");
-	lps = convert_lps(spec,typelist,&ids);
+	lps = convert_lps(spec,&ids);
 	
 	gsVerboseMsg("constructing action declarations...\n");
 	act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
@@ -423,13 +491,13 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 	{
 		substs = ATinsert(substs,
 			(ATerm) gsMakeSubst(
-				(ATerm) gsMakeOpId(gsString2ATermAppl("F"),gsMakeSortIdBool()),
+				(ATerm) gsMakeOpId(gsString2ATermAppl("F#"),gsMakeSortIdBool()),
 				(ATerm) gsMakeDataExprFalse()
 				)
 			);
 		substs = ATinsert(substs,
 			(ATerm) gsMakeSubst(
-				(ATerm) gsMakeOpId(gsString2ATermAppl("T"),gsMakeSortIdBool()),
+				(ATerm) gsMakeOpId(gsString2ATermAppl("T#"),gsMakeSortIdBool()),
 				(ATerm) gsMakeOpIdTrue()
 				)
 			);
@@ -441,25 +509,24 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 		substs = ATinsert(substs,
 			(ATerm) gsMakeSubst(
-				(ATerm) gsMakeOpId(gsString2ATermAppl("and"),bool_func_sort),
+				(ATerm) gsMakeOpId(gsString2ATermAppl("and#Bool#Bool"),bool_func_sort),
 				(ATerm) gsMakeOpIdAnd()
 				)
 			);
 		substs = ATinsert(substs,
 			(ATerm) gsMakeSubst(
-				(ATerm) gsMakeOpId(gsString2ATermAppl("or"),bool_func_sort),
+				(ATerm) gsMakeOpId(gsString2ATermAppl("or#Bool#Bool"),bool_func_sort),
 				(ATerm) gsMakeOpIdOr()
 				)
 			);
 
-		ATermAppl eq_str = gsString2ATermAppl("eq");
 		ATermAppl s_bool = gsMakeSortIdBool();
-
 		for (ATermList l=ATLgetArgument(sort_spec,0); !ATisEmpty(l); l=ATgetNext(l))
 		{
 			ATermAppl s = ATAgetFirst(l);
+			const char *sort_name = ATgetName(ATgetAFun(ATAgetArgument(s,0)));
 			substs = ATinsert(substs,(ATerm) gsMakeSubst(
-						(ATerm) gsMakeOpId(eq_str,gsMakeSortArrow2(s,s,s_bool)),
+						(ATerm) gsMakeOpId(gsString2ATermAppl((std::string("eq#")+sort_name+"#"+sort_name).c_str()),gsMakeSortArrow2(s,s,s_bool)),
 						(ATerm) gsMakeOpIdEq(s)
 						));
 		}
@@ -473,5 +540,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
 
 	
-	return r;
+	ATunprotectList(&typelist);
+
+	return implement_data_lin_proc_spec(r);
 }

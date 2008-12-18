@@ -50,17 +50,13 @@ bool parse_command_line(int ac, char** av, tool_options_type& options) {
 
   clinterface.
     add_option("no-conv-map",
-      "do not apply the conversion of mappings and, or and eq", 'n').
-    add_option("no-conv-cons",
-      "do not apply the conversion of constructors T and F; note that this conversion is "
-      "really needed for the toolset to know what true and false are (e.g. simulation "
-      "and state space generation will not be possible)");
+      "do not apply the conversion of mappings and, or and eq", 'n');
 
   command_line_parser parser(clinterface, ac, av);
 
   if (parser.continue_execution()) {
-    options.convert_funcs = parser.options.count("no-conv-map") == 0;
-    options.convert_bools = parser.options.count("no-conv-cons") == 0;
+    options.convert_bools = true;
+    options.convert_funcs = options.convert_bools && parser.options.count("no-conv-map") == 0;
  
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
