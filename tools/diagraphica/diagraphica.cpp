@@ -19,6 +19,8 @@
 #include <wx/clrpicker.h>
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/core/aterm_ext.h"
+
 
 // windows debug libraries
 #ifdef _MSC_VER
@@ -111,6 +113,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
 
+  MCRL2_ATERM_INIT(0, lpCmdLine) 
+
   if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
     return EXIT_SUCCESS;
   }
@@ -119,6 +123,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 }
 # else
 int main(int argc, char **argv) {
+
+  MCRL2_ATERM_INIT(argc, argv)
 
   if(interactor< squadt_interactor >::free_activation(argc, argv)) {
     return EXIT_SUCCESS;
