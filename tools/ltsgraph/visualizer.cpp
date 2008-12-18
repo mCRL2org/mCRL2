@@ -71,7 +71,7 @@ void Visualizer::drawStates(bool inSelectMode)
       for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
       {
         Transition* t = s->getSelfLoop(j);
-        drawSelfLoop(t, j);
+        drawSelfLoop(t, j, inSelectMode);
       }  
     }
 
@@ -314,37 +314,42 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     glPopName();  
   }
 
-  // Draw label near the control point (for the moment, fixed above the control 
-  // point
-  double labelX, labelY;
-  tr->getLabelPos(labelX, labelY);
-  labelX = (labelX / 2000.0) * (width - rad * 2);
-  labelY = (labelY / 2000.0) * (height - rad * 2);
-  if(selecting) {
-    glPushName(IDS::LABEL);
-    glPushName(from->getValue());
-    glPushName(trid);
-    fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
-                  8 * pixelSize / 20.0f, 
-                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
-    glPopName();
-    glPopName();
-    glPopName();
-  }
-  
-  if(tr->isSelected())
-  {
-    glColor3ub(255, 0, 0);
-  }
-  else
-  {
-    glColor3ub(0, 0, 0);
-  }
+
   
   if(showTransLabels) {
-    fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
+    // Draw label near the control point
+    // point
+    double labelX, labelY;
+    tr->getLabelPos(labelX, labelY);
+    labelX = (labelX / 2000.0) * (width - rad * 2);
+    labelY = (labelY / 2000.0) * (height - rad * 2);
+
+  
+    if(tr->isSelected())
+    {
+      glColor3ub(255, 0, 0);
+    }
+    else
+    {
+      glColor3ub(0, 0, 0);
+    }
+
+    if(selecting) {
+      glPushName(IDS::LABEL);
+      glPushName(from->getValue());
+      glPushName(trid);
+      fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
+                  8 * pixelSize / 20.0f, 
+                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
+      glPopName();
+      glPopName();
+      glPopName();
+    }
+    else {
+      fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+    }
   }
   
   glColor3ub(0, 0, 0); 
@@ -371,7 +376,7 @@ void Visualizer::drawArrowHead(double baseLength)
 
 }
 
-void Visualizer::drawSelfLoop(Transition* tr, size_t j)
+void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 {
   // We are drawing a self loop, so t.to == t.from
   State* s = tr->getFrom();
@@ -487,6 +492,8 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
     }
   glEnd(); 
   
+
+
   if(showHandles)
   {
     glPushName(IDS::SELF_LOOP);
@@ -500,7 +507,15 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
       glVertex2d(xVirtual + .015, yVirtual);
     glEnd();
     
-    glColor3ub(0, 0, 0);
+    if(tr->isSelected())
+    {
+      glColor3ub(255, 0, 0);
+    }
+    else
+    {
+      glColor3ub(0, 0, 0);
+    }
+    
     glBegin(GL_LINE_LOOP);
       glVertex2d(xVirtual , yVirtual - .015);
       glVertex2d(xVirtual - .015, yVirtual);
@@ -512,11 +527,32 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j)
     glPopName();
     glPopName();
   } 
+ 
+
   // Draw label.
   if(showTransLabels) {
-    fr->draw_text(tr->getLabel(), xVirtual, yVirtual + .025, 
+    double labelX, labelY;
+    tr->getLabelPos(labelX, labelY);
+    labelX = (labelX / 2000.0) * (width - rad * 2);
+    labelY = (labelY / 2000.0) * (height - rad * 2);
+
+    if(selecting) {
+      glPushName(IDS::SELF_LABEL);
+      glPushName(s->getValue());
+      glPushName(j);
+
+      fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
+                  8 * pixelSize / 20.0f, 
+                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
+      glPopName();
+      glPopName();
+      glPopName();
+    }
+    else {
+      fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
                 mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+    }
   }
  
 

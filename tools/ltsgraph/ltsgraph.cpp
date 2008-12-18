@@ -373,6 +373,10 @@ void LTSGraph::selectLabel(size_t state, size_t transition)
   selectedLabel = graph->selectTransition(state, transition);
 }
 
+void LTSGraph::selectSelfLabel(size_t state, size_t transition) {
+  selectedLabel = graph->selectSelfLoop(state, transition);
+}
+
 void LTSGraph::setRadius(int radius)
 {
   visualizer->setRadius(radius);

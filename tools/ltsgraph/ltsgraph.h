@@ -66,6 +66,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     void selectTransition(size_t state, size_t trans);
     void selectSelfLoop(size_t state, size_t trans);
     void selectLabel(size_t state, size_t trans);
+    void selectSelfLabel(size_t state, size_t trans);
 
     // Setters
     void setLTSInfo(int is, int ns, int nt, int nl);

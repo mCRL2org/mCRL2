@@ -38,7 +38,7 @@ namespace IDS
     myID_TOOL_SELECT
   };
 
-  enum PickState {TRANSITION, SELF_LOOP, STATE, LABEL};
+  enum PickState {TRANSITION, SELF_LOOP, STATE, LABEL, SELF_LABEL};
 }
 
 #endif //IDS_H

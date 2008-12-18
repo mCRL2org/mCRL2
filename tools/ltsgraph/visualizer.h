@@ -63,7 +63,7 @@ class Visualizer
 
 
     // Draws a self-loop, a transition from a state to itself
-    void drawSelfLoop(Transition* t, size_t trid);
+    void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
 
     mcrl2::utilities::font_renderer* fr;
 };

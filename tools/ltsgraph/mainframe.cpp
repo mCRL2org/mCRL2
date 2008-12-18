@@ -129,7 +129,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
              mcrl2::lts::lts::lts_extensions_as_string()+
              ")|"+
              mcrl2::lts::lts::lts_extensions_as_string(";")+
-             "All files (*.*)|*.*").c_str(),
+             "|All files (*.*)|*.*").c_str(),
              wxConvLocal),
     wxFD_OPEN|wxFD_CHANGE_DIR);
   

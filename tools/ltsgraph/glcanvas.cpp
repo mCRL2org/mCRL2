@@ -362,78 +362,76 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
   //  buffer[2]: The maximal depth of the object. We are certainly not 
   //             interested in this.
   //  buffer[3]: The first identifier of the object picked.
-
-  GLuint *ptr;
-
-  int number = 0;
-  int selectedType = -1;
-  size_t selectedObject;
-
-  ptr = (GLuint*) buffer;
-  int toProcess = hits;
-
-  while (toProcess > 0)
-  {
-    while(number <= 0)
-    {
-
-      number = *ptr;
-      ++ptr; // number;
-      ++ptr; // z1
-      ++ptr; // z2
-      // There are no names on the stack, so skip over them.
-    }
-    // Number != 0 => *ptr is the first name on the stack.
-    
-    if (number <= 3) {
-      selectedType = *ptr;
-
-      ++ptr; // ID;
-      selectedObject = *ptr;
-
-    
-
-
-      switch(selectedType)
-      {
-        case IDS::TRANSITION: 
-        { 
-          ++ptr; // Second ID, for transitions
-          size_t selectedTrans = *ptr;
-          owner->selectTransition(selectedObject, selectedTrans); 
-          break;
-        }
-        case IDS::SELF_LOOP:
-        {
-          ++ptr; // Second ID, for transitions
-          size_t selectedTrans = *ptr;
-          owner->selectSelfLoop(selectedObject, selectedTrans);
-          break;
-        }
-        case IDS::STATE:
-        {
-          if(!ctrl) {
-            owner->selectState(selectedObject);
-          }
-          else {
-            owner->colourState(selectedObject);
-          }
-          break;
-        }
-        case IDS::LABEL:
-        {
-          ++ptr; // Second ID, transitions
-          size_t selectedLabel = *ptr;
-          owner->selectLabel(selectedObject, selectedLabel);
-          break;
-        }
-        default: break;
+  // (buffer[4]: The second identifier of the object picked.)
+  int selectedObject[3]; // Identifier for the object picked
+  selectedObject[0] = -1; // None selected
+  GLuint names; // The number of names on the stack.
+  bool stateSelected = false; // Whether we've hit a state
+  bool transSelected = false; // Whether we've hit a transition
+  
+  // Choose the objects hit, and store it. Give preference to states, then
+  // to transition handles, then to labels
+  using namespace IDS;
+  for(GLint j = 0; j < hits; ++j) {
+    names = *buffer;
+    ++buffer; // Buffer points to minimal z value of hit.
+    ++buffer; // Buffer points to maximal z value of hit.
+    ++buffer; // Buffer points to first name on stack
+    GLuint objType = *buffer;
+  
+    for(GLuint k = 0; k < names; ++k) {
+      if(!(stateSelected || transSelected) || objType == STATE) {
+        selectedObject[k] = *buffer;
       }
+      ++buffer;
     }
-    --toProcess;
+    
+    stateSelected = objType == STATE;
+    transSelected = objType == TRANSITION || objType == SELF_LOOP;
   }
 
-  ptr = NULL; 
+
+  switch(selectedObject[0])
+  {
+    case TRANSITION: { 
+      //std::cerr << "Selected transition\n";
+      owner->selectTransition(selectedObject[1], selectedObject[2]); 
+      break;
+    }
+    case IDS::SELF_LOOP:
+    {
+      //std::cerr << "Selected selfloop\n";
+      owner->selectSelfLoop(selectedObject[1], selectedObject[2]);
+      break;
+    }
+    case IDS::STATE:
+    {
+      if(!ctrl) {
+        //std::cerr << "Selecting state\n";
+        owner->selectState(selectedObject[1]);
+      }
+      else {
+        //std::cerr << "Colouring state\n";
+        owner->colourState(selectedObject[1]);
+      }
+      break;
+    }
+    case IDS::LABEL:
+    {
+      //std::cerr << "Selecting label\n";
+      owner->selectLabel(selectedObject[1], selectedObject[2]);
+      break;
+    }
+    case IDS::SELF_LABEL:
+    { 
+      //std::cerr << "Selecting self label\n";
+      owner->selectSelfLabel(selectedObject[1], selectedObject[2]);
+      break;
+    }
+    default: break;
+  }
+
+  buffer = NULL; 
 }
 
 
