@@ -795,70 +795,37 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
       // Given inequalities x1 + bi * x <= ci
       //                   -x1 + bj * x <= cj
       // This is equivalent to bj * x + bi * x <= ci + cj
-
-      // Special cases: no positive or no negative occurrences
-      if(positive_variables.size() == 0)
+      for(data_expression_list::iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
       {
-        for(data_expression_list::const_iterator j = negative_variables.begin(); j != negative_variables.end(); ++j)
+        data_expression positive_inequality = remove_variable(*i, *j);
+        gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
+        positive_inequality = normalize_inequality(positive_inequality,r);
+        gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
+        assert(is_inequality(positive_inequality));
+        assert(!is_greater(positive_inequality) && !is_greater_equal(positive_inequality));
+        for(data_expression_list::iterator k = negative_variables.begin(); k != negative_variables.end(); ++k)
         {
-          data_expression negative_inequality = remove_variable(*i, *j);
+          gsDebugMsg("combining %s and %s into new inequality\n", pp(*j).c_str(), pp(*k).c_str());
+          data_expression negative_inequality = remove_variable(*i, *k);
           gsDebugMsg("negative inequality: %s\n", pp(negative_inequality).c_str());
           negative_inequality = normalize_inequality(negative_inequality, r);
           gsDebugMsg("negative inequality after normalization: %s\n", pp(negative_inequality).c_str());
-          if(lhs(negative_inequality) != real_zero())
+          // Results may not be inequalities any more
+          assert(is_inequality(negative_inequality));
+          assert(!is_greater(negative_inequality) && !is_greater_equal(negative_inequality));
+          data_expression new_inequality;
+          if(is_less(positive_inequality) && is_less(negative_inequality))
           {
-            new_inequalities = push_front(new_inequalities, negative_inequality);
+            new_inequality = less(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
           }
-        }
-      }
-      else if(negative_variables.size() == 0)
-      {
-        for(data_expression_list::const_iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
-        {
-          data_expression positive_inequality = remove_variable(*i, *j);
-          gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
-          positive_inequality = normalize_inequality(positive_inequality, r);
-          gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
-          if(lhs(positive_inequality) != real_zero())
+          else
           {
-            new_inequalities = push_front(new_inequalities, positive_inequality);
+            new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
           }
-        }
-      }
-      else
-      {
-        for(data_expression_list::iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
-        {
-          data_expression positive_inequality = remove_variable(*i, *j);
-          gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
-          positive_inequality = normalize_inequality(positive_inequality,r);
-          gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
-          assert(is_inequality(positive_inequality));
-          assert(!is_greater(positive_inequality) && !is_greater_equal(positive_inequality));
-          for(data_expression_list::iterator k = negative_variables.begin(); k != negative_variables.end(); ++k)
+          new_inequality = normalize_inequality(new_inequality, r);
+          if(lhs(new_inequality) != real_zero())
           {
-            gsDebugMsg("combining %s and %s into new inequality\n", pp(*j).c_str(), pp(*k).c_str());
-            data_expression negative_inequality = remove_variable(*i, *k);
-            gsDebugMsg("negative inequality: %s\n", pp(negative_inequality).c_str());
-            negative_inequality = normalize_inequality(negative_inequality, r);
-            gsDebugMsg("negative inequality after normalization: %s\n", pp(negative_inequality).c_str());
-            // Results may not be inequalities any more
-            assert(is_inequality(negative_inequality));
-            assert(!is_greater(negative_inequality) && !is_greater_equal(negative_inequality));
-            data_expression new_inequality;
-            if(is_less(positive_inequality) && is_less(negative_inequality))
-            {
-              new_inequality = less(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
-            }
-            else
-            {
-              new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
-            }
-            new_inequality = normalize_inequality(new_inequality, r);
-            if(lhs(new_inequality) != real_zero())
-            {
-              new_inequalities = push_front(new_inequalities, new_inequality);
-            }
+            new_inequalities = push_front(new_inequalities, new_inequality);
           }
         }
       }
@@ -898,6 +865,7 @@ data_expression_list compute_inequalities(unsigned long i, const atermpp::map<st
   return result;
 }
 
+static
 data_expression compute_condition_from_inequalities(data_expression_list inequalities, const data_variable_list& variables, rewriter& r, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
 {
   // Compute new condition
@@ -987,16 +955,42 @@ bool is_inconsistent(const data_expression_list& cond, rewriter& r)
       gsDebugMsg("*i = %s, *j = %s\n", pp(*i).c_str(), pp(*j).c_str());
       if(is_inequality(*i) && is_inequality(*j) && *i != *j && !is_less_equal(*i) && !is_less_equal(*j))
       {
-        if(lhs(*i) == lhs(*j) && rhs(*i) == rhs(*j))
+        if(lhs(*i) == lhs(*j))
         {
-          return true;
+          if(rhs(*i) == rhs(*j))
+          {
+            return true;
+          }
+          else if((is_less(*i) && is_equal_to(*j) && r(less(rhs(*j), rhs(*i))) == false_()) ||
+             (is_equal_to(*i) && is_less(*j) && r(less(rhs(*i), rhs(*j))) == false_()))
+          {
+            return true;
+          }
+          else if (is_equal_to(*i) && is_equal_to(*j) && rhs(*i) != rhs(*j))
+          {
+            return true;
+          }
         }
-        if(lhs(*i) == lhs(*j) &&
-           ((is_less(*i) && is_equal_to(*j) && r(less(rhs(*j), rhs(*i))) == false_()) ||
-            (is_equal_to(*i) && is_less(*j) && r(less(rhs(*i), rhs(*j))) == false_())))
+        else
         {
-          return true;
+          if(rhs(*i) == real_zero() && !is_negate(lhs(*i)) && is_negate(rhs(*j)) &&
+             lhs(*i) == r(negate(lhs(*j))))
+          {
+            if(r(greater(rhs(*j), rhs(*i))) == false_())
+            {
+              return true;
+            }
+          }
+          else if (rhs(*j) == real_zero() && !is_negate(lhs(*j)) && is_negate(lhs(*i)) &&
+            lhs(*j) == r(negate(lhs(*i))))
+          {
+            if(r(greater(rhs(*i), rhs(*j))) == false_())
+            {
+              return true;
+            }
+          }
         }
+        gsDebugMsg("Cannot conclude anything\n");
       }
     }
   }
