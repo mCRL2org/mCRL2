@@ -223,6 +223,7 @@ namespace tipi {
 
         size_t do_evaluate(std::string const& s) const;
         bool   do_validate(std::string const& s) const;
+
         enumeration< size_t >& do_add(const size_t v, std::string const& s);
 
         /** \brief Converts a string to an index representation
@@ -277,11 +278,6 @@ namespace tipi {
 
       private:
 
-        /** \brief The possible values in the domain */
-        std::map < size_t, std::string > m_values;
-
-      private:
-
         inline static enumeration< size_t >& get_single_instance() {
           static enumeration< size_t > instance;
 
@@ -315,7 +311,7 @@ namespace tipi {
          * \param[in] s the string to evaluate
          **/
         inline C evaluate(std::string const& s) const {
-          return static_cast < C > (get_single_instance().evaluate(s));
+          return static_cast< C >(get_single_instance().evaluate(s));
         }
 
       public:
@@ -337,9 +333,6 @@ namespace tipi {
         inline bool validate(std::string const& s) const {
           return get_single_instance().validate(s);
         }
-
-        /** \brief Destructor */
-        inline ~enumeration() { }
     };
 
     /// \cond INTERNAL_DOCS

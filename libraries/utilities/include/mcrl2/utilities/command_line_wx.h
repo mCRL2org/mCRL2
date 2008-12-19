@@ -68,7 +68,7 @@ namespace mcrl2 {
             if (m_execute) {
               return wxApp::OnRun();
             }
-   
+
             return EXIT_SUCCESS;
           }
 
@@ -87,15 +87,15 @@ namespace mcrl2 {
               }
               else {
                 std::cerr << e.what() << std::endl;
-         
+
                 return false;
               }
-         
+
               return true;
             }
-         
-            if (m_execute) {
-              return wxApp::Initialize(argc, argv);
+
+            if (!wxApp::Initialize(argc, argv) && m_execute) {
+              return false;
             }
 
             return true;
