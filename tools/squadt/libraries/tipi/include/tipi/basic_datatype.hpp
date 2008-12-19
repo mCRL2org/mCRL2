@@ -20,6 +20,7 @@
 
 #include <boost/config.hpp> // Platform specific workarounds
 #include <boost/any.hpp>
+#include <boost/assert.hpp>
 #include <boost/integer_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_enum.hpp>
@@ -291,11 +292,15 @@ namespace tipi {
 
         /** \brief Converts from the underlying implementation type */
         inline std::string specialised_convert(boost::any const& v) const {
+          BOOST_ASSERT(!get_single_instance().m_values.empty());
+
           return get_single_instance().convert(static_cast< size_t >(boost::any_cast< C >(v)));
         }
 
         /** \brief Returns an iterator over the values of the enumerated type */
         inline basic_enumeration::const_iterator_range values() const {
+          BOOST_ASSERT(!get_single_instance().m_values.empty());
+
           return get_single_instance().values();
         }
 
@@ -304,6 +309,8 @@ namespace tipi {
          * \return the string representation of the value of the enumerated type
          **/
         inline std::string convert(C const& s) const {
+          BOOST_ASSERT(!get_single_instance().m_values.empty());
+
           return get_single_instance().convert(static_cast< const size_t > (s));
         }
 
@@ -311,6 +318,8 @@ namespace tipi {
          * \param[in] s the string to evaluate
          **/
         inline C evaluate(std::string const& s) const {
+          BOOST_ASSERT(!get_single_instance().m_values.empty());
+
           return static_cast< C >(get_single_instance().evaluate(s));
         }
 
