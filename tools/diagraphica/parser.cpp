@@ -102,11 +102,11 @@ void Parser::parseFSMFile(
 using namespace mcrl2::lts;
 //using namespace mcrl2::core;
 
-    ifstream file;
+    //ifstream file;
     string line = "";
-    int sect = 0;
-    int lineCnt = 0;
-    int byteCnt = 0;
+    //int sect = 0;
+    //int lineCnt = 0;
+    //int byteCnt = 0;
 
       ////////////////////////////////////////////////////
     mcrl2::lts::lts l;
@@ -135,14 +135,15 @@ using namespace mcrl2::lts;
           line.append(l.pretty_print_state_parameter_value(*z));
           line.append("\"");
         }
-//        cout << line  << endl; 
+        //cout << line  << endl; 
                         parseStateVarDescr( 
                             line, 
                             graph );
       }
     }
 
-    for(state_iterator si = l.get_states(); si.more(); ++si)
+    state_iterator si = l.get_states();
+    while(si.more()) 
     {
       line.clear();
       for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
@@ -151,20 +152,31 @@ using namespace mcrl2::lts;
         {
           line.append(" ");
         } 
-        line.append( to_string( atoi(l.get_state_parameter_value_str( *si, i ).c_str())-1));
+
+        int c = 0;
+        atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
+        for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+        {
+          if (*z == l.get_state_parameter_value( *si, i ))
+          {
+            line.append(to_string(c));
+          }
+          ++c; 
+        }
       } 
-//      cout << line << endl;
+  //    cout << line << endl;
                         parseStates( 
                             line, 
                             graph ); 
+      ++si;
     }     
 
     for(transition_iterator ti = l.get_transitions(); ti.more(); ++ti)
     {
        line.clear();
-       line.append(to_string(ti.from()));
+       line.append(to_string(ti.from()+1));
        line.append(" ");
-       line.append(to_string(ti.to()));
+       line.append(to_string(ti.to()+1));
        line.append(" \"");
        line.append(l.label_value_str(ti.label() ) );
        line.append("\"");
@@ -174,6 +186,7 @@ using namespace mcrl2::lts;
                             graph );
     }
 
+    mediator->updateProgress( 1 );
     
  
     /////////////////////////////////////////////////////
