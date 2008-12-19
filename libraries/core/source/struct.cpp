@@ -12,7 +12,12 @@
 #include <cstdlib>
 #include <cassert>
 #include <climits>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sstream>
 
+#include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/struct.h"
 
 #include "mcrl2/core/messaging.h"
@@ -3853,6 +3858,14 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
     //SortExpr1 and SortExpr2 are both PNI sorts
     return UnitePNISorts(SortExpr1, SortExpr2);
   }
+}
+
+bool gsIsUserIdentifier(const std::string &name) {
+  std::istringstream *stream = new std::istringstream("identifier "+name);
+  std::vector<std::istream*> streams(1,stream);
+  ATerm result = parse_streams(streams,false);
+  delete stream;
+  return result != NULL;
 }
 
     }

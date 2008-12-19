@@ -32,7 +32,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/parse.h"
 #include "mcrl2/core/data_implementation.h"
 
 using namespace ::mcrl2::utilities;
@@ -59,20 +58,33 @@ static bool remove_sort_decl(ATermAppl sort)
 static bool remove_func_decl(ATermAppl func)
 {
 	const char *name = ATgetName(ATgetAFun(ATAgetArgument(func,0)));
-	return  (remove_bools && (!strcmp("T#",name) ||
-				  !strcmp("F#",name))) ||
-		(remove_standard_functions && (
-			!strcmp("and#Bool#Bool",name) ||
-			!strcmp("or#Bool#Bool",name) ||
-			!strncmp("eq#",name,3)));
-}
-
-
-static bool is_valid_identifier(const char *s)
-{
-	std::stringstream ss(s);
-	ATermAppl id = parse_identifier(ss);
-        return id != NULL;
+	if ( remove_bools && (	!strcmp("T#",name) ||
+				!strcmp("F#",name)) )
+	{
+		return true;
+	}
+	if ( remove_standard_functions )
+	{
+		if ( !strcmp("and#Bool#Bool",name) )
+		{
+			return true;
+//		} else if ( !strncmp("if#Bool#",name,8) )
+//		{
+//			const char *s = strchr(name+8,'#');
+//			if ( s != NULL && !strncmp(name+8,s+1,s-name) && s[1+(s-name)] == '\0' )
+//			{
+//				return true;
+//			}
+		} else if ( !strncmp("eq#",name,3) )
+		{
+			const char *s = strchr(name+3,'#');
+			if ( s != NULL && !strncmp(name+3,s+1,s-name-3) && s[1+(s-name-3)] == '\0' )
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -188,6 +200,12 @@ static ATermList get_substs(ATermList ids)
 	ATermIndexedSet used = ATindexedSetCreate(1000,50);
 	ATermList substs = ATmakeList0();
 
+//	if ( !remove_standard_functions )
+	{
+		ATbool b;
+		ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,ATtrue)),&b);
+	}
+
 	for (; !ATisEmpty(ids); ids=ATgetNext(ids))
 	{
 		char s[100], *t;
@@ -216,7 +234,7 @@ static ATermList get_substs(ATermList ids)
 
 		unsigned int i = 0;
 		ATermAppl new_id;
-		while ( !is_valid_identifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
+		while ( !gsIsUserIdentifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
 		{
 			sprintf(t,"%i",i);
 			i++;
@@ -256,7 +274,7 @@ static ATermList convert_sorts(ATermAppl spec, ATermList *ids)
 	return ATreverse(r);
 }
 
-static ATermList convert_funcs(ATermList funcs, ATermList *ids)
+static ATermList convert_funcs(ATermList funcs, ATermList *ids, bool funcs_are_cons = false)
 {
 	ATermList r,l,m, sorts;
 	ATermAppl sort;
@@ -264,7 +282,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 	r = ATmakeList0();
 	for (; !ATisEmpty(funcs); funcs=ATgetNext(funcs))
 	{
-		if ( !strcmp("T#",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0)))) )
+		if ( funcs_are_cons && !strcmp("T#",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0)))) )
 		{
 			has_func_T = true;
 		}
@@ -286,6 +304,14 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 
 		if ( !remove_func_decl(ATAgetFirst(funcs)) )
 		{
+			if ( funcs_are_cons && remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),2)))) )
+			{
+				char *name = strdup(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
+				*strchr(name,'#') = '\0';
+				gsErrorMsg("constructor %s of sort Bool found (only T and F are allowed)\n",name);
+				free(name);
+				exit(1);
+			}
 			add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
 			r = ATinsert(r,f);
 		}
@@ -298,7 +324,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 
 static ATermList convert_cons(ATermAppl spec, ATermList *ids)
 {
-	return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),1),ids);
+	return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),1),ids, true);
 }
 
 static ATermList convert_maps(ATermAppl spec, ATermList *ids)
@@ -513,12 +539,6 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 				(ATerm) gsMakeOpIdAnd()
 				)
 			);
-		substs = ATinsert(substs,
-			(ATerm) gsMakeSubst(
-				(ATerm) gsMakeOpId(gsString2ATermAppl("or#Bool#Bool"),bool_func_sort),
-				(ATerm) gsMakeOpIdOr()
-				)
-			);
 
 		ATermAppl s_bool = gsMakeSortIdBool();
 		for (ATermList l=ATLgetArgument(sort_spec,0); !ATisEmpty(l); l=ATgetNext(l))
@@ -529,6 +549,10 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 						(ATerm) gsMakeOpId(gsString2ATermAppl((std::string("eq#")+sort_name+"#"+sort_name).c_str()),gsMakeSortArrow2(s,s,s_bool)),
 						(ATerm) gsMakeOpIdEq(s)
 						));
+//			substs = ATinsert(substs,(ATerm) gsMakeSubst(
+//						(ATerm) gsMakeOpId(gsString2ATermAppl((std::string("if#Bool#")+sort_name+"#"+sort_name).c_str()),gsMakeSortArrow2(s,s,s_bool)),
+//						(ATerm) gsMakeOpIdIf(s)
+//						));
 		}
 	}
 

@@ -43,14 +43,16 @@ bool parse_command_line(int ac, char** av, tool_options_type& options) {
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
-    "The following conversions on the data specification will be applied:\n"
+    "This conversion assumes that Bool is the boolean sort with "
+    "constructors T and F. Additionally, the following "
+    "conversions on the data specification will be applied:\n"
     "  constructors T, F: -> Bool are replaced by true and false,\n"
-    "  mappings and, or: Bool # Bool -> Bool are replaced by && and ||, and\n"
+    "  mapping and: Bool # Bool -> Bool is replaced by ||, and\n"
     "  mapping eq: S # S -> Bool is replaced by == for each sort S");
 
   clinterface.
     add_option("no-conv-map",
-      "do not apply the conversion of mappings and, or and eq", 'n');
+      "do not apply the conversion of mappings and and eq", 'n');
 
   command_line_parser parser(clinterface, ac, av);
 

@@ -41,7 +41,7 @@ ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms *
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
 public:
-  mcrl2_lexer(void);             /* constructor */
+  mcrl2_lexer(bool print_parse_errors); /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
@@ -51,6 +51,7 @@ protected:
   int cur_index;                 /* current index in current streams */
   int line_nr;                   /* line number in cur_streams[cur_index] */
   int col_nr;                    /* column number in cu_streams[cur_index] */
+  bool show_errors;
   void process_string(void);     /* update position, provide token to parser */
 };
 
@@ -187,8 +188,8 @@ nil        { process_string(); return NIL; }
 
 //Implementation of parse_streams
 
-ATerm parse_streams(std::vector<std::istream*> &streams) {
-  lexer = new mcrl2_lexer();
+ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
+  lexer = new mcrl2_lexer(print_parse_errors);
   ATerm result = lexer->parse_streams(streams);
   delete lexer;
   return result;
@@ -212,22 +213,26 @@ int mcrl2yyFlexLexer::yywrap(void) {
 
 //Implementation of mcrl2_lexer
 
-mcrl2_lexer::mcrl2_lexer(void) : mcrl2yyFlexLexer(NULL, NULL) {
+mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
   cur_streams = NULL;
   cur_index = -1;
+  show_errors = print_parse_errors;
 }
 
 void mcrl2_lexer::yyerror(const char *s) {
-  int oldcol_nr = col_nr - YYLeng();
-  if (oldcol_nr < 0) {
-    oldcol_nr = 0;
+  if ( show_errors )
+  {
+    int oldcol_nr = col_nr - YYLeng();
+    if (oldcol_nr < 0) {
+      oldcol_nr = 0;
+    }
+    gsErrorMsg(
+      "token '%s' at position %d, %d caused the following error: %s\n", 
+      YYText(), line_nr, oldcol_nr, s
+    ); 
   }
-  gsErrorMsg(
-    "token '%s' at position %d, %d caused the following error: %s\n", 
-    YYText(), line_nr, oldcol_nr, s
-  ); 
 }
 
 int mcrl2_lexer::yywrap(void) {

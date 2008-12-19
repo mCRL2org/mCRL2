@@ -19,6 +19,7 @@
 
 #include "mcrl2/core/detail/struct_core.h"
 
+#include <string>
 #include <aterm2.h>
 
 namespace mcrl2 {
@@ -1599,6 +1600,14 @@ bool gsIsPBExpr(ATermAppl Term);
 ///\pre Term is not NULL
 ///\return Term is a fixpoint
 bool gsIsFixpoint(ATermAppl Term);
+
+
+// Misc.
+// -----
+
+///\return Name is a valid user identifier
+bool gsIsUserIdentifier(const std::string &Name);
+
 
     }
   }

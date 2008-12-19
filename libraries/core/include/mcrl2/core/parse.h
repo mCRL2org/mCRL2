@@ -14,6 +14,7 @@
 #define MCRL2_PARSE_H
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <aterm2.h>
 

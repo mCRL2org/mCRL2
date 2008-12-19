@@ -17,7 +17,7 @@
 
 //Global precondition: the ATerm library has been initialised
 
-ATerm parse_streams(std::vector<std::istream*> &streams);
+ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors = true);
 /*Pre: streams contains at least one element
        each element of streams is opened for reading 
   Post:the contents of streams is parsed
