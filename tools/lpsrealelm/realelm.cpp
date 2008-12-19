@@ -1084,7 +1084,8 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
   }
   gsDebugMsg("\n");
 
-  data_assignment_list nextstate;
+  data_assignment_list nextstate = get_nonreal_assignments(s.assignments());
+  nextstate = reverse(nextstate);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::const_iterator j = context.begin(); j != context.end(); ++j)
   {
     div_t q = div(i, 3);
@@ -1104,7 +1105,6 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
     }
   }
   nextstate = reverse(nextstate);
-  assert(nextstate.size() == context.size());
 
   gsDebugMsg("nextstate: %s\n", pp(nextstate).c_str());
 
