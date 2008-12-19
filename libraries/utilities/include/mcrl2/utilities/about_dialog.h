@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/about_box.h
-/// \brief About box for mCRL2 GUI tools
+/// \file mcrl2/utilities/about_dialog.h
+/// \brief About dialog for mCRL2 GUI tools
 
 #include <wx/wx.h>
 #include <wx/aboutdlg.h>
@@ -18,14 +18,14 @@ namespace mcrl2 {
   namespace utilities {
     namespace wx {
 
-      struct about_box {
+      struct about_dialog {
         /** \brief Displays a platform dependent about dialog for GUI tools of the mCRL2 toolset.
           * \param[in] tool_name   The name of the tool
           * \param[in] description A one line description of the tool
           * \param[in] developers  The developers of the tool
           * \param[in] documenters The documenters of the tool
           **/
-        about_box(
+        about_dialog(
            std::string const& tool_name,
            std::string const& description,
            std::vector<std::string> const& developers,

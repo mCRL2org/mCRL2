@@ -18,7 +18,7 @@
 #include "gui/dialog/preferences.hpp"
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
-#include "mcrl2/utilities/about_box.h"
+#include "mcrl2/utilities/about_dialog.h"
 
 #include <wx/menu.h>
 #include <wx/utils.h>
@@ -38,7 +38,7 @@ namespace squadt {
     void main::about() {      
       std::vector<std::string> developers;
       developers.push_back("Jeroen van der Wulp");
-      mcrl2::utilities::wx::about_box box("SQuADT",
+      mcrl2::utilities::wx::about_dialog dialog("SQuADT",
         "Graphical environment that provides a uniform interface for using all kinds of "
         "other connected tools.",
         developers
