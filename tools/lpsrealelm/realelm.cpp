@@ -126,12 +126,12 @@ unsigned long pow(unsigned long base, unsigned long exponent)
     div_t q = div(exponent, 2);
     if(q.rem == 0)
     {
-      return pow(base << 1, q.quot);
+      return pow(base * base, q.quot);
     }
     else
     {
       //q.rem == 1
-      return pow((base*base) << 1, q.quot);
+      return base * pow(base, exponent - 1);
     }
   }
 }
@@ -431,13 +431,17 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
   for(data_expression_list::iterator i = l.begin(); i != l.end() ; ++i)
   {
     data_expression inequality = r(*i);
-    if(is_equal_to(inequality) || is_less(inequality) || is_less_equal(inequality))
+    if(is_inequality(inequality))
     {
       inequality = normalize_inequality(inequality, r);
       if(!find_data_expression(result, inequality))
       {
         result = push_front(result,normalize_inequality(inequality, r));
       }
+    }
+    else
+    {
+      result = push_front(result, inequality);
     }
   }
   return result;
@@ -801,7 +805,10 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
           gsDebugMsg("negative inequality: %s\n", pp(negative_inequality).c_str());
           negative_inequality = normalize_inequality(negative_inequality, r);
           gsDebugMsg("negative inequality after normalization: %s\n", pp(negative_inequality).c_str());
-          new_inequalities = push_front(new_inequalities, negative_inequality);
+          if(lhs(negative_inequality) != real_zero())
+          {
+            new_inequalities = push_front(new_inequalities, negative_inequality);
+          }
         }
       }
       else if(negative_variables.size() == 0)
@@ -812,7 +819,10 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
           gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
           positive_inequality = normalize_inequality(positive_inequality, r);
           gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
-          new_inequalities = push_front(new_inequalities, positive_inequality);
+          if(lhs(positive_inequality) != real_zero())
+          {
+            new_inequalities = push_front(new_inequalities, positive_inequality);
+          }
         }
       }
       else
@@ -844,15 +854,16 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
             {
               new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
             }
-
-            new_inequalities = push_front(new_inequalities, new_inequality);
+            new_inequality = normalize_inequality(new_inequality, r);
+            if(lhs(new_inequality) != real_zero())
+            {
+              new_inequalities = push_front(new_inequalities, new_inequality);
+            }
           }
         }
       }
       inequalities = new_inequalities;
     }
-
-    inequalities = normalize_inequalities(inequalities, r);
   }
 }
 
@@ -963,6 +974,36 @@ data_expression_list simplify_cond(const data_expression_list& cond, const data_
 }
 
 static
+bool is_inconsistent(const data_expression_list& cond, rewriter& r)
+{
+  if(std::find(cond.begin(), cond.end(), false_()) != cond.end())
+  {
+    return true;
+  }
+  for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
+  {
+    for(data_expression_list::const_iterator j = cond.begin(); j != cond.end(); ++j)
+    {
+      gsDebugMsg("*i = %s, *j = %s\n", pp(*i).c_str(), pp(*j).c_str());
+      if(is_inequality(*i) && is_inequality(*j) && *i != *j && !is_less_equal(*i) && !is_less_equal(*j))
+      {
+        if(lhs(*i) == lhs(*j) && rhs(*i) == rhs(*j))
+        {
+          return true;
+        }
+        if(lhs(*i) == lhs(*j) &&
+           ((is_less(*i) && is_equal_to(*j) && r(less(rhs(*j), rhs(*i))) == false_()) ||
+            (is_equal_to(*i) && is_less(*j) && r(less(rhs(*i), rhs(*j))) == false_())))
+        {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+static
 data_expression_list transform_real_to_cond(const data_expression_list& cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
 {
   data_expression_list result;
@@ -1032,7 +1073,8 @@ data_expression_list transform_real_to_cond(const data_expression_list& cond, at
 static
 summand generate_summand(const summand& s, unsigned long i, data_expression_list cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, const data_expression_list& nextstate_inequalities, rewriter& r)
 {
-  gsDebugMsg("generating new summand from summand %s, with cond %s and nextstate inequalities %s\n", pp(s).c_str(), pp(cond).c_str(), pp(nextstate_inequalities).c_str());
+  gsDebugMsg("generating new summand from summand %s, with cond %s and nextstate inequalities %s, i = %ld\n", pp(s).c_str(), pp(cond).c_str(), pp(nextstate_inequalities).c_str(), i);
+  assert(context.size() == nextstate_inequalities.size());
 
   std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
   data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
@@ -1163,11 +1205,12 @@ specification realelm(specification s, int max_iterations)
     changed = false;
     summands = summand_list();
     assert(summands.empty());
-    gsVerboseMsg("Iteration %d\n", iteration++);
+    gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration++, context.size());
 
     for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
       unsigned long context_combinations = pow(3, context.size()); //Combinations to be considered
+      gsDebugMsg("Considering %ld combinations for context\n", context_combinations);
 
       for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
       {
@@ -1177,6 +1220,7 @@ specification realelm(specification s, int max_iterations)
 
         for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
+          gsDebugMsg("context = %ld, nextstate = %ld\n", context_combination, nextstate_combination);
           data_expression_list nextstate_inequalities = compute_inequalities(nextstate_combination, context);
           gsDebugMsg("inequalities for nextstate before substitution: %s\n", pp(nextstate_inequalities).c_str());
           nextstate_inequalities = data_expression_map_replace_list(nextstate_inequalities, summand_real_nextstate_map[*i]);
@@ -1184,7 +1228,9 @@ specification realelm(specification s, int max_iterations)
           gsDebugMsg("inequalities for nextstate: %s\n", pp(nextstate_inequalities).c_str());
 
           data_expression_list cond = nextstate_inequalities + summand_real_conditions[*i];
+          gsDebugMsg("cond: %s\n", pp(cond).c_str());
           cond = simplify_cond(cond, context_inequalities);
+          gsDebugMsg("cond after simplification: %s\n", pp(cond).c_str());
           cond = normalize_inequalities(cond, r);
 
           // Eliminate sum bound variables, resulting in inequalities over
@@ -1192,16 +1238,26 @@ specification realelm(specification s, int max_iterations)
           // that are not yet in the context.
           gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
           fourier_motzkin(cond, i->summation_variables(), r);
-          if(std::find(cond.begin(), cond.end(), false_()) == cond.end())
+          if(!is_inconsistent(cond, r))
           {
             cond = normalize_inequalities(cond, r);
-            gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
-            // cond contains the inequalities over the process parameters
-            changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
-            summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
-            if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
+            if(!is_inconsistent(cond, r))
             {
-              summands = push_front(summands, s);
+              gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
+              // cond contains the inequalities over the process parameters
+              changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
+              if(!changed)
+              {
+                summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
+                if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
+                {
+                  summands = push_front(summands, s);
+                }
+              }
+            }
+            else
+            {
+              gsDebugMsg("System inconsistent after normalization\n");
             }
           }
           else
@@ -1212,6 +1268,11 @@ specification realelm(specification s, int max_iterations)
       }
     }
   } while ((iteration < max_iterations) && changed);
+
+  if(changed)
+  {
+    gsVerboseMsg("No exact solution computed\n");
+  }
 
   gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = context.begin(); i != context.end(); ++i)
