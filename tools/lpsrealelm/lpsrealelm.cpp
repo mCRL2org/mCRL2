@@ -26,6 +26,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
 #include "realelm.h"
 
@@ -37,6 +38,7 @@ struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
   int max_iterations;
+  RewriteStrategy strategy;
 };
 
 //Squadt connectivity
@@ -120,7 +122,7 @@ int do_realelm(const tool_options& options)
   lps_specification.load(options.input_file);
 
   // Untime lps_specification and save the output to a binary file
-  specification new_spec = realelm(lps_specification, options.max_iterations);
+  specification new_spec = realelm(lps_specification, options.max_iterations, static_cast<const mcrl2::data::rewriter::strategy&>(options.strategy));
 
   gsDebugMsg("Real time abstraction completed, saving to %s\n", options.output_file.c_str());
   new_spec.save(options.output_file);
@@ -135,13 +137,15 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
                              "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
                              "If OUTFILE is not present, stdout is used.");
 
-  //clinterface.add_rewriting_options();
+  clinterface.add_rewriting_options();
   clinterface.add_option("max", make_mandatory_argument("NUM"),
     "perform at most NUM iterations");
 
   command_line_parser parser(clinterface, ac, av);
 
   if (parser.continue_execution()) {
+    t_options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+
     if (parser.options.count("max")) {
       t_options.max_iterations = parser.option_argument_as< int > ("max");
     }

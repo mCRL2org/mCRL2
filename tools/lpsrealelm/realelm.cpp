@@ -1148,12 +1148,12 @@ data_assignment_list determine_process_initialization(const data_assignment_list
   return reverse(init);
 }
 
-specification realelm(specification s, int max_iterations)
+specification realelm(specification s, int max_iterations, rewriter::strategy strategy)
 {
   gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
   s = set_data_specification(s, replace_real_implementation(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
-  rewriter r(s.data());
+  rewriter r = rewriter(s.data(), strategy);
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(s);
   s = normalize_specification(s, r, variable_generator);
