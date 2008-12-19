@@ -35,10 +35,14 @@ namespace squadt {
 
     wxString main::default_title = wxT("SQuADT");
 
-    void main::about() {
-      mcrl2::utilities::wx::about_box box("SQuADT", "Jeroen van der Wulp",
+    void main::about() {      
+      std::vector<std::string> developers;
+      developers.push_back("Jeroen van der Wulp");
+      mcrl2::utilities::wx::about_box box("SQuADT",
         "Graphical environment that provides a uniform interface for using all kinds of "
-        "other connected tools.");
+        "other connected tools.",
+        developers
+      );
     }
 
     void main::manual() {
