@@ -319,10 +319,7 @@ grape_event_attach_channel_communication::grape_event_attach_channel_communicati
     m_detach_channel_communication = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, p_channel );
   }
 
-  diagram* chan_diag_ptr = p_channel->get_diagram();
-  diagram* c_diag_ptr = p_channel_communication->get_diagram();
-
-  assert( ( chan_diag_ptr == dia_ptr ) && ( c_diag_ptr == dia_ptr ) );
+  assert( ( p_channel->get_diagram() == dia_ptr ) && ( p_channel_communication->get_diagram() == dia_ptr ) );
 }
 
 grape_event_attach_channel_communication::~grape_event_attach_channel_communication(  void  )

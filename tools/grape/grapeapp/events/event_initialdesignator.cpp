@@ -30,10 +30,8 @@ grape_event_add_initial_designator::grape_event_add_initial_designator( grape_fr
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
 
-  process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-  process_diagram* state_dia_ptr = dynamic_cast<process_diagram*> ( p_state->get_diagram() );
-  assert( state_dia_ptr != 0 );
-  assert( ( state_dia_ptr == proc_dia_ptr ) ); // Both have to be in the same diagram.
+  assert( dynamic_cast<process_diagram*> ( p_state->get_diagram() ) != 0 );
+  assert( ( dynamic_cast<process_diagram*> ( p_state->get_diagram() ) == dynamic_cast<process_diagram*> ( dia_ptr ) ) ); // Both have to be in the same diagram.
 }
 
 grape_event_add_initial_designator::~grape_event_add_initial_designator( void )

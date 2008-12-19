@@ -54,8 +54,7 @@ grape_event_select_diagram::grape_event_select_diagram(grape_frame *p_main_frame
     }
     else
     {
-      architecture_diagram* arch_dia_ptr = dynamic_cast<architecture_diagram*> ( dia_ptr );
-      assert( arch_dia_ptr != 0 );
+      assert(  dynamic_cast<architecture_diagram*> ( dia_ptr ) != 0 );
       m_diagram_type = GRAPE_ARCHITECTURE_DIAGRAM;
     }
   }
@@ -127,8 +126,7 @@ grape_event_rename_diagram::grape_event_rename_diagram(grape_frame *p_main_frame
     }
     else
     {
-      architecture_diagram* arch_dia_ptr = dynamic_cast<architecture_diagram*> ( p_dia );
-      assert( arch_dia_ptr != 0 );
+      assert(  dynamic_cast<architecture_diagram*> ( p_dia ) != 0 );
       m_diagram_type = GRAPE_ARCHITECTURE_DIAGRAM;
     }
   }

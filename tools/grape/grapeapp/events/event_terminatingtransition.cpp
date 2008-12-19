@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+	// Author(s): VitaminB100
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -26,12 +26,10 @@ grape_event_add_terminating_transition::grape_event_add_terminating_transition( 
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
 
-  process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-  assert( proc_dia_ptr != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
+  assert( dynamic_cast<process_diagram*> ( dia_ptr ) != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
 
-  process_diagram* b_diag_ptr = dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() );
-  assert( b_diag_ptr != 0 );
-  assert( ( b_diag_ptr == proc_dia_ptr ) ); // Objects have to be in the same diagram.
+  assert( dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() ) != 0 );
+  assert( ( dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() ) == dynamic_cast<process_diagram*> ( dia_ptr ) ) ); // Objects have to be in the same diagram.
 }
 
 grape_event_add_terminating_transition::~grape_event_add_terminating_transition( void )

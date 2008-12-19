@@ -35,8 +35,7 @@ grape_event_add_state::grape_event_add_state( grape_frame *p_main_frame, coordin
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
 
-  process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-  assert( proc_dia_ptr != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
+  assert( dynamic_cast<process_diagram*> ( dia_ptr ) != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
 }
 
 grape_event_add_state::~grape_event_add_state( void )

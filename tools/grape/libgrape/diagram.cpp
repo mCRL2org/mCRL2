@@ -110,10 +110,7 @@ arr_comment* diagram::get_comment_list( void )
 
 void diagram::attach_comment_to_object( comment* p_comm, object* p_object )
 {
-  diagram* comm_diag_ptr = p_comm->get_diagram();
-  diagram* obj_diag_ptr = p_object->get_diagram();
-
-  assert( ( comm_diag_ptr == obj_diag_ptr ) && ( obj_diag_ptr == this ) );//, _T( "diagram::attach_comment_to_object pre ( comm_diag_ptr == obj_diag_ptr ) failed \n" ) );
+  assert( ( p_comm->get_diagram() == p_object->get_diagram() ) && ( p_object->get_diagram() == this ) );//, _T( "diagram::attach_comment_to_object pre ( comm_diag_ptr == obj_diag_ptr ) failed \n" ) );
   // Detach the comment first, if necessary
   object* object_ptr = p_comm->get_attached_object();
   if ( object_ptr != 0 )

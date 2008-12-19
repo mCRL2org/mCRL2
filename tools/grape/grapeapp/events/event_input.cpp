@@ -552,7 +552,7 @@ bool grape_event_drag::Do( void )
       }
       else // a border was selected, thus a resize
       {
-        float new_x, new_y, new_width, new_height;
+        float new_x = 0, new_y = 0, new_width = 0, new_height = 0;
 
         switch ( m_click_location )
         {

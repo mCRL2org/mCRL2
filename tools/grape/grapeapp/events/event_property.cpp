@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+		// Author(s): VitaminB100
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -23,10 +23,7 @@ grape_event_attach_property::grape_event_attach_property( grape_frame *p_main_fr
   diagram* dia_ptr = m_main_frame->get_glcanvas()->get_diagram();
   m_diagram = dia_ptr->get_id();
 
-  diagram* prop_diag_ptr = p_prop->get_diagram();
-  diagram* con_diag_ptr = p_conn->get_diagram();
-
-  assert( ( prop_diag_ptr == dia_ptr ) && ( con_diag_ptr == dia_ptr ) ); // The objects have to be in the same diagram.
+  assert( ( p_prop->get_diagram() == dia_ptr ) && ( p_conn->get_diagram() == dia_ptr ) ); // The objects have to be in the same diagram.
 
   m_detach_prop = 0;
   connection_property* prop_ptr = p_conn->get_property();
