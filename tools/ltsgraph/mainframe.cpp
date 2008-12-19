@@ -287,6 +287,7 @@ void MainFrame::onAbout(wxCommandEvent& /*event*/) {
 
 void MainFrame::onQuit(wxCommandEvent& /*event */)
 {
+  app->getAlgorithm(0)->stop();
   Close(TRUE);
 }
 GLCanvas* MainFrame::getGLCanvas()
