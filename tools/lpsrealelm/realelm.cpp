@@ -33,6 +33,8 @@ using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
 
 // Custom replace functions
+// Needed as the replace functions of the data library do not
+// recurse into data expressions
 template <typename ReplaceFunction>
 struct realelm_replace_data_expressions_helper
 {
@@ -109,17 +111,16 @@ Term realelm_data_expression_map_replace(Term t, const MapContainer& replacement
 }
 // End of replace substitute
 
-// Implementation of integer exponentiation
+/// \brief Integer exponentiation
+/// \param base Base of the exponentiation
+/// \param exponent Exponent of the exponentiation
+/// \ret base^exponent
 static
 unsigned long pow(unsigned long base, unsigned long exponent)
 {
   if(exponent == 0)
   {
     return 1;
-  }
-  else if(exponent == 1)
-  {
-    return base;
   }
   else
   {
@@ -136,25 +137,36 @@ unsigned long pow(unsigned long base, unsigned long exponent)
   }
 }
 
-// Three valued type used for fourrier-motzkin elimination
-typedef enum { maybe_true, maybe_false, maybe_unknown } maybe;
-
-// Retrieve the left hand side of a data expression
+/// \brief Retrieve the left hand side of a data expression
+/// \param e A data expression
+/// \pre e is a data application d(x,y) with two arguments
+/// \ret x
 static inline
 data_expression lhs(const data_expression e)
 {
-  return *(static_cast<const data_application&>(e).arguments().begin());
+  assert(is_data_application(e));
+  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
+  assert(arguments.size() == 2);
+  return *(arguments.begin());
 }
 
-// Retrieve the right hand side of a data expression
+/// \brief Retrieve the right hand side of a data expression
+/// \param e A data expression
+/// \pre e is a data application d(x,y) with two arguments
+/// \ret y
 static inline
 data_expression rhs(const data_expression e)
 {
-  return *(++static_cast<const data_application&>(e).arguments().begin());
+  assert(is_data_application(e));
+  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
+  assert(arguments.size() == 2);
+  return *(++arguments.begin());
 }
 
-// Determine whether a data expression is a constant expression encoding a
-// number
+/// \brief Determine whether a data expression is a constant expression
+///        encoding a number
+/// \param e A data expression
+/// \ret true iff e is a numeric constant
 static inline
 bool is_number(const data_expression e)
 {
@@ -168,14 +180,19 @@ bool is_number(const data_expression e)
          (is_data_application(e) && static_cast<const data_application&>(e).head() == rational());
 }
 
-// Determine wheter a number is negative
+/// \brief Determine wheter a number is negative
+/// \param e A data expression
+/// \ret true iff e is -e' or @rational(-e',e'')
 static inline
 bool is_negative(const data_expression e)
 {
   return is_negate(e) || gsIsDataExprCNeg(e) || (is_rational(e) && is_negative(lhs(e)));
 }
 
-// Determine whether a data expression is an inequality
+/// \brief Determine whether a data expression is an inequality
+/// \param e A data expression
+/// \ret true iff e is a data application of ==, <, <=, > or >= to
+///      two arguments.
 static inline
 bool is_inequality(const data_expression& e)
 {
@@ -183,11 +200,14 @@ bool is_inequality(const data_expression& e)
          is_greater_equal(e);
 }
 
-// Determine whether one data expression is less or equal to an other data
-// expression. This assumes for e1 and e2 that they are either:
-// - negation
-// - multiplication with a number as left hand side
-// - data variable
+
+/// \brief Determine whether one data expression is less or equal to an other data
+///        expression.
+/// \param e1 A data expression
+/// \param e2 A data expression
+/// \pre e1 and e2 are eiter negation, multiplication with a number as left hand
+///      side, or a data variable
+/// \ret true iff e1 <= e2, where <= is lexicographic order on variable name.
 static
 bool less_or_equal(const data_expression& e1, const data_expression& e2)
 {
@@ -214,7 +234,12 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
   }
 }
 
-// Merge two sorted lists of data expressions
+/// \brief Merge two sorted lists of data expressions
+/// \param l1 A list of data expressions
+/// \param l2 A list of data expressions
+/// \pre l1 and l2 are sorted
+/// \ret The sorted list of data expressions consisting of all elements in l1
+///      and l2
 static
 data_expression_list merge(const data_expression_list& l1, const data_expression_list& l2)
 {
@@ -244,9 +269,10 @@ data_expression_list merge(const data_expression_list& l1, const data_expression
   return r;
 }
 
-// Sort a data expression
-// Assume data expression e is of the form c1 * x1 + ... + cn * xn, sort
-// the expression in lexicographic order of variable names
+/// \brief Sort a data expression
+/// \param e A data expression of the form c1 * x1 + ... + cn * xn
+/// \ret The list of data expressions ci * xi, such that it is sorted
+///      in lexicographic order of the names of xi
 static inline
 data_expression_list sort(const data_expression& e)
 {
@@ -262,9 +288,11 @@ data_expression_list sort(const data_expression& e)
   return r;
 }
 
-// Assuming data expression e is of the form c1 * x1 + ... + cn * xn + d1 + ... + dn,
-// split the data expression in a part contiaining c1 * x1 + ... + cn * xn, and
-// a part containing d1 + ... + dn
+/// \brief Split constant and variable parts of a data expression
+/// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
+///          dn, where ci and di are constants and xi are variables. Constants
+///          and variables may occur mixed.
+/// \ret The pair (c1 * x1 + ... + cn * xn, d1 + ... + cn)
 static
 std::pair<data_expression, data_expression> split_constants_and_variables(const data_expression& e)
 {
@@ -275,32 +303,29 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
     std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(e));
     result = std::make_pair(plus(left.first, right.first), plus(left.second, right.second));
   }
-  else if (is_negate(e))
-  {
-    if(is_plus(lhs(e)))
-    {
-      result = split_constants_and_variables(plus(negate(lhs(lhs(e))), negate(rhs(lhs(e)))));
-    }
-    else if(is_minus(lhs(e)))
-    {
-      result = split_constants_and_variables(plus(negate(lhs(lhs(e))), rhs(lhs(e))));
-    }
-    else
-    {
-      result = std::make_pair(e, real_zero());
-    }
-  }
   else if (is_minus(e))
   {
     std::pair<data_expression, data_expression> left = split_constants_and_variables(lhs(e));
     std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(e));
     result = std::make_pair(plus(left.first, negate(right.first)), minus(left.second, right.second));
   }
-  else if (is_multiplies(e))
+  else if (is_negate(e))
   {
-    result = std::make_pair(e, real_zero());
+    data_expression argument = *static_cast<const data_application&>(e).arguments().begin();
+    if(is_plus(argument))
+    {
+      result = split_constants_and_variables(plus(negate(lhs(argument)), negate(rhs(argument))));
+    }
+    else if(is_minus(argument))
+    {
+      result = split_constants_and_variables(plus(negate(lhs(argument)), rhs(argument)));
+    }
+    else
+    {
+      result = std::make_pair(e, real_zero());
+    }
   }
-  else if (is_data_variable(e))
+  else if (is_multiplies(e) || is_data_variable(e))
   {
     result = std::make_pair(e, real_zero());
   }
@@ -312,7 +337,9 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
   return result;
 }
 
-// Returns a list of all real variables in l
+/// \brief Returns a list of all real variables in l
+/// \param l a list of data variables
+/// \ret The list of all v in l such that v.sort() == real()
 static inline
 data_variable_list get_real_variables(const data_variable_list& l)
 {
@@ -327,7 +354,9 @@ data_variable_list get_real_variables(const data_variable_list& l)
   return r;
 }
 
-// Returns a list of all nonreal variables in l
+/// \brief Returns a list of all nonreal variables in l
+/// \param l a list of data variables
+/// \ret The list of all v in l such that v.sort() != real()
 static inline
 data_variable_list get_nonreal_variables(const data_variable_list& l)
 {
@@ -342,7 +371,9 @@ data_variable_list get_nonreal_variables(const data_variable_list& l)
   return r;
 }
 
-// Returns a list of all real expressions in l
+/// \brief Returns a list of all real expressions in l
+/// \param l a list of data expressions
+/// \ret The list of all e in l such that e.sort() == real()
 static inline
 data_expression_list get_real_expressions(const data_expression_list& l)
 {
@@ -357,7 +388,9 @@ data_expression_list get_real_expressions(const data_expression_list& l)
   return r;
 }
 
-// Returns a list of all nonreal expressions in l
+/// \brief Returns a list of all nonreal expressions in l
+/// \param l a list of data expressions
+/// \ret The list of all e in l such that e.sort() != real()
 static inline
 data_expression_list get_nonreal_expressions(const data_expression_list& l)
 {
@@ -372,7 +405,9 @@ data_expression_list get_nonreal_expressions(const data_expression_list& l)
   return r;
 }
 
-// Returns a list of all real assignments in l
+/// \brief Returns a list of all real assignments in l
+/// \param l a list of data assignments
+/// \ret The list of all x := e in l such that x.sort() == e.sort() == real()
 static inline
 data_assignment_list get_real_assignments(const data_assignment_list& l)
 {
@@ -387,7 +422,9 @@ data_assignment_list get_real_assignments(const data_assignment_list& l)
   return r;
 }
 
-// Returns a list of all nonreal assignments in l
+/// \brief Returns a list of all nonreal assignments in l
+/// \param l a list of data assignments
+/// \ret The list of all x := e in l such that x.sort() == e.sort() != real()
 static inline
 data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
 {
@@ -402,13 +439,21 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
   return r;
 }
 
-// Transform the inequality in e such that the left hand side only contains
-// arguments of the form ci * xi, this is variables, possibly multiplied by a
-// constant, and the right hand side contains a single constant.
-static
+/// \brief Transform the inequality in e such that the left hand side only
+///        contains multiples of variables and the right hand side contains a
+///        single constant.
+/// \param e A data expression
+/// \param r A rewriter
+/// \pre e is an inequality
+/// \ret An inequality e' equivalent to e, such that the left hand side is of
+///      the form c1 * e1 + ... + cn * en === d, with === one of ==, <, <=, >,
+///      >=
+static inline
 data_expression normalize_inequality(const data_expression& e, rewriter& r)
 {
+  assert(is_inequality(e));
   gsDebugMsg("Normalizing inequality %s\n", pp(e).c_str());
+
   data_application d = static_cast<const data_application&>(e);
   std::pair<data_expression, data_expression> left = split_constants_and_variables(r(lhs(d)));
   std::pair<data_expression, data_expression> right = split_constants_and_variables(r(rhs(d)));
@@ -416,14 +461,17 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
   data_expression new_left = r(plus(left.first, negate(right.first)));
   data_expression new_right = r(minus(right.second, left.second));
   data_expression result = data_application(d.head(), make_list(new_left, new_right));
+
   gsDebugMsg("Normalization result %s\n", pp(result).c_str());
   return result;
 }
 
-// Normalize the inequalities in l, that is, make sure that for each of the
-// expressions in l it holds that the left hand side is of the form
-// c1*x1 + ... + cn*xn
-// and the right hand side is a constant.
+/// \brief Normalize the inequalities in l. See normalize_inequality for more
+///        details.
+/// \param l A list of data expressions
+/// \param r A rewriter
+/// \ret The list of data expressions l' equivalent to l, but with all
+///      inequalities normalized.
 static
 data_expression_list normalize_inequalities(const data_expression_list& l, rewriter& r)
 {
@@ -447,11 +495,12 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
   return result;
 }
 
-// Assuming data expression is a conjunct at the top level
-// Split the expression into a list of real expressions and a list of non-real
-// expressions
-// Returns a pair (r, x) such that r is a list of real expressions, x is a list
-// of non-real expressions
+/// \brief Splits a conjunct in a conjunct ranging over inequalities of reals
+///        and a conjunct ranging over other expressions.
+/// \param e A data expression
+/// \pre e is a conjunct
+/// \ret Pair (r,x) such that r is a list of expressions over real numbers and
+///      x is a list of expressions not over real numbers.
 static
 std::pair<data_expression_list, data_expression_list> split_conjunct(data_expression e)
 {
@@ -466,8 +515,7 @@ std::pair<data_expression_list, data_expression_list> split_conjunct(data_expres
     e = rhs(e);
   }
 
-  if((is_equal_to(e) || is_less(e) || is_greater(e) || is_less_equal(e) || is_greater_equal(e)) &&
-    (lhs(e).sort() == sort_expr::real() || rhs(e).sort() == sort_expr::real()))
+  if(is_inequality(e) && (lhs(e).sort() == sort_expr::real() || rhs(e).sort() == sort_expr::real()))
   {
     real_conjuncts = push_front(real_conjuncts, e);
   }
@@ -478,6 +526,12 @@ std::pair<data_expression_list, data_expression_list> split_conjunct(data_expres
   return std::make_pair(real_conjuncts, nonreal_conjuncts);
 }
 
+/// \brief Removes constant real numbers from the nextstate vectors of all
+///        summands by introducing auxiliary sum variables
+/// \param s A data specification
+/// \param variable_generator A variable generator
+/// \ret A specification equivalent to s in which no real constants occur in
+///      nextstate vectors.
 static
 specification remove_real_constants_from_nextstate(specification s, identifier_generator& variable_generator)
 {
@@ -514,8 +568,12 @@ specification remove_real_constants_from_nextstate(specification s, identifier_g
 
 }
 
-// Transform all inequalities in the summands of the specification to be
-// normalized
+/// \brief Normalize all inequalities in the summands of the specification
+/// \param s A data specification
+/// \param r A rewriter
+/// \param variable_generator A variable generator
+/// \ret A specification equivalent to s, but of which all inequalities have
+///      been normalized.
 static
 specification normalize_specification(specification s, rewriter& r, identifier_generator& variable_generator)
 {
@@ -541,8 +599,10 @@ specification normalize_specification(specification s, rewriter& r, identifier_g
   return s;
 }
 
-// Determine the inequalities ranging over real numbers in data expression e,
-// and store them in inequalities
+/// \brief Determine the inequalities ranging over real numbers in a data expression.
+/// \param e A data expression
+/// \param inequalities A list of inequalities
+/// \post inequalities contains all inequalities ranging over real numbers in e.
 static
 void determine_real_inequalities(const data_expression& e, data_expression_list& inequalities)
 {
@@ -557,8 +617,13 @@ void determine_real_inequalities(const data_expression& e, data_expression_list&
   }
 }
 
-// post: variables contains the list of variables that have not been eliminated
-//       by gauss elimination
+/// \brief Try to eliminate variables from a system of inequalities using Gauss
+///        elimination.
+/// \param inequalities A list of inequalities over real numbers
+/// \param variables A list of variables to be eliminated
+/// \param r A rewriter.
+/// \post variables contains the list of variables that have not been eliminated
+/// \ret The system of inequalities after Gauss eliminatation.
 static
 data_expression_list gauss_elimination(data_expression_list inequalities, data_variable_list& variables, rewriter& r)
 {
@@ -644,12 +709,18 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
   return inequalities;
 }
 
-// Remove variable from the inequality, used for Fourrier-Motzkin elimination,
-// eliminating variable
+/// \brief Remove a variable from an inequality
+/// \param variable A variable
+/// \param inequality An inequality over real numbers
+/// \pre inequality is an inequality
+/// \ret The inequality from which variable has been removed
 static
 data_expression remove_variable(const data_variable& variable, const data_expression& inequality)
 {
+  assert(is_inequality(inequality));
+
   gsDebugMsg("Removing variable %s from inequality %s\n", pp(variable).c_str(), pp(inequality).c_str());
+
   data_expression left = lhs(inequality);
   data_expression new_left = real_zero();
   while(is_plus(left))
@@ -660,7 +731,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
       new_left = divide(plus(new_left, rhs(left)), factor);
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, divide(rhs(inequality), factor)));
     }
-    else if (lhs(left) == variable)
+    else if (lhs(left) == variable || lhs(left) == negate(static_cast<const data_expression&>(variable)))
     {
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(plus(new_left, rhs(left)), rhs(inequality)));
     }
@@ -671,16 +742,16 @@ data_expression remove_variable(const data_variable& variable, const data_expres
     }
   }
 
-  if(is_negate(left) && is_plus(lhs(left)))
+  if(is_negate(left))
   {
-    data_expression p = plus(negate(lhs(lhs(left))), negate(rhs(lhs(left))));
-    return remove_variable(variable, data_application(static_cast<const data_application&>(inequality).head(), make_list(p, rhs(inequality))));
+    data_expression argument = *static_cast<const data_application&>(left).arguments().begin();
+    if(is_plus(argument))
+    {
+      data_expression p = plus(negate(lhs(argument)), negate(rhs(argument)));
+      return remove_variable(variable, data_application(static_cast<const data_application&>(inequality).head(), make_list(p, rhs(inequality))));
+    }
   }
-  else if (left == variable)
-  {
-    return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, rhs(inequality)));
-  }
-  else if (left == negate(static_cast<const data_expression&>(variable)))
+  if (left == variable || left == negate(static_cast<const data_expression&>(variable)))
   {
     return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, rhs(inequality)));
   }
@@ -690,13 +761,25 @@ data_expression remove_variable(const data_variable& variable, const data_expres
   assert(false);
 }
 
-// Group inequalities by positive, 0 and negative occurrences of *i
+/// \brief Group inequalities by positive, 0 and negative occurrences of a
+///        variable.
+/// \param v A variable
+/// \param inequalities A list of inequalities
+/// \param positive_occurrences an empty list
+/// \param zero_occurrences an empty list
+/// \param negative_occurrences and empty list
+/// \post positive_occurrences contains all inequalities in which c * v occurs,
+///       zero_occurrences contains all inequalities in which v does not occur,
+///       negative_occurrences contains all inequalities in which -c * v occurs.
 static
 void group_inequalities(const data_variable& v, const data_expression_list& inequalities,
                         data_expression_list& positive_occurrences,
                         data_expression_list& zero_occurrences,
-                        data_expression_list& negative_occurrences) 
+                        data_expression_list& negative_occurrences)
 {
+  assert(positive_occurrences.empty());
+  assert(zero_occurrences.empty());
+  assert(negative_occurrences.empty());
   for(data_expression_list::iterator j = inequalities.begin(); j != inequalities.end(); ++j)
   {
     if(find_data_variable(*j, v))
@@ -718,10 +801,16 @@ void group_inequalities(const data_variable& v, const data_expression_list& ineq
 }
 
 // prototype
-static
+static inline
 bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator);
 
-static
+/// \brief Add inequalities to variable context
+/// \param l A list of inequalities
+/// \param context A variable context
+/// \param variable_generator A fresh variable generator
+/// \post All inequalities in l are in the context
+/// \ret true iff a variable has been added to the context
+static inline
 bool add_inequalities_to_context(data_expression_list l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
   bool result = false;
@@ -732,8 +821,12 @@ bool add_inequalities_to_context(data_expression_list l, atermpp::map<std::pair<
   return result;
 }
 
-// Add variable for inequality to context
-static
+/// \brief Add inequality to variable context
+/// \param e An inequality
+/// \param context A variable context
+/// \param variable_generator A fresh variable generator
+/// \post e is in the context
+/// \ret true iff there was no variable for e in the context
 bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
 {
   if(!is_inequality(e))
@@ -759,6 +852,13 @@ bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<
   return result;
 }
 
+/// \brief Eliminate variables from inequalities using Gauss elimination and
+///        Fourrier-Motzkin elimination.
+/// \param inequalities A list of inequalities
+/// \param variables The list of variables to be eliminated
+/// \param r A rewriter
+/// \post All variables in variables have been eliminated, inequalities contains
+///       the resulting system of inequalities.
 static
 void fourier_motzkin(data_expression_list& inequalities, data_variable_list variables, rewriter& r)
 {
@@ -834,6 +934,15 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
   }
 }
 
+/// \brief Compute a concrete inequality given a pair of data expressions and a
+///        number
+/// \param i a number
+/// \param e A pair <x,y> of data expressions
+/// \pre 0 <= i <= 2
+/// \ret Data expression for the following inequality:
+///      x < y if i = 0
+///      x = y if i = 1
+///      -x < -y if i = 2
 static inline
 data_expression compute_inequality(unsigned long i, const std::pair<data_expression, data_expression>& e)
 {
@@ -852,6 +961,10 @@ data_expression compute_inequality(unsigned long i, const std::pair<data_express
   }
 }
 
+/// \brief Compute a list of concrete inequalities given a variable context
+/// \param i a number
+/// \param context A variable context
+/// \ret The list of concrete inequalities corresponding to combination i
 static inline
 data_expression_list compute_inequalities(unsigned long i, const atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context)
 {
@@ -865,57 +978,11 @@ data_expression_list compute_inequalities(unsigned long i, const atermpp::map<st
   return result;
 }
 
-static
-data_expression compute_condition_from_inequalities(data_expression_list inequalities, const data_variable_list& variables, rewriter& r, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, identifier_generator& variable_generator)
-{
-  // Compute new condition
-  fourier_motzkin(inequalities, variables, r);
-  gsDebugMsg("condition inequalities: %s\n", pp(inequalities).c_str());
-  data_expression condition = true_();
-  for(data_expression_list::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
-  {
-    data_expression left = lhs(*j);
-    data_expression right = rhs(*j);
-    if(is_negative(right) || (right == real_zero() && is_negate(left)))
-    {
-      left = r(negate(left));
-      right = r(negate(right));
-      data_expression variable = context[std::make_pair(left, right)];
-      if(is_less(*j))
-      {
-        condition = and_(condition, is_larger(variable));
-      }
-      else if(is_less_equal(*j))
-      {
-        condition = and_(condition, or_(is_larger(variable), is_equal(variable)));
-      }
-      else
-      {
-        assert(is_equal_to(*j));
-        condition = and_(condition, is_equal(variable));
-      }
-    }
-    else
-    {
-      data_expression variable = context[std::make_pair(left, right)];
-      if(is_less(*j))
-      {
-        condition = and_(condition, is_smaller(variable));
-      }
-      else if(is_less_equal(*j))
-      {
-        condition = and_(condition, or_(is_smaller(variable), is_equal(variable)));
-      }
-      else
-      {
-        assert(is_equal_to(*j));
-        condition = and_(condition, is_equal(variable));
-      }
-    }
-  }
-  return condition;
-}
-
+/// \brief Apply replacements to a list of inequalities
+/// \param inequalities A list of data expressions
+/// \param replacements A map of replacements
+/// \ret inequalities to which the substitutions in replacements have been
+///      applied
 data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
 {
   data_expression_list result;
@@ -926,8 +993,12 @@ data_expression_list data_expression_map_replace_list(const data_expression_list
   return result;
 }
 
+/// \brief Simplify condition given a context
+/// \param cond A list of inequalities
+/// \param context A list of inequalities
+/// \ret A simplified version of inequalities, assuming context holds.
 static
-data_expression_list simplify_cond(const data_expression_list& cond, const data_expression_list& context)
+data_expression_list simplify_condition(const data_expression_list& cond, const data_expression_list& context)
 {
   data_expression_list result;
   for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
@@ -941,6 +1012,11 @@ data_expression_list simplify_cond(const data_expression_list& cond, const data_
   return result;
 }
 
+/// \brief Determine whether a list of data expressions is inconsistent
+/// \param cond A list of inequalities
+/// \param r A rewriter
+/// \ret true if the system of inequalities can be determined to be
+///      inconsistent, false otherwise.
 static
 bool is_inconsistent(const data_expression_list& cond, rewriter& r)
 {
@@ -997,6 +1073,13 @@ bool is_inconsistent(const data_expression_list& cond, rewriter& r)
   return false;
 }
 
+/// \brief Transform a list of inequalities over Reals to expressions over Cond,
+///        given a context.
+/// \param cond A list of inequalities
+/// \param context A variable context
+/// \param r A rewriter
+/// \ret The list of inequalities corresponding to cond, but expressed in
+///      expressions over sort Cond.
 static
 data_expression_list transform_real_to_cond(const data_expression_list& cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
 {
@@ -1064,11 +1147,18 @@ data_expression_list transform_real_to_cond(const data_expression_list& cond, at
   return result;
 }
 
+/// \brief Generate a summand
+/// \param s A summand
+/// \param i A number, denoting the next state
+/// \param cond A list of inequalities denoting the real part of the condition
+/// \param context A variable context
+/// \param r A rewriter
+/// \ret The summand corresponding to s with real part of condition cond, and
+///      nextstate determined by i.
 static
-summand generate_summand(const summand& s, unsigned long i, data_expression_list cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, const data_expression_list& nextstate_inequalities, rewriter& r)
+summand generate_summand(const summand& s, unsigned long i, data_expression_list cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
 {
-  gsDebugMsg("generating new summand from summand %s, with cond %s and nextstate inequalities %s, i = %ld\n", pp(s).c_str(), pp(cond).c_str(), pp(nextstate_inequalities).c_str(), i);
-  assert(context.size() == nextstate_inequalities.size());
+  gsDebugMsg("generating new summand from summand %s, with cond %s, i = %ld\n", pp(s).c_str(), pp(cond).c_str(), i);
 
   std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
   data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
@@ -1115,6 +1205,13 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
   return result;
 }
 
+/// \brief Compute process initialisation given a variable context and a process
+///        initialisation containing real values.
+/// \param initialization A process initialisation containing real values
+/// \param context A variable context
+/// \param r A rewriter
+/// \ret A process initialisation in which all assignments to real variables
+///      have been replaced with an initialization for each variable in context.
 data_assignment_list determine_process_initialization(const data_assignment_list& initialization, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
 {
   data_assignment_list init = get_nonreal_assignments(initialization);
@@ -1148,6 +1245,12 @@ data_assignment_list determine_process_initialization(const data_assignment_list
   return reverse(init);
 }
 
+/// \brief Perform elimination of real variables on a specification in a maximum
+///        number of iterations.
+/// \param s A specification
+/// \param max_iterations The maximal number of iterations the algorithm should
+///        perform
+/// \param strategy The rewrite strategy that should be used.
 specification realelm(specification s, int max_iterations, rewriter::strategy strategy)
 {
   gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
@@ -1215,34 +1318,34 @@ specification realelm(specification s, int max_iterations, rewriter::strategy st
         for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
           gsDebugMsg("context = %ld, nextstate = %ld\n", context_combination, nextstate_combination);
-          data_expression_list nextstate_inequalities = compute_inequalities(nextstate_combination, context);
-          gsDebugMsg("inequalities for nextstate before substitution: %s\n", pp(nextstate_inequalities).c_str());
-          nextstate_inequalities = data_expression_map_replace_list(nextstate_inequalities, summand_real_nextstate_map[*i]);
+          data_expression_list condition = compute_inequalities(nextstate_combination, context);
+          gsDebugMsg("inequalities for condition before substitution: %s\n", pp(condition).c_str());
+          condition = data_expression_map_replace_list(condition, summand_real_nextstate_map[*i]);
 
-          gsDebugMsg("inequalities for nextstate: %s\n", pp(nextstate_inequalities).c_str());
+          gsDebugMsg("inequalities for condition: %s\n", pp(condition).c_str());
 
-          data_expression_list cond = nextstate_inequalities + summand_real_conditions[*i];
-          gsDebugMsg("cond: %s\n", pp(cond).c_str());
-          cond = simplify_cond(cond, context_inequalities);
-          gsDebugMsg("cond after simplification: %s\n", pp(cond).c_str());
-          cond = normalize_inequalities(cond, r);
+          condition = condition + summand_real_conditions[*i];
+          gsDebugMsg("condition: %s\n", pp(condition).c_str());
+          condition = simplify_condition(condition, context_inequalities);
+          gsDebugMsg("cond after simplification: %s\n", pp(condition).c_str());
+          condition = normalize_inequalities(condition, r);
 
           // Eliminate sum bound variables, resulting in inequalities over
           // process parameters of sort Real. Of this, we add the inequalities
           // that are not yet in the context.
-          gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(cond).c_str());
-          fourier_motzkin(cond, i->summation_variables(), r);
-          if(!is_inconsistent(cond, r))
+          gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(condition).c_str());
+          fourier_motzkin(condition, i->summation_variables(), r);
+          if(!is_inconsistent(condition, r))
           {
-            cond = normalize_inequalities(cond, r);
-            if(!is_inconsistent(cond, r))
+            condition = normalize_inequalities(condition, r);
+            if(!is_inconsistent(condition, r))
             {
-              gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(cond).c_str());
-              // cond contains the inequalities over the process parameters
-              changed = changed || add_inequalities_to_context(cond, context, r, variable_generator);
+              gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(condition).c_str());
+              // condition contains the inequalities over the process parameters
+              changed = changed || add_inequalities_to_context(condition, context, r, variable_generator);
               if(!changed)
               {
-                summand s = generate_summand(*i, nextstate_combination, cond, context, nextstate_inequalities, r);
+                summand s = generate_summand(*i, nextstate_combination, condition, context, r);
                 if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
                 {
                   summands = push_front(summands, s);
