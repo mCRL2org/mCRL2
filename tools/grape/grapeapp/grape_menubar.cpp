@@ -239,7 +239,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   // help menu
   m_menu_help = new wxMenu;
   
-  item = new wxMenuItem( m_menu_help, wxID_HELP, _T("&Help\tF1"), _T("Show Help") );
+  item = new wxMenuItem( m_menu_help, wxID_HELP, _T("&Contents\tF1"), _T("Show help contents") );
   item->SetBitmap( g_icons[ _T("helpcontents") ] );
   m_menu_help->Append( item );
 

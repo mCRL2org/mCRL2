@@ -1375,7 +1375,8 @@ void Frame::initMenuBar()
     helpMenu = new wxMenu();
     helpMenu->Append(
         wxID_HELP,
-        wxString( wxT( "&Contents" ) ) );
+        wxString( wxT( "&Contents" ) ),
+        wxString( wxT( "Show help contents" ) ) );
     helpMenu->AppendSeparator();
     helpMenu->Append(
         wxID_ABOUT,

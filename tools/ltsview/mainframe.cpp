@@ -193,7 +193,7 @@ void MainFrame::setupMenuBar() {
     wxT("Assign states to their default positions"));
   toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
   
-  helpMenu->Append(wxID_HELP,wxT("&Contents"));
+  helpMenu->Append(wxID_HELP,wxT("&Contents"),wxT("Show help contents"));
   helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   

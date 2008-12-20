@@ -182,7 +182,7 @@ void XSimMain::CreateMenu()
     menu->Append( views, wxT("&Views") );
     
     wxMenu *help = new wxMenu;
-    help->Append(wxID_HELP, wxT("&Contents"));
+    help->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
     help->AppendSeparator();
     help->Append( wxID_ABOUT, wxT("&About"));
     menu->Append( help, wxT("&Help") );

@@ -97,7 +97,7 @@ void MainFrame::setupMenuBar()
 
   // Help menu
   wxMenu* helpMenu = new wxMenu;
-  helpMenu->Append(wxID_HELP, wxT("&Contents"));
+  helpMenu->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
   helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, wxT("&About"));
 

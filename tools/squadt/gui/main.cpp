@@ -133,7 +133,7 @@ namespace squadt {
 
       wxMenu* help_menu  = new wxMenu();
 
-      help_menu->Append(wxID_HELP, wxT("&Contents"));
+      help_menu->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
       help_menu->AppendSeparator();
       help_menu->Append(wxID_ABOUT, wxT("&About"));
 
