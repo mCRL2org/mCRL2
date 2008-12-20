@@ -13,8 +13,8 @@
 #define MCRL2_LPSREALELM_REALELM_H
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewrite.h"
 
-  mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5, mcrl2::data::rewriter::strategy = mcrl2::data::rewriter::jitty);
+mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5, RewriteStrategy = GS_REWR_JITTY);
 
 #endif // MCRL2_LPSREALELM_REALELM_H

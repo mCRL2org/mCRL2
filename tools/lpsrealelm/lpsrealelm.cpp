@@ -122,7 +122,7 @@ int do_realelm(const tool_options& options)
   lps_specification.load(options.input_file);
 
   // Untime lps_specification and save the output to a binary file
-  specification new_spec = realelm(lps_specification, options.max_iterations, static_cast<const mcrl2::data::rewriter::strategy&>(options.strategy));
+  specification new_spec = realelm(lps_specification, options.max_iterations, options.strategy);
 
   gsDebugMsg("Real time abstraction completed, saving to %s\n", options.output_file.c_str());
   new_spec.save(options.output_file);
