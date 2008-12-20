@@ -20,7 +20,7 @@
 #include <iostream>
 
 #define NAME   "GraPE"
-#define AUTHOR "VitaminB100"
+#define AUTHOR "Remco Blewanus, Thorstin Crijns, Diana Koenraadt, Bas Luksenburg, Jonathan Nelisse, Hans Poppelaars and Bram Schoenmakers"
 
 /**
  * \brief toolset version string
