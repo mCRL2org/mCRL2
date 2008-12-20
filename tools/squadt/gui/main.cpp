@@ -46,7 +46,7 @@ namespace squadt {
     }
 
     void main::manual() {
-      wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/SQuADT"));
+      wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/squadt"));
     }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),
@@ -133,7 +133,7 @@ namespace squadt {
 
       wxMenu* help_menu  = new wxMenu();
 
-      help_menu->Append(wxID_HELP, wxT("&User Manual"));
+      help_menu->Append(wxID_HELP, wxT("&Contents"));
       help_menu->AppendSeparator();
       help_menu->Append(wxID_ABOUT, wxT("&About"));
 

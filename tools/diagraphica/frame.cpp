@@ -1374,9 +1374,12 @@ void Frame::initMenuBar()
     // help menu
     helpMenu = new wxMenu();
     helpMenu->Append(
+        wxID_HELP,
+        wxString( wxT( "&Contents" ) ) );
+    helpMenu->AppendSeparator();
+    helpMenu->Append(
         wxID_ABOUT,
-        wxString( wxT( "&About DiaGraphica" )),
-        wxString( wxT( "Displays program information" ) ) );
+        wxString( wxT( "&About" ) ) );
     menuBar->Append(
         helpMenu,
         wxString( wxT( "&Help" ) ) );
@@ -2019,6 +2022,13 @@ void Frame::initTextCtrl()
         5 ); 
 }
 
+
+// ---------------------------
+void Frame::initHelpContents()
+// ---------------------------
+{
+  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/diagraphica"));
+}
 
 // -------------------------
 void Frame::initAboutFrame()
@@ -3097,6 +3107,10 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( frameSettings == NULL )
             initFrameSettings();
         frameSettings->setDgrmEditor();
+    }
+    else if ( e.GetId() == wxID_HELP )
+    {
+        initHelpContents();
     }
     else if ( e.GetId() == wxID_ABOUT )
     {
@@ -4610,6 +4624,7 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_SIMULATOR, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_TRACE, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_EDITOR, Frame::onMenuBar )
+    EVT_MENU( wxID_HELP, Frame::onMenuBar )
     EVT_MENU( wxID_ABOUT, Frame::onMenuBar )
     EVT_MENU( wxID_CLOSE, Frame::onMenuBar )
     // splitter windows

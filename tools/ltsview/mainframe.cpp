@@ -61,6 +61,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
   EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
   EVT_MENU  (wxID_ABOUT,MainFrame::onAbout)
+  EVT_MENU  (wxID_HELP,MainFrame::onHelpContents)
   EVT_MENU  (myID_ITERATIVE,MainFrame::onRankStyle)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
@@ -192,6 +193,8 @@ void MainFrame::setupMenuBar() {
     wxT("Assign states to their default positions"));
   toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
   
+  helpMenu->Append(wxID_HELP,wxT("&Contents"));
+  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   
   menuBar->Append(fileMenu, wxT("&File"));
@@ -224,6 +227,11 @@ GLCanvas* MainFrame::getGLCanvas() const {
 
 void MainFrame::setFileInfo(wxFileName fn) {
   filename.Assign(fn);
+}
+
+void MainFrame::onHelpContents( wxCommandEvent& /* event */ )
+{
+  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/ltsview"));
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {

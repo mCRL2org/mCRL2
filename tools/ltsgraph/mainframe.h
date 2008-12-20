@@ -66,6 +66,7 @@ class MainFrame : public wxFrame
     void onSettings(wxCommandEvent& event);
     void onInfo(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
+    void onHelpContents(wxCommandEvent& event);
     void onAbout(wxCommandEvent& event);
     void onImport(wxCommandEvent& event);
     void onSelect(wxCommandEvent& event);

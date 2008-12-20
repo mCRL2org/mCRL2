@@ -42,6 +42,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_ABOUT, MainFrame::onAbout)
+  EVT_MENU(wxID_HELP, MainFrame::onHelpContents)
   EVT_MENU(myID_TOOL_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
 END_EVENT_TABLE()
@@ -96,7 +97,9 @@ void MainFrame::setupMenuBar()
 
   // Help menu
   wxMenu* helpMenu = new wxMenu;
-  helpMenu->Append(wxID_ABOUT, wxT("&About..."), wxEmptyString);
+  helpMenu->Append(wxID_HELP, wxT("&Contents"));
+  helpMenu->AppendSeparator();
+  helpMenu->Append(wxID_ABOUT, wxT("&About"));
 
 
   menuBar->Append(fileMenu, wxT("&File"));
@@ -259,6 +262,11 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       wxOK | wxICON_INFORMATION);
     msgDlg.ShowModal();
   }
+}
+
+void MainFrame::onHelpContents( wxCommandEvent& /* event */ )
+{
+  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/ltsgraph"));
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {

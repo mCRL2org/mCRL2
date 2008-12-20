@@ -189,6 +189,7 @@ private:
     void initPanelRgtBotRgt();  // 4
     void initCanvasThree();     // 5
 
+    void initHelpContents();    // 1
     void initAboutFrame();      // 1
     void initAboutFrameOld();   // 1
     

@@ -68,6 +68,7 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
     EVT_MENU(ID_STOP, XSimMain::OnStop)
     EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
+    EVT_MENU(wxID_HELP, XSimMain::OnHelpContents)
     EVT_TIMER(-1, XSimMain::OnTimer)
     EVT_CLOSE(XSimMain::OnCloseWindow)
     EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
@@ -181,7 +182,9 @@ void XSimMain::CreateMenu()
     menu->Append( views, wxT("&Views") );
     
     wxMenu *help = new wxMenu;
-    help->Append( wxID_ABOUT, wxT("&About"), wxT("") );
+    help->Append(wxID_HELP, wxT("&Contents"));
+    help->AppendSeparator();
+    help->Append( wxID_ABOUT, wxT("&About"));
     menu->Append( help, wxT("&Help") );
 
     SetMenuBar( menu );
@@ -696,6 +699,11 @@ void XSimMain::StopAutomation()
 void XSimMain::OnStop( wxCommandEvent& /* event */ )
 {
 	StopAutomation();
+}
+
+void XSimMain::OnHelpContents( wxCommandEvent& /* event */ )
+{
+  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/xsim"));
 }
 
 void XSimMain::OnAbout( wxCommandEvent& /* event */ )
