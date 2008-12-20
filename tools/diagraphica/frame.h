@@ -190,6 +190,7 @@ private:
     void initCanvasThree();     // 5
 
     void initAboutFrame();      // 1
+    void initAboutFrameOld();   // 1
     
     void initFrameSettings();
     void initFramePartition(

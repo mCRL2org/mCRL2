@@ -19,8 +19,8 @@
 #include "export_svg.h"
 #include "export_xml.h"
 #include "export_latex.h"
-#include <wx/aboutdlg.h>
 #include <mcrl2/lts/lts.h>
+#include <mcrl2/utilities/about_dialog.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -262,27 +262,12 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  wxAboutDialogInfo info;
-
-  info.AddDeveloper(wxT("Carst Tankink"));
-  info.SetName(wxT("LTSGraph"));
- info.SetCopyright(
-    wxT("Copyright (C) 2008 Technische Universiteit Eindhoven."));
-  
-  info.SetLicense(wxT("This is free software.\nYou may redistribute copies of it under the terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\nThere is NO WARRANTY, to the extent permitted by law."));
-
-  info.SetWebSite(wxT("http://www.mcrl2.org"), wxT("mCRL2 home page"));
-  
-  wxString version(app->getVersion().c_str(), wxConvLocal);
-  wxString revision(app->getRevision().c_str(), wxConvLocal);
-  
-  wxString versionString = wxT("mCRL2 toolset ") + version + wxT(" revision ") 
-                  + revision + wxT("\n\n");
-  info.SetDescription(versionString + wxT("Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout."));
- 
-//  info.SetVersion(versionString);
-
-  ::wxAboutBox(info);
+  std::vector<std::string> developers;
+  developers.push_back("Carst Tankink");
+  mcrl2::utilities::wx::about_dialog("LTSGraph",
+    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
+    developers
+  );
 }
 
 void MainFrame::onQuit(wxCommandEvent& /*event */)

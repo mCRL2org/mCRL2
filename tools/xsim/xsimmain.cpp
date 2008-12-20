@@ -31,14 +31,13 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/about_dialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_SAVE wxSAVE
 # define wxFD_CHANGE_DIR wxCHANGE_DIR
 #endif
-
-std::string get_about_message();
 
 using namespace std;
 using namespace ::mcrl2::utilities;
@@ -701,9 +700,12 @@ void XSimMain::OnStop( wxCommandEvent& /* event */ )
 
 void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
-  wxMessageDialog(this,
-        wxString(get_about_message().c_str(), wxConvLocal),
-                wxT("About XSim"), wxOK|wxICON_INFORMATION).ShowModal();
+  std::vector<std::string> developers;
+  developers.push_back("Muck van Weerdenburg");
+  mcrl2::utilities::wx::about_dialog("XSim",
+    "Simulator for linear process specifications.",
+    developers
+  );
 }
 
 void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )

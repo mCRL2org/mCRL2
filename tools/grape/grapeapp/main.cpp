@@ -12,7 +12,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2gen/mcrl2gen.h"
-#include <wx/aboutdlg.h>
 #include "grape_frame.h"
 
 #include "mcrl2/utilities/command_line_interface.h"
@@ -29,31 +28,6 @@
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
 using namespace mcrl2::core;
-
-wxAboutDialogInfo get_about_info() {
-  using mcrl2::utilities::interface_description;
-
-  std::string copyright_message(
-    interface_description("", NAME, AUTHOR, "", "").copyright_message());
-
-  wxAboutDialogInfo info;
-
-  info.SetName(wxT(NAME));
-  info.SetVersion(wxString(mcrl2::utilities::version_tag().c_str(), wxConvLocal));
-  info.SetDescription(wxT("This is a Graphical Process Editor for the mCRL2 language.\nThis program is part of the mCRL2 toolkit"));
-  info.SetCopyright(wxString(copyright_message.c_str(), wxConvLocal));
-  info.SetWebSite(wxT("http://www.mcrl2.org/" ));
-  info.AddDeveloper(wxT( "Remco Blewanus" ));
-  info.AddDeveloper(wxT( "Thorstin Crijns" ));
-  info.AddDeveloper(wxT( "Diana Koenraadt" ));
-  info.AddDeveloper(wxT( "Bas Luksenburg" ));
-  info.AddDeveloper(wxT( "Jonathan Nelisse" ));
-  info.AddDeveloper(wxT( "Hans Poppelaars" ));
-  info.AddDeveloper(wxT( "Bram Schoenmakers" ));
-  info.AddDocWriter(wxT( "Hans Poppelaars" ));
-
-  return info;
-}
 
 class grape_app: public mcrl2::utilities::wx::tool< grape_app >
 {

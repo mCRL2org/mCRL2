@@ -29,13 +29,12 @@
 #include "savevecdialog.h"
 #include "settings.h"
 #include "settingsdialog.h"
+#include "mcrl2/utilities/about_dialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_OPEN wxOPEN
 #endif
-
-std::string get_about_message();
 
 using namespace std;
 using namespace Utils;
@@ -228,9 +227,20 @@ void MainFrame::setFileInfo(wxFileName fn) {
 }
 
 void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  wxMessageDialog(this,
-        wxString(get_about_message().c_str(), wxConvLocal),
-                wxT("About LTSView"), wxOK|wxICON_INFORMATION).ShowModal();
+  std::vector<std::string> developers;
+  developers.push_back("Bas Ploeger");
+  developers.push_back("Carst Tankink");
+  mcrl2::utilities::wx::about_dialog("LTSView",
+    "Tool for interactive visualisation of state transition systems.\n"
+    "\n"
+    "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. "
+    "See: F. van Ham, H. van de Wetering and J.J. van Wijk, "
+    "\"Visualization of State Transition Graphs\". "
+    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+    "\n"
+    "The default colour scheme for state marking was obtained through http://www.colorbrewer.org",
+    developers
+  );
 }
 
 /*

@@ -11,8 +11,6 @@
 #ifndef GRAPE_EVENT_HELP_H
 #define GRAPE_EVENT_HELP_H
 
-#include <wx/aboutdlg.h>
-
 #include "event_base.h"
 
 namespace grape

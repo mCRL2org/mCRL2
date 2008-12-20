@@ -12,6 +12,8 @@
 
 #include "frame.h"
 #include "figures.xpm"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/about_dialog.h"
 
 #include <iostream>
 using namespace std;
@@ -22,8 +24,6 @@ using namespace std;
 # define wxFD_SAVE wxSAVE
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
-
-std::string get_about_message();
 
 // -- constructors and destructor -----------------------------------
 
@@ -2024,6 +2024,23 @@ void Frame::initTextCtrl()
 void Frame::initAboutFrame()
 // -------------------------
 {
+  std::vector<std::string> developers;
+  developers.push_back("A. Johannes Pretorius");
+  mcrl2::utilities::wx::about_dialog("DiaGraphica",
+    "You are free to use images produced with DiaGraphica.\n"
+    "In this case, image credits would be much appreciated.\n"
+    "\n"
+    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
+    "uses the TinyXML parser (tinyxml.sourceforge.net). "
+    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
+    developers
+  );
+}
+
+// ----------------------------
+void Frame::initAboutFrameOld()
+// ----------------------------
+{
     frameAbout = new wxFrame(
         this,
         wxID_ANY,
@@ -2069,7 +2086,26 @@ void Frame::initAboutFrame()
     panel->SetSizer( sizer );
 
     // message
-    wxString msg = wxString(get_about_message().c_str(), wxConvLocal);
+    string s_msg =
+      mcrl2::utilities::interface_description("", "diagraphica", "A. Johannes Pretorius", "", "").version_information() +
+      string("\n"
+        "For more information please see:\n"
+        "www.win.tue.nl/~apretori/diagraphica\n"
+        "\n"
+        "You are free to use images produced with DiaGraphica. "
+        "In this case, image credits would be much appreciated.\n"
+        "\n"
+        "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
+        "uses the TinyXML parser (tinyxml.sourceforge.net). "
+        "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n"
+        "\n"
+        "This version of DiaGraphica is part of the mCRL2 toolset.\n"
+        "For information see http://www.mcrl2.org\n"
+        "\n"
+        "Please report bugs at http://www.mcrl2.org/issuetracker\n"
+      );
+
+    wxString msg = wxString(s_msg.c_str(), wxConvLocal);
 
     wxTextCtrl* textCtrl = new wxTextCtrl(
         panel, 

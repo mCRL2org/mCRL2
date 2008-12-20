@@ -31,29 +31,6 @@
 
 using namespace std;
 
-string get_about_message() {
-  static const string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-    string("\n"
-     "For more information please see:\n"
-     "www.win.tue.nl/~apretori/diagraphica\n"
-     "\n"
-     "You are free to use images produced with DiaGraphica. "
-     "In this case, image credits would be much appreciated.\n"
-     "\n"
-     "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
-     "uses the TinyXML parser (tinyxml.sourceforge.net). "
-     "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n"
-     "\n"
-     "This version of DiaGraphica is part of the mCRL2 toolset.\n"
-     "For information see http://www.mcrl2.org\n"
-     "\n"
-     "Please report bugs at http://www.mcrl2.org/issuetracker\n");
-
-  return version_information;
-}
-
 std::string fsm_file_argument;
 std::string parse_error;
 
