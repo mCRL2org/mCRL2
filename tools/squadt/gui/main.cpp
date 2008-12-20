@@ -38,7 +38,7 @@ namespace squadt {
     void main::about() {      
       std::vector<std::string> developers;
       developers.push_back("Jeroen van der Wulp");
-      mcrl2::utilities::wx::about_dialog dialog("SQuADT",
+      mcrl2::utilities::wx::about_dialog("SQuADT",
         "Graphical environment that provides a uniform interface for using all kinds of "
         "other connected tools.",
         developers
