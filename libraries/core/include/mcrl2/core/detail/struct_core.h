@@ -1017,6 +1017,28 @@ bool gsIsId(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunId();
 }
 
+// IdAssignment
+inline
+AFun initAFunIdAssignment(AFun& f)
+{
+  f = ATmakeAFun("IdAssignment", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunIdAssignment()
+{
+  static AFun AFunIdAssignment = initAFunIdAssignment(AFunIdAssignment);
+  return AFunIdAssignment;
+}
+
+inline
+bool gsIsIdAssignment(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunIdAssignment();
+}
+
 // IdInit
 inline
 AFun initAFunIdInit(AFun& f)
@@ -1785,6 +1807,28 @@ inline
 bool gsIsProcess(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunProcess();
+}
+
+// ProcessAssignment
+inline
+AFun initAFunProcessAssignment(AFun& f)
+{
+  f = ATmakeAFun("ProcessAssignment", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcessAssignment()
+{
+  static AFun AFunProcessAssignment = initAFunProcessAssignment(AFunProcessAssignment);
+  return AFunProcessAssignment;
+}
+
+inline
+bool gsIsProcessAssignment(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcessAssignment();
 }
 
 // ProcessInit
@@ -3092,6 +3136,12 @@ ATermAppl gsMakeId(ATermAppl String_0)
 }
 
 inline
+ATermAppl gsMakeIdAssignment(ATermAppl String_0, ATermList IdInit_1)
+{
+  return ATmakeAppl2(gsAFunIdAssignment(), (ATerm) String_0, (ATerm) IdInit_1);
+}
+
+inline
 ATermAppl gsMakeIdInit(ATermAppl String_0, ATermAppl DataExpr_1)
 {
   return ATmakeAppl2(gsAFunIdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
@@ -3303,6 +3353,12 @@ ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+}
+
+inline
+ATermAppl gsMakeProcessAssignment(ATermAppl ProcVarId_0, ATermList DataVarIdInit_1)
+{
+  return ATmakeAppl2(gsAFunProcessAssignment(), (ATerm) ProcVarId_0, (ATerm) DataVarIdInit_1);
 }
 
 inline

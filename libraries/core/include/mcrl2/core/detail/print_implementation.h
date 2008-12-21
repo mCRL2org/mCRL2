@@ -1249,6 +1249,15 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, 0, NULL, ", ");
       PRINT_FUNC(fprints)(OutStream, ")");
     }
+  } else if (gsIsIdAssignment(ProcExpr) || gsIsProcessAssignment(ProcExpr)) {
+    //print process assignment
+    PRINT_FUNC(dbg_prints)("printing process assignment\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(ProcExpr, 0),
+      pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(ProcExpr, 1),
+      pp_format, ShowSorts, 0, NULL, ", ");
+    PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsDelta(ProcExpr)) {
     //print delta
     PRINT_FUNC(dbg_prints)("printing delta\n");

@@ -154,8 +154,10 @@
 
 //process expression
 <ProcExpr>     ::= <ParamId>                                             [- tc]
+                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
                  | <Action>                                              [+ tc]
                  | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
+                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
                  | Delta
                  | Tau 
                  | Sum(<DataVarId>+, <ProcExpr>) 

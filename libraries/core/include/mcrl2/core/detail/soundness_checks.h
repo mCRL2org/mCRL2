@@ -147,6 +147,7 @@ template <typename Term> bool check_term_BooleanOr(Term t);
 template <typename Term> bool check_term_ProcEqn(Term t);
 template <typename Term> bool check_term_Hide(Term t);
 template <typename Term> bool check_term_SortArrow(Term t);
+template <typename Term> bool check_term_ProcessAssignment(Term t);
 template <typename Term> bool check_term_Forall(Term t);
 template <typename Term> bool check_term_CommExpr(Term t);
 template <typename Term> bool check_term_StateNot(Term t);
@@ -529,6 +530,7 @@ bool check_rule_ProcExpr(Term t)
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_rule_Action(t)
          || check_term_Process(t)
+         || check_term_ProcessAssignment(t)
          || check_term_Delta(t)
          || check_term_Tau(t)
          || check_term_Sum(t)
@@ -1061,6 +1063,39 @@ bool check_term_SortArrow(Term t)
   if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
     {
       std::cerr << "check_rule_SortExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// ProcessAssignment(ProcVarId, DataVarIdInit*)
+template <typename Term>
+bool check_term_ProcessAssignment(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsProcessAssignment(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_ProcVarId<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ProcVarId" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_DataVarIdInit<atermpp::aterm>, 0))
+    {
+      std::cerr << "check_rule_DataVarIdInit" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS

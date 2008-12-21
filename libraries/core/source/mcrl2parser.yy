@@ -144,7 +144,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> proc_expr_at proc_expr_at_wo_cond proc_expr_sync
 %type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
 %type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
-%type <appl> proc_quant ren_expr comm_expr comm_expr_lhs mult_act_name
+%type <appl> id_assignment proc_quant ren_expr comm_expr comm_expr_lhs
+%type <appl> mult_act_name
 //process specifications
 %type <appl> proc_spec proc_spec_elt act_spec proc_eqn_spec proc_eqn_decl
 %type <appl> proc_init
@@ -1561,6 +1562,10 @@ proc_expr_primary:
     {
       safe_assign($$, $1);
     }
+  | id_assignment
+    {
+      safe_assign($$, $1);
+    }
   | proc_quant
     {
       safe_assign($$, $1);
@@ -1582,6 +1587,20 @@ proc_constant:
     {
       safe_assign($$, gsMakeTau());
       gsDebugMsg("parsed process constant\n  %T\n", $$);
+    }
+  ;
+
+//identifier assignment
+id_assignment:
+  ID LPAR RPAR
+    {
+      safe_assign($$, gsMakeIdAssignment($1, ATmakeList0()));
+      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
+    }
+  | ID LPAR id_inits_cs RPAR
+    {
+      safe_assign($$, gsMakeIdAssignment($1, ATreverse($3)));
+      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
     }
   ;
 

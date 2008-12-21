@@ -48,6 +48,7 @@ ATermAppl constructBooleanOr();
 ATermAppl constructProcEqn();
 ATermAppl constructHide();
 ATermAppl constructSortArrow();
+ATermAppl constructProcessAssignment();
 ATermAppl constructForall();
 ATermAppl constructCommExpr();
 ATermAppl constructStateNot();
@@ -92,6 +93,7 @@ ATermAppl constructMultAct();
 ATermAppl constructPropVarInst();
 ATermAppl constructBagComp();
 ATermAppl constructStateDelay();
+ATermAppl constructIdAssignment();
 ATermAppl constructRegAlt();
 ATermAppl constructStructCons();
 ATermAppl constructIdInit();
@@ -252,6 +254,22 @@ inline
 ATermAppl constructSortArrow()
 {
   static ATermAppl t = initConstructSortArrow(t);
+  return t;
+}
+
+// ProcessAssignment
+inline
+ATermAppl initConstructProcessAssignment(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunProcessAssignment(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructProcessAssignment()
+{
+  static ATermAppl t = initConstructProcessAssignment(t);
   return t;
 }
 
@@ -956,6 +974,22 @@ inline
 ATermAppl constructStateDelay()
 {
   static ATermAppl t = initConstructStateDelay(t);
+  return t;
+}
+
+// IdAssignment
+inline
+ATermAppl initConstructIdAssignment(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunIdAssignment(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructIdAssignment()
+{
+  static ATermAppl t = initConstructIdAssignment(t);
   return t;
 }
 
