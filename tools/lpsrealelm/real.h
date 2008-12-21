@@ -67,18 +67,18 @@ data_application divide(const data_expression& r1, const data_expression& r2)
   return data_application(divide(r1.sort()), make_list(r1,r2));
 }
 
-inline
-data_operation invert()
-{
-  sort_expression rr = sort_arrow(make_list(sort_expr::real()), sort_expr::real());
-  return data_operation(identifier_string("@invert"), rr);
-}
-
-inline
-data_application invert(const data_expression& r)
-{
-  return data_application(invert(), make_list(r));
-}
+//inline
+//data_operation invert()
+//{
+//  sort_expression rr = sort_arrow(make_list(sort_expr::real()), sort_expr::real());
+//  return data_operation(identifier_string("@invert"), rr);
+//}
+  
+//inline
+//data_application invert(const data_expression& r)
+//{
+//  return data_application(invert(), make_list(r));
+//}
 
 inline
 data_operation rational()
@@ -157,10 +157,9 @@ data_operation_list additional_real_mappings()
   r = push_front(r,divide(sort_expr::nat()));
   r = push_front(r,divide(sort_expr::int_()));
   r = push_front(r,divide(sort_expr::real()));
-  r = push_front(r,invert());
+  //r = push_front(r,invert());
   r = push_front(r,rational());
   r = push_front(r,normalize_rational());
-  //r = push_front(r,data_operation(core::detail::gsMakeOpId(core::detail::gsMakeOpIdNameExp(), rpr)));
   r = push_front(r,numerator());
   r = push_front(r, denominator());
 
@@ -183,65 +182,61 @@ data_equation_list additional_real_equations()
   using namespace core::detail;
   data_equation_list res;
 
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprCReal(x), rational(x, pos(1))));
-  res = push_front(res, data_equation(make_list(p), gsMakeNil(), gsMakeDataExprPos2Real(p), rational(gsMakeDataExprPos2Int(p), pos(1))));
-  res = push_front(res, data_equation(make_list(n), gsMakeNil(), gsMakeDataExprNat2Real(n), rational(gsMakeDataExprNat2Int(n), pos(1))));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprInt2Real(x), rational(x, pos(1))));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Pos(rational(x, pos(1))), gsMakeDataExprInt2Pos(x)));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Nat(rational(x, pos(1))), gsMakeDataExprInt2Nat(x)));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Int(rational(x, pos(1))), x));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), trunc(rational(x,p)), divides(x,p)));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), round(r), trunc(plus(r,rational(int_(1),pos(2))))));
   res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), equal_to(rational(x,p), rational(y,q)), equal_to(multiplies(x,gsMakeDataExprPos2Int(q)),multiplies(y,gsMakeDataExprPos2Int(p)))));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), less(r,r), false_()));
-  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less(rational(x,p),rational(y,q)), less(multiplies(x,gsMakeDataExprPos2Int(q)),multiplies(y,gsMakeDataExprPos2Int(p)))));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprInt2Real(x), rational(x, pos(1))));
+  res = push_front(res, data_equation(make_list(n), gsMakeNil(), gsMakeDataExprNat2Real(n), rational(gsMakeDataExprCInt(n), pos(1))));
+  res = push_front(res, data_equation(make_list(p), gsMakeNil(), gsMakeDataExprPos2Real(p), rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), pos(1))));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Int(rational(x, pos(1))), x));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Nat(rational(x, pos(1))), gsMakeDataExprInt2Nat(x)));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Pos(rational(x, pos(1))), gsMakeDataExprInt2Pos(x)));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), less_equal(r,r), true_()));
-  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less_equal(rational(x,p),rational(y,q)), less_equal(multiplies(x,gsMakeDataExprPos2Int(q)),multiplies(y,gsMakeDataExprPos2Int(p)))));
-  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), greater(r,s), less(s,r)));
+  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less_equal(rational(x,p),rational(y,q)), less_equal(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
+  res = push_front(res, data_equation(make_list(r), gsMakeNil(), less(r,r), false_()));
+  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less(rational(x,p),rational(y,q)), less(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
   res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), greater_equal(r,s), less_equal(s,r)));
+  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), greater(r,s), less(s,r)));
   res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), max_(r,s), if_(less(r,s), s, r)));
   res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), min_(r,s), if_(less(r,s), r, s)));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), abs(r), if_(less(r,real_zero()),negate(r),r)));
   res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), negate(rational(x,p)), rational(negate(x), p)));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), negate(negate(r)), r));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprSucc(rational(x,p)), rational(plus(x,gsMakeDataExprPos2Int(p)),p)));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprPred(rational(x,p)), rational(minus(x,gsMakeDataExprPos2Int(p)),p)));
-  res = push_front(res, data_equation(make_list(x,p), greater(x,int_(0)), invert(rational(x,p)), rational(gsMakeDataExprPos2Int(p), gsMakeDataExprInt2Pos(x))));
-  res = push_front(res, data_equation(make_list(x,p), less(x,int_(0)), invert(rational(x,p)), rational(negate(p), gsMakeDataExprInt2Pos(negate(x)))));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprSucc(rational(x,p)), rational(plus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprPred(rational(x,p)), rational(minus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), plus(r, negate(r)), real_zero()));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), plus(negate(r), r), real_zero()));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), plus(r, rational(int_(0),p)), r));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), plus(rational(int_(0),p), r), r));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), plus(rational(x,p), rational(y,q)), normalize_rational(plus(multiplies(x,gsMakeDataExprPos2Int(q)), multiplies(y,gsMakeDataExprPos2Int(p))), gsMakeDataExprPos2Int(multiplies(p,q)))));
+  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), plus(rational(x,p), rational(y,q)), normalize_rational(plus(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), minus(r,r), real_zero()));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), minus(r, rational(int_(0),p)), r));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), minus(rational(int_(0),p), r), negate(r)));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), minus(rational(x,p), rational(y,q)), normalize_rational(minus(multiplies(x,gsMakeDataExprPos2Int(q)), multiplies(y,gsMakeDataExprPos2Int(p))), gsMakeDataExprPos2Int(multiplies(p,q)))));
+  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), minus(rational(x,p), rational(y,q)), normalize_rational(minus(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), multiplies(r, rational(int_(0), p)), real_zero()));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), multiplies(rational(int_(0), p), r), real_zero()));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), multiplies(rational(int_(1), pos(1)), r), r));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), multiplies(r, rational(int_(1), pos(1))), r));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), multiplies(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,y), gsMakeDataExprPos2Int(multiplies(p,q)))));
-  res = push_front(res, data_equation(make_list(p,q), gsMakeNil(), divide(p,q), normalize_rational(gsMakeDataExprPos2Int(p), gsMakeDataExprPos2Int(q))));
-  res = push_front(res, data_equation(make_list(m,n), gsMakeNil(), divide(m,n), normalize_rational(gsMakeDataExprNat2Int(m), gsMakeDataExprNat2Int(n))));
+  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), multiplies(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,y), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
+  res = push_front(res, data_equation(make_list(p,q), gsMakeNil(), divide(p,q), normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(gsMakeDataExprCNat(q)))));
+  res = push_front(res, data_equation(make_list(m,n), gsMakeNil(), divide(m,n), normalize_rational(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n))));
   res = push_front(res, data_equation(make_list(x,y), gsMakeNil(), divide(x,y), normalize_rational(x,y)));
   res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), divide(rational(int_(0), p), r), real_zero()));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), divide(r, rational(int_(1), pos(1))), r));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), divide(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,gsMakeDataExprPos2Int(q)), multiplies(y,gsMakeDataExprPos2Int(p)))));
+  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), divide(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
+  //generic rule for exponentation
+  //res = push_front(res, data_equation(make_list(x,p,n), gsMakeNil(), gsMakeDataExprExp(rational(x,p), n), normalize_rational(gsMakeDataExprExp(x,n), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDateExprExp(p,n))))));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), gsMakeDataExprExp(r, nat(0)), rational(int_(1), pos(1))));
   res = push_front(res, data_equation(make_list(r), gsMakeNil(), gsMakeDataExprExp(r, nat(1)), r));
-  res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r, gsMakeDataExprCNat(gsMakeDataExprCDub(gsMakeDataExprTrue(),p))), multiplies(r,multiplies(gsMakeDataExprExp(r,gsMakeDataExprPos2Nat(p)), gsMakeDataExprExp(r,gsMakeDataExprPos2Nat(p))))));
-  res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r,gsMakeDataExprPos2Nat(gsMakeDataExprCDub(gsMakeDataExprFalse(),p))), multiplies(gsMakeDataExprExp(r,gsMakeDataExprPos2Nat(p)), gsMakeDataExprExp(r,gsMakeDataExprPos2Nat(p)))));
-  //res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r, gsMakeDataExprPos2Nat(p)), gsMakeDataExprExp(r,p)));
-  //res = push_front(res, data_equation(make_list(r), gsMakeNil(), gsMakeDataExprExp(r, pos(1)), r));
-  //res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r, gsMakeDataExprSucc(multiplies(pos(2), p))), multiplies(r,multiplies(gsMakeDataExprExp(r,p), gsMakeDataExprExp(r,p)))));
-  //res = push_front(res, data_equation(make_list(r,p), gsMakeNil(), gsMakeDataExprExp(r,multiplies(pos(2),p)), multiplies(gsMakeDataExprExp(r,p), gsMakeDataExprExp(r,p))));
-
+  res = push_front(res, data_equation(make_list(x,p,b,q), gsMakeNil(), gsMakeDataExprExp(rational(x,p), gsMakeDataExprCNat(gsMakeDataExprCDub(b,q))), normalize_rational(gsMakeDataExprExp(x, gsMakeDataExprCNat(gsMakeDataExprCDub(b,q))), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprCDub(b,q))))))));
   res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), numerator(rational(x,p)), x));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), denominator(rational(x,p)), gsMakeDataExprPos2Int(p)));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,negate(p)), normalize_rational(negate(x), gsMakeDataExprPos2Int(p))));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), denominator(rational(x,p)), gsMakeDataExprCInt(gsMakeDataExprCNat(p))));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,negate(p)), normalize_rational(negate(x), gsMakeDataExprCInt(gsMakeDataExprCNat(p)))));
   res = push_front(res, data_equation(make_list(x), gsMakeNil(), normalize_rational(x, int_(1)), rational(x, pos(1)))); // workaround
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,gsMakeDataExprPos2Int(p)), if_(equal_to(modulus(x,p), nat(0)), rational(divides(x,p), pos(1)), rational(plus(denominator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))), multiplies(divides(x,p), numerator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))))), gsMakeDataExprInt2Pos(numerator(normalize_rational(gsMakeDataExprPos2Int(p),gsMakeDataExprNat2Int(modulus(x,p)))))))));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))), if_(equal_to(modulus(x,p), nat(0)), rational(divides(x,p), pos(1)), rational(plus(denominator(normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)),gsMakeDataExprCInt(modulus(x,p)))), multiplies(divides(x,p), numerator(normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)),gsMakeDataExprCInt(modulus(x,p)))))), gsMakeDataExprInt2Pos(numerator(normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)),gsMakeDataExprCInt(modulus(x,p)))))))));
+  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprCReal(x), rational(x, pos(1))));
+  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), trunc(rational(x,p)), divides(x,p)));
+  res = push_front(res, data_equation(make_list(r), gsMakeNil(), round(r), trunc(plus(r,rational(int_(1),pos(2))))));
+  //res = push_front(res, data_equation(make_list(x,p), greater(x,int_(0)), invert(rational(x,p)), rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprInt2Pos(x))));
+  //res = push_front(res, data_equation(make_list(x,p), less(x,int_(0)), invert(rational(x,p)), rational(negate(p), gsMakeDataExprInt2Pos(negate(x)))));
 
   return res;
 }
