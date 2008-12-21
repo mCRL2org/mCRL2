@@ -511,7 +511,7 @@ static const char *const yytname[] =
   "sort_expr_struct", "struct_constructors_bs", "struct_constructor",
   "recogniser", "struct_projections_cs", "struct_projection",
   "sort_expr_primary", "sort_constant", "sort_constructor", "data_expr",
-  "data_expr_whr", "whr_decls_cs", "whr_decl", "data_expr_quant",
+  "data_expr_whr", "id_inits_cs", "id_init", "data_expr_quant",
   "data_vars_decls_cs", "data_vars_decl", "data_expr_imp",
   "data_expr_imp_rhs", "data_expr_and", "data_expr_and_rhs",
   "data_expr_eq", "data_expr_eq_rhs", "data_expr_rel", "data_expr_cons",
@@ -2409,7 +2409,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 494 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      gsDebugMsg("parsed where clause declarations\n  %T\n", ((*yyvalp).list));
+      gsDebugMsg("parsed identifier initialisations\n  %T\n", ((*yyvalp).list));
     ;}
     break;
 
@@ -2417,15 +2417,15 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 499 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      gsDebugMsg("parsed where clause declarations\n  %T\n", ((*yyvalp).list));
+      gsDebugMsg("parsed identifier initialisations\n  %T\n", ((*yyvalp).list));
     ;}
     break;
 
   case 49:
 #line 508 "mcrl2parser.yy"
     {
-      safe_assign(((*yyvalp).appl), gsMakeWhrDecl((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      gsDebugMsg("parsed where clause declaration\n  %T\n", ((*yyvalp).appl));
+      safe_assign(((*yyvalp).appl), gsMakeIdInit((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
+      gsDebugMsg("parsed identifier initialisation\n  %T\n", ((*yyvalp).appl));
     ;}
     break;
 

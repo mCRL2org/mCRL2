@@ -473,9 +473,9 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing data expression\n");
     PRINT_FUNC(PrintDataExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
 
-  } else if (gsIsWhrDecl(Part)) {
-    //print where declaration element
-    PRINT_FUNC(dbg_prints)("printing where declaration\n");
+  } else if (gsIsIdInit(Part)) {
+    //print identifier initialisation
+    PRINT_FUNC(dbg_prints)("printing identifier initialisation\n");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, " = ");

@@ -94,6 +94,7 @@ ATermAppl constructBagComp();
 ATermAppl constructStateDelay();
 ATermAppl constructRegAlt();
 ATermAppl constructStructCons();
+ATermAppl constructIdInit();
 ATermAppl constructMu();
 ATermAppl constructPBEqnSpec();
 ATermAppl constructActNot();
@@ -110,7 +111,6 @@ ATermAppl constructPBESForall();
 ATermAppl constructStateTrue();
 ATermAppl constructBInit();
 ATermAppl constructPBESFalse();
-ATermAppl constructWhrDecl();
 ATermAppl constructDataAppl();
 ATermAppl constructRegTrans();
 ATermAppl constructStateDelayTimed();
@@ -176,6 +176,7 @@ ATermAppl constructSortConsType();
 ATermAppl constructStringOrNil();
 ATermAppl constructDataExpr();
 ATermAppl constructBindingOperator();
+ATermAppl constructWhrDecl();
 ATermAppl constructSortDecl();
 ATermAppl constructDataExprOrNil();
 ATermAppl constructParamIdOrAction();
@@ -990,6 +991,22 @@ ATermAppl constructStructCons()
   return t;
 }
 
+// IdInit
+inline
+ATermAppl initConstructIdInit(ATermAppl& t)
+{
+  t = ATmakeAppl2(gsAFunIdInit(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructDataExpr()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructIdInit()
+{
+  static ATermAppl t = initConstructIdInit(t);
+  return t;
+}
+
 // Mu
 inline
 ATermAppl initConstructMu(ATermAppl& t)
@@ -1243,22 +1260,6 @@ inline
 ATermAppl constructPBESFalse()
 {
   static ATermAppl t = initConstructPBESFalse(t);
-  return t;
-}
-
-// WhrDecl
-inline
-ATermAppl initConstructWhrDecl(ATermAppl& t)
-{
-  t = ATmakeAppl2(gsAFunWhrDecl(), reinterpret_cast<ATerm>(constructString()), reinterpret_cast<ATerm>(constructDataExpr()));
-  ATprotect(reinterpret_cast<ATerm*>(&t));
-  return t;
-}
-
-inline
-ATermAppl constructWhrDecl()
-{
-  static ATermAppl t = initConstructWhrDecl(t);
   return t;
 }
 
@@ -2255,6 +2256,13 @@ inline
 ATermAppl constructBindingOperator()
 {
   return constructSetBagComp();
+}
+
+// WhrDecl
+inline
+ATermAppl constructWhrDecl()
+{
+  return constructIdInit();
 }
 
 // SortDecl

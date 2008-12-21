@@ -90,8 +90,13 @@
                  | Lambda
 
 //where clause declaration
-<WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)                         [- tc]
+<WhrDecl>      ::= <IdInit>                                              [- tc]
                  | <DataVarIdInit>                                       [+ tc]  
+
+//data variable identifier and initialisation
+<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
+
+<IdInit>       ::= IdInit(<String>, <DataExpr>)
 
 //Data specifications
 //-------------------
@@ -249,9 +254,6 @@
                  | StateVar(<String>, <DataExpr>*)
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
-
-//data variable identifier and initialisation
-<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
 
 //regular formula
 <RegFrm>       ::= <ActFrm>

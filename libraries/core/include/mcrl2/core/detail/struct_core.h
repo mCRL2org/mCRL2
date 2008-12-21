@@ -1017,6 +1017,28 @@ bool gsIsId(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunId();
 }
 
+// IdInit
+inline
+AFun initAFunIdInit(AFun& f)
+{
+  f = ATmakeAFun("IdInit", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunIdInit()
+{
+  static AFun AFunIdInit = initAFunIdInit(AFunIdInit);
+  return AFunIdInit;
+}
+
+inline
+bool gsIsIdInit(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunIdInit();
+}
+
 // IfThen
 inline
 AFun initAFunIfThen(AFun& f)
@@ -2799,28 +2821,6 @@ bool gsIsWhr(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunWhr();
 }
 
-// WhrDecl
-inline
-AFun initAFunWhrDecl(AFun& f)
-{
-  f = ATmakeAFun("WhrDecl", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunWhrDecl()
-{
-  static AFun AFunWhrDecl = initAFunWhrDecl(AFunWhrDecl);
-  return AFunWhrDecl;
-}
-
-inline
-bool gsIsWhrDecl(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunWhrDecl();
-}
-
 inline
 ATermAppl gsMakeActAnd(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
@@ -3089,6 +3089,12 @@ inline
 ATermAppl gsMakeId(ATermAppl String_0)
 {
   return ATmakeAppl1(gsAFunId(), (ATerm) String_0);
+}
+
+inline
+ATermAppl gsMakeIdInit(ATermAppl String_0, ATermAppl DataExpr_1)
+{
+  return ATmakeAppl2(gsAFunIdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
@@ -3579,12 +3585,6 @@ inline
 ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
   return ATmakeAppl2(gsAFunWhr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
-}
-
-inline
-ATermAppl gsMakeWhrDecl(ATermAppl String_0, ATermAppl DataExpr_1)
-{
-  return ATmakeAppl2(gsAFunWhrDecl(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 //--- end generated code
 
