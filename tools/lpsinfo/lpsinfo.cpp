@@ -165,20 +165,22 @@ class info_tool
           cout << "Number of process parameters      : " << lps.process_parameters().size() << endl; 
           cout << "Number of declared actions        : " << lps_specification.action_labels().size() << endl;
           cout << "Number of used actions            : " << action_labels.size() << endl;
-          cout << "Number of unused declared action  : " << unused_action_labels.size() <<endl;
-          cout << "Labels of unused declared action  : " ;
-          for(std::set<action_label >::iterator i = unused_action_labels.begin(); 
-                                           i != unused_action_labels.end();
-                                           ++i)
+          if(  unused_action_labels.size() > 0 )
           {
-            if( i != unused_action_labels.begin() )
+            cout << "Labels of unused declared actions : " ;
+            for(std::set<action_label >::iterator i = unused_action_labels.begin(); 
+                                             i != unused_action_labels.end();
+                                             ++i)
             {
-              cout << ", ";
+              if( i != unused_action_labels.begin() )
+              {
+                cout << ", ";
+              }
+              cout << pp(*i) ;
             }
-            cout << pp(*i) ;
           } 
           cout << endl;
-          cout << "Number of multi-actions           : " << used_multiactions(lps).size() << endl;
+          cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
           cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
         }
 
@@ -235,8 +237,7 @@ class info_tool
                 append(d.create< label >().set_text("Process parameters (#):")).
                 append(d.create< label >().set_text("Action labels (#):")).
                 append(d.create< label >().set_text("Used actions: (#):")).
-                append(d.create< label >().set_text("Unused actions: (#):")).
-                append(d.create< label >().set_text("multi-actions: (#):")).
+                append(d.create< label >().set_text("Multi-actions: (#):")).
                 append(d.create< label >().set_text("Sorts (#):")));
 
       /* Second column */
@@ -248,7 +249,6 @@ class info_tool
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.process_parameters().size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.action_labels().size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_used_actions(lps).size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (unused_action_labels.size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (used_multiactions(lps).size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
 
