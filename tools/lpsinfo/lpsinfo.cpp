@@ -178,8 +178,8 @@ class info_tool
               }
               cout << pp(*i) ;
             }
+            cout << endl;
           } 
-          cout << endl;
           cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
           cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
         }
