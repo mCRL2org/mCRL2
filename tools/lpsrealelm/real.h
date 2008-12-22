@@ -22,197 +22,304 @@
 
 using namespace atermpp;
 using namespace mcrl2;
+using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
 
-inline
-data_operation round()
-{
-  sort_expression ri = sort_arrow(make_list(sort_expr::real()), sort_expr::int_());
-  return data_operation(identifier_string("@round"), ri);
+inline ATermAppl initMakeOpIdNameDivide(ATermAppl &t) {
+  t = gsString2ATermAppl("@/");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_application round(const data_expression& r)
-{
-  return data_application(round(), make_list(r));
+inline ATermAppl initMakeOpIdNameTrunc(ATermAppl &t) {
+  t = gsString2ATermAppl("@trunc");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_operation trunc()
-{
-  sort_expression ri = sort_arrow(make_list(sort_expr::real()), sort_expr::int_());
-  return data_operation(identifier_string("@trunc"), ri);
+inline ATermAppl initMakeOpIdNameRound(ATermAppl &t) {
+  t = gsString2ATermAppl("@round");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_application trunc(const data_expression& r)
-{
-  return data_application(trunc(), make_list(r));
+inline ATermAppl initMakeOpIdNameRational(ATermAppl &t) {
+  t = gsString2ATermAppl("@rational");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_operation divide(const sort_expression& s)
-{
-  sort_expression fs = sort_arrow(make_list(s, s), sort_expr::real());
-  return data_operation(identifier_string("@divide"), fs);
+inline ATermAppl initMakeOpIdNameNormalizeRational(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_application divide(const data_expression& r1, const data_expression& r2)
-{
-  assert(r1.sort() == r2.sort());
-  return data_application(divide(r1.sort()), make_list(r1,r2));
+inline ATermAppl initMakeOpIdNameNormalizeRationalWhr(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational_whr");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_operation rational()
-{
-  sort_expression ipr = sort_arrow(make_list(sort_expr::int_(), sort_expr::pos()), sort_expr::real());
-  return data_operation(identifier_string("@rational"), ipr);
+inline ATermAppl initMakeOpIdNameNormalizeRationalHelper(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational_helper");
+  ATprotectAppl(&t);
+  return t;
 }
 
-inline
-data_application rational(const data_expression& i, const data_expression& p)
-{
-  return data_application(rational(), make_list(i,p));
+ATermAppl gsMakeOpIdNameDivide() {
+  static ATermAppl t = initMakeOpIdNameDivide(t);
+  return t;
 }
 
-inline
-bool is_rational(const data_expression& e)
-{
-  return is_data_application(e) && static_cast<const data_application&>(e).head() == rational();
+ATermAppl gsMakeOpIdNameTrunc() {
+  static ATermAppl t = initMakeOpIdNameTrunc(t);
+  return t;
 }
 
-inline
-data_operation normalize_rational()
-{
-  sort_expression iir = sort_arrow(make_list(sort_expr::int_(), sort_expr::int_()), sort_expr::real());
-  return data_operation(identifier_string("@normalize_rational"), iir);
+ATermAppl gsMakeOpIdNameRound() {
+  static ATermAppl t = initMakeOpIdNameRound(t);
+  return t;
 }
 
-inline
-data_application normalize_rational(const data_expression& i1, const data_expression& i2)
-{
-  return data_application(normalize_rational(), make_list(i1, i2));
+ATermAppl gsMakeOpIdNameRational() {
+  static ATermAppl t = initMakeOpIdNameRational(t);
+  return t;
 }
 
-inline
-data_operation normalize_rational_whr()
-{
-  sort_expression pinr = sort_arrow(make_list(sort_expr::pos(), sort_expr::int_(), sort_expr::nat()), sort_expr::real());
-  return data_operation(identifier_string("@normalize_rational_whr"), pinr);
+ATermAppl gsMakeOpIdNameNormalizeRational() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRational(t);
+  return t;
 }
 
-inline
-data_application normalize_rational_whr(const data_expression& p, const data_expression& i, const data_expression& n)
-{
-  return data_application(normalize_rational_whr(), make_list(p, i, n));
+ATermAppl gsMakeOpIdNameNormalizeRationalWhr() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRationalWhr(t);
+  return t;
 }
 
-inline
-data_operation normalize_rational_helper()
-{
-  sort_expression rpr = sort_arrow(make_list(sort_expr::real(), sort_expr::pos()), sort_expr::real());
-  return data_operation(identifier_string("@normalize_rational_helper"), rpr);
+ATermAppl gsMakeOpIdNameNormalizeRationalHelper() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRationalHelper(t);
+  return t;
 }
 
-inline
-data_application normalize_rational_helper(const data_expression& r, const data_expression& p)
+ATermAppl gsMakeOpIdDivide(ATermAppl SortExpr)
 {
-  return data_application(normalize_rational_helper(), make_list(r, p));
+  //assert(IsPNIRSort(SortExpr));
+  return gsMakeOpId(gsMakeOpIdNameDivide(),
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprReal()));
 }
 
-inline
-data_expression real_zero()
+ATermAppl gsMakeOpIdTrunc(void)
 {
-  return rational(int_(0), pos(1));
+  return gsMakeOpId(gsMakeOpIdNameTrunc(), gsMakeSortArrow1(
+    gsMakeSortExprReal(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdRound(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameRound(), gsMakeSortArrow1(
+    gsMakeSortExprReal(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdRational(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameRational(), gsMakeSortArrow2(
+    gsMakeSortExprInt(), gsMakeSortExprPos(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRational(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRational(), gsMakeSortArrow2(
+    gsMakeSortExprInt(), gsMakeSortExprInt(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRationalWhr(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalWhr(), gsMakeSortArrow3(
+    gsMakeSortExprPos(), gsMakeSortExprInt(), gsMakeSortExprNat(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRationalHelper(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalHelper(), gsMakeSortArrow2(
+    gsMakeSortExprReal(), gsMakeSortExprInt(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeDataExprDivide(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdDivide(gsGetSort(DataExprLHS)),
+    DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprTrunc(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
+  return gsMakeDataAppl1(gsMakeOpIdTrunc(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprRound(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
+  return gsMakeDataAppl1(gsMakeOpIdRound(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprRational(ATermAppl DataExprInt, ATermAppl DataExprPos)
+{
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
+  return gsMakeDataAppl2(gsMakeOpIdRational(), DataExprInt, DataExprPos);
+}
+
+ATermAppl gsMakeDataExprNormalizeRational(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprRHS), gsMakeSortExprInt()));
+  return gsMakeDataAppl2(gsMakeOpIdNormalizeRational(), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprNormalizeRationalWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat)
+{
+  assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprNat), gsMakeSortExprNat()));
+  return gsMakeDataAppl3(gsMakeOpIdNormalizeRationalWhr(), DataExprPos, DataExprInt, DataExprNat);
+}
+
+ATermAppl gsMakeDataExprNormalizeRationalHelper(ATermAppl DataExprReal, ATermAppl DataExprInt)
+{
+  assert(ATisEqual(gsGetSort(DataExprReal), gsMakeSortExprReal()));
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  return gsMakeDataAppl2(gsMakeOpIdNormalizeRationalHelper(), DataExprReal, DataExprInt);
+}
+
+bool gsIsDataExprRational(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNameRational();
+  }
+  return false;
 }
 
 inline
 data_operation_list additional_real_mappings()
 {
-  sort_expression rpr = sort_arrow(make_list(sort_expr::real(), sort_expr::pos()), sort_expr::real());
-
-  data_operation_list r;
-
-  r = push_front(r,round());
-  r = push_front(r,trunc());
-  r = push_front(r,divide(sort_expr::pos()));
-  r = push_front(r,divide(sort_expr::nat()));
-  r = push_front(r,divide(sort_expr::int_()));
-  r = push_front(r,divide(sort_expr::real()));
-  r = push_front(r,rational());
-  r = push_front(r,normalize_rational());
-  r = push_front(r,normalize_rational_whr());
-  r = push_front(r,normalize_rational_helper());
-
-  return reverse(r);
+  ATermList ops = ATmakeList(10,
+    (ATerm) gsMakeOpIdDivide(gsMakeSortExprPos()),
+    (ATerm) gsMakeOpIdDivide(gsMakeSortExprNat()),
+    (ATerm) gsMakeOpIdDivide(gsMakeSortExprInt()),
+    (ATerm) gsMakeOpIdDivide(gsMakeSortExprReal()),
+    (ATerm) gsMakeOpIdTrunc(),
+    (ATerm) gsMakeOpIdRound(),
+    (ATerm) gsMakeOpIdRational(),
+    (ATerm) gsMakeOpIdNormalizeRational(),
+    (ATerm) gsMakeOpIdNormalizeRationalWhr(),
+    (ATerm) gsMakeOpIdNormalizeRationalHelper()
+  );
+  return data_operation_list(ops);
 }
 
 inline
 data_equation_list additional_real_equations()
 {
-  data_variable p("p", sort_expr::pos());
-  data_variable q("q", sort_expr::pos());
-  data_variable m("m", sort_expr::nat());
-  data_variable n("n", sort_expr::nat());
-  data_variable x("x", sort_expr::int_());
-  data_variable y("y", sort_expr::int_());
-  data_variable r("r", sort_expr::real());
-  data_variable s("s", sort_expr::real());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl zero = gsMakeDataExprC0();
+  ATermAppl one = gsMakeDataExprC1();
+  ATermAppl two = gsMakeDataExprCDub(gsMakeDataExprFalse(), one);
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl q = gsMakeDataVarId(gsString2ATermAppl("q"), gsMakeSortExprPos());
+  ATermAppl m = gsMakeDataVarId(gsString2ATermAppl("m"), gsMakeSortExprNat());
+  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
+  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), gsMakeSortExprInt());
+  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), gsMakeSortExprInt());
+  ATermAppl r = gsMakeDataVarId(gsString2ATermAppl("r"), gsMakeSortExprReal());
+  ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), gsMakeSortExprReal());
+  ATermList pl = ATmakeList1((ATerm) p);
+  ATermList nl = ATmakeList1((ATerm) n);
+  ATermList xl = ATmakeList1((ATerm) x);
+  ATermList rl = ATmakeList1((ATerm) r);
+  ATermList pql = ATmakeList2((ATerm) p, (ATerm) q);
+  ATermList pxl = ATmakeList2((ATerm) p, (ATerm) x);
+  ATermList pxyl = ATmakeList3((ATerm) p, (ATerm) x, (ATerm) y);
+  ATermList pqxyl = ATmakeList4((ATerm) p, (ATerm) q, (ATerm) x, (ATerm) y);
+  ATermList pnxl = ATmakeList3((ATerm) p, (ATerm) n, (ATerm) x);
+  ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
+  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
+  ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
+  ATermList DataEqns = ATmakeList(34,
+    //equality (Real # Real -> Bool)
+    (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprEq(gsMakeDataExprRational(x,p), gsMakeDataExprRational(y,q)), gsMakeDataExprEq(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+    //convert Int to Real (Int -> Real)
+    (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprInt2Real(x), gsMakeDataExprRational(x, one)),
+    //convert Nat to Real (Nat -> Real)
+    (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprNat2Real(n), gsMakeDataExprRational(gsMakeDataExprCInt(n), one)),
+    //convert Pos to Real (Pos -> Real)
+    (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprPos2Real(p), gsMakeDataExprRational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), one)),
+    //convert Real to Int (Real -> Int)
+    (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprReal2Int(gsMakeDataExprRational(x, one)), x),
+    //convert Real to Nat (Real -> Nat)
+    (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprReal2Nat(gsMakeDataExprRational(x, one)), gsMakeDataExprInt2Nat(x)),
+    //convert Real to Pos (Real -> Pos)
+    (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprReal2Pos(gsMakeDataExprRational(x, one)), gsMakeDataExprInt2Pos(x)),
+    //less than or equal (Real # Real -> Bool)
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLTE(r,r), true_()),
+    (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprLTE(gsMakeDataExprRational(x,p),gsMakeDataExprRational(y,q)), gsMakeDataExprLTE(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+    //less than (Real # Real -> Bool)
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLT(r,r), false_()),
+    (ATerm) gsMakeDataEqn(pqxyl, nil, less(gsMakeDataExprRational(x,p),gsMakeDataExprRational(y,q)), gsMakeDataExprLT(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+    //greater than or equal (Real # Real -> Bool)
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprGTE(r,s), gsMakeDataExprLTE(s,r)),
+    //greater than (Real # Real -> Bool)
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprGT(r,s), gsMakeDataExprLT(s,r)),
+    //maximum (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprMax(r,s), gsMakeDataExprIf(gsMakeDataExprLT(r,s), s, r)),
+    //minimum (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprMin(r,s), gsMakeDataExprIf(gsMakeDataExprLT(r,s), r, s)),
+    //absolute value (Real -> Real)
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAbs(r), gsMakeDataExprIf(gsMakeDataExprLT(r,gsMakeDataExprRational(gsMakeDataExprCInt(zero), one)),gsMakeDataExprNeg(r),r)),
+    //negation (Real -> Real)
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprNeg(gsMakeDataExprRational(x,p)), gsMakeDataExprRational(gsMakeDataExprNeg(x), p)),
+    //successor (Real -> Real)
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprSucc(gsMakeDataExprRational(x,p)), gsMakeDataExprRational(plus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)),
+    //predecessor (Real -> Real)
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprPred(gsMakeDataExprRational(x,p)), gsMakeDataExprRational(minus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)),
+    //addition (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprAdd(gsMakeDataExprRational(x,p), gsMakeDataExprRational(y,q)), gsMakeDataExprNormalizeRational(plus(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprMult(p,q))))),
+    //subtraction (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprSubt(gsMakeDataExprRational(x,p), gsMakeDataExprRational(y,q)), gsMakeDataExprNormalizeRational(minus(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprMult(p,q))))),
+    //multiplication (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprMult(gsMakeDataExprRational(x,p), gsMakeDataExprRational(y,q)), gsMakeDataExprNormalizeRational(gsMakeDataExprMult(x,y), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprMult(p,q))))),
+    //division (Real # Real -> Real)
+    (ATerm) gsMakeDataEqn(pqxyl, gsMakeDataExprNeq(y, gsMakeDataExprCInt(zero)), gsMakeDataExprDivide(gsMakeDataExprRational(x,p), gsMakeDataExprRational(y,q)), gsMakeDataExprNormalizeRational(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+    //division (Pos # Pos -> Real)
+    (ATerm) gsMakeDataEqn(pql, nil, gsMakeDataExprDivide(p,q), gsMakeDataExprNormalizeRational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(gsMakeDataExprCNat(q)))),
+    //division (Nat # Nat -> Real)
+    (ATerm) gsMakeDataEqn(mnl, gsMakeDataExprNeq(m, zero), gsMakeDataExprDivide(m,n), gsMakeDataExprNormalizeRational(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n))),
+    //division (Int # Int -> Real)
+    (ATerm) gsMakeDataEqn(xyl, gsMakeDataExprNeq(y, gsMakeDataExprCInt(zero)), gsMakeDataExprDivide(x,y), gsMakeDataExprNormalizeRational(x,y)),
+    //exponentiation (Real # Nat -> Real)
+    (ATerm) gsMakeDataEqn(pnxl, nil, gsMakeDataExprExp(gsMakeDataExprRational(x,p), n), gsMakeDataExprNormalizeRational(gsMakeDataExprExp(x,n), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprExp(p,n))))),
+    //trunc (Real -> Int)
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprTrunc(gsMakeDataExprRational(x,p)), gsMakeDataExprDiv(x,p)),
+    //round (Real -> Int)
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprRound(r), gsMakeDataExprTrunc(gsMakeDataExprAdd(r,gsMakeDataExprRational(gsMakeDataExprCInt(gsMakeDataExprCNat(one)),two)))),
+    //normalize_rational (Int # Int -> Real)
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprNormalizeRational(x,gsMakeDataExprNeg(p)), gsMakeDataExprNormalizeRational(negate(x), gsMakeDataExprCInt(gsMakeDataExprCNat(p)))),
+    (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprNormalizeRational(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))), gsMakeDataExprNormalizeRationalWhr(p, gsMakeDataExprDiv(x, p), gsMakeDataExprMod(x, p))),
+    //normalize_rational_whr (Pos # Int # Nat -> Real)
+    (ATerm) gsMakeDataEqn(pnxl, nil, gsMakeDataExprNormalizeRationalWhr(p, x, n), gsMakeDataExprIf(gsMakeDataExprEq(n, zero), gsMakeDataExprRational(x, one), gsMakeDataExprNormalizeRationalHelper(gsMakeDataExprNormalizeRational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(n)), x))),
+    //normalize_rational_helper (Real # Int -> Real)
+    (ATerm) gsMakeDataEqn(pxyl, nil, gsMakeDataExprNormalizeRationalHelper(gsMakeDataExprRational(x, p), y), gsMakeDataExprRational(gsMakeDataExprAdd(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprMult(y, x)), gsMakeDataExprInt2Pos(x))),
+    //CReal (Int -> Real)
+    (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprCReal(x), gsMakeDataExprRational(x, one))
+  );
 
-  using namespace core::detail;
-  data_equation_list res;
-
-  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), equal_to(rational(x,p), rational(y,q)), equal_to(multiplies(x,gsMakeDataExprPos2Int(q)),multiplies(y,gsMakeDataExprPos2Int(p)))));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprInt2Real(x), rational(x, pos(1))));
-  res = push_front(res, data_equation(make_list(n), gsMakeNil(), gsMakeDataExprNat2Real(n), rational(gsMakeDataExprCInt(n), pos(1))));
-  res = push_front(res, data_equation(make_list(p), gsMakeNil(), gsMakeDataExprPos2Real(p), rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), pos(1))));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Int(rational(x, pos(1))), x));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Nat(rational(x, pos(1))), gsMakeDataExprInt2Nat(x)));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprReal2Pos(rational(x, pos(1))), gsMakeDataExprInt2Pos(x)));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), less_equal(r,r), true_()));
-  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less_equal(rational(x,p),rational(y,q)), less_equal(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), less(r,r), false_()));
-  res = push_front(res, data_equation(make_list(p,q,x,y), gsMakeNil(), less(rational(x,p),rational(y,q)), less(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
-  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), greater_equal(r,s), less_equal(s,r)));
-  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), greater(r,s), less(s,r)));
-  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), max_(r,s), if_(less(r,s), s, r)));
-  res = push_front(res, data_equation(make_list(r,s), gsMakeNil(), min_(r,s), if_(less(r,s), r, s)));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), abs(r), if_(less(r,real_zero()),negate(r),r)));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), negate(rational(x,p)), rational(negate(x), p)));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), negate(negate(r)), r));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprSucc(rational(x,p)), rational(plus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), gsMakeDataExprPred(rational(x,p)), rational(minus(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),p)));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), plus(rational(x,p), rational(y,q)), normalize_rational(plus(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), minus(rational(x,p), rational(y,q)), normalize_rational(minus(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p)))), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeNil(), multiplies(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,y), gsMakeDataExprCInt(gsMakeDataExprCNat(multiplies(p,q))))));
-  res = push_front(res, data_equation(make_list(x,y,p,q), gsMakeDataExprNeq(y, gsMakeDataExprCInt(gsMakeDataExprC0())), divide(rational(x,p), rational(y,q)), normalize_rational(multiplies(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))), multiplies(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))));
-  res = push_front(res, data_equation(make_list(p,q), gsMakeNil(), divide(p,q), normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(gsMakeDataExprCNat(q)))));
-  res = push_front(res, data_equation(make_list(m,n), gsMakeDataExprNeq(m, gsMakeDataExprC0()), divide(m,n), normalize_rational(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n))));
-  res = push_front(res, data_equation(make_list(x,y), gsMakeDataExprNeq(y, gsMakeDataExprCInt(gsMakeDataExprC0())), divide(x,y), normalize_rational(x,y)));
-  res = push_front(res, data_equation(make_list(x,p,n), gsMakeNil(), gsMakeDataExprExp(rational(x,p), n), normalize_rational(gsMakeDataExprExp(x,n), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprExp(p,n))))));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), trunc(rational(x,p)), divides(x,p)));
-  res = push_front(res, data_equation(make_list(r), gsMakeNil(), round(r), trunc(plus(r,rational(int_(1),pos(2))))));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(), normalize_rational(x,negate(p)), normalize_rational(negate(x), gsMakeDataExprCInt(gsMakeDataExprCNat(p)))));
-  res = push_front(res, data_equation(make_list(x,p), gsMakeNil(),
-    normalize_rational(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))),
-    normalize_rational_whr(p, gsMakeDataExprDiv(x, p), gsMakeDataExprMod(x, p))
-  ));
-  res = push_front(res, data_equation(make_list(p,n,x), gsMakeNil(),
-    normalize_rational_whr(p, x, n),
-    gsMakeDataExprIf(gsMakeDataExprEq(n, gsMakeDataExprC0()), rational(x, gsMakeDataExprC1()), normalize_rational_helper(normalize_rational(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(n)), x))
-  ));
-  res = push_front(res, data_equation(make_list(p,x,y), gsMakeNil(),
-    normalize_rational_helper(rational(x, p), y),
-    rational(gsMakeDataExprAdd(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprMult(y, x)), gsMakeDataExprInt2Pos(x))
-  ));
-  res = push_front(res, data_equation(make_list(x), gsMakeNil(), gsMakeDataExprCReal(x), rational(x, pos(1))));
-
-  return reverse(res);
+  return data_equation_list(DataEqns);
 }
 
 inline

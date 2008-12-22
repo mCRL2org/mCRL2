@@ -163,6 +163,13 @@ data_expression rhs(const data_expression e)
   return *(++arguments.begin());
 }
 
+/// \brief returns the number zero of sort Real
+/// \ret the data_expression representing zero
+static inline data_expression real_zero()
+{
+  return gsMakeDataExprRational(int_(0), pos(1));
+}
+
 /// \brief Determine whether a data expression is a constant expression
 ///        encoding a number
 /// \param e A data expression
@@ -177,7 +184,7 @@ bool is_number(const data_expression e)
          core::detail::gsIsDataExprCNeg(e) ||
          core::detail::gsIsDataExprCInt(e) ||
          core::detail::gsIsDataExprCReal(e) ||
-         (is_data_application(e) && static_cast<const data_application&>(e).head() == rational());
+         (is_data_application(e) && static_cast<const data_application&>(e).head() == gsMakeOpIdRational());
 }
 
 /// \brief Determine wheter a number is negative
@@ -186,7 +193,7 @@ bool is_number(const data_expression e)
 static inline
 bool is_negative(const data_expression e)
 {
-  return is_negate(e) || gsIsDataExprCNeg(e) || (is_rational(e) && is_negative(lhs(e)));
+  return is_negate(e) || gsIsDataExprCNeg(e) || (gsIsDataExprRational(e) && is_negative(lhs(e)));
 }
 
 /// \brief Determine whether a data expression is an inequality
@@ -659,7 +666,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
             // Divide out the factor in the right hand side
             data_expression factor = lhs(left);
             left = rhs(left);
-            right = divide(right, factor);
+            right = gsMakeDataExprDivide(right, factor);
           }
           if(is_negate(left))
           {
@@ -673,7 +680,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
           // Divide out the factor in the right hand side
           data_expression factor = lhs(left);
           left = rhs(left);
-          right = divide(right, factor);
+          right = gsMakeDataExprDivide(right, factor);
         }
         if(is_negate(left))
         {
@@ -728,8 +735,8 @@ data_expression remove_variable(const data_variable& variable, const data_expres
     if(is_multiplies(lhs(left)))
     {
       data_expression factor = lhs(lhs(left));
-      new_left = divide(plus(new_left, rhs(left)), factor);
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, divide(rhs(inequality), factor)));
+      new_left = gsMakeDataExprDivide(plus(new_left, rhs(left)), factor);
+      return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, gsMakeDataExprDivide(rhs(inequality), factor)));
     }
     else if (lhs(left) == variable || lhs(left) == negate(static_cast<const data_expression&>(variable)))
     {
