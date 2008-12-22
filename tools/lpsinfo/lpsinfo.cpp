@@ -167,7 +167,7 @@ class info_tool
           cout << "Number of used actions            : " << action_labels.size() << endl;
           if(  unused_action_labels.size() > 0 )
           {
-            cout << "Labels of unused declared actions : " ;
+            cout << "Labels of unused actions : " ;
             for(std::set<action_label >::iterator i = unused_action_labels.begin(); 
                                              i != unused_action_labels.end();
                                              ++i)
