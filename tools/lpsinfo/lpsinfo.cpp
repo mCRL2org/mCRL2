@@ -17,6 +17,7 @@
 #include <exception>
 #include <cstdio>
 #include <set>
+#include <algorithm>
 
 //Boost
 #include <boost/lexical_cast.hpp>
@@ -64,14 +65,48 @@ static inline int get_number_of_tau_summands(linear_process lps) {
   return numOfTau;
 }
 
-static inline int get_number_of_used_actions(linear_process lps){
+static inline std::set<action_label > get_used_actions(linear_process lps){
   std::set<action_label > actionSet;
   for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	for(action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); ++currentAction){
+	for(action_list::iterator currentAction = currentSummand->actions().begin(); 
+        currentAction != currentSummand->actions().end(); 
+        ++currentAction)
+    {
 		actionSet.insert(currentAction->label());
 	}
   }
-  return actionSet.size();
+  return actionSet;
+}
+
+static inline std::set<action_list > used_multiactions(linear_process lps){
+  std::set<action_list > multiActionSet;
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+    if (currentSummand->actions().size() > 1)
+    {
+    		multiActionSet.insert(currentSummand->actions());
+    }
+  }
+  return multiActionSet;
+}
+
+static inline std::set<action_label > get_unused_actions(specification lps_specification ){
+  action_label_list action_list =lps_specification.action_labels();
+  std::set<action_label > actionSet;
+  for(action_label_list::iterator i = action_list.begin(); i != action_list.end(); ++i )
+  {
+    actionSet.insert(*i);
+  }
+
+  linear_process lps = lps_specification.process();
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+	for(action_list::iterator currentAction = currentSummand->actions().begin(); 
+        currentAction != currentSummand->actions().end(); 
+        ++currentAction)
+    {
+		  actionSet.erase(currentAction->label());
+	}
+  }
+  return actionSet;
 }
 
 class info_tool
@@ -118,17 +153,33 @@ class info_tool
  
           lps_specification.load(input_file_name);
           linear_process lps = lps_specification.process();
-      	 
+
+          std::set<action_label > action_labels = get_used_actions(lps);
+          std::set<action_label > unused_action_labels = get_unused_actions(lps_specification);
+         
           cout << "Input read from " << (input_file_name.empty()?"stdin":("'" + input_file_name + "'")) << endl;
           cout << endl;   
-          cout << "Number of summands                    : " << lps.summands().size() << endl;
-          cout << "Number of tau-summands                : " << get_number_of_tau_summands(lps) << endl; 
-          cout << "Number of free variables              : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
-          cout << "Number of process parameters          : " << lps.process_parameters().size() << endl; 
-          cout << "Number of action labels               : " << lps_specification.action_labels().size() << endl;
-          cout << "Number of used versus declared actions: " << get_number_of_used_actions(lps) << "/"<< lps_specification.action_labels().size() << endl;
-          //cout << "Number of used versus declared multi-actions: " << "" << endl;
-          cout << "Number of used sorts                  : " << lps_specification.data().sorts().size() << endl;
+          cout << "Number of summands                : " << lps.summands().size() << endl;
+          cout << "Number of tau-summands            : " << get_number_of_tau_summands(lps) << endl; 
+          cout << "Number of free variables          : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
+          cout << "Number of process parameters      : " << lps.process_parameters().size() << endl; 
+          cout << "Number of declared actions        : " << lps_specification.action_labels().size() << endl;
+          cout << "Number of used actions            : " << action_labels.size() << endl;
+          cout << "Number of unused declared action  : " << unused_action_labels.size() <<endl;
+          cout << "Labels of unused declared action  : " ;
+          for(std::set<action_label >::iterator i = unused_action_labels.begin(); 
+                                           i != unused_action_labels.end();
+                                           ++i)
+          {
+            if( i != unused_action_labels.begin() )
+            {
+              cout << ", ";
+            }
+            cout << pp(*i) ;
+          } 
+          cout << endl;
+          cout << "Number of multi-actions           : " << used_multiactions(lps).size() << endl;
+          cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
         }
 
         return EXIT_SUCCESS;
@@ -167,6 +218,9 @@ class info_tool
 
       linear_process lps = lps_specification.process();
 
+      std::set<action_label > action_labels = get_used_actions(lps);
+      std::set<action_label > unused_action_labels = get_unused_actions(lps_specification);
+
       /* Create display */
       tipi::tool_display d;
 
@@ -181,6 +235,8 @@ class info_tool
                 append(d.create< label >().set_text("Process parameters (#):")).
                 append(d.create< label >().set_text("Action labels (#):")).
                 append(d.create< label >().set_text("Used actions: (#):")).
+                append(d.create< label >().set_text("Unused actions: (#):")).
+                append(d.create< label >().set_text("multi-actions: (#):")).
                 append(d.create< label >().set_text("Sorts (#):")));
 
       /* Second column */
@@ -191,7 +247,9 @@ class info_tool
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.process_parameters().size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.action_labels().size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_used_actions(lps)))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_used_actions(lps).size()))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (unused_action_labels.size()))).
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (used_multiactions(lps).size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
 
       send_display_layout(d.manager(m));
