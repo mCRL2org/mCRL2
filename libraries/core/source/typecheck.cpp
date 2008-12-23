@@ -1783,6 +1783,8 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
      !ATisEqual(Name,gsMakeOpIdNameDiv()) &&
      !ATisEqual(Name,gsMakeOpIdNameMod()) &&
      !ATisEqual(Name,gsMakeOpIdNameExp()) &&
+     !ATisEqual(Name,gsMakeOpIdNameTrunc()) &&
+     !ATisEqual(Name,gsMakeOpIdNameRound()) &&
      !ATisEqual(Name,gsMakeOpIdNameHead()) &&
      !ATisEqual(Name,gsMakeOpIdNameTail()) &&
      !ATisEqual(Name,gsMakeOpIdNameRHead()) &&
