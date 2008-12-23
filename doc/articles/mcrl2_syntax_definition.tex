@@ -458,7 +458,7 @@ d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|
         & \mb{|} & ( d )\\
 \f{mvd}& \mb{::=} & x,\mb{\ldots},x: s\\
 \oplus & \mb{::=} & *\ \mb{|}\ .\ \mb{|}\ \cap\ \mb{|}\ 
-               \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\ 
+               /\ \mb{|}\  \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\ 
                +\ \mb{|}\ -\ \mb{|}\ \cup\ \mb{|}\ 
                \concat\ \mb{|}\ 
                \snoc\ \mb{|}\ 
@@ -473,10 +473,10 @@ Here $\f{mvd}$ stands for a multiple data variable declaration, $\oplus$ for a b
 The unary operators have the highest priority, followed by the infix operators,
 followed by $\lambda$, $\forall$ and $\exists$, followed by $\kwwhr\ \kwend$.
 The descending order of precedence of the infix operators is:
-$\set{*, ., \cap}, \set{\kwdiv, \kwmod}, \set{+, -, \cup}, \concat, \snoc,
+$\set{*, ., \cap}, \set{/, \kwdiv, \kwmod}, \set{+, -, \cup}, \concat, \snoc,
 \cons, \set{<, \leq, >, \geq, \subset, \subseteq, \in}, \set{\approx,\not\approx},
 \set{\land, \lor}, \limp$.
-Of these operators $*$, $.$, $\cap$, $\kwdiv$, $\kwmod$, $+$, $-$, $\cup$ and
+Of these operators $*$, $.$, $\cap$, $/$, $\kwdiv$, $\kwmod$, $+$, $-$, $\cup$ and
 $\concat$ associate to the left and $\approx$, $\not\approx$, $\land$, $\lor$
 and $\limp$ associate to the right.
 
