@@ -1985,6 +1985,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameBagDiff())      ||
      (OpIdName == gsMakeOpIdNameDiv())          ||
      (OpIdName == gsMakeOpIdNameMod())          ||
+     (OpIdName == gsMakeOpIdNameDivide())       ||
      (OpIdName == gsMakeOpIdNameMult())         ||
      (OpIdName == gsMakeOpIdNameEltAt())        ||
      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
@@ -2024,7 +2025,8 @@ int gsPrecOpIdInfix(ATermAppl OpIdName)
       (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
@@ -2066,7 +2068,8 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
       (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
@@ -2108,7 +2111,8 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
       (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 10;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 11;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||

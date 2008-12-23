@@ -252,6 +252,8 @@ ATermAppl gsMakeOpIdNameCNeg();
 ATermAppl gsMakeOpIdNameCInt();
 ///Creation of name for the system operation identifier "CReal"
 ATermAppl gsMakeOpIdNameCReal();
+///Creation of name for the system operation identifier "Rational"
+ATermAppl gsMakeOpIdNameRational();
 ///Creation of name for the system operation identifier "Pos2Nat"
 ATermAppl gsMakeOpIdNamePos2Nat();
 ///Creation of name for the system operation identifier "Pos2Int"
@@ -330,6 +332,18 @@ ATermAppl gsMakeOpIdNameGGDivMod();
 ATermAppl gsMakeOpIdNameExp();
 ///Creation of name for the system operation identifier "Even"
 ATermAppl gsMakeOpIdNameEven();
+///Creation of name for the system operation identifier "Divide"
+ATermAppl gsMakeOpIdNameDivide();
+///Creation of name for the system operation identifier "Trunc"
+ATermAppl gsMakeOpIdNameTrunc();
+///Creation of name for the system operation identifier "Round"
+ATermAppl gsMakeOpIdNameRound();
+///Creation of name for the system operation identifier "NormalizeRational"
+ATermAppl gsMakeOpIdNameNormalizeRational();
+///Creation of name for the system operation identifier "NormalizeRationalWhr"
+ATermAppl gsMakeOpIdNameNormalizeRationalWhr();
+///Creation of name for the system operation identifier "NormalizeRationalHelper"
+ATermAppl gsMakeOpIdNameNormalizeRationalHelper();
 ///Creation of name for the system operation identifier "EmptyList"
 ATermAppl gsMakeOpIdNameEmptyList();
 ///Creation of name for the system operation identifier "ListEnum"
@@ -456,11 +470,15 @@ ATermAppl gsMakeOpIdCPair(void);
 ATermAppl gsMakeOpIdCNeg(void);
 
 ///\return Operation identifier for the creation of an integer from a natural
-///     number
+///        number
 ATermAppl gsMakeOpIdCInt(void);
 
 ///\return Operation identifier for the creation of a real from an integer
 ATermAppl gsMakeOpIdCReal(void);
+
+///\return Operation identifier for the creation of a real from an
+///        integer and a positive number
+ATermAppl gsMakeOpIdRational(void);
 
 ///\return Operation identifier for the conversion of Pos to Nat
 ATermAppl gsMakeOpIdPos2Nat(void);
@@ -635,6 +653,29 @@ ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
 
 ///\return Operation identifier for 'even' of sort Nat -> Bool
 ATermAppl gsMakeOpIdEven();
+
+///\pre SortExpr is Pos, Nat, Int or Real
+///\return Operation identifier for division, which has sort S # S -> Real,
+///     where S stands for SortExpr
+ATermAppl gsMakeOpIdDivide(ATermAppl SortExpr);
+
+///\return Operation identifier for 'trunc' of sort Real -> Int
+ATermAppl gsMakeOpIdTrunc();
+
+///\return Operation identifier for 'round' of sort Real -> Int
+ATermAppl gsMakeOpIdRound();
+
+///\return Operation identifier for 'normalize_rational' of sort
+///        Int # Int -> Real
+ATermAppl gsMakeOpIdNormalizeRational();
+
+///\return Operation identifier for 'normalize_rational_whr' of sort
+///        Pos # Int # Nat -> Real
+ATermAppl gsMakeOpIdNormalizeRationalWhr();
+
+///\return Operation identifier for 'normalize_rational_helper' of sort
+///        Real # Int -> Real
+ATermAppl gsMakeOpIdNormalizeRationalHelper();
 
 ///\pre SortExpr is a sort expression
 ///\return Operation identifier for the empty list of sort SortExpr
@@ -874,6 +915,11 @@ ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 ///\return DataExpr as a data expression of sort Real
 ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr);
 
+///\pre DataExprInt and DataExprPos are data expressions of sort Int and Pos,
+//      respectively, such that their greater common divisor is 1
+///\return Data expression for DataExprInt divided by DataExprPos, of sort Real
+ATermAppl gsMakeDataExprRational(ATermAppl DataExprInt, ATermAppl DataExprPos);
+
 ///\pre DataExpr is a data expression of sort Pos 
 ///\return Data expression for the conversion of DataExpr to Nat
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr);
@@ -1079,6 +1125,34 @@ ATermAppl gsMakeDataExprLast(ATermAppl DataExpr);
 ///\pre DataExpr is a data expression of sort Nat, which we denote by n
 ///\return Data expression for 'even(n)', of sort Bool
 ATermAppl gsMakeDataExprEven(ATermAppl DataExpr);
+
+///\pre DataExprLHS and DataExprRHS are both data expressions of
+///     sort Pos, Nat, Int or Real
+///\return Data expression for the division of DataExprLHS by DataExprRHS
+ATermAppl gsMakeDataExprDivide(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+
+///\pre DataExpr is a data expression of sort Real, which we denote by r
+///\return Data expression for 'trunc(r)', of sort Int
+ATermAppl gsMakeDataExprTrunc(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression of sort Real, which we denote by r
+///\return Data expression for 'round(r)', of sort Int
+ATermAppl gsMakeDataExprRound(ATermAppl DataExpr);
+
+///\pre DataExprLHS and DataExprRHS are data expressions of sort Int,
+///     which we denote by x and y
+///\return Data expression for 'normalize_rational(x,y)' of sort Real
+ATermAppl gsMakeDataExprNormalizeRational(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+
+///\pre DataExprPos, DataExprInt and DataExprNat are data expressions of
+///     sort Pos, Int and Nat, respectively, which we denote by p, x, and n
+///\return Data expression for 'normalize_rational_whr(p,x,n)' of sort Real
+ATermAppl gsMakeDataExprNormalizeRationalWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat);
+
+///\pre DataExprReal and DataExprInt are data expressions of sort Real and Int,
+//      respectively, which we denote by r and x
+///\return Data expression for 'normalize_rational_helper(r,x)' of sort Real
+ATermAppl gsMakeDataExprNormalizeRationalHelper(ATermAppl DataExprReal, ATermAppl DataExprInt);
 
 ///\pre SortExpr is a sort expression
 ///\return Data expression for the empty list of sort SortExpr
@@ -1385,6 +1459,10 @@ bool gsIsDataExprCInt(ATermAppl DataExpr);
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a CReal
 bool gsIsDataExprCReal(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a Rational 
+bool gsIsDataExprRational(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a Pos2Nat

@@ -104,6 +104,7 @@ Number     "0"|([1-9][0-9]*)
 "=>"       { process_string(); return IMP; }
 "<<"       { process_string(); return BINIT; }
 "<>"       { process_string(); return ELSE; }
+"/"        { process_string(); return SLASH; }
 "*"        { process_string(); return STAR; }
 "+"        { process_string(); return PLUS; }
 "-"        { process_string(); return MINUS; }

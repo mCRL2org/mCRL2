@@ -103,8 +103,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %token <appl> TAG_STATE_FRM TAG_DATA_VARS TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
-%token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
-%token <appl> HASH BAR
+%token <appl> SLASH STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK 
+%token <appl> EXCLAM AT HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
@@ -788,6 +788,12 @@ data_expr_div:
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed mod expression\n  %T\n", $$);
+    }
+  | data_expr_div SLASH data_expr_mult
+    {
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+      gsDebugMsg("parsed division expression\n  %T\n", $$);
     }
   ;
 

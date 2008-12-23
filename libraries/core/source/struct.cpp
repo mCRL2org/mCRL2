@@ -251,6 +251,12 @@ inline ATermAppl initMakeOpIdNameCReal(ATermAppl &t)
   return t;
 }
 
+inline ATermAppl initMakeOpIdNameRational(ATermAppl &t) {
+  t = gsString2ATermAppl("@rational");
+  ATprotectAppl(&t);
+  return t;
+}
+
 inline ATermAppl initMakeOpIdNamePos2Nat(ATermAppl &t) 
 {
   t = gsString2ATermAppl("Pos2Nat");
@@ -520,6 +526,42 @@ inline ATermAppl initMakeOpIdNameExp(ATermAppl &t)
 inline ATermAppl initMakeOpIdNameEven(ATermAppl &t) 
 {
   t = gsString2ATermAppl("@even");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameDivide(ATermAppl &t) {
+  t = gsString2ATermAppl("/");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameTrunc(ATermAppl &t) {
+  t = gsString2ATermAppl("trunc");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameRound(ATermAppl &t) {
+  t = gsString2ATermAppl("round");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameNormalizeRational(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameNormalizeRationalWhr(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational_whr");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameNormalizeRationalHelper(ATermAppl &t) {
+  t = gsString2ATermAppl("@normalize_rational_helper");
   ATprotectAppl(&t);
   return t;
 }
@@ -1189,6 +1231,11 @@ ATermAppl gsMakeOpIdNameCReal() {
   return t;
 }
 
+ATermAppl gsMakeOpIdNameRational() {
+  static ATermAppl t = initMakeOpIdNameRational(t);
+  return t;
+}
+
 ATermAppl gsMakeOpIdNamePos2Nat() {
   static ATermAppl t = initMakeOpIdNamePos2Nat(t);
   return t;
@@ -1381,6 +1428,36 @@ ATermAppl gsMakeOpIdNameExp() {
 
 ATermAppl gsMakeOpIdNameEven() {
   static ATermAppl t = initMakeOpIdNameEven(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameDivide() {
+  static ATermAppl t = initMakeOpIdNameDivide(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameTrunc() {
+  static ATermAppl t = initMakeOpIdNameTrunc(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameRound() {
+  static ATermAppl t = initMakeOpIdNameRound(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameNormalizeRational() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRational(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameNormalizeRationalWhr() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRationalWhr(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameNormalizeRationalHelper() {
+  static ATermAppl t = initMakeOpIdNameNormalizeRationalHelper(t);
   return t;
 }
 
@@ -1657,6 +1734,12 @@ ATermAppl gsMakeOpIdCReal(void)
   return gsMakeOpId(gsMakeOpIdNameCReal(),
     gsMakeSortArrow1(gsMakeSortExprInt(), gsMakeSortExprReal()));
 } 
+
+ATermAppl gsMakeOpIdRational(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameRational(), gsMakeSortArrow2(
+    gsMakeSortExprInt(), gsMakeSortExprPos(), gsMakeSortExprReal()));
+}
 
 ATermAppl gsMakeOpIdPos2Nat(void)
 {
@@ -1956,6 +2039,43 @@ ATermAppl gsMakeOpIdEven(void)
 {
   return gsMakeOpId(gsMakeOpIdNameEven(),
     gsMakeSortArrow1(gsMakeSortExprNat(), gsMakeSortExprBool()));
+}
+
+ATermAppl gsMakeOpIdDivide(ATermAppl SortExpr)
+{
+  assert(IsPNIRSort(SortExpr));
+  return gsMakeOpId(gsMakeOpIdNameDivide(),
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdTrunc(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameTrunc(), gsMakeSortArrow1(
+    gsMakeSortExprReal(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdRound(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameRound(), gsMakeSortArrow1(
+    gsMakeSortExprReal(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRational(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRational(), gsMakeSortArrow2(
+    gsMakeSortExprInt(), gsMakeSortExprInt(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRationalWhr(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalWhr(), gsMakeSortArrow3(
+    gsMakeSortExprPos(), gsMakeSortExprInt(), gsMakeSortExprNat(), gsMakeSortExprReal()));
+}
+
+ATermAppl gsMakeOpIdNormalizeRationalHelper(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalHelper(), gsMakeSortArrow2(
+    gsMakeSortExprReal(), gsMakeSortExprInt(), gsMakeSortExprReal()));
 }
 
 ATermAppl gsMakeOpIdEmptyList(ATermAppl SortExpr)
@@ -2277,6 +2397,13 @@ ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr)
   return gsMakeDataAppl1(gsMakeOpIdCReal(), DataExpr);
 }
 
+ATermAppl gsMakeDataExprRational(ATermAppl DataExprInt, ATermAppl DataExprPos)
+{
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
+  return gsMakeDataAppl2(gsMakeOpIdRational(), DataExprInt, DataExprPos);
+}
+
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr)
 {
   assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprPos()));
@@ -2542,6 +2669,47 @@ ATermAppl gsMakeDataExprEven(ATermAppl DataExpr)
 {
   assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprNat()));
   return gsMakeDataAppl1(gsMakeOpIdEven(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprDivide(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdDivide(gsGetSort(DataExprLHS)),
+    DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprTrunc(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
+  return gsMakeDataAppl1(gsMakeOpIdTrunc(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprRound(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
+  return gsMakeDataAppl1(gsMakeOpIdRound(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprNormalizeRational(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprRHS), gsMakeSortExprInt()));
+  return gsMakeDataAppl2(gsMakeOpIdNormalizeRational(), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprNormalizeRationalWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat)
+{
+  assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  assert(ATisEqual(gsGetSort(DataExprNat), gsMakeSortExprNat()));
+  return gsMakeDataAppl3(gsMakeOpIdNormalizeRationalWhr(), DataExprPos, DataExprInt, DataExprNat);
+}
+
+ATermAppl gsMakeDataExprNormalizeRationalHelper(ATermAppl DataExprReal, ATermAppl DataExprInt)
+{
+  assert(ATisEqual(gsGetSort(DataExprReal), gsMakeSortExprReal()));
+  assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
+  return gsMakeDataAppl2(gsMakeOpIdNormalizeRationalHelper(), DataExprReal, DataExprInt);
 }
 
 ATermAppl gsMakeDataExprEmptyList(ATermAppl SortExpr)
@@ -3186,6 +3354,16 @@ bool gsIsDataExprCReal(ATermAppl DataExpr)
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameCReal();
+  }
+  return false;
+}
+
+bool gsIsDataExprRational(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr,0);
+    if(gsIsOpId(t)) 
+      return ATAgetArgument(t,0) == gsMakeOpIdNameRational();
   }
   return false;
 }

@@ -1129,10 +1129,16 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdPos()));
   gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdNat()));
   gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdReal()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdPos()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdNat()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdInt()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdReal()));
+  gstcAddSystemFunction(gsMakeOpIdTrunc());
+  gstcAddSystemFunction(gsMakeOpIdRound());
 //Lists
   gstcAddSystemConstant(gsMakeOpIdEmptyList(gsMakeSortExprList(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdCons(gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown())));

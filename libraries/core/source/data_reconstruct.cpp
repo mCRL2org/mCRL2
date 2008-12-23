@@ -566,6 +566,28 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
         Part = gsMakeOpId(name, gsMakeSortExprReal());
       }
     }
+  } else if (gsIsDataExprRational(Part)) {
+//    gsDebugMsg("Reconstructing implementation of Rational (%T)\n", Part);
+    ATermList Args = ATLgetArgument(Part, 1);
+    ATermAppl ArgNumerator = reconstruct_exprs_appl(ATAelementAt(Args, 0), p_substs, Spec);
+    ATermAppl ArgDenominator = reconstruct_exprs_appl(ATAelementAt(Args, 1), p_substs, Spec);
+    if (ATisEqual(ArgDenominator, gsMakeOpId(gsString2ATermAppl("1"), gsMakeSortExprPos()))) {
+      Part = gsMakeDataExprInt2Real(ArgNumerator);
+      if (gsIsOpId(ArgNumerator)) {
+        ATermAppl name = ATAgetArgument(ArgNumerator, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeOpId(name, gsMakeSortExprReal());
+        }
+      }
+    } else { 
+      Part = gsMakeDataExprDivide(ArgNumerator, gsMakeDataExprPos2Int(ArgDenominator));
+      if (gsIsOpId(ArgDenominator)) {
+        ATermAppl name = ATAgetArgument(ArgDenominator, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeDataExprDivide(ArgNumerator, gsMakeOpId(name, gsMakeSortExprInt()));
+        }
+      }
+    }
   } else if (gsIsDataExprDub(Part)) {
 //    gsDebugMsg("Reconstructing implementation of Dub (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);

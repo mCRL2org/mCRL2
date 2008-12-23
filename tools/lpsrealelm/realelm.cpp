@@ -22,7 +22,6 @@
 #include "mcrl2/lps/linear_process.h"
 
 #include "comp.h"
-#include "real.h"
 #include "realelm.h"
 
 using namespace atermpp;
@@ -1261,7 +1260,6 @@ data_assignment_list determine_process_initialization(const data_assignment_list
 specification realelm(specification s, int max_iterations, RewriteStrategy strategy)
 {
   gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
-  s = set_data_specification(s, replace_real_implementation(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
   rewriter r = rewriter(s.data(), (rewriter::strategy)strategy);
   postfix_identifier_generator variable_generator("");
