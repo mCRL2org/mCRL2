@@ -223,6 +223,9 @@ namespace squadt {
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void relocate_input(object_descriptor&, std::string const&);
 
+      /** \brief Find an object descriptor for a given name and change format if it exists */
+      void change_format(object_descriptor&, build_system::storage_format const&);
+
       /** \brief Add an output object */
       void register_output(tipi::configuration::parameter::identifier const&,
                 const build_system::storage_format&, const std::string&,

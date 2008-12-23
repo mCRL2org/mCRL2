@@ -506,7 +506,7 @@ namespace squadt {
             context_menu.Append(identifier++, wxString(i.first.get_name().c_str(), wxConvLocal), target_menu);
           }
 
-          cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
+          cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++,
                                     wxString(i.second->get_name().c_str(), wxConvLocal),
                                     i.second, i.second->find_input_configuration(i.first, n.get_object()->get_format()));
 
@@ -567,9 +567,7 @@ namespace squadt {
             p->flush_outputs();
             break;
           case cmID_DETAILS: {
-              dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
-
-              dialog.set_name(object_view->GetItemText(selection));
+              dialog::processor_details dialog(this, p, object);
 
               if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
                 dialog.show_tool_selector(false);

@@ -72,7 +72,7 @@ namespace squadt {
           tipi::uri                           location;       ///< The location of the object
           boost::md5::digest_type             checksum;       ///< The digest for the completed object
           std::time_t                         timestamp;      ///< The last time the file was modified just before the last checksum was computed
-        
+
         public:
 
           /** \brief Constructor */
@@ -172,13 +172,16 @@ namespace squadt {
 
       /** \brief Find an object descriptor for a given pointer to an object */
       boost::shared_ptr < processor::object_descriptor > find_output_by_id(tipi::configuration::parameter::identifier const&);
- 
+
       /** \brief Find an object descriptor for a given pointer to an object */
       boost::shared_ptr < processor::object_descriptor > find_input_by_id(tipi::configuration::parameter::identifier const&);
- 
+
       /** \brief Get the most original (main) input */
       boost::shared_ptr < object_descriptor > find_primary_input();
- 
+
+      /** \brief Change format for an object */
+      void change_format(object_descriptor const& o, build_system::storage_format const& n);
+
       /** \brief Relocate an input object */
       void relocate_input(object_descriptor const&, std::string const&);
 
@@ -199,13 +202,13 @@ namespace squadt {
 
       /** \brief Start tool configuration */
       void configure(interface_ptr const&, boost::shared_ptr< const tool::input_configuration >, const boost::filesystem::path&, std::string const& = "");
- 
+
       /** \brief Start tool configuration */
       void configure(interface_ptr const&, boost::shared_ptr < tipi::configuration > const&, std::string const& = "");
 
       /** \brief Start tool reconfiguration */
       void reconfigure(interface_ptr const&, boost::shared_ptr < tipi::configuration > const&, std::string const& = "");
- 
+
       /** \brief Start processing: generate outputs from inputs */
       void run(interface_ptr const&, boost::shared_ptr < tipi::configuration > c, bool b = false);
 
@@ -214,7 +217,7 @@ namespace squadt {
 
       /** \brief Start processing if not all outputs are up to date */
       void update(interface_ptr const&, boost::shared_ptr < tipi::configuration > c, bool b = false);
- 
+
       /** \brief Start updating and afterward execute a function */
       void update(interface_ptr const&, boost::function < void () > h, boost::shared_ptr < tipi::configuration > c, bool b = false);
 

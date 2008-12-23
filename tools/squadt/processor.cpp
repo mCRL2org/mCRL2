@@ -345,8 +345,24 @@ namespace squadt {
         break;
       }
     }
-                               
+
     return object;
+  }
+
+  /**
+   * \param[in] o the name (location) of the object
+   * \param[in] n the new format of the object
+   **/
+  void processor_impl::change_format(object_descriptor const& o, build_system::storage_format const& n) {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if (i->object.get() == &o) {
+        static_cast< object_descriptor& >(*(i->object)).mime_type = n;
+
+        return;
+      }
+    }
+
+    assert(false);
   }
 
   /**
@@ -1182,6 +1198,14 @@ namespace squadt {
    **/
   void processor::register_input(tipi::configuration::parameter::identifier const& id, boost::shared_ptr< object_descriptor > const& p) {
     impl->register_input(id, boost::static_pointer_cast< processor_impl::object_descriptor > (p));
+  }
+
+  /**
+   * \param o the name (location) of the object to change
+   * \param n the new name (location) of the object
+   **/
+  void processor::change_format(object_descriptor& o, build_system::storage_format const& n) {
+    impl->change_format(static_cast < processor_impl::object_descriptor& > (o), n);
   }
 
   /**

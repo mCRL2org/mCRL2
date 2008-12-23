@@ -161,11 +161,11 @@ namespace squadt {
 
         if (0 <= formats_and_actions) {
           wxListItem s;
-         
+
           get_wxlist_value(s, formats_and_actions, selected, 1);
-         
+
           command_dialog.SetValue(s.GetText());
-         
+
           if (command_dialog.ShowModal() == wxID_OK) {
             formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
 
@@ -209,7 +209,7 @@ namespace squadt {
       }
       catch (...) {
         wxMessageDialog error(this, wxT("Invalid format or MIME-type; ignoring"), wxT("Error"), wxICON_ERROR|wxOK);
-        
+
         error.ShowModal();
       }
     }
@@ -217,7 +217,7 @@ namespace squadt {
     void edit_preferences::remove_association(wxCommandEvent&) {
       long       selected = formats_and_actions->GetFirstSelected();
       wxListItem s;
-        
+
       get_wxlist_value(s, formats_and_actions, selected, 0);
 
       global_build_system.get_type_registry().register_command(
