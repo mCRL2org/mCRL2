@@ -195,12 +195,10 @@ namespace data_expr {
   inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
 
   /// \brief Returns a real with value i
-  // TODO: a function gsMakaDataExprReal_int will be added by Aad
-  // Perhaps even real(double d) will become possible?
   inline
   data_expression real(int i)
   {
-    return core::detail::gsMakeDataExprCReal(core::detail::gsMakeDataExprInt_int(i));
+    return core::detail::gsMakeDataExprReal_int(i);
   }
 
   /// \brief Returns a pos with value i

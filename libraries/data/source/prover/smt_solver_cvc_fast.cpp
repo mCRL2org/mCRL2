@@ -464,12 +464,12 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
 
-    CVC3::Expr SMT_Solver_CVC_Fast::translate_c_real(ATermAppl a_clause) {
-      ATermAppl v_clause;
+    //CVC3::Expr SMT_Solver_CVC_Fast::translate_c_real(ATermAppl a_clause) {
+    //  ATermAppl v_clause;
 
-      v_clause = f_expression_info.get_argument(a_clause, 0);
-      return translate_clause(v_clause);
-    }
+    //  v_clause = f_expression_info.get_argument(a_clause, 0);
+    //  return translate_clause(v_clause);
+    //}
 
     // --------------------------------------------------------------------------------------------
 

@@ -77,7 +77,7 @@ class SMT_Solver_CVC_Fast: public SMT_Solver {
     CVC3::Expr translate_add_c(ATermAppl a_clause);
     CVC3::Expr translate_c_nat(ATermAppl a_clause);
     CVC3::Expr translate_c_int(ATermAppl a_clause);
-    CVC3::Expr translate_c_real(ATermAppl a_clause);
+    //CVC3::Expr translate_c_real(ATermAppl a_clause);
     CVC3::Expr translate_unknown_operator(ATermAppl a_clause);
     CVC3::Expr translate_variable(ATermAppl a_clause);
     CVC3::Expr translate_nat_variable(ATermAppl a_clause);

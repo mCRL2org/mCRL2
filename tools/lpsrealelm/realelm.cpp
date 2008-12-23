@@ -166,7 +166,7 @@ data_expression rhs(const data_expression e)
 /// \ret the data_expression representing zero
 static inline data_expression real_zero()
 {
-  return gsMakeDataExprRational(int_(0), pos(1));
+  return gsMakeDataExprReal_int(0);
 }
 
 /// \brief Determine whether a data expression is a constant expression
@@ -182,8 +182,7 @@ bool is_number(const data_expression e)
          core::detail::gsIsDataExprCNat(e) ||
          core::detail::gsIsDataExprCNeg(e) ||
          core::detail::gsIsDataExprCInt(e) ||
-         core::detail::gsIsDataExprCReal(e) ||
-         (is_data_application(e) && static_cast<const data_application&>(e).head() == gsMakeOpIdRational());
+         core::detail::gsIsDataExprCReal(e);
 }
 
 /// \brief Determine wheter a number is negative
@@ -192,7 +191,7 @@ bool is_number(const data_expression e)
 static inline
 bool is_negative(const data_expression e)
 {
-  return is_negate(e) || gsIsDataExprCNeg(e) || (gsIsDataExprRational(e) && is_negative(lhs(e)));
+  return is_negate(e) || gsIsDataExprCNeg(e) || (gsIsDataExprCReal(e) && is_negative(lhs(e)));
 }
 
 /// \brief Determine whether a data expression is an inequality

@@ -554,9 +554,9 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
         Part = gsMakeOpId(name, gsMakeSortExprInt());
       }
     }
-  } else if ((gsIsDataExprCReal(Part) || gsIsDataExprInt2Real(Part))
+  } else if (gsIsDataExprInt2Real(Part)
             && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprInt()))) {
-//    gsDebugMsg("Reconstructing implementation of CReal or Int2Real (%T)\n", Part);
+//    gsDebugMsg("Reconstructing implementation of Int2Real (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_exprs_appl(value, p_substs, Spec);
     Part = gsMakeDataExprInt2Real(value);
@@ -566,8 +566,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
         Part = gsMakeOpId(name, gsMakeSortExprReal());
       }
     }
-  } else if (gsIsDataExprRational(Part)) {
-//    gsDebugMsg("Reconstructing implementation of Rational (%T)\n", Part);
+  } else if (gsIsDataExprCReal(Part)) {
+//    gsDebugMsg("Reconstructing implementation of CReal (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl ArgNumerator = reconstruct_exprs_appl(ATAelementAt(Args, 0), p_substs, Spec);
     ATermAppl ArgDenominator = reconstruct_exprs_appl(ATAelementAt(Args, 1), p_substs, Spec);

@@ -252,8 +252,6 @@ ATermAppl gsMakeOpIdNameCNeg();
 ATermAppl gsMakeOpIdNameCInt();
 ///Creation of name for the system operation identifier "CReal"
 ATermAppl gsMakeOpIdNameCReal();
-///Creation of name for the system operation identifier "Rational"
-ATermAppl gsMakeOpIdNameRational();
 ///Creation of name for the system operation identifier "Pos2Nat"
 ATermAppl gsMakeOpIdNamePos2Nat();
 ///Creation of name for the system operation identifier "Pos2Int"
@@ -473,12 +471,9 @@ ATermAppl gsMakeOpIdCNeg(void);
 ///        number
 ATermAppl gsMakeOpIdCInt(void);
 
-///\return Operation identifier for the creation of a real from an integer
-ATermAppl gsMakeOpIdCReal(void);
-
-///\return Operation identifier for the creation of a real from an
+///\return Operation identifier for the creation of a real number from an
 ///        integer and a positive number
-ATermAppl gsMakeOpIdRational(void);
+ATermAppl gsMakeOpIdCReal(void);
 
 ///\return Operation identifier for the conversion of Pos to Nat
 ATermAppl gsMakeOpIdPos2Nat(void);
@@ -911,14 +906,10 @@ ATermAppl gsMakeDataExprCNeg(ATermAppl DataExpr);
 ///\return DataExpr as a data expression of sort Int
 ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Int
-///\return DataExpr as a data expression of sort Real
-ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr);
-
 ///\pre DataExprInt and DataExprPos are data expressions of sort Int and Pos,
 //      respectively, such that their greater common divisor is 1
 ///\return Data expression for DataExprInt divided by DataExprPos, of sort Real
-ATermAppl gsMakeDataExprRational(ATermAppl DataExprInt, ATermAppl DataExprPos);
+ATermAppl gsMakeDataExprCReal(ATermAppl DataExprInt, ATermAppl DataExprPos);
 
 ///\pre DataExpr is a data expression of sort Pos 
 ///\return Data expression for the conversion of DataExpr to Nat
@@ -1459,10 +1450,6 @@ bool gsIsDataExprCInt(ATermAppl DataExpr);
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a CReal
 bool gsIsDataExprCReal(ATermAppl DataExpr);
-
-///\pre DataExpr is a data expression
-///\return DataExpr is a Rational 
-bool gsIsDataExprRational(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a Pos2Nat

@@ -251,12 +251,6 @@ inline ATermAppl initMakeOpIdNameCReal(ATermAppl &t)
   return t;
 }
 
-inline ATermAppl initMakeOpIdNameRational(ATermAppl &t) {
-  t = gsString2ATermAppl("@rational");
-  ATprotectAppl(&t);
-  return t;
-}
-
 inline ATermAppl initMakeOpIdNamePos2Nat(ATermAppl &t) 
 {
   t = gsString2ATermAppl("Pos2Nat");
@@ -1231,11 +1225,6 @@ ATermAppl gsMakeOpIdNameCReal() {
   return t;
 }
 
-ATermAppl gsMakeOpIdNameRational() {
-  static ATermAppl t = initMakeOpIdNameRational(t);
-  return t;
-}
-
 ATermAppl gsMakeOpIdNamePos2Nat() {
   static ATermAppl t = initMakeOpIdNamePos2Nat(t);
   return t;
@@ -1731,13 +1720,7 @@ ATermAppl gsMakeOpIdCInt(void)
 
 ATermAppl gsMakeOpIdCReal(void)
 {
-  return gsMakeOpId(gsMakeOpIdNameCReal(),
-    gsMakeSortArrow1(gsMakeSortExprInt(), gsMakeSortExprReal()));
-} 
-
-ATermAppl gsMakeOpIdRational(void)
-{
-  return gsMakeOpId(gsMakeOpIdNameRational(), gsMakeSortArrow2(
+  return gsMakeOpId(gsMakeOpIdNameCReal(), gsMakeSortArrow2(
     gsMakeSortExprInt(), gsMakeSortExprPos(), gsMakeSortExprReal()));
 }
 
@@ -2391,17 +2374,11 @@ ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr)
   return gsMakeDataAppl1(gsMakeOpIdCInt(), DataExpr);
 }
 
-ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr)
-{
-  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprInt()));
-  return gsMakeDataAppl1(gsMakeOpIdCReal(), DataExpr);
-}
-
-ATermAppl gsMakeDataExprRational(ATermAppl DataExprInt, ATermAppl DataExprPos)
+ATermAppl gsMakeDataExprCReal(ATermAppl DataExprInt, ATermAppl DataExprPos)
 {
   assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
   assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
-  return gsMakeDataAppl2(gsMakeOpIdRational(), DataExprInt, DataExprPos);
+  return gsMakeDataAppl2(gsMakeOpIdCReal(), DataExprInt, DataExprPos);
 }
 
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr)
@@ -3078,7 +3055,7 @@ ATermAppl gsMakeDataExprInt_int(int z)
 
 ATermAppl gsMakeDataExprReal(char *z)
 {
-  return gsMakeDataExprCReal(gsMakeDataExprInt(z));
+  return gsMakeDataExprCReal(gsMakeDataExprInt(z), gsMakeDataExprC1());
 }
 
 ATermAppl gsMakeDataExprReal_int(int z)
@@ -3354,16 +3331,6 @@ bool gsIsDataExprCReal(ATermAppl DataExpr)
     ATermAppl t = ATAgetArgument(DataExpr,0);
     if(gsIsOpId(t)) 
       return ATAgetArgument(t,0) == gsMakeOpIdNameCReal();
-  }
-  return false;
-}
-
-bool gsIsDataExprRational(ATermAppl DataExpr)
-{
-  if(gsIsDataAppl(DataExpr)) {
-    ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameRational();
   }
   return false;
 }
