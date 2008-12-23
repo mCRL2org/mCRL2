@@ -338,12 +338,12 @@ ATermAppl gsMakeOpIdNameFloor();
 ATermAppl gsMakeOpIdNameCeil();
 ///Creation of name for the system operation identifier "Round"
 ATermAppl gsMakeOpIdNameRound();
-///Creation of name for the system operation identifier "NormalizeRational"
-ATermAppl gsMakeOpIdNameNormalizeRational();
-///Creation of name for the system operation identifier "NormalizeRationalWhr"
-ATermAppl gsMakeOpIdNameNormalizeRationalWhr();
-///Creation of name for the system operation identifier "NormalizeRationalHelper"
-ATermAppl gsMakeOpIdNameNormalizeRationalHelper();
+///Creation of name for the system operation identifier "RedFrac"
+ATermAppl gsMakeOpIdNameRedFrac();
+///Creation of name for the system operation identifier "RedFracWhr"
+ATermAppl gsMakeOpIdNameRedFracWhr();
+///Creation of name for the system operation identifier "RedFracHlp"
+ATermAppl gsMakeOpIdNameRedFracHlp();
 ///Creation of name for the system operation identifier "EmptyList"
 ATermAppl gsMakeOpIdNameEmptyList();
 ///Creation of name for the system operation identifier "ListEnum"
@@ -666,17 +666,14 @@ ATermAppl gsMakeOpIdCeil();
 ///\return Operation identifier for 'round' of sort Real -> Int
 ATermAppl gsMakeOpIdRound();
 
-///\return Operation identifier for 'normalize_rational' of sort
-///        Int # Int -> Real
-ATermAppl gsMakeOpIdNormalizeRational();
+///\return Operation identifier for 'redfrac' of sort Int # Int -> Real
+ATermAppl gsMakeOpIdRedFrac();
 
-///\return Operation identifier for 'normalize_rational_whr' of sort
-///        Pos # Int # Nat -> Real
-ATermAppl gsMakeOpIdNormalizeRationalWhr();
+///\return Operation identifier for 'redfracwhr' of sort Pos # Int # Nat -> Real
+ATermAppl gsMakeOpIdRedFracWhr();
 
-///\return Operation identifier for 'normalize_rational_helper' of sort
-///        Real # Int -> Real
-ATermAppl gsMakeOpIdNormalizeRationalHelper();
+///\return Operation identifier for 'redfrachlp' of sort Real # Int -> Real
+ATermAppl gsMakeOpIdRedFracHlp();
 
 ///\pre SortExpr is a sort expression
 ///\return Operation identifier for the empty list of sort SortExpr
@@ -1144,18 +1141,18 @@ ATermAppl gsMakeDataExprRound(ATermAppl DataExpr);
 
 ///\pre DataExprLHS and DataExprRHS are data expressions of sort Int,
 ///     which we denote by x and y
-///\return Data expression for 'normalize_rational(x,y)' of sort Real
-ATermAppl gsMakeDataExprNormalizeRational(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+///\return Data expression for 'redfrac(x,y)' of sort Real
+ATermAppl gsMakeDataExprRedFrac(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 
 ///\pre DataExprPos, DataExprInt and DataExprNat are data expressions of
 ///     sort Pos, Int and Nat, respectively, which we denote by p, x, and n
-///\return Data expression for 'normalize_rational_whr(p,x,n)' of sort Real
-ATermAppl gsMakeDataExprNormalizeRationalWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat);
+///\return Data expression for 'redfracwhr(p,x,n)' of sort Real
+ATermAppl gsMakeDataExprRedFracWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat);
 
 ///\pre DataExprReal and DataExprInt are data expressions of sort Real and Int,
 //      respectively, which we denote by r and x
-///\return Data expression for 'normalize_rational_helper(r,x)' of sort Real
-ATermAppl gsMakeDataExprNormalizeRationalHelper(ATermAppl DataExprReal, ATermAppl DataExprInt);
+///\return Data expression for 'redfrachlp(r,x)' of sort Real
+ATermAppl gsMakeDataExprRedFracHlp(ATermAppl DataExprReal, ATermAppl DataExprInt);
 
 ///\pre SortExpr is a sort expression
 ///\return Data expression for the empty list of sort SortExpr

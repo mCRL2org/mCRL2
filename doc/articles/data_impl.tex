@@ -599,7 +599,7 @@ optional.
 For each constructor \frm{c_{i}} the following constructor operation is
 declared, where
 \frm{S} is the sort of the structured sort:
-\[c_{i}: A_{i,1} \times A_{i,k_{i}} \to S\]
+\[c_{i}: A_{i,1} \times \cdots \times A_{i,k_{i}} \to S\]
 For each defined projection \frm{p_{i,j}} the following operation is declared:
 \[p_{i,j}: S \to A_{i,j}\]
 For each defined recogniser \frm{\f{is\_c}_{i}} the following operation is
@@ -613,7 +613,7 @@ constructors are provided:
 
 \begin{mCRL2}
 &c1:   & \srtpos              & \text{one}\\
-&cDub: & \srtbool \to \srtpos & \text{double a positive number and add a bit}\\
+&cDub: & \srtbool \times \srtpos \to \srtpos & \text{double a positive number and add a bit}\\
 \\
 &c0 :  & \srtnat              & \text{zero}\\
 &cNat: & \srtpos \to \srtnat  & \text{positive number}\\
@@ -661,8 +661,8 @@ where \frm{n \in \nat} and all \frm{e_{i}}, \frm{0 \leq i \leq n} are of the
 same sort, say \frm{S}.  This is translated to the implementation of the
 following expression:
 \[\fa{@set}{\lambda x{:}S.\ (x == e_{0})\ \lor\ \cdots\ \lor\ (x == e_{n})}\]
-Here, \frm{\f{@set}} is an operation system identifier of sort \frm{S \to
-\srtbool \to \fa{Set}{S}}, and \frm{x} is a variable that does not occur free
+Here, \frm{\f{@set}} is an operation system identifier of sort \frm{(S \to
+\srtbool) \to \fa{Set}{S}}, and \frm{x} is a variable that does not occur free
 in \frm{e_{i}}, \frm{0 \leq i \leq n}.
 
 \subsection{Bag enumerations}
@@ -723,10 +723,10 @@ This expression is translated to the implementation of the following
 expression:
 \[\fa{lambda@k}{x_{-m}, \ldots, x_{-1}},\]
 Here, \frm{\f{lambda@k}} is an operation system identifier of where \frm{k} is
-a unique natural number. It has sort \frm{S_{-m} \to \cdots \to S_{-1}
-\to S_{0} \to \cdots \to S_{n} \to T}, where \frm{T} is the sort of expression
+a unique natural number. It has sort \frm{S_{-m} \times \cdots \times S_{-1}
+\to S_{0} \times \cdots \times S_{n} \to T}, where \frm{T} is the sort of expression
 \frm{e}. For \emph{lambda@k} we have the following property:
-\[\mathit{lambda@k}(x_{-m})\cdots(x_{-1})(x_{0})\cdots(x_{n}) = e\]
+\[\mathit{lambda@k}(x_{-m},\cdots,x_{-1})(x_{0},\cdots,x_{n}) = e\]
 
 \subsection{Where clauses}
 
@@ -735,9 +735,9 @@ A where clause is of the form
 This expression is translated to the implementation of a the following
 expression, where \frm{S_{i}} represents the sort of \frm{e_{i}}, \frm{0 \leq i
 \leq n}:
-\[(\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. e)(e_{0})\cdots(e_{n})\]
+\[(\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. e)(e_{0},\cdots,e_{n})\]
 
-[To do: explain functions defined on structured, numbers, lists,
+[To do: add rational numbers, explain functions defined on structured, numbers, lists,
 sets and bags. For now, see the op\_ids.tex document]
 
 \end{document}

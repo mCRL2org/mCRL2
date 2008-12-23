@@ -548,20 +548,20 @@ inline ATermAppl initMakeOpIdNameRound(ATermAppl &t) {
   return t;
 }
 
-inline ATermAppl initMakeOpIdNameNormalizeRational(ATermAppl &t) {
-  t = gsString2ATermAppl("@normalize_rational");
+inline ATermAppl initMakeOpIdNameRedFrac(ATermAppl &t) {
+  t = gsString2ATermAppl("@redfrac");
   ATprotectAppl(&t);
   return t;
 }
 
-inline ATermAppl initMakeOpIdNameNormalizeRationalWhr(ATermAppl &t) {
-  t = gsString2ATermAppl("@normalize_rational_whr");
+inline ATermAppl initMakeOpIdNameRedFracWhr(ATermAppl &t) {
+  t = gsString2ATermAppl("@redfracwhr");
   ATprotectAppl(&t);
   return t;
 }
 
-inline ATermAppl initMakeOpIdNameNormalizeRationalHelper(ATermAppl &t) {
-  t = gsString2ATermAppl("@normalize_rational_helper");
+inline ATermAppl initMakeOpIdNameRedFracHlp(ATermAppl &t) {
+  t = gsString2ATermAppl("@redfrachlp");
   ATprotectAppl(&t);
   return t;
 }
@@ -1446,18 +1446,18 @@ ATermAppl gsMakeOpIdNameRound() {
   return t;
 }
 
-ATermAppl gsMakeOpIdNameNormalizeRational() {
-  static ATermAppl t = initMakeOpIdNameNormalizeRational(t);
+ATermAppl gsMakeOpIdNameRedFrac() {
+  static ATermAppl t = initMakeOpIdNameRedFrac(t);
   return t;
 }
 
-ATermAppl gsMakeOpIdNameNormalizeRationalWhr() {
-  static ATermAppl t = initMakeOpIdNameNormalizeRationalWhr(t);
+ATermAppl gsMakeOpIdNameRedFracWhr() {
+  static ATermAppl t = initMakeOpIdNameRedFracWhr(t);
   return t;
 }
 
-ATermAppl gsMakeOpIdNameNormalizeRationalHelper() {
-  static ATermAppl t = initMakeOpIdNameNormalizeRationalHelper(t);
+ATermAppl gsMakeOpIdNameRedFracHlp() {
+  static ATermAppl t = initMakeOpIdNameRedFracHlp(t);
   return t;
 }
 
@@ -2062,21 +2062,21 @@ ATermAppl gsMakeOpIdRound(void)
     gsMakeSortExprReal(), gsMakeSortExprInt()));
 }
 
-ATermAppl gsMakeOpIdNormalizeRational(void)
+ATermAppl gsMakeOpIdRedFrac(void)
 {
-  return gsMakeOpId(gsMakeOpIdNameNormalizeRational(), gsMakeSortArrow2(
+  return gsMakeOpId(gsMakeOpIdNameRedFrac(), gsMakeSortArrow2(
     gsMakeSortExprInt(), gsMakeSortExprInt(), gsMakeSortExprReal()));
 }
 
-ATermAppl gsMakeOpIdNormalizeRationalWhr(void)
+ATermAppl gsMakeOpIdRedFracWhr(void)
 {
-  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalWhr(), gsMakeSortArrow3(
+  return gsMakeOpId(gsMakeOpIdNameRedFracWhr(), gsMakeSortArrow3(
     gsMakeSortExprPos(), gsMakeSortExprInt(), gsMakeSortExprNat(), gsMakeSortExprReal()));
 }
 
-ATermAppl gsMakeOpIdNormalizeRationalHelper(void)
+ATermAppl gsMakeOpIdRedFracHlp(void)
 {
-  return gsMakeOpId(gsMakeOpIdNameNormalizeRationalHelper(), gsMakeSortArrow2(
+  return gsMakeOpId(gsMakeOpIdNameRedFracHlp(), gsMakeSortArrow2(
     gsMakeSortExprReal(), gsMakeSortExprInt(), gsMakeSortExprReal()));
 }
 
@@ -2693,26 +2693,26 @@ ATermAppl gsMakeDataExprRound(ATermAppl DataExpr)
   return gsMakeDataAppl1(gsMakeOpIdRound(), DataExpr);
 }
 
-ATermAppl gsMakeDataExprNormalizeRational(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+ATermAppl gsMakeDataExprRedFrac(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   assert(ATisEqual(gsGetSort(DataExprLHS), gsMakeSortExprInt()));
   assert(ATisEqual(gsGetSort(DataExprRHS), gsMakeSortExprInt()));
-  return gsMakeDataAppl2(gsMakeOpIdNormalizeRational(), DataExprLHS, DataExprRHS);
+  return gsMakeDataAppl2(gsMakeOpIdRedFrac(), DataExprLHS, DataExprRHS);
 }
 
-ATermAppl gsMakeDataExprNormalizeRationalWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat)
+ATermAppl gsMakeDataExprRedFracWhr(ATermAppl DataExprPos, ATermAppl DataExprInt, ATermAppl DataExprNat)
 {
   assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
   assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
   assert(ATisEqual(gsGetSort(DataExprNat), gsMakeSortExprNat()));
-  return gsMakeDataAppl3(gsMakeOpIdNormalizeRationalWhr(), DataExprPos, DataExprInt, DataExprNat);
+  return gsMakeDataAppl3(gsMakeOpIdRedFracWhr(), DataExprPos, DataExprInt, DataExprNat);
 }
 
-ATermAppl gsMakeDataExprNormalizeRationalHelper(ATermAppl DataExprReal, ATermAppl DataExprInt)
+ATermAppl gsMakeDataExprRedFracHlp(ATermAppl DataExprReal, ATermAppl DataExprInt)
 {
   assert(ATisEqual(gsGetSort(DataExprReal), gsMakeSortExprReal()));
   assert(ATisEqual(gsGetSort(DataExprInt), gsMakeSortExprInt()));
-  return gsMakeDataAppl2(gsMakeOpIdNormalizeRationalHelper(), DataExprReal, DataExprInt);
+  return gsMakeDataAppl2(gsMakeOpIdRedFracHlp(), DataExprReal, DataExprInt);
 }
 
 ATermAppl gsMakeDataExprEmptyList(ATermAppl SortExpr)

@@ -464,7 +464,7 @@ d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|
                \snoc\ \mb{|}\ 
                \cons\\
        & \mb{|} &
-               <\ \mb{|}\ \leq\ \mb{|}\ >\ \mb{|}\ \geq\ \mb{|}\ \subset\ \mb{|}\ \subseteq\ \mb{|}\ \in\ \mb{|}\ 
+               <\ \mb{|}\ \leq\ \mb{|}\ \geq\ \mb{|}\ >\ \mb{|}\ \subset\ \mb{|}\ \subseteq\ \mb{|}\ \in\ \mb{|}\ 
                \approx\ \mb{|}\ \not\approx\ \mb{|}\ 
                \land\ \mb{|}\ \lor\ \mb{|}\ 
                \limp
@@ -474,7 +474,7 @@ The unary operators have the highest priority, followed by the infix operators,
 followed by $\lambda$, $\forall$ and $\exists$, followed by $\kwwhr\ \kwend$.
 The descending order of precedence of the infix operators is:
 $\set{*, ., \cap}, \set{/, \kwdiv, \kwmod}, \set{+, -, \cup}, \concat, \snoc,
-\cons, \set{<, \leq, >, \geq, \subset, \subseteq, \in}, \set{\approx,\not\approx},
+\cons, \set{<, \leq, \geq, >, \subset, \subseteq, \in}, \set{\approx,\not\approx},
 \set{\land, \lor}, \limp$.
 Of these operators $*$, $.$, $\cap$, $/$, $\kwdiv$, $\kwmod$, $+$, $-$, $\cup$ and
 $\concat$ associate to the left and $\approx$, $\not\approx$, $\land$, $\lor$

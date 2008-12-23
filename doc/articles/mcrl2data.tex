@@ -665,10 +665,11 @@ conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 
 \subsection{Numbers}
 
-Positive numbers, natural numbers and integers are represented by the sorts
-\frm{\srtpos}, \frm{\srtnat}, \frm{\srtint} and \frm{\srtreal}. For these
-sorts, we have the following operations, where \frm{A,B \in \set{\srtpos,
-\srtnat, \srtint, \srtreal}}:
+Positive numbers, natural numbers, integers and real numbers (rational
+number approximations) are represented by the sorts \frm{\srtpos},
+\frm{\srtnat}, \frm{\srtint} and \frm{\srtreal}. For these sorts, we
+have the following operations, where \frm{A,B \in \set{\srtpos, \srtnat,
+\srtint, \srtreal}}:
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -676,11 +677,15 @@ sorts, we have the following operations, where \frm{A,B \in \set{\srtpos,
 Operator                   & \textit{Rich}              & \verb+Plain+\\\hline
 positive numbers           & 1,2,3,\ldots               & \verb+1,2,3,...+\\
 natural numbers            & 0,1,2,\ldots               & \verb+0,1,2,...+\\
-integers                   & \ldots, -2,-1,0,1,2,\ldots
-                                              & \verb+...,-2,-1,0,1,2,...+\\
+integers                   & \ldots, -2,-1,0,1,2,\ldots & \verb+...,-2,-1,0,1,2,...+\\
+rational numbers           & \ldots                     & \verb+...+\\
+                           & -1/1,-1/2,-1/3,\ldots      & \verb+-1/1,-1/2,-1/3,...+\\
+                           & 0/1,0/2,0/3,\ldots         & \verb+0/1,0/2,0/3,...+\\
+                           & 1/1,1/2,1/3,\ldots         & \verb+1/1,1/2,1/3,...+\\
+                           & \ldots                     & \verb+...+\\
 conversion                 & \fa{A2B}{\_}               & \verb+A2B(_)+\\
-less than or equal         & \_ \leq \_                 & \verb+_ <= _+\\
 less than                  & \_ < \_                    & \verb+_ < _+\\
+less than or equal         & \_ \leq \_                 & \verb+_ <= _+\\
 greater than or equal      & \_ \geq \_                 & \verb+_ >= _+\\
 greater than               & \_ > \_                    & \verb+_ > _+\\
 maximum                    & \faa{max}{\_\,}{\_}        & \verb+max(_,_)+\\
@@ -692,9 +697,13 @@ predecessor                & \fa{pred}{\_}              & \verb+pred(_)+\\
 addition                   & \_ + \_                    & \verb-_ + _-\\
 subtraction                & \_ - \_                    & \verb+_ - _+\\
 multiplication             & \_ * \_                    & \verb+_ * _+\\
+division                   & \_ / \_                    & \verb+_ / _+\\
 integer div                & \_ \div \_                 & \verb+_ div _+\\
 integer mod                & \_ \mod \_                 & \verb+_ mod _+\\
 exponentiation             & \faa{exp}{\_\,}{\_}        & \verb+exp(_,_)+\\
+floor                      & \fa{floor}{\_}             & \verb+floor(_)+\\
+ceiling                    & \fa{ceil}{\_}              & \verb+ceil(_)+\\
+round                      & \fa{round}{\_}             & \verb+round(_)+\\
 \hline
 \end{tabular}\bigskip
 
@@ -703,6 +712,7 @@ Explicit type conversions can be done using the conversion operation
 \frm{\f{A2B}}. The other operations perform implicit type conversions, when
 needed.
 
+\newpage
 \section{Type constructors}
 \label{sec:TypeConstructors}
 
@@ -998,12 +1008,13 @@ b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
 \snoc e
 \]
  
-\begin{table}[h!bt]
+\begin{table}[!hbt]
 \centering
 \begin{tabular}{|ll|}
 \hline
 operators                                           & associativity\\\hline
-\verb+*+, \verb+div+, \verb+mod+, \verb+.+          & left\\
+\verb+*+, \verb+.+                                  & left\\
+\verb+/+, \verb+div+, \verb+mod+                    & left\\
 \verb-+-, \verb+-+                                  & left\\
 \verb+|>+                                           & right\\
 \verb+<|+                                           & left\\
@@ -1079,7 +1090,6 @@ controlling the evaluation order. This can be achieved by the use of
 
 \emph{Predefined data types} that could be desirable include the following:
 \begin{tdefinitions}{-}
-\item rational numbers (\frm{\mathbb{Q}})
 \item characters
 \item strings
 \end{tdefinitions}
