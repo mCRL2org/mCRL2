@@ -642,8 +642,9 @@ ATermAppl gsMakeOpIdFirst();
 ATermAppl gsMakeOpIdLast();
 
 ///\pre SortExpr is Pos, Nat, Int or Real
-///\return Operation identifier for exponentiation, which has sort S -> Nat -> S,
-///     where S stands for SortExpr
+///\return Operation identifier for exponentiation, which has sort:
+///        - SortExpr -> Nat -> SortExpr, when SortExpr is Pos, Nat or Int
+///        - SortExpr -> Int -> SortExpr, when SortExpr is Real
 ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
 
 ///\return Operation identifier for 'even' of sort Nat -> Bool
@@ -1100,8 +1101,10 @@ ATermAppl gsMakeDataExprGDivMod(ATermAppl DataExprPair, ATermAppl DataExprBool,
 ATermAppl gsMakeDataExprGGDivMod(ATermAppl DataExprNat1, ATermAppl DataExprNat2,
   ATermAppl DataExprPos);
 
-///\pre DataExprLHS is a data expression of sort Nat or Int
-///     DataExprRHS is a data expression of sort Pos
+///\pre DataExprLHS is a data expression of sort Pos, Nat, Int, or Real
+///     DataExprRHS is a data expression of sort:
+///     - Nat, if DataExprLHS is of sort Pos, Nat or Int
+///     - Int, if DataExprRHS is of sort Real
 ///\return Data expression for the exponentiation of DataExprLHS and DataExprRHS
 ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 

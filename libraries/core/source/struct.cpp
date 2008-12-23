@@ -2014,8 +2014,10 @@ ATermAppl gsMakeOpIdLast(void)
 ATermAppl gsMakeOpIdExp(ATermAppl SortExpr)
 {
   assert(IsPNIRSort(SortExpr));
-  return gsMakeOpId(gsMakeOpIdNameExp(),
-    gsMakeSortArrow2(SortExpr, gsMakeSortExprNat(), SortExpr));
+  return gsMakeOpId(gsMakeOpIdNameExp(), gsMakeSortArrow2(SortExpr,
+     IsPNISort(SortExpr)?gsMakeSortExprNat():gsMakeSortExprInt(),
+     SortExpr)
+  );
 }
 
 ATermAppl gsMakeOpIdEven(void)
@@ -2637,9 +2639,10 @@ ATermAppl gsMakeDataExprLast(ATermAppl DataExpr)
 
 ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  assert(ATisEqual(gsGetSort(DataExprRHS), gsMakeSortExprNat()));
-  return gsMakeDataAppl2(gsMakeOpIdExp(gsGetSort(DataExprLHS)),
-    DataExprLHS, DataExprRHS);
+  ATermAppl SortExpr = gsGetSort(DataExprLHS);
+  assert(IsPNIRSort(SortExpr));
+  assert(ATisEqual(gsGetSort(DataExprRHS), IsPNISort(SortExpr)?gsMakeSortExprNat():gsMakeSortExprInt()));
+  return gsMakeDataAppl2(gsMakeOpIdExp(SortExpr), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprEven(ATermAppl DataExpr)
