@@ -1734,7 +1734,7 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
 
   if(ATLtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
     if(high_level){
-      gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
+      gsErrorMsg("attempt to declare a constant with the name that is a built-in identifier (%P)\n", Name);
       return ATfalse;
     } else {
       // In this case we ignore the constant, i.e. don't add it to the context.constants
@@ -1757,9 +1757,9 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
   //    ThrowMF("Double declaration of constant and %s %T\n", msg, Name);
   //  }
 
-  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+  if(ATAtableGet(gssystem.constants, (ATerm)Name)){
     if(high_level){
-      gsErrorMsg("attempt to redeclare the system identifier with %s %P\n", msg, Name);
+      gsErrorMsg("attempt to redeclare the system constant with %s %P\n", msg, Name);
       return ATfalse;
     }
     else {
@@ -1768,6 +1768,32 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
     }
   }
 
+  if(ATLtableGet(gssystem.functions, (ATerm)Name) && 
+     !ATisEqual(Name,gsMakeOpIdNameMax()) &&
+     !ATisEqual(Name,gsMakeOpIdNameMin()) &&
+     !ATisEqual(Name,gsMakeOpIdNameAbs()) &&
+     !ATisEqual(Name,gsMakeOpIdNameSucc()) &&
+     !ATisEqual(Name,gsMakeOpIdNamePred()) &&
+     !ATisEqual(Name,gsMakeOpIdNameDiv()) &&
+     !ATisEqual(Name,gsMakeOpIdNameMod()) &&
+     !ATisEqual(Name,gsMakeOpIdNameExp()) &&
+     !ATisEqual(Name,gsMakeOpIdNameHead()) &&
+     !ATisEqual(Name,gsMakeOpIdNameTail()) &&
+     !ATisEqual(Name,gsMakeOpIdNameRHead()) &&
+     !ATisEqual(Name,gsMakeOpIdNameRTail()) &&
+     !ATisEqual(Name,gsMakeOpIdNameEltIn()) &&
+     !ATisEqual(Name,gsMakeOpIdNameCount()) 
+    ){
+    if(high_level){
+      gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
+      return ATfalse;
+    }
+    else {
+      //ignore the implemented buil-in function/constant
+      return Result;
+    }
+  }
+    
   ATermList Types=ATLtableGet(context.functions, (ATerm)Name);
   // the table context.functions contains a list of types for each
   // function name. We need to check if there is already such a type 
