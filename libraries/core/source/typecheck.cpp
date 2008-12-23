@@ -1137,7 +1137,8 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdNat()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdInt()));
   gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdReal()));
-  gstcAddSystemFunction(gsMakeOpIdTrunc());
+  gstcAddSystemFunction(gsMakeOpIdFloor());
+  gstcAddSystemFunction(gsMakeOpIdCeil());
   gstcAddSystemFunction(gsMakeOpIdRound());
 //Lists
   gstcAddSystemConstant(gsMakeOpIdEmptyList(gsMakeSortExprList(gsMakeSortUnknown())));
@@ -1783,7 +1784,8 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
      !ATisEqual(Name,gsMakeOpIdNameDiv()) &&
      !ATisEqual(Name,gsMakeOpIdNameMod()) &&
      !ATisEqual(Name,gsMakeOpIdNameExp()) &&
-     !ATisEqual(Name,gsMakeOpIdNameTrunc()) &&
+     !ATisEqual(Name,gsMakeOpIdNameFloor()) &&
+     !ATisEqual(Name,gsMakeOpIdNameCeil()) &&
      !ATisEqual(Name,gsMakeOpIdNameRound()) &&
      !ATisEqual(Name,gsMakeOpIdNameHead()) &&
      !ATisEqual(Name,gsMakeOpIdNameTail()) &&

@@ -2475,7 +2475,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermAppl se_nat  = gsMakeSortExprNat();
   ATermAppl se_int  = gsMakeSortExprInt();
   ATermAppl se_real = gsMakeSortExprReal();
-  p_data_decls->ops = ATconcat(ATmakeList(30,
+  p_data_decls->ops = ATconcat(ATmakeList(31,
       (ATerm) gsMakeOpIdCReal(),
       (ATerm) gsMakeOpIdPos2Real(),
       (ATerm) gsMakeOpIdNat2Real(),
@@ -2501,7 +2501,8 @@ void impl_sort_real(t_data_decls *p_data_decls)
       (ATerm) gsMakeOpIdDivide(se_nat),
       (ATerm) gsMakeOpIdDivide(se_int),
       (ATerm) gsMakeOpIdDivide(se_real),
-      (ATerm) gsMakeOpIdTrunc(),
+      (ATerm) gsMakeOpIdFloor(),
+      (ATerm) gsMakeOpIdCeil(),
       (ATerm) gsMakeOpIdRound(),
       (ATerm) gsMakeOpIdNormalizeRational(),
       (ATerm) gsMakeOpIdNormalizeRationalWhr(),
@@ -2535,7 +2536,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(34,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(35,
       //equality (Real # Real -> Bool)
       (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprEq(gsMakeDataExprCReal(x,p), gsMakeDataExprCReal(y,q)), gsMakeDataExprEq(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
       //convert Int to Real (Int -> Real)
@@ -2589,10 +2590,12 @@ void impl_sort_real(t_data_decls *p_data_decls)
       //exponentiation (Real # Int -> Real)
       (ATerm) gsMakeDataEqn(pnxl, nil, gsMakeDataExprExp(gsMakeDataExprCReal(x,p), gsMakeDataExprCInt(n)), gsMakeDataExprNormalizeRational(gsMakeDataExprExp(x,n), gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprExp(p,n))))),
       (ATerm) gsMakeDataEqn(pqxl, gsMakeDataExprNeq(x, gsMakeDataExprCInt(zero)), gsMakeDataExprExp(gsMakeDataExprCReal(x,p), gsMakeDataExprCNeg(q)), gsMakeDataExprNormalizeRational(gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprExp(p,gsMakeDataExprCNat(q)))), gsMakeDataExprExp(x,gsMakeDataExprCNat(q)))),
-      //trunc (Real -> Int)
-      (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprTrunc(gsMakeDataExprCReal(x,p)), gsMakeDataExprDiv(x,p)),
+      //floor (Real -> Int)
+      (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprFloor(gsMakeDataExprCReal(x,p)), gsMakeDataExprDiv(x,p)),
+      //ceil (Real -> Int)
+      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprCeil(r), gsMakeDataExprNeg(gsMakeDataExprFloor(gsMakeDataExprNeg(r)))),
       //round (Real -> Int)
-      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprRound(r), gsMakeDataExprTrunc(gsMakeDataExprAdd(r,gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)),two)))),
+      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprRound(r), gsMakeDataExprFloor(gsMakeDataExprAdd(r,gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)),two)))),
       //normalize_rational (Int # Int -> Real)
       (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprNormalizeRational(x,gsMakeDataExprNeg(p)), gsMakeDataExprNormalizeRational(gsMakeDataExprNeg(x), gsMakeDataExprCInt(gsMakeDataExprCNat(p)))),
       (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprNormalizeRational(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))), gsMakeDataExprNormalizeRationalWhr(p, gsMakeDataExprDiv(x, p), gsMakeDataExprMod(x, p))),

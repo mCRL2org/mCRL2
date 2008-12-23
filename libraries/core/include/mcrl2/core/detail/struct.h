@@ -332,8 +332,10 @@ ATermAppl gsMakeOpIdNameExp();
 ATermAppl gsMakeOpIdNameEven();
 ///Creation of name for the system operation identifier "Divide"
 ATermAppl gsMakeOpIdNameDivide();
-///Creation of name for the system operation identifier "Trunc"
-ATermAppl gsMakeOpIdNameTrunc();
+///Creation of name for the system operation identifier "Floor"
+ATermAppl gsMakeOpIdNameFloor();
+///Creation of name for the system operation identifier "Ceil"
+ATermAppl gsMakeOpIdNameCeil();
 ///Creation of name for the system operation identifier "Round"
 ATermAppl gsMakeOpIdNameRound();
 ///Creation of name for the system operation identifier "NormalizeRational"
@@ -655,8 +657,11 @@ ATermAppl gsMakeOpIdEven();
 ///     where S stands for SortExpr
 ATermAppl gsMakeOpIdDivide(ATermAppl SortExpr);
 
-///\return Operation identifier for 'trunc' of sort Real -> Int
-ATermAppl gsMakeOpIdTrunc();
+///\return Operation identifier for 'floor' of sort Real -> Int
+ATermAppl gsMakeOpIdFloor();
+
+///\return Operation identifier for 'ceil' of sort Real -> Int
+ATermAppl gsMakeOpIdCeil();
 
 ///\return Operation identifier for 'round' of sort Real -> Int
 ATermAppl gsMakeOpIdRound();
@@ -1126,8 +1131,12 @@ ATermAppl gsMakeDataExprEven(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprDivide(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 
 ///\pre DataExpr is a data expression of sort Real, which we denote by r
-///\return Data expression for 'trunc(r)', of sort Int
-ATermAppl gsMakeDataExprTrunc(ATermAppl DataExpr);
+///\return Data expression for 'floor(r)', of sort Int
+ATermAppl gsMakeDataExprFloor(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression of sort Real, which we denote by r
+///\return Data expression for 'ceil(r)', of sort Int
+ATermAppl gsMakeDataExprCeil(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression of sort Real, which we denote by r
 ///\return Data expression for 'round(r)', of sort Int

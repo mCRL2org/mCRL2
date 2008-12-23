@@ -530,8 +530,14 @@ inline ATermAppl initMakeOpIdNameDivide(ATermAppl &t) {
   return t;
 }
 
-inline ATermAppl initMakeOpIdNameTrunc(ATermAppl &t) {
-  t = gsString2ATermAppl("trunc");
+inline ATermAppl initMakeOpIdNameFloor(ATermAppl &t) {
+  t = gsString2ATermAppl("floor");
+  ATprotectAppl(&t);
+  return t;
+}
+
+inline ATermAppl initMakeOpIdNameCeil(ATermAppl &t) {
+  t = gsString2ATermAppl("ceil");
   ATprotectAppl(&t);
   return t;
 }
@@ -1425,8 +1431,13 @@ ATermAppl gsMakeOpIdNameDivide() {
   return t;
 }
 
-ATermAppl gsMakeOpIdNameTrunc() {
-  static ATermAppl t = initMakeOpIdNameTrunc(t);
+ATermAppl gsMakeOpIdNameFloor() {
+  static ATermAppl t = initMakeOpIdNameFloor(t);
+  return t;
+}
+
+ATermAppl gsMakeOpIdNameCeil() {
+  static ATermAppl t = initMakeOpIdNameCeil(t);
   return t;
 }
 
@@ -2033,9 +2044,15 @@ ATermAppl gsMakeOpIdDivide(ATermAppl SortExpr)
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprReal()));
 }
 
-ATermAppl gsMakeOpIdTrunc(void)
+ATermAppl gsMakeOpIdFloor(void)
 {
-  return gsMakeOpId(gsMakeOpIdNameTrunc(), gsMakeSortArrow1(
+  return gsMakeOpId(gsMakeOpIdNameFloor(), gsMakeSortArrow1(
+    gsMakeSortExprReal(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdCeil(void)
+{
+  return gsMakeOpId(gsMakeOpIdNameCeil(), gsMakeSortArrow1(
     gsMakeSortExprReal(), gsMakeSortExprInt()));
 }
 
@@ -2658,10 +2675,16 @@ ATermAppl gsMakeDataExprDivide(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
     DataExprLHS, DataExprRHS);
 }
 
-ATermAppl gsMakeDataExprTrunc(ATermAppl DataExpr)
+ATermAppl gsMakeDataExprFloor(ATermAppl DataExpr)
 {
   assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
-  return gsMakeDataAppl1(gsMakeOpIdTrunc(), DataExpr);
+  return gsMakeDataAppl1(gsMakeOpIdFloor(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprCeil(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprReal()));
+  return gsMakeDataAppl1(gsMakeOpIdCeil(), DataExpr);
 }
 
 ATermAppl gsMakeDataExprRound(ATermAppl DataExpr)
