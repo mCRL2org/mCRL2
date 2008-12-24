@@ -13,8 +13,8 @@ project squadt/libraries/tipi
 
 alias messenger
     : [ glob ../source/transport/*.cpp ]
-      tool/capabilities.cpp
-      controller/capabilities.cpp
+      [ obj capabilities_tool : tool/capabilities.cpp ]
+      [ obj capabilities_controller : controller/capabilities.cpp ]
       restore_visitor.cpp/<use>/libraries/ticpp//ticpp
       basic_datatype.cpp
       common.cpp

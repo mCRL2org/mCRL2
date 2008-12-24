@@ -6,10 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
-#ifdef HAVE_CVC
-
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
@@ -689,5 +685,3 @@ using namespace mcrl2::core;
         return true;
       }
     }
-
-#endif // HAVE_CVC

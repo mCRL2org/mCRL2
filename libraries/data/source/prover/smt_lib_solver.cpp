@@ -23,6 +23,10 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
 
+#ifdef HAVE_CVC
+# include "mcrl2/data/detail/prover/smt_lib_solver_fast.ipp"
+#endif // HAVE_CVC
+
 // Class SMT_LIB_Solver ---------------------------------------------------------------------------
   // Class SMT_LIB_Solver - Functions declared private --------------------------------------------
 
