@@ -11,7 +11,6 @@
 #include "terminatingtransition.h"
 #include "visualterminating_transition.h"
 #include "compoundstate.h"
-#include "font_renderer.h"
 #include "transition.h"
 #include "label.h"
 #include "geometric.h"

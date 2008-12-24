@@ -10,7 +10,6 @@
 
 #include "visualvisibilityframe.h"
 #include "geometric.h"
-#include "font_renderer.h"
 
 using namespace grape::grapeapp;
 

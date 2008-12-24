@@ -13,7 +13,6 @@
 #include "visualnonterminating_transition.h"
 #include "geometric.h"
 #include "state.h"
-#include "font_renderer.h"
 #include "label.h"
 
 namespace grape {
