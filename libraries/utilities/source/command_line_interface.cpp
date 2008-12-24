@@ -241,23 +241,88 @@ namespace mcrl2 {
     /// \endcond
 
     /**
-     * \param[in] name the name used to reference the argument in textual descriptions
+     * Creates an object that specifies an option with an optional argument.
+     * The default value is automatically substituted when the user specifies
+     * the option but does not specify an option argument.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
      * \param[in] default_value the default value
      * \return a basic_argument derived object that represents an untyped optional option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_optional_argument("DEPTH", "2"),
+     *                         "stop at recursion level DEPTH (default 2)", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0)
+       tool --recursive         (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
+       tool -r                  (effect: options("recursive").count() == 1 && option_argument("recursive") == 2)
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
      **/
     interface_description::optional_argument< std::string >
-       make_optional_argument(std::string const& name, std::string const& default_value) {
+         make_optional_argument(std::string const& name, std::string const& default_value) {
 
       return interface_description::optional_argument< std::string >(name, default_value);
     }
 
     /**
-     * \param[in] name the name used to reference the argument in textual descriptions
+     * Creates an object that specifies an option with a mandatory argument.
+     * Specifying the option in a command also requires specification of an
+     * option argument.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
      * \return a basic_argument derived object that represents an untyped mandatory option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_mandatory_argument("DEPTH"),
+     *                         "stop at recursion level DEPTH", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0)
+       tool --recursive         (effect: parsing fails)
+       tool -r                  (effect: parsing fails) 
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
      **/
     interface_description::mandatory_argument< std::string >
-                                make_mandatory_argument(std::string const& name) {
+         make_mandatory_argument(std::string const& name) {
+
       return interface_description::mandatory_argument< std::string >(name);
+    }
+
+    /**
+     * Creates an object that specifies an option with a mandatory argument.
+     * Specifying the option in a command also requires specification of an
+     * option argument. The default value is substituted by the
+     * option_argument() and option_argument_as() methods when the option is
+     * not part of the parsed command.
+     *
+     * \param[in] name a placeholder for referencing the argument in textual descriptions
+     * \return a basic_argument derived object that represents an untyped mandatory option argument
+     *
+     * The following example demonstrates the effect of an option with optional argument:
+     * \code
+     *  add_option("recursive", make_mandatory_argument("DEPTH", "2"),
+     *                         "stop at recursion level DEPTH (default 2)", 'r');
+     * \endcode
+     * The result is a command line interface with parsing behaviour:
+     * \verbatim
+       tool                     (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool --recursive         (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool -r                  (effect: options("recursive").count() == 0 && option_argument("recursive") == 2)
+       tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+       tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
+     *
+     **/
+    interface_description::mandatory_argument< std::string >
+         make_mandatory_argument(std::string const& name, std::string const& default_value) {
+
+      return interface_description::mandatory_argument< std::string >(name, default_value);
     }
 
     interface_description& interface_description::get_standard_description() {

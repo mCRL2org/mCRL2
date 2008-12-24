@@ -72,10 +72,10 @@ namespace mcrl2 {
      *
      * \code
      *  cli.
-     *   add_option("recursive", "recursively test all files in directories", 'r').
-     *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with").
-     *   add_option("language", make_mandatory_argument("LANG", "english"), "language for output").
-     *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period (default 2 seconds)").
+     *   add_option("recursive", "option without argument", 'r').
+     *   add_option("timeout", make_optional_argument("SEC", "2"), "option with optional argument (default 2)").
+     *   add_option("tool", make_mandatory_argument("FOO"), "option with mandatory argument").
+     *   add_option("language", make_mandatory_argument("LANG", "english"), "option with mandatory argument (default english)").
      *   add_rewriting_options().
      *   add_prover_options();
      * \endcode
@@ -94,10 +94,10 @@ namespace mcrl2 {
         class.
       
         Options:
-          -r, --recursive          recursively test all files in directories
-          -t[SEC], --timeout=[SEC] optional timeout period (default 2 seconds)
-              --tool=FOO           path that identifies the tool executable
-                                   to test with
+          -r, --recursive          option without argument
+          -t[SEC], --timeout=[SEC] option optional argument (default 2)
+              --tool=FOO           option with mandatory argument
+              --language=LANG      option with mandatory argument (default english)
       
         Standard options:
           -q, --quiet              do not display warning messages
