@@ -144,7 +144,7 @@ namespace squadt {
                         prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
 
               m_output_objects->SetItem(row, 2, write_time.Format(wxT("%x %X")));
-              m_output_objects->SetItem(row, 3, o->get_format().string());
+              m_output_objects->SetItem(row, 3, wxString(o->get_format().string().c_str(), wxConvLocal));
             }
 
             ++row;
