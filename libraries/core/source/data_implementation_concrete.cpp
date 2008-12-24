@@ -2536,7 +2536,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(35,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(36,
       //equality (Real # Real -> Bool)
       (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprEq(gsMakeDataExprCReal(x,p), gsMakeDataExprCReal(y,q)), gsMakeDataExprEq(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
       //convert Int to Real (Int -> Real)
@@ -2596,12 +2596,13 @@ void impl_sort_real(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprCeil(r), gsMakeDataExprNeg(gsMakeDataExprFloor(gsMakeDataExprNeg(r)))),
       //round (Real -> Int)
       (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprRound(r), gsMakeDataExprFloor(gsMakeDataExprAdd(r,gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)),two)))),
-      //normalize_rational (Int # Int -> Real)
+      //redfrac (Int # Int -> Real)
       (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprRedFrac(x,gsMakeDataExprCNeg(p)), gsMakeDataExprRedFrac(gsMakeDataExprNeg(x), gsMakeDataExprCInt(gsMakeDataExprCNat(p)))),
       (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprRedFrac(x,gsMakeDataExprCInt(gsMakeDataExprCNat(p))), gsMakeDataExprRedFracWhr(p, gsMakeDataExprDiv(x, p), gsMakeDataExprMod(x, p))),
-      //normalize_rational_whr (Pos # Int # Nat -> Real)
-      (ATerm) gsMakeDataEqn(pnxl, nil, gsMakeDataExprRedFracWhr(p, x, n), gsMakeDataExprIf(gsMakeDataExprEq(n, zero), gsMakeDataExprCReal(x, one), gsMakeDataExprRedFracHlp(gsMakeDataExprRedFrac(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(n)), x))),
-      //normalize_rational_helper (Real # Int -> Real)
+      //redfracwhr (Pos # Int # Nat -> Real)
+      (ATerm) gsMakeDataEqn(pxl, nil, gsMakeDataExprRedFracWhr(p, x, zero), gsMakeDataExprCReal(x, one)),
+      (ATerm) gsMakeDataEqn(pqxl, nil, gsMakeDataExprRedFracWhr(p, x, gsMakeDataExprCNat(q)), gsMakeDataExprRedFracHlp(gsMakeDataExprRedFrac(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprCInt(gsMakeDataExprCNat(q))), x)),
+      //redfrachlp (Real # Int -> Real)
       (ATerm) gsMakeDataEqn(pxyl, nil, gsMakeDataExprRedFracHlp(gsMakeDataExprCReal(x, p), y), gsMakeDataExprCReal(gsMakeDataExprAdd(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprMult(y, x)), gsMakeDataExprInt2Pos(x)))
       ), p_data_decls->data_eqns);
   //add implementation of sort Int, if necessary
