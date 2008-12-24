@@ -221,10 +221,10 @@ rule install-tool ( name : requirements * ) {
     if [ property.select install-rule : $(install-requirements) ] {
       local rule-name = [ feature.get-values install-rule : $(install-requirements) ] ;
 
-      alias $(rule-name) : install-$(name) $(targets) ;
+      alias $(rule-name) : install-$(name) $(targets) [ feature.get-values install-dependency : $(install-requirements) ] ;
     }
     else {
-      alias install : install-$(name) $(targets) ;
+      alias install : install-$(name) $(targets) [ feature.get-values install-dependency : $(install-requirements) ] ;
     }
 
     module $(m) {
