@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for selection.
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "grape_menubar.h"

@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for process diagrams
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "grape_listbox.h"

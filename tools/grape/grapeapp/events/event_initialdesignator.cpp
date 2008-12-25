@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for the initial designator
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
