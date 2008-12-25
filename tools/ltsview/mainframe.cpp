@@ -29,7 +29,6 @@
 #include "savevecdialog.h"
 #include "settings.h"
 #include "settingsdialog.h"
-#include "mcrl2/utilities/about_dialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -60,8 +59,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
   EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
-  EVT_MENU  (wxID_ABOUT,MainFrame::onAbout)
-  EVT_MENU  (wxID_HELP,MainFrame::onHelpContents)
   EVT_MENU  (myID_ITERATIVE,MainFrame::onRankStyle)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
@@ -227,28 +224,6 @@ GLCanvas* MainFrame::getGLCanvas() const {
 
 void MainFrame::setFileInfo(wxFileName fn) {
   filename.Assign(fn);
-}
-
-void MainFrame::onHelpContents( wxCommandEvent& /* event */ )
-{
-  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/ltsview"));
-}
-
-void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  std::vector<std::string> developers;
-  developers.push_back("Bas Ploeger");
-  developers.push_back("Carst Tankink");
-  mcrl2::utilities::wx::about_dialog("LTSView",
-    "Tool for interactive visualisation of state transition systems.\n"
-    "\n"
-    "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk. "
-    "See: F. van Ham, H. van de Wetering and J.J. van Wijk, "
-    "\"Visualization of State Transition Graphs\". "
-    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-    "\n"
-    "The default colour scheme for state marking was obtained through http://www.colorbrewer.org",
-    developers
-  );
 }
 
 /*

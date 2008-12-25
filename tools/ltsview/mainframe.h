@@ -38,8 +38,6 @@ class MainFrame : public wxFrame {
     GLCanvas* getGLCanvas() const;
     void loadTitle();
 
-    void onHelpContents(wxCommandEvent &event);
-    void onAbout(wxCommandEvent &event);
     void onActivateTool(wxCommandEvent& event);
     void onDisplay(wxCommandEvent& event);
     void onExit(wxCommandEvent& event);

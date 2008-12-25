@@ -34,7 +34,7 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
@@ -97,6 +97,11 @@ private:
     bool            dummies;
 
 public:
+    XSim() : mcrl2::utilities::wx::tool< XSim >("XSim",
+      "Simulator for linear process specifications.",
+      std::vector< std::string >(1, "Muck van Weerdenburg")) {
+    }
+
     bool DoInit();
 
     bool parse_command_line(int argc, wxChar** argv);

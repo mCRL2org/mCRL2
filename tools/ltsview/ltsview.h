@@ -14,8 +14,7 @@
 #include <wx/wx.h>
 #include <string>
 #include "mediator.h"
-#include "utils.h"
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 class MainFrame;
 class GLCanvas;
@@ -38,6 +37,7 @@ class LTSView : public mcrl2::utilities::wx::tool< LTSView >, public Mediator {
     void applyMarkStyle();
 
   public:
+    LTSView();
     virtual int OnExit();
     virtual bool DoInit();
     bool parse_command_line(int argc, wxChar** argv);

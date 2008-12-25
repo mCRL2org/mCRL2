@@ -25,6 +25,9 @@
 namespace mcrl2 {
   namespace utilities {
 
+    class interface_description;
+    class command_line_parser;
+
     /** \brief toolset version tag */
     inline std::string version_tag() {
       return "January 2009 (development)";
@@ -34,9 +37,6 @@ namespace mcrl2 {
     inline std::string copyright_period() {
       return "2008";
     }
-
-    class interface_description;
-    class command_line_parser;
 
     // \cond INTERNAL
     namespace detail {

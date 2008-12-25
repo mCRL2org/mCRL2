@@ -31,7 +31,6 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/about_dialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -67,8 +66,6 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_PLAYRI, XSimMain::OnResetAndPlayRandom)
     EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
     EVT_MENU(ID_STOP, XSimMain::OnStop)
-    EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
-    EVT_MENU(wxID_HELP, XSimMain::OnHelpContents)
     EVT_TIMER(-1, XSimMain::OnTimer)
     EVT_CLOSE(XSimMain::OnCloseWindow)
     EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
@@ -699,21 +696,6 @@ void XSimMain::StopAutomation()
 void XSimMain::OnStop( wxCommandEvent& /* event */ )
 {
 	StopAutomation();
-}
-
-void XSimMain::OnHelpContents( wxCommandEvent& /* event */ )
-{
-  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/xsim"));
-}
-
-void XSimMain::OnAbout( wxCommandEvent& /* event */ )
-{
-  std::vector<std::string> developers;
-  developers.push_back("Muck van Weerdenburg");
-  mcrl2::utilities::wx::about_dialog("XSim",
-    "Simulator for linear process specifications.",
-    developers
-  );
 }
 
 void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )

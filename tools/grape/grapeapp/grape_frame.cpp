@@ -342,7 +342,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
 
   // help menu
   EVT_MENU(wxID_HELP, grape_frame::event_menu_help)
-  EVT_MENU(wxID_ABOUT, grape_frame::event_menu_about)
 
   // toolbar + tools menu
   EVT_TOOL(GRAPE_TOOL_SELECT, grape_frame::event_tool_selected)

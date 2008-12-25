@@ -26,7 +26,7 @@
 
 #include <wx/app.h>
 
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
 {
@@ -51,6 +51,8 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     bool parse_command_line(int argc, wxChar** argv);
 
   public:
+    LTSGraph();
+
     bool DoInit();
     
     void openFile(std::string const &path);

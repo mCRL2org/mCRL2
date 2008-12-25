@@ -18,7 +18,7 @@
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/core/aterm_ext.h"
 
 
@@ -145,9 +145,19 @@ bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
 }
 // -- * -------------------------------------------------------------
 
+// -------------------------
+DiaGraph::DiaGraph() : mcrl2::utilities::wx::tool< DiaGraph >("DiaGraphica",
+    "You are free to use images produced with DiaGraphica.\n"
+    "In this case, image credits would be much appreciated.\n"
+    "\n"
+    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n"
+    "uses the TinyXML parser (tinyxml.sourceforge.net). \n"
+    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
+                std::vector< std::string >(1, "Johannes Pretorius")) {
+// -------------------------
+}
 
 // -- functions inherited from wxApp --------------------------------
-
 
 // --------------------
 bool DiaGraph::DoInit()

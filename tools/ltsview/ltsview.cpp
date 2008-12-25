@@ -29,6 +29,7 @@
 #include "markstateruledialog.h"
 #include "settings.h"
 #include "state.h"
+#include "utils.h"
 #include "visualizer.h"
 
 using namespace std;
@@ -123,6 +124,24 @@ IMPLEMENT_APP_NO_MAIN(LTSView)
 
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
+
+std::vector< std::string > developers() {
+  static char* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
+
+  return std::vector< std::string >(&developer_names[0], &developer_names[2]);
+}
+
+LTSView::LTSView() : mcrl2::utilities::wx::tool< LTSView >("LTSView",
+      "Tool for interactive visualisation of state transition systems.\n"
+      "\n"
+      "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk.\n"
+      "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
+      "\"Visualization of State Transition Graphs\". "
+      "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+      "\n"
+      "The default colour scheme for state marking was obtained through http://www.colorbrewer.org",
+      developers()) {
+}
 
 bool LTSView::DoInit()
 {

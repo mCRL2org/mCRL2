@@ -15,7 +15,7 @@
 #include "grape_frame.h"
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 #include <iostream>
 
@@ -35,42 +35,34 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app >
 
   private:
 
-    std::string parse_error;
-
     // the filename is the first parameter
     wxString    filename;
 
     bool parse_command_line(int& argc, wxChar** argv);
 
+    std::vector< std::string > developers() {
+      static char* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
+           "Diana Koenraadt", "Bas Luksenburg", "Jonathan Nelisse", "Hans Poppelaars", "Bram Schoenmakers"};
+
+      return std::vector< std::string >(&developer_names[0], &developer_names[7]);
+    }
+
   public:
 
+    grape_app() : mcrl2::utilities::wx::tool< grape_app >("GraPE",
+                  "Graphical Process Editor for mCRL2.",
+                  developers(), std::vector< std::string >(1, "Hans Poppelaars")) {
+    }
+
     bool DoInit();
-    void show_window();
 };
-
-void grape_app::show_window()
-{
-
-}
 
 bool grape_app::DoInit()
 {
-  try
-  {
-    grape_frame *frame = new grape_frame( filename );
-    SetTopWindow(frame);
+  grape_frame *frame = new grape_frame( filename );
+  SetTopWindow(frame);
 
-    if (!parse_error.empty()) {
-      wxMessageDialog(GetTopWindow(), wxString(parse_error.c_str(), wxConvLocal),
-                         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
-    }
-
-    wxInitAllImageHandlers();
-  }
-  catch (std::exception& e) // parsing not successful
-  {
-    std::cerr << e.what() << std::endl;
-  }
+  wxInitAllImageHandlers();
 
   return true;
 }

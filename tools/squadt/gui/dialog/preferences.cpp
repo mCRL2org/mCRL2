@@ -12,6 +12,7 @@
 #include "wx.hpp" // precompiled headers
 
 #include "gui/dialog/preferences.hpp"
+#include "type_registry.hpp"
 #include "build_system.hpp"
 #include "tool_manager.hpp"
 #include "executor.hpp"

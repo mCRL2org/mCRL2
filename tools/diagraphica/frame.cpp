@@ -12,8 +12,6 @@
 
 #include "frame.h"
 #include "figures.xpm"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/about_dialog.h"
 
 #include <iostream>
 using namespace std;
@@ -1157,7 +1155,7 @@ void Frame::initIcon()
     try
     {
         wxIcon icon(icon_16x16);
-        SetIcon( icon ); // icom defined in 'figures.xpm'
+        SetIcon( icon ); // icon defined in 'figures.xpm'
     }
     catch ( ... )
     {
@@ -2023,31 +2021,7 @@ void Frame::initTextCtrl()
         5 ); 
 }
 
-
-// ---------------------------
-void Frame::initHelpContents()
-// ---------------------------
-{
-  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/diagraphica"));
-}
-
-// -------------------------
-void Frame::initAboutFrame()
-// -------------------------
-{
-  std::vector<std::string> developers;
-  developers.push_back("A. Johannes Pretorius");
-  mcrl2::utilities::wx::about_dialog("DiaGraphica",
-    "You are free to use images produced with DiaGraphica.\n"
-    "In this case, image credits would be much appreciated.\n"
-    "\n"
-    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
-    "uses the TinyXML parser (tinyxml.sourceforge.net). "
-    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-    developers
-  );
-}
-
+/* commented dead code (jwulp)
 // ----------------------------
 void Frame::initAboutFrameOld()
 // ----------------------------
@@ -2142,7 +2116,7 @@ void Frame::initAboutFrameOld()
     frameAbout->Show();
     frameAbout->Update();
 }
-
+*/
 
 // ----------------------------
 void Frame::initFrameSettings()
@@ -3108,14 +3082,6 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( frameSettings == NULL )
             initFrameSettings();
         frameSettings->setDgrmEditor();
-    }
-    else if ( e.GetId() == wxID_HELP )
-    {
-        initHelpContents();
-    }
-    else if ( e.GetId() == wxID_ABOUT )
-    {
-        initAboutFrame();
     }
     else if ( e.GetId() == wxID_CLOSE )
     {
@@ -4625,8 +4591,6 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_SIMULATOR, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_TRACE, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_EDITOR, Frame::onMenuBar )
-    EVT_MENU( wxID_HELP, Frame::onMenuBar )
-    EVT_MENU( wxID_ABOUT, Frame::onMenuBar )
     EVT_MENU( wxID_CLOSE, Frame::onMenuBar )
     // splitter windows
     EVT_SPLITTER_DCLICK( ID_SPLITTER_FRAME, Frame::onSplitterDoubleClick )

@@ -11,6 +11,8 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "../type_registry.hpp"
+#include "../tool.hpp"
 #include "gui/main.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
@@ -18,7 +20,6 @@
 #include "gui/dialog/preferences.hpp"
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
-#include "mcrl2/utilities/about_dialog.h"
 
 #include <wx/menu.h>
 #include <wx/utils.h>
@@ -34,18 +35,6 @@ namespace squadt {
   namespace GUI {
 
     wxString main::default_title = wxT("SQuADT");
-
-    void main::about() {      
-      mcrl2::utilities::wx::about_dialog("SQuADT",
-        "Graphical environment that provides a uniform interface for using all kinds of "
-        "other connected tools.",
-        std::vector< std::string >(1, "Jeroen van der Wulp")
-      );
-    }
-
-    void main::manual() {
-      wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/squadt"));
-    }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),
                                        project_view(0) {
@@ -72,8 +61,6 @@ namespace squadt {
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
       Connect(cmID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
-      Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
-      Connect(wxID_HELP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_manual));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
 

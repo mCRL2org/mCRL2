@@ -22,11 +22,12 @@
 #include "boost/filesystem/convenience.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_wx.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
 #include "build_system.hpp"
+#include "type_registry.hpp"
 #include "executor.hpp"
 
 #include "gui/splash.hpp"
@@ -66,6 +67,14 @@ class SQuADt : public mcrl2::utilities::wx::tool< SQuADt > {
     bool parse_command_line(int& argc, wxChar** argv);
 
     bool DoInit();
+
+  public:
+
+    SQuADt() : mcrl2::utilities::wx::tool< SQuADt >("SQuADT",
+                  "Graphical environment that provides a uniform interface"
+                  " for using all kinds of other connected tools.",
+                  std::vector< std::string >(1, "Jeroen van der Wulp")) {
+    }
 };
 
 IMPLEMENT_APP(SQuADt)

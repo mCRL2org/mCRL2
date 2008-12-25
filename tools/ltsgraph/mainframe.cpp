@@ -20,7 +20,6 @@
 #include "export_xml.h"
 #include "export_latex.h"
 #include <mcrl2/lts/lts.h>
-#include <mcrl2/utilities/about_dialog.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -41,8 +40,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
-  EVT_MENU(wxID_ABOUT, MainFrame::onAbout)
-  EVT_MENU(wxID_HELP, MainFrame::onHelpContents)
   EVT_MENU(myID_TOOL_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
 END_EVENT_TABLE()
@@ -262,20 +259,6 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       wxOK | wxICON_INFORMATION);
     msgDlg.ShowModal();
   }
-}
-
-void MainFrame::onHelpContents( wxCommandEvent& /* event */ )
-{
-  wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/User_manual/ltsgraph"));
-}
-
-void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  std::vector<std::string> developers;
-  developers.push_back("Carst Tankink");
-  mcrl2::utilities::wx::about_dialog("LTSGraph",
-    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
-    developers
-  );
 }
 
 void MainFrame::onQuit(wxCommandEvent& /*event */)

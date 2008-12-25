@@ -110,6 +110,10 @@ bool LTSGraph::parse_command_line(int argc, wxChar** argv)
   return parser.continue_execution();
 }
 
+LTSGraph::LTSGraph() : mcrl2::utilities::wx::tool< LTSGraph >("LTSGraph",
+    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
+    std::vector< std::string >(1, "Carst Tankink")) {
+}
 
 bool LTSGraph::DoInit()
 {

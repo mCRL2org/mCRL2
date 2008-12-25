@@ -50,6 +50,8 @@ class DiaGraph : public mcrl2::utilities::wx::tool< DiaGraph >, public Mediator
   friend class mcrl2::utilities::wx::tool< DiaGraph >;
 
 public:
+        DiaGraph();
+
 	// -- functions inherited from wxApp ----------------------------
 	bool DoInit();
 	int OnExit();

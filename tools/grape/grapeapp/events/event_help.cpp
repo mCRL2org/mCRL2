@@ -12,7 +12,6 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
-#include "mcrl2/utilities/about_dialog.h"
 
 #include "event_help.h"
 
@@ -54,28 +53,8 @@ grape_event_about::~grape_event_about( void )
 {
 }
 
-extern const char *g_tool_name;
-extern const char *g_tool_author;
-extern const char *g_mcrl2_version;
-extern const char *g_mcrl2_copyright_year;
-
 bool grape_event_about::Do( void )
 {
-  std::vector<std::string> developers;
-  developers.push_back("Remco Blewanus");
-  developers.push_back("Thorstin Crijns");
-  developers.push_back("Diana Koenraadt");
-  developers.push_back("Bas Luksenburg");
-  developers.push_back("Jonathan Nelisse");
-  developers.push_back("Hans Poppelaars");
-  developers.push_back("Bram Schoenmakers");
-  std::vector<std::string> documenters;
-  documenters.push_back("Hans Poppelaars");
-  mcrl2::utilities::wx::about_dialog("GraPE",
-    "Graphical Process Editor for mCRL2.",
-    developers,
-    documenters
-  );
   return true;
 }
 
