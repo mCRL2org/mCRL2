@@ -31,6 +31,29 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
 
+static inline
+data_specification add_ad_hoc_real_equations(const data_specification& specification)
+{
+  ATermAppl nil = gsMakeNil();
+  ATermAppl zero = gsMakeDataExprC0();
+  ATermAppl one = gsMakeDataExprC1();
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl r = gsMakeDataVarId(gsString2ATermAppl("r"), gsMakeSortExprReal());
+  ATermList prl = ATmakeList2((ATerm) p, (ATerm) r);
+
+  ATermList result = ATmakeList(7,
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one)), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one), r), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r)
+  );
+
+  return set_equations(specification, specification.equations() + data_equation_list(result));
+}
+
 // Custom replace functions
 // Needed as the replace functions of the data library do not
 // recurse into data expressions
@@ -1259,6 +1282,7 @@ data_assignment_list determine_process_initialization(const data_assignment_list
 specification realelm(specification s, int max_iterations, RewriteStrategy strategy)
 {
   gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
+  s = set_data_specification(s, add_ad_hoc_real_equations(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
   rewriter r = rewriter(s.data(), (rewriter::strategy)strategy);
   postfix_identifier_generator variable_generator("");
