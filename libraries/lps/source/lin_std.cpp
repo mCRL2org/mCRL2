@@ -3887,7 +3887,8 @@ static stacklisttype *new_stack(
                  ATermList parameterlist,
                  specificationbasictype *spec, 
                  int regular,
-                 ATermList pCRLprocs)
+                 ATermList pCRLprocs,
+                 const bool singlecontrolstate)
 { ATermList walker=NULL; 
   ATermAppl tempsorts=NULL;
   ATermAppl var0=NULL;
@@ -3938,9 +3939,14 @@ static stacklisttype *new_stack(
   { stack->opns=NULL;
     if (oldstate==0)
     { if (!binary)
-      { enumeratedtype *e=create_enumeratedtype(no_of_states,spec);
-        stack->stackvar=gsMakeDataVarId(fresh_name(s3),
-                                    e->sortId); 
+      { if (!singlecontrolstate)
+        { enumeratedtype *e=create_enumeratedtype(no_of_states,spec);
+          stack->stackvar=gsMakeDataVarId(fresh_name(s3), e->sortId); 
+        }
+        else
+        { /* Generate a stackvariable that is never used */
+          stack->stackvar=gsMakeDataVarId(fresh_name("Never_used"), gsMakeSortExprBool());
+        }
       }
       else
       { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
@@ -6210,7 +6216,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId,
   if ((!regular)||((!singlecontrolstate)&&(!oldstate)&&(!binary))) 
   { declare_control_state(spec,pCRLprocs);
   }
-  stack=new_stack(parameters,spec,regular,pCRLprocs);
+  stack=new_stack(parameters,spec,regular,pCRLprocs,singlecontrolstate);
   initial=make_initialstate(procId,stack,pCRLprocs,
                               regular,singlecontrolstate,spec);
      
@@ -6290,7 +6296,9 @@ static ATermAppl generateLPEpCRL(ATermAppl procId,
       return linMakeInitProcSpec(initial,vars,sums);
     } 
     /* normal enumerated type */
-    { create_enumeratedtype(stack->no_of_states,spec);
+    { if (!singlecontrolstate)
+      { create_enumeratedtype(stack->no_of_states,spec);
+      }
       return linMakeInitProcSpec(
                   initial,
                   (singlecontrolstate?
