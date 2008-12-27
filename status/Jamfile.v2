@@ -65,7 +65,7 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
       tests += [ run /tools/$(tool)//$(tool) : --invariant=$(TOP)/status/invariant.data : test.lps : <testing.preserve>true ] ;
     }
     else if $(tool) in lpsactionrename {
-      tests += [ run /tools/$(tool)//$(tool) : --file=$(TOP)/status/rename.data : test.lps : <testing.preserve>true ] ;
+      tests += [ run /tools/$(tool)//$(tool) : --renamefile=$(TOP)/status/rename.data : test.lps : <testing.preserve>true ] ;
     }
     else {
       tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true <testing.post-pipes>/tools/lpspp//lpspp ] ;

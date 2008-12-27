@@ -4,4 +4,5 @@ tool lpsrewr
        : lpsrewr.cpp
          /libraries//data
          /libraries/utilities//command_line_interfacing
+       : <squadt-connectivity>implemented
        ;
