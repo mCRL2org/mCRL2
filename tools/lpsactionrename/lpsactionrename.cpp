@@ -81,10 +81,10 @@ class action_rename_tool: public rewriter_tool
       rewriter_tool::add_options(desc);
       desc.add_option("renamefile", make_mandatory_argument("NAME"),
               "use the rename rules from NAME", 'f');
-      desc.add_option("rewrite",
+      desc.add_option("no-rewrite",
               "do not rewrite data terms while renaming; use when the rewrite system "
               "does not terminate", 'o');
-      desc.add_option("sumelm",
+      desc.add_option("no-sumelm",
                 "do not apply sum elimination to the final result", 'm');
       desc.add_option("end-phase", make_mandatory_argument("PHASE"),
                 "stop conversion and output the action rename specification after phase PHASE: "
