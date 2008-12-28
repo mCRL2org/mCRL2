@@ -117,6 +117,7 @@ LTSGraph::LTSGraph() : mcrl2::utilities::wx::tool< LTSGraph >("LTSGraph",
 
 bool LTSGraph::DoInit()
 {
+  wxApp::SetExitOnFrameDelete(true);
   colouring = false;
   brushColour = *wxRED;
   selectedState = NULL;
@@ -342,6 +343,7 @@ void LTSGraph::deselect()
   selectedState = NULL;
   selectedTransition = NULL;
   selectedLabel = NULL;
+  display();  
 }
 
 void LTSGraph::colourState(size_t selectedObject) {

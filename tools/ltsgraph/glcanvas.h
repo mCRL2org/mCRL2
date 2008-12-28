@@ -48,6 +48,7 @@ class GLCanvas : public wxGLCanvas
    
     // Mouse event handlers
     void onMouseEnter(wxMouseEvent& event);
+    void onMouseLeave(wxMouseEvent& event);
     void onMouseLftDown(wxMouseEvent& event);
     void onMouseRgtDown(wxMouseEvent& event);
     void onMouseMove(wxMouseEvent& event);

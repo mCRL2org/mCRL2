@@ -29,6 +29,7 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
+  EVT_LEAVE_WINDOW(GLCanvas::onMouseLeave)
   EVT_LEFT_DOWN(GLCanvas::onMouseLftDown)
   EVT_RIGHT_DOWN(GLCanvas::onMouseRgtDown)
   EVT_LEFT_UP(GLCanvas::onMouseLftUp)
@@ -50,7 +51,6 @@ GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
 GLCanvas::~GLCanvas()
 {
   owner->getAlgorithm(0)->stop();
-
 }
 
 void GLCanvas::initialize()
@@ -232,6 +232,10 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /* event */)
   this->SetFocus();
 }
 
+void GLCanvas::onMouseLeave(wxMouseEvent& /* event */) {
+  std::cerr << "Lost focus\n";
+  owner->deselect();
+}
 
 void GLCanvas::onMouseLftDown(wxMouseEvent& event)
 {
@@ -280,6 +284,8 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 
     owner->moveObject(diffX, diffY);
     display();
+  } else {
+    event.Skip();
   }
 }
 
@@ -394,37 +400,31 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
   switch(selectedObject[0])
   {
     case TRANSITION: { 
-      //std::cerr << "Selected transition\n";
       owner->selectTransition(selectedObject[1], selectedObject[2]); 
       break;
     }
     case IDS::SELF_LOOP:
     {
-      //std::cerr << "Selected selfloop\n";
       owner->selectSelfLoop(selectedObject[1], selectedObject[2]);
       break;
     }
     case IDS::STATE:
     {
       if(!ctrl) {
-        //std::cerr << "Selecting state\n";
         owner->selectState(selectedObject[1]);
       }
       else {
-        //std::cerr << "Colouring state\n";
         owner->colourState(selectedObject[1]);
       }
       break;
     }
     case IDS::LABEL:
     {
-      //std::cerr << "Selecting label\n";
       owner->selectLabel(selectedObject[1], selectedObject[2]);
       break;
     }
     case IDS::SELF_LABEL:
     { 
-      //std::cerr << "Selecting self label\n";
       owner->selectSelfLabel(selectedObject[1], selectedObject[2]);
       break;
     }
