@@ -37,18 +37,34 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
   ATermAppl nil = gsMakeNil();
   ATermAppl zero = gsMakeDataExprC0();
   ATermAppl one = gsMakeDataExprC1();
+  ATermAppl two = gsMakeDataExprCDub(gsMakeDataExprFalse(), one);
+  ATermAppl real_zero = gsMakeDataExprCReal(gsMakeDataExprCInt(zero), one);
+  ATermAppl real_one = gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one);
+  ATermAppl real_two = gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(two)), one);
   ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
   ATermAppl r = gsMakeDataVarId(gsString2ATermAppl("r"), gsMakeSortExprReal());
+  ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), gsMakeSortExprReal());
+  ATermAppl t = gsMakeDataVarId(gsString2ATermAppl("t"), gsMakeSortExprReal());
+  ATermList rl = ATmakeList1((ATerm) r);
   ATermList prl = ATmakeList2((ATerm) p, (ATerm) r);
+  ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
+  ATermList rstl = ATmakeList3((ATerm) r, (ATerm) s, (ATerm) t);
 
-  ATermList result = ATmakeList(7,
+  ATermList result = ATmakeList(14,
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), r),
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, gsMakeDataExprNeg(r)), real_zero),
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), r), real_zero),
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, r), gsMakeDataExprMult(real_two, r)),
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(r)), gsMakeDataExprMult(gsMakeDataExprNeg(real_two), r)),
+    (ATerm) gsMakeDataEqn(rstl, nil, gsMakeDataExprAdd(gsMakeDataExprMult(s, r), gsMakeDataExprMult(t, r)), gsMakeDataExprMult(gsMakeDataExprAdd(s, t), r)),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one)), r),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one), r), r),
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r)
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprAdd(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(s))),
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprSubt(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), s))
   );
 
   return set_equations(specification, specification.equations() + data_equation_list(result));
@@ -239,6 +255,7 @@ bool is_inequality(const data_expression& e)
 static
 bool less_or_equal(const data_expression& e1, const data_expression& e2)
 {
+  gsDebugMsg("less or equal %s, %s\n", pp(e1).c_str(), pp(e2).c_str());
   if(is_negate(e1))
   {
     return less_or_equal(*(static_cast<const data_application&>(e1).arguments().begin()), e2);
@@ -255,8 +272,17 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
   {
     return less_or_equal(e1, rhs(e2));
   }
+  else if (gsIsDataExprCReal(e1))
+  {
+    return less_or_equal(lhs(e1), e2);
+  }
+  else if (gsIsDataExprCReal(e2))
+  {
+    return less_or_equal(e1, lhs(e2));
+  }
   else
   {
+    gsDebugMsg("e1 = %s, e2 = %s\n", pp(e1).c_str(), pp(e2).c_str());
     assert(is_data_variable(e1) && is_data_variable(e2));
     return (static_cast<const data_variable&>(e1).name() <= static_cast<const data_variable&>(e2).name());
   }
@@ -316,6 +342,28 @@ data_expression_list sort(const data_expression& e)
   return r;
 }
 
+/// \brief Order an inequality, using a lexicographic order on variable names.
+/// \param inequality An inequality
+/// \param r A rewriter
+/// \ret A version of the inequality in which the variables occur in
+///      lexicographically sorted order.
+static inline
+data_expression order_inequality(const data_expression& inequality, rewriter& r)
+{
+  assert(is_inequality(inequality));
+  data_expression left = lhs(inequality);
+  if (!is_number(left) && !is_data_variable(left))
+  {
+    data_expression_list sorted = sort(left);
+    left = real_zero();
+    for(data_expression_list::iterator j = sorted.begin(); j != sorted.end(); ++j)
+    {
+      left = plus(*j, left);
+    }
+  }
+  return data_application(static_cast<const data_application&>(inequality).head(), make_list(r(left), r(rhs(inequality))));
+}
+
 /// \brief Split constant and variable parts of a data expression
 /// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
 ///          dn, where ci and di are constants and xi are variables. Constants
@@ -324,6 +372,7 @@ data_expression_list sort(const data_expression& e)
 static
 std::pair<data_expression, data_expression> split_constants_and_variables(const data_expression& e)
 {
+  gsDebugMsg("Splitting constants and variables in %s\n", pp(e).c_str());
   std::pair<data_expression, data_expression> result;
   if(is_plus(e))
   {
@@ -335,7 +384,7 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
   {
     std::pair<data_expression, data_expression> left = split_constants_and_variables(lhs(e));
     std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(e));
-    result = std::make_pair(plus(left.first, negate(right.first)), minus(left.second, right.second));
+    result = std::make_pair(plus(left.first, negate(right.first)), plus(left.second, negate(right.second)));
   }
   else if (is_negate(e))
   {
@@ -348,10 +397,18 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
     {
       result = split_constants_and_variables(plus(negate(lhs(argument)), rhs(argument)));
     }
+    else if(is_number(argument))
+    {
+      result = std::make_pair(real_zero(), e);
+    }
     else
     {
       result = std::make_pair(e, real_zero());
     }
+  }
+  else if (gsIsDataExprCReal(e) && !is_number(*static_cast<const data_application&>(e).arguments().begin()))
+  {
+    result = std::make_pair(e, real_zero());
   }
   else if (is_multiplies(e) || is_data_variable(e))
   {
@@ -359,9 +416,11 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
   }
   else
   {
+    gsDebugMsg("e: %s (%s)\n", pp(e).c_str(), e.to_string().c_str());
     assert(is_number(e));
     result = std::make_pair(real_zero(), e);
   }
+  gsDebugMsg("split version: left = %s, right = %s\n", pp(result.first).c_str(), pp(result.second).c_str());
   return result;
 }
 
@@ -486,11 +545,31 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
   std::pair<data_expression, data_expression> left = split_constants_and_variables(r(lhs(d)));
   std::pair<data_expression, data_expression> right = split_constants_and_variables(r(rhs(d)));
 
-  data_expression new_left = r(plus(left.first, negate(right.first)));
-  data_expression new_right = r(minus(right.second, left.second));
+  gsDebugMsg("left.first = %s, left.second = %s, right.first = %s, right.second = %s\n", pp(left.first).c_str(), pp(left.second).c_str(), pp(right.first).c_str(), pp(right.second).c_str());
+
+  data_expression new_left = left.first;
+  while(is_plus(right.first))
+  {
+    new_left = plus(new_left, negate(rhs(right.first)));
+    right.first = lhs(right.first);
+  }
+  new_left = r(plus(new_left, negate(right.first)));
+
+  data_expression new_right = right.second;
+  while(is_plus(left.second))
+  {
+    new_right = plus(new_right, negate(rhs(left.second)));
+    left.second = lhs(left.second);
+  }
+  new_right = r(plus(new_right, negate(left.second)));
+
   data_expression result = data_application(d.head(), make_list(new_left, new_right));
 
   gsDebugMsg("Normalization result %s\n", pp(result).c_str());
+
+  result = order_inequality(result, r);
+  gsDebugMsg("Ordered version of result %s\n", pp(result).c_str());
+
   return result;
 }
 
@@ -753,6 +832,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
   data_expression new_left = real_zero();
   while(is_plus(left))
   {
+    gsDebugMsg("left = %s is a plus expression\n", pp(left).c_str());
     if(is_multiplies(lhs(left)))
     {
       data_expression factor = lhs(lhs(left));
@@ -769,6 +849,8 @@ data_expression remove_variable(const data_variable& variable, const data_expres
       left = rhs(left);
     }
   }
+
+  gsDebugMsg("left = %s\n", pp(left).c_str());
 
   if(is_negate(left))
   {
@@ -1282,9 +1364,8 @@ data_assignment_list determine_process_initialization(const data_assignment_list
 specification realelm(specification s, int max_iterations, RewriteStrategy strategy)
 {
   gsDebugMsg("Performing real time abstraction with a maximum of %d iterations\n", max_iterations);
-  s = set_data_specification(s, add_ad_hoc_real_equations(s.data()));
   s = set_data_specification(s, add_comp_sort(s.data()));
-  rewriter r = rewriter(s.data(), (rewriter::strategy)strategy);
+  rewriter r = rewriter(add_ad_hoc_real_equations(s.data()), (rewriter::strategy)strategy);
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(s);
   s = normalize_specification(s, r, variable_generator);
