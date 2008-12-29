@@ -192,12 +192,17 @@ class summand: public atermpp::aterm_appl
       return m_assignments;
     }
 
-    /// Returns the next state corresponding to this summand.
+    /// \brief Returns the next state corresponding to this summand.
+    /// \details The next state is constructed out of the assignments in 
+    /// this summand, by substituting the assignments to the list of
+    /// variables that are an argument of this function. In general this
+    /// argument is the list with the process parameters of this process.
     /// \param process_parameters The process parameters of the linear process that contains the summand.
     ///
-    data::data_variable_list next_state(const data::data_variable_list& process_parameters) const
+    data::data_expression_list next_state(const data::data_variable_list& process_parameters) const
     {
-      return process_parameters.substitute(data::assignment_list_substitution(assignments()));
+      const data::data_expression_list pp((atermpp::aterm)process_parameters);
+      return pp.substitute(data::assignment_list_substitution(assignments()));
     }
 
     /// Applies a substitution to this summand and returns the result.
