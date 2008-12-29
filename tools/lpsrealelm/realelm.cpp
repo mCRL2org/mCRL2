@@ -537,15 +537,17 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
   return r;
 }
 
-/// \brief Transform the inequality in e such that the left hand side only
+/// \brief Normalize an equality.
+/// \details Transform the inequality in e such that the left hand side only
 ///        contains multiples of variables and the right hand side contains a
-///        single constant.
+///        single constant. 
 /// \param e A data expression
 /// \param r A rewriter
 /// \pre e is an inequality
 /// \ret An inequality e' equivalent to e, such that the left hand side is of
 ///      the form c1 * e1 + ... + cn * en === d, with === one of ==, <, <=, >,
-///      >=
+///      >=. In case there are no variables left, the left hand side is the 
+///      expression 0.
 static inline
 data_expression normalize_inequality(const data_expression& e, rewriter& r)
 {
@@ -583,12 +585,14 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
   result = order_inequality(result, r);
   gsDebugMsg("Ordered version of result %s\n", pp(result).c_str());
   
-
   return result;
 }
 
-/// \brief Normalize the inequalities in l. See normalize_inequality for more
-///        details.
+/// \brief Normalize the inequalities in l. 
+/// \details See normalize_inequality for more details. The result
+///          can be an empty list, if the l was equivalent to true.
+///          In case the input was inconsistent, the result can be 
+///          [false]
 /// \param l A list of data expressions
 /// \param r A rewriter
 /// \ret The list of data expressions l' equivalent to l, but with all
@@ -602,8 +606,14 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
     data_expression inequality = r(*i);
     if (is_inequality(inequality))
     {
-      inequality = normalize_inequality(inequality, r);
-      if (!find_data_expression(result, inequality))
+      inequality = r(normalize_inequality(inequality, r));
+      if (inequality==true_())
+      { /* do nothing */
+      }
+      else if (inequality==false_())
+      { return push_front(data_expression_list(),false_());
+      }
+      else if (!find_data_expression(result, inequality))
       {
         result = push_front(result,normalize_inequality(inequality, r));
       }
@@ -1157,10 +1167,14 @@ data_expression_list simplify_condition(const data_expression_list& cond, const 
 static
 bool is_inconsistent(const data_expression_list& cond, rewriter& r)
 {
+  // Check if any condition rewrites to false.
   if(std::find(cond.begin(), cond.end(), false_()) != cond.end())
-  {
-    return true;
+  { return true;
   }
+  // for(data_expression_list::const_iterator j = cond.begin(); j != cond.end(); ++j)
+  // { if (false_()==r(*j))  
+  //  return true;
+  // }
   for(data_expression_list::const_iterator i = cond.begin(); i != cond.end(); ++i)
   {
     for(data_expression_list::const_iterator j = cond.begin(); j != cond.end(); ++j)
@@ -1469,14 +1483,14 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           // Eliminate sum bound variables, resulting in inequalities over
           // process parameters of sort Real. Of this, we add the inequalities
           // that are not yet in the context.
-          gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(condition).c_str());
+          gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(condition).c_str());
           fourier_motzkin(condition, i->summation_variables(), r);
           if(!is_inconsistent(condition, r))
           {
             condition = normalize_inequalities(condition, r);
             if(!is_inconsistent(condition, r))
             {
-              gsDebugMsg("inequalities after fourier-motzkin: %s\n", pp(condition).c_str());
+              gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(condition).c_str());
               // condition contains the inequalities over the process parameters
               changed = changed || add_inequalities_to_context(condition, context, r, variable_generator);
               if(!changed)
