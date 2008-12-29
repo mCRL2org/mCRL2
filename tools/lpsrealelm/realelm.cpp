@@ -51,12 +51,19 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
   ATermList rstl = ATmakeList3((ATerm) r, (ATerm) s, (ATerm) t);
 
   ATermList result = ATmakeList(14,
+    // r+0/p=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
+    // 0/p+r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), r),
+    // r+-r=0
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, gsMakeDataExprNeg(r)), real_zero),
+    // -r+r=0
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), r), real_zero),
+    // r+r=2*r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, r), gsMakeDataExprMult(real_two, r)),
+    // -r+-r=-2*r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(r)), gsMakeDataExprMult(gsMakeDataExprNeg(real_two), r)),
+    // s.r+t.r=(s+t).r
     (ATerm) gsMakeDataEqn(rstl, nil, gsMakeDataExprAdd(gsMakeDataExprMult(s, r), gsMakeDataExprMult(t, r)), gsMakeDataExprMult(gsMakeDataExprAdd(s, t), r)),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
@@ -245,13 +252,13 @@ bool is_inequality(const data_expression& e)
 }
 
 
-/// \brief Determine whether one data expression is less or equal to an other data
-///        expression.
-/// \param e1 A data expression
-/// \param e2 A data expression
-/// \pre e1 and e2 are eiter negation, multiplication with a number as left hand
-///      side, or a data variable
-/// \ret true iff e1 <= e2, where <= is lexicographic order on variable name.
+/// \brief Determine whether the variables in two data expressions are lexicographically ordered.
+/// \param e1 A data expression containing a single variable
+/// \param e2 A data expression also containing at most a single
+/// \pre e1 and e2 are either a negation, multiplication with a number as left hand
+///      side, a data variable or a constant
+/// \ret true iff e1 <= e2, where <= is lexicographic order on the variable name. An expression
+/// without a variable is considered the smallest.
 static
 bool less_or_equal(const data_expression& e1, const data_expression& e2)
 {
@@ -280,12 +287,16 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
   {
     return less_or_equal(e1, lhs(e2));
   }
-  else
-  {
-    gsDebugMsg("e1 = %s, e2 = %s\n", pp(e1).c_str(), pp(e2).c_str());
-    assert(is_data_variable(e1) && is_data_variable(e2));
-    return (static_cast<const data_variable&>(e1).name() <= static_cast<const data_variable&>(e2).name());
+  else if (gsIsDataExprCInt(e1))
+  { return true;
   }
+  else if (gsIsDataExprCInt(e2) )
+  { return false;
+  }
+
+  gsDebugMsg("e1 = %s, e2 = %s\n", pp(e1).c_str(), pp(e2).c_str());
+  assert(is_data_variable(e1) && is_data_variable(e2));
+  return (static_cast<const data_variable&>(e1).name() <= static_cast<const data_variable&>(e2).name());
 }
 
 /// \brief Merge two sorted lists of data expressions
@@ -342,7 +353,7 @@ data_expression_list sort(const data_expression& e)
   return r;
 }
 
-/// \brief Order an inequality, using a lexicographic order on variable names.
+/// \brief Order the variables in an inequality, using a lexicographic order.
 /// \param inequality An inequality
 /// \param r A rewriter
 /// \ret A version of the inequality in which the variables occur in
@@ -366,24 +377,24 @@ data_expression order_inequality(const data_expression& inequality, rewriter& r)
 
 /// \brief Split constant and variable parts of a data expression
 /// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
-///          dn, where ci and di are constants and xi are variables. Constants
+///          dm, where ci and di are constants and xi are variables. Constants
 ///          and variables may occur mixed.
-/// \ret The pair (c1 * x1 + ... + cn * xn, d1 + ... + cn)
+/// \ret The pair (c1 * x1 + ... + cn * xn, d1 + ... + dm)
 static
-std::pair<data_expression, data_expression> split_constants_and_variables(const data_expression& e)
+std::pair<data_expression, data_expression> split_variables_and_constants(const data_expression& e)
 {
   gsDebugMsg("Splitting constants and variables in %s\n", pp(e).c_str());
   std::pair<data_expression, data_expression> result;
   if(is_plus(e))
   {
-    std::pair<data_expression, data_expression> left = split_constants_and_variables(lhs(e));
-    std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(e));
+    std::pair<data_expression, data_expression> left = split_variables_and_constants(lhs(e));
+    std::pair<data_expression, data_expression> right = split_variables_and_constants(rhs(e));
     result = std::make_pair(plus(left.first, right.first), plus(left.second, right.second));
   }
   else if (is_minus(e))
   {
-    std::pair<data_expression, data_expression> left = split_constants_and_variables(lhs(e));
-    std::pair<data_expression, data_expression> right = split_constants_and_variables(rhs(e));
+    std::pair<data_expression, data_expression> left = split_variables_and_constants(lhs(e));
+    std::pair<data_expression, data_expression> right = split_variables_and_constants(rhs(e));
     result = std::make_pair(plus(left.first, negate(right.first)), plus(left.second, negate(right.second)));
   }
   else if (is_negate(e))
@@ -391,11 +402,11 @@ std::pair<data_expression, data_expression> split_constants_and_variables(const 
     data_expression argument = *static_cast<const data_application&>(e).arguments().begin();
     if(is_plus(argument))
     {
-      result = split_constants_and_variables(plus(negate(lhs(argument)), negate(rhs(argument))));
+      result = split_variables_and_constants(plus(negate(lhs(argument)), negate(rhs(argument))));
     }
     else if(is_minus(argument))
     {
-      result = split_constants_and_variables(plus(negate(lhs(argument)), rhs(argument)));
+      result = split_variables_and_constants(plus(negate(lhs(argument)), rhs(argument)));
     }
     else if(is_number(argument))
     {
@@ -538,12 +549,14 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
 static inline
 data_expression normalize_inequality(const data_expression& e, rewriter& r)
 {
+
   assert(is_inequality(e));
   gsDebugMsg("Normalizing inequality %s\n", pp(e).c_str());
 
   data_application d = static_cast<const data_application&>(e);
-  std::pair<data_expression, data_expression> left = split_constants_and_variables(r(lhs(d)));
-  std::pair<data_expression, data_expression> right = split_constants_and_variables(r(rhs(d)));
+  std::pair<data_expression, data_expression> left = split_variables_and_constants(r(lhs(d)));
+  std::pair<data_expression, data_expression> right = split_variables_and_constants(r(rhs(d)));
+  // Variables are moved to the left, constants to the right of each pair.
 
   gsDebugMsg("left.first = %s, left.second = %s, right.first = %s, right.second = %s\n", pp(left.first).c_str(), pp(left.second).c_str(), pp(right.first).c_str(), pp(right.second).c_str());
 
@@ -553,7 +566,7 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
     new_left = plus(new_left, negate(rhs(right.first)));
     right.first = lhs(right.first);
   }
-  new_left = r(plus(new_left, negate(right.first)));
+  new_left = plus(new_left, negate(right.first));
 
   data_expression new_right = right.second;
   while(is_plus(left.second))
@@ -561,14 +574,15 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
     new_right = plus(new_right, negate(rhs(left.second)));
     left.second = lhs(left.second);
   }
-  new_right = r(plus(new_right, negate(left.second)));
+  new_right = plus(new_right, negate(left.second));
 
-  data_expression result = data_application(d.head(), make_list(new_left, new_right));
+  data_expression result = data_application(d.head(), make_list(r(new_left), r(new_right)));
 
   gsDebugMsg("Normalization result %s\n", pp(result).c_str());
 
   result = order_inequality(result, r);
   gsDebugMsg("Ordered version of result %s\n", pp(result).c_str());
+  
 
   return result;
 }
@@ -586,10 +600,10 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
   for(data_expression_list::iterator i = l.begin(); i != l.end() ; ++i)
   {
     data_expression inequality = r(*i);
-    if(is_inequality(inequality))
+    if (is_inequality(inequality))
     {
       inequality = normalize_inequality(inequality, r);
-      if(!find_data_expression(result, inequality))
+      if (!find_data_expression(result, inequality))
       {
         result = push_front(result,normalize_inequality(inequality, r));
       }
@@ -676,6 +690,7 @@ specification remove_real_constants_from_nextstate(specification s, identifier_g
 }
 
 /// \brief Normalize all inequalities in the summands of the specification
+/// \details TODO: It is unclear what "normalize" means in this explanation.
 /// \param s A data specification
 /// \param r A rewriter
 /// \param variable_generator A variable generator
@@ -811,7 +826,8 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
   // Remove the variables that we have eliminated from the list of variables
   variables = term_list_difference(variables, eliminated_variables);
 
-  gsDebugMsg("Gauss elimination eliminated variables %s, resulting in the system %s\n", pp(eliminated_variables).c_str(), pp(inequalities).c_str());
+  gsDebugMsg("Gauss elimination eliminated variables %s, resulting in the system %s\n", 
+                        pp(eliminated_variables).c_str(), pp(inequalities).c_str());
 
   return inequalities;
 }
@@ -921,7 +937,13 @@ bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static inline
-bool add_inequalities_to_context(data_expression_list l, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+bool add_inequalities_to_context(
+                data_expression_list l, 
+                atermpp::map<std::pair<data_expression, 
+                data_expression>, 
+                data_variable>& context, 
+                rewriter& r, 
+                identifier_generator& variable_generator)
 {
   bool result = false;
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
@@ -937,7 +959,12 @@ bool add_inequalities_to_context(data_expression_list l, atermpp::map<std::pair<
 /// \param variable_generator A fresh variable generator
 /// \post e is in the context
 /// \ret true iff there was no variable for e in the context
-bool add_inequality_to_context(const data_expression& e, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r, identifier_generator& variable_generator)
+bool add_inequality_to_context(
+                const data_expression& e, 
+                atermpp::map<std::pair<data_expression, data_expression>, 
+                data_variable>& context, 
+                rewriter& r, 
+                identifier_generator& variable_generator)
 {
   if(!is_inequality(e))
   {
@@ -993,9 +1020,9 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
       zero_variables = normalize_inequalities(zero_variables, r);
       negative_variables = normalize_inequalities(negative_variables, r);
 
-      gsDebugMsg("equations with zero occurrance %s\n", pp(zero_variables).c_str());
-      gsDebugMsg("equations with positive occurrance %s\n", pp(positive_variables).c_str());
-      gsDebugMsg("equations with negative occurrance %s\n", pp(negative_variables).c_str());
+      gsDebugMsg("equations with zero occurrence %s\n", pp(zero_variables).c_str());
+      gsDebugMsg("equations with positive occurrence %s\n", pp(positive_variables).c_str());
+      gsDebugMsg("equations with negative occurrence %s\n", pp(negative_variables).c_str());
 
       data_expression_list new_inequalities = zero_variables;
 
