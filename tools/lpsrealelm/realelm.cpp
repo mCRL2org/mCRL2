@@ -307,7 +307,7 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
     return false;
   }
 
-  gsDebugMsg("e1 = %s, e2 = %s\n", pp(e1).c_str(), pp(e2).c_str());
+  gsDebugMsg("e1 = %s, e2 = %s\n", (ATermAppl)e1, (ATermAppl)e2);
   assert(is_data_variable(e1) && is_data_variable(e2));
   return (static_cast<const data_variable&>(e1).name() <= static_cast<const data_variable&>(e2).name());
 }
@@ -1199,7 +1199,7 @@ bool is_inconsistent(const data_expression_list& cond, rewriter& r)
   {
     for(data_expression_list::const_iterator j = cond.begin(); j != cond.end(); ++j)
     {
-      gsDebugMsg("*i = %s, *j = %s\n", pp(*i).c_str(), pp(*j).c_str());
+      gsDebugMsg("*i = %s, *j = %s\n", (ATermAppl)*i, (ATermAppl)*j);
       if(is_inequality(*i) && is_inequality(*j) && *i != *j && !is_less_equal(*i) && !is_less_equal(*j))
       {
         if(lhs(*i) == lhs(*j))
