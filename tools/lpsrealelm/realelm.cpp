@@ -1089,10 +1089,7 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
             new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
           }
           new_inequality = normalize_inequality(new_inequality, r);
-          if(lhs(new_inequality) != real_zero())
-          {
-            new_inequalities = push_front(new_inequalities, new_inequality);
-          }
+          new_inequalities = push_front(new_inequalities, new_inequality);
         }
       }
       inequalities = new_inequalities;
