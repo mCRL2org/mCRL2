@@ -624,7 +624,7 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
       { /* do nothing */
       }
       else if (inequality==false_())
-      { 
+      {
         return push_front(data_expression_list(),false_());
       }
       else if (!find_data_expression(result, inequality))
@@ -1481,6 +1481,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
 
       for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
       {
+        // xi == xi'
         data_expression_list context_inequalities = compute_inequalities(context_combination, context);
 
         gsDebugMsg("inequalites from context: %P\n", (ATermList)context_inequalities);
@@ -1488,14 +1489,18 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
           gsDebugMsg("context = %ld, nextstate = %ld\n", context_combination, nextstate_combination);
+          // zeta
           data_expression_list condition = compute_inequalities(nextstate_combination, context);
           gsDebugMsg("inequalities for condition before substitution: %P\n", (ATermList)condition);
+          // zeta[x := g(x)]
           condition = data_expression_map_replace_list(condition, summand_real_nextstate_map[*i]);
 
           gsDebugMsg("inequalities for condition: %P\n", (ATermList)condition);
 
+          // original condition of the summand && zeta[x := g(x)]
           condition = condition + summand_real_conditions[*i];
           gsDebugMsg("condition: %P\n", (ATermList)condition);
+          // simplify this condition in the context of xi'
           condition = simplify_condition(condition, context_inequalities);
           gsDebugMsg("cond after simplification: %P\n", (ATermList)condition);
           condition = normalize_inequalities(condition, r);
