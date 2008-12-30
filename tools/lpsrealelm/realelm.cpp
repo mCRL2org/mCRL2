@@ -914,6 +914,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
   gsErrorMsg("cannot remove variable %P from %P\n", (ATermAppl)variable, (ATermAppl)inequality);
 
   assert(false);
+  return data_expression(); // Never reached, silence gcc 4.1.2
 }
 
 /// \brief Group inequalities by positive, 0 and negative occurrences of a
@@ -1514,7 +1515,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       // First calculate the context for this particular summand, by only looking at variables that
       // occur in the condition or in the effect.
       atermpp::map<std::pair<data_expression, data_expression>, data_variable> context_for_this_summand;
-      for(context_type::iterator c=context.begin(); 
+      for(context_type::iterator c=context.begin();
                                  c!=context.end(); ++c)
       // { if (are_data_variables_shared(c->first.first,c->first.second,i->condition(),i->next_state(lps.process_parameters())))
       { if (are_data_variables_shared(c->first.first,c->first.second,i->condition(),i->assignments()))
@@ -1522,13 +1523,13 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         }
       }
 
-      
+
       unsigned long context_combinations = pow(3, context_for_this_summand.size()); //Combinations to be considered
       // gsDebugMsg("Considering %ld combinations for context\n", context_combinations);
 
       for(unsigned long context_combination = 0; context_combination < context_combinations; ++context_combination)
       {
-        
+
         // xi == xi'
         data_expression_list context_inequalities = compute_inequalities(context_combination, context_for_this_summand);
         // data_expression_list context_inequalities = compute_inequalities(context_combination, context);
