@@ -629,12 +629,19 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
       }
       else if (!find_data_expression(result, inequality))
       {
-        result = push_front(result,normalize_inequality(inequality, r));
+        result = push_front(result, inequality);
       }
     }
     else
     {
-      result = push_front(result, inequality);
+      assert(inequality==false_() || inequality==true_());
+      if (inequality==true_())
+      { /* do nothing */
+      }
+      else if (inequality==false_())
+      {
+        return push_front(data_expression_list(),false_());
+      }
     }
   }
   return result;
@@ -774,7 +781,7 @@ void determine_real_inequalities(const data_expression& e, data_expression_list&
 /// \param variables A list of variables to be eliminated
 /// \param r A rewriter.
 /// \post variables contains the list of variables that have not been eliminated
-/// \ret The system of inequalities after Gauss eliminatation.
+/// \ret The system of normalized inequalities after Gauss eliminatation.
 static
 data_expression_list gauss_elimination(data_expression_list inequalities, data_variable_list& variables, rewriter& r)
 {
@@ -858,7 +865,7 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
   // gsDebugMsg("Gauss elimination eliminated variables %P, resulting in the system %P\n", 
   //                       (ATermList)eliminated_variables, (ATermList)inequalities);
 
-  return inequalities;
+  return normalize_inequalities(inequalities, r);
 }
 
 /// \brief Remove a variable from an inequality
@@ -1024,8 +1031,9 @@ bool add_inequality_to_context(
 /// \param inequalities A list of inequalities
 /// \param variables The list of variables to be eliminated
 /// \param r A rewriter
+/// \pre inequalities has been normalized
 /// \post All variables in variables have been eliminated, inequalities contains
-///       the resulting system of inequalities.
+///       the resulting system of normalized inequalities.
 static
 void fourier_motzkin(data_expression_list& inequalities, data_variable_list variables, rewriter& r)
 {
@@ -1045,10 +1053,6 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
       data_expression_list negative_variables;
 
       group_inequalities(*i, inequalities, positive_variables, zero_variables, negative_variables);
-
-      positive_variables = normalize_inequalities(positive_variables, r);
-      zero_variables = normalize_inequalities(zero_variables, r);
-      negative_variables = normalize_inequalities(negative_variables, r);
 
       // gsDebugMsg("equations with zero occurrence %P\n", (ATermList)zero_variables);
       // gsDebugMsg("equations with positive occurrence %P\n", (ATermList)positive_variables);
@@ -1089,11 +1093,10 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
           {
             new_inequality = less_equal(plus(lhs(positive_inequality), lhs(negative_inequality)), plus(rhs(positive_inequality), rhs(negative_inequality)));
           }
-          new_inequality = normalize_inequality(new_inequality, r);
           new_inequalities = push_front(new_inequalities, new_inequality);
         }
       }
-      inequalities = new_inequalities;
+      inequalities = normalize_inequalities(new_inequalities, r);
     }
   }
 }
@@ -1561,7 +1564,6 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           // gsDebugMsg("inequalities before fourier-motzkin: %s\n", pp(condition).c_str());
           // gsDebugMsg("inequalities before fourier-motzkin: %P\n", (ATermList)condition);
           fourier_motzkin(condition, i->summation_variables(), r);
-          condition = normalize_inequalities(condition, r);
           // gsDebugMsg("cond after simplification: %s\n", pp(condition).c_str());
           if(!is_inconsistent(condition, r))
           {
