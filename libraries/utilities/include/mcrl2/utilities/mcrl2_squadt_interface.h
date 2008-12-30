@@ -26,11 +26,12 @@ namespace mcrl2 {
       /**
        * \brief mCRL2 tool specific squadt interface
        *
-       * In addition to the interface above, the message system used by most
-       * tools in the mCRL2 toolset is initialised such that messages are
-       * relayed.
+       * In addition to the functionality provided by the tool_interface class,
+       * logging system used by most tools in the mCRL2 toolset is initialised
+       * such that messages are relayed to sqaudt.
        *
-       * \note only works for one object at a time
+       * \note only works for one object at a time due to the global nature of
+       * the logging system
        **/
       class mcrl2_tool_interface : public squadt::tool_interface {
 
@@ -70,33 +71,36 @@ namespace mcrl2 {
 #endif
 
 #ifdef __LIBLTS_H
+            using namespace mcrl2::lts;
+
             tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
 
-            transformation_methods.
-              add(mcrl2::lts::lts_eq_none, "none").
-              add(mcrl2::lts::lts_eq_bisim, "modulo_strong_bisimulation").
-              add(mcrl2::lts::lts_eq_branching_bisim, "modulo_branching_bisimulation").
-              add(mcrl2::lts::lts_eq_sim, "strong_simulation_equivalence").
-              add(mcrl2::lts::lts_eq_trace, "modulo_trace_equivalence").
-              add(mcrl2::lts::lts_eq_weak_trace, "modulo_weak_trace_equivalence").
-              add(mcrl2::lts::lts_eq_isomorph, "isomorphism");
+            for (std::set< lts::lts_equivalence >::const_iterator i = lts::lts::supported_lts_equivalences().begin();
+                                                            i != lts::lts::supported_lts_equivalences().end(); ++i) {
+
+              transformation_methods.add(*i, lts::lts::string_for_equivalence(*i));
+            }
 
             tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
 
-            storage_types.
-              add(mcrl2::lts::lts_none, "none").
-              add(mcrl2::lts::lts_mcrl2, "mCRL2").
-              add(mcrl2::lts::lts_aut, "Aldebaran").
-              add(mcrl2::lts::lts_mcrl, "mCRL").
-              add(mcrl2::lts::lts_svc, "SVC").
-              add(mcrl2::lts::lts_fsm, "FSM").
-# ifdef USE_BCG
-              add(mcrl2::lts::lts_bcg, "BCG").
-# endif
-              add(mcrl2::lts::lts_dot, "DOT");
+            for (std::set< lts::lts_type >::const_iterator i = lts::lts::supported_lts_formats().begin();
+                                                            i != lts::lts::supported_lts_formats().end(); ++i) {
+
+              storage_types.add(*i, lts::lts::string_for_type(*i));
+            }
 #endif
 
-              return true;
+            return true;
+          }
+
+          void initalise() {
+            mcrl2::core::gsSetCustomMessageHandler(relay_message);
+          }
+
+          /** \brief finalisation after termination signal has been received */
+          void finalise() {
+            /* Unregister message relay */
+            mcrl2::core::gsSetCustomMessageHandler(0);
           }
 
         protected:
@@ -108,8 +112,6 @@ namespace mcrl2 {
             static_cast< void >(initialised);
 
             mcrl2_tool_interface::get_reporter() = this;
-
-            mcrl2::core::gsSetCustomMessageHandler(relay_message);
 
             tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
 
@@ -123,23 +125,7 @@ namespace mcrl2 {
               }
             }
           }
-
-          /** \brief finalisation after termination signal has been received */
-          virtual ~mcrl2_tool_interface() {
-            /* Unregister message relay */
-            mcrl2::core::gsSetCustomMessageHandler(0);
-          }
       };
-
-#ifdef __LIBLTS_H
-      inline tipi::mime_type lts_type_to_mime_type(const mcrl2::lts::lts_type f) {
-        std::string type_strings[] = { "unknown", "mcrl2-lts", "aut", "svc+mcrl", "svc", "fsm", "dot", "bcg", "" };
-  
-        return tipi::mime_type(type_strings[f],
-            ((f == mcrl2::lts::lts_aut || f == mcrl2::lts::lts_fsm || f == mcrl2::lts::lts_dot) ?
-          	 tipi::mime_type::text : tipi::mime_type::application));
-      }
-#endif
 
       /** \brief Used to relay messages generated using core::print */
       inline void relay_message(const ::mcrl2::core::messageType t, const char* data) {
@@ -174,6 +160,28 @@ namespace mcrl2 {
        **/
       typedef basic_wx_tool_interface< mcrl2_tool_interface > mcrl2_wx_tool_interface;
 #endif
+
+      /// \brief Helper function for unsigned long to string conversion
+      inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
+        char buf[21];
+
+        sprintf(buf,"%lu",t);
+
+        o << buf;
+
+        return o;
+      }
+
+      /// \brief Helper function for unsigned long long to string conversion
+      inline std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
+        char buf[21];
+
+        sprintf(buf,"%llu",t);
+
+        o << buf;
+
+        return o;
+      }
     }
   }
 }

@@ -142,7 +142,7 @@ class squadt_interactor::storage_configuration {
       /* Add output file to the configuration */
       std::string     output_name(c.get_output_name("." +
           lts::extension_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
-      tipi::mime_type output_type(mcrl2::utilities::squadt::lts_type_to_mime_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type)));
+      tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(c.get_option_argument< mcrl2::lts::lts_type >(option_lts_type))));
 
       if (c.output_exists(lts_file_for_output)) {
         tipi::configuration::object& output_file = c.get_output(lts_file_for_output);

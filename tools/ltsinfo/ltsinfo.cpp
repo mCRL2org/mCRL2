@@ -218,15 +218,11 @@ class info_tool
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("lts_in", tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::reporting);
-# ifdef USE_BCG
-      c.add_input_configuration("lts_in", tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::reporting);
-# endif
-      c.add_input_configuration("lts_in", tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::reporting);
-      c.add_input_configuration("lts_in", tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::reporting);
-      c.add_input_configuration("lts_in", tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::reporting);
-      c.add_input_configuration("lts_in", tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::reporting);
-      c.add_input_configuration("lts_in", tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::reporting);
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+
+      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+        c.add_input_configuration("lts_in", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::reporting);
+      }
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */

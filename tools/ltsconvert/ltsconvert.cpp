@@ -392,15 +392,11 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 };
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("aut", tipi::mime_type::text), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("mcrl2-lts", tipi::mime_type::application), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc+mcrl", tipi::mime_type::application), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("svc", tipi::mime_type::application), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::conversion);
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("dot", tipi::mime_type::text), tipi::tool::category::conversion);
-#ifdef USE_BCG
-  c.add_input_configuration(lts_file_for_input, tipi::mime_type("bcg", tipi::mime_type::application), tipi::tool::category::conversion);
-#endif
+  std::set< lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+
+  for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+    c.add_input_configuration(lts_file_for_input, tipi::mime_type(lts::mime_type_for_type(*i)), tipi::tool::category::conversion);
+  }
 }
 
 void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
@@ -508,7 +504,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   /* Add output file to the configuration */
   std::string     output_name(c.get_output_name("." +
                     lts::extension_for_type(format_selector.get_selection())));
-  tipi::mime_type output_type(mcrl2::utilities::squadt::lts_type_to_mime_type(format_selector.get_selection()));
+  tipi::mime_type output_type(tipi::mime_type(lts::mime_type_for_type(format_selector.get_selection())));
 
   if (c.output_exists(lts_file_for_output)) {
     tipi::configuration::object& output_file = c.get_output(lts_file_for_output);
@@ -543,7 +539,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   lts_equivalence selected_transformation = transformation_selector.get_selection();
 
-  c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
+  if (selected_transformation != lts_eq_none) {
+    c.add_option(option_selected_transformation).set_argument_value< 0 >(selected_transformation);
+  }
   c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
 
   if ((selected_transformation == lts_eq_bisim || selected_transformation == lts_eq_branching_bisim)) {
@@ -579,7 +577,6 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 
   result &= c.input_exists(lts_file_for_input);
   result &= c.output_exists(lts_file_for_output);
-  result &= c.option_exists(option_selected_transformation);
 
   if (c.option_exists(option_tau_actions)) {
     lts_eq_options eq_opts;
@@ -609,9 +606,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.set_source(c.get_input(lts_file_for_input).location());
   tool_options.set_target(c.get_output(lts_file_for_output).location());
 
-  lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
+  if (c.option_exists(option_selected_transformation)) {
+    lts_equivalence method = c.get_option_argument< lts_equivalence >(option_selected_transformation);
 
-  if (method != lts_eq_none) {
     tool_options.equivalence = method;
 
     if (method == mcrl2::lts::lts_eq_isomorph) {
