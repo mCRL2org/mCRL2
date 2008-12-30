@@ -92,8 +92,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //start token
 %start start
 
-//enable debug output
-%debug
+//Uncomment the line below to enable the bison debug facilities.
+//To produce traces, yydebug needs to be set to 1 (see mcrl2lexer.ll)
+//%debug
 
 //terminals
 //---------
