@@ -75,18 +75,18 @@ namespace mcrl2 {
 
             tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
 
-            for (std::set< lts::lts_equivalence >::const_iterator i = lts::lts::supported_lts_equivalences().begin();
-                                                            i != lts::lts::supported_lts_equivalences().end(); ++i) {
+            std::set< mcrl2::lts::lts_equivalence > const& equivalences(mcrl2::lts::lts::supported_lts_equivalences());
 
-              transformation_methods.add(*i, lts::lts::string_for_equivalence(*i));
+            for (std::set< mcrl2::lts::lts_equivalence >::const_iterator i = equivalences.begin(); i != equivalences.end(); ++i) {
+              transformation_methods.add(*i, mcrl2::lts::lts::string_for_equivalence(*i));
             }
 
             tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
 
-            for (std::set< lts::lts_type >::const_iterator i = lts::lts::supported_lts_formats().begin();
-                                                            i != lts::lts::supported_lts_formats().end(); ++i) {
+            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::lts::supported_lts_formats());
 
-              storage_types.add(*i, lts::lts::string_for_type(*i));
+            for (std::set< mcrl2::lts::lts_type >::const_iterator i = formats.begin(); i != formats.end(); ++i) {
+              storage_types.add(*i, mcrl2::lts::lts::string_for_type(*i));
             }
 #endif
 
