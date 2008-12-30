@@ -74,9 +74,9 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     // 0/p-r=-r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
     // r.(1/1)=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one)), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, real_one), r),
     // (1/1).r=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one), r), r),
+    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(real_one, r), r),
     // --r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
     // -(r+s)=-r+-s
@@ -382,7 +382,7 @@ data_expression order_inequality(const data_expression& inequality, rewriter& r)
     left = real_zero();
     for(data_expression_list::iterator j = sorted.begin(); j != sorted.end(); ++j)
     {
-      left = plus(*j, left);
+      left = plus(left, *j);
     }
   }
   return data_application(static_cast<const data_application&>(inequality).head(), make_list(r(left), r(rhs(inequality))));
@@ -714,7 +714,12 @@ specification remove_real_constants_from_nextstate(specification s, identifier_g
 }
 
 /// \brief Normalize all inequalities in the summands of the specification
-/// \details TODO: It is unclear what "normalize" means in this explanation.
+/// \details All real constants occurring in the nextstate vectors of all
+///          summands are replaced by a summation variable (see
+///          remove_real_constants_from_nextstate). Furthermore, the parts of the
+///          conditions ranging over real numbers and the other parts of the conditions
+///          are separated and the part ranging over real numbers is normalized
+///          (see normalize_inequalities for details).
 /// \param s A data specification
 /// \param r A rewriter
 /// \param variable_generator A variable generator
@@ -873,20 +878,20 @@ data_expression remove_variable(const data_variable& variable, const data_expres
   while(is_plus(left))
   {
     gsDebugMsg("left = %P is a plus expression\n", (ATermAppl)left);
-    if(is_multiplies(lhs(left)))
+    if(is_multiplies(rhs(left)))
     {
-      data_expression factor = lhs(lhs(left));
-      new_left = gsMakeDataExprDivide(plus(new_left, rhs(left)), factor);
+      data_expression factor = lhs(rhs(left));
+      new_left = gsMakeDataExprDivide(plus(new_left, lhs(left)), factor);
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, gsMakeDataExprDivide(rhs(inequality), factor)));
     }
-    else if (lhs(left) == variable || lhs(left) == negate(static_cast<const data_expression&>(variable)))
+    else if (rhs(left) == variable || rhs(left) == negate(static_cast<const data_expression&>(variable)))
     {
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(plus(new_left, rhs(left)), rhs(inequality)));
+      return data_application(static_cast<const data_application&>(inequality).head(), make_list(plus(new_left, lhs(left)), rhs(inequality)));
     }
     else
     {
-      new_left = plus(new_left, lhs(left));
-      left = rhs(left);
+      new_left = plus(new_left, rhs(left));
+      left = lhs(left);
     }
   }
 
