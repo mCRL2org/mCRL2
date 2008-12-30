@@ -41,7 +41,7 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app >
     bool parse_command_line(int& argc, wxChar** argv);
 
     std::vector< std::string > developers() {
-      static char* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
+      static char const* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
            "Diana Koenraadt", "Bas Luksenburg", "Jonathan Nelisse", "Hans Poppelaars", "Bram Schoenmakers"};
 
       return std::vector< std::string >(&developer_names[0], &developer_names[7]);

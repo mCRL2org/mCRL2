@@ -126,7 +126,7 @@ BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
 std::vector< std::string > developers() {
-  static char* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
+  static char const* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
 
   return std::vector< std::string >(&developer_names[0], &developer_names[2]);
 }
