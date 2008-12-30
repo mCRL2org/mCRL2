@@ -63,7 +63,7 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, r), gsMakeDataExprMult(real_two, r)),
     // -r+-r=-2*r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(r)), gsMakeDataExprMult(gsMakeDataExprNeg(real_two), r)),
-    // s.r+t.r=(s+t).r
+    // s*r+t*r=(s+t)*r
     (ATerm) gsMakeDataEqn(rstl, nil, gsMakeDataExprAdd(gsMakeDataExprMult(s, r), gsMakeDataExprMult(t, r)), gsMakeDataExprMult(gsMakeDataExprAdd(s, t), r)),
     // (r+s)+-s=r
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprAdd(gsMakeDataExprAdd(r,s), gsMakeDataExprNeg(s)), r),
@@ -73,9 +73,9 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
     // 0/p-r=-r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
-    // r.(1/1)=r
+    // r*(1/1)=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, real_one), r),
-    // (1/1).r=r
+    // (1/1)*r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(real_one, r), r),
     // --r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
