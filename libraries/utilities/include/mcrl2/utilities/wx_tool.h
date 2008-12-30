@@ -113,7 +113,7 @@ namespace mcrl2 {
      
             //our approach (put version in description to improve formatting):
             information.SetDescription(wx_cast("mCRL2 toolset " + mcrl2::utilities::version_tag() +
-                         "(revision " MCRL2_REVISION + ")\n\n" + m_description));
+                         "\n(revision " MCRL2_REVISION + ")\n\n" + m_description));
      
             //set copyright
             information.SetCopyright(wx_cast(std::string("Copyright \xA9 ") +
