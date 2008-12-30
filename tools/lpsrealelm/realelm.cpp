@@ -50,7 +50,7 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
   ATermList rstl = ATmakeList3((ATerm) r, (ATerm) s, (ATerm) t);
 
-  ATermList result = ATmakeList(14,
+  ATermList result = ATmakeList(16,
     // r+0/p=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
     // 0/p+r=r
@@ -65,12 +65,23 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(r)), gsMakeDataExprMult(gsMakeDataExprNeg(real_two), r)),
     // s.r+t.r=(s+t).r
     (ATerm) gsMakeDataEqn(rstl, nil, gsMakeDataExprAdd(gsMakeDataExprMult(s, r), gsMakeDataExprMult(t, r)), gsMakeDataExprMult(gsMakeDataExprAdd(s, t), r)),
+    // (r+s)+-s=r
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprAdd(gsMakeDataExprAdd(r,s), gsMakeDataExprNeg(s)), r),
+    // (r+-s)+s=r
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprAdd(gsMakeDataExprAdd(r,gsMakeDataExprNeg(s)), s), r),
+    // r-0/p=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
+    // 0/p-r=-r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
+    // r.(1/1)=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one)), r),
+    // (1/1).r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one), r), r),
+    // --r=r
     (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
+    // -(r+s)=-r+-s
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprAdd(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(s))),
+    // -(r-s)=-r+s
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprSubt(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), s))
   );
 
@@ -176,7 +187,7 @@ unsigned long pow(unsigned long base, unsigned long exponent)
     }
     else
     {
-      //q.rem == 1
+      assert(q.rem == 1);
       return base * pow(base, exponent - 1);
     }
   }
@@ -262,7 +273,7 @@ bool is_inequality(const data_expression& e)
 static
 bool less_or_equal(const data_expression& e1, const data_expression& e2)
 {
-  gsDebugMsg("less or equal %s, %s\n", pp(e1).c_str(), pp(e2).c_str());
+  gsDebugMsg("less or equal %P, %P\n", (ATermAppl)e1, (ATermAppl)e2);
   if(is_negate(e1))
   {
     return less_or_equal(*(static_cast<const data_application&>(e1).arguments().begin()), e2);
@@ -288,10 +299,12 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
     return less_or_equal(e1, lhs(e2));
   }
   else if (gsIsDataExprCInt(e1))
-  { return true;
+  {
+    return true;
   }
   else if (gsIsDataExprCInt(e2) )
-  { return false;
+  {
+    return false;
   }
 
   gsDebugMsg("e1 = %s, e2 = %s\n", pp(e1).c_str(), pp(e2).c_str());
@@ -383,7 +396,7 @@ data_expression order_inequality(const data_expression& inequality, rewriter& r)
 static
 std::pair<data_expression, data_expression> split_variables_and_constants(const data_expression& e)
 {
-  gsDebugMsg("Splitting constants and variables in %s\n", pp(e).c_str());
+  gsDebugMsg("Splitting constants and variables in %P\n", (ATermAppl)e);
   std::pair<data_expression, data_expression> result;
   if(is_plus(e))
   {
@@ -427,11 +440,11 @@ std::pair<data_expression, data_expression> split_variables_and_constants(const 
   }
   else
   {
-    gsDebugMsg("e: %s (%s)\n", pp(e).c_str(), e.to_string().c_str());
+    gsDebugMsg("e: %P (%T)\n", (ATermAppl)e, (ATermAppl)e);
     assert(is_number(e));
     result = std::make_pair(real_zero(), e);
   }
-  gsDebugMsg("split version: left = %s, right = %s\n", pp(result.first).c_str(), pp(result.second).c_str());
+  gsDebugMsg("split version: left = %P, right = %P\n", (ATermAppl)result.first, (ATermAppl)result.second);
   return result;
 }
 
@@ -553,14 +566,14 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
 {
 
   assert(is_inequality(e));
-  gsDebugMsg("Normalizing inequality %s\n", pp(e).c_str());
+  gsDebugMsg("Normalizing inequality %P\n", (ATermAppl)e);
 
   data_application d = static_cast<const data_application&>(e);
   std::pair<data_expression, data_expression> left = split_variables_and_constants(r(lhs(d)));
   std::pair<data_expression, data_expression> right = split_variables_and_constants(r(rhs(d)));
   // Variables are moved to the left, constants to the right of each pair.
 
-  gsDebugMsg("left.first = %s, left.second = %s, right.first = %s, right.second = %s\n", pp(left.first).c_str(), pp(left.second).c_str(), pp(right.first).c_str(), pp(right.second).c_str());
+  gsDebugMsg("left.first = %P, left.second = %P, right.first = %P, right.second = %P\n", (ATermAppl)left.first, (ATermAppl)left.second, (ATermAppl)right.first, (ATermAppl)right.second);
 
   data_expression new_left = left.first;
   while(is_plus(right.first))
@@ -568,7 +581,7 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
     new_left = plus(new_left, negate(rhs(right.first)));
     right.first = lhs(right.first);
   }
-  new_left = plus(new_left, negate(right.first));
+  new_left = r(plus(new_left, negate(right.first)));
 
   data_expression new_right = right.second;
   while(is_plus(left.second))
@@ -576,15 +589,15 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
     new_right = plus(new_right, negate(rhs(left.second)));
     left.second = lhs(left.second);
   }
-  new_right = plus(new_right, negate(left.second));
+  new_right = r(plus(new_right, negate(left.second)));
 
-  data_expression result = data_application(d.head(), make_list(r(new_left), r(new_right)));
+  data_expression result = data_application(d.head(), make_list(new_left, new_right));
 
-  gsDebugMsg("Normalization result %s\n", pp(result).c_str());
+  gsDebugMsg("Normalization result %P\n", (ATermAppl)result);
 
   result = order_inequality(result, r);
-  gsDebugMsg("Ordered version of result %s\n", pp(result).c_str());
-  
+  gsDebugMsg("Ordered version of result %P\n", (ATermAppl)result);
+
   return result;
 }
 
@@ -611,7 +624,8 @@ data_expression_list normalize_inequalities(const data_expression_list& l, rewri
       { /* do nothing */
       }
       else if (inequality==false_())
-      { return push_front(data_expression_list(),false_());
+      { 
+        return push_front(data_expression_list(),false_());
       }
       else if (!find_data_expression(result, inequality))
       {
@@ -759,7 +773,7 @@ void determine_real_inequalities(const data_expression& e, data_expression_list&
 static
 data_expression_list gauss_elimination(data_expression_list inequalities, data_variable_list& variables, rewriter& r)
 {
-  gsDebugMsg("Trying to eliminate variables %s from system %s using gauss elimination\n", pp(variables).c_str(), pp(inequalities).c_str());
+  gsDebugMsg("Trying to eliminate variables %P from system %P using gauss elimination\n", (ATermList)variables, (ATermList)inequalities);
 
   // First find out whether there are variables that occur in an equality, so
   // that we can perform gauss elimination.
@@ -836,8 +850,8 @@ data_expression_list gauss_elimination(data_expression_list inequalities, data_v
   // Remove the variables that we have eliminated from the list of variables
   variables = term_list_difference(variables, eliminated_variables);
 
-  gsDebugMsg("Gauss elimination eliminated variables %s, resulting in the system %s\n", 
-                        pp(eliminated_variables).c_str(), pp(inequalities).c_str());
+  gsDebugMsg("Gauss elimination eliminated variables %P, resulting in the system %P\n", 
+                        (ATermList)eliminated_variables, (ATermList)inequalities);
 
   return inequalities;
 }
@@ -852,13 +866,13 @@ data_expression remove_variable(const data_variable& variable, const data_expres
 {
   assert(is_inequality(inequality));
 
-  gsDebugMsg("Removing variable %s from inequality %s\n", pp(variable).c_str(), pp(inequality).c_str());
+  gsDebugMsg("Removing variable %P from inequality %P\n", (ATermAppl)variable, (ATermAppl)inequality);
 
   data_expression left = lhs(inequality);
   data_expression new_left = real_zero();
   while(is_plus(left))
   {
-    gsDebugMsg("left = %s is a plus expression\n", pp(left).c_str());
+    gsDebugMsg("left = %P is a plus expression\n", (ATermAppl)left);
     if(is_multiplies(lhs(left)))
     {
       data_expression factor = lhs(lhs(left));
@@ -876,7 +890,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
     }
   }
 
-  gsDebugMsg("left = %s\n", pp(left).c_str());
+  gsDebugMsg("left = %P\n", (ATermAppl)left);
 
   if(is_negate(left))
   {
@@ -892,7 +906,7 @@ data_expression remove_variable(const data_variable& variable, const data_expres
     return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, rhs(inequality)));
   }
 
-  gsErrorMsg("cannot remove variable %s from %s\n", pp(variable).c_str(), pp(inequality).c_str());
+  gsErrorMsg("cannot remove variable %P from %P\n", (ATermAppl)variable, (ATermAppl)inequality);
 
   assert(false);
 }
@@ -993,7 +1007,7 @@ bool add_inequality_to_context(
   {
     data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
     context[std::make_pair(left, right)] = xi;
-    gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(left).c_str(), pp(right).c_str());
+    gsVerboseMsg("Introduced variable %P for < %P, %P >\n", (ATermAppl)xi, (ATermAppl)left, (ATermAppl)right);
     result = true;
   }
   return result;
@@ -1013,7 +1027,7 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
 
   if(variables.size() != 0)
   {
-    gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination, with variables %s\n", pp(variables).c_str());
+    gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination, with variables %P\n", (ATermList)variables);
 
     // At this stage, the variables that should be eliminated only occur in
     // inequalities. Group the inequalities into positive, 0, and negative
@@ -1030,9 +1044,9 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
       zero_variables = normalize_inequalities(zero_variables, r);
       negative_variables = normalize_inequalities(negative_variables, r);
 
-      gsDebugMsg("equations with zero occurrence %s\n", pp(zero_variables).c_str());
-      gsDebugMsg("equations with positive occurrence %s\n", pp(positive_variables).c_str());
-      gsDebugMsg("equations with negative occurrence %s\n", pp(negative_variables).c_str());
+      gsDebugMsg("equations with zero occurrence %P\n", (ATermList)zero_variables);
+      gsDebugMsg("equations with positive occurrence %P\n", (ATermList)positive_variables);
+      gsDebugMsg("equations with negative occurrence %P\n", (ATermList)negative_variables);
 
       data_expression_list new_inequalities = zero_variables;
 
@@ -1045,18 +1059,18 @@ void fourier_motzkin(data_expression_list& inequalities, data_variable_list vari
       for(data_expression_list::iterator j = positive_variables.begin(); j != positive_variables.end(); ++j)
       {
         data_expression positive_inequality = remove_variable(*i, *j);
-        gsDebugMsg("positive inequality: %s\n", pp(positive_inequality).c_str());
+        gsDebugMsg("positive inequality: %P\n", (ATermAppl)positive_inequality);
         positive_inequality = normalize_inequality(positive_inequality,r);
-        gsDebugMsg("positive inequality after normalization: %s\n", pp(positive_inequality).c_str());
+        gsDebugMsg("positive inequality after normalization: %P\n", (ATermAppl)positive_inequality);
         assert(is_inequality(positive_inequality));
         assert(!is_greater(positive_inequality) && !is_greater_equal(positive_inequality));
         for(data_expression_list::iterator k = negative_variables.begin(); k != negative_variables.end(); ++k)
         {
-          gsDebugMsg("combining %s and %s into new inequality\n", pp(*j).c_str(), pp(*k).c_str());
+          gsDebugMsg("combining %P and %P into new inequality\n", (ATermAppl)*j, (ATermAppl)*k);
           data_expression negative_inequality = remove_variable(*i, *k);
-          gsDebugMsg("negative inequality: %s\n", pp(negative_inequality).c_str());
+          gsDebugMsg("negative inequality: %P\n", (ATermAppl)negative_inequality);
           negative_inequality = normalize_inequality(negative_inequality, r);
-          gsDebugMsg("negative inequality after normalization: %s\n", pp(negative_inequality).c_str());
+          gsDebugMsg("negative inequality after normalization: %P\n", (ATermAppl)negative_inequality);
           // Results may not be inequalities any more
           assert(is_inequality(negative_inequality));
           assert(!is_greater(negative_inequality) && !is_greater_equal(negative_inequality));
@@ -1169,7 +1183,8 @@ bool is_inconsistent(const data_expression_list& cond, rewriter& r)
 {
   // Check if any condition rewrites to false.
   if(std::find(cond.begin(), cond.end(), false_()) != cond.end())
-  { return true;
+  {
+    return true;
   }
   // for(data_expression_list::const_iterator j = cond.begin(); j != cond.end(); ++j)
   // { if (false_()==r(*j))  
@@ -1309,19 +1324,19 @@ data_expression_list transform_real_to_cond(const data_expression_list& cond, at
 static
 summand generate_summand(const summand& s, unsigned long i, data_expression_list cond, atermpp::map<std::pair<data_expression, data_expression>, data_variable>& context, rewriter& r)
 {
-  gsDebugMsg("generating new summand from summand %s, with cond %s, i = %ld\n", pp(s).c_str(), pp(cond).c_str(), i);
+  gsDebugMsg("generating new summand from summand %P, with cond %P, i = %ld\n", (ATermAppl)s, (ATermList)cond, i);
 
   std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
   data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
   cond = transform_real_to_cond(cond, context,r);
   condition = and_(condition, join_and(cond.begin(), cond.end()));
 
-  gsDebugMsg("condition: %s\n", pp(condition).c_str());
+  gsDebugMsg("condition: %P\n", (ATermAppl)condition);
 
   gsDebugMsg("context: ");
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator j = context.begin(); j != context.end(); ++j)
   {
-    gsDebugMsg("< %s, %s > %s, ", pp(j->first.first).c_str(), pp(j->first.second).c_str(), pp(j->second).c_str());
+    gsDebugMsg("< %P, %P > %P, ", (ATermAppl)j->first.first, (ATermAppl)j->first.second, (ATermAppl)j->second);
   }
   gsDebugMsg("\n");
 
@@ -1347,11 +1362,11 @@ summand generate_summand(const summand& s, unsigned long i, data_expression_list
   }
   nextstate = reverse(nextstate);
 
-  gsDebugMsg("nextstate: %s\n", pp(nextstate).c_str());
+  gsDebugMsg("nextstate: %P\n", (ATermList)nextstate);
 
   summand result = summand(get_nonreal_variables(s.summation_variables()), r(condition), s.is_delta(), s.actions(), nextstate);
 
-  gsDebugMsg("Generated summand %s\n", pp(result).c_str());
+  gsDebugMsg("Generated summand %P\n", (ATermAppl)result);
 
   return result;
 }
@@ -1436,10 +1451,10 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       }
     }
     summand_real_nextstate_map[*i] = replacements;
-    gsDebugMsg("replacements for summand %s:\n", pp(*i).c_str());
+    gsDebugMsg("replacements for summand %P:\n", (ATermAppl)*i);
     for(atermpp::map<data_expression, data_expression>::const_iterator j = replacements.begin(); j != replacements.end(); ++j)
     {
-      gsDebugMsg("%s := %s, ", pp(j->first).c_str(), pp(j->second).c_str());
+      gsDebugMsg("%P := %P, ", (ATermAppl)j->first, (ATermAppl)j->second);
     }
     gsDebugMsg("\n");
   }
@@ -1463,34 +1478,34 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       {
         data_expression_list context_inequalities = compute_inequalities(context_combination, context);
 
-        gsDebugMsg("inequalites from context: %s\n", pp(context_inequalities).c_str());
+        gsDebugMsg("inequalites from context: %P\n", (ATermList)context_inequalities);
 
         for(unsigned long nextstate_combination = 0; nextstate_combination < context_combinations; ++ nextstate_combination)
         {
           gsDebugMsg("context = %ld, nextstate = %ld\n", context_combination, nextstate_combination);
           data_expression_list condition = compute_inequalities(nextstate_combination, context);
-          gsDebugMsg("inequalities for condition before substitution: %s\n", pp(condition).c_str());
+          gsDebugMsg("inequalities for condition before substitution: %P\n", (ATermList)condition);
           condition = data_expression_map_replace_list(condition, summand_real_nextstate_map[*i]);
 
-          gsDebugMsg("inequalities for condition: %s\n", pp(condition).c_str());
+          gsDebugMsg("inequalities for condition: %P\n", (ATermList)condition);
 
           condition = condition + summand_real_conditions[*i];
-          gsDebugMsg("condition: %s\n", pp(condition).c_str());
+          gsDebugMsg("condition: %P\n", (ATermList)condition);
           condition = simplify_condition(condition, context_inequalities);
-          gsDebugMsg("cond after simplification: %s\n", pp(condition).c_str());
+          gsDebugMsg("cond after simplification: %P\n", (ATermList)condition);
           condition = normalize_inequalities(condition, r);
 
           // Eliminate sum bound variables, resulting in inequalities over
           // process parameters of sort Real. Of this, we add the inequalities
           // that are not yet in the context.
-          gsVerboseMsg("inequalities before fourier-motzkin: %s\n", pp(condition).c_str());
+          gsVerboseMsg("inequalities before fourier-motzkin: %P\n", (ATermList)condition);
           fourier_motzkin(condition, i->summation_variables(), r);
           if(!is_inconsistent(condition, r))
           {
             condition = normalize_inequalities(condition, r);
             if(!is_inconsistent(condition, r))
             {
-              gsVerboseMsg("inequalities after fourier-motzkin: %s\n", pp(condition).c_str());
+              gsVerboseMsg("inequalities after fourier-motzkin: %P\n", (ATermList)condition);
               // condition contains the inequalities over the process parameters
               changed = changed || add_inequalities_to_context(condition, context, r, variable_generator);
               if(!changed)
@@ -1524,11 +1539,11 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
   gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
   for(atermpp::map<std::pair<data_expression, data_expression>, data_variable>::iterator i = context.begin(); i != context.end(); ++i)
   {
-    gsVerboseMsg("< %s, %s > %s\n", pp(i->first.first).c_str(), pp(i->first.second).c_str(), pp(i->second).c_str());
+    gsVerboseMsg("< %P, %P > %P\n", (ATermAppl)i->first.first, (ATermAppl)i->first.second, (ATermAppl)i->second);
   }
 
   summands = reverse(summands);
-  gsVerboseMsg("Computed %d summands %s\n", summands.size(), pp(summands).c_str());
+  gsVerboseMsg("Computed %d summands %P\n", summands.size(), (ATermList)summands);
 
   // Process parameters
   data_variable_list process_parameters = reverse(nonreal_parameters);
