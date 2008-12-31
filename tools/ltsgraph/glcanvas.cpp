@@ -233,7 +233,6 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /* event */)
 }
 
 void GLCanvas::onMouseLeave(wxMouseEvent& /* event */) {
-  std::cerr << "Lost focus\n";
   owner->deselect();
 }
 
