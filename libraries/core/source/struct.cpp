@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libstruct.cpp
+/// \file struct.cpp
 
 #include <cstring>
 #include <cstdlib>
