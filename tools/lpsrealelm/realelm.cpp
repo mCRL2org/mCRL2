@@ -41,24 +41,40 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
   ATermAppl real_zero = gsMakeDataExprCReal(gsMakeDataExprCInt(zero), one);
   ATermAppl real_one = gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(one)), one);
   ATermAppl real_two = gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(two)), one);
-  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
   ATermAppl r = gsMakeDataVarId(gsString2ATermAppl("r"), gsMakeSortExprReal());
   ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), gsMakeSortExprReal());
   ATermAppl t = gsMakeDataVarId(gsString2ATermAppl("t"), gsMakeSortExprReal());
   ATermList rl = ATmakeList1((ATerm) r);
-  ATermList prl = ATmakeList2((ATerm) p, (ATerm) r);
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
   ATermList rstl = ATmakeList3((ATerm) r, (ATerm) s, (ATerm) t);
 
-  ATermList result = ATmakeList(16,
-    // r+0/p=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
-    // 0/p+r=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprAdd(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), r),
+  ATermList result = ATmakeList(18,
+    // General ad-hoc rewrite rules, should be added in the data implementation
+    // r+0=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, real_zero), r),
+    // 0+r=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(real_zero, r), r),
     // r+-r=0
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, gsMakeDataExprNeg(r)), real_zero),
     // -r+r=0
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), r), real_zero),
+    // r-0=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprSubt(r, real_zero), r),
+    // 0-r=-r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprSubt(real_zero, r), gsMakeDataExprNeg(r)),
+    // r*1=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprMult(r, real_one), r),
+    // 1*r=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprMult(real_one, r), r),
+    // r*0=0
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprMult(r, real_zero), real_zero),
+    // 0*r=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprMult(real_zero, r), real_zero),
+    // --r=r
+    (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
+
+    // realelm-specific rewrite rules to fully group variables in expressions of
+    // the form a1*x1+...+an*xn
     // r+r=2*r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, r), gsMakeDataExprMult(real_two, r)),
     // -r+-r=-2*r
@@ -69,16 +85,6 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprAdd(gsMakeDataExprAdd(r,s), gsMakeDataExprNeg(s)), r),
     // (r+-s)+s=r
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprAdd(gsMakeDataExprAdd(r,gsMakeDataExprNeg(s)), s), r),
-    // r-0/p=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(r, gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p)), r),
-    // 0/p-r=-r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprSubt(gsMakeDataExprCReal(gsMakeDataExprCInt(zero), p), r), gsMakeDataExprNeg(r)),
-    // r*(1/1)=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(r, real_one), r),
-    // (1/1)*r=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprMult(real_one, r), r),
-    // --r=r
-    (ATerm) gsMakeDataEqn(prl, nil, gsMakeDataExprNeg(gsMakeDataExprNeg(r)), r),
     // -(r+s)=-r+-s
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprAdd(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(s))),
     // -(r-s)=-r+s
