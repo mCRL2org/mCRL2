@@ -965,7 +965,7 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
       op_eqns = ATinsert(op_eqns,
          (ATerm) gsMakeDataEqn(args, gsMakeNil(),
            gsMakeDataAppl1(rec_op, gsMakeDataApplList(cons_op, args)),
-           ATisEqual(cons_op, rec_cons_op)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
+           gsMakeDataExprBool_bool(ATisEqual(cons_op, rec_cons_op))));
     }
   }
   //store equations for equalities in op_eqns

@@ -3029,6 +3029,15 @@ ATermAppl gsMakeDataExprAndList(ATermList DataExprs)
   return Result;
 }
 
+ATermAppl gsMakeDataExprBool_bool(bool b)
+{
+  if (b) {
+    return gsMakeDataExprTrue();
+  } else {
+    return gsMakeDataExprFalse();
+  }
+}
+
 ATermAppl gsMakeDataExprPos(char *p)
 {
   assert(strlen(p) > 0);

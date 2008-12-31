@@ -1336,6 +1336,9 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 ///          f(e |> e' |> l) = e && f(e' |> l);
 ATermAppl gsMakeDataExprAndList(ATermList DataExprs);
 
+///\return data expression of sort Bool that is a representation of b
+ATermAppl gsMakeDataExprBool_bool(bool b);
+
 ///\pre p is of the form "[1-9][0-9]*"
 ///\return data expression of sort Pos that is a representation of p
 ATermAppl gsMakeDataExprPos(char *p);

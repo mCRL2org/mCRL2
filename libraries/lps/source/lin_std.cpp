@@ -5155,7 +5155,7 @@ static enumeratedtype *create_enumeratedtype
           ATermAppl el2=ATAgetFirst(l2);
           eqns = ATinsertA(eqns, gsMakeDataEqn(emptyl, gsMakeNil(),
                                  gsMakeDataExprEq(el1, el2),
-                                 ATisEqual(el1,el2)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
+                                 gsMakeDataExprBool_bool(ATisEqual(el1,el2))));
         }
       }
 
