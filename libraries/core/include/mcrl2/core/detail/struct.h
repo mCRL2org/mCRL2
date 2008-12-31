@@ -1327,6 +1327,15 @@ ATermAppl gsMakeDataAppl4(ATermAppl DataExpr, ATermAppl DataExprArg1,
 ///\return Internal representation of the data expression e(e_0)...(e_n).
 ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 
+///\pre    DataExprs is a list of 0 or more data expressions of sort Bool,
+///        which we denote by l
+///\return Internal representation of the conjunction of the elements of l, i.e.
+///        the internal representation of f(l), inductively defined by:
+///          f([])           = true;
+///          f([e])          = e;
+///          f(e |> e' |> l) = e && f(e' |> l);
+ATermAppl gsMakeDataExprAndList(ATermList DataExprs);
+
 ///\pre p is of the form "[1-9][0-9]*"
 ///\return data expression of sort Pos that is a representation of p
 ATermAppl gsMakeDataExprPos(char *p);

@@ -3014,6 +3014,21 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
     return gsMakeDataAppl(DataExpr, DataExprArgs);
 }
 
+ATermAppl gsMakeDataExprAndList(ATermList DataExprs)
+{
+  if (ATisEmpty(DataExprs))
+    return gsMakeDataExprTrue();
+  ATermAppl Result = ATAgetFirst(DataExprs);
+  DataExprs = ATgetNext(DataExprs);
+  if (ATisEmpty(DataExprs)) {
+    return Result;
+  }
+  for ( ; !ATisEmpty(DataExprs) ; DataExprs = ATgetNext(DataExprs) ) {
+    Result = gsMakeDataExprAnd(Result, ATAgetFirst(DataExprs));
+  }
+  return Result;
+}
+
 ATermAppl gsMakeDataExprPos(char *p)
 {
   assert(strlen(p) > 0);

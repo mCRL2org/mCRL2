@@ -801,19 +801,20 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
   return result;
 }
 
-ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
-  ATermList *p_vars, ATerm context)
+ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context)
 {
   ATermAppl sort = gsGetSort(op_id);
   assert(gsIsSortId(sort) || gsIsSortArrow(sort));
-  *p_args = ATmakeList0();
+
+  //sort identifier case...
   if (gsIsSortId(sort)) {
-    return op_id;
+    return ATmakeList0();
   }
   
+  //sort arrow case...
   assert(gsIsSortArrow(sort));
   
-  ATermAppl t = op_id;
+  ATermList args = ATmakeList0(); //args contains the result in reverse order
   ATermList tmpvars = *p_vars; // We only use variables once in a term
  
   ATermList sort_dom = ATLgetArgument(sort, 0);
@@ -841,18 +842,18 @@ ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
     }
     assert(v != NULL);
  
-    // Add v to *p_args
-    *p_args = ATinsert(*p_args,(ATerm) v);
+    // Add v to args
+    args = ATinsert(args, (ATerm) v);
 
     // Next
     sort_dom = ATgetNext(sort_dom);
   }
   
-  // Apply t to p_args
-  *p_args = ATreverse(*p_args);
-  t = gsMakeDataAppl(t, *p_args);
+  // reverse *p_vars
   *p_vars = ATreverse(*p_vars);
-  return t;
+
+  // return args in reversed order
+  return ATreverse(args);
 }     
 
 ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
@@ -900,13 +901,7 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     }
     struct_cons_sorts = ATreverse(struct_cons_sorts);
     //store constructor operation in cons_ops
-    ATermAppl cons_op;
-    if (ATisEmpty(struct_cons_sorts))
-    {
-      cons_op = gsMakeOpId(cons_name, sort_id);
-    } else {
-      cons_op = gsMakeOpId(cons_name, gsMakeSortArrow(struct_cons_sorts, sort_id));
-    }
+    ATermAppl cons_op = gsMakeOpId(cons_name, gsMakeSortArrowList(struct_cons_sorts, sort_id));
     cons_ops = ATinsert(cons_ops, (ATerm) cons_op);
     //store recogniser in rec_ops and recs
     if (!gsIsNil(rec_name)) {
@@ -929,16 +924,11 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     p_data_decls->ops);
   //Declare data equations for structured sort
   ATermList op_eqns = ATmakeList0();
-  ATermAppl nil = gsMakeNil();
-  //ATermAppl t = gsMakeDataExprTrue();
-  //ATermAppl f = gsMakeDataExprFalse();
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   // XXX more intelligent variable names would be nice
   ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort_id);
   ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort_id);
   ATermList vars = ATmakeList3((ATerm) b, (ATerm) x, (ATerm) y);
-  ATermList rhsv = ATmakeList0();
-  ATermList lhsv = ATmakeList0();
   ATermList id_ctx = ATconcat(p_data_decls->sorts,
                       ATconcat(p_data_decls->ops,p_data_decls->cons_ops));
   //store equations for projections in op_eqns
@@ -950,13 +940,13 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     int proj_op_index = ATgetInt((ATermInt) ATgetFirst(l));
     l = ATgetNext(l);
     ATermAppl cons_op = ATAgetFirst(l);
-    //Apply constructor cons_op to (fresh) variables and store its arguments in lhsv
-    ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
+    //Create (fresh) variable arguments for constructor cons_op
+    ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
     //Add equation for projection function proj_op
     op_eqns = ATinsert(op_eqns,
-      (ATerm) gsMakeDataEqn(lhsv, nil,
-        gsMakeDataAppl1(proj_op, cons_expr),
-        ATAelementAt(lhsv, proj_op_index)));
+      (ATerm) gsMakeDataEqn(args, gsMakeNil(),
+        gsMakeDataAppl1(proj_op, gsMakeDataApplList(cons_op, args)),
+        ATAelementAt(args, proj_op_index)));
   }
   //store equations for recognition in op_eqns
   for (; !ATisEmpty(recs); recs=ATgetNext(recs))
@@ -969,13 +959,13 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     for (ATermList m = cons_ops; !ATisEmpty(m); m=ATgetNext(m))
     {
       ATermAppl cons_op = ATAgetFirst(m);
-      // Apply constructor cons_op to (fresh) variables and store its
-      // arguments in lhsv
-      ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
+      //Create (fresh) variable arguments for constructor cons_op
+      ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
       // Add right equation to op_eqns
-      op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(lhsv, nil,
-         gsMakeDataAppl1(rec_op, cons_expr),
-         ATisEqual(ATAgetFirst(m), rec_cons_op)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
+      op_eqns = ATinsert(op_eqns,
+         (ATerm) gsMakeDataEqn(args, gsMakeNil(),
+           gsMakeDataAppl1(rec_op, gsMakeDataApplList(cons_op, args)),
+           ATisEqual(cons_op, rec_cons_op)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
     }
   }
   //store equations for equalities in op_eqns
@@ -986,44 +976,36 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     {
       ATermAppl cons_op_lhs = ATAgetFirst(l);
       ATermAppl cons_op_rhs = ATAgetFirst(m);
-      // Save vars list
-      // Apply constructor cons_op_lhs to (fresh) variables and store its
-      // arguments in lhsv
-      ATermAppl cons_expr_lhs = apply_op_id_to_vars(cons_op_lhs, &lhsv, &vars, (ATerm) id_ctx);
-      // Apply constructor cons_op_rhs to (fresh) variables and store its
-      // arguments in rhsv (making sure we don't use the vars that occur in t)
-      ATermList tmpvars = subtract_list(vars, lhsv);
-      ATermAppl cons_expr_rhs = apply_op_id_to_vars(ATAgetFirst(m), &rhsv, &tmpvars, (ATerm) ATconcat(lhsv, id_ctx));
+      // Create (fresh) variable arguments for constructor cons_op_lhs
+      ATermList args_lhs = create_op_id_args(cons_op_lhs, &vars, (ATerm) id_ctx);
+      // Create (fresh) variable arguments for constructor cons_op_rhs,
+      // where we make sure that we don't use the vars that occur in args_lhs 
+      ATermList tmpvars = subtract_list(vars, args_lhs);
+      ATermList args_rhs = create_op_id_args(cons_op_rhs, &tmpvars, (ATerm) ATconcat(args_lhs, id_ctx));
       // Update vars
-      vars = merge_list(vars, rhsv);
-      // Combine variable lists of lhs and rhs
-      ATermList vs = ATconcat(lhsv, rhsv);
+      vars = merge_list(vars, args_rhs);
       // Create right result
       ATermAppl result_expr = NULL;
-      if ( ATisEqual(cons_op_lhs, cons_op_rhs) )
-      {
-        // Constructors are the same, so match all variables
-        if (ATisEmpty(lhsv)) {
-          result_expr = gsMakeDataExprTrue();
-        } else {
-          for (; !ATisEmpty(lhsv); lhsv = ATgetNext(lhsv), rhsv = ATgetNext(rhsv))
-          {
-            if ( result_expr == NULL )
-            {
-              result_expr = gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv));
-            } else {
-              result_expr = gsMakeDataExprAnd(result_expr,
-                gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv)));
-            }
-          }
-        }
-      } else {
-        // Different constructor, so not equal
+      if ( !ATisEqual(cons_op_lhs, cons_op_rhs) ) {
+        // Constructors are different: not equal
         result_expr = gsMakeDataExprFalse();
+      } else {
+        // Constructors are the same: equal when the conjunction of the arguments is
+        ATermList eq_exprs = ATmakeList0();
+        ATermList n = args_lhs;
+        ATermList o = args_rhs;
+        for ( ; !ATisEmpty(n) ; n = ATgetNext(n), o = ATgetNext(o)) {
+          eq_exprs = ATinsert(eq_exprs, (ATerm) gsMakeDataExprEq(ATAgetFirst(n), ATAgetFirst(o)));
+        }
+        result_expr = gsMakeDataExprAndList(ATreverse(eq_exprs));
       }
       // Add equation to op_eqns
-      op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(vs, nil,
-        gsMakeDataExprEq(cons_expr_lhs, cons_expr_rhs), result_expr));
+      op_eqns = ATinsert(op_eqns,
+        (ATerm) gsMakeDataEqn(ATconcat(args_lhs, args_rhs), gsMakeNil(),
+          gsMakeDataExprEq(
+            gsMakeDataApplList(cons_op_lhs, args_lhs),
+            gsMakeDataApplList(cons_op_rhs, args_rhs)),
+          result_expr));
     }
   }
   //Add op_eqns to data_eqns
