@@ -65,13 +65,13 @@ static ATermAppl impl_numerical_pattern_matching(ATermAppl spec);
 //     - Nat2Int(n) : replace by cInt(n)
 //     - Nat2Real(n): replace by cReal(cInt(n))
 //     - Int2Real(x): replace by cReal(x)
+//     - -p: replace by cNeg(p)
 //     TODO:
 //     - p+k, where k is a constant of sort Pos: replace by p,
 //       add condition p>=k, and add substitution [p -> Int2Pos(p-k)]
 //       (for the condition and the rhs)
 //     - n+k, where k is a constant of sort Nat: replace by n,
 //       add condition n>=k, and add substitution [n -> Int2Nat(n-k)]
-//     - -p: replace by cNeg(p)
 //     - -n: replace by the following two patterns:
 //           c0,      and add substitution [n -> c0]
 //           cNeg(p), and add substitution [p -> cNat(p)]
