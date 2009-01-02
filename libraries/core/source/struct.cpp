@@ -1809,28 +1809,24 @@ ATermAppl gsMakeOpIdReal2Int(void)
 
 ATermAppl gsMakeOpIdLTE(ATermAppl SortExpr)
 {
-  assert(IsPNIRSort(SortExpr));
   return gsMakeOpId(gsMakeOpIdNameLTE(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
 ATermAppl gsMakeOpIdLT(ATermAppl SortExpr)
 {
-  assert(IsPNIRSort(SortExpr));
   return gsMakeOpId(gsMakeOpIdNameLT(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
 ATermAppl gsMakeOpIdGTE(ATermAppl SortExpr)
 {
-  assert(IsPNIRSort(SortExpr));
   return gsMakeOpId(gsMakeOpIdNameGTE(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
 ATermAppl gsMakeOpIdGT(ATermAppl SortExpr)
 {
-  assert(IsPNIRSort(SortExpr));
   return gsMakeOpId(gsMakeOpIdNameGT(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }

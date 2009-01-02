@@ -918,20 +918,25 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     projs = ATreverse(tmpl);
     struct_conss = ATgetNext(struct_conss);
   }
+  cons_ops = ATreverse(cons_ops);
+  proj_ops = ATreverse(proj_ops);
+  projs = ATreverse(projs);
+  rec_ops = ATreverse(rec_ops);
+  recs = ATreverse(recs);
   //add declarations for the constructor, projection and recogniser operations
-  p_data_decls->cons_ops = ATconcat(ATreverse(cons_ops), p_data_decls->cons_ops);
-  p_data_decls->ops = ATconcat(ATconcat(ATreverse(proj_ops), ATreverse(rec_ops)),
-    p_data_decls->ops);
+  p_data_decls->cons_ops = ATconcat(cons_ops, p_data_decls->cons_ops);
+  p_data_decls->ops = ATconcat(ATconcat(proj_ops, rec_ops), p_data_decls->ops);
   //Declare data equations for structured sort
-  ATermList op_eqns = ATmakeList0();
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   // XXX more intelligent variable names would be nice
-  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort_id);
-  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort_id);
-  ATermList vars = ATmakeList3((ATerm) b, (ATerm) x, (ATerm) y);
+  ATermList vars = ATmakeList3(
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool()),
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("x"), sort_id),
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("y"), sort_id)
+  );
   ATermList id_ctx = ATconcat(p_data_decls->sorts,
                       ATconcat(p_data_decls->ops,p_data_decls->cons_ops));
-  //store equations for projections in op_eqns
+  //Create equations for projection functions
+  ATermList proj_eqns = ATmakeList0();
   for (; !ATisEmpty(projs); projs=ATgetNext(projs))
   {
     ATermList l = ATLgetFirst(projs);
@@ -942,37 +947,42 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
     ATermAppl cons_op = ATAgetFirst(l);
     //Create (fresh) variable arguments for constructor cons_op
     ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
-    //Add equation for projection function proj_op
-    op_eqns = ATinsert(op_eqns,
+    //Create equation for projection function proj_op
+    proj_eqns = ATinsert(proj_eqns,
       (ATerm) gsMakeDataEqn(args, gsMakeNil(),
         gsMakeDataAppl1(proj_op, gsMakeDataApplList(cons_op, args)),
         ATAelementAt(args, proj_op_index)));
   }
-  //store equations for recognition in op_eqns
+  //Create equations for recognition functions
+  ATermList rec_eqns = ATmakeList0();
   for (; !ATisEmpty(recs); recs=ATgetNext(recs))
   {
     ATermList l = ATLgetFirst(recs);
     ATermAppl rec_op = ATAgetFirst(l);
     l = ATgetNext(l);
     ATermAppl rec_cons_op = ATAgetFirst(l);
-    // Add equation for every constructor
+    //Create equation for every constructor
     for (ATermList m = cons_ops; !ATisEmpty(m); m=ATgetNext(m))
     {
       ATermAppl cons_op = ATAgetFirst(m);
       //Create (fresh) variable arguments for constructor cons_op
       ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
-      // Add right equation to op_eqns
-      op_eqns = ATinsert(op_eqns,
+      //Create equation for recognition function rec_op and constructor cons_op
+      rec_eqns = ATinsert(rec_eqns,
          (ATerm) gsMakeDataEqn(args, gsMakeNil(),
            gsMakeDataAppl1(rec_op, gsMakeDataApplList(cons_op, args)),
            gsMakeDataExprBool_bool(ATisEqual(cons_op, rec_cons_op))));
     }
   }
-  //store equations for equalities in op_eqns
-  //one equation for every pair of constructors
-  for (ATermList l=cons_ops; !ATisEmpty(l); l=ATgetNext(l))
+  //Create equations for ==, <, and <= for every pair of constructors
+  ATermList eq_eqns = ATmakeList0();
+  ATermList lt_eqns = ATmakeList0();
+  ATermList lte_eqns = ATmakeList0();
+  int i = 0; //represents the index of the constructor on the left-hand side
+  for (ATermList l=cons_ops; !ATisEmpty(l); l=ATgetNext(l), i++)
   {
-    for (ATermList m=cons_ops; !ATisEmpty(m); m=ATgetNext(m))
+    int j = 0; //represents the index of the constructor on the right-hand side
+    for (ATermList m=cons_ops; !ATisEmpty(m); m=ATgetNext(m), j++)
     {
       ATermAppl cons_op_lhs = ATAgetFirst(l);
       ATermAppl cons_op_rhs = ATAgetFirst(m);
@@ -984,32 +994,78 @@ ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
       ATermList args_rhs = create_op_id_args(cons_op_rhs, &tmpvars, (ATerm) ATconcat(args_lhs, id_ctx));
       // Update vars
       vars = merge_list(vars, args_rhs);
-      // Create right result
-      ATermAppl result_expr = NULL;
-      if ( !ATisEqual(cons_op_lhs, cons_op_rhs) ) {
-        // Constructors are different: not equal
-        result_expr = gsMakeDataExprFalse();
-      } else {
-        // Constructors are the same: equal when the conjunction of the arguments is
-        ATermList eq_exprs = ATmakeList0();
-        ATermList n = args_lhs;
-        ATermList o = args_rhs;
-        for ( ; !ATisEmpty(n) ; n = ATgetNext(n), o = ATgetNext(o)) {
-          eq_exprs = ATinsert(eq_exprs, (ATerm) gsMakeDataExprEq(ATAgetFirst(n), ATAgetFirst(o)));
+      // Create right-hand sides for ==, <, <=
+      ATermAppl eq_rhs;
+      ATermAppl lt_rhs;
+      ATermAppl lte_rhs;
+      if (i!=j) {
+        // Constructors are different:
+        // - rhs for c_i == d_i: false
+        // - rhs for c_i <  d_i: i < j
+        // - rhs for c_i <= d_i: i < j
+        eq_rhs  = gsMakeDataExprFalse();
+        lt_rhs  = gsMakeDataExprBool_bool(i < j);
+        lte_rhs = gsMakeDataExprBool_bool(i < j);
+      } else { // i==j
+        // Constructors are the same
+        if (ATisEmpty(args_lhs)) {
+          // Constructors do not have any arguments:
+          // - rhs for c == c: true
+          // - rhs for c <  c: false
+          // - rhs for c <= c: true
+          eq_rhs  = gsMakeDataExprTrue();
+          lt_rhs  = gsMakeDataExprFalse();
+          lte_rhs = gsMakeDataExprTrue();
+        } else {
+          // Constructors have one or more arguments:
+          // - rhs for c(x0,...,xn) == c(y0,..,yn):
+          //     x0 == y0 && ... && xn == yn
+          // - rhs for c(x0,...,xn) < c(y0,..,yn):
+          //     x0 < y0                                                     , when n = 0
+          //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
+          //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == x1 && x2 < y2))) , when n = 2
+          //     etcetera
+          // - rhs for c(x0,...,xn) <= c(y0,..,yn):
+          //     x0 <= y0                                                    , when n = 0
+          //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
+          //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == x1 && x2 <= y2))), when n = 2
+          //     etcetera
+          ATermList n = ATreverse(args_lhs);
+          ATermList o = ATreverse(args_rhs);
+          ATermAppl n0 = ATAgetFirst(n);
+          ATermAppl o0 = ATAgetFirst(o);
+          eq_rhs  = gsMakeDataExprEq(n0, o0);
+          lt_rhs  = gsMakeDataExprLT(n0, o0);
+          lte_rhs = gsMakeDataExprLTE(n0, o0);
+          n = ATgetNext(n);
+          o = ATgetNext(o);
+          for ( ; !ATisEmpty(n) ; n = ATgetNext(n), o = ATgetNext(o)) {
+            n0 = ATAgetFirst(n);
+            o0 = ATAgetFirst(o);
+            eq_rhs  = gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), eq_rhs);
+            lt_rhs  = gsMakeDataExprOr(gsMakeDataExprLT(n0, o0), gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), lt_rhs));
+            lte_rhs = gsMakeDataExprOr(gsMakeDataExprLT(n0, o0), gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), lte_rhs));
+          }
         }
-        result_expr = gsMakeDataExprAndList(ATreverse(eq_exprs));
       }
-      // Add equation to op_eqns
-      op_eqns = ATinsert(op_eqns,
-        (ATerm) gsMakeDataEqn(ATconcat(args_lhs, args_rhs), gsMakeNil(),
-          gsMakeDataExprEq(
-            gsMakeDataApplList(cons_op_lhs, args_lhs),
-            gsMakeDataApplList(cons_op_rhs, args_rhs)),
-          result_expr));
+      //Create equations for ==, < and <= for constructors i and j
+      ATermList args = ATconcat(args_lhs, args_rhs);
+      ATermAppl cons_expr_lhs = gsMakeDataApplList(cons_op_lhs, args_lhs);
+      ATermAppl cons_expr_rhs = gsMakeDataApplList(cons_op_rhs, args_rhs);
+      eq_eqns = ATinsert(eq_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprEq(cons_expr_lhs, cons_expr_rhs), eq_rhs));
+      lt_eqns = ATinsert(lt_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprLT(cons_expr_lhs, cons_expr_rhs), lt_rhs));
+      lte_eqns = ATinsert(lte_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprLTE(cons_expr_lhs, cons_expr_rhs), lte_rhs));
     }
   }
-  //Add op_eqns to data_eqns
-  p_data_decls->data_eqns = ATconcat(op_eqns, p_data_decls->data_eqns);
+  //Add equations to data_eqns
+  p_data_decls->data_eqns =
+    ATconcat(ATreverse(eq_eqns),
+    ATconcat(ATreverse(lt_eqns),
+    ATconcat(ATreverse(lte_eqns),
+    ATconcat(ATreverse(proj_eqns),
+    ATconcat(ATreverse(rec_eqns),
+      p_data_decls->data_eqns
+    )))));
 
   return sort_id;
 }
@@ -1030,6 +1086,7 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
   ATermAppl nil = gsMakeNil();
   ATermAppl zero = gsMakeDataExprC0();
   ATermAppl f = gsMakeDataExprFalse();
+  ATermAppl t = gsMakeDataExprTrue();
   ATermList dl = ATmakeList1((ATerm) d_sort_elt);
   ATermList sl = ATmakeList1((ATerm) s_sort_id);
   ATermList dsl = ATmakeList2((ATerm) d_sort_elt, (ATerm) s_sort_id);
@@ -1041,8 +1098,8 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
     (ATerm) s_sort_id, (ATerm) t_sort_id);
   ATermList dspl = ATmakeList3((ATerm) d_sort_elt, (ATerm) s_sort_id, (ATerm) p);
 
-  ATermList new_data_eqns = ATmakeList(20,
-      //equality (sort_id -> sort_id -> Bool)
+  ATermList new_data_eqns = ATmakeList(26,
+      //equality (sort_id # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(el_sort_id, ds), f),
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(ds, el_sort_id), f),
       (ATerm) gsMakeDataEqn(destl, nil,
@@ -1050,7 +1107,23 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
         gsMakeDataExprAnd(
           gsMakeDataExprEq(d_sort_elt, e_sort_elt),
           gsMakeDataExprEq(s_sort_id, t_sort_id))),
-      //element test (sort_elt -> sort_id -> Bool)
+      //less than (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLT(el_sort_id, ds), t),
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLT(ds, el_sort_id), f),
+      (ATerm) gsMakeDataEqn(destl, nil,
+        gsMakeDataExprLT(ds, et),
+        gsMakeDataExprOr(
+          gsMakeDataExprLT(s_sort_id, t_sort_id),
+          gsMakeDataExprAnd(gsMakeDataExprEq(s_sort_id, t_sort_id), gsMakeDataExprLT(d_sort_elt, e_sort_elt)))),
+      //less than or equal (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLTE(el_sort_id, ds), t),
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLTE(ds, el_sort_id), f),
+      (ATerm) gsMakeDataEqn(destl, nil,
+        gsMakeDataExprLTE(ds, et),
+        gsMakeDataExprOr(
+          gsMakeDataExprLT(s_sort_id, t_sort_id),
+          gsMakeDataExprAnd(gsMakeDataExprEq(s_sort_id, t_sort_id), gsMakeDataExprLTE(d_sort_elt, e_sort_elt)))),
+      //element test (sort_elt # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dl, nil,
         gsMakeDataExprEltIn(d_sort_elt, el_sort_id),
         f),
@@ -1067,14 +1140,14 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
         gsMakeDataExprListSize(ds),
         gsMakeDataExprCNat(
           gsMakeDataExprSucc(gsMakeDataExprListSize(s_sort_id)))),
-      //list snoc (sort_id -> sort_elt -> sort_id)
+      //list snoc (sort_id # sort_elt -> sort_id)
       (ATerm) gsMakeDataEqn(dl, nil,
         gsMakeDataExprSnoc(el_sort_id, d_sort_elt),
         gsMakeDataExprCons(d_sort_elt, el_sort_id)),
       (ATerm) gsMakeDataEqn(desl, nil,
         gsMakeDataExprSnoc(ds, e_sort_elt),
         gsMakeDataExprCons(d_sort_elt, gsMakeDataExprSnoc(s_sort_id, e_sort_elt))),
-      //list concatenation (sort_id -> sort_id -> sort_id)
+      //list concatenation (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(sl, nil,
         gsMakeDataExprConcat(el_sort_id, s_sort_id),
         s_sort_id),
@@ -1084,7 +1157,7 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
       (ATerm) gsMakeDataEqn(sl, nil,
         gsMakeDataExprConcat(s_sort_id, el_sort_id),
         s_sort_id),
-      //list element at (sort_id -> Nat -> sort_elt)
+      //list element at (sort_id # Nat -> sort_elt)
       (ATerm) gsMakeDataEqn(dsl, nil,
         gsMakeDataExprEltAt(ds, zero, sort_elt),
         d_sort_elt),
@@ -1216,44 +1289,44 @@ ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set)
     );
 
   ATermList new_data_eqns = ATmakeList(9,
-      //equality (sort_id -> sort_id -> Bool)
+      //equality (sort_id # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprEq(
           gsMakeDataExprSetComp(f_sort_func, sort_set),
           gsMakeDataExprSetComp(g_sort_func, sort_set)), 
         gsMakeDataExprEq(f_sort_func, g_sort_func)),
+      //proper subset (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprLT(s_sort_id, t_sort_id),
+        gsMakeDataExprAnd(
+          gsMakeDataExprLTE(s_sort_id, t_sort_id), 
+          gsMakeDataExprNeq(s_sort_id, t_sort_id)
+        )),
+      //subset or equal (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprLTE(
+          gsMakeDataExprSetComp(f_sort_func, sort_set),
+          gsMakeDataExprSetComp(g_sort_func, sort_set)), 
+        gsMakeDataExprForall(imp_func)),
       //empty set (sort_id)
       (ATerm) gsMakeDataEqn(el, nil,
         gsMakeDataExprEmptySet(sort_set),
         gsMakeDataExprSetComp(false_func, sort_set)),
-      //element test (sort_elt -> sort_id -> Bool)
+      //element test (sort_elt # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dfl, nil,
         gsMakeDataExprEltIn(d_sort_elt, gsMakeDataExprSetComp(f_sort_func, sort_set)),
         gsMakeDataAppl1(f_sort_func, d_sort_elt)),
-      //subset or equal (sort_id -> sort_id -> Bool)
-      (ATerm) gsMakeDataEqn(fgl, nil,
-        gsMakeDataExprSubSetEq(
-          gsMakeDataExprSetComp(f_sort_func, sort_set),
-          gsMakeDataExprSetComp(g_sort_func, sort_set)), 
-        gsMakeDataExprForall(imp_func)),
-      //proper subset (sort_id -> sort_id -> Bool)
-      (ATerm) gsMakeDataEqn(stl, nil,
-        gsMakeDataExprSubSet(s_sort_id, t_sort_id),
-        gsMakeDataExprAnd(
-          gsMakeDataExprSubSetEq(s_sort_id, t_sort_id), 
-          gsMakeDataExprNeq(s_sort_id, t_sort_id)
-        )),
-      //union (sort_id -> sort_id -> sort_id)
+      //union (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprSetUnion(
           gsMakeDataExprSetComp(f_sort_func, sort_set),
           gsMakeDataExprSetComp(g_sort_func, sort_set)), 
         gsMakeDataExprSetComp(OrFunc, sort_set)),
-      //difference (sort_id -> sort_id -> sort_id)
+      //difference (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(stl, nil,
         gsMakeDataExprSetDiff(s_sort_id, t_sort_id),
         gsMakeDataExprSetInterSect(s_sort_id, gsMakeDataExprSetCompl(t_sort_id))),
-      //intersection (sort_id -> sort_id -> sort_id)
+      //intersection (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprSetInterSect(
           gsMakeDataExprSetComp(f_sort_func, sort_set),
@@ -1294,12 +1367,10 @@ ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
   //declare operations for sort sort_id
-  ATermList new_ops = ATmakeList(9,
+  ATermList new_ops = ATmakeList(7,
       (ATerm) gsMakeOpIdSetComp(gsMakeSortArrow1(sort_elt, gsMakeSortExprBool()), sort_set),
       (ATerm) gsMakeOpIdEmptySet(sort_set),
       (ATerm) gsMakeOpIdEltIn(sort_elt, sort_set),
-      (ATerm) gsMakeOpIdSubSetEq(sort_set),
-      (ATerm) gsMakeOpIdSubSet(sort_set),
       (ATerm) gsMakeOpIdSetUnion(sort_set),
       (ATerm) gsMakeOpIdSetDiff(sort_set),
       (ATerm) gsMakeOpIdSetIntersect(sort_set),
@@ -1401,50 +1472,50 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl 
     );
 
   ATermList new_data_eqns = ATmakeList(11,
-      //equality (sort_id -> sort_id -> Bool)
+      //equality (sort_id # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprEq(
           gsMakeDataExprBagComp(f_sort_func, sort_bag),
           gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
         gsMakeDataExprEq(f_sort_func, g_sort_func)),
+      //proper subbag (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprLT(s_sort_id, t_sort_id),
+        gsMakeDataExprAnd(
+          gsMakeDataExprLTE(s_sort_id, t_sort_id), 
+          gsMakeDataExprNeq(s_sort_id, t_sort_id)
+        )),
+      //subbag or equal (sort_id # sort_id -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprLTE(
+          gsMakeDataExprBagComp(f_sort_func, sort_bag),
+          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
+        gsMakeDataExprForall(lte_func)),
       //empty bag (sort_id)
       (ATerm) gsMakeDataEqn(el, nil,
         gsMakeDataExprEmptyBag(sort_bag),
         gsMakeDataExprBagComp(zero_func, sort_bag)),
-      //count (sort_elt -> sort_id -> Bool)
+      //count (sort_elt # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dfl, nil,
         gsMakeDataExprCount(d_sort_elt, gsMakeDataExprBagComp(f_sort_func, sort_bag)),
         gsMakeDataAppl1(f_sort_func, d_sort_elt)),
-      //element test (sort_elt -> sort_id -> Bool)
+      //element test (sort_elt # sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dsl, nil,
         gsMakeDataExprEltIn(d_sort_elt, s_sort_id),
         gsMakeDataExprGT(gsMakeDataExprCount(d_sort_elt, s_sort_id), zero)),
-      //subbag or equal (sort_id -> sort_id -> Bool)
-      (ATerm) gsMakeDataEqn(fgl, nil,
-        gsMakeDataExprSubBagEq(
-          gsMakeDataExprBagComp(f_sort_func, sort_bag),
-          gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
-        gsMakeDataExprForall(lte_func)),
-      //proper subbag (sort_id -> sort_id -> Bool)
-      (ATerm) gsMakeDataEqn(stl, nil,
-        gsMakeDataExprSubBag(s_sort_id, t_sort_id),
-        gsMakeDataExprAnd(
-          gsMakeDataExprSubBagEq(s_sort_id, t_sort_id), 
-          gsMakeDataExprNeq(s_sort_id, t_sort_id)
-        )),
-      //union (sort_id -> sort_id -> sort_id)
+      //union (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprBagUnion(
           gsMakeDataExprBagComp(f_sort_func, sort_bag),
           gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
         gsMakeDataExprBagComp(add_func, sort_bag)),
-      //difference (sort_id -> sort_id -> sort_id)
+      //difference (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprBagDiff(
           gsMakeDataExprBagComp(f_sort_func, sort_bag),
           gsMakeDataExprBagComp(g_sort_func, sort_bag)), 
         gsMakeDataExprBagComp(subt_max0_func, sort_bag)),
-      //intersection (sort_id -> sort_id -> sort_id)
+      //intersection (sort_id # sort_id -> sort_id)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprBagInterSect(
           gsMakeDataExprBagComp(f_sort_func, sort_bag),
@@ -1488,13 +1559,11 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
   //declare operations for sort sort_id
-  ATermList new_ops = ATmakeList(11,
+  ATermList new_ops = ATmakeList(9,
       (ATerm) gsMakeOpIdBagComp(gsMakeSortArrow1(sort_elt, gsMakeSortExprNat()), sort_bag),
       (ATerm) gsMakeOpIdEmptyBag(sort_bag),
       (ATerm) gsMakeOpIdCount(sort_elt, sort_bag),
       (ATerm) gsMakeOpIdEltIn(sort_elt, sort_bag),
-      (ATerm) gsMakeOpIdSubBagEq(sort_bag),
-      (ATerm) gsMakeOpIdSubBag(sort_bag),
       (ATerm) gsMakeOpIdBagUnion(sort_bag),
       (ATerm) gsMakeOpIdBagDiff(sort_bag),
       (ATerm) gsMakeOpIdBagIntersect(sort_bag),
@@ -1541,34 +1610,39 @@ void impl_sort_bool(t_data_decls *p_data_decls)
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), se_bool);
+  ATermAppl c = gsMakeDataVarId(gsString2ATermAppl("c"), se_bool);
   ATermList bl = ATmakeList1((ATerm) b);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(19,
+  ATermList bcl = ATmakeList2((ATerm) b, (ATerm) c);
+  p_data_decls->data_eqns = ATconcat(ATmakeList(21,
+      //equality (Bool # Bool -> Bool)
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(t, b), b),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(f, b), gsMakeDataExprNot(b)),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, t), b),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, f), gsMakeDataExprNot(b)),
+      //less than (Bool # Bool -> Bool)
+      (ATerm) gsMakeDataEqn(bcl, nil, gsMakeDataExprLT(b, c), gsMakeDataExprAnd(gsMakeDataExprNot(b), c)),
+      //less than or equal (Bool # Bool -> Bool)
+      (ATerm) gsMakeDataEqn(bcl, nil, gsMakeDataExprLTE(b, c), gsMakeDataExprImp(b, c)),
       //logical negation (Bool -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(f), t),
       (ATerm) gsMakeDataEqn(bl, nil,
                      gsMakeDataExprNot(gsMakeDataExprNot(b)), b),
-      //conjunction (Bool -> Bool -> Bool)
+      //conjunction (Bool # Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(b, t), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(b, f), f),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(t, b), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(f, b), f),
-      //disjunction (Bool -> Bool -> Bool)
+      //disjunction (Bool # Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(b, t), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(b, f), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(t, b), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(f, b), b),
-      //implication (Bool -> Bool -> Bool)
+      //implication (Bool # Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(b, t), t),
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(b, f),
-                                            gsMakeDataExprNot(b)),
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(b, f), gsMakeDataExprNot(b)),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(t, b), b),
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(f, b), t),
-      //equality (Bool -> Bool -> Bool)
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(t, b), b),
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(f, b), gsMakeDataExprNot(b)),
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, t), b),
-      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, f), gsMakeDataExprNot(b))
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(f, b), t)
     ), p_data_decls->data_eqns);
 }
 
@@ -1584,11 +1658,7 @@ void impl_sort_pos(t_data_decls *p_data_decls)
   //Declare operations for sort Pos
   ATermAppl se_pos = gsMakeSortExprPos();
   ATermAppl se_bool = gsMakeSortExprBool();
-  p_data_decls->ops = ATconcat(ATmakeList(12,
-      (ATerm) gsMakeOpIdLTE(se_pos),
-      (ATerm) gsMakeOpIdLT(se_pos),
-      (ATerm) gsMakeOpIdGTE(se_pos),
-      (ATerm) gsMakeOpIdGT(se_pos),
+  p_data_decls->ops = ATconcat(ATmakeList(8,
       (ATerm) gsMakeOpIdMax(se_pos, se_pos),
       (ATerm) gsMakeOpIdMin(se_pos),
       (ATerm) gsMakeOpIdAbs(se_pos),
@@ -1617,8 +1687,8 @@ void impl_sort_pos(t_data_decls *p_data_decls)
   ATermList bpql = ATmakeList3((ATerm) b, (ATerm) p, (ATerm) q);
   ATermList bcpql = ATmakeList4((ATerm) b, (ATerm) c, (ATerm) p, (ATerm) q);
   ATermList bpqrl = ATmakeList4((ATerm) b, (ATerm) p, (ATerm) q, (ATerm) r);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(41,
-      //equality (Pos -> Pos -> Bool)
+  p_data_decls->data_eqns = ATconcat(ATmakeList(39,
+      //equality (Pos # Pos -> Bool)
       (ATerm) gsMakeDataEqn(bpl, nil, 
          gsMakeDataExprEq(one, gsMakeDataExprCDub(b, p)), f),
       (ATerm) gsMakeDataEqn(bpl, nil, 
@@ -1635,24 +1705,7 @@ void impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bcpql,nil, 
          gsMakeDataExprEq(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
          gsMakeDataExprAnd(gsMakeDataExprEq(b, c), gsMakeDataExprEq(p, q))),
-      //less than or equal (Pos -> Pos -> Bool)
-      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprLTE(one, p), t),
-      (ATerm) gsMakeDataEqn(bpl, nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), one), f),
-      (ATerm) gsMakeDataEqn(bpql,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(b, q)),
-         gsMakeDataExprLTE(p, q)),
-      (ATerm) gsMakeDataEqn(bpql,nil,
-         gsMakeDataExprLTE(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(b, q)),
-         gsMakeDataExprLTE(p, q)),
-      (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprLTE(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
-         gsMakeDataExprLT(p, q)),
-      (ATerm) gsMakeDataEqn(bcpql,nil,
-         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
-         gsMakeDataExprIf(gsMakeDataExprImp(b, c),
-           gsMakeDataExprLTE(p, q), gsMakeDataExprLT(p, q))),
-      //less than (Pos -> Pos -> Bool)
+      //less than (Pos # Pos -> Bool)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprLT(p, one), f),
       (ATerm) gsMakeDataEqn(bpl, nil, 
          gsMakeDataExprLT(one, gsMakeDataExprCDub(b, p)), t),
@@ -1669,16 +1722,27 @@ void impl_sort_pos(t_data_decls *p_data_decls)
          gsMakeDataExprLT(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
          gsMakeDataExprIf(gsMakeDataExprImp(c, b),
            gsMakeDataExprLT(p, q), gsMakeDataExprLTE(p, q))),
-      //greater than or equal (Pos -> Pos -> Bool)
+      //less than or equal (Pos # Pos -> Bool)
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprLTE(one, p), t),
+      (ATerm) gsMakeDataEqn(bpl, nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), one), f),
+      (ATerm) gsMakeDataEqn(bpql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(b, q)),
+         gsMakeDataExprLTE(p, q)),
+      (ATerm) gsMakeDataEqn(bpql,nil,
+         gsMakeDataExprLTE(gsMakeDataExprCDub(f, p), gsMakeDataExprCDub(b, q)),
+         gsMakeDataExprLTE(p, q)),
       (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprGTE(p, q), gsMakeDataExprLTE(q, p)),
-      //greater than (Pos -> Pos -> Bool)
-      (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprGT(p, q), gsMakeDataExprLT(q, p)),
-      //maximum (Pos -> Pos -> Pos)
+         gsMakeDataExprLTE(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
+         gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(bcpql,nil,
+         gsMakeDataExprLTE(gsMakeDataExprCDub(b, p), gsMakeDataExprCDub(c, q)),
+         gsMakeDataExprIf(gsMakeDataExprImp(b, c),
+           gsMakeDataExprLTE(p, q), gsMakeDataExprLT(p, q))),
+      //maximum (Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMax(p, q),
          gsMakeDataExprIf(gsMakeDataExprLTE(p, q), q, p)),
-      //minimum (Pos -> Pos -> Pos)
+      //minimum (Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMin(p, q),
          gsMakeDataExprIf(gsMakeDataExprLTE(p, q), p, q)),
       //absolute value (Pos -> Pos)
@@ -1693,10 +1757,10 @@ void impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pl,nil,
          gsMakeDataExprSucc(gsMakeDataExprCDub(t, p)),
          gsMakeDataExprCDub(f, gsMakeDataExprSucc(p))),
-      //addition (Pos -> Pos -> Pos)
+      //addition (Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql, nil, gsMakeDataExprAdd(p, q),
          gsMakeDataExprAddC(f, p, q)),
-      //addition with carry (Bool -> Pos -> Pos -> Pos)
+      //addition with carry (Bool # Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprAddC(f, one, p), gsMakeDataExprSucc(p)),
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -1716,7 +1780,7 @@ void impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bpql,nil, gsMakeDataExprAddC(
            b, gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
          gsMakeDataExprCDub(gsMakeDataExprNot(b), gsMakeDataExprAddC(b, p, q))),
-      //multiplication (Pos -> Pos -> Pos)
+      //multiplication (Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprLTE(p, q),
          gsMakeDataExprMult(p, q),
@@ -1727,7 +1791,7 @@ void impl_sort_pos(t_data_decls *p_data_decls)
          gsMakeDataExprMult(p, q),
          gsMakeDataExprMultIR(f, one, q, p)),
       //multiplication with intermediate result
-      //  (Bool -> Pos -> Pos -> Pos -> Pos)
+      //  (Bool # Pos # Pos # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprMultIR(f, p, one, q), q),
       (ATerm) gsMakeDataEqn(pql, nil,
@@ -1762,13 +1826,9 @@ void impl_sort_nat(t_data_decls *p_data_decls)
   ATermAppl se_nat = gsMakeSortExprNat();
   ATermAppl se_pos = gsMakeSortExprPos();
   ATermAppl se_bool = gsMakeSortExprBool();
-  p_data_decls->ops = ATconcat(ATmakeList(28,
+  p_data_decls->ops = ATconcat(ATmakeList(24,
       (ATerm) gsMakeOpIdPos2Nat(),
       (ATerm) gsMakeOpIdNat2Pos(),
-      (ATerm) gsMakeOpIdLTE(se_nat),
-      (ATerm) gsMakeOpIdLT(se_nat),
-      (ATerm) gsMakeOpIdGTE(se_nat),
-      (ATerm) gsMakeOpIdGT(se_nat),
       (ATerm) gsMakeOpIdMax(se_pos, se_nat),
       (ATerm) gsMakeOpIdMax(se_nat, se_pos),
       (ATerm) gsMakeOpIdMax(se_nat, se_nat),
@@ -1814,8 +1874,8 @@ void impl_sort_nat(t_data_decls *p_data_decls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList nl = ATmakeList1((ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(75,
-      //equality (Nat -> Nat -> Bool)
+  p_data_decls->data_eqns = ATconcat(ATmakeList(73,
+      //equality (Nat # Nat -> Bool)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprEq(zero, gsMakeDataExprCNat(p)), f),
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -1823,47 +1883,41 @@ void impl_sort_nat(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprEq(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprEq(p, q)),
-      //convert Pos to Nat (Pos -> Nat)
-      (ATerm) gsMakeDataEqn(el,nil, gsMakeOpIdPos2Nat(), gsMakeOpIdCNat()),
-      //convert Nat to Pos (Nat -> Pos)
-      (ATerm) gsMakeDataEqn(pl,nil,
-         gsMakeDataExprNat2Pos(gsMakeDataExprCNat(p)), p),
-      //less than or equal (Nat -> Nat -> Bool)
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprLTE(zero, n), t),
-      (ATerm) gsMakeDataEqn(pl, nil,
-         gsMakeDataExprLTE(gsMakeDataExprCNat(p), zero), f),
-      (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprLTE(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
-         gsMakeDataExprLTE(p, q)),
-      //less than (Nat -> Nat -> Bool)
+      //less than (Nat # Nat -> Bool)
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprLT(n, zero), f),
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprLT(zero, gsMakeDataExprCNat(p)), t),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprLT(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprLT(p, q)),
-      //greater than or equal (Nat -> Nat -> Bool)
-      (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGTE(m, n), gsMakeDataExprLTE(n, m)),
-      //greater than (Nat -> Nat -> Bool)
-      (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGT(m, n), gsMakeDataExprLT(n, m)),
-      //maximum (Pos -> Nat -> Pos)
+      //less than or equal (Nat # Nat -> Bool)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprLTE(zero, n), t),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprLTE(gsMakeDataExprCNat(p), zero), f),
+      (ATerm) gsMakeDataEqn(pql,nil,
+         gsMakeDataExprLTE(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprLTE(p, q)),
+      //convert Pos to Nat (Pos -> Nat)
+      (ATerm) gsMakeDataEqn(el,nil, gsMakeOpIdPos2Nat(), gsMakeOpIdCNat()),
+      //convert Nat to Pos (Nat -> Pos)
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprNat2Pos(gsMakeDataExprCNat(p)), p),
+      //maximum (Pos # Nat -> Pos)
       (ATerm) gsMakeDataEqn(pl,nil, gsMakeDataExprMax(p, zero), p),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprMax(p, gsMakeDataExprCNat(q)),
          //gsMakeDataExprMax(p, q)),
          gsMakeDataExprIf(gsMakeDataExprLTE(p, q), q, p)),
-      //maximum (Nat -> Pos -> Pos)
+      //maximum (Nat # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pl,nil, gsMakeDataExprMax(zero, p), p),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprMax(gsMakeDataExprCNat(p), q),
          //gsMakeDataExprMax(p, q)),
          gsMakeDataExprIf(gsMakeDataExprLTE(p, q), q, p)),
-      //maximum (Nat -> Nat -> Nat)
+      //maximum (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMax(m, n),
          gsMakeDataExprIf(gsMakeDataExprLTE(m, n), n, m)),
-      //minimum (Nat -> Nat -> Nat)
+      //minimum (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMin(m, n),
          gsMakeDataExprIf(gsMakeDataExprLTE(m, n), m, n)),
       //absolute value (Nat -> Nat)
@@ -1886,42 +1940,42 @@ void impl_sort_nat(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pl,nil,
          gsMakeDataExprPred(gsMakeDataExprCDub(f, p)),
          gsMakeDataExprDub(t, gsMakeDataExprPred(p))),
-      //double (Bool -> Nat -> Nat)
+      //double (Bool # Nat -> Nat)
       (ATerm) gsMakeDataEqn(el,nil, gsMakeDataExprDub(f, zero), zero),
       (ATerm) gsMakeDataEqn(el,nil,
          gsMakeDataExprDub(t, zero), gsMakeDataExprCNat(one)),
       (ATerm) gsMakeDataEqn(bpl,nil,
          gsMakeDataExprDub(b, gsMakeDataExprCNat(p)),
          gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
-      //addition (Pos -> Nat -> Pos)
+      //addition (Pos # Nat -> Pos)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprAdd(p, zero), p),
       (ATerm) gsMakeDataEqn(pql, nil,
         gsMakeDataExprAdd(p, gsMakeDataExprCNat(q)),
         //gsMakeDataExprAdd(p, q)),
         gsMakeDataExprAddC(f, p, q)),
-      //addition (Nat -> Pos -> Pos)
+      //addition (Nat # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprAdd(zero, p), p),
       (ATerm) gsMakeDataEqn(pql, nil,
         gsMakeDataExprAdd(gsMakeDataExprCNat(p), q),
         //gsMakeDataExprAdd(p, q)),
         gsMakeDataExprAddC(f, p, q)),
-      //addition (Nat -> Nat -> Nat)
+      //addition (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprAdd(zero, n), n),
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprAdd(n, zero), n),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprAdd(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprCNat(gsMakeDataExprAddC(f, p, q))),
-      //GTE subtraction (Pos -> Pos -> Nat)
+      //GTE subtraction (Pos # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprGTESubt(p, q),
          gsMakeDataExprGTESubtB(f, p, q)),
-      //GTE subtraction (Nat -> Nat -> Nat)
+      //GTE subtraction (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprGTESubt(n, zero), n),
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprGTESubt(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          //gsMakeDataExprGTESubt(p, q)),
          gsMakeDataExprGTESubtB(f, p, q)),
-      //GTE subtraction with borrow (Bool -> Pos -> Pos -> Nat)
+      //GTE subtraction with borrow (Bool # Pos # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprGTESubtB(f, p, one),
          gsMakeDataExprPred(p)),
@@ -1942,13 +1996,13 @@ void impl_sort_nat(t_data_decls *p_data_decls)
            gsMakeDataExprCDub(f, q)),
          gsMakeDataExprDub(gsMakeDataExprNot(b),
            gsMakeDataExprGTESubtB(f, p, q))),
-      //multiplication (Nat -> Nat -> Nat)
+      //multiplication (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(zero, n), zero),
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(n, zero), zero),
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMult(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprCNat(gsMakeDataExprMult(p, q))),
-      //exponentiation (Pos -> Nat -> Pos)
+      //exponentiation (Pos # Nat -> Pos)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprExp(p, zero), one),
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprExp(p, gsMakeDataExprCNat(one)), p),
@@ -1961,7 +2015,7 @@ void impl_sort_nat(t_data_decls *p_data_decls)
          gsMakeDataExprMultIR(f, one, p,
            gsMakeDataExprExp(gsMakeDataExprMultIR(f, one, p, p),
              gsMakeDataExprCNat(q)))),
-      //exponentiation (Nat -> Nat -> Nat)
+      //exponentiation (Nat # Nat -> Nat)
       (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprExp(n, zero),
         gsMakeDataExprCNat(one)),
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -1976,7 +2030,7 @@ void impl_sort_nat(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bpl, nil,
         gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
         gsMakeDataExprNot(b)),
-      //quotient after division (Pos -> Pos -> Nat)
+      //quotient after division (Pos # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprDiv(p, one),
          gsMakeDataExprCNat(p)),
@@ -2022,12 +2076,12 @@ void impl_sort_nat(t_data_decls *p_data_decls)
            //for consistency with lpsrewr.
            //gsMakeDataExprDivMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q))
          )),
-      //quotient after division (Nat -> Pos -> Nat)
+      //quotient after division (Nat # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprDiv(zero, p), zero),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprDiv(gsMakeDataExprCNat(p), q),
          gsMakeDataExprDiv(p, q)),
-      //remainder after division (Pos -> Pos -> Nat)
+      //remainder after division (Pos # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprMod(p, one),
          zero),
@@ -2073,7 +2127,7 @@ void impl_sort_nat(t_data_decls *p_data_decls)
            //for consistency with lpsrewr.
            //gsMakeDataExprDivMod(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(t, q))
          )),
-      //remainder after division (Nat -> Pos -> Nat)
+      //remainder after division (Nat # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprMod(zero, p), zero),
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
@@ -2120,16 +2174,24 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList pqnl = ATmakeList3((ATerm) p, (ATerm) q, (ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(10,
-      //equality (NatPair -> NatPair -> Bool)
+  p_data_decls->data_eqns = ATconcat(ATmakeList(12,
+      //equality (NatPair # NatPair -> Bool)
       (ATerm) gsMakeDataEqn(mnm_n_l,nil, 
          gsMakeDataExprEq(gsMakeDataExprCPair(m, n), gsMakeDataExprCPair(m_, n_)),
          gsMakeDataExprAnd(gsMakeDataExprEq(m, m_), gsMakeDataExprEq(n, n_))),
+      //less than (NatPair # NatPair -> Bool)
+      (ATerm) gsMakeDataEqn(mnm_n_l,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCPair(m, n), gsMakeDataExprCPair(m_, n_)),
+         gsMakeDataExprOr(gsMakeDataExprLT(m, m_), gsMakeDataExprAnd(gsMakeDataExprEq(m, m_), gsMakeDataExprLT(n, n_)))),
+      //less than or equal (NatPair # NatPair -> Bool)
+      (ATerm) gsMakeDataEqn(mnm_n_l,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCPair(m, n), gsMakeDataExprCPair(m_, n_)),
+         gsMakeDataExprOr(gsMakeDataExprLT(m, m_), gsMakeDataExprAnd(gsMakeDataExprEq(m, m_), gsMakeDataExprLTE(n, n_)))),
       //first (NatPair -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprFirst(gsMakeDataExprCPair(m, n)), m),
       //last (NatPair -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprLast(gsMakeDataExprCPair(m, n)), n),
-      //quotient and remainder after division (Pos -> Pos -> NatPair)
+      //quotient and remainder after division (Pos # Pos -> NatPair)
       (ATerm) gsMakeDataEqn(el,nil,
          gsMakeDataExprDivMod(one, one),
          gsMakeDataExprCPair(gsMakeDataExprCNat(one), zero)),
@@ -2139,11 +2201,11 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(bpql,nil,
          gsMakeDataExprDivMod(gsMakeDataExprCDub(b, p), q),
          gsMakeDataExprGDivMod(gsMakeDataExprDivMod(p, q), b, q)),
-      //generalised quotient and remainder after division (NatPair -> Bool -> Pos -> NatPair)
+      //generalised quotient and remainder after division (NatPair # Bool # Pos -> NatPair)
       (ATerm) gsMakeDataEqn(bpmnl,nil,
          gsMakeDataExprGDivMod(gsMakeDataExprCPair(m, n), b, p),
          gsMakeDataExprGGDivMod(gsMakeDataExprDub(b, n), m, p)),
-      //generalised generalised quotient and remainder after division (Nat -> Nat -> Pos -> NatPair)
+      //generalised generalised quotient and remainder after division (Nat # Nat # Pos -> NatPair)
       (ATerm) gsMakeDataEqn(pnl,nil,
          gsMakeDataExprGGDivMod(zero, n, p),
          gsMakeDataExprCPair(gsMakeDataExprDub(f, n), zero)),
@@ -2172,15 +2234,11 @@ void impl_sort_int(t_data_decls *p_data_decls)
   ATermAppl se_pos = gsMakeSortExprPos();
   ATermAppl se_nat = gsMakeSortExprNat();
   ATermAppl se_int = gsMakeSortExprInt();
-  p_data_decls->ops = ATconcat(ATmakeList(30,
+  p_data_decls->ops = ATconcat(ATmakeList(26,
       (ATerm) gsMakeOpIdNat2Int(),
       (ATerm) gsMakeOpIdInt2Nat(),
       (ATerm) gsMakeOpIdPos2Int(),
       (ATerm) gsMakeOpIdInt2Pos(),
-      (ATerm) gsMakeOpIdLTE(se_int),
-      (ATerm) gsMakeOpIdLT(se_int),
-      (ATerm) gsMakeOpIdGTE(se_int),
-      (ATerm) gsMakeOpIdGT(se_int),
       (ATerm) gsMakeOpIdMax(se_pos, se_int),
       (ATerm) gsMakeOpIdMax(se_int, se_pos),
       (ATerm) gsMakeOpIdMax(se_nat, se_int),
@@ -2225,8 +2283,8 @@ void impl_sort_int(t_data_decls *p_data_decls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(64,
-      //equality (Int -> Int -> Bool)
+  p_data_decls->data_eqns = ATconcat(ATmakeList(62,
+      //equality (Int # Int -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil, 
          gsMakeDataExprEq(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
          gsMakeDataExprEq(m, n)),
@@ -2237,6 +2295,28 @@ void impl_sort_int(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprEq(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
          gsMakeDataExprEq(p, q)),
+      //less than (Int # Int -> Bool)
+      (ATerm) gsMakeDataEqn(mnl,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
+         gsMakeDataExprLT(m, n)),
+      (ATerm) gsMakeDataEqn(pnl,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCInt(n), gsMakeDataExprCNeg(p)), f),
+      (ATerm) gsMakeDataEqn(pnl,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCNeg(p), gsMakeDataExprCInt(n)), t),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
+         gsMakeDataExprLT(q, p)),
+      //less than or equal (Int # Int -> Bool)
+      (ATerm) gsMakeDataEqn(mnl,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
+         gsMakeDataExprLTE(m, n)),
+      (ATerm) gsMakeDataEqn(pnl,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCInt(n), gsMakeDataExprCNeg(p)), f),
+      (ATerm) gsMakeDataEqn(pnl,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCNeg(p), gsMakeDataExprCInt(n)), t),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
+         gsMakeDataExprLTE(q, p)),
       //convert Nat to Int (Nat -> Int)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeOpIdNat2Int(), gsMakeOpIdCInt()),
       //convert Int to Nat (Int -> Nat)
@@ -2249,65 +2329,37 @@ void impl_sort_int(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(nl, nil,
          gsMakeDataExprInt2Pos(gsMakeDataExprCInt(n)),
          gsMakeDataExprNat2Pos(n)),
-      //less than or equal (Int -> Int -> Bool)
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
-         gsMakeDataExprLTE(m, n)),
-      (ATerm) gsMakeDataEqn(pnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCInt(n), gsMakeDataExprCNeg(p)), f),
-      (ATerm) gsMakeDataEqn(pnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCNeg(p), gsMakeDataExprCInt(n)), t),
-      (ATerm) gsMakeDataEqn(pql,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
-         gsMakeDataExprLTE(q, p)),
-      //less than (Int -> Int -> Bool)
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
-         gsMakeDataExprLT(m, n)),
-      (ATerm) gsMakeDataEqn(pnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprCInt(n), gsMakeDataExprCNeg(p)), f),
-      (ATerm) gsMakeDataEqn(pnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprCNeg(p), gsMakeDataExprCInt(n)), t),
-      (ATerm) gsMakeDataEqn(pql,nil, 
-         gsMakeDataExprLT(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
-         gsMakeDataExprLT(q, p)),
-      //greater than or equal (Int -> Int -> Bool)
-      (ATerm) gsMakeDataEqn(xyl,nil,
-         gsMakeDataExprGTE(x, y), gsMakeDataExprLTE(y, x)),
-      //greater than (Int -> Int -> Bool)
-      (ATerm) gsMakeDataEqn(xyl,nil,
-         gsMakeDataExprGT(x, y), gsMakeDataExprLT(y, x)),
-      //maximum (Pos -> Int -> Pos)
+      //maximum (Pos # Int -> Pos)
       (ATerm) gsMakeDataEqn(pnl,nil,
          gsMakeDataExprMax(p, gsMakeDataExprCInt(n)),
          //gsMakeDataExprMax(p, n)),
          gsMakeDataExprMax(p, n)),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprMax(p, gsMakeDataExprCNeg(q)), p),
-      //maximum (Int -> Pos -> Pos)
+      //maximum (Int # Pos -> Pos)
       (ATerm) gsMakeDataEqn(pnl,nil,
          gsMakeDataExprMax(gsMakeDataExprCInt(n), p),
          gsMakeDataExprMax(n, p)),
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprMax(gsMakeDataExprCNeg(q), p), p),
-      //maximum (Nat -> Int -> Nat)
+      //maximum (Nat # Int -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil,
          gsMakeDataExprMax(m, gsMakeDataExprCInt(n)),
          //gsMakeDataExprMax(m, n)),
          gsMakeDataExprIf(gsMakeDataExprLTE(m, n), n, m)),
       (ATerm) gsMakeDataEqn(pnl,nil,
          gsMakeDataExprMax(n, gsMakeDataExprCNeg(p)), n),
-      //maximum (Int -> Nat -> Nat)
+      //maximum (Int # Nat -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil,
          gsMakeDataExprMax(gsMakeDataExprCInt(m), n),
          //gsMakeDataExprMax(m, n)),
          gsMakeDataExprIf(gsMakeDataExprLTE(m, n), n, m)),
       (ATerm) gsMakeDataEqn(pnl,nil,
          gsMakeDataExprMax(gsMakeDataExprCNeg(p), n), n),
-      //maximum (Int -> Int -> Int)
+      //maximum (Int # Int -> Int)
       (ATerm) gsMakeDataEqn(xyl,nil, gsMakeDataExprMax(x, y),
          gsMakeDataExprIf(gsMakeDataExprLTE(x, y), y, x)),
-      //minimum (Int -> Int -> Int)
+      //minimum (Int # Int -> Int)
       (ATerm) gsMakeDataEqn(xyl,nil, gsMakeDataExprMin(x, y),
          gsMakeDataExprIf(gsMakeDataExprLTE(x, y), x, y)),
       //absolute value (Int -> Nat)
@@ -2350,7 +2402,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pl,nil,
          gsMakeDataExprPred(gsMakeDataExprCNeg(p)),
          gsMakeDataExprCNeg(gsMakeDataExprSucc(p))),
-      //double (Bool -> Int -> Int)
+      //double (Bool # Int -> Int)
       (ATerm) gsMakeDataEqn(bnl,nil,
          gsMakeDataExprDub(b, gsMakeDataExprCInt(n)),
          gsMakeDataExprCInt(gsMakeDataExprDub(b, n))),
@@ -2361,7 +2413,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprDub(t, gsMakeDataExprCNeg(p)),
          //gsMakeDataExprNeg(gsMakeDataExprPred(gsMakeDataExprCDub(f, p)))),
          gsMakeDataExprNeg(gsMakeDataExprDub(t, gsMakeDataExprPred(p)))),
-      //addition (Int -> Int -> Int)
+      //addition (Int # Int -> Int)
       (ATerm) gsMakeDataEqn(mnl, nil,
          gsMakeDataExprAdd(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
          gsMakeDataExprCInt(gsMakeDataExprAdd(m, n))),
@@ -2374,7 +2426,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprAdd(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
          gsMakeDataExprCNeg(gsMakeDataExprAddC(f, p, q))),
-      //subtraction (Pos -> Pos -> Int)
+      //subtraction (Pos # Pos -> Int)
       (ATerm) gsMakeDataEqn(pql,
          //gsMakeDataExprGTE(p, q),
          gsMakeDataExprLTE(q, p),
@@ -2386,7 +2438,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprSubt(p, q),
          //gsMakeDataExprNeg(gsMakeDataExprGTESubt(q, p))),
          gsMakeDataExprNeg(gsMakeDataExprGTESubtB(f, q, p))),
-      //subtraction (Nat -> Nat -> Int)
+      //subtraction (Nat # Nat -> Int)
       (ATerm) gsMakeDataEqn(mnl,
          //gsMakeDataExprGTE(m, n),
          gsMakeDataExprLTE(n, m),
@@ -2396,10 +2448,10 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprLT(m, n),
          gsMakeDataExprSubt(m, n),
          gsMakeDataExprNeg(gsMakeDataExprGTESubt(n, m))),
-      //subtraction (Int -> Int -> Int)
+      //subtraction (Int # Int -> Int)
       (ATerm) gsMakeDataEqn(xyl, nil,
          gsMakeDataExprSubt(x, y), gsMakeDataExprAdd(x, gsMakeDataExprNeg(y))),
-      //multiplication (Int -> Int -> Int)
+      //multiplication (Int # Int -> Int)
       (ATerm) gsMakeDataEqn(mnl, nil,
          gsMakeDataExprMult(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
          gsMakeDataExprCInt(gsMakeDataExprMult(m, n))),
@@ -2412,7 +2464,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprMult(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
          gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprMult(p, q)))),
-      //quotient after division (Int -> Pos -> Int)
+      //quotient after division (Int # Pos -> Int)
       (ATerm) gsMakeDataEqn(pnl, nil,
          gsMakeDataExprDiv(gsMakeDataExprCInt(n), p),
          gsMakeDataExprCInt(gsMakeDataExprDiv(n, p))),
@@ -2420,7 +2472,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprDiv(gsMakeDataExprCNeg(p), q),
          gsMakeDataExprCNeg(gsMakeDataExprSucc(
            gsMakeDataExprDiv(gsMakeDataExprPred(p), q)))),
-      //remainder after division (Int -> Pos -> Nat)
+      //remainder after division (Int # Pos -> Nat)
       (ATerm) gsMakeDataEqn(pnl, nil,
          gsMakeDataExprMod(gsMakeDataExprCInt(n), p),
          gsMakeDataExprMod(n, p)),
@@ -2428,7 +2480,7 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprMod(gsMakeDataExprCNeg(p), q),
          gsMakeDataExprInt2Nat(gsMakeDataExprSubt(q, gsMakeDataExprSucc(
            gsMakeDataExprMod(gsMakeDataExprPred(p), q))))),
-      //exponentiation (Int -> Nat -> Int)
+      //exponentiation (Int # Nat -> Int)
       (ATerm) gsMakeDataEqn(mnl,nil,
          gsMakeDataExprExp(gsMakeDataExprCInt(m), n),
          gsMakeDataExprCInt(gsMakeDataExprExp(m, n))),
@@ -2457,7 +2509,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermAppl se_nat  = gsMakeSortExprNat();
   ATermAppl se_int  = gsMakeSortExprInt();
   ATermAppl se_real = gsMakeSortExprReal();
-  p_data_decls->ops = ATconcat(ATmakeList(31,
+  p_data_decls->ops = ATconcat(ATmakeList(27,
       (ATerm) gsMakeOpIdCReal(),
       (ATerm) gsMakeOpIdPos2Real(),
       (ATerm) gsMakeOpIdNat2Real(),
@@ -2465,10 +2517,6 @@ void impl_sort_real(t_data_decls *p_data_decls)
       (ATerm) gsMakeOpIdReal2Pos(),
       (ATerm) gsMakeOpIdReal2Nat(),
       (ATerm) gsMakeOpIdReal2Int(),
-      (ATerm) gsMakeOpIdLT(se_real),
-      (ATerm) gsMakeOpIdLTE(se_real),
-      (ATerm) gsMakeOpIdGTE(se_real),
-      (ATerm) gsMakeOpIdGT(se_real),
       (ATerm) gsMakeOpIdMin(se_real),
       (ATerm) gsMakeOpIdMax(se_real, se_real),
       (ATerm) gsMakeOpIdAbs(se_real),
@@ -2518,9 +2566,15 @@ void impl_sort_real(t_data_decls *p_data_decls)
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(36,
+  p_data_decls->data_eqns = ATconcat(ATmakeList(34,
       //equality (Real # Real -> Bool)
       (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprEq(gsMakeDataExprCReal(x,p), gsMakeDataExprCReal(y,q)), gsMakeDataExprEq(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+      //less than (Real # Real -> Bool)
+      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLT(r,r), f),
+      (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprLT(gsMakeDataExprCReal(x,p),gsMakeDataExprCReal(y,q)), gsMakeDataExprLT(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
+      //less than or equal (Real # Real -> Bool)
+      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLTE(r,r), t),
+      (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprLTE(gsMakeDataExprCReal(x,p),gsMakeDataExprCReal(y,q)), gsMakeDataExprLTE(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
       //convert Int to Real (Int -> Real)
       (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprInt2Real(x), gsMakeDataExprCReal(x, one)),
       //convert Nat to Real (Nat -> Real)
@@ -2533,16 +2587,6 @@ void impl_sort_real(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprReal2Nat(gsMakeDataExprCReal(x, one)), gsMakeDataExprInt2Nat(x)),
       //convert Real to Pos (Real -> Pos)
       (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprReal2Pos(gsMakeDataExprCReal(x, one)), gsMakeDataExprInt2Pos(x)),
-      //less than (Real # Real -> Bool)
-      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLT(r,r), f),
-      (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprLT(gsMakeDataExprCReal(x,p),gsMakeDataExprCReal(y,q)), gsMakeDataExprLT(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
-      //less than or equal (Real # Real -> Bool)
-      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprLTE(r,r), t),
-      (ATerm) gsMakeDataEqn(pqxyl, nil, gsMakeDataExprLTE(gsMakeDataExprCReal(x,p),gsMakeDataExprCReal(y,q)), gsMakeDataExprLTE(gsMakeDataExprMult(x,gsMakeDataExprCInt(gsMakeDataExprCNat(q))),gsMakeDataExprMult(y,gsMakeDataExprCInt(gsMakeDataExprCNat(p))))),
-      //greater than or equal (Real # Real -> Bool)
-      (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprGTE(r,s), gsMakeDataExprLTE(s,r)),
-      //greater than (Real # Real -> Bool)
-      (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprGT(r,s), gsMakeDataExprLT(s,r)),
       //minimum (Real # Real -> Real)
       (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprMin(r,s), gsMakeDataExprIf(gsMakeDataExprLT(r,s), r, s)),
       //maximum (Real # Real -> Real)
@@ -2597,10 +2641,14 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
 {
   assert(gsIsSortExpr(sort));
   //Declare operations for sort
-  p_data_decls->ops = ATconcat(ATmakeList(3,
+  p_data_decls->ops = ATconcat(ATmakeList(7,
       (ATerm) gsMakeOpIdEq(sort),
       (ATerm) gsMakeOpIdNeq(sort),
-      (ATerm) gsMakeOpIdIf(sort)
+      (ATerm) gsMakeOpIdIf(sort),
+      (ATerm) gsMakeOpIdLT(sort),
+      (ATerm) gsMakeOpIdLTE(sort),
+      (ATerm) gsMakeOpIdGTE(sort),
+      (ATerm) gsMakeOpIdGT(sort)
     ), p_data_decls->ops);
   //Declare data equations for sort sort
   ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort);
@@ -2612,24 +2660,35 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
   ATermList xl = ATmakeList1((ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(5,
-      //equality (sort_arrow -> sort_arrow -> Bool)
+  p_data_decls->data_eqns = ATconcat(ATmakeList(9,
+      //equality (sort # sort -> Bool)
       (ATerm) gsMakeDataEqn(xl, nil,
         gsMakeDataExprEq(x, x), t),
-      //inequality (sort_arrow -> sort_arrow -> Bool)
+      //inequality (sort # sort -> Bool)
       (ATerm) gsMakeDataEqn(xyl,nil,
         gsMakeDataExprNeq(x, y),
         gsMakeDataExprNot(gsMakeDataExprEq(x, y))),
-      //conditional (Bool -> sort_arrow -> sort_arrow -> sort_arrow)
+      //conditional (Bool # sort # sort -> sort)
       (ATerm) gsMakeDataEqn(xyl,nil,
-        gsMakeDataExprIf(t, x, y),
-        x),
+        gsMakeDataExprIf(t, x, y), x),
       (ATerm) gsMakeDataEqn(xyl,nil,
-        gsMakeDataExprIf(f, x, y),
-        y),
+        gsMakeDataExprIf(f, x, y), y),
       (ATerm) gsMakeDataEqn(bxl,nil,
-        gsMakeDataExprIf(b, x, x),
-        x)
+        gsMakeDataExprIf(b, x, x), x),
+      //less than (sort # sort -> Bool)
+      (ATerm) gsMakeDataEqn(xl, nil,
+        gsMakeDataExprLT(x, x), f),
+      //less than or equal (sort # sort -> Bool)
+      (ATerm) gsMakeDataEqn(xl, nil,
+        gsMakeDataExprLTE(x, x), t),
+      //greater than or equal (sort # sort -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil,
+        gsMakeDataExprGTE(x, y),
+        gsMakeDataExprLTE(y, x)),
+      //greater than (sort # sort -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil,
+        gsMakeDataExprGT(x, y),
+        gsMakeDataExprLT(y, x))
     ), p_data_decls->data_eqns);
 }
 
