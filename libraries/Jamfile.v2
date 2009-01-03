@@ -7,8 +7,9 @@ rule mcrl2-library-components ( ) {
 
 for library in [ mcrl2-library-components ] gl2ps ticpp tr {
   if $(library) in [ mcrl2-library-components ] {
-    alias $(library) : /libraries//mcrl2 : <link>shared ;
-    alias $(library) : /libraries/$(library)//$(library)/<link>static : <link>static ;
+    alias $(library) :
+         : <link>shared:<source>/libraries//mcrl2/<link>shared
+           <link>static:<source>/libraries/$(library)//$(library)/<link>static ;
   }
   else {
     alias $(library) : /libraries/$(library)//$(library) ;
@@ -48,11 +49,13 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
     }
 
     rule library-targets-static ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+      usage-requirements += [ property.select library : $(requirements) ] ;
+
       if $(sources) {
-        lib $(name) : $(sources) : <link>static : $(defaults) : [ property.select library : $(requirements) ] $(usage-requirements) ;
+        lib $(name) : $(sources) : <link>static : $(defaults) : $(usage-requirements) ;
       }
       else {
-        alias $(name) : : <link>static : : [ property.select library : $(requirements) ] $(usage-requirements) ;
+        alias $(name) : : <link>static : : $(usage-requirements) ;
       }
     }
 

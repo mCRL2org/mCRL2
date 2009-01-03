@@ -188,7 +188,7 @@ boost-library filesystem ;
 boost-library program_options ;
 boost-library thread ;
 boost-library signals <link>static ;
-boost-library test ;
+boost-library test : <toolset>msvc:<asynch-exceptions>on ;
 boost-library system : ;
 boost-library md5 : <include>../3rd-party/boost/boost/md5 : local ;  # not part of Boost 1.36
 

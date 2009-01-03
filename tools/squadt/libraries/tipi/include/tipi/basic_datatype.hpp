@@ -331,7 +331,7 @@ namespace tipi {
          * \return *this
          **/
         inline enumeration< C >& add(const size_t v, std::string const& s) {
-          get_single_instance().add(static_cast< const size_t > (v), s);
+          get_single_instance().add(v, s);
 
           return *this;
         }

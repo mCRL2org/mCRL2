@@ -74,9 +74,9 @@ rule init ( version ? :  command * : options * )
 
 SPACE = " " ;
 
-flags intel-linux.compile OPTIONS <inlining>off : "-Ob0" ;
-flags intel-linux.compile OPTIONS <inlining>on : "-Ob1" ;
-flags intel-linux.compile OPTIONS <inlining>full : "-Ob2" ;
+flags intel-linux.compile OPTIONS <inlining>off : "-inline-level=0" ;
+flags intel-linux.compile OPTIONS <inlining>on : "-inline-level=1" ;
+flags intel-linux.compile OPTIONS <inlining>full : "-inline-level=2" ;
 flags intel-linux.compile OPTIONS <optimization>space : "-O1" ; # no specific space optimization flag in icc
 
 flags intel-linux.compile OPTIONS <warnings>off : -w0 ;
@@ -114,7 +114,7 @@ rule link ( targets * : sources * : properties * )
 
 actions link bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,-R$(SPACE)-Wl,"$(RPATH)" -Wl,-rpath-link$(SPACE)-Wl,"$(RPATH_LINK)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,-R$(SPACE)-Wl,"$(RPATH)" -Wl,-rpath-link$(SPACE)-Wl,"$(RPATH_LINK)" -o "$(<)" $(START-GROUP) "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(END-GROUP) $(OPTIONS)
 }
 
 rule link.dll ( targets * : sources * : properties * )
@@ -127,5 +127,5 @@ rule link.dll ( targets * : sources * : properties * )
 # Differ from 'link' above only by -shared.
 actions link.dll bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,-R$(SPACE)-Wl,"$(RPATH)" -o "$(<)" -Wl,-soname$(SPACE)-Wl,$(<[1]:D=) -shared "$(>)"  "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(OPTIONS)
+    "$(CONFIG_COMMAND)" -L"$(LINKPATH)" -Wl,-R$(SPACE)-Wl,"$(RPATH)" -o "$(<)" -Wl,-soname$(SPACE)-Wl,$(<[1]:D=) -shared $(START-GROUP) "$(>)"  "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) $(END-GROUP) $(OPTIONS)
 }
