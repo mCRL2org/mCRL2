@@ -10,11 +10,12 @@
 
 #include <vector>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include "aterm1.h"
-#include <assert.h>
+#include <cassert>
 #include "mcrl2/lts/lts.h"
 
 /* extern declarations data structures */
@@ -59,7 +60,7 @@ extern INTERVAL *Pi;
 extern int second_lts_states_offset;
 /* end extern declarations and data structures */
 
-extern int errno, label_tau;
+extern int label_tau;
 extern int traceLevel, optimal, classes;
 extern ATermTable *lab_src_tgt, *lab_tgt_src;
 

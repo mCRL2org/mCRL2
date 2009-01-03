@@ -15,9 +15,9 @@
 ExporterXML::ExporterXML(Graph* g) : Exporter(g)
 {
 
-};
+}
 
-ExporterXML::~ExporterXML(){};
+ExporterXML::~ExporterXML(){}
 
 bool ExporterXML::export_to(wxString _filename)
 {

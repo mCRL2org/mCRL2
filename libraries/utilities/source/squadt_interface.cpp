@@ -239,6 +239,26 @@ namespace mcrl2 {
       void tool_interface::send_display_layout(tipi::tool_display& d) {
         m_communicator->send_display_layout(d);
       }
+
+      std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
+        char buf[21];
+
+        sprintf(buf,"%lu",t);
+
+        o << buf;
+
+        return o;
+      }
+
+      std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
+        char buf[21];
+
+        sprintf(buf,"%llu",t);
+
+        o << buf;
+
+        return o;
+      }
     }
   }
 }

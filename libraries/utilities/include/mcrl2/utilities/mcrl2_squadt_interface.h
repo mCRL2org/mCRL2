@@ -162,26 +162,10 @@ namespace mcrl2 {
 #endif
 
       /// \brief Helper function for unsigned long to string conversion
-      inline std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
-        char buf[21];
-
-        sprintf(buf,"%lu",t);
-
-        o << buf;
-
-        return o;
-      }
+      std::ostream& operator<<(std::ostream& o, unsigned long const& t);
 
       /// \brief Helper function for unsigned long long to string conversion
-      inline std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
-        char buf[21];
-
-        sprintf(buf,"%llu",t);
-
-        o << buf;
-
-        return o;
-      }
+      std::ostream& operator<<(std::ostream& o, unsigned long long const& t);
     }
   }
 }

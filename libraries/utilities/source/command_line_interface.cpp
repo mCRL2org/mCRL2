@@ -406,7 +406,7 @@ namespace mcrl2 {
       m_options.find(l)->second.set_argument(a.clone());
 
       return *this;
-    };
+    }
 
     std::string interface_description::textual_description() const {
       std::ostringstream s;

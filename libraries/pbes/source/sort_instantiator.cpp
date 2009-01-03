@@ -105,7 +105,7 @@ data_expression_list sort_instantiator::get_enumeration (sort_expression ss)
 bool sort_instantiator::is_finite(sort_expression s) 
 {
   return mcrl2::data::is_finite(fl,s);
-};
+}
 
 // END CLASS   SORT_INSTANTIATOR
 

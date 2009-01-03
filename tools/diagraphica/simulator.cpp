@@ -73,7 +73,7 @@ Simulator::~Simulator()
 
     delete timerAnim;
     timerAnim = NULL;
-};
+}
 
 
 // -- get functions ---------------------------------------------

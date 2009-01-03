@@ -43,7 +43,7 @@ namespace mcrl2 {
 
       void register_rewriting_options(interface_description& d) {
         initialiser< RewriteStrategy >::add_options(d);
-      };
+      }
     }
   /// \endcond
   }

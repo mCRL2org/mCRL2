@@ -988,6 +988,8 @@ namespace mcrl2 {
 
       collect(d, convert(c, a));
 
+      static_cast< void >(mcrl2::utilities::detail::initialised); // prevents unused variable warnings
+
       process_default_options(d);
     }
 # ifndef __CYGWIN__ // std::wstring is not available for Cygwin

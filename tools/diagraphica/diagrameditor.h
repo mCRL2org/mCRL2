@@ -158,7 +158,7 @@ public:
         EDIT_MODE_ELLIPSE,
         EDIT_MODE_LINE,
         EDIT_MODE_ARROW,
-        EDIT_MODE_DARROW,
+        EDIT_MODE_DARROW
     };
 
 protected:

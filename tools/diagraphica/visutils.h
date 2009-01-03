@@ -567,7 +567,7 @@ public:
         BLEND_LINEAR,
         BLEND_CONCAVE,
         BLEND_CONVEX,
-        BLEND_OSCILLATE,
+        BLEND_OSCILLATE
     };
 
 private:

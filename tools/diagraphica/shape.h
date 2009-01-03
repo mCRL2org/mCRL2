@@ -205,7 +205,7 @@ public:
         ID_HDL_DOF_BEG,
         ID_HDL_DOF_END,
         ID_HDL_HGE,
-        ID_HDL_DIR,
+        ID_HDL_DIR
     };
     static double hdlSzeHnt;
     static double minSzeHnt;

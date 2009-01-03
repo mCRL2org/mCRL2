@@ -336,6 +336,10 @@ rule platform-configuration ( properties * ) {
       pch-path =  $(build-root)/precompile/dummies ;
     }
 
+    if <warnings>all in $(properties) {
+      requirements += <cxxflags>-Wno-long-long ;
+    }
+
     if <link>static in $(properties) {
       requirements += <linkflags>-export-dynamic ;
     }

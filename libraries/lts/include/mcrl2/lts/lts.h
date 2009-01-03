@@ -92,7 +92,7 @@ namespace lts
     lts_pre_trace,  /**< Strong trace preorder */
     lts_pre_weak_trace,   /**< Weak trace preorder */
     lts_preorder_min = lts_pre_none,
-    lts_preorder_max = lts_pre_weak_trace,
+    lts_preorder_max = lts_pre_weak_trace
   };
 
   /** \brief Transition sort styles.

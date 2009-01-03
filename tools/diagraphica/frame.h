@@ -451,7 +451,7 @@ private:
         ID_MENU_ITEM_DGRM_SET_TO_EXNR,
         ID_MENU_ITEM_EXNR_CLEAR,
 
-        ID_BUTTON_ABOUT,
+        ID_BUTTON_ABOUT
     };
 
     // -- declare event table ---------------------------------------

@@ -91,7 +91,7 @@ inline
 bool is_action_label(atermpp::aterm_appl t)
 {
   return core::detail::gsIsActId(t);
-};
+}
 
 } // namespace lps
 

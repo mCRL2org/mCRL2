@@ -123,4 +123,4 @@ Graph* XMLImporter::importFile(std::string filename)
     std::cerr << "Exception by ticpp: " << e.what();
     return NULL;
   }
-};
+}

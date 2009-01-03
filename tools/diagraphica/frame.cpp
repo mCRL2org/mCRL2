@@ -1946,7 +1946,7 @@ void Frame::initToolbarEdit()
     wxBitmap snapGridBmp( snapgrid );
     toolBarEdit->AddCheckTool( ID_TOOL_SNAP_GRID, wxString( wxT( "Snap grid" ) ), snapGridBmp );
     toolBarEdit->ToggleTool( ID_TOOL_SNAP_GRID, true );
-    
+
     // finalize toolbar
     toolBarEdit->Realize();
     sizerTopRgt->Add(

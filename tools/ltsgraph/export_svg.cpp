@@ -26,7 +26,7 @@ ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g) {
 }
 
 
-ExporterSVG::~ExporterSVG() {};
+ExporterSVG::~ExporterSVG() {}
 
 
 bool ExporterSVG::export_to(wxString filename)

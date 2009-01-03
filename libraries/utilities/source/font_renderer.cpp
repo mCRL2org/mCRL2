@@ -94,13 +94,13 @@ namespace mcrl2 {
       static bool initialised = initialise();
 
       static_cast< void >(initialised); // prevent unused variable warnings
-    };
+    }
 
 
     font_renderer::~font_renderer()
     {
       // Free texture resources
-    };
+    }
 
     void font_renderer::draw_text(
       const std::string s,

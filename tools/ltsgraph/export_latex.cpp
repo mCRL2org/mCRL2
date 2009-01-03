@@ -23,7 +23,7 @@
 ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
 {
   this->owner = owner;
-};
+}
 
 bool ExporterLatex::export_to(wxString filename)
 {

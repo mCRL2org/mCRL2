@@ -18,7 +18,7 @@ Graph::Graph()
   numStates = 0;
   numTrans = 0;
   numLabels = 0;
-};
+}
 
 Graph::~Graph()
 {

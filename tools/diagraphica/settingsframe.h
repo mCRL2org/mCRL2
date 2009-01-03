@@ -136,7 +136,7 @@ private:
         ID_PANEL_TRACE,
         ID_CHECK_BOX_USE_SHADING,
         
-        ID_PANEL_DGRM_EDITOR,
+        ID_PANEL_DGRM_EDITOR
     };
     
     // -- declare event table ---------------------------------------
