@@ -18,7 +18,6 @@
 namespace atermpp
 {
   /// \brief Makes a list with a fixed number of arguments.
-  ///
   /// \param t0 A list element.
   /// \return The generated list.
   template <typename T0>
@@ -28,7 +27,6 @@ namespace atermpp
   }
 
   /// \brief Makes a list with a fixed number of arguments.
-  ///
   /// \param t0 A list element.
   /// \param t1 A list element.
   /// \return The generated list.
@@ -39,7 +37,6 @@ namespace atermpp
   }
 
   /// \brief Makes a list with a fixed number of arguments.
-  ///
   /// \param t0 A list element.
   /// \param t1 A list element.
   /// \param t2 A list element.
@@ -51,7 +48,6 @@ namespace atermpp
   }
 
   /// \brief Makes a list with a fixed number of arguments.
-  ///
   /// \param t0 A list element.
   /// \param t1 A list element.
   /// \param t2 A list element.

@@ -29,16 +29,14 @@ struct substitution
   /// A replacement.
   aterm m_dest;
 
-  /// Constructor.
-  ///
+  /// \brief Constructor.
   /// \param src A value.
   /// \param dest A replacement.
   substitution(aterm src, aterm dest)
     : m_src(src), m_dest(dest)
   {}
 
-  /// Function call operator.
-  ///
+  /// \brief Function call operator.
   /// \param t A term.
   /// \return The term to which the substitution has been applied.
   aterm operator()(aterm t) const
@@ -47,7 +45,10 @@ struct substitution
   }
 };
 
-/// Creation function for substitutions.
+/// \brief Creation function for substitutions.
+/// \param src PARAM_DESCRIPTION
+/// \param dest PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Src, typename Dest>
 inline
 substitution make_substitution(Src src, Dest dest)
@@ -65,8 +66,7 @@ struct list_substitution
   /// A sequence of replacements.
   Dest m_dest;
 
-  /// Constructor.
-  ///
+  /// \brief Constructor.
   /// \param src A sequence of values.
   /// \param dest A sequence of replacements.
   list_substitution(Src src, Dest dest)
@@ -75,8 +75,7 @@ struct list_substitution
     assert(src.size() == dest.size());
   }
 
-  /// Function call operator.
-  ///
+  /// \brief Function call operator.
   /// \param t A term.
   /// \return The term to which all substitutions have been applied.
   aterm operator()(aterm t) const

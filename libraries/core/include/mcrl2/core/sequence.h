@@ -23,8 +23,12 @@ namespace core {
 namespace detail {
 
   /// \cond INTERNAL_DOCS
+  /// \brief Assignment function object
   struct foreach_sequence_assign
   {
+    /// \brief Function call operator
+    /// \param t1 An object
+    /// \param t2 A value
     template <typename T1, typename T2>
     void operator()(T1& t1, const T2& t2) const
     {
@@ -32,6 +36,12 @@ namespace detail {
     }
   };
   
+  /// \brief Implementation of the foreach_sequence algorithm
+  /// \param first Start of a sequence container
+  /// \param last End of a sequence container
+  /// \param i An output iterator to where the generated sequences are written.
+  /// \param f Function that is called for each generated sequence
+  /// \param assign Assignment operator for assigning a value to a sequence element
   template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
   void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
   {
@@ -53,7 +63,6 @@ namespace detail {
 } // namespace detail
 
 /// \brief Algorithm for generating sequences.
-///
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
@@ -78,11 +87,10 @@ void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f,
 }
 
 /// \brief Algorithm for generating sequences.
-///
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence
 /// as well, this function generates all sequences [x1, ..., xn], where
 /// xi is an element of Xi for all i = 1 ... n. For each of these sequences
-/// the function f is called. 
+/// the function f is called.
 /// \param X A sequence.
 /// \param i An output iterator to where the generated sequences are written.
 /// \param f A function that is called for each generated sequence.

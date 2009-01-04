@@ -27,13 +27,12 @@ namespace pbes_system {
 
 namespace detail {
 
-  /// The substitution function used by the pbes2bes rewriter.
+  /// \brief The substitution function used by the pbes2bes rewriter.
   typedef data::rewriter_map<atermpp::map<data::data_variable, data::data_expression_with_variables> > pbes2bes_substitution_function;
 
-  /// Simplifying PBES rewriter that eliminates quantifiers using enumeration.
+  /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// As a side effect propositional variable instantiations are being renamed
-  /// using a rename function.
-  
+  /// using a rename function. 
   template <typename DataRewriter, typename DataEnumerator>
   struct pbes2bes_rewrite_builder: public enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbes2bes_substitution_function>
   {
@@ -48,10 +47,10 @@ namespace detail {
       : super(datar, datae)
     {}
 
-    /// Creates a unique name for a propositional variable instantiation. The
+    /// \brief Creates a unique name for a propositional variable instantiation. The
     /// propositional variable instantiation must be closed.
     /// Implemented by Alexander van Dam.
-    /// \param v A propositional variable.
+    /// \param v A term
     /// \return A name that uniquely corresponds to the propositional variable.
     term_type rename(const term_type& v)
     {
@@ -89,7 +88,10 @@ namespace detail {
       return propositional_variable_type(propvar_name_current, data::data_expression_list());
     }
 
-    /// Check if the intermediate result is constant.
+    /// \brief Check if the intermediate result is constant.
+    /// \param x A term
+    /// \param result A term
+    /// \param sigma A substitution function
     void check_result(term_type x, term_type result, pbes2bes_substitution_function& sigma)
     {
       if (result == term_type())
@@ -115,8 +117,12 @@ namespace detail {
       }
     }
   
+    /// \brief Visit propositional_variable node
     /// Visit propositional variable node.
-    ///
+    /// \param x A term
+    /// \param v A propositional variable
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbes2bes_substitution_function& sigma)
     {
       term_type y = super::visit_propositional_variable(x, v, sigma);
@@ -125,8 +131,12 @@ namespace detail {
       return result;
     }
 /*
+    /// \brief Visit data_expression node
     /// Visit data expression node.
-    ///
+    /// \param x A term
+    /// \param d A data term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_data_expression(const term_type& x, const data_term_type& d, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_data_expression(x, d, sigma);
@@ -134,8 +144,11 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit true node
     /// Visit true node.
-    ///
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_true(const term_type& x, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_true(x, sigma);
@@ -143,8 +156,11 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit false node
     /// Visit false node.
-    ///
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_false(const term_type& x, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_false(x, sigma);
@@ -152,8 +168,12 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit not node
     /// Visit not node.
-    ///
+    /// \param x A term
+    /// \param n A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_not(const term_type& x, const term_type& n, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_not(x, n, sigma);
@@ -161,8 +181,13 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit and node
     /// Visit and node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_and(const term_type& x, const term_type& left, const term_type& right, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_and(x, left, right, sigma);
@@ -170,8 +195,13 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit or node
     /// Visit or node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_or(const term_type& x, const term_type& left, const term_type& right, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_or(x, left, right, sigma);
@@ -179,8 +209,13 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit imp node
     /// Visit imp node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_imp(x, left, right, sigma);
@@ -188,8 +223,13 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit forall node
     /// Visit forall node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param expression A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& expression, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_forall(x, variables, expression, sigma);
@@ -197,8 +237,13 @@ namespace detail {
       return result;
     }
   
+    /// \brief Visit exists node
     /// Visit exists node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param expression A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& expression, pbes2bes_substitution_function& sigma)
     {
       term_type result = super::visit_exists(x, variables, expression, sigma);
@@ -207,7 +252,6 @@ namespace detail {
     }
   
     /// Visit propositional variable node.
-    ///
     // term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbes2bes_substitution_function& sigma)
     // {
     //   term_type result = super::visit_data_expression(x, v, sigma);
@@ -218,7 +262,6 @@ namespace detail {
   };
 
   /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
-  ///
   class pbes2bes_rewriter
   {
     public:
@@ -227,7 +270,10 @@ namespace detail {
       typedef data::data_expression_with_variables data_term_type;
       typedef data::data_variable variable_type;
 
-      /// Constructor.
+      /// \brief Constructor.
+      /// \param data_spec A data specification
+      /// \param rewriter_strategy A rewriter strategy
+      /// \param print_rewriter_output If true, rewriter output is printed to standard error
       pbes2bes_rewriter(data::data_specification& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
        :
          datar(data_spec, rewriter_strategy),
@@ -238,9 +284,8 @@ namespace detail {
       {}     
       
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \param x A term
       /// \return The rewrite result.
-      ///
       term_type operator()(const term_type& x)
       {
         pbes2bes_substitution_function sigma;
@@ -254,10 +299,9 @@ namespace detail {
       }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \param x A term
+      /// \param sigma A substitution function
       /// \return The rewrite result.
-      ///
       term_type operator()(const term_type& x, pbes2bes_substitution_function& sigma)
       {
         pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
@@ -269,17 +313,18 @@ namespace detail {
         return result;
       }
 
-      /// \return Returns the flag for debug information. If set, rewriter output is printed
-      /// to standard out.
+      /// \brief Returns the flag for debug information.
+      /// If this flag is set, rewriter output is printed to standard out.
+      /// \return The flag for debug information.
       bool& print_rewriter_output()
       {
         return m_print_rewriter_output;
       }
 
-      /// Creates a unique name for a propositional variable instantiation. The
+      /// \brief Creates a unique name for a propositional variable instantiation. The
       /// propositional variable instantiation must be closed.
       /// Implemented by Alexander van Dam.
-      /// \param v A propositional variable.
+      /// \param v A term
       /// \return A name that uniquely corresponds to the propositional variable.
       term_type rename(const term_type& v)
       {

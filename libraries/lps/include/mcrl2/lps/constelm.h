@@ -27,11 +27,13 @@ namespace mcrl2 {
 
 namespace lps {
 
-/// Returns zero or more constant process parameters of the process p with initial state init.
-/// The result is returned as a map m that maps the constant parameters to their
-/// constant value.
-template <typename Rewriter>
-std::map<data::data_variable, data::data_expression> compute_constant_parameters(const linear_process& p, data::data_expression_list init, Rewriter& r)
+/// \brief Returns zero or more constant process parameters of the process p with initial state init.
+/// \param p A linear process
+/// \param init A sequence of data expressions
+/// \param r A data rewriter
+/// \return A map m that maps the constant parameters to their constant value
+template <typename DataRewriter>
+std::map<data::data_variable, data::data_expression> compute_constant_parameters(const linear_process& p, data::data_expression_list init, DataRewriter& r)
 {
   using namespace data::data_expr;
   
@@ -78,9 +80,11 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
   return replacements;
 }
 
-/// Returns zero or more constant process parameters of the process p with initial state init.
-/// The result is returned as a map m that maps the constant parameters to their
-/// constant value.
+/// \brief Returns zero or more constant process parameters of the process p with initial state init.
+/// \param p A linear process
+/// \param init A sequence of data expressions
+/// \param r A data rewriter
+/// \return A map m that maps constant parameters to their constant value.
 std::map<data::data_variable, data::data_expression> compute_constant_parameters_subst(const linear_process& p, data::data_expression_list init, data::rewriter& r)
 {
   using namespace data::data_expr;
@@ -144,9 +148,13 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
   return replacements;
 }
 
-/// Removes zero or more constant parameters from the specification p.
-template <typename Rewriter>
-specification constelm(const specification& spec, Rewriter& r, bool verbose = false)
+/// \brief Removes zero or more constant parameters from the specification p.
+/// \param spec A linear process specification
+/// \param r A data rewriter
+/// \param verbose If true, verbose output is generated
+/// \return The transformed specification
+template <typename DataRewriter>
+specification constelm(const specification& spec, DataRewriter& r, bool verbose = false)
 {
   using core::pp;
 

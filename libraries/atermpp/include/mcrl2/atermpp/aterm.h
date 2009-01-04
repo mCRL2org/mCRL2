@@ -22,7 +22,6 @@
 namespace atermpp
 {
   /// \brief Base class for aterm.
-  ///
   class aterm_base
   {
     template <typename T>
@@ -32,109 +31,98 @@ namespace atermpp
       /// The wrapped ATerm.
       ATerm m_term;
 
+      /// \brief Returns const reference to the wrapped ATerm.
       /// \return A const reference to the wrapped ATerm.
       const ATerm& term() const
       { return m_term; }
 
+      /// \brief Returns reference to the wrapped ATerm.
       /// \return A reference to the wrapped ATerm.
       ATerm& term()
       { return m_term; }
 
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       aterm_base()
         : m_term(0)
       {}
 
-      /// Constructor.
-      ///
-      /// \param term A term.
+      /// \brief Constructor.
+      /// \param term A term
       aterm_base(ATerm term)
         : m_term(term)
       {
       }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a list.
+      /// \brief Constructor.
+      /// \param term A sequence of terms
       aterm_base(ATermList term)
         : m_term(reinterpret_cast<ATerm>(term))
       {}
 
-      /// Constructor.
-      ///
-      /// \param term A term containing an integer.
+      /// \brief Constructor.
+      /// \param term An integer term
       aterm_base(ATermInt term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a real.
+      /// \brief Constructor.
+      /// \param term A real-valued term
       aterm_base(ATermReal term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a blob.
+      /// \brief Constructor.
+      /// \param term A term containing binary data
       aterm_base(ATermBlob term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a function application.
+      /// \brief Constructor.
+      /// \param term A term
       aterm_base(ATermAppl term)
         : m_term(reinterpret_cast<ATerm>(term))
       {
       }
 
-      /// Constructor.
-      ///
-      /// \param s A string.
+      /// \brief Constructor.
+      /// \param s A string
       aterm_base(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
 
-      /// Protect the aterm.
+      /// \brief Protect the aterm.
       /// Protects the aterm from being freed at garbage collection.
-      ///
       void protect()
       {
         ATprotect(&m_term);
       }
 
-      /// Unprotect the aterm.
+      /// \brief Unprotect the aterm.
       /// Releases protection of the aterm which has previously been protected through a
       /// call to protect.
-      ///
       void unprotect()
       {
         ATunprotect(&m_term);
       }
 
-      /// Mark the aterm for not being garbage collected.
-      ///
+      /// \brief Mark the aterm for not being garbage collected.
       void mark()
       {
         ATmarkTerm(m_term);
       }
 
-      /// Return the type of term.
+      /// \brief Return the type of term.
       /// Result is one of AT_APPL, AT_INT,
       /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
-      ///
       /// \return The type of the term.
       int type() const
       { return ATgetType(m_term); }
 
-      /// Writes the term to a string.
-      ///
+      /// \brief Writes the term to a string.
       /// \return A string representation of the term.
       std::string to_string() const
       { return std::string(ATwriteToString(m_term)); }
@@ -152,7 +140,7 @@ namespace atermpp
     static ATerm* ptr(aterm_base& t)         { return &t.term(); }
   };
   /// \endcond
-
+  
   /// \brief Returns true if x has the default value of an aterm. In the ATerm Library
   /// this value is given by ATfalse.
   /// \param x A term.
@@ -176,72 +164,62 @@ namespace atermpp
   ///////////////////////////////////////////////////////////////////////////////
   // aterm
   /// \brief Represents a generic term.
-  ///
   class aterm: public aterm_base
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       aterm() {}
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param term A term.
       aterm(aterm_base term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term.
+      /// \brief Constructor.
+      /// \param term A term
       aterm(ATerm term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a list.
+      /// \brief Constructor.
+      /// \param term A sequence of terms
       aterm(ATermList term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing an integer.
+      /// \brief Constructor.
+      /// \param term An integer term
       aterm(ATermInt term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a real.
+      /// \brief Constructor.
+      /// \param term A real-valued term
       aterm(ATermReal term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a blob.
+      /// \brief Constructor.
+      /// \param term A term containing binary data
       aterm(ATermBlob term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param term A term containing a function application.
+      /// \brief Constructor.
+      /// \param term A term
       aterm(ATermAppl term)
         : aterm_base(term)
       { }
 
-      /// Constructor.
-      ///
-      /// \param s A string.
+      /// \brief Constructor.
+      /// \param s A string
       aterm(const std::string& s)
         : aterm_base(s)
       { }
 
-      /// Conversion operator.
-      ///
+      /// \brief Conversion operator.
+      /// \return The wrapped ATerm pointer
       operator ATerm() const
       { return m_term; }
   };
@@ -258,11 +236,10 @@ namespace atermpp
     static ATerm* ptr(aterm& t)         { return &t.term(); }
   };
   /// \endcond
-
+  
   /// \brief Read an aterm from string.
   /// This function parses a character string into an aterm.
-  ///
-  /// \param s A string representation of a term.
+  /// \param s A string
   /// \return The term corresponding to the string.
   inline
   aterm read_from_string(const std::string& s)
@@ -272,9 +249,8 @@ namespace atermpp
 
   /// \brief Read a aterm from a string in baf format.
   /// This function decodes a baf character string into an aterm.
-  ///
-  /// \param s A string representation of a term in baf format.
-  /// \param size The size of the string.
+  /// \param s A string
+  /// \param size A positive integer
   /// \return The term corresponding to the string.
   inline
   aterm read_from_binary_string(const std::string& s, unsigned int size)
@@ -284,9 +260,8 @@ namespace atermpp
 
   /// \brief Read a aterm from a string in taf format.
   /// This function decodes a taf character string into an aterm.
-  ///
-  /// \param s A string.
-  /// \param size A positive number.
+  /// \param s A string
+  /// \param size A positive integer
   /// \return The term read from string.
   inline
   aterm read_from_shared_string(const std::string& s, unsigned int size)
@@ -297,8 +272,7 @@ namespace atermpp
   /// \brief Read an aterm from named binary or text file.
   /// This function reads an aterm file filename. A test is performed to see if the file
   /// is in baf, taf, or plain text. "-" is standard input's filename.
-  ///
-  /// \param name The name of a file.
+  /// \param name A string
   /// \return A term that was read from a file.
   inline
   aterm read_from_named_file(const std::string& name)
@@ -309,9 +283,8 @@ namespace atermpp
   /// \brief Writes term t to file named filename in textual format.
   /// This function writes aterm t in textual representation to file filename. "-" is
   /// standard output's filename.
-  ///
   /// \param t A term.
-  /// \param filename The name of a file.
+  /// \param filename A string
   /// \return True if the operation succeeded.
   inline
   bool write_to_named_text_file(aterm t, const std::string& filename)
@@ -320,9 +293,8 @@ namespace atermpp
   }
 
   /// \brief Writes term t to file named filename in Binary aterm Format (baf).
-  ///
   /// \param t A term.
-  /// \param filename The name of a file.
+  /// \param filename A string
   /// \return True if the operation succeeded.
   inline
   bool write_to_named_binary_file(aterm t, const std::string& filename)
@@ -331,9 +303,8 @@ namespace atermpp
   }
 
   /// \brief Writes term t to file named filename in Streamable aterm Format (saf).
-  ///
   /// \param t A term.
-  /// \param filename The name of a file.
+  /// \param filename A string
   /// \return True if the operation succeeded.
   inline
   bool write_to_named_saf_file(aterm t, const std::string& filename)
@@ -344,7 +315,6 @@ namespace atermpp
   /// \brief Annotate a term with a labeled annotation.
   /// Creates a version of t that is annotated with annotation and labeled by
   /// label.
-  ///
   /// \param t A term.
   /// \param label A label.
   /// \param annotation An annotation.
@@ -359,7 +329,6 @@ namespace atermpp
   /// This function can be used to retrieve a specific annotation of a term. If t has
   /// no annotations, or no annotation labeled with label exists, `aterm()` is returned. Otherwise the
   /// annotation is returned.
-  ///
   /// \param t A term.
   /// \param label A label.
   /// \return The annotation with the given label.
@@ -372,7 +341,6 @@ namespace atermpp
   /// \brief Remove a specific annotation from a term.
   /// This function returns a version of t which has its annotation with label label
   /// removed. If t has no annotations, or no annotation labeled with label exists, t itself is returned.
-  ///
   /// \param t A term.
   /// \param label A label.
   /// \return The term with a removed annotation.

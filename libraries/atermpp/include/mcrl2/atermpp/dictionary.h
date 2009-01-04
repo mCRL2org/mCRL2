@@ -18,18 +18,16 @@
 namespace atermpp
 {
   /// \brief Dictionary based on ATerms.
-  ///
   class dictionary: public aterm, boost::noncopyable
   {
    public:
-      /// Create a new dictionary.
-      ///
+      /// \brief Constructor.
+      /// Creates a new dictionary.
       dictionary()
         : aterm(ATdictCreate())
       {}
 
-      /// Get the value belonging to a given key in the dictionary.
-      ///
+      /// \brief Get the value belonging to a given key in the dictionary.
       /// \param key A key value.
       /// \return The value belonging to the key.
       aterm get(aterm key)
@@ -37,10 +35,9 @@ namespace atermpp
         return ATdictGet(*this, key);
       }
       
-      /// Add / update a (key, value)-pair in a dictionary.
+      /// \brief Add / update a (key, value)-pair in a dictionary.
       /// If key does not already exist in the dictionary, this function adds the (key,
       /// value)-pair to the dictionary. Otherwise, it updates the value to value.
-      ///
       /// \param key A key value.
       /// \param value A value.
       void put(aterm key, aterm value)
@@ -48,9 +45,8 @@ namespace atermpp
         m_term = ATdictPut(*this, key, value);
       }
       
-      /// Remove the (key, value)-pair from the dictionary.
+      /// \brief Remove the (key, value)-pair from the dictionary.
       /// This function can be used to remove an entry from the dictionary.
-      ///
       /// \param key A key value.
       void remove(aterm key)
       {

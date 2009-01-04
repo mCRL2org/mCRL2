@@ -23,8 +23,12 @@ namespace data {
 
 namespace detail {
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the sequence [first, last[ contains duplicates.
 // TODO: this implementation is not particularly efficient
+/// \param first Start of a sequence of PARAM_DESCRIPTION
+/// \param last End of a sequence of PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Iterator>
 bool sequence_contains_duplicates(Iterator first, Iterator last)
 {
@@ -33,8 +37,14 @@ bool sequence_contains_duplicates(Iterator first, Iterator last)
   return ssize < std::distance(first, last);
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the two sequences [first1, last1[ and [first2, last2[ have
 /// a non empty intersection.
+/// \param first1 PARAM_DESCRIPTION
+/// \param last1 PARAM_DESCRIPTION
+/// \param first2 PARAM_DESCRIPTION
+/// \param last2 PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Iterator1, typename Iterator2>
 bool sequences_do_overlap(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
 {
@@ -46,7 +56,12 @@ bool sequences_do_overlap(Iterator1 first1, Iterator1 last1, Iterator2 first2, I
   return !intersection.empty();
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if all elements of the range [first, last[ are element of s.
+/// \param first Start of a sequence of PARAM_DESCRIPTION
+/// \param last End of a sequence of PARAM_DESCRIPTION
+/// \param s PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Iterator, typename T>
 bool sequence_is_subset_of_set(Iterator first, Iterator last, const std::set<T>& s)
 {
@@ -60,7 +75,10 @@ bool sequence_is_subset_of_set(Iterator first, Iterator last, const std::set<T>&
   return true;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Makes a set of the given container.
+/// \param c PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <class Container>
 std::set<typename Container::value_type> make_set(const Container& c)
 {

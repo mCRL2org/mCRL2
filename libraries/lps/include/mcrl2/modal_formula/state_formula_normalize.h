@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace modal {
 
-/// \internal
+/// \cond INTERNAL_DOCS
 /// Puts a logical not around state variables named X
 struct state_variable_negation
 {
@@ -28,6 +28,9 @@ struct state_variable_negation
     : X(X_)
   {}
   
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The result of the function
   atermpp::aterm_appl operator()(atermpp::aterm_appl t) const
   {
     if (state_frm::is_var(t) && (state_frm::name(t) == X))
@@ -40,10 +43,12 @@ struct state_variable_negation
     }
   }
 };
+/// \endcond
 
-/// \internal
-/// The function normalize brings a state formula into positive normal form,
+/// \brief Brings a state formula into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
+/// \param f A modal formula
+/// \return The normalized formula
 inline
 state_formula normalize(state_formula f)
 {

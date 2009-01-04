@@ -38,6 +38,7 @@ struct t_instantiations {
   data::data_expression_list finite_exp;   // List of all finite expressions
   data::data_expression_list infinite_exp; // List of all infinite expressions
 
+  /// \brief FUNCTION_DESCRIPTION
   void protect()
   {
     finite_var.protect();
@@ -46,6 +47,7 @@ struct t_instantiations {
     infinite_exp.protect();
   }
 
+  /// \brief FUNCTION_DESCRIPTION
   void unprotect()
   {
     finite_var.unprotect();
@@ -53,6 +55,7 @@ struct t_instantiations {
     finite_exp.unprotect();
     infinite_exp.unprotect();
   }
+  /// \brief FUNCTION_DESCRIPTION
   void mark()
   {
     finite_var.mark();
@@ -64,6 +67,9 @@ struct t_instantiations {
 /// \endcond
 
 /// \brief Sort the equation system with respect to the order of predicate variables in the original equation system
+/// \param names_order PARAM_DESCRIPTION
+/// \param to_sort A sequence of PBES equations
+/// \return RETURN_DESCRIPTION
 inline
 atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string > names_order, atermpp::vector<pbes_equation> to_sort)
 {
@@ -99,6 +105,9 @@ atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string >
 }
 
 /// \brief Create a new propositional variable name
+/// \param propvar_name A
+/// \param del A sequence of data expressions
+/// \return RETURN_DESCRIPTION
 inline
 core::identifier_string create_propvar_name(core::identifier_string propvar_name, data::data_expression_list del)
 {
@@ -131,6 +140,9 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
 }
 
 /// \brief Create a new propositional variable instantiation with instantiated values and infinite variables
+/// \param propvarinst A propositional variable instantiation
+/// \param enumerated_sorts PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
 {
   data::data_expression_list finite_expression;
@@ -163,6 +175,9 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
 }
 
 /// \brief Create a BES, using the lazy approach
+/// \param pbes_spec A PBES
+/// \param rewrite A PBES rewriter
+/// \return RETURN_DESCRIPTION
 template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
@@ -267,6 +282,9 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 }
 
 /// \brief Create a PBES without finite data sorts, using the finite approach
+/// \param pbes_spec A PBES
+/// \param rewrite A PBES rewriter
+/// \return RETURN_DESCRIPTION
 template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {

@@ -24,8 +24,10 @@ namespace core {
 
 namespace detail {
 
-    /// Loads an ATerm from the given file, or from stdin if filename is the empty string.
+    /// \brief Loads an ATerm from the given file, or from stdin if filename is the empty string.
     /// If reading fails an exception is thrown.
+    /// \param filename A string
+    /// \return The loaded term
     inline
     ATerm load_aterm(const std::string& filename)
     {
@@ -54,8 +56,11 @@ namespace detail {
       return term;
     }
 
-    /// Saves an ATerm to the given file, or to stdout if filename is the empty string.
+    /// \brief Saves an ATerm to the given file, or to stdout if filename is the empty string.
     /// If writing fails an exception is thrown.
+    /// \param term A term
+    /// \param filename A string
+    /// \param binary If true the term is stored in binary format
     inline
     void save_aterm(ATerm term, const std::string& filename, bool binary = true)
     {

@@ -36,22 +36,29 @@ namespace detail {
     typedef typename super::term_type          term_type;
     typedef core::term_traits<Term> tr;
 
-    /// Visit true node.
-    ///
+    /// \brief Visit true node
+    /// \param x A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_true(const term_type& x, Arg& arg)
     {
       return tr::true_();
     }
 
-    /// Visit false node.
-    ///
+    /// \brief Visit false node
+    /// \param x A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_false(const term_type& x, Arg& arg)
     {
       return tr::false_();
     }
 
-    /// Visit not node.
-    ///
+    /// \brief Visit not node
+    /// \param x A term
+    /// \param n A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_not(const term_type& x, const term_type& n, Arg& arg)
     {
       if (tr::is_true(n))
@@ -65,8 +72,12 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
-    /// Visit and node.
-    ///
+    /// \brief Visit and node
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_and(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
@@ -92,8 +103,12 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
-    /// Visit or node.
-    ///
+    /// \brief Visit or node
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_or(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
@@ -119,8 +134,12 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
-    /// Visit imp node.
-    ///
+    /// \brief Visit imp node
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of visiting the node
     term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, Arg& arg)
     {
       if (tr::is_true(left))
@@ -146,16 +165,19 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
-    /// Applies this builder to the term x.
-    ///
+    /// \brief Applies this builder to the term x.
+    /// \param x A term
+    /// \return RETURN_DESCRIPTION
     term_type operator()(const term_type& x)
     {
       Arg tmp;
       return visit(x, tmp);
     }
 
-    /// Applies this builder to the term x, with argument arg.
-    ///
+    /// \brief Applies this builder to the term x, with argument arg.
+    /// \param x A term
+    /// \param arg An additional argument for the recursion
+    /// \return The result of simplifying the term x
     term_type operator()(const term_type& x, Arg& arg)
     {
       return visit(x, arg);

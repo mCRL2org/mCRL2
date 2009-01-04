@@ -28,7 +28,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief A propositional variable declaration.
-///
 // <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
 class propositional_variable: public atermpp::aterm_appl
 {
@@ -43,6 +42,7 @@ class propositional_variable: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
+    /// \param s A string
     propositional_variable(std::string s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
@@ -52,6 +52,7 @@ class propositional_variable: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param t A term
     propositional_variable(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -62,6 +63,8 @@ class propositional_variable: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param name A
+    /// \param parameters A sequence of data variables
     propositional_variable(core::identifier_string name, data::data_variable_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
@@ -70,12 +73,14 @@ class propositional_variable: public atermpp::aterm_appl
     }
 
     /// \brief Returns the name of the propositional variable.
+    /// \return RETURN_DESCRIPTION
     core::identifier_string name() const
     {
       return m_name;
     }
 
     /// \brief Returns the parameters of the propositional variable.
+    /// \return RETURN_DESCRIPTION
     data::data_variable_list parameters() const
     {
       return m_parameters;
@@ -83,10 +88,11 @@ class propositional_variable: public atermpp::aterm_appl
 };
 
 /// \brief Read-only singly linked list of propositional variable declarations
-///
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
 /// \brief Returns true if the term t is a propositional variable declaration
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 inline
 bool is_propositional_variable(atermpp::aterm_appl t)
 {
@@ -94,7 +100,6 @@ bool is_propositional_variable(atermpp::aterm_appl t)
 }
 
 /// \brief A propositional variable instantiation.
-///
 // <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
 class propositional_variable_instantiation: public atermpp::aterm_appl
 {
@@ -109,6 +114,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
+    /// \param s A string
     propositional_variable_instantiation(std::string s)
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
@@ -118,6 +124,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param t A term
     propositional_variable_instantiation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -128,6 +135,8 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param name A
+    /// \param parameters A sequence of data expressions
     propositional_variable_instantiation(core::identifier_string name, data::data_expression_list parameters)
       : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
@@ -136,18 +145,21 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     }
 
     /// \brief Returns the term containing the name of the propositional variable.
+    /// \return RETURN_DESCRIPTION
     core::identifier_string name() const
     {
       return m_name;
     }
 
     /// \brief Returns the parameters of the propositional variable.
+    /// \return RETURN_DESCRIPTION
     data::data_expression_list parameters() const
     {
       return m_parameters;
     }
 
     /// \brief Returns the unbound variables appearing in the parameters.
+    /// \return RETURN_DESCRIPTION
     std::set<data::data_variable> unbound_variables() const
     {
       std::set<data::data_variable> result;
@@ -161,10 +173,11 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
 };
 
 /// \brief Read-only singly linked list of propositional variables instantiations
-///
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
 
 /// \brief Returns true if the term t is a propositional variable instantiation
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 inline
 bool is_propositional_variable_instantiation(atermpp::aterm_appl t)
 {

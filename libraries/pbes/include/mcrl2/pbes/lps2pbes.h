@@ -24,8 +24,8 @@ namespace mcrl2 {
 namespace pbes_system {
 
   /// \brief Applies the lps2pbes algorithm
-  /// \param spec A specification
-  /// \param formula A state formula
+  /// \param spec A linear process specification
+  /// \param formula A modal formula
   /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
   /// \return The result of the algorithm
   inline
@@ -35,8 +35,8 @@ namespace pbes_system {
   }
 
   /// \brief Applies the lps2pbes algorithm
-  /// \param spec_text A specification
-  /// \param formula_text A state formula
+  /// \param spec_text A string
+  /// \param formula_text A string
   /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
   /// \return The result of the algorithm
   inline

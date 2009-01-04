@@ -23,6 +23,9 @@ namespace pbes_system {
 /// \brief Renames quantifier variables in the expression p, such that within the scope
 /// of a quantifier variable, no other quantifier variables or free variables
 /// with the same name occur.
+/// \param p A PBES expression
+/// \param free_variables A sequence of data variables
+/// \return RETURN_DESCRIPTION
 inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::data_variable_list& free_variables)
 {

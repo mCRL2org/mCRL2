@@ -26,6 +26,9 @@ namespace lps {
 namespace detail {
 
 /// \brief Collects the free variables that occur in the specification and writes them to dest.
+/// \param s A linear process summand
+/// \param bound_variables PARAM_DESCRIPTION
+/// \param dest PARAM_DESCRIPTION
 template <typename OutputIterator>
 void collect_free_variables(const summand& s, const std::set<data::data_variable>& bound_variables, OutputIterator dest)
 {

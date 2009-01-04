@@ -20,7 +20,6 @@ namespace atermpp
   /// the bottom of the program stack.
   /// \param bottom_of_stack The bottom of stack (or a good approximation of it).
   /// All aterms in the range [bottom_of_stack,...[ will not be garbage collected.
-  ///
   inline
   void aterm_init(const aterm& bottom_of_stack)
   {

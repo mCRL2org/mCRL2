@@ -25,7 +25,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief Pbes fixpoint symbol (mu or nu).
-///
 // <FixPoint>     ::= Mu
 //                  | Nu
 class fixpoint_symbol: public atermpp::aterm_appl
@@ -37,6 +36,7 @@ class fixpoint_symbol: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
+    /// \param t A term
     fixpoint_symbol(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -51,24 +51,28 @@ class fixpoint_symbol: public atermpp::aterm_appl
     }
 
     /// \brief Returns the mu symbol.
+    /// \return RETURN_DESCRIPTION
     static fixpoint_symbol mu()
     {
       return fixpoint_symbol(core::detail::gsMakeMu());
     }
 
     /// \brief Returns the nu symbol.
+    /// \return RETURN_DESCRIPTION
     static fixpoint_symbol nu()
     {
       return fixpoint_symbol(core::detail::gsMakeNu());
     }
 
     /// \brief Returns true if the symbol is mu.
+    /// \return RETURN_DESCRIPTION
     bool is_mu() const
     {
       return core::detail::gsIsMu(*this);
     }
 
     /// \brief Returns true if the symbol is nu.
+    /// \return RETURN_DESCRIPTION
     bool is_nu() const
     {
       return core::detail::gsIsNu(*this);

@@ -52,8 +52,12 @@ namespace pbes_system {
 using mcrl2::core::pp;
 
 /// \cond INTERNAL_DOCS
+/// \brief Normalizes a PBES equation
 struct normalize_pbes_equation
 {
+  /// \brief Function call operator
+  /// \param e A PBES equation
+  /// \return The function result
   pbes_equation operator()(const pbes_equation& e) const
   {
     return normalize(e);
@@ -61,8 +65,7 @@ struct normalize_pbes_equation
 };
 /// \endcond
 
-/// \brief Computes the free variables that occur in the sequence [first, last)
-/// of pbes equations.
+/// \brief Computes the free variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
 /// \param last End of a range of pbes equations
 /// \return The free variables in the sequence [first, last) of pbes equations.
@@ -82,8 +85,7 @@ std::set<data::data_variable> compute_free_variables(Iterator first, Iterator la
   return visitor.result;
 }
 
-/// \brief Computes the quantifier variables that occur in the sequence [first, last[
-/// of pbes equations.
+/// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
 /// \param last End of a range of pbes equations
 /// \return The quantifier variables in the sequence [first, last) of pbes equations.
@@ -102,7 +104,6 @@ std::set<data::data_variable> compute_quantifier_variables(Iterator first, Itera
 }
 
 /// \brief parameterized boolean equation system
-///
 // <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
 template <typename Container = atermpp::vector<pbes_equation> >
@@ -191,6 +192,7 @@ class pbes
     /// \param first Start of a sequence of propositional variable declarations
     /// \param last End of a sequence of propositional variable declarations
     /// \return True if the type of \p v is matched correctly
+    /// \param v A propositional variable instantiation
     template <typename Iter>
     bool is_declared_in(Iter first, Iter last, propositional_variable_instantiation v) const
     {
@@ -210,6 +212,7 @@ class pbes
     /// \param first Start of a sequence of propositional variable declarations
     /// \param last End of a sequence of propositional variable declarations
     /// \return True if a conflict has been detected
+    /// \param v A propositional variable instantiation
     template <typename Iter>
     bool has_conflicting_type(Iter first, Iter last, propositional_variable_instantiation v) const
     {
@@ -340,7 +343,7 @@ class pbes
     }
 
     /// \brief Reads the pbes from file.
-    /// \param[in] filename
+    /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
@@ -376,6 +379,7 @@ class pbes
     /// So, upon return the sequence of free variables of the pbes contains exactly those
     /// variables for which no default value could be found.
     /// \brief Returns true if all free variables were eliminated.
+    /// \return RETURN_DESCRIPTION
     bool instantiate_free_variables()
     {
       std::set<data::data_variable> free_variables = compute_unbound_variables();
@@ -409,7 +413,7 @@ class pbes
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    /// \param filename The name of a file
+    /// \param filename A string
     /// \param binary If true the file is saved in binary format
     void save(const std::string& filename, bool binary = true) const
     {
@@ -422,6 +426,7 @@ class pbes
     }
 
     /// \brief Conversion to ATermAppl.
+    /// \return The PBES converted to ATerm format.
     operator ATermAppl() const
     {
       // convert the equation system to ATerm format
@@ -430,9 +435,10 @@ class pbes
       return core::detail::gsMakePBES(m_data, core::detail::gsMakePBEqnSpec(free_variables, equations), pbes_initializer(free_variables, m_initial_state));
     }
 
-    /// \brief Returns the set of binding variables of the pbes, i.e. the
-    /// variables that occur on the left hand side of an equation.
+    /// \brief Returns the set of binding variables of the pbes.
+    /// This is the set variables that occur on the left hand side of an equation.
     /// \param The binding variables of the pbes
+    /// \return The set of binding variables of the pbes.
     atermpp::set<propositional_variable> binding_variables() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -445,8 +451,8 @@ class pbes
       return result;
     }
 
-    /// \brief Returns the set of occurring propositional variable instantiations of the pbes, i.e.
-    /// the variables that occur in the right hand side of an equation.
+    /// \brief Returns the set of occurring propositional variable instantiations of the pbes.
+    /// This is the set of variables that occur in the right hand side of an equation.
     /// \return The occurring propositional variable instantiations of the pbes
     atermpp::set<propositional_variable_instantiation> occurring_variable_instantiations() const
     {
@@ -513,7 +519,7 @@ class pbes
     }
 
     /// \brief Applies a substitution to the equations of this pbes.
-    /// \param f A substitution function.
+    /// \param f A
     /// The Substitution function must supply the method aterm operator()(aterm).
     template <typename Substitution>
     void substitute(Substitution f)
@@ -541,7 +547,8 @@ class pbes
       m_initial_state.mark();
     }
 
-    /// \brief Returns true if
+    /// \brief Checks if the PBES is well typed
+    /// \return True if
     /// <ul>
     /// <li>the sorts occurring in the free variables of the equations are declared in the data specification</li>
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>

@@ -44,154 +44,210 @@ struct state_formula_visitor
   virtual ~state_formula_visitor()
   { }
   
+  /// \brief Visit data_expression node
+  /// \param d A data expression
+  /// \return The result of visiting the node
   virtual bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
     return true;
   }
 
+  /// \brief Visit true node
+  /// \return The result of visiting the node
   virtual bool visit_true(const state_formula& /* e */)
   {
     return true;
   }
 
+  /// \brief Visit false node
+  /// \return The result of visiting the node
   virtual bool visit_false(const state_formula& /* e */)
   {
     return true;
   }
 
+  /// \brief Visit not node
+  /// \return The result of visiting the node
   virtual bool visit_not(const state_formula& /* e */, const state_formula& /* arg */)
   {
     return true;
   }
 
+  /// \brief Visit and node
+  /// \return The result of visiting the node
   virtual bool visit_and(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return true;
   }
 
+  /// \brief Visit or node
+  /// \return The result of visiting the node
   virtual bool visit_or(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return true;
   }    
 
+  /// \brief Visit imp node
+  /// \return The result of visiting the node
   virtual bool visit_imp(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return true;
   }    
 
+  /// \brief Visit forall node
+  /// \return The result of visiting the node
   virtual bool visit_forall(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
 
+  /// \brief Visit exists node
+  /// \return The result of visiting the node
   virtual bool visit_exists(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
 
+  /// \brief Visit must node
+  /// \return The result of visiting the node
   virtual bool visit_must(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
   {
     return true;
   }
 
+  /// \brief Visit may node
+  /// \return The result of visiting the node
   virtual bool visit_may(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
   {
     return true;
   }
 
+  /// \brief Visit yaled node
+  /// \return The result of visiting the node
   virtual bool visit_yaled(const state_formula& /* e */)
   {
     return true;
   }
 
+  /// \brief Visit yaled_timed node
+  /// \return The result of visiting the node
   virtual bool visit_yaled_timed(const state_formula& /* e */, const data::data_expression& /* d */)
   {
     return true;
   }
 
+  /// \brief Visit delay node
+  /// \return The result of visiting the node
   virtual bool visit_delay(const state_formula& /* e */)
   {
     return true;
   }
 
+  /// \brief Visit delay_timed node
+  /// \return The result of visiting the node
   virtual bool visit_delay_timed(const state_formula& /* e */, const data::data_expression& /* d */)
   {
     return true;
   }
 
+  /// \brief Visit var node
+  /// \return The result of visiting the node
   virtual bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& /* l */)
   {
     return true;
   }
 
+  /// \brief Visit mu node
+  /// \return The result of visiting the node
   virtual bool visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
 
+  /// \brief Visit nu node
+  /// \return The result of visiting the node
   virtual bool visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
 
+  /// \brief Leave data_expression node
   virtual void leave_data_expression()
   {}
 
+  /// \brief Leave true node
   virtual void leave_true()
   {}
 
+  /// \brief Leave false node
   virtual void leave_false()
   {}
 
+  /// \brief Leave not node
   virtual void leave_not()
   {}
 
+  /// \brief Leave and node
   virtual void leave_and()
   {}
 
+  /// \brief Leave or node
   virtual void leave_or()
   {}    
 
+  /// \brief Leave imp node
   virtual void leave_imp()
   {}    
 
+  /// \brief Leave forall node
   virtual void leave_forall()
   {}
 
+  /// \brief Leave exists node
   virtual void leave_exists()
   {}
 
+  /// \brief Leave must node
   virtual void leave_must()
   {}
 
+  /// \brief Leave may node
   virtual void leave_may()
   {}
 
+  /// \brief Leave yaled node
   virtual void leave_yaled()
   {}
 
+  /// \brief Leave yaled_timed node
   virtual void leave_yaled_timed()
   {}
 
+  /// \brief Leave delay node
   virtual void leave_delay()
   {}
 
+  /// \brief Leave delay_timed node
   virtual void leave_delay_timed()
   {}
 
+  /// \brief Leave var node
   virtual void leave_var()
   {}
 
+  /// \brief Leave mu node
   virtual void leave_mu()
   {}
 
+  /// \brief Leave nu node
   virtual void leave_nu()
   {}
 
-  /// Visits the nodes of the state formula expression, and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the state formula expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals state_formula(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
+  /// \param e A modal formula
   void visit(const state_formula& e)
   {
     using namespace state_frm;

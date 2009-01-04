@@ -41,89 +41,103 @@ struct pbes_expression_builder
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
   bool is_finished(const term_type& x)
   {
     return x != term_type();
   }
 
   /// \brief Destructor.
-  ///
   virtual ~pbes_expression_builder()
   { }
 
-  /// \brief Visit data expression node.
-  ///
+  /// \brief Visit data_expression node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit forall node.
-  ///
+  /// \brief Visit forall node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit exists node.
-  ///
+  /// \brief Visit exists node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit propositional variable node.
-  ///
+  /// \brief Visit propositional_variable node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
     throw mcrl2::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
@@ -134,6 +148,9 @@ struct pbes_expression_builder
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
+  /// \param e A term
+  /// \param arg1 PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   term_type visit(term_type e, Arg& arg1)
   {
     typedef core::term_traits<term_type> tr;
@@ -245,89 +262,103 @@ struct pbes_expression_builder<Term, void>
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
   bool is_finished(const term_type& x)
   {
     return x != term_type();
   }
 
   /// \brief Destructor.
-  ///
   virtual ~pbes_expression_builder()
   { }
 
-  /// \brief Visit data expression node.
-  ///
+  /// \brief Visit data_expression node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */)
   {
     return term_type();
   }
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& x)
   {
     return term_type();
   }
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& x)
   {
     return term_type();
   }
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit forall node.
-  ///
+  /// \brief Visit forall node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
 
-  /// \brief Visit exists node.
-  ///
+  /// \brief Visit exists node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return term_type();
   }
 
-  /// \brief Visit propositional variable node.
-  ///
+  /// \brief Visit propositional_variable node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */)
   {
     return term_type();
   }
 
-  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e)
   {
     throw mcrl2::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
@@ -338,6 +369,8 @@ struct pbes_expression_builder<Term, void>
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
+  /// \param e A term
+  /// \return The visit result
   term_type visit(term_type e)
   {
     typedef core::term_traits<term_type> tr;

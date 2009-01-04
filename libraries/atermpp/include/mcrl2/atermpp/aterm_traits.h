@@ -18,27 +18,35 @@ namespace atermpp {
 
 /// \brief Traits class for terms. It is used to specify how the term interacts
 /// with the garbage collector, and how it can be converted to an ATerm.
-///
 template <typename T>
 struct aterm_traits
 {
   /// The type of the aterm pointer (ATermAppl / ATermList ...)
   typedef void* aterm_type;
 
-  /// Protects the term t from garbage collection.
+  /// \brief Protects the term t from garbage collection.
+  /// \param t A term
   static void protect(T* t)       {}
 
-  /// Unprotects the term t from garbage collection.
+  /// \brief Unprotects the term t from garbage collection.
+  /// \param t A term
   static void unprotect(T* t)     {}
 
-  /// Marks t for garbage collection.
+  /// \brief Marks t for garbage collection.
+  /// \param t A term
   static void mark(T t)           {}
 
-  /// Returns the ATerm that corresponds to the term t.
-  static T term(const T& t)       { return t; }
+  /// \brief Returns the ATerm that corresponds to the term t.
+  /// \param t A term
+  /// \return The ATerm that corresponds to the term t.
+  static T term(const T& t)
+  { return t; }
 
-  /// Returns a pointer to the ATerm that corresponds to the term t.
-  static const T* ptr(const T& t) { return &t; }
+  /// \brief Returns a pointer to the ATerm that corresponds to the term t.
+  /// \param t A term
+  /// \return A pointer to the  ATerm that corresponds to the term t.
+  static const T* ptr(const T& t)
+  { return &t; }
 };
 
 /// \cond INTERNAL_DOCS
@@ -111,7 +119,7 @@ struct aterm_traits<ATermInt>
                                       
 } // namespace atermpp
 
-/// Generates an aterm_traits specialization for a given type.
+/// \brief Generates an aterm_traits specialization for a given type.
 /// \param type The type for which a specialization is generated.
 #define MCRL2_ATERM_TRAITS_SPECIALIZATION(type)       \
 namespace atermpp {                                   \

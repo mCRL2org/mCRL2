@@ -20,20 +20,17 @@
 namespace atermpp {
 
 /// \brief Protected deque container.
-///
 template <class T, class Allocator = std::allocator<T> >
 class deque: public std::deque<T, Allocator>, IProtectedATerm
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     deque()
     {
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param a An allocator.
     explicit deque(const Allocator& a)
       : std::deque<T, Allocator>(a)
@@ -41,38 +38,37 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param count A positive number.
+    /// \param std::deque<T PARAM_DESCRIPTION
     explicit deque(typename std::deque<T, Allocator>::size_type count)
       : std::deque<T, Allocator>(count)
     {
       ATprotectProtectedATerm(this);
     }
     
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param count A positive number.
     /// \param val A value.
+    /// \param std::deque<T PARAM_DESCRIPTION
     deque(typename std::deque<T, Allocator>::size_type count, const T& val)
       : std::deque<T, Allocator>(count, val)
     {
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param count A positive number.
     /// \param val A value.
     /// \param a An allocator.
+    /// \param std::deque<T PARAM_DESCRIPTION
     deque(typename std::deque<T, Allocator>::size_type count, const T& val, const Allocator& a)
       : std::deque<T, Allocator>(count, val, a)
     {
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     /// \param right A deque.
     deque(const deque& right)
       : std::deque<T, Allocator>(right)
@@ -80,10 +76,9 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
-    /// \param first The start of a range of elements.
-    /// \param last The end of a range of elements.
+        /// \brief Constructor.
+        /// \param first The start of a range of elements.
+        /// \param last The end of a range of elements.
     template<class InIt>
         deque(InIt first, InIt last)
       : std::deque<T, Allocator>(first, last)
@@ -91,11 +86,10 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-    /// Constructor.
-    ///
-    /// \param first The start of a range of elements.
-    /// \param last The end of a range of elements.
-    /// \param a An allocator.   
+        /// \brief Constructor.
+        /// \param first The start of a range of elements.
+        /// \param last The end of a range of elements.
+        /// \param a An allocator.
     template<class InIt>
         deque(InIt first, InIt last, const Allocator& a)
       : std::deque<T, Allocator>(first, last, a)
@@ -104,14 +98,12 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     }
 
     /// Destructor.
-    ///
     ~deque()
     {
       ATunprotectProtectedATerm(this);
     }
 
-    /// Protects the elements from being garbage collected.
-    ///
+    /// \brief Protects the elements from being garbage collected.
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION

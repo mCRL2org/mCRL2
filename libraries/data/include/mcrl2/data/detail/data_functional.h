@@ -45,6 +45,9 @@ struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
    : term(t)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param t PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   template <typename Term2>
   bool operator()(Term2 t) const
   {
@@ -63,6 +66,10 @@ struct compare_data_variable: public compare_term<data_variable>
 /// Function object that returns true if the expressions x and y have the same sort.
 struct equal_data_expression_sort: public std::binary_function<data_expression, data_expression, bool>
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param x A data expression
+  /// \param y A data expression
+  /// \return RETURN_DESCRIPTION
   bool operator()(const data_expression& x, const data_expression& y) const
   {
     return x.sort() == y.sort();
@@ -72,6 +79,9 @@ struct equal_data_expression_sort: public std::binary_function<data_expression, 
 /// \brief Function object that returns the name of a data variable
 struct data_variable_name: public std::unary_function<data_variable, core::identifier_string>
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param v A
+  /// \return RETURN_DESCRIPTION
   core::identifier_string operator()(const data_variable& v) const
   {
     return v.name();
@@ -81,6 +91,9 @@ struct data_variable_name: public std::unary_function<data_variable, core::ident
 /// \brief Function object that returns the sort of a data variable
 struct data_variable_sort: public std::unary_function<data_variable, sort_expression>
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param v A
+  /// \return RETURN_DESCRIPTION
   sort_expression operator()(const data_variable& v) const
   {
     return v.sort();
@@ -95,6 +108,9 @@ struct sort_has_name
     : m_name(name)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param s A sort expression
+  /// \return RETURN_DESCRIPTION
   bool operator()(sort_expression s) const
   {
     return is_sort_identifier(s) && std::string(sort_identifier(s).name()) == m_name;
@@ -109,13 +125,20 @@ struct data_operation_has_name
     : m_name(name)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param c PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   bool operator()(data_operation c) const
   {
     return std::string(c.name()) == m_name;
   }
 };
 
+/// \brief FUNCTION_DESCRIPTION
 /// Find the mapping named s.
+/// \param data A data specification
+/// \param s A string
+/// \return RETURN_DESCRIPTION
 inline
 data_operation find_mapping(data_specification data, std::string s)
 {
@@ -127,7 +150,11 @@ data_operation find_mapping(data_specification data, std::string s)
   return *i;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Find the constructor named s.
+/// \param data A data specification
+/// \param s A string
+/// \return RETURN_DESCRIPTION
 inline
 data_operation find_constructor(data_specification data, std::string s)
 {
@@ -139,7 +166,11 @@ data_operation find_constructor(data_specification data, std::string s)
   return *i;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Find the sort named s.
+/// \param data A data specification
+/// \param s A string
+/// \return RETURN_DESCRIPTION
 inline
 sort_expression find_sort(data_specification data, std::string s)
 {

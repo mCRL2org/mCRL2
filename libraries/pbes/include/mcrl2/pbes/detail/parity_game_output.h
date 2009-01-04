@@ -49,24 +49,34 @@ namespace detail {
       /// The odd vertices of the parity game graph.
       std::set<unsigned int> odd_vertices;
 
-      /// Returns the quoted name of the vertex, for example "X1"
+      /// \brief Returns the quoted name of the vertex, for example "X1"
+      /// \param i A positive integer
+      /// \return The quoted name of the vertex, for example "X1"
       std::string vertex(unsigned int i) const
       {
         return "\"X" + boost::lexical_cast<std::string>(i+1) + "\"";
       }
 
-      /// Returns a tuple representing an edge, for example ("X1", "X2")
+      /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
+      /// \param e An edge
+      /// \return A tuple representing an edge, for example ("X1", "X2")
       std::string edge(std::pair<unsigned int, unsigned int> e) const
       {
         return "(" + vertex(e.first) + ", " + vertex(e.second) + ")";
       }
 
-      /// Returns a string representing a priority, for example "X1":0
+      /// \brief Returns a string representing a priority, for example "X1":0
+      /// \param p A pair of integers
+      /// \return A string representing a priority, for example "X1":0
       std::string priority(std::pair<unsigned int, unsigned int> p) const
       {
         return vertex(p.first) + ":" + boost::lexical_cast<std::string>(p.second);
       }
 
+      /// \brief Applies a function to the elements of a container
+      /// \param c A container
+      /// \param f A function
+      /// \return The transformed container
       template <typename Container, typename Function>
       std::vector<std::string> apply(const Container& c, Function f) const
       {
@@ -78,6 +88,10 @@ namespace detail {
         return result;
       }
 
+      /// \brief Prints the elements of a container with a separator between them
+      /// \param c A container
+      /// \param sep A string
+      /// \return The joined elements
       template <typename Container>
       std::string join(const Container& c, std::string sep) const
       {
@@ -89,22 +103,18 @@ namespace detail {
         return out.str();
       }
 
-      /// Wraps the elements in a set.
+      /// \brief Wraps a sequence of strings in a Python set.
+      /// \param elements A vector of strings
+      /// \return The Python set representation
       std::string python_set(const std::vector<std::string>& elements) const
       {
 //        return "set([" + boost::algorithm::join(elements, ", ") +  "])"; THIS GIVES STACK OVERFLOW ERRORS!?!?
         return "set([" + join(elements, ", ") +  "])";
       }
 
-      template <class Iter, class T>
-      void iota(Iter first, Iter last, T value) const
-      {
-        while (first != last)
-        {
-          *first++ = value++;
-        }
-      }
-
+      /// \brief Prints the todo list
+      /// \param name A string
+      /// \param todo A todo list
       void print_set(std::string name, const std::set<unsigned int>& todo) const
       {
         std::cerr << name << " = {";
@@ -120,7 +130,6 @@ namespace detail {
         : parity_game_generator(p, true)
       {}
 
-      /// Generate python code for the python parity game solver.
       // Example:
       // set(["X1", "X2", "X3", "X4", "X5"])
       // set([("X1", "X2"), ("X2", "X1"), ("X2", "X3"), ("X3", "X4"), ("X3", "X5"), ("X4", "X1"), ("X5", "X3"), ("X5", "X1")])
@@ -133,6 +142,9 @@ namespace detail {
       // Line 3: dictionary of priorities
       // Line 4: set of vertices for player even
       // Line 5: set of vertices for player oneven
+      /// \brief Returns a representation of the parity game in python format.
+      /// This code is used as input for a python parity game solver.
+      /// \return A representation of the parity game in python format.
       std::string python_graph()
       {
         std::string result;
@@ -144,7 +156,8 @@ namespace detail {
         return result;
       }
 
-      /// Generate output in Alpaga format
+      /// \brief Returns a representation of the parity game in Alpaga format.
+      /// \return A representation of the parity game in Alpaga format.
       std::string pgsolver_graph()
       {
         std::vector<std::string> lines(V.size());
@@ -163,6 +176,7 @@ namespace detail {
         return join(lines, ";\n") + ";";
       }
 
+      /// \brief Generates the parity game graph
       void run()
       {
         std::set<unsigned int> todo = get_initial_values();

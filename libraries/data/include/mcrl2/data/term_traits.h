@@ -114,6 +114,7 @@ namespace core {
     /// \brief Conversion from variable to term
     /// \param v A variable
     /// \returns The converted variable
+    /// \return RETURN_DESCRIPTION
     static inline
     term_type variable2term(variable_type v)
     {
@@ -133,6 +134,7 @@ namespace core {
     /// \brief Pretty print function
     /// \param t A term
     /// \brief Returns a pretty print representation of the term
+    /// \return RETURN_DESCRIPTION
     static inline
     std::string pp(term_type t)
     {

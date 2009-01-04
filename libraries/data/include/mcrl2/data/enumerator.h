@@ -46,6 +46,9 @@ namespace detail {
       assert(variables.size() == replacements.size());
     }
 
+    /// \brief FUNCTION_DESCRIPTION
+    /// \param t A
+    /// \return RETURN_DESCRIPTION
     data_expression operator()(data_variable t) const
     {
       typename VariableContainer::const_iterator i = variables_.begin();
@@ -74,6 +77,7 @@ namespace detail {
      : e_(e), values_(values), result_(result)
     {}
 
+    /// \brief FUNCTION_DESCRIPTION
     void operator()()
     {
       data_expression d = replace_data_variables(e_, data_enumerator_replace_helper<data_variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_));
@@ -111,7 +115,7 @@ class data_enumerator
     constructor_map m_constructors;
 
     /// \brief Returns the constructors with target s.
-    /// \param s A sort expression.
+    /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
     const std::vector<data_operation>& constructors(sort_expression s)
     {
@@ -152,7 +156,7 @@ class data_enumerator
     }
 
     /// \brief Enumerates a data variable.
-    /// \param v A data variable.
+    /// \param v A
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
     atermpp::vector<data_expression_with_variables> enumerate(const data_variable& v)
     {

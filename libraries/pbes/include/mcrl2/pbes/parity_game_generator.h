@@ -29,7 +29,6 @@ namespace pbes_system {
   /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
   /// a graph corresponding to a parity game problem. The proposition variables
   /// of the BES correspond to the vertices of the graph.
-  ///
   /// An interface to the graph is provided in which the vertices correspond to
   /// integer values. The values are in the range [0, 1, ..., n], i.e. there are
   /// no holes in the sequence.
@@ -41,25 +40,25 @@ namespace pbes_system {
       /// \brief The traits class of the expression type.
       typedef core::term_traits<pbes_expression> tr;
 
-      /// Substitution function type used by the PBES rewriter.
+      /// \brief Substitution function type used by the PBES rewriter.
       typedef data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > substitution_function;
 
       /// \brief The PBES that is being solved.
       const pbes<>& m_pbes;
 
-      /// Identifier generator for the enumerator. (TODO: this needs to be improved!)
+      /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
       data::number_postfix_generator generator;
 
-      /// Data rewriter.
+      /// \brief Data rewriter.
       data::rewriter datar;
 
-      /// Data enumerator.
+      /// \brief Data enumerator.
       data::data_enumerator<> datae;
 
-      /// Data rewriter that operates on data expressions with variables.
+      /// \brief Data rewriter that operates on data expressions with variables.
       data::rewriter_with_variables datarv;
 
-      /// PBES rewriter.
+      /// \brief PBES rewriter.
       pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R;
 
       /// \brief Maps propositional variables to corresponding PBES equations.
@@ -71,7 +70,7 @@ namespace pbes_system {
       /// \brief Maps PBES closed expressions to corresponding BES variables.
       atermpp::map<pbes_expression, unsigned int> m_pbes_expression_index;
 
-      /// Contains intermediate results of the BES that is being generated.
+      /// \brief Contains intermediate results of the BES that is being generated.
       /// m_bes[i] represents a BES equation corresponding to BES variable i.
       /// m_bes[i].first is the right hand side of the BES equation
       /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
@@ -80,9 +79,9 @@ namespace pbes_system {
       /// Determines what kind of BES equations are generated for true and false.
       bool m_true_false_dependencies;
 
-      /// Adds a BES equation for a given PBES expression, if it not already exists.
-      /// \param t A closed PBES expression.
-      /// \param priority The priority of the equation.
+      /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
+      /// \param t A PBES expression
+      /// \param priority A positive integer
       /// \return The index of a BES equation corresponding to the given PBES expression.
       /// If no equation exists for the expression, a new one is added.
       unsigned int add_bes_equation(pbes_expression t, unsigned int priority)
@@ -102,9 +101,9 @@ namespace pbes_system {
         }
       }
 
-      /// Generates a substitution function for the pbes2bes rewriter.
-      /// \param v A sequence of data variables.
-      /// \param e A sequence of data expressions.
+      /// \brief Generates a substitution function for the pbes2bes rewriter.
+      /// \param v A sequence of data variables
+      /// \param e A sequence of data expressions
       /// \return A sugstitution function.
       substitution_function make_substitution(data::data_variable_list v, data::data_expression_list e)
       {
@@ -124,6 +123,8 @@ namespace pbes_system {
       enum operation_type { PGAME_OR, PGAME_AND };
 
       /// \brief Constructor.
+      /// \param p A PBES
+      /// \param true_false_dependencies PARAM_DESCRIPTION
       parity_game_generator(const pbes<>& p, bool true_false_dependencies = false)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),
@@ -171,7 +172,7 @@ namespace pbes_system {
       }
 
       /// \brief Returns the vertex type.
-      /// \param index The index of a proposition variable of the generated BES.
+      /// \param index A positive integer
       /// \return PGAME_AND if the corresponding BES equation is a conjunction,
       /// PGAME_OR if it is a disjunction.
       operation_type get_operation(unsigned int index) const
@@ -204,7 +205,7 @@ namespace pbes_system {
       /// \brief Returns the priority of a vertex.
       /// The priority of the first equation is 0 if it is a maximal fixpoint,
       /// and 1 if it is a minimal fixpoint.
-      /// \param index The index of a proposition variable of the generated BES.
+      /// \param index A positive integer
       /// \return The block nesting depth of the variable in the BES.
       unsigned int get_priority(unsigned int index) const
       {
@@ -229,7 +230,7 @@ namespace pbes_system {
       }
 
       /// \brief Returns the successors of a vertex in the graph.
-      /// \param index The index of a proposition variable of the generated BES.
+      /// \param index A positive integer
       /// \return The indices of the proposition variables that appear in the
       /// right hand side of the BES equation of the given index.
       std::set<unsigned int> get_dependencies(unsigned int index)
@@ -296,7 +297,7 @@ namespace pbes_system {
         return result;
       }
 
-      /// Prints the mapping from BES variables to the corresponding PBES expressions.
+      /// \brief Prints the mapping from BES variables to the corresponding PBES expressions.
       void print_variable_mapping()
       {
         std::cerr << "--- variable mapping ---" << std::endl;

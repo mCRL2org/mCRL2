@@ -39,6 +39,9 @@ namespace detail {
       : m_result(target)
     {}
 
+    /// \brief FUNCTION_DESCRIPTION
+    /// \param f PARAM_DESCRIPTION
+    /// \return RETURN_DESCRIPTION
     bool operator()(data_operation f)
     {
       return result_sort(f.sort()) == m_result;
@@ -49,7 +52,6 @@ namespace detail {
 /// \endcond
 
 /// \brief Container of sorts, constructors, mappings and equations.
-///
 // <DataSpec>     ::= DataSpec(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
 //                      MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*))
 class data_specification: public atermpp::aterm_appl
@@ -94,7 +96,7 @@ class data_specification: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    /// \param t A term.
+    /// \param t A term
     data_specification(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -107,7 +109,7 @@ class data_specification: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    /// \param sorts The sorts of the data specification.
+    /// \param sorts A sequence of sort expressions
     /// \param constructors The constructors of the data specification.
     /// \param mappings The mappings of the data specification.
     /// \param equations The equations of the data specification.
@@ -140,7 +142,7 @@ class data_specification: public atermpp::aterm_appl
     }
 
     /// \brief Returns the constructors of the data specification that have s as their target.
-    /// \param s A sort expression.
+    /// \param s A sort expression
     /// \return The constructors of the data specification that have s as their target.
     data_operation_list constructors(sort_expression s) const
     {
@@ -162,7 +164,7 @@ class data_specification: public atermpp::aterm_appl
     }
 
     /// \brief Returns the mappings of the data specification that have s as their target.
-    /// \param s A sort expression.
+    /// \param s A sort expression
     /// \return The mappings of the data specification that have s as their target.
     data_operation_list mappings(sort_expression s) const
     {
@@ -206,8 +208,8 @@ class data_specification: public atermpp::aterm_appl
     /// sort, for instance containing fucntion symbols with complex target sorts, containing
     /// explicit function constructors (lambda's). So, no reliance is possible on the particular
     /// shape of the terms that are generated.
-    /// \param s A sort expression.
-    /// \param max_recursion_depth A positive number.
+    /// \param s A sort expression
+    /// \param max_recursion_depth A positive integer
     /// \return A constant data expression of the given sort.
     data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3)
     // data_expression default_expression(sort_expression s) const
@@ -338,7 +340,7 @@ class data_specification: public atermpp::aterm_appl
 
     /// \brief Returns true if the sort s has a finite number of values.
     /// For efficiency, the results of this function are cached.
-    /// \param s A sort expression.
+    /// \param s A sort expression
     /// \return True if the sort is finite.
     bool is_finite(sort_expression s) const
     {
@@ -381,8 +383,8 @@ class data_specification: public atermpp::aterm_appl
 };
 
 /// \brief Sets the sequence of sorts
-/// \param s A data specification.
-/// \param sorts A sequence of sorts.
+/// \param s A data specification
+/// \param sorts A sequence of sort expressions
 /// \return The updated data specification.
 inline
 data_specification set_sorts(data_specification s, sort_expression_list sorts)
@@ -395,7 +397,7 @@ data_specification set_sorts(data_specification s, sort_expression_list sorts)
 }
 
 /// \brief Sets the sequence of constructors
-/// \param s A data specification.
+/// \param s A data specification
 /// \param constructors A sequence of constructors.
 /// \return The updated data specification.
 inline
@@ -409,7 +411,7 @@ data_specification set_constructors(data_specification s, data_operation_list co
 }
 
 /// \brief Sets the sequence of mappings
-/// \param s A data specification.
+/// \param s A data specification
 /// \param mappings A sequence of mappings.
 /// \return The updated data specification.
 inline
@@ -423,7 +425,7 @@ data_specification set_mappings(data_specification s, data_operation_list mappin
 }
 
 /// \brief Sets the sequence of data equations
-/// \param s A data specification.
+/// \param s A data specification
 /// \param equations A sequence of equations.
 /// \return The updated data specification.
 inline

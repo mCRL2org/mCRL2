@@ -33,13 +33,13 @@ struct pbes_equation_solver
   PbesRewriter& m_rewriter;
 
   /// \brief Constructor
-  /// \param rewriter A pbes rewriter
+  /// \param rewriter A PBES rewriter
   pbes_equation_solver(PbesRewriter& rewriter)
     : m_rewriter(rewriter)
   {}
 
   /// \brief Returns true if e.symbol() == nu(), else false.
-  /// \param e A pbes equation
+  /// \param e A PBES equation
   /// \return True if e.symbol() == nu(), else false.
   pbes_expression sigma(const pbes_equation& e) const
   {
@@ -48,9 +48,9 @@ struct pbes_equation_solver
   }
 
   /// \brief Applies the substitution X := phi to the pbes equation eq.
-  /// \param eq A pbes equation
+  /// \param eq A PBES equation
   /// \param X A propositional variable
-  /// \param phi A pbes expression
+  /// \param phi A PBES expression
   /// \return The substition result
   pbes_equation substitute(pbes_equation eq, propositional_variable X, pbes_expression phi) const
   {
@@ -59,15 +59,15 @@ struct pbes_equation_solver
   }
 
   /// \brief Applies the substitution from a solved pbes equation e2 to the pbes equation e1.
-  /// \param e1 A pbes equation
-  /// \param e2 A solved pbes equation
+  /// \param e1 A PBES equation
+  /// \param e2 A PBES equation
   void substitute(pbes_equation& e1, const pbes_equation& e2) const
   {
     e1 = substitute(e1, e2.variable(), e2.formula());
   }
 
   /// \brief Solves an equation
-  /// \param e A pbes equation
+  /// \param e A PBES equation
   void solve(pbes_equation& e) const
   {
     pbes_equation result = substitute(e, e.variable(), sigma(e));
@@ -110,7 +110,7 @@ int pbes_gauss_elimination(pbes<Container>& p)
 }
 
 /// \brief Instantiates a pbes.
-/// \param p A pbes
+/// \param p A PBES
 /// \param lazy If true, the lazy instantiation algorithm is used, otherwise the finite instantiation algorithm.
 /// \return A bes.
 pbes<> pbes2bes(const pbes<>& p, bool lazy = false)

@@ -42,7 +42,10 @@ namespace detail {
 
     DataRewriter& m_data_rewriter;
 
-    // Is called in the case rewriting is done with a substitution function.
+    /// \brief Is called in the case rewriting is done with a substitution function.
+    /// \param d A data term
+    /// \param sigma A substitution function
+    /// \return The rewrite result
     template <typename T>
     data_term_type rewrite(data_term_type d, T& sigma)
     {
@@ -51,41 +54,57 @@ namespace detail {
       return m_data_rewriter(d, sigma);
     }
     
-    // Is called in the case rewriting is done without a substitution function.
+    /// \brief Is called in the case rewriting is done without a substitution function.
+    /// \param d A data term
+    /// \return The rewrite result
     data_term_type rewrite(data_term_type d, no_substitution&)
     {
       return m_data_rewriter(d);
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param rewr A data rewriter
     simplify_rewrite_builder(DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
 
+    /// \brief Visit data_expression node
     /// Visit data expression node.
-    ///
+    /// \param x A term
+    /// \param d A data term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
     {
       return tr::dataterm2term(rewrite(d, sigma));
     }
 
+    /// \brief Visit true node
     /// Visit true node.
-    ///
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_true(const term_type& x, SubstitutionFunction& sigma)
     {
       return tr::true_();
     }
 
+    /// \brief Visit false node
     /// Visit false node.
-    ///
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_false(const term_type& x, SubstitutionFunction& sigma)
     {
       return tr::false_();
     }
 
+    /// \brief Visit not node
     /// Visit not node.
-    ///
+    /// \param x A term
+    /// \param n A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_not(const term_type& x, const term_type& n, SubstitutionFunction& sigma)
     {
       if (tr::is_true(n))
@@ -99,8 +118,13 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
+    /// \brief Visit and node
     /// Visit and node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_and(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
@@ -126,8 +150,13 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
+    /// \brief Visit or node
     /// Visit or node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_or(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
@@ -153,8 +182,13 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
+    /// \brief Visit imp node
     /// Visit imp node.
-    ///
+    /// \param x A term
+    /// \param left A term
+    /// \param right A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
       if (tr::is_true(left))
@@ -180,22 +214,36 @@ namespace detail {
       return term_type(); // continue recursion
     }
 
+    /// \brief Visit forall node
     /// Visit forall node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param phi A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       return core::optimized_forall(variables, visit(phi, sigma));
     }
 
+    /// \brief Visit exists node
     /// Visit exists node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param phi A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       return core::optimized_exists(variables, visit(phi, sigma));
     }
 
+    /// \brief Visit propositional_variable node
     /// Visit propositional variable node.
-    ///
+    /// \param x A term
+    /// \param v A propositional variable
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, SubstitutionFunction& sigma)
     {
       std::vector<data_term_type> d;
@@ -208,16 +256,19 @@ namespace detail {
       return result;
     }
    
-    /// Applies this builder to the term x.
-    ///
+    /// \brief Applies this builder to the term x.
+    /// \param x A term
+    /// \return The rewrite result
     term_type operator()(const term_type& x)
     {
       SubstitutionFunction tmp;
       return visit(x, tmp);
     }
 
-    /// Applies this builder to the term x, with substitution sigma.
-    ///
+    /// \brief Applies this builder to the term x, with substitution sigma.
+    /// \param x A term
+    /// \param sigma A substitution function
+    /// \return The rewrite result
     term_type operator()(const term_type& x, SubstitutionFunction& sigma)
     {
       return visit(x, sigma);

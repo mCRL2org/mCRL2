@@ -18,13 +18,13 @@ namespace core {
 
 namespace detail {
 
-  /// Splits a binary tree T into a sequence, and writes the result to the output range
+  /// \brief Splits a binary tree T into a sequence, and writes the result to the output range
   /// given by an output iterator.
   /// \param t The tree that has to be split.
   /// \param i The output iterator.
   /// \param match If this functions returns true in a node, the node will be split.
   /// \param lhs Function for getting the left subtree of a node.
-  /// \param rhs Function for getting the right subtree of a node. 
+  /// \param rhs Function for getting the right subtree of a node.
   template <typename T, typename OutputIterator, typename MatchFunction, typename AccessorFunction>
   void split(T t, OutputIterator i, MatchFunction match, AccessorFunction lhs, AccessorFunction rhs)
   {
@@ -44,6 +44,8 @@ namespace detail {
   /// \param empty_sequence_result The value that is returned when the sequence is empty.
   /// \param first [first, last[ is the range of elements.
   /// \param last
+  /// \param op An operator
+  /// \return The joined sequence
   template <typename T, typename FwdIt, typename BinaryOperation>
   T join(FwdIt first, FwdIt last, BinaryOperation op, T empty_sequence_result)
   {

@@ -27,6 +27,9 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief Returns true if the term has a given variable as subterm.
+/// \param t A term
+/// \param v A propositional variable instantiation
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
 {
@@ -37,6 +40,8 @@ bool find_propositional_variable(Term t, const propositional_variable_instantiat
 }
 
 /// \brief Returns all propositional variable instantiations that occur in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(Term t)
 {
@@ -55,7 +60,7 @@ std::set<propositional_variable_instantiation> find_all_propositional_variable_i
 }
 
 /// \brief Finds free data variables in a pbes expression.
-/// \param e A pbes expression.
+/// \param e A PBES expression
 /// \return The free data variables occurring in the expression.
 inline
 std::set<data::data_variable> find_free_variables(const pbes_expression& e)

@@ -33,7 +33,6 @@ struct pbes_expression_visitor
 
   /// \brief These names can be used as return types of the visit functions, to make
   /// the code more readible.
-  ///
   enum return_type
   {
     stop_recursion = false,
@@ -41,133 +40,145 @@ struct pbes_expression_visitor
   };
 
   /// \brief Destructor.
-  ///
   virtual ~pbes_expression_visitor()
   { }
 
-  /// \brief Visit data expression node.
-  ///
+  /// \brief Visit data_expression node
+  /// \param e A term
+  /// \param d A data term
+  /// \return The result of visiting the node
   virtual bool visit_data_expression(const term_type& e, const data_term_type& d, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave data_expression node
   /// Leave data expression node.
-  ///
   virtual void leave_data_expression()
   {}
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_true(const term_type& e, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave true node
   /// Leave true node.
-  ///
   virtual void leave_true()
   {}
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_false(const term_type& e, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave false node
   /// Leave false node.
-  ///
   virtual void leave_false()
   {}
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_not(const term_type& e, const term_type& /* arg */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave not node
   /// Leave not node.
-  ///
   virtual void leave_not()
   {}
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_and(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave and node
   /// Leave and node.
-  ///
   virtual void leave_and()
   {}
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_or(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave or node
   /// Leave or node.
-  ///
   virtual void leave_or()
   {}
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave imp node
   /// Leave imp node.
-  ///
   virtual void leave_imp()
   {}
 
-  /// \brief Visit forall node.
-  ///
+  /// \brief Visit forall node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave forall node
   /// Leave forall node.
-  ///
   virtual void leave_forall()
   {}
 
-  /// \brief Visit exists node.
-  ///
+  /// \brief Visit exists node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave exists node
   /// Leave exists node.
-  ///
   virtual void leave_exists()
   {}
 
-  /// \brief Visit propositional variable node.
-  ///
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_propositional_variable(const term_type& e, const propositional_variable_type& /* v */, Arg& /* a */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave propositional_variable node
   /// Leave propositional variable node.
-  ///
   virtual void leave_propositional_variable()
   {}
 
   /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
+  /// \param e A term
+  /// \param a PARAM_DESCRIPTION
   void visit(const term_type& e, Arg& a)
   {
     typedef core::term_traits<Term> tr;
@@ -253,7 +264,6 @@ struct pbes_expression_visitor<Term, void>
 
   /// \brief These names can be used as return types of the visit functions, to make
   /// the code more readible.
-  ///
   enum return_type
   {
     stop_recursion = false,
@@ -261,133 +271,144 @@ struct pbes_expression_visitor<Term, void>
   };
 
   /// \brief Destructor.
-  ///
   virtual ~pbes_expression_visitor()
   { }
 
-  /// \brief Visit data expression node.
-  ///
+  /// \brief Visit data_expression node
+  /// \param e A term
+  /// \param d A data term
+  /// \return The result of visiting the node
   virtual bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave data_expression node
   /// Leave data expression node.
-  ///
   virtual void leave_data_expression()
   {}
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_true(const term_type& e)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave true node
   /// Leave true node.
-  ///
   virtual void leave_true()
   {}
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_false(const term_type& e)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave false node
   /// Leave false node.
-  ///
   virtual void leave_false()
   {}
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_not(const term_type& e, const term_type& /* arg */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave not node
   /// Leave not node.
-  ///
   virtual void leave_not()
   {}
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_and(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave and node
   /// Leave and node.
-  ///
   virtual void leave_and()
   {}
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_or(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave or node
   /// Leave or node.
-  ///
   virtual void leave_or()
   {}
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave imp node
   /// Leave imp node.
-  ///
   virtual void leave_imp()
   {}
 
-  /// \brief Visit forall node.
-  ///
+  /// \brief Visit forall node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_forall(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave forall node
   /// Leave forall node.
-  ///
   virtual void leave_forall()
   {}
 
-  /// \brief Visit exists node.
-  ///
+  /// \brief Visit exists node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_exists(const term_type& e, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave exists node
   /// Leave exists node.
-  ///
   virtual void leave_exists()
   {}
 
-  /// \brief Visit propositional variable node.
-  ///
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual bool visit_propositional_variable(const term_type& e, const propositional_variable_type& /* v */)
   {
     return continue_recursion;
   }
 
+  /// \brief Leave propositional_variable node
   /// Leave propositional variable node.
-  ///
   virtual void leave_propositional_variable()
   {}
 
   /// \brief Visits the nodes of the pbes expressionnd calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
+  /// \param e A term
   void visit(const term_type& e)
   {
     typedef core::term_traits<Term> tr;

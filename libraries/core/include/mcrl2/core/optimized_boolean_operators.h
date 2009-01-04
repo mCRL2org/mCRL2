@@ -19,8 +19,8 @@ namespace mcrl2 {
 
 namespace core {
 
-  /// \brief Operator not.
-  /// \param arg A term.
+  /// \brief Make a negation
+  /// \param arg A term
   /// \return The application of not to the argument.
   template <typename Term>
   Term optimized_not(Term arg)
@@ -29,59 +29,59 @@ namespace core {
     return detail::optimized_not(arg, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// \brief Operator and.
-  /// \param left A term.
-  /// \param right A term.
+  /// \brief Make a conjunction
+  /// \param p A term
+  /// \param q A term
   /// \return The application of and to the arguments.
   template <typename Term>
-  Term optimized_and(Term left, Term right)
+  Term optimized_and(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_and(left, right, tr::and_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_and(p, q, tr::and_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// \brief Operator or.
-  /// \param left A term.
-  /// \param right A term.
+  /// \brief Make a disjunction
+  /// \param p A term
+  /// \param q A term
   /// \return The application of or to the arguments.
   template <typename Term>
-  Term optimized_or(Term left, Term right)
+  Term optimized_or(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_or(left, right, tr::or_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_or(p, q, tr::or_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// \brief Implication.
-  /// \param left A term.
-  /// \param right A term.
+  /// \brief Make an implication
+  /// \param p A term
+  /// \param q A term
   /// \return The application of implication to the arguments.
   template <typename Term>
-  Term optimized_imp(Term left, Term right)
+  Term optimized_imp(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_imp(left, right, tr::imp, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_imp(p, q, tr::imp, tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// \brief Universal quantification.
-  /// \param v A sequence of variables.
-  /// \param arg A term.
+  /// \brief Make a universal quantification
+  /// \param l A sequence of variables
+  /// \param p A term
   /// \return The application of universal quantification to the arguments.
   template <typename Term, typename VariableSequence>
-  Term optimized_forall(VariableSequence v, Term arg)
+  Term optimized_forall(VariableSequence l, Term p)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_forall(v, arg, tr::forall, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_forall(l, p, tr::forall, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
-  /// \brief Existential quantification.
-  /// \param v A sequence of variables.
-  /// \param arg A term.
+  /// \brief Make an existential quantification
+  /// \param l A sequence of variables
+  /// \param p A term
   /// \return The application of existential quantification to the arguments.
   template <typename Term, typename VariableSequence>
-  Term optimized_exists(VariableSequence v, Term arg)
+  Term optimized_exists(VariableSequence l, Term p)
   {
     typedef typename core::term_traits<Term> tr;
-    return detail::optimized_exists(v, arg, tr::exists, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return detail::optimized_exists(l, p, tr::exists, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
 } // namespace core

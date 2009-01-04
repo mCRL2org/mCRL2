@@ -34,12 +34,12 @@
 #else // BOOST_PP_IS_ITERATING
 
 #  define n BOOST_PP_ITERATION()
-
 #  define TEXT1(z, n, _) const T ## n& t ## n
 #  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 #  define TEXT3(z, n, _) aterm_traits<T ## n>::term(t ## n)
 
 /// \brief Make a term with a fixed number of arguments.
+/// \param format A string
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 aterm make_term(const std::string& format, BOOST_PP_ENUM(n, TEXT1, nil))
 {

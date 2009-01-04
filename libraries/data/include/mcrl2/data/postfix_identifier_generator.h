@@ -27,14 +27,14 @@ class postfix_identifier_generator: public set_identifier_generator
 
   public:
     /// \brief Constructor.
-    /// \param postfix A string that is used for generating new names.
+    /// \param postfix A string
     postfix_identifier_generator(std::string postfix)
       : m_postfix(postfix)
     {}
 
     /// \brief Returns a unique identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
-    /// \param hint A string that is used for generating new names.
+    /// \param hint A string
     /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint)
     {

@@ -22,11 +22,9 @@ namespace data {
 class sort_identifier;
 
 /// \brief Read-only singly linked list of sorts
-///
 typedef atermpp::term_list<sort_identifier> sort_identifier_list;
 
 /// \brief sort id.
-///
 //<SortId>       ::= SortId(<String>)
 class sort_identifier: public sort_expression
 {
@@ -37,7 +35,7 @@ class sort_identifier: public sort_expression
     {}
 
     /// \brief Constructor.
-    /// \param t A term containing a sort identifier.
+    /// \param t A term
     sort_identifier(ATermAppl t)
       : sort_expression(t)
     {
@@ -45,7 +43,7 @@ class sort_identifier: public sort_expression
     }
 
     /// \brief Constructor.
-    /// \param t A term containing a sort identifier.
+    /// \param t A term
     sort_identifier(atermpp::aterm_appl t)
       : sort_expression(t)
     {
@@ -53,7 +51,7 @@ class sort_identifier: public sort_expression
     }
 
     /// \brief Constructor.
-    /// \param name The name of a sort identifier.
+    /// \param name A
     sort_identifier(core::identifier_string name)
       : sort_expression(core::detail::gsMakeSortId(name))
     {
@@ -61,7 +59,7 @@ class sort_identifier: public sort_expression
     }
 
     /// \brief Constructor.
-    /// \param s A string representation of a sort identifier.
+    /// \param s A string
     sort_identifier(std::string s)
       : sort_expression(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
@@ -73,6 +71,7 @@ class sort_identifier: public sort_expression
       return atermpp::arg1(*this);
     }
 
+    /// \brief FUNCTION_DESCRIPTION
     /// \overload
     /// \return Always returns false.
     bool is_arrow() const
@@ -82,6 +81,8 @@ class sort_identifier: public sort_expression
 };
 
 /// \brief Returns true if the term t is a sort identifier.
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 inline
 bool is_sort_identifier(atermpp::aterm_appl t)
 {

@@ -32,11 +32,13 @@ namespace pbes_system {
       {}
 
       /// \brief Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
+      /// \param term A term
       pbes_expression_with_propositional_variables(atermpp::aterm_appl term)
         : pbes_expression_with_variables(term)
       {}
 
       /// \brief Constructor. Creates a pbes expression with empty sequences of data and propositional variables.
+      /// \param term A term
       pbes_expression_with_propositional_variables(ATermAppl term)
         : pbes_expression_with_variables(term)
       {}
@@ -54,13 +56,15 @@ namespace pbes_system {
         : pbes_expression_with_variables(expression), m_propositional_variables(propositional_variables)
       {}
 
-      /// Return the propositional variables.
+      /// Returns the propositional variables.
+      /// \return The propositional variables.
       propositional_variable_instantiation_list propositional_variables() const
       {
         return m_propositional_variables;
       }
 
-      /// Return the propositional variables.
+      /// Returns the propositional variables.
+      /// \return The propositional variables.
       propositional_variable_instantiation_list& propositional_variables()
       {
         return m_propositional_variables;
@@ -138,10 +142,10 @@ namespace core {
     static inline
     term_type not_(term_type p) { return term_type(tr::not_(p), p.variables(), p.propositional_variables()); }
 
-    /// \brief Operator and
+    /// \brief Make a conjunction
     /// \param p A term
     /// \param q A term
-    /// \return Operator and applied to p and q
+    /// \return The value <tt>p && q</tt>
     static inline
     term_type and_(term_type p, term_type q)
     {
@@ -151,10 +155,10 @@ namespace core {
                       );
     }
 
-    /// \brief Operator or
+    /// \brief Make a disjunction
     /// \param p A term
     /// \param q A term
-    /// \return Operator or applied to p and q
+    /// \return The value <tt>p || q</tt>
     static inline
     term_type or_(term_type p, term_type q)
     {
@@ -164,10 +168,10 @@ namespace core {
                       );
     }
 
-    /// \brief Implication
+    /// \brief Make an implication
     /// \param p A term
     /// \param q A term
-    /// \return Implication applied to p and q
+    /// \return The value <tt>p => q</tt>
     static inline
     term_type imp(term_type p, term_type q)
     {
@@ -177,10 +181,10 @@ namespace core {
                       );
     }
 
-    /// \brief Universal quantification
+    /// \brief Make a universal quantification
     /// \param l A sequence of variables
     /// \param p A term
-    /// \return Universal quantification of p over the variables l
+    /// \return The value <tt>forall l.p</tt>
     static inline
     term_type forall(variable_sequence_type l, term_type p)
     {
@@ -190,10 +194,10 @@ namespace core {
                       );
     }
 
-    /// \brief Existential quantification
+    /// \brief Make an existential quantification
     /// \param l A sequence of variables
     /// \param p A term
-    /// \return Existential quantification of p over the variables l
+    /// \return The value <tt>exists l.p</tt>
     static inline
     term_type exists(variable_sequence_type l, term_type p)
     {
@@ -315,7 +319,7 @@ namespace core {
 
     /// \brief Conversion from variable to term
     /// \param v A variable
-    /// \returns The converted variable
+    /// \return The converted variable
     static inline
     term_type variable2term(variable_type v)
     {
@@ -324,7 +328,7 @@ namespace core {
 
     /// \brief Conversion from data term to term
     /// \param t A data term
-    /// \returns The converted term
+    /// \return The converted term
     static inline
     term_type dataterm2term(data_term_type t)
     {
@@ -333,19 +337,21 @@ namespace core {
 
     /// \brief Conversion from term to data term
     /// \param t A term
-    /// \returns The converted term
+    /// \return The converted term
     static inline
-    data_term_type term2dataterm(term_type t) { return tr::term2dataterm(t); }
+    data_term_type term2dataterm(term_type t)
+    { return tr::term2dataterm(t); }
 
     /// \brief Test if a term is constant
     /// \param t A term
     /// \return True if the term is constant
     static inline
-    bool is_constant(const term_type& t) { return t.variables().empty(); }
+    bool is_constant(const term_type& t)
+    { return t.variables().empty(); }
 
     /// \brief Pretty print function
     /// \param t A term
-    /// \brief Returns a pretty print representation of the term
+    /// \return A pretty print representation of the term
     static inline
     std::string pp(term_type t)
     {

@@ -28,6 +28,10 @@ namespace pbes_system {
 
 namespace detail {
 
+  /// \brief Concatenates two containers
+  /// \param x A container
+  /// \param y A container
+  /// \return The concatenation of x and y
   template <typename Container>
   Container concat(const Container& x, const Container& y)
   {
@@ -47,22 +51,23 @@ namespace detail {
     typedef typename tr::data_term_type data_term_type;
     typedef typename tr::propositional_variable_type propositional_variable_type;
 
-    /// Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
+    /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
     typedef std::pair<bool, variable_sequence_type> quantifier;
 
-    /// Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
+    /// \brief Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
     typedef std::pair<term_type, std::vector<propositional_variable_type> > implication;
 
-    /// Represents an expression in PFNF format.
+    /// \brief Represents an expression in PFNF format.
     typedef boost::tuple<std::vector<quantifier>, pbes_expression, std::vector<implication> > expression;
 
-    /// A stack containing expressions in PFNF format.
+    /// \brief A stack containing expressions in PFNF format.
     std::vector<expression> expression_stack;
 
-    /// A stack containing quantifier variables.
+    /// \brief A stack containing quantifier variables.
     std::vector<data::data_variable_list> quantifier_stack;
 
-    /// Converts the top element of the expression stack to a pbes expression.
+    /// \brief Returns the top element of the expression stack converted to a pbes expression.
+    /// \return The top element of the expression stack converted to a pbes expression.
     pbes_expression evaluate() const
     {
       assert(!expression_stack.empty());
@@ -83,6 +88,8 @@ namespace detail {
       return result;
     }
 
+    /// \brief Prints an expression
+    /// \param expr An expression
     void print_expression(const expression& expr) const
     {
       std::vector<quantifier> q = boost::get<0>(expr);
@@ -118,6 +125,8 @@ namespace detail {
       std::cout << std::endl;
     }
     
+    /// \brief Prints the expression stack
+    /// \param msg A string
     void print(std::string msg = "") const
     {
       std::cout << "--- " << msg << std::endl;
@@ -128,42 +137,43 @@ namespace detail {
       std::cout << "value = " << core::pp(evaluate()) << std::endl;
     }
 
-    /// Visit data expression node.
-    ///
+    /// \brief Visit data_expression node
+    /// \param e A term
+    /// \return The result of visiting the node
     bool visit_data_expression(const term_type& e, const data_term_type& /* d */)
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
       return super::continue_recursion;
     }
 
-    /// Visit true node.
-    ///
+    /// \brief Visit true node
+    /// \param e A term
+    /// \return The result of visiting the node
     bool visit_true(const term_type& e)
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
-print("true");
       return super::continue_recursion;
     }
 
-    /// Visit false node.
-    ///
+    /// \brief Visit false node
+    /// \param e A term
+    /// \return The result of visiting the node
     bool visit_false(const term_type& e)
     {
       expression_stack.push_back(boost::make_tuple(std::vector<quantifier>(), e, std::vector<implication>()));
-print("false");
       return super::continue_recursion;
     }
 
-    /// Visit not node.
-    ///
+    /// \brief Visit not node
+    /// \param e A term
+    /// \return The result of visiting the node
     bool visit_not(const term_type& e, const term_type& /* arg */)
     {
       throw std::runtime_error("operation not should not occur");
       return super::continue_recursion;
     }
 
-    /// Leave and node.
-    ///
+    /// \brief Leave and node
     void leave_and()
     {
       // join the two expressions on top of the stack
@@ -175,11 +185,9 @@ print("false");
       pbes_expression h = core::optimized_and(boost::get<1>(left), boost::get<1>(right));
       std::vector<implication> g = concat(boost::get<2>(left), boost::get<2>(right));
       expression_stack.push_back(boost::make_tuple(q, h, g));
-print("and");
     }
 
-    /// Leave or node.
-    ///
+    /// \brief Leave or node
     void leave_or()
     {
       // join the two expressions on top of the stack
@@ -227,52 +235,55 @@ print("and");
       expression_stack.push_back(boost::make_tuple(q, h, g));
     }
 
-    /// Visit imp node.
-    ///
+    /// \brief Visit imp node
+    /// \param e A term
+    /// \return The result of visiting the node
     bool visit_imp(const term_type& e, const term_type& /* left */, const term_type& /* right */)
     {
       throw std::runtime_error("operation imp should not occur");
       return super::continue_recursion;
     }
 
-    /// Visit forall node.
-    ///
+    /// \brief Visit forall node
+    /// \param e A term
+    /// \param variables A sequence of variables
+    /// \return The result of visiting the node
     bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
       return super::continue_recursion;
     }
 
-    /// Leave forall node.
-    ///
+    /// \brief Leave forall node
     void leave_forall()
     {
       // push the quantifier on the expression stack
       boost::get<0>(expression_stack.back()).push_back(std::make_pair(true, quantifier_stack.back()));
       quantifier_stack.pop_back();
-print("forall");
     }
 
-    /// Visit exists node.
-    ///
+    /// \brief Visit exists node
+    /// \param e A term
+    /// \param variables A sequence of variables
+    /// \return The result of visiting the node
     bool visit_exists(const term_type& e, const variable_sequence_type& variables, const term_type& /* expression */)
     {
       quantifier_stack.push_back(variables);
       return super::continue_recursion;
     }
 
-    /// Leave exists node.
-    ///
+    /// \brief Leave exists node
     void leave_exists()
     {
       // push the quantifier on the expression stack
       boost::get<0>(expression_stack.back()).push_back(std::make_pair(false, quantifier_stack.back()));
       quantifier_stack.pop_back();
-print("exists");
     }
 
-    /// Visit propositional variable node.
-    ///
+    /// \brief Visit propositional_variable node
+    /// \param e A term
+    /// \param X A propositional variable
+    /// \return The result of visiting the node
     bool visit_propositional_variable(const term_type& e, const propositional_variable_type& X)
     {
       // push the propositional variable on the expression stack
@@ -280,7 +291,6 @@ print("exists");
       pbes_expression h = tr::true_();
       std::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
       expression_stack.push_back(boost::make_tuple(q, h, g));
-print("propvar");
       return super::continue_recursion;
     }    
   };

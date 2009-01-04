@@ -39,6 +39,9 @@ namespace data {
 
 /// \cond INTERNAL_DOCS
 namespace detail {
+  /// \brief Reads a specification from an input stream
+  /// \param from An input stream
+  /// \return A term in an undocumented format
   inline
   ATermAppl parse_specification(std::istream& from)
   {
@@ -48,6 +51,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Type checks a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
@@ -57,6 +63,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Applies alpha reduction to a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
@@ -66,6 +75,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Applies data implementation to a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl implement_process_specification(ATermAppl spec)
   {
@@ -75,6 +87,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Reads a data specification from an input stream
+  /// \param from An input stream
+  /// \return A term in an undocumented format
   inline
   ATermAppl parse_data_specification(std::istream& from)
   {
@@ -84,6 +99,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Type checks a data specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl type_check_data_specification(ATermAppl spec)
   {
@@ -93,6 +111,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Applies data implementation to a data specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
@@ -103,8 +124,8 @@ namespace detail {
   }
 
 } // namespace detail
-/// \endcond
-
+  /// \endcond
+  
   /// \brief Parses a data specification.
   /// \param text A string
   /// \return A data specification
@@ -129,15 +150,15 @@ namespace detail {
   }
 
   /// \brief Parses a single data expression.
-  /// \param[in] text The text that is parsed.
-  /// \param[in] var_decl An optional declaration of data variables
+  /// \param text A string
+  /// \param var_decl A string
   /// with their types.<br>
   /// An example of this is:
   /// \code
   ///   m, n: Nat;
   ///   b: Bool;
   /// \endcode
-  /// \param[in] data_spec An optional data specification containing user defined types
+  /// \param data_spec A string
   /// \return The parsed expression
   inline
   data_expression parse_data_expression(std::string text, std::string var_decl = "", std::string data_spec = "")
@@ -174,8 +195,8 @@ namespace detail {
   }
 
   /// \brief Parses a data variable.
-  /// \param[in] var_decl A declaration of a data variable, for example "n: Nat".
-  /// \param[in] data_spec A data specification
+  /// \param var_decl A string
+  /// \param data_spec A string
   /// \return The parsed variable
   inline
   data_variable parse_data_variable(std::string var_decl, std::string data_spec = "")

@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
@@ -39,16 +40,6 @@ namespace pbes_system {
 /// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
 {
-  private:
-    template <class Iter, class T>
-    void iota(Iter first, Iter last, T value) const
-    {
-      while (first != last)
-      {
-        *first++ = value++;
-      }
-    }
-
   protected:
     /// \brief The graph type of the dependency graph
     typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
@@ -60,8 +51,8 @@ class pbes_parelm_algorithm
     typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
 
     /// \brief Finds unbound variables in a pbes expression
-    /// \param t A pbes expression
-    /// \param bound_variables A sequence of variables
+    /// \param t A PBES expression
+    /// \param bound_variables A sequence of data variables
     /// \return The unbound variables in \p t that are not contained in \p bound_variables
     std::set<data::data_variable> unbound_variables(pbes_expression t, data::data_variable_list bound_variables) const
     {
@@ -71,9 +62,9 @@ class pbes_parelm_algorithm
       return visitor.result;
     }
 
-    /// Finds the index of a variable in a sequence
-    /// \param v A sequence of variables
-    /// \param d A variable
+    /// \brief Finds the index of a variable in a sequence
+    /// \param v A sequence of data variables
+    /// \param d A
     /// \return The index of \p d in \p v, or -1 if the variable wasn't found
     int variable_index(data::data_variable_list v, data::data_variable d) const
     {
@@ -89,8 +80,11 @@ class pbes_parelm_algorithm
       return -1;
     }
 
-/// \cond INTERNAL_DOCS
+    /// \cond INTERNAL_DOCS
     /// \brief For debugging
+    /// \param v PARAM_DESCRIPTION
+    /// \param message A string
+    /// \param print_index PARAM_DESCRIPTION
     template <typename Container>
     void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
     {
@@ -110,7 +104,9 @@ class pbes_parelm_algorithm
       std::cerr << std::endl;
     }
 
-    /// \brief For debugging
+    /// \brief Prints a container to standard error
+    /// \param v A container
+    /// \param message A string
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
@@ -122,7 +118,9 @@ class pbes_parelm_algorithm
       std::cerr << std::endl;
     }
 
-    /// \brief For debugging
+    /// \brief Prints a map to standard error
+    /// \param v A map container
+    /// \param message A string
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
@@ -133,8 +131,8 @@ class pbes_parelm_algorithm
       }
       std::cerr << std::endl;
     }
-/// \endcond
-
+    /// \endcond
+    
     /// \brief Finds the predicate variable to which the data parameter with the given index belongs.
     /// Here index refers to the cumulative index in the array obtained by concatening all parameters
     /// of the predicate variables in the pbes \p p.
@@ -235,7 +233,7 @@ class pbes_parelm_algorithm
       std::vector<int> r = core::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
       std::vector<int> q(N);
-      iota(q.begin(), q.end(), 0);
+      core::detail::iota(q.begin(), q.end(), 0);
       std::vector<int> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
 

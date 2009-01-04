@@ -18,7 +18,6 @@
 namespace atermpp {
 
 /// \brief Iterator for term_appl.
-///
 template <typename Value>
 class term_appl_iterator: public boost::iterator_facade<
         term_appl_iterator<Value>,         // Derived
@@ -28,14 +27,12 @@ class term_appl_iterator: public boost::iterator_facade<
     >
 {
  public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     term_appl_iterator()
     {}
 
-    /// Constructor.
-    ///
-    /// \param t A pointer to a term.
+    /// \brief Constructor.
+    /// \param t A term
     term_appl_iterator(ATerm* t)
       : m_term(t)
     {}
@@ -44,17 +41,24 @@ class term_appl_iterator: public boost::iterator_facade<
     friend class boost::iterator_core_access;
 
     /// \cond INTERNAL_DOCS
+    /// \brief Equality check
+    /// \param other An iterator
+    /// \return True if the iterators are equal
     bool equal(term_appl_iterator const& other) const
     { return this->m_term == other.m_term; }
 
+    /// \brief Dereference operator
+    /// \return The value that the iterator references
     const Value dereference() const
     {
       return Value(*m_term);
     }
 
+    /// \brief Increments the iterator
     void increment()
     { m_term++; }
 
+    /// \brief Decrements the iterator
     void decrement()
     { m_term--; }
     /// \endcond

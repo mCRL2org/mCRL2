@@ -49,47 +49,73 @@ namespace pbes_system {
 // inwards towards a data expression.
 struct complement_builder: public pbes_expression_builder<pbes_expression>
 {
+  /// \brief Visit data_expression node
+  /// \param d A data expression
+  /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
     return data::data_expr::not_(d);
   }
 
+  /// \brief Visit true node
+  /// \return The result of visiting the node
   pbes_expression visit_true(const pbes_expression& /* e */)
   {
     using namespace pbes_expr_optimized;
     return false_();
   }
 
+  /// \brief Visit false node
+  /// \return The result of visiting the node
   pbes_expression visit_false(const pbes_expression& /* e */)
   {
     using namespace pbes_expr_optimized;
     return true_();
   }
 
+  /// \brief Visit and node
+  /// \param left A PBES expression
+  /// \param right A PBES expression
+  /// \return The result of visiting the node
   pbes_expression visit_and(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
     using namespace pbes_expr_optimized;
     return or_(visit(left), visit(right));
   }
 
+  /// \brief Visit or node
+  /// \param left A PBES expression
+  /// \param right A PBES expression
+  /// \return The result of visiting the node
   pbes_expression visit_or(const pbes_expression& /* e */, const pbes_expression& left, const pbes_expression& right)
   {
     using namespace pbes_expr_optimized;
     return and_(visit(left), visit(right));
   }
 
+  /// \brief Visit forall node
+  /// \param variables A sequence of data variables
+  /// \param expression A PBES expression
+  /// \return The result of visiting the node
   pbes_expression visit_forall(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr_optimized;
     return exists(variables, visit(expression));
   }
 
+  /// \brief Visit exists node
+  /// \param variables A sequence of data variables
+  /// \param expression A PBES expression
+  /// \return The result of visiting the node
   pbes_expression visit_exists(const pbes_expression& /* e */, const data::data_variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr_optimized;
     return forall(variables, visit(expression));
   }
 
+  /// \brief Visit propositional_variable node
+  /// \param v A propositional variable instantiation
+  /// \return The result of visiting the node
   pbes_expression visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& v)
   {
     throw mcrl2::runtime_error(std::string("complement_builder error: unexpected propositional variable encountered ") + mcrl2::core::pp(v));
@@ -99,7 +125,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
 /// \endcond
 
 /// \brief Returns the complement of a pbes expression
-/// \param p A pbes expression
+/// \param p A PBES expression
 /// \return The expression obtained by pushing the negations in the pbes
 /// expression as far as possible inwards towards a data expression.
 inline

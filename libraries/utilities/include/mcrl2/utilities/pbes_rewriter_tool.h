@@ -53,7 +53,7 @@ namespace utilities {
        }
        
        /// \brief Returns the string corresponding to a pbes rewriter type
-       /// \param type A pbes rewriter type
+       /// \param type A string
        /// \return A string corresponding to the pbes rewriter type
        static
        pbes_rewriter_type parse_pbes_rewriter_type(std::string type)
@@ -139,6 +139,9 @@ namespace utilities {
   };
 
   /// \brief Stream operator for rewriter type
+  /// \param is An input stream
+  /// \param t PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   inline
   std::istream& operator>>(std::istream& is, pbes_rewriter_tool::pbes_rewriter_type& t)
   {

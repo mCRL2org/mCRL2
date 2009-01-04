@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
@@ -32,8 +33,10 @@ namespace mcrl2 {
 
 namespace lps {
 
-/// Returns the data variables that appear in the condition, action or time of
-/// the summands in the sequence [first, last[.
+/// \brief Returns the data variables that are considered in the parelm algorithm.
+/// \param first Start of a sequence of summands
+/// \param last End of a sequence of summands
+/// \return The data variables that appear in the condition, action or time of the summands in the sequence [first, last).
 template <typename Iterator>
 std::set<data::data_variable> transition_variables(Iterator first, Iterator last)
 {
@@ -54,7 +57,9 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
   return result;
 }
 
-/// Returns a set of insignificant process parameters that may be eliminated from p.
+/// \brief Returns a set of insignificant process parameters that may be eliminated from p.
+/// \param p A linear process
+/// \return A set of insignificant process parameters
 inline
 std::set<data::data_variable> compute_insignificant_parameters(const linear_process& p)
 {
@@ -87,7 +92,9 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
   return data::detail::set_difference(process_parameters, significant_variables);
 }
 
-/// Removes zero or more insignificant parameters from the specification spec.
+/// \brief Removes zero or more insignificant parameters from the specification spec.
+/// \param spec A linear process specification
+/// \return The transformed specification
 inline
 specification parelm(const specification& spec)
 {
@@ -106,20 +113,9 @@ specification parelm(const specification& spec)
   return result;
 }
 
-namespace detail {
-
-  template <class Iter, class T>
-  void iota(Iter first, Iter last, T value)
-  {
-    while (first != last)
-    {
-      *first++ = value++;
-    }
-  }
-
-} // namespace detail
-
-/// Removes zero or more insignificant parameters from the specification spec.
+/// \brief Removes zero or more insignificant parameters from the specification spec.
+/// \param spec A linear process specification
+/// \return The transformed specification
 inline
 specification parelm2(const specification& spec)
 {
@@ -166,7 +162,7 @@ specification parelm2(const specification& spec)
   std::vector<int> r = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
   std::sort(r.begin(), r.end());
   std::vector<int> q(process_parameters.size());
-  detail::iota(q.begin(), q.end(), 0);
+  core::detail::iota(q.begin(), q.end(), 0);
   std::vector<int> s;
   std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
   std::set<data::data_variable> to_be_removed;

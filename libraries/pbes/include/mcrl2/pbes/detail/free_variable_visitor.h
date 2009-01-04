@@ -43,7 +43,9 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
     : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
   {}
 
-  // returns true if v is an element of bound_variables or quantifier_stack
+  /// \brief Returns true if v is an element of bound_variables or quantifier_stack
+  /// \param v A
+  /// \return True if v is an element of bound_variables or quantifier_stack
   bool is_bound(const data::data_variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())
@@ -60,38 +62,55 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
     return false;
   }
 
+  /// \brief Pushes v on the stack of quantifier variables
+  /// \param v A sequence of data variables
   void push(const data::data_variable_list& v)
   {
     quantifier_stack.push_back(v);
   }
 
+  /// \brief Pops the stack of quantifier variables
   void pop()
   {
     quantifier_stack.pop_back();
   }
 
+  /// \brief Visit forall node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
   bool visit_forall(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave forall node
   void leave_forall()
   {
     pop();
   }
 
+  /// \brief Visit exists node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
   bool visit_exists(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave exists node
   void leave_exists()
   {
     pop();
   }
 
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \param v A propositional variable instantiation
+  /// \return The result of visiting the node
   bool visit_propositional_variable(const term_type& e, const propositional_variable_instantiation& v)
   {
     if (search_propositional_variables)
@@ -108,6 +127,10 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
     return true;
   }
 
+  /// \brief Visit data_expression node
+  /// \param e A term
+  /// \param d A data term
+  /// \return The result of visiting the node
   bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
     std::set<data::data_variable> variables = data::find_all_data_variables(d);
@@ -129,4 +152,3 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
-

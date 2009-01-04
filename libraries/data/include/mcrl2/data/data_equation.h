@@ -24,13 +24,11 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Conditional data equation.
-///
 /// The equality holds if
 /// the condition evaluates to true. A declaration of variables
 /// that can be used in the expressions is included. The condition
 /// is optional. In case there is no condition, it has the value
 /// nil.
-///
 //<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
 //                     <DataExpr>, <DataExpr>)
 class data_equation: public atermpp::aterm_appl
@@ -60,7 +58,7 @@ class data_equation: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    /// \param t A term.
+    /// \param t A term
     data_equation(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
     {
@@ -122,7 +120,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// \brief Applies a substitution to this data equation and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    /// \param f A substitution function.
+    /// \param f A
     /// \return The application of the substitution to the equation.
     template <typename Substitution>
     data_equation substitute(Substitution f) const
@@ -149,11 +147,10 @@ class data_equation: public atermpp::aterm_appl
 };
 
 /// \brief Read-only singly linked list of data equations
-///
 typedef atermpp::term_list<data_equation> data_equation_list;
 
 /// \brief Returns true if the term t is a data equation
-/// \param t A term.
+/// \param t A term
 /// \return True if the term is a data equation.
 inline
 bool is_data_equation(atermpp::aterm_appl t)

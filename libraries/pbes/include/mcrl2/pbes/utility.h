@@ -418,13 +418,13 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 /// I.e. if S is a constructorsort (which means that there exists at least one constructor 
 /// with S as target sort), then an expression of the form forall x:S.p(x) is replaced
 /// by forall x1..xn.p(f1(x1..xn) &&  forall x1..xm.p(f2(x1..xm)) && .... for all
-/// constructors fi with S as targetsort (this is done similarly for the exists). 
+/// \brief Constructors fi with S as targetsort (this is done similarly for the exists). 
 /// if the constructors are constants (i.e. n=0, m=0, etc.), no new quantifications
 /// will be generated. And if the expressions are not constant, expressions such as
 /// p(f1(x1..xn)) are simplified, which can lead to the situation that certain 
 /// variables x1..xn do not occur anymore. In that case the quantors can be removed
 /// also. The function pbes_expression_substitute_and_rewrite will continue substituting
-/// constructors for quantified variables until there are no variables left, or
+/// \brief Constructors for quantified variables until there are no variables left, or
 /// until there are only quantifications over non constructor sorts. In the last case,
 /// the function will halt with an exit(1). For every 100 new variables being used
 /// in new quantifications, a message is printed.

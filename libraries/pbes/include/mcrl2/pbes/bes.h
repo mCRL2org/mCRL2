@@ -63,7 +63,7 @@ namespace bes {
       }
 
       /// \brief Constructor.
-      /// \param name A string
+      /// \param name A
       explicit boolean_variable(core::identifier_string name)
         : atermpp::aterm_appl(core::detail::gsMakeBooleanVariable(name))
       {
@@ -86,7 +86,7 @@ namespace bes {
       }
 
       /// \brief Applies a substitution to this boolean variable and returns the result.
-      /// \param f A substitution function.
+      /// \param f A
       /// The Substitution function must supply the method aterm operator()(aterm).
       /// \return The result of applying the substitution.
       template <typename Substitution>
@@ -97,7 +97,6 @@ namespace bes {
   };
 
   /// \brief Read-only singly linked list of boolean variables
-  ///
   typedef atermpp::term_list<boolean_variable> boolean_variable_list;
 
   /// \brief Pretty print function
@@ -148,7 +147,7 @@ namespace bes {
       }
 
       /// \brief Applies a substitution to this boolean expression and returns the result.
-      /// \param f A substitution function.
+      /// \param f A
       /// The Substitution function must supply the method aterm operator()(aterm).
       /// \return The result of applying the substitution.
       template <typename Substitution>
@@ -323,6 +322,7 @@ namespace core {
     /// \brief Pretty print function
     /// \param t A term
     /// \brief Returns a pretty print representation of the term
+    /// \return RETURN_DESCRIPTION
     static inline
     std::string pp(term_type t)
     {
@@ -417,6 +417,7 @@ class boolean_equation: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
+    /// \param t A term
     boolean_equation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -429,6 +430,9 @@ class boolean_equation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
+    /// \param symbol PARAM_DESCRIPTION
+    /// \param variable PARAM_DESCRIPTION
+    /// \param expr PARAM_DESCRIPTION
     boolean_equation(fixpoint_symbol symbol, boolean_variable variable, boolean_expression expr)
       : atermpp::aterm_appl(core::detail::gsMakeBooleanEquation(symbol, variable, expr)),
         m_symbol(symbol),
@@ -438,18 +442,21 @@ class boolean_equation: public atermpp::aterm_appl
     }
 
     /// \brief Returns the fixpoint symbol of the equation.
+    /// \return RETURN_DESCRIPTION
     fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
     /// \brief Returns the boolean_equation_system variable of the equation.
+    /// \return RETURN_DESCRIPTION
     boolean_variable variable() const
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
+    /// \return RETURN_DESCRIPTION
     boolean_expression formula() const
     {
       return m_formula;
@@ -462,6 +469,7 @@ typedef atermpp::term_list<boolean_equation> boolean_equation_list;
   /// \brief Pretty print function
   /// \param e A boolean equation
   /// \return A pretty printed representation of the boolean equation
+  /// \param eq PARAM_DESCRIPTION
   inline
   std::string pp(const boolean_equation& eq)
   {
@@ -497,6 +505,7 @@ namespace bes {
       boolean_expression m_initial_state;
 
       /// \brief Conversion to ATerm
+      /// \return RETURN_DESCRIPTION
       ATerm term() const
       {
         return reinterpret_cast<ATerm>(ATermAppl(*this));
@@ -561,13 +570,14 @@ namespace bes {
 
       /// \brief Returns true.
       /// Some checks will be added later.
+      /// \return RETURN_DESCRIPTION
       bool is_well_typed() const
       {
         return true;
       }
 
       /// \brief Reads the boolean equation system from file.
-      /// \param[in] filename
+      /// \param filename A string
       /// If filename is nonempty, input is read from the file named filename.
       /// If filename is empty, input is read from standard input.
       void load(const std::string& filename)
@@ -588,7 +598,7 @@ namespace bes {
       /// \param binary If binary is true the boolean equation system is saved in compressed binary format.
       /// Otherwise an ascii representation is saved. In general the binary format is
       /// much more compact than the ascii representation.
-      /// \param filename The name of a file
+      /// \param filename A string
       /// \param binary If true, the file is saved in binary format
       void save(const std::string& filename, bool binary = true) // const
       {
@@ -601,6 +611,7 @@ namespace bes {
       }
 
       /// \brief Conversion to ATermAppl.
+      /// \return RETURN_DESCRIPTION
       operator ATermAppl() const
       {
         boolean_equation_list equations(m_equations.begin(), m_equations.end());
@@ -645,7 +656,7 @@ namespace bes {
       }
 
       /// \brief Applies a substitution to this boolean equation system and returns the result.
-      /// \param f A substitution function.
+      /// \param f A
       /// The Substitution function must supply the method aterm operator()(aterm).
       /// \return The result of applying the substitution.
       template <typename Substitution>

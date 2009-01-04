@@ -30,12 +30,16 @@ struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
     : result(true)
   {}
 
+  /// \brief Visit not node
+  /// \return The result of visiting the node
   bool visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
   {
     result = false;
     return stop_recursion;
   }
 
+  /// \brief Visit imp node
+  /// \return The result of visiting the node
   bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     result = false;
@@ -45,7 +49,7 @@ struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 /// \endcond
 
 /// \brief Checks if a pbes expression is normalized
-/// \param t A pbes expression
+/// \param t A PBES expression
 /// \return True if the pbes expression is normalized
 inline
 bool is_normalized(pbes_expression t)
@@ -57,7 +61,7 @@ bool is_normalized(pbes_expression t)
 
 /// \brief The function normalize brings a pbes expression into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
-/// \param f A pbes expression
+/// \param f A PBES expression
 /// \return The result of the normalization.
 inline
 pbes_expression normalize(pbes_expression f)
@@ -119,7 +123,7 @@ pbes_expression normalize(pbes_expression f)
 }
 
 /// \brief Applies normalization to the right hand side of the equation.
-/// \param e A pbes equation
+/// \param e A PBES equation
 /// \return The result of the normalization.
 inline
 pbes_equation normalize(const pbes_equation& e)

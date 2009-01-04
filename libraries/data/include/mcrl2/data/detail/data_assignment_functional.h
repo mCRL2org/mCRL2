@@ -24,6 +24,9 @@ namespace detail {
 /// Returns the left hand side of a data assignment.
 struct data_assignment_lhs: public std::unary_function<data_assignment, data_variable>
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param a An assignment to a data variable
+  /// \return RETURN_DESCRIPTION
   data_variable operator()(const data_assignment& a) const
   {
     return a.lhs();
@@ -39,6 +42,9 @@ struct has_left_hand_side
    : m_variable(variable)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param a An assignment to a data variable
+  /// \return RETURN_DESCRIPTION
   bool operator()(const data_assignment& a) const
   {
     return a.lhs() == m_variable;
@@ -54,6 +60,9 @@ struct has_left_hand_side_in
     : m_variables(variables)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param a An assignment to a data variable
+  /// \return RETURN_DESCRIPTION
   bool operator()(data_assignment a) const
   {
     return m_variables.find(a.lhs()) != m_variables.end();

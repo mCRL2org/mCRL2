@@ -22,7 +22,10 @@ namespace mcrl2 {
 
 namespace lps {
 
-  /// Generates a linearized process specification from a specification in text.
+  /// \brief Generates a linearized process specification from a specification in text.
+  /// \param spec A string
+  /// \param options PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
   {

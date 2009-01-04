@@ -36,20 +36,20 @@ namespace data {
       {}
 
       /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-      /// \param term A term.
+      /// \param term A term
       data_expression_with_variables(atermpp::aterm_appl term)
         : data_expression(term)
       {}
 
       /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-      /// \param term A term.
+      /// \param term A term
       data_expression_with_variables(ATermAppl term)
         : data_expression(term)
       {}
 
       /// \brief Constructor.
-      /// \param expression A data expression.
-      /// \param variables A sequence of variables.
+      /// \param expression A data expression
+      /// \param variables A sequence of data variables
       data_expression_with_variables(data_expression expression, data_variable_list variables)
         : data_expression(expression), m_variables(variables)
       {}
@@ -128,20 +128,20 @@ namespace core {
     static inline
     term_type not_(term_type p) { return term_type(data::data_expr::not_(p), p.variables()); }
 
-    /// \brief Operator and
+    /// \brief Make a conjunction
     /// \param p A term
     /// \param q A term
-    /// \return Operator and applied to p and q
+    /// \return The value <tt>p && q</tt>
     static inline
     term_type and_(term_type p, term_type q)
     {
       return term_type(data::data_expr::and_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
 
-    /// \brief Operator or
+    /// \brief Make a disjunction
     /// \param p A term
     /// \param q A term
-    /// \return Operator or applied to p and q
+    /// \return The value <tt>p || q</tt>
     static inline
     term_type or_(term_type p, term_type q)
     {
@@ -199,6 +199,7 @@ namespace core {
     /// \brief Conversion from variable to term
     /// \param v A variable
     /// \returns The converted variable
+    /// \return RETURN_DESCRIPTION
     static inline
     term_type variable2term(variable_type v)
     {
@@ -217,6 +218,7 @@ namespace core {
     /// \brief Pretty print function
     /// \param t A term
     /// \brief Returns a pretty print representation of the term
+    /// \return RETURN_DESCRIPTION
     static inline
     std::string pp(term_type t)
     {

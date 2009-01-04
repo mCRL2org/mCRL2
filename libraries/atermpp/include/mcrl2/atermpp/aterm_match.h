@@ -34,11 +34,11 @@
 #else // BOOST_PP_IS_ITERATING
 
 #  define n BOOST_PP_ITERATION()
-
 #  define TEXT1(z, n, _) T ## n& t ## n
 #  define TEXT2(z, n, _) aterm_traits<T ## n>::ptr(t ## n)
 
-/// Match terms based on patterns.
+/// \brief Match terms based on patterns.
+/// \param pattern A string
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 bool match(const aterm& t, const std::string& pattern, BOOST_PP_ENUM(n, TEXT1, nil))
 {

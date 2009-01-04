@@ -50,11 +50,12 @@ namespace utilities {
 
       /// \brief Checks if the number of positional options is OK.
       /// By default this function does nothing.
+      /// \param parser PARAM_DESCRIPTION
       virtual void check_positional_options(const command_line_parser& parser)
       {}
 
-      /// Returns the synopsis of the tool
-      /// \return The synopsis of the tool
+      /// \brief Returns the synopsis of the tool
+      /// \return The string "[OPTION]...\n"
       virtual std::string synopsis() const
       {
         return "[OPTION]...\n";

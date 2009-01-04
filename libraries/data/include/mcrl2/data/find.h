@@ -25,6 +25,8 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Returns the set of all identifier strings occurring in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<core::identifier_string> find_identifiers(Term t)
 {
@@ -34,6 +36,9 @@ std::set<core::identifier_string> find_identifiers(Term t)
 }
  
 /// \brief Returns true if the term has a given variable as subterm.
+/// \param t A term
+/// \param d A
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 bool find_data_variable(Term t, const data_variable& d)
 {
@@ -42,6 +47,8 @@ bool find_data_variable(Term t, const data_variable& d)
 
 /// \brief Returns all data variables that occur in the term t
 /// This is implementation is more efficient, but there are problems with it...
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<data_variable> find_all_data_variables2(Term t)
 {
@@ -55,6 +62,8 @@ std::set<data_variable> find_all_data_variables2(Term t)
 }
 
 /// \brief Returns all data variables that occur in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<data_variable> find_all_data_variables(Term t)
 {
@@ -64,6 +73,9 @@ std::set<data_variable> find_all_data_variables(Term t)
 }
 
 /// \brief Returns true if the term has a given sort identifier as subterm.
+/// \param t A term
+/// \param s PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 bool find_sort_identifier(Term t, const sort_identifier& s)
 {
@@ -71,6 +83,8 @@ bool find_sort_identifier(Term t, const sort_identifier& s)
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<sort_identifier> find_all_sort_identifiers(Term t)
 {
@@ -80,6 +94,9 @@ std::set<sort_identifier> find_all_sort_identifiers(Term t)
 }
 
 /// \brief Returns true if the term has a given sort expression as subterm.
+/// \param t A term
+/// \param s A sort expression
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 bool find_sort_expression(Term t, const sort_expression& s)
 {
@@ -87,6 +104,8 @@ bool find_sort_expression(Term t, const sort_expression& s)
 }
 
 /// \brief Returns all sort expressions that occur in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<sort_expression> find_all_sort_expressions(Term t)
 {
@@ -96,6 +115,9 @@ std::set<sort_expression> find_all_sort_expressions(Term t)
 }
 
 /// \brief Returns true if the term has a given data expression as subterm.
+/// \param t A term
+/// \param s A data expression
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 bool find_data_expression(Term t, const data_expression& s)
 {
@@ -103,6 +125,8 @@ bool find_data_expression(Term t, const data_expression& s)
 }
 
 /// \brief Returns all data expressions that occur in the term t
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 template <typename Term>
 std::set<data_expression> find_all_data_expressions(Term t)
 {

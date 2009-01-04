@@ -25,7 +25,6 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief pbes equation.
-///
 class pbes_equation: public atermpp::aterm_appl
 {
   protected:
@@ -38,13 +37,12 @@ class pbes_equation: public atermpp::aterm_appl
     typedef pbes_expression term_type;
     
     /// \brief Constructor.
-    ///
     pbes_equation()
       : atermpp::aterm_appl(core::detail::constructPBEqn())
     {}
 
     /// \brief Constructor.
-    ///
+    /// \param t A term
     pbes_equation(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -56,7 +54,9 @@ class pbes_equation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    ///
+    /// \param symbol PARAM_DESCRIPTION
+    /// \param variable PARAM_DESCRIPTION
+    /// \param expr A PBES expression
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
       : atermpp::aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
         m_symbol(symbol),
@@ -66,7 +66,6 @@ class pbes_equation: public atermpp::aterm_appl
     }
 
     /// \brief Assignment operator.
-    ///
     pbes_equation& operator=(atermpp::aterm t)
     {
       m_term = t;
@@ -74,21 +73,21 @@ class pbes_equation: public atermpp::aterm_appl
     }
 
     /// \brief Returns the fixpoint symbol of the equation.
-    ///
+    /// \return RETURN_DESCRIPTION
     fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
     /// \brief Returns the pbes variable of the equation.
-    ///
+    /// \return RETURN_DESCRIPTION
     propositional_variable variable() const
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
-    ///
+    /// \return RETURN_DESCRIPTION
     pbes_expression formula() const
     {
       return m_formula;
@@ -96,7 +95,7 @@ class pbes_equation: public atermpp::aterm_appl
 
     /// \brief Returns true if the predicate formula on the right hand side contains no predicate variables.
     // (Comment Wieger: is_const would be a better name)
-    ///
+    /// \return RETURN_DESCRIPTION
     bool is_solved() const
     {
       atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), modal::state_frm::is_var);
@@ -104,7 +103,7 @@ class pbes_equation: public atermpp::aterm_appl
     }
 
     /// \brief Returns true if the equation is a BES (boolean equation system).
-    ///
+    /// \return RETURN_DESCRIPTION
     bool is_bes() const
     {
       return variable().parameters().empty() && formula().is_bes();
@@ -116,7 +115,7 @@ class pbes_equation: public atermpp::aterm_appl
     /// <li>the names of the quantifier variables in the equation are disjoint with the binding variable parameter names</li>
     /// <li>within the scope of a quantifier variable in the formula, no other quantifier variables with the same name may occur</li>
     /// </ul>
-    ///
+    /// \return RETURN_DESCRIPTION
     bool is_well_typed() const
     {
       // check 1)
@@ -159,7 +158,6 @@ class pbes_equation: public atermpp::aterm_appl
 };
 
 /// \brief Read-only singly linked list of data expressions
-///
 typedef atermpp::term_list<pbes_equation> pbes_equation_list;
 
 } // namespace pbes_system

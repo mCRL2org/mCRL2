@@ -21,10 +21,10 @@
 namespace atermpp {
 
 namespace detail {
-
-  ///
-  /// Applies the function f to all elements of the list and returns the result.
-  ///
+  /// \brief Applies the function f to all elements of the list and returns the result.
+  /// \param l A sequence of terms
+  /// \param f A function on terms
+  /// \return The transformed sequence
   template <typename Term, typename Function>
   aterm_list list_apply(term_list<Term> l, const Function f)
   {
@@ -38,9 +38,6 @@ namespace detail {
     return reverse(result);
   }
 
-  ///
-  /// Applies the function f to all children of a and returns the result.
-  ///
   // template <typename Term, typename Function>
   // aterm_appl appl_apply(term_appl<Term> a, const Function f)
   // {
@@ -58,10 +55,11 @@ namespace detail {
   //   }
   //   return t;
   // }
-
-  ///
-  /// Applies the function f to all children of a and returns the result.
-  ///
+  
+  /// \brief Applies the function f to all children of a.
+  /// \param a A term
+  /// \param f A function on terms
+  /// \return The transformed term
   template <typename Term, typename Function>
   aterm_appl appl_apply(term_appl<Term> a, const Function f)
   {
@@ -124,6 +122,10 @@ namespace detail {
     {}
   };
 
+  /// \brief Implements the for_each algorithm
+  /// \param t A term
+  /// \param op A unary function on terms
+  /// \return The result of the algorithm
   template <typename UnaryFunction>
   UnaryFunction for_each_impl(aterm t, UnaryFunction op)
   {
@@ -145,6 +147,10 @@ namespace detail {
     return op;
   }
   
+  /// \brief Implements the find_if algorithm
+  /// If the term t is found, an exception of type found_term_exception is thrown
+  /// \param t A term
+  /// \param match A predicate function on terms
   template <typename MatchPredicate>
   void find_if_impl(aterm t, MatchPredicate match)
   {
@@ -168,6 +174,10 @@ namespace detail {
     }
   }
 
+  /// \brief Implements the find_all_if algorithm
+  /// \param t A term
+  /// \param op A predicate function on terms
+  /// \param destBegin The beginning of a range to where the results are written
   template <typename MatchPredicate, typename OutputIterator>
   void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
   {
@@ -195,8 +205,12 @@ namespace detail {
     }
   }
 
-//--- partial find --------------------------------------------------------//
-
+  //--- partial find --------------------------------------------------------//
+  
+  /// \brief Implements the partial_find_if_impl algorithm
+  /// \param t A term
+  /// \param match A predicate function on terms
+  /// \param stop A predicate function on terms
   template <typename MatchPredicate, typename StopPredicate>
   void partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
   {
@@ -225,6 +239,11 @@ namespace detail {
     }
   }
 
+  /// \brief Implements the partial_find_all_if algorithm
+  /// \param t A term
+  /// \param match A predicate function on terms
+  /// \param stop A predicate function on terms
+  /// \param destBegin The beginning of a range to where the results are written
   template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
   void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
   {
@@ -267,14 +286,19 @@ namespace detail {
       : m_replace(replace)
     {}
   
+    /// \brief Function call operator.
+    /// \param t A term
+    /// \return The function result
     aterm operator()(aterm t) const
     {
       return replace_impl(t, m_replace);
     }
   };
 
-  /// Replaces each subterm in the aterm_appl src for which the unary predicate
-  /// op holds with new_value.
+  /// \brief Implements the replace algorithm
+  /// \param t A term
+  /// \param f A replace function on terms
+  /// \return The result of the algorithm
   template <typename ReplaceFunction>
   aterm replace_impl(aterm t, ReplaceFunction f)
   {
@@ -303,6 +327,9 @@ namespace detail {
         m_dest(dest)
     { }
   
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
     aterm_appl operator()(aterm_appl t) const
     {
       return (t == m_src) ? m_dest : t;
@@ -323,14 +350,19 @@ namespace detail {
       : m_replace(replace)
     {}
   
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
     aterm operator()(aterm t) const
     {
       return partial_replace_impl(t, m_replace);
     }
   };
 
-  /// Replaces each subterm in the aterm_appl src for which the unary predicate
-  /// op holds with new_value.
+  /// \brief Implements the partial_replace algorithm
+  /// \param t A term
+  /// \param f A replace function on terms
+  /// \return The result of the algorithm
   template <typename ReplaceFunction>
   aterm partial_replace_impl(aterm t, ReplaceFunction f)
   {
@@ -366,14 +398,19 @@ namespace detail {
       : m_bottom_up_replace(bottom_up_replace)
     {}
   
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
     aterm operator()(aterm t) const
     {
       return bottom_up_replace_impl(t, m_bottom_up_replace);
     }
   };
 
-  /// Replaces each subterm in the aterm_appl src for which the unary predicate
-  /// op holds with new_value.
+  /// \brief Implements the bottom_up_replace algorithm
+  /// \param t A term
+  /// \param f A replace function on terms
+  /// \return The result of the algorithm
   template <typename ReplaceFunction>
   aterm bottom_up_replace_impl(aterm t, ReplaceFunction f)
   {
@@ -401,6 +438,9 @@ namespace detail {
         m_dest(dest)
     { }
   
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
     aterm_appl operator()(aterm_appl t) const
     {
       return (t == m_src) ? m_dest : t;

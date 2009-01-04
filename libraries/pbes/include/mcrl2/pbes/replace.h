@@ -31,6 +31,9 @@ struct replace_propositional_variables_helper
     : r_(r)
   {}
 
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_propositional_variable_instantiation(t))
@@ -71,6 +74,9 @@ struct propositional_variable_sequence_replace_helper
     assert(variables.size() == replacements.size());
   }
 
+  /// \brief Function call operator
+  /// \param t A propositional variable instantiation
+  /// \return The function result
   pbes_expression operator()(propositional_variable_instantiation t) const
   {
     typename VariableContainer::const_iterator i = variables_.begin();
@@ -110,12 +116,14 @@ struct propositional_variable_map_replace_helper
   const MapContainer& replacements_;
 
   /// \brief Constructor.
+  /// \param replacements A mapping of replacements
   propositional_variable_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
 
-  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
-  /// otherwise t.
+  /// \brief Returns s if a substitution of the form t := s is present in the replacement map, otherwise t.
+  /// \param t A propositional variable instantiation
+  /// \return S if a substitution of the form t := s is present in the replacement map, otherwise t.
   pbes_expression operator()(const propositional_variable_instantiation& t) const
   {
     typename MapContainer::const_iterator i = replacements_.find(t);
@@ -154,6 +162,9 @@ struct substitute_propositional_variable_helper
     : variable_(variable), replacement_(replacement)
   { }
 
+  /// \brief Function call operator
+  /// \param t A propositional variable instantiation
+  /// \return The function result
   pbes_expression operator()(propositional_variable_instantiation t) const
   {
     if (variable_.name() != t.name())

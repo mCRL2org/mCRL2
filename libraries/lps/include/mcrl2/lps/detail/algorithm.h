@@ -30,7 +30,7 @@ namespace lps {
   
 namespace detail {
 
-/// Adds a time parameter t to s if needed and returns the result. The time t
+/// \brief Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
 struct make_timed_lps_summand
 {
@@ -40,6 +40,9 @@ struct make_timed_lps_summand
     : m_generator(generator)
   {}
 
+  /// \brief Function call operator
+  /// \param summand_ A linear process summand
+  /// \return The result of the function
   summand operator()(summand summand_) const
   {
     if (!summand_.has_time())
@@ -52,8 +55,11 @@ struct make_timed_lps_summand
   }
 };
 
-/// Adds time parameters to the lps if needed and returns the result. The times
-/// are chosen such that they don't appear in context.
+/// \brief Adds time parameters to the lps if needed and returns the result.
+/// The times are chosen such that they don't appear in context.
+/// \param lps A linear process
+/// \param context A context for generating fresh variables
+/// \return A timed linear process
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
@@ -62,7 +68,7 @@ linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
   return set_summands(lps, new_summands);
 }
 
-/// Function object that can be used by the partial_replace algorithm
+/// \brief Function object that can be used by the partial_replace algorithm
 /// to replace data variables in an arbitrary term.
 template <typename SrcList, typename DestList>
 struct data_variable_replacer
@@ -76,6 +82,9 @@ struct data_variable_replacer
     assert(src_.size() == dest_.size());
   }
   
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (!data::is_data_variable(t))
@@ -95,14 +104,17 @@ struct data_variable_replacer
   }
 };
 
-/// Utility function for creating a data_variable_replacer.
+/// \brief Utility function for creating a data_variable_replacer.
+/// \param t1 A term
+/// \param t2 A term
+/// \return A data_variable_replacer
 template <typename T1, typename T2>
 data_variable_replacer<T1, T2> make_data_variable_replacer(const T1& t1, const T2& t2)
 {
   return data_variable_replacer<T1, T2>(t1, t2);
 }
 
-/// Function object that can be used by the partial_replace algorithm
+/// \brief Function object that can be used by the partial_replace algorithm
 /// to replace the names of data variables in an arbitrary term.
 template <typename SrcList, typename DestList>
 struct data_variable_name_replacer
@@ -116,6 +128,9 @@ struct data_variable_name_replacer
     assert(src_.size() == dest_.size());
   }
   
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (!data::is_data_variable(t))
@@ -136,7 +151,10 @@ struct data_variable_name_replacer
   }
 };
 
-/// Utility function for creating a data_variable_name_replacer.
+/// \brief Utility function for creating a data_variable_name_replacer.
+/// \param t1 A term
+/// \param t2 A term
+/// \return A data_variable_replacer
 template <typename T1, typename T2>
 data_variable_name_replacer<T1, T2> make_data_variable_name_replacer(const T1& t1, const T2& t2)
 {

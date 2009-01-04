@@ -39,7 +39,6 @@
 #  define ATMAKEAPPL(i) BOOST_PP_CAT(ATmakeAppl,i)
 
     /// Construct a term with a fixed number of arguments.
-    ///
     term_appl(function_symbol sym, BOOST_PP_ENUM(n, TEXT1, nil))
       : aterm_base(ATMAKEAPPL(n)(sym, BOOST_PP_ENUM(n, TEXT2, nil)))
     {

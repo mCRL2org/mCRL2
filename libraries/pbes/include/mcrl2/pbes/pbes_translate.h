@@ -37,6 +37,10 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
+/// \brief Concatenates two sequences of PBES equations
+/// \param p A sequence of PBES equations
+/// \param q A sequence of PBES equations
+/// \return The concatenation result
 inline
 atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const atermpp::vector<pbes_equation>& q)
 {
@@ -45,6 +49,10 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
   return result;
 }
 
+/// \brief Appends a PBES equation to a sequence of PBES equations
+/// \param p A sequence of PBES equations
+/// \param e A PBES equation
+/// \return The append result
 inline
 atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p, const pbes_equation& e)
 {
@@ -54,6 +62,7 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 }
 
 namespace detail {
+	/// \brief Negates a propositional variable
   struct propositional_variable_negator
   {
     const propositional_variable& v_;
@@ -62,6 +71,9 @@ namespace detail {
       : v_(v)
     {}
 
+    /// \brief Function call operator
+    /// \param t A propositional variable instantiation
+    /// \return The function result
     pbes_expression operator()(propositional_variable_instantiation t) const
     {
       if (t.name() == v_.name())
@@ -130,7 +142,7 @@ class pbes_translate_algorithm
         }
 
         /// \brief Applies a substitution to this multi-action and returns the result.
-        /// \param f A substitution function.
+        /// \param f A
         /// The Substitution function must supply the method aterm operator()(aterm).
         /// \return The result of applying the substitution.
         template <typename Substitution>
@@ -153,9 +165,9 @@ class pbes_translate_algorithm
     };
 
     /// \brief The Par function of the translation
-    /// \param x A string
-    /// \param l A sequence of variables
-    /// \param f A state formula
+    /// \param x A
+    /// \param l A sequence of data variables
+    /// \param f A modal formula
     /// \return The function result
     data::data_variable_list Par(core::identifier_string x, data::data_variable_list l, modal::state_formula f)
     {
@@ -208,8 +220,8 @@ class pbes_translate_algorithm
     /// \brief Renames data variables and predicate variables in the formula \p f, and
     /// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
     /// step for the algorithm.
-    /// \param formula A state formula
-    /// \param spec A specification
+    /// \param formula A modal formula
+    /// \param spec A linear process specification
     /// \return The preprocessed formula
     modal::state_formula preprocess_formula(const modal::state_formula& formula, const lps::specification& spec)
     {
@@ -245,6 +257,7 @@ class pbes_translate_algorithm
 
     /// \brief Returns the set of all free variables of the given specification
     /// \return The set of all free variables of the given specification
+    /// \param spec A linear process specification
     atermpp::set<data::data_variable> free_variables(const lps::specification& spec) const
     {
       atermpp::set<data::data_variable> result;
@@ -334,10 +347,10 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     }
 
     /// \brief The \p RHS function of the translation
-    /// \param f0 The original formula
-    /// \param f The current formula
-    /// \param lps A specification
-    /// \param T The time
+    /// \param f0 A modal formula
+    /// \param f A modal formula
+    /// \param lps A linear process
+    /// \param T A
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
@@ -547,10 +560,10 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     }
 
     /// \brief The \p E function of the translation
-    /// \param f0 The original formula
-    /// \param f The current formula
-    /// \param lps A specification
-    /// \param T The time
+    /// \param f0 A modal formula
+    /// \param f A modal formula
+    /// \param lps A linear process
+    /// \param T A
     /// \return The function result
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T)
     {
@@ -662,8 +675,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     {}
 
     /// \brief Runs the translation algorithm
-    /// \param formula A state formula
-    /// \param spec A specification
+    /// \param formula A modal formula
+    /// \param spec A linear process specification
     /// \return The result of the translation
     pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
     {
@@ -713,7 +726,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
   protected:
 
     /// \brief The \p sat_top function of the translation
-    /// \param a A timed multi-action
+    /// \param a A sequence of actions
     /// \param b An action formula
     /// \return The function result
     pbes_expression sat_top(lps::action_list a, modal::action_formula b)
@@ -774,9 +787,9 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     }
 
     /// \brief The \p RHS function of the translation
-    /// \param f0 The original formula
-    /// \param f The current formula
-    /// \param lps A specification
+    /// \param f0 A modal formula
+    /// \param f A modal formula
+    /// \param lps A linear process
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, std::set<std::string>& context)
@@ -949,7 +962,11 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
       return result;
     }
 
-    /// f0 is the original formula
+    /// \brief The \p E function of the translation
+    /// \param f0 A modal formula
+    /// \param f A modal formula
+    /// \param lps A linear process
+    /// \return The function result
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -1062,8 +1079,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     {}
 
     /// \brief Runs the translation algorithm
-    /// \param formula A state formula
-    /// \param spec A specification
+    /// \param formula A modal formula
+    /// \param spec A linear process specification
     /// \return The result of the translation
     pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
     {
@@ -1096,8 +1113,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 
 /// \brief Translates a modal::state_formula and a lps::specification to a pbes. If the pbes evaluates
 /// to true, the formula holds for the lps::specification.
-/// \param formula the state formula
-/// \param spec the lps::specification
+/// \param formula A modal formula
+/// \param spec A linear process specification
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \return The resulting pbes
 inline pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)

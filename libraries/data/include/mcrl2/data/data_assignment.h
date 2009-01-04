@@ -26,7 +26,6 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Assignment of a data expression to a data variable.
-///
 class data_assignment: public atermpp::aterm_appl
 {
   protected:
@@ -56,8 +55,8 @@ class data_assignment: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    /// \param lhs Left hand side of the assignment.
-    /// \param rhs Right hand side of the assignment.
+    /// \param lhs A
+    /// \param rhs A data expression
     data_assignment(data_variable lhs, data_expression rhs)
      :
        atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs)),
@@ -105,11 +104,11 @@ class data_assignment: public atermpp::aterm_appl
 ///////////////////////////////////////////////////////////////////////////////
 // data_assignment_list
 /// \brief Read-only singly linked list of data assignments
-///
 typedef atermpp::term_list<data_assignment> data_assignment_list;
 
 /// \brief Returns true if the term t is a data assignment
-/// \param t A term.
+/// \param t A term
+/// \return RETURN_DESCRIPTION
 inline
 bool is_data_assignment(atermpp::aterm_appl t)
 {
@@ -118,8 +117,8 @@ bool is_data_assignment(atermpp::aterm_appl t)
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Makes a data_assignment_list from lhs and rhs
-/// \param lhs A sequence of data variables.
-/// \param rhs A sequence of data expressions.
+/// \param lhs A sequence of data variables
+/// \param rhs A sequence of data expressions
 /// \return The corresponding assigment list.
 inline
 data_assignment_list make_assignment_list(data_variable_list lhs, data_expression_list rhs)
@@ -137,7 +136,7 @@ data_assignment_list make_assignment_list(data_variable_list lhs, data_expressio
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the right hand sides of the assignments
-/// \param l An assignment list.
+/// \param l A sequence of assignments to data variables
 /// \return The right hand sides of the assignments.
 inline
 data_expression_list data_assignment_expressions(data_assignment_list l)
@@ -153,7 +152,6 @@ data_expression_list data_assignment_expressions(data_assignment_list l)
 ///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
 /// \brief Sequence of data assignments.
-///
 // A linear search is done in the list of assignments.
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
 struct assignment_list_substitution
@@ -170,6 +168,9 @@ struct assignment_list_substitution
       : m_variable(variable)
     {}
 
+    /// \brief FUNCTION_DESCRIPTION
+    /// \param a An assignment to a data variable
+    /// \return RETURN_DESCRIPTION
     bool operator()(const data_assignment& a) const
     {
       return m_variable == a.lhs();
@@ -184,6 +185,9 @@ struct assignment_list_substitution
       : l(l_)
     {}
 
+    /// \brief FUNCTION_DESCRIPTION
+    /// \param t A term
+    /// \return RETURN_DESCRIPTION
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
@@ -202,9 +206,9 @@ struct assignment_list_substitution
     }
   };
   /// \endcond
-
+  
   /// \brief Constructor.
-  /// \param assignments An assignment list.
+  /// \param assignments A sequence of assignments to data variables
   assignment_list_substitution(const data_assignment_list& assignments)
     : m_assignments(assignments)
   {}

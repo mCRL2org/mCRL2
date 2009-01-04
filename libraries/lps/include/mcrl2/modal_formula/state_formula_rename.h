@@ -34,8 +34,10 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     : generator(generator)
   {}
 
-  /// Generates a new name for n, and adds a replacement to the replacement stack.
-  /// Returns the new name.
+  /// \brief Generates a new name for n, and adds a replacement to the replacement stack.
+  /// \brief Returns the new name.
+  /// \param n A
+  /// \return RETURN_DESCRIPTION
   core::identifier_string push(const core::identifier_string& n)
   {
     core::identifier_string new_name = generator(n);
@@ -43,13 +45,18 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     return new_name;
   }
 
-  /// Removes the last added replacement.
+  /// \brief Removes the last added replacement.
   void pop()
   {
     std::pair<core::identifier_string, core::identifier_string> p = replacements.front();
     replacements.pop_front();
   }
 
+  /// \brief Visit var node
+  /// \param e A modal formula
+  /// \param n A
+  /// \param l A sequence of data expressions
+  /// \return The result of visiting the node
   state_formula visit_var(const state_formula& e, const core::identifier_string& n, const data::data_expression_list& l)
   {
     core::identifier_string new_name = n;
@@ -64,6 +71,12 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     return state_frm::var(new_name, l);
   }
 
+  /// \brief Visit mu node
+  /// \param e A modal formula
+  /// \param n A
+  /// \param a A sequence of assignments to data variables
+  /// \param f A modal formula
+  /// \return The result of visiting the node
   state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
@@ -72,6 +85,12 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
     return state_frm::mu(new_name, a, new_formula);
   }
 
+  /// \brief Visit nu node
+  /// \param e A modal formula
+  /// \param n A
+  /// \param a A sequence of assignments to data variables
+  /// \param f A modal formula
+  /// \return The result of visiting the node
   state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const data::data_assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
@@ -81,22 +100,30 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   }
 };
 
-/// Utility function for creating a state_formula_predicate_variable_rename_builder.
+/// \brief Utility function for creating a state_formula_predicate_variable_rename_builder.
+/// \param generator A generator for fresh identifiers
+/// \return a state_formula_predicate_variable_rename_builder
 template <typename IdentifierGenerator>
 state_formula_predicate_variable_rename_builder<IdentifierGenerator> make_state_formula_predicate_variable_rename_builder(IdentifierGenerator& generator)
 {
   return state_formula_predicate_variable_rename_builder<IdentifierGenerator>(generator);
 }
 
-/// Renames predicate variables of the formula f using the specified identifier generator.
+/// \brief Renames predicate variables of the formula f using the specified identifier generator.
 /// \post predicate variables within the same scope have different names
+/// \param f A modal formula
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 state_formula rename_predicate_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   return make_state_formula_predicate_variable_rename_builder(generator).visit(f);
 }
 
-/// Renames all data variables in the formula f using the supplied identifier generator.
+/// \brief Renames all data variables in the formula f using the supplied identifier generator.
+/// \param f A modal formula
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 state_formula rename_data_variables(const state_formula& f, IdentifierGenerator& generator)
 {

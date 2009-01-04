@@ -19,7 +19,6 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Identifier generator that generates names from the range X, Y, Z, X0, Y0, Z0, X1, ...
-///
 class xyz_identifier_generator: public multiset_identifier_generator
 {
   protected:
@@ -30,6 +29,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     char m_char;
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
+    /// \return RETURN_DESCRIPTION
     std::string next()
     {
       switch (m_char) {
@@ -57,7 +57,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     {}
 
     /// \brief Constructor.
-    /// \param t A context.
+    /// \param t A term
     template <typename Term>
     xyz_identifier_generator(Term t)
      : m_index(-2), m_char('Z')
@@ -68,7 +68,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
-    /// \param hint A hint for the name of generated identifiers.
+    /// \param hint A string
     /// \return A fresh identifier.
     core::identifier_string operator()(const std::string& hint)
     {

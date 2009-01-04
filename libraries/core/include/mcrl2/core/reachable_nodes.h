@@ -35,19 +35,22 @@ namespace detail {
       : m_result(result)
     {}
   
+    /// \brief Is called whenever a new vertex is discovered
+    /// \param u A vertex
+    /// \param g A graph
     void discover_vertex(vertex_descriptor u, const Graph& g)
     {
       m_result.push_back(boost::get(boost::vertex_index, g)[u]);
     }
   };
 } // namespace detail
-/// \endcond
-
+  /// \endcond
+  
   /// \brief Compute reachable nodes in a graph.
-  /// \param[in] g A graph.
-  /// \param[in] first Iterator to the first node.
-  /// \param[in] last Iterator to the last node.
-  /// \returns The indices of the nodes that are reachable from the nodes
+  /// \param g A graph.
+  /// \param first Iterator to the first node.
+  /// \param last Iterator to the last node.
+  /// \return The indices of the nodes that are reachable from the nodes
   /// given by the range of vertex descriptors [first, last].
   template <typename Graph, typename Iter>
   std::vector<int> reachable_nodes(const Graph& g, Iter first, Iter last)

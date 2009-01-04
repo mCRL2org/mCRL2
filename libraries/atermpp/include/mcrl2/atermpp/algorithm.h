@@ -20,7 +20,7 @@
 namespace atermpp
 {
   /// \brief Calls op(elem) for subterms of the term t.
-  /// \param t The term that is being searched 
+  /// \param t A term
   /// \param op The operation that is applied to subterms
   /// \return a copy of the (internally modified) op.
   /// The function op must have the signature bool op(aterm_appl t).
@@ -32,7 +32,7 @@ namespace atermpp
   }
 
   /// \brief Finds a subterm of t that matches a given predicate.
-  /// \param t The term that is being searched 
+  /// \param t A term
   /// \param match The predicate that determines if a subterm is a match
   /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
   template <typename Term, typename MatchPredicate>
@@ -50,7 +50,7 @@ namespace atermpp
   /// \brief Finds a subterm of t that matches a given predicate.
   /// The term is only partially traversed. If the stop predicate
   /// returns true in a subterm, the recursion is not continued.
-  /// \param t The term that is being searched
+  /// \param t A term
   /// \param match The predicate that determines if a subterm is a match
   /// \param stop The predicate that determines if the recursion should not be continued in a subterm
   /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
@@ -68,7 +68,7 @@ namespace atermpp
 
   /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
   /// to the destination range starting with destBegin.
-  /// \param t The term that is being searched.
+  /// \param t A term
   /// \param match The predicate that determines if a subterm is a match
   /// \param destBegin The iterator range to which output is written.
   template <typename Term, typename MatchPredicate, typename OutputIterator>
@@ -82,7 +82,7 @@ namespace atermpp
   /// to the destination range starting with destBegin.
   /// The term is only partially traversed. If the stop predicate
   /// returns true in a subterm, the recursion is not continued.
-  /// \param t The term that is being searched.
+  /// \param t A term
   /// \param match The predicate that determines if a subterm is a match
   /// \param stop The predicate that determines if the recursion should not be continued in a subterm
   /// \param destBegin The iterator range to which output is written.
@@ -95,12 +95,10 @@ namespace atermpp
 
   /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
-  ///
   /// aterm_appl x;
   /// aterm_appl result = r(x);
-  ///
   /// The replacements are performed in top down order.
-  /// \param t The term to which a replacement is applied.
+  /// \param t A term
   /// \param r The replace function that is applied to subterms.
   /// \return The result of the replacement.
   template <typename Term, typename ReplaceFunction>
@@ -113,7 +111,7 @@ namespace atermpp
   /// \brief Replaces each subterm in t that is equal to old_value with new_value.
   /// The replacements are performed in top down order. For example,
   /// replace(f(f(x)), f(x), x) returns f(x) and not x.
-  /// \param t A term.
+  /// \param t A term
   /// \param old_value The subterm that will be replaced.
   /// \param new_value The value that will be substituted.
   /// \return The result of the replacement.
@@ -125,13 +123,11 @@ namespace atermpp
 
   /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
   /// the following signature:
-  ///
   /// aterm_appl x;
   /// aterm_appl result = r(x);
-  ///
   /// The replacements are performed in bottom up order. For example,
   /// replace(f(f(x)), f(x), x) returns x.
-  /// \param t The term to which a replacement is applied.
+  /// \param t A term
   /// \param r The replace function that is applied to subterms.
   /// \return The result of the replacement.
   template <typename Term, typename ReplaceFunction>
@@ -144,7 +140,7 @@ namespace atermpp
   /// \brief Replaces each subterm in t that is equal to old_value with new_value.
   /// The replacements are performed in top down order. For example,
   /// replace(f(f(x)), f(x), x) returns f(x) and not x.
-  /// \param t The term to which a replacement is applied.
+  /// \param t A term
   /// \param old_value The value of the subterm that is replaced.
   /// \param new_value The value that is substituted.
   /// \return The result of the replacement.
@@ -157,15 +153,12 @@ namespace atermpp
   /// \brief Replaces subterms x of t by r(x). The replace function r returns an
   /// additional boolean value. This value is used to prevent further recursion.
   /// The ReplaceFunction r has the following signature:
-  ///
   /// aterm_appl x;
   /// std::pair<aterm_appl, bool> result = r(x);
-  ///
   /// result.first  is the result r(x) of the replacement
   /// result.second denotes if the recursion should be continued
-  ///
   /// The replacements are performed in top down order.
-  /// \param t The term to which a replacement is applied.
+  /// \param t A term
   /// \param r The replace function that is applied to subterms.
   /// \return The result of the replacement.
   template <typename Term, typename ReplaceFunction>

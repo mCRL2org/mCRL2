@@ -40,14 +40,9 @@ namespace pbes_system {
 
 namespace detail {
 
-/*
-inline
-std::string pp(std::set<data::data_variable> s)
-{
-  return ::pp(data::data_variable_list(s.begin(), s.end()));
-}
-*/
-
+/// \brief Returns the free variables of a pbes expression
+/// \param e A PBES expression
+/// \return The free variables of a pbes expression
 inline
 std::set<data::data_variable> compute_free_pbes_expression_variables(const pbes_expression& e)
 {
@@ -65,6 +60,9 @@ struct prop_var_visitor
     : m_identifiers(identifiers)
   {}
 
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   bool operator()(atermpp::aterm_appl t)
   {
     bool result = true;
@@ -83,6 +81,8 @@ struct prop_var_visitor
 };
 
 /// \brief Returns the names of all propositional variables that occur in the term t
+/// \param t A term
+/// \return The names of all propositional variables that occur in the term t
 template <typename Term>
 std::set<core::identifier_string> propositional_variable_names(Term t)
 {
@@ -92,6 +92,8 @@ std::set<core::identifier_string> propositional_variable_names(Term t)
 }
 
 /// \brief Returns the variables corresponding to ass(f)
+/// \param f A modal formula
+/// \return The variables corresponding to ass(f)
 inline
 data::data_variable_list mu_variables(modal::state_formula f)
 {
@@ -106,6 +108,8 @@ data::data_variable_list mu_variables(modal::state_formula f)
 }
 
 /// \brief Returns the data expressions corresponding to ass(f)
+/// \param f A modal formula
+/// \return The data expressions corresponding to ass(f)
 inline
 data::data_expression_list mu_expressions(modal::state_formula f)
 {

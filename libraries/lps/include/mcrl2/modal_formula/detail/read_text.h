@@ -24,7 +24,10 @@ namespace modal {
 
 namespace detail {
 
-/// read text from a file
+/// \brief Reads text from a file
+/// \param filename A string
+/// \param warn If true, print a warning
+/// \return The text that has been read, or an empty string upon failure
 inline
 std::string read_text(const std::string& filename, bool warn=false)
 {

@@ -37,7 +37,9 @@ struct free_variable_visitor: public state_formula_visitor
     : bound_variables(bound_variables_)
   {}
 
-  // returns true if v is an element of bound_variables or quantifier_stack
+  /// \brief Returns true if v is an element of bound_variables or quantifier_stack
+  /// \return True if v is an element of bound_variables or quantifier_stack
+  /// \param v A
   bool is_bound(const data::data_variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())
@@ -54,38 +56,54 @@ struct free_variable_visitor: public state_formula_visitor
     return false;
   }
 
+  /// \brief Pushes a sequence of data variables on the stack
+  /// \param v A sequence of data variables
   void push(const data::data_variable_list& v)
   {
     quantifier_stack.push_back(v);
   }
 
+  /// \brief Pops the stack
   void pop()
   {
     quantifier_stack.pop_back();
   }
 
+  /// \brief Visit forall node
+  /// \param e A modal formula
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
   bool visit_forall(const state_formula& e, const data::data_variable_list& v, const state_formula&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave forall node
   void leave_forall()
   {
     pop();
   }
 
+  /// \brief Visit exists node
+  /// \param e A modal formula
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
   bool visit_exists(const state_formula& e, const data::data_variable_list& v, const state_formula&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave exists node
   void leave_exists()
   {
     pop();
   }
 
+  /// \brief Visit var node
+  /// \param l A sequence of data expressions
+  /// \return The result of visiting the node
   bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& l)
   {
     std::set<data::data_variable> variables = find_all_data_variables(l);
@@ -99,6 +117,9 @@ struct free_variable_visitor: public state_formula_visitor
     return true;
   }
 
+  /// \brief Visit data_expression node
+  /// \param d A data expression
+  /// \return The result of visiting the node
   bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
     std::set<data::data_variable> variables = find_all_data_variables(d);
@@ -115,7 +136,9 @@ struct free_variable_visitor: public state_formula_visitor
 
 } // namespace state_frm
 
-/// Computes the free variables that occur in the state formula f.
+/// \brief Returns the free variables that occur in the state formula f.
+/// \param f A modal formula
+/// \return The free variables that occur in the state formula f.
 inline
 std::set<data::data_variable> compute_free_state_formula_variables(const state_formula& f)
 {

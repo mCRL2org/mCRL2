@@ -28,7 +28,6 @@ namespace modal {
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula
 /// \brief regular formula expression.
-///
 class regular_formula: public atermpp::aterm_appl
 {
   public:
@@ -48,9 +47,10 @@ class regular_formula: public atermpp::aterm_appl
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
-    /// Applies a substitution to this regular formula and returns the result.
+    /// \brief Applies a substitution to this regular formula and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \param f A
+    /// \return RETURN_DESCRIPTION
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {
@@ -61,7 +61,6 @@ class regular_formula: public atermpp::aterm_appl
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula_list
 /// \brief Read-only singly linked list of regular expressions
-///
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 } // namespace modal

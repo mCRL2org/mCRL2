@@ -22,26 +22,43 @@ namespace pbes_system {
 
 namespace detail {
 
+  /// \brief Returns a data variable of type Nat with a given name
+  /// \param name A string
+  /// \return A data variable of type Nat with a given name
   data::data_variable nat(std::string name)
   {
     return data::data_variable(core::identifier_string(name), data::sort_expr::nat());
   }
 
+  /// \brief Returns a data variable of type Pos with a given name
+  /// \param name A string
+  /// \return A data variable of type Pos with a given name
   data::data_variable pos(std::string name)
   {
     return data::data_variable(core::identifier_string(name), data::sort_expr::pos());
   } 
   
+  /// \brief Returns a data variable of type Bool with a given name
+  /// \param name A string
+  /// \return A data variable of type Bool with a given name
   data::data_variable bool_(std::string name)
   {
     return data::data_variable(core::identifier_string(name), data::sort_expr::bool_());
   }
   
+  /// \brief Returns a propositional variable declaration with the given name and parameters
+  /// \param name A string
+  /// \param parameters A sequence of data variables
+  /// \return A propositional variable declaration with the given name and parameters
   propositional_variable propvar(std::string name, data::data_variable_list parameters)
   {
     return propositional_variable(core::identifier_string(name), parameters);
   }
 
+  /// \brief Returns a propositional variable instantiation with the given name and parameters
+  /// \param name A string
+  /// \param parameters A sequence of data expressions
+  /// \return A propositional variable instantiation with the given name and parameters
   propositional_variable_instantiation propvarinst(std::string name, data::data_expression_list parameters)
   {
     return propositional_variable_instantiation(core::identifier_string(name), parameters);

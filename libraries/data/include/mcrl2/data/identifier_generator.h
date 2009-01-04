@@ -27,7 +27,6 @@ namespace data {
 /// \brief Abstract base class for identifier generators.
 /// Identifier generators generate fresh names that do not appear in a
 /// given context.
-///
 /// A context is maintained containing already used identifiers.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers are generated that do not appear in the context.
@@ -55,7 +54,7 @@ class identifier_generator
     virtual void remove_identifier(core::identifier_string s) = 0;
 
     /// \brief Adds identifiers of term t to the context.
-    /// \param t A term.
+    /// \param t A term
     template <typename Term>
     void add_to_context(Term t)
     {
@@ -78,7 +77,7 @@ class identifier_generator
     }
 
     /// \brief Removes identifiers appearing in term t from the context.
-    /// \param t A term.
+    /// \param t A term
     template <typename Term>
     void remove_from_context(Term t)
     {
@@ -96,7 +95,7 @@ class identifier_generator
 
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
-    /// \param hint A hint for the name of an identifier.
+    /// \param hint A string
     /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint)
     {
@@ -117,7 +116,6 @@ class identifier_generator
 };
 
 /// \brief Identifier generator that generates names with a postfix consisting of a number.
-///
 class number_postfix_generator
 {
   protected:
@@ -134,8 +132,8 @@ class number_postfix_generator
     {}
 
     /// \brief Constructor.
-    /// \param prefix A prefix.
-    /// \param index A positive number.
+    /// \param prefix A string
+    /// \param index A positive integer
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
      : m_prefix(prefix), m_index(index)
     {}

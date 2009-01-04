@@ -20,6 +20,10 @@ namespace mcrl2 {
 
 namespace modal {
 
+  /// \brief Reads a state formula from a stream
+  /// \param from An input stream
+  /// \param f A modal formula
+  /// \return The read state formula
   inline
   std::istream& operator>>(std::istream& from, state_formula& f)
   {

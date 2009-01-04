@@ -25,7 +25,6 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Operation on data.
-///
 class data_operation: public data_expression
 {
   public:
@@ -36,7 +35,7 @@ class data_operation: public data_expression
     {}
 
     /// \brief Constructor.
-    /// \param t A term.
+    /// \param t A term
     data_operation(atermpp::aterm_appl t)
      : data_expression(t)
     {
@@ -44,8 +43,8 @@ class data_operation: public data_expression
     }
 
     /// \brief Constructor.
-    /// \param name A name.
-    /// \param s A sort expression.
+    /// \param name A
+    /// \param s A sort expression
     data_operation(core::identifier_string name, sort_expression s)
      : data_expression(core::detail::gsMakeOpId(name, s))
     {}
@@ -65,7 +64,7 @@ class data_operation: public data_expression
     }
 
     /// \brief Apply the data_operation to a list of arguments.
-    /// \param args A sequence of arguments.
+    /// \param args A sequence of data expressions
     /// \return The application of the operation to the arguments.
     data_expression operator()(data_expression_list args) const
     {
@@ -81,11 +80,10 @@ class data_operation: public data_expression
   };
 
 /// \brief Read-only singly linked list of data operations
-///
 typedef atermpp::term_list<data_operation> data_operation_list;
 
 /// \brief Returns true if the term t is a data operation
-/// \param t A term.
+/// \param t A term
 /// \return True if the term is a data operation.
 inline
 bool is_data_operation(atermpp::aterm_appl t)

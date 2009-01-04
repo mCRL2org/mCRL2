@@ -35,6 +35,9 @@ namespace detail {
     /// Precondition: The range [first, last[ contains sorted arrays.
     /// \brief Visits all permutations of the arrays, and calls f for
     /// each instance.
+    /// \param first Start of a sequence of PARAM_DESCRIPTION
+    /// \param last End of a sequence of PARAM_DESCRIPTION
+    /// \param f PARAM_DESCRIPTION
     template <typename Iter, typename Function>
     void forall_permutations(Iter first, Iter last, Function f)
     {
@@ -54,6 +57,9 @@ namespace detail {
 
     /// \brief Returns true if the actions in a and b have the same names, and the same sorts.
     /// \pre a and b are sorted w.r.t. to the names of the actions.
+    /// \param a A sequence of actions
+    /// \param b A sequence of actions
+    /// \return RETURN_DESCRIPTION
     inline bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
     {
       if (a.size() != b.size())
@@ -69,17 +75,26 @@ namespace detail {
       return true;
     }
 
-    // compare names and sorts of two actions
+    /// \brief Compares names and sorts of two actions
     struct compare_actions
     {
+      /// \brief Function call operator
+      /// \param a An action
+      /// \param b An action
+      /// \return The function result
       bool operator()(const lps::action& a, const lps::action& b) const
       {
         return a.label() < b.label();
       }
     };
 
+    /// \brief Compares names and sorts of two actions
     struct compare_actions2
     {
+      /// \brief Function call operator
+      /// \param a An action
+      /// \param b An action
+      /// \return The function result
       bool operator()(const lps::action& a, const lps::action& b) const
       {
         return a.label() < b.label();
@@ -107,7 +122,7 @@ namespace detail {
           result(result_)
       {}
 
-      /// Adds the expression 'a == b' to result.
+      /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
         using namespace data::data_expr::optimized;
@@ -150,7 +165,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
           result(result_)
       {}
 
-      /// Adds the expression 'a == b' to result.
+      /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
         using namespace data::data_expr::optimized;
@@ -174,12 +189,12 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     };
 
 } // namespace detail
-/// \endcond
-
+    /// \endcond
+    
     /// \brief Returns a data expression that expresses under which conditions the
     /// multi actions a and b are equal. The multi actions may contain free variables.
-    /// \param a A multi action
-    /// \param b A multi action
+    /// \param a A sequence of actions
+    /// \param b A sequence of actions
     /// \return Necessary conditions for the equality of a and b
     inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
     {
@@ -226,8 +241,8 @@ std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
 
     /// \brief Returns a pbes expression that expresses under which conditions the
     /// multi actions a and b are not equal. The multi actions may contain free variables.
-    /// \param a A multi action
-    /// \param b A multi action
+    /// \param a A sequence of actions
+    /// \param b A sequence of actions
     /// \return Necessary conditions for the inequality of a and b
     inline data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
     {

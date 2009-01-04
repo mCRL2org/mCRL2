@@ -47,6 +47,9 @@ struct data_variable_collector
       m_dest(dest)
   {}
   
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param t A term
+  /// \return RETURN_DESCRIPTION
   bool operator()(atermpp::aterm_appl t)
   {
     if (is_data_variable(t))

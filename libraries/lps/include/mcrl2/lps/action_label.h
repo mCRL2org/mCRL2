@@ -25,7 +25,6 @@ namespace lps {
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
 /// \brief Represents a label of an action.
-///
 // <ActId>        ::= ActId(<String>, <SortExpr>*)
 class action_label: public atermpp::aterm_appl
 {
@@ -34,14 +33,13 @@ class action_label: public atermpp::aterm_appl
     data::sort_expression_list m_sorts;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     action_label()
       : atermpp::aterm_appl(mcrl2::core::detail::constructActId())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     action_label(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
     {
@@ -51,31 +49,33 @@ class action_label: public atermpp::aterm_appl
       m_sorts = *i;
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param name A
+    /// \param sorts A sequence of sort expressions
     action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}
 
-    /// Returns the name of the action label.
-    ///
+    /// \brief Returns the name of the action label.
+    /// \return The name of the action label.
     core::identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the sorts of the action label
-    ///
+    /// \brief Returns the sorts of the action label
+    /// \return The sorts of the action label
     data::sort_expression_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Applies a substitution to this action label and returns the result
+    /// \brief Applies a substitution to this action label and returns the result
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \param f A
+    /// \return RETURN_DESCRIPTION
     template <typename Substitution>
     action_label substitute(Substitution f)
     {
@@ -87,6 +87,8 @@ class action_label: public atermpp::aterm_appl
 typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label
+/// \param t A term
+/// \return True if the term t is an action label
 inline
 bool is_action_label(atermpp::aterm_appl t)
 {

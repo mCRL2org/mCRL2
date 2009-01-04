@@ -21,13 +21,10 @@ namespace data {
 class sort_arrow;
 
 /// \brief Read-only singly linked list of sorts
-///
 typedef atermpp::term_list<sort_arrow> sort_arrow_list;
 
 /// \brief sort arrow.
-///
 /// Models sorts of shape <tt>A -\> B</tt>.
-///
 //<SortExpr>    ::= <SortId>
 //                | SortList(<SortExpr>)                                   (- di)
 //                | SortSet(<SortExpr>)                                    (- di)
@@ -44,7 +41,7 @@ class sort_arrow: public sort_expression
     {}
 
     /// \brief Constructor.
-    /// \param t A term containing a sort.
+    /// \param t A term
     sort_arrow(ATermAppl t)
       : sort_expression(t)
     {
@@ -52,7 +49,7 @@ class sort_arrow: public sort_expression
     }
 
     /// \brief Constructor.
-    /// \param t A term containing a sort.
+    /// \param t A term
     sort_arrow(atermpp::aterm_appl t)
       : sort_expression(t)
     {
@@ -60,14 +57,15 @@ class sort_arrow: public sort_expression
     }
 
     /// \brief Constructor.
-    /// \param arguments A sequence of arguments.
-    /// \param result A target sort.
+    /// \param arguments A sequence of sort expressions
+    /// \param result A sort expression
     sort_arrow(sort_expression_list arguments, sort_expression result)
       : sort_expression(core::detail::gsMakeSortArrow(arguments, result))
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
 
+    /// \brief FUNCTION_DESCRIPTION
     /// \overload
     /// \return Always returns true.
     bool is_arrow() const
@@ -91,7 +89,7 @@ class sort_arrow: public sort_expression
 };
 
 /// \brief Returns true if the term t is a sort arrow.
-/// \param t A term.
+/// \param t A term
 /// \return True if the term is a sort arrow.
 inline
 bool is_sort_arrow(atermpp::aterm_appl t)

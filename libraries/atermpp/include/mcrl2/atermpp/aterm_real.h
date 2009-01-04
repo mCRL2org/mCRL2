@@ -20,32 +20,27 @@ namespace atermpp
   ///////////////////////////////////////////////////////////////////////////////
   // aterm_real
   /// \brief Represents an term containing a real value.
-  ///
   class aterm_real: public aterm_base
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       aterm_real()
       {}
       
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       /// \param value A value.
       aterm_real(double value)
         : aterm_base(ATmakeReal(value))
       {}
       
-      /// Constructor.
-      ///
-      /// \param t A term containing a real.
+      /// \brief Constructor.
+      /// \param t A real-valued term
       aterm_real(ATermReal t)
         : aterm_base(t)
       {}
   
-      /// Constructor.
-      ///
-      /// \param t A term.
+      /// \brief Constructor.
+      /// \param t A term
       aterm_real(ATerm t)
         : aterm_base(t)
       {
@@ -53,7 +48,6 @@ namespace atermpp
       }
   
       /// Allow construction from an aterm. The aterm must be of the right type.
-      ///
       /// \param t A term.
       aterm_real(aterm t)
         : aterm_base(t)
@@ -61,15 +55,14 @@ namespace atermpp
         assert(type() == AT_REAL);
       }
 
-      /// Conversion to ATermReal.
-      ///
+      /// \brief Conversion to ATermReal.
+      /// \return RETURN_DESCRIPTION
       operator ATermReal() const
       {
         return reinterpret_cast<ATermReal>(m_term);
       }
 
       /// Assignment operator.
-      ///
       /// \param t A term.
       aterm_real& operator=(aterm_base t)
       {
@@ -78,8 +71,7 @@ namespace atermpp
         return *this;
       }
 
-      /// Get the real value of the aterm_real.
-      ///
+      /// \brief Get the real value of the aterm_real.
       /// \return The value of the term.
       double value() const
       {

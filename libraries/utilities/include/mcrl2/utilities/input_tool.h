@@ -35,8 +35,8 @@ namespace utilities {
         }
       }
 
-      /// Returns the synopsis of the tool
-      /// \return The synopsis of the tool
+      /// \brief Returns the synopsis of the tool
+      /// \return The string "[OPTION]... [INFILE]\n"
       std::string synopsis() const
       {
         return "[OPTION]... [INFILE]\n";
@@ -63,7 +63,7 @@ namespace utilities {
       }
 
       /// \brief Sets the input filename.
-      /// \param filename The name of a file.
+      /// \param filename A string
       /// \deprecated
       void set_input_filename(const std::string& filename)
       {

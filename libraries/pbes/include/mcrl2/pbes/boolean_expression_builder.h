@@ -36,68 +36,79 @@ struct boolean_expression_builder
   typedef typename core::term_traits<Term>::term_type term_type;
   typedef typename core::term_traits<Term>::variable_type variable_type;
 
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
   bool is_finished(const term_type& x)
   {
     return x != term_type();
   }
 
   /// \brief Destructor.
-  ///
   virtual ~boolean_expression_builder()
   { }
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& x, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit var node.
-  ///
+  /// \brief Visit var node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_var(const term_type& x, const variable_type& /* v */, Arg& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
     throw mcrl2::runtime_error(std::string("error in boolean_expression_builder::visit() : unknown boolean expression ") + e.to_string());
@@ -108,6 +119,9 @@ struct boolean_expression_builder
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
+  /// \param e A term
+  /// \param arg1 An additional argument for the recursion
+  /// \return The visit result
   term_type visit(term_type e, Arg& arg1)
   {
     typedef core::term_traits<term_type> tr;
@@ -186,61 +200,71 @@ struct boolean_expression_builder<Term, void>
   typedef void argument_type;
   typedef typename core::term_traits<Term>::term_type term_type;
 
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
   bool is_finished(const term_type& x)
   {
     return x != term_type();
   }
 
   /// \brief Destructor.
-  ///
   virtual ~boolean_expression_builder()
   { }
 
-  /// \brief Visit true node.
-  ///
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_true(const term_type& x)
   {
     return term_type();
   }
 
-  /// \brief Visit false node.
-  ///
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_false(const term_type& x)
   {
     return term_type();
   }
 
-  /// \brief Visit not node.
-  ///
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
   {
     return term_type();
   }
 
-  /// \brief Visit and node.
-  ///
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit or node.
-  ///
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit imp node.
-  ///
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
   virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
     return term_type();
   }
 
-  /// \brief Visit unknown node. This function is called whenever a node of unknown type is encountered.
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
+  /// \param e A term
+  /// \return The result of visiting the node
   virtual term_type visit_unknown(const term_type& e)
   {
     throw mcrl2::runtime_error(std::string("error in boolean_expression_builder::visit() : unknown boolean expression ") + e.to_string());
@@ -251,6 +275,8 @@ struct boolean_expression_builder<Term, void>
   /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
+  /// \param e A term
+  /// \return RETURN_DESCRIPTION
   term_type visit(term_type e)
   {
     typedef core::term_traits<term_type> tr;

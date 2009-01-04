@@ -33,6 +33,10 @@ namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
 namespace detail {
+  /// \brief Compares two terms
+  /// \param v A term
+  /// \param w A term
+  /// \return True if v is less than w
   inline
   bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
   {
@@ -69,6 +73,8 @@ namespace detail {
       : variables_(variables)
     {}
 
+    /// \brief Function call operator
+    /// \param p A true-false pair
     void operator()(true_false_pair<Term>& p) const
     {
       p.TC = tr::exists(variables_, p.TC);
@@ -88,6 +94,8 @@ namespace detail {
       : variables_(variables)
     {}
 
+    /// \brief Function call operator
+    /// \param p A true-false pair
     void operator()(true_false_pair<Term>& p) const
     {
       p.TC = tr::forall(variables_, p.TC);
@@ -107,11 +115,16 @@ namespace detail {
     term_type FC;
     condition_map condition;  // condT + condF
 
+    /// \brief Returns the true-false pair corresponding to the edge condition
+    /// \return The true-false pair corresponding to the edge condition
     true_false_pair<Term> TCFC() const
     {
       return true_false_pair<Term>(TC, FC);
     }
 
+    /// \brief Returns the condition
+    /// \param c A sequence of true-false pairs
+    /// \return The condition
     term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
     {
       term_type result = tr::true_();
@@ -154,7 +167,11 @@ namespace detail {
       }
     }
 
-    /// \brief Visit data expression node.
+    /// \brief Visit data_expression node
+    /// \param e A term
+    /// \param d A data term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_data_expression(const term_type& e, const data_term_type& d, edge_condition& ec)
     {
       ec.TC = d;
@@ -162,7 +179,10 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit true node.
+    /// \brief Visit true node
+    /// \param e A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_true(const term_type& e, edge_condition& ec)
     {
       ec.TC = tr::true_();
@@ -170,7 +190,10 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit false node.
+    /// \brief Visit false node
+    /// \param e A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_false(const term_type& e, edge_condition& ec)
     {
       ec.TC = tr::false_();
@@ -178,7 +201,11 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit not node.
+    /// \brief Visit not node
+    /// \param e A term
+    /// \param arg A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_not(const term_type& e, const term_type& arg, edge_condition& ec)
     {
       edge_condition ec_arg;
@@ -189,7 +216,12 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit and node.
+    /// \brief Visit and node
+    /// \param e A term
+    /// \param left A term
+    /// \param right A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_and(const term_type& e, const term_type& left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -202,7 +234,12 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit or node.
+    /// \brief Visit or node
+    /// \param e A term
+    /// \param left A term
+    /// \param right A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_or(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -215,7 +252,12 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit imp node.
+    /// \brief Visit imp node
+    /// \param e A term
+    /// \param left A term
+    /// \param right A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_imp(const term_type& e, const term_type&  left, const term_type&  right, edge_condition& ec)
     {
       edge_condition ec_left;
@@ -228,7 +270,12 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit forall node.
+    /// \brief Visit forall node
+    /// \param e A term
+    /// \param variables A sequence of variables
+    /// \param expr A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_forall(const term_type& e, const variable_sequence_type& variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
@@ -240,7 +287,12 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit exists node.
+    /// \brief Visit exists node
+    /// \param e A term
+    /// \param variables A sequence of variables
+    /// \param expr A term
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_exists(const term_type& e, const variable_sequence_type&  variables, const term_type& expr, edge_condition& ec)
     {
       visit(expr, ec);
@@ -252,7 +304,11 @@ namespace detail {
       return this->stop_recursion;
     }
 
-    /// \brief Visit propositional variable node.
+    /// \brief Visit propositional_variable node
+    /// \param e A term
+    /// \param v A propositional variable
+    /// \param ec An edge condition
+    /// \return The result of visiting the node
     bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v, edge_condition& ec)
     {
       ec.TC = tr::false_();
@@ -311,6 +367,7 @@ namespace detail {
         {}
 
         /// \brief Returns a string representation of the edge.
+        /// \return A string representation of the edge.
         std::string to_string() const
         {
           std::ostringstream out;
@@ -337,7 +394,9 @@ namespace detail {
           : variable(v)
         {}
 
-        /// \brief Return true if the data variable v has been assigned a constant expression.
+        /// \brief Returns true if the data variable v has been assigned a constant expression.
+        /// \param v A variable
+        /// \return True if the data variable v has been assigned a constant expression.
         bool is_constant(variable_type v) const
         {
           typename constraint_map::const_iterator i = constraints.find(v);
@@ -345,6 +404,7 @@ namespace detail {
         }
 
         /// \brief Returns the constant parameters of this vertex.
+        /// \return The constant parameters of this vertex.
         std::vector<variable_type> constant_parameters() const
         {
           std::vector<variable_type> result;
@@ -359,6 +419,7 @@ namespace detail {
         }
 
         /// \brief Returns the indices of the constant parameters of this vertex.
+        /// \return The indices of the constant parameters of this vertex.
         std::vector<int> constant_parameter_indices() const
         {
           std::vector<int> result;
@@ -374,6 +435,7 @@ namespace detail {
         }
 
         /// \brief Returns a string representation of the vertex.
+        /// \return A string representation of the vertex.
         std::string to_string() const
         {
           std::ostringstream out;
@@ -478,6 +540,7 @@ namespace detail {
       // Store the removed variables.
       std::map<propositional_variable_decl_type, std::set<variable_type> > m_removed;
 
+      /// \brief FUNCTION_DESCRIPTION
       // Prints the vertices of the dependency graph.
       void print_vertices() const
       {
@@ -487,7 +550,7 @@ namespace detail {
         }
       }
 
-      // Prints the edges of the dependency graph.
+      /// \brief Prints the edges of the dependency graph.
       void print_edges() const
       {
         for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
@@ -503,14 +566,14 @@ namespace detail {
       
       /// \brief Constructor.
       /// \param datar A data rewriter
-      /// \param pbesr A pbes rewriter
+      /// \param pbesr A PBES rewriter
       pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
         : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
       {}
 
       /// \brief Runs the constelm algorithm
       /// \param p A pbes
-      /// \param name_generator A class that generates fresh identifiers.
+      /// \param name_generator A generator for fresh identifiers
       /// The call \p name_generator() should return an identifier that doesn't appear
       /// in the pbes \p p
       /// \param compute_conditions If true, propagation conditions are computed. Note
@@ -690,7 +753,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
         }
       }
 
-      //// \brief Returns the propositional variables that have been removed by the constelm algorithm
+      /// \brief Returns the propositional variables that have been removed by the constelm algorithm
       /// \return The removed variables
       const std::map<propositional_variable_decl_type, std::set<variable_type> >& removed_variables() const
       {

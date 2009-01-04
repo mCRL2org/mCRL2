@@ -35,14 +35,12 @@ class process_initializer: public atermpp::aterm_appl
     data::data_assignment_list m_assignments;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     process_initializer()
       : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessInit())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     process_initializer(data::data_variable_list free_variables,
                         data::data_assignment_list assignments
                        )
@@ -52,8 +50,8 @@ class process_initializer: public atermpp::aterm_appl
     {
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     process_initializer(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -63,41 +61,42 @@ class process_initializer: public atermpp::aterm_appl
       m_assignments    = *i;
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables.
+    /// \return The sequence of free variables.
     data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of assignments.
-    ///
+    /// \brief Returns the sequence of assignments.
+    /// \return The sequence of assignments.
     data::data_assignment_list assignments() const
     {
       return m_assignments;
     }
 
-    /// Returns the initial state of the LPS.
-    ///
+    /// \brief Returns the initial state of the LPS.
+    /// \return RETURN_DESCRIPTION
     data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
 
-    /// Applies a substitution to this process initializer and returns the result.
+    /// \brief Applies a substitution to this process initializer and returns the result.
     /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \param f A
+    /// \return RETURN_DESCRIPTION
     template <typename Substitution>
     process_initializer substitute(Substitution f)
     {
       return process_initializer(f(atermpp::aterm(*this)));
     }     
 
-    /// Returns true if
+    /// \brief Checks if the process initializer is well typed
+    /// \return Returns true if
     /// <ul>
-    // <li>the left hand sides of the data assignments are unique</li>
+    /// <li>the left hand sides of the data assignments are unique</li>
     /// </ul>
-    ///
     bool is_well_typed() const
     {
       // check 1)

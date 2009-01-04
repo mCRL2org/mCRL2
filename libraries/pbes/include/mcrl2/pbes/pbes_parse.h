@@ -32,7 +32,10 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// Stream operator for pbes.
+  /// \brief Reads a PBES from an input stream.
+  /// \param from An input stream
+  /// \param p A PBES
+  /// \return The input stream
   template <typename Container>
   std::istream& operator>>(std::istream& from, pbes<Container>& p)
   {
@@ -55,7 +58,7 @@ namespace pbes_system {
     return from;
   }
 
-  /// Parses a sequence of pbes expressions. The format of the text is as
+  /// \brief Parses a sequence of pbes expressions. The format of the text is as
   /// follows:
   /// <ul>
   /// <li><tt>"datavar"</tt>, followed by a sequence of data variable declarations</li>
@@ -66,14 +69,12 @@ namespace pbes_system {
   /// \code
   /// datavar
   ///   n: Nat;
-  ///
   /// predvar
   ///   X: Pos;
   ///   Y: Nat, Bool;
-  ///
   /// \endcode
-  /// \param[in] text The text that is parsed.
-  /// \param[in] data_spec A data specification. This data specification may contain user definitions.
+  /// \param text A string
+  /// \param data_spec A string
   /// N.B. A side effect of the data specification is that it determines whether rewrite rules
   /// for types like Pos and Nat are generated or not.
   /// \return The parsed expression and the data specification that was used.
@@ -160,6 +161,8 @@ namespace pbes_system {
       pbesspec = pbesspec
         + "\nmu "
         + unique_prefix
+        /// \brief FUNCTION_DESCRIPTION
+        /// \return RETURN_DESCRIPTION
         + boost::lexical_cast<std::string>(unique_prefix_index++)
         + (datavar_text.empty() ? "" : "(")
         + datavar_text
@@ -194,32 +197,30 @@ namespace pbes_system {
     return std::make_pair(result, p.data());
   }
 
-  /// Parses a single pbes expression.
-  /// \param[in] text The text that is parsed.
-  /// \param[in] var_decl An optional declaration of data variables and predicate variables
+  /// \brief Parses a single pbes expression.
+  /// \param text A string
+  /// \param var_decl A string
   /// with their types.<br>
   /// An example of this is:
   /// \code
   /// datavar
   ///   n: Nat;
-  ///
   /// predvar
   ///   X: Pos;
   ///   Y: Nat, Bool;
-  ///
   /// \endcode
-  /// \param data_spec An optional data specification
-  /// \return the parsed expression
+  /// \param data_spec A string
+  /// \return The parsed expression
   inline
   pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n", std::string data_spec = "")
   {
     return parse_pbes_expressions(var_decl + "\nexpressions\n" + text, data_spec).first.front();
   }
 
-  /// Parses a string with substitutions and adds them to a substition function
-  /// \param[in] text A string with substitutions, for example "b: Bool := true, n: Nat := 0"
-  /// \param[in] data_spec A data specification
-  /// \param[in] sigma A substitution function
+  /// \brief Parses a string with substitutions and adds them to a substition function
+  /// \param text A string
+  /// \param data_spec A data specification
+  /// \param sigma A substitution function
   template <typename SubstitutionFunction>
   void parse_substitutions(std::string text, data::data_specification data_spec, SubstitutionFunction& sigma)
   {
@@ -238,12 +239,12 @@ namespace pbes_system {
     }
   }
 
-  /// Parses a pbes expression.
-  /// \param[in] expr The text that is parsed.
-  /// \param[in] subst A string with substitutions, for example "b: Bool := true, n: Nat := 0"
-  /// \param[in] p A pbes that provides the declarations used for parsing
-  /// \param[in] sigma A substitution function
-  /// \result the parsed expression
+  /// \brief Parses a pbes expression.
+  /// \param expr A string
+  /// \param subst A string
+  /// \param p A PBES
+  /// \param sigma A substitution function
+  /// \return The parsed expression
   template <typename SubstitutionFunction>
   pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes<>& p, SubstitutionFunction& sigma)
   {

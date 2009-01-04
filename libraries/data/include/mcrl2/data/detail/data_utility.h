@@ -29,7 +29,10 @@ namespace data {
 
 namespace detail {
 
+/// \brief FUNCTION_DESCRIPTION
 // example: "X(d:D,e:E)"
+/// \param s A string
+/// \return RETURN_DESCRIPTION
 inline
 std::pair<std::string, data_expression_list> parse_variable(std::string s)
 {
@@ -67,7 +70,10 @@ std::pair<std::string, data_expression_list> parse_variable(std::string s)
   return std::make_pair(name, atermpp::reverse(variables));
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the names of the given variables are unique.
+/// \param variables A sequence of data variables
+/// \return RETURN_DESCRIPTION
 inline
 bool unique_names(data_variable_list variables)
 {
@@ -83,7 +89,11 @@ bool unique_names(data_variable_list variables)
   return true;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the left hand sides of assignments are contained in variables.
+/// \param assignments A sequence of assignments to data variables
+/// \param variables A sequence of data variables
+/// \return RETURN_DESCRIPTION
 inline
 bool check_assignment_variables(data_assignment_list assignments, data_variable_list variables)
 {
@@ -106,7 +116,10 @@ struct is_operation_with_given_sort
   // is_operation_with_given_sort(atermpp::aterm_appl u):sort_to_compare_with(u)
   {}
 
+  /// \brief FUNCTION_DESCRIPTION
   // bool operator()(atermpp::aterm_appl t) const
+  /// \param t PARAM_DESCRIPTION
+  /// \return RETURN_DESCRIPTION
   bool operator()(data_operation t) const
   { data_operation op=t;
     return op.sort()==sort_to_compare_with;
@@ -116,6 +129,9 @@ struct is_operation_with_given_sort
 /// Function object for checking if a term is a constant sort.
 struct is_constant_sort
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param t A term
+  /// \return RETURN_DESCRIPTION
   bool operator()(atermpp::aterm_appl t) const
   {
     return is_sort_expression(t) && !sort_expression(t).is_arrow();
@@ -125,6 +141,9 @@ struct is_constant_sort
 /// Function object for checking if an operator is a constant sort.
 struct is_constant_operation
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param t A term
+  /// \return RETURN_DESCRIPTION
   bool operator()(atermpp::aterm_appl t) const
   { data_operation op=t;
     return is_sort_expression(op.sort()) && !sort_expression(op.sort()).is_arrow();
@@ -134,15 +153,22 @@ struct is_constant_operation
 /// Function object for checking if an operator is a not a constant sort.
 struct is_not_a_constant_operation
 {
+  /// \brief FUNCTION_DESCRIPTION
+  /// \param t A term
+  /// \return RETURN_DESCRIPTION
   bool operator()(atermpp::aterm_appl t) const
   { data_operation op=t;
     return is_sort_expression(op.sort()) && sort_expression(op.sort()).is_arrow();
   }
 };
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the domain sorts and the range sort of the given sort s are
 /// contained in sorts.
 
+/// \param s A sort expression
+/// \param sorts PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
 {
   std::set<sort_expression> s_sorts;
@@ -150,8 +176,13 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   return std::includes(sorts.begin(), sorts.end(), s_sorts.begin(), s_sorts.end());
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the domain sorts and the range sort of the sorts in the sequence [first, last[
 /// are contained in sorts.
+/// \param first Start of a sequence of PARAM_DESCRIPTION
+/// \param last End of a sequence of PARAM_DESCRIPTION
+/// \param sorts PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename Iterator>
 bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>& sorts)
 {
@@ -163,8 +194,12 @@ bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>&
   return true;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the domain sorts and the range sort of the given variables are contained
 /// in sorts.
+/// \param variables PARAM_DESCRIPTION
+/// \param sorts PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename VariableContainer>
 bool check_variable_sorts(const VariableContainer& variables, const std::set<sort_expression>& sorts)
 {
@@ -176,7 +211,11 @@ bool check_variable_sorts(const VariableContainer& variables, const std::set<sor
   return true;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if names of the given variables are not contained in names.
+/// \param variables A sequence of data variables
+/// \param names PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 inline
 bool check_variable_names(data_variable_list variables, const std::set<core::identifier_string>& names)
 {
@@ -188,8 +227,12 @@ bool check_variable_names(data_variable_list variables, const std::set<core::ide
   return true;
 }
 
+/// \brief FUNCTION_DESCRIPTION
 /// Returns true if the domain sorts and range sort of the given functions are
 /// contained in sorts.
+/// \param functions PARAM_DESCRIPTION
+/// \param sorts PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 inline
 bool check_data_spec_sorts(data_operation_list functions, const std::set<sort_expression>& sorts)
 {
@@ -202,6 +245,8 @@ bool check_data_spec_sorts(data_operation_list functions, const std::set<sort_ex
 }
 
 /// \brief Returns the names of the variables in t
+/// \param t A sequence of data variables
+/// \return RETURN_DESCRIPTION
 inline
 std::vector<std::string> variable_strings(data_variable_list t)
 {

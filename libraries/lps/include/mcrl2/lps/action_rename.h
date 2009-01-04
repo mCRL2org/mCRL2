@@ -65,6 +65,7 @@ namespace lps {
       { }
 
       /// \brief Constructor.
+      /// \param t A term
       action_rename_rule_rhs(atermpp::aterm_appl t)
         : atermpp::aterm_appl(t)
       {
@@ -72,12 +73,14 @@ namespace lps {
       }
 
       /// \brief Returns true if the right hand side is equal to delta.
+      /// \return RETURN_DESCRIPTION
       bool is_delta() const
       {
         return core::detail::gsIsDelta(*this);
       }
 
       /// \brief Returns true if the right hand side is equal to tau.
+      /// \return RETURN_DESCRIPTION
       bool is_tau() const
       {
         return core::detail::gsIsTau(*this);
@@ -85,6 +88,7 @@ namespace lps {
 
       /// \brief Returns the action.
       /// \pre The right hand side must be an action
+      /// \return RETURN_DESCRIPTION
       action act() const
       {
         return *this;
@@ -104,6 +108,7 @@ namespace lps {
       action_rename_rule_rhs   m_rhs;
 
       /// \brief Initialize the action rename rule with an aterm_appl.
+      /// \param t A term
       void init_term(atermpp::aterm_appl t)
       {
         m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
@@ -121,6 +126,7 @@ namespace lps {
       { }
 
       /// \brief Constructor.
+      /// \param t A term
       action_rename_rule(atermpp::aterm_appl t)
         : atermpp::aterm_appl(t)
       {
@@ -129,24 +135,28 @@ namespace lps {
       }
 
       /// \brief Returns the variables of the rule.
+      /// \return RETURN_DESCRIPTION
       data::data_variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the condition of the rule.
+      /// \return RETURN_DESCRIPTION
       data::data_expression condition() const
       {
         return m_condition;
       }
 
       /// \brief Returns the left hand side of the rule.
+      /// \return RETURN_DESCRIPTION
       action lhs() const
       {
         return m_lhs;
       }
 
       /// \brief Returns the right hand side of the rule.
+      /// \return RETURN_DESCRIPTION
       action_rename_rule_rhs rhs() const
       {
         return m_rhs;
@@ -165,6 +175,7 @@ namespace lps {
       action_rename_rule_list  m_rules;
 
       /// \brief Initialize the action_rename_specification with an aterm_appl.
+      /// \param t A term
       void init_term(atermpp::aterm_appl t)
       {
         m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
@@ -181,6 +192,7 @@ namespace lps {
       { }
 
       /// \brief Constructor.
+      /// \param t A term
       action_rename_specification(atermpp::aterm_appl t)
         : atermpp::aterm_appl(t)
       {
@@ -189,11 +201,10 @@ namespace lps {
       }
 
       /// \brief Constructor.
-      action_rename_specification(
-          data::data_specification  data,
-          action_label_list         action_labels,
-          action_rename_rule_list   rules
-         )
+      /// \param data A data specification
+      /// \param action_labels A sequence of action labels
+      /// \param rules PARAM_DESCRIPTION
+      action_rename_specification(data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
         :
           m_data(data),
           m_action_labels(action_labels),
@@ -209,7 +220,7 @@ namespace lps {
       }
 
       /// \brief Reads the action rename specification from file.
-      /// \param[in] filename
+      /// \param filename A string
       /// If filename is nonempty, input is read from the file named filename.
       /// If filename is empty, input is read from stdin.
       void load(const std::string& filename)
@@ -227,10 +238,10 @@ namespace lps {
       }
 
       /// \brief Writes the action rename specification to file.
-      /// \param[in] filename
+      /// \param filename A string
       /// If filename is nonempty, output is written to the file named filename.
       /// If filename is empty, output is written to stdout.
-      /// \param[in] binary
+      /// \param binary
       /// If binary is true the linear process is saved in compressed binary format.
       /// Otherwise an ascii representation is saved. In general the binary format is
       /// much more compact than the ascii representation.
@@ -244,15 +255,18 @@ namespace lps {
       }
 
       /// \brief Returns the data action_rename_specification.
+      /// \return RETURN_DESCRIPTION
       data::data_specification data() const
       { return m_data; }
 
       /// \brief Returns a sequence of action labels containing all action
       /// labels occurring in the action_rename_specification (but it can have more).
+      /// \return RETURN_DESCRIPTION
       action_label_list action_labels() const
       { return m_action_labels; }
 
       /// \brief Returns the action rename rules.
+      /// \return RETURN_DESCRIPTION
       action_rename_rule_list rules() const
       {
         return m_rules;
@@ -268,6 +282,9 @@ namespace lps {
 
 /// \cond INTERNAL_DOCS
   namespace detail {
+    /// \brief Reads an action rename specification from a stream
+    /// \param from An input stream
+    /// \return A term in an undocumented format
     inline
     ATermAppl parse_action_rename_specification(std::istream& from)
     {
@@ -277,6 +294,10 @@ namespace lps {
       return result;
     }
 
+    /// \brief Type checks an action rename specification
+    /// \param ar_spec A term
+    /// \param spec A term
+    /// \return A term in an undocumented format
     inline
     ATermAppl type_check_action_rename_specification(ATermAppl ar_spec, ATermAppl spec)
     {
@@ -286,6 +307,11 @@ namespace lps {
       return result;
     }
 
+    /// \brief Applies data implementation to an action rename specification
+    /// \param ar_spec A term
+    /// \param spec A term containing a specification
+    /// \return A term in an undocumented format
+    /// \param lps_spec A term
     inline
     ATermAppl implement_action_rename_specification(ATermAppl ar_spec, ATermAppl& lps_spec)
     {
@@ -298,6 +324,11 @@ namespace lps {
     using namespace mcrl2::data;
     using namespace mcrl2::lps;
 
+    /// \brief Renames variables
+    /// \param rcond A data expression
+    /// \param rleft An action
+    /// \param rright An action
+    /// \param generator A generator for fresh identifiers
     template <typename IdentifierGenerator>
     void rename_renamerule_variables(data_expression& rcond, action& rleft, action& rright, IdentifierGenerator& generator)
     {
@@ -329,17 +360,16 @@ namespace lps {
     } 
 
   } // namespace detail
-/// \endcond
-
+  /// \endcond
+  
   /// \brief Parses an action rename specification.
   /// \detail Parses an acion rename specification.
   /// If the action rename specification contains data types that are not
   /// present in the data specification of \p spec they are added to it.
-  /// \param text A string containing an action rename specification
+  /// \param in An input stream
   /// \param spec A linear process specification
   /// \return An action rename specification
   inline
-  // action_rename_specification parse_action_rename_specification(const std::string& text, lps::specification& spec)
   action_rename_specification parse_action_rename_specification(std::istream& in, lps::specification& spec)
   {
     //std::istringstream in(text);
@@ -689,4 +719,3 @@ lps::specification action_rename(
 
 
 #endif // MCRL2_LPS_ACTION_RENAME_H
-

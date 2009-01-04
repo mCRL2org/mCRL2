@@ -99,7 +99,7 @@ namespace pbes_system {
       {}
 
       /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-      /// \param p A pbes
+      /// \param p A PBES
       void run(pbes<>& p)
       {
         if (!p.instantiate_free_variables())

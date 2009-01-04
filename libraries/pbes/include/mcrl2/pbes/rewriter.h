@@ -44,7 +44,7 @@ namespace pbes_system {
       typedef typename core::term_traits<Term>::variable_type variable_type;
 
       /// \brief Rewrites a boolean expression.
-      /// \param x The boolean expression that is rewritten to normal form.
+      /// \param x A term
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
@@ -74,7 +74,7 @@ namespace pbes_system {
       {}
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \param x A term
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
@@ -83,8 +83,8 @@ namespace pbes_system {
       }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \param x A term
+      /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction sigma)
@@ -127,7 +127,7 @@ namespace pbes_system {
       {}
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \param x A term
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
@@ -142,8 +142,8 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \param x A term
+      /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
@@ -178,12 +178,13 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       /// \brief Constructor
       /// \param r A data rewriter
       /// \param e A data enumerator
+      /// \param enumerate_infinite_sorts PARAM_DESCRIPTION
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true)
         : m_rewriter(r, e, enumerate_infinite_sorts)
       {}
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
+      /// \param x A term
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
@@ -191,8 +192,8 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] x The pbes expression that is rewritten to normal form.
-      /// \param[in] sigma A substitution function that is applied to data variables during rewriting.
+      /// \param x A term
+      /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction& sigma)
@@ -214,7 +215,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       { }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \param p A PBES expression
       /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {
@@ -237,7 +238,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       { }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \param p A PBES expression
       /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {
@@ -268,7 +269,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       { }
 
       /// \brief Rewrites a pbes expression.
-      /// \param[in] p The pbes expression that is rewritten to normal form.
+      /// \param p A PBES expression
       /// \return The rewrite result.
       pbes_expression operator()(pbes_expression p)
       {

@@ -30,7 +30,6 @@ namespace data {
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
 /// \brief Data variable
-///
 // DataVarId(<String>, <SortExpr>)
 class data_variable: public data_expression
 {
@@ -42,7 +41,7 @@ class data_variable: public data_expression
     {}
 
     /// \brief Constructor.
-    /// \param t A term.
+    /// \param t A term
     data_variable(atermpp::aterm_appl t)
      : data_expression(t)
     {
@@ -51,7 +50,7 @@ class data_variable: public data_expression
 
     /// \brief Constructor for strings like "d:D".
     /// Only works for constant sorts.
-    /// \param s A string representation of a variable.
+    /// \param s A string
     data_variable(const std::string& s)
     {
       std::string::size_type idx = s.find(':');
@@ -62,15 +61,15 @@ class data_variable: public data_expression
     }
 
     /// \brief Constructor.
-    /// \param name The name of a variable.
-    /// \param s A sort.
+    /// \param name A
+    /// \param s A sort expression
     data_variable(core::identifier_string name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(name, s))
     {}
 
     /// \brief Constructor.
-    /// \param name The name of a variable.
-    /// \param s A sort.
+    /// \param name A string
+    /// \param s A sort expression
     data_variable(const std::string& name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), s))
     {}
@@ -91,11 +90,10 @@ class data_variable: public data_expression
   };
 
   /// \brief Read-only singly linked list of data variables
-  ///
   typedef atermpp::term_list<data_variable> data_variable_list;
 
   /// \brief Returns true if the term t is a data variable
-  /// \param t A term.
+  /// \param t A term
   /// \return True if the term is a data variable.
   inline
   bool is_data_variable(atermpp::aterm_appl t)
@@ -104,7 +102,7 @@ class data_variable: public data_expression
   }
 
   /// \brief Converts a data_variable_list to a data_expression_list.
-  /// \param l A sequence of data variables.
+  /// \param l A sequence of data variables
   /// \return The conversion of the sequence to data expressions.
   inline
   data_expression_list make_data_expression_list(data_variable_list l)

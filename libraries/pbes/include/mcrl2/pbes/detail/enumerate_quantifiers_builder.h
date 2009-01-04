@@ -36,8 +36,12 @@ namespace pbes_system {
 
 namespace detail {
 
-  /// Returns the subset with variables of finite sort.
-  /// TODO: this should be done more efficiently, by avoiding aterm lists
+  /// \brief Computes the subset with variables of finite sort and infinite.
+  // TODO: this should be done more efficiently, by avoiding aterm lists
+  /// \param variables A sequence of data variables
+  /// \param data A data specification
+  /// \param finite_variables A sequence of data variables
+  /// \param infinite_variables A sequence of data variables
   void split_finite_variables(data::data_variable_list variables, const data::data_specification& data, data::data_variable_list& finite_variables, data::data_variable_list& infinite_variables)
   {
     std::vector<data::data_variable> finite;
@@ -57,6 +61,9 @@ namespace detail {
     infinite_variables = data::data_variable_list(infinite.begin(), infinite.end());
   }
 
+  /// \brief Returns a string representation of a container
+  /// \param c A container
+  /// \return A string representation of a container
   template <typename Container>
   std::string print_term_container(const Container& c)
   {
@@ -70,7 +77,10 @@ namespace detail {
     return result.str();
   }
 
-  /// Determines if the unordered sequences s1 and s2 have an empty intersection
+  /// \brief Determines if the unordered sequences s1 and s2 have an empty intersection
+  /// \param s1 A sequence
+  /// \param s2 A sequence
+  /// \return True if the intersection of s1 and s2 is empty
   template <typename Sequence>
   bool empty_intersection(Sequence s1, Sequence s2)
   {
@@ -105,6 +115,10 @@ namespace detail {
       template <typename Term>
       struct join_and
       {
+        /// \brief Returns the conjunction of a sequence of pbes expressions
+        /// \param first Start of a sequence of pbes expressions
+        /// \param last End of a sequence of pbes expressions
+        /// \return The conjunction of the expressions
         template <typename FwdIt>
         Term operator()(FwdIt first, FwdIt last) const
         {
@@ -116,6 +130,10 @@ namespace detail {
       template <typename Term>
       struct join_or
       {
+        /// \brief Returns the disjunction of a sequence of pbes expressions
+        /// \param first Start of a sequence of pbes expressions
+        /// \param last End of a sequence of pbes expressions
+        /// \return The disjunction of the expressions
         template <typename FwdIt>
         Term operator()(FwdIt first, FwdIt last) const
         {
@@ -136,6 +154,9 @@ namespace detail {
           : sigma_(sigma)
         {}
       
+        /// \brief Function call operator
+        /// \param v A variable
+        /// \param t A term
         void operator()(variable_type v, term_type t)
         {
           sigma_[v] = t;
@@ -161,7 +182,10 @@ namespace detail {
         bool&                 is_constant_;
         StopCriterion         stop_;
 
-        /// Determines if the unordered sequences s1 and s2 have an empty intersection
+        /// \brief Determines if the unordered sequences s1 and s2 have an empty intersection
+        /// \param s1 A sequence
+        /// \param s2 A sequence
+        /// \return True if the intersection of s1 and s2 is empty
         template <typename Sequence, typename Set>
         bool empty_intersection(const Sequence& s1, const Set& s2)
         {
@@ -186,6 +210,7 @@ namespace detail {
           : A_(A), r_(r), phi_(phi), sigma_(sigma), v_(v), is_constant_(is_constant), stop_(stop)
         {}
     
+        /// \brief Function call operator
         void operator()()
         {
           PbesTerm c = r_(phi_, sigma_);
@@ -230,6 +255,11 @@ namespace detail {
         return sequence_action<PbesTermSet, PbesTerm, SubstitutionFunction, VariableSet, StopCriterion>(A, r, phi, sigma, v, is_constant, stop);
       }
 
+      /// \brief Prints debug information to standard error
+      /// \param x A sequence of variables
+      /// \param phi A term
+      /// \param sigma A substitution function
+      /// \param stop_value A term
       template <typename SubstitutionFunction>
       void print_arguments(variable_sequence_type x, const term_type& phi, SubstitutionFunction& sigma, term_type stop_value) const
       {
@@ -240,6 +270,10 @@ namespace detail {
                   << sigma.to_string() << std::endl;
       }
 
+      /// \brief Returns a string representation of D[i]
+      /// \param Di A sequence of data terms
+      /// \param i A positive integer
+      /// \return A string representation of D[i]
       std::string print_D_element(const atermpp::vector<data_term_type>& Di, unsigned int i) const
       {
         std::ostringstream out;
@@ -247,6 +281,8 @@ namespace detail {
         return out.str();
       }
 
+      /// \brief Prints debug information to standard error
+      /// \param D The sequence D of the algorithm
       void print_D(const std::vector<atermpp::vector<data_term_type> >& D) const
       {
         for (unsigned int i = 0; i < D.size(); i++)
@@ -255,6 +291,9 @@ namespace detail {
         }
       }
       
+      /// \brief Returns a string representation of a todo list element
+      /// \param e A todo list element
+      /// \return A string representation of a todo list element
       std::string print_todo_list_element(const boost::tuple<variable_type, data_term_type, unsigned int>& e) const
       {
         // const variable_type& xk = boost::get<0>(e);
@@ -263,6 +302,8 @@ namespace detail {
         return "(" + core::pp(y) + ", " + boost::lexical_cast<std::string>(k) + ")";
       }
 
+      /// \brief Prints a todo list to standard error
+      /// \param todo A todo list
       void print_todo_list(const std::deque<boost::tuple<variable_type, data_term_type, unsigned int> >& todo) const
       {
         std::cerr << "  todo = [";
@@ -407,12 +448,22 @@ namespace detail {
         : pbesr(r), datae(e)
       {}
       
+      /// \brief Enumerates a universal quantification
+      /// \param x A sequence of variables
+      /// \param phi A term
+      /// \param sigma A substitution function
+      /// \return The enumeration result
       template <typename SubstitutionFunction>
       term_type enumerate_universal_quantification(variable_sequence_type x, term_type phi, SubstitutionFunction& sigma)
       {
         return enumerate(x, phi, sigma, tr::is_false, tr::false_(), join_and<term_type>());
       }
 
+      /// \brief Enumerates an existential quantification
+      /// \param x A sequence of variables
+      /// \param phi A term
+      /// \param sigma A substitution function
+      /// \return The enumeration result
       template <typename SubstitutionFunction>
       term_type enumerate_existential_quantification(variable_sequence_type x, term_type phi, SubstitutionFunction& sigma)
       {
@@ -421,7 +472,7 @@ namespace detail {
   };
 
   // Simplifying PBES rewriter that eliminates quantifiers using enumeration.
-  /// \param[in] SubstitutionFunction This must be a MapSubstitution.
+  /// \param SubstitutionFunction This must be a MapSubstitution.
   template <typename Term, typename DataRewriter, typename DataEnumerator, typename SubstitutionFunction>
   struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction>
   {
@@ -440,15 +491,22 @@ namespace detail {
     /// If true, quantifier variables of infinite sort are enumerated.
     bool m_enumerate_infinite_sorts;
     
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param r A data rewriter
+    /// \param enumerator A data enumerator
+    /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
     enumerate_quantifiers_builder(DataRewriter& r, DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
       : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
     { }
 
 
+    /// \brief Visit forall node
     /// Visit forall node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param phi A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       if (m_enumerate_infinite_sorts)
@@ -471,8 +529,13 @@ namespace detail {
       }
     }
 
+    /// \brief Visit exists node
     /// Visit exists node.
-    ///
+    /// \param x A term
+    /// \param variables A sequence of variables
+    /// \param phi A term
+    /// \param sigma A substitution function
+    /// \return The result of visiting the node
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       if (m_enumerate_infinite_sorts)

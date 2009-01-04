@@ -20,9 +20,9 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// Parses a pbes specification.
-  /// \param text The text that is parsed.
-  /// \result The resulting pbes.
+  /// \brief Parses a PBES specification.
+  /// \param text A string
+  /// \return The parsed PBES
   inline
   pbes<> txt2pbes(const std::string& text)
   {

@@ -22,6 +22,10 @@ namespace data {
 
 namespace detail {
 
+/// \brief FUNCTION_DESCRIPTION
+/// \param x PARAM_DESCRIPTION
+/// \param y PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename T>
 std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
 {
@@ -30,6 +34,10 @@ std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
+/// \brief FUNCTION_DESCRIPTION
+/// \param x PARAM_DESCRIPTION
+/// \param y PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename T>
 std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
 {
@@ -38,6 +46,10 @@ std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
+/// \brief FUNCTION_DESCRIPTION
+/// \param x PARAM_DESCRIPTION
+/// \param y PARAM_DESCRIPTION
+/// \return RETURN_DESCRIPTION
 template <typename T>
 std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 {

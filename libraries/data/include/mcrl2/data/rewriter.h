@@ -71,6 +71,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
+      /// \param r PARAM_DESCRIPTION
       basic_rewriter(Rewriter* r)
         : m_rewriter(r)
       { }
@@ -78,19 +79,20 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
+      /// \param r PARAM_DESCRIPTION
       basic_rewriter(boost::shared_ptr<Rewriter>& r)
       	: m_rewriter(r)
       { }
 
       /// \brief Constructor.
-      /// \param d A data specification.
+      /// \param d A data specification
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_rewriter(createRewriter(d, static_cast<RewriteStrategy>(s)))
       { }
 
       /// \brief Adds an equation to the rewrite rules.
-      /// \param[in] eq The equation that is added.
+      /// \param eq The equation that is added.
       /// \return Returns true if the operation succeeded.
       bool add_rule(const data_equation& eq)
       {
@@ -98,7 +100,7 @@ namespace data {
       }
 
       /// \brief Removes an equation from the rewrite rules.
-      /// \param[in] eq The equation that is removed.
+      /// \param eq The equation that is removed.
       void remove_rule(const data_equation& eq)
       {
         m_rewriter.get()->removeRewriteRule(eq);
@@ -120,16 +122,15 @@ namespace data {
 
     public:
       /// \brief Constructor.
-      /// \param d A data specification.
+      /// \param d A data specification
       /// \param s A rewriter strategy.
       rewriter(data_specification d = default_data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression>(d, s)
       { }
 
       /// \brief Rewrites a data expression.
-      /// \param d The term to be rewritten.
+      /// \param d A data expression
       /// \return The normal form of d.
-      ///
       data_expression operator()(const data_expression& d) const
       {
         return m_rewriter.get()->rewrite(d);
@@ -137,10 +138,9 @@ namespace data {
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
       /// to data variables.
-      /// \param d A term.
-      /// \param sigma A substitution function.
+      /// \param d A data expression
+      /// \param sigma A substitution function
       /// \return The normal form of the term.
-      ///
       template <typename SubstitutionFunction>
       data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
       {
@@ -153,14 +153,14 @@ namespace data {
   {
     public:
       /// \brief Constructor.
-      /// \param d A data specification.
+      /// \param d A data specification
       /// \param s A rewriter strategy.
       rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression_with_variables>(d, s)
       { }
 
       /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
-      /// \param r A data rewriter.
+      /// \param r A data rewriter
       rewriter_with_variables(rewriter r)
         : basic_rewriter<data_expression_with_variables>(r.m_rewriter)
       {}
@@ -168,7 +168,6 @@ namespace data {
       /// \brief Rewrites a data expression.
       /// \param d The term to be rewritten.
       /// \return The normal form of d.
-      ///
       data_expression_with_variables operator()(const data_expression_with_variables& d) const
       {
         data_expression t = m_rewriter.get()->rewrite(d);
@@ -179,9 +178,8 @@ namespace data {
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
       /// to data variables.
       /// \param d A term.
-      /// \param sigma A substitution function.
+      /// \param sigma A substitution function
       /// \return The normal form of the term.
-      ///
       template <typename SubstitutionFunction>
       data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
       {
@@ -222,7 +220,7 @@ namespace data {
       {}
 
       /// \brief Function application.
-      /// \param v A variable.
+      /// \param v A variable
       /// \return The corresponding value.
       term_type operator()(const variable_type& v) const
       {
@@ -230,6 +228,7 @@ namespace data {
         return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
       /// \return A string representation of the map, for example [a := 3, b := true].
       std::string to_string() const
       {
