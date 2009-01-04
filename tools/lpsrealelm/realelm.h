@@ -28,6 +28,7 @@ Term realelm_data_expression_map_replace(Term t, const MapContainer& replacement
 
 // Terms that must be protected are put in the atermpp set below.
 static atermpp::set < data_expression > protective_set;
+static void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
 
 class real_representing_variable
 {
@@ -61,7 +62,7 @@ class real_representing_variable
     }
 };
 
-typedef atermpp::vector< real_representing_variable > context_type;
+typedef std::vector< real_representing_variable > context_type;
 
 class summand_information
 {
@@ -101,11 +102,27 @@ class summand_information
     { return summand_real_nextstate_map;
     }
 
+    /// \brief Update the new_values_for_xi_variables given that a new xi variable
+    ///        has been added to context.
+    /// \details Assume the new variable in the context is xi, with as bounds t and u.
+    ///          First check whether 1) t[x:=g(x)] and u[x:=g(x)] are smaller, equal or greater and
+    ///          if so, store this value as the default value for xi in this summand.
+    ///          Or 2) check whether t[:=g(x)] and u[x:=g(x)] form the bounds of another
+    ///          variable xi' and substitute xi' for xi. 
+    ///          If neither 1) or 2) applies subsitute the default data_expression() as an
+    ///          indication that no fixed value for xi can be used in this summand.
+    ///          Secondly, check whether the bounds for xi imply the substituted bounds for
+    ///          the other variables xi' and substitute xi for xi'.
     void add_a_new_next_state_argument(const context_type &context, const rewriter &r)
-    { // TODO: normalize the inequalities.
+    { 
+      assert(context.size()==new_values_for_xi_variables.size()+1);
       real_representing_variable new_xi_variable=context.back();
-      data_expression substituted_lowerbound=r(realelm_data_expression_map_replace(new_xi_variable.get_lowerbound(),summand_real_nextstate_map));
-      data_expression substituted_upperbound=r(realelm_data_expression_map_replace(new_xi_variable.get_upperbound(),summand_real_nextstate_map));
+      data_expression xi_t=new_xi_variable.get_lowerbound();
+      data_expression xi_u=new_xi_variable.get_upperbound();
+      data_expression substituted_lowerbound=realelm_data_expression_map_replace(xi_t,summand_real_nextstate_map);
+      data_expression substituted_upperbound=realelm_data_expression_map_replace(xi_u,summand_real_nextstate_map);
+      normalize_pair(substituted_lowerbound,substituted_upperbound,r,false);
+     
       // First check whether this new next state argument follows from an existing argument
       if (r(core::detail::gsMakeDataExprLT(substituted_lowerbound,substituted_upperbound))==true_())
       { new_values_for_xi_variables.push_back(smaller());
@@ -128,25 +145,36 @@ class summand_information
           }
         }
         if (!success)
-        { // Check whether this value can be set, immediatel, or whether other expressions can be set.
+        { // Check whether this value can be set, immediately, or whether other expressions can be set.
           new_values_for_xi_variables.push_back(mcrl2::data::data_expression());
         }
       }
 
       if (new_values_for_xi_variables.back()!=data_expression())
-      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is " << pp(new_values_for_xi_variables.back()) << "\n";
+      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is " << pp(new_values_for_xi_variables.back()) << "(" << &(new_values_for_xi_variables.back()) << ")\n";
       }
       else
-      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is undefined.\n";
+      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is undefined. (" 
+                       << &(new_values_for_xi_variables.back()) << ")\n";
       }
       // At this point a data_expression has been pushed to the back of the new_values_for_xi_variables
       // Now it must be checked whether the newly added xi variable can lead to a standard value of
       // existing xi variables.
       
-      for(atermpp::vector < mcrl2::data::data_expression >::iterator xi=new_values_for_xi_variables.begin();
-                       (xi+1)!=new_values_for_xi_variables.end(); ++xi)
-      { if (*xi==data_expression())
-        { // Check something.
+      context_type::const_iterator c=context.begin();
+      for(atermpp::vector < mcrl2::data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
+                       (cxi+1)!=new_values_for_xi_variables.end(); ++cxi, ++c)
+      { if (*cxi==data_expression())
+        { // Check whether lowerbound,upperbound for xi imply the substituted, normalized lowerbounds for
+          // c->get_variable().
+          data_expression cxi_t=c->get_lowerbound();
+          data_expression cxi_u=c->get_upperbound();
+          data_expression substituted_cxi_t=realelm_data_expression_map_replace(cxi_t,summand_real_nextstate_map);
+          data_expression substituted_cxi_u=realelm_data_expression_map_replace(cxi_u,summand_real_nextstate_map);
+          normalize_pair(substituted_cxi_t,substituted_cxi_u,r,false);
+          if ((substituted_cxi_t==xi_t) && (substituted_cxi_u==xi_u))
+          { *cxi=new_xi_variable.get_variable();
+          }
         }
       }
       assert(context.size()==new_values_for_xi_variables.size());

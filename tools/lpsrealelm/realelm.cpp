@@ -368,26 +368,34 @@ data_expression_list sort(const data_expression& e)
   return r;
 }
 
-/// \brief Order the variables in an inequality, using a lexicographic order.
+/// \brief Order the variables in the lhs of an inequality, using a lexicographic order.
 /// \param inequality An inequality
 /// \param r A rewriter
+/// \param negated If initially true, it allows to negate the data expression. If it results
+//         in true, the data expression has been negated.
 /// \ret A version of the inequality in which the variables occur in
 ///      lexicographically sorted order.
 static inline
-data_expression order_inequality(const data_expression& inequality, rewriter& r)
-{
-  assert(is_inequality(inequality));
-  data_expression left = lhs(inequality);
-  if (!is_number(left) && !is_data_variable(left))
-  {
-    data_expression_list sorted = sort(left);
-    left = real_zero();
-    for(data_expression_list::iterator j = sorted.begin(); j != sorted.end(); ++j)
-    {
-      left = plus(left, *j);
-    }
+data_expression order_lhs_inequality(const data_expression left, const rewriter& r,bool &negated)
+{ 
+  data_expression_list sorted = sort(left);
+  if (sorted.empty())
+  { return real_zero();
   }
-  return data_application(static_cast<const data_application&>(inequality).head(), make_list(r(left), r(rhs(inequality))));
+  if (negated)
+  { negated=is_negate(sorted.front());
+  }
+
+  data_expression result = real_zero();
+  
+  for(data_expression_list::iterator j = sorted.begin(); j != sorted.end(); ++j)
+  {
+    result = plus(result, *j);
+  }
+  if (negated)
+  { result=negate(result);
+  }
+  return r(result);
 }
 
 /// \brief Split constant and variable parts of a data expression
@@ -552,6 +560,56 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
   return r;
 }
 
+/// \brief Normalize a pair of terms.
+/// \details Transform the inequality in e such that the left hand side only
+///        contains multiples of variables and the right hand side contains a
+///        single constant. 
+/// \param e A data expression
+/// \param r A rewriter
+/// \param preserve_ordering If preserver_ordering is true the left and right hand
+//         side are not multiplied by a negative number. For the resulting t' and u' 
+//         it holds that t'<u' iff t<u. If preserve_ordering is false, then it holds
+//         that t'<u' iff t<u or u<t.
+/// \pre e is an inequality
+/// \ret An inequality e' equivalent to e, such that the left hand side is of
+///      the form c1 * e1 + ... + cn * en === d, with === one of ==, <, <=, >,
+///      >=. In case there are no variables left, the left hand side is the 
+///      expression 0.
+static inline void normalize_pair(data_expression& t, data_expression &u, const rewriter& r, const bool preserve_ordering)
+{
+
+  std::pair<data_expression, data_expression> left = split_variables_and_constants(r(t));
+  std::pair<data_expression, data_expression> right = split_variables_and_constants(r(u));
+  // Variables are moved to the left, constants to the right of each pair.
+
+  // gsDebugMsg("left.first = %P, left.second = %P, right.first = %P, right.second = %P\n", (ATermAppl)left.first, (ATermAppl)left.second, (ATermAppl)right.first, (ATermAppl)right.second);
+
+  data_expression new_left = left.first;
+  while(is_plus(right.first))
+  {
+    new_left = plus(new_left, negate(rhs(right.first)));
+    right.first = lhs(right.first);
+  }
+  new_left = r(plus(new_left, negate(right.first)));
+
+  data_expression new_right = right.second;
+  while(is_plus(left.second))
+  {
+    new_right = plus(new_right, negate(rhs(left.second)));
+    left.second = lhs(left.second);
+  }
+
+  bool negateable=!preserve_ordering;
+  t=order_lhs_inequality(new_left,r,negateable);
+  if (negateable)
+  { u = r(plus(negate(new_right), left.second));
+  }
+  else
+  { u = r(plus(new_right, negate(left.second)));
+  }
+}
+
+
 /// \brief Normalize an equality.
 /// \details Transform the inequality in e such that the left hand side only
 ///        contains multiples of variables and the right hand side contains a
@@ -571,37 +629,15 @@ data_expression normalize_inequality(const data_expression& e, rewriter& r)
   // gsDebugMsg("Normalizing inequality %P\n", (ATermAppl)e);
 
   data_application d = static_cast<const data_application&>(e);
-  std::pair<data_expression, data_expression> left = split_variables_and_constants(r(lhs(d)));
-  std::pair<data_expression, data_expression> right = split_variables_and_constants(r(rhs(d)));
-  // Variables are moved to the left, constants to the right of each pair.
-
-  // gsDebugMsg("left.first = %P, left.second = %P, right.first = %P, right.second = %P\n", (ATermAppl)left.first, (ATermAppl)left.second, (ATermAppl)right.first, (ATermAppl)right.second);
-
-  data_expression new_left = left.first;
-  while(is_plus(right.first))
-  {
-    new_left = plus(new_left, negate(rhs(right.first)));
-    right.first = lhs(right.first);
-  }
-  new_left = r(plus(new_left, negate(right.first)));
-
-  data_expression new_right = right.second;
-  while(is_plus(left.second))
-  {
-    new_right = plus(new_right, negate(rhs(left.second)));
-    left.second = lhs(left.second);
-  }
-  new_right = r(plus(new_right, negate(left.second)));
-
-  data_expression result = data_application(d.head(), make_list(new_left, new_right));
-
-  // gsDebugMsg("Normalization result %P\n", (ATermAppl)result);
-
-  result = order_inequality(result, r);
-  // gsDebugMsg("Ordered version of result %P\n", (ATermAppl)result);
-
+  data_expression left=lhs(d);
+  data_expression right=rhs(d);
+  // procedure below changes left and right into normal form.
+  normalize_pair(left,right,r,true);
+  data_expression result = data_application(d.head(), make_list(left, right));
   return result;
 }
+
+
 
 /// \brief Normalize the inequalities in l. 
 /// \details See normalize_inequality for more details. The result
@@ -1010,21 +1046,26 @@ static void add_inequalities_to_context_postponed(
     if (is_inequality(*i))
     { data_expression left = lhs(*i);
       data_expression right = rhs(*i);
-      if(is_negative(right) || (right == real_zero() && is_negate(left)))
+      normalize_pair(left,right,r,false);
+
+      // if(is_negative(right) || (right == real_zero() && is_negate(left)))
+      // {
+      //  left = r(negate(left));
+      //  right = r(negate(right));
+      //}
+      if (left!=real_zero())
       {
-        left = r(negate(left));
-        right = r(negate(right));
-      }
-      context_type::const_iterator c;
-      for(c=context.begin() ; c!=context.end(); ++c)
-      { if ((c->get_lowerbound()==left) && (c->get_upperbound()==right))
-        { break;
+        context_type::const_iterator c;
+        for(c=context.begin() ; c!=context.end(); ++c)
+        { if ((c->get_lowerbound()==left) && (c->get_upperbound()==right))
+          { break;
+          }
         }
-      }
-      if(c == context.end())
-      {
-        
-        inequalities_to_add.insert(std::pair< data_expression, data_expression >(left,right));
+        if(c == context.end())
+        {
+          
+          inequalities_to_add.insert(std::pair< data_expression, data_expression >(left,right));
+        }
       }
     }
   } 
@@ -1193,7 +1234,7 @@ data_expression_list simplify_condition(const data_expression_list& cond, const 
 /// \ret true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
 static
-bool is_inconsistent(const data_expression_list& cond, rewriter& r)
+bool is_inconsistent(const data_expression_list& cond, const rewriter& r)
 {
   // Check if any condition rewrites to false.
   if(std::find(cond.begin(), cond.end(), false_()) != cond.end())
@@ -1344,22 +1385,23 @@ static data_expression_list transform_real_to_cond(
 ///      nextstate determined by i.
 static
 summand generate_summand(const summand& s, 
-                         const std::vector <data_expression> &xi_condition,
-                         unsigned long i, 
-                         const atermpp::vector < data_expression > &values_for_zeta,
+                         const data_expression &xi_condition,
+                         // unsigned long i, 
+                         const data_expression_list &extra_zeta_values,
+                         const atermpp::vector < data_expression > &predetermined_values_for_zeta,
                          data_expression_list cond, 
                          context_type& zeta_context, 
                          context_type& complete_context, 
                          rewriter& r)
 {
-  // gsDebugMsg("generating new summand from summand %P, with cond %P, i = %ld\n", (ATermAppl)s, (ATermList)cond, i);
+  gsMessage("generating new summand from summand %P, with cond %P \n%P\n", (ATermAppl)s, (ATermList)cond,(ATermList)extra_zeta_values);
 
   std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
   data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
   // XXXXXXXXXXXX
   // cond = transform_real_to_cond(cond, context,r);
   // condition = and_(condition, join_and(cond.begin(), cond.end()));
-  condition=and_(condition,join_and(xi_condition.begin(), xi_condition.end()));
+  condition=and_(condition,xi_condition);
 
   // gsDebugMsg("condition: %P\n", (ATermAppl)condition);
 
@@ -1372,37 +1414,32 @@ summand generate_summand(const summand& s,
 
   data_assignment_list nextstate = get_nonreal_assignments(s.assignments());
   nextstate = reverse(nextstate);
-  context_type::const_iterator c = zeta_context.begin();
+  // context_type::const_iterator c = zeta_context.begin();
   context_type::const_iterator c_complete = complete_context.begin();
-  for(atermpp::vector < data_expression >::const_iterator j = values_for_zeta.begin(); 
-                j != values_for_zeta.end(); ++j,++c_complete)
+  data_expression_list::iterator extra_zeta_value=extra_zeta_values.begin();
+  if (extra_zeta_value!=extra_zeta_values.end())
+  { gsMessage("extra zeta value check: %P   %P\n",(ATermList)extra_zeta_values,(ATermAppl)*extra_zeta_value);
+  }
+  for(atermpp::vector < data_expression >::const_iterator j = predetermined_values_for_zeta.begin(); 
+                j != predetermined_values_for_zeta.end(); ++j,++c_complete)
   { 
     if ((*j)!=data_expression())
     { // We have a preset value for the j'th variable in the next state
       std::cerr << "Value for zeta: " << pp(*j) << "\n";
-      push_front(nextstate,data_assignment(c_complete->get_variable(),*j));
+      std::cerr << "Preset value for " << pp(c_complete->get_variable()) << ":=" << pp(*j) << "\n";
+      nextstate=push_front(nextstate,data_assignment(c_complete->get_variable(),*j));
     }
     else
-    { std::cerr << "zeta context: " << pp(c->get_variable()) << "\n";
-      div_t q = div(i, 3);
-      i = q.quot;
-      if(q.rem == 0)
-      {
-        nextstate = push_front(nextstate, data_assignment(c->get_variable(), data_expression(smaller())));
-      }
-      else if(q.rem == 1)
-      {
-        nextstate = push_front(nextstate, data_assignment(c->get_variable(), data_expression(equal())));
-      }
-      else
-      {
-        assert(q.rem == 2);
-        nextstate = push_front(nextstate, data_assignment(c->get_variable(), data_expression(larger())));
-      }
-      ++c;
+    { 
+      std::cerr << "Hier0\n";
+      std::cerr << "Extra value for " << pp(c_complete->get_variable()) << ":=" << pp(*extra_zeta_value) << "\n";
+      std::cerr << "Hier\n";
+      nextstate=push_front(nextstate,data_assignment(c_complete->get_variable(),*extra_zeta_value));
+      ++extra_zeta_value;
+      std::cerr << "Hier1\n";
     }
   }
-  assert(c==zeta_context.end());
+  assert(extra_zeta_value==extra_zeta_values.end());
  
   nextstate = reverse(nextstate);
 
@@ -1459,6 +1496,184 @@ data_assignment_list determine_process_initialization(
   return reverse(init);
 }
 
+
+static void generate_zeta_combinations_rec(
+              const context_type::const_reverse_iterator context_begin,
+              const context_type::const_reverse_iterator context_end,
+              const data_expression_list condition_list,
+              const data_expression_list comp_value_list,
+              atermpp::vector < data_expression_list > &resulting_conditions,
+              atermpp::vector < data_expression_list > &resulting_comp_values,
+              const atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  
+                    &summand_real_nextstate_map,
+              const rewriter &r)
+{ if (context_begin==context_end)
+  { resulting_conditions.push_back(condition_list);
+    resulting_comp_values.push_back(comp_value_list);
+    return;
+  }
+  data_expression t=realelm_data_expression_map_replace(
+                           context_begin->get_lowerbound(),
+                           summand_real_nextstate_map);
+  data_expression u=realelm_data_expression_map_replace(
+                           context_begin->get_upperbound(),
+                           summand_real_nextstate_map);
+
+  data_expression_list new_condition_list=
+                         push_front(condition_list,r(equal_to(t,u)));
+  data_expression_list new_comp_value_list=
+                         push_front(comp_value_list, data_expression(equal()));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_zeta_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      summand_real_nextstate_map,
+                                      r);
+  }
+  new_condition_list=push_front(condition_list,r(less(t,u)));
+  new_comp_value_list=push_front(comp_value_list, data_expression(smaller()));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_zeta_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      summand_real_nextstate_map,
+                                      r);
+  }
+  new_condition_list=push_front(condition_list,r(less(u,t)));
+  new_comp_value_list=push_front(comp_value_list,data_expression(larger()));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_zeta_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      summand_real_nextstate_map,
+                                      r);
+  }
+}
+
+/// \brief generate all combinations of contexts that are not inconsistent with each other
+///
+/// \param context The context variables from which the combinations must be generated.
+/// \param resulting_comp_values A vector with lists of values for the zeta/xi variables.
+///                              Depending on the parameter value_no_condition each list
+///                              contains values smaller, equal or greater corresponding to
+///                              the corresponding list in the result, or it contains
+///                              conditions is_smaller(xi), is_equal(xi) and is_greater(xi).
+/// \ret A vector containing consistent lists of conditions corresponding to context.
+static atermpp::vector < data_expression_list > 
+       generate_zeta_combinations(
+                   const context_type &context,
+                   atermpp::vector < data_expression_list > &resulting_comp_values,
+                   const atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  
+                         &summand_real_nextstate_map,
+                   const rewriter &r)
+{ atermpp::vector < data_expression_list > resulting_conditions;
+  generate_zeta_combinations_rec(
+                   context.rbegin(),
+                   context.rend(),
+                   data_expression_list(),
+                   data_expression_list(),
+                   resulting_conditions,
+                   resulting_comp_values,
+                   summand_real_nextstate_map,
+                   r);
+  return resulting_conditions;
+}
+
+static void generate_xi_combinations_rec(
+              const context_type::const_reverse_iterator context_begin,
+              const context_type::const_reverse_iterator context_end,
+              const data_expression_list condition_list,
+              const data_expression_list comp_value_list,
+              atermpp::vector < data_expression_list > &resulting_conditions,
+              atermpp::vector < data_expression_list > &resulting_comp_values,
+              const rewriter &r)
+{ if (context_begin==context_end)
+  { resulting_conditions.push_back(condition_list);
+    resulting_comp_values.push_back(comp_value_list);
+    return;
+  }
+  data_expression_list new_condition_list=
+                         push_front(condition_list,
+                             equal_to(
+                                    context_begin->get_lowerbound(),
+                                    context_begin->get_upperbound()));
+  data_expression_list new_comp_value_list=
+                         push_front(comp_value_list,
+                                    data_expression(is_equal(context_begin->get_variable())));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_xi_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      r);
+  }
+  new_condition_list=push_front(condition_list,
+                               less(context_begin->get_lowerbound(),
+                                    context_begin->get_upperbound()));
+  new_comp_value_list=push_front(comp_value_list,
+                                 data_expression(is_smaller(context_begin->get_variable())));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_xi_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      r);
+  }
+  new_condition_list=push_front(condition_list,
+                             less(context_begin->get_upperbound(),
+                                  context_begin->get_lowerbound()));
+  new_comp_value_list=push_front(comp_value_list,
+                                 data_expression(is_larger(context_begin->get_variable())));
+  if (!is_inconsistent(new_condition_list,r))
+  { generate_xi_combinations_rec(context_begin+1,
+                                      context_end,
+                                      new_condition_list,
+                                      new_comp_value_list,
+                                      resulting_conditions,
+                                      resulting_comp_values,
+                                      r);
+  }
+}
+
+/// \brief generate all combinations of contexts that are not inconsistent with each other
+///
+/// \param context The context variables from which the combinations must be generated.
+/// \param resulting_comp_values A vector with lists of values for the zeta/xi variables.
+///                              Depending on the parameter value_no_condition each list
+///                              contains values smaller, equal or greater corresponding to
+///                              the corresponding list in the result, or it contains
+///                              conditions is_smaller(xi), is_equal(xi) and is_greater(xi).
+/// \ret A vector containing consistent lists of conditions corresponding to context.
+static atermpp::vector < data_expression_list > 
+       generate_xi_combinations(
+                   const context_type &context,
+                   atermpp::vector < data_expression_list > &resulting_comp_values,
+                   const rewriter &r)
+{ atermpp::vector < data_expression_list > resulting_conditions;
+  generate_xi_combinations_rec(
+                   context.rbegin(),
+                   context.rend(),
+                   data_expression_list(),
+                   data_expression_list(),
+                   resulting_conditions,
+                   resulting_comp_values,
+                   r);
+  return resulting_conditions;
+}
+
 // Check whether variables in the first two arguments coincide with those in the last two
 static bool are_data_variables_shared(
                  const data_expression d1,
@@ -1480,6 +1695,28 @@ static bool are_data_variables_shared(
 
   // So, the variables in d1 and d2 do not occur in e and l.
   return false;
+}
+
+void print_debug(const std::vector <summand_information> &s)
+{
+  for(std::vector < summand_information >::const_iterator i = s.begin();
+                       i != s.end(); ++i)
+  {
+     for(atermpp::vector < mcrl2::data::data_expression > ::const_iterator
+                                value_for_xi=i->get_new_values_for_xi_variables().begin();
+                                value_for_xi!=i->get_new_values_for_xi_variables().end();
+                                ++value_for_xi)
+      { if ((*value_for_xi)==data_expression())
+        { 
+          std::cerr << "Pvalue is undefined ";
+        }
+        else
+        { std::cerr << "Pvalue is " << pp(*value_for_xi);
+        }
+        std::cerr << " A " << &(*value_for_xi) << " ";
+      }
+      std::cerr << "\n";
+  }
 }
 
 // Determine whether the pair t,u belonging to the variable xi
@@ -1566,31 +1803,33 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
   summand_list summands;
   do
   {
-    add_postponed_inequalities_to_context(
-                new_inequalities,
-                summand_info,
-                context,
-                r,
-                variable_generator);
-
     new_inequalities.clear();
     summands=summand_list();
     iteration++;
     gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration, context.size());
 
+    print_debug(summand_info);
     for(std::vector < summand_information >::const_iterator i = summand_info.begin(); 
                        i != summand_info.end(); ++i)
     {
       std::cerr << "SUMMAND_IN: " << pp(i->get_summand()) << "\n";
+      for(atermpp::vector < mcrl2::data::data_expression > ::iterator l=i->get_new_values_for_xi_variables().begin(); 
+             l!=i->get_new_values_for_xi_variables().end(); ++l)
+      { std::cerr << "OUTsummand " << pp(*l) << "\n";
+      }
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
       // occur in the condition or in the effect.
       context_type nextstate_context_for_this_summand;
-      atermpp::vector < mcrl2::data::data_expression > ::const_iterator 
+      // XXXXXXXXX Hier gaat het fout. De waarde voor value_for_xi
+      // deugt niet altijd. Maar waarom?????
+      atermpp::vector < data_expression > ::const_iterator 
                                 value_for_xi=i->get_new_values_for_xi_variables().begin();
+      print_debug(summand_info);
       for(context_type::iterator c=context.begin();
                                  c!=context.end(); ++c, ++value_for_xi)
-      { if ((*value_for_xi)==data_expression())
+      { print_debug(summand_info);
+        if ((*value_for_xi)==data_expression())
         // No value for xi is known. So, we might want to set it.
         { nextstate_context_for_this_summand.push_back(*c);
           std::cerr << "Predefined value for " << pp(c->get_variable()) << " is undefined \n";
@@ -1602,18 +1841,29 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       }
 
       //Combinations to be considered
-      const unsigned long nextstate_context_combinations = 
-                   pow(3, nextstate_context_for_this_summand.size()); 
-
-      std::cerr << "Nextstate combinations: " << nextstate_context_combinations << "\n";
-      for(unsigned long nextstate_combination = 0; 
-                        nextstate_combination < nextstate_context_combinations; 
-                        ++ nextstate_combination)
+      //const unsigned long nextstate_context_combinations = 
+      //             pow(3, nextstate_context_for_this_summand.size()); 
+      atermpp::vector < data_expression_list > nextstate_values;
+      atermpp::vector < data_expression_list > nextstate_context_combinations =
+                    generate_zeta_combinations(
+                                    nextstate_context_for_this_summand,
+                                    nextstate_values,
+                                    i->get_summand_real_nextstate_map(),
+                                    r);
+      assert(nextstate_values.size()==nextstate_context_combinations.size());
+      std::cerr << "#zeta combinations: " << nextstate_context_combinations.size() << "\n";
+      atermpp::vector < data_expression_list >::iterator nextstate_value=nextstate_values.begin();
+      print_debug(summand_info);
+      for(atermpp::vector < data_expression_list >::iterator 
+                nextstate_combination = nextstate_context_combinations.begin(); 
+                nextstate_combination != nextstate_context_combinations.end(); 
+                        ++ nextstate_combination,++ nextstate_value)
       { // zeta
-        data_expression_list zeta_condition = compute_inequalities(nextstate_combination, nextstate_context_for_this_summand);
-
+        //data_expression_list zeta_condition = compute_inequalities(nextstate_combination, nextstate_context_for_this_summand);
         // zeta[x := g(x)]
-        zeta_condition = data_expression_map_replace_list(zeta_condition, i->get_summand_real_nextstate_map());
+        data_expression_list zeta_condition=*nextstate_combination;
+
+        //zeta_condition = data_expression_map_replace_list(zeta_condition, i->get_summand_real_nextstate_map());
 
         // original condition of the summand && zeta[x := g(x)]
         data_expression_list condition = zeta_condition + i->get_summand_real_conditions();
@@ -1657,11 +1907,22 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           }
         }
 
-        const unsigned long xi_context_combinations = 
-                   pow(3, filtered_xi_context_for_this_summand.size()); 
+        // const unsigned long xi_context_combinations = 
+        //           pow(3, filtered_xi_context_for_this_summand.size()); 
+        
+        atermpp::vector < data_expression_list > xi_context_conditions;
+        atermpp::vector < data_expression_list > xi_context_combinations =
+                    generate_xi_combinations(filtered_xi_context_for_this_summand,
+                                                  xi_context_conditions,r);
 
-        std::cerr << "Xi combinations: " << xi_context_combinations << "\n";
-        for(unsigned long xi_context_combination = 0; xi_context_combination < xi_context_combinations; ++xi_context_combination)
+        std::cerr << "Xi combinations: " << xi_context_combinations.size() << "\n";
+        // for(unsigned long xi_context_combination = 0; xi_context_combination < xi_context_combinations; ++xi_context_combination)
+        atermpp::vector < data_expression_list >::const_iterator 
+                        xi_context_condition=xi_context_conditions.begin();
+        for(atermpp::vector < data_expression_list >::iterator 
+                  xi_context_combination = xi_context_combinations.begin(); 
+                  xi_context_combination != xi_context_combinations.end(); 
+                  ++xi_context_combination)
         {
           // xi == xi'
           // zeta
@@ -1677,24 +1938,34 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
             // condition contains the inequalities over the process parameters
             add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
             if (new_inequalities.empty())
-            {
+            { // TODO add xi_context_combinations.
               summand s = generate_summand(i->get_summand(), 
-                                           xi_condition, 
-                                           nextstate_combination, 
+                                           and_(join_and(xi_condition.begin(), xi_condition.end()),
+                                                join_and(xi_context_condition->begin(), 
+                                                         xi_context_condition->end())), 
+                                           *nextstate_value, 
                                            i->get_new_values_for_xi_variables(),
                                            condition, 
                                            nextstate_context_for_this_summand,
                                            context,
                                            r);
-              if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
-              { std::cerr << "SUMMAND_OUT: " << pp(s) << "\n";
-                summands = push_front(summands, s);
-              }
+              // if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
+              std::cerr << "SUMMAND_OUT: " << pp(s) << "\n";
+              summands = push_front(summands, s);
             }
           }
         }
       }
     }
+
+    add_postponed_inequalities_to_context(
+                new_inequalities,
+                summand_info,
+                context,
+                r,
+                variable_generator);
+    print_debug(summand_info);
+
   } while ((iteration < max_iterations) && !new_inequalities.empty());
 
   if (!new_inequalities.empty())
