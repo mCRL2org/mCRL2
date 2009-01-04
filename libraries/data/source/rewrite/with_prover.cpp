@@ -24,7 +24,6 @@
 
 #include "workarounds.h" // DECL_A
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 RewriterProver::RewriterProver(mcrl2::data::data_specification DataSpec, RewriteStrategy strat)

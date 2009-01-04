@@ -1,11 +1,11 @@
 %{
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 #include <iostream>
 #include "libstruct_core.h"
-#include <aterm2.h>
+#include "aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include <list>
@@ -13,14 +13,13 @@
 #include <set>
 #include <utility>
 #include <cctype>
-#include <string.h>
+#include <cstring>
 
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
 extern char* yytext; */
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
 
@@ -61,7 +60,7 @@ bool is_number(std::string s);
 %union {
   ATermAppl appl;
   ATermList list;
-}
+};
 
 //set name prefix
 %name-prefix="chiyy"

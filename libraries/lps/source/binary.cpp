@@ -33,7 +33,6 @@
 #include <mcrl2/lps/binary.h>
 
 // For Aterm library extension functions
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace atermpp;
 using namespace mcrl2::data;

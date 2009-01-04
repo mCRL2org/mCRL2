@@ -1,17 +1,16 @@
 %{
 
-#include "chiparser.hpp"
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include "libstruct_core.h"
 #include "mcrl2/core/messaging.h"
+#include "chiparser.hpp"
 #include <map>
 #include <set>
 #include <utility>
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
 

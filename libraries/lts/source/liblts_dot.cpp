@@ -18,7 +18,6 @@
 #include "mcrl2/lts/lts.h"
 #include "liblts_dotparser.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

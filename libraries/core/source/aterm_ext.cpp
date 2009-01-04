@@ -16,11 +16,11 @@
 #include "workarounds.h"
 
 namespace mcrl2 {
-  namespace utilities {
+  namespace core {
 
       //Substitutions on ATerm's
       //------------------------
-  
+
       static AFun substafun;
       static bool substafun_notset = true;
       ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
@@ -33,7 +33,7 @@ namespace mcrl2 {
         }
         return ATmakeAppl2(substafun, OldValue, NewValue);
       }
-  
+
       ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
       {
         ATermList l = Substs;
@@ -53,7 +53,7 @@ namespace mcrl2 {
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) {
-            	DECL_A(Args,ATerm,NrArgs);
+              DECL_A(Args,ATerm,NrArgs);
               for (int i = 0; i < NrArgs; i++) {
                 Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
                   Recursive);
@@ -78,7 +78,7 @@ namespace mcrl2 {
           }
         }
       }
-  
+
       ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
       {
         ATerm Result = ATtableGet(Substs, Term);
@@ -94,7 +94,7 @@ namespace mcrl2 {
             AFun Head = ATgetAFun((ATermAppl) Term);
             int NrArgs = ATgetArity(Head);
             if (NrArgs > 0) {
-            	DECL_A(Args,ATerm,NrArgs);
+              DECL_A(Args,ATerm,NrArgs);
               for (int i = 0; i < NrArgs; i++) {
                 Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i),
                   Recursive);
@@ -119,7 +119,7 @@ namespace mcrl2 {
           }
         }
       }
-  
+
       ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
       {
         //add Subst to Substs in which Subst is performed on the RHS's
@@ -133,10 +133,10 @@ namespace mcrl2 {
         }
         return ATinsert(ATreverse(Result), (ATerm) Subst);
       }
-  
+
       //Occurrences of ATerm's
       //----------------------
-  
+
       bool gsOccurs(ATerm Elt, ATerm Term)
       {
         bool Result = false;
@@ -160,7 +160,7 @@ namespace mcrl2 {
         }
         return Result;
       }
-  
+
       int gsCount(ATerm Elt, ATerm Term)
       {
         int Result = 0;
@@ -206,7 +206,6 @@ namespace mcrl2 {
         }
         return result;
       }
-
   }
 }
 

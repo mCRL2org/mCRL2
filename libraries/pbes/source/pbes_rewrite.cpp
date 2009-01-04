@@ -23,7 +23,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 // parameterised boolean expression

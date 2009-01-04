@@ -56,7 +56,6 @@
 int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 
 using namespace pbes_expr;
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;

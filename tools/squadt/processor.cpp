@@ -241,7 +241,7 @@ namespace squadt {
         BOOST_FOREACH(processor::configurated_object_descriptor& o, outputs) {
           boost::shared_ptr < object_descriptor > output_object(boost::static_pointer_cast< object_descriptor >(o.object));
 
-          result |= output_object->self_check(static_cast < const long int > (maximum_input_timestamp));
+          result |= output_object->self_check(static_cast < long int > (maximum_input_timestamp));
           result |= (output_object->status != object_descriptor::original) && (output_object->status != object_descriptor::reproducible_up_to_date);
         }
 

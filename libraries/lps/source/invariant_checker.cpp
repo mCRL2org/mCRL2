@@ -21,7 +21,6 @@
 #include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/exception.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 // Class Invariant_Checker ------------------------------------------------------------------------

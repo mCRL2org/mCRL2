@@ -22,7 +22,7 @@ using std::cin;
 using std::cout;
 #endif
 
-using namespace mcrl2::utilities;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::core;
 
 //Global precondition: the ATerm library has been initialised

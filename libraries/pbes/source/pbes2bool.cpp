@@ -65,7 +65,6 @@
 using namespace std;
 using atermpp::make_substitution;
 using namespace mcrl2::core;
-using namespace mcrl2::utilities;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using bes::bes_expression;

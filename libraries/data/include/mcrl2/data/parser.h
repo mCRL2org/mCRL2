@@ -142,8 +142,6 @@ namespace detail {
   inline
   data_expression parse_data_expression(std::string text, std::string var_decl = "", std::string data_spec = "")
   {
-    using namespace utilities;
-
     data_expression result;
 
     // make an equation of the form 'x == x'

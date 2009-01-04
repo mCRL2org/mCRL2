@@ -20,7 +20,6 @@
 #include <mcrl2/data/data_variable.h>
 #include <mcrl2/data/data_elimination.h>
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

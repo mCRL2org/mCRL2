@@ -58,6 +58,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -87,8 +88,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -597,7 +596,7 @@ using std::cin;
 using std::cout;
 #endif
 
-using namespace mcrl2::utilities;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::core;
 
 //Global precondition: the ATerm library has been initialised
@@ -637,7 +636,7 @@ int mcrl2yyFlexLexer::yylex(void) { return 1; }
 
 mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
-#line 641 "mcrl2lexer.cpp"
+#line 640 "mcrl2lexer.cpp"
 
 #define INITIAL 0
 
@@ -740,7 +739,7 @@ YY_DECL
 #line 73 "mcrl2lexer.ll"
 
 
-#line 744 "mcrl2lexer.cpp"
+#line 743 "mcrl2lexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1317,7 +1316,7 @@ YY_RULE_SETUP
 #line 188 "mcrl2lexer.ll"
 ECHO;
 	YY_BREAK
-#line 1321 "mcrl2lexer.cpp"
+#line 1320 "mcrl2lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

@@ -83,7 +83,7 @@ class Sort_Info {
     /// \brief Indicates whether or not a sort expression represents the sort List.
     inline bool is_sort_list(ATermAppl a_sort_expression) {
       return strncmp(
-        mcrl2::core::detail::gsATermAppl2String(mcrl2::utilities::ATAgetArgument(a_sort_expression, 0)), "List@", 5) == 0;
+        mcrl2::core::detail::gsATermAppl2String(mcrl2::core::ATAgetArgument(a_sort_expression, 0)), "List@", 5) == 0;
     }
 
     /// \brief Indicates whether or not a sort expression represents the sort Bool.
@@ -93,7 +93,7 @@ class Sort_Info {
 
     /// \brief Returns the ID of the sort.
     inline char* get_sort_id(ATermAppl a_sort_expression) {
-      return mcrl2::core::detail::gsATermAppl2String(mcrl2::utilities::ATAgetArgument(a_sort_expression, 0));
+      return mcrl2::core::detail::gsATermAppl2String(mcrl2::core::ATAgetArgument(a_sort_expression, 0));
     }
 
     /// \brief Returns the domain of a sort expression.
@@ -109,7 +109,7 @@ class Sort_Info {
     /// \brief Returns the number of arguments accepted by a function with this type;
     inline int get_number_of_arguments(ATermAppl a_sort_expression) {
       if (is_sort_arrow_prod(a_sort_expression)) {
-        return ATgetLength(mcrl2::utilities::ATLgetArgument(a_sort_expression, 0));
+        return ATgetLength(mcrl2::core::ATLgetArgument(a_sort_expression, 0));
       }
 
       return 0;
@@ -117,12 +117,12 @@ class Sort_Info {
 
     /// \brief Returns the type of the argument with the given number.
     inline ATermAppl get_type_of_argument(ATermAppl a_sort_expression, int a_number) {
-      return mcrl2::utilities::ATAelementAt(get_domain(a_sort_expression), a_number);
+      return mcrl2::core::ATAelementAt(get_domain(a_sort_expression), a_number);
     }
 
     /// \brief Returns the result type of a sort expression.
     inline ATermAppl get_result_type(ATermAppl a_sort_expression) {
-      return mcrl2::utilities::ATAgetArgument(a_sort_expression, 1);
+      return mcrl2::core::ATAgetArgument(a_sort_expression, 1);
     }
 };
 

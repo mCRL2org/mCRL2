@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {

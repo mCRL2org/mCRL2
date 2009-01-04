@@ -25,7 +25,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -81,7 +80,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
   ATerm term;
   ATermAppl appl;
   ATermList list;
-}
+};
 
 //generate a GLR parser
 %glr-parser

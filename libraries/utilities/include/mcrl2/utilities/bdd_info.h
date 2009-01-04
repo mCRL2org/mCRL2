@@ -24,21 +24,21 @@ class BDD_Info {
     /// \param a_bdd A binary decision diagram.
     /// \return The guard at the root of the BDD.
     inline ATermAppl get_guard(ATermAppl a_bdd) {
-      return mcrl2::utilities::ATAgetFirst(mcrl2::utilities::ATLgetArgument(a_bdd, 1));
+      return mcrl2::core::ATAgetFirst(mcrl2::core::ATLgetArgument(a_bdd, 1));
     }
 
     /// \brief Method that returns the true-branch of a BDD.
     /// \param a_bdd A binary decision diagram.
     /// \return The true-branch of the BDD.
     inline ATermAppl get_true_branch(ATermAppl a_bdd) {
-      return mcrl2::utilities::ATAgetFirst(ATgetNext(mcrl2::utilities::ATLgetArgument(a_bdd, 1)));
+      return mcrl2::core::ATAgetFirst(ATgetNext(mcrl2::core::ATLgetArgument(a_bdd, 1)));
     }
 
     /// \brief Method that returns the false-branch of a BDD.
     /// \param a_bdd A binary decision diagram.
     /// \return The false-branch of the BDD.
     inline ATermAppl get_false_branch(ATermAppl a_bdd) {
-      return mcrl2::utilities::ATAgetFirst(ATgetNext(ATgetNext(mcrl2::utilities::ATLgetArgument(a_bdd, 1))));
+      return mcrl2::core::ATAgetFirst(ATgetNext(ATgetNext(mcrl2::core::ATLgetArgument(a_bdd, 1))));
     }
 
     /// \brief Method that indicates whether or not a BDD equals true.

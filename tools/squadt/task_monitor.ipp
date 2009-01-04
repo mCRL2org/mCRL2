@@ -55,6 +55,8 @@ namespace squadt {
         /** \brief The event handlers that have been registered */
         handler_map                                     handlers;
 
+        using tipi::messaging::basic_messenger_impl< tipi::message >::disconnect;
+
       private:
 
         /** \brief Constructor */

@@ -30,10 +30,6 @@
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
-// #include "mcrl2/utilities/command_line_interface.h"
-// #include "mcrl2/utilities/command_line_messaging.h"
-// #include "mcrl2/utilities/command_line_rewriting.h"
-
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -372,7 +368,6 @@ lps::specification action_rename(
             const action_rename_specification &action_rename_spec,
             const lps::specification &lps_old_spec)
 {
-  using namespace mcrl2::utilities;
   using namespace mcrl2::core;
   using namespace mcrl2::data::data_expr;
   using namespace mcrl2::data;

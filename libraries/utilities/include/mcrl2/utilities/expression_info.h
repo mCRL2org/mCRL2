@@ -24,7 +24,7 @@ class Expression_Info {
 
     /// \brief Indicates whether or not the expression has a main operator.
     inline bool is_operator(ATermAppl a_expression) {
-      return (mcrl2::core::detail::gsIsOpId(mcrl2::utilities::ATAgetArgument(a_expression, 0)) &&
+      return (mcrl2::core::detail::gsIsOpId(mcrl2::core::ATAgetArgument(a_expression, 0)) &&
                   (ATgetLength(mcrl2::core::detail::gsGetDataExprArgs(a_expression)) != 0));
     }
 
@@ -36,7 +36,7 @@ class Expression_Info {
         v_arguments = ATgetNext(v_arguments);
       }
 
-      return mcrl2::utilities::ATAgetFirst(v_arguments);
+      return mcrl2::core::ATAgetFirst(v_arguments);
     }
 
     /// \brief Returns the main operator of an expression.
@@ -44,7 +44,7 @@ class Expression_Info {
       ATermAppl v_result = a_expression;
 
       while (!mcrl2::core::detail::gsIsOpId(v_result)) {
-        v_result = mcrl2::utilities::ATAgetArgument(v_result, 0);
+        v_result = mcrl2::core::ATAgetArgument(v_result, 0);
       }
 
       return v_result;

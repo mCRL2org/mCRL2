@@ -249,7 +249,7 @@ namespace utility {
           mime_type t(e->GetAttribute("mime-type"));
 
           ticpp::Element* command_element = e->FirstChildElement(false);
-    
+
           if (command_element != 0 && command_element->Value() == "command") {
             if (command_element->NoChildren()) {
               r.register_command(t, type_registry::command_system);
@@ -311,33 +311,33 @@ namespace utility {
         }
 
         e->GetAttribute("identifier", &tipi_id);
-       
+
         p.register_input(tipi_id, h.cmap[id]);
       }
       else if (e->Value() == "output") {
         /* Read output */
         unsigned long id;
-       
+
         e->GetAttribute("id", &id);
 
         assert(h.cmap.find(id) == h.cmap.end());
-       
+
         h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor >(
                 new processor_impl::object_descriptor(p.interface_object, p.manager, tipi::mime_type(e->GetAttribute("format")), tipi::uri(e->GetAttribute("location"))));
 
         processor_impl::object_descriptor& new_descriptor(*h.cmap[id]);
-        
+
         e->GetAttribute("timestamp", &new_descriptor.timestamp);
         e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
 
         if (new_descriptor.status != processor::object_descriptor::original) {
           e->GetAttribute("identifier", &tipi_id);
         }
-        
+
         if (new_descriptor.status == processor::object_descriptor::generation_in_progress) {
           new_descriptor.status = processor::object_descriptor::reproducible_out_of_date;
         }
-        
+
         e->GetAttribute("digest", &new_descriptor.checksum, false);
 
         p.register_output(tipi_id, h.cmap[id]);
@@ -384,11 +384,11 @@ namespace utility {
     for (id_helper h(tree->FirstChildElement(false)); h.tree != 0; h.tree = h.tree->NextSiblingElement(false)) {
       if (h.tree->Value() == "processor") {
         boost::shared_ptr < processor > new_processor(processor::create(p.m_interface));
-       
+
         visit(*new_processor, h);
 
         new_processor->check_status(true);
-       
+
         p.processors.push_back(new_processor);
       }
       else if (h.tree->Value() == "description") {

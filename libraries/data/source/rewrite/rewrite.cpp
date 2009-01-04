@@ -28,7 +28,6 @@
 #endif
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;

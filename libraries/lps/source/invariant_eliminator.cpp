@@ -17,7 +17,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/bdd_prover.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

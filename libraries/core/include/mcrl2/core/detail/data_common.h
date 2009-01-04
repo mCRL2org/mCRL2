@@ -57,7 +57,7 @@ inline bool is_struct_sort_id(ATermAppl sort_expr)
   if (gsIsSortId(sort_expr)) {
     return strncmp(
       struct_prefix(),
-      ATgetName(ATgetAFun(mcrl2::utilities::ATAgetArgument(sort_expr, 0))),
+      ATgetName(ATgetAFun(mcrl2::core::ATAgetArgument(sort_expr, 0))),
       strlen(struct_prefix())) == 0;
   } else {
     return false;
@@ -71,7 +71,7 @@ inline bool is_list_sort_id(ATermAppl sort_expr)
   if (gsIsSortId(sort_expr)) {
     return strncmp(
       list_prefix(),
-      ATgetName(ATgetAFun(mcrl2::utilities::ATAgetArgument(sort_expr, 0))),
+      ATgetName(ATgetAFun(mcrl2::core::ATAgetArgument(sort_expr, 0))),
       strlen(list_prefix())) == 0;
   } else {
     return false;
@@ -85,7 +85,7 @@ inline bool is_set_sort_id(ATermAppl sort_expr)
   if (gsIsSortId(sort_expr)) {
     return strncmp(
       set_prefix(),
-      ATgetName(ATgetAFun(mcrl2::utilities::ATAgetArgument(sort_expr, 0))),
+      ATgetName(ATgetAFun(mcrl2::core::ATAgetArgument(sort_expr, 0))),
       strlen(set_prefix())) == 0;
   } else {
     return false;
@@ -99,7 +99,7 @@ inline bool is_bag_sort_id(ATermAppl sort_expr)
   if (gsIsSortId(sort_expr)) {
     return strncmp(
       bag_prefix(),
-      ATgetName(ATgetAFun(mcrl2::utilities::ATAgetArgument(sort_expr, 0))),
+      ATgetName(ATgetAFun(mcrl2::core::ATAgetArgument(sort_expr, 0))),
       strlen(bag_prefix())) == 0;
   } else {
     return false;
@@ -114,7 +114,7 @@ inline bool is_lambda_op_id(ATermAppl data_expr)
   if (gsIsOpId(data_expr)) {
     return strncmp(
       lambda_prefix(),
-      ATgetName(ATgetAFun(mcrl2::utilities::ATAgetArgument(data_expr, 0))),
+      ATgetName(ATgetAFun(mcrl2::core::ATAgetArgument(data_expr, 0))),
       strlen(lambda_prefix())) == 0;
   } else {
     return false;
@@ -157,7 +157,6 @@ void inline initialize_data_decls(t_data_decls *p_data_decls)
 /// \post p_data_decls in which substs have been applied to sorts, cons_ops, ops and data_eqns
 void inline subst_values_list_data_decls(ATermList substs, t_data_decls *p_data_decls, bool recursive)
 {
-  using namespace mcrl2::utilities;
   p_data_decls->sorts     = gsSubstValues_List(substs, p_data_decls->sorts,     recursive);
   p_data_decls->cons_ops  = gsSubstValues_List(substs, p_data_decls->cons_ops,  recursive);
   p_data_decls->ops       = gsSubstValues_List(substs, p_data_decls->ops,       recursive);
@@ -200,7 +199,6 @@ inline bool data_decls_equal(t_data_decls data_decls1,
 /// \ret data declarations of spec
 inline t_data_decls get_data_decls(ATermAppl spec)
 {
-  using namespace mcrl2::utilities;
   t_data_decls data_decls;
   ATermAppl data_spec =  ATAgetArgument(spec, 0);
   data_decls.sorts =     ATLgetArgument(ATAgetArgument(data_spec, 0), 0);

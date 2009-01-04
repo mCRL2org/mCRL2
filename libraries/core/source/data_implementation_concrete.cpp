@@ -21,7 +21,6 @@
 
 #include "workarounds.h" // DECL_A
 
-using namespace ::mcrl2::utilities;
 namespace mcrl2 {
   namespace core {
     namespace detail {

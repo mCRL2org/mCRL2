@@ -21,7 +21,6 @@
 #include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

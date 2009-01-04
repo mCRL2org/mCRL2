@@ -30,7 +30,6 @@
 #include "mcrl2/lps/sumelm.h"
 
 // For Aterm library extension functions
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;

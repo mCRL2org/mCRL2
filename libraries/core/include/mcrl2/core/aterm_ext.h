@@ -17,7 +17,7 @@
 #include <aterm2.h>
 
 namespace mcrl2 {
-  namespace utilities {
+  namespace core {
 
 //Workarounds for the initialisation of the ATerm library
 //-------------------------------------------------------

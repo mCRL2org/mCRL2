@@ -34,7 +34,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/data_implementation.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
