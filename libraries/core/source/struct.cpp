@@ -41,13 +41,11 @@ static bool IsPNSort(ATermAppl SortExpr);
 static bool IsPNISort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat or Int
 
-#ifndef NDEBUG
 static bool IsNISort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Nat or Int
 
 static bool IsPNIRSort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat, Int or Real
-#endif
 
 static ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
 //Pre: IsPNSort(SortExpr1) and IsPNSort(SortExpr2)
@@ -4755,7 +4753,6 @@ bool IsPNISort(ATermAppl SortExpr)
     ATisEqual(SortExpr, gsMakeSortExprInt());
 }
 
-#ifndef NDEBUG
 bool IsNISort(ATermAppl SortExpr)
 {
   return
@@ -4769,7 +4766,6 @@ bool IsPNIRSort(ATermAppl SortExpr)
     IsPNISort(SortExpr) ||
     ATisEqual(SortExpr, gsMakeSortExprReal());
 }
-#endif
 
 ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
 {
