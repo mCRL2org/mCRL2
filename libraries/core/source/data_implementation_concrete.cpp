@@ -143,29 +143,29 @@ static void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
 static ATermAppl make_fresh_struct_sort_id(ATerm term);
 //Pre: term is not NULL
 //Ret: sort identifier for the implementation of a structured sort with prefix
-//     struct_prefix, that does not occur in term
+//     gsSortStructPrefix, that does not occur in term
 
 static ATermAppl make_fresh_list_sort_id(ATerm term);
 //Pre: term is not NULL
 //Ret: fresh sort identifier for the implementation of a list sort with prefix
-//     list_prefix, that does not occur in term
+//     gsSortListPrefix, that does not occur in term
 
 static ATermAppl make_fresh_set_sort_id(ATerm term);
 //Pre: term is not NULL
 //Ret: fresh sort identifier for the implementation of a set sort with prefix
-//     set_prefix, that does not occur in term
+//     gsSortSetPrefix, that does not occur in term
 
 static ATermAppl make_fresh_bag_sort_id(ATerm term);
 //Pre: term is not NULL
 //Ret: fresh sort identifier for the implementation of a bag sort with prefix
-//     bag_prefix, that does not occur in term
+//     gsSortBagPrefix, that does not occur in term
 
 static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //Pre: sort_expr is a sort expression
 //     term is not NULL
 //Ret: operation identifier op_id(n, s) for the implementation of a lambda
 //     abstraction, where s is sort_expr and n is a name with prefix
-//     lambda_prefix, that does not occur in term
+//     gsLambdaPrefix, that does not occur in term
 
 //implementation
 //--------------
@@ -294,8 +294,8 @@ ATermList compute_sort_ref_substs(ATermAppl spec)
     //if rhs is the first occurrence of an implementation of a type constructor
     //at the rhs of a sort reference, add rhs := lhs; otherwise add lhs := rhs
     ATermAppl subst;
-    if (is_struct_sort_id(rhs) || is_list_sort_id(rhs) || is_set_sort_id(rhs) ||
-      is_bag_sort_id(rhs))
+    if (gsIsStructSortId(rhs) || gsIsListSortId(rhs) || gsIsSetSortId(rhs) ||
+      gsIsBagSortId(rhs))
     {
       subst = gsMakeSubst_Appl(rhs, lhs);
     } else {
@@ -344,8 +344,8 @@ ATermAppl impl_sort_refs(ATermAppl spec)
     //if rhs is the first occurrence of an implementation of a type constructor
     //at the rhs of a sort reference, add rhs := lhs; otherwise add lhs := rhs
     ATermAppl subst;
-    if (is_struct_sort_id(rhs) || is_list_sort_id(rhs) || is_set_sort_id(rhs) ||
-      is_bag_sort_id(rhs))
+    if (gsIsStructSortId(rhs) || gsIsListSortId(rhs) || gsIsSetSortId(rhs) ||
+      gsIsBagSortId(rhs))
     {
       subst = gsMakeSubst_Appl(rhs, lhs);
     } else {
@@ -2693,27 +2693,27 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
 
 ATermAppl make_fresh_struct_sort_id(ATerm term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix(), term, false));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSortStructPrefix(), term, false));
 }
  
 ATermAppl make_fresh_list_sort_id(ATerm term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix(), term, false));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSortListPrefix(), term, false));
 }
 
 ATermAppl make_fresh_set_sort_id(ATerm term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix(), term, false));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSortSetPrefix(), term, false));
 }
 
 ATermAppl make_fresh_bag_sort_id(ATerm term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix(), term, false));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSortBagPrefix(), term, false));
 }
 
 ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
 {
-  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix(), term, false),
+  return gsMakeOpId(gsFreshString2ATermAppl(gsLambdaPrefix(), term, false),
     sort_expr);
 }
 

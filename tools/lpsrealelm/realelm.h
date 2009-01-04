@@ -42,7 +42,8 @@ class real_representing_variable
             mcrl2::data::data_expression lb,
             mcrl2::data::data_expression ub):
             variable(v), lowerbound(lb), upperbound(ub)
-    { protective_set.insert(v);
+    {
+      protective_set.insert(v);
       protective_set.insert(lb);
       protective_set.insert(ub);
     }

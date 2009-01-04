@@ -204,6 +204,9 @@ static bool match_list(ATermList aterm_ann, ATermList aterm, ATermList* p_substs
 //      lambda expressions in p_data_decls->data_eqns
 static void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p_substs);
 
+//ret: true if data_expr is a system defined expression
+static bool is_standard_function(const ATermAppl data_expr);
+
 //ret: true if data_eqn is a system defined equation
 static bool is_system_defined_equation(const ATermAppl data_eqn);
 
@@ -317,22 +320,14 @@ ATerm reconstruct_exprs(ATerm Part, const ATermAppl Spec)
 {
   assert ((Spec == NULL) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) ||
     gsIsPBES(Spec) || gsIsDataSpec(Spec));
-  /*
-  if (Spec == NULL) {
-    gsDebugMsg("No specification given, "
-                 "therefore not all components can be reconstructed\n");
-  } else {
-    gsDebugMsg("Specification provided, performing full reconstruction\n");
-  }
-  */
-  
+
   ATerm Result;
   ATermList substs = ATmakeList0();
   if (ATgetType(Part) == AT_APPL) {
     Result = (ATerm) reconstruct_exprs_appl((ATermAppl) Part, &substs, Spec);
-    } else { //(ATgetType(Part) == AT_LIST) {
-      Result = (ATerm) reconstruct_exprs_list((ATermList) Part, &substs, Spec);
-    }
+  } else { //(ATgetType(Part) == AT_LIST) {
+    Result = (ATerm) reconstruct_exprs_list((ATermList) Part, &substs, Spec);
+  }
   //  gsDebugMsg("Finished data reconstruction\n");
     return Result;
 }
@@ -351,13 +346,6 @@ ATermAppl reconstruct_exprs_appl(ATermAppl Part, ATermList* p_substs, const ATer
     }
     Part = remove_headers_without_binders_from_spec(Part, p_substs);
   }
-  /*
-  else if (Spec != NULL && ATisEmpty(*p_substs))
-  {
-    // Compute substitutions for sorts by determining reconstruction of Spec
-    remove_headers_without_binders_from_spec(Spec, p_substs);
-  }
-  */
 
   // Perform substitutions
   if (gsIsSortExpr(Part)) {
@@ -512,7 +500,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       *recursive = false;
       Part = reconstruct_exprs_appl(Part, p_substs, Spec);
     }
-  } else if (is_lambda_op_id(Part)) {
+  } else if (gsIsLambdaOpId(Part)) {
 //    gsDebugMsg("Reconstructing implementation of a lambda op id\n");
     Part = gsSubstValues_Appl(*p_substs, Part, true);
   } else if (gsIsDataExprC1(Part) || gsIsDataExprCDub(Part)) {
@@ -807,7 +795,7 @@ bool is_lambda_expr(ATermAppl Part)
   while(gsIsDataAppl(Part)) {
     Part = ATAgetArgument(Part, 0);
   }
-  return is_lambda_op_id(Part);
+  return gsIsLambdaOpId(Part);
 }
 
 bool is_lambda_binder_application(ATermAppl data_expr)
@@ -848,7 +836,6 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
   data_decls.cons_ops  = ATLgetArgument(ConsSpec, 0);
   data_decls.ops       = ATLgetArgument(MapSpec, 0);
   data_decls.data_eqns = ATLgetArgument(DataEqnSpec, 0);
-
 
   // Pruning data declarations needs to be skipped when we are reconstructing a specification in the
   // internal format before data implementation. For determining this, we use a
@@ -1048,48 +1035,41 @@ ATermList filter_table_elements_from_list(ATermList l, atermpp::table& t)
 bool is_list_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
-  ATermAppl name = gsGetName(data_expr);
-  return ATisEqual(name, gsMakeOpIdNameEltIn())    ||
-         ATisEqual(name, gsMakeOpIdNameListSize()) ||
-         ATisEqual(name, gsMakeOpIdNameSnoc())     ||
-         ATisEqual(name, gsMakeOpIdNameConcat())   ||
-         ATisEqual(name, gsMakeOpIdNameEltAt())    ||
-         ATisEqual(name, gsMakeOpIdNameHead())     ||
-         ATisEqual(name, gsMakeOpIdNameTail())     ||
-         ATisEqual(name, gsMakeOpIdNameRHead())    ||
-         ATisEqual(name, gsMakeOpIdNameRTail());
+  return gsIsOpIdListSize(data_expr) ||
+         gsIsOpIdEltIn(data_expr) ||
+         gsIsOpIdSnoc(data_expr) ||
+         gsIsOpIdConcat(data_expr) ||
+         gsIsOpIdEltAt(data_expr) ||
+         gsIsOpIdHead(data_expr) ||
+         gsIsOpIdTail(data_expr) ||
+         gsIsOpIdRHead(data_expr) ||
+         gsIsOpIdRTail(data_expr);
 }
 
 bool is_set_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
-  ATermAppl name = gsGetName(data_expr);
-  return ATisEqual(name, gsMakeOpIdNameSetComp())     ||
-         ATisEqual(name, gsMakeOpIdNameEmptySet())    ||
-         ATisEqual(name, gsMakeOpIdNameEltIn())       ||
-         ATisEqual(name, gsMakeOpIdNameSubSetEq())    ||
-         ATisEqual(name, gsMakeOpIdNameSubSet())      ||
-         ATisEqual(name, gsMakeOpIdNameSetUnion())    ||
-         ATisEqual(name, gsMakeOpIdNameSetDiff())     ||
-         ATisEqual(name, gsMakeOpIdNameSetIntersect())||
-         ATisEqual(name, gsMakeOpIdNameSetCompl());
+  return gsIsOpIdSetComp(data_expr) ||
+         gsIsOpIdEmptySet(data_expr) ||
+         gsIsOpIdEltIn(data_expr) ||
+         gsIsOpIdSetUnion(data_expr) ||
+         gsIsOpIdSetDiff(data_expr) ||
+         gsIsOpIdSetIntersect(data_expr) ||
+         gsIsOpIdSetCompl(data_expr);
 }
 
 bool is_bag_operator(const ATermAppl data_expr)
 {
   if (!gsIsOpId(data_expr)) return false;
-  ATermAppl name = gsGetName(data_expr);
-  return ATisEqual(name, gsMakeOpIdNameBagComp())     ||
-         ATisEqual(name, gsMakeOpIdNameEmptyBag())    ||
-         ATisEqual(name, gsMakeOpIdNameCount())       ||
-         ATisEqual(name, gsMakeOpIdNameEltIn())       ||
-         ATisEqual(name, gsMakeOpIdNameSubBagEq())    ||
-         ATisEqual(name, gsMakeOpIdNameSubBag())      ||
-         ATisEqual(name, gsMakeOpIdNameBagUnion())    ||
-         ATisEqual(name, gsMakeOpIdNameBagDiff())     ||
-         ATisEqual(name, gsMakeOpIdNameBagIntersect())||
-         ATisEqual(name, gsMakeOpIdNameBag2Set())     ||
-         ATisEqual(name, gsMakeOpIdNameSet2Bag());
+  return gsIsOpIdBagComp(data_expr) ||
+         gsIsOpIdEmptyBag(data_expr) ||
+         gsIsOpIdCount(data_expr) ||
+         gsIsOpIdEltIn(data_expr) ||
+         gsIsOpIdBagUnion(data_expr) ||
+         gsIsOpIdBagDiff(data_expr) ||
+         gsIsOpIdBagIntersect(data_expr) ||
+         gsIsOpIdBag2Set(data_expr) ||
+         gsIsOpIdSet2Bag(data_expr);
 }
 
 bool is_constructor_induced_equation(const ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors)
@@ -1330,7 +1310,7 @@ void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p
     while (gsIsDataAppl(expr)) {
       ATermList bound_vars = ATLgetArgument(expr, 1);
       expr = ATAgetArgument(expr, 0);
-      if (is_lambda_op_id(expr)) {
+      if (gsIsLambdaOpId(expr)) {
         ATermList vars = ATLgetArgument(data_eqn, 0);
         ATermAppl body = ATAgetArgument(data_eqn, 3);
         if (ATgetLength(vars) != ATgetLength(bound_vars)) {
@@ -1351,41 +1331,77 @@ void calculate_lambda_expressions(const t_data_decls* p_data_decls, ATermList* p
   }
 }
 
+bool is_standard_function(const ATermAppl data_expr)
+{
+  assert(gsIsDataExpr(data_expr));
+
+  bool result = gsIsOpIdEq(data_expr) ||
+         gsIsOpIdNeq(data_expr) ||
+         gsIsOpIdIf(data_expr) ||
+         gsIsOpIdLT(data_expr) ||
+         gsIsOpIdLTE(data_expr) ||
+         gsIsOpIdGTE(data_expr) ||
+         gsIsOpIdGT(data_expr);
+
+  return result;
+}
+
 bool is_system_defined_equation(const ATermAppl data_eqn)
 {
   assert(gsIsDataEqn(data_eqn));
   ATermAppl data_eqn_lhs = ATAgetArgument(data_eqn, 2);
   ATermAppl data_eqn_rhs = ATAgetArgument(data_eqn, 3);
-  if (gsIsDataExprEq(data_eqn_lhs)) {
+  if (gsIsDataAppl(data_eqn_lhs) &&
+      is_standard_function(ATAgetArgument(data_eqn_lhs, 0)))
+  {
     ATermList args = ATLgetArgument(data_eqn_lhs, 1);
     ATermAppl arg0 = ATAgetFirst(args);
     ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
-    assert(gsIsDataExpr(arg0) && gsIsDataExpr(arg1));
-    // Special case, data_eqn is of the form var == var = true;
-    return gsIsDataVarId(arg0) && gsIsDataVarId(arg1) && ATisEqual(arg0, arg1) &&
-        ATisEqual(data_eqn_rhs, gsMakeDataExprTrue());        
-  } else if (gsIsDataExprNeq(data_eqn_lhs)) {
-  // Special case, inequality: x != y == !(x==y)
-    ATermList args = ATLgetArgument(data_eqn_lhs, 1);
-    ATermAppl arg0 = ATAgetFirst(args);
-    ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
-    if (gsIsDataVarId(arg0) && gsIsDataVarId(arg1)) {
-      ATermAppl neq = gsMakeDataExprNot(gsMakeDataExprEq(arg0, arg1));
-      return ATisEqual(data_eqn_rhs, neq);
+    if (gsIsDataExprIf(data_eqn_lhs))
+    {
+      // Special case, if: if(true, x, y) == x
+      //                   if(false, x, y) == y
+      //                   if(b, x, x) == x
+      ATermAppl arg2 = ATAgetFirst(ATgetNext(ATgetNext(args)));
+      return (gsIsDataExprTrue(arg0) && ATisEqual(data_eqn_rhs, arg1)) ||
+             (gsIsDataExprFalse(arg0) && ATisEqual(data_eqn_rhs, arg2)) ||
+             (gsIsDataVarId(arg0) && ATisEqual(arg1, arg2) && ATisEqual(data_eqn_rhs, arg1));
     }
-  } else if (gsIsDataExprIf(data_eqn_lhs)) {
-  // Special case, if: if(true, x, y) == x
-  //                   if(false, x, y) == y
-  //                   if(b, x, x) == x
-    ATermList args = ATLgetArgument(data_eqn_lhs, 1);
-    ATermAppl arg0 = ATAgetFirst(args);
-    ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
-    ATermAppl arg2 = ATAgetFirst(ATgetNext(ATgetNext(args)));
-    return (gsIsDataExprTrue(arg0) && ATisEqual(data_eqn_rhs, arg1))
-      ||(gsIsDataExprFalse(arg0) && ATisEqual(data_eqn_rhs, arg2))
-      ||(gsIsDataVarId(arg0) && ATisEqual(arg1, arg2)
-         && ATisEqual(data_eqn_rhs, arg1));
-  } 
+    else if (gsIsDataExprEq(data_eqn_lhs)) {
+      // Special case, data_eqn is of the form var == var = true;
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(arg0, arg1) &&
+             gsIsDataExprTrue(data_eqn_rhs);
+    } else if (gsIsDataExprNeq(data_eqn_lhs)) {
+      // Special case, inequality: x != y == !(x==y)
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(data_eqn_rhs, gsMakeDataExprNot(gsMakeDataExprEq(arg0, arg1)));
+    } else if (gsIsDataExprLT(data_eqn_lhs)) {
+      // x < x == false
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(arg0, arg1) &&
+             gsIsDataExprFalse(data_eqn_rhs);
+    } else if (gsIsDataExprLTE(data_eqn_lhs)) {
+      // x <= x == true
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(arg0, arg1) &&
+             gsIsDataExprTrue(data_eqn_rhs);
+    } else if (gsIsDataExprGTE(data_eqn_lhs)) {
+      // x >= y == y <= x
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(data_eqn_rhs, gsMakeDataExprLTE(arg1, arg0));
+    } else if (gsIsDataExprGT(data_eqn_lhs)) {
+      // x > y == y < x
+      return gsIsDataVarId(arg0) &&
+             gsIsDataVarId(arg1) &&
+             ATisEqual(data_eqn_rhs, gsMakeDataExprLT(arg1, arg0));
+    }
+  }
   return false;
 }
 
@@ -1396,12 +1412,13 @@ ATermAppl get_linked_sort(const ATermAppl op_id)
   ATermList sort_domain = ATLgetArgument(sort, 0);
   ATermAppl sort_range = ATAgetArgument(sort, 1);
   ATermAppl linked_sort = ATAgetFirst(sort_domain);
-  if (ATisEqual(gsMakeOpIdNameIf(), gsGetName(op_id)) ||
-    ATisEqual(gsMakeOpIdNameEltIn(), gsGetName(op_id)) ||
-    ATisEqual(gsMakeOpIdNameCount(), gsGetName(op_id))) {
+  if (gsIsOpIdIf(op_id) ||
+      gsIsOpIdEltIn(op_id) ||
+      gsIsOpIdCount(op_id))
+  {
     linked_sort = ATAgetFirst(ATgetNext(sort_domain));
-  } else if (ATisEqual(gsMakeOpIdNameSetComp(), gsGetName(op_id)) ||
-    ATisEqual(gsMakeOpIdNameBagComp(), gsGetName(op_id))) {
+  } else if (gsIsOpIdSetComp(op_id) ||
+             gsIsOpIdBagComp(op_id)) {
     linked_sort = sort_range;
   }
   return linked_sort;
@@ -1477,8 +1494,8 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
 
     // The only relevant constant functions are empty set and empty bag,
     // treat these separately
-    if (ATisEqual(gsMakeOpIdNameEmptyBag(), gsGetName(op)) ||
-         ATisEqual(gsMakeOpIdNameEmptySet(), gsGetName(op))) {
+    if (gsIsOpIdEmptyBag(op) ||
+        gsIsOpIdEmptySet(op)) {
       assert(p_ctx->sorts_table.get(sort) != NULL);
       put_result = p_ctx->sort_mappings[sort].put(op);
       if (put_result.second) {
@@ -1504,6 +1521,10 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
       if (ATisEqual(gsMakeOpIdIf(linked_sort), op)
         || ATisEqual(gsMakeOpIdEq(linked_sort), op)
         || ATisEqual(gsMakeOpIdNeq(linked_sort), op)
+        || ATisEqual(gsMakeOpIdLT(linked_sort), op)
+        || ATisEqual(gsMakeOpIdLTE(linked_sort), op)
+        || ATisEqual(gsMakeOpIdGT(linked_sort), op)
+        || ATisEqual(gsMakeOpIdGTE(linked_sort), op)
         || is_list_operator(op)
         || is_set_operator(op)
         || is_bag_operator(op)
@@ -1514,7 +1535,7 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
           p_ctx->map_equations.insert(std::make_pair(op, atermpp::indexed_set(6, 50)));
           p_ctx->num_map_equations.insert(std::make_pair(op, 0));
         }
-        if (ATisEqual(gsMakeOpIdNameSetComp(), gsGetName(op))) {
+        if (gsIsOpIdSetComp(op)) {
           ATermList sort_elt = ATLgetArgument(gsGetSort(op), 0);
           ATermAppl sort_set = ATAgetArgument(gsGetSort(op), 1);
           assert(ATgetLength(sort_elt) == 1);
@@ -1522,7 +1543,7 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
             gsMakeSubst_Appl(sort_set,
                              gsMakeSortExprSet(ATAgetFirst(sort_elt))),
             *p_substs);
-        } else if (ATisEqual(gsMakeOpIdNameBagComp(), gsGetName(op))) {
+        } else if (gsIsOpIdBagComp(op)) {
           ATermList sort_elt = ATLgetArgument(gsGetSort(op), 0);
           ATermAppl sort_bag = ATAgetArgument(gsGetSort(op), 1);
           assert(ATgetLength(sort_elt) == 1);
@@ -1743,9 +1764,7 @@ void calculate_recognisers_and_projections(t_reconstruct_context* p_ctx)
     {
       ATermAppl map = ATAgetFirst(maps);
       assert(gsIsOpId(map));
-      if (!ATisEqual(gsMakeOpIdNameIf(), gsGetName(map)) &&
-          !ATisEqual(gsMakeOpIdNameEq(), gsGetName(map)) &&
-          !ATisEqual(gsMakeOpIdNameNeq(), gsGetName(map)))
+      if (!is_standard_function(map))
       { // ==. if. != cannot be recogniser/projection
         // map is possibly a recogniser or a projection function.
         ATermAppl map_sort = gsGetSort(map);
@@ -1867,8 +1886,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
       ATermList elts = p_ctx->sort_mappings[ATAgetFirst(l)].elements();
       while (!ATisEmpty(elts)) {
         ATermAppl elt = ATAgetFirst(elts);
-        if (ATisEqual(elt, gsMakeOpIdIf(sort)) || ATisEqual(elt, gsMakeOpIdEq(sort)) ||
-            ATisEqual(elt, gsMakeOpIdNeq(sort)) || p_ctx->composite_sorts.get(sort) == sort)
+        if (is_standard_function(elt) ||
+            p_ctx->composite_sorts.get(sort) == sort)
         {
           mappings->put(ATAgetFirst(elts), (ATerm) ATtrue);
         }
@@ -1878,7 +1897,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
       elts = p_ctx->sort_cons_equations[ATAgetFirst(l)].elements();
       while(!ATisEmpty(elts)) {
         ATermAppl elt = ATAgetFirst(elts);
-        if (is_system_defined_equation(elt) || p_ctx->composite_sorts.get(sort) == sort)
+        if (is_system_defined_equation(elt) ||
+            p_ctx->composite_sorts.get(sort) == sort)
         {
           equations->put(ATgetFirst(elts), (ATerm) ATtrue);
         }
@@ -1890,7 +1910,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
         elts = p_ctx->map_equations[ATAgetFirst(mappings)].elements();
         while (!ATisEmpty(elts)) {
           ATermAppl elt = ATAgetFirst(elts);
-          if (is_system_defined_equation(elt) || p_ctx->composite_sorts.get(sort) == sort)
+          if (is_system_defined_equation(elt) ||
+              p_ctx->composite_sorts.get(sort) == sort)
           {
             equations->put(ATgetFirst(elts), (ATerm) ATtrue);
           }
@@ -1933,7 +1954,7 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
   while (!ATisEmpty(p_data_decls->ops)) {
     ATermAppl op = ATAgetFirst(p_data_decls->ops);
     if (!ATisEqual(p_mappings->get(op), ATtrue) &&
-        !is_lambda_op_id(op)) {
+        !gsIsLambdaOpId(op)) {
       mappings = ATinsert(mappings, (ATerm) op);
     }
     p_data_decls->ops = ATgetNext(p_data_decls->ops);
@@ -1992,13 +2013,13 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
         ATermAppl element_sort = NULL;
         while (!ATisEmpty(constructors)) {
           ATermAppl constructor = ATAgetFirst(constructors);
-          if (ATisEqual(gsGetName(constructor), gsMakeOpIdNameCons())) {
+          if (gsIsOpIdCons(constructor)) {
             element_sort = ATAgetFirst(ATLgetArgument(gsGetSort(constructor), 0));
           }
           constructors = ATgetNext(constructors);
         }
         if (element_sort != NULL) {
-          if (is_list_sort_id(sort)) {
+          if (gsIsListSortId(sort)) {
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
           } else {
             ATermAppl sort_name = ATAgetArgument(sort, 0);
@@ -2040,7 +2061,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
         struct_constructors = ATreverse(struct_constructors);
         ATermAppl struct_sort = gsMakeSortStruct(struct_constructors);
         assert(gsIsSortId(sort));
-        if (is_struct_sort_id(sort)) {
+        if (gsIsStructSortId(sort)) {
           *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, struct_sort), *p_substs);
         } else {
           ATermAppl sort_name = ATAgetArgument(sort, 0);
@@ -2060,7 +2081,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
 bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
 {
   // simple sort ids
-  if (is_set_sort_id(sort) || is_bag_sort_id(sort) || is_list_sort_id(sort)) {
+  if (gsIsSetSortId(sort) || gsIsBagSortId(sort) || gsIsListSortId(sort)) {
     return true;
   }
 

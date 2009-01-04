@@ -104,6 +104,7 @@ ATermAppl gsMakeSortExprSet(ATermAppl SortExpr);
 ///\return Sort expression for `Bag of SortExpr'
 ATermAppl gsMakeSortExprBag(ATermAppl SortExpr);
 
+// Auxiliary functions concerning implemented sort expressions
 ///\return Term is a SortExprList
 bool gsIsSortExprList(ATermAppl Term);
 
@@ -112,6 +113,36 @@ bool gsIsSortExprSet(ATermAppl Term);
 
 ///\return Term is a SortExprBag
 bool gsIsSortExprBag(ATermAppl Term);
+
+///\return Prefix for implemented structured sort
+const char* gsSortStructPrefix();
+
+///\return Prefix for implemented list sort
+const char* gsSortListPrefix();
+
+///\return Prefix for implemented set sort
+const char* gsSortSetPrefix();
+
+///\return Prefix for implemented bag sort
+const char* gsSortBagPrefix();
+
+///\return Prefix for implemented lambda function
+const char* gsLambdaPrefix();
+
+///\return true iff SortExpr is the implementation of a structured sort
+bool gsIsStructSortId(ATermAppl SortExpr);
+
+///\return true iff SortExpr is the implementation of a list sort
+bool gsIsListSortId(ATermAppl SortExpr);
+
+///\return true iff SortExpr is the implementation of a set sort
+bool gsIsSetSortId(ATermAppl SortExpr);
+
+///\return true iff SortExpr is the implementation of a bag sort
+bool gsIsBagSortId(ATermAppl SortExpr);
+
+///\return true iff DataExpr is the implementation of a lambda abstraction
+bool gsIsLambdaOpId(ATermAppl DataExpr);
 
 // Auxiliary functions concerning sort expressions
 
@@ -1222,16 +1253,6 @@ ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
 ATermAppl gsMakeDataExprSetEnum(ATermList DataExprs, ATermAppl SortExpr);
 
 ///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
-///\return Data expression for the subset or equality relation "e <= e'", where
-///     e = DataExprLHS and e' = DataExprRHS
-ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-
-///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
-///\return Data expression for the proper subset relation "e < e'", where
-///     e = DataExprLHS and e' = DataExprRHS
-ATermAppl gsMakeDataExprSubSet(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-
-///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
 ///\return Data expression for the set union of DataExprLHS and DataExprRHS
 ATermAppl gsMakeDataExprSetUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 
@@ -1263,16 +1284,6 @@ ATermAppl gsMakeDataExprBagEnum(ATermList DataExprs, ATermAppl SortExpr);
 ///\pre DataExprLHS and DataExprRHS are data expressions
 ///\return Data expression for the count of element DataExprLHS in bag DataExprRHS
 ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-
-///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
-///\return Data expression for the subbag or equality relation "e <= e'", where
-///     e = DataExprLHS and e' = DataExprRHS
-ATermAppl gsMakeDataExprSubBagEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-
-///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
-///\return Data expression for the proper subbag relation "e < e'", where
-///     e = DataExprLHS and e' = DataExprRHS
-ATermAppl gsMakeDataExprSubBag(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 
 ///\pre DataExprLHS and DataExprRHS are data expressions of the same sort
 ///\return Data expression for the bag union of DataExprLHS and DataExprRHS
@@ -1407,6 +1418,230 @@ char *gsIntValue(const ATermAppl IntConstant);
 ///\pre IntConstant is a data expression of sort Int built from constructors only
 ///\return The value of IntExpr
 int gsIntValue_int(const ATermAppl IntConstant);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an equality function
+bool gsIsOpIdEq(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an inequality function
+bool gsIsOpIdNeq(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an if function
+bool gsIsOpIdIf(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a forall function
+bool gsIsOpIdForall(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an exists function
+bool gsIsOpIdExists(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a less than or equal function
+bool gsIsOpIdLTE(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a less than function
+bool gsIsOpIdLT(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an greater than or equal function
+bool gsIsOpIdGTE(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a greater than function
+bool gsIsOpIdGT(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a max function
+bool gsIsOpIdMax(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a min function
+bool gsIsOpIdMin(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an abs function
+bool gsIsOpIdAbs(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a neg function
+bool gsIsOpIdNeg(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a succ function
+bool gsIsOpIdSucc(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a pred function
+bool gsIsOpIdPred(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a dub function
+bool gsIsOpIdDub(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an add function
+bool gsIsOpIdAdd(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a subt function
+bool gsIsOpIdSubt(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a gtesubt function
+bool gsIsOpIdGTESubt(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a mult function
+bool gsIsOpIdMult(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a div function
+bool gsIsOpIdDiv(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a mod function
+bool gsIsOpIdMod(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an exp function
+bool gsIsOpIdExp(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a divide function
+bool gsIsOpIdDivide(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an empty list function
+bool gsIsOpIdEmptyList(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a list enum function
+bool gsIsOpIdListEnum(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a listsize function
+bool gsIsOpIdListSize(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a cons function
+bool gsIsOpIdCons(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a snoc function
+bool gsIsOpIdSnoc(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a concat function
+bool gsIsOpIdConcat(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a element at function
+bool gsIsOpIdEltAt(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a head function
+bool gsIsOpIdHead(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a tail function
+bool gsIsOpIdTail(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a reverse head function
+bool gsIsOpIdRHead(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a reverse tail function
+bool gsIsOpIdRTail(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set comprehension function
+bool gsIsOpIdSetComp(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an empty set function
+bool gsIsOpIdEmptySet(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set enumeration function
+bool gsIsOpIdSetEnum(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a element in function
+bool gsIsOpIdEltIn(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a subset or equal function
+bool gsIsOpIdSubSetEq(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a subset function
+bool gsIsOpIdSubSet(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set union function
+bool gsIsOpIdSetUnion(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set difference function
+bool gsIsOpIdSetDiff(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set intersection function
+bool gsIsOpIdSetIntersect(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set complement function
+bool gsIsOpIdSetCompl(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag comprehension function
+bool gsIsOpIdBagComp(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is an empty bag function
+bool gsIsOpIdEmptyBag(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag enumeration function
+bool gsIsOpIdBagEnum(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a count function
+bool gsIsOpIdCount(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a subbag or equal function
+bool gsIsOpIdSubBagEq(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a subbag function
+bool gsIsOpIdSubBag(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag union function
+bool gsIsOpIdBagUnion(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag difference function
+bool gsIsOpIdBagDiff(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag intersection function
+bool gsIsOpIdBagIntersect(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a bag2set function
+bool gsIsOpIdBag2Set(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a set2bag function
+bool gsIsOpIdSet2Bag(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return DataExpr is true

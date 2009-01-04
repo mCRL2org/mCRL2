@@ -756,7 +756,6 @@ inline ATermAppl initMakeOpIdNameCount(ATermAppl &t)
   ATprotectAppl(&t);
   return t;
 }
-
 inline ATermAppl initMakeOpIdNameSubBagEq(ATermAppl &t) 
 {
   t = gsString2ATermAppl("<=");
@@ -945,6 +944,91 @@ bool gsIsSortExprBag(ATermAppl Term)
     return false;
   else
     return gsIsSortBag(ATAgetArgument(Term, 0));
+}
+
+const char* gsSortStructPrefix()
+{
+  return "Struct@";
+}
+
+const char* gsSortListPrefix()
+{
+  return "List@";
+}
+
+const char* gsSortSetPrefix()
+{
+  return "Set@";
+}
+
+const char* gsSortBagPrefix()
+{
+  return "Bag@";
+}
+
+const char* gsLambdaPrefix()
+{
+  return "lambda@";
+}
+
+bool gsIsStructSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsSortStructPrefix(),
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsSortStructPrefix())) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsListSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsSortListPrefix(),
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsSortListPrefix())) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsSetSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsSortSetPrefix(),
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsSortSetPrefix())) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsBagSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsSortBagPrefix(),
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsSortBagPrefix())) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsLambdaOpId(ATermAppl DataExpr)
+{
+  if (gsIsOpId(DataExpr)) {
+    return strncmp(
+      gsLambdaPrefix(),
+      ATgetName(ATgetAFun(ATAgetArgument(DataExpr, 0))),
+      strlen(gsLambdaPrefix())) == 0;
+  } else {
+    return false;
+  }
 }
 
 //Auxiliary functions concerning sort expressions
@@ -1547,7 +1631,6 @@ ATermAppl gsMakeOpIdNameSubSet() {
   static ATermAppl t = initMakeOpIdNameSubSet(t);
   return t;
 }
-
 ATermAppl gsMakeOpIdNameSetUnion() {
   static ATermAppl t = initMakeOpIdNameSetUnion(t);
   return t;
@@ -1607,6 +1690,7 @@ ATermAppl gsMakeOpIdNameSubBag() {
   static ATermAppl t = initMakeOpIdNameSubBag(t);
   return t;
 }
+
 
 ATermAppl gsMakeOpIdNameBagUnion() {
   static ATermAppl t = initMakeOpIdNameBagUnion(t);
@@ -2178,7 +2262,6 @@ ATermAppl gsMakeOpIdSubSet(ATermAppl SortExpr)
   return gsMakeOpId(gsMakeOpIdNameSubSet(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
-
 ATermAppl gsMakeOpIdSetUnion(ATermAppl SortExpr)
 {
   return gsMakeOpId(gsMakeOpIdNameSetUnion(),
@@ -2238,7 +2321,6 @@ ATermAppl gsMakeOpIdSubBag(ATermAppl SortExpr)
   return gsMakeOpId(gsMakeOpIdNameSubBag(),
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
-
 ATermAppl gsMakeOpIdBagUnion(ATermAppl SortExpr)
 {
   return gsMakeOpId(gsMakeOpIdNameBagUnion(),
@@ -2838,20 +2920,6 @@ ATermAppl gsMakeDataExprSetEnum(ATermList DataExprs, ATermAppl SortExpr)
   return gsMakeOpIdSetEnum(SortExpr);
 }
 
-ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
-  return gsMakeDataAppl2(
-    gsMakeOpIdSubSetEq(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
-}
-
-ATermAppl gsMakeDataExprSubSet(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
-  return gsMakeDataAppl2(
-    gsMakeOpIdSubSet(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
-}
-
 ATermAppl gsMakeDataExprSetUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
@@ -2924,20 +2992,6 @@ ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   return gsMakeDataAppl2(
     gsMakeOpIdCount(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)),
     DataExprLHS, DataExprRHS);
-}
-
-ATermAppl gsMakeDataExprSubBagEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
-  return gsMakeDataAppl2(
-    gsMakeOpIdSubBagEq(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
-}
-
-ATermAppl gsMakeDataExprSubBag(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
-  return gsMakeDataAppl2(
-    gsMakeOpIdSubBag(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprBagUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
@@ -3237,6 +3291,808 @@ int gsIntValue_int(const ATermAppl IntConstant)
   return n;
 }
 
+// Recognisers for OpId's
+bool gsIsOpIdEq(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdEq(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdNeq(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdNeq(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdIf(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 3)
+      {
+        return ATisEqual(DataExpr, gsMakeOpIdIf(ATAgetFirst(ATgetNext(domain))));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdForall(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdForall(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdExists(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdExists(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdLTE(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdLTE(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdLT(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdLT(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdGTE(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdGTE(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdGT(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdGT(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdMax(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return IsPNIRSort(arg0) &&
+               IsPNIRSort(arg1) &&
+               (ATisEqual(arg0, gsMakeSortExprReal()) == ATisEqual(arg1, gsMakeSortExprReal())) &&
+               ATisEqual(DataExpr, gsMakeOpIdMax(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdMin(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdMin(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdAbs(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdAbs(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdNeg(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdNeg(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSucc(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdSucc(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdPred(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdPred(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdDub(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+      return ATgetLength(domain) == 3 &&
+             IsNISort(arg1) &&
+             ATisEqual(DataExpr, gsMakeOpIdDub(arg1));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdAdd(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return IsPNIRSort(arg0) &&
+               IsPNIRSort(arg1) &&
+               (ATisEqual(arg0, gsMakeSortExprInt()) == ATisEqual(arg1, gsMakeSortExprInt())) &&
+               (ATisEqual(arg0, gsMakeSortExprReal()) == ATisEqual(arg1, gsMakeSortExprReal())) &&
+               ATisEqual(DataExpr, gsMakeOpIdAdd(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSubt(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdSubt(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdGTESubt(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdGTESubt(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdMult(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdMult(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdDiv(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNISort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdDiv(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdMod(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNISort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdMod(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdExp(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdExp(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdDivide(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return IsPNIRSort(ATAgetFirst(domain)) &&
+             ATisEqual(DataExpr, gsMakeOpIdDivide(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdEmptyList(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortId(s))
+    {
+      return ATisEqual(DataExpr, gsMakeOpIdEmptyList(s));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdListEnum(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortId(s))
+    {
+      return ATisEqual(DataExpr, gsMakeOpIdListEnum(s));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdListSize(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdListSize(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdCons(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return ATisEqual(DataExpr, gsMakeOpIdCons(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSnoc(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return ATisEqual(DataExpr, gsMakeOpIdSnoc(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdConcat(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdConcat(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdEltAt(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return ATisEqual(DataExpr, gsMakeOpIdEltAt(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdHead(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return ATisEqual(DataExpr, gsMakeOpIdHead(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdTail(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdTail(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdRHead(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return ATisEqual(DataExpr, gsMakeOpIdRHead(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdRTail(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return ATisEqual(DataExpr, gsMakeOpIdRTail(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetComp(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return gsIsSortArrow(ATAgetFirst(domain)) &&
+             gsGetSortExprResult(ATAgetFirst(domain)) == gsMakeSortExprBool() &&
+             ATisEqual(DataExpr, gsMakeOpIdSetComp(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdEmptySet(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortId(s))
+    {
+      return(gsIsSortExprSet(s) ||
+              gsIsSetSortId(s)) &&
+              ATisEqual(DataExpr, gsMakeOpIdEmptySet(s));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetEnum(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    return ATisEqual(DataExpr, gsMakeOpIdSetEnum(s));
+  }
+  return false;
+}
+
+bool gsIsOpIdEltIn(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return ATisEqual(DataExpr, gsMakeOpIdEltIn(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetUnion(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
+              gsIsSetSortId(ATAgetFirst(domain))) &&
+             ATisEqual(DataExpr, gsMakeOpIdSetUnion(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetDiff(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
+              gsIsSetSortId(ATAgetFirst(domain))) &&
+             ATisEqual(DataExpr, gsMakeOpIdSetDiff(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetIntersect(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
+              gsIsSetSortId(ATAgetFirst(domain))) &&
+             ATisEqual(DataExpr, gsMakeOpIdSetIntersect(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSetCompl(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return (gsIsSortExprSet(codomain) || gsIsSetSortId(codomain)) &&
+              ATisEqual(DataExpr, gsMakeOpIdSetCompl(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBagComp(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return gsIsSortArrow(ATAgetFirst(domain)) &&
+             gsGetSortExprResult(ATAgetFirst(domain)) == gsMakeSortExprNat() &&
+             ATisEqual(DataExpr, gsMakeOpIdBagComp(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdEmptyBag(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortId(s))
+    {
+      return (gsIsSortExprBag(s) ||
+              gsIsBagSortId(s)) &&
+             ATisEqual(DataExpr, gsMakeOpIdEmptyBag(s));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBagEnum(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    return ATisEqual(DataExpr, gsMakeOpIdBagEnum(s));
+  }
+  return false;
+}
+
+bool gsIsOpIdCount(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      if(ATgetLength(domain) == 2)
+      {
+        ATermAppl arg0 = ATAgetFirst(domain);
+        ATermAppl arg1 = ATAgetFirst(ATgetNext(domain));
+        return ATisEqual(DataExpr, gsMakeOpIdCount(arg0, arg1));
+      }
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBagUnion(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
+              gsIsBagSortId(ATAgetFirst(domain))) &&
+             ATisEqual(DataExpr, gsMakeOpIdBagUnion(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBagDiff(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
+              gsIsBagSortId(ATAgetFirst(domain))) &&
+              ATisEqual(DataExpr, gsMakeOpIdBagDiff(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBagIntersect(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
+              gsIsBagSortId(ATAgetFirst(domain))) &&
+             ATisEqual(DataExpr, gsMakeOpIdBagIntersect(ATAgetFirst(domain)));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdBag2Set(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return ATisEqual(DataExpr, gsMakeOpIdBag2Set(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+bool gsIsOpIdSet2Bag(ATermAppl DataExpr)
+{
+  if(gsIsOpId(DataExpr))
+  {
+    ATermAppl s = ATAgetArgument(DataExpr,1);
+    if(gsIsSortArrow(s))
+    {
+      ATermList domain = ATLgetArgument(s, 0);
+      ATermAppl codomain = ATAgetArgument(s, 1);
+      return ATisEqual(DataExpr, gsMakeOpIdSet2Bag(ATAgetFirst(domain), codomain));
+    }
+  }
+  return false;
+}
+
+// Regognisers for data expressions
 bool gsIsDataExprTrue(ATermAppl DataExpr)
 {
   return DataExpr == gsMakeOpIdTrue();
@@ -3251,8 +4107,8 @@ bool gsIsDataExprNot(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if (t==gsMakeOpIdNot())
-      return true;
+    return gsGetSort(DataExpr) == gsMakeSortExprBool() &&
+           ATisEqual(t,gsMakeOpIdNot());
   }
   return false;
 }
@@ -3261,8 +4117,7 @@ bool gsIsDataExprAnd(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if (t==gsMakeOpIdAnd())
-      return true;
+    return ATisEqual(t, gsMakeOpIdAnd());
   } 
   return false;
 }
@@ -3271,8 +4126,7 @@ bool gsIsDataExprOr(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if (t==gsMakeOpIdOr())
-      return true;
+    return ATisEqual(t, gsMakeOpIdOr());
   } 
   return false;
 }
@@ -3281,8 +4135,7 @@ bool gsIsDataExprImp(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) { 
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if (t==gsMakeOpIdImp())
-      return true;
+    return ATisEqual(t, gsMakeOpIdImp());
   } 
   return false;
 }
@@ -3291,8 +4144,7 @@ bool gsIsDataExprEq(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameEq();
+    return gsIsOpIdEq(t);
   }
   return false;
 }
@@ -3301,8 +4153,7 @@ bool gsIsDataExprNeq(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameNeq();
+    return gsIsOpIdNeq(t);
   }
   return false;
 }
@@ -3311,44 +4162,35 @@ bool gsIsDataExprIf(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameIf();
+    return gsIsOpIdIf(t);
   }
   return false;
 }
 
 bool gsIsDataExprC0(ATermAppl DataExpr)
 {
-  if (gsIsOpId(DataExpr)) {
-    return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameC0());
-  } 
-  return false;
+  return ATisEqual(DataExpr, gsMakeOpIdC0());
 }
 
 bool gsIsDataExprC1(ATermAppl DataExpr)
 {
-  if (gsIsOpId(DataExpr)) {
-    return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameC1());
-  } 
-  return false;
+  return ATisEqual(DataExpr, gsMakeOpIdC1());
 }
 
 bool gsIsDataExprCDub(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameCDub());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return ATisEqual(t, gsMakeOpIdCDub());
   }
   return false;
 }  
+
 bool gsIsDataExprCNat(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameCNat();
+    return ATisEqual(t, gsMakeOpIdCNat());
   }
   return false;
 }
@@ -3357,8 +4199,7 @@ bool gsIsDataExprCPair(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATisEqual(ATAgetArgument(t,0), gsMakeOpIdNameCPair());
+    return ATisEqual(t, gsMakeOpIdCPair());
   }
   return false;
 }
@@ -3367,8 +4208,7 @@ bool gsIsDataExprCInt(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameCInt();
+    return ATisEqual(t, gsMakeOpIdCInt());
   }
   return false;
 }
@@ -3377,8 +4217,7 @@ bool gsIsDataExprCReal(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameCReal();
+    return ATisEqual(t, gsMakeOpIdCReal());
   }
   return false;
 }
@@ -3387,8 +4226,7 @@ bool gsIsDataExprPos2Nat(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Nat();
+    return ATisEqual(t, gsMakeOpIdPos2Nat());
   }
   return false;
 }
@@ -3397,8 +4235,7 @@ bool gsIsDataExprPos2Int(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Int();
+    return ATisEqual(t, gsMakeOpIdPos2Int());
   }
   return false;
 }
@@ -3407,8 +4244,7 @@ bool gsIsDataExprPos2Real(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNamePos2Real();
+    return ATisEqual(t, gsMakeOpIdPos2Real());
   }
   return false;
 }
@@ -3417,8 +4253,7 @@ bool gsIsDataExprNat2Int(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameNat2Int();
+    return ATisEqual(t, gsMakeOpIdNat2Int());
   }
   return false;
 }
@@ -3427,8 +4262,7 @@ bool gsIsDataExprNat2Real(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameNat2Real();
+    return ATisEqual(t, gsMakeOpIdNat2Real());
   }
   return false;
 }
@@ -3437,8 +4271,7 @@ bool gsIsDataExprInt2Real(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t)) 
-      return ATAgetArgument(t,0) == gsMakeOpIdNameInt2Real();
+    return ATisEqual(t, gsMakeOpIdInt2Real());
   }
   return false;
 }
@@ -3447,8 +4280,7 @@ bool gsIsDataExprCNeg(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr, 0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameCNeg();
+    return ATisEqual(t, gsMakeOpIdCNeg());
   }
   return false;
 }
@@ -3457,8 +4289,7 @@ bool gsIsDataExprLTE(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameLTE();
+    return gsIsOpIdLTE(t);
   }
   return false;
 }
@@ -3467,8 +4298,7 @@ bool gsIsDataExprLT(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameLT();
+    return gsIsOpIdLT(t);
   }
   return false;
 }
@@ -3477,8 +4307,7 @@ bool gsIsDataExprGTE(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGTE();
+    return gsIsOpIdGTE(t);
   }
   return false;
 }
@@ -3487,8 +4316,7 @@ bool gsIsDataExprGT(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGT();
+    return gsIsOpIdGT(t);
   }
   return false;
 }
@@ -3497,8 +4325,7 @@ bool gsIsDataExprMax(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameMax();
+    return gsIsOpIdMax(t);
   }
   return false;
 }
@@ -3507,8 +4334,7 @@ bool gsIsDataExprMin(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameMin();
+    return gsIsOpIdMin(t);
   }
   return false;
 }
@@ -3517,8 +4343,7 @@ bool gsIsDataExprAbs(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameAbs();
+    return gsIsOpIdAbs(t);
   }
   return false;
 }
@@ -3527,8 +4352,7 @@ bool gsIsDataExprNeg(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameNeg() && ATgetLength(ATLgetArgument(DataExpr,1)) == 1;
+    return gsIsOpIdNeg(t);
   }
   return false;
 }
@@ -3537,8 +4361,7 @@ bool gsIsDataExprSucc(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameSucc();
+    return gsIsOpIdSucc(t);
   }
   return false;
 }
@@ -3547,8 +4370,7 @@ bool gsIsDataExprPred(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNamePred();
+    return gsIsOpIdPred(t);
   }
   return false;
 }
@@ -3557,8 +4379,7 @@ bool gsIsDataExprDub(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameDub();
+    return gsIsOpIdDub(t);
   }
   return false;
 }
@@ -3567,8 +4388,7 @@ bool gsIsDataExprAdd(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameAdd();
+    return gsIsOpIdAdd(t);
   }
   return false;
 }
@@ -3577,8 +4397,7 @@ bool gsIsDataExprAddC(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameAddC();
+    return ATisEqual(t, gsMakeOpIdAddC());
   }
   return false;
 }
@@ -3587,8 +4406,7 @@ bool gsIsDataExprSubt(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameSubt() && ATgetLength(ATLgetArgument(DataExpr,1)) == 2;
+    return gsIsOpIdSubt(t);
   }
   return false;
 }
@@ -3597,8 +4415,7 @@ bool gsIsDataExprGTESubt(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGTESubt();
+    return gsIsOpIdGTESubt(t);
   }
   return false;
 }
@@ -3607,8 +4424,7 @@ bool gsIsDataExprGTESubtB(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGTESubtB();
+    return ATisEqual(t, gsMakeOpIdGTESubtB());
   }
   return false;
 }
@@ -3617,8 +4433,7 @@ bool gsIsDataExprMult(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameMult();
+    return gsIsOpIdMult(t);
   }
   return false;
 }
@@ -3627,8 +4442,7 @@ bool gsIsDataExprMultIR(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameMultIR();
+    return ATisEqual(t, gsMakeOpIdMultIR());
   }
   return false;
 }
@@ -3637,8 +4451,7 @@ bool gsIsDataExprDiv(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameDiv();
+    return gsIsOpIdDiv(t);
   }
   return false;
 }
@@ -3647,8 +4460,7 @@ bool gsIsDataExprMod(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameMod();
+    return gsIsOpIdMod(t);
   }
   return false;
 }
@@ -3657,8 +4469,7 @@ bool gsIsDataExprDivMod(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameDivMod();
+    return ATisEqual(t, gsMakeOpIdDivMod());
   }
   return false;
 }
@@ -3667,8 +4478,7 @@ bool gsIsDataExprGDivMod(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGDivMod();
+    return ATisEqual(t, gsMakeOpIdGDivMod());
   }
   return false;
 }
@@ -3677,8 +4487,7 @@ bool gsIsDataExprGGDivMod(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameGGDivMod();
+    return ATisEqual(t, gsMakeOpIdGGDivMod());
   }
   return false;
 }
@@ -3687,8 +4496,7 @@ bool gsIsDataExprEven(ATermAppl DataExpr)
 {
   if(gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr,0);
-    if(gsIsOpId(t))
-      return ATAgetArgument(t,0) == gsMakeOpIdNameEven();
+    return ATisEqual(t, gsMakeOpIdEven());
   }
   return false;
 }
@@ -3704,18 +4512,14 @@ bool gsIsDataExprNumber(ATermAppl DataExpr)
 
 bool gsIsDataExprEmptyList(ATermAppl DataExpr)
 {
-  if (!gsIsOpId(DataExpr)) return false;
-  ATermAppl Name = gsGetName(DataExpr);
-  return ATisEqual(Name, gsMakeOpIdNameEmptyList());
+  return gsIsOpIdEmptyList(DataExpr);
 }
 
 bool gsIsDataExprListEnum(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameListEnum());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdListEnum(t);
   }
   return false;
 }
@@ -3723,10 +4527,8 @@ bool gsIsDataExprListEnum(ATermAppl DataExpr)
 bool gsIsDataExprCons(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameCons());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdCons(t);
   }
   return false;
 }
@@ -3734,32 +4536,32 @@ bool gsIsDataExprCons(ATermAppl DataExpr)
 bool gsIsDataExprSetEnum(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameSetEnum());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdSetEnum(t);
   }
-  return false;
+  else
+  {
+    return gsIsOpIdBagEnum(DataExpr);
+  }
 }
 
 bool gsIsDataExprBagEnum(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameBagEnum());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdBagEnum(t);
   }
-  return false;
+  else
+  {
+    return gsIsOpIdBagEnum(DataExpr);
+  }
 }
 
 bool gsIsDataExprSetComp(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameSetComp());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdSetComp(t);
   }
   return false;
 }
@@ -3767,10 +4569,8 @@ bool gsIsDataExprSetComp(ATermAppl DataExpr)
 bool gsIsDataExprBagComp(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameBagComp());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdBagComp(t);
   }
   return false;
 }
@@ -3779,10 +4579,8 @@ bool gsIsDataExprBagComp(ATermAppl DataExpr)
 bool gsIsDataExprForall(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameForall());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdForall(t);
   }
   return false;
 }
@@ -3790,10 +4588,8 @@ bool gsIsDataExprForall(ATermAppl DataExpr)
 bool gsIsDataExprExists(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    DataExpr = ATAgetArgument(DataExpr, 0);
-    if (gsIsOpId(DataExpr)) {
-      return ATisEqual(gsGetName(DataExpr), gsMakeOpIdNameExists());
-    }
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsOpIdForall(t);
   }
   return false;
 }
