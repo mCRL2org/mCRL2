@@ -56,8 +56,8 @@ namespace atermpp {
   {
     protected:
       /// \return The wrapped ATermList.
-      const ATermList list() const
-      { return reinterpret_cast<const ATermList>(m_term); }
+      ATermList list() const
+      { return reinterpret_cast<ATermList>(m_term); }
 
       /// \return The wrapped ATermList.
       ATermList list()

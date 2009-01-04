@@ -39,9 +39,9 @@ namespace atermpp
     protected:
       /// \return The wrapped ATerm.
       ///
-      const ATermAppl appl() const
+      ATermAppl appl() const
       {
-        return reinterpret_cast<const ATermAppl>(m_term);
+        return reinterpret_cast<ATermAppl>(m_term);
       }
 
     public:

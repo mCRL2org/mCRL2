@@ -22,7 +22,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATerm>(t); }
 
   inline
-  const ATerm void2term(const void* t)
+  ATerm void2term(const void* t)
   { return reinterpret_cast<ATerm>(const_cast<void*>(t)); }
   
   inline
@@ -35,7 +35,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATermList>(t); }
 
   inline
-  const ATermList void2list(const void* t)
+  ATermList void2list(const void* t)
   { return reinterpret_cast<ATermList>(const_cast<void*>(t)); }
   
   inline
@@ -48,7 +48,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATermAppl>(t); }
   
   inline
-  const ATermAppl void2appl(const void* t)
+  ATermAppl void2appl(const void* t)
   { return reinterpret_cast<ATermAppl>(const_cast<void*>(t)); }
   
   inline
@@ -61,7 +61,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATermReal>(t); }
   
   inline
-  const ATermReal void2real(const void* t)
+  ATermReal void2real(const void* t)
   { return reinterpret_cast<ATermReal>(const_cast<void*>(t)); }
   
   inline
@@ -74,7 +74,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATermBlob>(t); }
   
   inline
-  const ATermBlob void2blob(const void* t)
+  ATermBlob void2blob(const void* t)
   { return reinterpret_cast<ATermBlob>(const_cast<void*>(t)); }
   
   inline
@@ -87,7 +87,7 @@ namespace { // unnamed namespace
   { return reinterpret_cast<ATermInt>(t); }
   
   inline
-  const ATermInt void2int(const void* t)
+  ATermInt void2int(const void* t)
   { return reinterpret_cast<ATermInt>(const_cast<void*>(t)); }
   
   inline
