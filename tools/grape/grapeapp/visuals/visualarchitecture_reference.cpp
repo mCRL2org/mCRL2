@@ -19,7 +19,7 @@
 namespace grape {
 	
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualarchitecture_reference::visualarchitecture_reference( architecture_reference* p_architecture_reference )
 {

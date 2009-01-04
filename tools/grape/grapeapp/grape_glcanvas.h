@@ -21,7 +21,7 @@ namespace grape
   namespace grapeapp
   {
 
-    using namespace mcrl2::utilities;
+    using mcrl2::utilities::wx::font_renderer;
 
     class grape_frame;
 

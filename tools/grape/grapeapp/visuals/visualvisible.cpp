@@ -21,7 +21,7 @@
 namespace grape {
 	
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualvisible::visualvisible( visible* p_visible, coordinate &p_coord, float &p_width, float &p_height )
 {

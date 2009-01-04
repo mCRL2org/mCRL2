@@ -42,7 +42,7 @@ void Visualizer::visualize(double _width, double _height, double _pixelSize,
  
   if (!fr)
   {
-    fr = new mcrl2::utilities::font_renderer();
+    fr = new mcrl2::utilities::wx::font_renderer();
   } 
 
   drawStates(inSelectMode);
@@ -180,7 +180,7 @@ void Visualizer::drawState(State* s)
  
   if(showStateLabels) {
     fr->draw_text(labelstr.str(), x, y, (rad - 2 * pixelSize) / 24.0f,  
-                mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
   }
   
   glPopName();
@@ -340,7 +340,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
       glPushName(trid);
       fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
                   8 * pixelSize / 20.0f, 
-                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
+                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
       glPopName();
       glPopName();
       glPopName();
@@ -348,7 +348,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     else {
       fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
-                mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
     }
   }
   
@@ -402,7 +402,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double gamma = alpha + beta;
   double delta = alpha - beta;
   
-  double xFactor;
+  double xFactor = 1;
   double yFactor;
   double cosGamma = cos(gamma);
   double cosDelta = cos(delta);
@@ -543,7 +543,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
       fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
                   8 * pixelSize / 20.0f, 
-                  mcrl2::utilities::al_center, mcrl2::utilities::al_top, false);
+                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
       glPopName();
       glPopName();
       glPopName();
@@ -551,7 +551,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
     else {
       fr->draw_text(tr->getLabel(), labelX, labelY + .025, 
                 8 * pixelSize / 20.0f, 
-                mcrl2::utilities::al_center, mcrl2::utilities::al_top);
+                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
     }
   }
  
@@ -581,7 +581,7 @@ void Visualizer::initFontRenderer()
 {
   if (!fr)
   {
-    fr = new mcrl2::utilities::font_renderer();
+    fr = new mcrl2::utilities::wx::font_renderer();
   }
 }
 

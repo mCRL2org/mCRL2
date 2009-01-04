@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "boost/algorithm/string.hpp"
+#include "boost/type_traits/is_pod.hpp"
 #include "boost/shared_ptr.hpp"
 
 namespace mcrl2 {
@@ -45,6 +46,32 @@ namespace mcrl2 {
 
       void register_rewriting_options(interface_description&);
       void register_proving_options(interface_description&);
+
+      /// Helper class to prevent uninitialised variable warnings
+      template < typename T, bool = boost::is_pod< T >::value >
+      struct instance_of;
+
+      template < typename T >
+      struct instance_of< T, true > {
+        T m_wrapped;
+
+        instance_of() {
+          m_wrapped = static_cast< T >(0);
+        }
+
+        T& wrapped() {
+          return m_wrapped;
+        }
+      };
+
+      template < typename T >
+      struct instance_of< T, false > {
+        T m_wrapped;
+
+        T& wrapped() {
+          return m_wrapped;
+        }
+      };
     }
     // \endcond
 
@@ -802,9 +829,9 @@ namespace mcrl2 {
         inline T option_argument_as(std::string const& long_identifier) const {
           std::istringstream in(option_argument(long_identifier));
 
-          T result;
+          detail::instance_of< T > result;
 
-          in >> result;
+          in >> result.wrapped();
 
           if (in.fail()) {
             const char short_option(m_interface.long_to_short(long_identifier));
@@ -813,7 +840,7 @@ namespace mcrl2 {
                 ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
           }
 
-          return result;
+          return result.wrapped();
         }
     };
 

@@ -18,8 +18,8 @@
 #include "mcrl2/utilities/colorbutton.h"
 #include "mcrl2/utilities/spinctrlfloat.h"
 
-using mcrl2::utilities::wxColorButton;
-using mcrl2::utilities::wxSpinCtrlFloat;
+using mcrl2::utilities::wx::wxColorButton;
+using mcrl2::utilities::wx::wxSpinCtrlFloat;
 
 class SettingsFrame : public PopupFrame
 {

@@ -17,7 +17,7 @@
 #include "mcrl2/utilities/font_renderer.h"
 
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualreference_state::visualreference_state( reference_state* p_reference_state )
 {

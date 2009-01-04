@@ -18,62 +18,64 @@
 
 namespace mcrl2 {
   namespace utilities {
+    namespace wx {
 
-    /**
-     * \brief A spin control widget
-     *
-     * A widget that consists of a text field with a string that represents a
-     * numeric value in it that is editable by the user, and a pair of buttons
-     * that can be used to increase or decrease the value in the text field
-     * with a configurable amount.
-     **/
-    class wxSpinCtrlFloat : public wxPanel {
+      /**
+       * \brief A spin control widget
+       *
+       * A widget that consists of a text field with a string that represents a
+       * numeric value in it that is editable by the user, and a pair of buttons
+       * that can be used to increase or decrease the value in the text field
+       * with a configurable amount.
+       **/
+      class wxSpinCtrlFloat : public wxPanel {
 
-      private:
+        private:
 
-        /// \brief A wxWidgets text control, used to display the current value
-        wxTextCtrl*   m_TextCtrl;
-        /// \brief A wxWidgets spin button, used to manipulate the current value
-        wxSpinButton* m_SpinButton;
-    	
-        /// \brief The spin button resolution
-        double m_Rate;
+          /// \brief A wxWidgets text control, used to display the current value
+          wxTextCtrl*   m_TextCtrl;
+          /// \brief A wxWidgets spin button, used to manipulate the current value
+          wxSpinButton* m_SpinButton;
 
-        /// \brief The rounded minimum value
-        int    m_Min;
+          /// \brief The spin button resolution
+          double m_Rate;
 
-        /// \brief The rounded maximum value
-        int    m_Max;
-          
-        DECLARE_EVENT_TABLE()
+          /// \brief The rounded minimum value
+          int    m_Min;
 
-      private:
+          /// \brief The rounded maximum value
+          int    m_Max;
 
-        /// \brief Event handler for SPIN events
-        void OnEnter(wxCommandEvent & event);
+          DECLARE_EVENT_TABLE()
 
-        /// \brief Event handler for SPIN events
-        void OnSpin(wxSpinEvent & event);
+        private:
 
-      public:
+          /// \brief Event handler for SPIN events
+          void OnEnter(wxCommandEvent & event);
 
-        /// \brief Constructor
-        wxSpinCtrlFloat(
-            wxWindow* parent, 
-            wxWindowID id, 
-            double p_Min, 
-            double p_Max,
-            double p_Rate, 
-            double p_Init, 
-            const wxPoint& pos = wxDefaultPosition,
-            const wxSize& size = wxDefaultSize );
-    
-        /// \brief Gets current value
-        double GetValue();
+          /// \brief Event handler for SPIN events
+          void OnSpin(wxSpinEvent & event);
 
-        /// \brief Sets current value
-        void SetValue(float v);
-    };
+        public:
+
+          /// \brief Constructor
+          wxSpinCtrlFloat(
+              wxWindow* parent, 
+              wxWindowID id, 
+              double p_Min, 
+              double p_Max,
+              double p_Rate, 
+              double p_Init, 
+              const wxPoint& pos = wxDefaultPosition,
+              const wxSize& size = wxDefaultSize );
+
+          /// \brief Gets current value
+          double GetValue();
+
+          /// \brief Sets current value
+          void SetValue(float v);
+      };
+    }
   }
 }
 

@@ -232,7 +232,7 @@ static ATermList get_substs(ATermList ids)
 		*t = 0;
 
 		unsigned int i = 0;
-		ATermAppl new_id;
+		ATermAppl new_id = 0;
 		while ( !gsIsUserIdentifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
 		{
 			sprintf(t,"%i",i);

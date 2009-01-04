@@ -24,7 +24,7 @@ const float preamble_height = 0.3f;
 namespace grape {
 	
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualpreamble::visualpreamble( preamble* p_preamble )
 {

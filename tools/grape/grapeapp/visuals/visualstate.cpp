@@ -19,6 +19,7 @@
 namespace grape {
 	
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities::wx;
 
 visualstate::visualstate( state* p_state )
 {

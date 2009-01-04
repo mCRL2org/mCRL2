@@ -126,26 +126,26 @@ namespace data {
         : basic_rewriter<data_expression>(d, s)
       { }
 
-		  /// \brief Rewrites a data expression.
-		  /// \param d The term to be rewritten.
-		  /// \return The normal form of d.
-		  ///
-		  data_expression operator()(const data_expression& d) const
-		  {
-		    return m_rewriter.get()->rewrite(d);
-		  }
+      /// \brief Rewrites a data expression.
+      /// \param d The term to be rewritten.
+      /// \return The normal form of d.
+      ///
+      data_expression operator()(const data_expression& d) const
+      {
+        return m_rewriter.get()->rewrite(d);
+      }
 
-		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-		  /// to data variables.
-		  /// \param d A term.
-		  /// \param sigma A substitution function.
-		  /// \return The normal form of the term.
-		  ///
-		  template <typename SubstitutionFunction>
-		  data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
-		  {
-		    return this->operator()(replace_data_variables(d, sigma));
-		  }
+      /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+      /// to data variables.
+      /// \param d A term.
+      /// \param sigma A substitution function.
+      /// \return The normal form of the term.
+      ///
+      template <typename SubstitutionFunction>
+      data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
+      {
+        return this->operator()(replace_data_variables(d, sigma));
+      }
   };
 
   /// \brief Rewriter that operates on data expressions.
@@ -165,31 +165,31 @@ namespace data {
         : basic_rewriter<data_expression_with_variables>(r.m_rewriter)
       {}
 
-		  /// \brief Rewrites a data expression.
-		  /// \param d The term to be rewritten.
-		  /// \return The normal form of d.
-		  ///
-		  data_expression_with_variables operator()(const data_expression_with_variables& d) const
-		  {
-		    data_expression t = m_rewriter.get()->rewrite(d);
-		    std::set<data_variable> v = find_all_data_variables(t);
-		    return data_expression_with_variables(t, data_variable_list(v.begin(), v.end()));
-		  }
+      /// \brief Rewrites a data expression.
+      /// \param d The term to be rewritten.
+      /// \return The normal form of d.
+      ///
+      data_expression_with_variables operator()(const data_expression_with_variables& d) const
+      {
+        data_expression t = m_rewriter.get()->rewrite(d);
+        std::set<data_variable> v = find_all_data_variables(t);
+        return data_expression_with_variables(t, data_variable_list(v.begin(), v.end()));
+      }
 
-		  /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-		  /// to data variables.
-		  /// \param d A term.
-		  /// \param sigma A substitution function.
-		  /// \return The normal form of the term.
-		  ///
-		  template <typename SubstitutionFunction>
-		  data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
-		  {
-		    data_expression t = this->operator()(replace_data_variables(d, sigma));
-		    std::set<data_variable> v = find_all_data_variables(t);
-		    data_expression_with_variables result(t, data_variable_list(v.begin(), v.end()));
-		    return result;
-		  }
+      /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+      /// to data variables.
+      /// \param d A term.
+      /// \param sigma A substitution function.
+      /// \return The normal form of the term.
+      ///
+      template <typename SubstitutionFunction>
+      data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
+      {
+        data_expression t = this->operator()(replace_data_variables(d, sigma));
+        std::set<data_variable> v = find_all_data_variables(t);
+        data_expression_with_variables result(t, data_variable_list(v.begin(), v.end()));
+        return result;
+      }
   };
 
   /// \brief Function object that turns a map of substitutions to variables into a substitution function.

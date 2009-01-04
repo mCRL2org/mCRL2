@@ -20,7 +20,7 @@
 namespace grape {
 	
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualchannel::visualchannel( channel* p_channel )
 {

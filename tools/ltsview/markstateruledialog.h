@@ -40,7 +40,7 @@ class MarkStateRuleDialog : public wxDialog {
     std::map< wxString, int > parameterIndices;
     wxListBox* parameterListBox;
     wxListBox* relationListBox;
-    mcrl2::utilities::wxColorButton* ruleClrButton;
+    mcrl2::utilities::wx::wxColorButton* ruleClrButton;
     atermpp::map< wxString, ATerm > values;
     wxCheckListBox* valuesListBox;
     LTS*  lts;

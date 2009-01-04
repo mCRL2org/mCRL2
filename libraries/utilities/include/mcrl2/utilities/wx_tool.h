@@ -25,6 +25,9 @@
 
 namespace mcrl2 {
   namespace utilities {
+    /**
+     * \brief Namespace containing wxWidgets utility functionality
+     **/
     namespace wx {
       /**
        * \brief Component for building wxWidgets tools with mCRL2 toolset command line interface

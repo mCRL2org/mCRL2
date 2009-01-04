@@ -94,7 +94,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   spRight->SplitVertically(relPanel,valPanel,200);
   spLeft->SplitVertically(parPanel,spRight,200);
 
-  ruleClrButton = new mcrl2::utilities::wxColorButton(
+  ruleClrButton = new mcrl2::utilities::wx::wxColorButton(
       this,this,wxID_ANY,wxDefaultPosition,wxSize(25,25));
   ruleClrButton->SetBackgroundColour(RGB_to_wxC(
     mediator->getNewRuleColour()));

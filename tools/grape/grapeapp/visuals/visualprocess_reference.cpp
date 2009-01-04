@@ -18,7 +18,7 @@
 
 namespace grape {
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualprocess_reference::visualprocess_reference( process_reference* p_process_reference )
 {

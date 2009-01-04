@@ -19,7 +19,7 @@
 namespace grape {
 	
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 visualcomment::visualcomment( comment* p_comment )
 {

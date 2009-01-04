@@ -244,7 +244,7 @@ int process(t_tool_options const & tool_options) {
     throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
   }
 
-  bool result;
+  bool result = true;
   if ( tool_options.equivalence != lts_eq_none )
   {
     gsVerboseMsg("comparing LTSs using %s...\n",

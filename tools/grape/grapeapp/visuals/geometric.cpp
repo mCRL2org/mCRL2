@@ -20,7 +20,7 @@
 #include <cmath>
 
 using namespace grape::grapeapp;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::wx;
 
 const float DEG2RAD = static_cast<float> ( M_PI/180 );
 const unsigned int ELLIPSE_POINTS = 360; //pre: shouldn't be zero
