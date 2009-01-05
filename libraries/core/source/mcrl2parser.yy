@@ -33,8 +33,8 @@ using namespace mcrl2::core::detail;
 //external declarations from mcrl2lexer.ll
 void mcrl2yyerror(const char *s);
 int mcrl2yylex(void);
-extern ATerm spec_tree;
-extern ATermIndexedSet parser_protect_table;
+extern ATerm mcrl2_spec_tree;
+extern ATermIndexedSet mcrl2_parser_protect_table;
 
 #ifdef _MSC_VER
 #define yyfalse 0
@@ -73,7 +73,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //     data equation, action and parameterised boolean equation specification,
 //     and one parameterised boolean initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(parser_protect_table, (ATerm) lhs, &b); }
+#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (ATerm) lhs, &b); }
 %}
 
 %union {
@@ -207,57 +207,57 @@ start:
   TAG_IDENTIFIER ID
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_SORT_EXPR sort_expr
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_DATA_EXPR data_expr
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_DATA_SPEC data_spec
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_MULT_ACT mult_act
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_PROC_SPEC proc_spec
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_STATE_FRM state_frm
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_ACTION_RENAME action_rename_spec
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_PBES_SPEC pbes_spec
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   | TAG_DATA_VARS data_vars_decls_scs
     {
       safe_assign($$, (ATerm) $2);
-      spec_tree = $$;
+      mcrl2_spec_tree = $$;
     }
   ;
 

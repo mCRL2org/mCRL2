@@ -35,8 +35,8 @@ extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
-ATerm spec_tree = NULL;      /* the parse tree */
-ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
+ATerm mcrl2_spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet mcrl2_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
@@ -60,7 +60,7 @@ protected:
 #define YY_DECL int mcrl2_lexer::yylex()
 int mcrl2yyFlexLexer::yylex(void) { return 1; }
 
-mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
+mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
@@ -190,9 +190,9 @@ nil        { process_string(); return NIL; }
 //Implementation of parse_streams
 
 ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
-  lexer = new mcrl2_lexer(print_parse_errors);
-  ATerm result = lexer->parse_streams(streams);
-  delete lexer;
+  an_mcrl2_lexer = new mcrl2_lexer(print_parse_errors);
+  ATerm result = an_mcrl2_lexer->parse_streams(streams);
+  delete an_mcrl2_lexer;
   return result;
 }
 
@@ -200,11 +200,11 @@ ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors
 //Implementation of global functions
 
 int mcrl2yylex(void) {
-  return lexer->yylex();
+  return an_mcrl2_lexer->yylex();
 }
 
 void mcrl2yyerror(const char *s) {
-  return lexer->yyerror(s);
+  return an_mcrl2_lexer->yyerror(s);
 }
 
 int mcrl2yyFlexLexer::yywrap(void) {
@@ -265,9 +265,9 @@ ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
     return result;
   }
   //streams.size() > 0
-  spec_tree = NULL;
-  ATprotect(&spec_tree);
-  parser_protect_table = ATindexedSetCreate(10000, 50);
+  mcrl2_spec_tree = NULL;
+  ATprotect(&mcrl2_spec_tree);
+  mcrl2_parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
@@ -276,11 +276,11 @@ ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   if (mcrl2yyparse() != 0) {
     result = NULL;
   } else {
-    //spec_tree contains the parsed specification
-    result = spec_tree;
-    spec_tree = NULL;
+    //mcrl2_spec_tree contains the parsed specification
+    result = mcrl2_spec_tree;
+    mcrl2_spec_tree = NULL;
   }
-  ATindexedSetDestroy(parser_protect_table);
-  ATunprotect(&spec_tree);
+  ATindexedSetDestroy(mcrl2_parser_protect_table);
+  ATunprotect(&mcrl2_spec_tree);
   return result;
 }

@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -88,6 +87,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -537,8 +538,8 @@ set<ATermAppl> used_process_identifiers;
 map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
 int parsing_mode;
 
-extern ATermAppl spec_tree;
-extern ATermIndexedSet parser_protect_table;
+extern ATermAppl chi_spec_tree;
+extern ATermIndexedSet chi_parser_protect_table;
 
 
 /**
@@ -561,13 +562,13 @@ extern YYSTYPE chiyylval;      /* declared in parser.cpp */
 int  chiyylex(void);           /* lexer function */
 void chiyyerror(const char *s);/* error function */
 void chigetposition();
-ATermAppl spec_tree = NULL;      /* the parse tree */
-ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
+ATermAppl chi_spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet chi_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
-class chiLexer : public chiyyFlexLexer {
+class chi_lexer : public chiyyFlexLexer {
 public:
-  chiLexer(void);                /* constructor */
+  chi_lexer(void);                /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   ATermAppl parse_stream(std::istream &stream );
@@ -579,14 +580,14 @@ protected:
   void process_string(void);     /* update position, provide token to parser */
 };
 
-//implement yylex in chiLexer instead of chiyyFlexLexer
-#define YY_DECL int chiLexer::yylex()
+//implement yylex in chi_lexer instead of chiyyFlexLexer
+#define YY_DECL int chi_lexer::yylex()
 int chiyyFlexLexer::yylex(void) { return 1; }
 
-chiLexer *lexer = NULL;       /* lexer object, used by parse_streams */
+chi_lexer *a_chi_lexer = NULL;       /* lexer object, used by parse_streams */
 
 
-#line 590 "chilexer.cpp"
+#line 591 "chilexer.cpp"
 
 #define INITIAL 0
 
@@ -688,7 +689,7 @@ YY_DECL
     
 #line 86 "chilexer.ll"
 
-#line 692 "chilexer.cpp"
+#line 693 "chilexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1227,7 +1228,7 @@ YY_RULE_SETUP
 #line 191 "chilexer.ll"
 ECHO;
 	YY_BREAK
-#line 1231 "chilexer.cpp"
+#line 1232 "chilexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2134,24 +2135,24 @@ void chiyyfree (void * ptr )
 //Implementation of parse_stream 
 
 ATermAppl parse_stream ( std::istream &stream ) {
-  lexer = new chiLexer();
-  ATermAppl result = lexer->parse_stream(stream);
-  delete lexer;
+  a_chi_lexer = new chi_lexer();
+  ATermAppl result = a_chi_lexer->parse_stream(stream);
+  delete a_chi_lexer;
   return result;
 }
 
 //Implementation of the global functions
 
 int chiyylex(void) {
-  return lexer->yylex();
+  return a_chi_lexer->yylex();
 }
 
 void chiyyerror(const char *s) {
-  return lexer->yyerror(s);
+  return a_chi_lexer->yyerror(s);
 }
 
 void chigetposition() {
-  return lexer->getposition();
+  return a_chi_lexer->getposition();
 }
 
 int chiyyFlexLexer::yywrap(void) {
@@ -2159,14 +2160,14 @@ int chiyyFlexLexer::yywrap(void) {
 }
 
 
-//Implementation of chiLexer
+//Implementation of chi_lexer
 
-chiLexer::chiLexer(void) : chiyyFlexLexer(NULL, NULL) {
+chi_lexer::chi_lexer(void) : chiyyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
 }
 
-void chiLexer::yyerror(const char *s) {
+void chi_lexer::yyerror(const char *s) {
   int oldcol_nr = col_nr - YYLeng();
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
@@ -2177,7 +2178,7 @@ void chiLexer::yyerror(const char *s) {
   ); 
 }
 
-void chiLexer::getposition()
+void chi_lexer::getposition()
 {
   int oldcol_nr = col_nr - YYLeng();
   if (oldcol_nr < 0) {
@@ -2189,12 +2190,12 @@ void chiLexer::getposition()
   ); 
 }
 
-void chiLexer::process_string(void) {
+void chi_lexer::process_string(void) {
   col_nr += YYLeng();
   chiyylval.appl = gsString2ATermAppl(YYText());
 }
 
-ATermAppl chiLexer::parse_stream (std::istream &stream ) {
+ATermAppl chi_lexer::parse_stream (std::istream &stream ) {
 /**
   * Pre: stream is opened for reading
   * Post:the content of tag followed by stream is parsed
@@ -2204,9 +2205,9 @@ ATermAppl chiLexer::parse_stream (std::istream &stream ) {
   **/ 
   
   ATermAppl result = NULL;
-  spec_tree = NULL;
-  ATprotectAppl(&spec_tree);
-  parser_protect_table = ATindexedSetCreate(10000, 50);
+  chi_spec_tree = NULL;
+  ATprotectAppl(&chi_spec_tree);
+  chi_parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_stream  = &stream ;
@@ -2214,13 +2215,13 @@ ATermAppl chiLexer::parse_stream (std::istream &stream ) {
   if (chiyyparse() != 0) {
     result = NULL;
   } else {
-    //spec_tree contains the parsed specification
-    result = spec_tree;
-    spec_tree = NULL;
+    //chi_spec_tree contains the parsed specification
+    result = chi_spec_tree;
+    chi_spec_tree = NULL;
   }
   
-  ATindexedSetDestroy(parser_protect_table);
-  ATunprotectAppl(&spec_tree);
+  ATindexedSetDestroy(chi_parser_protect_table);
+  ATunprotectAppl(&chi_spec_tree);
   
   return result;
 }

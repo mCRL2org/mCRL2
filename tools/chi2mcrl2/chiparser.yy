@@ -23,12 +23,12 @@ extern char* yytext; */
 using namespace mcrl2::core;
 using namespace std;
 
-//external declarations from lexer.l
+//external declarations from lexer.ll
 void chiyyerror( const char *s );
 extern void chigetposition();
 int chiyylex( void );
-extern ATermAppl spec_tree;
-extern ATermIndexedSet parser_protect_table;
+extern ATermAppl chi_spec_tree;
+extern ATermIndexedSet chi_parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
 extern map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
@@ -48,7 +48,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and process specification, and one initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
@@ -152,7 +152,7 @@ ChiProgram:
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
     	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
           safe_assign($$, gsMakeChiSpec($1,ATreverse($2)));
-		  spec_tree = $$;
+		  chi_spec_tree = $$;
 		}
 	;
 
