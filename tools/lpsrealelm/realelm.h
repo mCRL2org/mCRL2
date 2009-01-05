@@ -28,7 +28,7 @@ Term realelm_data_expression_map_replace(Term t, const MapContainer& replacement
 
 // Terms that must be protected are put in the atermpp set below.
 static atermpp::set < data_expression > protective_set;
-static void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
+void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
 
 class real_representing_variable
 {
@@ -91,7 +91,14 @@ class summand_information
     }
 
     atermpp::vector < mcrl2::data::data_expression > get_new_values_for_xi_variables() const
-    { return new_values_for_xi_variables;
+    { 
+      // sanity check
+      for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
+          i != new_values_for_xi_variables.end(); ++i)
+      {
+        assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
+      }
+      return new_values_for_xi_variables;
     }
 
     mcrl2::data::data_expression_list get_summand_real_conditions() const
@@ -176,6 +183,13 @@ class summand_information
           { *cxi=new_xi_variable.get_variable();
           }
         }
+      }
+
+      // sanity check
+      for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
+          i != new_values_for_xi_variables.end(); ++i)
+      {
+        assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
       }
       assert(context.size()==new_values_for_xi_variables.size());
     }

@@ -575,7 +575,7 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
 ///      the form c1 * e1 + ... + cn * en === d, with === one of ==, <, <=, >,
 ///      >=. In case there are no variables left, the left hand side is the 
 ///      expression 0.
-static inline void normalize_pair(data_expression& t, data_expression &u, const rewriter& r, const bool preserve_ordering)
+void normalize_pair(data_expression& t, data_expression &u, const rewriter& r, const bool preserve_ordering)
 {
 
   std::pair<data_expression, data_expression> left = split_variables_and_constants(r(t));
@@ -1001,6 +1001,32 @@ void group_inequalities(const data_variable& v, const data_expression_list& ineq
   }
 }
 
+void print_debug(const std::vector <summand_information> &s)
+{
+  for(std::vector < summand_information >::const_iterator i = s.begin();
+                       i != s.end(); ++i)
+  {
+     atermpp::vector<mcrl2::data::data_expression> new_values_for_xi_variables = i->get_new_values_for_xi_variables();
+     for(atermpp::vector < mcrl2::data::data_expression > ::const_iterator
+                                value_for_xi=new_values_for_xi_variables.begin();
+                                value_for_xi!=new_values_for_xi_variables.end();
+                                ++value_for_xi)
+      {
+        assert(is_data_expression(*value_for_xi) || *value_for_xi == data_expression());
+        if ((*value_for_xi)==data_expression())
+        { 
+          std::cerr << "Pvalue is undefined ";
+        }
+        else
+        { assert(is_data_expression(*value_for_xi));
+          std::cerr << "Pvalue is " << pp(*value_for_xi);
+        }
+        std::cerr << " A " << &(*value_for_xi) << " ";
+      }
+      std::cerr << "\n";
+  }
+}
+
 /// \brief Add postponed inequalities to variable context
 /// \param inequalities_to_add The pairs of inequalities to be added.
 /// \param context A variable context
@@ -1022,10 +1048,12 @@ static void add_postponed_inequalities_to_context(
     if (core::gsVerbose)
     { gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(i->first).c_str(), pp(i->second).c_str());
     }
+    print_debug(summand_info);
     for(std::vector < summand_information >::iterator j = summand_info.begin();
                        j != summand_info.end(); ++j)
     { j->add_a_new_next_state_argument(context,r);
     }
+    print_debug(summand_info);
   }
 }
 
@@ -1697,28 +1725,6 @@ static bool are_data_variables_shared(
   return false;
 }
 
-void print_debug(const std::vector <summand_information> &s)
-{
-  for(std::vector < summand_information >::const_iterator i = s.begin();
-                       i != s.end(); ++i)
-  {
-     for(atermpp::vector < mcrl2::data::data_expression > ::const_iterator
-                                value_for_xi=i->get_new_values_for_xi_variables().begin();
-                                value_for_xi!=i->get_new_values_for_xi_variables().end();
-                                ++value_for_xi)
-      { if ((*value_for_xi)==data_expression())
-        { 
-          std::cerr << "Pvalue is undefined ";
-        }
-        else
-        { std::cerr << "Pvalue is " << pp(*value_for_xi);
-        }
-        std::cerr << " A " << &(*value_for_xi) << " ";
-      }
-      std::cerr << "\n";
-  }
-}
-
 // Determine whether the pair t,u belonging to the variable xi
 // already occurs in the list of conditions in the form t<u, t==u
 // or t>u. If so, return in new_condition_for_xi smaller(xi),
@@ -1813,9 +1819,11 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                        i != summand_info.end(); ++i)
     {
       std::cerr << "SUMMAND_IN: " << pp(i->get_summand()) << "\n";
-      for(atermpp::vector < mcrl2::data::data_expression > ::iterator l=i->get_new_values_for_xi_variables().begin(); 
-             l!=i->get_new_values_for_xi_variables().end(); ++l)
-      { std::cerr << "OUTsummand " << pp(*l) << "\n";
+      atermpp::vector<mcrl2::data::data_expression> new_values_for_xi_variables = i->get_new_values_for_xi_variables();
+      for(atermpp::vector < mcrl2::data::data_expression > ::const_iterator l=new_values_for_xi_variables.begin(); 
+             l!=new_values_for_xi_variables.end(); ++l)
+      { assert(is_data_expression(*l));
+        std::cerr << "OUTsummand " << pp(*l) << "\n";
       }
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
@@ -1824,10 +1832,10 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       // XXXXXXXXX Hier gaat het fout. De waarde voor value_for_xi
       // deugt niet altijd. Maar waarom?????
       atermpp::vector < data_expression > ::const_iterator 
-                                value_for_xi=i->get_new_values_for_xi_variables().begin();
+                                value_for_xi=new_values_for_xi_variables.begin();
+      context_type::const_iterator c = context.begin();
       print_debug(summand_info);
-      for(context_type::iterator c=context.begin();
-                                 c!=context.end(); ++c, ++value_for_xi)
+      for(; c!=context.end(); ++c, ++value_for_xi)
       { print_debug(summand_info);
         if ((*value_for_xi)==data_expression())
         // No value for xi is known. So, we might want to set it.
@@ -1957,6 +1965,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         }
       }
     }
+    print_debug(summand_info);
 
     add_postponed_inequalities_to_context(
                 new_inequalities,
@@ -1964,6 +1973,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                 context,
                 r,
                 variable_generator);
+
     print_debug(summand_info);
 
   } while ((iteration < max_iterations) && !new_inequalities.empty());
