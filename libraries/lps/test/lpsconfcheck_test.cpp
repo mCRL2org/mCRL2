@@ -19,8 +19,8 @@
 
 using namespace atermpp;
 using namespace mcrl2::data;
+using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using namespace mcrl2::utilities;
 
 // Parameter i should be removed
 const std::string case_1(
@@ -38,8 +38,6 @@ const std::string case_3(
 
 static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
 { 
-  using namespace mcrl2::utilities;
-
   ATermAppl v_process_equation = ATAgetArgument(s1, 2);
   ATermList v_summands = ATLgetArgument(v_process_equation, 2);
 
