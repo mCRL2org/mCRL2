@@ -95,7 +95,7 @@ class linear_process: public atermpp::aterm_appl
     }
 
     /// \brief Returns the sequence of LPS summands.
-    /// \return RETURN_DESCRIPTION
+    /// \return The sequence of LPS summands.
     summand_list summands() const
     {
       return m_summands;
@@ -135,10 +135,12 @@ class linear_process: public atermpp::aterm_appl
       return false;
     }
 
-    /// \brief Applies a substitution to this LPS and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
@@ -258,9 +260,9 @@ class linear_process: public atermpp::aterm_appl
     }
   };
 
-/// \brief Computes the free variables that occur in the specification
+/// \brief Returns the free variables that occur in the specification
 /// \param process A linear process
-/// \return RETURN_DESCRIPTION
+/// \return The free variables that occur in the specification
 inline
 std::set<data::data_variable> compute_free_variables(const linear_process& process)
 {
@@ -273,9 +275,9 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
   return result;
 }
 
-/// \brief Computes the action labels that occur in the process
+/// \brief Returns the action labels that occur in the process
 /// \param process A linear process
-/// \return RETURN_DESCRIPTION
+/// \return The action labels that occur in the process
 inline
 std::set<action_label> compute_action_labels(const linear_process& process)
 {
@@ -287,7 +289,7 @@ std::set<action_label> compute_action_labels(const linear_process& process)
 /// \brief Sets the free variables of l and returns the result
 /// \param l A linear process
 /// \param free_variables A sequence of data variables
-/// \return RETURN_DESCRIPTION
+/// \return The modified linear process
 inline
 linear_process set_free_variables(linear_process l, data::data_variable_list free_variables)
 {
@@ -300,7 +302,7 @@ linear_process set_free_variables(linear_process l, data::data_variable_list fre
 /// \brief Sets the process parameters of l and returns the result
 /// \param l A linear process
 /// \param process_parameters A sequence of data variables
-/// \return RETURN_DESCRIPTION
+/// \return The modified linear process
 inline
 linear_process set_process_parameters(linear_process l, data::data_variable_list process_parameters)
 {
@@ -312,8 +314,8 @@ linear_process set_process_parameters(linear_process l, data::data_variable_list
 
 /// \brief Sets the summands of l and returns the result
 /// \param l A linear process
-/// \param summands PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \param summands A sequence of summands
+/// \return The modified linear process
 inline
 linear_process set_summands(linear_process l, summand_list summands)
 {

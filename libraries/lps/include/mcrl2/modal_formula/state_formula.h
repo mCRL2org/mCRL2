@@ -77,10 +77,12 @@ class state_formula: public atermpp::aterm_appl
     /// \return True if the formula is timed.
     bool has_time() const;
 
-    /// \brief Applies a substitution to this state formula and returns the result
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     state_formula substitute(Substitution f) const
     {
@@ -263,7 +265,7 @@ namespace state_frm
 
   /// \brief Returns true if the term t is a data expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a data expression
   inline bool is_data(atermpp::aterm_appl t)
   { return core::detail::gsIsDataExpr(t); }
 
@@ -317,55 +319,55 @@ namespace state_frm
 
   /// \brief Returns true if the term t is a must expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a must expression
   inline bool is_must(atermpp::aterm_appl t)
   { return core::detail::gsIsStateMust(t); }
 
   /// \brief Returns true if the term t is a must expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a must expression
   inline bool is_may(atermpp::aterm_appl t)
   { return core::detail::gsIsStateMay(t); }
 
   /// \brief Returns true if the term t is a delay expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a delay expression
   inline bool is_delay(atermpp::aterm_appl t)
   { return core::detail::gsIsStateDelay(t); }
 
   /// \brief Returns true if the term t is a timed delay expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a timed delay expression
   inline bool is_delay_timed(atermpp::aterm_appl t)
   { return core::detail::gsIsStateDelayTimed(t); }
 
   /// \brief Returns true if the term t is a yaled expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a yaled expression
   inline bool is_yaled(atermpp::aterm_appl t)
   { return core::detail::gsIsStateYaled(t); }
 
   /// \brief Returns true if the term t is a timed yaled expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a timed yaled expression
   inline bool is_yaled_timed(atermpp::aterm_appl t)
   { return core::detail::gsIsStateYaledTimed(t); }
 
   /// \brief Returns true if the term t is a variable expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a variable expression
   inline bool is_var(atermpp::aterm_appl t)
   { return core::detail::gsIsStateVar(t); }
 
   /// \brief Returns true if the term t is a nu expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a nu expression
   inline bool is_nu(atermpp::aterm_appl t)
   { return core::detail::gsIsStateNu(t); }
 
   /// \brief Returns true if the term t is a mu expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the term t is a mu expression
   inline bool is_mu(atermpp::aterm_appl t)
   { return core::detail::gsIsStateMu(t); }
 

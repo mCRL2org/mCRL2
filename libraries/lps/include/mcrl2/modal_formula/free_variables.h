@@ -39,7 +39,7 @@ struct free_variable_visitor: public state_formula_visitor
 
   /// \brief Returns true if v is an element of bound_variables or quantifier_stack
   /// \return True if v is an element of bound_variables or quantifier_stack
-  /// \param v A
+  /// \param v A data variable
   bool is_bound(const data::data_variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())

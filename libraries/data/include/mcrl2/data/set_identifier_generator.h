@@ -66,14 +66,14 @@ class set_identifier_generator: public identifier_generator
 
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
     /// \brief Returns the context.
-    /// \return RETURN_DESCRIPTION
+    /// \return The context.
     const atermpp::set<core::identifier_string>& context() const
     {
       return m_identifiers;
@@ -133,14 +133,14 @@ class multiset_identifier_generator: public identifier_generator
 
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s A
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
     /// \brief Returns the context.
-    /// \return RETURN_DESCRIPTION
+    /// \return The context.
     const atermpp::multiset<core::identifier_string>& context() const
     {
       return m_identifiers;

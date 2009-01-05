@@ -58,7 +58,7 @@ struct make_timed_lps_summand
 /// \brief Adds time parameters to the lps if needed and returns the result.
 /// The times are chosen such that they don't appear in context.
 /// \param lps A linear process
-/// \param context A context for generating fresh variables
+/// \param context A term
 /// \return A timed linear process
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)

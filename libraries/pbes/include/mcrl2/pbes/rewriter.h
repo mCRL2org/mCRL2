@@ -105,7 +105,7 @@ namespace pbes_system {
       /// \brief A data enumerator
       DataEnumerator m_enumerator;
 
-      /// If true, quantifier variables of infinite sort are enumerated.
+      /// \brief If true, quantifier variables of infinite sort are enumerated.
       bool m_enumerate_infinite_sorts;
 
     public:
@@ -178,7 +178,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       /// \brief Constructor
       /// \param r A data rewriter
       /// \param e A data enumerator
-      /// \param enumerate_infinite_sorts PARAM_DESCRIPTION
+      /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated.
       enumerate_quantifiers_rewriter(const DataRewriter& r, const DataEnumerator& e, bool enumerate_infinite_sorts = true)
         : m_rewriter(r, e, enumerate_infinite_sorts)
       {}

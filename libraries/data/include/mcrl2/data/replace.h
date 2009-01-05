@@ -34,9 +34,9 @@ struct replace_data_variables_helper
     : r_(r)
   {}
 
-  /// \brief FUNCTION_DESCRIPTION
+  /// \brief Function call operator
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_variable(t))
@@ -77,9 +77,9 @@ struct data_variable_sequence_replace_helper
     assert(variables.size() == replacements.size());
   }
 
-  /// \brief FUNCTION_DESCRIPTION
-  /// \param t A
-  /// \return RETURN_DESCRIPTION
+  /// \brief Function call operator
+  /// \param t A data variable
+  /// \return The function result
   data_expression operator()(data_variable t) const
   {
     typename VariableContainer::const_iterator i = variables_.begin();
@@ -119,15 +119,15 @@ struct data_variable_map_replace_helper
   const MapContainer& replacements_;
 
   /// \brief Constructor.
-  /// \param replacements PARAM_DESCRIPTION
+  /// \param replacements A mapping of data variable replacements
   data_variable_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
 
   /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
   /// otherwise t.
-  /// \param t A
-  /// \return RETURN_DESCRIPTION
+  /// \param t A data variable
+  /// \return The function result
   data_expression operator()(const data_variable& t) const
   {
     typename MapContainer::const_iterator i = replacements_.find(t);
@@ -168,9 +168,9 @@ struct replace_data_expressions_helper
     : r_(r)
   {}
 
-  /// \brief FUNCTION_DESCRIPTION
+  /// \brief Function call operator
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_data_expression(t))
@@ -211,9 +211,9 @@ struct data_expression_sequence_replace_helper
     assert(expressions.size() == replacements.size());
   }
 
-  /// \brief FUNCTION_DESCRIPTION
+  /// \brief Function call operator
   /// \param t A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The function result
   data_expression operator()(data_expression t) const
   {
     typename VariableContainer::const_iterator i = expressions_.begin();
@@ -253,7 +253,7 @@ struct data_expression_map_replace_helper
   const MapContainer& replacements_;
 
   /// \brief Constructor.
-  /// \param replacements PARAM_DESCRIPTION
+  /// \param replacements A map of data variable replacements
   data_expression_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
@@ -261,7 +261,7 @@ struct data_expression_map_replace_helper
   /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
   /// otherwise t.
   /// \param t A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The function result
   data_expression operator()(const data_expression& t) const
   {
     typename MapContainer::const_iterator i = replacements_.find(t);

@@ -45,10 +45,10 @@ struct substitution
   }
 };
 
-/// \brief Creation function for substitutions.
-/// \param src PARAM_DESCRIPTION
-/// \param dest PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \brief Convenience function for creating a substitution.
+/// \param src A term
+/// \param dest A term
+/// \return A substitution
 template <typename Src, typename Dest>
 inline
 substitution make_substitution(Src src, Dest dest)

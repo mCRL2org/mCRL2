@@ -276,7 +276,7 @@ struct boolean_expression_builder<Term, void>
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
   /// \param e A term
-  /// \return RETURN_DESCRIPTION
+  /// \return The visit result
   term_type visit(term_type e)
   {
     typedef core::term_traits<term_type> tr;

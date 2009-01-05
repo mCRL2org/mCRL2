@@ -161,8 +161,6 @@ namespace pbes_system {
       pbesspec = pbesspec
         + "\nmu "
         + unique_prefix
-        /// \brief FUNCTION_DESCRIPTION
-        /// \return RETURN_DESCRIPTION
         + boost::lexical_cast<std::string>(unique_prefix_index++)
         + (datavar_text.empty() ? "" : "(")
         + datavar_text

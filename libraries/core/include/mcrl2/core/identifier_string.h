@@ -22,9 +22,8 @@ namespace mcrl2 {
   typedef atermpp::aterm_string identifier_string;
   
   /// \brief Tests if a term is an identifier string.
-  /// \param t an ATerm
-  /// \returns Whether t is an identifier string.
-  /// \return RETURN_DESCRIPTION
+  /// \param t A term
+  /// \return Whether t is an identifier string.
   inline
   bool is_identifier_string(atermpp::aterm t)
   {

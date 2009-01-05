@@ -178,7 +178,7 @@ struct pbes_expression_visitor
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   /// \param e A term
-  /// \param a PARAM_DESCRIPTION
+  /// \param a An additional argument for the recursion
   void visit(const term_type& e, Arg& a)
   {
     typedef core::term_traits<Term> tr;

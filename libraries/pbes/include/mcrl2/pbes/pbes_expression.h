@@ -65,10 +65,12 @@ class pbes_expression: public atermpp::aterm_appl
       assert(core::detail::check_rule_PBExpr(m_term));
     }
 
-    /// \brief Applies a substitution to this pbes expression and returns the result.
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// The Substitution function must supply the method aterm operator()(aterm).
-    /// \return The result of applying the substitution.
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     pbes_expression substitute(Substitution f) const
     {
@@ -90,75 +92,111 @@ typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 namespace pbes_expr {
 
   /// \brief Returns true if the term t is equal to true
+  /// \param t A PBES expression
+  /// \return True if the term t is equal to true
   inline bool is_pbes_true(pbes_expression t)
   { return core::detail::gsIsPBESTrue(t); }
 
   /// \brief Returns true if the term t is equal to false
+  /// \param t A PBES expression
+  /// \return True if the term t is equal to false
   inline bool is_pbes_false(pbes_expression t)
   { return core::detail::gsIsPBESFalse(t); }
 
   /// \brief Returns true if the term t is a not expression
+  /// \param t A PBES expression
+  /// \return True if the term t is a not expression
   inline bool is_pbes_not(pbes_expression t)
   { return core::detail::gsIsPBESNot(t); }
 
 
   /// \brief Returns true if the term t is an and expression
+  /// \param t A PBES expression
+  /// \return True if the term t is an and expression
   inline bool is_pbes_and(pbes_expression t)
   { return core::detail::gsIsPBESAnd(t); }
 
   /// \brief Returns true if the term t is an or expression
+  /// \param t A PBES expression
+  /// \return True if the term t is an or expression
   inline bool is_pbes_or(pbes_expression t)
   { return core::detail::gsIsPBESOr(t); }
 
   /// \brief Returns true if the term t is an imp expression
+  /// \param t A PBES expression
+  /// \return True if the term t is an imp expression
   inline bool is_pbes_imp(pbes_expression t)
   { return core::detail::gsIsPBESImp(t); }
 
   /// \brief Returns true if the term t is a universal quantification
+  /// \param t A PBES expression
+  /// \return True if the term t is a universal quantification
   inline bool is_pbes_forall(pbes_expression t)
   { return core::detail::gsIsPBESForall(t); }
 
   /// \brief Returns true if the term t is an existential quantification
+  /// \param t A PBES expression
+  /// \return True if the term t is an existential quantification
   inline bool is_pbes_exists(pbes_expression t)
   { return core::detail::gsIsPBESExists(t); }
 
-  /// \brief Returns true if the term t is equal to true
+  /// \brief Test for the value true
+  /// \param t A PBES expression
+  /// \return True if it is the value \p true
   inline bool is_true(pbes_expression t)
   { return is_pbes_true(t) || data::data_expr::is_true(t); }
 
-  /// \brief Returns true if the term t is equal to false
+  /// \brief Test for the value false
+  /// \param t A PBES expression
+  /// \return True if it is the value \p false
   inline bool is_false(pbes_expression t)
   { return is_pbes_false(t) || data::data_expr::is_false(t); }
 
-  /// \brief Returns true if the term t is a not expression
+  /// \brief Test for a negation
+  /// \param t A PBES expression
+  /// \return True if it is a negation
   inline bool is_not(pbes_expression t)
   { return is_pbes_not(t) || data::data_expr::is_not(t); }
 
-  /// \brief Returns true if the term t is an and expression
+  /// \brief Test for a conjunction
+  /// \param t A PBES expression
+  /// \return True if it is a conjunction
   inline bool is_and(pbes_expression t)
   { return is_pbes_and(t) || data::data_expr::is_and(t); }
 
-  /// \brief Returns true if the term t is an or expression
+  /// \brief Test for a disjunction
+  /// \param t A PBES expression
+  /// \return True if it is a disjunction
   inline bool is_or(pbes_expression t)
   { return is_pbes_or(t) || data::data_expr::is_or(t); }
 
-  /// \brief Returns true if the term t is an imp expression
+  /// \brief Test for an implication
+  /// \param t A PBES expression
+  /// \return True if it is an implication
   inline bool is_imp(pbes_expression t)
   { return is_pbes_imp(t) || data::data_expr::is_imp(t); }
 
-  /// \brief Returns true if the term t is a universal quantification
+  /// \brief Test for an universal quantification
+  /// \param t A PBES expression
+  /// \return True if it is a universal quantification
   inline bool is_forall(pbes_expression t)
   { return is_pbes_forall(t); }
 
-  /// \brief Returns true if the term t is an existential quantification
+  /// \brief Test for an existential quantification
+  /// \param t A PBES expression
+  /// \return True if it is an existential quantification
   inline bool is_exists(pbes_expression t)
   { return is_pbes_exists(t); }
 
   /// \brief Returns true if the term t is a data expression
+  /// \param t A PBES expression
+  /// \return True if the term t is a data expression
   inline bool is_data(pbes_expression t)
   { return core::detail::gsIsDataExpr(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
+  /// \param t A PBES expression
+  /// \return True if the term t is a propositional variable expression
   inline bool is_propositional_variable_instantiation(pbes_expression t)
   { return core::detail::gsIsPropVarInst(t); }
 
@@ -168,10 +206,9 @@ namespace pbes_expr {
 namespace accessors {
 
   /// \brief Conversion of a pbes expression to a data expression.
-  /// \pre The pbes expression must be of the form val(d) for
-  /// some data variable d.
+  /// \pre The pbes expression must be of the form val(d) for some data variable d.
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The converted expression
   inline
   data::data_expression val(pbes_expression t)
   {
@@ -179,10 +216,9 @@ namespace accessors {
     return atermpp::aterm_appl(t);
   }
 
-  /// \brief Returns the pbes expression argument of expressions of type not,
-  /// exists and forall.
+  /// \brief Returns the pbes expression argument of expressions of type not, exists and forall.
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The pbes expression argument of expressions of type not, exists and forall.
   inline
   pbes_expression arg(pbes_expression t)
   {
@@ -199,7 +235,7 @@ namespace accessors {
 
   /// \brief Returns the left hand side of an expression of type and, or or imp.
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The left hand side of an expression of type and, or or imp.
   inline
   pbes_expression left(pbes_expression t)
   {
@@ -209,7 +245,7 @@ namespace accessors {
 
   /// \brief Returns the right hand side of an expression of type and, or or imp.
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The right hand side of an expression of type and, or or imp.
   inline
   pbes_expression right(pbes_expression t)
   {
@@ -219,7 +255,7 @@ namespace accessors {
 
   /// \brief Returns the variables of a quantification expression
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The variables of a quantification expression
   inline
   data::data_variable_list var(pbes_expression t)
   {
@@ -229,7 +265,7 @@ namespace accessors {
 
   /// \brief Returns the name of a propositional variable expression
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The name of a propositional variable expression
   inline
   core::identifier_string name(pbes_expression t)
   {
@@ -239,7 +275,7 @@ namespace accessors {
 
   /// \brief Returns the parameters of a propositional variable instantiation.
   /// \param t A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The parameters of a propositional variable instantiation.
   inline
   data::data_expression_list param(pbes_expression t)
   {
@@ -334,32 +370,32 @@ namespace pbes_expr {
     return pbes_expression(core::detail::gsMakePBESExists(l, p));
   }
 
-  /// \brief Returns or applied to the sequence of pbes expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns or applied to the sequence of pbes expressions [first, last)
+  /// \param first Start of a sequence of pbes expressions
+  /// \param last End of a sequence of of pbes expressions
+  /// \return Or applied to the sequence of pbes expressions [first, last)
   template <typename FwdIt>
   pbes_expression join_or(FwdIt first, FwdIt last)
   {
     return core::detail::join(first, last, or_, false_());
   }
 
-  /// \brief Returns and applied to the sequence of pbes expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns and applied to the sequence of pbes expressions [first, last)
+  /// \param first Start of a sequence of pbes expressions
+  /// \param last End of a sequence of of pbes expressions
+  /// \return And applied to the sequence of pbes expressions [first, last)
   template <typename FwdIt>
   pbes_expression join_and(FwdIt first, FwdIt last)
   {
     return core::detail::join(first, last, and_, true_());
   }
 
-  /// \brief FUNCTION_DESCRIPTION
+  /// \brief Splits a disjunction into a sequence of operands
   /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
   /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
   /// function symbol.
   /// \param expr A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return A sequence of operands
   inline
   atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
   {
@@ -369,12 +405,12 @@ namespace pbes_expr {
     return result;
   }
 
-  /// \brief FUNCTION_DESCRIPTION
+  /// \brief Splits a conjunction into a sequence of operands
   /// Given a pbes expression of the form p1 && p2 && .... && pn, this will yield a
   /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
   /// function symbol.
   /// \param expr A PBES expression
-  /// \return RETURN_DESCRIPTION
+  /// \return A sequence of operands
   inline
   atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
   {
@@ -448,20 +484,20 @@ namespace pbes_expr_optimized {
     return core::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
   }
 
-  /// \brief Returns or applied to the sequence of pbes expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns or applied to the sequence of pbes expressions [first, last)
+  /// \param first Start of a sequence of pbes expressions
+  /// \param last End of a sequence of pbes expressions
+  /// \return Or applied to the sequence of pbes expressions [first, last)
   template <typename FwdIt>
   inline pbes_expression join_or(FwdIt first, FwdIt last)
   {
     return core::detail::join(first, last, or_, false_());
   }
 
-  /// \brief Returns and applied to the sequence of pbes expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns and applied to the sequence of pbes expressions [first, last)
+  /// \param first Start of a sequence of pbes expressions
+  /// \param last End of a sequence of pbes expressions
+  /// \return And applied to the sequence of pbes expressions [first, last)
   template <typename FwdIt>
   inline pbes_expression join_and(FwdIt first, FwdIt last)
   {
@@ -520,7 +556,7 @@ namespace pbes_expr_optimized {
 
   /// \brief Returns true if the pbes expression t is a boolean expression
   /// \param t A term
-  /// \return RETURN_DESCRIPTION
+  /// \return True if the pbes expression t is a boolean expression
   inline
   bool is_bes(atermpp::aterm_appl t)
   {

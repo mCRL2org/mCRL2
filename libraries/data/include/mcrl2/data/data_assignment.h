@@ -55,7 +55,7 @@ class data_assignment: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    /// \param lhs A
+    /// \param lhs A data variable
     /// \param rhs A data expression
     data_assignment(data_variable lhs, data_expression rhs)
      :
@@ -79,7 +79,7 @@ class data_assignment: public atermpp::aterm_appl
     }
 
     /// \brief Applies the assignment to t and returns the result.
-    /// \param t A term.
+    /// \param t A term
     /// \return The application of the assignment to the term.
     atermpp::aterm operator()(atermpp::aterm t) const
     {
@@ -108,7 +108,7 @@ typedef atermpp::term_list<data_assignment> data_assignment_list;
 
 /// \brief Returns true if the term t is a data assignment
 /// \param t A term
-/// \return RETURN_DESCRIPTION
+/// \return True if the term t is a data assignment
 inline
 bool is_data_assignment(atermpp::aterm_appl t)
 {
@@ -168,9 +168,9 @@ struct assignment_list_substitution
       : m_variable(variable)
     {}
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Function call operator
     /// \param a An assignment to a data variable
-    /// \return RETURN_DESCRIPTION
+    /// \return The function result
     bool operator()(const data_assignment& a) const
     {
       return m_variable == a.lhs();
@@ -185,9 +185,9 @@ struct assignment_list_substitution
       : l(l_)
     {}
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Function call operator
     /// \param t A term
-    /// \return RETURN_DESCRIPTION
+    /// \return The function result
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
@@ -214,7 +214,7 @@ struct assignment_list_substitution
   {}
 
   /// \brief Applies the assignments to the term t and returns the result.
-  /// \param t A term.
+  /// \param t A term
   /// \return The application of the assignments to the term.
   atermpp::aterm operator()(atermpp::aterm t) const
   {

@@ -540,8 +540,7 @@ namespace detail {
       // Store the removed variables.
       std::map<propositional_variable_decl_type, std::set<variable_type> > m_removed;
 
-      /// \brief FUNCTION_DESCRIPTION
-      // Prints the vertices of the dependency graph.
+      /// \brief Prints the vertices of the dependency graph.
       void print_vertices() const
       {
         for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)

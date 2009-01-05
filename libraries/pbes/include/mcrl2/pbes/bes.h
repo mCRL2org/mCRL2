@@ -85,10 +85,12 @@ namespace bes {
         return atermpp::arg1(*this);
       }
 
-      /// \brief Applies a substitution to this boolean variable and returns the result.
+      /// \brief Applies a low level substitution function to this term and returns the result.
       /// \param f A
-      /// The Substitution function must supply the method aterm operator()(aterm).
-      /// \return The result of applying the substitution.
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
+      /// \return The substitution result.
       template <typename Substitution>
       boolean_variable substitute(Substitution f) const
       {
@@ -146,10 +148,12 @@ namespace bes {
         assert(core::detail::check_rule_BooleanExpression(m_term));
       }
 
-      /// \brief Applies a substitution to this boolean expression and returns the result.
+      /// \brief Applies a low level substitution function to this term and returns the result.
       /// \param f A
-      /// The Substitution function must supply the method aterm operator()(aterm).
-      /// \return The result of applying the substitution.
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
+      /// \return The substitution result.
       template <typename Substitution>
       boolean_expression substitute(Substitution f) const
       {
@@ -321,8 +325,7 @@ namespace core {
 
     /// \brief Pretty print function
     /// \param t A term
-    /// \brief Returns a pretty print representation of the term
-    /// \return RETURN_DESCRIPTION
+    /// \return Returns a pretty print representation of the term
     static inline
     std::string pp(term_type t)
     {
@@ -430,9 +433,9 @@ class boolean_equation: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    /// \param symbol PARAM_DESCRIPTION
-    /// \param variable PARAM_DESCRIPTION
-    /// \param expr PARAM_DESCRIPTION
+    /// \param symbol A fixpoint symbol
+    /// \param variable A boolean variable
+    /// \param expr A boolean expression
     boolean_equation(fixpoint_symbol symbol, boolean_variable variable, boolean_expression expr)
       : atermpp::aterm_appl(core::detail::gsMakeBooleanEquation(symbol, variable, expr)),
         m_symbol(symbol),
@@ -442,21 +445,21 @@ class boolean_equation: public atermpp::aterm_appl
     }
 
     /// \brief Returns the fixpoint symbol of the equation.
-    /// \return RETURN_DESCRIPTION
+    /// \return The fixpoint symbol of the equation.
     fixpoint_symbol symbol() const
     {
       return m_symbol;
     }
 
     /// \brief Returns the boolean_equation_system variable of the equation.
-    /// \return RETURN_DESCRIPTION
+    /// \return The boolean_equation_system variable of the equation.
     boolean_variable variable() const
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
-    /// \return RETURN_DESCRIPTION
+    /// \return The predicate formula on the right hand side of the equation.
     boolean_expression formula() const
     {
       return m_formula;
@@ -467,9 +470,8 @@ class boolean_equation: public atermpp::aterm_appl
 typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
   /// \brief Pretty print function
-  /// \param e A boolean equation
+  /// \param eq A boolean equation
   /// \return A pretty printed representation of the boolean equation
-  /// \param eq PARAM_DESCRIPTION
   inline
   std::string pp(const boolean_equation& eq)
   {
@@ -505,7 +507,7 @@ namespace bes {
       boolean_expression m_initial_state;
 
       /// \brief Conversion to ATerm
-      /// \return RETURN_DESCRIPTION
+      /// \return The converted term
       ATerm term() const
       {
         return reinterpret_cast<ATerm>(ATermAppl(*this));
@@ -570,7 +572,7 @@ namespace bes {
 
       /// \brief Returns true.
       /// Some checks will be added later.
-      /// \return RETURN_DESCRIPTION
+      /// \return The value true.
       bool is_well_typed() const
       {
         return true;
@@ -611,7 +613,7 @@ namespace bes {
       }
 
       /// \brief Conversion to ATermAppl.
-      /// \return RETURN_DESCRIPTION
+      /// \return An ATerm representation of the boolean equation system
       operator ATermAppl() const
       {
         boolean_equation_list equations(m_equations.begin(), m_equations.end());
@@ -655,10 +657,11 @@ namespace bes {
         return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
       }
 
-      /// \brief Applies a substitution to this boolean equation system and returns the result.
+      /// \brief Applies a low level substitution function to this term.
       /// \param f A
-      /// The Substitution function must supply the method aterm operator()(aterm).
-      /// \return The result of applying the substitution.
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
       template <typename Substitution>
       void substitute(Substitution f)
       {

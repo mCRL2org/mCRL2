@@ -44,7 +44,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   {}
 
   /// \brief Returns true if v is an element of bound_variables or quantifier_stack
-  /// \param v A
+  /// \param v A data variable
   /// \return True if v is an element of bound_variables or quantifier_stack
   bool is_bound(const data::data_variable& v) const
   {

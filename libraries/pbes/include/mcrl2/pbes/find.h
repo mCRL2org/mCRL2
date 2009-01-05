@@ -29,7 +29,7 @@ namespace pbes_system {
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param t A term
 /// \param v A propositional variable instantiation
-/// \return RETURN_DESCRIPTION
+/// \return True if the term has a given variable as subterm.
 template <typename Term>
 bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
 {
@@ -41,7 +41,7 @@ bool find_propositional_variable(Term t, const propositional_variable_instantiat
 
 /// \brief Returns all propositional variable instantiations that occur in the term t
 /// \param t A term
-/// \return RETURN_DESCRIPTION
+/// \return All propositional variable instantiations that occur in the term t
 template <typename Term>
 std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(Term t)
 {

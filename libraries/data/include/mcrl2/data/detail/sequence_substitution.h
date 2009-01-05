@@ -41,9 +41,9 @@ struct sequence_substitution
       : m_variable(variable)
     {}
     
-    /// \brief FUNCTION_DESCRIPTION
-    /// \param a PARAM_DESCRIPTION
-    /// \return RETURN_DESCRIPTION
+    /// \brief Function call operator
+    /// \param a A pair of data variables
+    /// \return The function result
     bool operator()(const std::pair<data_variable, data_variable>& a) const
     {
       return m_variable == a.first;
@@ -58,9 +58,9 @@ struct sequence_substitution
       : m_assignments(assignments)
     {}
     
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Function call operator
     /// \param t A term
-    /// \return RETURN_DESCRIPTION
+    /// \return The function result
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
@@ -85,19 +85,18 @@ struct sequence_substitution
     : m_assignments(assignments)
   {}
   
-  /// \brief FUNCTION_DESCRIPTION
-  /// Applies the assignments to the term t and returns the result.
-  /// \param t PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   atermpp::aterm operator()(atermpp::aterm t) const
   {
     return atermpp::partial_replace(t, sequence_substitution_helper(m_assignments));
   }
 };
 
-/// \brief FUNCTION_DESCRIPTION
-/// \param c PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \brief Convenience function for creating a sequence_substitution
+/// \param c A container
+/// \return A sequence_substitution
 template <typename Container>
 sequence_substitution<Container> make_sequence_substitution(const Container& c)
 {

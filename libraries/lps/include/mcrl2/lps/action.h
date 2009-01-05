@@ -48,7 +48,7 @@ class action: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    /// \param label PARAM_DESCRIPTION
+    /// \param label An action label
     /// \param arguments A sequence of data expressions
     action(const action_label& label, const data::data_expression_list& arguments)
      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
@@ -70,10 +70,12 @@ class action: public atermpp::aterm_appl
       return m_arguments;
     }
 
-    /// \brief Applies a substitution to this action and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action substitute(Substitution f)
     {

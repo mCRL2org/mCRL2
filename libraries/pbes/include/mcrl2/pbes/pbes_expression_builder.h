@@ -149,8 +149,8 @@ struct pbes_expression_builder
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
   /// \param e A term
-  /// \param arg1 PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param arg1 An additional argument for the recursion
+  /// \return The visit result
   term_type visit(term_type e, Arg& arg1)
   {
     typedef core::term_traits<term_type> tr;

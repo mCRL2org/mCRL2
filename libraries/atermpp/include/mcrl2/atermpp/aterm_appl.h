@@ -31,7 +31,7 @@ namespace atermpp
       /// \brief Prevent accidental usage of operator[], since this maps to the
       /// built-in C++ operator[](ATermAppl, int)
       /// \param i A positive integer
-      /// \return RETURN_DESCRIPTION
+      /// \return The default constructed term
       Term operator[](unsigned int i) const
       {
         return Term();

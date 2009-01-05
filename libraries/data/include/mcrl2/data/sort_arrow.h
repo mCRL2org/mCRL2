@@ -65,14 +65,6 @@ class sort_arrow: public sort_expression
       assert(core::detail::check_term_SortArrow(m_term));
     }
 
-    /// \brief FUNCTION_DESCRIPTION
-    /// \overload
-    /// \return Always returns true.
-    bool is_arrow() const
-    {
-      return true;
-    }
-
     /// \brief Returns the argument sorts.
     /// \return The arguments of the sort arrow.
     sort_expression_list argument_sorts() const

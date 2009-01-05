@@ -56,14 +56,14 @@ namespace pbes_system {
         : pbes_expression_with_variables(expression), m_propositional_variables(propositional_variables)
       {}
 
-      /// Returns the propositional variables.
+      /// \brief Returns the propositional variables.
       /// \return The propositional variables.
       propositional_variable_instantiation_list propositional_variables() const
       {
         return m_propositional_variables;
       }
 
-      /// Returns the propositional variables.
+      /// \brief Returns the propositional variables.
       /// \return The propositional variables.
       propositional_variable_instantiation_list& propositional_variables()
       {

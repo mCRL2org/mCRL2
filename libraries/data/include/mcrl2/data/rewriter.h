@@ -71,7 +71,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
-      /// \param r PARAM_DESCRIPTION
+      /// \param r A rewriter
       basic_rewriter(Rewriter* r)
         : m_rewriter(r)
       { }
@@ -79,7 +79,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification.
       /// \param s A rewriter strategy.
-      /// \param r PARAM_DESCRIPTION
+      /// \param r A rewriter
       basic_rewriter(boost::shared_ptr<Rewriter>& r)
       	: m_rewriter(r)
       { }
@@ -228,8 +228,8 @@ namespace data {
         return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return A string representation of the map, for example [a := 3, b := true].
+      /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+      /// \return A string representation of the map.
       std::string to_string() const
       {
         std::stringstream result;

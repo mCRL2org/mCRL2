@@ -124,7 +124,7 @@ namespace pbes_system {
 
       /// \brief Constructor.
       /// \param p A PBES
-      /// \param true_false_dependencies PARAM_DESCRIPTION
+      /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
       parity_game_generator(const pbes<>& p, bool true_false_dependencies = false)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),

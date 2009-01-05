@@ -103,10 +103,12 @@ class data_expression: public atermpp::aterm_appl
       return sort_expression(result);
     }
 
-    /// \brief Applies a substitution to this data expression and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return The application of the substitution to the expression.
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
@@ -193,8 +195,8 @@ namespace data_expr {
   inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
 
   /// \brief Returns a real with value i
-  /// \param i PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param i An integer value
+  /// \return A real with value i
   inline
   data_expression real(int i)
   {
@@ -202,9 +204,9 @@ namespace data_expr {
   }
 
   /// \brief Returns a pos with value i
-  /// Precondition: i > 0
+  /// \pre i > 0
   /// \param i A positive integer
-  /// \return RETURN_DESCRIPTION
+  /// \return A pos with value i
   inline
   data_expression pos(unsigned int i)
   {
@@ -214,7 +216,7 @@ namespace data_expr {
 
   /// \brief Returns a nat with value i
   /// \param i A positive integer
-  /// \return RETURN_DESCRIPTION
+  /// \return A nat with value i
   inline
   data_expression nat(unsigned int i)
   {
@@ -222,8 +224,8 @@ namespace data_expr {
   }
 
   /// \brief Returns an int with value i
-  /// \param i PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param i An integer value
+  /// \return An int with value i
   inline
   data_expression int_(int i)
   {
@@ -278,20 +280,20 @@ namespace data_expr {
     return data_expression(core::detail::gsMakeDataExprOr(p,q));
   }
 
-  /// \brief Returns or applied to the sequence of data expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns or applied to the sequence of data expressions [first, last)
+  /// \param first Start of a sequence of data expressions
+  /// \param last End of a sequence of data expressions
+  /// \return Or applied to the sequence of data expressions [first, last)
   template <typename FwdIt>
   data_expression join_or(FwdIt first, FwdIt last)
   {
     return core::detail::join(first, last, or_, false_());
   }
 
-  /// \brief Returns and applied to the sequence of data expressions [first, last[
-  /// \param first Start of a sequence of PARAM_DESCRIPTION
-  /// \param last End of a sequence of PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \brief Returns and applied to the sequence of data expressions [first, last)
+  /// \param first Start of a sequence of data expressions
+  /// \param last End of a sequence of data expressions
+  /// \return And applied to the sequence of data expressions [first, last)
   template <typename FwdIt>
   data_expression join_and(FwdIt first, FwdIt last)
   {
@@ -345,7 +347,7 @@ namespace data_expr {
 
   /// \brief Returns the expression d - e
   /// \param d A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d - e
   inline
   data_expression negate(data_expression d)
   {
@@ -355,7 +357,7 @@ namespace data_expr {
   /// \brief Returns the expression d + e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d + e
   inline
   data_expression plus(data_expression d, data_expression e)
   {
@@ -365,7 +367,7 @@ namespace data_expr {
   /// \brief Returns the expression d - e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d - e
   inline
   data_expression minus(data_expression d, data_expression e)
   {
@@ -375,7 +377,7 @@ namespace data_expr {
   /// \brief Returns the expression d * e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d * e
   inline
   data_expression multiplies(data_expression d, data_expression e)
   {
@@ -385,7 +387,7 @@ namespace data_expr {
   /// \brief Returns the expression d / e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d / e
   inline
   data_expression divides(data_expression d, data_expression e)
   {
@@ -395,7 +397,7 @@ namespace data_expr {
   /// \brief Returns the expression d % e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d % e
   inline
   data_expression modulus(data_expression d, data_expression e)
   {
@@ -405,7 +407,7 @@ namespace data_expr {
   /// \brief Returns the expression d = e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d = e
   inline
   data_expression equal_to(data_expression d, data_expression e)
   {
@@ -415,7 +417,7 @@ namespace data_expr {
   /// \brief Returns the expression d != e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d != e
   inline
   data_expression not_equal_to(data_expression d, data_expression e)
   {
@@ -425,7 +427,7 @@ namespace data_expr {
   /// \brief Returns the expression d < e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d < e
   inline
   data_expression less(data_expression d, data_expression e)
   {
@@ -435,7 +437,7 @@ namespace data_expr {
   /// \brief Returns the expression d > e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d < e
   inline
   data_expression greater(data_expression d, data_expression e)
   {
@@ -445,7 +447,7 @@ namespace data_expr {
   /// \brief Returns the expression d <= e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d <= e
   inline
   data_expression less_equal(data_expression d, data_expression e)
   {
@@ -455,7 +457,7 @@ namespace data_expr {
   /// \brief Returns the expression d >= e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression d >= e
   inline
   data_expression greater_equal(data_expression d, data_expression e)
   {
@@ -465,7 +467,7 @@ namespace data_expr {
   /// \brief Returns an expression for the minimum of d and e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return An expression for the minimum of d and e
   inline
   data_expression min_(data_expression d, data_expression e)
   {
@@ -475,7 +477,7 @@ namespace data_expr {
   /// \brief Returns an expression for the maximum of d and e
   /// \param d A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return An expression for the maximum of d and e
   inline
   data_expression max_(data_expression d, data_expression e)
   {
@@ -484,7 +486,7 @@ namespace data_expr {
 
   /// \brief Returns an expression for the absolute value of d
   /// \param d A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return An expression for the absolute value of d
   inline
   data_expression abs(data_expression d)
   {
@@ -495,7 +497,7 @@ namespace data_expr {
   /// \param i A data expression
   /// \param t A data expression
   /// \param e A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The expression 'if i then t else e'
   inline
   data_expression if_(data_expression i, data_expression t, data_expression e)
   {
@@ -538,7 +540,7 @@ namespace data_expr {
     /// \brief Returns the expression d = e
     /// \param d A data expression
     /// \param e A data expression
-    /// \return RETURN_DESCRIPTION
+    /// \return The expression d = e
     inline
     data_expression equal_to(data_expression d, data_expression e)
     {
@@ -552,7 +554,7 @@ namespace data_expr {
     /// \brief Returns the expression d != e
     /// \param d A data expression
     /// \param e A data expression
-    /// \return RETURN_DESCRIPTION
+    /// \return The expression d != e
     inline
     data_expression not_equal_to(data_expression d, data_expression e)
     {
@@ -564,9 +566,9 @@ namespace data_expr {
     }
 
     /// \brief Returns or applied to the sequence of data expressions [first, last)
-    /// \param first Start of a sequence of PARAM_DESCRIPTION
-    /// \param last End of a sequence of PARAM_DESCRIPTION
-    /// \return RETURN_DESCRIPTION
+    /// \param first Start of a sequence of data expressions
+    /// \param last End of a sequence of data expressions
+    /// \return Or applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
     data_expression join_or(FwdIt first, FwdIt last)
     {
@@ -575,9 +577,9 @@ namespace data_expr {
     }
 
     /// \brief Returns and applied to the sequence of data expressions [first, last)
-    /// \param first Start of a sequence of PARAM_DESCRIPTION
-    /// \param last End of a sequence of PARAM_DESCRIPTION
-    /// \return RETURN_DESCRIPTION
+    /// \param first Start of a sequence of data expressions
+    /// \param last End of a sequence of data expressions
+    /// \return And applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
     data_expression join_and(FwdIt first, FwdIt last)
     {

@@ -40,8 +40,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
 
     /// \brief Constructor.
     /// \param count A positive number.
-    /// \param std::deque<T PARAM_DESCRIPTION
-    explicit deque(typename std::deque<T, Allocator>::size_type count)
+    explicit deque(typename std::deque<T,Allocator>::size_type count)
       : std::deque<T, Allocator>(count)
     {
       ATprotectProtectedATerm(this);
@@ -50,8 +49,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param count A positive number.
     /// \param val A value.
-    /// \param std::deque<T PARAM_DESCRIPTION
-    deque(typename std::deque<T, Allocator>::size_type count, const T& val)
+    deque(typename std::deque<T,Allocator>::size_type count, const T& val)
       : std::deque<T, Allocator>(count, val)
     {
       ATprotectProtectedATerm(this);
@@ -61,8 +59,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     /// \param count A positive number.
     /// \param val A value.
     /// \param a An allocator.
-    /// \param std::deque<T PARAM_DESCRIPTION
-    deque(typename std::deque<T, Allocator>::size_type count, const T& val, const Allocator& a)
+    deque(typename std::deque<T,Allocator>::size_type count, const T& val, const Allocator& a)
       : std::deque<T, Allocator>(count, val, a)
     {
       ATprotectProtectedATerm(this);

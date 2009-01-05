@@ -35,7 +35,7 @@ data_expression_list operator+(data_variable_list l, data_expression_list m)
 { return data_expression_list(ATconcat(l, m)); }
 
 /// \brief Returns the concatenation of [v] and the list l.
-/// \param v A
+/// \param v A data variable
 /// \param l A sequence of data expressions
 /// \return The concatenation of [v] and the list l.
 inline
@@ -46,7 +46,7 @@ data_expression_list operator+(data_variable v, data_expression_list l)
 
 /// \brief Returns the concatenation of the list l and [v].
 /// \param l A sequence of data expressions
-/// \param v A
+/// \param v A data variable
 /// \return The concatenation of the list l and [v].
 inline
 data_expression_list operator+(data_expression_list l, data_variable v)

@@ -26,7 +26,7 @@ namespace core {
 
   /// \brief Split a string into paragraphs.
   /// \param text A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The paragraphs of <tt>text</tt>
   std::vector<std::string> split_paragraphs(const std::string& text)
   {
     std::vector<std::string> result;
@@ -54,7 +54,7 @@ namespace core {
   /// \brief Split the text.
   /// \param line A string
   /// \param separators A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The splitted text
   inline
   std::vector<std::string> split(const std::string& line, const std::string& separators)
   {
@@ -65,8 +65,8 @@ namespace core {
 
   /// \brief Read text from a file.
   /// \param filename A string
-  /// \param warn PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param warn If true, a warning is printed to standard error if the file is not found
+  /// \return The contents of the file
   inline
   std::string read_text(const std::string& filename, bool warn=false)
   {
@@ -91,7 +91,7 @@ namespace core {
 
   /// \brief Remove comments from a text (everything from '%' until end of line).
   /// \param text A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The removal result
   inline
   std::string remove_comments(const std::string& text)
   {
@@ -104,7 +104,7 @@ namespace core {
 
   /// \brief Removes whitespace from a string.
   /// \param text A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The removal result
   inline
   std::string remove_whitespace(const std::string& text)
   {
@@ -117,7 +117,7 @@ namespace core {
   /// \param src A string
   /// \param dest A string
   /// \param text A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The transformed string
   inline
   std::string regex_replace(const std::string& src, const std::string& dest, const std::string& text)
   {
@@ -127,7 +127,7 @@ namespace core {
   /// \brief Split a string using a regular expression separator.
   /// \param text A string
   /// \param sep A string
-  /// \return RETURN_DESCRIPTION
+  /// \return The splitted string
   std::vector<std::string> regex_split(const std::string& text, const std::string& sep)
   {
     std::vector<std::string> result;

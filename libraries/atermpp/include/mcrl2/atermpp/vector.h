@@ -21,7 +21,7 @@ namespace atermpp {
 
 /// \brief Protected vector container.
 template <class T, class Allocator = std::allocator<T> >
-class vector: public std::vector<T, Allocator>, IProtectedATerm
+class vector: public std::vector<T,Allocator>, IProtectedATerm
 {
   public:
     /// \brief Constructor.
@@ -33,16 +33,15 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param a An allocator.
     explicit vector(const Allocator& a)
-      : std::vector<T, Allocator>(a)
+      : std::vector<T,Allocator>(a)
     {
       ATprotectProtectedATerm(this);
     }
 
     /// \brief Constructor.
     /// \param count A positive number.
-    /// \param std::vector<T PARAM_DESCRIPTION
-    explicit vector(typename std::vector<T, Allocator>::size_type count)
-      : std::vector<T, Allocator>(count)
+    explicit vector(typename std::vector<T,Allocator>::size_type count)
+      : std::vector<T,Allocator>(count)
     {
       ATprotectProtectedATerm(this);
     }
@@ -50,9 +49,8 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param count A positive number.
     /// \param val A value.
-    /// \param std::vector<T PARAM_DESCRIPTION
-    vector(typename std::vector<T, Allocator>::size_type count, const T& val)
-      : std::vector<T, Allocator>(count, val)
+    vector(typename std::vector<T,Allocator>::size_type count, const T& val)
+      : std::vector<T,Allocator>(count, val)
     {
       ATprotectProtectedATerm(this);
     }
@@ -61,9 +59,8 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
     /// \param count A positive number.
     /// \param val A value.
     /// \param a An allocator.
-    /// \param std::vector<T PARAM_DESCRIPTION
-    vector(typename std::vector<T, Allocator>::size_type count, const T& val, const Allocator& a)
-      : std::vector<T, Allocator>(count, val, a)
+    vector(typename std::vector<T,Allocator>::size_type count, const T& val, const Allocator& a)
+      : std::vector<T,Allocator>(count, val, a)
     {
       ATprotectProtectedATerm(this);
     }
@@ -71,7 +68,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param right A vector.
     vector(const vector& right)
-      : std::vector<T, Allocator>(right)
+      : std::vector<T,Allocator>(right)
     {
       ATprotectProtectedATerm(this);
     }
@@ -81,7 +78,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
         /// \param last The end of a range of elements.
     template<class InIt>
         vector(InIt first, InIt last)
-      : std::vector<T, Allocator>(first, last)
+      : std::vector<T,Allocator>(first, last)
     {
       ATprotectProtectedATerm(this);
     }
@@ -92,7 +89,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
         /// \param a An allocator.
     template<class InIt>
         vector(InIt first, InIt last, const Allocator& a)
-      : std::vector<T, Allocator>(first, last, a)
+      : std::vector<T,Allocator>(first, last, a)
     {
       ATprotectProtectedATerm(this);
     }
@@ -109,7 +106,7 @@ class vector: public std::vector<T, Allocator>, IProtectedATerm
 #ifdef ATERM_DEBUG_PROTECTION
 std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
-      for (typename std::vector<T, Allocator>::iterator i = std::vector<T, Allocator>::begin(); i != std::vector<T, Allocator>::end(); ++i)
+      for (typename std::vector<T,Allocator>::iterator i = std::vector<T,Allocator>::begin(); i != std::vector<T,Allocator>::end(); ++i)
       {
         aterm_traits<T>::mark(*i);
       }

@@ -47,10 +47,12 @@ class regular_formula: public atermpp::aterm_appl
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
-    /// \brief Applies a substitution to this regular formula and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {

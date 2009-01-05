@@ -39,9 +39,9 @@ namespace detail {
       : m_result(target)
     {}
 
-    /// \brief FUNCTION_DESCRIPTION
-    /// \param f PARAM_DESCRIPTION
-    /// \return RETURN_DESCRIPTION
+    /// \brief Function call operator
+    /// \param f A data operation
+    /// \return The function result
     bool operator()(data_operation f)
     {
       return result_sort(f.sort()) == m_result;

@@ -25,7 +25,7 @@ namespace pbes_system {
 /// with the same name occur.
 /// \param p A PBES expression
 /// \param free_variables A sequence of data variables
-/// \return RETURN_DESCRIPTION
+/// \return The rename result
 inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::data_variable_list& free_variables)
 {

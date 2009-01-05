@@ -70,19 +70,11 @@ class sort_identifier: public sort_expression
     {
       return atermpp::arg1(*this);
     }
-
-    /// \brief FUNCTION_DESCRIPTION
-    /// \overload
-    /// \return Always returns false.
-    bool is_arrow() const
-    {
-      return false;
-    }
 };
 
 /// \brief Returns true if the term t is a sort identifier.
 /// \param t A term
-/// \return RETURN_DESCRIPTION
+/// \return True if the term t is a sort identifier.
 inline
 bool is_sort_identifier(atermpp::aterm_appl t)
 {

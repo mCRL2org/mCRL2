@@ -35,9 +35,8 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   {}
 
   /// \brief Generates a new name for n, and adds a replacement to the replacement stack.
-  /// \brief Returns the new name.
   /// \param n A
-  /// \return RETURN_DESCRIPTION
+  /// \return The new name.
   core::identifier_string push(const core::identifier_string& n)
   {
     core::identifier_string new_name = generator(n);

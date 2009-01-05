@@ -378,8 +378,7 @@ class pbes
     /// value for them. Variables for which no default value can be found are untouched.
     /// So, upon return the sequence of free variables of the pbes contains exactly those
     /// variables for which no default value could be found.
-    /// \brief Returns true if all free variables were eliminated.
-    /// \return RETURN_DESCRIPTION
+    /// \return true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
       std::set<data::data_variable> free_variables = compute_unbound_variables();
@@ -518,9 +517,11 @@ class pbes
       return true;
     }
 
-    /// \brief Applies a substitution to the equations of this pbes.
+    /// \brief Applies a low level substitution function to this term.
     /// \param f A
-    /// The Substitution function must supply the method aterm operator()(aterm).
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
     template <typename Substitution>
     void substitute(Substitution f)
     {

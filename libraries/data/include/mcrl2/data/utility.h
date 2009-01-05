@@ -66,11 +66,11 @@ data_variable_list fresh_variables(data_variable_list t, const std::set<std::str
   return atermpp::reverse(result);
 }
 
-/// \brief Returns an identifier that doesn't appear in the term context
-/// \param context PARAM_DESCRIPTION
+/// \brief Returns an identifier that doesn't appear in the set <tt>context</tt>
+/// \param context A set of strings
 /// \param hint A string
-/// \param id_creator PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \param id_creator A function that generates identifiers
+/// \return An identifier that doesn't appear in the set <tt>context</tt>
 template <typename IdentifierCreator>
 core::identifier_string fresh_identifier(const std::set<core::identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
@@ -87,8 +87,8 @@ core::identifier_string fresh_identifier(const std::set<core::identifier_string>
 /// \brief Returns an identifier that doesn't appear in the term context
 /// \param context A term
 /// \param hint A string
-/// \param id_creator PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \param id_creator A function that generates identifiers
+/// \return An identifier that doesn't appear in the term context
 template <typename Term, class IdentifierCreator>
 core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
 {
@@ -113,7 +113,7 @@ struct default_identifier_creator
 /// \brief Returns an identifier that doesn't appear in the term context
 /// \param context A term
 /// \param hint A string
-/// \return RETURN_DESCRIPTION
+/// \return An identifier that doesn't appear in the term context
 template <typename Term>
 core::identifier_string fresh_identifier(const Term& context, const std::string& hint)
 {
@@ -124,7 +124,7 @@ core::identifier_string fresh_identifier(const Term& context, const std::string&
 /// \param context A term
 /// \param s A sort expression
 /// \param hint A string
-/// \return RETURN_DESCRIPTION
+/// \return A variable that doesn't appear in context
 template <typename Term>
 data_variable fresh_variable(Term context, sort_expression s, std::string hint)
 {
@@ -226,7 +226,7 @@ class fresh_variable_generator
 
     /// \brief Returns a unique variable with the same sort as the variable v, and with
     /// the same prefix. The returned variable is added to the context.
-    /// \param v A
+    /// \param v A data variable
     /// \return A fresh variable with the same sort as the given variable, and with the name of
     /// the variable as prefix.
     data_variable operator()(data_variable v)

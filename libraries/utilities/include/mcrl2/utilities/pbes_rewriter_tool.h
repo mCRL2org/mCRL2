@@ -140,8 +140,8 @@ namespace utilities {
 
   /// \brief Stream operator for rewriter type
   /// \param is An input stream
-  /// \param t PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param t A rewriter type
+  /// \return The input stream
   inline
   std::istream& operator>>(std::istream& is, pbes_rewriter_tool::pbes_rewriter_type& t)
   {

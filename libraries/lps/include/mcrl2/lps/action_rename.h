@@ -73,14 +73,14 @@ namespace lps {
       }
 
       /// \brief Returns true if the right hand side is equal to delta.
-      /// \return RETURN_DESCRIPTION
+      /// \return True if the right hand side is equal to delta.
       bool is_delta() const
       {
         return core::detail::gsIsDelta(*this);
       }
 
       /// \brief Returns true if the right hand side is equal to tau.
-      /// \return RETURN_DESCRIPTION
+      /// \return True if the right hand side is equal to tau.
       bool is_tau() const
       {
         return core::detail::gsIsTau(*this);
@@ -88,7 +88,7 @@ namespace lps {
 
       /// \brief Returns the action.
       /// \pre The right hand side must be an action
-      /// \return RETURN_DESCRIPTION
+      /// \return The action.
       action act() const
       {
         return *this;
@@ -135,28 +135,28 @@ namespace lps {
       }
 
       /// \brief Returns the variables of the rule.
-      /// \return RETURN_DESCRIPTION
+      /// \return The variables of the rule.
       data::data_variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the condition of the rule.
-      /// \return RETURN_DESCRIPTION
+      /// \return The condition of the rule.
       data::data_expression condition() const
       {
         return m_condition;
       }
 
       /// \brief Returns the left hand side of the rule.
-      /// \return RETURN_DESCRIPTION
+      /// \return The left hand side of the rule.
       action lhs() const
       {
         return m_lhs;
       }
 
       /// \brief Returns the right hand side of the rule.
-      /// \return RETURN_DESCRIPTION
+      /// \return The right hand side of the rule.
       action_rename_rule_rhs rhs() const
       {
         return m_rhs;
@@ -203,7 +203,7 @@ namespace lps {
       /// \brief Constructor.
       /// \param data A data specification
       /// \param action_labels A sequence of action labels
-      /// \param rules PARAM_DESCRIPTION
+      /// \param rules A sequence of action rename rules
       action_rename_specification(data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
         :
           m_data(data),
@@ -255,18 +255,18 @@ namespace lps {
       }
 
       /// \brief Returns the data action_rename_specification.
-      /// \return RETURN_DESCRIPTION
+      /// \return The data action_rename_specification.
       data::data_specification data() const
       { return m_data; }
 
-      /// \brief Returns a sequence of action labels containing all action
+      /// \brief Returns the sequence of action labels
+      /// \return A sequence of action labels containing all action
       /// labels occurring in the action_rename_specification (but it can have more).
-      /// \return RETURN_DESCRIPTION
       action_label_list action_labels() const
       { return m_action_labels; }
 
       /// \brief Returns the action rename rules.
-      /// \return RETURN_DESCRIPTION
+      /// \return The action rename rules.
       action_rename_rule_list rules() const
       {
         return m_rules;

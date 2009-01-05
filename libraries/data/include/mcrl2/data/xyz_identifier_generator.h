@@ -29,7 +29,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
     char m_char;
 
     /// \brief Returns the next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
-    /// \return RETURN_DESCRIPTION
+    /// \return The next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
     std::string next()
     {
       switch (m_char) {

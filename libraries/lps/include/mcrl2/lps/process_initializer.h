@@ -76,16 +76,18 @@ class process_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Returns the initial state of the LPS.
-    /// \return RETURN_DESCRIPTION
+    /// \return The initial state of the LPS.
     data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
 
-    /// \brief Applies a substitution to this process initializer and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     process_initializer substitute(Substitution f)
     {

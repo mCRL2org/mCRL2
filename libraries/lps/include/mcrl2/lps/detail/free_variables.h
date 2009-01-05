@@ -27,8 +27,9 @@ namespace detail {
 
 /// \brief Collects the free variables that occur in the specification and writes them to dest.
 /// \param s A linear process summand
-/// \param bound_variables PARAM_DESCRIPTION
-/// \param dest PARAM_DESCRIPTION
+/// \param bound_variables A set of data variables. The variables in this set are considered
+/// to be bound_variables and will not be part of the result
+/// \param dest An output iterator to which the result is written
 template <typename OutputIterator>
 void collect_free_variables(const summand& s, const std::set<data::data_variable>& bound_variables, OutputIterator dest)
 {

@@ -167,7 +167,7 @@ namespace detail {
 
     /// \brief Applies this builder to the term x.
     /// \param x A term
-    /// \return RETURN_DESCRIPTION
+    /// \return The function result
     term_type operator()(const term_type& x)
     {
       Arg tmp;

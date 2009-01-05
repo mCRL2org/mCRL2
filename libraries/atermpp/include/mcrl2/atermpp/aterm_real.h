@@ -56,7 +56,7 @@ namespace atermpp
       }
 
       /// \brief Conversion to ATermReal.
-      /// \return RETURN_DESCRIPTION
+      /// \return The converted term
       operator ATermReal() const
       {
         return reinterpret_cast<ATermReal>(m_term);

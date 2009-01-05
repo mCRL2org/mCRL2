@@ -42,7 +42,7 @@ namespace detail {
   /// \brief Given a sequence [t1, t2, ..., tn] of elements of type T, returns
   /// op(t1, op(t2, ...), tn)))).
   /// \param empty_sequence_result The value that is returned when the sequence is empty.
-  /// \param first [first, last[ is the range of elements.
+  /// \param first [first, last) is the range of elements.
   /// \param last
   /// \param op An operator
   /// \return The joined sequence

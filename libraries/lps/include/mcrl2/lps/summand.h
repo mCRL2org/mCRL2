@@ -200,10 +200,12 @@ class summand: public atermpp::aterm_appl
       return pp.substitute(data::assignment_list_substitution(assignments()));
     }
 
-    /// \brief Applies a substitution to this summand and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     summand substitute(Substitution f) const
     {

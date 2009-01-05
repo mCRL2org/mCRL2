@@ -58,10 +58,12 @@ class action_formula: public atermpp::aterm_appl
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
-    /// \brief Applies a substitution to this action_formula and returns the result
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
@@ -157,10 +159,10 @@ namespace act_frm
     return action_formula(core::detail::gsMakeActExists(l, p));
   }
 
-  /// \brief Returns the 'p at d'
+  /// \brief Returns the operation 'p at d'
   /// \param p An action formula
   /// \param d A data expression
-  /// \return RETURN_DESCRIPTION
+  /// \return The operation 'p at d'
   inline
   action_formula at(action_formula p, data::data_expression d)
   {
@@ -206,7 +208,7 @@ namespace accessors
 {
   /// \brief Returns the parameters of an action formula
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The parameters of an action formula
   inline
   lps::action_list mult_params(action_formula t)
   {
@@ -214,10 +216,9 @@ namespace accessors
     return atermpp::list_arg1(t);
   }
   
-  /// \brief Returns the action formula argument of an expression of
-  /// type not, at, exists or forall.
+  /// \brief Returns the action formula argument of an expression of type not, at, exists or forall.
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The action formula argument of an expression of type not, at, exists or forall.
   inline
   action_formula arg(action_formula t)
   {
@@ -231,7 +232,7 @@ namespace accessors
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The left hand side of an expression of type and/or/imp
   inline
   action_formula left(action_formula t)
   {
@@ -241,7 +242,7 @@ namespace accessors
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The right hand side of an expression of type and/or/imp.
   inline
   action_formula right(action_formula t)
   {
@@ -251,7 +252,7 @@ namespace accessors
   
   /// \brief Returns the variables of a quantification expression
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The variables of a quantification expression
   inline
   data::data_variable_list var(action_formula t)
   {
@@ -261,7 +262,7 @@ namespace accessors
   
   /// \brief Returns the time of an at expression
   /// \param t An action formula
-  /// \return RETURN_DESCRIPTION
+  /// \return The time of an at expression
   inline
   data::data_expression time(action_formula t)
   {

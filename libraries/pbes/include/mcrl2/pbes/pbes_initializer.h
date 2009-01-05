@@ -61,31 +61,33 @@ class pbes_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Returns the sequence of free variables.
-    /// \return RETURN_DESCRIPTION
+    /// \return The sequence of free variables.
     data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// \brief Returns the sequence of variables.
-    /// \return RETURN_DESCRIPTION
+    /// \return The sequence of variables.
     propositional_variable_instantiation variable() const
     {
       return m_variable;
     }
 
-    /// \brief Applies a substitution to this pbes initializer and returns the result.
-    /// \brief The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
     /// \param f A
-    /// \return RETURN_DESCRIPTION
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     pbes_initializer substitute(Substitution f)
     {
       return pbes_initializer(f(atermpp::aterm(*this)));
     }
 
-    /// \brief Returns true (there are no well typedness checks defined yet).
-    /// \return RETURN_DESCRIPTION
+    /// \brief Checks if the PBES initializer is well typed.
+    /// \return Always returns true.
     bool is_well_typed() const
     {
       return true;

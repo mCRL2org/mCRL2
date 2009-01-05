@@ -24,8 +24,8 @@ namespace lps {
 
   /// \brief Generates a linearized process specification from a specification in text.
   /// \param spec A string
-  /// \param options PARAM_DESCRIPTION
-  /// \return RETURN_DESCRIPTION
+  /// \param options Options for the linearization algorithm.
+  /// \return The linearized specification.
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
   {

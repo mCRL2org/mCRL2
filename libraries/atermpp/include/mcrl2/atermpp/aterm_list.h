@@ -200,10 +200,12 @@ namespace atermpp {
       operator ATermList() const
       { return void2list(m_term); }
 
-      /// \brief Applies a substitution to this list and returns the result.
-      /// The Substitution object must supply the method aterm operator()(aterm).
+      /// \brief Applies a low level substitution function to this term and returns the result.
       /// \param f A
-      /// \return The transformed list.
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
+      /// \return The substitution result.
       template <typename Substitution>
       term_list<Term> substitute(Substitution f) const
       {

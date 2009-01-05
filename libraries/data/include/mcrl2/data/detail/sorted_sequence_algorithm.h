@@ -22,10 +22,10 @@ namespace data {
 
 namespace detail {
 
-/// \brief FUNCTION_DESCRIPTION
-/// \param x PARAM_DESCRIPTION
-/// \param y PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \brief Returns the union of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The union of two sets.
 template <typename T>
 std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
 {
@@ -34,10 +34,10 @@ std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
-/// \brief FUNCTION_DESCRIPTION
-/// \param x PARAM_DESCRIPTION
-/// \param y PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \brief Returns the difference of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The difference of two sets.
 template <typename T>
 std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
 {
@@ -46,10 +46,10 @@ std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
-/// \brief FUNCTION_DESCRIPTION
-/// \param x PARAM_DESCRIPTION
-/// \param y PARAM_DESCRIPTION
-/// \return RETURN_DESCRIPTION
+/// \brief Returns the intersection of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The intersection of two sets.
 template <typename T>
 std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 {

@@ -32,12 +32,11 @@ namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-    /// Precondition: The range [first, last[ contains sorted arrays.
-    /// \brief Visits all permutations of the arrays, and calls f for
-    /// each instance.
-    /// \param first Start of a sequence of PARAM_DESCRIPTION
-    /// \param last End of a sequence of PARAM_DESCRIPTION
-    /// \param f PARAM_DESCRIPTION
+    /// \brief Visits all permutations of the arrays, and calls f for each instance.
+    /// \pre The range [first, last) contains sorted arrays.
+    /// \param first Start of a sequence of arrays
+    /// \param last End of a sequence of arrays
+    /// \param f A function
     template <typename Iter, typename Function>
     void forall_permutations(Iter first, Iter last, Function f)
     {
@@ -59,7 +58,7 @@ namespace detail {
     /// \pre a and b are sorted w.r.t. to the names of the actions.
     /// \param a A sequence of actions
     /// \param b A sequence of actions
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the actions in a and b have the same names, and the same sorts.
     inline bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
     {
       if (a.size() != b.size())

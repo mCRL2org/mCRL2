@@ -22,7 +22,7 @@ namespace detail {
 
 /// \brief Returns all names of data variables that occur in the term t
 /// \param t A term
-/// \return RETURN_DESCRIPTION
+/// \return All names of data variables that occur in the term t
 template <typename Term>
 std::set<core::identifier_string> find_variable_names(Term t)
 {
@@ -40,7 +40,7 @@ std::set<core::identifier_string> find_variable_names(Term t)
 
 /// \brief Returns all names of data variables that occur in the term t
 /// \param t A term
-/// \return RETURN_DESCRIPTION
+/// \return All names of data variables that occur in the term t
 template <typename Term>
 std::set<std::string> find_variable_name_strings(Term t)
 {

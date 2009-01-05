@@ -141,10 +141,12 @@ class pbes_translate_algorithm
           return front(m_actions).arguments();
         }
 
-        /// \brief Applies a substitution to this multi-action and returns the result.
+        /// \brief Applies a low level substitution function to this term and returns the result.
         /// \param f A
-        /// The Substitution function must supply the method aterm operator()(aterm).
-        /// \return The result of applying the substitution.
+        /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+        /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+        /// \deprecated
+        /// \return The substitution result.
         template <typename Substitution>
         timed_action substitute(Substitution f)
         {
@@ -350,7 +352,7 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     /// \param f0 A modal formula
     /// \param f A modal formula
     /// \param lps A linear process
-    /// \param T A
+    /// \param T A data variable
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
     pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T, std::set<std::string>& context)
@@ -563,7 +565,7 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     /// \param f0 A modal formula
     /// \param f A modal formula
     /// \param lps A linear process
-    /// \param T A
+    /// \param T A data variable
     /// \return The function result
     atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::data_variable T)
     {

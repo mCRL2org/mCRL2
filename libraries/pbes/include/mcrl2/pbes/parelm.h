@@ -64,7 +64,7 @@ class pbes_parelm_algorithm
 
     /// \brief Finds the index of a variable in a sequence
     /// \param v A sequence of data variables
-    /// \param d A
+    /// \param d A data variable
     /// \return The index of \p d in \p v, or -1 if the variable wasn't found
     int variable_index(data::data_variable_list v, data::data_variable d) const
     {
@@ -81,10 +81,10 @@ class pbes_parelm_algorithm
     }
 
     /// \cond INTERNAL_DOCS
-    /// \brief For debugging
-    /// \param v PARAM_DESCRIPTION
+    /// \brief Prints a container of terms to standard error
+    /// \param v A container
     /// \param message A string
-    /// \param print_index PARAM_DESCRIPTION
+    /// \param print_index If true, an index is written in front of each term
     template <typename Container>
     void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
     {
