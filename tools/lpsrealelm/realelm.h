@@ -90,15 +90,14 @@ class summand_information
     { return smd;
     }
 
-    atermpp::vector < mcrl2::data::data_expression > get_new_values_for_xi_variables() const
+    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
     { 
-      // sanity check
-      for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
-          i != new_values_for_xi_variables.end(); ++i)
-      {
-        assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
-      }
-      return new_values_for_xi_variables;
+      return new_values_for_xi_variables.begin();
+    }
+
+    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
+    { 
+      return new_values_for_xi_variables.end();
     }
 
     mcrl2::data::data_expression_list get_summand_real_conditions() const
@@ -158,11 +157,10 @@ class summand_information
       }
 
       if (new_values_for_xi_variables.back()!=data_expression())
-      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is " << pp(new_values_for_xi_variables.back()) << "(" << &(new_values_for_xi_variables.back()) << ")\n";
+      { // std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is " << pp(new_values_for_xi_variables.back()) << ")\n";
       }
       else
-      { std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is undefined. (" 
-                       << &(new_values_for_xi_variables.back()) << ")\n";
+      { // std::cerr << "New standard value for " << pp(context.back().get_variable()) << " is undefined.\n";
       }
       // At this point a data_expression has been pushed to the back of the new_values_for_xi_variables
       // Now it must be checked whether the newly added xi variable can lead to a standard value of

@@ -105,7 +105,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).location();
   options.output_file = configuration.get_output(lps_file_for_output).location();
-  options.max_iterations = 5;
+  options.max_iterations = 500;
 
   gsDebugMsg("Calling do_realelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_realelm(options)==0);
@@ -151,7 +151,7 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
     }
     else
     {
-      t_options.max_iterations = 5;
+      t_options.max_iterations = 500;
     }
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
