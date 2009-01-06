@@ -10,6 +10,7 @@
 project site-config ;
 
 import os ;
+import pch ;
 import feature ;
 import property ;
 
