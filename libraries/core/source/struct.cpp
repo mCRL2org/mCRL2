@@ -2249,17 +2249,6 @@ ATermAppl gsMakeOpIdEltIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
     gsMakeSortArrow2(SortExprLHS, SortExprRHS, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdSubSetEq(ATermAppl SortExpr)
-{
-  return gsMakeOpId(gsMakeOpIdNameSubSetEq(),
-    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
-}
-
-ATermAppl gsMakeOpIdSubSet(ATermAppl SortExpr)
-{
-  return gsMakeOpId(gsMakeOpIdNameSubSet(),
-    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
-}
 ATermAppl gsMakeOpIdSetUnion(ATermAppl SortExpr)
 {
   return gsMakeOpId(gsMakeOpIdNameSetUnion(),
@@ -2308,17 +2297,6 @@ ATermAppl gsMakeOpIdCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
     gsMakeSortArrow2(SortExprLHS, SortExprRHS, gsMakeSortExprNat()));
 }
 
-ATermAppl gsMakeOpIdSubBagEq(ATermAppl SortExpr)
-{
-  return gsMakeOpId(gsMakeOpIdNameSubBagEq(),
-    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
-}
-
-ATermAppl gsMakeOpIdSubBag(ATermAppl SortExpr)
-{
-  return gsMakeOpId(gsMakeOpIdNameSubBag(),
-    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
-}
 ATermAppl gsMakeOpIdBagUnion(ATermAppl SortExpr)
 {
   return gsMakeOpId(gsMakeOpIdNameBagUnion(),

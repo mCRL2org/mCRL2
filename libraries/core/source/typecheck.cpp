@@ -144,7 +144,7 @@ static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
-static ATermAppl gstcMatchEqNeq(ATermAppl Type);
+static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type);
 static ATermAppl gstcMatchListOpCons(ATermAppl Type);
 static ATermAppl gstcMatchListOpSnoc(ATermAppl Type);
 static ATermAppl gstcMatchListOpConcat(ATermAppl Type);
@@ -153,7 +153,6 @@ static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type);
 static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type);
-static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type);
 static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
@@ -1040,6 +1039,10 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdEq(gsMakeSortUnknown()));
   gstcAddSystemFunction(gsMakeOpIdNeq(gsMakeSortUnknown()));
   gstcAddSystemFunction(gsMakeOpIdIf(gsMakeSortUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortUnknown()));
   //Numbers
   gstcAddSystemFunction(gsMakeOpIdPos2Nat());
   gstcAddSystemFunction(gsMakeOpIdPos2Int());
@@ -1053,25 +1056,6 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdReal2Pos());
   gstcAddSystemFunction(gsMakeOpIdReal2Nat());
   gstcAddSystemFunction(gsMakeOpIdReal2Int());
-  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdPos()));
-  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdNat()));
-  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdInt()));
-  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdReal()));
-  //more
-  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdPos()));
-  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdNat()));
-  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdInt()));
-  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdReal()));
-  //more
-  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdPos()));
-  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdNat()));
-  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdInt()));
-  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdReal()));
-  //more
-  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdPos()));
-  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdNat()));
-  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdInt()));
-  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdReal()));
   //more
   gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos(),gsMakeSortIdPos()));
   gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos(),gsMakeSortIdNat()));
@@ -1155,8 +1139,6 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdSet2Bag(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemConstant(gsMakeOpIdEmptySet(gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprSet(gsMakeSortUnknown())));
-  gstcAddSystemFunction(gsMakeOpIdSubSetEq(gsMakeSortExprSet(gsMakeSortUnknown())));
-  gstcAddSystemFunction(gsMakeOpIdSubSet(gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdSetUnion(gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdSetDiff(gsMakeSortExprSet(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdSetIntersect(gsMakeSortExprSet(gsMakeSortUnknown())));
@@ -1168,8 +1150,6 @@ void gstcDataInit(void){
   gstcAddSystemConstant(gsMakeOpIdEmptyBag(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdCount(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
-  gstcAddSystemFunction(gsMakeOpIdSubBagEq(gsMakeSortExprBag(gsMakeSortUnknown())));
-  gstcAddSystemFunction(gsMakeOpIdSubBag(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagUnion(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagDiff(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagIntersect(gsMakeSortExprBag(gsMakeSortUnknown())));
@@ -2974,12 +2954,17 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	Type=NewType;
       }
 
-      if(ATisEqual(gsMakeOpIdNameEq(),ATAgetArgument(*DataTerm,0))||
-	 ATisEqual(gsMakeOpIdNameNeq(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing == or != matching Type %T, PosType %T\n",Type,PosType);    
-	ATermAppl NewType=gstcMatchEqNeq(Type);
-	if(!NewType){
-	  gsErrorMsg("the function == or != has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+      if ( ATisEqual(gsMakeOpIdNameEq(),ATAgetArgument(*DataTerm,0))
+        || ATisEqual(gsMakeOpIdNameNeq(),ATAgetArgument(*DataTerm,0))
+        || ATisEqual(gsMakeOpIdNameLT(),ATAgetArgument(*DataTerm,0))
+        || ATisEqual(gsMakeOpIdNameLTE(),ATAgetArgument(*DataTerm,0))
+        || ATisEqual(gsMakeOpIdNameGTE(),ATAgetArgument(*DataTerm,0))
+        || ATisEqual(gsMakeOpIdNameGT(),ATAgetArgument(*DataTerm,0))
+      ) {
+	gsDebugMsg("Doing ==, !=, <, <=, >= or > matching Type %T, PosType %T\n",Type,PosType);
+	ATermAppl NewType=gstcMatchEqNeqComparison(Type);
+	if(!NewType){          
+	  gsErrorMsg("the function %P has incompatible argument types %P (while typechecking %P)\n",ATAgetArgument(*DataTerm,0),Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3062,17 +3047,6 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
 	if(!NewType){
 	  gsErrorMsg("the function {List,Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
-	  return NULL;
-	}
-	Type=NewType;
-      }
-
-      if(ATisEqual(gsMakeOpIdNameSubSet(),ATAgetArgument(*DataTerm,0))||
-	 ATisEqual(gsMakeOpIdNameSubSetEq(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing SubSet[Eq] or SubBag[Eq] matching Type %T, PosType %T\n",Type,PosType);    
-	ATermAppl NewType=gstcMatchSetBagOpSubEq(Type);
-	if(!NewType){
-	  gsErrorMsg("the function SubSet[Eq] or SubBag[Eq] has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3708,12 +3682,11 @@ static ATermAppl gstcMatchIf(ATermAppl Type){
   return gsMakeSortArrow(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
 }
 
-static ATermAppl gstcMatchEqNeq(ATermAppl Type){
-  //tries to sort out the types for == or !=.
+static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type){
+  //tries to sort out the types for ==, !=, <, <=, >= and >.
   //If some of the parameters are Pos,Nat, or Int do upcasting.
 
   assert(gsIsSortArrow(Type));
-  //assert(gsIsBool(ATAgetFirst(Args)));
   ATermList Args=ATLgetArgument(Type,0);
   assert((ATgetLength(Args)==2));
   ATermAppl Arg1=ATAgetFirst(Args);
@@ -3926,33 +3899,6 @@ static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type){
   if(!Arg) return NULL;
 
   return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)ATsetArgument(Arg2,(ATerm)Arg,1)),gsMakeSortIdBool());
-}
-
-static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type){
-  //tries to sort out the types of SubSet, SubSetEq (Set(S)xSet(S)->Bool)
-  //or SubBag, SubBagEq (Bag(S)xBag(S)->Bool)
-  //If some of the parameters are Pos,Nat, or Int do upcasting.
-
-  assert(gsIsSortArrow(Type));
-  //assert(gsIsBool(ATAgetArgument(Type,1)));
-  ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
-
-  ATermAppl Arg1=ATAgetFirst(Args);
-  if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
-  if(gstcIsNumericType(Arg1)) return Type;
-  assert(gsIsSortExprSet(Arg1)||gsIsSortExprBag(Arg1));
-
-  Args=ATgetNext(Args);
-  ATermAppl Arg2=ATAgetFirst(Args);
-  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-  if(gstcIsNumericType(Arg2)) return Type;
-  assert(gsIsSortExprSet(Arg2)||gsIsSortExprBag(Arg2));
-  
-  ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
-  if(!Arg) return NULL;
-
-  return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)Arg),gsMakeSortIdBool());
 }
 
 static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type){

@@ -777,16 +777,6 @@ ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdSetEnum(ATermAppl SortExpr);
 
 ///\pre SortExpr is a sort expression
-///\return Operation identifier for 'subset or equal', which has sort
-///     S -> S -> Bool, where S stands for SortExpr
-ATermAppl gsMakeOpIdSubSetEq(ATermAppl SortExpr);
-
-///\pre SortExpr is a sort expression
-///\return Operation identifier for 'proper subset', which has sort S -> S -> Bool,
-///     where S stands for SortExpr
-ATermAppl gsMakeOpIdSubSet(ATermAppl SortExpr);
-
-///\pre SortExpr is a sort expression
 ///\return Operation identifier for 'set union', which has sort S -> S -> S,
 ///     where S stands for SortExpr
 ATermAppl gsMakeOpIdSetUnion(ATermAppl SortExpr);
@@ -823,16 +813,6 @@ ATermAppl gsMakeOpIdBagEnum(ATermAppl SortExpr);
 ///\return Operation identifier for 'bag multiplicity', which has sort
 ///     S -> T -> Nat, where S and T stand for SortExprLHS and SortExprRHS
 ATermAppl gsMakeOpIdCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
-
-///\pre SortExpr is a sort expression
-///\return Operation identifier for 'subbag or equal', which has sort
-///     S -> S -> Bool, where S stands for SortExpr
-ATermAppl gsMakeOpIdSubBagEq(ATermAppl SortExpr);
-
-///\pre SortExpr is a sort expression
-///\return Operation identifier for 'proper subbag', which has sort S -> S -> Bool,
-///     where S stands for SortExpr
-ATermAppl gsMakeOpIdSubBag(ATermAppl SortExpr);
 
 ///\pre SortExpr is a sort expression
 ///\return Operation identifier for 'bag union', which has sort S -> S -> S,
