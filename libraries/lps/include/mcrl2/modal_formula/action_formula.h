@@ -42,16 +42,22 @@ namespace modal {
 class action_formula: public atermpp::aterm_appl
 {
   public:
+
+    /// \brief Constructor
     action_formula()
       : atermpp::aterm_appl(mcrl2::core::detail::constructActFrm())
     {}
 
+    /// \brief Constructor
+    /// \param t A term
     action_formula(ATermAppl t)
       : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
+    /// \brief Constructor
+    /// \param t A term
     action_formula(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {

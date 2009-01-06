@@ -40,7 +40,6 @@ class term_appl_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// \cond INTERNAL_DOCS
     /// \brief Equality check
     /// \param other An iterator
     /// \return True if the iterators are equal
@@ -61,7 +60,6 @@ class term_appl_iterator: public boost::iterator_facade<
     /// \brief Decrements the iterator
     void decrement()
     { m_term--; }
-    /// \endcond
 
     ATerm* m_term;
 };

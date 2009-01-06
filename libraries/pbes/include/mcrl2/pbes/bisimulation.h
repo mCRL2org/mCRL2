@@ -124,7 +124,7 @@ class bisimulation_algorithm
       }
     }
 
-    /// \cond INTERNAL_DOCS
+  private:
     /// \brief Check function used for debugging.
     /// \param expr A PBES expression
     /// \param p A linear process
@@ -149,7 +149,6 @@ class bisimulation_algorithm
         }
       }
     }
-    /// \endcond
 
 public:
     /// \brief Creates a name for the propositional variable Xpq
@@ -633,9 +632,10 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
+    /// \param d A sequence of data expressions
+    /// \param d1 A sequence of data expressions
     /// \return The function result
-    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i,
-                           data_expression_list d, data_expression_list d1) const
+    pbes_expression close2(const linear_process& p, const linear_process& q, my_iterator i, data_expression_list d, data_expression_list d1) const
     {
       using namespace pbes_expr_optimized;
 

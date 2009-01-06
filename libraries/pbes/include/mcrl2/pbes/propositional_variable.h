@@ -32,7 +32,10 @@ namespace pbes_system {
 class propositional_variable: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The name of the propositional variable
     core::identifier_string m_name;
+
+    /// \brief The parameters of the propositional variable
     data::data_variable_list m_parameters;
 
   public:
@@ -104,7 +107,10 @@ bool is_propositional_variable(atermpp::aterm_appl t)
 class propositional_variable_instantiation: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The name of the propositional variable
     core::identifier_string m_name;
+
+    /// \brief The parameters of the propositional variable
     data::data_expression_list m_parameters;
 
   public:

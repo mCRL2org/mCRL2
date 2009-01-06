@@ -81,6 +81,7 @@ class pbes_parelm_algorithm
     }
 
     /// \cond INTERNAL_DOCS
+    
     /// \brief Prints a container of terms to standard error
     /// \param v A container
     /// \param message A string
@@ -104,8 +105,11 @@ class pbes_parelm_algorithm
       std::cerr << std::endl;
     }
 
-    /// \brief Prints a container to standard error
-    /// \param v A container
+    /// \brief FUNCTION_DESCRIPTION
+    // \brief Prints a container to standard error
+    // \param v A container
+    // \param message A string
+    /// \param v PARAM_DESCRIPTION
     /// \param message A string
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
@@ -131,6 +135,7 @@ class pbes_parelm_algorithm
       }
       std::cerr << std::endl;
     }
+
     /// \endcond
     
     /// \brief Finds the predicate variable to which the data parameter with the given index belongs.

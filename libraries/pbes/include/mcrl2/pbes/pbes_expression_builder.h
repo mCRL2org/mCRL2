@@ -35,10 +35,19 @@ namespace pbes_system {
 template <typename Term, typename Arg = void>
 struct pbes_expression_builder
 {
+  /// \brief The type of the additional argument for the recursion
   typedef Arg argument_type;
+
+  /// \brief The term type
   typedef typename core::term_traits<Term>::term_type term_type;
+
+  /// \brief The data term type
   typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+  /// \brief The variable sequence type
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+
+  /// \brief The propositional variable instantiation type
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
   /// \brief Returns true if the term is not equal to term_type().
@@ -256,10 +265,19 @@ std::cerr << "<visit result>" << tr::pp(result) << std::endl;
 template <typename Term>
 struct pbes_expression_builder<Term, void>
 {
+  /// \brief The type of the additional argument for the recursion
   typedef void argument_type;
+
+  /// \brief The term type
   typedef typename core::term_traits<Term>::term_type term_type;
+
+  /// \brief The data term type
   typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+  /// \brief The variable sequence type
   typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+
+  /// \brief The propositional variable instantiation type
   typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
 
   /// \brief Returns true if the term is not equal to term_type().

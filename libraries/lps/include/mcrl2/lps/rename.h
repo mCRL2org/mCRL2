@@ -31,6 +31,7 @@ namespace mcrl2 {
 namespace lps {
 
 /// \cond INTERNAL_DOCS
+//
 /// Generates a renaming of process parameters of the process p. The parameters are
 /// renamed according to the given identifier generator, and well typedness constraints
 /// are taken into account. The result consists of two vectors (src, dest) that specify

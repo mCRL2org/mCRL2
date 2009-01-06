@@ -20,9 +20,9 @@ namespace mcrl2 {
   
 namespace core {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
-  /// \cond INTERNAL_DOCS
   /// \brief Assignment function object
   struct foreach_sequence_assign
   {
@@ -58,9 +58,9 @@ namespace detail {
       }
     }
   }
-  /// \endcond
 
 } // namespace detail
+/// \endcond
 
 /// \brief Algorithm for generating sequences.
 /// Given a sequence [X1, ..., Xn], where each element Xi is a sequence

@@ -31,16 +31,21 @@ namespace modal {
 class regular_formula: public atermpp::aterm_appl
 {
   public:
+    /// \brief Constructor
     regular_formula()
       : atermpp::aterm_appl(mcrl2::core::detail::constructRegFrm())
     {}
 
+    /// \brief Constructor
+    /// \param t A term
     regular_formula(ATermAppl t)
       : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
+    /// \brief Constructor
+    /// \param t A term
     regular_formula(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {

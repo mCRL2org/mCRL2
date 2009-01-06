@@ -37,6 +37,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
+//
 /// \brief Concatenates two sequences of PBES equations
 /// \param p A sequence of PBES equations
 /// \param q A sequence of PBES equations
@@ -48,7 +49,10 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
   result.insert(result.end(), q.begin(), q.end());
   return result;
 }
+/// \endcond
 
+/// \cond INTERNAL_DOCS
+//
 /// \brief Appends a PBES equation to a sequence of PBES equations
 /// \param p A sequence of PBES equations
 /// \param e A PBES equation
@@ -60,8 +64,11 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
   result.push_back(e);
   return result;
 }
+/// \endcond
 
+/// \cond INTERNAL_DOCS
 namespace detail {
+
 	/// \brief Negates a propositional variable
   struct propositional_variable_negator
   {
@@ -86,6 +93,7 @@ namespace detail {
       }
     }
   };
+
 } // namespace detail
 /// \endcond
 
@@ -98,10 +106,17 @@ class pbes_translate_algorithm
     class timed_action
     {
       protected:
-        lps::action_list     m_actions;
+        /// \brief The actions of the multi action
+        lps::action_list m_actions;
+          
+        /// \brief The time of the multi action
         data::data_expression m_time;
 
       public:
+        
+        /// \brief Constructor
+        /// \param actions A sequence of actions
+        /// \param time A data expression
         timed_action(lps::action_list actions, data::data_expression time)
           : m_actions(actions), m_time(time)
         {}

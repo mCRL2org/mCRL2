@@ -50,7 +50,6 @@ class term_list_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// \cond INTERNAL_DOCS
     /// \brief Equality operator
     /// \param other An iterator
     /// \return True if the iterators are equal
@@ -67,7 +66,6 @@ class term_list_iterator: public boost::iterator_facade<
     /// \brief Increments the iterator
     void increment()
     { m_list = ATgetNext(m_list); }
-    /// \endcond
 
     ATermList m_list;
 };

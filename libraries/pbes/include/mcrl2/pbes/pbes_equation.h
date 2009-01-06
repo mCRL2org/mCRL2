@@ -28,9 +28,15 @@ namespace pbes_system {
 class pbes_equation: public atermpp::aterm_appl
 {
   protected:
-    fixpoint_symbol        m_symbol;
+
+    /// \brief The fixpoint symbol of the equation
+    fixpoint_symbol m_symbol;
+
+    /// \brief The variable on the left hand side of the equation
     propositional_variable m_variable;
-    pbes_expression        m_formula;  // the right hand side
+
+    /// \brief The expression on the right hand side of the equation
+    pbes_expression m_formula;
 
   public:
     /// \brief The expression type of the equation.

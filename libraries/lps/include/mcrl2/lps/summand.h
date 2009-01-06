@@ -41,11 +41,24 @@ namespace lps {
 class summand: public atermpp::aterm_appl
 {
   protected:
-    data::data_variable_list   m_summation_variables;
-    data::data_expression      m_condition;
-    bool                 m_delta;         // m_delta == true represents no multi-action
-    action_list          m_actions;
-    data::data_expression      m_time;          // m_time == data::data_expression() represents no time available
+    /// \brief The summation variables of the summand
+    data::data_variable_list m_summation_variables;
+    
+    /// \brief The condition of the summand
+    data::data_expression m_condition;
+
+    /// \brief If m_delta is true the summand is a delta summand
+    bool m_delta;
+    
+    /// \brief The actions of the summand
+    action_list m_actions;
+
+    /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
+    /// the summand has no time.
+    data::data_expression m_time; 
+
+    /// \brief The assignments of the summand. These assignments are an encoding of
+    /// the 'next states' of the summand.
     data::data_assignment_list m_assignments;
 
   public:

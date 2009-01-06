@@ -24,15 +24,24 @@ namespace modal {
 
 namespace state_frm {
 
+/// \brief Visitor class for finding free variables in a state formula
 struct free_variable_visitor: public state_formula_visitor
 {
+  /// \brief A sequence of bound variables
   data::data_variable_list bound_variables;
+
+  /// \brief A stack with quantifier variables
   std::vector<data::data_variable_list> quantifier_stack;
+
+  /// \brief Contains the solution
   std::set<data::data_variable> result;
 
+  /// \brief Constructor
   free_variable_visitor()
   {}
 
+  /// \brief Constructor
+  /// \param bound_variables_ A sequence of data variables
   free_variable_visitor(data::data_variable_list bound_variables_)
     : bound_variables(bound_variables_)
   {}

@@ -27,9 +27,14 @@ namespace modal {
 template <typename IdentifierGenerator>
 struct state_formula_predicate_variable_rename_builder: public state_formula_builder
 {
+  /// \brief An identifier generator
   IdentifierGenerator& generator;
-  std::deque<std::pair<core::identifier_string, core::identifier_string> > replacements; // may also contain pairs with identical values
 
+  /// \brief A stack of replacements. It may contain pairs with identical values.
+  std::deque<std::pair<core::identifier_string, core::identifier_string> > replacements;
+
+  /// \brief Constructor
+  /// \param generator A generator for fresh identifiers
   state_formula_predicate_variable_rename_builder(IdentifierGenerator& generator)
     : generator(generator)
   {}

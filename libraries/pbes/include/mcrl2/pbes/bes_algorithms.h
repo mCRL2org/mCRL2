@@ -135,6 +135,7 @@ pbes<> pbes2bes(const pbes<>& p, bool lazy = false)
 
 namespace bes {
 
+  /// \brief Solver for boolean equations.
   template <typename BesRewriter>
   struct bes_equation_solver
   {

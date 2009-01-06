@@ -102,9 +102,16 @@ namespace lps {
   class action_rename_rule: public atermpp::aterm_appl
   {
     protected:
+      /// \brief The data variables of the rule
       data::data_variable_list m_variables;
+        
+      /// \brief The condition of the rule
       data::data_expression    m_condition;
+
+      /// \brief The left hand side of the rule
       action                   m_lhs;
+
+      /// \brief right hand side of the rule
       action_rename_rule_rhs   m_rhs;
 
       /// \brief Initialize the action rename rule with an aterm_appl.
@@ -170,8 +177,14 @@ namespace lps {
   class action_rename_specification: public atermpp::aterm_appl
   {
     protected:
+      
+      /// \brief The data specification of the action rename specification
       data::data_specification m_data;
+
+      /// \brief The action labels of the action rename specification
       action_label_list        m_action_labels;
+
+      /// \brief The action rename rules of the action rename specification
       action_rename_rule_list  m_rules;
 
       /// \brief Initialize the action_rename_specification with an aterm_appl.
@@ -363,7 +376,7 @@ namespace lps {
   /// \endcond
   
   /// \brief Parses an action rename specification.
-  /// \detail Parses an acion rename specification.
+  /// Parses an acion rename specification.
   /// If the action rename specification contains data types that are not
   /// present in the data specification of \p spec they are added to it.
   /// \param in An input stream
@@ -383,7 +396,6 @@ namespace lps {
 
 
 /// \brief  Rename the actions in a linear specification using a given action rename spec
-/// \detail Rename the actions in a linear specification using a given action rename spec.
 ///         Note that the rules are applied in the order they appear in the specification.
 ///         This yield quite elaborate conditions in the resulting lps, as a latter rule
 ///         can only be applied if an earlier rule is not applicable. Note also that 

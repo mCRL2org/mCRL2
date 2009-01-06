@@ -486,8 +486,10 @@ namespace state_frm
     assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
     return atermpp::arg1(t);
   }
-  
-  /// \internal
+
+  /// \cond INTERNAL_DOCS
+  //
+  /// \brief Function that determines if a state formula is time dependent
   struct is_timed_subterm
   {
     /// \brief Function call operator
@@ -498,6 +500,7 @@ namespace state_frm
       return is_delay_timed(t) || is_yaled_timed(t) || act_frm::is_at(t);
     }
   };
+  /// \endcond
 
 } // namespace state_frm
 

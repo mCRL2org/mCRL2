@@ -29,6 +29,7 @@ namespace pbes_system {
   class pbes_expression_with_variables: public pbes_expression
   {
     protected:
+      /// \brief The sequence of variables.
       data::data_variable_list m_variables;
 
     public:

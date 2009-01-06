@@ -24,6 +24,7 @@ namespace pbes_system {
   class pbes_expression_with_propositional_variables: public pbes_expression_with_variables
   {
     protected:
+      /// \brief The sequence of propositional variable instantiations.
       propositional_variable_instantiation_list m_propositional_variables;
 
     public:

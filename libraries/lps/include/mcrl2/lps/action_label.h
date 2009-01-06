@@ -29,7 +29,10 @@ namespace lps {
 class action_label: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The name of the label
     core::identifier_string m_name;
+
+    /// \brief The sorts of the label
     data::sort_expression_list m_sorts;
 
   public:

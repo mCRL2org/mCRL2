@@ -32,8 +32,13 @@ namespace bes {
 template <typename Term, typename Arg = void>
 struct boolean_expression_builder
 {
+  /// \brief The type of the additional argument for the recursion
   typedef Arg argument_type;
+
+  /// \brief The term type
   typedef typename core::term_traits<Term>::term_type term_type;
+
+  /// \brief The variable type
   typedef typename core::term_traits<Term>::variable_type variable_type;
 
   /// \brief Returns true if the term is not equal to term_type().
@@ -197,7 +202,10 @@ std::cerr << "<visit result>" << tr::pp(result) << std::endl;
 template <typename Term>
 struct boolean_expression_builder<Term, void>
 {
+  /// \brief The type of the additional argument for the recursion
   typedef void argument_type;
+
+  /// \brief The term type
   typedef typename core::term_traits<Term>::term_type term_type;
 
   /// \brief Returns true if the term is not equal to term_type().
@@ -279,6 +287,7 @@ struct boolean_expression_builder<Term, void>
   /// \return The visit result
   term_type visit(term_type e)
   {
+  /// \brief The term traits type
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG

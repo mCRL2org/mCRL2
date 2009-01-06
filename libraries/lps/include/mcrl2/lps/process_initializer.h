@@ -31,7 +31,10 @@ namespace lps {
 class process_initializer: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The free variables of the initializer
     data::data_variable_list   m_free_variables;
+      
+    /// \brief The assignments of the initializer
     data::data_assignment_list m_assignments;
 
   public:

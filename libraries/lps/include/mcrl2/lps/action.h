@@ -27,7 +27,11 @@ namespace lps {
 class action: public atermpp::aterm_appl
 {
   protected:
+    
+    /// \brief The label of the action
     action_label m_label;
+
+    /// \brief The arguments of the action
     data::data_expression_list m_arguments;
 
   public:

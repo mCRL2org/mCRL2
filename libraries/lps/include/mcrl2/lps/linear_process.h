@@ -59,9 +59,14 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
 class linear_process: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The free variables of the process
     data::data_variable_list m_free_variables;
+
+    /// \brief The process parameters of the process
     data::data_variable_list m_process_parameters;
-    summand_list       m_summands;
+
+    /// \brief The summands of the process
+    summand_list m_summands;
 
   public:
     /// \brief Constructor.

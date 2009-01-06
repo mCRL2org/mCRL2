@@ -69,16 +69,12 @@ namespace data {
       };
 
       /// \brief Constructor.
-      /// \param d A data specification.
-      /// \param s A rewriter strategy.
       /// \param r A rewriter
       basic_rewriter(Rewriter* r)
         : m_rewriter(r)
       { }
 
       /// \brief Constructor.
-      /// \param d A data specification.
-      /// \param s A rewriter strategy.
       /// \param r A rewriter
       basic_rewriter(boost::shared_ptr<Rewriter>& r)
       	: m_rewriter(r)

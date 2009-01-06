@@ -19,7 +19,8 @@ namespace mcrl2 {
 namespace modal {
 
 /// \cond INTERNAL_DOCS
-/// Puts a logical not around state variables named X
+//
+/// \brief Puts a logical not around state variables named X
 struct state_variable_negation
 {
   core::identifier_string X;

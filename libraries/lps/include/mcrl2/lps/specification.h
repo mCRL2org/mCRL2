@@ -53,10 +53,17 @@ namespace lps {
 class specification: public atermpp::aterm_appl
 {
   protected:
-    data::data_specification   m_data;
-    action_label_list    m_action_labels;
-    linear_process       m_process;
-    process_initializer  m_initial_process;
+    /// \brief The data specification of the specification
+    data::data_specification m_data;
+
+    /// \brief The action specification of the specification
+    action_label_list m_action_labels;
+
+    /// \brief The linear process of the specification
+    linear_process m_process;
+
+    /// \brief The initial state of the specification
+    process_initializer m_initial_process;
 
     /// \brief Initializes the specification with an ATerm.
     /// \param t A term

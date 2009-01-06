@@ -52,17 +52,19 @@ namespace pbes_system {
 using mcrl2::core::pp;
 
 /// \cond INTERNAL_DOCS
-/// \brief Normalizes a PBES equation
-struct normalize_pbes_equation
-{
-  /// \brief Function call operator
-  /// \param e A PBES equation
-  /// \return The function result
-  pbes_equation operator()(const pbes_equation& e) const
+
+  /// \brief Normalizes a PBES equation
+  struct normalize_pbes_equation
   {
-    return normalize(e);
-  }
-};
+    /// \brief Function call operator
+    /// \param e A PBES equation
+    /// \return The function result
+    pbes_equation operator()(const pbes_equation& e) const
+    {
+      return normalize(e);
+    }
+  };
+
 /// \endcond
 
 /// \brief Computes the free variables that occur in the sequence [first, last) of pbes equations.
@@ -436,7 +438,6 @@ class pbes
 
     /// \brief Returns the set of binding variables of the pbes.
     /// This is the set variables that occur on the left hand side of an equation.
-    /// \param The binding variables of the pbes
     /// \return The set of binding variables of the pbes.
     atermpp::set<propositional_variable> binding_variables() const
     {

@@ -58,6 +58,8 @@ namespace pbes_system {
   class simplifying_rewriter
   {
     protected:
+      
+      /// \brief The data rewriter
       DataRewriter m_rewriter;
 
     public:

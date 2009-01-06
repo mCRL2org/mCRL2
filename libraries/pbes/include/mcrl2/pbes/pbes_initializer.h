@@ -30,7 +30,10 @@ namespace pbes_system {
 class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The free variables of the PBES initializer
     data::data_variable_list   m_free_variables;
+
+    /// \brief The value of the PBES initializer
     propositional_variable_instantiation m_variable;
 
   public:

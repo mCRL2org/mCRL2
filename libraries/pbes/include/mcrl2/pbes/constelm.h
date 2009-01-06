@@ -328,17 +328,40 @@ namespace detail {
   class pbes_constelm_algorithm
   {
     public:
+      /// \brief The term type
       typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The variable type
       typedef typename core::term_traits<Term>::variable_type variable_type;
+
+      /// \brief The variable sequence type
       typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+
+      /// \brief The data term type
       typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+      /// \brief The data term sequence type
       typedef typename core::term_traits<Term>::data_term_sequence_type data_term_sequence_type;
+
+      /// \brief The string type
       typedef typename core::term_traits<Term>::string_type string_type;
+
+      /// \brief The propositional variable declaration type
       typedef typename core::term_traits<Term>::propositional_variable_decl_type propositional_variable_decl_type;
+
+      /// \brief The propositional variable instantiation type
       typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
+
+      /// \brief The visitor type for edge conditions
       typedef typename detail::edge_condition_visitor<Term> edge_condition_visitor;
+
+      /// \brief The edge condition type
       typedef typename edge_condition_visitor::edge_condition edge_condition;
+
+      /// \brief The edge condition map type
       typedef typename edge_condition_visitor::condition_map condition_map;
+
+      /// \brief The term traits
       typedef typename core::term_traits<Term> tr;
 
     protected:
@@ -351,18 +374,24 @@ namespace detail {
       /// vertex.
       struct edge
       {
+        /// \brief The propositional variable at the source of the edge
         propositional_variable_decl_type left;
+
+        /// \brief The propositional variable at the target of the edge
         propositional_variable_type right;
+
+        /// \brief The condition of the edge
         term_type condition;
 
+        /// \brief Constructor
         edge()
         {}
 
-        edge(
-          propositional_variable_decl_type l,
-          propositional_variable_type r,
-          term_type c = pbes_expr::true_()
-        )
+        /// \brief Constructor
+        /// \param l A propositional variable declaration
+        /// \param r A propositional variable
+        /// \param c A term
+        edge(propositional_variable_decl_type l, propositional_variable_type r, term_type c = pbes_expr::true_())
          : left(l), right(r), condition(c)
         {}
 
@@ -379,6 +408,7 @@ namespace detail {
       /// \brief Represents a vertex of the dependency graph.
       struct vertex
       {
+        /// \brief The propositional variable that corresponds to the vertex
         propositional_variable_decl_type variable;
 
         /// \brief Maps data variables to data expressions. If the right hand side is a data
@@ -387,9 +417,12 @@ namespace detail {
         /// that is under consideration.
         constraint_map constraints;
 
+        /// \brief Constructor
         vertex()
         {}
 
+        /// \brief Constructor
+        /// \param v A propositional variable declaration
         vertex(propositional_variable_decl_type v)
           : variable(v)
         {}
@@ -520,24 +553,27 @@ namespace detail {
         }
       };
 
+      /// \brief The storage type for vertices
       typedef std::map<string_type, vertex> vertex_map;
+
+      /// \brief The storage type for edges
       typedef std::map<string_type, std::vector<edge> > edge_map;
 
-      // Compares data expressions for equality.
+      /// \brief Compares data expressions for equality.
       DataRewriter m_data_rewriter;
 
-      // Compares data expressions for equality.
+      /// \brief Compares data expressions for equality.
       PbesRewriter m_pbes_rewriter;
 
-      // The vertices of the dependency graph. They are stored in a map, to
-      // support searching for a vertex.
+      /// \brief The vertices of the dependency graph. They are stored in a map, to
+      /// support searching for a vertex.
       vertex_map m_vertices;
 
-      // The edges of the dependency graph. They are stored in a map, to
-      // easily access all out-edges corresponding to a particular vertex.
+      /// \brief The edges of the dependency graph. They are stored in a map, to
+      /// easily access all out-edges corresponding to a particular vertex.
       edge_map m_edges;
 
-      // Store the removed variables.
+      /// \brief Store the removed variables.
       std::map<propositional_variable_decl_type, std::set<variable_type> > m_removed;
 
       /// \brief Prints the vertices of the dependency graph.
