@@ -16,7 +16,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <boost/bind.hpp>
-#include <aterm2.h>
+#include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
