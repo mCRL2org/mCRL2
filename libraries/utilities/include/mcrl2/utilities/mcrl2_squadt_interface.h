@@ -93,7 +93,7 @@ namespace mcrl2 {
             return true;
           }
 
-          void initalise() {
+          void initialise() {
             mcrl2::core::gsSetCustomMessageHandler(relay_message);
           }
 
