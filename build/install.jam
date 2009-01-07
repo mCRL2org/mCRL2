@@ -15,6 +15,9 @@ import project ;
 import property ;
 
 # Feature for building/installing optional tools/libraries
+feature.feature regression-testing : no yes : incidental ;
+
+# Feature for building/installing optional tools/libraries
 feature.feature install : no yes : incidental ;
 
 # Feature that specifies an alternative name for the install rule
@@ -328,8 +331,12 @@ rule get-boost-path {
 }
 
 rule platform-configuration ( properties * ) {
-  local requirements = <dll-path>$(libdir) ; # dll-path required for rpath-linking
-  local pch-path     = $(build-root)/precompile ;
+  local requirements ;
+  local pch-path = $(build-root)/precompile ;
+
+  if <regression-testing>no in $(properties) {
+    requirements = <dll-path>$(libdir) ; # dll-path required for rpath-linking
+  }
 
   if <toolset>gcc in $(properties) { # GCC
     if <pch>on in $(properties) {
