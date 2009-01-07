@@ -97,8 +97,8 @@ namespace grape
     {
       private:
         unsigned int  m_trans;      /**< The identifier of the transition to be changed. */
-        wxString      m_old_text;   /**< A string containing the previous text of the label. */
-        wxString      m_new_text;   /**< A string containing the new text of the label. */
+        label         m_old_label;  /**< Containing the previous label of the transition. */
+        label         m_new_label;  /**< Containing the new label of the transition. */
         bool          m_pressed_ok; /**< A flag indicating whether the user has confirmed changing the label. */
       public:
 

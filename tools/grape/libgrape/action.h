@@ -50,6 +50,12 @@ namespace grape
         ~action( void );
 
         /**
+         * Text retrieval function.
+         * @return Returns the text of the action.
+         */
+        wxString get_text( void );
+
+        /**
          * Name retrieval function.
          * @return Returns the name of the action.
          */

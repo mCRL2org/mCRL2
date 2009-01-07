@@ -26,7 +26,7 @@
 // mCRL2 core libraries
 #include "mcrl2/core/detail/struct.h"                      // ATerm building blocks.
 #include "mcrl2/core/messaging.h"                   // Library for messaging.
-//#include "mcrl2/core/print.h"                       // Printing library.    <-- we need Boost to enable this, unfortunately :(...
+#include "mcrl2/core/print.h"                       // Printing library.    <-- we need Boost to enable this, unfortunately :(...
 
 // mCRL2 core/detail libraries
 #include "mcrl2/core/parse.h"                // Parse library.
@@ -356,10 +356,11 @@ wxString infer_state_name(wxXmlNode *p_process_diagram, wxString &p_id, bool &p_
  * @param p_diagram_name The name of the process diagram that contains the transition to be parsed.
  * @param p_preamble_parameter_decls The preamble parameter declarations of the process diagram that contains the transition to be parsed.
  * @param p_preamble_local_var_decls The preamble local variable declarations of the process diagram that contains the transition to be parse.
+ * @param datatype_spec The datatype specification.
  * @pre p_process_diagram is a valid pointer to an XML process diagram, p_transition is a valid pointer to an XML transition, p_declaration is a valid reference to an mCRL2 process definition, p_diagram_name is a valid process diagram name, p_preamble_parameter_decls is a valid reference to a parameter declaration and p_preamble_local_var_decls is a valid reference to a local variable declaration.
  * @post The transition is parsed and the results are appended to p_declaration or error messages are produced.
  */
-void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxString &p_declaration, bool p_alternative, bool p_is_terminating, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls)
+void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxString &p_declaration, bool p_alternative, bool p_is_terminating, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   wxString state_from, state_to, id_from, id_to;
   bool is_ref_from, is_ref_to;
@@ -389,23 +390,14 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
 
   // load label
-  wxXmlNode *t_label = get_child(p_transition, _T("label"));
-  if(t_label == 0)
-  {
-    // ERROR: <transition> does not contain <label>
-    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-         << " has a transition without associated transition label." << endl;
-    throw CONVERSION_ERROR;
-    return;
-  }
   // t_label = <label>
   label trans_label;
-  if(!trans_label.set_text(t_label->GetNodeContent()))
+  try
   {
-    // ERROR: transition label is not valid
-    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-         << " has an invalid transition label: " << trans_label.get_text().ToAscii() << endl;
-    throw CONVERSION_ERROR;
+    trans_label = parse_transition_label(p_transition, p_preamble_parameter_decls, p_preamble_local_var_decls, diagram_name, datatype_spec);
+  }
+  catch(...)
+  {
     return;
   }
   wxString variables = trans_label.get_declarations_text();
@@ -833,7 +825,7 @@ wxString process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p
             break;
           }
 
-          parse_transition(p_process_diagram, child_trans, decl_trans, !first_line, true, diagram_name, p_preamble_parameter_decls, p_preamble_local_var_decls);
+          parse_transition(p_process_diagram, child_trans, decl_trans, !first_line, true, diagram_name, p_preamble_parameter_decls, p_preamble_local_var_decls, datatype_spec);
           if(first_line)
           {
             first_line = false;
@@ -853,7 +845,7 @@ wxString process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p
             break;
           }
 
-          parse_transition(p_process_diagram, child_trans, decl_trans, !first_line, false, diagram_name, p_preamble_parameter_decls, p_preamble_local_var_decls);
+          parse_transition(p_process_diagram, child_trans, decl_trans, !first_line, false, diagram_name, p_preamble_parameter_decls, p_preamble_local_var_decls, datatype_spec);
           if(first_line)
           {
             first_line = false;
@@ -2599,17 +2591,17 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
 
 void grape::mcrl2gen::test_export(void)
 {
-    wxXmlDocument doc;
-    doc.Load(_T("testprocessPQAB.xml"));
-    if(!doc.IsOk())
-    {
-      cerr << "loading failed." << endl;
-      return;
-    }
+  wxXmlDocument doc;
+  doc.Load(_T("testprocessPQAB.xml"));
+  if(!doc.IsOk())
+  {
+    cerr << "loading failed." << endl;
+    return;
+  }
 
-    wxString diag_id = _T("50");
-    wxString fname = _T("test.mcrl2");
-    export_architecture_diagram_to_mcrl2(doc, fname, diag_id, true);
+  wxString diag_id = _T("50");
+  wxString fname = _T("test.mcrl2");
+  export_architecture_diagram_to_mcrl2(doc, fname, diag_id, true);
 }
 
 /**
@@ -2663,33 +2655,75 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
   }
 
   // determine occuring actions
-  list_of_action act = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
+  list_of_action acts = process_diagram_mcrl2_action(diagram, preamble_parameter_decls, preamble_local_var_decls, datatype_spec);
   if(p_verbose)
   {
     cerr << "+actions:" << endl;
-    for(unsigned int i=0; i<act.GetCount(); ++i)
+    for(unsigned int i=0; i<acts.GetCount(); ++i)
     {
-      cerr << " action: " << act[i].get_name().ToAscii()
-//TODO           << " type: " << act[i].get_type().ToAscii() << endl;
-           << endl;
-    }
+      cerr << " action: " << acts[i].get_name().ToAscii();
+      wxString action_text = wxEmptyString;
+      for(unsigned int j=0; j<acts[i].get_parameters().GetCount(); ++j)
+      {
+        if (!acts[i].get_parameters()[j].get_type().IsEmpty())
+        {
+          action_text += acts[i].get_parameters()[j].get_type();
+          if (j != acts[i].get_parameters().GetCount()-1)
+          {
+            action_text += _T(" # ");
+          }
+        }
+      }
+      if (!action_text.IsEmpty())
+      {
+        cerr << " type: " << action_text.ToAscii();
+      }
+      cerr << endl;
+	  }
   }
-  for(unsigned int i=0; i<act.GetCount(); ++i)
+  for(unsigned int i=0; i<acts.GetCount(); ++i)
   {
     bool found = false;
     for(unsigned int j=0; j<p_actions.GetCount(); ++j)
     {
-      if((p_actions[j].get_name() == act[i].get_name()) &&
-//TODO         (p_actions[j].get_type() == act[i].get_type()))
-         true)
-      {
-        found = true;
+	    if ( acts[i].get_name() == p_actions[j].get_name() )
+	    {
+        cerr << found << ": " << acts[i].get_name().ToAscii() << endl;
+	      if ( acts[i].get_parameters().GetCount() == p_actions[j].get_parameters().GetCount() )
+	      {
+          cerr << found << ": " << acts[i].get_parameters().GetCount() << " parameters" << endl;
+		      if ( acts[i].get_parameters().GetCount() == 0 )
+		      {
+		        found = true;
+		      }
+		      else
+		      {
+		        list_of_dataexpression acts_params = acts[i].get_parameters();
+		        list_of_dataexpression actions_params = p_actions[j].get_parameters();
+            for ( unsigned int k = 0; k < acts_params.GetCount(); ++k )
+		        {
+              if (!found)
+              {
+                found = acts_params[k].get_type() == actions_params[k].get_type();
+              }
+              cerr << found << ": " << acts_params[k].get_type().ToAscii() << "==" << actions_params[k].get_type().ToAscii() << endl;
+		        }
+		      }
+	      }
+	      else
+	      {
+		      found = false;
+	      }
       }
+	    else if (!found)
+	    {
+	      found = false;
+	    }
     }
-
-    if(!found)
+    cerr << found << endl;
+    if (!found)
     {
-      p_actions.Add(act[i]);
+	    p_actions.Add(acts[i]);
     }
   }
 
@@ -2819,10 +2853,25 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     {
       specification += _T(" ");
       specification += actions[i].get_name();
-//TODO      if(actions[i].get_type() != wxEmptyString)
-//      {
-//        specification += _T(": ") + actions[i].get_type();
-//      }
+      wxString action_text = wxEmptyString;
+      if(actions[i].get_parameters().GetCount() != 0)
+      {
+        for(unsigned int j=0; j<actions[i].get_parameters().GetCount(); ++j)
+        {
+          if (!actions[i].get_parameters()[j].get_type().IsEmpty())
+          {
+            action_text += actions[i].get_parameters()[j].get_type();
+            if (j != actions[i].get_parameters().GetCount()-1)
+            {
+              action_text += _T(" # ");
+            }
+          }
+        }
+      }
+      if (!action_text.IsEmpty())
+      {
+        specification += _T(": ") + action_text;
+      }
       specification += _T(";\n");
     }
     specification += _T("\n");
@@ -2833,8 +2882,8 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     }
     specification += init_spec;
 
-    //cerr << "+spec:" << endl;
-    //cerr << specification.ToAscii() << endl;
+    cerr << "+spec:" << endl;
+    cerr << specification.ToAscii() << endl;
 
     // try to parse constructed mCRL2 specification
     string mcrl2_specification = string(specification.mb_str());
@@ -3079,10 +3128,25 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     {
       specification += _T(" ");
       specification += actions[i].get_name();
-//TODO      if(actions[i].get_type() != wxEmptyString)
-//      {
-//        specification += _T(": ") + actions[i].get_type();
-//      }
+      wxString action_text = wxEmptyString;
+      if(actions[i].get_parameters().GetCount() != 0)
+      {
+        for(unsigned int j=0; j<actions[i].get_parameters().GetCount(); ++j)
+        {
+          if (!actions[i].get_parameters()[j].get_type().IsEmpty())
+          {
+            action_text += actions[i].get_parameters()[j].get_type();
+            if (j != actions[i].get_parameters().GetCount()-1)
+            {
+              action_text += _T(" # ");
+            }
+          }
+        }
+      }
+      if (!action_text.IsEmpty())
+      {
+        specification += _T(": ") + action_text;
+      }
       specification += _T(";\n");
     }
     specification += _T("\n");
@@ -3097,8 +3161,8 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     }
     specification += init_spec;
 
-//    cerr << "+spec:" << endl;
-//    cerr << specification.ToAscii() << endl;
+    cerr << "+spec:" << endl;
+    cerr << specification.ToAscii() << endl;
 
     // try to parse constructed mCRL2 specification
     string mcrl2_specification = string(specification.mb_str());

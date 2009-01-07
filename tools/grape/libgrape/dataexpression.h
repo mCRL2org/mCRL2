@@ -24,7 +24,7 @@ namespace grape
     class dataexpression
     {
       protected:
-        wxString  m_expression;       /**< The data expression's text */
+        wxString        m_expression;     /**< The data expression's text */
         sortexpression  m_sortexpression; /**< The data expression's sort */
       private:
       public:
@@ -55,9 +55,21 @@ namespace grape
 
         /**
          * Data expression retrieval function
-         * @return The dataexpression
+         * @return The data expression
          */
         wxString get_expression( void ) const;
+
+        /**
+         * Data expression type assignment function
+         * @param p_type The new data expression type
+         */
+        void set_type( const wxString &p_type );
+
+        /**
+         * Data expression type retreival function
+         * @return The data expression type
+         */
+        wxString get_type( void ) const;
     };
 
     /**

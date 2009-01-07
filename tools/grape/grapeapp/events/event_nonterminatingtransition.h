@@ -23,10 +23,10 @@ namespace grape
     class grape_event_add_nonterminating_transition : public grape_event_base
     {
       private:
-        unsigned int       m_ntt; /**< The identifier of the terminating transition that will be created. */
-        unsigned int       m_beginstate; /**< The identifier of the beginstate of the terminating transition. */
-        unsigned int       m_endstate; /**< The identifier of the endstate of the terminating transition. */
-        unsigned int       m_in_diagram; /**< The identifier of the transition will have been added to. */
+        unsigned int       m_ntt;         /**< The identifier of the terminating transition that will be created. */
+        unsigned int       m_beginstate;  /**< The identifier of the beginstate of the terminating transition. */
+        unsigned int       m_endstate;    /**< The identifier of the endstate of the terminating transition. */
+        unsigned int       m_in_diagram;  /**< The identifier of the transition will have been added to. */
       public:
         /**
          * Initializes the event.
@@ -61,15 +61,15 @@ namespace grape
     class grape_event_remove_nonterminating_transition : public grape_event_base
     {
       private:
-        unsigned int                m_ntt;       /**< The identifier of the transition. */
-        wxString            m_label;        /**< A backup of the transition label text. */
-        int                 m_beginstate;  /**< The identifier of the beginstate of the transition. */
-        int                 m_endstate;    /**<  The identifier of the endstate of the transition. */
+        unsigned int        m_ntt;          /**< The identifier of the transition. */
+        label               m_label;        /**< A backup of the transition label. */
+        int                 m_beginstate;   /**< The identifier of the beginstate of the transition. */
+        int                 m_endstate;     /**< The identifier of the endstate of the transition. */
         coordinate          m_coordinate;   /**< Backup of the coordinate of the transition. */
         float               m_width;        /**< Backup of the width of the transition. */
         float               m_height;       /**< Backup of the height of the transition. */
         wxArrayLong         m_comments;     /**< The identifiers of comments attached to the transition. */
-        unsigned int                m_in_diagram;  /**< The identifier of the diagram the transition is in. */
+        unsigned int        m_in_diagram;   /**< The identifier of the diagram the transition is in. */
       public:
 
         /**
@@ -105,9 +105,9 @@ namespace grape
     class grape_event_attach_nonterminating_transition_endstate : public grape_event_base
     {
       private:
-        unsigned int    m_ntt; /**< Identifier of the to be attached nonterminating transition. */
-        unsigned int    m_state; /**< Identifier of the state the nonterminating transition is to be attached to. */
-        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_ntt;      /**< Identifier of the to be attached nonterminating transition. */
+        unsigned int    m_state;    /**< Identifier of the state the nonterminating transition is to be attached to. */
+        unsigned int    m_diagram;  /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.
@@ -142,9 +142,9 @@ namespace grape
     class grape_event_detach_nonterminating_transition_endstate : public grape_event_base
     {
       private:
-        unsigned int    m_ntt; /**< Identifier of the to be detached nonterminating transition. */
-        int     m_state; /**< Identifier of the state the nonterminating transition is to be detached from. */
-        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_ntt;      /**< Identifier of the to be detached nonterminating transition. */
+        int             m_state;    /**< Identifier of the state the nonterminating transition is to be detached from. */
+        unsigned int    m_diagram;  /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.

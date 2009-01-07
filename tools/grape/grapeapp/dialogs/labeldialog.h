@@ -60,7 +60,7 @@ namespace grape
         * Constructor.
         * @param p_label A pointer to the label which is being editted.
         */
-        grape_label_dialog( const wxString &p_text );
+        grape_label_dialog( const label &p_label );
 
         /** Destructor. */
         ~grape_label_dialog();
@@ -105,7 +105,7 @@ namespace grape
          * @param p_label Shall contain the value of the label.
          * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
          */
-        bool show_modal( wxString &p_text );
+        bool show_modal( label &p_label );
         
         void update_preview();
     };

@@ -37,6 +37,16 @@ wxString dataexpression::get_expression( void ) const
   return m_expression;
 }
 
+void dataexpression::set_type( const wxString &p_type )
+{
+  m_sortexpression.set_expression( p_type );
+}
+
+wxString dataexpression::get_type( void ) const
+{
+  return m_sortexpression.get_expression();
+}
+
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY( list_of_dataexpression );

@@ -74,7 +74,7 @@ grape_event_remove_nonterminating_transition::grape_event_remove_nonterminating_
 : grape_event_base( p_main_frame, true, _T( "remove transition" ) )
 {
   m_ntt = p_ntt->get_id();
-  m_label = p_ntt->get_label()->get_text();
+  m_label = *p_ntt->get_label();
   compound_state* beginstate = p_ntt->get_beginstate();
   if ( beginstate != 0 )
   {
@@ -145,7 +145,7 @@ bool grape_event_remove_nonterminating_transition::Undo( void )
   }
 
   nonterminating_transition* new_ntt = dia_ptr->add_nonterminating_transition( m_ntt, beginstate, endstate);
-  new_ntt->get_label()->set_text( m_label );
+  new_ntt->set_label( m_label );
   new_ntt->set_width( m_width );
   new_ntt->set_height( m_height );
   new_ntt->set_coordinate( m_coordinate );

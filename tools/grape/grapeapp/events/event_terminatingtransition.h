@@ -23,10 +23,10 @@ namespace grape
     class grape_event_add_terminating_transition : public grape_event_base
     {
       private:
-        unsigned int              m_tt; /**< Identifier of the terminating transition that will be created. */
-        unsigned int              m_beginstate; /**< Identifier of the beginstate of the terminating transition. */
-        coordinate        m_coord; /**< The coordinate that was clicked, at which the terminating transition ends. */
-        unsigned int               m_in_diagram; /**< Identifier of the diagram the transition will have been added to. */
+        unsigned int      m_tt;         /**< Identifier of the terminating transition that will be created. */
+        unsigned int      m_beginstate; /**< Identifier of the beginstate of the terminating transition. */
+        coordinate        m_coord;      /**< The coordinate that was clicked, at which the terminating transition ends. */
+        unsigned int      m_in_diagram; /**< Identifier of the diagram the transition will have been added to. */
       public:
 
         /**
@@ -62,14 +62,14 @@ namespace grape
     class grape_event_remove_terminating_transition : public grape_event_base
     {
       private:
-        unsigned int                m_tt;      /**< Identifier of the to be deleted transition. */
-        wxString            m_label;        /**< A backup of the transition label text. */
-        int                 m_beginstate;  /**< Identifier of the beginstate of this transition. */
+        unsigned int        m_tt;           /**< Identifier of the to be deleted transition. */
+        label               m_label;        /**< A backup of the transition label. */
+        int                 m_beginstate;   /**< Identifier of the beginstate of this transition. */
         coordinate          m_coordinate;   /**< Backup of the coordinate of the transition. */
         float               m_width;        /**< Backup of the width of the transition. */
         float               m_height;       /**< Backup of the height of the transition. */
-        wxArrayLong         m_comments;      /**< Identifiers of the comments attached to the transition. */
-        unsigned int                m_in_diagram;  /**< Identifier of the diagram the transition is in. */
+        wxArrayLong         m_comments;     /**< Identifiers of the comments attached to the transition. */
+        unsigned int        m_in_diagram;   /**< Identifier of the diagram the transition is in. */
       public:
 
         /**

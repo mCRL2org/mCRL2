@@ -30,22 +30,12 @@ namespace grape
      */
     class label
     {
-      private:
-        bool              m_is_valid;     /**< @c true if the label's text is syntactically correct and processed successfully.*/
       protected:
-        wxString          m_text;         /**< The label's text 	m_declarations.[m_condition]m_actions@timestamp/varupdates */
         list_of_decl      m_declarations; /**< The label's declarations */
         dataexpression    m_condition;    /**< The label's condition */
         list_of_action    m_actions;      /**< The label's actions */
         dataexpression    m_timestamp;    /**< The label's timestamp */
         list_of_varupdate m_variable_updates; /**< The label's variable updates */
-
-        /**
-         * Processes the text supplied with set_text().
-         * Sets the several data expressions and variable updates.
-         * @post m_is_valid is set to @c true if m_text appeared to be valid, otherwise @c false
-         */
-        void process_text( void );
 
       public:
         /**
@@ -73,18 +63,15 @@ namespace grape
         wxString get_text( void ) const;
 
         /**
-         * Label text assignment function
-         * @param p_text The new text for the label
-         * @return @c true if the text was syntactically correct and processed successfully. @c false otherwise.
-         */
-        bool set_text( const wxString &p_text );
-
-        /**
          * Label actions retrieval function
          * @return the actions of the label
          */
         list_of_action &get_actions( void );
 
+        /**
+         * Label actions text retrieval function
+         * @return the text of the actions of the label
+         */
         wxString get_actions_text( void ) const;
 
         /**
@@ -93,6 +80,10 @@ namespace grape
          */
         list_of_decl &get_declarations( void );
 
+        /**
+         * Label declarations text retrieval function
+         * @return the text of the declarations of the label
+         */
         wxString get_declarations_text( void ) const;
 
         /**
@@ -107,25 +98,43 @@ namespace grape
          */
         list_of_varupdate &get_variable_updates( void );
 
+        /**
+         * Label variable updates text retrieval function
+         * @return the text of the variable updates of the label
+         */
         wxString get_variable_updates_text( void ) const;
 
         /**
-         * Label donditions retrieval function
+         * Label conditions retrieval function
          * @return the conditions of the label
          */
         wxString get_condition( void ) const;
 
-        void set_declarations( const list_of_decl &p_declarations );
-        void set_condition( const wxString &p_condition );
-        void set_actions( const list_of_action &p_actions );
-        void set_timestamp( const wxString &p_timestamp );
-        void set_variable_updates( const list_of_varupdate &p_variable_updates );
-
         /**
-         * Label has a valid text.
-         * @return @c true if the label has a valid text, otherwise @c false .
+         * Label declarations assignment function
+         * @param p_declarations The list of declarations
          */
-        bool has_valid_text() const;
+        void set_declarations( const list_of_decl &p_declarations );
+        /**
+         * Label condition assignment function
+         * @param p_condition The condition text
+         */
+        void set_condition( const wxString &p_condition );
+        /**
+         * Label actions assignment function
+         * @param p_actions The list of actions
+         */
+        void set_actions( const list_of_action &p_actions );
+        /**
+         * Label timestamp assignment function
+         * @param p_timestamp The timestamp text
+         */
+        void set_timestamp( const wxString &p_timestamp );
+        /**
+         * Label variable updates assignment function
+         * @param p_variable_updates The list of variable updates
+         */
+        void set_variable_updates( const list_of_varupdate &p_variable_updates );
     };
 
     /**

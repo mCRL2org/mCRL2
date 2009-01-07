@@ -29,6 +29,27 @@ action::~action(void)
   m_parameters.Clear();
 }
 
+wxString action::get_text( void )
+{
+  wxString result = wxEmptyString;
+  result += m_name;
+  int count = m_parameters.GetCount();
+  if ( count > 0 )
+  {
+    result += _T( "(" );
+    for ( int j = 0; j < count; ++j )
+    {
+      result += m_parameters.Item( j ).get_expression();
+      if ( j < count - 1 )
+      {
+        result += _T( "," );
+      }
+    }
+    result += _T( ")" );
+  }
+  return result;
+}
+
 wxString action::get_name( void )
 {
   return m_name;

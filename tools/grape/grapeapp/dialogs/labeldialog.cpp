@@ -17,11 +17,10 @@
 
 using namespace grape::grapeapp;
 
-grape_label_dialog::grape_label_dialog( const wxString &p_text )
+grape_label_dialog::grape_label_dialog( const label &p_label )
 : wxDialog( 0, wxID_ANY, _T( "Edit label" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
 {
-  m_label = new label();
-  m_label->set_text(p_text);   
+  m_label = new label( p_label );
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
   
   // define notebook
@@ -68,10 +67,11 @@ grape_label_dialog::grape_label_dialog( const wxString &p_text )
 
   // create multiaction grid
   m_multiaction_grid = new wxGrid( m_multiaction_page, GRAPE_MULTIACTION_GRID_TEXT, wxDefaultPosition, wxSize(570, 300));
-  m_multiaction_grid->CreateGrid( m_label->get_actions().GetCount()+1, 1 ); 
-  m_multiaction_grid->CreateGrid( 8, 1 );  
-  m_multiaction_grid->SetColSize( 0, 500 );
+  m_multiaction_grid->CreateGrid( m_label->get_actions().GetCount()+1, 2 ); 
+  m_multiaction_grid->SetColSize( 0, 250 );
+  m_multiaction_grid->SetColSize( 1, 250 );
   m_multiaction_grid->SetColLabelValue(0, _T("action"));
+  m_multiaction_grid->SetColLabelValue(1, _T("parameter 1"));
   m_multiaction_grid->SetRowLabelSize(30);
 
   // fill grid with mulit actions
@@ -79,7 +79,22 @@ grape_label_dialog::grape_label_dialog( const wxString &p_text )
   {     
     //fill cells
     action multi_action = m_label->get_actions().Item(i);
-    m_multiaction_grid->SetCellValue(i, 0, multi_action.get_name());      
+    m_multiaction_grid->SetCellValue(i, 0, multi_action.get_name());
+    list_of_dataexpression multi_action_params = multi_action.get_parameters();
+    int multiaction_count = multi_action_params.GetCount();
+    for ( int j = 0; j < multiaction_count; ++j )
+    {
+      if ( m_multiaction_grid->GetNumberCols() <= j+2 )
+      {
+        m_multiaction_grid->AppendCols();
+        wxString label_text = _T("parameter ");
+        label_text = label_text << j+2;
+        m_multiaction_grid->SetColLabelValue( j + 2, label_text );
+        m_multiaction_grid->SetColSize( j + 2, 250 );
+        m_multiaction_grid->ForceRefresh();
+      }
+      m_multiaction_grid->SetCellValue(i, j+1, multi_action_params[j].get_expression());
+    }
   }    
   
   // create timestamp grid
@@ -88,7 +103,6 @@ grape_label_dialog::grape_label_dialog( const wxString &p_text )
   // create variable updates grid
   m_var_updates_grid = new wxGrid( m_var_updates_page, GRAPE_VAR_UPDATES_GRID_TEXT, wxDefaultPosition, wxSize(570, 300));
   m_var_updates_grid->CreateGrid( m_label->get_variable_updates().GetCount()+1, 2 ); 
-  m_var_updates_grid->CreateGrid( 8, 2 );  
   m_var_updates_grid->SetColSize( 0, 250 );
   m_var_updates_grid->SetColSize( 1, 250 );
   m_var_updates_grid->SetColLabelValue(0, _T("variable"));
@@ -157,11 +171,26 @@ void grape_label_dialog::event_change_var_updates_text( wxGridEvent &p_event )
 void grape_label_dialog::event_change_multiaction_text( wxGridEvent &p_event )
 {
   int rows_count = m_multiaction_grid->GetNumberRows();
+  // add new cols
+  for ( int i = 0; i < rows_count; ++i )
+  {
+    int cols_count = m_multiaction_grid->GetNumberCols();
+    if ( !m_multiaction_grid->GetCellValue(i, cols_count-1).IsEmpty() )
+    {
+      m_multiaction_grid->AppendCols();
+      wxString label_text = _T("parameter ");
+      label_text = label_text << cols_count;
+      m_multiaction_grid->SetColLabelValue(cols_count, label_text);
+      m_multiaction_grid->SetColSize( cols_count, 250 );
+      m_multiaction_grid->ForceRefresh();
+      m_multiaction_grid->MoveCursorRight(false);
+    }
+  }
   // add new rows
-  while ( (m_multiaction_grid->GetCellValue(rows_count-1, 0) != _T("")) ) {
+  if ( !m_multiaction_grid->GetCellValue(rows_count-1, 0).IsEmpty() ) {
     m_multiaction_grid->AppendRows();
-    rows_count = m_multiaction_grid->GetNumberRows();
-  }  
+    m_multiaction_grid->ForceRefresh();
+  }
   update_preview();
 }
 
@@ -179,7 +208,7 @@ void grape_label_dialog::update_preview()
 {
   // fill label with variable declarations 
   m_label->get_declarations().Clear();
-  for ( int i = 0; i < m_var_decls_grid->GetNumberRows()+1; ++i )
+  for ( int i = 0; i < m_var_decls_grid->GetNumberRows(); ++i )
   {     
     if ( m_var_decls_grid->GetCellValue(i, 0) != _T("") ) 
     {
@@ -192,7 +221,7 @@ void grape_label_dialog::update_preview()
    
   // fill label with variable updates 
   m_label->get_variable_updates().Clear();
-  for ( int i = 0; i < m_var_updates_grid->GetNumberRows()+1; ++i )
+  for ( int i = 0; i < m_var_updates_grid->GetNumberRows(); ++i )
   {     
     if ( m_var_updates_grid->GetCellValue(i, 0) != _T("") ) 
     {
@@ -211,12 +240,23 @@ void grape_label_dialog::update_preview()
     
   // fill label with actions
   m_label->get_actions().Clear();
-  for ( int i = 0; i < m_multiaction_grid->GetNumberRows()+1; ++i )
+  for ( int i = 0; i < m_multiaction_grid->GetNumberRows(); ++i )
   {     
     if ( m_multiaction_grid->GetCellValue(i, 0) != _T("") ) 
     {
       action multi_action;
       multi_action.set_name(m_multiaction_grid->GetCellValue(i, 0));
+      list_of_dataexpression multi_action_parameters;
+      for( int j = 1; j < m_multiaction_grid->GetNumberCols(); ++j )
+      {
+        if ( m_multiaction_grid->GetCellValue(i, j) != _T("") )
+        {
+          dataexpression multi_action_parameter;
+          multi_action_parameter.set_expression(m_multiaction_grid->GetCellValue(i, j));
+          multi_action_parameters.Add( multi_action_parameter );
+        }
+      }
+      multi_action.set_parameters(multi_action_parameters);
       m_label->get_actions().Add(multi_action);
     }
   }  
@@ -225,7 +265,7 @@ void grape_label_dialog::update_preview()
   m_preview_text->SetLabel( m_label->get_text() );
 }  
   
-bool grape_label_dialog::show_modal( wxString &p_text )
+bool grape_label_dialog::show_modal( label &p_label )
 {
   int result = ShowModal();
   if ( result == wxID_CANCEL )
@@ -235,7 +275,7 @@ bool grape_label_dialog::show_modal( wxString &p_text )
       
   update_preview();
   
-  p_text = m_label->get_text();  
+  p_label = *m_label;
 
   return true;
 }
@@ -243,7 +283,7 @@ bool grape_label_dialog::show_modal( wxString &p_text )
 BEGIN_EVENT_TABLE(grape_label_dialog, wxDialog)
   EVT_GRID_CMD_CELL_CHANGE(GRAPE_VAR_DECLS_GRID_TEXT, grape_label_dialog::event_change_var_decls_text)  
   EVT_GRID_CMD_CELL_CHANGE(GRAPE_VAR_UPDATES_GRID_TEXT, grape_label_dialog::event_change_var_updates_text)  
-  EVT_GRID_CMD_CELL_CHANGE(GRAPE_MULTIACTION_GRID_TEXT, grape_label_dialog::event_change_multiaction_text)  
+  EVT_GRID_CMD_CELL_CHANGE(GRAPE_MULTIACTION_GRID_TEXT, grape_label_dialog::event_change_multiaction_text)
   EVT_TEXT_ENTER(GRAPE_CONDITION_INPUT_TEXT, grape_label_dialog::event_change_condition_text)
   EVT_TEXT_ENTER(GRAPE_TIMESTAMP_INPUT_TEXT, grape_label_dialog::event_change_timestamp_text)
 END_EVENT_TABLE()

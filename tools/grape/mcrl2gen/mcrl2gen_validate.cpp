@@ -19,6 +19,7 @@
 
 #include <aterm2.h>
 #include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/aterm_list.h"
 
 // mCRL2 core libraries
 #include "mcrl2/core/detail/struct.h"               // ATerm building blocks.
@@ -28,15 +29,20 @@
 // mCRL2 core/detail libraries
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
+#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/sort_identifier.h"
 
 // mCRL2 utility libraries
 #include "mcrl2/core/aterm_ext.h"
-
+#include "mcrl2/utilities/sort_info.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2;
 using namespace std;
 
@@ -1376,11 +1382,28 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
                 ATermAppl a_type_checked_action_param_expr = type_check_data_expr( a_parsed_action_param_expr, NULL, datatype_spec, vars);
                 if ( a_type_checked_action_param_expr == 0 )
                 {
-                  // ERROR: variable declaration is not valid
+                  // ERROR: action parameter is not valid
                   cerr << "mCRL2 conversion error: process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter " 
                        << action_param.ToAscii() << " could not be type checked." << endl;
                   throw CONVERSION_ERROR;
                   return label;
+                }
+                else
+                {
+                  ATermAppl data_type_spec = datatype_spec;
+                  ATermAppl a_implemented_data_expr = implement_data_data_expr( a_type_checked_action_param_expr, data_type_spec );
+                  if (a_implemented_data_expr == 0 )
+                  {
+                    // ERROR: action parameter is not valid
+                    cerr << "mCRL2 conversion error: process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action paramter "
+                         << action_param.ToAscii() << " could not be inferred." << endl;
+                    throw CONVERSION_ERROR;
+                    return label;
+                  }
+                  data_expression data_expr = data_expression( a_implemented_data_expr );
+                  sort_identifier sort_expr = data_expr.sort();
+                  string sort_expr_string = string(sort_expr.name());
+                  action_param_type = _T(sort_expr_string);
                 }
               }
               else
@@ -1414,6 +1437,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
               }
               dataexpression param;
               param.set_expression( action_param );
+			        param.set_type( action_param_type );
               action_params.Add( param );
             }
           }
@@ -1478,7 +1502,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
         else
         {
           // parse succeeded: try to type check
-          // get type of condtion
+          // get type of timestamp
           wxString timestamp_type = infer_type( timestamp, p_preamble_parameter_decls, p_preamble_local_var_decls, variable_decl_list );
           if ( timestamp_type.IsEmpty() )
           {
@@ -1741,7 +1765,6 @@ wxString grape::mcrl2gen::infer_type(wxString &p_name, list_of_decl &p_preamble_
       return p_preamble_local_var_decls[i].get_type();
     }
   }
-
   return wxEmptyString;
 }
 
@@ -2386,6 +2409,7 @@ list_of_action grape::mcrl2gen::infer_architecture_visibles(wxXmlNode *p_archite
 list_of_action grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec)
 {
   list_of_action actions;
+//  actions.Clear();
 
   list_of_decl preamble_params;
   list_of_decl_init preamble_vars;
@@ -2415,7 +2439,42 @@ list_of_action grape::mcrl2gen::infer_process_actions(wxXmlNode *p_doc_root, wxS
     list_of_action acts = process_diagram_mcrl2_action(curr_diag, preamble_params, preamble_vars, datatype_spec);
     for(unsigned int i=0; i<acts.GetCount(); ++i)
     {
-      actions.Add(acts[i]);
+	    bool found = false;
+	    for(unsigned int j=0; j<actions.GetCount(); ++j)
+	    {
+	      if ( acts[i].get_name() == actions[j].get_name() )
+		    {
+		      if ( acts[i].get_parameters().GetCount() == actions[j].get_parameters().GetCount() )
+		      {
+			      if ( acts[i].get_parameters().GetCount() == 0 )
+			      {
+			        found = true;
+			      }
+			      else
+			      {
+			        list_of_dataexpression acts_params = acts[i].get_parameters();
+			        list_of_dataexpression actions_params = actions[j].get_parameters();
+			        for ( unsigned int k = 0; k < acts_params.GetCount(); ++k )
+			        {
+			          found = true;
+			          found &= acts_params[k].get_type() == actions_params[k].get_type();
+			        }
+			      }
+		      }
+		      else
+		      {
+		        found = false;
+		      }
+		    }
+		    else if (!found)
+		    {
+		      found = false;
+		    }
+	    }
+	    if (!found)
+	    {
+	      actions.Add(acts[i]);
+	    }
     }
 
     // determine references contained in diagram

@@ -78,7 +78,7 @@ grape_event_remove_terminating_transition::grape_event_remove_terminating_transi
 : grape_event_base( p_main_frame, true, _T( "remove terminating transition" ) )
 {
   m_tt = p_tt->get_id();
-  m_label = p_tt->get_label()->get_text();
+  m_label = *p_tt->get_label();
   compound_state* beginstate = p_tt->get_beginstate();
   if ( beginstate != 0 )
   {
@@ -125,7 +125,7 @@ bool grape_event_remove_terminating_transition::Undo( void )
 
   compound_state* beginstate = dynamic_cast<compound_state*> ( find_object( m_beginstate ) );
   terminating_transition* new_tt = dia_ptr->add_terminating_transition( m_tt, beginstate, m_coordinate);
-  new_tt->get_label()->set_text( m_label );
+  new_tt->set_label( m_label );
   new_tt->set_width( m_width );
   new_tt->set_height( m_height );
   new_tt->set_coordinate( m_coordinate );

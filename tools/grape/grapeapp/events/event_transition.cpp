@@ -191,13 +191,11 @@ grape_event_change_transition::grape_event_change_transition(grape_frame *p_main
 {
   m_trans = p_transition->get_id();
 
-  m_old_text = p_transition->get_label()->get_text();
+  m_old_label = *p_transition->get_label();
   
- 
-  //grape_text_dlg dialog( _T("Change transition label"), _T("Enter the new transition label."), m_old_text, false /* no multiline */ );
-  grape_label_dialog dialog( m_old_text );
+  grape_label_dialog dialog( m_old_label );
   
-  m_pressed_ok = dialog.show_modal( m_new_text );
+  m_pressed_ok = dialog.show_modal( m_new_label );
 }
 
 grape_event_change_transition::~grape_event_change_transition(void)
@@ -217,7 +215,8 @@ bool grape_event_change_transition::Do(void)
   {
     transition_ptr = static_cast<transition*>(find_object(m_trans, TERMINATING_TRANSITION));
   }
-  transition_ptr->get_label()->set_text( m_new_text );
+
+  transition_ptr->set_label( m_new_label );
 
   finish_modification();
   return true;
@@ -230,7 +229,8 @@ bool grape_event_change_transition::Undo(void)
   {
     transition_ptr = static_cast<transition*>(find_object(m_trans, TERMINATING_TRANSITION));
   }
-  transition_ptr->get_label()->set_text( m_old_text );
+
+  transition_ptr->set_label( m_old_label );
  
   finish_modification();
   return true;
