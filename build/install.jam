@@ -15,9 +15,6 @@ import project ;
 import property ;
 
 # Feature for building/installing optional tools/libraries
-feature.feature regression-testing : no yes : incidental ;
-
-# Feature for building/installing optional tools/libraries
 feature.feature install : no yes : incidental ;
 
 # Feature that specifies an alternative name for the install rule

@@ -1,4 +1,8 @@
 # mCRL2 regression-testing Jamfile
+import feature ;
+
+# Feature for building/installing optional tools/libraries
+feature.feature regression-testing : no yes : incidental ;
 
 project status
     : source-location .
