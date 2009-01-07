@@ -1403,7 +1403,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
                   data_expression data_expr = data_expression( a_implemented_data_expr );
                   sort_identifier sort_expr = data_expr.sort();
                   string sort_expr_string = string(sort_expr.name());
-                  action_param_type = _T(sort_expr_string);
+                  action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
                 }
               }
               else

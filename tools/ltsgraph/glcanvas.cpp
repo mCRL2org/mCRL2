@@ -29,7 +29,7 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
-  EVT_LEAVE_WINDOW(GLCanvas::onMouseLeave)
+  EVT_KILL_FOCUS(GLCanvas::onMouseLeave)
   EVT_LEFT_DOWN(GLCanvas::onMouseLftDown)
   EVT_RIGHT_DOWN(GLCanvas::onMouseRgtDown)
   EVT_LEFT_UP(GLCanvas::onMouseLftUp)
@@ -232,7 +232,7 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /* event */)
   this->SetFocus();
 }
 
-void GLCanvas::onMouseLeave(wxMouseEvent& /* event */) {
+void GLCanvas::onMouseLeave(wxFocusEvent& /* event */) {
   owner->deselect();
 }
 
@@ -270,6 +270,8 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
   if(event.Dragging() && event.LeftIsDown())
   {
     int width, height;
+    int x, y;
+    GetPosition(&x, &y);
     GetClientSize(&width, &height);
 
     int newX = static_cast<int>(event.GetX());
@@ -278,8 +280,12 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
     double diffX = static_cast<double>(newX - oldX) / static_cast<double>(width) * 2000;
     double diffY = static_cast<double>(oldY - newY) / static_cast<double>(height) * 2000;
     
-    oldX = newX;
-    oldY = newY;
+    if ((x < newX) && (newX < x + width)) {
+      oldX = newX;
+    }
+    if ((y < newY) && (newY < y + height)) {
+      oldY = newY;
+    }
 
     owner->moveObject(diffX, diffY);
     display();

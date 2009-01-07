@@ -264,8 +264,6 @@ void LTSGraph::moveObject(double x, double y)
     selectedState->setX(selectedState->getX() + x);
     selectedState->setY(selectedState->getY() + y);
   }
-  
-
 
   if(selectedTransition != NULL)
   {
