@@ -56,7 +56,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   m_menu_file->AppendSeparator();
 
-  item = new wxMenuItem( m_menu_file, GRAPE_MENU_VALIDATE, _T("&Validate specification"), _T("Validates current specification") );
+  item = new wxMenuItem( m_menu_file, GRAPE_MENU_VALIDATE, _T("&Validate specification\tShift+F5"), _T("Validates current specification") );
   item->SetBitmap( g_icons[ _T("validate") ] );
   m_menu_file->Append(item);
 
@@ -145,7 +145,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_RENAME_DIAGRAM, _T("Re&name"), _T("Rename current diagram...") );
   m_menu_diagram->Append( item );
 
-  item = new wxMenuItem(m_menu_diagram, GRAPE_MENU_VALIDATE_DIAGRAM, _T("&Validate"), _T("Validate current diagram"));
+  item = new wxMenuItem(m_menu_diagram, GRAPE_MENU_VALIDATE_DIAGRAM, _T("&Validate\tF5"), _T("Validate current diagram"));
   item->SetBitmap( g_icons[ _T("validate") ] );
   m_menu_diagram->Append(item);
 

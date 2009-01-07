@@ -56,7 +56,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
   {
     architecture_diagram *diagram = p_spec->get_architecture_diagram( i );
     int pos = choices.Add( diagram->get_name() );
-    m_pos2diagramid[pos] = diagram->get_id();
+    m_name2diagramid[ diagram->get_name() ] = diagram->get_id();
     if ( p_ref->get_relationship_refers_to() &&
          p_ref->get_relationship_refers_to()->get_id() == diagram->get_id() )
     {
@@ -93,7 +93,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   {
     process_diagram *diagram = p_spec->get_process_diagram( i );
     int pos = choices.Add( diagram->get_name() );
-    m_pos2diagramid[pos] = diagram->get_id();
+    m_name2diagramid[ diagram->get_name() ] = diagram->get_id();
     if ( p_diagram && p_diagram->get_id() == diagram->get_id() )
     {
       selected = pos;
@@ -172,14 +172,13 @@ bool grape_reference_dialog::show_modal()
 
 int grape_reference_dialog::get_diagram_id()
 {
-  int selected = m_combo->GetSelection();
-  if ( selected == wxNOT_FOUND )
+  if (m_name2diagramid.find( m_combo->GetValue() ) == m_name2diagramid.end())
   {
     return wxNOT_FOUND;
   }
   else
   {
-    return m_pos2diagramid[ m_combo->GetSelection() ];
+    return m_name2diagramid[ m_combo->GetValue() ];
   }
 }
 

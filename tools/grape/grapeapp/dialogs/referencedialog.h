@@ -25,7 +25,7 @@ class wxTextCtrl;
 
 using namespace grape::libgrape;
 
-WX_DECLARE_HASH_MAP( int, int, wxIntegerHash, wxIntegerEqual, diagramhash );
+WX_DECLARE_STRING_HASH_MAP( int, diagramhash );
 
 namespace grape
 {
@@ -38,7 +38,7 @@ namespace grape
     {
       private:
         wxComboBox    *m_combo; /**< Combobox with all diagrams. */
-        diagramhash   m_pos2diagramid; /**< Maps the combobox positions to references. */
+        diagramhash   m_name2diagramid; /**< Maps the combobox positions to references. */
         wxGrid        *m_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
         /**
          * Private default constructor.

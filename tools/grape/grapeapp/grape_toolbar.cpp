@@ -87,6 +87,7 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddRadioTool(GRAPE_TOOL_ADD_BLOCKED, _T("Add Blocked property"), g_icons[ _T("blocked") ], wxNullBitmap, _T("Add Blocked property"), _T("Add Blocked property"));
   AddRadioTool(GRAPE_TOOL_ADD_VISIBLE, _T("Add Visible property"), g_icons[ _T("visible") ], wxNullBitmap, _T("Add Visible property"), _T("Add Visible property"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
+  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
 
   Realize();
 }
@@ -112,6 +113,7 @@ grape_proc_toolbar::grape_proc_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddRadioTool(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, _T("Add Initial designator"), g_icons[ _T("initdes") ], wxNullBitmap, _T("Add Initial designator"), _T("Add Initial designator"));
   AddRadioTool(GRAPE_TOOL_ADD_TERMINATING_TRANSITION, _T("Add Terminating transition"), g_icons[ _T("termtransition") ], wxNullBitmap, _T("Add Terminating transition"), _T("Add Terminating transition"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
+  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
 
   Realize();
 }
