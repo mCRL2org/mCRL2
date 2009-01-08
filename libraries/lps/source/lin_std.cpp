@@ -127,13 +127,7 @@ static ATermList construct_renaming(ATermList pars1, ATermList pars2,
                 ATermList *pars3, ATermList *pars4,const bool unique=true);
 static void alphaconversion(ATermAppl procId, ATermList parameters);
 static ATermAppl fresh_name(const std::string &name);
-static void declare_equation_variables(ATermList t1);
-static void end_equation_section(void);
-static void newequation(
-                ATermAppl condition,
-                ATermAppl t2, 
-                ATermAppl t3, 
-                specificationbasictype *spec);
+static void newequation(ATermAppl eqn, specificationbasictype *spec);
 static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
 static ATermAppl RewriteTerm(ATermAppl t);
 
@@ -966,15 +960,7 @@ static specificationbasictype *create_spec(ATermAppl t)
   for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(data_spec,3),0));
     !ATisEmpty(eqns); eqns = ATgetNext(eqns) )
   {
-    ATermAppl eqn=ATAgetFirst(eqns);
-    declare_equation_variables(ATLgetArgument(eqn,0));
-    newequation(
-      ATAgetArgument(eqn,1),
-      ATAgetArgument(eqn,2),
-      ATAgetArgument(eqn,3),
-      spec
-    );
-    end_equation_section();
+    newequation(ATAgetFirst(eqns), spec);
   }
 
   spec->eqns = ATLgetArgument(ATAgetArgument(data_spec,3),0);
@@ -3726,43 +3712,8 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
 
 /****************  Declare local datatypes  ******************************/
 
-static ATermList localequationvariables=NULL;
-
-static void declare_equation_variables(ATermList t1)
+static void newequation(ATermAppl eqn, specificationbasictype *spec)
 { 
-  if (localequationvariables!=NULL)
-  { gsErrorMsg("cannot declare variables as section is not yet closed %T\n",
-                localequationvariables);
-    exit(1);
-  }
-  localequationvariables=t1;
-}
-
-static void end_equation_section(void)
-{ if (localequationvariables==NULL)
-  { gsErrorMsg("cannot open an non ended equation section\n",NULL);
-    exit(1);
-  }
-  
-  localequationvariables=NULL;
-}
-
-static void newequation(
-                ATermAppl condition,
-                ATermAppl t2, 
-                ATermAppl t3, 
-                specificationbasictype *spec)
-{ 
-  if (localequationvariables==NULL)
-  { gsErrorMsg("variables must be declared first! %T\n",t2);
-    exit(1);
-  }
-
-  ATermAppl eqn=gsMakeDataEqn(
-                     localequationvariables,
-                     ((condition==NULL)?gsMakeNil():condition),
-                     t2,
-                     t3);
   if (mayrewrite) rewr->addRewriteRule(eqn);
   spec->eqns=ATinsertA(spec->eqns,eqn);
 }
@@ -4080,28 +4031,32 @@ static stacklisttype *new_stack(
       /* Generate equations for get, pop and isempty */
       var0=getfreshvariable("svr",gsMakeSortExprPos());
       makepushargsvars(&t1,&t2,var0,stack);
-      declare_equation_variables(t2);
-      newequation(
-              NULL,
+      ATermList vars = t2;
+      newequation(gsMakeDataEqn(
+              vars,
+              gsMakeNil(),
               gsMakeDataAppl1(stack->opns->empty,stack->opns->emptystack),
-              gsMakeDataExprTrue(),
+              gsMakeDataExprTrue()),
               spec);
       /* t1 contains push(var0,v1,..,vn,stackvar), t2 the list of variables
          state, var0,v1,...,vn,stackvar*/
-      newequation(
-              NULL,
+      newequation(gsMakeDataEqn(
+              vars,
+              gsMakeNil(),
               gsMakeDataAppl1(stack->opns->empty,t1),
-              gsMakeDataExprFalse(),
+              gsMakeDataExprFalse()),
               spec);
-      newequation(
-              NULL,
+      newequation(gsMakeDataEqn(
+              vars,
+              gsMakeNil(),
               gsMakeDataAppl1(stack->opns->pop,t1),
-              stack->stackvar,
+              stack->stackvar),
               spec);
-      newequation(
-              NULL,
+      newequation(gsMakeDataEqn(
+              vars,
+              gsMakeNil(),
               gsMakeDataAppl1(stack->opns->getstate,t1),
-              var0,
+              var0),
               spec);
 
       t2=ATgetNext(t2);
@@ -4109,14 +4064,14 @@ static stacklisttype *new_stack(
           walker!=ATempty;
           walker=ATgetNext(walker))
       { 
-        newequation(
-              NULL,
+        newequation(gsMakeDataEqn(
+              vars,
+              gsMakeNil(),
               gsMakeDataAppl1(ATAgetFirst(walker),t1), 
-              ATAgetFirst(t2),
+              ATAgetFirst(t2)),
               spec);
         t2=ATgetNext(t2);
       }
-      end_equation_section();
     }
   }
   
@@ -5211,27 +5166,26 @@ static void define_equations_for_case_function(
    /* I generate here an equation of the form
       C(e,x,x,x,...x)=x for a variable x. */
   v=getfreshvariable("e",e->sortId);
-  declare_equation_variables( ATinsertA(ATinsertA(ATempty,v),v1));
-  newequation(NULL,
+  newequation(gsMakeDataEqn(
+              ATmakeList2((ATerm) v, (ATerm) v1),
+              gsMakeNil(),
               gsMakeDataAppl(functionname,ATinsertA(xxxterm,v)),
-              v1,
+              v1),
               spec);
-  end_equation_section();
 
-  declare_equation_variables(vars);
   auxvars=vars;
 
   for(w=e->elementnames; w!=ATempty ; w=ATgetNext(w))
   { 
-    newequation(
-           NULL,
+    newequation(gsMakeDataEqn(
+           vars,
+           gsMakeNil(),
            gsMakeDataAppl(functionname,ATinsertA(args,ATAgetFirst(w))),
-           ATAgetFirst(auxvars),
+           ATAgetFirst(auxvars)),
            spec);
     
     auxvars=ATgetNext(auxvars);
   }
-  end_equation_section(); 
   
 }
 
@@ -7735,12 +7689,9 @@ static ATermAppl makesingleultimatedelaycondition(
                           gsMakeSortArrowList(getsorts(used_sumvars), 
                                               gsMakeSortExprBool())));
     insertmapping(newopid,spec);
-    ATermList extendedvariables=ATconcat(variables, used_sumvars);
-    declare_equation_variables(extendedvariables);
     ATermAppl eqn = gsMakeDataApplList(newopid,variables);
     ATermAppl neweqn = gsMakeDataApplList(eqn, used_sumvars);
-    newequation(NULL,neweqn,result,spec);
-    end_equation_section();
+    newequation(gsMakeDataEqn(ATconcat(variables, used_sumvars),gsMakeNil(),neweqn,result),spec);
     result=gsMakeDataExprExists(eqn);
   }
 
@@ -8406,7 +8357,6 @@ static void initialize_data(void)
   enumeratedtypelist=NULL;
   stacklist=NULL;
   ATprotectList(&sumlist);
-  ATprotectList(&localequationvariables);
   ATprotectAppl(&realsort);
   realsort=gsMakeSortId(gsString2ATermAppl("Real"));
 }
@@ -8430,7 +8380,6 @@ static void uninitialize_data(void)
   enumeratedtypelist=NULL;
   stacklist=NULL;
   ATunprotectList(&sumlist);
-  ATunprotectList(&localequationvariables);
   ATunprotectAppl(&realsort);
 }
 
@@ -9304,7 +9253,6 @@ void lin_std_initialize_global_variables()
   tau_process=NULL;
   delta_process=NULL;
   LocalpCRLprocs=NULL;
-  localequationvariables=NULL;
   stacklist=NULL;
   sumlist=NULL;
   enumeratedtypes=NULL;
