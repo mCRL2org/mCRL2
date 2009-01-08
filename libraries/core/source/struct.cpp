@@ -3657,10 +3657,7 @@ bool gsIsOpIdListEnum(ATermAppl DataExpr)
   if(gsIsOpId(DataExpr))
   {
     ATermAppl s = ATAgetArgument(DataExpr,1);
-    if(gsIsSortId(s))
-    {
-      return ATisEqual(DataExpr, gsMakeOpIdListEnum(s));
-    }
+    return ATisEqual(DataExpr, gsMakeOpIdListEnum(s));
   }
   return false;
 }
