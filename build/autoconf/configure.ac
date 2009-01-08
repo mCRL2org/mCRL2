@@ -94,6 +94,17 @@ BUILD_OPTIONS="${BUILD_OPTIONS} address-model=${ADDRESS_MODEL}"
 AC_PROG_CPP
 AC_PROG_CXX
 
+#check if the g++ compiler works
+AC_CACHE_CHECK([whether the C++ compiler works], [avahi_cv_sys_cxx_works], [
+    AC_LANG_PUSH([C++])
+    AC_COMPILE_IFELSE([int main() { }], [avahi_cv_sys_cxx_works=yes],
+        [avahi_cv_sys_cxx_works=no])
+    AC_LANG_POP([C++])
+    ])
+[ if [ "x$avahi_cv_sys_cxx_works" = "xno" ]; then ]
+    AC_MSG_FAILURE([The C++ compiler does not work. Please (re)install the C++ compiler])
+[ fi ]
+
 # Check for compatible flex
 AC_CHECK_PROG([FLEX], [flex], [flex], [])
 if test -n $FLEX; then
