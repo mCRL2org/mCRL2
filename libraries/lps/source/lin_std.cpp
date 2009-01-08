@@ -33,6 +33,8 @@
 #include <sstream>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/data_common.h"
+#include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -3721,17 +3723,6 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
   return parameters;
 }
 
-/**************** makenewsort  **********************************/
-
-static ATermAppl makenewsort(
-                    ATermAppl sortname, 
-                    specificationbasictype *spec)
-{ ATermAppl newSort=NULL;
-  newSort=gsMakeSortId(sortname);
-  insertsort(newSort,spec);
-  return newSort;
-}
-
 /****************  Declare local datatypes  ******************************/
 
 static ATermList localequationvariables=NULL;
@@ -3977,7 +3968,8 @@ static stacklisttype *new_stack(
         exit(1);
       }
 
-      stack->opns->stacksort=makenewsort(fresh_name("Stack"),spec);
+      stack->opns->stacksort=gsMakeSortId(fresh_name("Stack"));
+      insertsort(stack->opns->stacksort, spec);
       stack->opns->sorts=ATempty;
       ATprotectList(&(stack->opns->sorts));
       stack->opns->get=ATempty;
@@ -5100,7 +5092,6 @@ static enumeratedtype *create_enumeratedtype
                 (int n,specificationbasictype *spec)
 { enumeratedtype *w=NULL;
   int j=0;
-  ATermAppl equalitymapping=NULL;
 
   for(w=enumeratedtypelist; ((w!=NULL)&&(w->size!=n));
                 w=w->next){};
@@ -5114,81 +5105,64 @@ static enumeratedtype *create_enumeratedtype
     ATprotectList(&(w->functions));
 
     w->size=n;
-    if (n==2)
-    { w->sortId=gsMakeSortExprBool(); 
-      w->elementnames=ATinsertA(ATinsertA(ATempty,
-                           gsMakeDataExprFalse()),gsMakeDataExprTrue());
-    }
-    else 
-    { snprintf(scratch1,STRINGLENGTH,"Enum%d",n);
-      w->sortId=makenewsort(fresh_name(scratch1),spec); 
-      w->elementnames=ATempty;
-      /* enumeratedtypes[i].elements=ATmake("ems"); */
+    if (n==2) {
+      //reuse the booleans
+      w->sortId = gsMakeSortIdBool(); 
+      w->elementnames = ATmakeList2((ATerm) gsMakeOpIdFalse(), (ATerm) gsMakeOpIdTrue());
+    } else {
+      //create new sort identifier
+      snprintf(scratch1,STRINGLENGTH,"Enum%d",n);
+      ATermAppl sort_id = gsMakeSortId(fresh_name(scratch1));
+      //create structured sort
+      ATermList struct_conss = ATmakeList0();
       for(j=0 ; (j<n) ; j++)
-      { /* Maak hier een naamlijst van sort elementen. */
-        ATermAppl constructor=NULL;
+      {
+        //create constructor declaration of the structured sort
         snprintf(scratch1,STRINGLENGTH,"e%d_%d",j,n);
-        constructor=gsMakeOpId(fresh_name(scratch1),w->sortId);
-        insertconstructor(constructor,spec);
-        w->elementnames=ATinsertA(w->elementnames,constructor);
+        ATermAppl struct_cons = gsMakeStructCons(
+          fresh_name(scratch1), ATmakeList0(), gsMakeNil()
+        );
+        struct_conss = ATinsert(struct_conss, (ATerm) struct_cons);
       }
-      
-      /* Lists with equation variables */
-      ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
-      ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), w->sortId);
-      ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), w->sortId);
-      ATermList emptyl = ATmakeList0();
-      ATermList xl = ATmakeList1((ATerm) x);
-      ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-      ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
-      ATermList eqns = ATmakeList0();
+      ATermAppl sort_struct = gsMakeSortStruct(struct_conss);
+       
+      //add declaration of standard functions
+      ATermList substs = ATmakeList0();
+      t_data_decls data_decls;
+      initialize_data_decls(&data_decls);
+      impl_standard_functions_sort(sort_id, &data_decls);
+      impl_sort_struct(sort_struct, sort_id, &substs, &data_decls);
+      //data_decls.sorts contains precisely one sort, namely sort_id
+      assert(ATgetLength(data_decls.sorts) == 1);
+      assert(ATisEqual(ATAgetFirst(data_decls.sorts), sort_id));
 
-      equalitymapping=gsMakeOpIdEq(w->sortId);
-      insertmapping(equalitymapping,spec);
-
-      eqns = ATinsertA(eqns, gsMakeDataEqn(xl, gsMakeNil(),
-                               gsMakeDataExprEq(x, x), gsMakeDataExprTrue()));
-      for(ATermList l1=w->elementnames ; l1!=ATempty ; l1=ATgetNext(l1))
-      { for(ATermList l2=w->elementnames ; l2!=ATempty ; l2=ATgetNext(l2))
-        { ATermAppl el1=ATAgetFirst(l1);
-          ATermAppl el2=ATAgetFirst(l2);
-          eqns = ATinsertA(eqns, gsMakeDataEqn(emptyl, gsMakeNil(),
-                                 gsMakeDataExprEq(el1, el2),
-                                 gsMakeDataExprBool_bool(ATisEqual(el1,el2))));
-        }
+      //store new declarations from data_decls in spec
+      //store sorts, i.e. store sort_id
+      insertsort(sort_id, spec); 
+      //store constructors
+      for (ATermList l = data_decls.cons_ops ; !ATisEmpty(l) ; l = ATgetNext(l)) {
+        insertconstructor(ATAgetFirst(l), spec);
       }
-
-      ATermAppl nonequalitymapping=gsMakeOpIdNeq(w->sortId);
-      insertmapping(nonequalitymapping,spec);
-
-      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
-                               gsMakeDataExprNeq(x,y),
-                               gsMakeDataExprNot(gsMakeDataExprEq(x,y))));
-
-      ATermAppl ifmapping=gsMakeOpIdIf(w->sortId);
-      insertmapping(ifmapping,spec);
-
-      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
-                             gsMakeDataExprIf(gsMakeDataExprTrue(),x,y),
-                             x));
-      eqns = ATinsertA(eqns, gsMakeDataEqn(xyl, gsMakeNil(),
-                             gsMakeDataExprIf(gsMakeDataExprFalse(),x,y),
-                             y));
-      eqns = ATinsertA(eqns, gsMakeDataEqn(bxl, gsMakeNil(),
-                             gsMakeDataExprIf(b,x,x),
-                             x));
-
-      while(!ATisEmpty(eqns)) {
-        ATermAppl eqn = ATAgetFirst(eqns);
+      //store mappings
+      for (ATermList l = data_decls.ops ; !ATisEmpty(l) ; l = ATgetNext(l)) {
+        insertmapping(ATAgetFirst(l), spec);
+      }
+      //store equation declarations
+      for (ATermList l = data_decls.data_eqns; !ATisEmpty(l) ; l = ATgetNext(l)) {
+        ATermAppl eqn = ATAgetFirst(l);
         if (mayrewrite) rewr->addRewriteRule(eqn);
         spec->eqns = ATinsertA(spec->eqns,eqn);
-        eqns = ATgetNext(eqns);
       }
+
+      //store new declarations in return value w
+      w->sortId = sort_id;
+      w->elementnames = data_decls.cons_ops;
     }
+
     w->functions=ATempty;
     w->next=enumeratedtypelist;
     enumeratedtypelist=w;
-  } 
+  }
   return w;
 }
 

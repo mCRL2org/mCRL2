@@ -67,53 +67,64 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
 **/
 ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_spec);
 
+/// \pre  sort_struct is a structured sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_struct
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_struct
+/// \post an implementation of sort_struct represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
+
 /// \pre sort_elt and sort_list are sort expressions.
 /// \return the list of data equations belonging to the list sort sort_list, with
 //     elements sort_elt.
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_list);
 
-/// \pre sort_list is a list sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_expression_list
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_expression_list
-/// \post an implementation of sort_list is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_list
-ATermAppl impl_sort_list(ATermAppl sort_expression_list, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+/// \pre  sort_list is a list sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_expression_list
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_expression_list
+/// \post an implementation of sort_list represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_list(ATermAppl sort_expression_list, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre sort_elt and sort_list are sort expressions
 /// \return the list of data equations belonging to the set sort_set, with elements
 ///     of sort_elt
 ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set);
 
-/// \pre sort_set is a set sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_set
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_set
-/// \post an implementation of sort_set is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_set
-ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+/// \pre  sort_set is a set sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of sort_set represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre sort_elt and sort_list are sort expressions
 /// \return the list of data equations belonging to the set sort_set, with elements
 ///     of sort_elt
 ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl sort_set);
 
-/// \pre sort_bag is a bag sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_bag
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_bag
-/// \post an implementation of sort_bag is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_bag
-ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+/// \pre  sort_bag is a bag sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_bag
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_bag
+/// \post an implementation of sort_bag represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Bool is added to *p_data_decls
