@@ -63,6 +63,11 @@ const std::string case_7(
   "init X(0,5, 1);\n"
 );
 
+const std::string case_8(
+   "act a;\n"
+   "init sum t:Nat. a@t;\n"
+);
+
 void test_multiple_linearization_calls()
 {
   specification spec;
@@ -73,6 +78,7 @@ void test_multiple_linearization_calls()
   spec = mcrl22lps(case_5);
   spec = mcrl22lps(case_6);
   spec = mcrl22lps(case_7);
+  spec = mcrl22lps(case_8);
 }
 
 void test_struct()

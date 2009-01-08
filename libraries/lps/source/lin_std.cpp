@@ -2974,6 +2974,7 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   if (gsIsSeq(body1)||
       gsIsIfThen(body1)||
       gsIsMultAct(body1)||
+      gsIsAtTime(body1)||
       gsIsProcess(body1)||
       isDeltaAtZero(body1))
   { return gsMakeSum(sumvars,body1);
