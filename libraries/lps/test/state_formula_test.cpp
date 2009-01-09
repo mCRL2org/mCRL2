@@ -333,7 +333,7 @@ void test_rename()
   set_identifier_generator generator;
   generator.add_identifiers(find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
-  BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)");
+  BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
 
   generator = set_identifier_generator();
   generator.add_identifiers(find_identifiers(spec));
