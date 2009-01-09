@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, December 22, 2008 16:03:40}
+%TCIDATA{LastRevised=Friday, January 09, 2009 17:38:05}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -956,46 +956,117 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=d_{X} \\ 
+c_{X}:=\bot  \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
-do }}c_{X}:=update_{X}(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
+do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X\} \\ 
 \qquad \text{\textbf{for }}Y(e)\in \mathsf{iocc}(\varphi _{X}\mathcal{)}%
 \text{ \textbf{do}} \\ 
-\qquad \qquad \text{\textbf{if }}\mathsf{eval}(do%
-\_update(Y(e)[d_{X}:=c_{X}]))\neq false\text{ \textbf{then}} \\ 
-\qquad \qquad \qquad c_{Y}^{\prime }:=update_{X}(c_{Y},\mathsf{eval}%
+\qquad \qquad \text{\textbf{if }}\mathsf{eval}(needs\_update(Y(e),\varphi
+_{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\ 
+\qquad \qquad \qquad c_{Y}^{\prime }:=update(c_{Y},\mathsf{eval}%
 (e[d_{X}:=c_{X}])) \\ 
 \qquad \qquad \qquad \text{\textbf{if }}c_{Y}^{\prime }\neq c_{Y}\text{ 
 \textbf{then}} \\ 
 \qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
 \qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
-redundant\_variables=\{X\in \mathsf{occ}(\mathcal{E)}\ |\ c_{X}=d_{X}\} \\ 
+redundant\_variables=\{X\in \mathsf{occ}(\mathcal{E)}\ |\ c_{X}=\bot \} \\ 
 redundant\_parameters=\{(X,i)\ |\ c_{X}[i]\in D_{X}[i]\} \\ 
 \text{\textbf{return }}\{redundant\_variables\text{, }redundant\_parameters\}%
 \end{array}%
 \end{equation*}
 
-where $update$ is defined as follows:%
+where $update_{X}$ is defined as follows:%
 \begin{equation*}
-update_{X}(c,c^{\prime })=_{def}c^{\prime \prime },\text{ with }c^{\prime
-\prime }[i]=\left\{ 
+update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
 \begin{array}{ll}
-c[i] & \text{if }c[i]=c^{\prime }[i] \\ 
-c[i] & \text{if }c[i]\notin D_{X}\cup \{d_{X}[i]\} \\ 
-c^{\prime }[i] & \text{if }c[i]=d_{X}[i]\wedge c^{\prime }[i]\notin D_{X} \\ 
-fresh\_var(D_{X}[i]) & \text{otherwise}%
+e[i] & \text{if }c=\bot  \\ 
+c[i] & \text{if }e[i]=c[i] \\ 
+d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}
 
-and where $do\_update$ is a boolean function that determines whether an
+and where $needs\_update$ is a boolean function that determines whether an
 update should be performed. A safe choice for this function is the constant
-function $true$, but a more sophisticated choice can be made (see [Simon
-Janssen, 2008]).\pagebreak
+function $true$. In [Simon Janssen, 2008] the following alternative is
+proposed.
+
+Let $c_{T}$ and $c_{F}$ be defined as
+
+\begin{equation*}
+\begin{array}{lll}
+c_{T}(c) & = & c \\ 
+c_{F}(c) & = & \lnot c \\ 
+c_{T}(\lnot \varphi ) & = & c_{F}(\varphi ) \\ 
+c_{F}(\lnot \varphi ) & = & c_{T}(\varphi ) \\ 
+c_{\Gamma }(X(e)) & = & false \\ 
+c_{\Gamma }(\mathsf{Q}d:{D}.\varphi ) & = & \mathsf{Q}d:{D}.c_{\Gamma
+}(\varphi ) \\ 
+c_{T}(\varphi \wedge \psi ) & = & c_{T}(\varphi )\wedge c_{T}(\psi ) \\ 
+c_{T}(\varphi \vee \psi ) & = & c_{T}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{T}(\varphi \Rightarrow \psi ) & = & c_{F}(\varphi )\vee c_{T}(\psi ) \\ 
+c_{F}(\varphi \wedge \psi ) & = & c_{F}(\varphi )\vee c_{F}(\psi ) \\ 
+c_{F}(\varphi \vee \psi ) & = & c_{F}(\varphi )\wedge c_{F}(\psi ) \\ 
+c_{F}(\varphi \Rightarrow \psi ) & = & c_{T}(\varphi )\wedge c_{F}(\psi )%
+\end{array}%
+\end{equation*}%
+and let the multi sets $cond_{T}$ and $cond_{F}$ be defined as%
+\begin{equation*}
+\begin{array}{lll}
+cond_{\Gamma }(X(e),c) & = & \emptyset  \\ 
+cond_{\Gamma }(X(e),Y(f)) & = & \emptyset  \\ 
+cond_{\Gamma }(X(e),\lnot \varphi ) & = & cond_{\Gamma }(X(e),\varphi ) \\ 
+cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\varphi ) & 
+\text{if }X(e)\in \mathsf{iocc}(\varphi ) \\ 
+\{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\psi ) & \text{%
+if }X(e)\in \mathsf{iocc}(\psi ) \\ 
+\emptyset  & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+cond_{T}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{T}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\ \theta
+\ \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
+(\varphi ) \\ 
+\emptyset  & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+cond_{T}(X(e),\mathsf{\forall }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\forall }d:{D}.\varphi )\}\cup \{\mathsf{\exists }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset  & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+cond_{T}(X(e),\mathsf{\exists }d:{D}.\varphi ) & = & \left\{ 
+\begin{array}{cc}
+\{c_{F}(\mathsf{\exists }d:{D}.\varphi )\}\cup \{\mathsf{\forall }d:{D}%
+.\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
+\mathsf{iocc}(\varphi ) \\ 
+\emptyset  & \text{otherwise}%
+\end{array}%
+\right. 
+\end{array}%
+\end{equation*}%
+with $\Gamma \in \{T,F\}$. Then we define%
+\begin{equation*}
+needs\_update(X(e),\varphi )=\dbigwedge\limits_{c\in cond_{T}(X(e),\varphi
+)\cup cond_{F}(X(e),\varphi )}\lnot c
+\end{equation*}
+
+\begin{remark}
+Note that a direct implementation of this function is extremely inefficient.
+It is expected that a more suitable representation can be found.
+\end{remark}
+
+\newpage 
 
 \section{Gau\ss\ Elimination}
 
@@ -1144,23 +1215,23 @@ _{0}/X]\text{)}%
 \mathtt{<DataExpr>} & c \\ 
 \mathtt{StateTrue} & true \\ 
 \mathtt{StateFalse} & false \\ 
-\mathtt{StateNot(<StateFrm>)} & \lnot \varphi  \\ 
-\mathtt{StateAnd(<StateFrm>,<StateFrm>)} & \varphi \wedge \varphi  \\ 
-\mathtt{StateOr(<StateFrm>,<StateFrm>)} & \varphi \vee \varphi  \\ 
-\mathtt{StateImp(<StateFrm>,<StateFrm>)} & \varphi \Rightarrow \varphi  \\ 
-\mathtt{StateForall(<DataVarId>+,<StateFrm>)} & \forall x{:}D.\varphi  \\ 
-\mathtt{StateExists(<DataVarId>+,<StateFrm>)} & \exists x{:}D.\varphi  \\ 
-\mathtt{StateMust(<RegFrm>,<StateFrm>)} & \langle \alpha \rangle \varphi  \\ 
-\mathtt{StateMay(<RegFrm>,<StateFrm>)} & [\alpha ]\varphi  \\ 
-\mathtt{StateYaled} & \nabla  \\ 
+\mathtt{StateNot(<StateFrm>)} & \lnot \varphi \\ 
+\mathtt{StateAnd(<StateFrm>,<StateFrm>)} & \varphi \wedge \varphi \\ 
+\mathtt{StateOr(<StateFrm>,<StateFrm>)} & \varphi \vee \varphi \\ 
+\mathtt{StateImp(<StateFrm>,<StateFrm>)} & \varphi \Rightarrow \varphi \\ 
+\mathtt{StateForall(<DataVarId>+,<StateFrm>)} & \forall x{:}D.\varphi \\ 
+\mathtt{StateExists(<DataVarId>+,<StateFrm>)} & \exists x{:}D.\varphi \\ 
+\mathtt{StateMust(<RegFrm>,<StateFrm>)} & \langle \alpha \rangle \varphi \\ 
+\mathtt{StateMay(<RegFrm>,<StateFrm>)} & [\alpha ]\varphi \\ 
+\mathtt{StateYaled} & \nabla \\ 
 \mathtt{StateYaledTimed(<DataExpr>)} & \nabla (t) \\ 
-\mathtt{StateDelay} & \Delta  \\ 
+\mathtt{StateDelay} & \Delta \\ 
 \mathtt{StateDelayTimed(<DataExpr>)} & \Delta (t) \\ 
 \mathtt{StateVar(<String>,<DataExpr>\ast )} & X(d) \\ 
 \mathtt{StateNu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \nu X(x{:}%
-D:=d).~\varphi  \\ 
+D:=d).~\varphi \\ 
 \mathtt{StateMu(<String>,<DataVarIdInit>\ast ,<StateFrm>)} & \mu X(x{:}%
-D:=d).~\varphi 
+D:=d).~\varphi%
 \end{array}%
 \end{equation*}
 
