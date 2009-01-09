@@ -38,7 +38,6 @@ void test1()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);
-  new_spec.save("tempkoekiedoerie1");
   BOOST_CHECK(new_spec.process().summands().size()==3);
 }
 
@@ -64,7 +63,6 @@ void test2()
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);
-  new_spec.save("tempkoekiedoerie2");
   BOOST_CHECK(new_spec.process().summands().size()==2);
 }
 
