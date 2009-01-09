@@ -583,17 +583,15 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   // Variables in which the result is stored
   propositional_variable_instantiation new_initial_state;
   
-  // Variables used in whole function
-  unsigned long nr_of_processed_variables = 0;
-  unsigned long nr_of_generated_variables = 1;
-
   // atermpp::indexed_set variable_index(10000, 50); 
   // In order to generate a counterexample, this must also be known outside
   // this procedure.
 
-  variable_index.put(bes::true_()); /* Put first a dummy term that
-                                       gets index 0 in the indexed set, to
-                                       prevent variables from getting an index 0 */
+  variable_index.put(bes::true_()); 
+  variable_index.put(bes::false_()); /* Put first two dummy terms that
+                                       gets index 0 and 1 in the indexed set, to
+                                       take care that the first variable gets an index 2, to
+                                       make space for a first equation of the shape X1=X2. */
 
   /* The following list contains that variables that need to be explored.
      This list is only relevant if tool_options.opt_strategy>=on_the_fly,
@@ -603,9 +601,8 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
   deque < bes::variable_type> todo;
   if (tool_options.opt_strategy>=on_the_fly)
-  { todo.push_front(1);
+  { todo.push_front(2);
   }
-
   // Data rewriter
   pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
                      rewriter,
@@ -660,6 +657,18 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   #define RELEVANCE_DIVIDE_FACTOR 100
 
   gsVerboseMsg("Computing a BES from the PBES....\n");
+  
+  // Set the first BES equation X1=X2
+  bes_equations.add_equation(
+                1,
+                eqsys.begin()->symbol(),
+                1,
+                bes::variable(2));
+
+  // Variables used in whole function
+  unsigned long nr_of_processed_variables = 1;
+  unsigned long nr_of_generated_variables = 2;
+
   // As long as there are states to be explored
   while ((tool_options.opt_strategy>=on_the_fly)
              ?todo.size()>0
@@ -1180,7 +1189,9 @@ bool solve_bes(const t_tool_options &tool_options,
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
   { 
-    // std::cerr << "Solve equations of rank " << current_rank << "\n";
+    if (gsVerbose)
+    { std::cerr << "Solve equations of rank " << current_rank << ".\n";
+    }
 
     /* Calculate the stable solution for the current rank */
 
@@ -1232,7 +1243,6 @@ bool solve_bes(const t_tool_options &tool_options,
   
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
-      // std::cerr << "Evaluate variable from TODO list" << *w << "\n";
       bes::variable_type w_value=*w;
       todo.erase(w);
 
@@ -1331,7 +1341,6 @@ bool solve_bes(const t_tool_options &tool_options,
     }
  
   }
-
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
   return bes::is_true(approximation[1]);  /* 1 is the index of the initial variable */
