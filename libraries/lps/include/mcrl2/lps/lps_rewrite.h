@@ -116,11 +116,14 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
     new_summands=push_front(new_summands,new_summand);
   }
   new_summands=reverse(new_summands);
-
+  
   return specification(
                 spec.data(),
                 spec.action_labels(),
-                spec.process(),
+                linear_process(
+                    lpe.free_variables(),
+                    lpe.process_parameters(),
+                    new_summands),
                 process_initializer(
                         spec.initial_process().free_variables(),
                         new_initial_assignments));
