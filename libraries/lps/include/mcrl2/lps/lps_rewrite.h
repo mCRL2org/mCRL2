@@ -93,7 +93,7 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
            push_front(new_assignments,
                   data_assignment(j->lhs(),r(j->rhs()))); 
     }
-    new_initial_assignments=reverse(new_initial_assignments);
+    new_assignments=reverse(new_assignments);
 
 
     // Construct a new summand, with or without time.
