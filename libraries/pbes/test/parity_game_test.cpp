@@ -12,7 +12,9 @@
 /// in a format that can be read by a python script.
 
 // #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+
 #define MCRL2_PARITY_GAME_DEBUG
+// #define MCRL2_PARITY_GAME_CREATE_FILES
 
 #include <fstream>
 #include <string>
@@ -91,26 +93,30 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
   pgg.run();
   {
     std::string text = pgg.python_graph();
+#ifdef MCRL2_PARITY_GAME_CREATE_FILES
     std::ofstream to(output_file.c_str());
     to << text << std::endl;
+#endif      
   }
   {
     std::string text = pgg.pgsolver_graph();
+#ifdef MCRL2_PARITY_GAME_CREATE_FILES
     std::ofstream to((output_file + "1").c_str());
     to << text << std::endl;
+#endif      
   }
 }
 
 void test_bes_examples()
 {
-  test_bes(BES1, "bes1.pg", false);
-  test_bes(BES2, "bes2.pg", true);
-  test_bes(BES3, "bes3.pg", true);
-  test_bes(BES4, "bes4.pg", true);
-  test_bes(BES5, "bes5.pg", false);
-  test_bes(BES6, "bes6.pg", true);
-  test_bes(BES7, "bes7.pg", false);
-  test_bes(BES8, "bes8.pg", true);
+  test_bes(BES1, "parity_game_test_bes1.pg", false);
+  test_bes(BES2, "parity_game_test_bes2.pg", true);
+  test_bes(BES3, "parity_game_test_bes3.pg", true);
+  test_bes(BES4, "parity_game_test_bes4.pg", true);
+  test_bes(BES5, "parity_game_test_bes5.pg", false);
+  test_bes(BES6, "parity_game_test_bes6.pg", true);
+  test_bes(BES7, "parity_game_test_bes7.pg", false);
+  test_bes(BES8, "parity_game_test_bes8.pg", true);
 }
 
 int test_main(int argc, char** argv)

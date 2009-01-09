@@ -17,6 +17,7 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/utility.h"
@@ -181,19 +182,22 @@ void test_pbes()
   {
   }
 
+  std::string filename = "write_to_named_text_file.pbes";
   try
   {
     atermpp::aterm t = atermpp::make_term("f(x)");
-    std::string filename = "write_to_named_text_file.pbes";
     atermpp::write_to_named_text_file(t, filename);
     p.load(filename);
     BOOST_CHECK(false); // loading is expected to fail
   }
   catch (mcrl2::runtime_error e)
   {
+    boost::filesystem::remove(boost::filesystem::path(filename));
   }
-  p.save("pbes_test_file.pbes");
-  p.load("pbes_test_file.pbes");
+  filename = "pbes_test_file.pbes";
+  p.save(filename);
+  p.load(filename);
+  boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
 void test_free_variables()

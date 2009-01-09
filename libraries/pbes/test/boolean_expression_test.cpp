@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
+#include <boost/filesystem/operations.hpp>
 #include "mcrl2/pbes/bes.h"
 
 using namespace mcrl2;
@@ -41,6 +42,7 @@ void test_boolean_expressions()
   boolean_equation_system<> q;
   q.load(filename);
   BOOST_CHECK(p == q);
+  boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
 int test_main(int argc, char* argv[])
