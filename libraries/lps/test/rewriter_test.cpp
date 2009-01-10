@@ -18,6 +18,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
@@ -27,7 +28,7 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-const std::string SPECIFICATION =
+const std::string SPECIFICATION1 =
 "sort Natural;                                    \n" 
 "                                                 \n"
 "cons _0: Natural;                                \n"
@@ -81,7 +82,7 @@ const std::string SPECIFICATION =
 
 void test1()
 {
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = mcrl22lps(SPECIFICATION1);
   rewriter r(spec.data());
 
   data_expression n1    = find_mapping(spec.data(), "_1");
@@ -95,11 +96,41 @@ void test1()
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
   
-  cout << mcrl2::core::pp(data_application(plus, make_list(n4, n5))) << endl;
+  // cout << mcrl2::core::pp(data_application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
-  
+  specification spec1=rewrite_lps(spec,r);
+  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
+  BOOST_CHECK(spec1.process().summands().size()==1);
   // test destructor
   rewriter r1 = r;
+}
+
+const std::string SPECIFICATION2=
+"act  c:Pos#Nat;                          \n"
+"proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
+"init P(1+1,2+2);                         \n";
+
+void test2()
+{ specification spec = mcrl22lps(SPECIFICATION2);
+  rewriter r(spec.data());
+  specification spec1=rewrite_lps(spec,r);
+  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
+  BOOST_CHECK(spec1.process().summands().size()==1);
+}
+
+const std::string SPECIFICATION3=
+"act  c:Pos#Nat;                          \n"
+"proc P(a:Pos,b:Nat)=tau.P(a+1,b+1+2)+    \n"
+"                    tau.P(a+1,pred(a))+  \n"
+"                    c(a,0).P(a,b);       \n"
+"init P(1+1,0);                           \n";
+
+void test3()
+{ specification spec = mcrl22lps(SPECIFICATION3);
+  rewriter r(spec.data());
+  specification spec1=rewrite_lps(spec,r);
+  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
+  BOOST_CHECK(spec1.process().summands().size()==2);
 }
 
 int test_main(int argc, char* argv[])
@@ -107,6 +138,8 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test1();
+  test2();
+  test3();
 
   return 0;
 }
