@@ -89,6 +89,17 @@ namespace grape
     coordinate get_coordinate_from_controlpoints(coordinate p_startp, coordinate p_cp, coordinate p_endp, float pos);
 
     /**
+     * Get intersection coordinate of ellipse
+     * @param p_start start coordinate of the transition
+     * @param p_ex ellipse x coordinate
+     * @param p_ey ellipse y coordinate
+     * @param p_width ellipse width
+     * @param p_height ellipse height
+     * @return Returns coordinate on the border of ellipse
+     */
+    coordinate get_coordinate_on_edge_ellipse(coordinate p_start, float p_ex, float p_ey, float p_width, float p_height);
+
+    /**
      * Get intersection coordinate depending on the compound_state type
      * @param p_start start coordinate of the transition
      * @param p_compound_state begin or end state of the transition
@@ -105,7 +116,6 @@ namespace grape
      */
     bool is_inside(coordinate p_poly[], int p_count, const coordinate& p_coord);
 
-// NOTE: Checked methods from here.
     /**
      * Set opengl color, performs a set color, depending on whether the object is selected.
      * @param p_color draw color
@@ -160,6 +170,16 @@ namespace grape
      */
     bool is_on_border_ellipse( const coordinate &p_center, float p_radius_x, float p_radius_y, const coordinate &p_coord );
 
+    /**
+     * Function to see if a coordinate is on the border of an ellipse with the center at the specified coordinate, and with the specified width and height. Note that the y-axis is negative and the origin is the upper left corner.
+     * @param p_center The center cordinate of the reference.
+     * @param p_width Width of the reference.
+     * @param p_height Height of the reference.
+     * @param p_coord The to be checked coordinate.
+     * @return Returns whether the coordinate is on the edge of the ellipse.
+     */
+    grape_direction is_on_border_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord);
+        
     /**
      * Function to see if a coordinate is inside a rectangle with the upper left corner at the specified coordinate, and with the specified width and height. Note that the y-axis is negative and the origin is the upper left corner.
      * @param p_rect_coord The center coordinate of the rectangle.
@@ -284,6 +304,15 @@ namespace grape
     bool is_inside_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord );
 
     /**
+     * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.
+     * @param p_center The coordinate center coordinate of the reference.
+     * @param p_width Width of the reference.
+     * @param p_height Height of the reference.
+     * @param p_coord The to be checked coordinate.
+     */
+    bool is_inside_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord);
+
+    /**
      * Nonterminating transition (arrow) draw function.
      * @param p_begin The begin coordinate of the arrow.
      * @param p_control The control coordinate of the arrow.
@@ -368,23 +397,14 @@ namespace grape
     void draw_tick( const coordinate &p_center, float p_width, float p_height, bool p_selected );
 
     /**
-     * Corner (ellipse) draw function.
-     * @param p_center The center coordinate of the ellipse.
-     * @param p_radius_x The radius of the ellipse, in the direction of the x-axis.
-     * @param p_radius_y The radius of the ellipse, in the direction of the y-axis.
-     * @param p_selected A flag indicating whether the object is selected.
-     */
-    void draw_process_reference_corner(const coordinate &p_center, float p_radius_x, float p_radius_y, bool p_selected);
-
-    /**
      * Process reference draw function.
      * @param p_center The center coordinate of the process reference.
      * @param p_width The width of the process reference.
      * @param p_height The height of the process reference.
      * @param p_selected A flag indicating whether the process reference is selected.
      */
-    void draw_process_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected);
-
+    void draw_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected);
+        
     /**
      * Bounding box draw function.
      * @param p_center The center coordinate of the bounding box.

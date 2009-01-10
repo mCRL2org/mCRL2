@@ -44,7 +44,7 @@ void visualreference_state::draw( void )
   float y = m_object->get_coordinate().m_y-height/2;
 
   // draw reference state
-  draw_process_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
+  draw_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 
   // draw reference state name 
   grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_name().fn_str()), x, x+width, y+height, y+height*0.75, 0.0015f, al_center, al_center );
@@ -58,11 +58,10 @@ void visualreference_state::draw( void )
 
 bool visualreference_state::is_inside( coordinate &p_coord )
 {
-  return is_inside_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
-
+  return is_inside_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
 }
 
 grape_direction visualreference_state::is_on_border( coordinate &p_coord )
 {
-  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+  return is_on_border_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord );
 }
