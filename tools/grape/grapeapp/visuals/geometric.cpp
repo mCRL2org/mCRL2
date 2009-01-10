@@ -712,12 +712,10 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   // render text based on the calculated angle
   if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-//    render_text(p_label_text, p_control.m_x - 0.05f, p_control.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x - 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-//    render_text(p_label_text, p_control.m_x + 0.05f, p_control.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
@@ -767,12 +765,10 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-//    render_text(p_label_text, p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-//    render_text(p_label_text, p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
@@ -822,12 +818,10 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-//    render_text(p_label_text, midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-//    render_text(p_label_text, midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
       grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 

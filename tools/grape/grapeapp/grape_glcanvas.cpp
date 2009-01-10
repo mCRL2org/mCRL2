@@ -450,20 +450,23 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
   {
     coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
 
-    if ( m_touched_visual_object )
+    if ( m_lmouse_down_coordinate.m_x != clicked_coord.m_x || m_lmouse_down_coordinate.m_y != clicked_coord.m_y ) //we are only dragging if there was a displacement
     {
-      // select object
-      object *obj_ptr = m_touched_visual_object->get_selectable_object();
-      if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
+      if ( m_touched_visual_object )
       {
-        m_diagram->select_object( obj_ptr );
+        // select object
+        object *obj_ptr = m_touched_visual_object->get_selectable_object();
+        if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
+        {
+          m_diagram->select_object( obj_ptr );
+        }
+
+        m_dragging = true;
+        
+        m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
+        // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
+        m_touched_visual_object = get_visual_object( obj_ptr );
       }
-
-      m_dragging = true;
-
-      m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
-      // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
-      m_touched_visual_object = get_visual_object( obj_ptr );
     }
   }
 }
@@ -528,10 +531,11 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   {
     released_coordinate.m_y = -1 * ( m_max_size_y - g_cursor_margin );
   }
-
+      
   // Determine if we had touched an object upon mouse down
   if ( m_touched_visual_object && m_touched_visual_object_id >= 0 )
   {
+   // m_dragging = false;
     if ( m_dragging ) // if touched an object and then dragged
     {
       // inform the frame of the performed event.

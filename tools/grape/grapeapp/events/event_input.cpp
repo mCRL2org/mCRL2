@@ -12,6 +12,8 @@
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
+#include "visuals/geometric.h"
+
 #include "visuals/visualobject.h"
 #include "visuals/visualarchitecture_reference.h"
 #include "visuals/visualnonterminating_transition.h"
@@ -251,27 +253,53 @@ bool grape_event_click::Do( void )
     {
       if ( m_vis_obj != 0 ) // Only do something if the mouse clicked on a state.
       {
-        object* begin_object_ptr = m_vis_obj->get_selectable_object();
-        if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == STATE ) )
+        object* begin_object_ptr = m_vis_obj->get_selectable_object();        
+        if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == STATE ) )  // If it is a state
         {
           libgrape::state* designated_state_ptr = static_cast<libgrape::state*> ( begin_object_ptr );
-          // Think of a decent coordinate to place the thing.
-          coordinate coord = { designated_state_ptr->get_coordinate().m_x,
-                               designated_state_ptr->get_coordinate().m_y - designated_state_ptr->get_height() };
-          grape_event_add_initial_designator* event = new
-            grape_event_add_initial_designator( m_main_frame,
-            designated_state_ptr, coord );
+          
+          // Initial values
+          coordinate coord = { designated_state_ptr->get_coordinate().m_x, designated_state_ptr->get_coordinate().m_y + designated_state_ptr->get_height()*0.5 + 0.1 };          
+          coordinate end_coord = get_coordinate_on_edge(coord, designated_state_ptr);
+          coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
+          float displacement = 0.01;
+          
+          // Find a decent coordinate to place the designator           
+          while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)
+          {
+            displacement = -displacement*1.1;
+            coord.m_x = coord.m_x + displacement;
+            // Update values
+            end_coord = get_coordinate_on_edge(coord, designated_state_ptr);
+            mid_coord.m_x = (coord.m_x + end_coord.m_x)*0.5;
+            mid_coord.m_y = (coord.m_y + end_coord.m_y)*0.5;
+          }          
+                 
+          grape_event_add_initial_designator* event = new grape_event_add_initial_designator( m_main_frame, designated_state_ptr, coord );
           m_main_frame->get_event_handler()->Submit( event, true );
         }
-        else if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == REFERENCE_STATE ) )
+        else if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == REFERENCE_STATE ) )  // If it is a reference state
         {
-          libgrape::reference_state* designated_ptr = static_cast<libgrape::reference_state*> ( begin_object_ptr );
-          // Think of a decent coordinate to place the thing.
-          coordinate coord = { designated_ptr->get_coordinate().m_x,
-                               designated_ptr->get_coordinate().m_y - designated_ptr->get_height() };
-          grape_event_add_initial_designator* event = new
-            grape_event_add_initial_designator( m_main_frame,
-            designated_ptr, coord );
+          libgrape::reference_state* designated_reference_ptr = static_cast<libgrape::reference_state*> ( begin_object_ptr );
+          
+          // Initial values
+          coordinate coord = { designated_reference_ptr->get_coordinate().m_x, designated_reference_ptr->get_coordinate().m_y + designated_reference_ptr->get_height()*0.5 + 0.1 };          
+          coordinate end_coord = get_coordinate_on_edge(coord, designated_reference_ptr);
+          coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
+          float displacement = 0.01;
+          
+          // Find a decent coordinate to place the designator           
+          while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)
+          {
+            displacement = -displacement*1.1;
+            coord.m_x = coord.m_x + displacement;
+            // Update values
+            end_coord = get_coordinate_on_edge(coord, designated_reference_ptr);
+            mid_coord.m_x = (coord.m_x + end_coord.m_x)*0.5;
+            mid_coord.m_y = (coord.m_y + end_coord.m_y)*0.5;
+          }          
+                
+          grape_event_add_initial_designator* event = new grape_event_add_initial_designator( m_main_frame, designated_reference_ptr, coord );
           m_main_frame->get_event_handler()->Submit( event, true );
         }
       }
@@ -280,7 +308,7 @@ bool grape_event_click::Do( void )
     case ADD_VISIBLE:
     {
       if ( m_vis_obj != 0 ) // Only do something if the mouse clicked on a state.
-      {
+      {        
         object* begin_object_ptr = m_vis_obj->get_selectable_object();
         if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == CHANNEL ) )
         {
