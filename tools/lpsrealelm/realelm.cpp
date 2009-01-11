@@ -842,19 +842,19 @@ void determine_real_inequalities(const data_expression& e, data_expression_list&
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
-                const std::set < std::pair < data_expression, data_expression > > &inequalities_to_add,
+                const atermpp::vector < data_expression > &inequalities_to_add,
                 std::vector < summand_information > &summand_info,
                 context_type& context, 
                 const rewriter& r, 
                 identifier_generator& variable_generator)
-{
-  for(std::set < std::pair < data_expression, data_expression > >::const_iterator i=inequalities_to_add.begin();
-                        i!=inequalities_to_add.end(); ++i)
+{ assert(inequalities_to_add.size() % 2==0);
+  for(atermpp::vector < data_expression > ::const_iterator i=inequalities_to_add.begin();
+                        i!=inequalities_to_add.end(); i=i+2)
   {
     data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
-    context.push_back(real_representing_variable(xi,i->first, i->second));
+    context.push_back(real_representing_variable(xi,*i, *(i+1)));
     if (core::gsVerbose)
-    { gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(i->first).c_str(), pp(i->second).c_str());
+    { gsVerboseMsg("Introduced variable %s for < %s, %s >\n", pp(xi).c_str(), pp(*i).c_str(), pp(*(i+1)).c_str());
     }
     // print_debug(summand_info);
     for(std::vector < summand_information >::iterator j = summand_info.begin();
@@ -872,11 +872,11 @@ static void add_postponed_inequalities_to_context(
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
-                std::set < std::pair < data_expression, data_expression > > &inequalities_to_add,
+                atermpp::vector < data_expression > &inequalities_to_add,
                 data_expression_list l, 
                 context_type& context, 
                 const rewriter& r)
-{
+{ assert(inequalities_to_add.size() % 2==0);
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
     if (is_inequality(*i))
@@ -890,17 +890,24 @@ static void add_inequalities_to_context_postponed(
       //  right = r(negate(right));
       //}
       if (left!=real_zero())
-      {
-        context_type::const_iterator c;
-        for(c=context.begin() ; c!=context.end(); ++c)
+      { bool pair_is_new(true);
+        for(context_type::const_iterator c=context.begin() ; c!=context.end() && pair_is_new; ++c)
         { if ((c->get_lowerbound()==left) && (c->get_upperbound()==right))
-          { break;
+          { pair_is_new=false;
           }
         }
-        if(c == context.end())
-        {
-          
-          inequalities_to_add.insert(std::pair< data_expression, data_expression >(left,right));
+        if (pair_is_new)
+        { for(atermpp::vector < data_expression >::const_iterator j=inequalities_to_add.begin() ; 
+                     j!=inequalities_to_add.end() && pair_is_new ; j=j+2)
+          { if ((*j==left) && (*(j+1)==right))
+            { pair_is_new=false;
+            }
+          }
+          if(pair_is_new)
+          {
+            inequalities_to_add.push_back(left);
+            inequalities_to_add.push_back(right);
+          }
         }
       }
     }
@@ -1864,7 +1871,8 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
   // atermpp::map<summand, data_expression_list> summand_real_conditions;
   // atermpp::map<summand, atermpp::map<data_expression, data_expression> > summand_real_nextstate_map;
 
-  std::set < std::pair < data_expression,data_expression> > new_inequalities;
+  atermpp::vector < data_expression > new_inequalities; // New inequalities are stored in two consecutive positions;
+                                                        // I.e., for t<u, t is at position i, and u at position i+1.
   int iteration = 0;
   summand_list summands;
   do
@@ -1928,6 +1936,8 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         //zeta_condition = data_expression_map_replace_list(zeta_condition, i->get_summand_real_nextstate_map());
 
         // original condition of the summand && zeta[x := g(x)]
+        // std::cerr << "Zeta_condition " << zeta_condition << "\n";
+        // std::cerr << "get_summand_real_condition " << i->get_summand_real_conditions()  << "\n";
         data_expression_list condition = zeta_condition + i->get_summand_real_conditions();
         // condition = normalize_inequalities(condition, r);
 

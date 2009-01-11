@@ -28,6 +28,7 @@ Term realelm_data_expression_map_replace(Term t, const MapContainer& replacement
 
 // Terms that must be protected are put in the atermpp set below.
 static atermpp::set < data_expression > protective_set;
+static atermpp::set < data_expression_list > protective_list_set;
 void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
 
 class real_representing_variable
@@ -84,7 +85,8 @@ class summand_information
       new_values_for_xi_variables(nv),
       summand_real_conditions(src),
       summand_real_nextstate_map(srnm)
-    {}
+    { protective_list_set.insert(src);
+    }
 
     mcrl2::lps::summand get_summand() const
     { return smd;
