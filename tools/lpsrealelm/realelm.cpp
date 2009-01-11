@@ -47,7 +47,7 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
   ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
   ATermList rstl = ATmakeList3((ATerm) r, (ATerm) s, (ATerm) t);
 
-  ATermList result = ATmakeList(18,
+  ATermList result = ATmakeList(21,
     // General ad-hoc rewrite rules, should be added in the data implementation
     // r+0=r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, real_zero), r),
@@ -57,6 +57,8 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(r, gsMakeDataExprNeg(r)), real_zero),
     // -r+r=0
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprAdd(gsMakeDataExprNeg(r), r), real_zero),
+    // r- -s=r+s
+    (ATerm) gsMakeDataEqn(rsl,nil,gsMakeDataExprSubt(r,gsMakeDataExprNeg(s)),gsMakeDataExprAdd(r,s)),
     // r-0=r
     (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprSubt(r, real_zero), r),
     // 0-r=-r
@@ -87,7 +89,11 @@ data_specification add_ad_hoc_real_equations(const data_specification& specifica
     // -(r+s)=-r+-s
     (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprAdd(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), gsMakeDataExprNeg(s))),
     // -(r-s)=-r+s
-    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprSubt(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), s))
+    (ATerm) gsMakeDataEqn(rsl, nil, gsMakeDataExprNeg(gsMakeDataExprSubt(r,s)), gsMakeDataExprAdd(gsMakeDataExprNeg(r), s)), 
+    // (r+s)/t=r/t+s/t
+    (ATerm) gsMakeDataEqn(rstl,nil,gsMakeDataExprDivide(gsMakeDataExprAdd(r,s),t),gsMakeDataExprAdd(gsMakeDataExprDivide(r,t),gsMakeDataExprDivide(s,t))),
+    // (r-s)/t=r/t-s/t
+    (ATerm) gsMakeDataEqn(rstl,nil,gsMakeDataExprDivide(gsMakeDataExprSubt(r,s),t),gsMakeDataExprSubt(gsMakeDataExprDivide(r,t),gsMakeDataExprDivide(s,t)))
   );
 
   return set_equations(specification, specification.equations() + data_equation_list(result));
@@ -472,7 +478,6 @@ std::pair<data_expression, data_expression> split_variables_and_constants(const 
   }
   else
   {
-    // gsDebugMsg("e: %P (%T)\n", (ATermAppl)e, (ATermAppl)e);
     assert(is_number(e));
     result = std::make_pair(real_zero(), e);
   }
@@ -1138,6 +1143,10 @@ void group_inequalities(const data_variable& v, const data_expression_list& ineq
 static
 data_expression_list remove_redundant_inequalities(const data_expression_list &inequalities, const rewriter &r)
 {
+  if (inequalities.empty())
+  { return inequalities;
+  }
+
   // If false is among the inequalities, [false] is the minimal result.
   if(std::find(inequalities.begin(), inequalities.end(), false_()) != inequalities.end())
   { return push_front(data_expression_list(),false_());
@@ -1147,23 +1156,28 @@ data_expression_list remove_redundant_inequalities(const data_expression_list &i
   for(data_expression_list::iterator e1=inequalities.begin();
                             e1!=inequalities.end(); ++e1)
   { // Create a list of inequalities where e1 is negated.
-    data_expression_list inconsistent_inequalities;
-    for(data_expression_list::iterator e2=resulting_inequalities.begin();
-                            e2!=resulting_inequalities.end(); ++e2)
-    { // copy resulting inequalities with e1 negated.
-      inconsistent_inequalities=push_front(inconsistent_inequalities,(*e1==*e2?negate_less(*e2):*e2));
+    if (is_equal_to(*e1))
+    { // Do nothing.
     }
-    if (is_inconsistent(inconsistent_inequalities,r))
-    {  
-      // copy resulting inequalities with e1 negated.
-      data_expression_list tempresult;
+    else 
+    { data_expression_list inconsistent_inequalities;
       for(data_expression_list::iterator e2=resulting_inequalities.begin();
                               e2!=resulting_inequalities.end(); ++e2)
-      { if (*e1!=*e2)
-        { tempresult=push_front(tempresult,*e2);
-        }
+      { // copy resulting inequalities with e1 negated.
+        inconsistent_inequalities=push_front(inconsistent_inequalities,(*e1==*e2?negate_less(*e2):*e2));
       }
-      resulting_inequalities=tempresult;
+      if (is_inconsistent(inconsistent_inequalities,r))
+      {  
+        // copy resulting inequalities with e1 negated.
+        data_expression_list tempresult;
+        for(data_expression_list::iterator e2=resulting_inequalities.begin();
+                                e2!=resulting_inequalities.end(); ++e2)
+        { if (*e1!=*e2)
+          { tempresult=push_front(tempresult,*e2);
+          }
+        }
+        resulting_inequalities=tempresult;
+      }
     }
   }
   return resulting_inequalities;
@@ -1187,10 +1201,9 @@ static void fourier_motzkin(data_expression_list& inequalities,
                      data_variable_list variables, 
                      const rewriter& r)
 {
-  // std::cerr << "Fourier_Motzkin " << pp(inequalities) << "\n";
-  inequalities = gauss_elimination(inequalities, variables, r);
-
   gsDebugMsg("Starting Fourier-Motzkin elimination on system produced by Gauss elimination on %P\n", (ATermList)inequalities);
+  inequalities = gauss_elimination(inequalities, variables, r);
+  inequalities = normalize_inequalities(inequalities, r);
 
   // At this stage, the variables that should be eliminated only occur in
   // inequalities. Group the inequalities into positive, 0, and negative
@@ -1202,11 +1215,6 @@ static void fourier_motzkin(data_expression_list& inequalities,
     data_expression_list negative_variables;
 
     group_inequalities(*i, inequalities, positive_variables, zero_variables, negative_variables);
-
-    // gsDebugMsg("equations with zero occurrence %P\n", (ATermList)zero_variables);
-    // gsDebugMsg("equations with positive occurrence %P\n", (ATermList)positive_variables);
-    // gsDebugMsg("equations with negative occurrence %P\n", (ATermList)negative_variables);
-
     data_expression_list new_inequalities = zero_variables;
 
     // Variables are grouped, now construct new inequalities as follows:
@@ -1245,16 +1253,10 @@ static void fourier_motzkin(data_expression_list& inequalities,
         new_inequalities = push_front(new_inequalities, new_inequality);
       }
     }
-    new_inequalities = normalize_inequalities(new_inequalities, r);
-    if (is_inconsistent(new_inequalities,r))
-    { inequalities=push_front(data_expression_list(),false_());
-    }
-    else 
-    { inequalities = remove_redundant_inequalities(new_inequalities,r);
-    }
+    inequalities = normalize_inequalities(new_inequalities, r);
   }
   
-  // std::cerr << "Fourier_Motzkin-result " << pp(inequalities) << "\n";
+  inequalities = remove_redundant_inequalities(inequalities,r);
 }
 
 /// \brief Compute a concrete inequality given a pair of data expressions and a
@@ -1945,11 +1947,11 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // process parameters of sort Real. 
 
         if (core::gsVerbose)
-        { std::cerr << "inequalities before fourier-motzkin: " << pp(condition) << "\n";
+        { std::cerr << "Inequalities before Fourier-Motzkin: " << pp(condition) << "\n";
         }
         fourier_motzkin(condition, i->get_summand().summation_variables(), r);
         if (core::gsVerbose)
-        { std::cerr << "inequalities after fourier-motzkin: " << pp(condition) << "\n";
+        { std::cerr << "Inequalities after Fourier-Motzkin: " << pp(condition) << "\n";
         }
 
         // First check which of these inequalities are equivalent to concrete values of xi variables.
