@@ -1,0 +1,32 @@
+[section: Terms]
+
+The mCRL2 Library contains many different kinds of (boolean) terms.
+
+[table Overview of term types
+    [[type] [class]]
+    [ [action formulas]        [ =action_formula= ] ]
+    [ [modal formulas]         [ =state_formula= ] ]
+    [ [regular formulas]       [ =regular_formula= ] ]
+    [ [predicate formulas]     [ =pbes_expression= ] ]
+    [ [propositional formulas] [ =boolean_expression= ] ]
+]
+
+[section: Grammars]
+
+grammars for =pbes_expression= and =boolean_expression=.
+
+[endsect]
+
+[section: Term traits]
+
+term traits
+
+[endsect]
+
+[section: Term visitors]
+
+visitors and builders
+
+[endsect]
+
+[endsect]

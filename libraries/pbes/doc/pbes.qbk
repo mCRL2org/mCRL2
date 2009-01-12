@@ -1,6 +1,6 @@
 [section: Parameterised Boolean Equation Systems]
 A Parameterised Boolean Equation System (PBES) is a triple ['(E, I, V)],
-with /E/ an ordered sequence of equations of the form
+with /E/ an ordered sequence of equations of the form 
 
 __pbes__
 

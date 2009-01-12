@@ -1,0 +1,98 @@
+
+[section: Boolean Equation Systems]
+
+[section: Definition]
+A Boolean Equation System (BES) is a PBES in which every predicate variable
+is of type boolean and every formula __phi adheres to the following grammar
+[endsect]
+
+[section: Boolean variables]
+Boolean variables are represented by the class =boolean_variable=.
+The only attribute they have is a name.
+[endsect]
+
+[section: Boolean expressions]
+Boolean expressions are represented by the class =boolean_expression=.
+The following operators are defined on boolean expressions.
+Let =x= and =y= be two boolean expressions.
+
+[table Operations on boolean types
+    [[Expression] [Meaning]]
+    [ [ `true_()     `                           ] [the value true            ]]
+    [ [ `false_()    `                           ] [the value false           ]]
+    [ [ `not_(x)     ` or [^ !x          ]       ] [negation                  ]]
+    [ [ `and_(x, y)  ` or [^ x && y      ]       ] [conjunction               ]]
+    [ [ `or_(x, y)   ` or [^ x || y      ]       ] [disjunction               ]]
+    [ [ `imp(x, y)   `                           ] [implication               ]]
+]
+
+There are also recognize functions available to determine the type of a
+boolean expression. For example, if `t` is a boolean expression, then `is_and(t)`
+tells if `t` is a conjunction. Finally, there are accessor functions for decomposing
+a boolean expression. For example, if `t` is a conjunction, then the operands of
+`t` are given by `left(t)` and `right(t)`.
+
+All of these operations on boolean expressions are defined in the traits class
+`core::term_traits<boolean_expression>`. This is done to support generic algorithms
+that work both for both BES and PBES expressions.
+
+[h4 example]
+  typedef core::term_traits<boolean_expression> tr;
+  boolean_variable x("X");
+  boolean_variable y("Y");
+  boolean_expression z = tr::and_(x, y);
+  if (tr::is_and(z))
+  {
+  	boolean_expression x1 = tr::left(z);
+  	boolean_expression y1 = tr::right(z);
+  	assert(x == x1);
+  	assert(y == y1);
+  }
+
+[endsect]
+
+[section: Boolean equations]
+Boolean equations are represented by the class =boolean_equation=. A boolean
+equation has a symbol (__mu or __nu), a variable on the left hand side and
+a formula on the right hand side.
+
+[h4 example]
+  boolean_equation e = ...;
+  boolean_variable x = e.variable();
+  boolean_expression phi = e.formula();
+  fixpoint_symbol sigma = e.symbol();
+
+[note
+Boolean equations are internally stored using ATerms. However, it is highly
+unlikely that boolean equations are shared in memory, so this has to be
+changed.
+]
+[endsect]
+
+[section: Boolean equation systems]
+Boolean equation systems are represented by the class [^template<typename Container> class boolean_equation_system].
+The template argument =Container= determines how the equations are stored internally.
+This is done to give the programmer the choice of the most optimal representation
+for algorithms on BESs. The default container type is =atermpp::vector<boolean_equation>=.
+
+[h4 example]
+  // load a BES from file
+  boolean_equation_system<> bes1;
+  bes1.load("bes1.bes");
+
+  // print the equations to standard output
+  for (boolean_equation_system<>::iterator i = bes1.equations().begin(); i != bes1.equations().end(); ++i)
+  {
+  	std::cout << pp(*i) << std::endl;
+  }
+
+  // print the initial state
+  boolean_expression init = bes1.initial_state();
+  std::cout << "initial state: " << pp(init) << std::endl;
+  
+  // solve the BES
+  bool b = gauss_elimination(bes1);
+
+[endsect] [/ Class overview]
+
+[endsect]

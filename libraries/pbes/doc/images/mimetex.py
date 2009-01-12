@@ -6,5 +6,4 @@ for file in os.listdir('.'):
         source = file
         target = file[:-4] + '.gif'
         os.system('mimetex -f %s -e ../html/images/%s' % (source, target))
-    
-raw_input('yes')
+
