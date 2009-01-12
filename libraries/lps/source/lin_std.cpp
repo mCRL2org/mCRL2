@@ -3988,7 +3988,10 @@ static stacklisttype *new_stack(
       //create recogniser function isempty
       stack->opns->empty = gsMakeOpId(fresh_name("isempty"),
         gsMakeSortArrow1(stack->opns->stacksort,gsMakeSortExprBool()));
-      //create structured sort stack->opns->stacksort
+      //create structured sort
+      //  Stack = struct emptystack?is_empty
+      //               | push(getstate: Pos, getx1: S1, ..., getxn: Sn, pop: Stack)
+      //               ;
       ATermAppl sc_emptystack = gsMakeStructCons(
         gsGetName(stack->opns->emptystack), ATmakeList0(), gsGetName(stack->opns->empty));
       ATermList sp_push = ATmakeList0();
@@ -5018,6 +5021,7 @@ static enumeratedtype *create_enumeratedtype
       snprintf(scratch1,STRINGLENGTH,"Enum%d",n);
       ATermAppl sort_id = gsMakeSortId(fresh_name(scratch1));
       //create structured sort
+      //  Enumi = struct en_i | ... | e0_i;
       ATermList struct_conss = ATmakeList0();
       for(j=0 ; (j<n) ; j++)
       {
