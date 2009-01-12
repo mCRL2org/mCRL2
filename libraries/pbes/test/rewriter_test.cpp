@@ -207,10 +207,8 @@ void test_enumerate_quantifiers_rewriter()
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
-  // These tests fail because of different orderings of subterms in the resulting normal forms.
-  // test_expressions(R, "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
-  // test_expressions(R, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(0) && Y(1) && Y(2) && Y(3)");
-
+  test_expressions(R, "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
+  test_expressions(R, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
   test_expressions(R, "(Y(0) && Y(1)) => (Y(0) && Y(1))"                                , "true");
   test_expressions(R, "exists b: Bool. val(if(b, false, b))"                            , "val(false)");
   test_expressions(R, "exists b: Bool. W(b)"                                            , "W(true) || W(false)");

@@ -660,7 +660,14 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return core::detail::gsMakePBESAnd(p,q);
+      if (p < q)
+      {
+        return core::detail::gsMakePBESAnd(p,q);
+      }
+      else
+      {
+        return core::detail::gsMakePBESAnd(q,p);
+      }
     }
 
     /// \brief Make a disjunction
@@ -670,7 +677,14 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return core::detail::gsMakePBESOr(p,q);
+      if (p < q)
+      {
+        return core::detail::gsMakePBESOr(p,q);
+      }
+      else
+      {
+        return core::detail::gsMakePBESOr(q,p);
+      }
     }
 
     /// \brief Make an implication
