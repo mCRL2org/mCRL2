@@ -225,21 +225,23 @@ void test_free_variables()
   }
 }
 
-void test_pbes_expression_builder()
-{
-  specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
-  state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
-  bool timed = false;
-  pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
-
-  for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-  {
-    const pbes_expression& q = i->formula();
-    pbes_expression_builder<pbes_expression> builder;
-    pbes_expression q1 = builder.visit(q);
-    BOOST_CHECK(q == q1);
-  }
-}
+// No longer valid due to that the order of and_ and or_ may be changed.
+// 
+// void test_pbes_expression_builder()
+// {
+//   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
+//   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
+//   bool timed = false;
+//   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
+// 
+//   for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+//   {
+//     const pbes_expression& q = i->formula();
+//     pbes_expression_builder<pbes_expression> builder;
+//     pbes_expression q1 = builder.visit(q);
+//     BOOST_CHECK(q == q1);
+//   }
+// }
 
 void test_quantifier_rename_builder()
 {
@@ -343,7 +345,6 @@ int test_main(int argc, char** argv)
   test_pbes();
   // test_xyz_generator();
   test_free_variables();
-  test_pbes_expression_builder();
   test_quantifier_rename_builder();
   test_complement_method_builder();
   test_pbes_expression();
