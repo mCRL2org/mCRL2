@@ -853,7 +853,7 @@ ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context)
 }     
 
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls)
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive)
 {
   assert(gsIsSortStruct(sort_struct));
   assert(gsIsSortId(sort_id));
@@ -884,8 +884,10 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
     {
       ATermAppl struct_proj = ATAgetFirst(struct_projs);
       ATermAppl proj_name = ATAgetArgument(struct_proj, 0);
-      ATermAppl proj_sort = impl_exprs_appl(ATAgetArgument(struct_proj, 1),
-        p_substs, p_data_decls);
+      ATermAppl proj_sort = ATAgetArgument(struct_proj, 1);
+      if (recursive) {
+        proj_sort = impl_exprs_appl(proj_sort, p_substs, p_data_decls);
+      }
       struct_cons_sorts = ATinsert(struct_cons_sorts, (ATerm) proj_sort);
       //store projection operation in proj_ops and projs
       if (!gsIsNil(proj_name)) {

@@ -75,8 +75,9 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
 ///       the context of sort_struct
 /// \post an implementation of sort_struct represented by sort sort_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
+///       if recursive, then the sorts of the projection functions are also implemented
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre sort_elt and sort_list are sort expressions.
 /// \return the list of data equations belonging to the list sort sort_list, with

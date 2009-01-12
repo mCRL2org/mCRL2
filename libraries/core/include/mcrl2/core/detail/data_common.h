@@ -110,11 +110,19 @@ inline bool data_decls_equal(t_data_decls data_decls1,
     ATisEqual(data_decls1.data_eqns, data_decls2.data_eqns);
 }
 
+/// \pre spec is a process specification, an LPS, a PBES,
+///      an action rename specification, and a data specification
 /// \ret data declarations of spec
 inline t_data_decls get_data_decls(ATermAppl spec)
 {
+  assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   t_data_decls data_decls;
-  ATermAppl data_spec =  ATAgetArgument(spec, 0);
+  ATermAppl data_spec;
+  if (gsIsDataSpec(spec)) {
+    data_spec = spec;
+  } else {
+    data_spec = ATAgetArgument(spec, 0);
+  }
   data_decls.sorts =     ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
   data_decls.cons_ops =  ATLgetArgument(ATAgetArgument(data_spec, 1), 0);
   data_decls.ops =       ATLgetArgument(ATAgetArgument(data_spec, 2), 0);
@@ -122,6 +130,8 @@ inline t_data_decls get_data_decls(ATermAppl spec)
   return data_decls;
 }
 
+/// \pre spec is a process specification, an LPS, a PBES,
+///      an action rename specification, and a data specification
 /// \ret spec in which the data declarations are replaced by data_decls
 inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
