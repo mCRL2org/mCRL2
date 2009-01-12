@@ -105,14 +105,33 @@ ATermAppl gsMakeSortExprSet(ATermAppl SortExpr);
 ATermAppl gsMakeSortExprBag(ATermAppl SortExpr);
 
 // Auxiliary functions concerning implemented sort expressions
-///\return Term is a SortExprList
-bool gsIsSortExprList(ATermAppl Term);
 
-///\return Term is a SortExprSet
-bool gsIsSortExprSet(ATermAppl Term);
+///\return SortExpr is a sort expression for Pos
+bool gsIsSortExprPos(ATermAppl SortExpr);
 
-///\return Term is a SortExprBag
-bool gsIsSortExprBag(ATermAppl Term);
+///\return SortExpr is a sort expression for Nat
+bool gsIsSortExprNat(ATermAppl SortExpr);
+
+///\return SortExpr is a sort expression for NatPair
+bool gsIsSortExprNatPair(ATermAppl SortExpr);
+
+///\return SortExpr is a sort expression for Int
+bool gsIsSortExprInt(ATermAppl SortExpr);
+
+///\return SortExpr is a sort expression for Real
+bool gsIsSortExprReal(ATermAppl SortExpr);
+
+///\return SortExpr is a numeric sort expression
+bool gsIsSortExprNumeric(ATermAppl SortExpr);
+
+///\return SortExpr is a SortExprList
+bool gsIsSortExprList(ATermAppl SortExpr);
+
+///\return SortExpr is a SortExprSet
+bool gsIsSortExprSet(ATermAppl SortExpr);
+
+///\return SortExpr is a SortExprBag
+bool gsIsSortExprBag(ATermAppl SortExpr);
 
 ///\return Prefix for implemented structured sort
 const char* gsSortStructPrefix();

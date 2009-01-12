@@ -571,6 +571,7 @@ static long insertconstructor(
   return insertConstructorOrFunction(constructor,func);
 }
 
+// TODO Aad: This function always yields true, since every defined sort has an if
 static bool hasif(ATermAppl sort,
                specificationbasictype *spec)
 {
@@ -622,6 +623,51 @@ static void insert_data_decls(t_data_decls data_decls, specificationbasictype *s
     insertequation(ATAgetFirst(l), spec);
   }
 }
+
+///\pre sort_expr is a numeric sort expression (Pos, Nat, Int, or Real)
+///\ret All declarations needed for the implementation of sort_expr are inserted in spec
+///     using the insertsort, insertconstructor, insertmapping and insertequation
+///     functions (in the same order)
+static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictype *spec)
+{
+  assert(gsIsSortExprNumeric(sort_expr));
+  //initialise local variables for storing the generated declarations
+  t_data_decls data_decls;
+  initialize_data_decls(&data_decls);
+  //add sort Real, if needed
+  if (gsIsSortExprReal(sort_expr)) {
+    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
+      impl_standard_functions_sort(gsMakeSortIdReal(), &data_decls);
+      impl_sort_real(&data_decls, false);
+    }
+  }
+  //add sort Int, if needed
+  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr)) {
+    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+      impl_standard_functions_sort(gsMakeSortIdInt(), &data_decls);
+      impl_sort_int(&data_decls, false);
+    }
+  }
+  //add sort Nat, if needed
+  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr) || gsIsSortExprNat(sort_expr)) {
+    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
+      impl_standard_functions_sort(gsMakeSortIdNatPair(), &data_decls);
+      impl_sort_nat_pair(&data_decls);
+    }
+    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+      impl_standard_functions_sort(gsMakeSortIdNat(), &data_decls);
+      impl_sort_nat(&data_decls, false);
+    }
+  }
+  //add sort Pos, if needed
+  if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+    impl_standard_functions_sort(gsMakeSortIdPos(), &data_decls);
+    impl_sort_pos(&data_decls);
+  }
+  //add generated declarations to spec
+  insert_data_decls(data_decls, spec);
+}
+
 
 static ATermList getnames(ATermAppl multiAction)
 { ATermList result=ATempty;
@@ -3855,8 +3901,13 @@ static stacklisttype *new_stack(
       }
     }
     else
-    { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
-                                    gsMakeSortExprPos()); 
+    { 
+      ATermAppl se_pos = gsMakeSortExprPos();
+      //declare sort Pos, if needed
+      if (!existsort(se_pos)) {
+        insert_numeric_sort_decls(se_pos, spec);
+      }
+      stack->stackvar=gsMakeDataVarId(fresh_name(s3), se_pos);
     }
     ATprotectAppl(&(stack->stackvar));
     insertvariable(stack->stackvar,ATtrue);
@@ -3883,6 +3934,11 @@ static stacklisttype *new_stack(
       { gsErrorMsg("cannot allocate memory for stack operations\n");
         exit(1);
       }
+      ATermAppl se_pos = gsMakeSortExprPos();
+      //declare sort Pos, if needed
+      if (!existsort(se_pos)) {
+        insert_numeric_sort_decls(se_pos, spec);
+      }
       //initialise stack->opns
       stack->opns->stacksort=gsMakeSortId(fresh_name("Stack"));
       stack->opns->getstate=NULL;
@@ -3901,7 +3957,7 @@ static stacklisttype *new_stack(
       ATprotectAppl(&(stack->opns->empty));
       //create projection function getstate
       stack->opns->getstate = gsMakeOpId(fresh_name("getstate"),
-        gsMakeSortArrow1(stack->opns->stacksort, gsMakeSortExprPos()));
+        gsMakeSortArrow1(stack->opns->stacksort, se_pos));
       //create projection functions getx1 to getxn for parameters x1,...,xn
       for (ATermList l = parameterlist ; !ATisEmpty(l) ; l = ATgetNext(l)) {
         ATermAppl par = ATAgetFirst(l);
@@ -3923,7 +3979,7 @@ static stacklisttype *new_stack(
       for (ATermList l = ATreverse(stack->opns->sorts); !ATisEmpty(l); l = ATgetNext(l)) {
         push_sort_domain = ATinsert(push_sort_domain, ATgetFirst(l));
       }
-      push_sort_domain = ATinsert(push_sort_domain, (ATerm) gsMakeSortExprPos());
+      push_sort_domain = ATinsert(push_sort_domain, (ATerm) se_pos);
       stack->opns->push = gsMakeOpId(fresh_name("push"),
         gsMakeSortArrow(push_sort_domain, stack->opns->stacksort));
       //create constructor function emptystack
@@ -7557,8 +7613,8 @@ static ATermAppl makesingleultimatedelaycondition(
 
   if(!ATisEmpty(used_sumvars)) 
   { // Make a new data equation.
-    if (!existsort(realsort))
-    { insertsort(realsort,spec);
+    if (!existsort(realsort)) {
+      insert_numeric_sort_decls(realsort, spec);
     }
     ATermAppl newopid = gsMakeOpId(fresh_name("ExistsFun"),
       gsMakeSortArrowList(getsorts(variables), 
@@ -7580,9 +7636,9 @@ static ATermAppl getUltimateDelayCondition(
                  ATermAppl timevariable,
                  specificationbasictype *spec)
 {  
-  if (!existsort(realsort))
-    { insertsort(realsort,spec);
-    }
+  if (!existsort(realsort)) {
+    insert_numeric_sort_decls(realsort, spec);
+  }
 
   for (ATermList walker=sumlist; (walker!=ATempty);
                                walker=ATgetNext(walker))

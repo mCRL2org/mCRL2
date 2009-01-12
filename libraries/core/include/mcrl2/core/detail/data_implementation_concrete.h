@@ -137,7 +137,8 @@ void impl_sort_pos(t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Nat is added to *p_data_decls
-void impl_sort_nat(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_nat(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort PairNat is added to *p_data_decls
@@ -145,11 +146,13 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Int is added to *p_data_decls
-void impl_sort_int(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_int(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Real is added to *p_data_decls
-void impl_sort_real(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_real(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre sort is a sort expression that adheres to the internal syntax after
 ///     data implementation

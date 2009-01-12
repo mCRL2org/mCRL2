@@ -179,8 +179,7 @@ ATermAppl implement_data_spec(ATermAppl spec)
   data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
   data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
+  //add implementation of sort Bool
   impl_sort_bool(&data_decls);
   //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
@@ -236,8 +235,7 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
   data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
   data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
+  //add implementation of sort Bool
   impl_sort_bool(&data_decls);
   //add new data declarations to spec
   lps_spec = add_data_decls(lps_spec, data_decls);
@@ -473,8 +471,7 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec)
   data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
   data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
-  //add implementation of sort Pos and Bool
-  impl_sort_pos(&data_decls);
+  //add implementation of sort Bool
   impl_sort_bool(&data_decls);
   //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
@@ -529,8 +526,12 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     part = sort_id;
   } else if (gsIsSortId(part)) {
     //part is a sort identifier; add data declarations for this sort, if needed
-    if (ATisEqual(part,gsMakeSortIdNat()))
-    {
+    if (ATisEqual(part,gsMakeSortIdPos())) {
+      //add implementation of sort Pos, if necessary
+      if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+        impl_sort_pos(p_data_decls);
+      }
+    } else if (ATisEqual(part,gsMakeSortIdNat())) {
       //add implementation of sort Nat, if necessary
       if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
         impl_sort_nat(p_data_decls);
@@ -1812,10 +1813,10 @@ void impl_sort_pos(t_data_decls *p_data_decls)
     ), p_data_decls->data_eqns);
 }
 
-void impl_sort_nat(t_data_decls *p_data_decls)
+void impl_sort_nat(t_data_decls *p_data_decls, bool recursive)
 {
   //add implementation of sort NatPair, if necessary
-  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
+  if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
     impl_sort_nat_pair(p_data_decls);
   }
   //Declare sort Nat
@@ -2136,6 +2137,10 @@ void impl_sort_nat(t_data_decls *p_data_decls)
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
          gsMakeDataExprMod(p, q))
     ), p_data_decls->data_eqns);
+  //add implementation of sort Pos, if necessary
+  if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+    impl_sort_pos(p_data_decls);
+  }
 }
 
 void impl_sort_nat_pair(t_data_decls *p_data_decls)
@@ -2224,7 +2229,7 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls)
     ), p_data_decls->data_eqns);
 }
 
-void impl_sort_int(t_data_decls *p_data_decls)
+void impl_sort_int(t_data_decls *p_data_decls, bool recursive)
 {
   //Declare sort Int
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdInt());
@@ -2497,12 +2502,12 @@ void impl_sort_int(t_data_decls *p_data_decls)
          gsMakeDataExprCNeg(gsMakeDataExprExp(p, n)))
     ), p_data_decls->data_eqns);
   //add implementation of sort Nat, if necessary
-  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+  if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     impl_sort_nat(p_data_decls);
   }
 }
 
-void impl_sort_real(t_data_decls *p_data_decls)
+void impl_sort_real(t_data_decls *p_data_decls, bool recursive)
 {
   //Declare sort Real
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdReal());
@@ -2635,7 +2640,7 @@ void impl_sort_real(t_data_decls *p_data_decls)
       (ATerm) gsMakeDataEqn(pxyl, nil, gsMakeDataExprRedFracHlp(gsMakeDataExprCReal(x, p), y), gsMakeDataExprCReal(gsMakeDataExprAdd(gsMakeDataExprCInt(gsMakeDataExprCNat(p)), gsMakeDataExprMult(y, x)), gsMakeDataExprInt2Pos(x)))
       ), p_data_decls->data_eqns);
   //add implementation of sort Int, if necessary
-  if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+  if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
     impl_sort_int(p_data_decls);
   }
 }

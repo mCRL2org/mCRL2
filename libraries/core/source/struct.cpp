@@ -903,7 +903,6 @@ ATermAppl gsMakeSortExprReal()
   return gsMakeSortIdReal();
 }
 
-//Creation for system defined sort expressions list/set/bag
 ATermAppl gsMakeSortExprList(ATermAppl SortExpr)
 {
   return gsMakeSortCons(gsMakeSortList(), SortExpr);
@@ -919,7 +918,33 @@ ATermAppl gsMakeSortExprBag(ATermAppl SortExpr)
   return gsMakeSortCons(gsMakeSortBag(), SortExpr);
 }
 
-//Recognition functions for system defined sort expressions list/set/bag
+//Recognition functions for system defined sort expressions
+
+bool gsIsSortExprPos(ATermAppl SortExpr) {
+  return ATisEqual(SortExpr, gsMakeSortExprPos());
+}
+
+bool gsIsSortExprNat(ATermAppl SortExpr) {
+  return ATisEqual(SortExpr, gsMakeSortExprNat());
+}
+
+bool gsIsSortExprNatPair(ATermAppl SortExpr) {
+  return ATisEqual(SortExpr, gsMakeSortExprNatPair());
+}
+
+bool gsIsSortExprInt(ATermAppl SortExpr) {
+  return ATisEqual(SortExpr, gsMakeSortExprInt());
+}
+
+bool gsIsSortExprReal(ATermAppl SortExpr) {
+  return ATisEqual(SortExpr, gsMakeSortExprReal());
+}
+
+bool gsIsSortExprNumeric(ATermAppl SortExpr)
+{
+  return IsPNIRSort(SortExpr);
+}
+
 bool gsIsSortExprList(ATermAppl Term)
 {
   if (!gsIsSortCons(Term))
@@ -4717,29 +4742,32 @@ bool gsIsFixpoint(ATermAppl Term)
 bool IsPNSort(ATermAppl SortExpr)
 {
   return
-    ATisEqual(SortExpr, gsMakeSortExprPos()) ||
-    ATisEqual(SortExpr, gsMakeSortExprNat());
+    gsIsSortExprPos(SortExpr) ||
+    gsIsSortExprNat(SortExpr);
 }
 
 bool IsPNISort(ATermAppl SortExpr)
 {
   return
-    IsPNSort(SortExpr) ||
-    ATisEqual(SortExpr, gsMakeSortExprInt());
+    gsIsSortExprPos(SortExpr) ||
+    gsIsSortExprNat(SortExpr) ||
+    gsIsSortExprInt(SortExpr);
 }
 
 bool IsNISort(ATermAppl SortExpr)
 {
   return
-    ATisEqual(SortExpr, gsMakeSortExprNat()) ||
-    ATisEqual(SortExpr, gsMakeSortExprInt());
+    gsIsSortExprNat(SortExpr) ||
+    gsIsSortExprInt(SortExpr);
 }
 
 bool IsPNIRSort(ATermAppl SortExpr)
 {
   return
-    IsPNISort(SortExpr) ||
-    ATisEqual(SortExpr, gsMakeSortExprReal());
+    gsIsSortExprPos(SortExpr) ||
+    gsIsSortExprNat(SortExpr) ||
+    gsIsSortExprInt(SortExpr) ||
+    gsIsSortExprReal(SortExpr);
 }
 
 ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
