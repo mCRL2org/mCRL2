@@ -16,6 +16,7 @@ test-suite pbes
       [ run parity_game_test.cpp ]
       [ run pbes2bes_test.cpp ]
       [ run pbes2bes_test2.cpp ]
+      #[ run pbes2bes_test3.cpp ]
       [ run boolean_expression_test.cpp ]
       [ run boolean_operator_test.cpp ]
       [ run parse_test.cpp ]
