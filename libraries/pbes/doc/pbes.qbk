@@ -1,58 +1,32 @@
 [section: Parameterised Boolean Equation Systems]
-A Parameterised Boolean Equation System (PBES) is a triple ['(E, I, V)],
-with /E/ an ordered sequence of equations of the form 
 
-__pbes__
-
-where
-
-* __sigmai is either a least fixpoint symbol __mu or a greatest fixpoint symbol __nu
-* __Xi is a parameterised propositional variable
-* __di is a data variable of sort __Di
-* __phii is a pbes expression
-
-with /I/ an instantiation of a parameterised propositional variable referred to as the ['initial state],
-and with /V/ a set of data variables that are referred to as the ['free variables] of the pbes.
-The free variables are unbound data variables that can have arbitrary values.
-
-A ['pbes expression] is an expression that satisfies the following grammar:
-
-__pbes_expression__
-
-Here /c/ is a data term of sort /Bool/, /X/ is a parameterised propositional variable,
-/x/ is a variable of sort /D/ and /d/ is a data expression.
-
-The variables __Xi ['(i = 1...m)] are called the ['binding variables] of the pbes.
-
-[note
-Free variables have local scope. So if free variables of the same name and
-sort appear in two different PBESses, they must be interpreted as unrelated.
-]
-
-[section: Class overview]
 The following classes are defined for parameterised boolean equation systems
 
-* [^class propositional_variable]
-* [^class propositional_variable_instantiation]
-* [^class pbes_equation]
-* [^class pbes_expression]
-* [^template<typename Container> class pbes]
-
-The template argument =Container= of a =pbes= is the container type of the
-pbes equations. By default it is of type =atermpp::vector<pbes_equation>=. It
-is expected that =Container= satisfies the general interface requirements for
-containers as described in the C++ Standard Library.
-
-[note
-In the interface of the =pbes= class a data specification is present as an
-additional attribute. This is for completeness only. It is assumed that all
-data variables and data expressions that appear in a PBES are defined in
-terms of this data specification.
+[table Overview of PBES Library classes
+    [[type] [class]]
+    [[ propositional variable declaration   ] [ `propositional_variable`                  ]] 
+    [[ propositional variable instantiation ] [ `propositional_variable_instantiation`    ]] 
+    [[ PBES equation                        ] [ `pbes_equation`                           ]] 
+    [[ predicate formula                    ] [ `pbes_expression`                         ]] 
+    [[ initial state of a PBES              ] [ `pbes_initializer`                        ]] 
+    [[ PBES                                 ] [ `template<typename Container> class pbes` ]] 
+    [[ fixpoint symbol                      ] [ `fixed_point_symbol`                      ]] 
 ]
- 
-[endsect] [/ Class overview]
 
-[section: Well typedness constraints]
+The classes and algorithms of the PBES Library reside in the namespace `pbes_system`.
+
+[section: PBES]
+Parameterised Boolean Equation System (PBESs) are represented by the class
+`template <typename Container> class pbes`.
+A PBES is a sequence of equations with an initial state, which is a propositional
+variable instantiation. The user can choose what container is used for storing
+the equations using the template argument `Container`. The default container is
+`atermpp::vector`. PBESs may have unbound data variables, that we will refer to
+as ['free variables]. Each PBES stores a set of free variables, which is a
+superset of the unbound data variables that actually occur in the PBES. Finally
+a PBES contains a data specification in which all the data types of the parameters
+occurring in the PBES must be defined.
+
 A PBES must satisfy the following well typedness constraints:
 
 * the sorts occurring in the free variables of the equations are declared in the data specification
@@ -63,8 +37,84 @@ A PBES must satisfy the following well typedness constraints:
 * the free variables occurring in the equations with the same name are identical
 * the declared free variables and the quantifier variables occurring in the equations have different names
 [/ * the data specification is well typed]
+[endsect] [/ PBES]
 
-[endsect] [/ Well typedness constraints]
+[h4 Examples]
+PBESs can be loaded and saved using the `load` and `save` member functions:
+
+  // load a PBES from file
+  pbes<> p;
+  p.load("pbes1.pbes");
+
+  // print the equations
+  for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  {
+    std::cout << pp(*i) << std::endl;
+  }
+
+  // print the initial state
+  pbes_initializer init = p.initial_state();
+  std::cout << "initial state: " << pp(init) << std::endl;
+
+  // save a PBES to file
+  p.save("pbes2.pbes");
+
+
+PBESs can be parsed, using the function `txt2pbes`:
+
+    std::string text =
+      "pbes                                             \n"
+      "nu X(b:Bool) = val(b) && Y(!b);                  \n"
+      "mu Y(c:Bool) = forall d:Bool. X(d && c) || Y(d); \n"
+      "init X(true);                                    \n"
+      ;
+    pbes<> p = txt2pbes(text);
+
+[section: PBES expressions]
+
+PBES expressions (or predicate formulae) are defined using the following
+grammar
+
+__pbes_expression__
+
+Here /c/ is a data term of sort /Bool/, /X/ is a parameterised propositional variable,
+/d/ is a variable of sort /D/ and /e/ is a vector of data expressions.
+
+[tip The negation and implication operators are usually not defined
+in the theory about PBESs. For practical reasons they are supported in the
+implementation.]
+
+[note PBES expressions must be /monotonous/: every occurrence of a propositional
+variable should be in a scope such that the number of "!" operators plus the
+number of left-hand sides of the "=>" operator is even ]
+
+[h4 Examples]
+PBES expressions can be parsed from a string:
+
+    const std::string var_decl =
+      "datavar         \n"
+      "  n: Nat;       \n"
+      "                \n"
+      "predvar         \n"
+      "  X: Bool, Pos; \n"
+      "  Y: Nat;       \n"
+      ;
+    pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", var_decl);
+
+[table Algorithms on PBES expressions
+  [ [           algorithm                            ] [               description                                                                          ] ]
+  [ [`complement`                                    ] [Pushes negations as far as possible inwards towards data expressions                                ] ]
+  [ [`find_propositional_variable`                   ] [Checks if a PBES expression has a given propositional variable as subterm                           ] ]
+  [ [`find_all_propositional_variable_instantiations`] [Finds all propositional variable instantiations occurring in a PBES expression                      ] ]
+  [ [`find_free_variables`                           ] [Finds all free variables occurring in a PBES expression                                             ] ]
+  [ [`replace_propositional_variables`               ] [Generic replace function for propositional variable instantiations                                  ] ]
+  [ [`propositional_variable_sequence_replace`       ] [Replaces propositional variable instantiations according to two sequences of values and replacements] ]
+  [ [`propositional_variable_map_replace`            ] [Replaces propositional variable instantiations according to a mapping of values and replacements    ] ]
+  [ [`substitute_propositional_variable`             ] [Applies the substitution `X(e) := __phi[d := e]` to all instantiations `X(e)` of the propositional variable declaration `X(d)` in a PBES expression]]
+]
+
+
+[endsect] [/ PBES expressions]
 
 [section: Algorithms]
 

@@ -13,6 +13,10 @@ The mCRL2 Library contains many different kinds of (boolean) terms.
 
 [section: Grammars]
 
+__pbes_expression__
+
+__boolean_expression__
+
 grammars for =pbes_expression= and =boolean_expression=.
 
 [endsect]

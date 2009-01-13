@@ -75,7 +75,7 @@ The template argument =Container= determines how the equations are stored intern
 This is done to give the programmer the choice of the most optimal representation
 for algorithms on BESs. The default container type is =atermpp::vector<boolean_equation>=.
 
-[h4 example]
+[h4 Example]
   // load a BES from file
   boolean_equation_system<> bes1;
   bes1.load("bes1.bes");
