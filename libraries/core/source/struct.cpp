@@ -3850,9 +3850,7 @@ bool gsIsOpIdEmptySet(ATermAppl DataExpr)
     ATermAppl s = ATAgetArgument(DataExpr,1);
     if(gsIsSortId(s))
     {
-      return(gsIsSortExprSet(s) ||
-              gsIsSetSortId(s)) &&
-              ATisEqual(DataExpr, gsMakeOpIdEmptySet(s));
+      return ATisEqual(DataExpr, gsMakeOpIdEmptySet(s));
     }
   }
   return false;
@@ -3894,10 +3892,8 @@ bool gsIsOpIdSetUnion(ATermAppl DataExpr)
     ATermAppl s = ATAgetArgument(DataExpr,1);
     if(gsIsSortArrow(s))
     {
-      ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
-              gsIsSetSortId(ATAgetFirst(domain))) &&
-             ATisEqual(DataExpr, gsMakeOpIdSetUnion(ATAgetFirst(domain)));
+      ATermList domain = ATLgetArgument(s, 0); 
+      return ATisEqual(DataExpr, gsMakeOpIdSetUnion(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -3911,9 +3907,7 @@ bool gsIsOpIdSetDiff(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
-              gsIsSetSortId(ATAgetFirst(domain))) &&
-             ATisEqual(DataExpr, gsMakeOpIdSetDiff(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdSetDiff(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -3927,9 +3921,7 @@ bool gsIsOpIdSetIntersect(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprSet(ATAgetFirst(domain)) ||
-              gsIsSetSortId(ATAgetFirst(domain))) &&
-             ATisEqual(DataExpr, gsMakeOpIdSetIntersect(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdSetIntersect(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -3943,9 +3935,7 @@ bool gsIsOpIdSetCompl(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      ATermAppl codomain = ATAgetArgument(s, 1);
-      return (gsIsSortExprSet(codomain) || gsIsSetSortId(codomain)) &&
-              ATisEqual(DataExpr, gsMakeOpIdSetCompl(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdSetCompl(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -3975,9 +3965,7 @@ bool gsIsOpIdEmptyBag(ATermAppl DataExpr)
     ATermAppl s = ATAgetArgument(DataExpr,1);
     if(gsIsSortId(s))
     {
-      return (gsIsSortExprBag(s) ||
-              gsIsBagSortId(s)) &&
-             ATisEqual(DataExpr, gsMakeOpIdEmptyBag(s));
+      return ATisEqual(DataExpr, gsMakeOpIdEmptyBag(s));
     }
   }
   return false;
@@ -4020,9 +4008,7 @@ bool gsIsOpIdBagUnion(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
-              gsIsBagSortId(ATAgetFirst(domain))) &&
-             ATisEqual(DataExpr, gsMakeOpIdBagUnion(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdBagUnion(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -4036,9 +4022,7 @@ bool gsIsOpIdBagDiff(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
-              gsIsBagSortId(ATAgetFirst(domain))) &&
-              ATisEqual(DataExpr, gsMakeOpIdBagDiff(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdBagDiff(ATAgetFirst(domain)));
     }
   }
   return false;
@@ -4052,9 +4036,7 @@ bool gsIsOpIdBagIntersect(ATermAppl DataExpr)
     if(gsIsSortArrow(s))
     {
       ATermList domain = ATLgetArgument(s, 0);
-      return (gsIsSortExprBag(ATAgetFirst(domain)) ||
-              gsIsBagSortId(ATAgetFirst(domain))) &&
-             ATisEqual(DataExpr, gsMakeOpIdBagIntersect(ATAgetFirst(domain)));
+      return ATisEqual(DataExpr, gsMakeOpIdBagIntersect(ATAgetFirst(domain)));
     }
   }
   return false;

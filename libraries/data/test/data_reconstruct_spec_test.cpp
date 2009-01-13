@@ -89,6 +89,9 @@ void test_data_reconstruct_struct()
   BOOST_CHECK(find_term(rec_data(0), d2));
   BOOST_CHECK(find_term(rec_data(0), s));
   BOOST_CHECK(find_term(rec_data(0), d));
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 void test_data_reconstruct_struct_complex()
@@ -140,6 +143,10 @@ void test_data_reconstruct_struct_complex()
   BOOST_CHECK(!find_term(rec_data(2), is_d2_name));
   BOOST_CHECK(!find_term(rec_data(2), is_d3_name));
   BOOST_CHECK(!find_term(rec_data(2), arg3_name));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 void test_data_reconstruct_struct_nest()
@@ -197,6 +204,10 @@ void test_data_reconstruct_struct_nest()
   BOOST_CHECK(find_term(rec_data(0), s2));
   BOOST_CHECK(find_term(rec_data(0), D));
   BOOST_CHECK(find_term(rec_data(0), DPos));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 void test_data_reconstruct_simple_constructor()
@@ -228,6 +239,8 @@ void test_data_reconstruct_simple_constructor()
   BOOST_CHECK(!find_term(rec_data(0), c_struct));
   BOOST_CHECK(!find_term(rec_data(0), S_struct));
 
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 /// Test case for issue #344, reported by Yaroslav Usenko
@@ -257,6 +270,10 @@ void test_data_reconstruct_bool_function()
   BOOST_CHECK(find_term(rec_data(2), b));
   BOOST_CHECK(find_term(rec_data(2), bb));
   BOOST_CHECK(find_term(rec_data(2), cbb));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 /// Test case for issue #351
@@ -289,6 +306,99 @@ void test_data_reconstruct_bool_function_one_eq()
   BOOST_CHECK(find_term(rec_data(2), cbb));
   BOOST_CHECK(find_term(rec_data(3), t));
   BOOST_CHECK(find_term(rec_data(3), ct));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+}
+
+void test_data_reconstruct_bag()
+{
+  std::string text =
+  "map f:Bag(Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  identifier_string f_name("f");
+  sort_expression b = sort_expr::bool_();
+  sort_expression bag_bool = gsMakeSortExprBag(b);
+  data_operation f(f_name, bag_bool);
+
+  std::cerr << rec_data << std::endl;
+  std::cerr << f << std::endl;
+
+  BOOST_CHECK(find_term(rec_data(2), f_name));
+  BOOST_CHECK(find_term(rec_data(2), bag_bool));
+  BOOST_CHECK(find_term(rec_data(2), f));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+void test_data_reconstruct_set()
+{
+  std::string text =
+  "map f:Set(Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  identifier_string f_name("f");
+  sort_expression b = sort_expr::bool_();
+  sort_expression set_bool = gsMakeSortExprSet(b);
+  data_operation f(f_name, set_bool);
+
+  std::cerr << rec_data << std::endl;
+  std::cerr << f << std::endl;
+
+  BOOST_CHECK(find_term(rec_data(2), f_name));
+  BOOST_CHECK(find_term(rec_data(2), set_bool));
+  BOOST_CHECK(find_term(rec_data(2), f));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+void test_data_reconstruct_bag_alias()
+{
+  std::string text =
+  "sort S = Bag(Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  sort_expression b = sort_expr::bool_();
+  sort_expression bag_bool = gsMakeSortExprBag(b);
+
+  BOOST_CHECK(find_term(rec_data(0), bag_bool));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+void test_data_reconstruct_set_alias()
+{
+  std::string text =
+  "sort S = Set(Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  sort_expression b = sort_expr::bool_();
+  sort_expression set_bool = gsMakeSortExprSet(b);
+
+  BOOST_CHECK(find_term(rec_data(0), set_bool));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 int test_main(int argc, char** argv)
@@ -302,6 +412,10 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_simple_constructor();
   test_data_reconstruct_bool_function();
   test_data_reconstruct_bool_function_one_eq();
+  test_data_reconstruct_bag();
+  test_data_reconstruct_set();
+  test_data_reconstruct_bag_alias();
+  test_data_reconstruct_set_alias();
 
   return 0;
 }
