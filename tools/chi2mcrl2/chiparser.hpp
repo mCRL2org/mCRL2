@@ -130,7 +130,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "chiparser.yy"
+#line 9 "chiparser.yy"
 
 
 #include <cstdio>
@@ -192,7 +192,7 @@ bool is_number(std::string s);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 60 "chiparser.yy"
+#line 68 "chiparser.yy"
 {
   ATermAppl appl;
   ATermList list;

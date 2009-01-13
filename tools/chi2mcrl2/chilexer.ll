@@ -1,4 +1,11 @@
 %{
+// Author(s): Frank Stappers
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file chilexer.ll
 
 #include <cstring>
 #include <cmath>
@@ -24,6 +31,7 @@ int parsing_mode;
 
 extern ATermAppl chi_spec_tree;
 extern ATermIndexedSet chi_parser_protect_table;
+extern int chiyydebug;         /* declared in chiparser.cpp */
 
 
 /**
@@ -262,6 +270,8 @@ ATermAppl chi_lexer::parse_stream (std::istream &stream ) {
   *
   **/ 
   
+  //uncomment the line below to let bison generate debug information 
+  //chiyydebug = 1;
   ATermAppl result = NULL;
   chi_spec_tree = NULL;
   ATprotectAppl(&chi_spec_tree);

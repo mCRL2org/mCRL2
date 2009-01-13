@@ -1,3 +1,11 @@
+// Author(s): Frank Stappers
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file chiparser.yy
+
 %{
 
 #include <cstdio>
@@ -110,9 +118,14 @@ bool is_number(std::string s);
 %start ChiProgram
 
 
+//generate a GLR parser
 %glr-parser
-%debug
-%verbose
+
+//Uncomment the line below to enable the bison debug facilities.
+//To produce traces, yydebug needs to be set to 1 (see chilexer.ll)
+//%debug
+
+
 /* 
  *  TERMINALS
  *  ---------
