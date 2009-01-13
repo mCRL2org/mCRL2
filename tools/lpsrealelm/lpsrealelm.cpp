@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jan Friso Groote, Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -8,8 +8,10 @@
 //
 /// \file lpsrealelm.cpp
 
-#define NAME "lpsrealelm"
-#define AUTHOR "Jeroen Keiren"
+#define TOOLNAME "lpsrealelm"
+#define AUTHORS "Jan Friso Groote and Jeroen Keiren"
+
+#define DEFAULT_MAX_ITERATIONS 10
 
 //C++
 #include <exception>
@@ -105,7 +107,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   tool_options options;
   options.input_file = configuration.get_input(lps_file_for_input).location();
   options.output_file = configuration.get_output(lps_file_for_output).location();
-  options.max_iterations = 500;
+  options.max_iterations = DEFAULT_MAX_ITERATIONS;
 
   gsDebugMsg("Calling do_realelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_realelm(options)==0);
@@ -132,7 +134,7 @@ int do_realelm(const tool_options& options)
 
 ///Parses command line and sets settings from command line switches
 bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], TOOLNAME, AUTHORS, "[OPTION]... [INFILE [OUTFILE]]\n",
                              "Remove Real numbers from the linear process specification (LPS) in "
                              "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
                              "If OUTFILE is not present, stdout is used.");
@@ -151,7 +153,7 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
     }
     else
     {
-      t_options.max_iterations = 500;
+      t_options.max_iterations = DEFAULT_MAX_ITERATIONS;
     }
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");

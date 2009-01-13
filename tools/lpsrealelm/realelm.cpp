@@ -17,6 +17,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/sort_utility.h"
 
 #include "realelm.h"
 
@@ -1503,12 +1504,17 @@ summand generate_summand(const summand_information &summand_info,
                          const data_expression &xi_condition,
                          // unsigned long i, 
                          const data_expression_list &extra_zeta_values,
-                         data_expression_list cond, 
+                         // data_expression_list cond, 
                          context_type& zeta_context, 
                          context_type& complete_context, 
-                         rewriter& r)
-{
-
+                         rewriter& r,
+                         action_label_list &a,
+                         identifier_generator& variable_generator,
+                         const bool is_may_summand=false)
+{ static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
+  static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map; 
+                                         // Used to recall which may actions labels have been
+                                         // introduced, in order to re-use them.
   const summand s=summand_info.get_summand();
   std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
   data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
@@ -1536,9 +1542,36 @@ summand generate_summand(const summand_information &summand_info,
  
   nextstate = reverse(nextstate);
 
-  // gsDebugMsg("nextstate: %P\n", (ATermList)nextstate);
+  action_list new_actions=s.actions();
+  if ((!s.is_delta()) && is_may_summand)
+  { action_list resulting_actions;
+    for(action_list::const_iterator i=new_actions.begin();
+                 i!=new_actions.end(); i++)
+    { // put "_MAY" behind each action, and add its declaration to the action declarations.
+      data_expression_list args=i->arguments();
+      sort_expression_list sorts=get_sorts(args);
+      std::map < std::pair< std::string, sort_expression_list >,
+                 std::string> ::iterator action_label_it=
+                     action_label_map.find(std::pair< std::string, sort_expression_list >
+                                         (std::string(i->label().name()),sorts));
+      if (action_label_it==action_label_map.end())
+      { std::string may_action_label=variable_generator(std::string(i->label().name())+"_MAY");
+        std::pair< std::string, sort_expression_list > p(std::string(i->label().name()),sorts);
+        action_label_it=(action_label_map.insert(
+                    std::pair< std::pair< std::string, sort_expression_list >,std::string>
+                      ( p,may_action_label))).first;
+        a=push_front(a,action_label(may_action_label,sorts));
+        protect_against_garbage_collect.push_back(sorts);
+      }
+ 
+      action_label may_action_label(action_label_it->second,sorts); 
+      resulting_actions=push_front(resulting_actions,action(may_action_label,args));
+    }
+    new_actions=reverse(resulting_actions);
+  }
 
-  summand result = summand(get_nonreal_variables(s.summation_variables()), r(condition), s.is_delta(), s.actions(), nextstate);
+  summand result = summand(get_nonreal_variables(s.summation_variables()), 
+                           r(condition), s.is_delta(), new_actions, nextstate);
 
   // gsDebugMsg("Generated summand %P\n", (ATermAppl)result);
 
@@ -1863,58 +1896,40 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
     summand_info.push_back(s);
   }
 
-
   context_type context; // Contains introduced variables
   data_variable_list real_parameters = get_real_variables(lps.process_parameters());
   data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
 
 
   // Compute some context information for each summand.
-  // atermpp::map<summand, data_expression_list> summand_real_conditions;
-  // atermpp::map<summand, atermpp::map<data_expression, data_expression> > summand_real_nextstate_map;
 
   atermpp::vector < data_expression > new_inequalities; // New inequalities are stored in two consecutive positions;
                                                         // I.e., for t<u, t is at position i, and u at position i+1.
   int iteration = 0;
-  summand_list summands;
   do
   {
     new_inequalities.clear();
-    summands=summand_list();
     iteration++;
     gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration, context.size());
 
-    // print_debug(summand_info);
     for(std::vector < summand_information >::const_iterator i = summand_info.begin(); 
                        i != summand_info.end(); ++i)
     {
-      // std::cerr << "SUMMAND_IN: " << pp(i->get_summand()) << "\n";
-      // atermpp::vector<mcrl2::data::data_expression> new_values_for_xi_variables = i->get_new_values_for_xi_variables();
-      // for(atermpp::vector < mcrl2::data::data_expression > ::const_iterator l=new_values_for_xi_variables.begin(); 
-      //        l!=new_values_for_xi_variables.end(); ++l)
-      // { assert(is_data_expression(*l));
-      //   std::cerr << "OUTsummand " << pp(*l) << "\n";
-      // }
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
       // occur in the condition or in the effect.
       context_type nextstate_context_for_this_summand;
       atermpp::vector < data_expression > ::const_iterator 
                                 value_for_xi=i->get_new_values_for_xi_variables_begin();
-      // context_type::const_iterator c = context.begin();
-      // print_debug(summand_info);
       for(context_type::const_iterator c = context.begin() ; 
                                        c!=context.end(); ++c, ++value_for_xi)
-      { // print_debug(summand_info);
+      { 
         if ((*value_for_xi)==data_expression())
-        // No value for xi is known. So, we might want to set it.
         { nextstate_context_for_this_summand.push_back(*c);
         }
       }
 
       //Combinations to be considered
-      //const unsigned long nextstate_context_combinations = 
-      //             pow(3, nextstate_context_for_this_summand.size()); 
       atermpp::vector < data_expression_list > nextstate_values;
       atermpp::vector < data_expression_list > nextstate_context_combinations =
                     generate_zeta_combinations(
@@ -1923,34 +1938,31 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                                     i->get_summand_real_nextstate_map(),
                                     r);
       assert(nextstate_values.size()==nextstate_context_combinations.size());
-      std::cerr << "#zeta combinations: " << nextstate_context_combinations.size() << "\n";
+      // std::cerr << "#zeta combinations: " << nextstate_context_combinations.size() << "\n";
       atermpp::vector < data_expression_list >::iterator nextstate_value=nextstate_values.begin();
-      // print_debug(summand_info);
+      
       for(atermpp::vector < data_expression_list >::iterator 
                 nextstate_combination = nextstate_context_combinations.begin(); 
                 nextstate_combination != nextstate_context_combinations.end(); 
                         ++ nextstate_combination,++ nextstate_value)
-      { // zeta
-        //data_expression_list zeta_condition = compute_inequalities(nextstate_combination, nextstate_context_for_this_summand);
+      { 
         // zeta[x := g(x)]
         data_expression_list zeta_condition=*nextstate_combination;
 
         //zeta_condition = data_expression_map_replace_list(zeta_condition, i->get_summand_real_nextstate_map());
 
         // original condition of the summand && zeta[x := g(x)]
-        // std::cerr << "Zeta_condition " << zeta_condition << "\n";
-        // std::cerr << "get_summand_real_condition " << i->get_summand_real_conditions()  << "\n";
         data_expression_list condition = zeta_condition + i->get_summand_real_conditions();
         // condition = normalize_inequalities(condition, r);
 
         // Eliminate sum bound variables, resulting in inequalities over
         // process parameters of sort Real. 
 
-        if (core::gsVerbose)
+        if (core::gsDebug)
         { std::cerr << "Inequalities before Fourier-Motzkin: " << pp(condition) << "\n";
         }
         fourier_motzkin(condition, i->get_summand().summation_variables(), r);
-        if (core::gsVerbose)
+        if (core::gsDebug)
         { std::cerr << "Inequalities after Fourier-Motzkin: " << pp(condition) << "\n";
         }
 
@@ -1958,12 +1970,102 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // Add these values for xi variables as a new condition. Remove these variables from the
         // context combinations to be considered for the xi variables.
         
+        if(!is_inconsistent(condition, r))
+        {
+          // condition contains the inequalities over the process parameters
+          add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
+        }
+
+      }
+    }
+    add_postponed_inequalities_to_context(
+                new_inequalities,
+                summand_info,
+                context,
+                r,
+                variable_generator);
+
+  } while ((iteration < max_iterations) && !new_inequalities.empty());
+
+  gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
+  for(context_type::iterator i = context.begin(); i != context.end(); ++i)
+  {
+    gsVerboseMsg("< %P, %P > %P\n", (ATermAppl)i->get_lowerbound(), 
+                   (ATermAppl)i->get_upperbound(), (ATermAppl)i->get_variable());
+  }
+
+  if (!new_inequalities.empty())
+  {
+    gsVerboseMsg("The generated lps is may bisimilar, but most likely not strongly bisimilar.\n");
+  }
+  else
+  {
+    gsVerboseMsg("A strongly bisimilar lps is generated.\n");
+  }
+
+
+  /* Generate the new summand list */
+  summand_list summands;
+  action_label_list new_act_declarations;
+  for(std::vector < summand_information >::const_iterator i = summand_info.begin(); 
+                       i != summand_info.end(); ++i)
+  {
+    // First calculate the newly introduced variables xi for which the next_state value is not yet known.
+    // get , by only looking at variables that
+    // occur in the condition or in the effect.
+    context_type nextstate_context_for_this_summand;
+    atermpp::vector < data_expression > ::const_iterator 
+                              value_for_xi=i->get_new_values_for_xi_variables_begin();
+    // context_type::const_iterator c = context.begin();
+    // print_debug(summand_info);
+    for(context_type::const_iterator c = context.begin() ; 
+                                     c!=context.end(); ++c, ++value_for_xi)
+    { 
+      if ((*value_for_xi)==data_expression())
+      { nextstate_context_for_this_summand.push_back(*c);
+      }
+    }
+
+    //Combinations to be considered
+    //const unsigned long nextstate_context_combinations = 
+    atermpp::vector < data_expression_list > nextstate_values;
+    atermpp::vector < data_expression_list > nextstate_context_combinations =
+                  generate_zeta_combinations(
+                                  nextstate_context_for_this_summand,
+                                  nextstate_values,
+                                  i->get_summand_real_nextstate_map(),
+                                  r);
+    assert(nextstate_values.size()==nextstate_context_combinations.size());
+    atermpp::vector < data_expression_list >::iterator nextstate_value=nextstate_values.begin();
+    
+    for(atermpp::vector < data_expression_list >::iterator 
+              nextstate_combination = nextstate_context_combinations.begin(); 
+              nextstate_combination != nextstate_context_combinations.end(); 
+                      ++ nextstate_combination,++ nextstate_value)
+    { 
+      // zeta[x := g(x)]
+      data_expression_list zeta_condition=*nextstate_combination;
+
+      // original condition of the summand && zeta[x := g(x)]
+      data_expression_list condition = zeta_condition + i->get_summand_real_conditions();
+
+      // Eliminate sum bound variables, resulting in inequalities over
+      // process parameters of sort Real. 
+
+      fourier_motzkin(condition, i->get_summand().summation_variables(), r);
+
+      // First check which of these inequalities are equivalent to concrete values of xi variables.
+      // Add these values for xi variables as a new condition. Remove these variables from the
+      // context combinations to be considered for the xi variables.
+      
+      if(!is_inconsistent(condition, r))
+      {
         context_type xi_context_for_this_summand;
         data_expression_list xi_condition;
         // data_expression_list original_xi_conditions;
         value_for_xi=i->get_new_values_for_xi_variables_begin();
         for(context_type::iterator c=context.begin();
-                                   c!=context.end(); ++c, ++value_for_xi)
+                                     c!=context.end(); ++c, ++value_for_xi)
         { data_expression new_condition_for_xi;
           data_expression original_xi_condition;
           if (check_whether_condition_exist(*c,condition,new_condition_for_xi,original_xi_condition))
@@ -1987,9 +2089,6 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           }
         }
 
-        // const unsigned long xi_context_combinations = 
-        //           pow(3, filtered_xi_context_for_this_summand.size()); 
-        
         atermpp::vector < data_expression_list > xi_context_conditions;
         atermpp::vector < data_expression_list > xi_context_combinations =
                     generate_xi_combinations(filtered_xi_context_for_this_summand,
@@ -1997,70 +2096,54 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                     condition, //original_xi_conditions,
                     r);
 
-        std::cerr << "Xi combinations: " << xi_context_combinations.size() << "\n";
-        // for(unsigned long xi_context_combination = 0; xi_context_combination < xi_context_combinations; ++xi_context_combination)
+        // std::cerr << "Xi combinations: " << xi_context_combinations.size() << "\n";
         atermpp::vector < data_expression_list >::const_iterator 
-                        xi_context_condition=xi_context_conditions.begin();
+                      xi_context_condition=xi_context_conditions.begin();
         for(atermpp::vector < data_expression_list >::iterator 
                   xi_context_combination = xi_context_combinations.begin(); 
                   xi_context_combination != xi_context_combinations.end(); 
                   ++xi_context_combination, ++xi_context_condition)
         { 
-          // xi == xi'
-          // zeta
-          // data_expression_list xi_condition = compute_inequalities(xi_context_combination, filtered_xi_context_for_this_summand);
-          // data_expression_list context_inequalities = 
-          //                      compute_inequalities(xi_context_combination, filtered_xi_context_for_this_summand);
-        
-          // std::cerr << "Context inequalities " << context_inequalities << "\n"; 
-          // simplify this condition in the context of xi'
-          // condition = simplify_condition(condition, context_inequalities);
-          if(!is_inconsistent(condition, r))
-          {
-            // condition contains the inequalities over the process parameters
-            add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
-            if (new_inequalities.empty())
-            { // TODO add xi_context_combinations.
-              summand s = generate_summand(*i,
-                                           and_(join_and(xi_condition.begin(), xi_condition.end()),
-                                                join_and(xi_context_condition->begin(), 
-                                                         xi_context_condition->end())), 
-                                           *nextstate_value, 
-                                           condition, 
-                                           nextstate_context_for_this_summand,
-                                           context,
-                                           r);
-              // if(s.condition() != false_() && std::find(summands.begin(), summands.end(), s) == summands.end())
-              // std::cerr << "SUMMAND_OUT: " << pp(s) << "\n";
-              summands = push_front(summands, s);
-            }
+          atermpp::vector < data_expression > new_inequalities;
+          add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
+          if (!new_inequalities.empty())
+          { // add a may transition. 
+            summand s = generate_summand(*i,
+                                         and_(join_and(xi_condition.begin(), xi_condition.end()),
+                                              join_and(xi_context_condition->begin(), 
+                                                     xi_context_condition->end())), 
+                                         *nextstate_value, 
+                                         // condition, 
+                                         nextstate_context_for_this_summand,
+                                         context,
+                                         r,
+                                         new_act_declarations,
+                                         variable_generator,
+                                         true);
+            // std::cerr << "MAY SUMMAND_OUT: " << pp(s) << "\n";
+            summands = push_front(summands, s);
+          }
+          else
+          { // add a must transition.
+            summand s = generate_summand(*i,
+                                      and_(join_and(xi_condition.begin(), xi_condition.end()),
+                                            join_and(xi_context_condition->begin(), 
+                                                     xi_context_condition->end())), 
+                                       *nextstate_value, 
+                                       // condition, 
+                                       nextstate_context_for_this_summand,
+                                       context,
+                                       r,
+                                       new_act_declarations,
+                                       variable_generator,
+                                       false);
+            summands = push_front(summands, s);
           }
         }
       }
     }
-
-    add_postponed_inequalities_to_context(
-                new_inequalities,
-                summand_info,
-                context,
-                r,
-                variable_generator);
-
-  } while ((iteration < max_iterations) && !new_inequalities.empty());
-
-  if (!new_inequalities.empty())
-  {
-    gsVerboseMsg("No exact solution computed\n");
   }
-
-  gsVerboseMsg("generated the following variables in %d iterations:\n", iteration);
-  for(context_type::iterator i = context.begin(); i != context.end(); ++i)
-  {
-    gsVerboseMsg("< %P, %P > %P\n", (ATermAppl)i->get_lowerbound(), (ATermAppl)i->get_upperbound(), (ATermAppl)i->get_variable());
-  }
-
   summands = reverse(summands);
-  // gsVerboseMsg("Computed %d summands %P\n", summands.size(), (ATermList)summands);
 
   // Process parameters
   data_variable_list process_parameters = reverse(nonreal_parameters);
@@ -2072,13 +2155,17 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
 
   // New lps
   lps = linear_process(lps.free_variables(), process_parameters, summands);
-  s = set_lps(s, lps);
+  // s = set_lps(s, lps);
 
   // New process initializer
   data_assignment_list initialization(determine_process_initialization(s.initial_process().assignments(), context, r));
   process_initializer init(s.initial_process().free_variables(), initialization);
-  s = set_initial_process(s, init);
+  // s = set_initial_process(s, init);
 
-  return s;
+  return specification(s.data(),
+                       s.action_labels()+new_act_declarations,
+                       lps,
+                       init);
+
 }
 
