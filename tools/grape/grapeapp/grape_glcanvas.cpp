@@ -160,11 +160,20 @@ void grape_glcanvas::reset()
 }
 void grape_glcanvas::draw_visual_objects()
 {
+  // draw all objects
   for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
   {
     visual_object* vis_obj_ptr = m_visual_objects.Item( i );
     vis_obj_ptr->draw();
   }
+    
+  // draw terminating transition if we are dragging a transition
+  if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) && (m_mousedown))
+  {
+    wxString label_text = _T("");
+    // draw transition
+    draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, label_text);
+  }        
 }
 
 void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
@@ -176,7 +185,6 @@ void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
   }
 
   SetCurrent();
-
 
   if( !m_initialized )
   {
@@ -304,7 +312,6 @@ void grape_glcanvas::event_size(wxSizeEvent &p_event)
   }
   
   update_scrollbars();
-
   Refresh();
 }
 
@@ -447,13 +454,20 @@ void grape_glcanvas::event_scroll_pagedown(wxScrollWinEvent &p_event)
 void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 {
   if ( p_event.Dragging() )
-  {
-    coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
+  { 
+    coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() );
+    m_mouse_coordinate = clicked_coord;
 
     if ( m_lmouse_down_coordinate.m_x != clicked_coord.m_x || m_lmouse_down_coordinate.m_y != clicked_coord.m_y ) //we are only dragging if there was a displacement
     {
       if ( m_touched_visual_object )
       {
+        // update canvas if we are dragging a transition
+        if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)
+        {
+          draw();
+        }
+        
         // select object
         object *obj_ptr = m_touched_visual_object->get_selectable_object();
         if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
@@ -474,6 +488,7 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 {
   coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
+    m_mouse_coordinate = clicked_coord;
 
   if ( !m_mousedown ) // first mousedown event
   {
@@ -560,6 +575,9 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   m_mousedown = false;
   m_dragging = false;
   m_touched_visual_object = 0;
+  
+  // update canvas
+  draw();
 }
 
 void grape_glcanvas::event_lmouse_doubleclick( wxMouseEvent &p_event )

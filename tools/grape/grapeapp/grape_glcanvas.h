@@ -72,6 +72,7 @@ namespace grape
         arr_visual_object_ptr m_visual_objects; /**< The current list of pointers to visual objects that are drawn on the canvas. */
 
         coordinate      m_lmouse_down_coordinate;    /**< The last coordinate at which the left mouse button was pressed down. */
+        coordinate      m_mouse_coordinate;    /**< Current mouse coordinate. */
         visual_object*  m_touched_visual_object; /**< The object that has been clicked last. */
         int             m_touched_visual_object_id; /**< The ID of the object that has been clicked. */
         grape_direction m_touched_click_location; /**< When a border of a visual is clicked, it is stored which border was clicked. This is needed for grape_event_drag to determine to which direction to resize. */

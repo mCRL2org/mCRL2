@@ -456,7 +456,7 @@ grape_event_drag::~grape_event_drag( void )
 }
 
 bool grape_event_drag::Do( void )
-{
+{    
   canvas_state state = m_main_frame->get_glcanvas()->get_canvas_state();
 
   // only add objects when the mousebutton is up again.
@@ -571,7 +571,7 @@ bool grape_event_drag::Do( void )
                 m_main_frame->get_event_handler()->Submit( detach_event, true );  
               }
             }           
-          }         
+          }            
         } else {
           //other object
         }   
