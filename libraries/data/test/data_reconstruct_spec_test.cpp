@@ -322,11 +322,8 @@ void test_data_reconstruct_bag()
 
   identifier_string f_name("f");
   sort_expression b = sort_expr::bool_();
-  sort_expression bag_bool = gsMakeSortExprBag(b);
-  data_operation f(f_name, bag_bool);
-
-  std::cerr << rec_data << std::endl;
-  std::cerr << f << std::endl;
+  aterm_appl bag_bool = gsMakeSortExprBag(b);
+  aterm_appl f = gsMakeOpId(f_name, bag_bool);
 
   BOOST_CHECK(find_term(rec_data(2), f_name));
   BOOST_CHECK(find_term(rec_data(2), bag_bool));
@@ -348,11 +345,8 @@ void test_data_reconstruct_set()
 
   identifier_string f_name("f");
   sort_expression b = sort_expr::bool_();
-  sort_expression set_bool = gsMakeSortExprSet(b);
-  data_operation f(f_name, set_bool);
-
-  std::cerr << rec_data << std::endl;
-  std::cerr << f << std::endl;
+  aterm_appl set_bool = gsMakeSortExprSet(b);
+  aterm_appl f = gsMakeOpId(f_name, set_bool);
 
   BOOST_CHECK(find_term(rec_data(2), f_name));
   BOOST_CHECK(find_term(rec_data(2), set_bool));
@@ -373,7 +367,7 @@ void test_data_reconstruct_bag_alias()
   aterm_appl rec_data = reconstruct_spec(data);
 
   sort_expression b = sort_expr::bool_();
-  sort_expression bag_bool = gsMakeSortExprBag(b);
+  aterm_appl bag_bool = gsMakeSortExprBag(b);
 
   BOOST_CHECK(find_term(rec_data(0), bag_bool));
 
@@ -392,7 +386,7 @@ void test_data_reconstruct_set_alias()
   aterm_appl rec_data = reconstruct_spec(data);
 
   sort_expression b = sort_expr::bool_();
-  sort_expression set_bool = gsMakeSortExprSet(b);
+  aterm_appl set_bool = gsMakeSortExprSet(b);
 
   BOOST_CHECK(find_term(rec_data(0), set_bool));
 
