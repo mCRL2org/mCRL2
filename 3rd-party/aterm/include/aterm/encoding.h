@@ -6,6 +6,14 @@
 #define ENCODING_H
 #include "atypes.h"
 
+#ifndef AT_64BIT
+/* Covers gcc, icc, msvc and Solaris cc */
+# if defined(__LP64__) || defined(_LP64) || defined(__lp64) || \
+     defined(_ADDR64) || defined(__arch64__) || defined(_M_X64)
+#  define AT_64BIT
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
