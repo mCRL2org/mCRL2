@@ -349,10 +349,13 @@
 % false
 \newcommand{\false}{\ensuremath{\f{false}}}
 
+% equals
+\newcommand{\oeq}{\ensuremath{\approx}}
+
 % implies: =>
 \newcommand{\limp}{\ensuremath{\Rightarrow}}
 
-% follows: =>
+% follows: <=
 \newcommand{\lfol}{\ensuremath{\Leftarrow}}
 
 % bi-implies: <=>
@@ -573,12 +576,12 @@ of higher-order algebra. For sorts, this core set contains sort
 identifiers and arrow sorts only. For data expressions, it
 contains data variables, operation identifiers and data
 applications only. In this document we show how this is done. To
-increase readability, we only show expressions in the external
-format instead of the internal format.
+increase readability, we only show expressions in the rich text format instead
+of the plain text format.
 
 \subsection{Structured sorts}
 
-A structured sorts is of the form
+A structured sort is of the form
 \begin{mCRL2}
 & \kwstruct
     &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}})
@@ -596,15 +599,54 @@ where \frm{n \in \pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}.
 All projections \frm{\f{pr}_{i,j}} and recognisers \frm{\f{is\_c_{i}}} are
 optional.
 
-For each constructor \frm{c_{i}} the following constructor operation is
+For each constructor \frm{c_{i}} the following constructor function is
 declared, where
 \frm{S} is the sort of the structured sort:
 \[c_{i}: A_{i,1} \times \cdots \times A_{i,k_{i}} \to S\]
-For each defined projection \frm{p_{i,j}} the following operation is declared:
-\[p_{i,j}: S \to A_{i,j}\]
-For each defined recogniser \frm{\f{is\_c}_{i}} the following operation is
-generated:
+For each defined projection \frm{p_{i,j}} the following function is declared:
+\[\f{pr}_{i,j}: S \to A_{i,j}\]
+For each defined recogniser \frm{\f{is\_c}_{i}} the following function is
+declared:
 \[\f{is\_c}_{i}: S \to \srtbool\]
+The following definitions are generated for the projection and recogniser functions (with the appropriate variable definitions):
+\begin{mCRL2}
+    & \f{pr}_{i,j}(c_{i}(x_{i,1}, \ldots , x_{i,k_{i}}))  & = & x_{i,j}\\
+    & \f{is\_c}_{i}(c_{i}(x_{i,1}, \ldots , x_{i,k_{i}})) & = & \true\\
+    & \f{is\_c}_{i}(c_{j}(x_{j,1}, \ldots , x_{j,k_{j}})) & = & \false \quad \text{(${i \neq j}$)}
+\end{mCRL2}
+
+\noindent
+The predefined operators $\oeq$, $<$ and $\leq$ are defined as follows:
+\begin{itemize}
+\item ${c_{i}(x_{i,1}, \ldots , x_{i,k_{i}}) \oeq c_{j}(y_{j,1}, \ldots , y_{j,k_{j}})}$ equals
+  \begin{itemize}
+  \item ${\false}$ when ${i \neq j}$
+  \item ${\true}$ when ${i = j}$ and ${k_{i} = 0}$
+  \item the \emph{equality} of ${\langle x_{i,1}, \ldots , x_{i,k_{i}} \rangle}$ and ${\langle y_{i,1}, \ldots , y_{i,k_{i}} \rangle}$ when ${i = j}$ and ${k_{i} > 0}$, i.e.\ ${x_{i,1} \oeq y_{i,1}\enspace \land \enspace \cdots \enspace \land \enspace x_{i,k_{i}} \oeq y_{i,k_{i}}}$
+  \end{itemize}
+\item ${c_{i}(x_{i,1}, \ldots , x_{i,k_{i}}) < c_{j}(y_{j,1}, \ldots , y_{j,k_{j}})}$ equals
+  \begin{itemize}
+  \item ${\true}$ when ${i < j}$
+  \item ${\false}$ when ${i = j}$ and ${k_{i} = 0}$
+  \item the \emph{lexicographic order} of ${\langle x_{i,1}, \ldots , x_{i,k_{i}} \rangle}$ and ${\langle y_{i,1}, \ldots , y_{i,k_{i}} \rangle}$ when ${i = j}$ and ${k_{i} > 0}$, i.e.\ ${\langle x_{i,1}, \ldots , x_{i,k_{i}}\rangle <^{l} \langle y_{i,1}, \ldots , y_{i,k_{i}} \rangle}$, defined by:
+    \begin{itemize}
+    \item ${\langle x_{i,j}, \ldots, x_{i,k_{i}} \rangle <^{l} \langle y_{i,j}, \ldots, y_{i,k_{i}} \rangle = x_{i,j} < y_{i,j} \lor (x_{i,j} \oeq y_{i,j} \land \langle x_{i,j+1}, \ldots, x_{i,k_{i}} \rangle <^{l} \langle y_{i,j+1}, \ldots, y_{i,k_{i}} \rangle)}$ for all ${1 \leq j < k_{i}}$
+    \item ${\langle x_{i,k_{i}} \rangle <^{l} \langle y_{i,k_{i}} \rangle = x_{i,k_{i}} < y_{i,k_{i}}}$
+    \end{itemize}
+  \item ${\false}$ when ${i > j}$
+  \end{itemize}
+\item ${c_{i}(x_{i,1}, \ldots , x_{i,k_{i}}) \leq c_{j}(y_{j,1}, \ldots , y_{j,k_{j}})}$ equals
+  \begin{itemize}
+  \item ${\true}$ when ${i < j}$
+  \item ${\true}$ when ${i = j}$ and ${k_{i} = 0}$
+  \item the \emph{lexicographic order or equality} of ${\langle x_{i,1}, \ldots , x_{i,k_{i}} \rangle}$ and ${\langle y_{i,1}, \ldots , y_{i,k_{i}} \rangle}$ when ${i = j}$ and ${k_{i} > 0}$, i.e.\ ${\langle x_{i,1}, \ldots , x_{i,k_{i}}\rangle \leq^{l} \langle y_{i,1}, \ldots , y_{i,k_{i}} \rangle}$, defined by:
+    \begin{itemize}
+    \item ${\langle x_{i,j}, \ldots, x_{i,k_{i}} \rangle \leq^{l} \langle y_{i,j}, \ldots, y_{i,k_{i}} \rangle = x_{i,j} < y_{i,j} \lor (x_{i,j} \oeq y_{i,j} \land \langle x_{i,j+1}, \ldots, x_{i,k_{i}} \rangle \leq^{l} \langle y_{i,j+1}, \ldots, y_{i,k_{i}} \rangle)}$ for all ${1 \leq j < k_{i}}$
+    \item ${\langle x_{i,k_{i}} \rangle \leq^{l} \langle y_{i,k_{i}} \rangle = x_{i,k_{i}} \leq y_{i,k_{i}}}$
+    \end{itemize}
+  \item ${\false}$ when ${i > j}$
+  \end{itemize}
+\end{itemize}
 
 \subsection{Numerical constants}
 
@@ -737,7 +779,6 @@ expression, where \frm{S_{i}} represents the sort of \frm{e_{i}}, \frm{0 \leq i
 \leq n}:
 \[(\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. e)(e_{0},\cdots,e_{n})\]
 
-[To do: add rational numbers, explain functions defined on structured, numbers, lists,
-sets and bags. For now, see the op\_ids.tex document]
+[To do: add rational numbers, explain functions defined on numbers, lists, sets and bags. For now, see the op\_ids.tex document]
 
 \end{document}
