@@ -613,6 +613,10 @@ Name          & \text{Type}                          & Description & Ext. repr.\
 \verb+!=+     & S \times S \to \srtbool               & inequality   & infix\\
 \verb+if+     & \srtbool \times S \times S \to S
 & conditional of sort \frm{S} & functional\\
+\verb-<-      & S \times S \to \srtbool& less than            & infix\\
+\verb+<=+     & S \times S \to \srtbool& less than or equal   & infix\\
+\verb+>=+     & S \times S \to \srtbool& greater than or equal& infix\\
+\verb->-      & S \times S \to \srtbool& greater than         & infix\\
 \verb+forall+$^*$ & (S \to \srtbool) \to \srtbool
 & universal quantification over \frm{S} & functional\\
 \verb+exists+$^*$ & (S \to \srtbool) \to \srtbool
@@ -683,10 +687,6 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
                                                                   & number\\
 \verb+A2B+        & A \to B                & convert \frm{A} to \frm{B}
                                                                   & functional\\
-\verb-<-          & A \times A \to \srtbool& less than            & infix\\
-\verb+<=+         & A \times A \to \srtbool& less than or equal   & infix\\
-\verb+>=+         & A \times A \to \srtbool& greater than or equal& infix\\
-\verb->-          & A \times A \to \srtbool& greater than         & infix\\
 \verb+max+        & \sub{A}{\f{PNI}} \times \sub{B}{\f{PNI}} \to
                     \sub{A}{\f{PNI}} \cap \sub{B}{\f{PNI}}
                                            & maximum              & functional\\
