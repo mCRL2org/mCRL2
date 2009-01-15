@@ -207,7 +207,9 @@ rule install-tool ( name : requirements * ) {
       targets += $(bundles).app ;
     }
 
-    local install-requirements = [ property.select install-dependency install-plugin install-rule : $(requirements) ] ;
+    local install-requirements = [ property.select install-dependency : $(requirements) ] ;
+
+    install-requirements = <install>yes:$(install-requirements) [ property.select install-plugin install-rule : $(requirements) ] ;
 
     if $(name) {
       install install-$(name) : $(name) : <install-dependencies>off <install-type>EXE <location>$(destination) ;
