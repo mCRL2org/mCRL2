@@ -601,7 +601,7 @@ static void insertequation(ATermAppl eqn, specificationbasictype *spec)
   spec->eqns=ATinsertA(spec->eqns,eqn);
 }
 
-///\ret The declarations from data_decls are inserted in spec using the
+///\return The declarations from data_decls are inserted in spec using the
 ///     insertsort, insertconstructor, insertmapping and insertequation functions
 ///     (in the same order)
 static void insert_data_decls(t_data_decls data_decls, specificationbasictype *spec)
@@ -625,7 +625,7 @@ static void insert_data_decls(t_data_decls data_decls, specificationbasictype *s
 }
 
 ///\pre sort_expr is a numeric sort expression (Pos, Nat, Int, or Real)
-///\ret All declarations needed for the implementation of sort_expr are inserted in spec
+///\return All declarations needed for the implementation of sort_expr are inserted in spec
 ///     using the insertsort, insertconstructor, insertmapping and insertequation
 ///     functions (in the same order)
 static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictype *spec)

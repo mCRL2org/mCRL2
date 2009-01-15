@@ -39,6 +39,7 @@ namespace tipi {
     template class real_range< long double, true, false >;
     template class real_range< long double, true, true >;
 
+    /// \cond INTERNAL_DOCS
     enumeration< size_t >& enumeration< size_t >::do_add(const size_t v, std::string const& s) {
       using namespace boost::xpressive;
 
@@ -74,7 +75,6 @@ namespace tipi {
       return false;
     }
 
-    /// \cond INTERNAL_DOCS
     std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
       std::auto_ptr < basic_integer_range > new_range;
 

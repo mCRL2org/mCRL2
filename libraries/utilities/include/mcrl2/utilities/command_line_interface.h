@@ -612,7 +612,6 @@ namespace mcrl2 {
 
         /**
          * \brief Returns the text of a man page
-         * \param[in] revision the revision tag used in the heading of the man page
          * \return string containing a man page description of the interface
          **/
         std::string man_page() const;
@@ -772,6 +771,7 @@ namespace mcrl2 {
 
         /**
          * \brief Throws standard formatted std::runtime_error exception
+         * \param[in] message mandatory message indicating what went wrong
          *
          * The following example shows the output of this method for a tool named test.
          *

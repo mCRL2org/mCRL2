@@ -65,7 +65,7 @@ namespace mcrl2 {
           std::string                m_tool_name;
           std::string                m_description;
           std::vector< std::string > m_developers;
-          std::vector< std::string > m_documentors;
+          std::vector< std::string > m_documenters;
 
         private:
 
@@ -103,7 +103,7 @@ namespace mcrl2 {
               void add_developer(std::string const& s) {
                 AddDeveloper(wx_cast(s));
               }
-              void add_documentor(std::string const& s) {
+              void add_documenter(std::string const& s) {
                 AddDocWriter(wx_cast(s));
               }
           };
@@ -113,22 +113,22 @@ namespace mcrl2 {
 
             //set tool name
             information.SetName(wx_cast(m_tool_name));
-     
+
             //our approach (put version in description to improve formatting):
             information.SetDescription(wx_cast("mCRL2 toolset " + mcrl2::utilities::version_tag() +
                          "\n(revision " MCRL2_REVISION + ")\n\n" + m_description));
-     
+
             //set copyright
             information.SetCopyright(wx_cast(std::string("Copyright \xA9 ") +
                          mcrl2::utilities::copyright_period() + " Technische Universiteit Eindhoven."));
-     
+
             //set developers
             std::for_each(m_developers.begin(), m_developers.end(),
                  boost::bind(&about_information::add_developer, &information, _1));
-     
+
             //set documenters
-            std::for_each(m_documentors.begin(), m_documentors.end(),
-                 boost::bind(&about_information::add_documentor, &information, _1));
+            std::for_each(m_documenters.begin(), m_documenters.end(),
+                 boost::bind(&about_information::add_documenter, &information, _1));
      
             //set license
             information.SetLicense(wxT("This is free software.\n"
@@ -215,10 +215,10 @@ namespace mcrl2 {
           inline tool(std::string const& tool_name,
                       std::string const& description,
                       std::vector< std::string > const& developers,
-                      std::vector< std::string > const& documentors = std::vector< std::string >()) :
+                      std::vector< std::string > const& documenters = std::vector< std::string >()) :
                           m_execute(true), m_tool_name(tool_name),
                           m_description(description), m_developers(developers),
-                          m_documentors(documentors) {
+                          m_documenters(documenters) {
           }
       };
     }

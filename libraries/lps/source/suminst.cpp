@@ -48,7 +48,7 @@ namespace lps {
 // Helper functions
 /////
 
-///\ret a list of all data_variables of sort s in vl
+///\return a list of all data_variables of sort s in vl
 data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
 {
   data_variable_list result;
@@ -63,7 +63,7 @@ data_variable_list get_occurrences(const data_variable_list& vl, const sort_expr
   return result;
 }
 
-///\ret the list of all data_variables in vl, which are unequal to v
+///\return the list of all data_variables in vl, which are unequal to v
 data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 {
   data_variable_list result;
@@ -77,7 +77,7 @@ data_variable_list filter(const data_variable_list& vl, const data_variable& v)
   return result;
 }
 
-///\ret the list of all date_variables in vl, that are not in rl
+///\return the list of all date_variables in vl, that are not in rl
 data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
 {
   data_variable_list result;
@@ -93,7 +93,7 @@ data_variable_list filter(const data_variable_list& vl, const data_variable_list
 }
 
 ///\pre fl is a list of constructors
-///\ret a list of finite sorts in sl
+///\return a list of finite sorts in sl
 sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_expression_list& sl)
 {
   sort_expression_list result;
@@ -108,7 +108,7 @@ sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_
   return result;
 }
 
-///\ret a list of all variables of a sort that occurs in sl
+///\return a list of all variables of a sort that occurs in sl
 data_variable_list get_variables(const data_variable_list& vl, const sort_expression_list& sl)
 {
   data_variable_list result;
@@ -130,7 +130,7 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_expres
 
 ///\pre specification is the specification belonging to summand
 ///\post the instantiated version of summand has been appended to result
-///\ret none
+///\return none
 void instantiate_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, EnumeratorStandard& enumerator, const t_suminst_options& o)
 {
   int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output

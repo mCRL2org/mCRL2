@@ -4,6 +4,7 @@
 
 namespace mcrl2 {
   namespace utilities {
+    /// \cond INTERNAL_DOCS
     inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
       char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -18,7 +19,6 @@ namespace mcrl2 {
       return is;
     }
 
-    /// \cond INTERNAL_DOCS
     namespace detail {
       template <>
       struct initialiser< RewriteStrategy > {

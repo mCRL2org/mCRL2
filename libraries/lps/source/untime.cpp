@@ -36,7 +36,7 @@ namespace mcrl2 {
 
 namespace lps {
 
-///\ret specification, in which all delta summands have been removed, and replaced with a single true->delta
+///\return specification, in which all delta summands have been removed, and replaced with a single true->delta
 lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;

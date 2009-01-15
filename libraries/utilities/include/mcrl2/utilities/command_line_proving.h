@@ -4,6 +4,7 @@
 
 namespace mcrl2 {
   namespace utilities {
+    /// \cond INTERNAL_DOCS
     inline std::istream& operator>>(std::istream& is, SMT_Solver_Type& s) {
       char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -27,7 +28,6 @@ namespace mcrl2 {
       return is;
     }
 
-    /// \cond INTERNAL_DOCS
     namespace detail {
       template <>
       struct initialiser< SMT_Solver_Type > {

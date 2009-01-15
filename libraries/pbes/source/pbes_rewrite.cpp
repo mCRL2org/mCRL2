@@ -214,7 +214,7 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 	return result;
 }
 
-///\ret variable v occurs in l.
+///\return variable v occurs in l.
 bool occurs_inL(atermpp::aterm_appl l, data_variable v)
 {
   return find_if(l, mcrl2::data::detail::compare_data_variable(v)) != atermpp::aterm_appl();

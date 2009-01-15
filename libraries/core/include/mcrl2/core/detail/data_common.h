@@ -24,11 +24,11 @@ namespace mcrl2 {
 // --------------------------
 
 /// \pre l and m are two lists without duplicates
-/// \ret a list with all elements of l and m precisely once
+/// \return a list with all elements of l and m precisely once
 ATermList merge_list(ATermList l, ATermList m);
 
 /// \pre l and m are two lists
-/// \ret a copy of l without elements that occur in m
+/// \return a copy of l without elements that occur in m
 ATermList subtract_list(ATermList l, ATermList m);
 
 // ---------------------------------------------
@@ -36,7 +36,7 @@ ATermList subtract_list(ATermList l, ATermList m);
 // ---------------------------------------------
 
 /// \pre data_expr is a data expression
-/// \ret data_expr is the implementation of a list enumeration
+/// \return data_expr is the implementation of a list enumeration
 bool is_list_enum_impl(ATermAppl data_expr);
 
 // ---------------------------------------------------------
@@ -61,7 +61,7 @@ void inline initialize_data_decls(t_data_decls *p_data_decls)
   p_data_decls->data_eqns = ATmakeList0();
 }
 
-/// \ret indicates whether the elements of data_decls are initialised
+/// \return indicates whether the elements of data_decls are initialised
 #define data_decls_is_initialised(data_decls)\
 (data_decls.sorts != NULL && data_decls.cons_ops  != NULL &&\
  data_decls.ops   != NULL && data_decls.data_eqns != NULL)
@@ -99,7 +99,7 @@ void inline subtract_data_decls(t_data_decls *p_data_decls_1, t_data_decls *p_da
   p_data_decls_1->data_eqns = subtract_list(p_data_decls_1->data_eqns, p_data_decls_2->data_eqns);
 }
 
-/// \ret data_decls1 is equal to data_decls2
+/// \return data_decls1 is equal to data_decls2
 inline bool data_decls_equal(t_data_decls data_decls1,
   t_data_decls data_decls2)
 {
@@ -112,7 +112,7 @@ inline bool data_decls_equal(t_data_decls data_decls1,
 
 /// \pre spec is a process specification, an LPS, a PBES,
 ///      an action rename specification, and a data specification
-/// \ret data declarations of spec
+/// \return data declarations of spec
 inline t_data_decls get_data_decls(ATermAppl spec)
 {
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
@@ -132,7 +132,7 @@ inline t_data_decls get_data_decls(ATermAppl spec)
 
 /// \pre spec is a process specification, an LPS, a PBES,
 ///      an action rename specification, and a data specification
-/// \ret spec in which the data declarations are replaced by data_decls
+/// \return spec in which the data declarations are replaced by data_decls
 inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 {
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
@@ -154,7 +154,7 @@ inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 
 /// \pre spec is a specification that adheres to the internal syntax of an
 //     arbitary phase
-/// \ret spec in which the data declarations from data_decls are added
+/// \return spec in which the data declarations from data_decls are added
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 
 // --------------------
@@ -163,7 +163,7 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
-/// \ret if(BoolExpr, 1, 0) of sort SortExpr
+/// \return if(BoolExpr, 1, 0) of sort SortExpr
 inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
@@ -174,20 +174,20 @@ inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
 
 /// \pre data_expr is a data expression that adheres to the internal syntax after
 //     type checking
-/// \ret The free variables in data_expr
+/// \return The free variables in data_expr
 ATermList get_free_vars(ATermAppl data_expr);
 
 /// \pre term adheres to the internal format
-/// \ret a list of all sorts occuring in term, where each element is unique
+/// \return a list of all sorts occuring in term, where each element is unique
 ATermList get_sorts(ATerm term);
 
 /// \pre Term to perform beta reduction on,
 //     this is the top-level function, which should be used when
 //     there is no appropriate context.
-/// \ret Term with beta reduction performed on it.
+/// \return Term with beta reduction performed on it.
 ATerm beta_reduce_term(ATerm Term);
 
-/// \ret Part with capture avoiding substitution of the substitutions in Substs
+/// \return Part with capture avoiding substitution of the substitutions in Substs
 //       performed on it.
 ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs);
 

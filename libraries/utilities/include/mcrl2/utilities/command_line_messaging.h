@@ -6,6 +6,7 @@
 
 namespace mcrl2 {
   namespace utilities {
+    /// \cond INTERNAL
     namespace detail {
       template < >
       struct initialiser< mcrl2::core::messageType > {
@@ -41,6 +42,7 @@ namespace mcrl2 {
 
       bool initialiser< mcrl2::core::messageType >::initialised = register_messaging_actions();
     }
+    /// \endcond
   }
 }
 

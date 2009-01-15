@@ -42,6 +42,7 @@ namespace tipi {
 
       public:
 
+        /// \brief Standard categories
         enum standard_category_type {
           editing,        ///< show edit
           reporting,      ///< show properties of objects
