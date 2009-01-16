@@ -23,6 +23,18 @@
 
 [def __mu     [' '''&mu;''']]
 [def __nu     [' '''&nu;''']]
+[def __sigma  [' '''&sigma;''']]
+[def __szlig  [' '''&szlig;''']]
+
+[def __not     [' '''&not;''']]
+[def __and     [' '''&and;''']]
+[def __or      [' '''&or;''']]
+[def __implies [' '''&rArr;''']]
+[def __forall  [' '''&forall;''']]
+[def __exist   [' '''&exist;''']]
+
+[def __rArr   [' '''&rArr;''']]
+
 [def __sigmai [' '''&sigma;<subscript>i</subscript>''']]
 [def __phi    [' '''&#x03C6;''']]
 [def __phii   [' '''&#x03C6;<subscript>i</subscript>''']]
@@ -45,7 +57,8 @@
 [def __mcrl2__                 [@http://mcrl2.org mCRL2]]
 [def __mcrl__                  mCRL]
 [def __atermlib__              [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
+[def __pbes_implementation__   [@http://mcrl2.org/mcrl2/wiki/images/6/6c/Pbes_implementation_notes.pdf PBES implementation notes]]
+[def __pbes_introduction__     [@http://mcrl2.org/mcrl2/wiki/index.php/PBES_library PBES introduction]]
 
-[include terms.qbk]
 [include pbes.qbk]
 [include bes.qbk]
