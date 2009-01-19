@@ -1154,7 +1154,7 @@ void Frame::initIcon()
 {
     try
     {
-        wxIcon icon(icon_16x16);
+        wxIcon icon(logo);
         SetIcon( icon ); // icon defined in 'figures.xpm'
     }
     catch ( ... )
