@@ -520,7 +520,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   if ((format_selector.get_selection() == lts_fsm && (
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc+mcrl" ||
-         c.get_input(lts_file_for_input).type().sub_type() == "mcrl2-lts"))
+         c.get_input(lts_file_for_input).type().sub_type() == "lts"))
    || (format_selector.get_selection() == lts_mcrl2 && (
          c.get_input(lts_file_for_input).type().sub_type() == "aut" ||
          c.get_input(lts_file_for_input).type().sub_type() == "svc" ||

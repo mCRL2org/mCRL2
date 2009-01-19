@@ -2184,7 +2184,7 @@ static std::string type_desc_strings[] = { "unknown LTS format",
 
 static std::string extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
 
-static std::string mime_type_strings[] = { "", "application/mcrl2-lts", "text/aut", "application/svc+mcrl", "application/svc", "text/fsm", "text/dot", "application/bcg" };
+static std::string mime_type_strings[] = { "", "application/lts", "text/aut", "application/svc+mcrl", "application/svc", "text/fsm", "text/dot", "application/bcg" };
 
 lts_type lts::parse_format(std::string const& s) {
   if ( s == "aut" )
@@ -2193,7 +2193,7 @@ lts_type lts::parse_format(std::string const& s) {
   } else if ( s == "mcrl" || s == "svc+mcrl")
   {
     return lts_mcrl;
-  } else if ( s == "mcrl2" || s == "mcrl2-lts")
+  } else if ( s == "mcrl2" || s == "lts")
   {
     return lts_mcrl2;
   } else if ( s == "svc" )
