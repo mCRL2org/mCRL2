@@ -11,11 +11,11 @@ alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
 alias font_renderer : font_renderer.o ;
 
-wx-requirements = <pch>on:<source>/site-config//wx.pch <use>/site-config//wx_base <include>../include/mcrl2/utilities ;
+wx-requirements = <pch>on:<source>/site-config//wx.pch <include>../include/mcrl2/utilities ;
 
-obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) ;
-obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) ;
-obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) ;
+obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) <use>/site-config//wx_base ;
+obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) <use>/site-config//wx_base ;
+obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) <use>/site-config//wx_gl ;
 
 # mCRL2 specific tool for SQuADt interface
 obj squadt_interface
