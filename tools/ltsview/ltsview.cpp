@@ -19,6 +19,7 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "cluster.h"
@@ -44,8 +45,8 @@ std::string parse_error;
 #include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 using namespace mcrl2::utilities::squadt;
-
-const char* fsm_file_for_input = "fsm_in";
+using namespace mcrl2::lts;
+const char* lts_file_for_input  = "lts_in";
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
 
@@ -53,8 +54,11 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
 
     // Configures tool capabilities.
     void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration(fsm_file_for_input,tipi::mime_type("fsm",
-            tipi::mime_type::text),tipi::tool::category::visualisation);
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
+
+      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+      }
     }
 
     // Queries the user via SQuADt if needed to obtain configuration information
@@ -62,17 +66,22 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interfac
     }
 
     bool check_configuration(tipi::configuration const& c) const {
-      bool valid = c.input_exists(fsm_file_for_input);
-
-      if (!valid) {
-        send_error("Invalid input combination!");
+      if (c.input_exists(lts_file_for_input)) {
+        /* The input object is present, verify whether the specified format is supported */
+        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
+          send_error("Invalid configuration: unsupported type `" +
+              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
+        }
+        else {
+          return true;
+        }
       }
 
-      return valid;
+      return false;
     }
 
     bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(fsm_file_for_input).location();
+      lts_file_argument = c.get_input(lts_file_for_input).location();
 
       return mcrl2_wx_tool_interface::perform_task(c);
     }
