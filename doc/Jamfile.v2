@@ -15,12 +15,14 @@ boostbook doc
     <dependency>../libraries/data/doc//data_manual
     <dependency>../libraries/lps/doc//lps_manual
     <dependency>../libraries/pbes/doc//pbes_manual
+    <dependency>../libraries/utilities/doc//utilities_manual
 
     ## Add path references to the QuickBook generated docs...
 
     <implicit-dependency>../libraries/data/doc//data_manual
     <implicit-dependency>../libraries/lps/doc//lps_manual
     <implicit-dependency>../libraries/pbes/doc//pbes_manual
+    <implicit-dependency>../libraries/utilities/doc//utilities_manual
 
     <xsl:param>nav.layout=none
     <xsl:param>boost.libraries=../../libs/libraries.htm

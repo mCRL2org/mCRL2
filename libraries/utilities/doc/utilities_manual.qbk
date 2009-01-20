@@ -1,0 +1,10 @@
+[library Utilities Library
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [id pbes]
+    [dirname pbes]
+]
+
+[include tools.qbk]
