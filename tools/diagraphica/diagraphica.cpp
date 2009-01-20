@@ -21,7 +21,7 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/core/aterm_ext.h"
 
-
+#include "mcrl2/lts/lts.h"
 // windows debug libraries
 #ifdef _MSC_VER
   #define _CRTDBG_MAP_ALLOC
@@ -31,49 +31,55 @@
 
 using namespace std;
 
-std::string fsm_file_argument;
+std::string lts_file_argument;
 std::string parse_error;
 
-// -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-# include <mcrl2/utilities/squadt_interface.h>
 
-  using namespace mcrl2::utilities::squadt;
+// SQuADT protocol interface
+# include <mcrl2/utilities/mcrl2_squadt_interface.h>
+using namespace mcrl2::utilities::squadt;
+using namespace mcrl2::lts;
+const char* lts_file_for_input  = "lts_in";
 
-  const char* fsm_file_for_input = "fsm_in";
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
 
-  class squadt_interactor : public mcrl2::utilities::squadt::wx_tool_interface {
+  public:
+    // Configures tool capabilities.
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
-    public:
-
-      // Configures tool capabilities.
-      void set_capabilities(tipi::tool::capabilities& c) const {
-        /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-        c.add_input_configuration(fsm_file_for_input,
-             tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
       }
+    }
 
-      // Queries the user via SQuADt if needed to obtain configuration information
-      void user_interactive_configuration(tipi::configuration&) {}
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(tipi::configuration&) { }
 
-      // Check an existing configuration object to see if it is usable
-      bool check_configuration(tipi::configuration const& c) const {
-        bool valid = c.input_exists(fsm_file_for_input);
-
-        if (!valid) {
-          send_error("Invalid input combination");
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(tipi::configuration const& c) const {
+      if (c.input_exists(lts_file_for_input)) {
+        /* The input object is present, verify whether the specified format is supported */
+        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
+          send_error("Invalid configuration: unsupported type `" +
+              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
         }
-
-        return valid;
+        else {
+          return true;
+        }
       }
 
-      // Performs the task specified by a configuration
-      bool perform_task(tipi::configuration& c) {
-        fsm_file_argument = c.get_input(fsm_file_for_input).location();
+      return false;
+    }
 
-        return wx_tool_interface::perform_task(c);
-      }
-  };
+    // Performs the task specified by a configuration
+    bool perform_task(tipi::configuration& c) {
+      lts_file_argument = c.get_input(lts_file_for_input).location();
+
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
+};
 #endif
 
 #include "diagraph.h"
@@ -134,7 +140,7 @@ bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
 
   if (parser.continue_execution()) {
     if (0 < parser.arguments.size()) {
-      fsm_file_argument = parser.arguments[0];
+      lts_file_argument = parser.arguments[0];
     }
     if (1 < parser.arguments.size()) {
       parser.error("too many file arguments");
@@ -183,8 +189,8 @@ bool DiaGraph::DoInit()
     clustered = false;
     critSect = false;
 
-    if (!fsm_file_argument.empty()) {
-      openFile(fsm_file_argument);
+    if (!lts_file_argument.empty()) {
+      openFile(lts_file_argument);
     }
 
     // start event loop
