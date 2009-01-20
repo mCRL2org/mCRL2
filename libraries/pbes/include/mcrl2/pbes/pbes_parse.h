@@ -280,6 +280,10 @@ namespace pbes_system {
     // add an initialization section to the pbes
     pbesspec = pbesspec + "\ninit dummy2;";
 
+std::cout << "--------------------------------------------------------------------\n"
+          << pbesspec
+          << "--------------------------------------------------------------------"
+          << std::endl;
     std::stringstream in(pbesspec);
     try
     {

@@ -1,0 +1,44 @@
+# Copyright (c) 2009 Wieger Wesselink
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+project mcrl2/doc ;
+import boostbook : boostbook ;
+
+boostbook doc
+    :
+    src/mcrl2.xml
+    :
+    ## Build the various generated docs (Doxygen and QuickBook)...
+
+    <dependency>../libraries/data/doc//data_manual
+    <dependency>../libraries/lps/doc//lps_manual
+    <dependency>../libraries/pbes/doc//pbes_manual
+
+    ## Add path references to the QuickBook generated docs...
+
+    <implicit-dependency>../libraries/data/doc//data_manual
+    <implicit-dependency>../libraries/lps/doc//lps_manual
+    <implicit-dependency>../libraries/pbes/doc//pbes_manual
+
+    <xsl:param>nav.layout=none
+    <xsl:param>boost.libraries=../../libs/libraries.htm
+    <xsl:param>boost.image.src=images/mcrl2.png
+    <xsl:param>boost.image.alt=mCRL2
+    <xsl:param>boost.image.w=294
+    <xsl:param>boost.image.h=70
+ 
+    <dependency>css
+    <dependency>images
+    <dependency>callouts
+    ;
+
+install css : [ glob src/*.css ] : <location>html ;
+explicit css ;
+install images : [ glob src/images/*.png ] : <location>html/images ;
+explicit images ;
+install callouts : [ glob src/images/callouts/*.png ] : <location>html/images/callouts ;
+explicit callouts ;
+
+

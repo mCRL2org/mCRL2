@@ -1,13 +1,10 @@
-[library The mCRL2 Data Library
+[library Data Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2005-2008 Technische Universiteit Eindhoven]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
         A C++ layer for the Data Library.
-    ]
-    [license
-        Distributed under the Boost Software License, Version 1.0.
     ]
 ]
 
