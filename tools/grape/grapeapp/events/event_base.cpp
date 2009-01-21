@@ -156,22 +156,10 @@ bool grape_event_base::close_specification()
 
   // get specification
   grape_specification* del_spec = m_main_frame->get_grape_specification();
-  if ( del_spec )
-  {
-    // Remove all diagrams
-    for ( unsigned int i = 0; i < del_spec->count_architecture_diagram(); ++i )
-    {
-      architecture_diagram* arch_dia_ptr = del_spec->get_architecture_diagram( i );
-      grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, arch_dia_ptr, false );
-      m_main_frame->get_event_handler()->Submit( event, false );
-    }
-    for ( unsigned int i = 0; i < del_spec->count_process_diagram(); ++i )
-    {
-      process_diagram* proc_dia_ptr = del_spec->get_process_diagram( i );
-      grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, proc_dia_ptr, false );
-      m_main_frame->get_event_handler()->Submit( event, false );
-    }
-  }
+
+  //Destroy grapespecification
+  delete del_spec;
+  m_main_frame->set_grape_specification( 0 );
 
   // reset listboxes
   m_main_frame->get_process_diagram_listbox()->Clear();
@@ -196,11 +184,6 @@ bool grape_event_base::close_specification()
   m_main_frame->GetToolBar()->SetToolShortHelp( wxID_UNDO, _T("Undo") );
   m_main_frame->GetToolBar()->EnableTool( wxID_REDO, false );
   m_main_frame->GetToolBar()->SetToolShortHelp( wxID_REDO, _T("Redo") );
-
-  //Destroy grapespecification
-  delete del_spec;
-
-  m_main_frame->set_grape_specification( 0 );
 
   // closing was successful
   return true;

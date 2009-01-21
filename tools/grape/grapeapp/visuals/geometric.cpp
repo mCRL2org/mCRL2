@@ -695,13 +695,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   }
 
   // calculate rotation of arrow
-  float angle_arrow = atan2((pre_pnt.m_x-pnt.m_x), (pre_pnt.m_y-pnt.m_y));
+  float angle_arrow = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = pnt.m_x + 0.03 * sin( angle_arrow - M_PI_4 );
-  float one_side_y = pnt.m_y + 0.03 * cos( angle_arrow - M_PI_4 );
-  float other_side_x = pnt.m_x + 0.03 * sin( angle_arrow + M_PI_4 );
-  float other_side_y = pnt.m_y + 0.03 * cos( angle_arrow + M_PI_4 );
+  float one_side_x = pnt.m_x + 0.03 * cos( angle_arrow - M_PI/4 );
+  float one_side_y = pnt.m_y + 0.03 * sin( angle_arrow - M_PI/4 );
+  float other_side_x = pnt.m_x + 0.03 * cos( angle_arrow + M_PI/4 );
+  float other_side_y = pnt.m_y + 0.03 * sin( angle_arrow + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
@@ -748,13 +748,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
 
   // calculate rotation of arrow
   // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_x - end_coord.m_x), ( p_begin.m_y - end_coord.m_y));
+  float angle = atan2(( p_begin.m_y - end_coord.m_y), ( p_begin.m_x - end_coord.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = end_coord.m_x + 0.03 * sin( angle - M_PI_4 );
-  float one_side_y = end_coord.m_y + 0.03 * cos( angle - M_PI_4 );
-  float other_side_x = end_coord.m_x + 0.03 * sin( angle + M_PI_4 );
-  float other_side_y = end_coord.m_y + 0.03 * cos( angle + M_PI_4 );
+  float one_side_x = end_coord.m_x + 0.03 * cos( angle - M_PI/4 );
+  float one_side_y = end_coord.m_y + 0.03 * sin( angle - M_PI/4 );
+  float other_side_x = end_coord.m_x + 0.03 * cos( angle + M_PI/4 );
+  float other_side_y = end_coord.m_y + 0.03 * sin( angle + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
@@ -801,13 +801,13 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
 
   // calculate rotation of arrow
   // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_x - end_coord.m_x), ( p_begin.m_y - end_coord.m_y));
+  float angle = atan2(( p_begin.m_y - end_coord.m_y), ( p_begin.m_x - end_coord.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = end_coord.m_x + 0.03 * sin( angle - M_PI_4 );
-  float one_side_y = end_coord.m_y + 0.03 * cos( angle - M_PI_4 );
-  float other_side_x = end_coord.m_x + 0.03 * sin( angle + M_PI_4 );
-  float other_side_y = end_coord.m_y + 0.03 * cos( angle + M_PI_4 );
+  float one_side_x = end_coord.m_x + 0.03 * cos( angle - M_PI/4 );
+  float one_side_y = end_coord.m_y + 0.03 * sin( angle - M_PI/4 );
+  float other_side_x = end_coord.m_x + 0.03 * cos( angle + M_PI/4 );
+  float other_side_y = end_coord.m_y + 0.03 * sin( angle + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);

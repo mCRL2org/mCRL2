@@ -80,33 +80,25 @@ void process_diagram::remove_state( state* p_state )
   deselect_object( p_state );
 
   // Remove all transitions that have this state as beginstate
-  int count = p_state->count_transition_beginstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_beginstate() )
   {
-    transition* trans_ptr = p_state->get_transition_beginstate( i );
+    transition* trans_ptr = p_state->get_transition_beginstate( 0 );
     p_state->detach_transition_beginstate( trans_ptr );
     delete_transition( trans_ptr );
-  } // end for
+  } // end while
 
   // Remove all transitions that have this state as endstate
-  count = p_state->count_transition_endstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_endstate() )
   {
-    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( i );
+    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( 0 );
     p_state->detach_transition_endstate( ntt_ptr );
-    int n = m_nonterminating_transitions.Index ( *ntt_ptr );
-    if ( n != wxNOT_FOUND )
-    {
-      m_nonterminating_transitions.Detach( n );
-      delete ntt_ptr;
-    }
-  } // end for
+    delete_transition( ntt_ptr );
+  } // end while
 
   // Remove all initial designators that designate this state
-  count = p_state->count_initial_designator();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_initial_designator() )
   {
-    initial_designator* init_ptr = p_state->get_initial_designator( i );
+    initial_designator* init_ptr = p_state->get_initial_designator( 0 );
     p_state->detach_initial_designator( init_ptr );
     int m = m_initial_designators.Index( *init_ptr );
     if ( m != wxNOT_FOUND )
@@ -114,7 +106,7 @@ void process_diagram::remove_state( state* p_state )
       m_initial_designators.Detach( m );
     }
     delete init_ptr;
-  } // end for
+  } // end while
 
   // Remove the state itself
   int i = m_states.Index( *p_state );
@@ -166,33 +158,25 @@ void process_diagram::remove_reference_state( reference_state* p_state )
   deselect_object( p_state );
 
   // Remove all transitions that have this state as beginstate
-  int count = p_state->count_transition_beginstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_beginstate() )
   {
-    transition* trans_ptr = p_state->get_transition_beginstate( i );
+    transition* trans_ptr = p_state->get_transition_beginstate( 0 );
     p_state->detach_transition_beginstate( trans_ptr );
     delete_transition( trans_ptr );
-  } // end for
+  } // end while
 
   // Remove all transitions that have this state as endstate
-  count = p_state->count_transition_endstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_endstate() )
   {
-    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( i );
+    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( 0 );
     p_state->detach_transition_endstate( ntt_ptr );
-    int n = m_nonterminating_transitions.Index( *ntt_ptr );
-    if ( n != wxNOT_FOUND )
-    {
-      m_nonterminating_transitions.Detach( n );
-      delete ntt_ptr;
-    }
-  } // end for
+    delete_transition( ntt_ptr );
+  } // end while
 
   // Remove all initial designators that designate this state
-  count = p_state->count_initial_designator();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_initial_designator() )
   {
-    initial_designator* init_ptr = p_state->get_initial_designator( i );
+    initial_designator* init_ptr = p_state->get_initial_designator( 0 );
     p_state->detach_initial_designator( init_ptr );
     int m = m_initial_designators.Index( *init_ptr );
     if ( m != wxNOT_FOUND )
@@ -200,7 +184,7 @@ void process_diagram::remove_reference_state( reference_state* p_state )
       m_initial_designators.Detach( m );
       delete init_ptr;
     }
-  } // end for
+  } // end while
 
   // Remove the state itself
   int i = m_reference_states.Index( *p_state );

@@ -262,7 +262,7 @@ bool grape_event_click::Do( void )
           coordinate coord = { designated_state_ptr->get_coordinate().m_x, designated_state_ptr->get_coordinate().m_y + designated_state_ptr->get_height()*0.5 + 0.1 };          
           coordinate end_coord = get_coordinate_on_edge(coord, designated_state_ptr);
           coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
-          float displacement = 0.01;
+          double displacement = 0.01;
           
           // Find a decent coordinate to place the designator           
           while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)
@@ -286,7 +286,7 @@ bool grape_event_click::Do( void )
           coordinate coord = { designated_reference_ptr->get_coordinate().m_x, designated_reference_ptr->get_coordinate().m_y + designated_reference_ptr->get_height()*0.5 + 0.1 };          
           coordinate end_coord = get_coordinate_on_edge(coord, designated_reference_ptr);
           coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
-          float displacement = 0.01;
+          double displacement = 0.01;
           
           // Find a decent coordinate to place the designator           
           while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)

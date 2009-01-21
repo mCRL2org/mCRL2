@@ -36,7 +36,7 @@ using namespace mcrl2::utilities;
 
 const float g_frame_border_space = 0.4f;
 
-grape_glcanvas::grape_glcanvas(wxWindow *p_parent, int *p_args, grape_frame* p_main_frame) : wxGLCanvas(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, _T("grape_glcanvas"), p_args, wxNullPalette)
+grape_glcanvas::grape_glcanvas(wxWindow *p_parent, int *p_args, grape_frame* p_main_frame) : wxGLCanvas(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL, _T("grape_glcanvas"), p_args, wxNullPalette)
 {
   m_main_frame = p_main_frame;
 

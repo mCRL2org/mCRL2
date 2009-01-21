@@ -40,7 +40,7 @@ visualnonterminating_transition::visualnonterminating_transition( nonterminating
       coordinate base_corner = { beginstate->get_coordinate().m_x - beginstate->get_height(), beginstate->get_coordinate().m_y };
       m_arrow_base = get_coordinate_on_edge( base_corner, beginstate ) - m_object->get_coordinate();
       coordinate head_corner = { base_corner.m_x, base_corner.m_y - beginstate->get_width() };
-      m_arrow_head = get_coordinate_on_edge( head_corner, beginstate ) - m_object->get_coordinate();\
+      m_arrow_head = get_coordinate_on_edge( head_corner, beginstate ) - m_object->get_coordinate();
     }
   }
 
