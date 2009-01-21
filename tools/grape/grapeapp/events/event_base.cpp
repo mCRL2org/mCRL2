@@ -157,10 +157,6 @@ bool grape_event_base::close_specification()
   // get specification
   grape_specification* del_spec = m_main_frame->get_grape_specification();
 
-  //Destroy grapespecification
-  delete del_spec;
-  m_main_frame->set_grape_specification( 0 );
-
   // reset listboxes
   m_main_frame->get_process_diagram_listbox()->Clear();
   m_main_frame->get_architecture_diagram_listbox()->Clear();
@@ -184,6 +180,10 @@ bool grape_event_base::close_specification()
   m_main_frame->GetToolBar()->SetToolShortHelp( wxID_UNDO, _T("Undo") );
   m_main_frame->GetToolBar()->EnableTool( wxID_REDO, false );
   m_main_frame->GetToolBar()->SetToolShortHelp( wxID_REDO, _T("Redo") );
+
+  //Destroy grapespecification
+  delete del_spec;
+  m_main_frame->set_grape_specification( 0 );
 
   // closing was successful
   return true;
