@@ -150,6 +150,8 @@ namespace mcrl2 {
     }
 
     std::string interface_description::option_descriptor::man_page_description() const {
+      using namespace boost::xpressive;
+
       std::ostringstream s;
 
       s << ".TP" << std::endl;
@@ -177,11 +179,9 @@ namespace mcrl2 {
               "=\\fI" + m_argument->get_name() + "\\fR");
       }
 
-      std::string description(word_wrap(m_description, 80));
-
-      boost::replace_all(description, "'", "\\&'");
-
-      s << std::endl << description << std::endl;
+      s << std::endl
+        << regex_replace(word_wrap(m_description, 80),
+			 sregex(as_xpr('\'')), std::string("\\&'")) << std::endl;
 
       return s.str();
     }
