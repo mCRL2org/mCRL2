@@ -603,9 +603,11 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
       part = gsMakeDataExprNat(gsATermAppl2String(Number));
     else if (ATisEqual(sort, gsMakeSortExprInt()))
       part = gsMakeDataExprInt(gsATermAppl2String(Number));
+    else if (ATisEqual(sort, gsMakeSortExprReal()))
+      part = gsMakeDataExprReal(gsATermAppl2String(Number));
     else //sort of part is wrong
       gsWarningMsg("%P can not be implemented because its sort differs from "
-        "Pos, Nat or Int\n", part);
+        "Pos, Nat, Int or Real\n", part);
   } else if (gsIsBinder(part)) {
     ATermAppl binding_operator = ATAgetArgument(part, 0);
     if (gsIsSetBagComp(binding_operator)) {
