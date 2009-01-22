@@ -659,6 +659,11 @@ data_expr_eq_rhs:
     {
       safe_assign($$, $1);
     }
+  | LAMBDA data_vars_decls_cs DOT data_expr_eq_rhs
+    {
+      safe_assign($$, gsMakeBinder(gsMakeLambda(), $2, $4));
+      gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
+    }
   | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
