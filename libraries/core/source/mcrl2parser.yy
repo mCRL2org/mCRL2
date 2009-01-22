@@ -1570,7 +1570,9 @@ proc_expr_primary:
     }
   | id_assignment
     {
-      safe_assign($$, $1);
+      mcrl2yyerror("process assignments are not yet supported");
+      YYABORT
+      //XXX safe_assign($$, $1);
     }
   | proc_quant
     {
