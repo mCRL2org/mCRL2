@@ -4574,6 +4574,15 @@ bool gsIsDataExprExists(ATermAppl DataExpr)
   return false;
 }
 
+bool gsIsDataExprLambda(ATermAppl DataExpr)
+{
+  if(gsIsDataAppl(DataExpr)) {
+    ATermAppl t = ATAgetArgument(DataExpr, 0);
+    return gsIsLambdaOpId(t);
+  }
+  return false;
+}
+
 //Multiactions
 //------------
 

@@ -1872,6 +1872,11 @@ bool gsIsDataExprForall(ATermAppl DataExpr);
 ///     an existential quantification.
 bool gsIsDataExprExists(ATermAppl DataExpr);
 
+///\pre DataExpr is a lambda expression
+///\return the data expression is the implementation of
+///     a lambda expression.
+bool gsIsDataExprLambda(ATermAppl DataExpr);
+
 // Multiactions
 // ------------
 

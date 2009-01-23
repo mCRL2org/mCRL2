@@ -103,13 +103,19 @@ namespace core {
     /// \param t A term
     /// \return True if the term is an universal quantification
     static inline
-    bool is_forall(term_type t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(atermpp::aterm_appl(t(0))); }
+    bool is_forall(term_type t) { return core::detail::gsIsDataExprForall(t); }
 
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification
     static inline
-    bool is_exists(term_type t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
+    bool is_exists(term_type t) { return core::detail::gsIsDataExprExists(t); }
+
+    /// \brief Test for lambda abstraction
+    /// \param t A term
+    /// \return True if the term is a lambda expression
+    static inline
+    bool is_lambda(term_type t) { return core::detail::gsIsDataExprLambda(t); }
 
     /// \brief Conversion from variable to term
     /// \param v A variable

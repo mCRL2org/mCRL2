@@ -186,13 +186,13 @@ namespace data_expr {
   // that we know we are working with a Binder before we take the binding operator.
 
   /// \brief Returns true if the term t is an existial quantification
-  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsExists(atermpp::aterm_appl(t(0))); }
+  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsDataExprExists(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(atermpp::aterm_appl(t(0))); }
+  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsDataExprForall(t); }
 
   /// \brief Returns true if the term t is a lambda expression
-  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
+  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsDataExprLambda(t); }
 
   /// \brief Returns a real with value i
   /// \param i An integer value
