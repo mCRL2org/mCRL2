@@ -4569,7 +4569,7 @@ bool gsIsDataExprExists(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
     ATermAppl t = ATAgetArgument(DataExpr, 0);
-    return gsIsOpIdForall(t);
+    return gsIsOpIdExists(t);
   }
   return false;
 }
