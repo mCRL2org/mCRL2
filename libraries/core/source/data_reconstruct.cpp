@@ -71,6 +71,8 @@ typedef struct {
   atermpp::map<ATermAppl, int>                       num_sort_cons_equations;
   atermpp::map<ATermAppl, atermpp::indexed_set>      map_equations;
   atermpp::map<ATermAppl, int>                       num_map_equations;
+  ATermList                                          function_operation_mappings; // operations on functions for finite sets/bags
+  ATermList                                          function_operation_equations; // equations for operations on functions for finite sets/bags
   atermpp::map<ATermAppl, ATermAppl>                 recognises;
   atermpp::map<ATermAppl, ATermAppl>                 is_recognised_by;
   atermpp::map<std::pair<ATermAppl, int>, ATermAppl> projects;
@@ -324,6 +326,11 @@ static bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx);
 ///\pre data_expr is a set or bag comprehension
 static ATermAppl get_element_sort(ATermAppl data_expr);
 
+//!\brief Determine whether data_expr is an operation identifier for a function
+// introduced in the data implementation of sets and bags.
+///\ret true iff the name of data_expr is @false_, @true_, @not_, @and_, @or_
+//(sets), or @zero_, @one_, @add_, @min_, @monus_, @nat2bool_, @bool2nat_
+static bool is_function_operation(ATermAppl data_expr);
 
 // implementation
 // ----------------------------------------------
@@ -417,26 +424,66 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     gsIsPBES(Spec) || gsIsDataSpec(Spec));
   assert(gsIsDataExpr(Part));
 
-  if (gsIsDataExprBagComp(Part)) {
-//    gsDebugMsg("Reconstructing implementation of bag comprehension\n", Part);
-    //part is an implementation of a bag comprehension;
-    //replace by a bag comprehension.
-    ATermList Args = ATLgetArgument(Part, 1);
-    ATermAppl Body = ATAelementAt(Args, 0);
-    ATermList Vars = ATmakeList0();
-    ATermList BodySortDomain = ATLgetArgument(gsGetSort(Body), 0);
-    ATermList Context = ATmakeList1((ATerm) Body);
-    for(;!ATisEmpty(BodySortDomain); BodySortDomain = ATgetNext(BodySortDomain))
+ if (gsIsDataExprSet(Part)) {
+//    gsDebugMsg("Reconstructing implementation of set comprehension\n");
+    //part is an internal set representation;
+    //replace by a finite set to set conversion or a set comprehension.
+
+    ATermList args = ATLgetArgument(Part, 1);
+    ATermAppl de_func = ATAgetFirst(args);
+    ATermAppl de_fset = ATAgetFirst(ATgetNext(args));
+    ATermAppl se_set = gsGetSort(Part);
+    ATermAppl de_set_fset = gsMakeDataExprSetFSet(de_fset, se_set);
+    if(gsIsDataExprFalseFunc(de_func))
     {
-      ATermAppl Var = gsMakeDataVarId(
-                        gsFreshString2ATermAppl("x", (ATerm) Context, true),
-                        ATAgetFirst(BodySortDomain));
-      Context = ATinsert(Context, (ATerm) Var);
-      Vars = ATinsert(Vars, (ATerm) Var);
+      Part = reconstruct_data_expr(de_set_fset, p_substs, Spec, recursive);
     }
-    Vars = ATreverse(Vars);
-    Body = gsMakeDataAppl(Body, Vars);
-    Part = gsMakeBinder(gsMakeBagComp(),Vars, Body);
+    else if (gsIsDataExprTrueFunc(de_func))
+    {
+      Part = gsMakeDataExprSetCompl(de_set_fset);
+    }
+    else
+    {
+      ATermAppl se_func = gsGetSort(de_func);
+      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      ATermList context = ATmakeList2((ATerm) de_func, (ATerm) de_fset);
+      ATermAppl var = gsMakeDataVarId(
+                        gsFreshString2ATermAppl("x", (ATerm) context, true),
+                        se_func_dom);
+      ATermAppl body;
+      if (gsIsDataExprEmptyList(de_fset) || gsIsDataExprFSetEmpty(de_fset))
+      {
+        body = gsMakeDataAppl1(de_func, var);
+      }
+      else
+      {
+        body = gsMakeDataExprNeq(gsMakeDataAppl1(de_func, var), gsMakeDataExprEltIn(var, de_set_fset));
+      }
+      Part = gsMakeBinder(gsMakeSetComp(), ATmakeList1((ATerm)var), body);
+    }
+  } else if (gsIsDataExprSetFSet(Part)) {
+    //try to reconstruct Part as the empty set or as a set enumeration
+    ATermList args = ATLgetArgument(Part, 1);
+    ATermAppl de_fset = ATAgetFirst(args);
+    ATermAppl se_set = gsGetSort(Part);
+    bool elts_is_consistent = true;
+    ATermList elts = ATmakeList0();
+    while (!(gsIsDataExprEmptyList(de_fset) || gsIsDataExprFSetEmpty(de_fset)) && elts_is_consistent) {
+      if (gsIsDataExprCons(de_fset) || gsIsDataExprFSetInsert(de_fset)) {
+        ATermList de_fset_args = ATLgetArgument(de_fset, 1);
+        elts = ATinsert(elts, ATelementAt(de_fset_args, 0));
+        de_fset = ATAelementAt(de_fset_args, 1);
+      } else {
+        elts_is_consistent = false;
+      }
+    }
+    if (elts_is_consistent) {
+      if (ATisEmpty(elts)) {
+        Part = gsMakeDataExprEmptySet(se_set);
+      } else {
+        Part = gsMakeDataExprSetEnum(ATreverse(elts), se_set);
+      }
+    }
   } else if (gsIsDataExprSetComp(Part)) {
 //    gsDebugMsg("Reconstructing implementation of set comprehension\n");
     //part is an implementation of a set comprehension;
@@ -457,6 +504,98 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Vars = ATreverse(Vars);
     Body = gsMakeDataAppl(Body, Vars);
     Part = gsMakeBinder(gsMakeSetComp(), Vars, Body);
+} else if (gsIsDataExprBag(Part)) {
+//    gsDebugMsg("Reconstructing implementation of bag comprehension\n");
+    //part is an internal bag representation;
+    //replace by a finite bag to bag conversion or a bag comprehension.
+
+    ATermList args = ATLgetArgument(Part, 1);
+    ATermAppl de_func = ATAgetFirst(args);
+    ATermAppl de_fbag = ATAgetFirst(ATgetNext(args));
+    ATermAppl se_bag = gsGetSort(Part);
+    ATermAppl de_bag_fbag = gsMakeDataExprBagFBag(de_fbag, se_bag);
+    if(gsIsDataExprZeroFunc(de_func))
+    {
+      Part = reconstruct_data_expr(de_bag_fbag, p_substs, Spec, recursive);
+    }
+    else
+    {
+      ATermAppl se_func = gsGetSort(de_func);
+      ATermAppl se_func_dom = ATAgetFirst(ATLgetArgument(se_func, 0));
+      ATermList context = ATmakeList2((ATerm) de_func, (ATerm) de_fbag);
+      ATermAppl var = gsMakeDataVarId(
+                        gsFreshString2ATermAppl("x", (ATerm) context, true),
+                        se_func_dom);
+      ATermAppl body;
+      if (gsIsDataExprOneFunc(de_func)) {
+        body = gsMakeDataExprCNat(gsMakeDataExprC1());
+      } else {
+        body = gsMakeDataAppl1(de_func, var);
+      }
+      if (!gsIsDataExprEmptyList(de_fbag) && !gsIsDataExprFSetEmpty(de_fbag)) {
+        body = gsMakeDataExprSwapZero(body, gsMakeDataExprCount(var, de_bag_fbag));
+      }
+      Part = gsMakeBinder(gsMakeBagComp(), ATmakeList1((ATerm)var), body);
+    }
+  } else if (gsIsDataExprBagFBag(Part)) {
+    //try to reconstruct Part as the empty bag or as a bag enumeration
+    ATermList args = ATLgetArgument(Part, 1);
+    ATermAppl de_fbag = ATAgetFirst(args);
+    ATermAppl se_bag = gsGetSort(Part);
+    bool elts_is_consistent = true;
+    ATermList elts = ATmakeList0();
+    while (!(gsIsDataExprEmptyList(de_fbag) || gsIsDataExprFBagEmpty(de_fbag)) && elts_is_consistent) {
+      if (gsIsDataExprCons(de_fbag)) {
+        ATermList de_fbag_args = ATLgetArgument(de_fbag, 1);
+        ATermAppl de_bag_elt = ATAelementAt(de_fbag_args, 0);
+        if (gsIsDataExprBagElt(de_bag_elt)) {
+          ATermList de_bag_elt_args = ATLgetArgument(de_bag_elt, 1);
+          ATermAppl de_bag_elt_elt = ATAelementAt(de_bag_elt_args, 0);
+          elts = ATinsert(elts, (ATerm) de_bag_elt_elt);
+          ATermAppl de_bag_elt_count = ATAelementAt(de_bag_elt_args, 1);
+          elts = ATinsert(elts, (ATerm) gsMakeDataExprCNat(de_bag_elt_count));
+          de_fbag = ATAelementAt(de_fbag_args, 1);
+        } else {
+          elts_is_consistent = false;
+        }
+      } else if (gsIsDataExprFBagCInsert(de_fbag)) {
+        ATermList de_fbag_args = ATLgetArgument(de_fbag, 1);
+        ATermAppl de_bag_elt_elt = ATAelementAt(de_fbag_args, 0);
+        elts = ATinsert(elts, (ATerm) de_bag_elt_elt);
+        ATermAppl de_bag_elt_count = ATAelementAt(de_fbag_args, 1);
+        elts = ATinsert(elts, (ATerm) de_bag_elt_count);
+        de_fbag = ATAelementAt(de_fbag_args, 2);
+      } else {
+        elts_is_consistent = false;
+      }
+    }
+    if (elts_is_consistent) {
+      if (ATisEmpty(elts)) {
+        Part = gsMakeDataExprEmptyBag(se_bag);
+      } else {
+        Part = gsMakeDataExprBagEnum(ATreverse(elts), se_bag);
+      }
+    }
+  } else if (gsIsDataExprBagComp(Part)) {
+//    gsDebugMsg("Reconstructing implementation of bag comprehension\n", Part);
+    //part is an implementation of a bag comprehension;
+    //replace by a bag comprehension.
+    ATermList Args = ATLgetArgument(Part, 1);
+    ATermAppl Body = ATAelementAt(Args, 0);
+    ATermList Vars = ATmakeList0();
+    ATermList BodySortDomain = ATLgetArgument(gsGetSort(Body), 0);
+    ATermList Context = ATmakeList1((ATerm) Body);
+    for(;!ATisEmpty(BodySortDomain); BodySortDomain = ATgetNext(BodySortDomain))
+    {
+      ATermAppl Var = gsMakeDataVarId(
+                        gsFreshString2ATermAppl("x", (ATerm) Context, true),
+                        ATAgetFirst(BodySortDomain));
+      Context = ATinsert(Context, (ATerm) Var);
+      Vars = ATinsert(Vars, (ATerm) Var);
+    }
+    Vars = ATreverse(Vars);
+    Body = gsMakeDataAppl(Body, Vars);
+    Part = gsMakeBinder(gsMakeBagComp(),Vars, Body);
   } else if (gsIsDataExprForall(Part)) {
 //    gsDebugMsg("Reconstructing implementation of universal quantification\n");
     //part is an implementation of a universal quantification;
@@ -675,6 +814,15 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     Part = gsMakeDataExprEq(gsMakeDataExprMod(Arg,
                gsMakeOpId(gsString2ATermAppl("2"),gsMakeSortExprPos())),
              gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat()));
+  } else if (gsIsDataExprSwapZero(Part)) {
+//    gsDebugMsg("Reconstructing implementation of swap_zero (%T)\n", Part);
+    ATermList args = ATLgetArgument(Part, 1);
+    ATermAppl arg0 = ATAgetFirst(args);
+    ATermAppl arg1 = ATAgetFirst(ATgetNext(args));
+    Part = gsMakeDataExprIf(
+      gsMakeDataExprEq(arg1, gsMakeDataExprC0()),
+      arg0,
+      gsMakeDataExprIf(gsMakeDataExprEq(arg1, arg0), gsMakeDataExprC0(), arg1));
   } else if (is_list_enum_impl(Part)) {
     if(!gsIsDataExprEmptyList(Part)) {
       ATermList Elts = ATmakeList0();
@@ -1043,7 +1191,7 @@ bool is_and_or_of_data_var_eq_lt(const ATermAppl data_expr, bool equal)
     }
   }
   else if ((!equal && gsIsDataExprLT(data_expr)) ||
-             equal && gsIsDataExprLTE(data_expr))
+           (equal && gsIsDataExprLTE(data_expr)))
   {
     return gsIsDataVarId(ATAgetFirst(ATLgetArgument(data_expr, 1))) &&
            gsIsDataVarId(ATAgetFirst(ATgetNext(ATLgetArgument(data_expr, 1))));
@@ -1098,7 +1246,17 @@ bool is_set_operator(const ATermAppl data_expr)
          gsIsOpIdSetUnion(data_expr) ||
          gsIsOpIdSetDiff(data_expr) ||
          gsIsOpIdSetIntersect(data_expr) ||
-         gsIsOpIdSetCompl(data_expr);
+         gsIsOpIdSetCompl(data_expr) ||
+         gsIsOpIdSetFSet(data_expr) ||
+         gsIsOpIdSet(data_expr) ||
+         // Finite set operations
+         gsIsOpIdFSetEmpty(data_expr) ||
+         gsIsOpIdFSetInsert(data_expr) ||
+         gsIsOpIdFSetCInsert(data_expr) ||
+         gsIsOpIdFSetIn(data_expr) ||
+         gsIsOpIdFSetLTE(data_expr) ||
+         gsIsOpIdFSetUnion(data_expr) ||
+         gsIsOpIdFSetInter(data_expr);
 }
 
 bool is_bag_operator(const ATermAppl data_expr)
@@ -1108,11 +1266,25 @@ bool is_bag_operator(const ATermAppl data_expr)
          gsIsOpIdEmptyBag(data_expr) ||
          gsIsOpIdCount(data_expr) ||
          gsIsOpIdEltIn(data_expr) ||
-         gsIsOpIdBagUnion(data_expr) ||
+         gsIsOpIdBagJoin(data_expr) ||
          gsIsOpIdBagDiff(data_expr) ||
          gsIsOpIdBagIntersect(data_expr) ||
          gsIsOpIdBag2Set(data_expr) ||
-         gsIsOpIdSet2Bag(data_expr);
+         gsIsOpIdSet2Bag(data_expr) ||
+         gsIsOpIdBagFBag(data_expr) ||
+         gsIsOpIdBag(data_expr) ||
+         // Finite bag operations
+         gsIsOpIdFBagEmpty(data_expr)||
+         gsIsOpIdFBagInsert(data_expr)||
+         gsIsOpIdFBagCInsert(data_expr)||
+         gsIsOpIdFBagCount(data_expr)||
+         gsIsOpIdFBagIn(data_expr)||
+         gsIsOpIdFBagLTE(data_expr)||
+         gsIsOpIdFBagJoin(data_expr)||
+         gsIsOpIdFBagInter(data_expr)||
+         gsIsOpIdFBagDiff(data_expr)||
+         gsIsOpIdFBag2FSet(data_expr)||
+         gsIsOpIdFSet2FBag(data_expr);
 }
 
 bool is_constructor_induced_equation(const ATermAppl data_eqn, atermpp::map<ATermAppl, atermpp::indexed_set>& sort_constructors)
@@ -1488,10 +1660,14 @@ bool is_system_defined_equation(const ATermAppl data_eqn)
     }
     else if (gsIsDataExprEq(data_eqn_lhs)) {
       // Special case, data_eqn is of the form var == var = true;
-      return gsIsDataVarId(arg0) &&
-             gsIsDataVarId(arg1) &&
-             ATisEqual(arg0, arg1) &&
-             gsIsDataExprTrue(data_eqn_rhs);
+      return (gsIsDataVarId(arg0) &&
+              gsIsDataVarId(arg1) &&
+              ATisEqual(arg0, arg1) &&
+              gsIsDataExprTrue(data_eqn_rhs)) ||
+             (is_function_operation(arg0) &&
+              is_function_operation(arg1) &&
+              !ATisEqual(arg0, arg1) &&
+              gsIsDataExprFalse(data_eqn_rhs));
     } else if (gsIsDataExprNeq(data_eqn_lhs)) {
       // Special case, inequality: x != y == !(x==y)
       return gsIsDataVarId(arg0) &&
@@ -1524,23 +1700,57 @@ bool is_system_defined_equation(const ATermAppl data_eqn)
   return false;
 }
 
-ATermAppl get_linked_sort(const ATermAppl op_id)
+ATermAppl get_linked_sort(const ATermAppl data_expr)
 {
-  assert(gsIsOpId(op_id));
-  ATermAppl sort = gsGetSort(op_id);
-  ATermList sort_domain = ATLgetArgument(sort, 0);
-  ATermAppl sort_range = ATAgetArgument(sort, 1);
-  ATermAppl linked_sort = ATAgetFirst(sort_domain);
-  if (gsIsOpIdIf(op_id) ||
-      gsIsOpIdEltIn(op_id) ||
-      gsIsOpIdCount(op_id))
+  if(gsIsDataAppl(data_expr))
   {
-    linked_sort = ATAgetFirst(ATgetNext(sort_domain));
-  } else if (gsIsOpIdSetComp(op_id) ||
-             gsIsOpIdBagComp(op_id)) {
-    linked_sort = sort_range;
+    ATermList arguments = ATLgetArgument(data_expr, 1);
+    assert(ATgetLength(arguments) == 2);
+    ATermAppl arg2 = ATAgetFirst(ATgetNext(arguments));
+    ATermAppl op = ATAgetArgument(arg2, 0);
+    assert(gsIsOpId(op));
+    ATermAppl linked_sort = get_linked_sort(op);
+    return linked_sort;
   }
-  return linked_sort;
+  else
+  {
+    assert(gsIsOpId(data_expr));
+    ATermAppl sort = gsGetSort(data_expr);
+    ATermList sort_domain = ATLgetArgument(sort, 0);
+    ATermAppl sort_range = ATAgetArgument(sort, 1);
+    ATermAppl linked_sort = ATAgetFirst(sort_domain);
+    // second argument
+    if (gsIsOpIdIf(data_expr) ||
+        gsIsOpIdEltIn(data_expr) ||
+        gsIsOpIdCount(data_expr) ||
+        gsIsOpIdFBag2FSet(data_expr) ||
+        gsIsOpIdFBagLTE(data_expr) ||
+        gsIsOpIdFBagIn(data_expr) ||
+        gsIsOpIdFBagCount(data_expr) ||
+        gsIsOpIdFSetLTE(data_expr) ||
+        gsIsOpIdFSetIn(data_expr))
+    {
+      linked_sort = ATAgetFirst(ATgetNext(sort_domain));
+    // third argument
+    } else if (gsIsOpIdFBagDiff(data_expr) ||
+               gsIsOpIdFBagInter(data_expr) ||
+               gsIsOpIdFBagJoin(data_expr) ||
+               gsIsOpIdFBagCInsert(data_expr) ||
+               gsIsOpIdFSetInter(data_expr) ||
+               gsIsOpIdFSetUnion(data_expr) ||
+               gsIsOpIdFSetCInsert(data_expr)) {
+      linked_sort = ATAgetFirst(ATgetNext(ATgetNext(sort_domain)));
+    // range
+    } else if (gsIsOpIdSetComp(data_expr) ||
+               gsIsOpIdBagComp(data_expr) ||
+               gsIsOpIdFSetInsert(data_expr) ||
+               gsIsOpIdFBagInsert(data_expr) ||
+               gsIsOpIdSet(data_expr) ||
+               gsIsOpIdBag(data_expr)) {
+      linked_sort = sort_range;
+    }
+    return linked_sort;
+  }
 }
 
 void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p_ctx)
@@ -1600,6 +1810,8 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
   assert(p_ctx != NULL);
   assert(p_substs != NULL);
 
+  p_ctx->function_operation_mappings = ATmakeList0();
+
 //  gsDebugMsg("Initialising mappings\n");
   std::pair<long, bool> put_result;
   // Traverse mappings to find relevant functions, and mark possible recogniser
@@ -1613,8 +1825,14 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
 
     // The only relevant constant functions are empty set and empty bag,
     // treat these separately
+    if (is_function_operation(op))
+    {
+      p_ctx->function_operation_mappings = ATinsert(p_ctx->function_operation_mappings, (ATerm) op);
+    }
     if (gsIsOpIdEmptyBag(op) ||
-        gsIsOpIdEmptySet(op)) {
+        gsIsOpIdEmptySet(op) ||
+        gsIsOpIdFBagEmpty(op) ||
+        gsIsOpIdFSetEmpty(op)) {
       assert(p_ctx->sorts_table.get(sort) != NULL);
       put_result = p_ctx->sort_mappings[sort].put(op);
       if (put_result.second) {
@@ -1664,6 +1882,18 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
                                gsMakeSortExprSet(element_sort)),
               *p_substs);
           }
+        /*
+        } else if (gsIsOpIdFSetInsert(op)) {
+          ATermAppl sort_fset = ATAgetArgument(gsGetSort(op), 1);
+          if(gsIsFSetSortId(sort_fset))
+          {
+            ATermAppl element_sort = get_element_sort(op);
+            *p_substs = gsAddSubstToSubsts(
+              gsMakeSubst_Appl(sort_fset,
+                               gsMakeSortExprSet(element_sort)),
+              *p_substs);
+          }
+        */
         } else if (gsIsOpIdBagComp(op)) {
           ATermAppl sort_bag = ATAgetArgument(gsGetSort(op), 1);
           if(gsIsBagSortId(sort_bag))
@@ -1674,6 +1904,18 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
                                gsMakeSortExprBag(element_sort)),
               *p_substs);
           }
+        /*
+        } else if (gsIsOpIdFBagInsert(op)) {
+          ATermAppl sort_fbag = ATAgetArgument(gsGetSort(op), 1);
+          if(gsIsFBagSortId(sort_fbag))
+          {
+            ATermAppl element_sort = get_element_sort(op);
+            *p_substs = gsAddSubstToSubsts(
+              gsMakeSubst_Appl(sort_fbag,
+                               gsMakeSortExprBag(element_sort)),
+              *p_substs);
+          } 
+        */
         }
       }
     }
@@ -1686,20 +1928,30 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
   assert(p_ctx != NULL);
   assert(p_substs != NULL);
 
+  p_ctx->function_operation_equations = ATmakeList0();
+
 //  gsDebugMsg("Collecting data equations\n");
  // for matching against list, set, bag equations
   ATermAppl elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt"));
+  ATermAppl fbag_elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt_fbag"));
   ATermAppl list_sort = gsMakeSortId(gsString2ATermAppl("sort_list"));
   ATermAppl set_sort = gsMakeSortId(gsString2ATermAppl("sort_set"));
   ATermAppl bag_sort = gsMakeSortId(gsString2ATermAppl("sort_bag"));
+  ATermAppl fset_sort = gsMakeSortId(gsString2ATermAppl("sort_fset"));
+  ATermAppl fbag_sort = gsMakeSortId(gsString2ATermAppl("sort_fbag"));
   ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
   elt_sort =  (ATermAppl) ATsetAnnotation((ATerm) elt_sort,  dummy, dummy);
+  fbag_elt_sort = (ATermAppl) ATsetAnnotation((ATerm) fbag_elt_sort, dummy, dummy);
   list_sort = (ATermAppl) ATsetAnnotation((ATerm) list_sort, dummy, dummy);
   set_sort =  (ATermAppl) ATsetAnnotation((ATerm) set_sort,  dummy, dummy);
   bag_sort =  (ATermAppl) ATsetAnnotation((ATerm) bag_sort,  dummy, dummy);
+  fset_sort =  (ATermAppl) ATsetAnnotation((ATerm) fset_sort,  dummy, dummy);
+  fbag_sort =  (ATermAppl) ATsetAnnotation((ATerm) fbag_sort,  dummy, dummy);
   ATermList generic_equations = ATconcat(build_list_equations(elt_sort, list_sort),
-                                ATconcat(build_set_equations(elt_sort, set_sort),
-                                         build_bag_equations(elt_sort, bag_sort, set_sort)));
+                                ATconcat(build_set_equations(elt_sort, fset_sort, set_sort),
+                                ATconcat(build_fset_equations(elt_sort, fset_sort),
+                                ATconcat(build_bag_equations(elt_sort, fset_sort, fbag_sort, set_sort, bag_sort),
+                                         build_fbag_equations(elt_sort, fset_sort, fbag_elt_sort, fbag_sort)))));
   std::pair<long, bool> put_result;
 
   // Traverse data equations and:
@@ -1723,17 +1975,28 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         assert(gsIsOpId(head));
         assert(p_ctx->sorts_table.get(get_linked_sort(head)) != NULL);
         assert(p_ctx->sort_mappings[get_linked_sort(head)].index(head) >= 0);
+        if (is_function_operation(head))
+        {
+          p_ctx->function_operation_equations = ATinsert(p_ctx->function_operation_equations, (ATerm)data_eqn);
+        }
         put_result = p_ctx->map_equations[head].put(data_eqn);
         if (put_result.second) {
           p_ctx->num_map_equations[head]++;
         }
       } else if (is_constructor_induced_equation(data_eqn, p_ctx->sort_constructors)
         || find_match_in_list(data_eqn, generic_equations)) {
-        assert(gsIsOpId(head));
-        ATermAppl sort = get_linked_sort(head);
-        put_result = p_ctx->sort_cons_equations[sort].put(data_eqn);
-        if (put_result.second) {
-          p_ctx->num_sort_cons_equations[sort]++;
+        ATermAppl sort = NULL;
+        if(!gsIsOpId(head) || is_function_operation(head))
+        {
+          p_ctx->function_operation_equations = ATinsert(p_ctx->function_operation_equations, (ATerm)data_eqn);
+        }
+        else
+        {
+          sort = get_linked_sort(head);
+          put_result = p_ctx->sort_cons_equations[sort].put(data_eqn);
+          if (put_result.second) {
+            p_ctx->num_sort_cons_equations[sort]++;
+          }
         }
       } else if (is_recogniser_equation(data_eqn)) {
         assert(gsIsOpId(head));
@@ -1780,6 +2043,10 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
           }
         }
       } else if (find_match_in_list(data_eqn, generic_equations)) {
+        if(is_function_operation(data_eqn_lhs))
+        {
+          p_ctx->function_operation_equations = ATinsert(p_ctx->function_operation_equations, (ATerm) data_eqn);
+        }
         put_result = p_ctx->map_equations[head].put(data_eqn);
         if (put_result.second) {
           p_ctx->num_map_equations[head]++;
@@ -1789,7 +2056,11 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         }
       }
     } else if (gsIsOpId(data_eqn_lhs)) {
-      if (find_match_in_list(data_eqn, generic_equations)) {
+      if(is_function_operation(data_eqn_lhs))
+      {
+        p_ctx->function_operation_equations = ATinsert(p_ctx->function_operation_equations, (ATerm) data_eqn);
+      }
+      else if (find_match_in_list(data_eqn, generic_equations)) {
         put_result = p_ctx->map_equations[data_eqn_lhs].put(data_eqn);
         if (put_result.second) {
           p_ctx->num_map_equations[data_eqn_lhs]++;
@@ -2002,6 +2273,18 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
   assert(equations != NULL);
   assert(p_ctx != NULL);
 
+  // Mappings for function operations should be removed unconditionally
+  for (ATermList l = p_ctx->function_operation_mappings; !ATisEmpty(l); l = ATgetNext(l))
+  {
+    mappings->put(ATgetFirst(l), (ATerm) ATtrue);
+  }
+
+  // Equations for function operations should be removed unconditionally
+  for (ATermList l = p_ctx->function_operation_equations; !ATisEmpty(l); l = ATgetNext(l))
+  {
+    equations->put(ATgetFirst(l), (ATerm) ATtrue);
+  }
+
 //  gsDebugMsg("Flatten mappings and equations\n");
   for (ATermList l = p_ctx->sorts_table.table_keys(); !ATisEmpty(l); l = ATgetNext(l))
   {
@@ -2130,7 +2413,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
     ATermAppl sort = ATAgetFirst(l);
     ATermList constructors = p_ctx->sort_constructors[sort].elements();
 
-    if(p_ctx->num_sort_constructors[sort] != 0) {
+    if(p_ctx->num_sort_constructors[sort] != 0) { 
       if(p_ctx->num_sort_constructors[sort] == 2 &&
          (ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)) {
         // sort is a list sort
@@ -2143,13 +2426,13 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
           constructors = ATgetNext(constructors);
         }
         if (element_sort != NULL) {
-          if (gsIsListSortId(sort)) {
+          if (gsIsListSortId(sort) || gsIsFSetSortId(sort) || gsIsFBagSortId(sort)) {
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
           } else {
-            ATermAppl sort_name = ATAgetArgument(sort, 0);
             assert(ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) == -1); // Do not add duplicate sorts
+            ATermAppl sort_name = ATAgetArgument(sort, 0);
             p_data_decls->sorts = ATinsert(p_data_decls->sorts,
-                                    (ATerm) gsMakeSortRef(sort_name, gsMakeSortExprList(element_sort)));
+                                  (ATerm) gsMakeSortRef(sort_name, gsMakeSortExprList(element_sort)));
           }
         }
       } else {
@@ -2233,13 +2516,16 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
 bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
 {
   // simple sort ids
-  if (gsIsSetSortId(sort) || gsIsBagSortId(sort) || gsIsListSortId(sort)) {
+  if (gsIsSetSortId(sort) || gsIsFSetSortId(sort) || gsIsBagSortId(sort) ||
+      gsIsFBagSortId(sort) || gsIsListSortId(sort)) {
     return true;
   }
 
   // Sort reference to set/bag sort
   if (p_ctx->sort_mappings[sort].index(gsMakeOpIdEmptySet(sort)) >= 0 ||
-      p_ctx->sort_mappings[sort].index(gsMakeOpIdEmptyBag(sort)) >= 0)
+      p_ctx->sort_mappings[sort].index(gsMakeOpIdEmptyBag(sort)) >= 0 ||
+      p_ctx->sort_mappings[sort].index(gsMakeOpIdFSetEmpty(sort)) >= 0 ||
+      p_ctx->sort_mappings[sort].index(gsMakeOpIdFBagEmpty(sort)) >= 0) 
   {
     return true;
   }
@@ -2254,18 +2540,56 @@ bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
 
 ATermAppl get_element_sort(ATermAppl data_expr)
 {
-  assert(gsIsOpIdSetComp(data_expr) || gsIsOpIdBagComp(data_expr));
-  ATermList domain = ATLgetArgument(gsGetSort(data_expr), 0);
-  assert(ATgetLength(domain) == 1);
-  ATermAppl element_sort = ATAgetFirst(domain);
-  // Element sort should be of the form S -> Bool or S -> Nat
-  assert(gsIsSortArrow(element_sort));
-  assert(ATAgetArgument(element_sort, 1) == gsMakeSortExprBool() ||
-         ATAgetArgument(element_sort, 1) == gsMakeSortExprNat());
-  assert(ATgetLength(ATLgetArgument(element_sort, 0)));
-  element_sort = ATAgetFirst(ATLgetArgument(element_sort, 0));
+  if(gsIsOpIdFSetInsert(data_expr) || gsIsOpIdFBagInsert(data_expr))
+  {
+    ATermList domain = ATLgetArgument(gsGetSort(data_expr), 0);
+    assert((gsIsOpIdFSetInsert(data_expr) && ATgetLength(domain) == 2) ||
+           ((gsIsOpIdFBagInsert(data_expr) && ATgetLength(domain) == 3) && 
+              gsIsSortExprPos(ATAgetFirst(ATgetNext(domain)))));
+    return ATAgetFirst(domain);
+  }
+  else
+  {
+    assert(gsIsOpIdSetComp(data_expr) || gsIsOpIdBagComp(data_expr));
+    ATermList domain = ATLgetArgument(gsGetSort(data_expr), 0);
+    assert(ATgetLength(domain) == 1);
+    ATermAppl element_sort = ATAgetFirst(domain);
+    // Element sort should be of the form S -> Bool or S -> Nat
+    assert(gsIsSortArrow(element_sort));
+    assert(ATAgetArgument(element_sort, 1) == gsMakeSortExprBool() ||
+           ATAgetArgument(element_sort, 1) == gsMakeSortExprNat());
+    assert(ATgetLength(ATLgetArgument(element_sort, 0)));
+    element_sort = ATAgetFirst(ATLgetArgument(element_sort, 0));
 
-  return element_sort;
+    return element_sort;
+  }
+}
+
+//!\brief Determine whether data_expr is an operation identifier for a function
+// introduced in the data implementation of sets and bags.
+///\ret true iff the name of data_expr is @false_, @true_, @not_, @and_, @or_
+//(sets), or @zero_, @one_, @add_, @min_, @monus_, @nat2bool_, @bool2nat_
+bool is_function_operation(ATermAppl data_expr)
+{
+  if(gsIsOpId(data_expr))
+  {
+    ATermAppl name = gsGetName(data_expr);
+    return ATisEqual(name, gsMakeOpIdNameFalseFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameTrueFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameNotFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameAndFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameOrFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameZeroFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameOneFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameAddFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameMinFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameMonusFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameNat2BoolFunc()) ||
+           ATisEqual(name, gsMakeOpIdNameBool2NatFunc());
+
+  }
+  return false;
+
 }
 
   }   //namespace core

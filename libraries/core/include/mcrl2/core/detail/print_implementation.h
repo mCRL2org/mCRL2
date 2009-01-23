@@ -1981,7 +1981,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameSubt())         ||
      (OpIdName == gsMakeOpIdNameSetUnion())     ||
      (OpIdName == gsMakeOpIdNameSetDiff())      ||
-     (OpIdName == gsMakeOpIdNameBagUnion())     ||
+     (OpIdName == gsMakeOpIdNameBagJoin())     ||
      (OpIdName == gsMakeOpIdNameBagDiff())      ||
      (OpIdName == gsMakeOpIdNameDiv())          ||
      (OpIdName == gsMakeOpIdNameMod())          ||
@@ -2022,7 +2022,7 @@ int gsPrecOpIdInfix(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
   } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
@@ -2065,7 +2065,7 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
   } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
@@ -2108,7 +2108,7 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 10;
   } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||

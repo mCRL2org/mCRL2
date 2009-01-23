@@ -1150,7 +1150,7 @@ void gstcDataInit(void){
   gstcAddSystemConstant(gsMakeOpIdEmptyBag(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdCount(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
-  gstcAddSystemFunction(gsMakeOpIdBagUnion(gsMakeSortExprBag(gsMakeSortUnknown())));
+  gstcAddSystemFunction(gsMakeOpIdBagJoin(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagDiff(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagIntersect(gsMakeSortExprBag(gsMakeSortUnknown())));
 }
