@@ -1,0 +1,10 @@
+project toolset/lpsparunfold ;
+
+tool lpsparunfold
+       : lpsparunfold.cpp
+         lpsparunfoldlib.cpp
+         /libraries//lps
+       : <squadt-connectivity>implemented
+       ;
+
+install-tools lpsparunfold ;
