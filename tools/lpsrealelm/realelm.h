@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jan Friso Groote and Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -19,15 +19,8 @@
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/rewriter.h"
 #include "comp.h"
+#include "linear_inequalities.h"
 
-
-static
-bool is_inconsistent(const mcrl2::data::data_expression_list& cond, const rewriter& r);
-
-static
-mcrl2::data::data_expression_list remove_redundant_inequalities(
-                const mcrl2::data::data_expression_list &inequalities, 
-                const rewriter &r);
 
 mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5, RewriteStrategy = GS_REWR_JITTY);
 
@@ -79,11 +72,11 @@ class summand_information
   private:
     mcrl2::lps::summand smd;
     atermpp::vector < mcrl2::data::data_expression > new_values_for_xi_variables;
-    mcrl2::data::data_expression_list summand_real_conditions;
+    vector < linear_inequality > summand_real_conditions;
     atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
-    atermpp::vector < data_expression_list > nextstate_context_combinations;
+    vector < vector < linear_inequality > > nextstate_context_combinations;
     atermpp::vector < data_expression_list > nextstate_value_combinations;
     // context_type local_context;
     
@@ -91,17 +84,16 @@ class summand_information
   public:
     summand_information(
              const mcrl2::lps::summand s,
-             atermpp::vector < mcrl2::data::data_expression > nv,
-             mcrl2::data::data_expression_list src,
+             vector < linear_inequality > src,
              atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
              ):
       smd(s),
-      new_values_for_xi_variables(nv),
+      new_values_for_xi_variables(),
       summand_real_conditions(src),
       summand_real_nextstate_map(srnm),
-      nextstate_context_combinations(1,data_expression_list()),
+      nextstate_context_combinations(1,vector < linear_inequality >()),
       nextstate_value_combinations(1,data_expression_list())
-    { protective_list_set.insert(src);
+    { 
     }
 
     mcrl2::lps::summand get_summand() const
@@ -118,19 +110,23 @@ class summand_information
       return new_values_for_xi_variables.end();
     }
 
-    mcrl2::data::data_expression_list get_summand_real_conditions() const
-    { return summand_real_conditions;
+    vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const
+    { return summand_real_conditions.begin();
+    }
+
+    vector < linear_inequality >::const_iterator get_summand_real_conditions_end() const
+    { return summand_real_conditions.end();
     }
 
     atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> get_summand_real_nextstate_map() const
     { return summand_real_nextstate_map;
     }
 
-    atermpp::vector < data_expression_list > :: const_iterator nextstate_context_combinations_begin() const
+    vector < vector < linear_inequality > > :: const_iterator nextstate_context_combinations_begin() const
     { return nextstate_context_combinations.begin();
     }
 
-    atermpp::vector < data_expression_list > :: const_iterator nextstate_context_combinations_end() const
+    vector < vector < linear_inequality > > :: const_iterator nextstate_context_combinations_end() const
     { return nextstate_context_combinations.end();
     }
 
@@ -163,7 +159,10 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound=realelm_data_expression_map_replace(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound=realelm_data_expression_map_replace(xi_u,summand_real_nextstate_map);
-      normalize_pair(substituted_lowerbound,substituted_upperbound,r,false);
+      // normalize_pair(substituted_lowerbound,substituted_upperbound,r,false);
+      linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
+      e.typical_pair(substituted_lowerbound,substituted_upperbound,r);
+
      
       // First check whether this new next state argument follows from an existing argument
       if (r(core::detail::gsMakeDataExprLT(substituted_lowerbound,substituted_upperbound))==true_())
@@ -212,13 +211,15 @@ class summand_information
           data_expression cxi_u=c->get_upperbound();
           data_expression substituted_cxi_t=realelm_data_expression_map_replace(cxi_t,summand_real_nextstate_map);
           data_expression substituted_cxi_u=realelm_data_expression_map_replace(cxi_u,summand_real_nextstate_map);
-          normalize_pair(substituted_cxi_t,substituted_cxi_u,r,false);
+          linear_inequality e(substituted_cxi_t,substituted_cxi_u,linear_inequality::less,r);
+          e.typical_pair(substituted_cxi_t,substituted_cxi_u,r);
           if ((substituted_cxi_t==xi_t) && (substituted_cxi_u==xi_u))
           { *cxi=new_xi_variable.get_variable();
           }
         }
       }
 
+#ifndef NDEBUG
       // sanity check
       for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
           i != new_values_for_xi_variables.end(); ++i)
@@ -226,6 +227,7 @@ class summand_information
         assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
       }
       assert(context.size()==new_values_for_xi_variables.size());
+#endif
 
       // Update the nextstate_context_combinations if new_values_for_xi_variables for this summand
       // does not get a concrete variable for this context variable.
@@ -238,34 +240,41 @@ class summand_information
                              context.back().get_upperbound(),
                              summand_real_nextstate_map);
   
-        atermpp::vector < data_expression_list > new_nextstate_context_combinations;
+        vector < vector < linear_inequality > > new_nextstate_context_combinations;
         atermpp::vector < data_expression_list > new_nextstate_value_combinations;
         atermpp::vector < data_expression_list >::const_iterator j=nextstate_value_combinations.begin();
-        for(atermpp::vector < data_expression_list >::const_iterator i=nextstate_context_combinations.begin();
+        for(vector < vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
                     i!=nextstate_context_combinations.end(); ++i,j++)
-        { 
-          data_expression_list new_condition_list=
-                           remove_redundant_inequalities(push_front(*i,r(equal_to(t,u))),r);
-          // if (!is_inconsistent(new_condition_list,r))
-          if (new_condition_list.front()!=false_()) // I.e. the new_condition_list is consistent.
+        { vector < linear_inequality > vec_lin_eq;
+          vec_lin_eq.swap(*i);
+          unsigned int old_size=vec_lin_eq.size();
+          vector < linear_inequality > new_condition_list;
+          vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
+          remove_redundant_inequalities(
+                    vec_lin_eq,
+                    new_condition_list,
+                    r);
+          if (!is_inconsistent(new_condition_list,r))
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
           }
   
-          new_condition_list= remove_redundant_inequalities(push_front(*i,r(less(t,u))),r);
-          // if (!is_inconsistent(new_condition_list,r))
-          if (new_condition_list.front()!=false_())
+          vec_lin_eq[old_size]=linear_inequality(t,u,linear_inequality::less,r);
+          remove_redundant_inequalities(
+                    vec_lin_eq,
+                    new_condition_list,
+                    r);
+          if (!is_inconsistent(new_condition_list,r))
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
           }
           
-          new_condition_list= remove_redundant_inequalities(push_front(*i,r(less(u,t))),r);
-          // if the inconsistency_counter equals 2, t==u and t<u are not consistent in
-          // combination with a set of consistent inequalities. So, t>u must be consistent, and
-          // so, we can skip a check.
-  
-          // if ((inconsistency_counter==2)||(!is_inconsistent(new_condition_list,r)))
-          if (new_condition_list.front()!=false_())
+          vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
+          remove_redundant_inequalities(
+                    vec_lin_eq,
+                    new_condition_list,
+                    r);
+          if (!is_inconsistent(new_condition_list,r))
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(larger())));
           }
