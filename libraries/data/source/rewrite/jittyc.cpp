@@ -3653,11 +3653,13 @@ RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification D
   term2int = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifdef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+#ifndef NDEBUG
+  if (!gsDebug)
 #endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
@@ -3665,9 +3667,11 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   finalise_common();
   ATtableDestroy(term2int);
 #ifndef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+  if (gsDebug)
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 #endif
 }
 

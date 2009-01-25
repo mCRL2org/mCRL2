@@ -302,6 +302,7 @@ void process(t_tool_options const& tool_options)
                             tool_options.opt_counter_example_file);
     }
   }
+  delete rewriter;
 }
 
 //function calculate_bes

@@ -2219,11 +2219,13 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specifi
   term2int = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifdef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+#ifndef NDEBUG
+  if (!gsDebug)
 #endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 }
 
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
@@ -2231,9 +2233,11 @@ RewriterCompilingInnermost::~RewriterCompilingInnermost()
   finalise_common();
   ATtableDestroy(term2int);
 #ifndef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+  if (gsDebug)
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 #endif
 }
 
