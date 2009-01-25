@@ -803,7 +803,6 @@ static void generate_xi_conditions_rec(
     return;
   }
   
-  vector < linear_inequality > new_condition_list;
   unsigned int old_size=condition_list.size();
   condition_list.push_back(linear_inequality(
                                     context_begin->get_lowerbound(),
@@ -811,13 +810,16 @@ static void generate_xi_conditions_rec(
                                     linear_inequality::equal,
                                     r));
   // std::cerr << "condition list " << pp_vector(condition_list) << "\n";
+
+  vector < linear_inequality > new_condition_list;
   remove_redundant_inequalities(condition_list,new_condition_list,r);
   // std::cerr << "new condition list " << pp_vector(new_condition_list) << "\n";
   data_expression_list new_comp_value_list=
                                 push_front(comp_value_list,
                                     data_expression(is_equal(context_begin->get_variable())));
   
-  if (!is_inconsistent(new_condition_list,r))
+  // if (!is_inconsistent(new_condition_list,r))
+  if (new_condition_list.empty() || !new_condition_list.front().is_false())
   { generate_xi_conditions_rec(context_begin+1,
                                       context_end,
                                       new_condition_list,
@@ -830,12 +832,14 @@ static void generate_xi_conditions_rec(
                                     context_begin->get_upperbound(),
                                     linear_inequality::less,
                                     r);
+  new_condition_list.clear();
   remove_redundant_inequalities(condition_list,new_condition_list,r);
    
   new_comp_value_list= push_front(comp_value_list,
                                  data_expression(is_smaller(context_begin->get_variable())));
   
-  if (!is_inconsistent(new_condition_list,r))
+  // if (!is_inconsistent(new_condition_list,r))
+  if (new_condition_list.empty() || !new_condition_list.front().is_false())
   { generate_xi_conditions_rec(context_begin+1,
                                       context_end,
                                       new_condition_list,
@@ -849,12 +853,14 @@ static void generate_xi_conditions_rec(
                                     context_begin->get_lowerbound(),
                                     linear_inequality::less,
                                     r);
+  new_condition_list.clear();
   remove_redundant_inequalities(condition_list,new_condition_list,r);
    
   new_comp_value_list=push_front(comp_value_list,
                                  data_expression(is_larger(context_begin->get_variable())));
   
-  if (!is_inconsistent(new_condition_list,r))
+  // if (!is_inconsistent(new_condition_list,r))
+  if (new_condition_list.empty() || !new_condition_list.front().is_false())
   { generate_xi_conditions_rec(context_begin+1,
                                       context_end,
                                       new_condition_list,
@@ -885,7 +891,8 @@ static atermpp::vector < data_expression_list >
   // std::cerr << "context conditions " << pp_vector(context_conditions) << std::endl;
   // std::cerr << "new context conditions " << pp_vector(new_context_conditions) << std::endl;
 //  linear_inequality front = new_constext_conditions.front();
-  if (!is_inconsistent(new_context_conditions,r))
+  // if (!is_inconsistent(new_context_conditions,r))
+  if (new_context_conditions.empty() || !new_context_conditions.front().is_false())
   { generate_xi_conditions_rec(
                    context.rbegin(),
                    context.rend(),
@@ -1049,6 +1056,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                         sumvars.end(),
                         condition1,
                         r);
+        condition.clear(); 
         remove_redundant_inequalities(condition1,condition,r);
 
         // First check which of these inequalities are equivalent to concrete values of xi variables.
@@ -1056,7 +1064,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // context combinations to be considered for the xi variables.
 
         
-        if (!is_inconsistent(condition,r))
+        if (condition.empty() || !condition.front().is_false())
         {
           // condition contains the inequalities over the process parameters
           add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
@@ -1119,13 +1127,14 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                       sumvars.end(),
                       condition1,
                       r);
+      condition.clear();
       remove_redundant_inequalities(condition1,condition,r);
 
       // First check which of these inequalities are equivalent to concrete values of xi variables.
       // Add these values for xi variables as a new condition. Remove these variables from the
       // context combinations to be considered for the xi variables.
       
-      if(!is_inconsistent(condition,r))
+      if (condition.empty() || !condition.front().is_false()) // is consistent...
       {
         context_type xi_context_for_this_summand;
         data_expression_list xi_condition;

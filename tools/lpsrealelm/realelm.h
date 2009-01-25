@@ -254,27 +254,35 @@ class summand_information
                     vec_lin_eq,
                     new_condition_list,
                     r);
-          if (!is_inconsistent(new_condition_list,r))
+          // std::cerr << "New conditions list 1 " << pp_vector(new_condition_list) << "\n";
+          // if (!is_inconsistent(new_condition_list,r))
+          if (new_condition_list.empty() || !new_condition_list.front().is_false())
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
           }
   
           vec_lin_eq[old_size]=linear_inequality(t,u,linear_inequality::less,r);
+          new_condition_list.clear();
           remove_redundant_inequalities(
                     vec_lin_eq,
                     new_condition_list,
                     r);
-          if (!is_inconsistent(new_condition_list,r))
+          // std::cerr << "New conditions list 2 " << pp_vector(new_condition_list) << "\n";
+          // if (!is_inconsistent(new_condition_list,r))
+          if (new_condition_list.empty() || !new_condition_list.front().is_false())
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
           }
           
           vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
+          new_condition_list.clear();
           remove_redundant_inequalities(
                     vec_lin_eq,
                     new_condition_list,
                     r);
-          if (!is_inconsistent(new_condition_list,r))
+          // std::cerr << "New conditions list 3 " << pp_vector(new_condition_list) << "\n";
+          // if (!is_inconsistent(new_condition_list,r))
+          if (new_condition_list.empty() || !new_condition_list.front().is_false())
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(larger())));
           }

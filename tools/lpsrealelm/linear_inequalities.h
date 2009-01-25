@@ -187,6 +187,15 @@ class linear_inequality
       return m_rhs.front();
     }
 
+    void swap(linear_inequality &l)
+    { 
+      m_rhs.swap(l.m_rhs);
+      m_lhs.swap(l.m_lhs);
+      const comparison_t c(m_comparison);
+      m_comparison=l.m_comparison;
+      l.m_comparison=c;
+    }
+
     void set_rhs(const data_expression e)
     { assert(is_number(e));
       m_rhs[0]=e;
@@ -528,8 +537,10 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   for(atermpp::vector < data_variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
     vector < linear_inequality > new_inequalities;
-    vector < linear_inequality > inequalities_with_positive_variable;  // This array should contain references for efficiency.
-    vector < linear_inequality > inequalities_with_negative_variable;  // Idem.
+    // The vectors below contain references for efficiency.
+    // It is important that "inequalities" is not touched while using the arrays below.
+    vector < linear_inequality *> inequalities_with_positive_variable;  
+    vector < linear_inequality *> inequalities_with_negative_variable;  // Idem.
 
     for(std::vector < linear_inequality >::iterator j = inequalities.begin();
                     j != inequalities.end(); ++j)
@@ -542,10 +553,10 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
         j->lhs().erase(*i);
         j->divide(f,r);
         if (is_positive(f))
-        { inequalities_with_positive_variable.push_back((*j));
+        { inequalities_with_positive_variable.push_back(&(*j));
         }
         else if (is_negative(f))
-        { inequalities_with_negative_variable.push_back((*j));
+        { inequalities_with_negative_variable.push_back(&(*j));
         }
         else assert(0);
       }
@@ -562,14 +573,14 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     // Given inequalities x1 + bi * x <= ci
     //                   -x1 + bj * x <= cj
     // This is equivalent to bj * x + bi * x <= ci + cj
-    for(std::vector < linear_inequality >::iterator j = inequalities_with_positive_variable.begin(); 
+    for(std::vector < linear_inequality *>::iterator j = inequalities_with_positive_variable.begin(); 
                     j != inequalities_with_positive_variable.end(); ++j)
-    { for(std::vector < linear_inequality >::iterator k = inequalities_with_negative_variable.begin(); 
+    { for(std::vector < linear_inequality *>::iterator k = inequalities_with_negative_variable.begin(); 
                     k != inequalities_with_negative_variable.end(); ++k)
-      { linear_inequality e=*j;
-        e.subtract(*k,r);
-        e.set_comparison((j->comparison()==linear_inequality::less_eq) && 
-                         (k->comparison()==linear_inequality::less_eq)?
+      { linear_inequality e= *(*j);
+        e.subtract(*(*k),r);
+        e.set_comparison(((*j)->comparison()==linear_inequality::less_eq) && 
+                         ((*k)->comparison()==linear_inequality::less_eq)?
                                 linear_inequality::less_eq:
                                 linear_inequality::less);
         if (e.is_false())
@@ -591,7 +602,10 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // Add the equalities to the inequalities and return the result
   for(std::vector < linear_inequality > :: const_iterator i=equalities.begin();
               i!=equalities.end(); ++i)
-  { resulting_inequalities.push_back(*i);
+  { assert(!i->is_false());
+    if (!i->is_true())
+    { resulting_inequalities.push_back(*i);
+    }
   }
   if (core::gsDebug)
   { std::cerr << "Fourier-Motzkin elimination yields " + pp_vector(resulting_inequalities) + "\n";
@@ -600,7 +614,11 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
  
 
 
-/// \brief remove every redundant inequality from inequalities.
+/// \brief Remove every redundant inequality from a set of inequalities.
+/// \details If inequalities is inconsistent, [false] is returned. Otherwise
+///          a list of inequalities is returned, from which no inequality can
+///          be removed without changing the set of solutions of the inequalities.
+///          Redundancy of equalities is not checked, because this is quite expensive.
 /// \param inequalities A list of inequalities
 /// \param resulting_inequalities A list of inequalities to which the result is stored. 
 //                                Initially this list must be empty.
@@ -611,7 +629,7 @@ inline void remove_redundant_inequalities(
               std::vector < linear_inequality > &resulting_inequalities,
               const rewriter &r)
 {
-  resulting_inequalities.clear();
+  assert(resulting_inequalities.empty());
   if (inequalities.empty())
   { return;
   }
@@ -619,6 +637,7 @@ inline void remove_redundant_inequalities(
   // If false is among the inequalities, [false] is the minimal result.
   if (is_inconsistent(inequalities,r))
   { resulting_inequalities.push_back(linear_inequality());
+    return;
   }
 
   // std::cerr << "redundant in " << pp_vector(inequalities) << "\n";
@@ -627,17 +646,41 @@ inline void remove_redundant_inequalities(
   { // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
     // If yes, the i-th inequality is redundant.
     if (resulting_inequalities[i].comparison()==linear_inequality::equal)
-    { // Do nothing.
-      ++i;
+    { // Do nothing, as removing redundant inequalities is expensive.
+      i++;
+      /* resulting_inequalities[i].set_comparison(linear_inequality::less);
+      if (is_inconsistent(resulting_inequalities,r))
+      { 
+        resulting_inequalities[i].invert(r);
+        resulting_inequalities[i].set_comparison(linear_inequality::less);
+        if (is_inconsistent(resulting_inequalities,r))
+        { // So, t<c and t>c is inconsistent. So, t==c is redundant.
+          if (i+1<resulting_inequalities.size())
+          { // Copy the last element to the current position.
+            resulting_inequalities[i].swap(resulting_inequalities.back());
+          }
+          resulting_inequalities.pop_back();
+        }
+        else 
+        { 
+          resulting_inequalities[i].invert(r);
+          resulting_inequalities[i].set_comparison(linear_inequality::equal);
+          ++i;
+        } 
+      }
+      else
+      { resulting_inequalities[i].set_comparison(linear_inequality::equal);
+        ++i;
+      } */
     }
     else 
     { 
       resulting_inequalities[i].invert(r);
       if (is_inconsistent(resulting_inequalities,r))
-      { unsigned int last_position=resulting_inequalities.size()-1; // This is always >=0. 
-        if (i<last_position)
+      { 
+        if (i+1<resulting_inequalities.size())
         { // Copy the last element to the current position.
-          resulting_inequalities[i]=resulting_inequalities[last_position];
+          resulting_inequalities[i].swap(resulting_inequalities.back());
         }
         resulting_inequalities.pop_back();
       }
@@ -652,6 +695,11 @@ inline void remove_redundant_inequalities(
 }
 
 /// \brief Determine whether a list of data expressions is inconsistent
+/// \details First it is checked whether false is among the input. If
+///          not, Fourier-Motzkin is applied to all variables in the
+///          inequalities. If the empty set of equalities is the result, 
+///          the input was consistent. Otherwise the resulting set contains
+///          an inconsistent inequality.
 /// \param inequalities A list of inequalities
 /// \param r A rewriter
 /// \ret true if the system of inequalities can be determined to be
@@ -669,7 +717,6 @@ inline bool is_inconsistent(
     }
   }
   
-  
   atermpp::set<data_variable> dvs;
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin(); 
                 i!=inequalities.end(); ++i)
@@ -678,26 +725,45 @@ inline bool is_inconsistent(
 
   std::vector < linear_inequality > resulting_inequalities;
   fourier_motzkin (inequalities,dvs.begin(),dvs.end(),resulting_inequalities,r);
+#if NDEBUG
+  return (!resulting_inequalities.empty());
+#else
+  if (resulting_inequalities.empty())
+  { return false;
+  }
   // Check if result contains false
+
   for(std::vector < linear_inequality >::const_iterator i=resulting_inequalities.begin(); 
-                i!=resulting_inequalities.end(); ++i)
+                 i!=resulting_inequalities.end(); ++i)
   { if(i->is_false())
     { return true;
     }
+    else 
+    { assert(0); // All inequalities in resulting_inequalities must be false;
+    }
   }
   return false;
+#endif
 }
 
 
-/// \brief Try to eliminate variables from a system of inequalities using Gauss
-///        elimination.
+/// \brief Try to eliminate variables from a system of inequalities using Gauss elimination.
+/// \details For all variables yi in y1,...,yn indicated by variables_begin to variables_end, it
+///          attempted to find and equation among inequalities of the form yi==expression. All
+///          occurrences of yi in equalities are subsequently replaced by yi. If no equation of
+///          the form yi can be found, yi is added to the list of variables that is returned by
+///          this function. If the input contains an inconsistent inequality, resulting_equalities
+///          becomes empty, resulting_inequalities contains false and the returned list of variables
+///          is also empty. The resulting equalities and inequalities do not contain linear inequalites
+///          equivalent to true.
 /// \param inequalities A list of inequalities over real numbers
-///  \param variables A list of variables to be eliminated
-/// \param resulting_equalities A vector containing the inequalities after Gauss elimination. 
-//                              Initially, this vector must be empty.
+/// \param resulting_inequalities A list with the resulting equalities.
+/// \param resulting_inequalities A list of the resulting inequalities
+/// \param variables_begin An iterator indicating the beginning of the eliminatable variables.
+/// \param variables_end An iterator indicating the end of the eliminatable variables.
 /// \param r A rewriter.
 /// \post variables contains the list of variables that have not been eliminated
-/// \ret The system of normalized inequalities after Gauss eliminatation.
+/// \ret The variables that could not be removed by gauss elimination.
 
 template < class Variable_iterator >
 atermpp::vector < data_variable > gauss_elimination(
@@ -714,11 +780,20 @@ atermpp::vector < data_variable > gauss_elimination(
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
   for(vector < linear_inequality > ::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
-  { if (j->comparison()==linear_inequality::equal)
-    { resulting_equalities.push_back(*j);
+  { if (j->is_false())
+    { // The input contains false. Return false and stop.
+      resulting_equalities.clear();
+      resulting_inequalities.clear();
+      resulting_inequalities.push_back(linear_inequality());
+      return remaining_variables;
     }
-    else
-    { resulting_inequalities.push_back(*j);
+    else if (!j->is_true()) // Do not consider redundant equations.
+    { if (j->comparison()==linear_inequality::equal)
+      { resulting_equalities.push_back(*j);
+      }
+      else
+      { resulting_inequalities.push_back(*j);
+      }
     }
   }
 
@@ -729,6 +804,7 @@ atermpp::vector < data_variable > gauss_elimination(
   { unsigned int j;
     for(j=0; j<resulting_equalities.size(); ++j)
     {
+      bool check_equalities_for_redundant_inequalities(false);
       set < data_variable > vars;
       resulting_equalities[j].add_variables(vars);
       if (vars.count(*i)>0)
@@ -736,32 +812,87 @@ atermpp::vector < data_variable > gauss_elimination(
         // Equality *j contains data variable *i.
         // Perform gauss elimination, and break the loop.
 
-        for(vector < linear_inequality > ::iterator k = resulting_inequalities.begin(); 
-                          k != resulting_inequalities.end(); ++k)
-        { k->subtract(resulting_equalities[j],
-                      k->get_factor_for_a_variable(*i),
+        for(unsigned int k = 0; k < resulting_inequalities.size(); )
+        { resulting_inequalities[k].subtract(resulting_equalities[j],
+                      resulting_inequalities[k].get_factor_for_a_variable(*i),
                       resulting_equalities[j].get_factor_for_a_variable(*i),
                       r);
+          if (resulting_inequalities[k].is_false())
+          { // The input is inconsistent. Return false.
+            resulting_equalities.clear();
+            resulting_inequalities.clear();
+            resulting_inequalities.push_back(linear_inequality());
+            remaining_variables.clear();
+            return remaining_variables;
+          }
+          else if (resulting_inequalities[k].is_true())
+          { // Inequality k has become redundant, and can be removed.
+            if ((k+1)<resulting_inequalities.size())
+            { resulting_inequalities[k].swap(resulting_inequalities.back());
+            }
+            resulting_inequalities.pop_back();
+          }
+          else ++k;
         }
 
-        for(unsigned int k = 0; k<resulting_equalities.size(); ++k) 
-        { if (k!=j)
+        for(unsigned int k = 0; k<resulting_equalities.size(); ) 
+        { if (k==j)
+          { ++k;
+          }
+          else
           { resulting_equalities[k].subtract(
                                        resulting_equalities[j],
                                        resulting_equalities[k].get_factor_for_a_variable(*i),
                                        resulting_equalities[j].get_factor_for_a_variable(*i),
                                        r);
+            if (resulting_equalities[k].is_false())
+            { // The input is inconsistent. Return false.
+              resulting_equalities.clear();
+              resulting_inequalities.clear();
+              resulting_inequalities.push_back(linear_inequality());
+              remaining_variables.clear();
+              return remaining_variables;
+            }
+            else if (resulting_equalities[k].is_true())
+            { // Equality k has become redundant, and can be removed.
+              if (j+1==resulting_equalities.size())
+              { // It is not possible to move move the last element of resulting
+                // inequalities to position k, because j is at this last position.
+                // Hence, we must recall to check the resulting_equalities for inequalities
+                // that are true.
+                check_equalities_for_redundant_inequalities=true;
+              }
+              else 
+              { if ((k+1)<resulting_equalities.size())
+                { resulting_equalities[k].swap(resulting_equalities.back());
+                }
+                resulting_equalities.pop_back();
+              }
+            }
+            else ++k;
           }
         }
 
         // Remove equation j.
 
-        unsigned int last_position=resulting_equalities.size()-1;
-        if (j!=last_position)
-        { resulting_equalities[j]=resulting_equalities[last_position];
+        if (j+1<resulting_equalities.size())
+        { resulting_equalities[j].swap(resulting_equalities.back());
         }
-        resulting_equalities.resize(last_position);
-        break;
+        resulting_equalities.pop_back();
+
+        // If there are unremoved resulting equalities, remove them now.
+        if (check_equalities_for_redundant_inequalities)
+        { for(unsigned int k = 0; k<resulting_equalities.size(); )
+          { if (resulting_equalities[k].is_true())
+            { // Equality k is redundant, and can be removed.
+              if ((k+1)<resulting_equalities.size())
+              { resulting_equalities[k].swap(resulting_equalities.back());
+              }
+              resulting_equalities.pop_back();
+            }
+            else ++k;
+          }
+        }
       }
     }
     remaining_variables.push_back(*i);
