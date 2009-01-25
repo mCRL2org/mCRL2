@@ -1,0 +1,35 @@
+% This file contains a specification of the well known 
+% cabbage-goat-wolf problem, which dates back to the French
+% 8th century mathematician Alcuin. There are a man with
+% a wolf, a goat and a cabbage standing at one side of a
+% river. He wants to cross and for this purpose he has a
+% small boat that can only contain him and one item. If
+% the wolf is left with the goat, the goat will be eaten.
+% If the goat is left with the cabbage, the cabbage is consumed.
+% The question is to find a strategy to bring the man to
+% the other shore without losing any of his items.
+%
+% This example shows the use of sets in MCRL2.
+%
+% Jan Friso Groote, Januari 2009
+
+
+sort Item=struct cabbage | goat | wolf;
+     Position=struct left | right;
+
+act move_right,move_left:Item;
+    move_right,move_left;
+    all_arrived,cabbage_is_eaten,goat_is_eaten;
+
+proc P(left_shore,right_shore:Set(Item),boat:Position)=
+          (boat==left)-> sum i:Item.(i in left_shore)-> move_right(i).P(left_shore-{i},right_shore+{i},right)+
+          (boat==right)-> sum i:Item.(i in right_shore)-> move_left(i).P(left_shore+{i},right_shore-{i},left)+
+          (boat==left)-> move_right.P(left_shore,right_shore,right)+
+          (boat==right)-> move_left.P(left_shore,right_shore,left)+
+          (right_shore=={cabbage,goat,wolf})-> all_arrived.delta+
+          (boat==right && cabbage in left_shore && goat in left_shore)-> cabbage_is_eaten.delta+
+          (boat==left && cabbage in right_shore && goat in right_shore)-> cabbage_is_eaten.delta+
+          (boat==right && goat in left_shore && wolf in left_shore)-> goat_is_eaten.delta+
+          (boat==left && goat in right_shore && wolf in right_shore)-> goat_is_eaten.delta;
+
+init P({cabbage,goat,wolf},{},left);
