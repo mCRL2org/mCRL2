@@ -286,7 +286,7 @@ using namespace mcrl2::core;
       }
       
       //typecheck the invariant formula
-      ATermList vars = ATLgetArgument(ATAgetArgument(f_reconstructed_spec, 2), 0);
+      ATermList vars = ATLgetArgument(ATAgetArgument(f_reconstructed_spec, 2), 1);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
