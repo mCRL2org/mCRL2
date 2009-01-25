@@ -118,7 +118,7 @@ static void print_tree_rec(const char c,
     }
     else
     { data_expression t1(t);
-      f << c << pp(t1);   // ATfprintf(f,"%c%t",c,t);
+      f << c << pp(t1);   
     }
   }
 }
@@ -195,7 +195,7 @@ static void print_counter_example(bes::equations &bes_equations,
   if (filename.empty())
   { // Print the counterexample to cout.
     cout << "Below the justification for this outcome is listed\n1: ";
-    print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
+    print_counter_example_rec(2,"  ",bes_equations,variable_index,already_printed,
                        opt_precompile_pbes,rewriter,opt_store_as_tree,cout);
   }
   if (f!=NULL)
@@ -204,7 +204,7 @@ static void print_counter_example(bes::equations &bes_equations,
     { 
       ofstream f(filename.c_str());
       f << "Below the justification for this outcome is listed\n1: ";
-      print_counter_example_rec(1,"  ",bes_equations,variable_index,already_printed,
+      print_counter_example_rec(2,"  ",bes_equations,variable_index,already_printed,
                        opt_precompile_pbes,rewriter,opt_store_as_tree,f);
       f.close();
     }
@@ -1355,7 +1355,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
                                         const bes_expression b,
                                         const expression_sort s,
                                         bes::equations &bes_equations)
-{
+{ 
   if (bes::is_true(b))
   { return b;
   }
@@ -1402,8 +1402,34 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   {
     return b;
   }
+  else if (bes::is_if(b))
+  { //BESIF(x,y,z) => (x & y) | (!x&z)
+    //If y is true, this reduces to (x | z)
+    //If z is false, this reduces to (x & y)
+    //Otherwise, the result is not monotonic, 
+    //which ought not to be possible.
+    const bes_expression y=then_branch(b);
+    const bes_expression z=else_branch(b);
+    if (is_true(y))
+    { if (is_false(z))
+      { return translate_equation_for_vasy(i,condition(b),s,bes_equations);
+      }
+      else
+      { return translate_equation_for_vasy(i,or_(condition(b),z),s,bes_equations);
+      }
+    }
+    else if (is_false(z))
+    { // not is_true(y)
+      { return translate_equation_for_vasy(i,and_(condition(b),y),s,bes_equations);
+      }
+    }
+    else 
+    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
+      exit(1);
+    }
+  }
   else
-  {
+  { 
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
     exit(1);
   }
@@ -1514,8 +1540,33 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
     { outputfile << "_" << bes_equations.get_rank(get_variable(b))-1;
     }
   }
+  else if (bes::is_if(b))
+  { //BESIF(x,y,z) => (x & y) | (!x&z)
+    //If y is true, this reduces to (x | z)
+    //If z is false, this reduces to (x & y)
+    //Otherwise, the result is not monotonic, 
+    //which ought not to be possible.
+    const bes_expression y=then_branch(b);
+    const bes_expression z=else_branch(b);
+    if (is_true(y))
+    { if (is_false(z))
+      { save_rhs_in_vasy_form(outputfile,condition(b),variable_index,current_rank,bes_equations);
+      }
+      else
+      { save_rhs_in_vasy_form(outputfile,or_(condition(b),z),variable_index,current_rank,bes_equations);
+      }
+    }
+    else if (is_false(z))
+    { // not is_true(y)
+      save_rhs_in_vasy_form(outputfile,and_(condition(b),y),variable_index,current_rank,bes_equations);
+    }
+    else 
+    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
+      exit(1);
+    }
+  }
   else
-  {
+  { 
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
     exit(1);
   }
@@ -1556,7 +1607,7 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
 //function save_rhs_in_cwi
 //---------------------------
 static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equations &bes_equations)
-{
+{ 
   if (bes::is_true(b))
   { outputfile << "T";
   }
@@ -1585,6 +1636,31 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
   {
     // PropVar => <Int>
     outputfile << "X" << get_variable(b);
+  }
+  else if (bes::is_if(b))
+  { //BESIF(x,y,z) => (x & y) | (!x&z)
+    //If y is true, this reduces to (x | z)
+    //If z is false, this reduces to (x & y)
+    //Otherwise, the result is not monotonic, 
+    //which ought not to be possible.
+    const bes_expression y=then_branch(b);
+    const bes_expression z=else_branch(b);
+    if (is_true(y))
+    { if (is_false(z))
+      { save_rhs_in_cwi_form(outputfile,condition(b),bes_equations);
+      }
+      else
+      { save_rhs_in_cwi_form(outputfile,or_(condition(b),z),bes_equations);
+      }
+    }
+    else if (is_false(z))
+    { // not is_true(y)
+      save_rhs_in_cwi_form(outputfile,and_(condition(b),y),bes_equations);
+    }
+    else 
+    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
+      exit(1);
+    }
   }
   else
   { 
