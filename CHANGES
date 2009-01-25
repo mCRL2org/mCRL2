@@ -3,9 +3,39 @@ Changes between toolset releases July 2008 and January 2009:
 ===============================================================================
 
  General:
+   - compatible with LTSmin toolset 1.1 van de Universiteit Twente
+   - added support for importing LTSes from DOT format
+   - improved mCRL2 lts storage format which now uses the .lts suffix
+
+      Affected tools: lps2lts, ltsinfo, ltsconvert, ltscompare, ltsgraph,
+      ltsview, and diagraphica
+
+   - support for rational numbers (as part of sort Real):
+     + rational numbers can be created using the division operator /
+     + rational numbers can be converted to integers by means of functions
+       floor, ceil and round
+   - comparison operations <, <=, >= and > are now defined on all standard
+     data types (including structured sorts)
+   - sets and bags data structures have been reimplementated to use exception
+     lists. This allows the use sets and bags in most specifications for
+     generating state spaces. Up till now, sets and bags only worked properly
+     with simulation. Note that we are dealing with sets and bags as the
+     "infinite" mathematical object; specifying the set of all even numbers can
+     easily be done....
+   - numerous small improvements to tools and underlying infrastructure
+   - lots of bug fixes
  
  Renamed tools:
    - formcheck is now called formulacheck
+
+ New functionality:
+   - ltsgraph is completely reimplemented and now uses OpenGL for rendering
+   - ltsgraph, ltsview, diagraphica now support the input from the unified lts
+     format
+
+ New tools:
+   - pbesparelm: removes unused parameters from a PBES.
+   - pbesconstelm: removes constant parameters from a PBES.
 
 ===============================================================================
 Changes between toolset releases January 2008 and July 2008:
