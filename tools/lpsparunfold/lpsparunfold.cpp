@@ -31,6 +31,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/core/print.h"
+
 
 //LPS framework
 #include "mcrl2/lps/specification.h"
@@ -52,39 +54,9 @@ using namespace mcrl2::data;
 /* Name of the file to read input from (or standard input if empty) */
 std::string file_name;
 
-/* "is_tau_summand" taken from ../libraries/prover/source/confluence_checker.cpp */
-static inline bool is_tau_summand(ATermAppl a_summand) {
-    ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
-    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta)) {
-      return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
-    } else {
-      return false;
-    }
-  }
-
-static inline int get_number_of_tau_summands(linear_process lps) {
-  int numOfTau = 0;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	if ( is_tau_summand(*currentSummand)){
-		++numOfTau;
-	}
-  }
-  return numOfTau;
-}
-
-static inline int get_number_of_used_actions(linear_process lps){
-  std::set<action_label > actionSet;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	for(action_list::iterator currentAction = currentSummand->actions().begin(); currentAction != currentSummand->actions().end(); ++currentAction){
-		actionSet.insert(currentAction->label());
-	}
-  }
-  return actionSet.size();
-}
-
 void parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
-                           "Print basic information on the linear process specification (LPS) in INFILE.");
+                           "Unfolds complex sorts of a linear process specification (LPS) in INFILE.");
       
   command_line_parser parser(clinterface, ac, av);
 
@@ -176,14 +148,11 @@ int main(int argc, char** argv)
     lps_specification.load(file_name);
     linear_process lps = lps_specification.process();
     data_specification data_spec = lps_specification.data();
-    cout << "#Sorts: " << data_spec.sorts().size() << endl;
-    cout << "#Cons : " << data_spec.constructors().size() << endl;
-
-    Sorts sorts( data_spec.sorts() );
+    Sorts sorts( data_spec ); 
     //Debug-hack
-//    sorts.unfoldParameter = "Frame";
+    sorts.unfoldParameter = basic_sort( "Frame" );
 
-    sorts.generateFreshSort();
+    sorts.algorithm();
 
     assert(false);    
   	 

@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2 {
   
@@ -92,16 +93,12 @@ namespace mcrl2 {
           return core::detail::gsIsNumericString(name().c_str());
         }
 
-
-
-        /*
-        /// \overload
+        /// \brief Returns the sort of the variable.
         inline
-        sort_expression sort() const
+        sort_expression get_sort_expression() const
         {
-          return atermpp::arg2(*this);
+          return sort_expression( atermpp::arg2(*this) );
         }
-        */
 
     }; // class function_symbol
 
