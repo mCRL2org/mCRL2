@@ -2578,10 +2578,12 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     //1) a cast has happened
     //2) some parameter Types became sharper.
     //we do the arguments again with the types.
-
+    
     if(gsIsSortArrow(gstcUnwindType(NewType))){
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
-     
+
+      gsDebugMsg("Arguments again: NeededArgumentTypes: %P, ArgumentTypes: %P\n",NeededArgumentTypes,ArgumentTypes);
+    
       //arguments again
       ATermList NewArgumentTypes=ATmakeList0();
       ATermList NewArguments=ATmakeList0();
@@ -2627,7 +2629,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       return NULL;
     }
 
-    gsDebugMsg("Arguments once more: Arguments %T, ArgumentTypes: %T\n",Arguments,ArgumentTypes);
+    gsDebugMsg("Arguments once more: Arguments %T, ArgumentTypes: %T, NewType: %T\n",Arguments,ArgumentTypes,NewType);
 
     //and the arguments once more
     if(gsIsSortArrow(gstcUnwindType(NewType))){
@@ -2845,8 +2847,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 
     if(!ParList) {
-      gsErrorMsg("unknown operation %P with %d parameter%s\n",
-        Name, nFactPars, (nFactPars != 1)?"s":"");
+      if(nFactPars>=0) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
+      else gsErrorMsg("unknown operation %P\n",Name);
       return NULL;
     }
     gsDebugMsg("Possible types for Op/Var %T with %d argument%s are (ParList: %T; PosType: %T)\n",
@@ -2930,8 +2932,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       ATermAppl Sort;
       if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=gsMakeSortsPossible(CandidateParList);
       *DataTerm=gsMakeOpId(Name,Sort);
-      gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
+      if(nFactPars>=0) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
         Name, nFactPars, (nFactPars != 1)?"s":"", PosType);    
+      else 
+        gsErrorMsg("unknown operation/variable %P that matches type %P\n",Name,PosType);
       return NULL;
     }
     
@@ -3104,11 +3108,13 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       was_ambiguous=true;
       if(strict_ambiguous){
         gsDebugMsg("ambiguous operation %P (ParList %T)\n",Name,ParList);
-	gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":""); return NULL;
+	if(nFactPars>=0) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":""); 
+        else gsErrorMsg("ambiguous operation %P\n", Name);
+        return NULL;
       }
       else{
-        *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-	if(variable) *DataTerm=gsMakeDataVarId(Name,gsMakeSortUnknown());
+        //*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+	//if(variable) *DataTerm=gsMakeDataVarId(Name,gsMakeSortUnknown());
         return gsMakeSortUnknown();
       }
     }
@@ -3158,6 +3164,7 @@ static ATermList gstcGetNotInferredList(ATermList TypeListList){
 static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par, bool warn_upcasting){
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type      
 
+  if(gsIsSortUnknown(Type)) return Type;
   if(gsIsSortUnknown(NeededType)) return Type;
   if(gstcEqTypesA(NeededType,Type)) return Type;
 
