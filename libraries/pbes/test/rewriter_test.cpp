@@ -10,7 +10,7 @@
 /// \brief Test for the pbes rewriters.
 
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 
 #include <iostream>
 #include <set>
@@ -176,6 +176,11 @@ void test_simplifying_rewriter()
   test_expressions(R, "val(true)"                                                       , "true");  
   test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_expressions(R, "exists m:Nat.true"                                               , "true");
+  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3)"                               , "false");
+  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) => Y(n)"                       , "true");
+
+  test_expressions(R, "forall m:Nat. Y(n)"                                              , "Y(n)");
+  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) || Y(n)"                       , "Y(n)");
 
   // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
   // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
@@ -439,6 +444,17 @@ void test_substitutions3()
   pbes_system::pbes_expression x = r(phi, sigma);
 }
 
+void test_pfnf_rewriter()
+{
+  using namespace pbes_system;
+
+  pfnf_rewriter<pbes_expression> R;
+  pbes_expression x = expr("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)");
+  pbes_expression y = R(x);
+  
+  // TODO: add real test cases for PFNF rewriter
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -449,6 +465,7 @@ int test_main(int argc, char* argv[])
   test_substitutions1();
   test_substitutions2();
   test_substitutions3();
+  test_pfnf_rewriter();
 
   return 0;
 }

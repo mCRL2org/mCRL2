@@ -180,12 +180,8 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   // constelm algorithm
   pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
-  // name generator
-  std::string prefix = "UNIQUE_PREFIX"; // unique_prefix(p);
-  data::number_postfix_generator name_generator(prefix);
-
   // run the algorithm
-  algorithm.run(q, name_generator, compute_conditions);
+  algorithm.run(q, compute_conditions);
 
   std::set<std::string> lines1;
   const std::map<propositional_variable, std::set<data_variable> >& removed = algorithm.removed_variables();

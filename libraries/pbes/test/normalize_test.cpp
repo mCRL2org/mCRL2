@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
+#include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
 
@@ -157,9 +158,9 @@ pbes_system::pbes_expression expr(const std::string& text)
 void test_pfnf_expression(std::string s)
 {
   pbes_system::detail::pfnf_visitor<pbes_system::pbes_expression> visitor;
-  pbes_expression t1 = expr(s);
+  pbes_system::pbes_expression t1 = expr(s);
   visitor.visit(t1);
-  pbes_expression t2 = visitor.evaluate();
+  pbes_system::pbes_expression t2 = visitor.evaluate();
   data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))

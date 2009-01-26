@@ -368,6 +368,12 @@ namespace detail {
       /// \brief A map with constraints on the vertices of the graph
       typedef std::map<variable_type, data_term_type> constraint_map;
 
+      /// \brief Compares data expressions for equality.
+      DataRewriter m_data_rewriter;
+
+      /// \brief Compares data expressions for equality.
+      PbesRewriter m_pbes_rewriter;
+
       /// \brief Represents an edge of the dependency graph. The assignments are stored
       /// implicitly using the 'right' parameter. The condition determines under
       /// what circumstances the influence of the edge is propagated to its target
@@ -375,10 +381,10 @@ namespace detail {
       struct edge
       {
         /// \brief The propositional variable at the source of the edge
-        propositional_variable_decl_type left;
+        propositional_variable_decl_type source;
 
-        /// \brief The propositional variable at the target of the edge
-        propositional_variable_type right;
+        /// \brief The propositional variable instantiation that determines the target of the edge
+        propositional_variable_type target;
 
         /// \brief The condition of the edge
         term_type condition;
@@ -391,8 +397,8 @@ namespace detail {
         /// \param l A propositional variable declaration
         /// \param r A propositional variable
         /// \param c A term
-        edge(propositional_variable_decl_type l, propositional_variable_type r, term_type c = pbes_expr::true_())
-         : left(l), right(r), condition(c)
+        edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
+         : source(src), target(tgt), condition(c)
         {}
 
         /// \brief Returns a string representation of the edge.
@@ -400,7 +406,7 @@ namespace detail {
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << mcrl2::core::pp(left.name()) << ", " << mcrl2::core::pp(right.name()) << ")  label = " << mcrl2::core::pp(right) << "  condition = " << mcrl2::core::pp(condition);
+          out << "(" << mcrl2::core::pp(source.name()) << ", " << mcrl2::core::pp(target.name()) << ")  label = " << mcrl2::core::pp(target) << "  condition = " << mcrl2::core::pp(condition);
           return out.str();
         }
       };
@@ -412,9 +418,7 @@ namespace detail {
         propositional_variable_decl_type variable;
 
         /// \brief Maps data variables to data expressions. If the right hand side is a data
-        /// variable, it means that it represents NaC ("not a constant"). In such case,
-        /// a fresh variable is chosen, that does not appear anywhere else in the pbes
-        /// that is under consideration.
+        /// variable, it means that it represents NaC ("not a constant").
         constraint_map constraints;
 
         /// \brief Constructor
@@ -423,8 +427,8 @@ namespace detail {
 
         /// \brief Constructor
         /// \param v A propositional variable declaration
-        vertex(propositional_variable_decl_type v)
-          : variable(v)
+        vertex(propositional_variable_decl_type x)
+          : variable(x)
         {}
 
         /// \brief Returns true if the data variable v has been assigned a constant expression.
@@ -433,7 +437,7 @@ namespace detail {
         bool is_constant(variable_type v) const
         {
           typename constraint_map::const_iterator i = constraints.find(v);
-          return i != constraints.end() && !data::is_data_variable(i->second);
+          return i != constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
         }
 
         /// \brief Returns the constant parameters of this vertex.
@@ -476,7 +480,7 @@ namespace detail {
           for (typename constraint_map::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
           {
             std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = is_constant(i->first) ? mcrl2::core::pp(i->second) : "NaC";
+            std::string rhs = core::term_traits<data_term_type>::is_variable(i->second) ? "NaC" : mcrl2::core::pp(i->second);
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -484,53 +488,41 @@ namespace detail {
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        template <typename IdentifierGenerator>
-        bool update(data_term_sequence_type new_values,
-                    const constraint_map& new_value_constraints,
-                    DataRewriter datar,
-                    IdentifierGenerator name_generator
-                   )
+        bool update(data_term_sequence_type e, const constraint_map& e_constraints, DataRewriter datar)
         {
           bool changed = false;
-          variable_sequence_type params = variable.parameters();
+
           typename data_term_sequence_type::iterator i;
           typename variable_sequence_type::iterator j;
-          for (i = new_values.begin(), j = params.begin(); i != new_values.end(); ++i, ++j)
-          {
-            // handle the parameter d
-            variable_type d = *j;
-            typename constraint_map::iterator k = constraints.find(d);
+          variable_sequence_type params = variable.parameters();
 
-            if (k != constraints.end())
+          if (constraints.empty())
+          {
+            changed = true;
+            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
-              if (!data::is_data_variable(k->second)) // d has been assigned a constant value
-              {
-                data_term_type old_value = k->second;
-                data_term_type new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
-                if (old_value != new_value)
-                {
-                  // mark the parameter as NaC by assigning a fresh variable to it
-                  k->second = variable_type(name_generator(), j->sort());
-                  changed = true;
-                }
-              }
+              constraints[*j] = datar(data::data_variable_map_replace(*i, e_constraints));
             }
-            else
+          }
+          else
+          {        
+            for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
-              changed = true;
-              data_term_type new_value = datar(data::data_variable_map_replace(*i, new_value_constraints));
-              if (core::term_traits<data_term_type>::is_constant(new_value))
+              typename constraint_map::iterator k = constraints.find(*j);
+              assert(k != constraints.end());
+              data_term_type& ci = k->second;
+			  if (ci == *j)
+			  {
+                continue;
+			  }
+              data_term_type ei = datar(data::data_variable_map_replace(*i, e_constraints));
+              if (ci != ei)
               {
-                constraints[d] = new_value;
-              }
-              else
-              {
-                // mark the parameter as NaC by assigning a fresh variable to it
-                constraints[d] = variable_type(name_generator(), j->sort());
+                ci = *j;
+                changed = true;
               }
             }
           }
-
           return changed;
         }
 
@@ -541,7 +533,7 @@ namespace detail {
           typename constraint_map::iterator pos;
           for (pos = constraints.begin(); pos != constraints.end(); )
           {
-            if (data::is_data_variable(pos->second)) // the value is NaC
+            if (core::term_traits<data_term_type>::is_variable(pos->second)) // the value is NaC
             {
               constraints.erase(pos++);
             }
@@ -558,12 +550,6 @@ namespace detail {
 
       /// \brief The storage type for edges
       typedef std::map<string_type, std::vector<edge> > edge_map;
-
-      /// \brief Compares data expressions for equality.
-      DataRewriter m_data_rewriter;
-
-      /// \brief Compares data expressions for equality.
-      PbesRewriter m_pbes_rewriter;
 
       /// \brief The vertices of the dependency graph. They are stored in a map, to
       /// support searching for a vertex.
@@ -613,8 +599,8 @@ namespace detail {
       /// in the pbes \p p
       /// \param compute_conditions If true, propagation conditions are computed. Note
       /// that the currently implementation has exponential behavior.
-      template <typename Container, typename IdentifierGenerator>
-      void run(pbes<Container>& p, IdentifierGenerator name_generator, bool compute_conditions = false)
+      template <typename Container>
+      void run(pbes<Container>& p, bool compute_conditions = false)
       {
         // compute the vertices and edges of the dependency graph
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -659,9 +645,9 @@ namespace detail {
         std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(p.initial_state());
         for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
         {
-          data_term_sequence_type new_values = i->parameters();
+          data_term_sequence_type e = i->parameters();
           vertex& u = m_vertices[i->name()];
-          u.update(new_values, constraint_map(), m_data_rewriter, name_generator);
+          u.update(e, constraint_map(), m_data_rewriter);
           todo.push_back(u.variable);
         }
 
@@ -691,7 +677,7 @@ std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(
           for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
           {
             const edge& e = *ei;
-            vertex& v = m_vertices[e.right.name()];
+            vertex& v = m_vertices[e.target.name()];
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
 std::cerr << "\n<updating edge>" << e.to_string() << std::endl;
 std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
@@ -710,7 +696,7 @@ std::cerr << "\nCould not evaluate condition " << core::pp(data::data_variable_m
             }
             if (!tr::is_false(value))
             {
-              bool changed = v.update(e.right.parameters(), u.constraints, m_data_rewriter, name_generator);
+              bool changed = v.update(e.target.parameters(), u.constraints, m_data_rewriter);
               if (changed)
               {
                 todo.push_back(v.variable);

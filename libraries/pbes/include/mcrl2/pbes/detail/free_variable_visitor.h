@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace mcrl2 {
@@ -29,6 +28,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   typedef pbes_expression_visitor<Term> super;
   typedef typename super::term_type term_type;
   typedef typename super::data_term_type data_term_type;
+  typedef typename super::propositional_variable_type propositional_variable_type;
   
   data::data_variable_list bound_variables;
   std::vector<data::data_variable_list> quantifier_stack;
@@ -111,7 +111,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A propositional variable instantiation
   /// \return The result of visiting the node
-  bool visit_propositional_variable(const term_type& e, const propositional_variable_instantiation& v)
+  bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
   {
     if (search_propositional_variables)
     {

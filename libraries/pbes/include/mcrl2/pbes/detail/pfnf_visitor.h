@@ -20,7 +20,6 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
-#include "mcrl2/pbes/rewriter.h"
 
 namespace mcrl2 {
 

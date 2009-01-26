@@ -76,8 +76,11 @@ namespace pbes_system {
       /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
       std::vector<std::pair<pbes_expression, unsigned int> > m_bes;
 
-      /// Determines what kind of BES equations are generated for true and false.
+      /// \brief Determines what kind of BES equations are generated for true and false.
       bool m_true_false_dependencies;
+
+      /// \brief True if it is a min-parity game.
+      bool m_is_min_parity;
 
       /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
       /// \param t A PBES expression
@@ -125,14 +128,16 @@ namespace pbes_system {
       /// \brief Constructor.
       /// \param p A PBES
       /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
-      parity_game_generator(const pbes<>& p, bool true_false_dependencies = false)
+      /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
+      parity_game_generator(const pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),
           datar(p.data()),
           datae(p.data(), datar, generator),
           datarv(p.data()),
           R(datarv, datae),
-          m_true_false_dependencies(true_false_dependencies)
+          m_true_false_dependencies(true_false_dependencies),
+          m_is_min_parity(is_min_parity)
       {
         // Nothing to be done for an empty PBES.
         if (m_pbes.equations().empty())
@@ -159,6 +164,16 @@ namespace pbes_system {
           {
             sigma = i->symbol();
             m_priorities[i->variable().name()] = ++priority;
+          }
+        }
+        // If it is a max-priority game, adjust the priorities        
+        if (!m_is_min_parity)
+        {
+          // Choose an even upperbound max_priority
+          unsigned int max_priority = (priority % 2 == 0 ? priority : priority + 1);
+          for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+          {
+            i->second = max_priority - i->second;
           }
         }
 

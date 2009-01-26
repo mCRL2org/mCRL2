@@ -81,7 +81,7 @@ class pbes_constelm_tool: public utilities::pbes_rewriter_tool
           my_pbes_rewriter pbesr(datar);    
           pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          algorithm.run(p, name_generator, m_compute_conditions);
+          algorithm.run(p, m_compute_conditions);
           break;
         }
         case quantifier_all:
@@ -94,7 +94,7 @@ class pbes_constelm_tool: public utilities::pbes_rewriter_tool
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
           pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          algorithm.run(p, name_generator, m_compute_conditions);
+          algorithm.run(p, m_compute_conditions);
           break;
         }
         default:

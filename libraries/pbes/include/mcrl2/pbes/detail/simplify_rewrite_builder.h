@@ -223,7 +223,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      return core::optimized_forall(variables, visit(phi, sigma));
+      typedef typename core::term_traits<data_term_type> tt;
+      term_type t = visit(phi, sigma);
+      return core::optimized_forall(tt::set_difference(variables, tr::free_variables(t)), t);
     }
 
     /// \brief Visit exists node
@@ -235,7 +237,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
-      return core::optimized_exists(variables, visit(phi, sigma));
+      typedef typename core::term_traits<data_term_type> tt;
+      term_type t = visit(phi, sigma);
+      return core::optimized_exists(tt::set_difference(variables, tr::free_variables(t)), t);
     }
 
     /// \brief Visit propositional_variable node

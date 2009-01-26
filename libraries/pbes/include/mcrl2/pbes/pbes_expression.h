@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {
 
@@ -907,6 +908,26 @@ namespace core {
     term_type variable2term(variable_type v)
     {
       return v;
+    }
+
+    /// \brief Test if a term is a variable
+    /// \param t A term
+    /// \return True if the term is a variable
+    static inline
+    bool is_variable(term_type t)
+    {
+      return data::is_data_variable(t);
+    }
+
+    /// \brief Returns the free variables of a term
+    /// \param t A term
+    /// \return The free variables of a term
+    static inline
+    variable_sequence_type free_variables(term_type t)
+    {
+      pbes_system::detail::free_variable_visitor<term_type> visitor;
+      visitor.visit(t);
+      return variable_sequence_type(visitor.result.begin(), visitor.result.end());
     }
 
     /// \brief Conversion from data term to term

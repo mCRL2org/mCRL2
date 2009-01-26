@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_variable.h"
+#include "mcrl2/data/term_traits.h"
 
 namespace mcrl2 {
 
@@ -203,6 +204,34 @@ namespace core {
     term_type variable2term(variable_type v)
     {
       return term_type(v, atermpp::make_list(v));
+    }
+
+    /// \brief Test if a term is a variable
+    /// \param t A term
+    /// \return True if the term is a variable
+    static inline
+    bool is_variable(term_type t)
+    {
+      return is_data_variable(t);
+    }
+
+    /// \brief Returns the free variables of a term
+    /// \param t A term
+    /// \return The free variables of a term
+    static inline
+    variable_sequence_type free_variables(term_type t)
+    {
+      return t.variables();
+    }
+
+    /// \brief Returns the difference of two unordered sets of variables
+    /// \param v A sequence of data variables
+    /// \param w A sequence of data variables
+    /// \return The difference of two sets.
+    static inline
+    variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
+    {
+      return term_traits<data::data_expression>::set_difference(v, w);
     }
 
     /// \brief Test if a term is constant

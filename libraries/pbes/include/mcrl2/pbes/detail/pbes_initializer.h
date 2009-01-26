@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbes_initializer.h
+/// \file mcrl2/pbes/detail/pbes_initializer.h
 /// \brief The class pbes_initializer.
 
-#ifndef MCRL2_PBES_PBES_INITIALIZER_H
-#define MCRL2_PBES_PBES_INITIALIZER_H
+#ifndef MCRL2_PBES_DETAIL_PBES_INITIALIZER_H
+#define MCRL2_PBES_DETAIL_PBES_INITIALIZER_H
 
 #include <cassert>
 #include <string>
@@ -24,6 +24,8 @@
 namespace mcrl2 {
 
 namespace pbes_system {
+  
+namespace detail {
 
 /// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
@@ -97,12 +99,14 @@ class pbes_initializer: public atermpp::aterm_appl
     }
 };
 
+} // namespace detail
+
 } // namespace pbes_system
 
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_initializer)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::detail::pbes_initializer)
 /// \endcond
 
-#endif // MCRL2_PBES_PBES_INITIALIZER_H
+#endif // MCRL2_PBES_DETAIL_PBES_INITIALIZER_H

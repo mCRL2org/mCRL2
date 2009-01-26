@@ -33,7 +33,8 @@ namespace utilities {
          simplify,
          quantifier_all,
          quantifier_finite,
-         prover
+         prover,
+         pfnf
        };
        
        /// \brief Returns a description of a pbes rewriter
@@ -48,6 +49,7 @@ namespace utilities {
            case quantifier_all    : return "  'quantifier-all' for eliminating all quantifiers";
            case quantifier_finite : return "  'quantifier-finite' for eliminating finite quantifier variables";
            case prover            : return "  'prover' for rewriting using a prover";
+           case pfnf              : return "  'pfnf' for rewriting into PFNF normal form";
          }
          return "  unknown pbes rewriter";
        }
@@ -62,6 +64,7 @@ namespace utilities {
          if (type == "quantifier-all"   ) { return quantifier_all   ; }
          if (type == "quantifier-finite") { return quantifier_finite; }
          if (type == "prover"           ) { return prover           ; }
+         if (type == "pfnf"             ) { return pfnf             ; }
          throw std::runtime_error("Error: unknown pbes rewriter option " + type);
        }
 
@@ -79,6 +82,7 @@ namespace utilities {
         result.insert(simplify);
         result.insert(quantifier_all);
         result.insert(quantifier_finite);
+        result.insert(pfnf);
         return result;
       }
 

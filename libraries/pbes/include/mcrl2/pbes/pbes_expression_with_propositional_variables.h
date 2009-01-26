@@ -327,6 +327,24 @@ namespace core {
       return tr::variable2term(v);
     }
 
+    /// \brief Test if a term is a variable
+    /// \param t A term
+    /// \return True if the term is a variable
+    static inline
+    bool is_variable(term_type t)
+    {
+      return tr::is_variable(t);
+    }
+
+    /// \brief Returns the free variables of a term
+    /// \param t A term
+    /// \return The free variables of a term
+    static inline
+    variable_sequence_type free_variables(term_type t)
+    {
+      return t.variables();
+    }
+
     /// \brief Conversion from data term to term
     /// \param t A data term
     /// \return The converted term

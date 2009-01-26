@@ -38,7 +38,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/pbes_initializer.h"
+#include "mcrl2/pbes/detail/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
@@ -140,7 +140,7 @@ class pbes
       atermpp::aterm_appl::iterator i = t.begin();
       m_data          = atermpp::aterm_appl(*i++);
       atermpp::aterm_appl eqn_spec = *i++;
-      pbes_initializer init = pbes_initializer(*i);
+      detail::pbes_initializer init = detail::pbes_initializer(*i);
 
       m_initial_state = init.variable();
       data::data_variable_list freevars = eqn_spec(0);
@@ -433,7 +433,7 @@ class pbes
       // convert the equation system to ATerm format
       data::data_variable_list free_variables(m_free_variables.begin(), m_free_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
-      return core::detail::gsMakePBES(m_data, core::detail::gsMakePBEqnSpec(free_variables, equations), pbes_initializer(free_variables, m_initial_state));
+      return core::detail::gsMakePBES(m_data, core::detail::gsMakePBEqnSpec(free_variables, equations), detail::pbes_initializer(free_variables, m_initial_state));
     }
 
     /// \brief Returns the set of binding variables of the pbes.

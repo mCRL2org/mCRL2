@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
+#include "mcrl2/pbes/detail/pfnf_visitor.h"
 
 namespace mcrl2 {
 
@@ -93,6 +94,38 @@ namespace pbes_system {
       {
         detail::simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
         return r(x, sigma);
+      }
+  };
+
+  /// \brief A rewriter that brings PBES expressions into PFNF normal form.
+  template <typename Term>
+  class pfnf_rewriter
+  {
+    public:
+      /// \brief The term type
+      typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The variable type
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+
+      /// \brief Rewrites a pbes expression.
+      /// \param x A term
+      /// \return The rewrite result.
+      term_type operator()(const term_type& x)
+      {
+        pbes_system::detail::pfnf_visitor<term_type> visitor;
+        visitor.visit(x);
+        return visitor.evaluate();
+      }
+
+      /// \brief Rewrites a pbes expression.
+      /// \param x A term
+      /// \param sigma A substitution function
+      /// \return The rewrite result.
+      template <typename SubstitutionFunction>
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      {
+        return sigma(this->operator()(x));
       }
   };
 
