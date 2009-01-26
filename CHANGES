@@ -5,23 +5,18 @@ Changes between toolset releases July 2008 and January 2009:
  General:
    - compatible with LTSmin toolset 1.1 van de Universiteit Twente
    - added support for importing LTSes from DOT format
-   - improved mCRL2 lts storage format which now uses the .lts suffix
-
-      Affected tools: lps2lts, ltsinfo, ltsconvert, ltscompare, ltsgraph,
-      ltsview, and diagraphica
-
+   - extended mCRL2 LTS storage format to include extra information such data
+     and parameter specifications. This new format uses the .lts suffix.
    - support for rational numbers (as part of sort Real):
      + rational numbers can be created using the division operator /
      + rational numbers can be converted to integers by means of functions
        floor, ceil and round
    - comparison operations <, <=, >= and > are now defined on all standard
      data types (including structured sorts)
-   - sets and bags data structures have been reimplementated to use exception
-     lists. This allows the use sets and bags in most specifications for
-     generating state spaces. Up till now, sets and bags only worked properly
-     with simulation. Note that we are dealing with sets and bags as the
-     "infinite" mathematical object; specifying the set of all even numbers can
-     easily be done....
+   - sets and bags data structures have been reimplementated to better support
+     the use of finite sets and bags. By guaranteeing a unique representation
+     of finite sets/bags it is now no longer a problem to generate state spaces
+     of processes with finite sets/bags as parameters, for instance.
    - numerous small improvements to tools and underlying infrastructure
    - lots of bug fixes
  
@@ -30,8 +25,8 @@ Changes between toolset releases July 2008 and January 2009:
 
  New functionality:
    - ltsgraph is completely reimplemented and now uses OpenGL for rendering
-   - ltsgraph, ltsview, diagraphica now support the input from the unified lts
-     format
+   - ltsgraph, ltsview, diagraphica now support all LTS formats supported by
+     the LTS library
 
  New tools:
    - pbesparelm: removes unused parameters from a PBES.
