@@ -3998,17 +3998,19 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
   //tries to sort out the types of BagCount (SxBag(S)->Nat)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
 
-  assert(gsIsSortArrow(Type));
+  //If the second argument is not a Bag, don't match 
+
+  if(!gsIsSortArrow(Type)) return Type;
   //assert(gsIsNat(ATAgetArgument(Type,1)));
   ATermList Args=ATLgetArgument(Type,0);
-  assert((ATgetLength(Args)==2));
+  if(!(ATgetLength(Args)==2)) return Type;
 
   ATermAppl Arg1=ATAgetFirst(Args);
 
   Args=ATgetNext(Args);
   ATermAppl Arg2=ATAgetFirst(Args);
   if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-  assert(gsIsSortExprBag(Arg2));
+  if(!gsIsSortExprBag(Arg2)) return Type;
   Arg2=ATAgetArgument(Arg2,1);
   
   ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
