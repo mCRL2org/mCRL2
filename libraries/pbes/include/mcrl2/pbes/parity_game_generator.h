@@ -171,15 +171,24 @@ namespace pbes_system {
         {
           // Choose an even upperbound max_priority
           unsigned int max_priority = (priority % 2 == 0 ? priority : priority + 1);
+          if (max_priority == 0)
+          {
+            max_priority = 2;
+          }
           for (std::map<core::identifier_string, unsigned int>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
           {
             i->second = max_priority - i->second;
           }
+          // Add BES equations for true and false with priorities 0 and 1.
+          add_bes_equation(tr::true_(), max_priority);
+          add_bes_equation(tr::false_(), max_priority - 1);
         }
-
-        // Add BES equations for true and false with priorities 0 and 1.
-        add_bes_equation(tr::true_(), 0);
-        add_bes_equation(tr::false_(), 1);
+        else
+        {
+          // Add BES equations for true and false with priorities 0 and 1.
+          add_bes_equation(tr::true_(), 0);
+          add_bes_equation(tr::false_(), 1);
+        }
 
         // Add a BES equation for the initial state.
         propositional_variable_instantiation phi = R(m_pbes.initial_state());
