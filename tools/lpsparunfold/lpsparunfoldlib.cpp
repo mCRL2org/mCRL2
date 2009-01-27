@@ -105,10 +105,10 @@ bool Sorts::basic_sortOccursInSort_expression( mcrl2::data::sort_expression s, m
   {
     std::cerr << "f" ;
     bool x = basic_sortOccursInSort_expression(static_cast<function_sort>(s).codomain(), b ) ;
-    boost::iterator_range<sort_expression_list::const_iterator> lst;
-    lst = static_cast<function_sort>(s).domain();
+    boost::iterator_range<sort_expression_list::const_iterator> lst = static_cast<function_sort>(s).domain();
     std::cerr << lst.size() ; 
     for( sort_expression_list::const_iterator i = lst.begin(); i != lst.end(); ++i ){
+      std::cout << i-> to_string() << std::endl;
       x = x || basic_sortOccursInSort_expression( *i, b );
     }   
     return x;
