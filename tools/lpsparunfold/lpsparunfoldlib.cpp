@@ -72,13 +72,13 @@ std::set<function_symbol> Sorts::determineAffectedConstructors()
   for( std::set<mcrl2::data::function_symbol>::iterator i = consSet.begin();
                                                         i != consSet.end();
                                                         ++i){
-    if( i->get_sort_expression().is_function_sort() ){
-      if (static_cast<function_sort>( i->get_sort_expression()).codomain() == unfoldParameter ){
+    if( i->sort().is_function_sort() ){
+      if (static_cast<function_sort>( i->sort()).codomain() == unfoldParameter ){
         k.insert(*i) ;
       }
     }
-    if( i->get_sort_expression().is_basic_sort() ){
-      if (static_cast<basic_sort>( i->get_sort_expression() ) == unfoldParameter ){
+    if( i->sort().is_basic_sort() ){
+      if (static_cast<basic_sort>( i->sort() ) == unfoldParameter ){
         k.insert(*i) ;
       }
     }
@@ -143,7 +143,7 @@ std::set<function_symbol> Sorts::determineAffectedMappings()
                                                         i != mapSet.end();
                                                         ++i){
     std::cout << i->to_string() <<std::endl;
-    if(basic_sortOccursInSort_expression( i->get_sort_expression(), unfoldParameter ))
+    if(basic_sortOccursInSort_expression( i->sort(), unfoldParameter ))
     {
       m.insert( *i );
       std::cout << "--" << i->to_string() <<std::endl;

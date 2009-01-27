@@ -93,13 +93,6 @@ namespace mcrl2 {
           return core::detail::gsIsNumericString(name().c_str());
         }
 
-        /// \brief Returns the sort of the variable.
-        inline
-        sort_expression get_sort_expression() const
-        {
-          return sort_expression( atermpp::arg2(*this) );
-        }
-
     }; // class function_symbol
 
     /// \brief list of function symbols
