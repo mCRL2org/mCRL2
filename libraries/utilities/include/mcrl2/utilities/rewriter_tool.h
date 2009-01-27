@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
-#include "mcrl2/utilities/input_output_tool.h"
 
 namespace mcrl2 {
 
@@ -23,7 +22,8 @@ namespace utilities {
 namespace tools {
 
   /// \brief Base class for tools that use a rewriter.
-  class rewriter_tool: public input_output_tool
+  template <typename Tool>
+  class rewriter_tool: public Tool
   {
     protected:
       /// The data rewriter strategy
@@ -34,7 +34,7 @@ namespace tools {
       /// \param desc An interface description
       void add_options(interface_description& desc)
       {
-        input_output_tool::add_options(desc);
+        Tool::add_options(desc);
         desc.add_rewriting_options();
       }
 
@@ -42,7 +42,7 @@ namespace tools {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-      	input_output_tool::parse_options(parser);
+      	Tool::parse_options(parser);
         m_rewrite_strategy = parser.option_argument_as<RewriteStrategy>("rewriter");
       }
 
@@ -50,10 +50,10 @@ namespace tools {
 
       /// \brief Constructor.
       rewriter_tool(const std::string& name,
-                                const std::string& author,
-                                const std::string& tool_description
-                               )
-        : input_output_tool(name, author, tool_description),
+                    const std::string& author,
+                    const std::string& tool_description
+                   )
+        : Tool(name, author, tool_description),
           m_rewrite_strategy(GS_REWR_JITTY)
       {}
 

@@ -15,6 +15,7 @@
 #define AUTHOR "Aad Mathijssen"
 
 #include "mcrl2/lps/lps_rewrite.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 
 using namespace mcrl2::data;
@@ -22,11 +23,14 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 
+using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 
-class lps_rewriter_tool : public rewriter_tool
+class lps_rewriter_tool : public rewriter_tool<input_output_tool>
 { 
   protected: 
+    typedef rewriter_tool<input_output_tool> super;
+    
     static Rewriter *rewr;
 
     bool m_benchmark;
@@ -38,14 +42,14 @@ class lps_rewriter_tool : public rewriter_tool
 
     void add_options(interface_description& desc)
     {
-      rewriter_tool::add_options(desc);
+      super::add_options(desc);
       desc.add_option("benchmark", make_mandatory_argument("NUM"),
               "rewrite data expressions NUM times; do not save output", 'b');
     }
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
-    { rewriter_tool::parse_options(parser);
+    { super::parse_options(parser);
 
       m_benchmark = (parser.options.count("benchmark")>0);
 
@@ -56,7 +60,7 @@ class lps_rewriter_tool : public rewriter_tool
 
   public: 
     lps_rewriter_tool()
-      : rewriter_tool(
+      : super(
           TOOLNAME,
           AUTHOR,
           "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
@@ -185,8 +189,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const
 
 bool squadt_interactor::perform_task(tipi::configuration& c) 
 {
-  set_input_filename(c.get_input(lps_file_for_input).location());
-  set_output_filename(c.get_output(lps_file_for_output).location());
+  input_filename() = c.get_input(lps_file_for_input).location();
+  output_filename() = c.get_output(lps_file_for_output).location();
 
   bool result = run();
 

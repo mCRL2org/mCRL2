@@ -15,6 +15,8 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
@@ -27,28 +29,32 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
+using utilities::tools::input_output_tool;
+using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 
-class pbes_constelm_tool: public pbes_rewriter_tool
+class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
+    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+    
     bool m_compute_conditions;
 
     void parse_options(const command_line_parser& parser)
     {
-    	pbes_rewriter_tool::parse_options(parser);
+    	super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
     }
 
     void add_options(interface_description& desc)
     {
-    	pbes_rewriter_tool::add_options(desc);
+    	super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
     }
 
   public:
     pbes_constelm_tool()
-      : pbes_rewriter_tool(
+      : super(
           "pbesconstelm",
           "Wieger Wesselink",
           "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "

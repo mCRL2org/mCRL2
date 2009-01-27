@@ -41,6 +41,7 @@
 #include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
+#include <mcrl2/utilities/input_output_tool.h>
 #include <mcrl2/utilities/rewriter_tool.h>
 
 using namespace atermpp;
@@ -52,9 +53,10 @@ using namespace mcrl2::lps;
 using namespace std;
 
 using namespace mcrl2;
+using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 
-class action_rename_tool: public rewriter_tool
+class action_rename_tool: public rewriter_tool<input_output_tool>
 {
   //Type definitions
   //----------------
@@ -78,7 +80,7 @@ class action_rename_tool: public rewriter_tool
   
     void add_options(interface_description& desc)
     {
-      rewriter_tool::add_options(desc);
+      rewriter_tool<input_output_tool>::add_options(desc);
       desc.add_option("renamefile", make_mandatory_argument("NAME"),
               "use the rename rules from NAME", 'f');
       desc.add_option("no-rewrite",
@@ -99,7 +101,7 @@ class action_rename_tool: public rewriter_tool
 
     void parse_options(const command_line_parser& parser)
     {
-      rewriter_tool::parse_options(parser);
+      rewriter_tool<input_output_tool>::parse_options(parser);
 
       m_rewrite = (parser.options.count("rewrite")==0); 
       m_sumelm  = (parser.options.count("sumelm")==0); 
@@ -125,7 +127,7 @@ class action_rename_tool: public rewriter_tool
 
   public:
     action_rename_tool()
-      : rewriter_tool(
+      : rewriter_tool<input_output_tool>(
           TOOLNAME,
           AUTHOR,
           "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
@@ -404,8 +406,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const
 bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   m_action_rename_filename = c.get_input(rename_file).location();
-  set_input_filename(c.get_input(lps_file_for_input).location());
-  set_output_filename(c.get_output(lps_file_for_output).location());
+  input_filename() = c.get_input(lps_file_for_input).location();
+  output_filename() = c.get_output(lps_file_for_output).location();
   m_sumelm = c.get_option_argument< bool >(option_sumelm);
   m_rewrite = c.get_option_argument< bool >(option_rewrite);
 

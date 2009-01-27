@@ -26,7 +26,8 @@ namespace utilities {
 namespace tools {
 
   /// \brief Base class for filter tools that use a pbes rewriter.
-  class pbes_rewriter_tool: public rewriter_tool
+  template <typename Tool>
+  class pbes_rewriter_tool: public Tool
   {
     public:
        /// An enumerated type for the available pbes rewriters
@@ -78,9 +79,9 @@ namespace tools {
       /// \brief Returns the types of rewriters that are available for this tool.
       /// Override this method to change the standard behavior.
       /// \return The set { simplify, quantifier_all, quantifier_finite }
-      virtual std::set<pbes_rewriter_tool::pbes_rewriter_type> available_rewriters() const
+      virtual std::set<pbes_rewriter_type> available_rewriters() const
       {
-        std::set<pbes_rewriter_tool::pbes_rewriter_type> result;
+        std::set<pbes_rewriter_type> result;
         result.insert(simplify);
         result.insert(quantifier_all);
         result.insert(quantifier_finite);
@@ -101,10 +102,10 @@ namespace tools {
       /// \param desc An interface description
       void add_options(interface_description& desc)
       {
-      	rewriter_tool::add_options(desc);
+      	Tool::add_options(desc);
         std::string text = "use pbes rewrite strategy NAME:\n";
         std::set<pbes_rewriter_type> types = available_rewriters();
-        for (std::set<pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
+        for (typename std::set<pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
         {
           text = text + (i == types.begin() ? "" : "\n") + rewriter_description(*i);
         }
@@ -120,9 +121,13 @@ namespace tools {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-      	rewriter_tool::parse_options(parser);
-        m_pbes_rewriter_type = parser.option_argument_as<pbes_rewriter_type>("pbes-rewriter");
+  	    Tool::parse_options(parser);
+        m_pbes_rewriter_type = parse_pbes_rewriter_type(parser.option_argument("pbes-rewriter"));
+
+        // The following alternative doesn't work, it is not clear why.
+        // m_pbes_rewriter_type = parser.option_argument_as<pbes_rewriter_tool<Tool>::pbes_rewriter_type>("pbes-rewriter");
       }
+        
 
     public:
       /// \brief Constructor.
@@ -133,7 +138,7 @@ namespace tools {
                          const std::string& author,
                          const std::string& tool_description
                         )
-        : rewriter_tool(name, author, tool_description)
+        : Tool(name, author, tool_description)
       {}
       
       /// \brief Returns the rewriter type
@@ -148,14 +153,14 @@ namespace tools {
   /// \param is An input stream
   /// \param t A rewriter type
   /// \return The input stream
-  inline
-  std::istream& operator>>(std::istream& is, pbes_rewriter_tool::pbes_rewriter_type& t)
+  template <typename Tool>
+  std::istream& operator>>(std::istream& is, typename pbes_rewriter_tool<Tool>::pbes_rewriter_type& t)
   {
     std::string s;
     is >> s;
     try
     {
-      t = pbes_rewriter_tool::parse_pbes_rewriter_type(s);
+      t = pbes_rewriter_tool<Tool>::parse_pbes_rewriter_type(s);
     }
     catch (std::runtime_error)
     {

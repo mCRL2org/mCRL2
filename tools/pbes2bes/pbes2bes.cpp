@@ -35,6 +35,7 @@
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 
 // SQuADT protocol interface
@@ -44,14 +45,17 @@
 
 using namespace mcrl2;
 using utilities::command_line_parser;
-using utilities::tools::rewriter_tool;
 using utilities::interface_description;
 using utilities::make_optional_argument;
+using utilities::tools::input_output_tool;
+using utilities::tools::rewriter_tool;
   
 /// The pbes2bes tool.
-class pbes2bes_tool: public rewriter_tool
+class pbes2bes_tool: public rewriter_tool<input_output_tool>
 {
   protected:
+    typedef rewriter_tool<input_output_tool> super;
+    
     /// The output formats of the tool.
     enum pbes_output_format {
       of_binary,
@@ -116,7 +120,7 @@ class pbes2bes_tool: public rewriter_tool
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
-    	rewriter_tool::parse_options(parser);
+    	super::parse_options(parser);
       try
       {
         set_output_format(parser.option_argument("output"));
@@ -138,7 +142,7 @@ class pbes2bes_tool: public rewriter_tool
 
     void add_options(interface_description& desc)
     {
-    	rewriter_tool::add_options(desc);
+    	super::add_options(desc);
       desc.
         add_option("strategy",
           make_optional_argument("NAME", "lazy"),
@@ -195,7 +199,7 @@ class pbes2bes_tool: public rewriter_tool
   public:
     /// Constructor.
     pbes2bes_tool()
-      : rewriter_tool(
+      : super(
           "pbes2bes",
           "Alexander van Dam, Wieger Wesselink",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
@@ -330,7 +334,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
         return EXIT_SUCCESS;
       }
-      return rewriter_tool::execute(argc, argv);
+      return super::execute(argc, argv);
     }     
 };
 

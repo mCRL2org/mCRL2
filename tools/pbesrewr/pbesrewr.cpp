@@ -12,6 +12,8 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/enumerator.h"
@@ -21,13 +23,19 @@
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
+using utilities::tools::input_output_tool;
+using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
-
-class pbes_rewr_tool: public pbes_rewriter_tool
+using namespace mcrl2::utilities::tools;
+  
+class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
+  protected:
+    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+     
   public:
     pbes_rewr_tool()
-      : pbes_rewriter_tool(
+      : super(
           "pbesrewr",
           "Jan friso Groote, Wieger Wesselink",
           "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
@@ -268,8 +276,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   using namespace utilities;
-  set_input_filename(c.get_input(pbes_file_for_input).location());
-  set_output_filename(c.get_output(pbes_file_for_output).location());
+  input_filename() = c.get_input(pbes_file_for_input).location();
+  output_filename() = c.get_output(pbes_file_for_output).location();
   m_rewrite_strategy = c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
   m_pbes_rewriter_type = c.get_option_argument< pbes_rewriter_type >(option_pbes_rewrite_strategy, 0);
   bool result = run();
