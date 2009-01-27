@@ -23,6 +23,8 @@ namespace mcrl2 {
 
 namespace utilities {
 
+namespace tools {
+
   /// \brief Base class for filter tools that use a pbes rewriter.
   class pbes_rewriter_tool: public rewriter_tool
   {
@@ -161,6 +163,8 @@ namespace utilities {
     }
     return is;
   }
+
+} // namespace tools
 
 } // namespace utilities
 

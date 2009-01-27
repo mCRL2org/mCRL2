@@ -18,6 +18,8 @@ namespace mcrl2 {
 
 namespace utilities {
 
+namespace tools {
+
   /// \brief Base class for tools that take a file as input,
   /// and write the results to a file.
   class input_output_tool: public input_tool
@@ -72,6 +74,8 @@ namespace utilities {
         m_output_filename = filename;
       }
   };
+
+} // namespace tools
 
 } // namespace utilities
 

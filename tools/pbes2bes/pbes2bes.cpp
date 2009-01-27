@@ -44,7 +44,7 @@
 
 using namespace mcrl2;
 using utilities::command_line_parser;
-using utilities::rewriter_tool;
+using utilities::tools::rewriter_tool;
 using utilities::interface_description;
 using utilities::make_optional_argument;
   

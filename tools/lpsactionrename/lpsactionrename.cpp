@@ -52,7 +52,7 @@ using namespace mcrl2::lps;
 using namespace std;
 
 using namespace mcrl2;
-using utilities::rewriter_tool;
+using mcrl2::utilities::tools::rewriter_tool;
 
 class action_rename_tool: public rewriter_tool
 {

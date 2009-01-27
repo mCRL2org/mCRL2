@@ -21,7 +21,7 @@
 #include "mcrl2/utilities/mcrl2_squadt_interface.h"
 #endif
 
-class lps_parelm_tool : public mcrl2::utilities::input_output_tool
+class lps_parelm_tool : public mcrl2::utilities::tools::input_output_tool
 #ifdef ENABLE_SQUADT_CONNECTIVITY
                       , public mcrl2::utilities::squadt::mcrl2_tool_interface
 #endif

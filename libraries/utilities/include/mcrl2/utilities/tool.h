@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/command_line_tool.h
-/// \brief Base class for command line tools.
+/// \file mcrl2/utilities/tool.h
+/// \brief add your file description here.
 
-#ifndef MCRL2_UTILITIES_COMMAND_LINE_TOOL_H
-#define MCRL2_UTILITIES_COMMAND_LINE_TOOL_H
+#ifndef MCRL2_UTILITIES_TOOL_H
+#define MCRL2_UTILITIES_TOOL_H
 
 #include <cstdlib>
 #include <string>
@@ -23,9 +23,12 @@ namespace mcrl2 {
 
 namespace utilities {
 
+/// \brief The namespace for command line tool classes
+namespace tools {
+
   /// \brief Base class for command line tools.
   /// as result.
-  class command_line_tool
+  class tool
   {
     protected:
       /// The name of the tool
@@ -63,7 +66,7 @@ namespace utilities {
 
     public:
       /// \brief Constructor.
-      command_line_tool(const std::string& name,
+      tool(const std::string& name,
                   const std::string& author,
                   const std::string& tool_description
                  )
@@ -74,7 +77,7 @@ namespace utilities {
       }
 
       /// \brief Destructor.
-      virtual ~command_line_tool()
+      virtual ~tool()
       {}
 
       /// \brief Run the tool. The options must be set manually.
@@ -110,8 +113,10 @@ namespace utilities {
       }
   };
 
+} // namespace tools
+
 } // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_COMMAND_LINE_TOOL_H
+#endif // MCRL2_UTILITIES_TOOL_H

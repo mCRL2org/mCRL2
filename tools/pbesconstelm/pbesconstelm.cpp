@@ -27,8 +27,9 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
+using utilities::tools::pbes_rewriter_tool;
 
-class pbes_constelm_tool: public utilities::pbes_rewriter_tool
+class pbes_constelm_tool: public pbes_rewriter_tool
 {
   protected:
     bool m_compute_conditions;

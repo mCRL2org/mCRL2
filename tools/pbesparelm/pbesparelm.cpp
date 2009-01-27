@@ -22,7 +22,7 @@
 
 using namespace mcrl2;
 using utilities::interface_description;
-using utilities::input_output_tool;
+using utilities::tools::input_output_tool;
 
 class pbes_parelm_tool: public input_output_tool
 {

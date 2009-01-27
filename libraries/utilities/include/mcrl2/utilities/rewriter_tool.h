@@ -19,6 +19,8 @@
 namespace mcrl2 {
 
 namespace utilities {
+  
+namespace tools {
 
   /// \brief Base class for tools that use a rewriter.
   class rewriter_tool: public input_output_tool
@@ -70,6 +72,8 @@ namespace utilities {
         return data::rewriter(data_spec, rewrite_strategy());
       }
   };
+
+} // namespace tools
 
 } // namespace utilities
 

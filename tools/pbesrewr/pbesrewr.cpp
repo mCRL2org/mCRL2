@@ -21,7 +21,7 @@
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace mcrl2;
-using utilities::pbes_rewriter_tool;
+using utilities::tools::pbes_rewriter_tool;
 
 class pbes_rewr_tool: public pbes_rewriter_tool
 {

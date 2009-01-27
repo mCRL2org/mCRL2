@@ -12,14 +12,16 @@
 #ifndef MCRL2_UTILITIES_INPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_TOOL_H
 
-#include "mcrl2/utilities/command_line_tool.h"
+#include "mcrl2/utilities/tool.h"
 
 namespace mcrl2 {
 
 namespace utilities {
 
+namespace tools {
+
   /// \brief Base class for tools that take a file as input.
-  class input_tool: public command_line_tool
+  class input_tool: public tool
   {
     protected:
       /// The input file name
@@ -58,7 +60,7 @@ namespace utilities {
                  const std::string& author,
                  const std::string& tool_description
                 )
-        : command_line_tool(name, author, tool_description)
+        : tool(name, author, tool_description)
       {
       }
 
@@ -70,6 +72,8 @@ namespace utilities {
         m_input_filename = filename;
       }
   };
+
+} // namespace tools
 
 } // namespace utilities
 

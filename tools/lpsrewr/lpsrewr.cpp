@@ -22,6 +22,8 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 
+using mcrl2::utilities::tools::rewriter_tool;
+
 class lps_rewriter_tool : public rewriter_tool
 { 
   protected: 
