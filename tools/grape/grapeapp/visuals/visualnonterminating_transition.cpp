@@ -22,51 +22,13 @@ using namespace grape::grapeapp;
 visualnonterminating_transition::visualnonterminating_transition( nonterminating_transition* p_nonterminating_transition )
 {
   m_object = p_nonterminating_transition;
-  m_same_begin_end = false;
   compound_state *beginstate = p_nonterminating_transition->get_beginstate();
   compound_state *endstate = p_nonterminating_transition->get_endstate();
 
-  // if the transition has a beginstate and an endstate
-  if ( ( beginstate != 0 ) && ( endstate != 0 ) )
-  {
-    if ( beginstate != endstate )
-    {
-      m_arrow_base = get_coordinate_on_edge( m_object->get_coordinate(), beginstate ) - m_object->get_coordinate();
-      m_arrow_head = get_coordinate_on_edge( m_object->get_coordinate(), endstate ) - m_object->get_coordinate();
-    }
-    else
-    {
-      m_same_begin_end = true;
-      coordinate base_corner = { beginstate->get_coordinate().m_x - beginstate->get_height(), beginstate->get_coordinate().m_y };
-      m_arrow_base = get_coordinate_on_edge( base_corner, beginstate ) - m_object->get_coordinate();
-      coordinate head_corner = { base_corner.m_x, base_corner.m_y - beginstate->get_width() };
-      m_arrow_head = get_coordinate_on_edge( head_corner, beginstate ) - m_object->get_coordinate();
-    }
-  }
-
-  // if the transition only has a endstate.
-  if ( ( endstate != 0 ) && ( beginstate == 0 ) )
-  {
-    m_arrow_base.m_x = 0;
-    m_arrow_base.m_y = 0;
-    m_arrow_head = get_coordinate_on_edge( m_arrow_base, endstate) - m_object->get_coordinate();
-  }
-
-  // if the transition only has an beginstate.
-  if ( ( beginstate != 0 ) && ( endstate == 0 ) )
-  {
-    m_arrow_head.m_x = m_object->get_width();
-    m_arrow_head.m_y = m_object->get_height();
-    m_arrow_base = get_coordinate_on_edge( m_arrow_head, beginstate ) - m_object->get_coordinate();
-  }
-
-  if ( ( beginstate == 0 ) && ( endstate == 0 ) )
-  {
-    m_arrow_base.m_x = 0;
-    m_arrow_base.m_y = 0;
-    m_arrow_head.m_x = m_object->get_width();
-    m_arrow_head.m_y = m_object->get_height();
-  }
+  m_same_begin_end = ( ( beginstate != 0 ) && ( endstate != 0 ) && ( beginstate == endstate ) );
+  
+  m_arrow_base = p_nonterminating_transition->get_begin_coordinate();
+  m_arrow_head = p_nonterminating_transition->get_end_coordinate();
 }
 
 visualnonterminating_transition::visualnonterminating_transition( const visualnonterminating_transition &p_nonterminating_transition )

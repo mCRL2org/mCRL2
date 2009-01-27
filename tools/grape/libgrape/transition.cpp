@@ -110,13 +110,19 @@ bool transition::movable( void ) const
 }
 
 coordinate transition::get_begin_coordinate( void )
-{ 
-  coordinate tail_coordinate = get_coordinate();
-  // get coordinate of begin state
-  if (m_beginstate != 0) 
+{   
+  coordinate tail_coordinate;  
+  compound_state *beginstate = get_beginstate();
+ 
+  // if the transition has an beginstate
+  if ( beginstate != 0 )
   {
-    // if there is an endstate, find the intersection point with the end state
-    tail_coordinate = grape::grapeapp::get_coordinate_on_edge( get_coordinate(), get_beginstate() );            
+    tail_coordinate = grape::grapeapp::get_coordinate_on_edge( get_coordinate(), beginstate ) - get_coordinate();
+  } else
+  {
+    tail_coordinate.m_x = 0;
+    tail_coordinate.m_y = 0;
   }
+  
   return tail_coordinate;
 } 

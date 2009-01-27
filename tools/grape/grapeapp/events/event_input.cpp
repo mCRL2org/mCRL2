@@ -487,17 +487,19 @@ bool grape_event_drag::Do( void )
       static bool new_drag = true;
       static coordinate s_coord_mousedown;
       static coordinate s_orig_center;
+      static coordinate s_dif;
       static float s_orig_width;
       static float s_orig_height;
       static int s_flag;
-
+        
+        
       if ( m_mousedown && new_drag )
       {
         s_orig_center = begin_object_ptr->get_coordinate();
         s_orig_width = begin_object_ptr->get_width();
         s_orig_height = begin_object_ptr->get_height();
         s_coord_mousedown = m_up;
-
+        s_dif = s_orig_center - s_coord_mousedown;
         if (new_drag == true) 
         {
           s_flag = -1;
@@ -507,16 +509,24 @@ bool grape_event_drag::Do( void )
           {
             nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( begin_object_ptr );
             //dragging begin coordinate
-            coordinate tail_coordinate = ntt_ptr->get_begin_coordinate();
-            if (distance(tail_coordinate, s_coord_mousedown) < 0.05f) s_flag = 1;
+            coordinate tail_coordinate = ntt_ptr->get_begin_coordinate() + ntt_ptr->get_coordinate();
+            if (distance(tail_coordinate, m_up) < 0.05f) s_flag = 1;
+
             //dragging end coordinate
-            coordinate head_coordinate = ntt_ptr->get_end_coordinate();
-            if (distance(head_coordinate, s_coord_mousedown) < 0.05f) s_flag = 0;
+            coordinate head_coordinate = ntt_ptr->get_end_coordinate() + ntt_ptr->get_coordinate();
+            if (distance(head_coordinate, m_up) < 0.05f) s_flag = 0;
           }
         }
       } else if ( !m_mousedown ) new_drag = true;
 
       coordinate delta = m_up - s_coord_mousedown;
+      
+      // only update up coordinate with initial coordinate difference if the type is not a NONTERMINATING_TRANSITION
+      if (begin_object_ptr->get_type() != NONTERMINATING_TRANSITION)
+      {
+        m_up.m_x = m_up.m_x + s_dif.m_x;
+        m_up.m_y = m_up.m_y + s_dif.m_y;
+      }
 
       if ( m_click_location == GRAPE_DIR_NONE ) // no border clicked, thus a move
       {        
@@ -534,13 +544,23 @@ bool grape_event_drag::Do( void )
               {
                 compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
                 grape_event_attach_transition_beginstate* attach_event = new grape_event_attach_transition_beginstate( m_main_frame, ntt_ptr, state);
-                m_main_frame->get_event_handler()->Submit( attach_event, true );     
-           
+                m_main_frame->get_event_handler()->Submit( attach_event, true );    
+                
                 // if there is a begin and end state set the coordinate of the transition in the middle of the begin and end coordinate 
                 if ((ntt_ptr->get_beginstate() != 0) && (ntt_ptr->get_endstate() != 0))
                 {
-                  coordinate new_coordinate = {(ntt_ptr->get_beginstate()->get_coordinate().m_x + ntt_ptr->get_endstate()->get_coordinate().m_x) / 2, (ntt_ptr->get_beginstate()->get_coordinate().m_y + ntt_ptr->get_endstate()->get_coordinate().m_y) / 2};
-                  ntt_ptr->set_coordinate(new_coordinate);
+                  coordinate new_coordinate;
+                  if ( ntt_ptr->get_beginstate() == ntt_ptr->get_endstate() ) 
+                  {
+                    // if it is a loop
+                    new_coordinate.m_x = ntt_ptr->get_beginstate()->get_coordinate().m_x - ntt_ptr->get_beginstate()->get_width() * 0.5 - 0.1;
+                    new_coordinate.m_y = ntt_ptr->get_beginstate()->get_coordinate().m_y;
+                  } else {
+                    // if the begin and endstate are different
+                    new_coordinate.m_x = (ntt_ptr->get_beginstate()->get_coordinate().m_x + ntt_ptr->get_endstate()->get_coordinate().m_x) * 0.5;
+                    new_coordinate.m_y = (ntt_ptr->get_beginstate()->get_coordinate().m_y + ntt_ptr->get_endstate()->get_coordinate().m_y) * 0.5;
+                  }
+                  ntt_ptr->set_coordinate(new_coordinate);                  
                 }
               }
             } else {
@@ -552,12 +572,13 @@ bool grape_event_drag::Do( void )
             }  
           }
 
-          //detach or attach end state
+          //detach or attach endstate
           if (s_flag == 0) 
-          {
+          { 
             visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
             if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
             {
+              //attach endstate
               if ( ntt_ptr->get_endstate() == 0 ) 
               {
                 compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
@@ -565,6 +586,7 @@ bool grape_event_drag::Do( void )
                 m_main_frame->get_event_handler()->Submit( attach_event, true );
               }
             } else {             
+              //detach endstate
               if ( ntt_ptr->get_endstate() != 0 ) 
               {
                 grape_event_detach_nonterminating_transition_endstate* detach_event = new grape_event_detach_nonterminating_transition_endstate( m_main_frame, ntt_ptr);
@@ -577,6 +599,9 @@ bool grape_event_drag::Do( void )
         }   
         //move object
         grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+        //grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_coord_mousedown, m_up, !m_mousedown, s_flag );
+        
+        //s_coord_mousedown
         m_main_frame->get_event_handler()->Submit( event, !m_mousedown );    
       }
       else // a border was selected, thus a resize

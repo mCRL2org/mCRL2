@@ -92,13 +92,13 @@ void visualchannel::draw( void )
 bool visualchannel::is_inside( libgrape::coordinate &p_coord )
 {
   // test is inside ellipse
-  return is_inside_ellipse( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
+  return is_inside_ellipse( m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
 }
 
 grape_direction visualchannel::is_on_border( libgrape::coordinate &p_coord )
 {
   // test if a coordinate is on the border of a channel
-  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord, m_object->get_selected() );
 }
 
 }

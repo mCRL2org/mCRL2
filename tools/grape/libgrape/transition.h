@@ -144,7 +144,7 @@ namespace grape
          * Transition get begin coordinate
          * Get the begin coordinate of a transition
          */
-        coordinate get_begin_coordinate( void );
+        virtual coordinate get_begin_coordinate( void );
     };
 
     /**

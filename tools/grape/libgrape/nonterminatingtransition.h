@@ -85,6 +85,12 @@ namespace grape
          * Get the end coordinate of a transition
          */
         coordinate get_end_coordinate( void );
+        
+        /**
+         * Transition get begin coordinate
+         * Get the begin coordinate of a transition
+         */
+        virtual coordinate get_begin_coordinate( void );
     };
 
     /**
