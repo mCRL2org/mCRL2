@@ -488,11 +488,13 @@ bool grape_event_drag::Do( void )
       static coordinate s_coord_mousedown;
       static coordinate s_orig_center;
       static coordinate s_dif;
+      // dynamic array containing initial transition coordinates     
+      static coordinate* s_orig_ntt = NULL; 
       static float s_orig_width;
       static float s_orig_height;
-      static int s_flag;
-        
-        
+      static int s_flag;  
+      
+      // if we started a new drag
       if ( m_mousedown && new_drag )
       {
         s_orig_center = begin_object_ptr->get_coordinate();
@@ -500,6 +502,28 @@ bool grape_event_drag::Do( void )
         s_orig_height = begin_object_ptr->get_height();
         s_coord_mousedown = m_up;
         s_dif = s_orig_center - s_coord_mousedown;
+        
+        // store the initial position of the nonterminating transitions attached to the state
+        visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( s_orig_center );
+        if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
+        {
+          compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );        
+          // set length of dynamic array
+          s_orig_ntt = new coordinate[state->count_transition_endstate()];  
+         
+          // fill dynamic array with initial coordinates
+          for ( unsigned int i = 0; i < state->count_transition_endstate(); ++i )
+          {
+            nonterminating_transition* ntt = state->get_transition_endstate( i );        
+            s_orig_ntt[i] = ntt->get_coordinate();
+          }
+        } else
+        {  
+          // set length of dynamic array 
+          s_orig_ntt = new coordinate[0];
+         
+        }
+        
         if (new_drag == true) 
         {
           s_flag = -1;
@@ -597,12 +621,29 @@ bool grape_event_drag::Do( void )
         } else {
           //other object
         }   
-        //move object
-        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
-        //grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_coord_mousedown, m_up, !m_mousedown, s_flag );
         
-        //s_coord_mousedown
-        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );    
+        //move object
+        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );        
+        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );   
+        
+        //also move the nonterminating transitions attached to the state
+        visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
+        if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
+        {
+          compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
+                
+          for ( unsigned int i = 0; i < state->count_transition_endstate(); ++i )
+          {
+            nonterminating_transition* ntt = state->get_transition_endstate( i );
+            if (ntt->get_beginstate() == ntt->get_endstate())
+            {
+              coordinate c = s_orig_ntt[i]+m_up-s_orig_center;
+              //move the nonterminating transition object
+              grape_event_move *event = new grape_event_move( m_main_frame, ntt, s_orig_ntt[i], c, !m_mousedown, s_flag );
+              m_main_frame->get_event_handler()->Submit( event, !m_mousedown );                
+            }          
+          }
+        } 
       }
       else // a border was selected, thus a resize
       {
