@@ -66,12 +66,16 @@ namespace tools {
       {
       }
 
-      /// \brief Sets the output filename.
-      /// \param filename A string
-      /// \deprecated
-      void set_output_filename(const std::string& filename)
+      /// \brief Returns a const reference to the output filename.
+      const std::string& output_filename() const
       {
-        m_output_filename = filename;
+        return m_output_filename;
+      }
+
+      /// \brief Returns a reference to the output filename.
+      std::string& output_filename()
+      {
+        return m_output_filename;
       }
   };
 

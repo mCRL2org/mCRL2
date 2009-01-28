@@ -64,12 +64,16 @@ namespace tools {
       {
       }
 
-      /// \brief Sets the input filename.
-      /// \param filename A string
-      /// \deprecated
-      void set_input_filename(const std::string& filename)
+      /// \brief Returns a const reference to the input filename.
+      const std::string& input_filename() const
       {
-        m_input_filename = filename;
+        return m_input_filename;
+      }
+
+      /// \brief Returns a reference to the input filename.
+      std::string& input_filename()
+      {
+        return m_input_filename;
       }
   };
 
