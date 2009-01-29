@@ -15,7 +15,8 @@
 #include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2 {
-  namespace core {
+
+namespace core {
 
   /// \brief String type of the LPS library.
   /// Identifier strings are represented internally as ATerms.
@@ -30,7 +31,11 @@ namespace mcrl2 {
     return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
   }
 
-  }
-} 
+  /// \brief Read-only singly linked list of identifier strings
+  typedef atermpp::term_list<identifier_string> identifier_string_list;
+
+} // namespace core
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_IDENTIFIER_STRING_H
