@@ -192,7 +192,7 @@ namespace data_expr {
   inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsDataExprForall(t); }
 
   /// \brief Returns true if the term t is a lambda expression
-  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsDataExprLambda(t); }
+  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsLambdaOpId(t); }
 
   /// \brief Returns a real with value i
   /// \param i An integer value
