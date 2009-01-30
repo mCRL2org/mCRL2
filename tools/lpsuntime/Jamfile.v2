@@ -5,5 +5,3 @@ tool lpsuntime
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsuntime ;

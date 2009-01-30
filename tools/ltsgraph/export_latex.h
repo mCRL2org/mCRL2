@@ -1,4 +1,4 @@
-// Author(s): Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp
+// Author(s): Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,51 +6,30 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ./export_latex.h
+/// \file export_latex.h
+/// \brief LaTeX exporter.
 
-#ifndef ltx_h
-#define ltx_h
+#ifndef LATEX_EXPORT_H
+#define LATEX_EXPORT_H
 
-#include <wx/string.h>
-#include <vector>
-#include <string>
+#include "exporter.h"
+class LTSGraph;
 
-typedef struct {
-	unsigned int num;
-	double x, y;
-	std::string lbl;
-} nodeLatex;
-
-typedef struct {
-	unsigned int numNode1, numNode2;
-	std::string lbl;
-} edgeLatex ;
-
-
-
-class ExportToLatex
+class ExporterLatex: public Exporter
 {
-public:
-	ExportToLatex(wxString _filename, std::vector<nodeLatex> _node, std::vector<edgeLatex> _edge, int _height);
-	bool Generate();
-	
+  public:
+    ExporterLatex(Graph* g, LTSGraph* app);
+    ~ExporterLatex() {};
+    bool export_to(wxString _filename);
 
-private:
-
-	std::string EscSpecChar(std::string);//To escape special characters
-	std::string str_replace(std::string to_replace, std::string replace_by, std::string replace_in);
-
-	wxString filename;
-	std::string LatexCode;
-
-	std::vector<nodeLatex> node;
-	std::vector<edgeLatex> edge;
-
-	int height; //height of the drawing area
-
-
+  private:
+    LTSGraph* owner;
+    std::string tikz_code;
+    
+    void drawBezier(Transition* tr);
+    void drawSelfLoop(Transition* tr);
 };
 
 
 
-#endif //latex_h
+#endif //LATEX_EXPORT_H

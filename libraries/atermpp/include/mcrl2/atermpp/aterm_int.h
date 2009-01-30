@@ -16,45 +16,43 @@
 
 namespace atermpp
 {
-  /// Term containing an integer.
-  ///
+  /// \brief Term containing an integer.
   class aterm_int: public aterm_base
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       aterm_int()
       {} 
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
+      /// \param t An integer term
       aterm_int(ATermInt t)
         : aterm_base(t)
       {}
   
       /// Allow construction from an aterm. The aterm must be of the right type.
-      ///
+      /// \param t A term.
       aterm_int(aterm t)
         : aterm_base(t)
       {
         assert(type() == AT_INT);
       }
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
+      /// \param value An integer value.
       aterm_int(int value)
         : aterm_base(ATmakeInt(value))
       {}
 
-      /// Conversion to ATermInt.
-      ///
+      /// \brief Conversion operator
+      /// \return The wrapped ATermInt pointer
       operator ATermInt() const
       {
         return reinterpret_cast<ATermInt>(m_term);
       }
 
-      /// Assignment operator.
-      ///
+      /// \brief Assignment operator.
+      /// \param t A term.
       aterm_int& operator=(aterm_base t)
       {
         assert(t.type() == AT_INT);
@@ -62,8 +60,8 @@ namespace atermpp
         return *this;
       }
 
-      /// Get the integer value of the aterm_int.
-      ///
+      /// \brief Get the integer value of the aterm_int.
+      /// \return The value of the term.
       int value() const
       {
         return ATgetInt(reinterpret_cast<ATermInt>(m_term));

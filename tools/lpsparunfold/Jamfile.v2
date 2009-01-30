@@ -6,5 +6,3 @@ tool lpsparunfold
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsparunfold ;

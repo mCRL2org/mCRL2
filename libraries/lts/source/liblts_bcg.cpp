@@ -10,13 +10,12 @@
 
 #include <string>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/lts/lts.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 
 #include <bcg_user.h>
 

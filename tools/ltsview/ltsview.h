@@ -14,14 +14,16 @@
 #include <wx/wx.h>
 #include <string>
 #include "mediator.h"
-#include "mainframe.h"
-#include "glcanvas.h"
-#include "lts.h"
-#include "visualizer.h"
-#include "utils.h"
-#include "markmanager.h"
+#include "mcrl2/utilities/wx_tool.h"
 
-class LTSView : public wxApp, public Mediator {
+class MainFrame;
+class GLCanvas;
+class LTS;
+class Visualizer;
+class MarkManager;
+class Settings;
+
+class LTSView : public mcrl2::utilities::wx::tool< LTSView >, public Mediator {
   private:
     LTS *lts;
     unsigned int colourCounter;
@@ -35,11 +37,14 @@ class LTSView : public wxApp, public Mediator {
     void applyMarkStyle();
 
   public:
+    LTSView();
     virtual int OnExit();
-    virtual bool OnInit();
+    virtual bool DoInit();
+    bool parse_command_line(int argc, wxChar** argv);
     void activateMarkRule(int index,bool activate);
     void addMarkRule();
     void editMarkRule(int index);
+    void exportToText(std::string filename);
     Utils::MarkStyle getMarkStyle();
     Utils::MatchStyle getMatchStyle();
     bool isMarked(State *s);
@@ -52,9 +57,10 @@ class LTSView : public wxApp, public Mediator {
     void notifyRenderingStarted();
     void openFile(std::string fileName);
     void removeMarkRule(int mr);
-    void setActionMark(std::string label,bool b);
+    void setActionMark(int l,bool b);
     void setMarkStyle(Utils::MarkStyle ms);
     void setMatchStyle(Utils::MatchStyle ms);
+    void setMatchStyleClusters(Utils::MatchStyle ms);
     void setRankStyle(Utils::RankStyle rs);
     void setVisStyle(Utils::VisStyle vs);
     void setFSMStyle(bool b);
@@ -62,7 +68,7 @@ class LTSView : public wxApp, public Mediator {
     int getNumberOfParams() const;
     std::string getActionLabel(const int i) const;
     std::string getParName(const int i) const;
-    std::string getParValue(const int i, const int j) const;
+    std::string getParValue(State *s, const int j) const;
     void selectStateByID(const int id);
     void selectCluster(const int rank, const int pos);
     void deselect();

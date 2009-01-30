@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/transform.h"
+#include "mcrl2/atermpp/set_operations.h"
 
 using namespace std;
 using namespace atermpp;
@@ -89,9 +90,33 @@ void test_aterm_list()
   }
 }
 
+void test_set_operations()
+{
+  aterm x = make_term("x");
+  aterm y = make_term("y");
+  aterm z = make_term("z");
+
+  aterm_list l;
+  l = push_front(l, x);
+  l = push_front(l, y);
+
+  aterm_list m;
+  m = push_front(m, z);
+  m = push_front(m, x);
+
+  aterm_list lm_union = term_list_union(l, m);
+  BOOST_CHECK(lm_union.size() == 3);
+
+  aterm_list lm_difference = term_list_difference(l, m);
+  BOOST_CHECK(lm_difference.size() == 1);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
   test_aterm_list();
+  test_set_operations();
+
   return 0;
 }

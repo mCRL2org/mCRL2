@@ -5,12 +5,9 @@ tool diagraphica
         /libraries/utilities//spinctrlfloat
         /libraries/utilities//colorbutton
         /libraries/utilities//command_line_interfacing
+        /libraries//core
+        /libraries//lts
         /libraries//ticpp
-        /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <wx>yes
-        <opengl>yes
-        <define>NO_MCRL2_TOOL_FACILITIES
+        <wx>gl
       ;
-
-install-tools diagraphica ;

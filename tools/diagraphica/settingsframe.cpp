@@ -8,6 +8,7 @@
 //
 /// \file ./settingsframe.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "settingsframe.h"
 

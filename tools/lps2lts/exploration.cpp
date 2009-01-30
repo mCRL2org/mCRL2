@@ -13,7 +13,7 @@
 #include <time.h>
 #include <sstream>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/old_data/data_specification.h"
 #include "mcrl2/lps/data_elimination.h"
@@ -24,12 +24,17 @@
 #include "squadt_interactor.h"
 #include "exploration.h"
 #include "lts.h"
+#include "mcrl2/atermpp/vector.h"
+
 
 using namespace std;
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
+
+
+static ATerm get_repr(ATerm state);
+
 
 exploration_strategy str_to_expl_strat(const char *s)
 {
@@ -266,7 +271,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
     nsgen = nstate->getNextStates(ns,nsgen);
     while ( nsgen->next(&trans,&t,&priority) )
     {
-      if ( !priority && ATisEqual(s,t) )
+      if ( !priority && ATisEqual(s,get_repr(t)) )
       {
         break;
       }
@@ -277,7 +282,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
       delete nsgen;
       return false;
     }
-    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,ns));
+    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
     s = ns;
   }
 
@@ -630,7 +635,7 @@ static void set_bithash(unsigned long long i)
 static void remove_state_from_bithash(ATerm state)
 {
   unsigned long long i = calc_hash(state);
-  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1 << (i%(8*sizeof(unsigned long))));
+  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
 }
 
 static unsigned long long add_state(ATerm state, bool *is_new)

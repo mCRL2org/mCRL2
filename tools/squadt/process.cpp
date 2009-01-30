@@ -9,16 +9,15 @@
 /// \file process.cpp
 /// \brief Add your file description here.
 
-#ifndef PROCESS_TCC
-#define PROCESS_TCC
+#include "boost.hpp" // precompiled headers
 
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
-#include <cerrno>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>
+# undef __in_range // for STLport
 # include <workarounds.h>
 # include <tchar.h>
 #else
@@ -125,19 +124,19 @@ namespace squadt {
 
         /** \brief Constructor with listener */
         process_impl(boost::shared_ptr < process >&);
- 
+
         /** \brief Start the process by executing a command */
         void execute(const command&);
-     
+
         /** \brief Start the process by executing a command */
         void execute(const command&, process::termination_handler const& h);
-     
+
         /** \brief Returns the process id */
         pid_t get_identifier() const;
- 
+
         /** \brief Terminates the process */
         void terminate();
- 
+
         /** \brief Destructor */
         ~process_impl();
     };
@@ -149,14 +148,14 @@ namespace squadt {
     process_impl::process_impl(boost::shared_ptr < process >& p) :
         m_status(process::stopped), m_interface(p) {
     }
- 
+
     process_impl::~process_impl() {
       /* Inform listener */
       if (m_status != process::running && m_status != process::stopped) {
         terminate();
       }
     }
- 
+
     inline pid_t process_impl::get_identifier() const {
       return m_information.get_identifier();
     }
@@ -193,9 +192,9 @@ namespace squadt {
 
       if (process_handle != 0) {
         DWORD exit_code;
-    
+
         WaitForSingleObject(process_handle, INFINITE);
-    
+
         h((GetExitCodeProcess(process_handle, &exit_code) && exit_code == 0) ? process::completed : process::aborted);
       }
       else {
@@ -207,7 +206,7 @@ namespace squadt {
      * \param[in] c the command to execute
      **/
     inline void process_impl::create_process(command const& c, boost::function < void (process::status) > h) {
-      LPTSTR command = _tcsdup(TEXT(c.as_string().c_str()));
+      LPTSTR command = _tcsdup(TEXT(c.string().c_str()));
 
       int identifier  = CreateProcess(0,command,0,0,false,CREATE_NO_WINDOW,0,c.working_directory.string().c_str(),&m_information.startup,&m_information.process);
 
@@ -239,7 +238,7 @@ namespace squadt {
 #if defined(__APPLE__)
     class smaller {
       public:
-        
+
         bool operator() (ProcessSerialNumber const& l, ProcessSerialNumber const& r) const {
           return l.highLongOfPSN < r.highLongOfPSN || (l.highLongOfPSN == r.highLongOfPSN && l.lowLongOfPSN < r.lowLongOfPSN);
         }
@@ -316,7 +315,7 @@ namespace squadt {
         CFURLRef bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
             CFStringCreateWithCString(kCFAllocatorDefault, c.executable.c_str(), kCFStringEncodingASCII),
                                                                                         kCFURLPOSIXPathStyle, true);
-         
+
         CFBundleRef bundle  = CFBundleCreate(kCFAllocatorDefault, bundle_url);
 
         // Assume that bundle is unusable
@@ -345,7 +344,7 @@ namespace squadt {
                 FSRef executable_path;
 
                 if (FSPathMakeRef(reinterpret_cast < const UInt8* > ((path(c.executable) / std::string("Contents/MacOS") / local::as_string(CFURLGetString(executable_url))).string().c_str()), &executable_path, 0) == noErr) {
-                  std::string unparsed_command_line_arguments(c.as_string());
+                  std::string unparsed_command_line_arguments(c.string());
 
                   AppleEvent          initialEvent;
                   ProcessSerialNumber serial_number;
@@ -372,14 +371,14 @@ namespace squadt {
                     GetProcessPID(&serial_number, &m_information.process_identifier);
 
                     // Register termination handler
-                    if (termination_handling) { 
+                    if (termination_handling) {
                       termination_handlers[serial_number] = h;
                     }
 
                     m_status = process::running;
                   }
                 }
-             
+
                 CFRelease(executable_url);
               }
 
@@ -484,7 +483,7 @@ namespace squadt {
 
       create_process(c, boost::bind(&process_impl::termination_handler, this, m_interface, h, _1));
     }
- 
+
     process::process() {
     }
 
@@ -495,7 +494,7 @@ namespace squadt {
 
       return p;
     }
- 
+
     pid_t process::get_identifier() const {
       return (impl->get_identifier());
     }
@@ -542,6 +541,4 @@ namespace squadt {
     }
   }
 }
-
-#endif
 

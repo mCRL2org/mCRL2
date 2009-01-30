@@ -7,17 +7,21 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visualizer.h
-/// \brief Add your file description here.
+/// \brief Header file for the visualizer
 
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 #include <vector>
-#include "mediator.h"
-#include "utils.h"
-#include "lts.h"
-#include "primitivefactory.h"
 #include "settings.h"
-#include "visobjectfactory.h"
+#include "utils.h"
+
+class Mediator;
+class PrimitiveFactory;
+class LTS;
+class VisObjectFactory;
+class State;
+class Cluster;
+class Transition;
 
 class Visualizer: public Subscriber {
   private:
@@ -82,6 +86,7 @@ class Visualizer: public Subscriber {
     void forceDirectedInit();
     void forceDirectedStep();
     void resetStatePositions();
+    void exportToText(std::string filename);
 };
 
 #endif

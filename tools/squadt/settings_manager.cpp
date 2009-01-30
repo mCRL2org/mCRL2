@@ -9,6 +9,8 @@
 /// \file settings_manager.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <iostream>
 #include <exception>
 #include <cstdio>

@@ -40,8 +40,8 @@ public:
         const std::vector< int > &indices,
         const std::string &newValue );
     virtual void moveValue(
-        const int &idxFr,
-        const int &idxTo );
+        const size_t &idxFr,
+        const size_t &idxTo );
     
     // functions overridden by AttrDiscr
     virtual void configValues(
@@ -85,7 +85,7 @@ public:
         ATTR_TYPE_DISCR,
         PART_METH_EQUAL_INTERVALS,
         PART_METH_QUANTILES,
-        PART_METH_MEAN_STANDARD_DEVIATION,
+        PART_METH_MEAN_STANDARD_DEVIATION
     };
 
 protected:

@@ -8,6 +8,7 @@
 //
 /// \file ./opacitychooser.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "opacitychooser.h"
 

@@ -8,6 +8,8 @@
 //
 /// \file ./colorchooser.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "colorchooser.h"
 
 using namespace std;

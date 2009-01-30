@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 
 bool parse_fsm( std::istream &stream, mcrl2::lts::lts &lts );
 

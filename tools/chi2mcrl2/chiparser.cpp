@@ -1,23 +1,22 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison GLR parsers in C
-
-   Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+      Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -28,7 +27,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -38,7 +37,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.4.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "glr.c"
@@ -60,13 +59,79 @@
 #define yynerrs chiyynerrs
 #define yylloc  chiyylloc
 
+/* Copy the first part of user declarations.  */
+
+/* Line 172 of glr.c  */
+#line 9 "chiparser.yy"
+
+
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <iostream>
+#include "libstruct_core.h"
+#include "aterm2.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include <list>
+#include <map>
+#include <set>
+#include <utility>
+#include <cctype>
+#include <cstring>
+
+
+/*extern int yyerror(const char *s);
+extern int yylex( void );
+extern char* yytext; */
+
+using namespace mcrl2::core;
+using namespace std;
+
+//external declarations from lexer.ll
+void chiyyerror( const char *s );
+extern void chigetposition();
+int chiyylex( void );
+extern ATermAppl chi_spec_tree;
+extern ATermIndexedSet chi_parser_protect_table;
+extern int scope_lvl;
+extern map<ATerm, ATerm> var_type_map;
+extern map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
+extern set<ATermAppl> used_process_identifiers;
+//extern bool processing_models;
+
+enum { UNDEFINEDPARSING, CHANNELPARSING, VARIABLEPARSING };
+extern int parsing_mode;
+
+#define YYMAXDEPTH 160000
+
+//local declarations
+ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
+//Pre: SpecElts contains one initialisation and zero or more occurrences of
+//     sort, constructor, operation, equation, action and process
+//     specifications.
+//Ret: specification containing one sort, constructor, operation, equation,
+//     action and process specification, and one initialisation, in that order.
+
+#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+
+void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
+void UnaryTypeCheck(ATermAppl arg1, std::string type);
+bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2);
+bool is_number(std::string s);
+
+
+
+/* Line 172 of glr.c  */
+#line 127 "chiparser.cpp"
+
 
 
 #include "chiparser.hpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 
 /* Enabling verbose error messages.  */
@@ -92,13 +157,12 @@ static YYSTYPE yyval_default;
 /* Copy the second part of user declarations.  */
 
 
-/* Line 234 of glr.c.  */
-#line 97 "chiparser.cpp"
+/* Line 243 of glr.c  */
+#line 162 "chiparser.cpp"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 #ifndef YY_
 # if YYENABLE_NLS
@@ -211,8 +275,7 @@ YYID (i)
 #define YYMAXUTOK   344
 
 #define YYTRANSLATE(YYX)						\
-  ((YYX <= 0) ? YYEOF :							\
-   (unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+  ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
 /* YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX.  */
 static const unsigned char yytranslate[] =
@@ -339,22 +402,22 @@ static const short int yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   151,   151,   161,   169,   173,   180,   187,   191,   198,
-     215,   231,   239,   243,   250,   260,   267,   271,   278,   283,
-     288,   293,   297,   314,   332,   357,   361,   378,   382,   389,
-     394,   402,   453,   457,   473,   516,   563,   567,   574,   579,
-     597,   601,   608,   650,   697,   701,   708,   727,   728,   734,
-     740,   745,   750,   755,   756,   766,   772,   778,   787,   792,
-     805,   809,   810,   811,   815,   816,   823,   824,   825,   829,
-     833,   843,   864,   873,   875,   894,   896,   905,   909,   916,
-     920,   927,   942,   954,   969,   988,   992,   999,  1003,  1014,
-    1020,  1032,  1045,  1060,  1061,  1062,  1063,  1064,  1065,  1066,
-    1067,  1068,  1069,  1079,  1083,  1089,  1117,  1162,  1255,  1264,
-    1273,  1284,  1295,  1308,  1321,  1337,  1346,  1358,  1370,  1383,
-    1396,  1409,  1422,  1435,  1448,  1461,  1474,  1487,  1500,  1516,
-    1581,  1659,  1688,  1721,  1763,  1784,  1788,  1813,  1833,  1853,
-    1873,  1891,  1895,  1915,  1939,  1943,  1957,  1971,  1986,  2001,
-    2016,  2040,  2065,  2079,  2088,  2092
+       0,   163,   163,   173,   181,   185,   192,   199,   203,   210,
+     227,   243,   251,   255,   262,   272,   279,   283,   290,   295,
+     300,   305,   309,   326,   344,   369,   373,   390,   394,   401,
+     406,   414,   465,   469,   485,   528,   575,   579,   586,   591,
+     609,   613,   620,   662,   709,   713,   720,   739,   740,   746,
+     752,   757,   762,   767,   768,   778,   784,   790,   799,   804,
+     817,   821,   822,   823,   827,   828,   835,   836,   837,   841,
+     845,   855,   876,   885,   887,   906,   908,   917,   921,   928,
+     932,   939,   954,   966,   981,  1000,  1004,  1011,  1015,  1026,
+    1032,  1044,  1057,  1072,  1073,  1074,  1075,  1076,  1077,  1078,
+    1079,  1080,  1081,  1091,  1095,  1101,  1129,  1174,  1267,  1276,
+    1285,  1296,  1307,  1320,  1333,  1349,  1358,  1370,  1382,  1395,
+    1408,  1421,  1434,  1447,  1460,  1473,  1486,  1499,  1512,  1528,
+    1593,  1671,  1700,  1733,  1775,  1796,  1800,  1825,  1845,  1865,
+    1885,  1903,  1907,  1927,  1951,  1955,  1969,  1983,  1998,  2013,
+    2028,  2052,  2077,  2091,  2100,  2104
 };
 #endif
 
@@ -1892,17 +1955,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   switch (yyn)
     {
         case 2:
-#line 152 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 164 "chiparser.yy"
     { 
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
     	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
           safe_assign(((*yyvalp).appl), gsMakeChiSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl),ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
-		  spec_tree = ((*yyvalp).appl);
+		  chi_spec_tree = ((*yyvalp).appl);
 		;}
     break;
 
   case 3:
-#line 162 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 174 "chiparser.yy"
     {
       	  safe_assign(((*yyvalp).appl), gsMakeModelDef((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (6))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((6) - (6))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed Model Def \n  %T\n", ((*yyvalp).appl));
@@ -1910,21 +1977,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 4:
-#line 170 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 182 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeModelSpec( ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl) ));
       	  gsDebugMsg("parsed Model Body  \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 5:
-#line 174 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 186 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeModelSpec( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed Model Body  \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 6:
-#line 181 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 193 "chiparser.yy"
     {
           var_type_map.clear();
           chan_type_direction_map.clear();
@@ -1932,21 +2005,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 7:
-#line 188 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 200 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed Process Definition \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 8:
-#line 192 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 204 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed Process Definition \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 9:
-#line 199 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 211 "chiparser.yy"
     { 
           /**
             * Check if Identifier is not already used
@@ -1966,7 +2045,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 10:
-#line 216 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 228 "chiparser.yy"
     { 
       	  safe_assign(((*yyvalp).appl), gsMakeProcDef((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (7))].yystate.yysemantics.yysval.appl), gsMakeProcDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (7))].yystate.yysemantics.yysval.list))), (((yyGLRStackItem const *)yyvsp)[YYFILL ((7) - (7))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed proc Def\n  %T\n", ((*yyvalp).appl));
@@ -1974,7 +2055,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 11:
-#line 232 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 244 "chiparser.yy"
     {
 		  scope_lvl++;
 		  gsDebugMsg("Increase Scope to: %d\n",scope_lvl);
@@ -1982,21 +2065,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 12:
-#line 240 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 252 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeProcSpec( ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl) ));
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 13:
-#line 244 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 256 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeProcSpec( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed ProcessBody  \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 14:
-#line 251 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 263 "chiparser.yy"
     {
 		  assert(scope_lvl > 0);
 		  scope_lvl--;
@@ -2007,7 +2096,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 15:
-#line 261 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 273 "chiparser.yy"
     { 
  	  	  safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl) );
       	  gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).appl));
@@ -2015,21 +2106,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 16:
-#line 268 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 280 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 17:
-#line 272 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 284 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 18:
-#line 279 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 291 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeVarSpec( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list) ) );
 		  gsDebugMsg("LocalVariables: parsed \n %T\n", ((*yyvalp).appl));
@@ -2037,7 +2134,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 19:
-#line 284 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 296 "chiparser.yy"
     {
 		  //safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );  //<-- gsMakeVarSpec aanpassen
 		  gsDebugMsg("LocalVariables: parsed \n %T\n", ((*yyvalp).appl));
@@ -2045,14 +2144,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 21:
-#line 294 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 306 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
 		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", ((*yyvalp).list));
 		;}
     break;
 
   case 22:
-#line 298 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 310 "chiparser.yy"
     { 
           ATermList new_list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list);
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
@@ -2069,7 +2172,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 23:
-#line 315 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 327 "chiparser.yy"
     {
           //An expression cannot be of type "Void"
           ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list);
@@ -2090,7 +2195,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 24:
-#line 333 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 345 "chiparser.yy"
     {
           ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
           ATermList new_list = ATmakeList0();
@@ -2115,14 +2222,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 25:
-#line 358 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 370 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
 		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", ((*yyvalp).list));
 		;}
     break;
 
   case 26:
-#line 362 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 374 "chiparser.yy"
     {
           ATermList new_list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list));
@@ -2139,21 +2250,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 27:
-#line 379 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 391 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
 		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", ((*yyvalp).list));
 		;}
     break;
 
   case 28:
-#line 383 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 395 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
 		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", ((*yyvalp).list));
 		;}
     break;
 
   case 29:
-#line 390 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 402 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeVarDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)) ) );
 		  gsDebugMsg("FormalParameter: parsed \n %T\n", ((*yyvalp).appl));
@@ -2161,7 +2278,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 30:
-#line 395 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 407 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeChanDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)) ) );
 		  gsDebugMsg("FormalParameter: parsed \n %T\n", ((*yyvalp).appl));
@@ -2169,7 +2288,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 31:
-#line 403 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 415 "chiparser.yy"
     {
 		  /**
 			* Build TypeCheck table for declared variables
@@ -2220,14 +2341,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 32:
-#line 454 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 466 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list) );
       	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 33:
-#line 458 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 470 "chiparser.yy"
     { 
           ATermList new_list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list));
@@ -2243,7 +2368,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 34:
-#line 474 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 486 "chiparser.yy"
     {
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
 		  ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
@@ -2289,7 +2416,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 35:
-#line 517 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 529 "chiparser.yy"
     {
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
 
@@ -2336,21 +2465,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 36:
-#line 564 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 576 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 37:
-#line 568 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 580 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 38:
-#line 575 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 587 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeRecv()));
 		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", ((*yyvalp).appl));
@@ -2358,7 +2493,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 39:
-#line 580 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 592 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeSend()));
 		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", ((*yyvalp).appl));
@@ -2366,21 +2503,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 40:
-#line 598 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 610 "chiparser.yy"
     { //safe_assign($$, ATmakeList1((ATerm) $1));
       	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 41:
-#line 602 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 614 "chiparser.yy"
     { //safe_assign($$, ATinsert($1, (ATerm) $3));
       	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 42:
-#line 609 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 621 "chiparser.yy"
     {
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
           gsDebugMsg("ChannelDefinition\n");
@@ -2425,7 +2568,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 43:
-#line 651 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 663 "chiparser.yy"
     {
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
 
@@ -2472,21 +2617,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 44:
-#line 698 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 710 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 45:
-#line 702 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 714 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 46:
-#line 709 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 721 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), gsMakeNil()));
 		  gsDebugMsg("IdentifierChannelDefinition: parsed \n %T\n", ((*yyvalp).appl));
@@ -2494,7 +2645,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 48:
-#line 729 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 741 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)  );
       	  gsDebugMsg("Type: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2502,7 +2655,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 50:
-#line 741 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 753 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl( "Bool" ) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2510,7 +2665,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 51:
-#line 746 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 758 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl("Nat" ) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2518,7 +2675,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 52:
-#line 751 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 763 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl("Void" ) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2526,7 +2685,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 54:
-#line 757 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 769 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), gsMakeType( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2534,7 +2695,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 55:
-#line 767 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 779 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeListType((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2543,7 +2706,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 56:
-#line 773 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 785 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeSetType((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", ((*yyvalp).appl));
@@ -2552,7 +2717,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 57:
-#line 779 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 791 "chiparser.yy"
     { 
           ATermList list = ATinsert( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl) ); 
           safe_assign(((*yyvalp).appl), gsMakeTupleType(ATreverse(list)));
@@ -2561,7 +2728,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 58:
-#line 788 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 800 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).list), ATmakeList1( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)) );
       	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));	
@@ -2569,7 +2738,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 59:
-#line 793 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 805 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).list), ATinsert( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl) ) );
       	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).list));
@@ -2577,21 +2748,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 60:
-#line 806 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 818 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeParenthesisedStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("Statement: parsed \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 65:
-#line 817 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 829 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeParStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("ModelStatement: parsed \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 70:
-#line 834 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 846 "chiparser.yy"
     {
         // Ugly Hack :D
         safe_assign(((*yyvalp).appl), gsMakeSkipStat( gsMakeNil(), gsMakeNil(), gsMakeSkip() ));
@@ -2600,7 +2777,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 71:
-#line 844 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 856 "chiparser.yy"
     {
           ATermList ids = (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list);
           ATermList exprs = (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.list);
@@ -2623,7 +2802,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 72:
-#line 865 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 877 "chiparser.yy"
     { 
           safe_assign(((*yyvalp).appl), gsMakeSkipStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl), gsMakeSkip() ));
       	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", ((*yyvalp).appl));	
@@ -2631,13 +2812,17 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 73:
-#line 873 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 885 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeNil() );
 		;}
     break;
 
   case 74:
-#line 876 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 888 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -2656,13 +2841,17 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 75:
-#line 894 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 906 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeNil() );
 		;}
     break;
 
   case 76:
-#line 897 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 909 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl));
 		  gsErrorMsg("OptChannel not yet implemented");
 		  assert(false);
@@ -2671,35 +2860,45 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 77:
-#line 906 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 918 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 78:
-#line 910 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 922 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 79:
-#line 917 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 929 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("Expression_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 80:
-#line 921 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 933 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("Expression_csp: parsed \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 81:
-#line 928 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 940 "chiparser.yy"
     {
           //Check if $2 is properly typed
           //Check if $4 is properly typed
@@ -2716,7 +2915,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 82:
-#line 943 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 955 "chiparser.yy"
     {
           gsDebugMsg("%T",(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
  
@@ -2729,7 +2930,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 83:
-#line 955 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 967 "chiparser.yy"
     {
           //Check if $2 is properly typed
           //Check if $4 is properly typed
@@ -2746,7 +2949,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 84:
-#line 970 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 982 "chiparser.yy"
     {
           //Check if $2 is properly typed
           //Check if $4 is properly typed
@@ -2763,35 +2968,45 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 85:
-#line 989 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1001 "chiparser.yy"
     {
         safe_assign(((*yyvalp).appl), gsMakeInstantiation((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), ATmakeList0()));
       ;}
     break;
 
   case 86:
-#line 993 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1005 "chiparser.yy"
     {
         safe_assign(((*yyvalp).appl), gsMakeInstantiation((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.list))));
       ;}
     break;
 
   case 87:
-#line 1000 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1012 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeSepStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed SEP statement \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 88:
-#line 1004 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1016 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeAltStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed ALT statement \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 89:
-#line 1015 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1027 "chiparser.yy"
     { 
           gsDebugMsg("%d\n", __LINE__);
       	  safe_assign(((*yyvalp).appl), gsMakeStarStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
@@ -2800,7 +3015,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 90:
-#line 1021 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1033 "chiparser.yy"
     {
           gsDebugMsg("%d\n", __LINE__);
           gsDebugMsg("%T\n",(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
@@ -2812,14 +3029,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 91:
-#line 1033 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1045 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeDeltaStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeDelta()));
       	  gsDebugMsg("parsed deadlock statement \n  %T\n", ((*yyvalp).appl));	
 		;}
     break;
 
   case 92:
-#line 1046 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1058 "chiparser.yy"
     { 
 			/**
 			  * Type Checking inherhit
@@ -2836,21 +3057,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 103:
-#line 1080 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1092 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed expression-element \n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 104:
-#line 1084 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1096 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       	  gsDebugMsg("parsed expression-element\n  %T\n", ((*yyvalp).list));	
 		;}
     break;
 
   case 105:
-#line 1090 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1102 "chiparser.yy"
     {
 		  /**  
 		    * Lookup Identifier Type
@@ -2878,7 +3105,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 106:
-#line 1118 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1130 "chiparser.yy"
     {
 		  /**  
 		    * Lookup Identifier Type
@@ -2926,7 +3155,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 107:
-#line 1164 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1176 "chiparser.yy"
     {
 		  /**  
 		    * Lookup Identifier Type
@@ -3014,7 +3245,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 108:
-#line 1256 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1268 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -3026,7 +3259,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 109:
-#line 1265 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1277 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -3038,7 +3273,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 110:
-#line 1274 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1286 "chiparser.yy"
     { 
             UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl),1), "Bool");
 
@@ -3052,7 +3289,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 111:
-#line 1285 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1297 "chiparser.yy"
     { 
             UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl),1), "Bool");
 
@@ -3066,7 +3305,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 112:
-#line 1296 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1308 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Bool");
 
@@ -3082,7 +3323,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 113:
-#line 1309 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1321 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Bool");
 
@@ -3098,7 +3341,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 114:
-#line 1322 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1334 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Bool");
 
@@ -3114,7 +3359,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 115:
-#line 1338 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1350 "chiparser.yy"
     { 
  	  		safe_assign(((*yyvalp).appl), 
 				gsMakeExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 
@@ -3126,7 +3373,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 116:
-#line 1347 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1359 "chiparser.yy"
     { 
             UnaryTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3141,7 +3390,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 117:
-#line 1359 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1371 "chiparser.yy"
     { 
             UnaryTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3156,7 +3407,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 118:
-#line 1371 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1383 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3172,7 +3425,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 119:
-#line 1384 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1396 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3188,7 +3443,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 120:
-#line 1397 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1409 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3204,7 +3461,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 121:
-#line 1410 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1422 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3220,7 +3479,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 122:
-#line 1423 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1435 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3236,7 +3497,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 123:
-#line 1436 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1448 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3252,7 +3515,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 124:
-#line 1449 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1461 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3268,7 +3533,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 125:
-#line 1462 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1474 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3284,7 +3551,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 126:
-#line 1475 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1487 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3300,7 +3569,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 127:
-#line 1488 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1500 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3316,7 +3587,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 128:
-#line 1501 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1513 "chiparser.yy"
     { 
             BinTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
@@ -3332,7 +3605,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 129:
-#line 1517 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1529 "chiparser.yy"
     { 
        gsDebugMsg("Expression 1: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
        gsDebugMsg("Expression 2: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl));
@@ -3397,7 +3672,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 130:
-#line 1582 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1594 "chiparser.yy"
     { 
        gsDebugMsg("Expression 1: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
        gsDebugMsg("Expression 2: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl));
@@ -3475,7 +3752,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 131:
-#line 1660 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1672 "chiparser.yy"
     {
 			/**
 			  * Type Checking
@@ -3507,7 +3786,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 132:
-#line 1689 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1701 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -3538,7 +3819,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 133:
-#line 1722 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1734 "chiparser.yy"
     {
        bool processed = false;
        if (strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1))), "SetType") == 0 )
@@ -3580,7 +3863,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 134:
-#line 1764 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1776 "chiparser.yy"
     {
       	  gsDebugMsg("R:%d",__LINE__);
           ATermList tuple_type = ATmakeList0(); 
@@ -3601,14 +3886,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 135:
-#line 1785 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1797 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeSetLiteral( ATmakeList0(), gsMakeSetType(gsMakeType(gsMakeNil()))));
       ;}
     break;
 
   case 136:
-#line 1789 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1801 "chiparser.yy"
     {
       	  gsDebugMsg("R:%d",__LINE__);
           ATerm type; 
@@ -3636,7 +3925,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 137:
-#line 1814 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1826 "chiparser.yy"
     { 
 	   	  /**
 		    * Type Checking
@@ -3659,7 +3950,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 138:
-#line 1834 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1846 "chiparser.yy"
     { 
 	   	  /**
 		    * Type Checking
@@ -3682,7 +3975,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 139:
-#line 1854 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1866 "chiparser.yy"
     { 
 	   	  /**
 		    * Type Checking
@@ -3705,7 +4000,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 140:
-#line 1874 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1886 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3723,14 +4020,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 141:
-#line 1892 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1904 "chiparser.yy"
     {
         safe_assign(((*yyvalp).appl), ((*yyvalp).appl));
       ;}
     break;
 
   case 142:
-#line 1896 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1908 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -3753,7 +4054,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 143:
-#line 1916 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1928 "chiparser.yy"
     { 
 			/**
 			  * Type Checking
@@ -3776,7 +4079,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 145:
-#line 1944 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1956 "chiparser.yy"
     {
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
@@ -3793,7 +4098,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 146:
-#line 1958 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1970 "chiparser.yy"
     {
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
@@ -3810,7 +4117,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 147:
-#line 1972 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1984 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3828,7 +4137,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 148:
-#line 1987 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 1999 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3846,7 +4157,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 149:
-#line 2002 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2014 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3864,7 +4177,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 150:
-#line 2017 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2029 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3891,7 +4206,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 151:
-#line 2041 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2053 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3918,7 +4235,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 152:
-#line 2066 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2078 "chiparser.yy"
     {
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
@@ -3935,7 +4254,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 153:
-#line 2080 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2092 "chiparser.yy"
     {
         chigetposition();
         gsErrorMsg("%T is not supported", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl));
@@ -3944,14 +4265,18 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 154:
-#line 2089 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2101 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeListLiteral( ATmakeList0(), gsMakeListType(gsMakeType(gsMakeNil()))));
       ;}
     break;
 
   case 155:
-#line 2093 "chiparser.yy"
+
+/* Line 936 of glr.c  */
+#line 2105 "chiparser.yy"
     {
       	  gsDebugMsg("Entering ListLiteral\n");
           ATerm type; 
@@ -3979,8 +4304,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
 
-/* Line 930 of glr.c.  */
-#line 3984 "chiparser.cpp"
+
+/* Line 936 of glr.c  */
+#line 4310 "chiparser.cpp"
       default: break;
     }
 
@@ -4503,11 +4829,11 @@ yy_reduce_print (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      fprintf (stderr, "   $%d = ", yyi + 1);
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(((yyGLRStackItem const *)yyvsp)[YYFILL ((yyi + 1) - (yynrhs))].yystate.yysemantics.yysval)
 		       		       );
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
 }
 #endif
@@ -5098,11 +5424,19 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
 	    {
 	      YYDPRINTF ((stderr, "Reading a token: "));
 	      yychar = YYLEX;
+	    }
+
+	  if (yychar <= YYEOF)
+	    {
+	      yychar = yytoken = YYEOF;
+	      YYDPRINTF ((stderr, "Now at end of input.\n"));
+	    }
+	  else
+	    {
 	      yytoken = YYTRANSLATE (yychar);
 	      YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
 	    }
-	  else
-	    yytoken = YYTRANSLATE (yychar);
+
 	  yygetLRActions (yystate, yytoken, &yyaction, &yyconflicts);
 
 	  while (*yyconflicts != 0)
@@ -5238,7 +5572,7 @@ yyreportSyntaxError (yyGLRStack* yystackp)
 
 /* Recover from a syntax error on *YYSTACKP, assuming that *YYSTACKP->YYTOKENP,
    yylval, and yylloc are the syntactic category, semantic value, and location
-   of the look-ahead.  */
+   of the lookahead.  */
 /*ARGSUSED*/ static void
 yyrecoverSyntaxError (yyGLRStack* yystackp)
 {
@@ -5261,8 +5595,16 @@ yyrecoverSyntaxError (yyGLRStack* yystackp)
 	  }
 	YYDPRINTF ((stderr, "Reading a token: "));
 	yychar = YYLEX;
-	yytoken = YYTRANSLATE (yychar);
-	YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
+	if (yychar <= YYEOF)
+	  {
+	    yychar = yytoken = YYEOF;
+	    YYDPRINTF ((stderr, "Now at end of input.\n"));
+	  }
+	else
+	  {
+	    yytoken = YYTRANSLATE (yychar);
+	    YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
+	  }
 	yyj = yypact[yystackp->yytops.yystates[0]->yylrState];
 	if (yyis_pact_ninf (yyj))
 	  return;
@@ -5310,7 +5652,8 @@ yyrecoverSyntaxError (yyGLRStack* yystackp)
 	    }
 	}
 
-      yydestroyGLRState ("Error: popping", yys);
+      if (yys->yypred != NULL)
+	yydestroyGLRState ("Error: popping", yys);
       yystackp->yytops.yystates[0] = yys->yypred;
       yystackp->yynextFree -= 1;
       yystackp->yyspaceLeft += 1;
@@ -5400,19 +5743,26 @@ yyparse (void)
 		{
 		  YYDPRINTF ((stderr, "Reading a token: "));
 		  yychar = YYLEX;
+		}
+
+	      if (yychar <= YYEOF)
+		{
+		  yychar = yytoken = YYEOF;
+		  YYDPRINTF ((stderr, "Now at end of input.\n"));
+		}
+	      else
+		{
 		  yytoken = YYTRANSLATE (yychar);
 		  YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
 		}
-	      else
-		yytoken = YYTRANSLATE (yychar);
+
 	      yygetLRActions (yystate, yytoken, &yyaction, &yyconflicts);
 	      if (*yyconflicts != 0)
 		break;
 	      if (yyisShiftAction (yyaction))
 		{
 		  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-		  if (yychar != YYEOF)
-		    yychar = YYEMPTY;
+		  yychar = YYEMPTY;
 		  yyposn += 1;
 		  yyglrShift (&yystack, 0, yyaction, yyposn, &yylval, &yylloc);
 		  if (0 < yystack.yyerrState)
@@ -5528,7 +5878,7 @@ yyparse (void)
   goto yyreturn;
 
  yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
+  if (yychar != YYEMPTY)
     yydestruct ("Cleanup: discarding lookahead",
 		YYTRANSLATE (yychar),
 		&yylval);
@@ -5549,7 +5899,8 @@ yyparse (void)
 		while (yystates[yyk])
 		  {
 		    yyGLRState *yys = yystates[yyk];
-		    yydestroyGLRState ("Cleanup: popping", yys);
+		    if (yys->yypred != NULL)
+		      yydestroyGLRState ("Cleanup: popping", yys);
 		    yystates[yyk] = yys->yypred;
 		    yystack.yynextFree -= 1;
 		    yystack.yyspaceLeft += 1;
@@ -5565,7 +5916,7 @@ yyparse (void)
 }
 
 /* DEBUGGING ONLY */
-#ifdef YYDEBUG
+#if YYDEBUG
 static void yypstack (yyGLRStack* yystackp, size_t yyk)
   __attribute__ ((__unused__));
 static void yypdumpstack (yyGLRStack* yystackp) __attribute__ ((__unused__));
@@ -5576,19 +5927,20 @@ yy_yypstack (yyGLRState* yys)
   if (yys->yypred)
     {
       yy_yypstack (yys->yypred);
-      fprintf (stderr, " -> ");
+      YYFPRINTF (stderr, " -> ");
     }
-  fprintf (stderr, "%d@%lu", yys->yylrState, (unsigned long int) yys->yyposn);
+  YYFPRINTF (stderr, "%d@%lu", yys->yylrState,
+             (unsigned long int) yys->yyposn);
 }
 
 static void
 yypstates (yyGLRState* yyst)
 {
   if (yyst == NULL)
-    fprintf (stderr, "<null>");
+    YYFPRINTF (stderr, "<null>");
   else
     yy_yypstack (yyst);
-  fprintf (stderr, "\n");
+  YYFPRINTF (stderr, "\n");
 }
 
 static void
@@ -5608,36 +5960,40 @@ yypdumpstack (yyGLRStack* yystackp)
   size_t yyi;
   for (yyp = yystackp->yyitems; yyp < yystackp->yynextFree; yyp += 1)
     {
-      fprintf (stderr, "%3lu. ", (unsigned long int) (yyp - yystackp->yyitems));
+      YYFPRINTF (stderr, "%3lu. ",
+                 (unsigned long int) (yyp - yystackp->yyitems));
       if (*(yybool *) yyp)
 	{
-	  fprintf (stderr, "Res: %d, LR State: %d, posn: %lu, pred: %ld",
-		   yyp->yystate.yyresolved, yyp->yystate.yylrState,
-		   (unsigned long int) yyp->yystate.yyposn,
-		   (long int) YYINDEX (yyp->yystate.yypred));
+	  YYFPRINTF (stderr, "Res: %d, LR State: %d, posn: %lu, pred: %ld",
+		     yyp->yystate.yyresolved, yyp->yystate.yylrState,
+		     (unsigned long int) yyp->yystate.yyposn,
+		     (long int) YYINDEX (yyp->yystate.yypred));
 	  if (! yyp->yystate.yyresolved)
-	    fprintf (stderr, ", firstVal: %ld",
-		     (long int) YYINDEX (yyp->yystate.yysemantics.yyfirstVal));
+	    YYFPRINTF (stderr, ", firstVal: %ld",
+		       (long int) YYINDEX (yyp->yystate
+                                             .yysemantics.yyfirstVal));
 	}
       else
 	{
-	  fprintf (stderr, "Option. rule: %d, state: %ld, next: %ld",
-		   yyp->yyoption.yyrule - 1,
-		   (long int) YYINDEX (yyp->yyoption.yystate),
-		   (long int) YYINDEX (yyp->yyoption.yynext));
+	  YYFPRINTF (stderr, "Option. rule: %d, state: %ld, next: %ld",
+		     yyp->yyoption.yyrule - 1,
+		     (long int) YYINDEX (yyp->yyoption.yystate),
+		     (long int) YYINDEX (yyp->yyoption.yynext));
 	}
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
-  fprintf (stderr, "Tops:");
+  YYFPRINTF (stderr, "Tops:");
   for (yyi = 0; yyi < yystackp->yytops.yysize; yyi += 1)
-    fprintf (stderr, "%lu: %ld; ", (unsigned long int) yyi,
-	     (long int) YYINDEX (yystackp->yytops.yystates[yyi]));
-  fprintf (stderr, "\n");
+    YYFPRINTF (stderr, "%lu: %ld; ", (unsigned long int) yyi,
+	       (long int) YYINDEX (yystackp->yytops.yystates[yyi]));
+  YYFPRINTF (stderr, "\n");
 }
 #endif
 
 
-#line 2144 "chiparser.yy"
+
+/* Line 2634 of glr.c  */
+#line 2156 "chiparser.yy"
 
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)

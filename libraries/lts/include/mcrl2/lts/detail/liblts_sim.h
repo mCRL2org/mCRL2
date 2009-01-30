@@ -12,7 +12,7 @@
 #ifndef LIBLTS_SIM_H
 #define LIBLTS_SIM_H
 #include <vector>
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/sim_hashtable.h"
 
 typedef unsigned int uint;

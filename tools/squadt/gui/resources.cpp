@@ -9,6 +9,8 @@
 /// \file gui/resources.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/wx.h>
 #include <wx/imaglist.h>
 

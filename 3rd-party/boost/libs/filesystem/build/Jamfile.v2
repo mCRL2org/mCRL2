@@ -13,6 +13,8 @@ project boost/filesystem
     : usage-requirements # pass these requirement to dependents (i.e. users)
       <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
       <link>static:<define>BOOST_FILESYSTEM_STATIC_LINK=1
+    : requirements
+      <include>../../..
     ;
 
 SOURCES =

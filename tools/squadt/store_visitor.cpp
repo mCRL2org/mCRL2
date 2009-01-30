@@ -9,14 +9,17 @@
 /// \file store_visitor.cpp
 /// \brief Add your file description here.
 
-#include "visitors.hpp"
+#include "wx.hpp" // precompiled headers
 
 #include <fstream>
 #include <exception>
 
+#include <boost/thread.hpp> // workaround, because boost::thread includes errno.h
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+
+#include "visitors.hpp"
 
 #include "build_system.hpp"
 #include "settings_manager.hpp"
@@ -157,11 +160,11 @@ namespace utility {
     out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                     << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
                     << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
- 
+
     BOOST_FOREACH(tool_manager::tool_list::value_type t, tm.get_tools()) {
       do_visit(*t);
     }
- 
+
     /* Write footer */
     out << "</tool-catalog>\n";
   }

@@ -8,6 +8,8 @@
 //
 /// \file ./arcdiagram.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include <limits>
 #include "arcdiagram.h"
 #include <iostream>

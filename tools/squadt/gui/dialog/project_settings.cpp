@@ -9,6 +9,8 @@
 /// \file gui/dialog/project_settings.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <boost/filesystem/operations.hpp>
 
 #include "gui/dialog/project_settings.hpp"
@@ -45,7 +47,7 @@ namespace squadt {
        * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
-        
+
         try {
           boost::shared_ptr < project_manager > m = project_manager::create(std::string(p.fn_str()), false); 
 
@@ -115,7 +117,7 @@ namespace squadt {
         screen0->Add(open_project_instead);
 
         screen0->Show(open_project_instead, false);
-         
+
         /* Add sizers to the main sizer */
         s->AddSpacer(10);
         s->Add(screen0, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
@@ -135,7 +137,7 @@ namespace squadt {
             break;
           case cmID_BROWSE: {
             wxDirDialog dialog(0, wxT("Select a directory"), default_directory);
-           
+
             if (dialog.ShowModal() == wxID_OK) {
               location->SetValue(dialog.GetPath());
             }
@@ -146,27 +148,32 @@ namespace squadt {
             break;
           default: { /* wxID_OK */
               using namespace boost::filesystem;
-             
-              path target(std::string(location->GetValue().fn_str()));
-             
-              if (exists(target)) {
-                if (is_directory(target)) {
-                  if (directory_iterator(target) != directory_iterator()) {
-                    if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
-                                          wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+
+              try {
+                path target(std::string(location->GetValue().fn_str()));
+
+                if (exists(target)) {
+                  if (is_directory(target)) {
+                    if (directory_iterator(target) != directory_iterator()) {
+                      if (wxMessageDialog(0, wxT("Convert the directory to project store and import any other files it contains."),
+                                            wxT("Warning: directory exists"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                        EndModal(1);
+                      }
+                    }
+                    else {
                       EndModal(1);
                     }
                   }
                   else {
-                    EndModal(1);
+                    wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"), wxT("Error"), wxOK).ShowModal();
                   }
                 }
                 else {
-                  wxMessageDialog(0, wxT("Unable to create project store, a file is in the way.`"),wxT("Error"), wxOK).ShowModal();
+                  EndModal(1);
                 }
               }
-              else {
-                EndModal(1);
+              catch (...) {
+                wxMessageDialog(0, wxT("Invalid file or directory.`"), wxT("Error"), wxOK).ShowModal();
               }
             } break;
         }
@@ -177,19 +184,23 @@ namespace squadt {
 
         button_accept->Enable(false);
 
-        if (!location->GetValue().IsEmpty()) {
-          using namespace boost::filesystem;
+        try {
+          if (!location->GetValue().IsEmpty()) {
+            using namespace boost::filesystem;
 
-          path target(std::string(location->GetValue().fn_str()));
+            path target(std::string(location->GetValue().fn_str()));
 
-          if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
-            /* Directory contains a directory with the name of this project */
-            screen0->Show(open_project_instead, true);
-          } else {
-            button_accept->Enable(true);
+            if (exists(target) && is_directory(target) && dialog::project::is_project_directory(location->GetValue())) {
+              /* Directory contains a directory with the name of this project */
+              screen0->Show(open_project_instead, true);
+            } else {
+              button_accept->Enable(true);
+            }
           }
         }
-         
+        catch (...) {
+        }
+
         screen0->Layout();
       }
 
@@ -399,7 +410,7 @@ namespace squadt {
             break;
           default: { /* wxID_OK */
               wxSizer* sizer = main_panel->GetSizer();
-             
+
               using namespace boost::filesystem;
 
               try {

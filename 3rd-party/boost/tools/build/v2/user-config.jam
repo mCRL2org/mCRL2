@@ -102,6 +102,3 @@ else {
 
   import_user_config ;
 }
-
-using xsltproc : xsltproc ;
-using doxygen : doxygen ;

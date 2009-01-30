@@ -8,6 +8,7 @@
 //
 /// \file ./edge.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "edge.h"
 

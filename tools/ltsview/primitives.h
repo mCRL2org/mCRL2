@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitives.h
-/// \brief Add your file description here.
+/// \brief Header file for primitive classes
 
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
@@ -19,6 +19,7 @@ extern "C" {
 #else
 # if defined(_WIN32_) || defined(_MSC_VER)
 #  include <windows.h>
+#  undef __in_range // For STLport
 # endif
 # include <GL/gl.h>
 # include <GL/glu.h>

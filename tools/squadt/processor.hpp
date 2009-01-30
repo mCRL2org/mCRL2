@@ -20,7 +20,6 @@
 #include <boost/function.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/md5.hpp>
 
 #include "task_monitor.hpp"
 #include "tool.hpp"
@@ -50,7 +49,7 @@ namespace squadt {
 
     template < typename R, typename S >
     friend class utility::visitor;
- 
+
     public:
 
       class monitor;
@@ -138,17 +137,17 @@ namespace squadt {
     private:
 
       /** \brief Basic constructor */
-      processor();
+      inline processor() { }
 
     public:
 
       /** \brief Factory method for creating instances of this object */
       static boost::shared_ptr < processor > create(boost::weak_ptr < project_manager > const&);
- 
+
       /** \brief Factory method for creating instances of this object */
       static boost::shared_ptr < processor > create(boost::weak_ptr < project_manager > const&,
                         boost::shared_ptr < const tool >, boost::shared_ptr < const tool::input_configuration >);
- 
+
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
 
@@ -160,13 +159,13 @@ namespace squadt {
 
       /** \brief Start tool configuration */
       void configure(boost::shared_ptr< const tool::input_configuration >, const boost::filesystem::path&, std::string const& = "");
- 
+
       /** \brief Start tool configuration */
       void configure(std::string const& = "");
 
       /** \brief Start tool reconfiguration */
       void reconfigure(std::string const& = "");
- 
+
       /** \brief Start processing: generate outputs from inputs */
       void run(bool b = false);
 
@@ -175,7 +174,7 @@ namespace squadt {
 
       /** \brief Start processing if not all outputs are up to date */
       void update(bool b = false);
- 
+
       /** \brief Start updating and afterward execute a function */
       void update(boost::function < void () > h, bool b = false);
 
@@ -202,10 +201,10 @@ namespace squadt {
 
       /** \brief Get input objects */
       boost::iterator_range < input_object_iterator > get_input_iterators() const;
- 
+
       /** \brief Get output objects */
       boost::iterator_range < output_object_iterator > get_output_iterators() const;
- 
+
       /** \brief Add (or modify) an input object */
       void register_input(tipi::configuration::parameter::identifier const&,
                         boost::shared_ptr < object_descriptor > const&);
@@ -213,33 +212,36 @@ namespace squadt {
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
       const boost::shared_ptr < object_descriptor > find_input(
                         tipi::configuration::parameter::identifier const&) const;
- 
+
       /** \brief Find an object descriptor for a given pointer to an object (by id) */
       const boost::shared_ptr < object_descriptor > find_output(
                         tipi::configuration::parameter::identifier const&) const;
- 
+
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void relocate_output(object_descriptor&, std::string const&);
- 
+
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void relocate_input(object_descriptor&, std::string const&);
- 
+
+      /** \brief Find an object descriptor for a given name and change format if it exists */
+      void change_format(object_descriptor&, build_system::storage_format const&);
+
       /** \brief Add an output object */
       void register_output(tipi::configuration::parameter::identifier const&,
                 const build_system::storage_format&, const std::string&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_nonexistent);
- 
+
       /** \brief Add an output object */
       void replace_output(tipi::configuration::parameter::identifier const&,
                 boost::shared_ptr < object_descriptor >, tipi::configuration::object const&,
                 object_descriptor::status_type const& = object_descriptor::reproducible_up_to_date);
 
       /** \brief The number of input objects of this processor */
-      const size_t number_of_inputs() const;
- 
+      size_t number_of_inputs() const;
+
       /** \brief The number output objects of this processor */
-      const size_t number_of_outputs() const;
- 
+      size_t number_of_outputs() const;
+
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
 
@@ -264,10 +266,10 @@ namespace squadt {
       typedef boost::function < void () >                                                     status_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
-      typedef boost::function < void (boost::shared_ptr < tipi::tool_display >) >     display_layout_callback_function;
+      typedef boost::function < void (boost::shared_ptr < tipi::tool_display >) >             display_layout_callback_function;
 
       /** \brief Type for functions that is used to handle incoming (G)UI state changes */
-      typedef boost::function < void (std::vector< tipi::layout::element const* > const&) > display_update_callback_function;
+      typedef boost::function < void (std::vector< tipi::layout::element const* > const&) >   display_update_callback_function;
 
       /** \brief Type for functions that is used to handle incoming layout state changes */
       typedef boost::function < void (boost::shared_ptr < tipi::report >) >                   status_message_callback_function;
@@ -278,23 +280,17 @@ namespace squadt {
       boost::weak_ptr < processor > owner;
 
     private:
- 
+
       /** \brief Actualisation function for process state changes */
       status_callback_function         status_change_handler;
- 
+
     private:
- 
+
       /** \brief Handler function that is called when an associated process changes state */
       void signal_change(const execution::process::status);
 
       /** \brief Handler function that is called when an associated process changes state */
       void signal_change(boost::shared_ptr < execution::process >, const execution::process::status);
-
-      /** \brief Helper function for communication with a tool, starts a new thread with tool_configuration() */
-      void start_tool_configuration(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const& c);
-
-      /** \brief Helper function for communication with a tool, starts a new thread with tool_operation() */
-      void start_tool_operation(boost::shared_ptr < processor > const&, boost::shared_ptr < tipi::configuration > const&);
 
       /** \brief Actual tool configuration operation */
       void tool_configuration(boost::shared_ptr < processor >, boost::shared_ptr < tipi::configuration >);
@@ -303,7 +299,7 @@ namespace squadt {
       void tool_operation(boost::shared_ptr < processor >, boost::shared_ptr < tipi::configuration > const&);
 
     public:
- 
+
       /** \brief Constructor with a callback handler */
       monitor(boost::shared_ptr < processor >);
 

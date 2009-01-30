@@ -14,8 +14,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include "tipi/mime_type.hpp"
 #include "tipi/uri.hpp"
 
@@ -62,22 +60,22 @@ namespace tipi {
     public:
 
       /** \brief Returns the object storage format */
-      inline mime_type get_mime_type() const {
+      inline mime_type type() const {
         return (m_mime_type);
       }
 
       /** \brief Sets the object storage format */
-      inline void set_mime_type(mime_type const& m) {
+      inline void type(mime_type const& m) {
         m_mime_type = m;
       }
 
       /** \brief Returns the object location */
-      inline uri get_location() const {
+      inline uri location() const {
         return (m_location);
       }
 
       /** \brief Sets the object location */
-      inline void set_location(uri const& l) {
+      inline void location(uri const& l) {
         m_location = l;
       }
   };

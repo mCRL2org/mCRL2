@@ -1,7 +1,23 @@
-#include "simdialog.h"
+// Author(s): Bas Ploeger and Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file simdialog.cpp
+/// \brief Source file for simulation dialog class
+
+#include "wx.hpp" // precompiled headers
+
+#include "simdialog.h"
 #include <vector>
+#include <wx/listctrl.h>
+#include "ids.h"
+#include "mediator.h"
+#include "state.h"
+#include "transition.h"
 
 using namespace IDs;
 using namespace std;
@@ -213,10 +229,8 @@ void SimDialog::refresh() {
         wxString stateChange = wxT("");
         if ((nextState != NULL) && (currState != NULL)) {
           for(int j = 0; j < mediator->getNumberOfParams(); ++j) {
-            string nextVal = mediator->getParValue(j, 
-                                       nextState->getParameterValue(j));
-            if (mediator->getParValue(j, currState->getParameterValue(j)) !=
-                nextVal) {
+            string nextVal = mediator->getParValue(nextState,j);
+            if (mediator->getParValue(currState,j) != nextVal) {
               stateChange += wxString(mediator->getParName(j).c_str(), 
                                wxConvLocal) +  
                             wxT(":=") + 

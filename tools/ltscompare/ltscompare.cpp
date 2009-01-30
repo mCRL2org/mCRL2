@@ -14,10 +14,11 @@
 #include <string>
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 using namespace std;
 using namespace mcrl2::lts;
@@ -35,7 +36,7 @@ static const char *equivalent_string(lts_equivalence eq)
     case lts_eq_sim:
       return "strongly simulation equivalent";
     case lts_eq_trace:
-      return "trace equivalent";
+      return "strongly trace equivalent";
     case lts_eq_weak_trace:
       return "weak trace equivalent";
     default:
@@ -49,9 +50,29 @@ static const char *preorder_string(lts_preorder pre)
   {
     case lts_pre_sim:
       return "strongly simulated by";
+    case lts_pre_trace:
+      return "strongly trace-included in";
+    case lts_pre_weak_trace:
+      return "weakly trace-included in";
     default:
       return "included in";
   }
+}
+
+static const std::set<lts_equivalence> &initialise_allowed_eqs()
+{
+  static std::set<lts_equivalence> s;
+  s.insert(lts_eq_bisim);
+  s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_sim);
+  s.insert(lts_eq_trace);
+  s.insert(lts_eq_weak_trace);
+  return s;
+}
+static const std::set<lts_equivalence> &allowed_eqs()
+{
+  static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
+  return s;
 }
 
 struct t_tool_options {
@@ -64,7 +85,7 @@ struct t_tool_options {
   lts_eq_options  eq_opts;
 };
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE1] INFILE2\n",
     "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some equivalence or preorder. "
     "If INFILE1 is not supplied, stdin is used.\n"
@@ -72,13 +93,7 @@ t_tool_options parse_command_line(int ac, char** av) {
     "The input formats are determined by the contents of INFILE1 and INFILE2. "
     "Options --in1 and --in2 can be used to force the input format of INFILE1 and INFILE2, respectively. "
     "The supported formats are:\n"
-    "  'aut' for the Aldebaran format (CADP),\n"
-#ifdef MCRL2_BCG
-    "  'bcg' for the Binary Coded Graph format (CADP),\n"
-#endif
-    "  'fsm' for the Finite State Machine format,\n"
-    "  'mcrl' for the mCRL SVC format, or\n"
-    "  'mcrl2' for the mCRL2 SVC format (default)"
+    +lts::supported_lts_formats_text()
   );
 
   clinterface.
@@ -88,20 +103,12 @@ t_tool_options parse_command_line(int ac, char** av) {
       "use FORMAT as the format for INFILE2", 'j').
     add_option("equivalence", make_mandatory_argument("NAME"),
       "use equivalence NAME:\n"
-      "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_bisim) + " (default), or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
-            + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_trace) + "' for "
-            + lts::name_of_equivalence(lts_eq_trace) + ", or\n"
-      "  '" + lts::string_for_equivalence(lts_eq_weak_trace) + "' for " 
-            + lts::name_of_equivalence(lts_eq_weak_trace) + "\n"
+      +lts::supported_lts_equivalences_text(allowed_eqs())+"\n"
       "(not allowed in combination with -p/--preorder)"
       , 'e').
     add_option("preorder", make_mandatory_argument("NAME"),
       "use preorder NAME:\n"
-      "  '" + lts::string_for_preorder(lts_pre_sim) + "' for "
-            + lts::name_of_preorder(lts_pre_sim) + "\n"
+      +lts::supported_lts_preorders_text()+"\n"
       "(not allowed in combination with -e/--equivalence)"
       , 'p').
     add_option("tau", make_mandatory_argument("ACTNAMES"),
@@ -111,106 +118,107 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
-
-  if (parser.options.count("equivalence") > 1)
-  {
-    parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
-  }
+  if (parser.continue_execution()) {
+    if (parser.options.count("equivalence") > 1)
+    {
+      parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
+    }
   
-  if (parser.options.count("preorder") > 1)
-  {
-    parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
-  }
-
-  if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
-  {
-    parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
-  }
-
-  tool_options.equivalence = lts_eq_bisim;
-
-  if (parser.options.count("equivalence")) {
-
-    tool_options.equivalence = lts::parse_equivalence(
-        parser.option_argument("equivalence"));
-    
-    if (tool_options.equivalence != lts_eq_bisim &&
-        tool_options.equivalence != lts_eq_branching_bisim &&
-        tool_options.equivalence != lts_eq_sim &&
-        tool_options.equivalence != lts_eq_trace &&
-        tool_options.equivalence != lts_eq_weak_trace)
+    if (parser.options.count("preorder") > 1)
     {
-      parser.error("option -e/--equivalence has illegal argument '" + 
-          parser.option_argument("equivalence") + "'");
+      parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
     }
-  }
 
-  tool_options.preorder = lts_pre_none;
-
-  if (parser.options.count("preorder")) {
-
-    tool_options.preorder = lts::parse_preorder(
-        parser.option_argument("preorder"));
-    
-    if (tool_options.preorder != lts_pre_sim)
+    if (parser.options.count("equivalence") + parser.options.count("preorder") > 1)
     {
-      parser.error("option -p/--preorder has illegal argument '" + 
-          parser.option_argument("preorder") + "'");
+      parser.error("options -e/--equivalence and -p/--preorder cannot be used simultaneously");
+    }
+
+    if (parser.options.count("equivalence") + parser.options.count("preorder") < 1)
+    {
+      parser.error("one of the options -e/--equivalence and -p/--preorder must be used");
+    }
+
+    tool_options.equivalence = lts_eq_none;
+
+    if (parser.options.count("equivalence")) {
+
+      tool_options.equivalence = lts::parse_equivalence(
+          parser.option_argument("equivalence"));
+    
+      if ( allowed_eqs().count(tool_options.equivalence) == 0 )
+      {
+        parser.error("option -e/--equivalence has illegal argument '" + 
+            parser.option_argument("equivalence") + "'");
+      }
+    }
+
+    tool_options.preorder = lts_pre_none;
+
+    if (parser.options.count("preorder")) {
+
+      tool_options.preorder = lts::parse_preorder(
+          parser.option_argument("preorder"));
+    
+      if (tool_options.preorder == lts_pre_none)
+      {
+        parser.error("option -p/--preorder has illegal argument '" + 
+            parser.option_argument("preorder") + "'");
+      }
+    }
+
+    if (parser.options.count("tau")) {
+      lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+    }
+
+    if (parser.arguments.size() == 0) {
+      parser.error("need at least one file argument");
+    }
+    else if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.name_for_first  = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.name_for_second  = parser.arguments[1];
+      }
+    }
+
+    if (parser.options.count("in1")) {
+      if (1 < parser.options.count("in1")) {
+        std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
+      }
+
+      tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
+
+      if (tool_options.format_for_first == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("in1") <<
+                     "' is not recognised; option ignored" << std::endl;
+      }
+    }
+    else if (!tool_options.name_for_first.empty()) {
+      tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
+    }
+    if (parser.options.count("in2")) {
+      if (1 < parser.options.count("in2")) {
+        std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
+      }
+
+      tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
+
+      if (tool_options.format_for_second == lts_none) {
+        std::cerr << "warning: format '" << parser.option_argument("in2") <<
+                     "' is not recognised; option ignored" << std::endl;
+      }
+    }
+    else {
+      tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
     }
   }
 
-  if (parser.options.count("tau")) {
-    lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
-  }
-
-  if (parser.arguments.size() == 0) {
-    parser.error("need at least one file argument");
-  }
-  else if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.name_for_first  = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.name_for_second  = parser.arguments[1];
-    }
-  }
-
-  if (parser.options.count("in1")) {
-    if (1 < parser.options.count("in1")) {
-      std::cerr << "warning: multiple input formats specified for first LTS; can only use one\n";
-    }
-
-    tool_options.format_for_first = lts::parse_format(parser.option_argument("in1"));
-
-    if (tool_options.format_for_first == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("in1") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-  else if (!tool_options.name_for_first.empty()) {
-    tool_options.format_for_first = lts::guess_format(tool_options.name_for_first);
-  }
-  if (parser.options.count("in2")) {
-    if (1 < parser.options.count("in2")) {
-      std::cerr << "warning: multiple input formats specified for second LTS; can only use one\n";
-    }
-
-    tool_options.format_for_second = lts::parse_format(parser.option_argument("in2"));
-
-    if (tool_options.format_for_second == lts_none) {
-      std::cerr << "warning: format '" << parser.option_argument("in2") <<
-                   "' is not recognised; option ignored" << std::endl;
-    }
-  }
-  else {
-    tool_options.format_for_second = lts::guess_format(tool_options.name_for_second);
-  }
-
-  return tool_options;
+  return parser.continue_execution();
 }
 
 int process(t_tool_options const & tool_options) {
@@ -226,40 +234,18 @@ int process(t_tool_options const & tool_options) {
     gsVerboseMsg("reading first LTS from '%s'...\n", tool_options.name_for_first.c_str());
 
     if ( !l1.read_from(tool_options.name_for_first, tool_options.format_for_first) ) {
-      bool failed = true; 
-      if ( tool_options.format_for_first == lts_none ) { // XXX really do this? 
-        gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
-        lts_type guessedtype = lts::guess_format(tool_options.name_for_first); 
-        if ( (guessedtype != lts_none) && l1.read_from(tool_options.name_for_first,guessedtype) ) 
-        { 
-          failed = false; 
-        } 
-      } 
-      if ( failed ) {
-        throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
-      }
+      throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_first + "'\nretry with -v/--verbose for more information");
     }
   }
 
   gsVerboseMsg("reading second LTS from '%s'...\n", tool_options.name_for_second.c_str());
 
   if ( !l2.read_from(tool_options.name_for_second, tool_options.format_for_second) ) {
-    bool failed = true; 
-    if ( tool_options.format_for_second == lts_none ) { // XXX really do this? 
-      gsVerboseMsg("reading failed; trying to force format by extension...\n"); 
-      lts_type guessedtype = lts::guess_format(tool_options.name_for_second); 
-      if ( (guessedtype != lts_none) && l2.read_from(tool_options.name_for_second,guessedtype) ) 
-      { 
-        failed = false; 
-      } 
-    } 
-    if ( failed ) {
-      throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
-    }
+    throw mcrl2::runtime_error("cannot read LTS from file '" + tool_options.name_for_second + "'\nretry with -v/--verbose for more information");
   }
 
-  bool result;
-  if ( tool_options.preorder == lts_pre_none )
+  bool result = true;
+  if ( tool_options.equivalence != lts_eq_none )
   {
     gsVerboseMsg("comparing LTSs using %s...\n",
         lts::name_of_equivalence(tool_options.equivalence).c_str());
@@ -270,12 +256,13 @@ int process(t_tool_options const & tool_options) {
         ((result) ? "" : "not "),
         equivalent_string(tool_options.equivalence));
   }
-  else
+
+  if ( tool_options.preorder != lts_pre_none )
   {
     gsVerboseMsg("comparing LTSs using %s...\n",
         lts::name_of_preorder(tool_options.preorder).c_str());
 
-    result = l1.compare(l2,tool_options.preorder);
+    result = l1.compare(l2,tool_options.preorder,tool_options.eq_opts);
 
     gsMessage("LTS in %s is %s%s LTS in %s\n", 
         tool_options.name_for_first.c_str(),
@@ -297,11 +284,16 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    return process(parse_command_line(argc, argv));
+    t_tool_options options;
+
+    if (parse_command_line(argc, argv, options)) {
+      return (process(options));
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

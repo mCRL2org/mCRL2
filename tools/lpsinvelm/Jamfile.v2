@@ -4,5 +4,3 @@ tool lpsinvelm
        : lpsinvelm.cpp
          /libraries//lps
        ;
-
-install-tools lpsinvelm ;

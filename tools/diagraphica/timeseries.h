@@ -234,7 +234,7 @@ protected:
     std::set< int >::iterator animFrame;
     
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

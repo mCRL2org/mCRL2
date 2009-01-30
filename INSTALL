@@ -22,7 +22,7 @@ The following packages are required:
 - make >= 3.80: package make
 
 The following packages are recommended:
-- wxWidgets >= 2.8.0: package libwxgtk2.8-dev or libwxgtk2.8-dbg
+- wxWidgets >= 2.8.4: package libwxgtk2.8-dev or libwxgtk2.8-dbg
 
 These packages enable the following tools:
 - diagraphica (wxWidgets must be compiled with OpenGL support)

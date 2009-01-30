@@ -7,17 +7,21 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file markstateruledialog.h
-/// \brief Add your file description here.
+/// \brief Header file for MarkStateRuleDialog class
 
 #ifndef MARKSTATERULEDIALOG_H
 #define MARKSTATERULEDIALOG_H
 #include <map>
+#include <vector>
 #include <wx/wx.h>
-#include <wx/checklst.h>
-#include "mediator.h"
-#include "lts.h"
 #include "utils.h"
 #include "mcrl2/utilities/colorbutton.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set.h"
+
+class LTS;
+class wxCheckListBox;
+class Mediator;
 
 class MarkStateRuleDialog : public wxDialog { 
   public:
@@ -25,18 +29,19 @@ class MarkStateRuleDialog : public wxDialog {
     ~MarkStateRuleDialog();
     int getParamIndex();
     bool getNegated();
-    void getValues(std::vector<bool> &vals);
+    atermpp::set<ATerm> getValues();
     Utils::RGB_Color getColor();
     wxString getMarkRuleString();
-    void setData(int p,Utils::RGB_Color col,bool neg,std::vector<bool> &vals);
+    void setData(int p,Utils::RGB_Color col,bool neg,
+        atermpp::set<ATerm> vals);
     void onParameterChoice(wxCommandEvent& event);
   private:
     Mediator* mediator;
     std::map< wxString, int > parameterIndices;
     wxListBox* parameterListBox;
     wxListBox* relationListBox;
-    mcrl2::utilities::wxColorButton* ruleClrButton;
-    std::map< wxString, int > valueIndices;
+    mcrl2::utilities::wx::wxColorButton* ruleClrButton;
+    atermpp::map< wxString, ATerm > values;
     wxCheckListBox* valuesListBox;
     LTS*  lts;
     void loadValues(wxString paramName);

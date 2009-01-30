@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Bert Lisser
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,16 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file bsim.h
-/// \brief Based on bsim.h (revision 1.1.1.1) from the muCRL toolset
 
 #include <vector>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include "aterm1.h"
-#include <assert.h>
-#include "mcrl2/lts/liblts.h"
+#include <cassert>
+#include "mcrl2/lts/lts.h"
 
 /* extern declarations data structures */
 #define INITSIZE 50
@@ -60,7 +60,7 @@ extern INTERVAL *Pi;
 extern int second_lts_states_offset;
 /* end extern declarations and data structures */
 
-extern int errno, label_tau;
+extern int label_tau;
 extern int traceLevel, optimal, classes;
 extern ATermTable *lab_src_tgt, *lab_tgt_src;
 

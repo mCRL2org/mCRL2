@@ -12,14 +12,9 @@
 #ifndef SQUADT_MAIN_H
 #define SQUADT_MAIN_H
 
-#include <map>
-
 #include "project.hpp"
-#include "../type_registry.hpp"
-#include "../tool.hpp"
 
 #include <wx/wx.h>
-#include <wx/menu.h>
 #include <wx/frame.h>
 
 namespace squadt {
@@ -50,37 +45,31 @@ namespace squadt {
         void build();
 
         /** \brief Shows a project creation dialog and switches the active view to the new project */
-        inline void on_menu_new(wxCommandEvent&);
+        void on_menu_new(wxCommandEvent&);
 
         /** \brief Shows a project open dialog and switches the active view to the new project */
-        inline void on_menu_open(wxCommandEvent&);
+        void on_menu_open(wxCommandEvent&);
 
         /** \brief Closes the active project view */
-        inline void on_menu_close(wxCommandEvent&);
+        void on_menu_close(wxCommandEvent&);
 
         /** \brief Triggers project update */
-        inline void on_menu_update(wxCommandEvent&);
+        void on_menu_update(wxCommandEvent&);
 
         /** \brief Closes the active project view */
-        inline void on_menu_add_existing_file(wxCommandEvent&);
+        void on_menu_add_existing_file(wxCommandEvent&);
 
         /** \brief Closes the active project view */
-        inline void on_menu_add_new_file(wxCommandEvent&);
-
-        /** \brief Creates, shows and eventually removes the about window */
-        inline void on_menu_about(wxCommandEvent&);
-
-        /** \brief Creates, shows and eventually removes the user manual window */
-        inline void on_menu_manual(wxCommandEvent&);
+        void on_menu_add_new_file(wxCommandEvent&);
 
         /** \brief Cleans up and closes the window */
-        inline void on_menu_quit(wxCommandEvent&);
+        void on_menu_quit(wxCommandEvent&);
 
         /** \brief Shows the preferences dialog */
-        inline void on_menu_preferences(wxCommandEvent&);
+        void on_menu_preferences(wxCommandEvent&);
 
         /** \brief Cleans up and closes the window */
-        inline void on_window_close(wxCloseEvent&);
+        void on_window_close(wxCloseEvent&);
 
       public:
 
@@ -157,14 +146,6 @@ namespace squadt {
       project_view->store();
 
       project_close();
-    }
-
-    inline void main::on_menu_about(wxCommandEvent&) {
-      about();
-    }
-
-    inline void main::on_menu_manual(wxCommandEvent&) {
-      manual();
     }
 
     inline void main::on_menu_quit(wxCommandEvent&) {

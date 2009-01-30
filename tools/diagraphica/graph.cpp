@@ -8,6 +8,7 @@
 //
 /// \file ./graph.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "graph.h"
 #include <iostream>

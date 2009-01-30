@@ -4,5 +4,3 @@ tool ltscompare
        : ltscompare.cpp
          /libraries//lts
        ;
-
-install-tools ltscompare ;

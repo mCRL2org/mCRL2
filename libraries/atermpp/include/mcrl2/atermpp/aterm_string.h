@@ -21,26 +21,24 @@ namespace atermpp
 {
   using detail::str2appl;
   
-  /// Term containing a string.
-  ///
+  /// \brief Term containing a string.
   class aterm_string: public aterm_appl
   {
     public:
-      /// Constructor.
-      ///
+      /// \brief Constructor.
       aterm_string()
       {} 
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
+      /// \param t A term
       aterm_string(ATermAppl t)
         : aterm_appl(t)
       {
         assert(aterm_appl(t).size() == 0);
       }
   
-      /// Constructor.
-      ///
+      /// \brief Constructor.
+      /// \param t A term containing a string.
       aterm_string(aterm_appl t)
         : aterm_appl(t)
       {
@@ -48,7 +46,7 @@ namespace atermpp
       }
   
       /// Allow construction from an aterm. The aterm must be of the right type, and may have no children.
-      ///
+      /// \param t A term containing a string.
       aterm_string(aterm t)
         : aterm_appl(t)
       {
@@ -57,7 +55,8 @@ namespace atermpp
       }
 
       /// Allow construction from a string.
-      ///
+      /// \param s A string.
+      /// \param quoted A boolean indicating if the string is quoted.
       aterm_string(std::string s, bool quoted = true)
         : aterm_appl(quoted ? str2appl(s) : make_term(s))
       {
@@ -66,7 +65,7 @@ namespace atermpp
       }
 
       /// Assignment operator.
-      ///
+      /// \param t A term.
       aterm_string& operator=(aterm_base t)
       {
         assert(t.type() == AT_APPL);
@@ -75,8 +74,8 @@ namespace atermpp
         return *this;
       }
 
-      /// Conversion to string.
-      ///
+      /// \brief Conversion operator
+      /// \return The term converted to string
       operator std::string() const
       {
         return function().name();

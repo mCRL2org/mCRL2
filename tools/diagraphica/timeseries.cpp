@@ -8,6 +8,7 @@
 //
 /// \file ./timeseries.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "timeseries.h"
 

@@ -1,4 +1,4 @@
-// Author(s): Didier Le Lann, Carst Tankink, Muck van Weerdenburg and Jeroen van der Wulp
+// Author(s): Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,124 +6,213 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ./export_latex.cpp
+/// \file export_latex.cpp
+/// \brief Implementation of LaTeX exporter.
+
+#include "wx.hpp" // precompiled headers
 
 #include "export_latex.h"
-
+#include <iostream>
+#include "ltsgraph.h"
+#include <boost/format.hpp>
+#include <cmath>
 #include <wx/textfile.h>
 
-#include <boost/format.hpp>
+#include <workarounds.h> // for M_PI
 
-ExportToLatex::ExportToLatex(wxString _filename, std::vector<nodeLatex> _node, std::vector<edgeLatex> _edge, int _height) : 
-		filename(_filename) , node(_node), edge(_edge), height(_height)
-{}
+ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
+{
+  this->owner = owner;
+}
 
-bool ExportToLatex::Generate() {
+bool ExporterLatex::export_to(wxString filename)
+{
+  tikz_code  = "\\documentclass[10pt, a4paper]{article}\n\n";
+  tikz_code += "\\usepackage{tikz}\n";
+  tikz_code += "\\usetikzlibrary{arrows}\n\n";
 
-	//Create the latex code
-	LatexCode  = "\\documentclass{article} \n";
-	LatexCode += "\\usepackage {pstricks,pst-node} \n";
-	LatexCode += "\\begin{document}\n";
-	LatexCode += "\\begin{pspicture}(0.0,12.0) \n";
-	LatexCode += "\\psset{arrows=->,shortput=nab} \n";
+  tikz_code += "\\begin{document}\n";
+  tikz_code += "\\begin{tikzpicture}\n";
+  tikz_code += "  [scale=2]\n\n";
+  tikz_code += "   \\tikzstyle{state}=[circle, draw]\n";
+  tikz_code += "   \\tikzstyle{initstate}=[state,draw=green]\n";
+  tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
 
 
-        for (unsigned int i=0; i<node.size(); i++) {
-		boost::format f("\\rput(%1%,%2%){\\circlenode{%3%}{%4%}} \n");
-		double nodeX = (node[i].x)/50;
-		double nodeY = (height - node[i].y)/50;
-		f%nodeX%nodeY%node[i].num%node[i].num;
-		LatexCode += boost::str(f);
-	}
+  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  {
+    State* s = graph->getState(i);
 
-	for (unsigned int i=0; i<edge.size(); i++) {
-          if (edge[i].numNode1 == edge[i].numNode2) {
-            //Draw self-loop
-            boost::format f("\\nccircle{%1%}{.5}^{%2%} \n");
-            f%edge[i].numNode1%EscSpecChar(edge[i].lbl);
-            LatexCode += boost::str(f);
-          }
-          else {
-            boost::format f("\\ncline{%1%}{%2%}^{%3%} \n");
-	    f%edge[i].numNode1%edge[i].numNode2%EscSpecChar(edge[i].lbl);
-	    LatexCode += boost::str(f);
-          }
-	}
+    boost::format node;
 
-        // Redraw nodes, to overlap the edges.
-	for (unsigned int i=0; i<node.size(); i++) {
-		boost::format f("\\rput(%1%,%2%){\\circlenode{%3%}{%4%}} \n");
-		double nodeX = (node[i].x)/50;
-		double nodeY = (height - node[i].y)/50;
-		f%nodeX%nodeY%node[i].num%node[i].num;
-		LatexCode += boost::str(f);
-	}
+    if(s->isInitialState())
+    {
+      node = 
+        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1%pt, %2%pt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
+    }
+    else
+    {
+      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1%pt, %2%pt) [state, fill=currentcolor] (state%3%) {%3%};\n");
+    }
+    
+    double aspect = owner->getAspectRatio();
+    double x = s->getX() / 10.0 * aspect;
+    double y = s->getY() / 10.0;
+    
+    wxColour c = s->getColour();
+    double r = static_cast<double>(c.Red()) / 255.0;
+    double g = static_cast<double>(c.Green()) / 255.0;
+    double b = static_cast<double>(c.Blue()) / 255.0;
 
-	LatexCode += "\\end{pspicture} \n";
-	LatexCode += "\\end{document} \n";
+    node%x%y%i%r%g%b;
 
-	//Create a file
-	wxTextFile latex_file(filename);
+    tikz_code += boost::str(node);
+  }
+  tikz_code += "\n"; 
 
-	if (latex_file.Exists()) {
-          if (!latex_file.Open(filename)) {
-            return false;
-          }
-          else {
-            latex_file.Clear();
-          }
-        }
-        else {
-          if (!latex_file.Create(filename)) {
-            return false;
-          }
-        }
+  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  {
+    State* s = graph->getState(i);
+    for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
+    {
+      Transition* tr = s->getTransition(j);
+      drawBezier(tr);
+    }
 
-        // Write the code to the file.
-        wxString latex_code_wx(LatexCode.c_str(), wxConvLocal);
-	latex_file.AddLine(latex_code_wx);
-        latex_file.AddLine(wxEmptyString);
+    for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
+    {
+      Transition* sl = s->getSelfLoop(j);
+      drawSelfLoop(sl);
+    }
+  }
 
-	if (!latex_file.Write()) {
-          return false;
-        }
+  tikz_code += "\n\\end{tikzpicture}\n";
+  tikz_code += "\\end{document}\n";
 
-        if (!latex_file.Close()) {
-          return false;
-        }
+  wxTextFile tikzFile(filename);
+
+  // Open file if it exists.
+  if(tikzFile.Exists())
+  {
+    if(!tikzFile.Open(filename))
+    {
+      return false;
+    }
+    else
+    {
+      tikzFile.Clear();
+    }
+  }
+
+  // Convert code to wxString
+  wxString tikzCodeWX(tikz_code.c_str(), wxConvLocal);
+  tikzFile.AddLine(tikzCodeWX);
+  tikzFile.AddLine(wxEmptyString);
+
+  // Write to file
+  if(!tikzFile.Write())
+  {
+    return false;
+  }
+  
+  // Close file
+  if(!tikzFile.Close())
+  {
+    return false;
+  }
+
+  // If we came this far, all went well
   return true;
 
 }
 
-std::string ExportToLatex::EscSpecChar(std::string str) {
+void ExporterLatex::drawBezier(Transition* tr)
+{
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3%pt, %4%pt) .. (state%2%);\n");
 
-	str = str_replace("_","\\_",str);
-	return str;
+  State* from = tr->getFrom();
+  State* to = tr->getTo();
+
+  size_t fromState = from->getValue();
+  size_t toState = to->getValue();
+
+  double controlX, controlY;
+  double aspect = owner->getAspectRatio();
+  tr->getControl(controlX, controlY);
+  controlX /= 10.0;
+  controlX = controlX * aspect;
+  controlY /= 10.0;
+  
+  draw%fromState%toState
+      %controlX%controlY
+      %tr->getLabel();
+  tikz_code += boost::str(draw);
+
 }
 
-std::string ExportToLatex::str_replace(std::string to_replace, std::string replace_by, std::string replace_in) {
-	int i_pos;
-	std::string text_left;
-	std::string text_right;
-	std::string str_result="";
+void ExporterLatex::drawSelfLoop(Transition* tr)
+{
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%2%} controls (%3%pt, %4%pt) and (%5%pt, %6%pt) .. (state%1%);\n");
 
-	i_pos = replace_in.find(to_replace);
-	if(i_pos == -1 || i_pos == (int)std::string::npos)
-	{
-		str_result = replace_in;
-	}
-	else
-	{
-		while(i_pos != -1 && i_pos != (int)std::string::npos)
-		{
-			text_left = replace_in.substr(0, i_pos);
-			text_right = replace_in.substr((i_pos + to_replace.size()), (replace_in.size() - (i_pos + to_replace.size())));
-			replace_in = text_right;
-			i_pos = replace_in.find(to_replace);
-			str_result = str_result + text_left + replace_by;
-		}
-		str_result += text_right;
-	}
-	return str_result;
+  State* s = tr->getFrom();
+
+  size_t stateNo = s->getValue();
+  
+  // Calculate control points for the self loop.
+  double beta = .25 * M_PI;
+
+  double xState,    yState;
+  double xVirtual,  yVirtual;
+  double xControl1, yControl1;
+  double xControl2, yControl2;
+  double alpha = tr->getControlAlpha();
+  double dist = tr->getControlDist();
+
+  xState = s->getX() / 10.0;
+  yState = s->getY() / 10.0;
+  
+  xVirtual = xState + cos(alpha) * dist * 20.0f;
+  yVirtual = yState + sin(alpha) * dist * 20.0f;
+
+  double gamma = alpha + beta;
+  double delta = alpha - beta;
+
+  double xFactor, yFactor;
+  double cosGamma = cos(gamma);
+  double sinGamma = sin(gamma);
+  double cosDelta = cos(delta);
+  double sinDelta = sin(delta);
+
+  if(fabs(cosGamma + cosDelta) > 0.01)
+  {
+    xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
+    xControl1 = xState + xFactor * cosGamma;
+    xControl2 = xState + xFactor * cosDelta;
+  }
+
+  if(fabs(sinGamma + sinDelta) <= .01)
+  {
+    float additive = tan(beta) * (xControl1 - xState);
+    yControl1 = yState + additive;
+    yControl2 = yState - additive;
+  }
+  else
+  {
+    yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
+    yControl1 = yState + yFactor * sinGamma;
+    yControl2 = yState + yFactor * sinDelta;
+    
+    if(fabs(cosGamma + cosDelta) <= .01)
+    {
+      float additive = tan(beta) * (yControl1 - yState);
+      xControl1 = xState - additive;
+      xControl2 = xState + additive;
+    }
+  }
+
+  draw%stateNo%tr->getLabel()
+      %xControl1%yControl1
+      %xControl2%yControl2;
+
+  tikz_code += boost::str(draw);
 }
-

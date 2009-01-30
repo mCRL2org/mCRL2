@@ -1,47 +1,53 @@
 project libraries/utilities
        : source-location ..
        : requirements
+          <use>/site-config//boost
           <include>../include
-          <include>../../core/include      # Circular dependency
-          <include>../../old_data/include      # Circular dependency
+          <include>../../old_data/include                   # temporary
+          <include>../../atermpp/include                    # temporary
+          <include>../../core/include                       # temporary
+          <include>../../../3rd-party/aterm/include/aterm   # temporary
        : usage-requirements
-          <include>../include
+          <use>/site-config//boost
        ;
-
-include $(TOP)/build/config.jam ;
 
 alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
+alias font_renderer : font_renderer.o ;
 
-obj spinctrlfloat.o : source/spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
-obj colorbutton.o   : source/colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+wx-requirements = <pch>on:<source>/site-config//wx.pch <include>../include/mcrl2/utilities ;
 
-# mCRL2 Tool for SQuADt interface
+obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) <use>/site-config//wx_base ;
+obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) <use>/site-config//wx_base ;
+obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) <use>/site-config//wx_gl ;
+
+# mCRL2 specific tool for SQuADt interface
 obj squadt_interface
       : source/squadt_interface.cpp
-      : <threading>multi
-        <use>/libraries/tipi//tool_interface
-        <define>ENABLE_SQUADT_CONNECTIVITY
+      : <use>/libraries/tipi//tool
       :
-      : <library>/libraries/tipi//tool_interface
+      : <library>/libraries/tipi//tool
         <toolset>darwin:<framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
+        <include>../include
       ;
 
 obj command_line_interfacing
-      : source/command_line.cpp
-      : <use>/site-config//boost_headers
+      : source/command_line_interface.cpp
+      : <use>/site-config//boost
+      :
+      : <include>../include
       ;
 
 mcrl2-library utilities
-      : source/aterm_ext.cpp
-        source/numeric_string.cpp
-        source/info.cpp            # Temporary?
+      : source/info.cpp            # Temporary?
         source/bdd2dot.cpp         # Temporary?
         source/manipulator.cpp     # Temporary?
-        /libraries/utilities//command_line_interfacing
-      : <use>/site-config//boost_headers
-        <use>/libraries/atermpp//headers
+        source/command_line_interface.cpp
+      : <use>/site-config//boost
+        <library>/libraries//atermpp
+        <include>../../core/include      # Circular dependency
+        <include>../../old_data/include      # Circular dependency
       :
-      : <library>/libraries//aterm
+      : <include>../include
       ;

@@ -3,11 +3,10 @@ project toolset/ltsgraph ;
 tool ltsgraph
        : [ glob *.cpp ]
          /libraries/utilities//spinctrlfloat
+         /libraries/utilities//font_renderer
          /libraries//core
          /libraries//lts
-         /site-config//wx_base
-       : <wx>yes
+         /libraries//ticpp
+       : <wx>gl
          <squadt-connectivity>implemented
        ;
-
-install-tools ltsgraph ;

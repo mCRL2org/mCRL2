@@ -8,6 +8,8 @@
 //
 /// \file ./bundle.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "bundle.h"
 
 // -- constructors and destructors ----------------------------------

@@ -8,6 +8,7 @@
 //
 /// \file ./node.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "node.h"
 

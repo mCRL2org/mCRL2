@@ -20,7 +20,6 @@
 #include "mcrl2/old_data/rewrite.h"
 #include "mcrl2/old_data/detail/rewrite/with_prover.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 RewriterProver::RewriterProver(mcrl2::old_data::data_specification DataSpec, RewriteStrategy strat)

@@ -1,0 +1,6 @@
+project toolset/formulacheck ;
+
+tool formulacheck
+       : formulacheck.cpp
+         /libraries//old_data
+       ;

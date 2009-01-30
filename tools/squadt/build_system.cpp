@@ -7,8 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file build_system.cpp
-/// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
+#include <boost/version.hpp>
+#include <boost/config.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -22,6 +25,14 @@
 #include "executor.hpp"
 #include "tool.hpp"
 
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
+}
+
 /**
  * \namespace squadt
  *
@@ -29,8 +40,8 @@
  **/
 namespace squadt {
   void build_system::default_tool_collection(tool_manager& m) const {
-    static char const* default_tools[] = { "diagraphica.app", "lps2pbes",
-      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst",
+    static char const* default_tools[] = { "chi2mcrl2", "diagraphica.app",
+      "lpsactionrename", "lpsbinary", "lpsconstelm", "lpssuminst", "lpsrewr", 
       "lpsinfo", "lpsparelm", "lpsuntime", "lps2lts", "lpssumelm",
       "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app", "mcrl22lps",
       "pbes2bool", "pnml2mcrl2", "xsim.app", 0 };
@@ -41,7 +52,7 @@ namespace squadt {
     const path default_path(m_settings_manager->path_to_default_binaries());
 
     for (char const** t = default_tools; *t != 0; ++t) {
-#if defined(__WIN32__) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if (BOOST_WINDOWS)
       path path_to_binary(std::string(basename(path(*t))).append(".exe"));
 
       path_to_binary = default_path / path_to_binary;
@@ -52,7 +63,7 @@ namespace squadt {
         path_to_binary = default_path / path_to_binary;
       }
       else {
-        path_to_binary = default_path.branch_path() / path_to_binary;
+        path_to_binary = parent_path(default_path) / path_to_binary;
       }
 #else
       path path_to_binary(basename(*t));
@@ -204,7 +215,7 @@ namespace squadt {
     visitors::store(*m_tool_manager, tool_manager_file_name);
 
     store_visitor preferences(miscellaneous_file_name);
-   
+
     preferences.store(*m_executor);
     preferences.store(*m_type_registry);
   }

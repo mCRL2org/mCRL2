@@ -107,19 +107,22 @@ namespace tipi {
 
     protected:
 
+      /** \brief Pointer to implementation object (handle body idiom) */
       boost::shared_ptr< display_impl > impl;
 
-    protected:
-
+      /** \brief Factory function for layout elements */
       template < typename T >
       T& create(const display::element_identifier);
 
+      /** \brief Factory function for layout elements */
       template < typename T >
       void create(boost::shared_ptr < ::tipi::layout::element >&, element_identifier const&);
 
+      /** \brief Copy constructor */
       display(display const& other) : impl(other.impl) {
       }
 
+      /** \brief Standard constructor */
       display() : impl(new display_impl) {
       }
 
@@ -130,7 +133,7 @@ namespace tipi {
       T& create();
 
       /** \brief Find the id for an element */
-      const ::tipi::display::element_identifier find(tipi::layout::element const* element) const {
+      ::tipi::display::element_identifier find(tipi::layout::element const* element) const {
         return impl->find(element);
       }
 
@@ -143,7 +146,7 @@ namespace tipi {
       inline T const& find(tipi::display::element_identifier id) const {
         return static_cast < T const& > (*impl->find(id));
       }
-  
+
       /**
        * \param[in] id the identifier of the element to find
        * \pre the element should be in the list

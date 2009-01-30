@@ -8,6 +8,7 @@
 //
 /// \file ./utils.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "utils.h"
 #include <iostream>

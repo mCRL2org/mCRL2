@@ -1,6 +1,23 @@
-#include "markmanager.h"
+// Author(s): Bas Ploeger and Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file markmanager.cpp
+/// \brief Mark manager source file
+
+#include "wx.hpp" // precompiled headers
+
+#include "markmanager.h"
+#include <algorithm>
+#include "lts.h"
+#include "state.h"
+#include "cluster.h"
+#include "transition.h"
+
 using namespace std;
 using namespace Utils;
 
@@ -9,13 +26,14 @@ struct MarkRule {
   bool is_activated;
   bool is_negated;
   RGB_Color color; // Colour asociated with this mark rule.
-  vector< bool > value_set;
+  atermpp::set< ATerm > value_set;
 };
 
 MarkManager::MarkManager() {
   lts = NULL;
   first_free_mark_rule = mark_rules.end();
   match_style = MATCH_ANY;
+  match_style_clusters = MATCH_ANY;
   mark_style = NO_MARKS;
   num_active_mark_rules = 0;
   num_marked_states_all = 0;
@@ -79,7 +97,7 @@ void MarkManager::setLTS(LTS *l,bool need_reset) {
 }
 
 int MarkManager::createMarkRule(int param,bool neg,Utils::RGB_Color col,
-        std::vector<bool> &vals) {
+        atermpp::set<ATerm> vals) {
   MarkRule *m = new MarkRule;
   m->param_index = param;
   m->is_activated = true;
@@ -128,28 +146,28 @@ RGB_Color MarkManager::getMarkRuleColor(int mr) {
   return mark_rules[mr]->color;
 }
 
-void MarkManager::getMarkRuleValues(int mr,vector<bool> &vals) {
-  vals = mark_rules[mr]->value_set;
+atermpp::set<ATerm> MarkManager::getMarkRuleValues(int mr)
+{
+  return mark_rules[mr]->value_set;
 }
 
 void MarkManager::setMarkRuleData(int mr,int param,bool neg,
-    Utils::RGB_Color col,std::vector<bool> &vals) {
+    Utils::RGB_Color col,atermpp::set<ATerm> vals)
+{
   bool changed = (param != mark_rules[mr]->param_index)
-              || (neg != mark_rules[mr]->is_negated);
-  unsigned int i = 0;
-  while (i < vals.size() && !changed) {
-    changed = (vals[i] != mark_rules[mr]->value_set[i]);
-    ++i;
-  }
+              || (neg != mark_rules[mr]->is_negated)
+              || (vals != mark_rules[mr]->value_set);
 
-  if (changed && mark_rules[mr]->is_activated) {
+  if (changed && mark_rules[mr]->is_activated)
+  {
     deactivateMarkRule(mr);
   }
   mark_rules[mr]->param_index = param;
   mark_rules[mr]->is_negated = neg;
   mark_rules[mr]->color = col;
   mark_rules[mr]->value_set = vals;
-  if (changed && mark_rules[mr]->is_activated) {
+  if (changed && mark_rules[mr]->is_activated)
+  {
     activateMarkRule(mr);
   }
 }
@@ -186,24 +204,40 @@ int MarkManager::getNumMarkedTransitions() {
   return 0;
 }
 
-void MarkManager::setActionMark(std::string label,bool b) {
-  int l = lts->getLabelIndex(label);
+void MarkManager::setActionMark(int l,bool b) {
   *(label_marks[l]) = b;
   num_marked_transitions = 0;
-  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+  for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+      ++ci)
+  {
     num_marked_transitions += (**ci).setActionMark(l,b);
   }
 }
 
-void MarkManager::setMatchStyle(MatchStyle ms) {
-  if (match_style != ms) {
-    changeMatchStyle(ms);
+void MarkManager::setMatchStyle(MatchStyle ms)
+{
+  if (match_style != ms)
+  {
     match_style = ms;
   }
 }
 
-MatchStyle MarkManager::getMatchStyle() {
+MatchStyle MarkManager::getMatchStyle()
+{
   return match_style;
+}
+
+void MarkManager::setMatchStyleClusters(MatchStyle ms)
+{
+  if (ms != MATCH_MULTI && match_style_clusters != ms)
+  {
+    match_style_clusters = ms;
+  }
+}
+
+MatchStyle MarkManager::getMatchStyleClusters()
+{
+  return match_style_clusters;
 }
 
 void MarkManager::setMarkStyle(MarkStyle ms) {
@@ -320,49 +354,71 @@ void MarkManager::deactivateMarkRule(int mr) {
   --num_active_mark_rules;
 }
 
-void MarkManager::changeMatchStyle(MatchStyle ms) {
-}
-
-bool MarkManager::matchesRule(State *s,int mr) {
+bool MarkManager::matchesRule(State *s,int mr)
+{
   MarkRule *rule = mark_rules[mr];
-  bool retval = rule->value_set[s->getParameterValue(rule->param_index)];
-  if (!rule->is_negated) {
-    return retval;
-  } else {
-    return !retval;
+  bool in_set = rule->value_set.find(lts->getStateParameterValue(s,
+        rule->param_index)) != rule->value_set.end();
+  if (rule->is_negated)
+  {
+    return !in_set;
   }
+  return in_set;
 }
 
-bool MarkManager::isMarked(State* s) {
-  if (mark_style == MARK_STATES) {
-    if (match_style == MATCH_ALL) {
+bool MarkManager::isMarked(State* s)
+{
+  if (mark_style == MARK_STATES)
+  {
+    if (match_style == MATCH_ALL)
+    {
       return (s->getNumMatchedRules() == num_active_mark_rules);
-    } else {
+    }
+    else
+    {
       return (s->getNumMatchedRules() > 0);
     }
   }
-  if (mark_style == MARK_DEADLOCKS) {
+  if (mark_style == MARK_DEADLOCKS)
+  {
     return s->isDeadlock();
   }
   return false;
 }
 
-bool MarkManager::isMarked(Cluster* c) {
+bool MarkManager::isMarked(Cluster* c)
+{
   if (c == NULL) return false;
-  switch (mark_style) {
-    case MARK_STATES:
-      if (match_style == MATCH_ALL) {
-        return (c->getNumMarkedStatesAll() > 0);
-      } else {
-        return (c->getNumMarkedStatesAny() > 0);
-      }
-    case MARK_DEADLOCKS:
-      return c->hasDeadlock();
-    case MARK_TRANSITIONS:
-      return c->hasMarkedTransition();
-    default:
-      return false;
+
+  int limit = 1;
+  if (match_style_clusters == MATCH_ALL)
+  {
+    limit = c->getNumStates();
   }
+  
+  bool result;
+  switch (mark_style)
+  {
+    case MARK_STATES:
+      if (match_style == MATCH_ALL)
+      {
+        result = (c->getNumMarkedStatesAll() >= limit);
+      }
+      else
+      {
+        result = (c->getNumMarkedStatesAny() >= limit);
+      }
+      break;
+    case MARK_DEADLOCKS:
+      result = (c->getNumDeadlocks() >= limit);
+      break;
+    case MARK_TRANSITIONS:
+      result = c->hasMarkedTransition();
+      break;
+    default:
+      result = false;
+  }
+  return result;
 }
 
 bool MarkManager::isMarked(Transition* t) {

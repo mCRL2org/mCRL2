@@ -45,12 +45,16 @@
 #include "simulator.h"
 #include "timeseries.h"
 
-class DiaGraph : public wxApp, public Mediator
+class DiaGraph : public mcrl2::utilities::wx::tool< DiaGraph >, public Mediator
 {
+  friend class mcrl2::utilities::wx::tool< DiaGraph >;
+
 public:
+        DiaGraph();
+
 	// -- functions inherited from wxApp ----------------------------
-	virtual bool OnInit();
-	virtual int OnExit();
+	bool DoInit();
+	int OnExit();
 	
 	// -- load & save data ------------------------------------------
 	void openFile( const std::string &path );
@@ -414,6 +418,8 @@ protected:
     void displAttributes( const int &selAttrIdx );
     void displAttrDomain( const int &attrIdx );
     void clearAttrDomain();
+
+    bool parse_command_line(int argc, wxChar** argv);
 
 private:
     // -- data members ----------------------------------------------

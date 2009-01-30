@@ -8,21 +8,26 @@
 //
 /// \file squadt.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "squadt"
 #define AUTHOR "Jeroen van der Wulp"
 
-#include "boost/bind.hpp"
-#include "boost/filesystem/convenience.hpp"
+#include "boost/version.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/function.hpp"
+#include "boost/bind.hpp"
+#include "boost/filesystem/convenience.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 #include "settings_manager.hpp"
 #include "tool_manager.hpp"
 #include "build_system.hpp"
+#include "type_registry.hpp"
 #include "executor.hpp"
 
 #include "gui/splash.hpp"
@@ -35,24 +40,19 @@
 #include <wx/msgdlg.h>
 #include <wx/sysopt.h>
 
-using namespace squadt::GUI;
-
-std::string get_about_message() {
-  static const std::string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-           std::string("\n"
-           "This tool is part of the mCRL2 toolset.\n"
-           "For information see http://www.mcrl2.org\n"
-           "\n"
-           "For feature requests or bug reports,\n"
-           "please visit http://www.mcrl2.org/issuetracker");
-
-  return version_information;
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
 }
 
+using namespace squadt::GUI;
+
 /* SQuADt class declaration */
-class SQuADt : public wxApp {
+class SQuADt : public mcrl2::utilities::wx::tool< SQuADt > {
+  friend class mcrl2::utilities::wx::tool< SQuADt >;
 
   private:
 
@@ -60,26 +60,33 @@ class SQuADt : public wxApp {
     boost::function < void (squadt::GUI::main*) > action;
 
     // Port number to listen on for incoming TCP connections
-    tipi::tcp_port tcp_port_number;
+    tipi::tcp_port                                tcp_port_number;
 
-    void parse_command_line();
+  private:
+
+    bool parse_command_line(int& argc, wxChar** argv);
+
+    bool DoInit();
 
   public:
 
-    bool OnInit();
-    int  OnExit();
+    SQuADt() : mcrl2::utilities::wx::tool< SQuADt >("SQuADT",
+                  "Graphical environment that provides a uniform interface"
+                  " for using all kinds of other connected tools.",
+                  std::vector< std::string >(1, "Jeroen van der Wulp")) {
+    }
 };
 
 IMPLEMENT_APP(SQuADt)
 
-void SQuADt::parse_command_line() {
+bool SQuADt::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
   if (0 < argc) {
     interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()), NAME, AUTHOR, "[OPTION]... [PATH]\n",
         "Graphical environment that provides a uniform interface for using all kinds of "
         "other connected tools. If PATH is provided, it provides an existing project in "
-        "PATH."); 
+        "PATH.");
 
     clinterface.
       add_option("create", "create new project in PATH", 'c').
@@ -89,50 +96,56 @@ void SQuADt::parse_command_line() {
 
     command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
 
-    // default log level
-    tipi::utility::logger::log_level default_log_level = 1;
-
-    if (0 < parser.options.count("create")) {
-      if (parser.arguments.size() != 1) {
-        parser.error("create option requires that a path is provided.");
-      }
-    }
-    if (0 < parser.options.count("port")) {
-      tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
-    }
-
-    if (parser.arguments.size() == 1) {
-      boost::filesystem::path target(parser.arguments[0]);
-
-      if (!target.has_root_path()) {
-        target = boost::filesystem::initial_path() / target;
-      }
+    if (parser.continue_execution()) {
+      // default log level
+      tipi::utility::logger::log_level default_log_level = 1;
 
       if (0 < parser.options.count("create")) {
-        action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
+        if (parser.arguments.size() != 1) {
+          parser.error("create option requires that a path is provided.");
+        }
       }
-      else {
-        action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
+      if (0 < parser.options.count("port")) {
+        tcp_port_number = parser.option_argument_as< tipi::tcp_port > ("port");
       }
+
+      if (parser.arguments.size() == 1) {
+        boost::filesystem::path target(parser.arguments[0]);
+
+        if (!target.has_root_path()) {
+          target = boost::filesystem::initial_path() / target;
+        }
+
+        if (0 < parser.options.count("create")) {
+          action = boost::bind(&squadt::GUI::main::project_new, _1, target.string(), std::string());
+        }
+        else {
+          action = boost::bind(&squadt::GUI::main::project_open, _1, target.string());
+        }
+      }
+
+      if (1 < parser.arguments.size()) {
+        parser.error("too many file arguments!");
+      }
+
+      if (parser.options.count("quiet")) {
+        default_log_level = 0;
+      }
+      if (parser.options.count("verbose")) {
+        default_log_level = 2;
+      }
+      if (parser.options.count("debug")) {
+        default_log_level = 3;
+      }
+
+      tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
+      tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
     }
 
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments!");
-    }
-
-    if (parser.options.count("quiet")) {
-      default_log_level = 0;
-    }
-    if (parser.options.count("verbose")) {
-      default_log_level = 2;
-    }
-    if (parser.options.count("debug")) {
-      default_log_level = 3;
-    }
-
-    tipi::controller::communicator::get_default_logger().set_default_filter_level(default_log_level);
-    tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
+    return parser.continue_execution();
   }
+
+  return true;
 }
 
 /*
@@ -140,29 +153,20 @@ void SQuADt::parse_command_line() {
  *
  * Must return true because static initialisation might not have completed
  */
-bool SQuADt::OnInit() {
+bool SQuADt::DoInit() {
   using namespace squadt;
   using namespace squadt::GUI;
-
-  std::string command_line_error;
-
-  try {
-    parse_command_line();
-  }
-  catch (std::exception& e) {
-    command_line_error = e.what();
-  }
 
   wxInitAllImageHandlers();
 
   // Windows specific workaround for correct handling of icon transparency
   wxSystemOptions::SetOption(wxT("msw.remap"), 0);
-    
+
   splash* splash_window = new splash(1);
 
   try {
     struct local {
-      static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< tool > >& retry_list) {
+      static void initialise_tools(splash& splash_window, bool& finished, std::vector< boost::shared_ptr< squadt::tool > >& retry_list) {
         tool_manager& local_tool_manager(squadt::global_build_system.get_tool_manager());
 
         tool_manager::const_tool_sequence tools(local_tool_manager.get_tools());
@@ -197,12 +201,12 @@ bool SQuADt::OnInit() {
 
       return false;
     }
-   
+
     splash_window->set_category("Querying tools", global_build_system.get_tool_manager().number_of_tools());
-   
+
     /* Perform initialisation */
     bool finished = false;
-    std::vector< boost::shared_ptr < tool > > retry_list;
+    std::vector< boost::shared_ptr < squadt::tool > > retry_list;
 
     boost::thread initialisation_thread(boost::bind(&local::initialise_tools,
                       boost::ref(*splash_window), boost::ref(finished), boost::ref(retry_list)));
@@ -222,8 +226,8 @@ bool SQuADt::OnInit() {
 
       if (retry.ShowModal() == wxID_YES) {
         struct tester {
-          inline static bool query_with_path(tool& t, boost::filesystem::path const& p) {
-            boost::shared_ptr< tool > dummy(new tool(t));
+          inline static bool query_with_path(squadt::tool& t, boost::filesystem::path const& p) {
+            boost::shared_ptr< squadt::tool > dummy(new squadt::tool(t));
 
             dummy->set_location(p);
 
@@ -238,27 +242,24 @@ bool SQuADt::OnInit() {
           }
         };
 
-        boost::filesystem::path path_to_try(retry_list[0]->get_location().branch_path());
+        boost::filesystem::path path_to_try(parent_path(retry_list[0]->get_location()));
 
         // Perform initialisation
-        for (std::vector< boost::shared_ptr< tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
-          if (!boost::filesystem::exists((*t)->get_location())) {
-            splash_window->set_operation("", (*t)->get_name());
-            splash_window->update();
+        for (std::vector< boost::shared_ptr< squadt::tool > >::iterator t = retry_list.begin(); t != retry_list.end(); ++t) {
+          splash_window->set_operation("", (*t)->get_name());
+          splash_window->update();
 
-            if (!path_to_try.empty()) {
-              if (tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf())) {
-                continue;
-              }
-            }
+          if (!boost::filesystem::exists((*t)->get_location()) &&
+                   (!path_to_try.empty() &&
+		 !tester::query_with_path(**t, path_to_try / (*t)->get_location().leaf()))) {
 
             wxFileDialog file_picker(0, wxT("Choose the file to use for `") +
                       wxString((*t)->get_name().c_str(), wxConvLocal) + wxT("'"),
                               wxString(path_to_try.string().c_str(), wxConvLocal), wxT(""), wxT("*"), wxFD_DEFAULT_STYLE|wxFD_FILE_MUST_EXIST|wxFD_OPEN);
 
             if (file_picker.ShowModal() == wxID_OK) {
-              path_to_try = boost::filesystem::path(
-                      std::string(file_picker.GetPath().fn_str())).branch_path();
+              path_to_try = parent_path(boost::filesystem::path(
+                              std::string(file_picker.GetPath().fn_str())));
 
               tester::query_with_path(**t, std::string(file_picker.GetPath().fn_str()));
             }
@@ -277,12 +278,7 @@ bool SQuADt::OnInit() {
     /* Initialise main application window */
     SetTopWindow(new squadt::GUI::main());
 
-    if (!command_line_error.empty()) {
-      wxMessageDialog(GetTopWindow(), wxString(command_line_error.
-             append("\n\nNote that other other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
-                         wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
-    }
-    else if (action) {
+    if (action) {
       action(static_cast < squadt::GUI::main* > (GetTopWindow()));
     }
 
@@ -299,8 +295,4 @@ bool SQuADt::OnInit() {
   }
 
   return true;
-}
-
-int SQuADt::OnExit() {
-  return wxApp::OnExit();
 }

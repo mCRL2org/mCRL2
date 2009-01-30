@@ -8,6 +8,8 @@
 //
 /// \file ./diagrameditor.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "diagrameditor.h"
 #include <iostream>
 #include <sstream>

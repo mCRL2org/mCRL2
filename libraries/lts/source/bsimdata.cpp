@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Bert Lisser
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,20 +7,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file bsimdata.cpp
-/// \brief Based on bsimdata.c (revision 1.1.1.1) from the muCRL toolset
 
 #include <algorithm>
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/detail/bsim.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
+
+#include "workarounds.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)
 
 using namespace std;
 using namespace mcrl2::lts;
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -674,6 +674,15 @@ int WriteDataAddParam(lts &l, bool is_branching)
   for (unsigned int i=0; i<l.num_states(); i++)
   {
     set_new_state(l,i);
+  }
+
+  ATermAppl extra = (ATermAppl) l.get_extra_data();
+  if ( extra != NULL && !gsIsNil(ATAgetArgument(extra,1)) )
+  {
+    ATermList params = ATLgetArgument(ATAgetArgument(extra,1),0);
+    params = ATappend(params,(ATerm) gsMakeDataVarId(gsString2ATermAppl("bb_class"),gsMakeSortIdNat()));
+    extra = ATsetArgument(extra,(ATerm) ATsetArgument(ATAgetArgument(extra,1),(ATerm) params,0),1);
+    l.set_extra_data((ATerm) extra);
   }
 
   return 1;

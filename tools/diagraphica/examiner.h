@@ -155,7 +155,7 @@ protected:
         ID_ICON_RGT,
         ID_ICON_PLAY,
         ID_FRAME,
-        ID_FRAME_HIST,
+        ID_FRAME_HIST
     };
     
     // -- data members ----------------------------------------------
@@ -181,7 +181,7 @@ protected:
     size_t vsblHistIdxRgt;
 
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

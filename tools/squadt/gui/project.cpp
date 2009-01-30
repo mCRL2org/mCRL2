@@ -8,6 +8,8 @@
 //
 /// \file gui/project.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include <map>
 #include <set>
 #include <stack>
@@ -98,11 +100,11 @@ namespace squadt {
         inline boost::shared_ptr< processor > get_processor() {
           boost::shared_ptr< processor::object_descriptor > t(target.lock());
           boost::shared_ptr< processor >                    r;
-         
+
           if (t.get() != 0) {
             r = t->get_generator();
           }
-         
+
           return r;
         }
 
@@ -163,10 +165,10 @@ namespace squadt {
 
       if (g.get() != 0 && s.IsOk()) {
         wxTreeItemIdValue cookie; // For wxTreeCtrl traversal
-       
+
         for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
           project::tool_data* instance_data = static_cast < project::tool_data* > (object_view->GetItemData(j));
-       
+
           if (instance_data->get_processor().get() == g.get()) {
             object_view->SetItemImage(j, instance_data->get_object()->get_status());
           }
@@ -197,13 +199,13 @@ namespace squadt {
       BOOST_FOREACH(boost::shared_ptr < processor > const& p, processor_range) {
         if (p->number_of_inputs() == 0) {
           boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
-          
+
           BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
             wxTreeItemId item = object_view->AppendItem(root_item_id,
                         wxString(boost::filesystem::path(object->get_location()).leaf().c_str(), wxConvLocal), object->get_status());
-          
+
             object_view->SetItemData(item, new tool_data(*this, object));
-          
+
             object_view->EnsureVisible(item);
           }
         }
@@ -236,12 +238,12 @@ namespace squadt {
                 boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
                 BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& oobject, output_range) {
-              
+
                   wxTreeItemId item = object_view->AppendItem(j,
                      wxString(boost::filesystem::path(oobject->get_location()).leaf().c_str(), wxConvLocal), oobject->get_status());
 
                   object_view->SetItemData(item, new tool_data(*this, oobject));
-              
+
                   object_view->EnsureVisible(item);
                 }
               }
@@ -301,17 +303,17 @@ namespace squadt {
      **/
     GUI::tool_display* project::install_tool_display(boost::shared_ptr < processor::monitor > p, std::string const& t) {
       wxSizer* s = process_display_view->GetSizer();
-       
+
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
 
       s->Insert(0, display, 0, wxEXPAND|wxALL, 2);
       s->Layout();
 
       display->set_title(wxString(t.c_str(), wxConvLocal));
-       
+
       return display;
     }
-            
+
     /**
      * \param e a reference to a tree event object
      **/
@@ -366,19 +368,26 @@ namespace squadt {
       dialog::add_to_project dialog(this, manager->get_project_store().string());
 
       if (dialog.ShowModal()) {
-        /* File does not exist in project directory */
-        processor* p = manager->import_file(
-                              boost::filesystem::path(dialog.get_source()), 
-                              boost::filesystem::path(dialog.get_destination()).leaf()).get();
+        try {
+          /* File does not exist in project directory */
+          processor& p(*manager->import_file(
+                                boost::filesystem::path(dialog.get_source()),
+                                boost::filesystem::path(dialog.get_destination()).leaf()));
 
-        /* Add to the new project */
-        wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
-                wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
+          /* Add to the new project */
+          wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(),
+                  wxString(dialog.get_name().c_str(), wxConvLocal), processor::object_descriptor::original);
 
-        object_view->SetItemData(i, new tool_data(*this, *p->get_output_iterators().begin()));
-        object_view->EnsureVisible(i);
+          object_view->SetItemData(i, new tool_data(*this, *p.get_output_iterators().begin()));
+          object_view->EnsureVisible(i);
 
-        manager->store();
+          manager->store();
+        }
+        catch (std::exception& e) {
+          wxMessageDialog(0, wxT("Failed to add `") + wxString(dialog.get_name().c_str(), wxConvLocal) +
+                wxT("' to project, please try again.\n\n Details: ") +
+                wxString(e.what(), wxConvLocal) + wxT("."), wxT("Error")).ShowModal();
+        }
       }
     }
 
@@ -387,7 +396,7 @@ namespace squadt {
 
       while (file_name_dialog.ShowModal() == wxID_OK) {
         boost::filesystem::path  name(file_name_dialog.GetValue().fn_str());
-        
+
         try {
           boost::shared_ptr < processor > new_processor(manager->construct());
 
@@ -497,7 +506,7 @@ namespace squadt {
             context_menu.Append(identifier++, wxString(i.first.get_name().c_str(), wxConvLocal), target_menu);
           }
 
-          cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++, 
+          cmMenuItem* new_menu_item = new cmMenuItem(target_menu, identifier++,
                                     wxString(i.second->get_name().c_str(), wxConvLocal),
                                     i.second, i.second->find_input_configuration(i.first, n.get_object()->get_format()));
 
@@ -526,116 +535,120 @@ namespace squadt {
       boost::shared_ptr< processor >                    p = node_data->get_processor();
       boost::shared_ptr< processor::object_descriptor > object = node_data->get_object();
 
-      type_registry& registry(global_build_system.get_type_registry());
+      try {
+        type_registry& registry(global_build_system.get_type_registry());
 
-      switch (e.GetId()) {
-        case cmID_EDIT:
-          p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
-          break;
-        case cmID_REMOVE:
-          if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
-                           wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
+        switch (e.GetId()) {
+          case cmID_EDIT:
+            p->edit(registry.get_registered_command(object->get_format(), object->get_location().leaf()).get());
+            break;
+          case cmID_REMOVE:
+            if (wxMessageDialog(this, wxT("This operation will remove files from the project store do you wish to continue?"),
+                             wxT("Warning: irreversible operation"), wxYES_NO|wxNO_DEFAULT).ShowModal() == wxID_YES) {
 
-            manager->remove(p);
+              manager->remove(p);
 
-            object_view->Delete(selection);
-          }
-          break;
-        case cmID_RENAME:
-          object_view->EditLabel(selection);
-          break;
-        case cmID_REFRESH:
-          p->flush_outputs();
-
-          /* Register handler to on update the object view after process termination */
-          p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
-
-          /* Attach tool display */
-          manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
-          break;
-        case cmID_CLEAN:
-          p->flush_outputs();
-          break;
-        case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxString(manager->get_project_store().string().c_str(), wxConvLocal), p);
-
-            dialog.set_name(object_view->GetItemText(selection));
-
-            if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
-              dialog.show_tool_selector(false);
-              dialog.show_input_objects(false);
+              object_view->Delete(selection);
             }
-            else {
-              boost::shared_ptr< const tool > selected_tool = p->get_tool();
-
-              if (p->has_input_configuration()) {
-                /* Add the main input (must exist) */
-                dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.get_sub_type()));
-               
-                if (selected_tool) {
-                  dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());
-                }
-               
-                dialog.allow_tool_selection(false);
-              }
-              else {
-                if (selected_tool) {
-                  wxMessageDialog(this, wxString(boost::str(
-                           boost::format("Tool %s is improperly initialised!") %
-                             selected_tool->get_name()).c_str(), wxConvLocal),
-                           wxT("Warning: tool problem"), wxOK).ShowModal();
-                }
-                else {
-                  wxMessageDialog(this, wxT("Tool is unknown!"),
-                           wxT("Warning: tool problem"), wxOK).ShowModal();
-                }
-              }
-            }
-
-            if (dialog.ShowModal()) {
-            }
-          }
-          break;
-        case cmID_CONFIGURE:
-            /* Attach tool display */
-            install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
+            break;
+          case cmID_RENAME:
+            object_view->EditLabel(selection);
+            break;
+          case cmID_REFRESH:
+            p->flush_outputs();
 
             /* Register handler to on update the object view after process termination */
             p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
-             
-            /* Start tool configuration phase */
-            p->reconfigure();
-          break;
-        default: {
-            /* Assume that a tool was selected */
-            wxMenu*     menu      = reinterpret_cast < wxMenu* > (e.GetEventObject());
-            cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
 
-            boost::shared_ptr< const tool::input_configuration > icon(menu_item->input_configuration.lock());
+            /* Attach tool display */
+            manager->update(p, boost::bind(&project::prepare_tool_display, this, _1));
+            break;
+          case cmID_CLEAN:
+            p->flush_outputs();
+            break;
+          case cmID_DETAILS: {
+              dialog::processor_details dialog(this, p, object);
 
-            if (icon.get()) {
-              /* Create a temporary processor */
-              boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
-             
-              /* Attach the new processor by relating it to t */
-              tp->register_input(icon->get_primary_object_descriptor().first, object);
-             
+              if (object_view->GetItemParent(selection) == object_view->GetRootItem()) {
+                dialog.show_tool_selector(false);
+                dialog.show_input_objects(false);
+              }
+              else {
+                boost::shared_ptr< const tool > selected_tool = p->get_tool();
+
+                if (p->has_input_configuration()) {
+                  /* Add the main input (must exist) */
+                  dialog.populate_tool_list(registry.tools_by_mime_type(p->get_input_configuration()->get_primary_object_descriptor().second.sub_type()));
+
+                  if (selected_tool) {
+                    dialog.select_tool(p->get_input_configuration().get(), p->get_tool()->get_name());
+                  }
+
+                  dialog.allow_tool_selection(false);
+                }
+                else {
+                  if (selected_tool) {
+                    wxMessageDialog(this, wxString(boost::str(
+                             boost::format("Tool %s is improperly initialised!") %
+                               selected_tool->get_name()).c_str(), wxConvLocal),
+                             wxT("Warning: tool problem"), wxOK).ShowModal();
+                  }
+                  else {
+                    wxMessageDialog(this, wxT("Tool is unknown!"),
+                             wxT("Warning: tool problem"), wxOK).ShowModal();
+                  }
+                }
+              }
+
+              if (dialog.ShowModal()) {
+              }
+            }
+            break;
+          case cmID_CONFIGURE:
               /* Attach tool display */
-              install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
-             
+              install_tool_display(p->get_monitor(), p->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
+
               /* Register handler to on update the object view after process termination */
-              tp->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, tp, true));
-             
+              p->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, object_view->GetItemParent(selection), p, false));
+
               /* Start tool configuration phase */
-              tp->configure(icon, boost::filesystem::path(object->get_location()));
+              p->reconfigure();
+            break;
+          default: {
+              /* Assume that a tool was selected */
+              wxMenu*     menu      = reinterpret_cast < wxMenu* > (e.GetEventObject());
+              cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
+
+              boost::shared_ptr< const tool::input_configuration > icon(menu_item->input_configuration.lock());
+
+              if (icon.get()) {
+                /* Create a temporary processor */
+                boost::shared_ptr< processor > tp(manager->construct(menu_item->the_tool, icon));
+
+                /* Attach the new processor by relating it to t */
+                tp->register_input(icon->get_primary_object_descriptor().first, object);
+
+                /* Attach tool display */
+                install_tool_display(tp->get_monitor(), tp->get_tool()->get_name() + " : " + boost::filesystem::path(object->get_location()).leaf());
+
+                /* Register handler to on update the object view after process termination */
+                tp->get_monitor()->once_on_completion(boost::bind(&project::update_after_configuration, this, selection, tp, true));
+
+                /* Start tool configuration phase */
+                tp->configure(icon, boost::filesystem::path(object->get_location()));
+              }
+              else {
+                wxMessageDialog(0, wxT("Selected tool configuration is not available.\n\nTool (") +
+                                    wxString(menu_item->the_tool->get_name().c_str(), wxConvLocal) +
+                                    wxT(") initialisation problem?"), wxT("Error"), wxOK).ShowModal();
+              }
             }
-            else {
-              wxMessageDialog(0, wxT("Selected tool configuration is not available.\n\nTool (") +
-                                  wxString(menu_item->the_tool->get_name().c_str(), wxConvLocal) +
-                                  wxT(") initialisation problem?"), wxT("Error"), wxOK).ShowModal();
-            }
-          }
-          break;
+            break;
+        }
+      }
+      catch (std::exception& e) {
+        wxMessageDialog(0, wxT("Error in command execution: \n") +
+                                    wxString(e.what(), wxConvLocal), wxT("Error"), wxOK).ShowModal();
       }
     }
 
@@ -645,6 +658,7 @@ namespace squadt {
      * \param[in] r whether or not to run the tool
      **/
     void project::update_after_configuration(wxTreeItemId s, boost::shared_ptr< processor > tp, bool r) {
+
       if (0 < tp->number_of_outputs()) {
         /* Add the processor to the project */
         if (synchronise_outputs_with_objects(s, tp)) {
@@ -676,13 +690,13 @@ namespace squadt {
     bool project::synchronise_outputs_with_objects(wxTreeItemId s, boost::shared_ptr< processor > tp) {
       if (object_view != 0) {
         std::set < std::string > existing;
-       
+
         /* Gather existing objects */
         wxTreeItemIdValue cookie;   // For wxTreeCtrl traversal
-       
+
         for (wxTreeItemId j = object_view->GetFirstChild(s, cookie); j.IsOk(); j = object_view->GetNextChild(s, cookie)) {
           boost::shared_ptr< processor::object_descriptor > object = static_cast < tool_data* > (object_view->GetItemData(j))->get_object();
-       
+
           if (object.get() != 0) {
             existing.insert(std::string(object_view->GetItemText(j).fn_str()));
           }
@@ -690,13 +704,13 @@ namespace squadt {
             remove_from_object_view(j);
           }
         }
-       
+
         std::auto_ptr < project_manager::conflict_list > conflicts(manager->get_conflict_list(tp));
-       
+
         if (tp->number_of_outputs() == 0 || 0 < conflicts->size()) {
           manager->remove(tp);
         }
-       
+
         if (0 < conflicts->size()) {
           for (project_manager::conflict_list::iterator j = conflicts->begin(); j != conflicts->end(); ++j) {
             report_conflict(boost::str(boost::format("The file %s was already part of the project but has now also been produced by %s."
@@ -716,7 +730,7 @@ namespace squadt {
 
           /// Add new outputs as objects to view
           BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-            std::set< std::string >::const_iterator existing_object(existing.find(boost::filesystem::path(object->get_location()).leaf()));
+            std::set< std::string >::iterator existing_object(existing.find(boost::filesystem::path(object->get_location()).leaf()));
 
             if (existing_object == existing.end()) {
               add_to_object_view(s, object);
@@ -738,7 +752,7 @@ namespace squadt {
             }
           }
         }
-       
+
         return conflicts->size() == 0;
       }
 
@@ -776,7 +790,7 @@ namespace squadt {
 
           if (owner.get() != 0) {
             wxTreeItemIdValue cookie;
-       
+
             for (wxTreeItemId j = view->GetFirstChild(id, cookie); j.IsOk(); j = view->GetNextChild(id, cookie)) {
               boost::shared_ptr< processor::object_descriptor > object = static_cast < tool_data* > (view->GetItemData(j))->get_object();
 
@@ -787,7 +801,7 @@ namespace squadt {
 
             wxTreeItemId item = view->AppendItem(id,
                    wxString(boost::filesystem::path(target->get_location()).leaf().c_str(), wxConvLocal), target->get_status());
-           
+
             view->SetItemData(item, new tool_data(*static_cast< squadt::GUI::project* > (view->GetParent()), target));
 
             if (!view->IsExpanded(id)) {

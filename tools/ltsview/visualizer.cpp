@@ -7,16 +7,42 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visualizer.cpp
-/// \brief Add your file description here.
+/// \brief Implements the visualizer
 
+#include "wx.hpp" // precompiled headers
+
+#include "visualizer.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream> 
-#include "visualizer.h"
+#include <fstream> 
+#include "cluster.h"
+#include "lts.h"
+#include "mediator.h"
+#include "primitivefactory.h"
+#include "settings.h"
+#include "state.h"
+#include "transition.h"
+#include "visobjectfactory.h"
+
+extern "C" {
+#ifdef __APPLE__
+# include <OpenGL/gl.h>
+# include <OpenGL/glu.h>
+#else
+# if defined(_WIN32_) || defined(_MSC_VER)
+#  include <windows.h>
+#  undef __in_range // For STLport
+# endif
+# include <GL/gl.h>
+# include <GL/glu.h>
+#endif
+}
+
 using namespace std;
 using namespace Utils;
-#define SELECT_BLEND 0.3f
 
+#define SELECT_BLEND 0.3f
 
 Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   lts = NULL;
@@ -24,6 +50,7 @@ Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   settings = ss;
   settings->subscribe(BranchRotation,this);
   settings->subscribe(BranchTilt,this);
+  settings->subscribe(ClusterHeight,this);
   settings->subscribe(InterpolateColor1,this);
   settings->subscribe(InterpolateColor2,this);
   settings->subscribe(LongInterpolation,this);
@@ -89,6 +116,7 @@ void Visualizer::notify(SettingID s) {
       update_abs = true;
       break;
     case BranchRotation:
+    case ClusterHeight:
       update_matrices = true;
       update_abs = true;
       break;
@@ -453,75 +481,83 @@ float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
   return r * cos(phi) / sqrt(1.0f - f*f);
 }
 
-void Visualizer::updateColors() {
+void Visualizer::updateColors()
+{
   Cluster *cl;
   RGB_Color c;
-  if (mediator->getMarkStyle() == NO_MARKS) {
+  if (mediator->getMarkStyle() == NO_MARKS)
+  {
     Interpolater ipr(settings->getRGB(InterpolateColor1),
         settings->getRGB(InterpolateColor2),
         lts->getMaxRanks(),
         settings->getBool(LongInterpolation));
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+        ++ci)
+    {
       cl = *ci;
       c = ipr.getColor(cl->getRank());
-      if (cl->isSelected()) {
+      if (cl->isSelected())
+      {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
       }
       // set color of cluster cl
       visObjectFactory->updateObjectColor(cl->getVisObject(),c);
       // and its branches
-      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
-        if (cl->getBranchVisObject(i) != -1) {
-          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
+      {
+        if (cl->getBranchVisObject(i) != -1)
+        {
+          visObjectFactory->updateObjectColor(
+              cl->getBranchVisObject(i),c);
         }
       }
     }
-  } else {
-    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end(); ++ci) {
+  }
+  else // mediator->getMarkStyle() != NO_MARKS
+  {
+    for (Cluster_iterator ci = lts->getClusterIterator(); !ci.is_end();
+        ++ci)
+    {
       cl = *ci;
       vector<RGB_Color> rule_colours;
 
-      // set color of cluster cl
+      c = RGB_WHITE;
       if (mediator->isMarked(cl)) 
       {
-        if (mediator->getMatchStyle() != MATCH_MULTI)
+        if (mediator->getMarkStyle() == MARK_STATES &&
+            mediator->getMatchStyle() == MATCH_MULTI)
         {
-          c = settings->getRGB(MarkedColor);
-        }
-        else
-        {
-          c = settings->getRGB(StateColor);
-
           vector<int> cluster_rules;
-
           cl->getMatchedRules(cluster_rules);
-
           for(size_t i = 0; i <  cluster_rules.size(); ++i)
           {
             rule_colours.push_back(
                     mediator->getMarkRuleColor(cluster_rules[i]));
-
           }
         }
-
+        else
+        {
+          c = settings->getRGB(MarkedColor);
+        }
       } 
-      else {
-        c = RGB_WHITE;
-      }
       
-      if (cl->isSelected()) {
+      if (cl->isSelected())
+      {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
       }
 
       visObjectFactory->updateObjectColor(cl->getVisObject(),c);
-      visObjectFactory->updateObjectTexture(cl->getVisObject(), 
-                                           rule_colours);
+      visObjectFactory->updateObjectTexture(cl->getVisObject(),
+          rule_colours);
 
-      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i) {
-        if (cl->getBranchVisObject(i) != -1) {
-          visObjectFactory->updateObjectColor(cl->getBranchVisObject(i),c);
-          visObjectFactory->updateObjectTexture(cl->getBranchVisObject(i), 
-                                                rule_colours);
+      for (int i = 0; i < cl->getNumBranchVisObjects(); ++i)
+      {
+        if (cl->getBranchVisObject(i) != -1)
+        {
+          visObjectFactory->updateObjectColor(
+              cl->getBranchVisObject(i),c);
+          visObjectFactory->updateObjectTexture(
+              cl->getBranchVisObject(i),rule_colours);
         }
       }
     }
@@ -531,15 +567,6 @@ void Visualizer::updateColors() {
 void Visualizer::sortClusters(Point3D viewpoint) {
   visObjectFactory->sortObjects(viewpoint);
 }
-
-/*
-bool Visualizer::isMarked(Cluster* c) {
-  return c != NULL &&
-           ((markStyle == MARK_STATES && c->hasMarkedState()) ||
-            (markStyle == MARK_MULTI && c->hasMarkedState())  ||
-            (markStyle == MARK_DEADLOCKS && c->hasDeadlock()) ||
-            (markStyle == MARK_TRANSITIONS && c->hasMarkedTransition()));
-}*/
 
 // ------------- STATES --------------------------------------------------------
 
@@ -935,17 +962,6 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
     }
   }
 }
-
-/*
-bool Visualizer::isMarked(State* s) {
-  return ((markStyle == MARK_STATES && s->isMarked()) || 
-          (markStyle == MARK_DEADLOCKS && s->isDeadlock()));
-}
-
-bool Visualizer::isMultiMarked(State* s) 
-{
-  return (markStyle == MARK_MULTI && s->isMarked());
-}*/
 
 // ------------- FORCE DIRECTED ------------------------------------------------
 
@@ -1450,3 +1466,57 @@ void Visualizer::drawLoop(State* state) {
 bool Visualizer::isMarked(Transition* t) {
   return markStyle == MARK_TRANSITIONS && t->isMarked();
 }*/
+
+void Visualizer::exportToText(std::string filename)
+{
+  if (lts == NULL)
+  {
+    return ;
+  }
+  std::map< Cluster*, unsigned int > clus_id;
+  unsigned int N = 0;
+  float ch = settings->getFloat(ClusterHeight);
+  Cluster_iterator ci(lts,false);
+  std::ofstream file(filename.c_str());
+  if (!file)
+  {
+    return ;
+  }
+
+  file << "Legend:\n";
+  file << "  cone(x,y,z): a cone with top radius x, base radius y and height z\n";
+  file << "  sphere(x):   a sphere with radius x\n";
+  file << "  at angle(x): cluster is on the rim of the base of its parent cluster at angle x\n";
+  file << "               If cluster is a cone, the center of its top side is placed there.\n";
+  file << "               If cluster is a sphere, the center of the sphere is placed there.\n";
+  file << "---------------------------------------------------------------------------------\n";
+
+  for ( ; !ci.is_end(); ++ci)
+  {
+    file << "rank " << (*ci)->getRank() << ": cluster " << N << " ";
+    if ((*ci)->hasDescendants())
+    {
+      file << "cone(" << (*ci)->getTopRadius() << "," << (*ci)->getBaseRadius()
+      << "," << ch << ") ";
+    }
+    else
+    {
+      file << "sphere(" << (*ci)->getTopRadius() << ") ";
+    }
+    if ((*ci)->isCentered())
+    {
+      file << "centered";
+    }
+    else
+    {
+      file << "at angle(" << (*ci)->getPosition() << ")";
+    }
+    if ((*ci)->getAncestor() != NULL)
+    {
+      file << " below parent cluster " << clus_id[(*ci)->getAncestor()];
+    }
+    file << std::endl;
+    clus_id[*ci] = N;
+    ++N;
+  }
+}

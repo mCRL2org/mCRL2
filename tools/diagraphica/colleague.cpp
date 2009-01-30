@@ -8,6 +8,7 @@
 //
 /// \file ./colleague.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "colleague.h"
 

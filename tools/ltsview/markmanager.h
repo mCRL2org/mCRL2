@@ -11,13 +11,15 @@
 
 #ifndef MARKMANAGER_H
 #define MARKMANAGER_H
-#include <list>
 #include <vector>
-#include "lts.h"
-#include "state.h"
 #include "utils.h"
+#include "mcrl2/atermpp/set.h"
 
 struct MarkRule;
+class LTS;
+class State;
+class Cluster;
+class Transition;
 
 class MarkManager {
   public:
@@ -26,25 +28,28 @@ class MarkManager {
 
     /* Mark rules */
     int createMarkRule(int param,bool neg,Utils::RGB_Color col,
-        std::vector<bool> &vals);
+        atermpp::set<ATerm> vals);
     void removeMarkRule(int mr);
     int getMarkRuleParam(int mr);
     bool getMarkRuleActivated(int mr);
     bool getMarkRuleNegated(int mr);
     Utils::RGB_Color getMarkRuleColor(int mr);
-    void getMarkRuleValues(int mr,std::vector<bool> &vals);
+    atermpp::set<ATerm> getMarkRuleValues(int mr);
     void setMarkRuleData(int mr,int param,bool neg,Utils::RGB_Color col,
-        std::vector<bool> &vals);
+        atermpp::set<ATerm> vals);
     void setMarkRuleActivated(int mr,bool act);
+
     void setMatchStyle(Utils::MatchStyle ms);
     Utils::MatchStyle getMatchStyle();
+    void setMatchStyleClusters(Utils::MatchStyle ms);
+    Utils::MatchStyle getMatchStyleClusters();
 
     int getNumMarkedStates();
     int getNumMarkedTransitions();
     void setLTS(LTS *l,bool need_reset);
     void setMarkStyle(Utils::MarkStyle ms);
     Utils::MarkStyle getMarkStyle();
-    void setActionMark(std::string label,bool b);
+    void setActionMark(int l,bool b);
     void markClusters();
 
     bool isMarked(State *s);
@@ -52,13 +57,11 @@ class MarkManager {
     bool isMarked(Transition *t);
 
   private:
-    //std::list< State* > marked_states;
-    //std::list< State* > unmarked_states;
-    //std::list< int > active_mark_rules;
     std::vector< MarkRule* > mark_rules;
     std::vector< bool* > label_marks;
     std::vector< MarkRule* >::iterator first_free_mark_rule;
     Utils::MatchStyle match_style;
+    Utils::MatchStyle match_style_clusters;
     Utils::MarkStyle mark_style;
     int num_marked_states_any;
     int num_marked_states_all;
@@ -68,7 +71,6 @@ class MarkManager {
 
     void activateMarkRule(int mr);
     void deactivateMarkRule(int mr);
-    void changeMatchStyle(Utils::MatchStyle ms);
     bool matchesRule(State *s,int mr);
     void recomputeMarkedStateNumbers();
     void reset();

@@ -1,8 +1,0 @@
-project toolset/formcheck ;
-
-tool formcheck
-       : formcheck.cpp
-         /libraries//old_data
-       ;
-
-install-tools formcheck ;

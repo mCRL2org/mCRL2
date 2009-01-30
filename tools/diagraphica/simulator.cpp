@@ -8,6 +8,7 @@
 //
 /// \file ./simulator.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "simulator.h"
 
@@ -72,7 +73,7 @@ Simulator::~Simulator()
 
     delete timerAnim;
     timerAnim = NULL;
-};
+}
 
 
 // -- get functions ---------------------------------------------

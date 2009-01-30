@@ -40,6 +40,17 @@ case $host in
     HOST_OS="BSD"
     ;;
   *-*-darwin*)
+    case $host in
+      arm-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=arm"
+      ;;
+      i386-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=x86"
+      ;;
+      powerpc-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=power"
+      ;;
+    esac
     HOST_OS="MACOSX"
     R_CFLAGS="-Wno-unused -O3"
     R_CXXFLAGS="-Wno-unused -O3"
@@ -82,6 +93,17 @@ BUILD_OPTIONS="${BUILD_OPTIONS} address-model=${ADDRESS_MODEL}"
 # Checks for programs.
 AC_PROG_CPP
 AC_PROG_CXX
+
+#check if the g++ compiler works
+AC_CACHE_CHECK([whether the C++ compiler works], [avahi_cv_sys_cxx_works], [
+    AC_LANG_PUSH([C++])
+    AC_COMPILE_IFELSE([int main() { }], [avahi_cv_sys_cxx_works=yes],
+        [avahi_cv_sys_cxx_works=no])
+    AC_LANG_POP([C++])
+    ])
+[ if [ "x$avahi_cv_sys_cxx_works" = "xno" ]; then ]
+    AC_MSG_FAILURE([The C++ compiler does not work. Please (re)install the C++ compiler])
+[ fi ]
 
 # Check for compatible flex
 AC_CHECK_PROG([FLEX], [flex], [flex], [])
@@ -215,7 +237,7 @@ if test "x$enable_profile" = xyes; then
 fi
 
 # Check for debug/profile options
-AC_ARG_WITH(
+AC_ARG_ENABLE(
   [static],
   AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
@@ -244,6 +266,9 @@ AC_ARG_ENABLE(
 if test "x$enable_deprecated" = xyes; then
   BUILD_OPTIONS="--enable-deprecated $BUILD_OPTIONS"
 fi
+
+AC_CHECK_LIB([dl], [dlopen], DL=dl, )
+AC_SUBST([DL],[])
 
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
@@ -366,49 +391,49 @@ if test ${with_cadp}; then
 fi
 AC_MSG_RESULT($USE_BCG)
 
-AC_ARG_WITH(
-  [cvc],
-  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])  
-)
-USE_CVC3=no
-if test ${with_cvc}; then
-  AC_MSG_CHECKING([for CVC3 (with GMP) in $with_cvc])
-  CPPFLAGS="-I${with_cvc}/include/cvc3"
-  AC_LANG_PUSH(C++)
-  AC_COMPILE_IFELSE(
-     [
-      #include <$with_cvc/include/cvc3/vc.h>
-     ],
-     [
-       LIBS="-L${with_cvc}/lib -lcvc3"
-       AC_LINK_IFELSE(
-       [
-        #include <$with_cvc/include/cvc3/vc.h>
-     
-        int main() {
-          return (0);
-        }
-       ],
-       [],
-       [
-         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
-         AC_LINK_IFELSE(
-         [
-          #include <$with_cvc/include/cvc3/vc.h>
-      
-          int main() {
-            return (0);
-          }
-         ],
-         [
-           USE_CVC="$with_cvc"
-           USE_CVC3=yes
-         ])
-       ])
-     ])
-  AC_LANG_POP()
-  AC_MSG_RESULT($USE_CVC3)
-fi
+#AC_ARG_WITH(
+#  [cvc],
+#  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])  
+#)
+#USE_CVC3=no
+#if test ${with_cvc}; then
+#  AC_MSG_CHECKING([for CVC3 (with GMP) in $with_cvc])
+#  CPPFLAGS="-I${with_cvc}/include/cvc3"
+#  AC_LANG_PUSH(C++)
+#  AC_COMPILE_IFELSE(
+#     [
+#      #include <$with_cvc/include/cvc3/vc.h>
+#     ],
+#     [
+#       LIBS="-L${with_cvc}/lib -lcvc3"
+#       AC_LINK_IFELSE(
+#       [
+#        #include <$with_cvc/include/cvc3/vc.h>
+#     
+#        int main() {
+#          return (0);
+#        }
+#       ],
+#       [],
+#       [
+#         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
+#         AC_LINK_IFELSE(
+#         [
+#          #include <$with_cvc/include/cvc3/vc.h>
+#      
+#          int main() {
+#            return (0);
+#          }
+#         ],
+#         [
+#           USE_CVC="$with_cvc"
+#           USE_CVC3=yes
+#         ])
+#       ])
+#     ])
+#  AC_LANG_POP()
+#  AC_MSG_RESULT($USE_CVC3)
+#fi
 AC_SUBST([USE_CVC],[])
 
 # Check for Boost C++ library
@@ -518,30 +543,35 @@ AC_SUBST([OPENGL_NAME],[])
 
 # Check for wxWidgets
 AC_ARG_WITH(
-  [wx],
-  AS_HELP_STRING([--with-wx=DIR],[use wxWidgets configuration program wx-config in DIR])
+  [wx-config],
+  AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
-if test $with_wx; then
-  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx/wx-config],[],[$with_wx])
-else 
+if test "$with_wx_config"; then
+  if test $($with_wx_config --version 2>/dev/null); then
+    WX_CONFIG="$with_wx_config"
+  fi
+else
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
-fi
-if test -z $WX_CONFIG; then
-  if test $with_wx; then
-    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[$with_wx/wx-config-2.8],[],[$with_wx])
-  else 
+  if test -z $WX_CONFIG; then
     AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
   fi
 fi
-if test $WX_CONFIG; then
+if test "$WX_CONFIG"; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl,xml,html,adv)"
+  if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="shared"
+  else
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="static"
+  fi
 else
   USE_WX=no
 fi
-AC_SUBST([WX_CONFIG],[])
+AC_SUBST([WX_TYPE],[])
 AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_BASE_LDFLAGS],[])
 AC_SUBST([WX_GL_LDFLAGS],[])
@@ -620,7 +650,6 @@ AC_MSG_RESULT([
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
      

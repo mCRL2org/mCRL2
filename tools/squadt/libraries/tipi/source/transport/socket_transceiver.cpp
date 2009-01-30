@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <iostream>
 #include <sstream>
 
@@ -39,7 +41,7 @@ namespace transport {
         m_buffer.reset(new char[input_buffer_size + 1]);
 
         /* Clear buffer */
-        for (size_t i = 0; i < input_buffer_size; ++i) {
+        for (size_t i = 0; i <= input_buffer_size; ++i) {
           m_buffer[i] = 0;
         }
 
@@ -123,18 +125,18 @@ namespace transport {
 
       if (!w.expired()) {
         boost::mutex::scoped_lock s(m_send_lock);
-       
+
         /* Wait until send operations complete */
         if (0 < m_send_count) {
           m_send_monitor.wait(s);
         }
-        
+
         boost::mutex::scoped_lock ll(m_operation_lock);
-       
+
         boost::system::error_code e;
-       
+
         m_socket.close(e);
-       
+
         if (e) { // An error occurred.
           throw boost::system::system_error(e.value(), boost::system::get_system_category());
         }
@@ -185,13 +187,13 @@ namespace transport {
           basic_transceiver::deliver(std::string(m_buffer.get()));
 
           /* Clear buffer */
-          for (size_t i = 0; i < input_buffer_size; ++i) {
+          for (size_t i = 0; i <= input_buffer_size; ++i) {
             m_buffer[i] = 0;
           }
 
           m_socket.async_receive(asio::buffer(m_buffer.get(), input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));
-       
+
           /* Make sure the scheduler is running */
           m_scheduler->run();
         }
@@ -259,7 +261,7 @@ namespace transport {
         boost::mutex::scoped_lock l(m_operation_lock);
 
         /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
-        boost::shared_array < char > buffer(new char[d.size() + 1]);
+        boost::shared_array< char > buffer(new char[d.size() + 1]);
 
         d.copy(buffer.get(), d.size(), 0);
 
@@ -291,7 +293,7 @@ namespace transport {
         s << d.rdbuf();
 
         /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
-        shared_array < char > buffer(new char[s.str().size() + 1]);
+        shared_array< char > buffer(new char[s.str().size() + 1]);
 
         s.str().copy(buffer.get(), s.str().size(), 0);
 

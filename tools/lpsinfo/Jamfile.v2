@@ -5,5 +5,3 @@ tool lpsinfo
          /libraries//lps
        : <squadt-connectivity>implemented
        ;
-
-install-tools lpsinfo ;

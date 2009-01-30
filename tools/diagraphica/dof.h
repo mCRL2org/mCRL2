@@ -59,7 +59,7 @@ public:
         ID_TEXT_NONE,
         ID_TEXT_ALL,
         ID_TEXT_ATTR,
-        ID_TEXT_VAL,
+        ID_TEXT_VAL
     };
     
 protected:

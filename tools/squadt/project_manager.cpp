@@ -9,6 +9,8 @@
 /// \file project_manager.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <fstream>
 #include <map>
@@ -16,10 +18,12 @@
 #include <set>
 #include <memory>
 
+#include <boost/version.hpp>
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <boost/ref.hpp>
+#include <boost/thread.hpp> // workaround for boost::thread that includes errno.h
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/function.hpp>
@@ -30,6 +34,21 @@
 #include "settings_manager.hpp"
 #include "type_registry.hpp"
 #include "visitors.hpp"
+
+inline std::string filename(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.filename();
+#else
+  return p.leaf();
+#endif
+}
+inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
+#if (103500 < BOOST_VERSION)
+  return p.parent_path();
+#else
+  return p.branch_path();
+#endif
+}
 
 namespace squadt {
   /// \cond INTERNAL_DOCS
@@ -56,11 +75,11 @@ namespace squadt {
 
     assert(!l.empty());
 
-    if (l.leaf() == settings_manager::project_definition_base_name) {
-      store = l.branch_path();
+    if (filename(l) == settings_manager::project_definition_base_name) {
+      store = parent_path(l);
     }
     else {
-      store = (exists(l) && !is_directory(l)) ? l.branch_path() : l;
+      store = (exists(l) && !is_directory(l)) ? parent_path(l) : l;
     }
 
     filesystem::path project_file = store / filesystem::path(settings_manager::project_definition_base_name);
@@ -77,27 +96,24 @@ namespace squadt {
           throw std::runtime_error("Unable to load project file `"+project_file.string()+"'.");
         }
       }
-      else {
-        try {
-          visitors::restore(*this, project_file);
-        }
-        catch (std::exception&) {
-          if (b) {
-            filesystem::remove(project_file);
+      else if (b) {
+        /* Project description file is probably broken */
+        filesystem::remove(project_file);
 
-            /* Project description file is probably broken */
-            import_directory(l);
-          
-            /* Create initial project description file */
-            visitors::store(*this, project_file);
-          }
-          else {
-            throw;
-          }
-        }
+        import_directory(store);
+
+        /* Create initial project description file */
+        visitors::store(*this, project_file);
+      }
+      else {
+        visitors::restore(*this, project_file);
       }
     }
     else if (b) {
+      if (!exists(store.root_path())) { // root path need not exist on Windows
+        throw std::runtime_error("Unable to create project store, " + store.root_path().string() + " does not exist.");
+      }
+
       filesystem::create_directories(store);
 
       /* Create initial project description file */
@@ -138,7 +154,7 @@ namespace squadt {
       write();
     }
   }
-  
+
   /**
    * \param p a reference to the processor to add
    * \pre p->impl->manager.lock().get() == m_interface.lock().get()
@@ -201,7 +217,7 @@ namespace squadt {
 
     for (bf::directory_iterator i(l); i != end; ++i) {
       if (!is_directory(*i) && !symbolic_link_exists(*i)) {
-        if ((*i).leaf() != settings_manager::project_definition_base_name) {
+        if (filename(*i) != settings_manager::project_definition_base_name) {
           import_file(*i);
         }
       }
@@ -227,9 +243,15 @@ namespace squadt {
    *      - f(p) = 1 + f(max i : f(p.inputs[i].generator))
    **/
   void project_manager_impl::sort_processors() {
-    unsigned int number = 0; /* The number of */
+    unsigned int number = 0; /* The number of inputs */
 
-    std::map < processor*, unsigned short > weights;
+    struct compare_by_weight {
+      static bool less(std::map< processor*, unsigned int >& weights, boost::shared_ptr< processor > const& a, boost::shared_ptr< processor > const& b) {
+        return weights[a.get()] < weights[b.get()];
+      }
+    };
+
+    std::map < processor*, unsigned int > weights;
 
     /* Compute weights */
     processor_list::const_iterator j = processors.begin(); /* Lower bound */
@@ -263,7 +285,7 @@ namespace squadt {
               }
               else {
                 unsigned int current_weight = weights[target.get()];
-             
+
                 if (maximum_weight < current_weight) {
                   maximum_weight = current_weight;
                 }
@@ -279,11 +301,7 @@ namespace squadt {
     }
 
     /* Do the actual sorting */
-    std::stable_sort(processors.begin(), processors.end(), boost::bind(std::less< unsigned short >(), 
-                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&boost::shared_ptr< processor >::get, _1)),
-                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
-                                boost::bind(&boost::shared_ptr< processor >::get, _2))));
+    std::stable_sort(processors.begin(), processors.end(), boost::bind(&compare_by_weight::less, weights, _1, _2));
   }
 
   /**
@@ -458,7 +476,7 @@ namespace squadt {
 
     assert(exists(s) && !is_directory(s));
 
-    path           destination_path  = store / path(d.empty() ? s.leaf() : d);
+    path           destination_path  = store / path(d.empty() ? filename(s) : d);
     boost::shared_ptr< processor > p = processor::create(m_interface.lock());
 
     if (s != destination_path && !exists(destination_path)) {
@@ -466,8 +484,8 @@ namespace squadt {
     }
 
     /* Add the file to the project */
-    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(destination_path.leaf()),
-                                destination_path.leaf(), processor::object_descriptor::original);
+    p->register_output("", global_build_system.get_type_registry().mime_type_from_name(filename(destination_path)),
+                                filename(destination_path), processor::object_descriptor::original);
 
     processors.push_back(p);
 
@@ -618,14 +636,16 @@ namespace squadt {
       boost::iterator_range< processor::output_object_iterator > output_range(p->get_output_iterators());
 
       BOOST_FOREACH(boost::shared_ptr< processor::object_descriptor > const& object, output_range) {
-        objects.insert(bf::path(object->get_location()).leaf());
+        objects.insert(filename(bf::path(object->get_location())));
       }
     }
 
     for (bf::directory_iterator i(store); i != bf::directory_iterator(); ++i) {
-      if (objects.find((*i).leaf()) == objects.end()) {
-        if (bf::exists((*i).leaf()) && !bf::is_directory((*i).leaf()) && !bf::symbolic_link_exists((*i).leaf())) {
-          bf::remove((*i).leaf());
+      std::string name(filename(*i));
+
+      if (objects.find(name) == objects.end()) {
+        if (bf::exists(name) && !bf::is_directory(name) && !bf::symbolic_link_exists(name)) {
+          bf::remove(name);
         }
       }
     }
@@ -664,13 +684,13 @@ namespace squadt {
   }
 
   std::string project_manager::get_name() const {
-    return (impl->store.leaf());
+    return (filename(impl->store));
   }
 
   void project_manager_impl::write() const {
     boost::filesystem::path project_file(settings_manager::path_concatenate(store,
              settings_manager::project_definition_base_name));
- 
+
     visitors::store(*this, project_file);
   }
 

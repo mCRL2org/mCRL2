@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file conedb.h
-/// \brief Add your file description here.
+/// \brief Header file for the ConeDB class.
 
 #ifndef CONEDB_H
 #define CONEDB_H

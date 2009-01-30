@@ -9,20 +9,25 @@
 /// \file liblts.cpp
 
 #include <string>
+#include <set>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
+#include <boost/bind.hpp>
+#include "aterm2.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 #include <bcg_user.h>
 #endif
 
@@ -168,6 +173,7 @@ lts::~lts()
   {
     ATunprotectArray(label_values);
   }
+  ATunprotect(&extra_data);
 
   free(state_values);
   free(taus);
@@ -194,6 +200,9 @@ void p_lts::init(bool state_info, bool label_info)
   transitions_size = 0;
   ntransitions = 0;
   transitions = NULL;
+
+  extra_data = NULL;
+  ATprotect(&extra_data);
   
   this->type = lts_none;
   this->state_info = state_info;
@@ -216,6 +225,9 @@ void p_lts::init(p_lts const &l)
   type = l.type;
   state_info = l.state_info;
   label_info = l.label_info;
+
+  extra_data = l.extra_data;
+  ATprotect(&extra_data);
  
   if ( state_info )
   {
@@ -266,6 +278,7 @@ void p_lts::clear(bool state_info, bool label_info)
   clear_labels();
   clear_transitions();
   clear_type();
+  extra_data = NULL;
 
   this->state_info = state_info;
   this->label_info = label_info;
@@ -717,6 +730,25 @@ lts_type p_lts::detect_type(istream &is)
       }
     }
   }
+
+  // detect lts_dot
+  if ( r >= 7 )
+  {
+    // we assume that "digraph" is completely in buf in case this is a dot file
+    int i = 0;
+    // skip any spaces or tabs
+    while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
+    {
+      i++;
+    }
+    // at least need to start with digraph
+    if ( (i+7 <= r) && !memcmp(buf+i,"digraph",7) )
+    {
+      i = i + 7;
+      gsVerboseMsg("detected DOT input file\n");
+      return lts_dot;
+    }
+  }
   
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
@@ -786,7 +818,7 @@ lts_type p_lts::detect_type(istream &is)
     }
   }
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   // detect lts_bcg
   if ( r >= 2 )
   {
@@ -835,7 +867,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
   if ( type == lts_none )
   {
     type = detect_type(filename);
-    if ( type == lts_none )
+    if ( type == lts_none && (type = guess_format(filename)) == lts_none )
     {
       gsVerboseMsg("could not determine type of input file '%s'\n",filename.c_str());
       return false;
@@ -863,9 +895,8 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
           return read_from_fsm(filename);
       }
     case lts_dot:
-      gsVerboseMsg("cannot read dot files\n");
-      return false;
-#ifdef MCRL2_BCG
+      return read_from_dot(filename);
+#ifdef USE_BCG
     case lts_bcg:
       return read_from_bcg(filename);
 #endif
@@ -909,9 +940,8 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
           return read_from_fsm(is);
       }
     case lts_dot:
-      gsVerboseMsg("cannot read dot files\n");
-      return false;
-#ifdef MCRL2_BCG
+      return read_from_dot(is);
+#ifdef USE_BCG
     case lts_bcg:
       gsVerboseMsg("cannot read BCG files from streams\n");
       return false;
@@ -949,7 +979,12 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl2:
           return write_to_fsm(filename,*extra.get_mcrl2_spec());
         default:
-          return write_to_fsm(filename);
+          if ( this->type == lts_mcrl2 && extra_data != NULL )
+          {
+            return write_to_fsm(filename,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } else {
+            return write_to_fsm(filename);
+          }
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
@@ -962,7 +997,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         opts.print_states = false;
         return write_to_dot(filename,opts);
       }
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       return write_to_bcg(filename);
 #endif
@@ -992,7 +1027,12 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         case le_mcrl2:
           return write_to_fsm(os,*extra.get_mcrl2_spec());
         default:
-          return write_to_fsm(os);
+          if ( this->type == lts_mcrl2 && extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+          {
+            return write_to_fsm(os,lts_mcrl2,ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0));
+          } else {
+            return write_to_fsm(os);
+          }
       }
     case lts_dot:
       if ( extra.get_type() == le_dot )
@@ -1005,7 +1045,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         opts.print_states = false;
         return write_to_dot(os,opts);
       }
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     case lts_bcg:
       gsVerboseMsg("cannot write BCG files to streams\n");
       return false;
@@ -1289,7 +1329,7 @@ string p_lts::p_state_value_str(unsigned int state)
   if ( state_info )
   {
     ATerm value = state_values[state];
-    if ( ATisAppl(value) ) // XXX better check for mCRL2
+    if ( ATisAppl(value) && !strcmp(ATgetName(ATgetAFun((ATermAppl) value)),"STATE") )
     {
       s = "(";
       ATermList args = ATgetArguments((ATermAppl) value);
@@ -1446,6 +1486,273 @@ void lts::remove_state_values()
   p_remove_state_values();
 }
 
+bool lts::has_state_parameters()
+{
+  return state_info && ( ( type == lts_mcrl2 ) ||
+                         ( type == lts_mcrl ) ||
+                         ( type == lts_dot ) ||
+                         ( type == lts_fsm ) );
+}
+
+unsigned int lts::num_state_parameters()
+{
+  if ( type == lts_mcrl2 )
+  {
+    if ( is_timed_pair((ATermAppl) state_values[0]) )
+    {
+      return ATgetArity(ATgetAFun(ATAgetArgument((ATermAppl) state_values[0],0)));
+    } else {
+      return ATgetArity(ATgetAFun((ATermAppl) state_values[0]));
+    }
+  } else if ( type == lts_mcrl || type == lts_fsm || type == lts_dot )
+  {
+    return ATgetLength((ATermList) state_values[0]);
+  }
+
+  assert(0);
+  return 0;
+}
+
+ATerm lts::state_parameter_name(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    if ( extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+    {
+      return ATelementAt(ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0),idx);
+    } else {
+      char s[2+sizeof(unsigned int)*3];
+      sprintf(s,"p%u",idx);
+      return (ATerm) gsMakeDataVarId(gsString2ATermAppl(s),(ATermAppl) state_parameter_sort(idx));
+    }
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"p%u",idx);
+    return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),0);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::state_parameter_name_str(unsigned int idx)
+{
+  if ( type == lts_mcrl2 || type == lts_mcrl )
+  {
+    if ( extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+    {
+      return ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0),idx),0)));
+    } else {
+      char s[2+sizeof(unsigned int)*3];
+      sprintf(s,"p%u",idx);
+      return s;
+    }
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    return ATgetName(ATgetAFun((ATermAppl) state_parameter_name(idx)));
+  }
+
+  assert(0);
+  return "";
+}
+
+ATerm lts::state_parameter_sort(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return (ATerm) gsGetSort((ATermAppl) get_state_parameter_value(0,idx));
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"D%u",idx);
+    return (ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue));
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    return ATgetArgument(ATAgetArgument(ATAelementAt((ATermList) state_values[0],idx),1),1);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::state_parameter_sort_str(unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(state_parameter_sort(idx),ppDefault);
+  } else if ( type == lts_mcrl )
+  {
+    char s[2+sizeof(unsigned int)*3];
+    sprintf(s,"D%u",idx);
+    return s;
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    return ATgetName(ATgetAFun((ATermAppl) state_parameter_sort(idx)));
+  }
+
+  assert(0);
+  return "";
+}
+
+ATerm lts::get_state_parameter_value(unsigned int state, unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return ATgetArgument((ATermAppl) state_values[state],idx);
+  } else if ( type == lts_mcrl )
+  {
+    return ATelementAt((ATermList) state_values[state],idx);
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    return ATgetArgument(ATAelementAt((ATermList) state_values[state],idx),0);
+  }
+
+  assert(0);
+  return NULL;
+}
+
+std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int idx)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(get_state_parameter_value(state,idx),ppDefault);
+  } else if ( type == lts_mcrl )
+  {
+    return ATwriteToString(get_state_parameter_value(state,idx));
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    std::string s = ATwriteToString(get_state_parameter_value(state,idx));
+    return s.substr(1,s.size()-2);
+  }
+
+  assert(0);
+  return "";
+}
+
+atermpp::set<ATerm> lts::get_label_values()
+{
+  atermpp::set<ATerm> r;
+  
+  for (unsigned int i=0; i<nlabels; i++)
+  {
+    r.insert(label_values[i]);
+  }
+
+  return r;
+}
+
+atermpp::set<ATerm> lts::get_state_values()
+{
+  atermpp::set<ATerm> r;
+  
+  for (unsigned int i=0; i<nstates; i++)
+  {
+    r.insert(state_values[i]);
+  }
+
+  return r;
+}
+
+atermpp::set<ATerm> lts::get_state_parameter_values(unsigned int idx)
+{
+  atermpp::set<ATerm> r;
+  
+  for (unsigned int i=0; i<nstates; i++)
+  {
+    r.insert(get_state_parameter_value(i,idx));
+  }
+
+  return r;
+}
+
+std::string lts::pretty_print_label_value(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(value,ppDefault);
+  } else if ( type == lts_mcrl || type == lts_fsm || type == lts_dot )
+  {
+    std::string s = ATwriteToString(value);
+    return s.substr(1,s.size()-2);
+  }
+
+  return ATwriteToString(value);
+}
+
+std::string lts::pretty_print_state_value(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    std::string s = "[";
+    for (unsigned int i=0; i<ATgetArity(ATgetAFun((ATermAppl) value)); i++)
+    {
+      if ( i > 0 )
+      {
+        s += ",";
+      }
+      s += PrintPart_CXX(ATgetArgument(value,i),ppDefault);
+    }
+    return s+"]";
+  }
+
+  return ATwriteToString(value);
+}
+
+std::string lts::pretty_print_state_parameter_value(ATerm value)
+{
+  if ( type == lts_mcrl2 )
+  {
+    return PrintPart_CXX(value,ppDefault);
+  } else if ( type == lts_fsm || type == lts_dot )
+  {
+    std::string s = ATwriteToString(value);
+    return s.substr(1,s.size()-2);
+  }
+
+  return ATwriteToString(value);
+}
+
+ATerm lts::get_extra_data()
+{
+  return extra_data;
+}
+
+void lts::set_extra_data(ATerm data)
+{
+  extra_data = data;
+}
+
+bool lts::has_data_specification()
+{
+  return extra_data != NULL &&
+         ATisAppl(extra_data) &&
+         !strcmp("mCRL2LTS1",ATgetName(ATgetAFun((ATermAppl) extra_data))) &&
+         !gsIsNil(ATAgetArgument((ATermAppl) extra_data,0));
+}
+
+old_data::data_specification lts::get_data_specification()
+{
+  assert(has_data_specification());
+
+  return old_data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
+}
+
+void lts::set_data_specification(old_data::data_specification spec)
+{
+  assert( type == lts_mcrl2 );
+
+  if ( extra_data == NULL )
+  {
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) spec, (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+  } else {
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) spec,0);
+  }
+}
+
 void p_lts::p_remove_state_values()
 {
   state_info = false;
@@ -1454,6 +1761,10 @@ void p_lts::p_remove_state_values()
     ATunprotectArray(state_values);
     free(state_values);
     state_values = NULL;
+  }
+  if ( type == lts_mcrl2 && extra_data != NULL )
+  {
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm) gsMakeNil(),1);
   }
 }
 
@@ -1830,24 +2141,28 @@ lts_type lts::guess_format(string const& s) {
 
     if ( ext == "aut" )
     {
-      gsVerboseMsg("detected AUT extension\n");
+      gsVerboseMsg("detected Aldebaran extension\n");
       return lts_aut;
+    } else if ( ext == "lts" )
+    {
+      gsVerboseMsg("detected mCRL2 extension\n");
+      return lts_mcrl2;
     } else if ( ext == "svc" )
     {
-      gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
-      return lts_mcrl2;
+      gsVerboseMsg("detected SVC extension; assuming mCRL format\n");
+      return lts_mcrl;
     } else if ( ext == "fsm" )
     {
-      gsVerboseMsg("detected FSM extension\n");
+      gsVerboseMsg("detected Finite State Machine extension\n");
       return lts_fsm;
     } else if ( ext == "dot" )
     {
-      gsVerboseMsg("detected dot extension\n");
+      gsVerboseMsg("detected GraphViz extension\n");
       return lts_dot;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
     } else if ( ext == "bcg" )
     {
-      gsVerboseMsg("detected BCG extension\n");
+      gsVerboseMsg("detected Binary Coded Graph extension\n");
       return lts_bcg;
 #endif
     }
@@ -1856,6 +2171,21 @@ lts_type lts::guess_format(string const& s) {
   return lts_none;
 }
 
+static std::string type_strings[] = { "unknown", "mcrl2", "aut", "mcrl", "svc", "fsm", "dot", "bcg" };
+
+static std::string type_desc_strings[] = { "unknown LTS format",
+                                           "mCRL2 LTS format",
+                                           "Aldebaran format (CADP)",
+                                           "mCRL SVC format",
+                                           "(generic) SVC format",
+                                           "Finite State Machine format",
+                                           "GraphViz format",
+                                           "Binary Coded Graph format (CADP)" };
+
+static std::string extension_strings[] = { "", "lts", "aut", "svc", "svc", "fsm", "dot", "bcg" };
+
+static std::string mime_type_strings[] = { "", "application/lts", "text/aut", "application/svc+mcrl", "application/svc", "text/fsm", "text/dot", "application/bcg" };
+
 lts_type lts::parse_format(std::string const& s) {
   if ( s == "aut" )
   {
@@ -1863,7 +2193,7 @@ lts_type lts::parse_format(std::string const& s) {
   } else if ( s == "mcrl" || s == "svc+mcrl")
   {
     return lts_mcrl;
-  } else if ( s == "mcrl2" || s == "svc+mcrl2")
+  } else if ( s == "mcrl2" || s == "lts")
   {
     return lts_mcrl2;
   } else if ( s == "svc" )
@@ -1875,7 +2205,7 @@ lts_type lts::parse_format(std::string const& s) {
   } else if ( s == "dot" )
   {
     return lts_dot;
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
   } else if ( s == "bcg" )
   {
     return lts_bcg;
@@ -1885,16 +2215,16 @@ lts_type lts::parse_format(std::string const& s) {
   return lts_none;
 }
 
-std::string p_lts::type_strings[]      = { "unknown", "mCRL2", "AUT", "mCRL", "SVC", "FSM", "dot", "BCG" };
-                                                                                                      
-std::string p_lts::extension_strings[] = { "", "svc", "aut", "svc", "svc", "fsm", "dot", "bcg" };
-
 std::string lts::string_for_type(const lts_type type) {
   return (type_strings[type]);
 }
 
 std::string lts::extension_for_type(const lts_type type) {
   return (extension_strings[type]);
+}
+
+std::string lts::mime_type_for_type(const lts_type type) {
+  return (mime_type_strings[type]);
 }
 
 lts_equivalence lts::parse_equivalence(std::string const& s)
@@ -1922,9 +2252,25 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   }
 }
 
-std::string p_lts::equivalence_strings[]      = { "unknown", "bisim", "branching-bisim", "sim", "trace", "weak-trace", "isomorph" };
+static std::string equivalence_strings[] = {
+  "unknown",
+  "bisim",
+  "branching-bisim",
+  "sim",
+  "trace",
+  "weak-trace",
+  "isomorph"
+};
 
-std::string p_lts::equivalence_desc_strings[] = { "unknown equivalence", "strong bisimilarity", "branching bisimilarity", "strong simulation equivalence", "trace equivalence", "weak trace equivalence", "isomorphism" };
+static std::string equivalence_desc_strings[] = {
+  "unknown equivalence",
+  "strong bisimilarity",
+  "branching bisimilarity",
+  "strong simulation equivalence",
+  "strong trace equivalence",
+  "weak trace equivalence",
+  "isomorphism"
+};
 
 std::string lts::string_for_equivalence(const lts_equivalence eq)
 {
@@ -1941,14 +2287,28 @@ lts_preorder lts::parse_preorder(std::string const& s)
   if ( s == "sim" )
   {
     return lts_pre_sim;
+  } else if ( s == "trace" ) {
+    return lts_pre_trace;
+  } else if ( s == "weak-trace" ) {
+    return lts_pre_weak_trace;
   } else {
     return lts_pre_none;
   }
 }
 
-std::string p_lts::preorder_strings[]      = { "unknown", "sim" };
+static std::string preorder_strings[] = {
+  "unknown",
+  "sim",
+  "trace",
+  "weak-trace"
+};
 
-std::string p_lts::preorder_desc_strings[] = { "unknown preorder", "strong simulation preorder" };
+static std::string preorder_desc_strings[] = {
+  "unknown preorder",
+  "strong simulation preorder",
+  "strong trace preorder",
+  "weak trace preorder"
+};
 
 std::string lts::string_for_preorder(const lts_preorder pre)
 {
@@ -1958,6 +2318,241 @@ std::string lts::string_for_preorder(const lts_preorder pre)
 std::string lts::name_of_preorder(const lts_preorder pre)
 {
   return preorder_desc_strings[pre];
+}
+
+void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec)
+{
+  FILE *f = fopen(filename.c_str(),"ab");
+  if ( f == NULL )
+  {
+    gsErrorMsg("could not open file '%s' to add extra LTS information\n",filename.c_str());
+    return;
+  }
+
+  ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
+  ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
+  ATerm arg3 = (ATerm) ((act_spec == NULL)?gsMakeNil():act_spec);
+  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
+
+  long position;
+  if ( (position = ftell(f)) == -1 )
+  {
+    gsErrorMsg("could not determine file size of '%s'; not adding extra information\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  if ( ATwriteToBinaryFile(data,f) == ATfalse )
+  {
+    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  unsigned char buf[8+12+1] = "XXXXXXXX   1STL2LRCm";
+  for (unsigned int i=0; i<8; i++)
+  {
+    buf[i] = position % 0x100;
+    position /= 0x100;
+  }
+  if ( fwrite(buf,1,8+12,f) != 8+12 )
+  {
+    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
+    fclose(f);
+    return;
+  }
+
+  fclose(f);
+}
+
+static const std::set<lts_type> &initialise_supported_lts_formats()
+{
+  static std::set<lts_type> s;
+  for (unsigned int i = lts_type_min; i<1+(unsigned int)lts_type_max; ++i)
+  {
+    if ( lts_none != (lts_type) i )
+    {
+      s.insert((lts_type) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_type> &lts::supported_lts_formats()
+{
+  static const std::set<lts_type> &s = initialise_supported_lts_formats();
+  return s;
+}
+
+static const std::set<lts_equivalence> &initialise_supported_lts_equivalences()
+{
+  static std::set<lts_equivalence> s;
+  for (unsigned int i = lts_equivalence_min; i<1+(unsigned int)lts_equivalence_max; ++i)
+  {
+    if ( lts_eq_none != (lts_equivalence) i )
+    {
+      s.insert((lts_equivalence) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_equivalence> &lts::supported_lts_equivalences()
+{
+  static const std::set<lts_equivalence> &s = initialise_supported_lts_equivalences();
+  return s;
+}
+
+static const std::set<lts_preorder> &initialise_supported_lts_preorders()
+{
+  static std::set<lts_preorder> s;
+  for (unsigned int i = lts_preorder_min; i<1+(unsigned int)lts_preorder_max; ++i)
+  {
+    if ( lts_pre_none != (lts_preorder) i )
+    {
+      s.insert((lts_preorder) i);
+    }
+  }
+  return s;
+}
+const std::set<lts_preorder> &lts::supported_lts_preorders()
+{
+  static const std::set<lts_preorder> &s = initialise_supported_lts_preorders();
+  return s;
+}
+
+template<typename T>
+static bool lts_named_cmp(std::string N[], T a, T b)
+{
+  return N[a] < N[b];
+}
+
+std::string lts::supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
+{
+  vector<lts_type> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
+
+  string r;
+  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + type_strings[*i] + "' for the " + type_desc_strings[*i];
+
+    if ( *i == default_format )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 != types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_formats_text(const std::set<lts_type> &supported)
+{
+  return supported_lts_formats_text(lts_none,supported);
+}
+
+std::string lts::lts_extensions_as_string(const std::string &sep, const std::set<lts_type> &supported)
+{
+  vector<lts_type> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
+
+  string r, prev;
+  bool first = true;
+  for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    if ( extension_strings[*i] == prev ) // avoid mentioning extensions more than once
+    {
+      continue;
+    }
+    if ( first )
+    {
+      first = false;
+    } else {
+      r += sep;
+    }
+    r += "*." + extension_strings[*i];
+    prev = extension_strings[*i];
+  }
+
+  return r;
+}
+
+std::string lts::lts_extensions_as_string(const std::set<lts_type> &supported)
+{
+  return lts_extensions_as_string(",",supported);
+}
+
+std::string lts::supported_lts_equivalences_text(lts_equivalence default_equivalence, const std::set<lts_equivalence> &supported)
+{
+  vector<lts_equivalence> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_equivalence>,equivalence_strings,_1,_2));
+
+  string r;
+  for (vector<lts_equivalence>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + equivalence_strings[*i] + "' for " + equivalence_desc_strings[*i];
+
+    if ( *i == default_equivalence )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 != types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_equivalences_text(const std::set<lts_equivalence> &supported)
+{
+  return supported_lts_equivalences_text(lts_eq_none,supported);
+}
+
+std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, const std::set<lts_preorder> &supported)
+{
+  vector<lts_preorder> types(supported.begin(),supported.end());
+  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_preorder>,preorder_strings,_1,_2));
+
+  string r;
+  for (vector<lts_preorder>::iterator i=types.begin(); i!=types.end(); i++)
+  {
+    r += "  '" + preorder_strings[*i] + "' for " + preorder_desc_strings[*i];
+
+    if ( *i == default_preorder )
+    {
+      r += " (default)";
+    }
+
+    
+    if ( i+2 == types.end() )
+    {
+      r += ", or\n";
+    } else if ( i+1 == types.end() )
+    {
+      r += ",\n";
+    }
+  }
+
+  return r;
+}
+
+std::string lts::supported_lts_preorders_text(const std::set<lts_preorder> &supported)
+{
+  return supported_lts_preorders_text(lts_pre_none,supported);
 }
 
 }

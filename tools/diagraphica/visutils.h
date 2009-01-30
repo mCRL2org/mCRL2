@@ -17,6 +17,7 @@
 #else
 	#ifdef WIN32
 		#include <windows.h>
+	  #undef __in_range
 	#endif
     #include <GL/glu.h>
 #endif
@@ -566,7 +567,7 @@ public:
         BLEND_LINEAR,
         BLEND_CONCAVE,
         BLEND_CONVEX,
-        BLEND_OSCILLATE,
+        BLEND_OSCILLATE
     };
 
 private:

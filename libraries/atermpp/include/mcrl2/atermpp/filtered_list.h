@@ -19,34 +19,34 @@ namespace atermpp {
 
   /// \brief Represents a filtered list. The range [begin(), end()[ is filtered
   /// according to a predicate.
-  ///
   template <typename List, typename Predicate>
   class filtered_list: public List
   {
     protected:
+      /// A predicate.
       const Predicate& m_predicate;
     
     public:
       /// The iterator type of the filtered list.
-      ///
       typedef boost::filter_iterator<Predicate, typename List::const_iterator> iterator;
 
-      /// Constructor.
-      ///
+      /// \brief Constructor.
+      /// \param l A list.
+      /// \param predicate A predicate.
       filtered_list(List l, Predicate predicate)
         : List(l), m_predicate(predicate)
       {
       }
 
-      /// Returns a const iterator pointing to the beginning of the filtered list.     
-      ///
+      /// \brief Returns a const iterator pointing to the beginning of the filtered list.
+      /// \return A const iterator pointing to the beginning of the filtered list.
       iterator begin() const
       {
         return iterator(m_predicate, List::begin(), List::end());
       }
 
-      /// Returns a const iterator pointing to the end of the filtered list.
-      ///
+      /// \brief Returns a const iterator pointing to the end of the filtered list.
+      /// \return A const iterator pointing to the end of the filtered list.
       iterator end() const
       {
         return iterator(m_predicate, List::end(), List::end());

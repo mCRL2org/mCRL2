@@ -9,6 +9,8 @@
 /// \file chi2mcrl2.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "chi2mcrl2"
 #define AUTHOR "Frank Stappers"
 
@@ -21,8 +23,10 @@
 #include "chilexer.h"
 #include "translate.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/exception.h"
 
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
@@ -37,7 +41,7 @@ static ATermAppl translate_file(t_options &options);
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 const char* chi_file_for_input = "chi_in";
 const char* mcrl2_file_for_output  = "mcrl2_out";
@@ -73,7 +77,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_opt
   bool result = true;
 
   if (c.input_exists(chi_file_for_input)) {
-    task_options.infilename = c.get_input(chi_file_for_input).get_location();
+    task_options.infilename = c.get_input(chi_file_for_input).location();
   }
   else {
     send_error("Configuration does not contain an input object\n");
@@ -82,7 +86,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_opt
   }
 
   if (c.output_exists(mcrl2_file_for_output) ) {
-    task_options.outfilename = c.get_output(mcrl2_file_for_output).get_location();
+    task_options.outfilename = c.get_output(mcrl2_file_for_output).location();
   }
   else {
     send_error("Configuration does not contain an output object\n");
@@ -120,15 +124,15 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   extract_task_options(c, options);
- 
+
   label& message = d.create< label >();
- 
-  d.set_manager(d.create< vertical_box >().
+
+  d.manager(d.create< vertical_box >().
                         append(message.set_text("Translation in progress"), layout::left));
 
   send_display_layout(d);
 
-  std::string mcrl2spec; 
+  std::string mcrl2spec;
 
   ATermAppl ast_result = translate_file(options);
 
@@ -174,7 +178,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 }
 #endif
 
-t_options parse_command_line(int argc, char *argv[])
+bool parse_command_line(int argc, char *argv[], t_options& options)
 { 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Translates the Chi specifiation in INFILE and writes the resulting mCRL2 "
@@ -185,23 +189,23 @@ t_options parse_command_line(int argc, char *argv[])
 
   command_line_parser parser(clinterface, argc, argv);
 
-  t_options options;
+  if (parser.continue_execution()) {
+    options.no_statepar = false;
 
-  options.no_statepar = false;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      options.outfilename = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        options.outfilename = parser.arguments[1];
+      }
     }
   }
 
-  return options;  // main continues
+  return parser.continue_execution();  // main continues
 }
 
 ATermAppl translate_file(t_options &options)
@@ -246,35 +250,38 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    t_options options = parse_command_line(argc,argv);
+    t_options options;
 
-    std::string mcrl2spec; 
-    CAsttransform asttransform;
+    if (parse_command_line(argc,argv, options)) {
 
-    ATermAppl result = translate_file(options);
+      std::string mcrl2spec; 
+      CAsttransform asttransform;
 
-    gsDebugMsg("Set options");
-    asttransform.set_options(options);
+      ATermAppl result = translate_file(options);
+
+      gsDebugMsg("Set options");
+      asttransform.set_options(options);
  
-    gsDebugMsg("Transforming AST to mcrl2 specification\n");
-    if (asttransform.translator(result))
-      {
-        mcrl2spec = asttransform.getResult();
-      }
+      gsDebugMsg("Transforming AST to mcrl2 specification\n");
+      if (asttransform.translator(result))
+        {
+          mcrl2spec = asttransform.getResult();
+        }
         
-    //store the result
-    if (options.outfilename == "") {
-      gsVerboseMsg("saving result to stdout...\n");
-      printf("%s",mcrl2spec.c_str());
-    } else { //outfilename != NULL
-      //open output filename
-      FILE *outstream = fopen(options.outfilename.c_str(), "w");
-      if (outstream == NULL) {
-        throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
+      //store the result
+      if (options.outfilename == "") {
+        gsVerboseMsg("saving result to stdout...\n");
+        printf("%s",mcrl2spec.c_str());
+      } else { //outfilename != NULL
+        //open output filename
+        FILE *outstream = fopen(options.outfilename.c_str(), "w");
+        if (outstream == NULL) {
+          throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
+        }
+        gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
+        fputs (mcrl2spec.c_str(), outstream); 
+        fclose(outstream);
       }
-      gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
-      fputs (mcrl2spec.c_str(), outstream); 
-      fclose(outstream);
     }
 
     return EXIT_SUCCESS;

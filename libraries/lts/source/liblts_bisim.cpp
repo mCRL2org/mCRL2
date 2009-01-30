@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Bert Lisser
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -10,7 +10,7 @@
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/bsim.h"
 
 using namespace mcrl2::core;

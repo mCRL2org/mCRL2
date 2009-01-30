@@ -7,28 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file simulation.h
-/// \brief Add your file description here.
+/// \brief Header file for Simulation class
 
 #ifndef SIMULATION_H
 #define SIMULATION_H
-
-#ifndef TRANSITION_H
-  #include "transition.h"
-#else
-  class Transition;
-#endif //TRANSITION_H
-
-#ifndef STATE_H
-  #include "state.h"
-#else
-  class State;
-#endif //STATE_H
-
 // Boost signals and slots
 #include <boost/signal.hpp>
 #include <boost/bind.hpp>
 
-#include <algorithm>
+class Transition;
+class State;
 
 class Simulation {
   public:

@@ -7,27 +7,28 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mainframe.h
-/// \brief Add your file description here.
+/// \brief Header file for the main LTSView window
 
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
 #include <string>
+#include <vector>
 #include <wx/wx.h>
-#include <wx/checklst.h>
 #include <wx/filename.h>
-#include <wx/listctrl.h>
-#include <wx/progdlg.h>
 
-#include "infodialog.h"
-#include "simdialog.h"
-#include "markdialog.h"
-#include "settingsdialog.h"
-#include "savepicdialog.h"
-#include "glcanvas.h"
-#include "mediator.h"
-#include "settings.h"
-
+class wxCheckListBox;
+class wxProgressDialog;
+class InfoDialog;
+class SimDialog;
+class MarkDialog;
+class SettingsDialog;
+class SavePicDialog;
+class SaveVecDialog;
+class GLCanvas;
+class Mediator;
+class Settings;
+class Simulation;
 
 class MainFrame : public wxFrame {
   public:
@@ -37,7 +38,6 @@ class MainFrame : public wxFrame {
     GLCanvas* getGLCanvas() const;
     void loadTitle();
 
-    void onAbout(wxCommandEvent &event);
     void onActivateTool(wxCommandEvent& event);
     void onDisplay(wxCommandEvent& event);
     void onExit(wxCommandEvent& event);
@@ -45,6 +45,8 @@ class MainFrame : public wxFrame {
     void onOpen(wxCommandEvent& event);
     void onOpenTrace(wxCommandEvent& event);
     void onSavePic(wxCommandEvent& event);
+    void onSaveVec(wxCommandEvent& event);
+    void onSaveText(wxCommandEvent& event);
     void onRankStyle(wxCommandEvent& event);
     void onVisStyle(wxCommandEvent& event);
     void onFSMStyle(wxCommandEvent& event);
@@ -100,6 +102,7 @@ class MainFrame : public wxFrame {
     wxRadioButton*    nomarksRadio;
     wxProgressDialog* progDialog;
     SavePicDialog*    savePicDialog;
+    SaveVecDialog*    saveVecDialog;
     SettingsDialog*   settingsDialog;
     InfoDialog*       infoDialog;
     MarkDialog*       markDialog;

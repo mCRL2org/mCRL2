@@ -55,18 +55,6 @@
   class p_lts
   {
     protected:
-      /** \brief String representations for lts_type */
-      static std::string type_strings[];
-
-      /** \brief Extensions associated with elements of lts_type (except lts_none) */
-      static std::string extension_strings[];
-      
-      static std::string equivalence_strings[];
-      static std::string equivalence_desc_strings[];
-
-      static std::string preorder_strings[];
-      static std::string preorder_desc_strings[];
-
       lts *lts_object;
       lts_type type;
       std::string creator;
@@ -83,6 +71,7 @@
       ATerm *label_values;
       transition *transitions;
       unsigned int init_state;
+      ATerm extra_data;
 
       p_lts(lts *l);
 
@@ -133,10 +122,12 @@
       bool write_to_fsm(std::ostream& os, ATerm lps = NULL);
       bool write_to_fsm(std::ostream& os, lps::specification &spec);
 
+      bool read_from_dot(std::string const& filename);
+      bool read_from_dot(std::istream &is);
       bool write_to_dot(std::ostream& os, lts_dot_options opts);
       bool write_to_dot(std::string const& filename, lts_dot_options opts);
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
       bool read_from_bcg(std::string const& filename);
       bool write_to_bcg(std::string const& filename);
 #endif

@@ -156,7 +156,7 @@ namespace mcrl2 {
     /// \brief Returns the application of f to a sufficient number of variables,
     ///        taking variables from context if possible, otherwise extending
     ///        the context.
-    data_expression apply_function_symbol_to_variables(const function_symbol& f, variable_list& context, variable_list& used_context)
+    inline data_expression apply_function_symbol_to_variables(const function_symbol& f, variable_list& context, variable_list& used_context)
     {
       if(f.sort().is_function_sort())
       {

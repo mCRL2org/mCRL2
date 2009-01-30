@@ -34,3 +34,6 @@ else {
   rule compile-headers ( base ) {
   }
 }
+
+IMPORT $(__name__) : compile-headers : : compile-headers ;
+

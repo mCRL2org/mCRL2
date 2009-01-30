@@ -18,14 +18,15 @@
 namespace atermpp
 {
 
-  /// Remove leading and trailing quotes from a quoted aterm_string.
-  ///
+  /// \brief Remove leading and trailing quotes from a quoted aterm_string.
+  /// \param t A term containing a quoted string.
+  /// \return The string without quotes.
   inline
   std::string unquote(aterm_string t)
   {
     std::string s(t);
     assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
-    return std::string(++s.begin(), --s.end());
+    return std::string(s, 1, s.size() - 2);
   }
 
 } // namespace atermpp

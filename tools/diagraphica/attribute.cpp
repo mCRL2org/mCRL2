@@ -8,6 +8,8 @@
 //
 /// \file ./attribute.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "attribute.h"
 
 // -- constructors and destructor -----------------------------------
@@ -83,8 +85,8 @@ void Attribute::clusterValues(
 
 // -----------------------
 void Attribute::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // ------------------------
 {}
 

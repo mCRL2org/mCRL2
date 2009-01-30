@@ -49,44 +49,44 @@ namespace squadt {
 
         /** \brief Smart pointer instance that references the associated implementation object */
         boost::shared_ptr < executor_impl > impl;
-    
+
       private:
-    
+
         /** \brief Start a new process */
         void start_process(const command&);
-    
+
         /** \brief Start a new process with a listener */
-        void start_process(const command&, task_monitor::sptr&);
+        void start_process(const command&, boost::shared_ptr< task_monitor >&);
 
         /** \brief Start processing commands if the queue contains any waiters */
         void start_delayed();
- 
+
         /** \brief Remove a process from the list */
         void remove(process*);
-    
+
       public:
-    
+
         /** \brief Constructor */
         executor(unsigned int const& = 3);
 
         /** \brief Maximum number of tool instances */
         size_t get_maximum_instance_count() const;
- 
+
         /** \brief Maximum number of tool instances */
         void set_maximum_instance_count(size_t);
- 
+
         /** \brief Execute a tool */
         void execute(command const&, boost::shared_ptr < task_monitor >&, bool = false);
 
         /** \brief Execute a command */
         void execute(command const&, bool = false);
-    
+
         /** \brief Terminate a specific process */
         void terminate(process*);
-    
+
         /** \brief Terminate a specific process */
-        void terminate(process::wptr);
-    
+        void terminate(boost::weak_ptr< process >);
+
         /** \brief Terminate all processes */
         void terminate_all();
 
@@ -100,12 +100,12 @@ namespace squadt {
     inline void executor::terminate(process* p) {
       p->terminate();
     }
- 
+
     /**
      * @param[in] p a shared pointer (or reference to) to the process that should be terminated
      **/
-    inline void executor::terminate(process::wptr p) {
-      process::sptr w = p.lock();
+    inline void executor::terminate(boost::weak_ptr< process > p) {
+      boost::shared_ptr< process > w = p.lock();
 
       if (w.get() != 0) {
         w->terminate();
@@ -113,5 +113,5 @@ namespace squadt {
     }
   }
 }
-  
+
 #endif

@@ -258,7 +258,7 @@ protected:
         ID_DIAGRAM_RWND,
         ID_DIAGRAM_PREV,
         ID_DIAGRAM_PLAY,
-        ID_DIAGRAM_NEXT,
+        ID_DIAGRAM_NEXT
     };
 
     static int MIN_RAD_HINT_PX; // radius cannot be smaller than this
@@ -267,7 +267,7 @@ protected:
     static int SEGM_HINT_LQ;
     
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

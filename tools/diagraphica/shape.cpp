@@ -8,11 +8,14 @@
 //
 /// \file ./shape.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #ifdef __APPLE__
     #include <GLUT/glut.h>
 #else
 	#ifdef WIN32
 		#include <windows.h>
+		#undef __in_range // for STLport on Windows
 	#endif
     #include <GL/glu.h>
 #endif

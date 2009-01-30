@@ -38,13 +38,13 @@ namespace squadt {
         private:
           /** \brief a reference to the image to be displayed */
           wxBitmap image;
-     
+
         private:
           /** \brief Method that paints the image */
           inline void on_paint(wxPaintEvent& WXUNUSED(event));
-     
+
         public:
-     
+
           picture(wxWindow*, wxImage*);
       };
     }
@@ -104,7 +104,7 @@ namespace squadt {
         /** \brief Calls the wxWidgets Update() method, if required */
         inline void update();
     };
- 
+
     /// \cond INTERNAL_DOCS
     namespace detail {
 
@@ -120,16 +120,16 @@ namespace squadt {
 
       inline void picture::on_paint(wxPaintEvent& WXUNUSED(event)) {
         wxPaintDC dc(this);
-     
+
         splash& s = *(dynamic_cast < splash* > (GetParent()));
-     
+
         dc.DrawBitmap(image, 0, 0, false);
         dc.SetTextForeground(*wxBLACK);
         dc.SetBackgroundMode(wxTRANSPARENT);
         dc.SetFont(wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
         dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 400, 40);
         dc.SetFont(wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-     
+
         wxString o = wxString(s.operation.c_str(), wxConvLocal);
 
         if (!s.operation.empty()) {
@@ -151,7 +151,7 @@ namespace squadt {
             number_of_categories(n), current_category(0), new_amount(0), changed(false) {
 
       static wxImage logo(logo_xpm);
-    
+
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
       display            = new detail::picture(this, &logo);
@@ -165,9 +165,9 @@ namespace squadt {
 
       Fit();
 
-      Show(true);
-
       CentreOnScreen();
+
+      Show(true);
     }
 
     /**

@@ -8,6 +8,8 @@
 //
 /// \file ./bitmappanel.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "bitmappanel.h"
 
 // -- constructors and desctructor ----------------------------------

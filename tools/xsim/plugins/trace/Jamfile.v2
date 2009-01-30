@@ -8,8 +8,8 @@ plugin xsim_trace_view
        : xsimtracedll.cpp
          /tools/xsim//xsim_core
          /libraries//old_data
-         /site-config//wx_base
        : <include>../..
-         <wx>yes
+         <wx>base
+         <pch>on:<source>/site-config//wx.pch
        ;
 

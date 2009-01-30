@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include "tipi/display.hpp"
 
 namespace tipi {
@@ -22,7 +24,7 @@ namespace tipi {
     for (element_by_id::iterator i = m_element_by_id.begin(); i != m_element_by_id.end(); ++i) {
       if (i->second.get() == e) {
         m_element_by_id.erase(i);
-   
+
         break;
       }
     }

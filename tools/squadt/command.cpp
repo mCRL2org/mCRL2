@@ -19,7 +19,7 @@ namespace squadt {
 
       if (!c.empty()) {
         std::string::const_iterator current = c.begin();
-       
+
         // skip initial white space
         while (current != c.end() && *current == ' ') {
           ++current;
@@ -36,10 +36,10 @@ namespace squadt {
           while (current != c.end() && *current == ' ') {
             ++current;
           }
-       
+
           if (current != c.end()) {
             std::string::const_iterator start = current;
-           
+
             while (current != c.end() && *current != ' ') {
               if (*current == '\'') {
                 do {
@@ -74,20 +74,20 @@ namespace squadt {
       return (new_command);
     }
 
-    std::string command::as_string(bool b) const {
+    std::string command::string(bool b) const {
       std::string s;
 
       if (b) {
         s = executable;
       }
-  
+
       for (std::deque < std::string >::const_iterator i = arguments.begin(); i != arguments.end(); ++i) {
         s.append(" " + *i);
       }
-  
+
       return (s);
     }
-  
+
     command::const_argument_sequence command::get_arguments() const {
       return (boost::make_iterator_range(arguments.begin(), arguments.end()));
     }

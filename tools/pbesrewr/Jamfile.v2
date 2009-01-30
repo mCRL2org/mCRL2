@@ -4,6 +4,5 @@ tool pbesrewr
        : pbesrewr.cpp
          /libraries//lps
          /libraries//pbes
+       : <squadt-connectivity>implemented
        ;
-
-install-tools pbesrewr ;

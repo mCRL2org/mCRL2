@@ -1,12 +1,18 @@
+// Author(s): Frank Stappers
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file translate.cpp
+
 #include <algorithm>
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <iostream>
 #include <cstdio>
 #include <string.h>
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "translate.h"
 #include <vector> 
 #include <sstream>
@@ -19,7 +25,6 @@
 #include "libstruct_core.h"
 #include <limits.h>
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
 

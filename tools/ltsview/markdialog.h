@@ -12,8 +12,12 @@
 #ifndef MARKDIALOG_H
 #define MARKDIALOG_H
 
+#include <string>
+#include <vector>
+#include <map>
 #include <wx/wx.h>
-#include "mediator.h"
+
+class Mediator;
 
 class MarkDialog: public wxDialog {
   public:
@@ -23,6 +27,7 @@ class MarkDialog: public wxDialog {
     void onRemoveMarkRuleButton(wxCommandEvent& event);
 
     void onMarkAnyAll(wxCommandEvent& event);
+    void onMarkCluster(wxCommandEvent& event);
     void onMarkRadio(wxCommandEvent& event);
     void onMarkRuleActivate(wxCommandEvent& event);
     void onMarkRuleEdit(wxCommandEvent& event);
@@ -36,12 +41,15 @@ class MarkDialog: public wxDialog {
   private:
     Mediator* mediator;
 
+    std::map<wxString,int> label_index;
+
     wxRadioButton* nomarksRadio;
     wxRadioButton* markDeadlocksRadio;
     wxRadioButton* markStatesRadio;
     wxRadioButton* markTransitionsRadio;
 
     wxChoice* markAnyAllChoice;
+    wxChoice* markClusterChoice;
     wxCheckListBox* markStatesListBox;
     wxCheckListBox* markTransitionsListBox;
 

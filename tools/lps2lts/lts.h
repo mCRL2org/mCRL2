@@ -13,7 +13,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/lps/nextstate.h>
-#include <mcrl2/lts/liblts.h>
+#include <mcrl2/lts/lts.h>
 
 typedef struct {
   mcrl2::lts::lts_type outformat;

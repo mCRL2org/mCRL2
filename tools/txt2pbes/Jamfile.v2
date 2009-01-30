@@ -6,5 +6,3 @@ project toolset/txt2pbes
 tool txt2pbes
        : txt2pbes.cpp
        ;
-
-install-tools txt2pbes ;

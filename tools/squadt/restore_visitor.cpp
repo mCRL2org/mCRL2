@@ -9,25 +9,27 @@
 /// \file restore_visitor.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <fstream>
 
+#include <boost/thread.hpp> // workaround for boost::thread that includes errno.h (stlport)
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/foreach.hpp>
 
-#include "build_system.hpp"
-#include "settings_manager.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
+
 #include "tool_manager.ipp"
 #include "project_manager.ipp"
+#include "settings_manager.hpp"
+#include "build_system.hpp"
 #include "type_registry.hpp"
 #include "executor.ipp"
 #include "processor.ipp"
 
-#include <tipi/detail/utility/generic_visitor.hpp>
-
 #include "visitors.hpp"
-
-#include "tipi/visitors.hpp"
 
 #include "ticpp.h"
 
@@ -37,13 +39,13 @@ namespace squadt {
   class restore_visitor_impl {
 
     protected:
-  
+
       typedef std::map < unsigned long, boost::shared_ptr < processor_impl::object_descriptor > > id_conversion_map;
-  
+
       struct id_helper {
         id_conversion_map  cmap;
         ticpp::Element*    tree;
-  
+
         inline id_helper(ticpp::Element* t) : tree(t) {
         }
       };
@@ -147,8 +149,12 @@ namespace utility {
   void visitor< squadt::restore_visitor_impl >::visit(tool& t) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "tool");
 
+    std::string location;
+
     tree->GetAttribute("name", &t.m_name);
-    tree->GetAttribute("location", &t.m_location);
+    tree->GetAttribute("location", &location);
+
+    t.set_location(location);
 
     if (!tree->NoChildren()) {
       t.m_capabilities.reset(new tipi::tool::capabilities);
@@ -243,7 +249,7 @@ namespace utility {
           mime_type t(e->GetAttribute("mime-type"));
 
           ticpp::Element* command_element = e->FirstChildElement(false);
-    
+
           if (command_element != 0 && command_element->Value() == "command") {
             if (command_element->NoChildren()) {
               r.register_command(t, type_registry::command_system);
@@ -283,7 +289,7 @@ namespace utility {
       p.tool_descriptor            = global_build_system.get_tool_manager().
                                        get_tool_by_name(h.tree->GetAttribute("tool-name"));
       p.selected_input_configuration = p.tool_descriptor->find_input_configuration(
-                                       tipi::tool::category::fit(h.tree->GetAttribute("category")),
+                                       tipi::tool::category::match(h.tree->GetAttribute("category")),
                                        tipi::mime_type(h.tree->GetAttribute("format")));
     }
     catch (...) {
@@ -305,33 +311,33 @@ namespace utility {
         }
 
         e->GetAttribute("identifier", &tipi_id);
-       
+
         p.register_input(tipi_id, h.cmap[id]);
       }
       else if (e->Value() == "output") {
         /* Read output */
         unsigned long id;
-       
+
         e->GetAttribute("id", &id);
 
         assert(h.cmap.find(id) == h.cmap.end());
-       
+
         h.cmap[id] = boost::shared_ptr < processor_impl::object_descriptor >(
                 new processor_impl::object_descriptor(p.interface_object, p.manager, tipi::mime_type(e->GetAttribute("format")), tipi::uri(e->GetAttribute("location"))));
 
         processor_impl::object_descriptor& new_descriptor(*h.cmap[id]);
-        
+
         e->GetAttribute("timestamp", &new_descriptor.timestamp);
         e->GetAttributeOrDefault("status", &new_descriptor.status, processor::object_descriptor::original);
 
         if (new_descriptor.status != processor::object_descriptor::original) {
           e->GetAttribute("identifier", &tipi_id);
         }
-        
+
         if (new_descriptor.status == processor::object_descriptor::generation_in_progress) {
           new_descriptor.status = processor::object_descriptor::reproducible_out_of_date;
         }
-        
+
         e->GetAttribute("digest", &new_descriptor.checksum, false);
 
         p.register_output(tipi_id, h.cmap[id]);
@@ -350,7 +356,7 @@ namespace utility {
       if (0 < p.inputs.size()) {
         // Take the first input as main input and try to find a combination
         p.selected_input_configuration = p.tool_descriptor->find_input_configuration(
-        	p.current_monitor->get_configuration()->get_category(), p.inputs[0].object->get_format());
+        p.current_monitor->get_configuration()->category(), p.inputs[0].object->get_format());
       }
     }
   }
@@ -378,11 +384,11 @@ namespace utility {
     for (id_helper h(tree->FirstChildElement(false)); h.tree != 0; h.tree = h.tree->NextSiblingElement(false)) {
       if (h.tree->Value() == "processor") {
         boost::shared_ptr < processor > new_processor(processor::create(p.m_interface));
-       
+
         visit(*new_processor, h);
 
         new_processor->check_status(true);
-       
+
         p.processors.push_back(new_processor);
       }
       else if (h.tree->Value() == "description") {

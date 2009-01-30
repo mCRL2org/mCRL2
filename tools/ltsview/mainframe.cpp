@@ -7,21 +7,33 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mainframe.cpp
-/// \brief Add your file description here.
+/// \brief Implements the main LTSView window
+
+#include "wx.hpp" // precompiled headers
 
 #include "mainframe.h"
+#include <wx/checklst.h>
 #include <wx/filedlg.h>
 #include <wx/notebook.h>
+#include <wx/progdlg.h>
+#include <mcrl2/lts/lts.h>
 //#include <time.h>
-#include "ids.h"
+#include "glcanvas.h"
 #include "icons/main_window.xpm"
+#include "ids.h"
+#include "infodialog.h"
+#include "simdialog.h"
+#include "markdialog.h"
+#include "mediator.h"
+#include "savepicdialog.h"
+#include "savevecdialog.h"
+#include "settings.h"
+#include "settingsdialog.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
 # define wxFD_OPEN wxOPEN
 #endif
-
-std::string get_about_message();
 
 using namespace std;
 using namespace Utils;
@@ -31,6 +43,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
   EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
   EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)
+  EVT_MENU  (myID_SAVEVEC, MainFrame::onSaveVec)
+  EVT_MENU  (myID_SAVETXT, MainFrame::onSaveText)
   EVT_MENU  (wxID_EXIT, MainFrame::onExit)
   EVT_MENU  (wxID_RESET, MainFrame::onResetView)
   EVT_MENU  (myID_DISPLAY_STATES,MainFrame::onDisplay)
@@ -45,7 +59,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
   EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
   EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
-  EVT_MENU  (wxID_ABOUT,MainFrame::onAbout)
   EVT_MENU  (myID_ITERATIVE,MainFrame::onRankStyle)
   EVT_MENU  (myID_CYCLIC,MainFrame::onRankStyle)
   EVT_MENU  (myID_CONES_STYLE,MainFrame::onVisStyle)
@@ -70,6 +83,7 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   settings = ss;
   progDialog = NULL;
   savePicDialog = NULL;
+  saveVecDialog = NULL;
   settingsDialog = NULL;
   infoDialog = new InfoDialog(this);
   simDialog = new SimDialog(this, mediator);
@@ -95,16 +109,23 @@ void MainFrame::setupMenuBar() {
   // Set up the menu bar
   wxMenuBar* menuBar = new wxMenuBar;
   wxMenu* fileMenu = new wxMenu;
+  wxMenu* exportMenu = new wxMenu;
   wxMenu* viewMenu = new wxMenu;
   toolMenu = new wxMenu;
   wxMenu* helpMenu = new wxMenu;
   
   fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
     wxT("Load an LTS from file"));
-  fileMenu->Append(myID_SAVEPIC,wxT("Save &Picture...\tCtrl+P"),
-      wxT("Save current picture to file"));
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
     wxT("Open a trace for this file"));
+  fileMenu->AppendSeparator();
+  exportMenu->Append(myID_SAVEPIC,wxT("&Bitmap..."),
+      wxT("Export picture to bitmap"));
+  exportMenu->Append(myID_SAVETXT,wxT("&Text..."),
+      wxT("Export picture to text"));
+  exportMenu->Append(myID_SAVEVEC,wxT("&Vector..."),
+      wxT("Export picture to vector graphics"));
+  fileMenu->AppendSubMenu(exportMenu,wxT("Export"),wxT("Export picture"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
     
@@ -169,6 +190,8 @@ void MainFrame::setupMenuBar() {
     wxT("Assign states to their default positions"));
   toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
   
+  helpMenu->Append(wxID_HELP,wxT("&Contents"),wxT("Show help contents"));
+  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
   
   menuBar->Append(fileMenu, wxT("&File"));
@@ -203,12 +226,6 @@ void MainFrame::setFileInfo(wxFileName fn) {
   filename.Assign(fn);
 }
 
-void MainFrame::onAbout(wxCommandEvent& /*event*/) {
-  wxMessageDialog(this,
-        wxString(get_about_message().c_str(), wxConvLocal),
-                wxT("About LTSView"), wxOK|wxICON_INFORMATION).ShowModal();
-}
-
 /*
 void MainFrame::onIdle(wxIdleEvent &event) {
   glCanvas->display();
@@ -216,7 +233,12 @@ void MainFrame::onIdle(wxIdleEvent &event) {
 */
 
 void MainFrame::onOpen(wxCommandEvent& /*event*/) {
-  wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
+  wxString filemask = wxString(("All supported files (" +
+        mcrl2::lts::lts::lts_extensions_as_string() +
+        ")|" +
+        mcrl2::lts::lts::lts_extensions_as_string(";") +
+        "|All files (*.*)|*.*").c_str(),
+        wxConvLocal);
   wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),
       filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
   dialog->CentreOnParent();
@@ -241,28 +263,59 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
   dialog->Destroy();
 }
 
-void MainFrame::onSavePic(wxCommandEvent& /*event*/) {
-  if (savePicDialog == NULL) {
+void MainFrame::onSavePic(wxCommandEvent& /*event*/)
+{
+  if (savePicDialog == NULL)
+  {
     savePicDialog = new SavePicDialog(this,GetStatusBar(),glCanvas,filename);
-  } else {
-    savePicDialog->updateSlider();
+  }
+  else
+  {
+    savePicDialog->updateAspectRatio();
   }
   savePicDialog->ShowModal();
+}
+
+void MainFrame::onSaveVec(wxCommandEvent& /*event*/)
+{
+  if (saveVecDialog == NULL)
+  {
+    saveVecDialog = new SaveVecDialog(this,GetStatusBar(),glCanvas,filename);
+  }
+  saveVecDialog->ShowModal();
+}
+
+void MainFrame::onSaveText(wxCommandEvent& /*event*/)
+{
+  wxString new_file = wxFileSelector(wxT("Select a file"),filename.GetPath(),
+    wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
+  if (!new_file.empty())
+  {
+    mediator->exportToText(static_cast<std::string>(new_file.fn_str()));
+  }
 }
 
 void MainFrame::onExit(wxCommandEvent& /*event*/) {
   Close();
 }
 
-void MainFrame::onClose(wxCloseEvent &event) {
-  if (settingsDialog != NULL) {
+void MainFrame::onClose(wxCloseEvent &event)
+{
+  if (settingsDialog != NULL)
+  {
     settingsDialog->Destroy();
   }
-  if (progDialog != NULL) {
+  if (progDialog != NULL)
+  {
     progDialog->Destroy();
   }
-  if (savePicDialog != NULL) {
+  if (savePicDialog != NULL)
+  {
     savePicDialog->Destroy();
+  }
+  if (saveVecDialog != NULL)
+  {
+    saveVecDialog->Destroy();
   }
   infoDialog->Destroy();
   simDialog->Destroy();

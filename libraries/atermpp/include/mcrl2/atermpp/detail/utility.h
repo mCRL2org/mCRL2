@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/detail/utility.h
-/// \brief Add your file description here.
+/// \brief Utility functions.
 
 #ifndef ATERM_DETAIL_UTILITY_H
 #define ATERM_DETAIL_UTILITY_H
@@ -20,6 +20,9 @@ namespace atermpp {
 
   namespace detail {
     
+    /// \brief Converts a string to an ATerm string
+    /// \param s A string
+    /// \return The converted string
     inline
     ATermAppl str2appl(std::string s)
     {

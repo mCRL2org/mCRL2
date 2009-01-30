@@ -8,6 +8,7 @@
 //
 /// \file ./glcanvas.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "glcanvas.h"
 

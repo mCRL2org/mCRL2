@@ -7,12 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file cluster.cpp
-/// \brief Add your file description here.
+/// \brief Implementation of the Cluster class
 
 #include "cluster.h"
 #include <algorithm>
 #include <math.h>
+#include "state.h"
 #include "utils.h"
+
 using namespace std;
 using namespace Utils;
 
@@ -29,7 +31,7 @@ Cluster::Cluster(int r) {
   position = 0.0f;
   baseRadius = 0.0f;
   topRadius = 0.0f;
-  deadlock = false;
+  numDeadlocks = 0;
   numMarkedStatesAll = 0;
   numMarkedStatesAny = 0;
   visObject = -1;
@@ -85,33 +87,6 @@ State* Cluster::getState(int i) const {
 
 int Cluster::getNumStates() const {
   return states.size();
-}
-
-void Cluster::getParameterValues(int i, std::vector<int> &vs)
-{
-  std::vector<int> pars; 
-  // TODO: Very inefficient
-  for (size_t j = 0; j != states.size(); ++j)
-  {
-    int par = states[j]->getParameterValue(i);
-    
-    bool found = false;
-    
-    for(size_t k = 0; k != pars.size() && !found; ++k)
-    {
-      if (pars[k] == par)
-      {
-        found = true;
-      }
-    }
-
-    if (!found)
-    {
-      pars.push_back(par);
-    }
-  }
-
-  vs = pars;
 }
 
 Cluster* Cluster::getAncestor() const {
@@ -762,12 +737,14 @@ int Cluster::setActionMark(int l,bool b) {
   return numMarkedTransitions;
 }
 
-bool Cluster::hasDeadlock() const {
-  return deadlock;
+int Cluster::getNumDeadlocks() const
+{
+  return numDeadlocks;
 }
 
-void Cluster::setDeadlock(bool b) {
-  deadlock = b;
+void Cluster::addDeadlock()
+{
+  ++numDeadlocks;
 }
 
 int Cluster::getVisObject() const {

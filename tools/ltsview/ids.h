@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ids.h
-/// \brief Add your file description here.
+/// \brief Defines IDs for wxWidget controls
 
 #ifndef IDS_H
 #define IDS_H
@@ -15,7 +15,10 @@
 
 namespace IDs
 {
-  enum { myID_SAVEPIC = wxID_HIGHEST + 1, 
+  enum {
+    myID_SAVEPIC = wxID_HIGHEST + 1,
+    myID_SAVEVEC,
+    myID_SAVETXT,
     // Tool identifiers
     myID_SELECT,
     myID_ZOOM,
@@ -31,6 +34,7 @@ namespace IDs
     // Event identifiers
     myID_MARK_RADIOBUTTON,
     myID_MARK_ANYALL,
+    myID_MARK_CLUSTER,
     myID_MARK_RULES,
     myID_ADD_RULE,
     myID_REMOVE_RULE,
@@ -79,6 +83,7 @@ namespace IDs
     myID_SIM_PREV_CLR,
     myID_BRANCH_ROTATION,
     myID_STATE_SIZE,
+    myID_CLUSTER_HEIGHT,
     myID_BRANCH_TILT,
     myID_QUALITY,
     myID_TRANSPARENCY,

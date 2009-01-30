@@ -8,6 +8,7 @@
 //
 /// \file ./droptarget.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "droptarget.h"
 

@@ -1,6 +1,12 @@
+// Author(s): Frank Stappers
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file translate.h
+
 #ifndef TRANSLATE_H
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define TRANSLATE_H
 
 #include <string.h>
@@ -8,7 +14,7 @@
 #include <iostream>
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include <cstdio>
 #include <vector>
 #include <map>
@@ -117,6 +123,12 @@ inline std::string to_string (const T& t)
   std::stringstream ss;
   ss << t;
   return ss.str();
+}
+
+template < >
+inline std::string to_string (const std::string& t)
+{
+  return t;
 }
 
 class CAsttransform

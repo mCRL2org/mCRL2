@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <functional>
 
@@ -13,6 +15,7 @@
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include <tipi/detail/transport/detail/transporter.ipp>
 #include <tipi/detail/transport/detail/transceiver.ipp>

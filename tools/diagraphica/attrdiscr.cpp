@@ -8,6 +8,8 @@
 //
 /// \file ./attrdiscr.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "attrdiscr.h"
 
 // -- constructors and destructor -----------------------------------
@@ -156,8 +158,8 @@ void AttrDiscr::clusterValues(
 
 // -----------------------
 void AttrDiscr::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------
 {
     try
@@ -168,7 +170,7 @@ void AttrDiscr::moveValue(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < idxTo; ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
             {
                 curValues[i] = curValues[i+1];
                 curValues[i]->setIndex( i );
@@ -180,7 +182,7 @@ void AttrDiscr::moveValue(
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > idxTo; --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
             {
                 curValues[i] = curValues[i-1];
                 curValues[i]->setIndex( i );

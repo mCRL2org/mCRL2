@@ -7,7 +7,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settings.cpp
-/// \brief Add your file description here.
+/// \brief Implements the settings store
+
+#include "wx.hpp" // precompiled headers
 
 #include <vector>
 #include "settings.h"

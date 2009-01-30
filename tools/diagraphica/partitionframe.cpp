@@ -8,6 +8,7 @@
 //
 /// \file ./partitionframe.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "partitionframe.h"
 

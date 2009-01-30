@@ -11,10 +11,6 @@
 
 #include <ostream>
 
-#include <boost/mpl/or.hpp>
-#include <boost/mpl/not.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include "tipi/detail/utility/generic_visitor.hpp"
@@ -40,7 +36,9 @@ namespace squadt {
 
       /** \brief Stores elements using the visitor */
       template < typename T >
-      void store(T const&);
+      void store(T const& t) {
+        visit(t);
+      }
   };
 
   class restore_visitor_impl;
@@ -49,7 +47,7 @@ namespace squadt {
    * \brief Reads preferences from file and updates the state of components accordingly
    **/
   class restore_visitor : public utility::visitor_interface< squadt::restore_visitor_impl > {
- 
+
     public:
 
       /** \brief Constructor to read from string */
@@ -64,111 +62,55 @@ namespace squadt {
 
       /** \brief Restores elements using the visitor */
       template < typename T >
-      void restore(T&);
+      void restore(T& t) {
+        visit(t);
+      }
   };
 
   class visitors {
-
-    private:
-
-      template < typename U >
-      struct not_string_or_path : public boost::enable_if_c < boost::mpl::not_<
-                                           boost::mpl::or_< boost::is_same < U, std::string >,
-                                              boost::is_same < U, boost::filesystem::path > > >::value, void > {
-      };
 
     public:
 
       /** \brief Writes to string */
       template < typename T >
-      static std::string store(T const&);
+      static std::string store(T const& t) {
+        std::string output;
+
+        store(t, output);
+
+        return (output);
+      }
 
       /** \brief Writes to string */
       template < typename T >
-      static void store(T const&, std::string&);
+      static void store(T const& t, std::string& s) {
+        squadt::store_visitor  v(s);
+
+        v.visit(t);
+      }
 
       /** \brief Writes to file */
       template < typename T >
-      static void store(T const&, boost::filesystem::path const&);
+      static void store(T const& t, boost::filesystem::path const& p) {
+        squadt::store_visitor  v(p);
+
+        v.visit(t);
+      }
 
       /** \brief Writes to stream */
       template < typename T >
-      static void store(T const&, std::ostream&);
+      static void store(T const& t, std::ostream& o) {
+        squadt::store_visitor  v(o);
 
-      /** \brief Reads from string */
-      template < typename T >
-      static void restore(T&, std::string const&);
-
-      /** \brief Reads from file */
-      template < typename T >
-      static void restore(T&, boost::filesystem::path const&);
+        v.visit(t);
+      }
 
       /** \brief Reads from stream */
       template < typename T, typename U >
-      static typename not_string_or_path< U >::type restore(T&, U&);
+      static void restore(T& t, U const& s) {
+        squadt::restore_visitor v(s);
+
+        v.visit(t);
+      }
   };
-
-  template < typename T >
-  void store_visitor::store(T const& t) {
-    visit(t);
-  }
-
-  template < typename T >
-  void restore_visitor::restore(T& t) {
-    visit(t);
-  }
-
-  template < typename T >
-  std::string visitors::store(T const& t) {
-    std::string output;
-
-    store(t, output);
-
-    return (output);
-  }
-
-  template < typename T >
-  inline void visitors::store(T const& t, std::string& s) {
-    squadt::store_visitor  v(s);
-
-    v.visit(t);
-  }
-
-  template < typename T >
-  inline void visitors::store(T const& t, boost::filesystem::path const& p) {
-    squadt::store_visitor  v(p);
-
-    v.visit(t);
-  }
-
-  template < typename T >
-  inline void visitors::store(T const& t, std::ostream& o) {
-    squadt::store_visitor  v(o);
-
-    v.visit(t);
-  }
-
-  /** \brief Reads from string */
-  template < typename T >
-  inline void visitors::restore(T& t, std::string const& s) {
-    squadt::restore_visitor  v(s);
-
-    v.visit(t);
-  }
-
-  /** \brief Reads from string */
-  template < typename T >
-  inline void visitors::restore(T& t, boost::filesystem::path const& p) {
-    squadt::restore_visitor  v(p);
-
-    v.visit(t);
-  }
-
-  template < typename T, typename U >
-  inline typename visitors::not_string_or_path< U >::type visitors::restore(T& t, U& s) {
-
-    squadt::restore_visitor v(s);
-
-    v.visit(t);
-  }
 }

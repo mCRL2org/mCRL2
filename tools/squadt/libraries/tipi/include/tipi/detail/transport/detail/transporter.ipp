@@ -1,18 +1,24 @@
-#ifndef TIPI_TRANSPORTER_TCC__
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#define TIPI_TRANSPORTER_TCC__
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file include/tipi/detail/transport/detail/transporter.ipp
+#ifndef TIPI_TRANSPORTER_IPP__
+#define TIPI_TRANSPORTER_IPP__
 
 #include <exception>
 #include <list>
 #include <istream>
 
+#include <boost/asio/ip/address.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+
 #include <tipi/detail/transport/transporter.hpp>
 #include <tipi/detail/transport/detail/listener.hpp>
-
-#include <boost/asio/ip/address.hpp>
-
-#include <boost/thread/recursive_mutex.hpp>
 
 namespace transport {
   using namespace transceiver;
@@ -93,10 +99,10 @@ namespace transport {
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
-  
+
       /** \brief Communicate a string with all peers */
       void send(const std::string&);
- 
+
       /** \brief Communicate data from a stream with all peers */
       void send(std::istream&);
 

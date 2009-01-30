@@ -9,68 +9,71 @@
 /// \file mcrl2/utilities/command_line_interface.h
 /// \brief Components for command line interfaces of mCRL2 tools
 
+#ifndef __MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_HPP_
+#define __MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_HPP_
 #include <algorithm>
 #include <vector>
 #include <map>
 #include <iostream>
 #include <cassert>
+#include <cstdlib>
 #include <sstream>
-#include <memory>
 
 #include "boost/algorithm/string.hpp"
-
-#include "mcrl2/exception.h"
+#include "boost/type_traits/is_pod.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace mcrl2 {
   namespace utilities {
 
+    class interface_description;
+    class command_line_parser;
+
     /** \brief toolset version tag */
-    const std::string version_tag("July 2008 (development)");
+    inline std::string version_tag() {
+      return "June 2009 (development)";
+    }
 
     /** \brief toolset copyright period description */
-    const std::string copyright_period("2008");
-
-#if defined(__LIBREWRITE_H)
-    inline std::istream& operator>>(std::istream& is, RewriteStrategy& s) {
-      char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    
-      is.readsome(strategy, 9);
-
-      s = RewriteStrategyFromString(strategy);
-
-      if (s == GS_REWR_INVALID) {
-        is.setstate(std::ios_base::failbit);
-      }
-    
-      return is;
+    inline std::string copyright_period() {
+      return "2009";
     }
-#endif
-#if defined(BDD_PATH_ELIMINATOR_H)
-    inline std::istream& operator>>(std::istream& is, SMT_Solver_Type& s) {
-      char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    
-      /// no standard conversion available function, so implement on-the-spot
-      is.readsome(solver_type, 10);
 
-      s = solver_type_cvc;
+    // \cond INTERNAL
+    namespace detail {
+      template < typename T >
+      struct initialiser;
 
-      if (std::strncmp(solver_type, "ario", 5) == 0) {
-        s = solver_type_ario;
-      }
-      else if (std::strncmp(solver_type, "cvc", 3) == 0) {
-        if (solver_type[3] != '\0') {
-          is.setstate(std::ios_base::failbit);
+      void register_rewriting_options(interface_description&);
+      void register_proving_options(interface_description&);
+
+      /// Helper class to prevent uninitialised variable warnings
+      template < typename T, bool = boost::is_pod< T >::value >
+      struct instance_of;
+
+      template < typename T >
+      struct instance_of< T, true > {
+        T m_wrapped;
+
+        instance_of() {
+          m_wrapped = static_cast< T >(0);
         }
-      }
-      else {
-        is.setstate(std::ios_base::failbit);
-      }
 
-      return is;
+        T& wrapped() {
+          return m_wrapped;
+        }
+      };
+
+      template < typename T >
+      struct instance_of< T, false > {
+        T m_wrapped;
+
+        T& wrapped() {
+          return m_wrapped;
+        }
+      };
     }
-#endif
-
-    class command_line_parser;
+    // \endcond
 
     /**
      * \brief Command line interface description component.
@@ -84,27 +87,33 @@ namespace mcrl2 {
      * that are shared amongst multiple tools can be predefined in this
      * component and included on demand for individual tools.
      *
-     * The following example illustrates use of the interface description class:
+     * The following examples illustrate use of the interface description
+     * class. Construction of an interface description object.
      * \code
      *  interface_description interface("/path/to/demo-tool",
      *          "demo-tool", "Rincewind", "[OPTIONS]... [PATHS]"
      *          "Serves as demonstration of the features of the interface_description class.");
+     * \endcode
      *
-     *  // Note default options: --help,(-h), --version, --verbose, --debug (-d) and --quiet (-q)
+     * Adding options to an interface description.
+     *
+     * \code
      *  cli.
-     *   add_option("recursive", "recursively test all files in directories", 'r').
-     *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with").
-     *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period (default 2 seconds)").
+     *   add_option("recursive", "option without argument", 'r').
+     *   add_option("timeout", make_optional_argument("SEC", "2"), "option with optional argument (default 2)").
+     *   add_option("tool", make_mandatory_argument("FOO"), "option with mandatory argument").
+     *   add_option("language", make_mandatory_argument("LANG", "english"), "option with mandatory argument (default english)").
      *   add_rewriting_options().
      *   add_prover_options();
-     *
-     *  std::cerr << cli.textual_description() << std::endl;
-     *
-     *  std::cerr << "VERSION INFORMATION:" << std::endl
-     *            << std::endl
-     *            << cli.version_information() << std::endl;
      * \endcode
-     * The output produced when running the program is something similar to:
+     *
+     * Printing an interface description.
+     *
+     * \code
+     *  std::cerr << cli.textual_description() << std::endl;
+     * \endcode
+     *
+     * Prints:
      * \verbatim
         interface description:
         /path/to/demo-tool [OPTIONS]... [PATHS]
@@ -112,10 +121,10 @@ namespace mcrl2 {
         class.
       
         Options:
-          -r, --recursive          recursively test all files in directories
-          -t[SEC], --timeout=[SEC] optional timeout period (default 2 seconds)
-              --tool=FOO           path that identifies the tool executable
-                                   to test with
+          -r, --recursive          option without argument
+          -t[SEC], --timeout=[SEC] option optional argument (default 2)
+              --tool=FOO           option with mandatory argument
+              --language=LANG      option with mandatory argument (default english)
       
         Standard options:
           -q, --quiet              do not display warning messages
@@ -127,9 +136,17 @@ namespace mcrl2 {
         Report bugs at <http://www.mcrl2.org/issuetracker>.
       
         See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
-      
-        VERSION INFORMATION:
-      
+       \endverbatim
+     * Printing version information.
+     *
+     * \code
+     *
+     *  std::cerr << "VERSION INFORMATION:" << std::endl
+     *            << std::endl
+     *            << cli.version_information() << std::endl;
+     * \endcode
+     * Prints:
+     * \verbatim
         demo-tool July 2008 (development) (revision 4624M-shared)
         Copyright (c) 2008 Technische Universiteit Eindhoven.
         This is free software.  You may redistribute copies of it under the
@@ -140,6 +157,9 @@ namespace mcrl2 {
      **/
     class interface_description {
       friend class command_line_parser;
+
+      template < typename T >
+      friend struct detail::initialiser;
 
       private:
 
@@ -152,12 +172,12 @@ namespace mcrl2 {
         class basic_argument {
 
           protected:
-       
+
             /// name of the argument (for reference purposes in option description)
             std::string m_name;
 
           protected:
-       
+
             /// sets the name for the argument
             void set_name(std::string const& n) {
               m_name = n;
@@ -181,6 +201,9 @@ namespace mcrl2 {
 
             /// whether the argument is optional or not
             virtual bool is_optional() const = 0;
+
+            /// whether the argument is optional or not
+            virtual bool has_default() const = 0;
 
             /// Destructor
             virtual ~basic_argument() {
@@ -217,19 +240,19 @@ namespace mcrl2 {
           private:
 
             /// Long representation for the option
-            std::string                       m_long;
+            std::string                         m_long;
 
             /// Description for the option
-            std::string                       m_description;
+            std::string                         m_description;
 
             /// Option argument
-            std::auto_ptr < basic_argument >  m_argument;
+            boost::shared_ptr< basic_argument > m_argument;
 
             /// Short representation for the option or 0
-            char                              m_short;
+            char                                m_short;
 
             /// whether the option is printed as part of the tool-specific interface
-            bool                              m_show;
+            bool                                m_show;
 
           protected:
 
@@ -238,6 +261,9 @@ namespace mcrl2 {
 
             /// Returns a man page description for the option
             std::string man_page_description() const;
+
+            /// Returns a man page description for the option
+            std::string wiki_page_description() const;
 
           public:
 
@@ -257,13 +283,15 @@ namespace mcrl2 {
 
             /// copy constructor
             option_descriptor(option_descriptor const& o) : m_long(o.m_long),
-                    m_description(o.m_description), m_short(o.m_short), m_show(true) {
-
-              m_argument.reset(const_cast< std::auto_ptr< basic_argument >& > (o.m_argument).release());
+                    m_description(o.m_description), m_argument(o.m_argument), m_short(o.m_short), m_show(true) {
             }
 
             option_descriptor operator=(option_descriptor const& o) {
               return option_descriptor(o);
+            }
+
+            basic_argument const& argument() const {
+              return *m_argument;
             }
 
             /**
@@ -277,9 +305,8 @@ namespace mcrl2 {
 
             /**
              * \brief Gets default
-             * \pre m_argument->is_optional()
              **/
-            inline std::string get_default() const {
+            inline std::string const& get_default() const {
               return m_argument->get_default();
             }
 
@@ -298,7 +325,7 @@ namespace mcrl2 {
             }
 
             /**
-             * \brief Whether the option takes a mandatory argument
+             * \brief Whether the option takes an argument
              **/
             inline bool accepts_argument() const {
               return m_argument.get() != 0;
@@ -314,8 +341,8 @@ namespace mcrl2 {
         /// \endcond
 
       friend optional_argument< std::string >  make_optional_argument(std::string const&, std::string const&);
-
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
+      friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
 
         typedef std::map< std::string, option_descriptor > option_map;
 
@@ -366,6 +393,8 @@ namespace mcrl2 {
           return result;
         }
 
+        option_descriptor const& find_option(std::string const& long_identifier) const;
+
         /**
          * \brief adds a hidden option
          * \see add_option(std::string const&, basic_argument const& std::string const&, char const)
@@ -381,8 +410,35 @@ namespace mcrl2 {
          * \see add_option(std::string const&, std::string const&, char const)
          **/
         void add_hidden_option(std::string const& long_identifier,
-                                                 std::string const& description,
-                                                 char const short_identifier = '\0');
+                               std::string const& description,
+                               char const short_identifier = '\0');
+
+        /// \brief Stores a sequence of actions that automatically add options (used in constructor)
+        static interface_description& get_standard_description();
+
+        /// \brief Registers option that should be added to every interface
+        template < typename T >
+        inline static void register_initialiser() {
+          T::add_options(get_standard_description());
+        }
+
+        /// \brief Returns the revision number
+        inline static std::string const& revision() {
+          static std::string revision;
+
+          return revision;
+        }
+
+        /// \brief Internal use only
+        inline interface_description() {
+        }
+
+        /**
+         * \brief Returns the text of a wiki page
+         * \param[in] revision the revision tag used in the heading of the man page
+         * \return string containing a man page description of the interface
+         **/
+        std::string wiki_page() const;
 
       public:
 
@@ -403,7 +459,7 @@ namespace mcrl2 {
          * \brief Composes a copyright message
          * \return formatted string that represents the copyright message
          **/
-        std::string copyright_message() const;
+        static std::string copyright_message();
 
         /**
          * \brief Composes a version information message
@@ -429,11 +485,7 @@ namespace mcrl2 {
          * Where toolset version, revision and copyright year are constants
          * supplied internally at compile time.
          **/
-        inline std::string version_information() const {
-          return m_name + " mCRL2 toolset " + version_tag + " (revision " + std::string(MCRL2_REVISION) + ")\n" +
-                 copyright_message() +
-                 "\nWritten by " + m_authors + ".\n";
-        }
+        std::string version_information() const;
 
         /**
          * \brief Adds an option with argument identified by a long-identifier to the interface
@@ -535,14 +587,22 @@ namespace mcrl2 {
          * Adds a single option called `rewrite' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_rewriting_options();
+        interface_description& add_rewriting_options() {
+          detail::register_rewriting_options(*this);
+
+          return *this;
+        }
 
         /**
          * \brief Adds options for the prover
          * Adds a single option called `smt-solver' with a mandatory argument.
          * \return *this
          **/
-        interface_description& add_prover_options();
+        interface_description& add_prover_options() {
+          detail::register_proving_options(*this);
+
+          return *this;
+        }
 
         /**
          * \brief Generates a human readable interface description (used for -h,--help)
@@ -552,10 +612,9 @@ namespace mcrl2 {
 
         /**
          * \brief Returns the text of a man page
-         * \param[in] revision the revision tag used in the heading of the man page
          * \return string containing a man page description of the interface
          **/
-        std::string man_page(std::string const& revision) const;
+        std::string man_page() const;
     };
 
     /**
@@ -584,25 +643,29 @@ namespace mcrl2 {
      *  cli.
      *   add_option("recursive", "recursively test all files in directories", 'r').
      *   add_option("tool", make_mandatory_argument("FOO"), "path that identifies the tool executable to test with", 't').
+     *   add_option("language", make_mandatory_argument("LANG", "english"), "language for output").
      *   add_option("timeout", make_optional_argument("SEC", "2"), "optional timeout period");
      *
      *  try {
      *    // parse command line
      *    command_line_parser parser(cli, "test -v --verbose -r --timeout --tool=foo bar1 bar2");
      * 
-     *    std::cerr << parser.options.count("recursive");        // prints: "1"
-     *    std::cerr << parser.options.count("verbose");          // prints: "2"
-     *    std::cerr << parser.options.count("tool");             // prints: "1"
-     *    std::cerr << parser.options.count("timeout");          // prints: "1"
-     *    std::cerr << parser.options.count("bar1");             // prints: "0"
+     *    std::cerr << parser.options.count("recursive");        // prints: 1
+     *    std::cerr << parser.options.count("verbose");          // prints: 2
+     *    std::cerr << parser.options.count("tool");             // prints: 1
+     *    std::cerr << parser.options.count("timeout");          // prints: 1
+     *    std::cerr << parser.options.count("bar1");             // prints: 0
      * 
      *    std::cerr << parser.option_argument("tool");           // prints: "foo"
-     *    std::cerr << parser.option_argument_as< int >("tool"); // prints: "2"
+     *    std::cerr << parser.option_argument_as< int >("tool"); // prints: 2
      *    std::cerr << parser.option_argument("recursive");      // prints: ""
      * 
-     *    std::cerr << parser.arguments.size();                  // prints: "2"
+     *    std::cerr << parser.arguments.size();                  // prints: 2
      *    std::cerr << parser.arguments[0];                      // prints: "bar1"
      *    std::cerr << parser.arguments[1];                      // prints: "bar2"
+     *
+     *    std::cerr << parser.options.count("language");         // prints: 0
+     *    std::cerr << parser.option_argument("language");       // prints: "english"
      *  }
      *  catch (std::exception& e) {
      *    std::cerr << e.what() << std::endl;
@@ -615,6 +678,8 @@ namespace mcrl2 {
      * are provided.
      **/
     class command_line_parser {
+      template < typename T >
+      friend struct detail::initialiser;
 
       public:
 
@@ -635,9 +700,12 @@ namespace mcrl2 {
         /// \brief The command line interface specification
         interface_description&  m_interface;
 
+        /// \brief Whether the actions after parsing indicate that program execution should continue
+        bool                    m_continue;
+
       public:
 
-        /// \brief The list of options found on the command line
+        /// \brief Maps options found on the command line to their argument or the empty string
         option_map const&       options;
 
         /// \brief The list of arguments that have not been matched with an option
@@ -660,6 +728,18 @@ namespace mcrl2 {
         /// \brief Executes actions for default options
         void process_default_options(interface_description& d);
 
+        /// \brief Stores a sequence of actions that are automatically executed after parsing completes
+        static std::vector< bool (*)(command_line_parser&) >& get_registered_actions() {
+          static std::vector< bool (*)(command_line_parser&) > actions;
+
+          return actions;
+        }
+
+        /// \brief Registers default actions after successful parsing
+        static void register_action(bool (*action)(command_line_parser&)) {
+          get_registered_actions().push_back(action);
+        }
+
       public:
 
         /**
@@ -670,7 +750,7 @@ namespace mcrl2 {
          * \throws std::runtime_error
          **/
         inline command_line_parser(interface_description& interface_specification, char const* const command_line) :
-                                         m_interface(interface_specification), options(m_options), arguments(m_arguments) {
+                     m_interface(interface_specification), m_continue(true), options(m_options), arguments(m_arguments) {
           collect(interface_specification, parse_command_line(command_line));
 
           process_default_options(interface_specification);
@@ -691,7 +771,7 @@ namespace mcrl2 {
 
         /**
          * \brief Throws standard formatted std::runtime_error exception
-         * \param[in] message the exception message
+         * \param[in] message mandatory message indicating what went wrong
          *
          * The following example shows the output of this method for a tool named test.
          *
@@ -715,22 +795,26 @@ namespace mcrl2 {
         /**
          * \brief Returns the argument of the first option matching a name
          * \param[in] long_identifier the long identifier for the option
+         * Finds and returns the argument of an option with long identifier
+         * matching long_identifier in this.options. There may be more than one
+         * occurence of the option in this.options, if so the first argument
+         * to the option will be returned. A default value is returned when a
+         * user did not specify the option matching long_identifier on the
+         * command line. A default value is only returned when the option
+         * matching long_identifier is either an option with optional argument
+         * or when it is an option with mandatory argument and a standard value.
          * \return options.find(long_identifier)->second
          * \pre 0 < options.count(long_identifier)
-         * \throw std::logic_error containing a message that the option
-         * was not part of the command
-         * \throw std::logic_error containing a message that the option
-         * does not take argument
+         * \throw std::logic_error containing a message that the option was not part of the command
+         * \throw std::logic_error containing a message that the option does not take argument
          **/
-        std::string const& option_argument(std::string const& long_identifier) {
-          if (options.count(long_identifier) == 0) {
-            throw std::logic_error("Fatal error: argument requested of unspecified option!");
-          }
-          else if (!m_interface.m_options.find(long_identifier)->second.accepts_argument()) {
-            throw std::logic_error("Fatal error: argument requested of option that does not take an argument!");
-          }
+        std::string const& option_argument(std::string const& long_identifier) const;
 
-          return options.find(long_identifier)->second;
+        /**
+         * \brief Whether main program execution should continue
+         **/
+        inline bool continue_execution() const {
+          return m_continue;
         }
 
         /**
@@ -738,15 +822,16 @@ namespace mcrl2 {
          * \param[in] long_identifier the long identifier for the option
          * \pre 0 < options.count(long_identifier) and !options.find(long_identifier)->second.empty()
          * \throw std::runtime_error containing a message that the argument cannot be converted to the specified type
-         * \return t : T where t << std::istringstream(options.find(long_identifier)->second)
+         * \return t : T where t << std::istringstream(option_argument_as(long_identifier))
+         * \see std::string const& option_argument(std::string const& long_identifier)
          **/
         template < typename T >
-        inline T option_argument_as(std::string const& long_identifier) {
+        inline T option_argument_as(std::string const& long_identifier) const {
           std::istringstream in(option_argument(long_identifier));
 
-          T result;
-           
-          in >> result;
+          detail::instance_of< T > result;
+
+          in >> result.wrapped();
 
           if (in.fail()) {
             const char short_option(m_interface.long_to_short(long_identifier));
@@ -755,7 +840,7 @@ namespace mcrl2 {
                 ((short_option == '\0') ? " " : " or -" + std::string(1, short_option)) + " is invalid");
           }
 
-          return result;
+          return result.wrapped();
         }
     };
 
@@ -764,6 +849,9 @@ namespace mcrl2 {
 
     /// Creates a mandatory option argument specification object
     interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name);
+
+    /// Creates a mandatory option argument specification object
+    interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name, std::string const& standard_value);
 
     /// \cond INTERNAL
 
@@ -783,11 +871,11 @@ namespace mcrl2 {
         /// Checks whether string is convertible to a value of a specific type
         inline bool validate(std::string const& s) const {
           std::istringstream test(s);
-         
+
           T result;
-       
-          s >> result;
-         
+
+          test >> result;
+
           return !test.fail();
         }
     };
@@ -810,14 +898,14 @@ namespace mcrl2 {
       friend class interface_description;
       friend class interface_description::option_descriptor;
       friend class command_line_parser;
-    
+
       protected:
-      
+
         /// default value
         std::string m_default;
 
       public:
-    
+
         virtual basic_argument* clone() const {
           return new optional_argument< T >(*this);
         }
@@ -831,6 +919,13 @@ namespace mcrl2 {
           basic_argument::set_name(name);
 
           m_default = d;
+        }
+
+        /**
+         * \brief Throws because mandatory arguments have no default
+         **/
+        inline bool has_default() const {
+          return true;
         }
 
         /**
@@ -849,9 +944,17 @@ namespace mcrl2 {
     /// Represents a mandatory argument to an option
     template < typename T >
     class interface_description::mandatory_argument : public typed_argument< T > {
-    
+
+      protected:
+
+        /// default value
+        std::string m_default;
+
+        /// whether a default value has been specified
+        bool        m_has_default;
+
       public:
-    
+
         virtual basic_argument* clone() const {
           return new mandatory_argument< T >(*this);
         }
@@ -860,7 +963,15 @@ namespace mcrl2 {
          * Constructor
          * \param[in] n the name of the argument
          **/
-        inline mandatory_argument(std::string const& name) {
+        inline mandatory_argument(std::string const& name) : m_has_default(false) {
+          basic_argument::set_name(name);
+        }
+
+        /**
+         * Constructor
+         * \param[in] n the name of the argument
+         **/
+        inline mandatory_argument(std::string const& name, std::string const& d) : m_default(d), m_has_default(true) {
           basic_argument::set_name(name);
         }
 
@@ -868,7 +979,14 @@ namespace mcrl2 {
          * \brief Throws because mandatory arguments have no default
          **/
         inline std::string const& get_default() const {
-          throw std::logic_error("Fatal error: default argument requested for mandatory option! (this is a bug)\n");
+          return m_default;
+        }
+
+        /**
+         * \brief Throws because mandatory arguments have no default
+         **/
+        inline bool has_default() const {
+          return m_has_default;
         }
 
         /// whether the argument is optional or not
@@ -878,84 +996,46 @@ namespace mcrl2 {
     };
 
 #if !defined(__COMMAND_LINE_INTERFACE__)
+    namespace detail {
+      template <>
+      struct initialiser< void > {
+        static bool set_revision(std::string const& r) {
+          const_cast< std::string& > (interface_description::revision()) = r;
+
+          return true;
+        }
+      };
+
+      static bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
+    }
+
     template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
-                                         m_interface(d), options(m_options), arguments(m_arguments) {
+    inline command_line_parser::command_line_parser(interface_description& d, const int c, char const* const* const a) :
+                                         m_interface(d), m_continue(true), options(m_options), arguments(m_arguments) {
+
+      collect(d, convert(c, a));
+
+      static_cast< void >(mcrl2::utilities::detail::initialised); // prevents unused variable warnings
+
+      process_default_options(d);
+    }
+# ifndef __CYGWIN__ // std::wstring is not available for Cygwin
+    template <>
+    inline command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
+                                         m_interface(d), m_continue(true), options(m_options), arguments(m_arguments) {
 
       collect(d, convert(c, a));
 
       process_default_options(d);
     }
-
-#ifndef __CYGWIN__ // std::wstring is not available for Cygwin
-    template <>
-    command_line_parser::command_line_parser(interface_description& d, const int c, wchar_t const* const* const a) :
-                                         m_interface(d), options(m_options), arguments(m_arguments) {
-
-      collect(d, convert(c, a));
-
-      process_default_options(d);
-    }
-#endif // __CYGWIN__
-
-    /**
-     * \param[in] d the interface description
-     **/
-    void command_line_parser::process_default_options(interface_description& d) {
-      if (m_options.count("help")) {
-        std::cout << d.textual_description();
-
-        exit(0);
-      }
-      else if (m_options.count("version")) {
-        std::cout << d.version_information();
-
-        exit(0);
-      }
-      else if (m_options.count("generate-man-page")) {
-        std::cout << d.man_page(MCRL2_REVISION);
-
-        exit(0);
-      }
-      else if (!m_options.count("rewriter")) {
-        // Add rewrite option for default strategy
-        interface_description::option_map::const_iterator i = d.m_options.find("rewriter");
-
-        if (i != d.m_options.end()) {
-          // Set default rewriter
-          m_options.insert(std::make_pair("rewriter", "jitty"));
-        }
-      }
-#if defined(__LIBREWRITE_H)
-      if (m_options.count("rewriter")) {
-        option_argument_as< RewriteStrategy >("rewriter");
-      }
-#endif
-#if defined(BDD_PATH_ELIMINATOR_H)
-      if (m_options.count("smt-solver")) {
-        option_argument_as< SMT_Solver_Type >("smt-solver");
-      }
-#endif
-#if defined(__MCRL2_MESSAGING_H__)
-      if (m_options.count("quiet")) {
-        if (m_options.count("debug")) {
-          error("options -q/--quiet and -d/--debug cannot be used together\n");
-        }
-        if (m_options.count("verbose")) {
-          error("options -q/--quiet and -v/--verbose cannot be used together\n");
-        }
-
-        mcrl2::core::gsSetQuietMsg();
-      }
-      if (m_options.count("verbose")) {
-        mcrl2::core::gsSetVerboseMsg();
-      }
-      if (m_options.count("debug")) {
-        mcrl2::core::gsSetDebugMsg();
-      }
-#endif
-    }
+# endif // __CYGWIN__
 #endif
     /// \endcond
   }
 }
+
+#ifdef __LIBREWRITE_H // std::wstring is not available for Cygwin
+# include "mcrl2/utilities/command_line_rewriting.h" //temporarily
+#endif
+
+#endif

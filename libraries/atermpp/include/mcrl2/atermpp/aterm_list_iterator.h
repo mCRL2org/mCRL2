@@ -27,7 +27,6 @@ namespace atermpp {
   /// \endcond
 
 /// \brief Iterator for term_list.
-///
 template <typename Value>
 class term_list_iterator: public boost::iterator_facade<
         term_list_iterator<Value>,         // Derived
@@ -37,14 +36,13 @@ class term_list_iterator: public boost::iterator_facade<
     >
 {
  public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     term_list_iterator()
       : m_list(ATempty)
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param l A sequence of terms
     term_list_iterator(ATermList l)
       : m_list(l)
     {}
@@ -52,18 +50,22 @@ class term_list_iterator: public boost::iterator_facade<
  private:
     friend class boost::iterator_core_access;
 
-    /// \cond INTERNAL_DOCS
+    /// \brief Equality operator
+    /// \param other An iterator
+    /// \return True if the iterators are equal
     bool equal(term_list_iterator const& other) const
     { return this->m_list == other.m_list; }
 
+    /// \brief Dereference operator
+    /// \return The value that the iterator references
     const Value dereference() const
     {
       return Value(typename term_list_iterator_traits<Value>::value_type(ATgetFirst(m_list)));
     }
 
+    /// \brief Increments the iterator
     void increment()
     { m_list = ATgetNext(m_list); }
-    /// \endcond
 
     ATermList m_list;
 };

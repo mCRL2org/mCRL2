@@ -41,7 +41,7 @@ namespace squadt {
         GUI::project*                                           m_project;
 
         /** \brief Abstract description of the current layout of this panel */
-        boost::shared_ptr < tipi::tool_display >        m_layout;
+        boost::shared_ptr < tipi::tool_display >                m_layout;
 
         /** \brief Sizer that contains the content part */
         wxSizer*                                                m_content;

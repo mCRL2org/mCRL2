@@ -7,19 +7,15 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file cluster.h
-/// \brief Add your file description here.
+/// \brief Header file of the Cluster class
 
 #ifndef CLUSTER_H
 #define CLUSTER_H
 #include <vector>
 #include <map>
-#include "utils.h"
+#include <set>
 
-#ifndef STATE_H
-  #include "state.h"
-#else
-  class State;
-#endif
+class State;
 
 // forward declaration
 class Cluster;
@@ -64,8 +60,8 @@ class Cluster {
     void addUndecidedState(State* s);
     State* getState(int i) const;
     int getNumStates() const;
-    bool hasDeadlock() const;
-    void setDeadlock( bool b );
+    int getNumDeadlocks() const;
+    void addDeadlock();
 
     void addMatchedRule(int mr);
     void removeMatchedRule(int mr);
@@ -75,23 +71,6 @@ class Cluster {
     void setNumMarkedStatesAll(int n);
     void setNumMarkedStatesAny(int n);
     int getNumMarkedTransitions();
-
-    void getParameterValues(int i, std::vector<int> &vs);
-    /*
-    bool getMarking() const;
-    void setMarking(bool b);
-    void setMarkAllEmpty(bool b);
-    bool hasMarkedState() const;
-    int getMarkedTransitionCount() const;
-
-    // Calls s->mark(rule) for all s in states that match rule, and adapts
-    // markedState to the number of states marked.
-    void markState(Utils::MarkRule* rule);
-
-    // Calls s->unmark(rule) for all s in states that match rule, and adapts 
-    // markedState to the number of states marked.
-    void unmarkState(Utils::MarkRule* rule);
-    */
 
     unsigned int getTotalNumSlots() const;
     unsigned int getNumSlots(unsigned int ring) const;
@@ -139,15 +118,12 @@ class Cluster {
     std::map< int, int > actionLabelCounts;
     Cluster* ancestor;
     float baseRadius;
-    bool deadlock;
+    int numDeadlocks;
     std::vector< Cluster* > descendants;
     std::vector<std::vector<bool> > severedDescendants;
     unsigned int severedDescendantsC;
     int numMarkedStatesAll;
     int numMarkedStatesAny;
-    /*
-    bool marking;
-    bool markAllEmpty;*/
     int numMarkedTransitions;
     float position;
     int rank;

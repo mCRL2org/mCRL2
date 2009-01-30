@@ -12,7 +12,7 @@
 #define _SQUADT_LPS2LTS_H
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
 
 class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   friend class status_display;
@@ -20,7 +20,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
   public:
     squadt_interactor();
-  
+
   public:
 
     class status_display;
@@ -37,21 +37,21 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
     static const char*  option_rewrite_strategy;
     static const char*  option_exploration_strategy;
-      
+
     static const char*  option_detect_deadlock;
     static const char*  option_detect_actions;
     static const char*  option_trace;
     static const char*  option_max_traces;
     static const char*  option_error_trace;
-      
+
     static const char*  option_confluence_reduction;
     static const char*  option_confluent_tau;
-      
+
     static const char*  option_max_states;
-      
+
     static const char*  option_bithashing;
     static const char*  option_bithashsize;
-      
+
     static const char*  option_init_tsize;
 
     static const char* lps_file_for_input;

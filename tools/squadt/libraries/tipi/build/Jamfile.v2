@@ -2,91 +2,71 @@ project squadt/libraries/tipi
     : source-location
        ../source
     : requirements
-       <use>/site-config//boost_headers
-       <use>/libraries/utilities//headers
-       <toolset>darwin:<cxxflags>-ftemplate-depth-512
-       <toolset>gcc:<cxxflags>-ftemplate-depth-512
+       <use>/site-config//boost
        <include>../include
+       <c++-template-depth>512
+       <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
     : usage-requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <include>../include
-    ;
-
-transport_sources = [ glob ../source/transport/*.cpp ] ;
-
-alias transport
-    : $(transport_sources)
-    : <library>/site-config//boost_thread
-      <library>/site-config//boost_system
-      <threading>multi
-      <os>NT:<use>/site-config//winsock
-      <os>CYGWIN:<use>/site-config//winsock
-    :
-    : <library>/site-config//boost_thread
-      <library>/site-config//boost_system
-      <os>SOLARIS:<library>/site-config//socket
-      <os>NT:<library>/site-config//winsock
-      <os>CYGWIN:<library>/site-config//winsock
-    ;
-
-obj restore_visitor.o
-    : restore_visitor.cpp
-    : <use>/libraries//ticpp
-      <use>/site-config//boost_filesystem
-    :
-    : <library>/libraries//ticpp
-      <library>/site-config//boost_filesystem
     ;
 
 alias messenger
-    :
-      [ obj tool_capabilities.o : tool/capabilities.cpp ]
-      [ obj controller_capabilities.o : controller/capabilities.cpp ]
+    : [ glob ../source/transport/*.cpp ]
+      [ obj capabilities_tool : tool/capabilities.cpp ]
+      [ obj capabilities_controller : controller/capabilities.cpp ]
+      restore_visitor.cpp/<use>/libraries/ticpp//ticpp
       basic_datatype.cpp
       common.cpp
       command_line_interface.cpp
       configuration.cpp
       display.cpp
       mime_type.cpp
-      transport
       store_visitor.cpp
-      restore_visitor.o
       detail/event_handlers.cpp
+      /libraries/ticpp//ticpp
+      /site-config//boost_filesystem
+      /site-config//boost_thread
+      /site-config//boost_system
+      /site-config//socket
     : <threading>multi
-      <use>/libraries/utilities//headers
-      <dependency>/site-config//boost_filesystem
-    : # no default build
+    :
     : <library>/site-config//boost_filesystem
+      <library>/site-config//boost_thread
+      <library>/site-config//boost_system
+      <library>/site-config//socket
     ;
 
-obj tool_communicator.o       : tool/communicator.cpp       : <use>transport ;
-obj controller_communicator.o : controller/communicator.cpp : <use>transport ;
+obj communicator_tool.o
+    : tool/communicator.cpp
+    : <use>/site-config//socket
+    ;
+
+obj communicator_controller.o
+    : controller/communicator.cpp
+    : <use>/site-config//socket
+    ;
 
 lib tipi-controller
-    : controller_communicator.o
+    : communicator_controller.o
       messenger
-    : <threading>multi
-      <link>static
-    ;
-
-lib tipi
-    : controller_communicator.o
-      tool_communicator.o
-      messenger
-    : <threading>multi
-      <link>shared
+    : <link>static
     ;
 
 lib tipi-tool
-    : tool_communicator.o
+    : communicator_tool.o
       messenger
-    : <threading>multi
-      <link>static
+    : <link>static
     ;
 
-alias tool_interface       : tipi            : <link>shared ;
-alias tool_interface       : tipi-tool       : <link>static ;
-alias controller_interface : tipi            : <link>shared ;
-alias controller_interface : tipi-controller : <link>static ;
+lib tipi
+    : communicator_tool.o
+      communicator_controller.o
+      messenger
+    : <link>shared
+    ;
 
-install-libraries tool_interface controller_interface ;
+alias tool       : : <link>shared:<source>tipi <link>static:<source>tipi-tool ;
+alias controller : : <link>shared:<source>tipi <link>static:<source>tipi-controller ;
+
+install-libraries tool controller ;

@@ -1,6 +1,7 @@
 project libraries/lts/test
    : requirements
-       <dependency>/site-config//boost_headers
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lts
    ;
 

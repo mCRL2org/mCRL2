@@ -120,7 +120,7 @@ protected:
         MSE_CLICK_SINGLE,
         MSE_CLICK_DOUBLE,
         MSE_DRAG_TRUE,
-        MSE_DRAG_FALSE,
+        MSE_DRAG_FALSE
     };
     int mouseButton;
     int mouseSide;

@@ -654,6 +654,7 @@ LIBOBJS
 WX_GL_LDFLAGS
 WX_BASE_LDFLAGS
 WX_CPPFLAGS
+WX_TYPE
 WX_CONFIG
 OPENGL_NAME
 OPENGL_LPATH
@@ -668,6 +669,7 @@ ATERM_LDFLAGS
 ATERM_CPPFLAGS
 EGREP
 GREP
+DL
 BFLAGS
 BISON
 FLEX
@@ -737,16 +739,15 @@ enable_option_checking
 enable_optimisation
 enable_debug
 enable_profile
-with_static
+enable_static
 enable_experimental
 enable_deprecated
 enable_squadt_support
 with_aterm
 with_cadp
-with_cvc
 with_boost
 with_opengl
-with_wx
+with_wx_config
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1392,6 +1393,8 @@ Optional Features:
 
   --enable-profile        adds profiling support to libraries and executables
 
+  --enable-static         produce and link to static libraries
+
   --enable-experimental   also build experimental tools
 
   --enable-deprecated     also build deprecated tools
@@ -1403,20 +1406,17 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --enable-static         produce and link to static libraries
-
   [--with-aterm=dir[,suf]]
                           use ATerm headers from dir/include[/suf] and the
                           ATerm library from dir/lib[/suf]
 
   --with-cadp=prefix      try this for the CADP prefix directory
 
-  --with-cvc=prefix       try this for the CVC3 prefix directory
-
   --with-boost=prefix     try this for the boost prefix install directory
 
   --with-opengl=DIR       OpenGL/Mesa installation directory
-  --with-wx=DIR           use wxWidgets configuration program wx-config in DIR
+  --with-wx-config=FILE   use FILE for wxWidgets configuration program
+                          wx-config
 
 
 Some influential environment variables:
@@ -2032,6 +2032,17 @@ case $host in
     HOST_OS="BSD"
     ;;
   *-*-darwin*)
+    case $host in
+      arm-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=arm"
+      ;;
+      i386-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=x86"
+      ;;
+      powerpc-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=power"
+      ;;
+    esac
     HOST_OS="MACOSX"
     R_CFLAGS="-Wno-unused -O3"
     R_CXXFLAGS="-Wno-unused -O3"
@@ -3614,6 +3625,70 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+#check if the g++ compiler works
+
+{ $as_echo "$as_me:$LINENO: checking whether the C++ compiler works" >&5
+$as_echo_n "checking whether the C++ compiler works... " >&6; }
+if test "${avahi_cv_sys_cxx_works+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    cat >conftest.$ac_ext <<_ACEOF
+int main() { }
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  avahi_cv_sys_cxx_works=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	avahi_cv_sys_cxx_works=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $avahi_cv_sys_cxx_works" >&5
+$as_echo "$avahi_cv_sys_cxx_works" >&6; }
+ if [ "x$avahi_cv_sys_cxx_works" = "xno" ]; then
+    { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+{ { $as_echo "$as_me:$LINENO: error: The C++ compiler does not work. Please (re)install the C++ compiler
+See \`config.log' for more details." >&5
+$as_echo "$as_me: error: The C++ compiler does not work. Please (re)install the C++ compiler
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }; }
+ fi
+
 # Check for compatible flex
 # Extract the first word of "flex", so it can be a program name with args.
 set dummy flex; ac_word=$2
@@ -3830,7 +3905,6 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-
 if test "$cross_compiling" = yes; then
   { { $as_echo "$as_me:$LINENO: error: C++ 98 standard not supported" >&5
 $as_echo "$as_me: error: C++ 98 standard not supported" >&2;}
@@ -3949,10 +4023,9 @@ if test "x$enable_profile" = xyes; then
 fi
 
 # Check for debug/profile options
-
-# Check whether --with-static was given.
-if test "${with_static+set}" = set; then
-  withval=$with_static;
+# Check whether --enable-static was given.
+if test "${enable_static+set}" = set; then
+  enableval=$enable_static;
 fi
 
 if test "x$enable_static" = xyes; then
@@ -3980,6 +4053,77 @@ fi
 if test "x$enable_deprecated" = xyes; then
   BUILD_OPTIONS="--enable-deprecated $BUILD_OPTIONS"
 fi
+
+{ $as_echo "$as_me:$LINENO: checking for dlopen in -ldl" >&5
+$as_echo_n "checking for dlopen in -ldl... " >&6; }
+if test "${ac_cv_lib_dl_dlopen+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  ac_cv_lib_dl_dlopen=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_dl_dlopen=no
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_dl_dlopen" >&5
+$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
+if test "x$ac_cv_lib_dl_dlopen" = x""yes; then
+  DL=dl
+fi
+
+
 
 # Check whether optimization must be suppressed
 # Check whether --enable-squadt_support was given.
@@ -4998,153 +5142,49 @@ fi
 { $as_echo "$as_me:$LINENO: result: $USE_BCG" >&5
 $as_echo "$USE_BCG" >&6; }
 
-
-# Check whether --with-cvc was given.
-if test "${with_cvc+set}" = set; then
-  withval=$with_cvc;
-fi
-
-USE_CVC3=no
-if test ${with_cvc}; then
-  { $as_echo "$as_me:$LINENO: checking for CVC3 (with GMP) in $with_cvc" >&5
-$as_echo_n "checking for CVC3 (with GMP) in $with_cvc... " >&6; }
-  CPPFLAGS="-I${with_cvc}/include/cvc3"
-  ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-  cat >conftest.$ac_ext <<_ACEOF
-
-      #include <$with_cvc/include/cvc3/vc.h>
-
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-
-       LIBS="-L${with_cvc}/lib -lcvc3"
-       cat >conftest.$ac_ext <<_ACEOF
-
-        #include <$with_cvc/include/cvc3/vc.h>
-
-        int main() {
-          return (0);
-        }
-
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  :
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
-         cat >conftest.$ac_ext <<_ACEOF
-
-          #include <$with_cvc/include/cvc3/vc.h>
-
-          int main() {
-            return (0);
-          }
-
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-
-           USE_CVC="$with_cvc"
-           USE_CVC3=yes
-
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-  { $as_echo "$as_me:$LINENO: result: $USE_CVC3" >&5
-$as_echo "$USE_CVC3" >&6; }
-fi
+#AC_ARG_WITH(
+#  [cvc],
+#  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])
+#)
+#USE_CVC3=no
+#if test ${with_cvc}; then
+#  AC_MSG_CHECKING([for CVC3 (with GMP) in $with_cvc])
+#  CPPFLAGS="-I${with_cvc}/include/cvc3"
+#  AC_LANG_PUSH(C++)
+#  AC_COMPILE_IFELSE(
+#     [
+#      #include <$with_cvc/include/cvc3/vc.h>
+#     ],
+#     [
+#       LIBS="-L${with_cvc}/lib -lcvc3"
+#       AC_LINK_IFELSE(
+#       [
+#        #include <$with_cvc/include/cvc3/vc.h>
+#
+#        int main() {
+#          return (0);
+#        }
+#       ],
+#       [],
+#       [
+#         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
+#         AC_LINK_IFELSE(
+#         [
+#          #include <$with_cvc/include/cvc3/vc.h>
+#
+#          int main() {
+#            return (0);
+#          }
+#         ],
+#         [
+#           USE_CVC="$with_cvc"
+#           USE_CVC3=yes
+#         ])
+#       ])
+#     ])
+#  AC_LANG_POP()
+#  AC_MSG_RESULT($USE_CVC3)
+#fi
 
 
 # Check for Boost C++ library
@@ -5420,49 +5460,15 @@ fi
 
 # Check for wxWidgets
 
-# Check whether --with-wx was given.
-if test "${with_wx+set}" = set; then
-  withval=$with_wx;
+# Check whether --with-wx-config was given.
+if test "${with_wx_config+set}" = set; then
+  withval=$with_wx_config;
 fi
 
-if test $with_wx; then
-  # Extract the first word of "wx-config", so it can be a program name with args.
-set dummy wx-config; ac_word=$2
-{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_WX_CONFIG+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$WX_CONFIG"; then
-  ac_cv_prog_WX_CONFIG="$WX_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $with_wx
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_WX_CONFIG="$with_wx/wx-config"
-    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
+if test "$with_wx_config"; then
+  if test $($with_wx_config --version 2>/dev/null); then
+    WX_CONFIG="$with_wx_config"
   fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-WX_CONFIG=$ac_cv_prog_WX_CONFIG
-if test -n "$WX_CONFIG"; then
-  { $as_echo "$as_me:$LINENO: result: $WX_CONFIG" >&5
-$as_echo "$WX_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:$LINENO: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
 else
   # Extract the first word of "wx-config", so it can be a program name with args.
 set dummy wx-config; ac_word=$2
@@ -5501,47 +5507,7 @@ $as_echo "no" >&6; }
 fi
 
 
-fi
-if test -z $WX_CONFIG; then
-  if test $with_wx; then
-    # Extract the first word of "wx-config-2.8", so it can be a program name with args.
-set dummy wx-config-2.8; ac_word=$2
-{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_WX_CONFIG+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$WX_CONFIG"; then
-  ac_cv_prog_WX_CONFIG="$WX_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $with_wx
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_WX_CONFIG="$with_wx/wx-config-2.8"
-    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-fi
-fi
-WX_CONFIG=$ac_cv_prog_WX_CONFIG
-if test -n "$WX_CONFIG"; then
-  { $as_echo "$as_me:$LINENO: result: $WX_CONFIG" >&5
-$as_echo "$WX_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:$LINENO: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  else
+  if test -z $WX_CONFIG; then
     # Extract the first word of "wx-config-2.8", so it can be a program name with args.
 set dummy wx-config-2.8; ac_word=$2
 { $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -5581,11 +5547,18 @@ fi
 
   fi
 fi
-if test $WX_CONFIG; then
+if test "$WX_CONFIG"; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl,xml,html,adv)"
+  if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="shared"
+  else
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="static"
+  fi
 else
   USE_WX=no
 fi
@@ -6790,7 +6763,6 @@ R_SLDFLAGS="$R_SLDFLAGS"
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 
@@ -6802,7 +6774,6 @@ $as_echo "
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
      CADP          :  $USE_BCG
-     CVC3          :  $USE_CVC3
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
 

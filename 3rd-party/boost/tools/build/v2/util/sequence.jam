@@ -204,8 +204,8 @@ rule unique ( list * : stable ? )
 }
 
 
-# Returns the maximum number in 'elements'. Uses 'ordered' for comparisons, or
-# 'numbers.less' is none is provided.
+# Returns the maximum number in 'elements'. Uses 'ordered' for comparisons or
+# 'numbers.less' if none is provided.
 #
 rule max-element ( elements + : ordered ? )
 {
@@ -247,7 +247,7 @@ rule select-highest-ranked ( elements * : ranks * )
 NATIVE_RULE sequence : select-highest-ranked ;
 
 
-local rule __test__ ( )
+rule __test__ ( )
 {
     # Use a unique module so we can test the use of local rules.
     module sequence.__test__

@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
@@ -14,8 +16,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <tipi/detail/utility/generic_visitor.hpp>
-#include "tipi/visitors.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/controller/capabilities.hpp"
@@ -96,12 +98,12 @@ namespace tipi {
     tree = in.FirstChildElement(false);
   }
 
-  std::istream& operator >> (std::istream& s, tipi::message::type_identifier_t& id) {
+  std::istream& operator >> (std::istream& s, tipi::message::message_type & id) {
     size_t t;
 
     s >> t;
 
-    id = static_cast < tipi::message::type_identifier_t > (t);
+    id = static_cast < tipi::message::message_type > (t);
 
     return (s);
   }
@@ -142,7 +144,7 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::message& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message");
 
-    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::message_unknown);
+    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::unknown());
 
     o.m_content.clear();
 
@@ -294,7 +296,7 @@ namespace utility {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
     o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
-    
+
     tree->GetAttribute("location", &o.m_location, false);
   }
 
@@ -331,18 +333,19 @@ namespace utility {
     c.m_output_objects.clear();
     c.m_positions.clear();
 
-    tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("interactive", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("valid", &c.m_fresh, c.m_fresh);
     tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
 
     std::string category;
 
     tree->GetAttribute("category", &category);
 
-    c.m_category = tipi::tool::category::fit(category);
+    c.m_category = tipi::tool::category::match(category);
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       std::string identifier = e->GetAttribute("id");
-     
+
       if (e->Value() == "option") {
         boost::shared_ptr < tipi::configuration::option > o(new tipi::configuration::option);
 
@@ -376,7 +379,7 @@ namespace utility {
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration");
 
-    cp.reset(new capabilities::input_configuration(tipi::tool::category::fit(tree->GetAttribute("category"))));
+    cp.reset(new capabilities::input_configuration(tipi::tool::category::match(tree->GetAttribute("category"))));
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       cp->m_object_map.insert(std::make_pair(e->GetAttribute("id"), e->GetAttribute("format")));
@@ -397,7 +400,7 @@ namespace utility {
       static capabilities::input_configuration dummy(tipi::tool::category("unknown"));
 
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-     
+
         if (e->Value() == "protocol-version") {
           c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("major")));
           c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
@@ -447,11 +450,11 @@ namespace utility {
 
     c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttribute("type")));
 
-    c.description.clear();
+    c.m_description.clear();
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "description") {
-        c.description += e->GetText(false);
+        c.m_description += e->GetText(false);
       }
     }
   }
@@ -463,10 +466,10 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::label& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
-    
+
     c.m_text = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -479,7 +482,7 @@ namespace utility {
 
     c.m_label = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS
@@ -551,7 +554,7 @@ namespace utility {
     catch (...) {
     }
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -566,7 +569,7 @@ namespace utility {
 
     tree->GetAttributeOrDefault("checked", &c.m_status, false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -581,7 +584,7 @@ namespace utility {
     tree->GetAttribute("maximum", &c.m_maximum);
     tree->GetAttribute("current", &c.m_current);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -598,7 +601,7 @@ namespace utility {
       }
     }
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS
@@ -674,10 +677,10 @@ namespace utility {
       c.m_visible = text_to_visibility(s); 
     }
 
-    tree->GetAttribute("margin-top", &c.m_margin.top, false);
-    tree->GetAttribute("margin-left", &c.m_margin.left, false);
-    tree->GetAttribute("margin-bottom", &c.m_margin.bottom, false);
-    tree->GetAttribute("margin-right", &c.m_margin.right, false);
+    tree->GetAttribute("margin-top", &c.m_margin.m_top, false);
+    tree->GetAttribute("margin-left", &c.m_margin.m_left, false);
+    tree->GetAttribute("margin-bottom", &c.m_margin.m_bottom, false);
+    tree->GetAttribute("margin-right", &c.m_margin.m_right, false);
     tree->GetAttribute("grow", &c.m_grow, false);
     tree->GetAttribute("enabled", &c.m_enabled, false);
   }
@@ -880,8 +883,8 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
-  
-    if (c.get_manager() != 0) {
+
+    if (c.manager() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
           ::tipi::display::element_identifier id;

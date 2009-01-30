@@ -175,7 +175,7 @@ protected:
         ANIM_POS,
         ANIM_BLEND,
         ID_CLEAR,
-        ID_DIAGRAM_MORE,
+        ID_DIAGRAM_MORE
     };
     
     // -- data members ----------------------------------------------
@@ -239,7 +239,7 @@ protected:
     double opacityKeyFrameTo;
 
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

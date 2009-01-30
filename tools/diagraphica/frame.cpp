@@ -8,8 +8,11 @@
 //
 /// \file ./frame.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "frame.h"
 #include "figures.xpm"
+#include <mcrl2/lts/lts.h>
 
 #include <iostream>
 using namespace std;
@@ -20,8 +23,6 @@ using namespace std;
 # define wxFD_SAVE wxSAVE
 # define wxFD_OVERWRITE_PROMPT wxOVERWRITE_PROMPT
 #endif
-
-std::string get_about_message();
 
 // -- constructors and destructor -----------------------------------
 
@@ -1154,8 +1155,8 @@ void Frame::initIcon()
 {
     try
     {
-        wxIcon icon(icon_16x16);
-        SetIcon( icon ); // icom defined in 'figures.xpm'
+        wxIcon icon(logo);
+        SetIcon( icon ); // icon defined in 'figures.xpm'
     }
     catch ( ... )
     {
@@ -1372,9 +1373,13 @@ void Frame::initMenuBar()
     // help menu
     helpMenu = new wxMenu();
     helpMenu->Append(
+        wxID_HELP,
+        wxString( wxT( "&Contents" ) ),
+        wxString( wxT( "Show help contents" ) ) );
+    helpMenu->AppendSeparator();
+    helpMenu->Append(
         wxID_ABOUT,
-        wxString( wxT( "&About DiaGraphica" )),
-        wxString( wxT( "Displays program information" ) ) );
+        wxString( wxT( "&About" ) ) );
     menuBar->Append(
         helpMenu,
         wxString( wxT( "&Help" ) ) );
@@ -1942,7 +1947,7 @@ void Frame::initToolbarEdit()
     wxBitmap snapGridBmp( snapgrid );
     toolBarEdit->AddCheckTool( ID_TOOL_SNAP_GRID, wxString( wxT( "Snap grid" ) ), snapGridBmp );
     toolBarEdit->ToggleTool( ID_TOOL_SNAP_GRID, true );
-    
+
     // finalize toolbar
     toolBarEdit->Realize();
     sizerTopRgt->Add(
@@ -2017,10 +2022,10 @@ void Frame::initTextCtrl()
         5 ); 
 }
 
-
-// -------------------------
-void Frame::initAboutFrame()
-// -------------------------
+/* commented dead code (jwulp)
+// ----------------------------
+void Frame::initAboutFrameOld()
+// ----------------------------
 {
     frameAbout = new wxFrame(
         this,
@@ -2067,7 +2072,26 @@ void Frame::initAboutFrame()
     panel->SetSizer( sizer );
 
     // message
-    wxString msg = wxString(get_about_message().c_str(), wxConvLocal);
+    string s_msg =
+      mcrl2::utilities::interface_description("", "diagraphica", "A. Johannes Pretorius", "", "").version_information() +
+      string("\n"
+        "For more information please see:\n"
+        "www.win.tue.nl/~apretori/diagraphica\n"
+        "\n"
+        "You are free to use images produced with DiaGraphica. "
+        "In this case, image credits would be much appreciated.\n"
+        "\n"
+        "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
+        "uses the TinyXML parser (tinyxml.sourceforge.net). "
+        "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n"
+        "\n"
+        "This version of DiaGraphica is part of the mCRL2 toolset.\n"
+        "For information see http://www.mcrl2.org\n"
+        "\n"
+        "Please report bugs at http://www.mcrl2.org/issuetracker\n"
+      );
+
+    wxString msg = wxString(s_msg.c_str(), wxConvLocal);
 
     wxTextCtrl* textCtrl = new wxTextCtrl(
         panel, 
@@ -2093,7 +2117,7 @@ void Frame::initAboutFrame()
     frameAbout->Show();
     frameAbout->Update();
 }
-
+*/
 
 // ----------------------------
 void Frame::initFrameSettings()
@@ -2648,7 +2672,12 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // open file dialog
         wxString filePath = wxT( "" );
         wxString caption  = wxString( wxT( "Choose a file" ) );
-        wxString wildcard = wxString( wxT( "FSM file (*.fsm)|*.fsm" ) );
+        wxString wildcard = wxString(("All supported files (" +
+	    mcrl2::lts::lts::lts_extensions_as_string() +
+	    ")|" +
+	    mcrl2::lts::lts::lts_extensions_as_string(";") +
+	    "|All files (*.*)|*.*").c_str(),
+	    wxConvLocal);
 
         wxFileDialog* fileDialog = new wxFileDialog( 
             this,
@@ -2688,7 +2717,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".fsm");
+	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
 		s.append(".fsm");
@@ -2719,7 +2748,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".fsm");
+	    size_t found = s.find(".fsm");
 	    if( found == string::npos)
 	    {
 		s.append(".fsm");
@@ -2776,7 +2805,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".dgc");
+	    size_t found = s.find(".dgc");
 	    if( found == string::npos)
 	    {
 		s.append(".dgc");
@@ -2832,7 +2861,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         {
             filePath = fileDialog->GetPath();
 	    string s = string( filePath.fn_str() );
-	    int found = s.find(".dgd");
+	    size_t found = s.find(".dgd");
 	    if( found == string::npos)
 	    {
 		s.append(".dgd");
@@ -3059,10 +3088,6 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( frameSettings == NULL )
             initFrameSettings();
         frameSettings->setDgrmEditor();
-    }
-    else if ( e.GetId() == wxID_ABOUT )
-    {
-        initAboutFrame();
     }
     else if ( e.GetId() == wxID_CLOSE )
     {
@@ -4572,7 +4597,6 @@ BEGIN_EVENT_TABLE( Frame, wxFrame )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_SIMULATOR, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_TRACE, Frame::onMenuBar )
     EVT_MENU( ID_MENU_ITEM_SETTINGS_EDITOR, Frame::onMenuBar )
-    EVT_MENU( wxID_ABOUT, Frame::onMenuBar )
     EVT_MENU( wxID_CLOSE, Frame::onMenuBar )
     // splitter windows
     EVT_SPLITTER_DCLICK( ID_SPLITTER_FRAME, Frame::onSplitterDoubleClick )

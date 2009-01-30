@@ -80,7 +80,7 @@ private:
         ID_SPIN_CTRL_NUMBER,
         ID_COMBO_BOX_METHOD,
         ID_BUTTON_CANCEL,
-        ID_BUTTON_OK,
+        ID_BUTTON_OK
     };
     
     // -- declare event table ---------------------------------------

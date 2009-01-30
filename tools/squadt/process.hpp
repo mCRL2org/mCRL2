@@ -17,6 +17,8 @@
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include "workarounds.h" // pid_t
+
 #include "command.hpp"
 
 namespace squadt {
@@ -40,12 +42,6 @@ namespace squadt {
           completed, ///< has terminated successfully 
           aborted    ///< was aborted
         };
- 
-        /** \brief Convenience type for weak pointer implementation */
-        typedef boost::weak_ptr < process >            wptr;
-
-        /** \brief Convenience type to hide shared pointer implementation */
-        typedef boost::shared_ptr < process >          sptr;
 
         /** \brief Convenience type for handlers */
         typedef boost::function < void (boost::shared_ptr < process >) >    termination_handler;
@@ -59,34 +55,34 @@ namespace squadt {
 
         /** \brief Constructor */
         process();
-    
+
       public:
 
         /** \brief Factory method */
         static boost::shared_ptr < process > create();
-    
+
         /** \brief Start the process by executing a command */
         void execute(const command&);
-     
+
         /** \brief Start the process by executing a command */
         void execute(const command&, termination_handler const& h);
-     
+
         /** \brief Returns the process status */
         status get_status() const;
 
         /** \brief Returns the process id */
         pid_t get_identifier() const;
- 
+
         /** \brief Returns the process id */
         std::string get_executable_name() const;
 
         /** \brief Terminates the process */
         bool terminate();
- 
+
         /** \brief Returns the last command that is (or was) executing */
         command const& get_command() const;
     };
   }
 }
-  
+
 #endif

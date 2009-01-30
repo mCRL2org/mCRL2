@@ -3,14 +3,12 @@ project atermpp
        : requirements
           <include>../include
        : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library atermpp
        :
-       : <use>/site-config//boost_headers
-         <use>/libraries/aterm//headers
+       : <library>/libraries//aterm
        :
-       : <use>/site-config//boost_headers
-         <library>/libraries//aterm
+       : <include>../include
+         <use>/site-config//boost
        ;

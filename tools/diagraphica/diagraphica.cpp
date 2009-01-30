@@ -8,6 +8,8 @@
 //
 /// \file ./diagraph.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 
@@ -16,7 +18,10 @@
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/core/aterm_ext.h"
 
+#include "mcrl2/lts/lts.h"
 // windows debug libraries
 #ifdef _MSC_VER
   #define _CRTDBG_MAP_ALLOC
@@ -26,71 +31,55 @@
 
 using namespace std;
 
-string get_about_message() {
-  static const string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-    string("\n"
-     "For more information please see:\n"
-     "www.win.tue.nl/~apretori/diagraphica\n"
-     "\n"
-     "You are free to use images produced with DiaGraphica. "
-     "In this case, image credits would be much appreciated.\n"
-     "\n"
-     "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and "
-     "uses the TinyXML parser (tinyxml.sourceforge.net). "
-     "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).\n"
-     "\n"
-     "This version of DiaGraphica is part of the mCRL2 toolset.\n"
-     "For information see http://www.mcrl2.org\n"
-     "\n"
-     "Please report bugs at http://www.mcrl2.org/issuetracker\n");
+std::string lts_file_argument;
+std::string parse_error;
 
-  return version_information;
-}
-
-string fsm_file_argument;
-
-// -- Squadt protocol interface -------------------------------------
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-# include <mcrl2/utilities/squadt_interface.h>
 
-  using namespace mcrl2::utilities::squadt;
+// SQuADT protocol interface
+# include <mcrl2/utilities/mcrl2_squadt_interface.h>
+using namespace mcrl2::utilities::squadt;
+using namespace mcrl2::lts;
+const char* lts_file_for_input  = "lts_in";
 
-  const char* fsm_file_for_input = "fsm_in";
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
 
-  class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+  public:
+    // Configures tool capabilities.
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
-    public:
-
-      // Configures tool capabilities.
-      void set_capabilities(tipi::tool::capabilities& c) const {
-        /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-        c.add_input_configuration(fsm_file_for_input,
-             tipi::mime_type("fsm", tipi::mime_type::text), tipi::tool::category::visualisation);
+      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
       }
-     
-      // Queries the user via SQuADt if needed to obtain configuration information
-      void user_interactive_configuration(tipi::configuration&) {}
-     
-      // Check an existing configuration object to see if it is usable
-      bool check_configuration(tipi::configuration const& c) const {
-        bool valid = c.input_exists(fsm_file_for_input);
-     
-        if (!valid) {
-          send_error("Invalid input combination");
+    }
+
+    // Queries the user via SQuADt if needed to obtain configuration information
+    void user_interactive_configuration(tipi::configuration&) { }
+
+    // Check an existing configuration object to see if it is usable
+    bool check_configuration(tipi::configuration const& c) const {
+      if (c.input_exists(lts_file_for_input)) {
+        /* The input object is present, verify whether the specified format is supported */
+        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
+          send_error("Invalid configuration: unsupported type `" +
+              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
         }
-     
-        return valid;
+        else {
+          return true;
+        }
       }
-     
-      // Performs the task specified by a configuration
-      bool perform_task(tipi::configuration& c) {
-        fsm_file_argument = c.get_input(fsm_file_for_input).get_location();
-    
-        return mcrl2_wx_tool_interface::perform_task(c);
-      }
-  };
+
+      return false;
+    }
+
+    // Performs the task specified by a configuration
+    bool perform_task(tipi::configuration& c) {
+      lts_file_argument = c.get_input(lts_file_for_input).location();
+
+      return mcrl2_wx_tool_interface::perform_task(c);
+    }
+};
 #endif
 
 #include "diagraph.h"
@@ -102,10 +91,12 @@ IMPLEMENT_APP( DiaGraph )
 IMPLEMENT_APP_NO_MAIN( DiaGraph )
 
 # ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   HINSTANCE hPrevInstance,
                                   wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {                                                                     
+                                  int nCmdShow) {
+
+  MCRL2_ATERM_INIT(0, lpCmdLine) 
 
   if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
     return EXIT_SUCCESS;
@@ -115,6 +106,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 }
 # else
 int main(int argc, char **argv) {
+
+  MCRL2_ATERM_INIT(argc, argv)
 
   if(interactor< squadt_interactor >::free_activation(argc, argv)) {
     return EXIT_SUCCESS;
@@ -130,50 +123,52 @@ int main(int argc, char **argv) {
 // -- command line --------------------------------------------------
 
 // parse command line 
-bool parse_command_line(int argc, wxChar** argv) {
+bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
 
   using namespace ::mcrl2::utilities;
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
       NAME, AUTHOR, "[OPTION]... [INFILE]\n",
-      "Multivariate state visualization and simulation analysis techniques for labelled"
-      "transition systems (LTS's) in the FSM format. If INFILE is supplied, it will be"
-      "loaded by the tool.");
+      "Multivariate state visualisation and simulation analysis for labelled "
+      "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
+      "DiaGraphica is started without opening an LTS.");
 
   command_line_parser parser(clinterface, argc, argv);
 
-  if (0 < parser.arguments.size()) {
-    fsm_file_argument = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
+  // needed as guard for clearColleagues() in OnExit()
+  graph = 0;
+
+  if (parser.continue_execution()) {
+    if (0 < parser.arguments.size()) {
+      lts_file_argument = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
   }
 
-  return (true);
+  return parser.continue_execution();
 }
 // -- * -------------------------------------------------------------
 
+// -------------------------
+DiaGraph::DiaGraph() : mcrl2::utilities::wx::tool< DiaGraph >("DiaGraphica",
+    "You are free to use images produced with DiaGraphica.\n"
+    "In this case, image credits would be much appreciated.\n"
+    "\n"
+    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n"
+    "uses the TinyXML parser (tinyxml.sourceforge.net). \n"
+    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
+                std::vector< std::string >(1, "Johannes Pretorius")) {
+// -------------------------
+}
 
 // -- functions inherited from wxApp --------------------------------
 
-
 // --------------------
-bool DiaGraph::OnInit()
+bool DiaGraph::DoInit()
 // --------------------
 {
-    bool parse_error = false;
-    wxString error_string = wxEmptyString;
-
-    try
-    {
-      parse_command_line(argc, argv);
-    }
-    catch (std::exception &e)
-    {
-      parse_error = true;
-      error_string = wxString(e.what(),wxConvLocal);
-    }
-
     // windows debugging
     #ifdef _MSC_VER
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
@@ -191,31 +186,25 @@ bool DiaGraph::OnInit()
     // init colleagues
     initColleagues();
 
-	clustered = false;
+    clustered = false;
     critSect = false;
 
-    if ( parse_error )
-    {
-      wxMessageDialog msg_dlg(frame, error_string,
-        wxT("Command line error"), wxOK | wxICON_ERROR);
-      msg_dlg.ShowModal();
-    }
-   
-    if (!fsm_file_argument.empty()) {
-      openFile(fsm_file_argument);
+    if (!lts_file_argument.empty()) {
+      openFile(lts_file_argument);
     }
 
     // start event loop
     return true;
 }
 
-
 // -------------------
 int DiaGraph::OnExit()
 // -------------------
 {
-    // clear colleagues
-    clearColleagues();
+    if (graph != 0) {
+      // clear colleagues
+      clearColleagues();
+    }
     
     // normal exit
     return 0;

@@ -63,7 +63,7 @@ namespace tipi {
         void remove(const void*);
 
         /** \brief Process an event for a specific object */
-        void process(const void*, bool = true);
+        void process(const void*, bool = true, bool = false);
    
         /** \brief Execute handlers for a specific object */
         void execute_handlers(const void*, bool);
@@ -73,6 +73,9 @@ namespace tipi {
 
         /** \brief Remove all stored non-global handlers */
         void clear();
+
+        /** \brief Wakes all blocked threads */
+        void shutdown();
 
         /** \brief Constructor */
         ~basic_event_handler();

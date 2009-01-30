@@ -1,9 +1,5 @@
 project old_data
        : source-location ..
-       : requirements
-          <include>../include
-       : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library old_data
@@ -13,14 +9,14 @@ mcrl2-library old_data
          source/formula_checker.cpp
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
-       : <use>/libraries/core//headers
-         <use>/libraries/data//headers
-         <use>/libraries/atermpp//headers
-         <use>/libraries/utilities//headers
-         <use>/site-config//cvc
+       : <library>/libraries//core
+         <library>/libraries//data
+         <library>/libraries//atermpp
+         <library>/libraries//utilities
+         <library>/site-config//cvc
          <library>/site-config//m               # for rewrite
          <library>/site-config//dynamic_loading # for rewrite
-       : <threading>single
-       : <library>/libraries/core
-         <library>/site-config//cvc
+         <include>../include
+       :
+       : <include>../include
        ;

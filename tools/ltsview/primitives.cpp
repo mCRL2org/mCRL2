@@ -7,11 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitives.cpp
-/// \brief Add your file description here.
+/// \brief Source file for primitive classes
 
 #include "primitives.h"
 #include "utils.h"
-#include <math.h>
+#include <cmath>
 
 using namespace Utils;
 

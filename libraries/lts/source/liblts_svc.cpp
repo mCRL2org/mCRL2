@@ -10,18 +10,18 @@
 
 #include <string>
 #include <sstream>
-#include <svc/svc.h>
-#include "mcrl2/utilities/aterm_ext.h"
+#include "aterm2.h"
+#include "svc/svc.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
@@ -142,6 +142,45 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
 
   SVCclose(&f);
 
+  if ( type == lts_mcrl2 )
+  {
+    // Check to see if there is extra data at the end
+    FILE *g = fopen(filename.c_str(),"rb");
+    if ( (g == NULL) ||
+         (fseek(g,-(12+sizeof(unsigned long long int)),SEEK_END) != 0) )
+    {
+      gsErrorMsg("could not determine whether mCRL2 SVC has extra information; continuing without\n");
+    } else {
+      unsigned char buf[8+12];
+      if ( fread(&buf,1,8+12,g) != 8+12 )
+      {
+        gsErrorMsg("could not determine whether mCRL2 SVC has extra information; continuing without\n");
+      } else {
+        if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
+        {
+          ATerm data;
+          unsigned long long int position = 0;
+          for (unsigned int i=0; i<8; i++)
+          {
+            position = position*0x100 + buf[7-i];
+          }
+          if ( (fseek(g,position,SEEK_SET) != 0 ) ||
+               ((data = ATreadFromFile(g)) == NULL) )
+          {
+            gsErrorMsg("could not read extra information from mCRL2 LTS; continuing without\n");
+          } else {
+            gsVerboseMsg("read extra information from mCRL2 LTS\n");
+            extra_data = data;
+          }
+        }
+      }
+    }
+    if ( g != NULL )
+    {
+      fclose(g);
+    }
+  }
+
   this->type = type;
 
   return true;
@@ -194,7 +233,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
     {
       for (unsigned int i=0; i<nstates; i++)
       {
-        if ( !ATisAppl(state_values[i]) ) // XXX check validity of data terms
+        if ( !ATisAppl(state_values[i]) || strcmp(ATgetName(ATgetAFun((ATermAppl) state_values[i])),"STATE") )
         {
           gsWarningMsg("state values are not saved as they are not the in mCRL2 format\n");
 	  state_info = false;
@@ -309,6 +348,36 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
   }
 
   SVCclose(&f);
+
+  if ( type == lts_mcrl2 && ((extra_data != NULL) || applied_conversion) )
+  {
+    ATermAppl data_spec = NULL;
+    ATermList params = NULL;
+    ATermAppl act_spec = NULL;
+
+    if ( applied_conversion )
+    {
+      data_spec = spec->data();
+      act_spec = ATAgetArgument((ATermAppl) *spec,1);
+    } else {
+      data_spec = ATAgetArgument((ATermAppl) extra_data,0);
+      if ( gsIsNil(data_spec) )
+      {
+        data_spec = NULL;
+      }
+      if ( state_info && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+      {
+        params = ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0);
+      }
+      act_spec = ATAgetArgument((ATermAppl) extra_data,2);
+      if ( gsIsNil(data_spec) )
+      {
+        act_spec = NULL;
+      }
+    }
+
+    add_extra_mcrl2_svc_data(filename,data_spec,params,act_spec);
+  }
 
   return true;
 }

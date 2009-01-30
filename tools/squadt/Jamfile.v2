@@ -8,21 +8,19 @@ source_files = [ set.difference $(source_files) : [ glob ./squadt_proxy.cpp ] ] 
 
 tool squadt
       : [ sequence.insertion-sort $(source_files) ]
-        /site-config//wx_base
         /site-config//boost_md5
-        /libraries/tipi//controller_interface
+        /libraries/tipi//controller
         /libraries/utilities//command_line_interfacing
-      : <dependency>/libraries//ticpp
-        <define>USING_WX
+        /libraries//ticpp
+      : <define>USING_WX
         <include>.
-        <wx>yes
+        <wx>base
+        <define>PREFIX=\"\\\"$(INSTALL_ROOT)\\\"\"
       ;
 
 exe squadt_proxy
       : squadt_proxy.cpp
-      : <library>/libraries/tipi//tool_interface
+        /libraries/tipi//tool
       ;
 
 explicit squadt_proxy ;
-
-install-tools squadt ;

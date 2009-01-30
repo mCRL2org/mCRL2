@@ -11,6 +11,10 @@
 #ifndef GLCANVAS_H
 #define GLCANVAS_H
 
+#include <cstddef>
+#include <cmath>
+#include <string>
+
 #ifdef __APPLE__
 # include <GLUT/glut.h>
 #else
@@ -19,9 +23,6 @@
 # endif
 # include <GL/glu.h>
 #endif
-#include <cstddef>
-#include <cmath>
-#include <string>
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/tooltip.h>

@@ -10,9 +10,11 @@
 
 #include <vector>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/tree_set.h"
 //#include "mcrl2/lts/detail/liblts_private.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace std;
 using namespace mcrl2::core;

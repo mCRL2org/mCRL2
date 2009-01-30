@@ -8,6 +8,8 @@
 //
 /// \file ./corrlplot.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "corrlplot.h"
 
 using namespace std;

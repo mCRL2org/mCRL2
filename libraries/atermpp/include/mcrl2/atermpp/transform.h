@@ -17,9 +17,11 @@
 namespace atermpp
 {
 
-  /// Applies the function f to the list l. If l = [x0, x1, ..., xn] then
+  /// \brief Applies the function f to the list l. If l = [x0, x1, ..., xn] then
   /// the list [f(x0), f(x1), ..., f(xn)] is returned.
-  ///
+  /// \param l A sequence of terms
+  /// \param f A function that is applied to the list element.
+  /// \return The transformed list.
   template <typename Func>
   ATermList transform(ATermList l, const Func& f)
   {

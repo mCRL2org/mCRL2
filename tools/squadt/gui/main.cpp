@@ -9,8 +9,11 @@
 /// \file gui/main.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
+#include "../type_registry.hpp"
+#include "../tool.hpp"
 #include "gui/main.hpp"
-#include "gui/about.hpp"
 #include "gui/project.hpp"
 #include "gui/resources.hpp"
 #include "gui/dialog/project_settings.hpp"
@@ -32,16 +35,6 @@ namespace squadt {
   namespace GUI {
 
     wxString main::default_title = wxT("SQuADT");
-
-    void main::about() {
-      squadt::GUI::about about_dialog(this);
-      
-      about_dialog.ShowModal();
-    }
-
-    void main::manual() {
-      wxLaunchDefaultBrowser(wxT("http://www.mcrl2.org/wiki/index.php/SQuADT"));
-    }
 
     main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize,wxDEFAULT_FRAME_STYLE|wxWS_EX_PROCESS_UI_UPDATES),
                                        project_view(0) {
@@ -68,8 +61,6 @@ namespace squadt {
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
       Connect(cmID_PREFERENCES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_preferences));
-      Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
-      Connect(wxID_HELP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_manual));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
 
@@ -127,7 +118,7 @@ namespace squadt {
 
       wxMenu* help_menu  = new wxMenu();
 
-      help_menu->Append(wxID_HELP, wxT("&User Manual"));
+      help_menu->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
       help_menu->AppendSeparator();
       help_menu->Append(wxID_ABOUT, wxT("&About"));
 
@@ -276,7 +267,7 @@ namespace squadt {
         if (project_view != 0) {
           remove_project_view(project_view);
         }
-       
+
         global_build_system.shutdown();
       }
       catch (std::exception&) {

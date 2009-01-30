@@ -189,7 +189,7 @@ private:
     void initPanelRgtBotRgt();  // 4
     void initCanvasThree();     // 5
 
-    void initAboutFrame();      // 1
+//    void initAboutFrameOld();   // 1
     
     void initFrameSettings();
     void initFramePartition(
@@ -451,7 +451,7 @@ private:
         ID_MENU_ITEM_DGRM_SET_TO_EXNR,
         ID_MENU_ITEM_EXNR_CLEAR,
 
-        ID_BUTTON_ABOUT,
+        ID_BUTTON_ABOUT
     };
 
     // -- declare event table ---------------------------------------

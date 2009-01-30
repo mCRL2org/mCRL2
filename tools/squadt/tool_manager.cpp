@@ -9,8 +9,12 @@
 /// \file tool_manager.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include <algorithm>
 #include <functional>
+
+#include "tipi/detail/controller.ipp" // stlport workarounds because boost::thread uses errno.h
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -20,9 +24,7 @@
 #include <boost/foreach.hpp>
 
 #include "tipi/detail/utility/generic_visitor.hpp"
-#include "tipi/visitors.hpp"
-
-#include "tipi/detail/controller.ipp"
+#include "tipi/detail/visitors.hpp"
 
 #include "settings_manager.hpp"
 #include "tool_manager.ipp"
@@ -85,7 +87,7 @@ namespace squadt {
    * \param[in] p pointer to the associated monitor
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    **/
-  void tool_manager_impl::execute(execution::command const* c, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(execution::command const* c, boost::shared_ptr< execution::task_monitor > p, bool b) {
     global_build_system.get_executor().execute(*c, p, b);
   }
 
@@ -95,7 +97,7 @@ namespace squadt {
    * \param[in] b whether or not to circumvent the executor restriction mechanism
    * \param[in] w the directory in which execution should take place
    **/
-  void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, execution::task_monitor::sptr p, bool b) {
+  void tool_manager_impl::execute(tool const& t, boost::filesystem::path const& w, boost::shared_ptr< execution::task_monitor > p, bool b) {
     static const char* socket_connect_pattern("--si-connect=tipi://%s:%s");
     static const char* identifier_pattern("--si-identifier=%s");
     static const char* log_filter_level_pattern("--si-log-filter-level=%s");
@@ -135,11 +137,11 @@ namespace squadt {
         struct local {
           static void store_capabilities(boost::weak_ptr < extractor > e, boost::shared_ptr< const tipi::message >& m, boost::shared_ptr < tool > t) {
             boost::shared_ptr < extractor > guard(e.lock());
-       
+
             try {
               if (guard) {
                 t->m_capabilities.reset(new tipi::tool::capabilities);
-  
+
                 tipi::visitors::restore(*t->m_capabilities, m->to_string());
 
                 return;
@@ -151,27 +153,27 @@ namespace squadt {
             t->m_capabilities.reset();
           }
         };
-       
+
         boost::shared_ptr < extractor > guard(e.lock());
-        
+
         if (guard) {
           try {
             add_handler(tipi::message_capabilities, bind(&local::store_capabilities, e, _1, t));
-       
+
             /* Await connection */
             if (await_connection(5)) {
               request_tool_capabilities();
             }
 
             await_message(tipi::message_capabilities, 2);
-        
+
             finish();
           }
           catch (...) {
             // ignore exceptions, the capabilities object is the only thing that matters
           }
         }
-       
+
         return t->m_capabilities.get() != 0;
       }
   };
@@ -187,13 +189,13 @@ namespace squadt {
 
       /* Extractor object, for retrieving the data from the running tool process */
       boost::shared_ptr < extractor > e(new extractor());
- 
+
       execute(*t, boost::filesystem::current_path().string(),
                  boost::dynamic_pointer_cast < execution::task_monitor > (e), true);
- 
+
       /* Wait until the process has been identified */
       boost::shared_ptr < execution::process > p(e->get_process(true));
- 
+
       if (p.get() != 0) {
         /* Start extracting */
         return (*e)(e, t);
@@ -219,7 +221,7 @@ namespace squadt {
 
     disconnect();
   }
-  
+
   /**
    * \param[in] n the name of the tool
    **/
@@ -338,7 +340,7 @@ namespace squadt {
   bool tool_manager::add_tool(tool const& t) {
     return (impl->add_tool(t));
   }
- 
+
   void tool_manager::query_tools() {
     tool_manager::const_tool_sequence tools(get_tools());
 
@@ -369,7 +371,7 @@ namespace squadt {
   tool_manager::const_tool_sequence tool_manager::get_tools() const {
     return boost::make_iterator_range(impl->tools);
   }
- 
+
   /** \brief Get the number of known tools */
   unsigned int tool_manager::number_of_tools() const {
     return impl->tools.size();

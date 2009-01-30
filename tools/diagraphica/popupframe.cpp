@@ -8,6 +8,7 @@
 //
 /// \file ./popupframe.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "popupframe.h"
 

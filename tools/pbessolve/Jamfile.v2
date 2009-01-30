@@ -8,5 +8,3 @@ tool pbessolve
        : pbessolve.cpp
        : <status>experimental
        ;
-
-install-tools pbessolve ;

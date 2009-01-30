@@ -1,14 +1,13 @@
-ifneq ($(filter all bjam install tools test, ${MAKECMDGOALS}),)
-include build/Makefile
-endif
-ifeq (${MAKECMDGOALS},)
-include build/Makefile
-endif
+.PHONY: all bjam install test tags clean distclean parsers mcrl2parser chiparser liblts_fsmparser doxy
 
-.PHONY: tags clean distclean parsers mcrl2parser ltsview_fsmparser liblts_fsmparser doxy
+all: bjam config.status
+	$(BOOST_BUILD)
 
-build/Makefile:
-	$(error Please run configure first)
+install: bjam config.status
+	$(BOOST_BUILD) --install
+
+test: bjam config.status
+	$(BJAM) ./status -l300 --enable-experimental --enable-deprecated --tool-tests
 
 clean:
 	@$(RM) -r autom4te.cache core core.* tags build/bin/.jamdeps
@@ -18,8 +17,15 @@ distclean: clean
 	@$(RM) -rf build/Makefile config.log config.status build/config.jam libraries/utilities/include/mcrl2/setup.h
 	$(RM) -rf build/bin
 
-parsers: mcrl2parser chiparser ltsview_fsmparser liblts_fsmparser
-	cp /usr/include/FlexLexer.h build/workarounds/all
+ifneq ($(filter all bjam install test configure, ${MAKECMDGOALS}),)
+  include build/Makefile
+endif
+ifeq (${MAKECMDGOALS},)
+  include build/Makefile
+endif
+
+parsers: mcrl2parser chiparser liblts_fsmparser liblts_dotparser
+	cp /usr/include/FlexLexer.h build/workarounds
 
 liblts_fsmparser:
 	cd libraries/lts/source; \
@@ -27,10 +33,11 @@ liblts_fsmparser:
 	bison -p fsm -d -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
 	mv liblts_fsmparser.hpp ../include/mcrl2
 
-ltsview_fsmparser:
-	cd tools/ltsview; \
-	flex -+ -oltsview_fsmlexer.cpp ltsview_fsmlexer.ll; \
-	bison -d -o ltsview_fsmparser.cpp ltsview_fsmparser.yy
+liblts_dotparser:
+	cd libraries/lts/source; \
+	flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll; \
+	bison -p dot -d -o liblts_dotparser.cpp liblts_dotparser.yy; \
+	mv liblts_dotparser.hpp ../include/mcrl2
 
 mcrl2parser:
 	cd libraries/core/source; \
@@ -43,11 +50,12 @@ chiparser:
 	flex -Pchi -ochilexer.cpp chilexer.ll; \
 	bison -p chi -d -o chiparser.cpp chiparser.yy;
 
-configure: build/autoconf/configure.ac
-	autoconf -o $@ -W all $<
-
 tags:
 	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .
 
 doxy:
 	@doc/doxy/generate_libref_website.sh
+
+build/Makefile:
+	$(error Please run configure first)
+

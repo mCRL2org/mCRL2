@@ -20,12 +20,12 @@
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/old_data/rewrite.h"
-#include "mcrl2/lts/liblts.h"
+#include "mcrl2/lts/lts.h"
 
 #include "workarounds.h"
 
 #define DEFAULT_MAX_STATES ULLONG_MAX
-#define DEFAULT_MAX_TRACES 10UL
+#define DEFAULT_MAX_TRACES ULONG_MAX
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB 
 #define DEFAULT_INIT_TSIZE 10000UL 
 
@@ -95,7 +95,7 @@ inline lts_generation_options::lts_generation_options() :
     expl_strat(es_breadth),
     bithashing(false),
     bithashsize(DEFAULT_BITHASHSIZE),
-    todo_max(std::numeric_limits< unsigned long >::max()),
+    todo_max((std::numeric_limits< unsigned long >::max)()),
     initial_table_size(DEFAULT_INIT_TSIZE) {
 
   generate_filename_for_trace = boost::bind(

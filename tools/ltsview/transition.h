@@ -7,15 +7,12 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file transition.h
-/// \brief Add your file description here.
+/// \brief Header file for Transition class
 
 #ifndef TRANSITION_H
 #define TRANSITION_H
-#ifndef STATE_H
-  #include "state.h"
-#else
-  class State;
-#endif
+
+class State;
 
 class Transition
 {

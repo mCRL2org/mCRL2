@@ -7,12 +7,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file markstateruledialog.cpp
-/// \brief Add your file description here.
+/// \brief Source file for MarkStateRuleDialog class
+
+#include "wx.hpp" // precompiled headers
 
 #include "markstateruledialog.h"
+#include <wx/checklst.h>
 #include <wx/statline.h>
 #include <wx/splitter.h>
 #include "ids.h"
+#include "lts.h"
+#include "mediator.h"
 #include "utils.h"
 
 using namespace std;
@@ -89,7 +94,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   spRight->SplitVertically(relPanel,valPanel,200);
   spLeft->SplitVertically(parPanel,spRight,200);
 
-  ruleClrButton = new mcrl2::utilities::wxColorButton(
+  ruleClrButton = new mcrl2::utilities::wx::wxColorButton(
       this,this,wxID_ANY,wxDefaultPosition,wxSize(25,25));
   ruleClrButton->SetBackgroundColour(RGB_to_wxC(
     mediator->getNewRuleColour()));
@@ -117,26 +122,34 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
 MarkStateRuleDialog::~MarkStateRuleDialog() {
 }
 
-void MarkStateRuleDialog::loadValues(wxString paramName) {
-  int p = parameterIndices[paramName];
-  wxArrayString values;
-  wxString str;
-  valueIndices.clear();
-  for (int i = 0; i < lts->getNumParameterValues(p); ++i) {
-    wxString str = wxString(lts->getParameterValue(p,i).c_str(),wxConvLocal);
-    values.Add(str);
-    valueIndices[str] = i;
+void MarkStateRuleDialog::loadValues(wxString paramName)
+{
+  atermpp::set<ATerm> domain = lts->getParameterDomain(
+      parameterIndices[paramName]);
+  atermpp::set<ATerm>::iterator dom_it;
+  wxArrayString wxvalues;
+  values.clear();
+  for (dom_it = domain.begin(); dom_it != domain.end(); ++dom_it)
+  {
+    wxString str = wxString(
+        lts->prettyPrintParameterValue(*dom_it).c_str(),wxConvLocal);
+    wxvalues.Add(str);
+    values[str] = *dom_it;
   }
-  values.Sort();
-  valuesListBox->Set(values);
+  wxvalues.Sort();
+  valuesListBox->Set(wxvalues);
 }
 
-void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event) {
+void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event)
+{
   loadValues(event.GetString());
 }
 
-void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,vector<bool> &vals) {
-  wxString paramName = wxString(lts->getParameterName(p).c_str(),wxConvLocal);
+void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
+    atermpp::set<ATerm> vals)
+{
+  wxString paramName = wxString(lts->getParameterName(p).c_str(),
+      wxConvLocal);
   parameterListBox->SetStringSelection(paramName);
   loadValues(paramName);
 
@@ -144,32 +157,40 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,vector<bool> &val
 
   relationListBox->SetSelection(neg ? 1 : 0);
 
-  for (int i = 0; i < lts->getNumParameterValues(p); ++i) {
-    if (vals[i]) {
-      valuesListBox->Check(valuesListBox->FindString(wxString(
-        lts->getParameterValue(p,i).c_str(),wxConvLocal)),true);
-    }
+  atermpp::set<ATerm>::iterator i;
+  for (i = vals.begin(); i != vals.end(); ++i)
+  {
+    valuesListBox->Check(valuesListBox->FindString(wxString(
+      lts->prettyPrintParameterValue(*i).c_str(),wxConvLocal)),true);
   }
 }
 
-int MarkStateRuleDialog::getParamIndex() {
+int MarkStateRuleDialog::getParamIndex()
+{
   int parIndex = parameterListBox->GetSelection();
-  if (parIndex == wxNOT_FOUND) {
+  if (parIndex == wxNOT_FOUND)
+  {
     return -1;
   }
   return parameterIndices[parameterListBox->GetString(parIndex)];
 }
 
-bool MarkStateRuleDialog::getNegated() {
+bool MarkStateRuleDialog::getNegated()
+{
   return (relationListBox->GetSelection() == 1);
 }
 
-void MarkStateRuleDialog::getValues(std::vector<bool> &vals) {
-  vals.assign(valuesListBox->GetCount(),false);
-  for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i) {
-    vals[valueIndices[valuesListBox->GetString(i)]] =
-      valuesListBox->IsChecked(i);
+atermpp::set<ATerm> MarkStateRuleDialog::getValues()
+{
+  atermpp::set<ATerm> vals;
+  for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i)
+  {
+    if (valuesListBox->IsChecked(i))
+    {
+      vals.insert(values[valuesListBox->GetString(i)]);
+    }
   }
+  return vals;
 }
 
 Utils::RGB_Color MarkStateRuleDialog::getColor() {

@@ -8,18 +8,18 @@
 //
 /// \file include/tipi/detail/controller.ipp
 
-#ifndef TIPI_CONTROLLER_TCC_
-#define TIPI_CONTROLLER_TCC_
+#ifndef TIPI_CONTROLLER_IPP_
+#define TIPI_CONTROLLER_IPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "tipi/controller.hpp"
-#include "tipi/configuration.hpp"
-#include "tipi/controller/capabilities.hpp"
 #include "tipi/detail/basic_messenger.ipp"
+#include "tipi/detail/visitors.hpp"
+#include "tipi/controller/communicator.hpp"
+#include "tipi/controller/capabilities.hpp"
+#include "tipi/configuration.hpp"
 #include "tipi/common.hpp"
-#include "tipi/visitors.hpp"
 
 namespace tipi {
   namespace controller {
@@ -27,7 +27,7 @@ namespace tipi {
     /// \cond INTERNAL_DOCS
     class communicator_impl : public tipi::messaging::basic_messenger_impl< tipi::message > {
       friend class communicator;
-      
+
       private:
 
         /** \brief call-back function type for layout changes of the display */
@@ -91,6 +91,5 @@ namespace tipi {
     /// \endcond
   }
 }
- 
 
 #endif

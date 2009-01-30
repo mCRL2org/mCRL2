@@ -1,17 +1,19 @@
 project toolset/grape ;
 
 tool grape
-      : [ MATCH $(TOP)/tools/grape/(.*) : [ glob-tree *.cpp ] ]
-        /site-config//wx_gl
+      : [ glob-tree *.cpp : .svn ]
         /libraries//core
+        /libraries//data
         /libraries/utilities//command_line_interfacing
-      : <define>GRAPE_HELP_DIR=PREFIX\"\\\"/share\\\"\"
+        /libraries/utilities//font_renderer
+      : <define>GRAPE_HELP_DIR=\"\\\"$(INSTALL_ROOT)/share/mcrl2/grape\\\"\"
         <include>libgrape
         <include>grapeapp
+        <include>mcrl2gen
         <include>.
-        <wx>yes
-        <opengl>yes
+        <wx>gl
         <status>experimental
+        <install-dependency>manual
       ;
 
-install-tools grape ;
+install-data manual : grapeapp/help/grapehelp.zip : <data-sub-location>grape ;

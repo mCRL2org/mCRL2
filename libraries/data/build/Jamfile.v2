@@ -1,17 +1,16 @@
 project data
        : source-location ..
-       : requirements
-          <include>../include
-       : usage-requirements
-          <include>../include
        ;
 
 mcrl2-library data
        : source/data_implementation_concrete.cpp 
          source/standard.cpp
-       : <use>/libraries/core//headers 
-         <use>/libraries/atermpp//headers
-         <use>/site-config//cvc
-       : <threading>single
-       : <library>/libraries/core 
+       : <library>/libraries//core
+         <library>/libraries//atermpp
+         <library>/libraries//utilities
+         <library>/site-config//cvc
+         <include>../include
+       :
+       : <toolset>gcc,<link>static:<linkflags>-export-dynamic
+         <include>../include
        ;

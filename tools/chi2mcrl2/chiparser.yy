@@ -1,35 +1,42 @@
+// Author(s): Frank Stappers
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file chiparser.yy
+
 %{
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 #include <iostream>
 #include "libstruct_core.h"
-#include <aterm2.h>
+#include "aterm2.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include <list>
 #include <map>
 #include <set>
 #include <utility>
 #include <cctype>
-#include <string.h>
+#include <cstring>
 
 
 /*extern int yyerror(const char *s);
 extern int yylex( void );
 extern char* yytext; */
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
 
-//external declarations from lexer.l
+//external declarations from lexer.ll
 void chiyyerror( const char *s );
 extern void chigetposition();
 int chiyylex( void );
-extern ATermAppl spec_tree;
-extern ATermIndexedSet parser_protect_table;
+extern ATermAppl chi_spec_tree;
+extern ATermIndexedSet chi_parser_protect_table;
 extern int scope_lvl;
 extern map<ATerm, ATerm> var_type_map;
 extern map<ATerm, pair<ATerm,ATerm> > chan_type_direction_map;
@@ -49,7 +56,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and process specification, and one initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
@@ -61,7 +68,7 @@ bool is_number(std::string s);
 %union {
   ATermAppl appl;
   ATermList list;
-}
+};
 
 //set name prefix
 %name-prefix="chiyy"
@@ -111,9 +118,14 @@ bool is_number(std::string s);
 %start ChiProgram
 
 
+//generate a GLR parser
 %glr-parser
-%debug
-%verbose
+
+//Uncomment the line below to enable the bison debug facilities.
+//To produce traces, yydebug needs to be set to 1 (see chilexer.ll)
+//%debug
+
+
 /* 
  *  TERMINALS
  *  ---------
@@ -153,7 +165,7 @@ ChiProgram:
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
     	  gsDebugMsg("inputs contains a valid Chi-specification\n"); 
           safe_assign($$, gsMakeChiSpec($1,ATreverse($2)));
-		  spec_tree = $$;
+		  chi_spec_tree = $$;
 		}
 	;
 

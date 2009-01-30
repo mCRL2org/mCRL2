@@ -9,6 +9,8 @@
 /// \file gui/dialog/base.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>

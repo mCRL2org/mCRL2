@@ -9,7 +9,10 @@
 /// \file gui/dialog/preferences.cpp
 /// \brief Add your file description here.
 
+#include "wx.hpp" // precompiled headers
+
 #include "gui/dialog/preferences.hpp"
+#include "type_registry.hpp"
 #include "build_system.hpp"
 #include "tool_manager.hpp"
 #include "executor.hpp"
@@ -159,11 +162,11 @@ namespace squadt {
 
         if (0 <= formats_and_actions) {
           wxListItem s;
-         
+
           get_wxlist_value(s, formats_and_actions, selected, 1);
-         
+
           command_dialog.SetValue(s.GetText());
-         
+
           if (command_dialog.ShowModal() == wxID_OK) {
             formats_and_actions->SetItem(selected, 1, command_dialog.GetValue());
 
@@ -190,13 +193,13 @@ namespace squadt {
           long row = formats_and_actions->InsertItem(formats_and_actions->GetItemCount(), wxEmptyString);
 
           mime_type mt(std::string(format_dialog.GetValue().fn_str()));
-      
-          formats_and_actions->SetItem(row, 0, wxString(mt.to_string().c_str(), wxConvLocal));
+
+          formats_and_actions->SetItem(row, 0, wxString(mt.string().c_str(), wxConvLocal));
 
           std::auto_ptr< command > c = global_build_system.get_type_registry().get_registered_command(mt, "$");
 
           if (c.get()) {
-            formats_and_actions->SetItem(row, 1, wxString(c->as_string().c_str(), wxConvLocal));
+            formats_and_actions->SetItem(row, 1, wxString(c->string().c_str(), wxConvLocal));
           }
           else {
             formats_and_actions->SetItem(row, 1, wxEmptyString);
@@ -207,7 +210,7 @@ namespace squadt {
       }
       catch (...) {
         wxMessageDialog error(this, wxT("Invalid format or MIME-type; ignoring"), wxT("Error"), wxICON_ERROR|wxOK);
-        
+
         error.ShowModal();
       }
     }
@@ -215,7 +218,7 @@ namespace squadt {
     void edit_preferences::remove_association(wxCommandEvent&) {
       long       selected = formats_and_actions->GetFirstSelected();
       wxListItem s;
-        
+
       get_wxlist_value(s, formats_and_actions, selected, 0);
 
       global_build_system.get_type_registry().register_command(
@@ -265,8 +268,8 @@ namespace squadt {
       BOOST_FOREACH(tipi::mime_type f, types) {
         std::auto_ptr < command > command_line = registry.get_registered_command(f, "$");
 
-        formats_and_actions->InsertItem(row, wxString(f.as_string().c_str(), wxConvLocal));
-        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->as_string().c_str(), wxConvLocal) : no_action);
+        formats_and_actions->InsertItem(row, wxString(f.string().c_str(), wxConvLocal));
+        formats_and_actions->SetItem(row++, 1, command_line.get() ? wxString(command_line->string().c_str(), wxConvLocal) : no_action);
       }
 
       known_formats->AddSpacer(5);

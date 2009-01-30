@@ -8,6 +8,7 @@
 //
 /// \file ./visutils.cpp
 
+#include "wx.hpp" // precompiled headers
 
 #include "visutils.h"
 #include "character_set.xpm"

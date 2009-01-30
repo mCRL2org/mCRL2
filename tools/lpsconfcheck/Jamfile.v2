@@ -4,5 +4,3 @@ tool lpsconfcheck
        : lpsconfcheck.cpp
          /libraries//lps
        ;
-
-install-tools lpsconfcheck ;

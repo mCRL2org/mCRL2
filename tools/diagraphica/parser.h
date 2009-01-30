@@ -24,6 +24,14 @@
 #include "tinyxml.h"
 #include "utils.h"
 
+template <class T>
+inline std::string to_string (const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
+
 class Mediator;
 
 class Parser : public Colleague
@@ -76,7 +84,6 @@ private:
         const std::string &nextLine,
         Graph* graph );
     void parseTransitions( 
-        const int &lineNumber,
         const std::string &nextLine,
         Graph* graph );
 

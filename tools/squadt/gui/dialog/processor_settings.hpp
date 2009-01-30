@@ -14,12 +14,9 @@
 
 #include <wx/wx.h>
 #include <wx/dialog.h>
-#include <wx/button.h>
-#include <wx/sizer.h>
 #include <wx/treectrl.h>
 #include <wx/textctrl.h>
 #include <wx/listctrl.h>
-#include <wx/notebook.h>
 
 #include "base.hpp"
 #include "../../type_registry.hpp"
@@ -33,10 +30,11 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          processor(wxWindow*, wxString);
+          processor(wxWindow* p, wxString t) : dialog::basic(p, t, wxSize(800, 375)) {
+          }
 
           /** \brief Virtual destructor */
-          virtual ~processor() = 0;
+          virtual ~processor() {};
       };
 
       class processor_details : public dialog::processor {
@@ -44,46 +42,47 @@ namespace squadt {
 
         private:
 
-          /** \brief Path to the project store where input/output objects are stored */
-          wxString                                project_store;
-
           /** \brief Tree control for tool selection */
-          wxTreeCtrl*                             tool_selector;
+          wxTreeCtrl*                             m_tool_selector;
 
           /** \brief Text field that contains a name */
-          wxStaticText*                           name;
+          wxStaticText*                           m_name;
 
           /** \brief The list of input objects */
-          wxListCtrl*                             input_objects;
+          wxListCtrl*                             m_input_objects;
 
           /** \brief The list of output objects */
-          wxListCtrl*                             output_objects;
+          wxListCtrl*                             m_output_objects;
 
           /** \brief The processor for which to display information */
-          boost::shared_ptr < squadt::processor > target_processor;
+          boost::shared_ptr < squadt::processor > m_target_processor;
 
           /** \brief Whether tools are selectable or not */
-          bool                                    tools_selectable;
+          bool                                    m_tools_selectable;
 
           /** \brief Selected tool id, because selections are lost when a part containing it is collapsed */
-          wxTreeItemId                            selected_tool;
+          wxTreeItemId                            m_selected_tool;
 
         private:
-        
+
           /** \brief Helper function that places the widgets */
-          void build();
+          void build(boost::shared_ptr< squadt::processor::object_descriptor > const&);
+
+          void show_inputs();
+
+          void show_outputs();
 
           /** \brief Helper function for filling the tool list with tools */
           void populate_tool_list(type_registry::tool_sequence const&);
 
           /** \brief Event handler for when something is selected in the tool_selector control */
-          void on_tool_selector_item_selected(wxTreeEvent& e);
+          void on_tool_selector_item_selected(wxTreeEvent&);
 
           /** \brief Event handler for when something is about to be selected in the tool_selector control */
-          void on_tool_selector_item_select(wxTreeEvent& e);
+          void on_tool_selector_item_select(wxTreeEvent&);
 
           /** \brief Event handler for when something is about to be collapsed in the tool_selector control */
-          void on_tool_selector_item_collapsed(wxTreeEvent& e);
+          void on_tool_selector_item_collapsed(wxTreeEvent&);
 
           /** \brief Select a tool by its name */
           void select_tool(tipi::tool::capabilities::input_configuration const*, std::string const&);
@@ -91,79 +90,43 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          processor_details(wxWindow*, wxString, boost::shared_ptr < squadt::processor >);
+          processor_details(wxWindow*, boost::shared_ptr < squadt::processor >, boost::shared_ptr< squadt::processor::object_descriptor > const& object);
 
           /** \brief Whether tools in the tool list are selectable */
-          inline void allow_tool_selection(bool b);
+          inline void allow_tool_selection(bool b) {
+            m_tools_selectable = b;
+          }
 
           /** \brief Show or hide the tool selector */
-          inline void show_tool_selector(bool b);
+          inline void show_tool_selector(bool b) {
+            m_tool_selector->Show(b);
+            Update();
+            Refresh();
+          }
 
           /** \brief Show or hide the list of input objects */
-          inline void show_input_objects(bool b);
+          inline void show_input_objects(bool b) {
+            if (m_input_objects != 0) {
+              m_input_objects->Show(b);
+            }
+          }
 
           /** \brief Show or hide the list of output objects */
-          inline void show_output_objects(bool b);
+          inline void show_output_objects(bool b) {
+            if (m_output_objects != 0) {
+              m_output_objects->Show(b);
+            }
+          }
 
           /** \brief Sets the value of the name field */
-          inline void set_name(wxString);
+          inline void set_name(wxString const& n) {
+            m_name->SetLabel(n);
+          }
 
-          /** \brief Gets the value of the name field */
-          inline wxString get_name();
+          inline wxString get_name() {
+            return (m_name->GetLabel());
+          }
       };
-
-      /**
-       * @param p the parent window
-       * @param t the title for the window
-       **/
-      inline processor::processor(wxWindow* p, wxString t) : dialog::basic(p, t, wxSize(800, 375)) {
-      }
-
-      inline processor::~processor() {
-      }
-
-      /**
-       * @param b whether the tool list should allow selection
-       **/
-      inline void processor_details::allow_tool_selection(bool b) {
-        tools_selectable = b;
-      }
-
-      /**
-       * @param b whether to show tool_selector
-       **/
-      inline void processor_details::show_tool_selector(bool b) {
-        tool_selector->Show(b);
-      }
-
-      /**
-       * @param b whether to show input_objects
-       **/
-      inline void processor_details::show_input_objects(bool b) {
-        if (input_objects != 0) {
-          input_objects->Show(b);
-        }
-      }
-
-      /**
-       * @param[in] b whether to show output_objects
-       **/
-      inline void processor_details::show_output_objects(bool b) {
-        if (output_objects != 0) {
-          output_objects->Show(b);
-        }
-      }
-
-      /**
-       * @param[in] n the new name
-       **/
-      inline void processor_details::set_name(wxString n) {
-        name->SetLabel(n);
-      }
-
-      inline wxString processor_details::get_name() {
-        return (name->GetLabel());
-      }
     }
   }
 }

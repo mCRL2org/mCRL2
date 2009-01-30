@@ -8,6 +8,8 @@
 //
 /// \file ./cluster.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #include "cluster.h"
 
 // -- constructors and destructors ----------------------------------

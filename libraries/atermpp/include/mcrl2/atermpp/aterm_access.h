@@ -18,56 +18,72 @@
 
 namespace atermpp
 {
-  /// Returns the first child of t casted to an aterm_appl.
+  /// \brief Returns the first child of t casted to an aterm_appl.
+  /// \param t A term
+  /// \return The first child of t casted to an aterm_appl.
   inline
   aterm_appl arg1(ATermAppl t)
   {
     return aterm_appl(t)(0);
   }
   
-  /// Returns the second child of t casted to an aterm_appl.
+  /// \brief Returns the second child of t casted to an aterm_appl.
+  /// \param t A term
+  /// \return The second child of t casted to an aterm_appl.
   inline
   aterm_appl arg2(ATermAppl t)
   {
     return aterm_appl(t)(1);
   }
   
-  /// Returns the third child of t casted to an aterm_appl.
+  /// \brief Returns the third child of t casted to an aterm_appl.
+  /// \param t A term
+  /// \return The third child of t casted to an aterm_appl.
   inline
   aterm_appl arg3(ATermAppl t)
   {
     return aterm_appl(t)(2);
   }
 
-  /// Returns the fourth child of t casted to an aterm_appl.
+  /// \brief Returns the fourth child of t casted to an aterm_appl.
+  /// \param t A term
+  /// \return The fourth child of t casted to an aterm_appl.
   inline
   aterm_appl arg4(ATermAppl t)
   {
     return aterm_appl(t)(3);
   }
   
-  /// Returns the first child of t casted to an aterm_list.
+  /// \brief Returns the first child of t casted to an aterm_list.
+  /// \param t A term
+  /// \return The first child of t casted to an aterm_list.
   inline
   ATermList list_arg1(ATermAppl t)
   {
     return aterm_list(aterm_appl(t)(0));
   }
   
-  /// Returns the second child of t casted to an aterm_list.
+  /// \brief Returns the second child of t casted to an aterm_list.
+  /// \param t A term
+  /// \return The second child of t casted to an aterm_list.
   inline
   ATermList list_arg2(ATermAppl t)
   {
     return aterm_list(aterm_appl(t)(1));
   }
   
-  /// Returns the third child of t casted to an aterm_list.
+  /// \brief Returns the third child of t casted to an aterm_list.
+  /// \param t A term
+  /// \return The third child of t casted to an aterm_list.
   inline
   ATermList list_arg3(ATermAppl t)
   {
     return aterm_list(aterm_appl(t)(2));
   }
 
-  /// Returns the fourth child of t casted to an aterm_list.
+  /// \brief Returns the fourth child of t casted to an aterm_list.
+  /// \param t A term
+  /// \return The fourth child of t casted to an aterm_list.
   inline
   ATermList list_arg4(ATermAppl t)
   {

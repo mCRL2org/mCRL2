@@ -39,6 +39,7 @@ actions make {
 
   /Developer/Tools/Rez -t APPL -d __DARWIN__ -d __WXMAC__ Carbon.r $(SAMPLE_R) -o $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
   /Developer/Tools/SetFile -a C $(LOCATION)/$(<:BS)/Contents/MacOS/$(>:BS)
+  touch $(<)
 }
 
 rule mac-bundle ( target : executable info icon : requirements * : default-build * ) {
