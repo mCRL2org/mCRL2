@@ -54,7 +54,7 @@ mcrl2::data::basic_sort Sorts::generateFreshSort()
                                                         i != sortSet.end();
                                                         ++i){
     if (i->is_basic_sort()) {
-      s.insert( (static_cast<basic_sort>(*i)).name() );
+      s.insert( (basic_sort(*i)).name() );
     }
   };
   mcrl2::data::postfix_identifier_generator generator("");
@@ -73,17 +73,17 @@ std::set<function_symbol> Sorts::determineAffectedConstructors()
                                                         i != consSet.end();
                                                         ++i){
     if( i->sort().is_function_sort() ){
-      if (static_cast<function_sort>( i->sort()).codomain() == unfoldParameter ){
+      if (function_sort( i->sort()).codomain() == unfoldParameter ){
         k.insert(*i) ;
       }
     }
     if( i->sort().is_basic_sort() ){
-      if (static_cast<basic_sort>( i->sort() ) == unfoldParameter ){
+      if (basic_sort( i->sort() ) == unfoldParameter ){
         k.insert(*i) ;
       }
     }
-  } 
-  
+  }
+
   gsVerboseMsg("%s has %d constructor function(s)\n", unfoldParameter.name().c_str() , k.size() );
 
   return k;
@@ -92,36 +92,37 @@ std::set<function_symbol> Sorts::determineAffectedConstructors()
 bool Sorts::basic_sortOccursInSort_expression( mcrl2::data::sort_expression s, mcrl2::data::basic_sort b )
 {
   using namespace mcrl2::data;
-  
+
   if( s.is_basic_sort() )
   {
     std::cerr << "b";
-    if (static_cast<basic_sort>(s) == b)
+    if (basic_sort(s) == b)
     {
       return true;
     }
-  } 
+  }
   if( s.is_function_sort() )
   {
+    function_sort sf(s);
     std::cerr << "f" ;
-    bool x = basic_sortOccursInSort_expression(static_cast<function_sort>(s).codomain(), b ) ;
-    boost::iterator_range<sort_expression_list::const_iterator> lst = static_cast<function_sort>(s).domain();
-    std::cerr << lst.size() ; 
+    bool x = basic_sortOccursInSort_expression(sf.codomain(), b ) ;
+    boost::iterator_range<sort_expression_list::const_iterator> lst(sf.domain());
+    std::cerr << lst.size() ;
     for( sort_expression_list::const_iterator i = lst.begin(); i != lst.end(); ++i ){
-      std::cout << i-> to_string() << std::endl;
+      std::cout << i->to_string() << std::endl;
       x = x || basic_sortOccursInSort_expression( *i, b );
-    }   
+    }
     return x;
   }
   if( s.is_container_sort() )
   {
     std::cerr << "c" ;
-    return basic_sortOccursInSort_expression((static_cast<container_sort>(s)).element_sort(), b );
+    return basic_sortOccursInSort_expression((container_sort(s)).element_sort(), b );
   }
   if( s.is_alias() )
   {
     std::cerr << "a" ;
-    return basic_sortOccursInSort_expression(static_cast<alias>(s).reference(), b ); 
+    return basic_sortOccursInSort_expression(alias(s).reference(), b );
   }
   if( s.is_structured_sort() )
   {
@@ -129,9 +130,8 @@ bool Sorts::basic_sortOccursInSort_expression( mcrl2::data::sort_expression s, m
     gsVerboseMsg("No structs are yet supported");
     assert("false");
   }
-  
-  
-  return false;  
+
+  return false;
 }
 
 std::set<function_symbol> Sorts::determineAffectedMappings()

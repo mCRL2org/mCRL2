@@ -133,7 +133,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -144,18 +144,18 @@ int main(int argc, char** argv)
     parse_command_line(argc,argv);
 
     specification lps_specification;
- 
+
     lps_specification.load(file_name);
     linear_process lps = lps_specification.process();
     data_specification data_spec = lps_specification.data();
-    Sorts sorts( data_spec ); 
+    Sorts sorts( data_spec );
     //Debug-hack
     sorts.unfoldParameter = basic_sort( "Frame" );
 
     sorts.algorithm();
 
-    assert(false);    
-  	 
+    assert(false);
+
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
