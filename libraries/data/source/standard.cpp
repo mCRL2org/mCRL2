@@ -114,6 +114,143 @@ namespace mcrl2 {
       return false;
     }
 
+    // Function symbol <
+    function_symbol less(const sort_expression& s)
+    {
+      function_symbol less("<", function_sort(s, s, sort_bool_::bool_()));
+      return less;
+    }
+
+    // Recogniser for <
+    bool is_less_function_symbol(const data_expression& e)
+    {
+      if (e.is_function_symbol())
+      {
+        return static_cast<const function_symbol&>(e).name() == "<";
+      }
+      return false;
+    }
+
+    // Application of <
+    application less(const data_expression& arg0, const data_expression& arg1)
+    {
+      assert(arg0.sort() == arg1.sort());
+      return application(less(arg0.sort()),arg0, arg1);
+    }
+
+
+    // Recogniser for application of <
+    bool is_less_application(const data_expression& e)
+    {
+      if (e.is_application())
+      {
+        return is_less_function_symbol(static_cast<const application&>(e).head());
+      }
+      return false;
+    }
+
+    // Function symbol <=
+    function_symbol less_equal(const sort_expression& s)
+    {
+      function_symbol less_equal("<=", function_sort(s, s, sort_bool_::bool_()));
+      return less_equal;
+    }
+
+    // Recogniser for <=
+    bool is_less_equal_function_symbol(const data_expression& e)
+    {
+      if (e.is_function_symbol())
+      {
+        return static_cast<const function_symbol&>(e).name() == "<=";
+      }
+      return false;
+    }
+
+    // Application of <=
+    application less_equal(const data_expression& arg0, const data_expression& arg1)
+    {
+      assert(arg0.sort() == arg1.sort());
+      return application(less_equal(arg0.sort()),arg0, arg1);
+    }
+
+    // Recogniser for application of <=
+    bool is_less_equal_application(const data_expression& e)
+    {
+      if (e.is_application())
+      {
+        return is_less_equal_function_symbol(static_cast<const application&>(e).head());
+      }
+      return false;
+    }
+
+    // Function symbol >
+    function_symbol greater(const sort_expression& s)
+    {
+      function_symbol greater(">", function_sort(s, s, sort_bool_::bool_()));
+      return greater;
+    }
+
+    // Recogniser for >
+    bool is_greater_function_symbol(const data_expression& e)
+    {
+      if (e.is_function_symbol())
+      {
+        return static_cast<const function_symbol&>(e).name() == ">";
+      }
+      return false;
+    }
+
+    // Application of >
+    application greater(const data_expression& arg0, const data_expression& arg1)
+    {
+      assert(arg0.sort() == arg1.sort());
+      return application(greater(arg0.sort()),arg0, arg1);
+    }
+
+    // Recogniser for application of >
+    bool is_greater_application(const data_expression& e)
+    {
+      if (e.is_application())
+      {
+        return is_greater_function_symbol(static_cast<const application&>(e).head());
+      }
+      return false;
+    }
+
+    // Function symbol >=
+    function_symbol greater_equal(const sort_expression& s)
+    {
+      function_symbol greater_equal(">=", function_sort(s, s, sort_bool_::bool_()));
+      return greater_equal;
+    }
+    
+    // Recogniser for >=
+    bool is_greater_equal_function_symbol(const data_expression& e)
+    {
+      if (e.is_function_symbol())
+      {
+        return static_cast<const function_symbol&>(e).name() == ">=";
+      }
+      return false;
+    }
+
+    // Application of >=
+    application greater_equal(const data_expression& arg0, const data_expression& arg1)
+    {
+      assert(arg0.sort() == arg1.sort());
+      return application(greater_equal(arg0.sort()),arg0, arg1);
+    }
+
+    // Recogniser for application of >=
+    bool is_greater_equal_application(const data_expression& e)
+    {
+      if (e.is_application())
+      {
+        return is_greater_equal_function_symbol(static_cast<const application&>(e).head());
+      }
+      return false;
+    }
+
     // Give all system defined constructors for s
     function_symbol_list standard_generate_functions_code(const sort_expression& s)
     {
@@ -137,6 +274,10 @@ namespace mcrl2 {
       result.push_back(data_equation(make_vector(x, y), if_(sort_bool_::true_(), x, y), x));
       result.push_back(data_equation(make_vector(x, y), if_(sort_bool_::false_(), x, y), y));
       result.push_back(data_equation(make_vector(b, x), if_(b, x, x), x));
+      result.push_back(data_equation(make_vector(x), less(x,x), sort_bool_::false_()));
+      result.push_back(data_equation(make_vector(x), less_equal(x,x), sort_bool_::true_()));
+      result.push_back(data_equation(make_vector(x, y), greater(x,y), less(y,x)));
+      result.push_back(data_equation(make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
 
       return result;
     }

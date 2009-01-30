@@ -327,6 +327,14 @@ def lookup_identifier(functions, data_expression, arity):
     return "equal_to"
   elif data_expression.string == "!=":
     return "not_equal_to"
+  elif data_expression.string == "<":
+    return "less"
+  elif data_expression.string == "<=":
+    return "less_equal"
+  elif data_expression.string == ">":
+    return "greater"
+  elif data_expression.string == ">=":
+    return "greater_equal"
   else:
     for f in functions:
       # The or arity == 0 is to support use of functions without argument
@@ -368,20 +376,6 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
                   head_code = f[1].label
                   if f[1].label == "not_":
                     head_code = "sort_bool_::%s" % (head_code)
-        # Work around for subbag or equal
-        if (data_expression[1].expr[0].string == "<=" or data_expression[1].expr[0].string == "+") and len(data_expression[2].expr[1]) == 2:
-          argument = data_expression[2].expr[1]
-          if len(argument) >= 1:
-            argument_zero = argument[0]
-            if argument_zero[0] == "application":
-              for v in variable_declarations:
-                if v[0].string == argument_zero[1].expr[0].string:
-                  f = lookup_function_symbol_with_sort(functions + variable_declarations, data_expression[1].expr, v[1].expr[2])
-                  head_code = f[1].label
-                  if f[1].label == "less_equal":
-                    head_code = "sort_nat::%s" % (head_code)
-                  if f[1].label == "plus":
-                    head_code = "sort_nat::%s" % (head_code)
         # Work around for in (element test of set/bag)
         if data_expression[1].expr[0].string == "in" and len(data_expression[2].expr[1]) == 2:
           argument = data_expression[2].expr[1]
@@ -396,7 +390,8 @@ def generate_data_expression_code(sorts, functions, variable_declarations, data_
                     head_code = "sort_bag::bagin"
         # end work around          
 
-      if f[0] <> "lambda" and f[0] <> "application" and (f[0].string == "if" or f[0].string == "==" or f[0].string == "!="):
+      if f[0] <> "lambda" and f[0] <> "application" and (f[0].string == "if" or f[0].string == "==" or f[0].string == "!=" or
+         f[0].string == "<" or f[0].string == "<=" or f[0].string == ">" or f[0].string == ">="):
         sort_args = ""
       else:
         sort_args = get_sort_parameters_from_sort_expression(sorts, f[len(f)-1].expr)
@@ -1964,7 +1959,7 @@ sorts_cache = []
 sorts_to_functions = {}
 sorts_to_namespaces = {}
 functions_cache = []
-functions_table = {'==':'equal_to', '!=':'not_equal_to', 'if':'if_'}  # Maps ids to function names
+functions_table = {'==':'equal_to', '!=':'not_equal_to', 'if':'if_', '<':'less', '<=':'less_equal', '>':'greater', '>=':'greater_equal'}  # Maps ids to function names
 includes_table = {}   # Maps sorts to include files
 current_sort = ""     # current sort, to map include file to sort
 outputcode = ""       # String to collect the generated code

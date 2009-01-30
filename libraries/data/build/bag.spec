@@ -8,8 +8,6 @@ map @bag <"bag_comprehension"> : (S -> Nat) <"arg"> -> Bag(S);
     {} <"emptybag"> : Bag(S);
     count <"count"> : S <"left"> # Bag(S) <"right"> -> Nat;
     in <"bagin"> : S <"left"> # Bag(S) <"right"> -> Bool;
-    <= <"subbag_or_equal"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bool;
-    < <"subbag"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bool;
     + <"bagunion_"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     - <"bagdifference"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
     * <"bagintersection"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);

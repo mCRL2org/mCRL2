@@ -67,7 +67,7 @@ void test_constructors()
 {
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(make_vector(static_cast<sort_expression>(s0)),s);
+  function_sort s0s(make_vector(sort_expression(s0)),s);
   function_symbol f("f", s);
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
@@ -128,7 +128,7 @@ void test_functions()
 {
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s(make_vector(static_cast<sort_expression>(s0)), s);
+  function_sort s0s(make_vector(sort_expression(s0)), s);
   function_symbol f("f", s);
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
@@ -196,7 +196,7 @@ void test_equations()
   function_symbol f("f", s0s);
   variable x("x", s0);
   data_expression_list xel(make_vector(reinterpret_cast<data_expression&>(x)));
-  application fx(f, xel);
+  application fx(f, boost::make_iterator_range(xel));
   variable_list xl(make_vector(x));
   boost::iterator_range<variable_list::const_iterator> x_range(xl);
   data_equation fxx(x_range, x, fx, x);
@@ -243,7 +243,7 @@ void test_is_certainly_finite()
   function_symbol f("f", s);
   function_symbol g("g", s0s0);
   variable x("x", s0);
-  application gx(g, make_vector(reinterpret_cast<data_expression&>(x)));
+  application gx(g, boost::make_iterator_range(make_vector(reinterpret_cast<data_expression&>(x))));
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);

@@ -43,8 +43,8 @@ namespace mcrl2 {
       inline
       function_symbol creal()
       {
-        //static function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_real_::real_()));
-        function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_real_::real_()));
+        //static function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), sort_real_::real_()));
+        function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), sort_real_::real_()));
         return creal;
       }
 
@@ -61,11 +61,12 @@ namespace mcrl2 {
 
       // Application of @cReal
       inline
-      application creal(const data_expression& arg0)
+      application creal(const data_expression& arg0, const data_expression& arg1)
       {
         //assert(sort_int_::is_int_(arg0.sort()));
+        //assert(sort_pos::is_pos(arg1.sort()));
         
-        return application(creal(),arg0);
+        return application(creal(),arg0, arg1);
       }
 
       // Recogniser for application of @cReal
@@ -319,182 +320,68 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol <=
+      // Function symbol min
       inline
-      function_symbol less_equal(const sort_expression& s0, const sort_expression& s1)
+      function_symbol min(const sort_expression& s0, const sort_expression& s1)
       {
         //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
                //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
                //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
                //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
 
-        sort_expression target_sort(sort_bool_::bool_());
-        //static function_symbol less_equal("<=", function_sort(s0, s1, target_sort));
-        function_symbol less_equal("<=", function_sort(s0, s1, target_sort));
-        return less_equal;
+        sort_expression target_sort;
+        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        {
+          target_sort = sort_real_::real_();
+        }
+        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else
+        {
+          assert(false);
+        }
+
+        //static function_symbol min("min", function_sort(s0, s1, target_sort));
+        function_symbol min("min", function_sort(s0, s1, target_sort));
+        return min;
       }
 
-      // Recogniser for <=
+      // Recogniser for min
       inline
-      bool is_less_equal_function_symbol(const data_expression& e)
+      bool is_min_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "<=";
+          return static_cast<const function_symbol&>(e).name() == "min";
         }
         return false;
       }
 
-      // Application of <=
+      // Application of min
       inline
-      application less_equal(const data_expression& arg0, const data_expression& arg1)
+      application min(const data_expression& arg0, const data_expression& arg1)
       {
         
-        return application(less_equal(arg0.sort(), arg1.sort()),arg0, arg1);
+        return application(min(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of <=
+      // Recogniser for application of min
       inline
-      bool is_less_equal_application(const data_expression& e)
+      bool is_min_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_less_equal_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol <
-      inline
-      function_symbol less(const sort_expression& s0, const sort_expression& s1)
-      {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
-        sort_expression target_sort(sort_bool_::bool_());
-        //static function_symbol less("<", function_sort(s0, s1, target_sort));
-        function_symbol less("<", function_sort(s0, s1, target_sort));
-        return less;
-      }
-
-      // Recogniser for <
-      inline
-      bool is_less_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "<";
-        }
-        return false;
-      }
-
-      // Application of <
-      inline
-      application less(const data_expression& arg0, const data_expression& arg1)
-      {
-        
-        return application(less(arg0.sort(), arg1.sort()),arg0, arg1);
-      }
-
-      // Recogniser for application of <
-      inline
-      bool is_less_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_less_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol >=
-      inline
-      function_symbol greater_equal(const sort_expression& s0, const sort_expression& s1)
-      {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
-        sort_expression target_sort(sort_bool_::bool_());
-        //static function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
-        function_symbol greater_equal(">=", function_sort(s0, s1, target_sort));
-        return greater_equal;
-      }
-
-      // Recogniser for >=
-      inline
-      bool is_greater_equal_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == ">=";
-        }
-        return false;
-      }
-
-      // Application of >=
-      inline
-      application greater_equal(const data_expression& arg0, const data_expression& arg1)
-      {
-        
-        return application(greater_equal(arg0.sort(), arg1.sort()),arg0, arg1);
-      }
-
-      // Recogniser for application of >=
-      inline
-      bool is_greater_equal_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_greater_equal_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol >
-      inline
-      function_symbol greater(const sort_expression& s0, const sort_expression& s1)
-      {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
-        sort_expression target_sort(sort_bool_::bool_());
-        //static function_symbol greater(">", function_sort(s0, s1, target_sort));
-        function_symbol greater(">", function_sort(s0, s1, target_sort));
-        return greater;
-      }
-
-      // Recogniser for >
-      inline
-      bool is_greater_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == ">";
-        }
-        return false;
-      }
-
-      // Application of >
-      inline
-      application greater(const data_expression& arg0, const data_expression& arg1)
-      {
-        
-        return application(greater(arg0.sort(), arg1.sort()),arg0, arg1);
-      }
-
-      // Recogniser for application of >
-      inline
-      bool is_greater_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_greater_function_symbol(static_cast<const application&>(e).head());
+          return is_min_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
@@ -591,72 +478,6 @@ namespace mcrl2 {
         if (e.is_application())
         {
           return is_max_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-
-      // Function symbol min
-      inline
-      function_symbol min(const sort_expression& s0, const sort_expression& s1)
-      {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
-        sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
-        {
-          target_sort = sort_real_::real_();
-        }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
-        {
-          target_sort = sort_nat::nat();
-        }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
-        {
-          target_sort = sort_int_::int_();
-        }
-        else
-        {
-          assert(false);
-        }
-
-        //static function_symbol min("min", function_sort(s0, s1, target_sort));
-        function_symbol min("min", function_sort(s0, s1, target_sort));
-        return min;
-      }
-
-      // Recogniser for min
-      inline
-      bool is_min_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "min";
-        }
-        return false;
-      }
-
-      // Application of min
-      inline
-      application min(const data_expression& arg0, const data_expression& arg1)
-      {
-        
-        return application(min(arg0.sort(), arg1.sort()),arg0, arg1);
-      }
-
-      // Recogniser for application of min
-      inline
-      bool is_min_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_min_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
@@ -1137,13 +958,13 @@ namespace mcrl2 {
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_nat::nat())||
+        //assert(//(s0 == sort_real_::real_() && s1 == sort_int_::int_())||
                //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
                //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
                //(s0 == sort_int_::int_() && s1 == sort_nat::nat()));
 
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_nat::nat())
+        if(s0 == sort_real_::real_() && s1 == sort_int_::int_())
         {
           target_sort = sort_real_::real_();
         }
@@ -1199,6 +1020,295 @@ namespace mcrl2 {
         return false;
       }
 
+      // Function symbol /
+      inline
+      function_symbol divides(const sort_expression& s0, const sort_expression& s1)
+      {
+        //assert(//(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
+               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
+               //(s0 == sort_int_::int_() && s1 == sort_int_::int_())||
+               //(s0 == sort_real_::real_() && s1 == sort_real_::real_()));
+
+        sort_expression target_sort(sort_real_::real_());
+        //static function_symbol divides("/", function_sort(s0, s1, target_sort));
+        function_symbol divides("/", function_sort(s0, s1, target_sort));
+        return divides;
+      }
+
+      // Recogniser for /
+      inline
+      bool is_divides_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "/";
+        }
+        return false;
+      }
+
+      // Application of /
+      inline
+      application divides(const data_expression& arg0, const data_expression& arg1)
+      {
+        
+        return application(divides(arg0.sort(), arg1.sort()),arg0, arg1);
+      }
+
+      // Recogniser for application of /
+      inline
+      bool is_divides_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_divides_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol floor
+      inline
+      function_symbol floor()
+      {
+        //static function_symbol floor("floor", function_sort(sort_real_::real_(), sort_int_::int_()));
+        function_symbol floor("floor", function_sort(sort_real_::real_(), sort_int_::int_()));
+        return floor;
+      }
+
+      // Recogniser for floor
+      inline
+      bool is_floor_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "floor";
+        }
+        return false;
+      }
+
+      // Application of floor
+      inline
+      application floor(const data_expression& arg0)
+      {
+        //assert(sort_real_::is_real_(arg0.sort()));
+        
+        return application(floor(),arg0);
+      }
+
+      // Recogniser for application of floor
+      inline
+      bool is_floor_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_floor_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol ceil
+      inline
+      function_symbol ceil()
+      {
+        //static function_symbol ceil("ceil", function_sort(sort_real_::real_(), sort_int_::int_()));
+        function_symbol ceil("ceil", function_sort(sort_real_::real_(), sort_int_::int_()));
+        return ceil;
+      }
+
+      // Recogniser for ceil
+      inline
+      bool is_ceil_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "ceil";
+        }
+        return false;
+      }
+
+      // Application of ceil
+      inline
+      application ceil(const data_expression& arg0)
+      {
+        //assert(sort_real_::is_real_(arg0.sort()));
+        
+        return application(ceil(),arg0);
+      }
+
+      // Recogniser for application of ceil
+      inline
+      bool is_ceil_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_ceil_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol round
+      inline
+      function_symbol round()
+      {
+        //static function_symbol round("round", function_sort(sort_real_::real_(), sort_int_::int_()));
+        function_symbol round("round", function_sort(sort_real_::real_(), sort_int_::int_()));
+        return round;
+      }
+
+      // Recogniser for round
+      inline
+      bool is_round_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "round";
+        }
+        return false;
+      }
+
+      // Application of round
+      inline
+      application round(const data_expression& arg0)
+      {
+        //assert(sort_real_::is_real_(arg0.sort()));
+        
+        return application(round(),arg0);
+      }
+
+      // Recogniser for application of round
+      inline
+      bool is_round_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_round_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol @redfrac
+      inline
+      function_symbol redfrac()
+      {
+        //static function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), sort_real_::real_()));
+        function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), sort_real_::real_()));
+        return redfrac;
+      }
+
+      // Recogniser for @redfrac
+      inline
+      bool is_redfrac_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "@redfrac";
+        }
+        return false;
+      }
+
+      // Application of @redfrac
+      inline
+      application redfrac(const data_expression& arg0, const data_expression& arg1)
+      {
+        //assert(sort_int_::is_int_(arg0.sort()));
+        //assert(sort_int_::is_int_(arg1.sort()));
+        
+        return application(redfrac(),arg0, arg1);
+      }
+
+      // Recogniser for application of @redfrac
+      inline
+      bool is_redfrac_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_redfrac_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol @redfracwhr
+      inline
+      function_symbol redfracwhr()
+      {
+        //static function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), sort_real_::real_()));
+        function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), sort_real_::real_()));
+        return redfracwhr;
+      }
+
+      // Recogniser for @redfracwhr
+      inline
+      bool is_redfracwhr_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "@redfracwhr";
+        }
+        return false;
+      }
+
+      // Application of @redfracwhr
+      inline
+      application redfracwhr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        //assert(sort_pos::is_pos(arg0.sort()));
+        //assert(sort_int_::is_int_(arg1.sort()));
+        //assert(sort_nat::is_nat(arg2.sort()));
+        
+        return application(redfracwhr(),arg0, arg1, arg2);
+      }
+
+      // Recogniser for application of @redfracwhr
+      inline
+      bool is_redfracwhr_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_redfracwhr_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
+      // Function symbol @redfrachlp
+      inline
+      function_symbol redfrachlp()
+      {
+        //static function_symbol redfrachlp("@redfrachlp", function_sort(sort_real_::real_(), sort_int_::int_(), sort_real_::real_()));
+        function_symbol redfrachlp("@redfrachlp", function_sort(sort_real_::real_(), sort_int_::int_(), sort_real_::real_()));
+        return redfrachlp;
+      }
+
+      // Recogniser for @redfrachlp
+      inline
+      bool is_redfrachlp_function_symbol(const data_expression& e)
+      {
+        if (e.is_function_symbol())
+        {
+          return static_cast<const function_symbol&>(e).name() == "@redfrachlp";
+        }
+        return false;
+      }
+
+      // Application of @redfrachlp
+      inline
+      application redfrachlp(const data_expression& arg0, const data_expression& arg1)
+      {
+        //assert(sort_real_::is_real_(arg0.sort()));
+        //assert(sort_int_::is_int_(arg1.sort()));
+        
+        return application(redfrachlp(),arg0, arg1);
+      }
+
+      // Recogniser for application of @redfrachlp
+      inline
+      bool is_redfrachlp_application(const data_expression& e)
+      {
+        if (e.is_application())
+        {
+          return is_redfrachlp_function_symbol(static_cast<const application&>(e).head());
+        }
+        return false;
+      }
+
       // Give all system defined constructors for Real
       inline
       function_symbol_list real__generate_constructors_code()
@@ -1220,12 +1330,8 @@ namespace mcrl2 {
         result.push_back(real2pos());
         result.push_back(real2nat());
         result.push_back(real2int());
-        result.push_back(less_equal(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(less(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(greater_equal(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(greater(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(max(sort_real_::real_(), sort_real_::real_()));
         result.push_back(min(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(max(sort_real_::real_(), sort_real_::real_()));
         result.push_back(abs(sort_real_::real_()));
         result.push_back(negate(sort_real_::real_()));
         result.push_back(succ(sort_real_::real_()));
@@ -1233,7 +1339,17 @@ namespace mcrl2 {
         result.push_back(plus(sort_real_::real_(), sort_real_::real_()));
         result.push_back(minus(sort_real_::real_(), sort_real_::real_()));
         result.push_back(times(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(exp(sort_real_::real_(), sort_nat::nat()));
+        result.push_back(exp(sort_real_::real_(), sort_int_::int_()));
+        result.push_back(divides(sort_pos::pos(), sort_pos::pos()));
+        result.push_back(divides(sort_nat::nat(), sort_nat::nat()));
+        result.push_back(divides(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(divides(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(floor());
+        result.push_back(ceil());
+        result.push_back(round());
+        result.push_back(redfrac());
+        result.push_back(redfracwhr());
+        result.push_back(redfrachlp());
 
         return result;
       }
@@ -1242,34 +1358,14 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e));
+        //assert( || is_min_application(e) || is_max_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
         
-        if (is_less_equal_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_less_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_greater_equal_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_greater_application(e))
+        if (is_min_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
 
         if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_min_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -1290,6 +1386,16 @@ namespace mcrl2 {
         }
 
         if (is_exp_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+
+        if (is_divides_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+
+        if (is_redfrachlp_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -1298,58 +1404,73 @@ namespace mcrl2 {
         assert(false); 
       }
 
-      // Function for projecting out left
+      // Function for projecting out arg3
       inline
-      data_expression left(const data_expression& e)
+      data_expression arg3(const data_expression& e)
       {
-        //assert( || is_less_equal_application(e) || is_less_application(e) || is_greater_equal_application(e) || is_greater_application(e) || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e));
+        //assert( || is_redfracwhr_application(e));
         
-        if (is_less_equal_application(e))
+        if (is_redfracwhr_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[2];
+        }
+
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
+
+      // Function for projecting out arg1
+      inline
+      data_expression arg1(const data_expression& e)
+      {
+        //assert( || is_redfracwhr_application(e));
+        
+        if (is_redfracwhr_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_less_application(e))
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
+
+      // Function for projecting out arg2
+      inline
+      data_expression arg2(const data_expression& e)
+      {
+        //assert( || is_redfracwhr_application(e));
+        
+        if (is_redfracwhr_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_greater_equal_application(e))
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
+
+      // Function for projecting out denominator
+      inline
+      data_expression denominator(const data_expression& e)
+      {
+        //assert( || is_creal_application(e));
+        
+        if (is_creal_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_greater_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
 
-        if (is_max_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_min_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_plus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_minus_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_times_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_exp_application(e))
+      // Function for projecting out numerator
+      inline
+      data_expression numerator(const data_expression& e)
+      {
+        //assert( || is_creal_application(e));
+        
+        if (is_creal_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
@@ -1362,13 +1483,8 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        //assert( || is_creal_application(e) || is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e));
+        //assert( || is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e) || is_floor_application(e) || is_ceil_application(e) || is_round_application(e));
         
-        if (is_creal_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
         if (is_pos2real_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
@@ -1419,6 +1535,71 @@ namespace mcrl2 {
           return static_cast<const application&>(e).arguments()[0];
         }
 
+        if (is_floor_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_ceil_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_round_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        // This should never be reached, otherwise something is severely wrong.
+        assert(false); 
+      }
+
+      // Function for projecting out left
+      inline
+      data_expression left(const data_expression& e)
+      {
+        //assert( || is_min_application(e) || is_max_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
+        
+        if (is_min_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_max_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_plus_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_minus_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_times_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_exp_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_divides_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
+        if (is_redfrachlp_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+
         // This should never be reached, otherwise something is severely wrong.
         assert(false); 
       }
@@ -1428,27 +1609,38 @@ namespace mcrl2 {
       data_equation_list real__generate_equations_code()
       {
         data_equation_list result;
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), equal_to(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), equal_to(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(variable_list(), sort_real_::int2real(), sort_real_::creal()));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_real_::nat2real(variable("n", sort_nat::nat())), sort_real_::creal(sort_int_::cint(variable("n", sort_nat::nat())))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_real_::pos2real(variable("p", sort_pos::pos())), sort_real_::creal(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2int(sort_real_::creal(variable("x", sort_int_::int_()))), variable("x", sort_int_::int_())));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2nat(sort_real_::creal(variable("x", sort_int_::int_()))), sort_int_::int2nat(variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2pos(sort_real_::creal(variable("x", sort_int_::int_()))), sort_int_::int2pos(variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::less_equal(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::less_equal(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::less(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::less(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::greater_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::less_equal(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::greater(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::less(variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::max(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_real_::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::min(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(sort_real_::less_equal(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::abs(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_int_::cint(sort_real_::abs(variable("x", sort_int_::int_()))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::negate(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::negate(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::succ(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::succ(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::pred(sort_real_::creal(variable("x", sort_int_::int_()))), sort_real_::creal(sort_real_::pred(variable("x", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::plus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), sort_real_::negate(variable("y", sort_int_::int_()))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::times(sort_real_::creal(variable("x", sort_int_::int_())), sort_real_::creal(variable("y", sort_int_::int_()))), sort_real_::creal(sort_real_::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("x", sort_int_::int_())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_())), variable("n", sort_nat::nat())), sort_real_::creal(sort_real_::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), equal_to(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), equal_to(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), less(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less_equal(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), less_equal(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::int2real(variable("x", sort_int_::int_())), sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_real_::nat2real(variable("n", sort_nat::nat())), sort_real_::creal(sort_int_::cint(variable("n", sort_nat::nat())), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_real_::pos2real(variable("p", sort_pos::pos())), sort_real_::creal(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2int(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), variable("x", sort_int_::int_())));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2nat(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), sort_int_::int2nat(variable("x", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2pos(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), sort_int_::int2pos(variable("x", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::min(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::max(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::abs(variable("r", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), sort_real_::creal(sort_int_::cint(sort_nat::c0()), sort_pos::c1())), sort_real_::negate(variable("r", sort_real_::real_())), variable("r", sort_real_::real_()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::negate(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::negate(variable("x", sort_int_::int_())), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::succ(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::pred(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::minus(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::plus(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::plus(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::minus(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::times(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), not_equal_to(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::divides(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::divides(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), not_equal_to(variable("m", sort_nat::nat()), sort_nat::c0()), sort_real_::divides(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_real_::redfrac(sort_int_::cint(variable("m", sort_nat::nat())), sort_int_::cint(variable("n", sort_nat::nat())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), not_equal_to(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::divides(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_int_::cint(variable("n", sort_nat::nat()))), sort_real_::redfrac(sort_real_::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())), sort_int_::cint(sort_nat::cnat(sort_real_::exp(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())))))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), not_equal_to(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_int_::cneg(variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(sort_real_::exp(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))))), sort_real_::exp(variable("x", sort_int_::int_()), sort_nat::cnat(variable("q", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::floor(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_nat::div(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::ceil(variable("r", sort_real_::real_())), sort_real_::negate(sort_real_::floor(sort_real_::negate(variable("r", sort_real_::real_()))))));
+        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::round(variable("r", sort_real_::real_())), sort_real_::floor(sort_real_::plus(variable("r", sort_real_::real_()), sort_real_::creal(sort_int_::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), sort_int_::cneg(variable("p", sort_pos::pos()))), sort_real_::redfrac(sort_real_::negate(variable("x", sort_int_::int_())), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), sort_real_::redfracwhr(variable("p", sort_pos::pos()), sort_nat::div(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_nat::mod(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::redfracwhr(variable("p", sort_pos::pos()), variable("x", sort_int_::int_()), sort_nat::c0()), sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::redfracwhr(variable("p", sort_pos::pos()), variable("x", sort_int_::int_()), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_real_::redfrachlp(sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), variable("x", sort_int_::int_()))));
+        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::redfrachlp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), variable("y", sort_int_::int_())), sort_real_::creal(sort_real_::plus(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_real_::times(variable("y", sort_int_::int_()), variable("x", sort_int_::int_()))), sort_int_::int2pos(variable("x", sort_int_::int_())))));
 
         return result;
       }

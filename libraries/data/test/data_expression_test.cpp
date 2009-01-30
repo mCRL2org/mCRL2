@@ -129,8 +129,8 @@ void application_test()
   basic_sort s1("S1");
   basic_sort s("S");
   sort_expression_list s01;
-  s01.push_back(static_cast<sort_expression>(s0));
-  s01.push_back(static_cast<sort_expression>(s1));
+  s01.push_back(sort_expression(s0));
+  s01.push_back(sort_expression(s1));
   function_sort s01s(boost::make_iterator_range(s01), s);
 
   function_symbol f("f", s01s);

@@ -5,8 +5,6 @@ sort Set(S) <"set">;
 map @set <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S);
     {} <"emptyset"> : Set(S);
     in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;
-    <= <"subset_or_equal"> : Set(S) <"left"> # Set(S) <"right"> -> Bool;
-    < <"subset"> : Set(S) <"left"> # Set(S) <"right"> -> Bool;
     + <"setunion_"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
     - <"setdifference"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
     * <"setintersection"> : Set(S) <"left"> # Set(S) <"right"> -> Set(S);
