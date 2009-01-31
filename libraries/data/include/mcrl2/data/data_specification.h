@@ -50,11 +50,11 @@ namespace mcrl2 {
       /// \pre f is a constructor.
       /// \ret All sorts on which f depends.
       inline
-      boost::iterator_range<sort_expression_list::const_iterator> dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited)
+      sort_expression_list dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited)
       {
         if (f.sort().is_basic_sort())
         {
-          return boost::make_iterator_range(sort_expression_list());
+          return sort_expression_list();
         }
         else
         {
@@ -64,10 +64,10 @@ namespace mcrl2 {
           {
             result.push_back(*i);
             visited.insert(*i);
-            boost::iterator_range<sort_expression_list::const_iterator> l(dependent_sorts(*i, visited));
+            sort_expression_list l(dependent_sorts(*i, visited));
             result.insert(result.end(), l.begin(), l.end());
           }
-          return boost::make_iterator_range(result);
+          return result;
         }
       }
 
@@ -76,25 +76,25 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \ret All sorts on which s depends.
       inline
-      boost::iterator_range<sort_expression_list::const_iterator> dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited)
+      sort_expression_list dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited)
       {
         if (visited.find(s) != visited.end())
         {
-          return boost::make_iterator_range(sort_expression_list());
+          return sort_expression_list();
         }
         visited.insert(s);
 
         if (s.is_basic_sort())
         {
           sort_expression_list result;
-
-          for (function_symbol_list::const_iterator i = constructors(s).begin(); i != constructors(s).end(); ++i)
+          boost::iterator_range< function_symbol_list::const_iterator > cl(constructors(s));
+          for (function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
           {
-            boost::iterator_range<sort_expression_list::const_iterator> l(dependent_sorts(*i, visited));
+            sort_expression_list l(dependent_sorts(*i, visited));
             result.insert(result.end(), l.begin(), l.end());
           }
 
-          return boost::make_iterator_range(result);
+          return result;
         }
         else if (s.is_container_sort())
         {
@@ -107,13 +107,13 @@ namespace mcrl2 {
 
           for (sort_expression_list::const_iterator i = fs.domain().begin(); i != fs.domain().end(); ++i)
           {
-            boost::iterator_range<sort_expression_list::const_iterator> l(dependent_sorts(*i, visited));
+            sort_expression_list l(dependent_sorts(*i, visited));
             result.insert(result.end(), l.begin(), l.end());
           }
 
-          boost::iterator_range<sort_expression_list::const_iterator> l(dependent_sorts(fs.codomain(), visited));
+          sort_expression_list l(dependent_sorts(fs.codomain(), visited));
           result.insert(result.end(), l.begin(), l.end());
-          return boost::make_iterator_range(result);
+          return result;
         }
         else if (s.is_structured_sort())
         {
@@ -125,12 +125,12 @@ namespace mcrl2 {
             boost::iterator_range<structured_sort_constructor_argument_list::const_iterator> scal(i->arguments());
             for (structured_sort_constructor_argument_list::const_iterator j = scal.begin(); j != scal.end(); ++j)
             {
-              boost::iterator_range<sort_expression_list::const_iterator> sl(dependent_sorts(j->sort(), visited));
+              sort_expression_list sl(dependent_sorts(j->sort(), visited));
               result.insert(result.end(), sl.begin(), sl.end());
             }
           }
 
-          return boost::make_iterator_range(result);
+          return result;
         }
         else
         {
@@ -139,7 +139,7 @@ namespace mcrl2 {
       }
 
       protected:
-        
+
         ///\brief The basic sorts and structured sorts in the specification.
         sort_expression_list m_sorts;
 
@@ -196,7 +196,7 @@ namespace mcrl2 {
       inline
       boost::iterator_range<sort_expression_list::const_iterator> sorts() const
       {
-        return boost::make_iterator_range(m_sorts);
+        return boost::make_iterator_range(m_sorts.begin(), m_sorts.end());
       }
 
       /// \brief Gets the aliases
@@ -723,7 +723,7 @@ namespace mcrl2 {
       {
         // Check for recursive occurrence.
         atermpp::set<sort_expression> visited;
-        boost::iterator_range<sort_expression_list::const_iterator> dsl(dependent_sorts(s, visited));
+        sort_expression_list dsl(dependent_sorts(s, visited));
         if (std::find(dsl.begin(), dsl.end(), s) != dsl.end())
         {
           return false;
@@ -731,16 +731,12 @@ namespace mcrl2 {
 
         if (s.is_basic_sort())
         {
-          boost::iterator_range<function_symbol_list::const_iterator> fl(constructors(s));
-          if (fl.empty())
-          {
-            return false;
-          }
+          boost::iterator_range< function_symbol_list::const_iterator > fl(constructors(s));
 
           for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
           {
             atermpp::set<sort_expression> visited;
-            boost::iterator_range<sort_expression_list::const_iterator> sl(dependent_sorts(*i, visited));
+            sort_expression_list sl(dependent_sorts(*i, visited));
             for (sort_expression_list::const_iterator j = sl.begin(); j != sl.end(); ++j)
             {
               if (!is_certainly_finite(*j))
@@ -749,7 +745,7 @@ namespace mcrl2 {
               }
             }
           }
-          return true;
+          return !fl.empty();
         }
         else if (s.is_container_sort())
         {
