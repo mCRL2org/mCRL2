@@ -181,17 +181,13 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 ///     p_args points to a list
 ///     p_vars points to a list of DataVarIds
 ///     context is some term
-/// \return op_id, if s_op_id is a sort identifier
+/// \return [v_0,...,v_n] if s_op_id is a sort identifier
 ///     op_id(v_0,...,v_n), if s_op_id is of the form s_0 x ... x s_n -> s;
 ///     here for 1 <= i <= n, v_i is a data variable of sort s_i different from
 ///     the other v_j, and either
 ///     - v_i occurs in *p_vars
 ///     - v_i does not occur in *p_vars and context
-/// \post *p_args = [v_0,...,v_n]
-///     *p_vars is extended with newly introduced v_i (which did not occur in
-///     *p_vars and context)
-ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
-                                   ATermList *p_vars, ATerm context);
+ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context);
 
 //Pre: term is not NULL
 //Ret: sort identifier for the implementation of a structured sort with prefix

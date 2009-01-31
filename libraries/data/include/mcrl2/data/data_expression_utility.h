@@ -30,6 +30,26 @@ namespace mcrl2 {
 
   namespace data {
 
+    template <typename Term>
+    atermpp::vector<Term> term_vector_difference(atermpp::vector<Term> v, atermpp::vector<Term> w)
+    {
+      if (w.empty())
+      {
+        return v;
+      }
+      if (v.empty())
+      {
+        return w;
+      }
+      std::set<Term> result;
+      result.insert(v.begin(), v.end());
+      for (typename atermpp::vector<Term>::iterator i = w.begin(); i != w.end(); ++i)
+      {
+        result.erase(*i);
+      }
+      return atermpp::vector<Term>(result.begin(), result.end());
+    }
+
     /// \brief Returns the sorts of the data expressions in the input
     /// \param[in] l A range of data expressions
     /// \ret The sorts of the data expressions in l.

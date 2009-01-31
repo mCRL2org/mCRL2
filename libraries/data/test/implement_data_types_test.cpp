@@ -15,6 +15,7 @@
 
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/implement_data_types.h"
 #include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
@@ -262,7 +263,7 @@ void old_impl_sort_pos(t_data_decls *p_data_decls)
 
 void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
 {
-  std::cerr << "impl_sort_natpair" << std::endl;
+  std::clog << "impl_sort_natpair" << std::endl;
   //Declare sort NatPair
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair());
   //Declare constructors for sort NatPair
@@ -337,12 +338,12 @@ void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
          gsMakeDataExprGGDivMod(gsMakeDataExprCNat(p), n, q),
          gsMakeDataExprCPair(gsMakeDataExprDub(t, n), gsMakeDataExprGTESubtB(f, p, q)))
     ), p_data_decls->data_eqns);
-  std::cerr << "end impl_sort_natpair" << std::endl;
+  std::clog << "end impl_sort_natpair" << std::endl;
 }
 
 void old_impl_sort_nat(t_data_decls *p_data_decls)
 {
-  std::cerr << "impl_sort_nat" << std::endl;
+  std::clog << "impl_sort_nat" << std::endl;
   //add implementation of sort NatPair, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
     old_impl_sort_nat_pair(p_data_decls);
@@ -675,12 +676,12 @@ void old_impl_sort_nat(t_data_decls *p_data_decls)
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
          gsMakeDataExprMod(p, q))
     ), p_data_decls->data_eqns);
-  std::cerr << "end impl_sort_nat" << std::endl;
+  std::clog << "end impl_sort_nat" << std::endl;
 }
 
 void old_impl_sort_int(t_data_decls *p_data_decls)
 {
-  std::cerr << "impl_sort_int" << std::endl;
+  std::clog << "impl_sort_int" << std::endl;
   //Declare sort Int
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdInt());
   //Declare constructors for sort Int
@@ -965,7 +966,7 @@ void old_impl_sort_int(t_data_decls *p_data_decls)
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     old_impl_sort_nat(p_data_decls);
   }
-  std::cerr << "end impl_sort_int" << std::endl;
+  std::clog << "end impl_sort_int" << std::endl;
 }
 
 void old_impl_sort_real(t_data_decls *p_data_decls)
@@ -1096,7 +1097,7 @@ void old_impl_sort_real(t_data_decls *p_data_decls)
     ), p_data_decls->data_eqns);
   //add implementation of sort Int, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-    std::cerr << "implement integers" << std::endl;
+    std::clog << "implement integers" << std::endl;
     old_impl_sort_int(p_data_decls);
   }
 }
@@ -1662,6 +1663,225 @@ void old_impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls
     ), p_data_decls->data_eqns);
 }
 
+ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
+     ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true)
+{
+  assert(gsIsSortStruct(sort_struct));
+  //declare fresh sort identifier for sort_struct 
+  ATermAppl sort_id = make_fresh_struct_sort_id((ATerm) p_data_decls->sorts); 
+  assert(gsIsSortId(sort_id));
+  assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
+  //declare sort sort_id as representative of sort sort_struct
+  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
+  //add substitution sort_struct -> sort_id
+  ATermAppl subst = gsMakeSubst_Appl(sort_struct, sort_id);
+  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
+  //store constructor, projection and recogniser operations for this identifier
+  ATermList cons_ops = ATmakeList0();
+  ATermList proj_ops = ATmakeList0();
+  ATermList projs = ATmakeList0();
+  ATermList rec_ops = ATmakeList0();
+  ATermList recs = ATmakeList0();
+  ATermList struct_conss = ATLgetArgument(sort_struct, 0);
+  while (!ATisEmpty(struct_conss))
+  {
+    ATermAppl struct_cons = ATAgetFirst(struct_conss);
+    ATermAppl cons_name = ATAgetArgument(struct_cons, 0);
+    ATermList struct_projs = ATLgetArgument(struct_cons, 1);
+    ATermAppl rec_name = ATAgetArgument(struct_cons, 2);
+    ATermList struct_cons_sorts = ATmakeList0();
+    //store projection operations in proj_ops and store the implementations of
+    //the sorts in struct_cons_sorts
+    int i = 0;
+    while (!ATisEmpty(struct_projs))
+    {
+      ATermAppl struct_proj = ATAgetFirst(struct_projs);
+      ATermAppl proj_name = ATAgetArgument(struct_proj, 0);
+      ATermAppl proj_sort = ATAgetArgument(struct_proj, 1);
+      if (recursive) {
+        proj_sort = impl_exprs_appl(proj_sort, p_substs, p_data_decls);
+      }
+      struct_cons_sorts = ATinsert(struct_cons_sorts, (ATerm) proj_sort);
+      //store projection operation in proj_ops and projs
+      if (!gsIsNil(proj_name)) {
+        ATermAppl proj_op = gsMakeOpId(proj_name, gsMakeSortArrow1(sort_id, proj_sort));
+        proj_ops = ATinsert(proj_ops, (ATerm) proj_op);
+        projs = ATinsert(projs, (ATerm) ATmakeList2((ATerm) proj_op, (ATerm) ATmakeInt(i)));
+      }
+      struct_projs = ATgetNext(struct_projs);
+      i++;
+    }
+    struct_cons_sorts = ATreverse(struct_cons_sorts);
+    //store constructor operation in cons_ops
+    ATermAppl cons_op = gsMakeOpId(cons_name, gsMakeSortArrowList(struct_cons_sorts, sort_id));
+    cons_ops = ATinsert(cons_ops, (ATerm) cons_op);
+    //store recogniser in rec_ops and recs
+    if (!gsIsNil(rec_name)) {
+      ATermAppl rec_op = gsMakeOpId(rec_name, gsMakeSortArrow1(sort_id, gsMakeSortExprBool()));
+      rec_ops = ATinsert(rec_ops, (ATerm) rec_op);
+      recs = ATinsert(recs, (ATerm) ATmakeList2((ATerm) rec_op, (ATerm) cons_op));
+    }
+    //add constructor to projs
+    ATermList tmpl = ATmakeList0();
+    for (; !ATisEmpty(projs); projs=ATgetNext(projs))
+    {
+      tmpl = ATinsert(tmpl, (ATerm) ATappend(ATLgetFirst(projs), (ATerm) cons_op));
+    }
+    projs = ATreverse(tmpl);
+    struct_conss = ATgetNext(struct_conss);
+  }
+  cons_ops = ATreverse(cons_ops);
+  proj_ops = ATreverse(proj_ops);
+  projs = ATreverse(projs);
+  rec_ops = ATreverse(rec_ops);
+  recs = ATreverse(recs);
+  //add declarations for the constructor, projection and recogniser operations
+  p_data_decls->cons_ops = ATconcat(cons_ops, p_data_decls->cons_ops);
+  p_data_decls->ops = ATconcat(ATconcat(proj_ops, rec_ops), p_data_decls->ops);
+  //Declare data equations for structured sort
+  // XXX more intelligent variable names would be nice
+  ATermList vars = ATmakeList3(
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool()),
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("x"), sort_id),
+    (ATerm) gsMakeDataVarId(gsString2ATermAppl("y"), sort_id)
+  );
+  ATermList id_ctx = ATconcat(p_data_decls->sorts,
+                      ATconcat(p_data_decls->ops,p_data_decls->cons_ops));
+  //Create equations for projection functions
+  ATermList proj_eqns = ATmakeList0();
+  for (; !ATisEmpty(projs); projs=ATgetNext(projs))
+  {
+    ATermList l = ATLgetFirst(projs);
+    ATermAppl proj_op = ATAgetFirst(l);
+    l = ATgetNext(l);
+    int proj_op_index = ATgetInt((ATermInt) ATgetFirst(l));
+    l = ATgetNext(l);
+    ATermAppl cons_op = ATAgetFirst(l);
+    //Create (fresh) variable arguments for constructor cons_op
+    ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
+    //Create equation for projection function proj_op
+    proj_eqns = ATinsert(proj_eqns,
+      (ATerm) gsMakeDataEqn(args, gsMakeNil(),
+        gsMakeDataAppl1(proj_op, gsMakeDataApplList(cons_op, args)),
+        ATAelementAt(args, proj_op_index)));
+  }
+  //Create equations for recognition functions
+  ATermList rec_eqns = ATmakeList0();
+  for (; !ATisEmpty(recs); recs=ATgetNext(recs))
+  {
+    ATermList l = ATLgetFirst(recs);
+    ATermAppl rec_op = ATAgetFirst(l);
+    l = ATgetNext(l);
+    ATermAppl rec_cons_op = ATAgetFirst(l);
+    //Create equation for every constructor
+    for (ATermList m = cons_ops; !ATisEmpty(m); m=ATgetNext(m))
+    {
+      ATermAppl cons_op = ATAgetFirst(m);
+      //Create (fresh) variable arguments for constructor cons_op
+      ATermList args = create_op_id_args(cons_op, &vars, (ATerm) id_ctx);
+      //Create equation for recognition function rec_op and constructor cons_op
+      rec_eqns = ATinsert(rec_eqns,
+         (ATerm) gsMakeDataEqn(args, gsMakeNil(),
+           gsMakeDataAppl1(rec_op, gsMakeDataApplList(cons_op, args)),
+           (ATisEqual(cons_op, rec_cons_op)) ? gsMakeDataExprTrue() : gsMakeDataExprFalse()));
+    }
+  }
+  //Create equations for ==, <, and <= for every pair of constructors
+  ATermList eq_eqns = ATmakeList0();
+  ATermList lt_eqns = ATmakeList0();
+  ATermList lte_eqns = ATmakeList0();
+  int i = 0; //represents the index of the constructor on the left-hand side
+  for (ATermList l=cons_ops; !ATisEmpty(l); l=ATgetNext(l), i++)
+  {
+    int j = 0; //represents the index of the constructor on the right-hand side
+    for (ATermList m=cons_ops; !ATisEmpty(m); m=ATgetNext(m), j++)
+    {
+      ATermAppl cons_op_lhs = ATAgetFirst(l);
+      ATermAppl cons_op_rhs = ATAgetFirst(m);
+      // Create (fresh) variable arguments for constructor cons_op_lhs
+      ATermList args_lhs = create_op_id_args(cons_op_lhs, &vars, (ATerm) id_ctx);
+      // Create (fresh) variable arguments for constructor cons_op_rhs,
+      // where we make sure that we don't use the vars that occur in args_lhs 
+      ATermList tmpvars = subtract_list(vars, args_lhs);
+      ATermList args_rhs = create_op_id_args(cons_op_rhs, &tmpvars, (ATerm) ATconcat(args_lhs, id_ctx));
+      // Update vars
+      vars = merge_list(vars, args_rhs);
+      // Create right-hand sides for ==, <, <=
+      ATermAppl eq_rhs;
+      ATermAppl lt_rhs;
+      ATermAppl lte_rhs;
+      if (i!=j) {
+        // Constructors are different:
+        // - rhs for c_i == d_i: false
+        // - rhs for c_i <  d_i: i < j
+        // - rhs for c_i <= d_i: i < j
+        eq_rhs  = gsMakeDataExprFalse();
+        lt_rhs  = (i < j) ? gsMakeDataExprTrue() : gsMakeDataExprFalse();
+        lte_rhs = lt_rhs;
+      } else { // i==j
+        // Constructors are the same
+        if (ATisEmpty(args_lhs)) {
+          // Constructors do not have any arguments:
+          // - rhs for c == c: true
+          // - rhs for c <  c: false
+          // - rhs for c <= c: true
+          eq_rhs  = gsMakeDataExprTrue();
+          lt_rhs  = gsMakeDataExprFalse();
+          lte_rhs = gsMakeDataExprTrue();
+        } else {
+          // Constructors have one or more arguments:
+          // - rhs for c(x0,...,xn) == c(y0,..,yn):
+          //     x0 == y0 && ... && xn == yn
+          // - rhs for c(x0,...,xn) < c(y0,..,yn):
+          //     x0 < y0                                                     , when n = 0
+          //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
+          //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == x1 && x2 < y2))) , when n = 2
+          //     etcetera
+          // - rhs for c(x0,...,xn) <= c(y0,..,yn):
+          //     x0 <= y0                                                    , when n = 0
+          //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
+          //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == x1 && x2 <= y2))), when n = 2
+          //     etcetera
+          ATermList n = ATreverse(args_lhs);
+          ATermList o = ATreverse(args_rhs);
+          ATermAppl n0 = ATAgetFirst(n);
+          ATermAppl o0 = ATAgetFirst(o);
+          eq_rhs  = gsMakeDataExprEq(n0, o0);
+          lt_rhs  = gsMakeDataExprLT(n0, o0);
+          lte_rhs = gsMakeDataExprLTE(n0, o0);
+          n = ATgetNext(n);
+          o = ATgetNext(o);
+          for ( ; !ATisEmpty(n) ; n = ATgetNext(n), o = ATgetNext(o)) {
+            n0 = ATAgetFirst(n);
+            o0 = ATAgetFirst(o);
+            eq_rhs  = gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), eq_rhs);
+            lt_rhs  = gsMakeDataExprOr(gsMakeDataExprLT(n0, o0), gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), lt_rhs));
+            lte_rhs = gsMakeDataExprOr(gsMakeDataExprLT(n0, o0), gsMakeDataExprAnd(gsMakeDataExprEq(n0, o0), lte_rhs));
+          }
+        }
+      }
+      //Create equations for ==, < and <= for constructors i and j
+      ATermList args = ATconcat(args_lhs, args_rhs);
+      ATermAppl cons_expr_lhs = gsMakeDataApplList(cons_op_lhs, args_lhs);
+      ATermAppl cons_expr_rhs = gsMakeDataApplList(cons_op_rhs, args_rhs);
+      eq_eqns = ATinsert(eq_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprEq(cons_expr_lhs, cons_expr_rhs), eq_rhs));
+      lt_eqns = ATinsert(lt_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprLT(cons_expr_lhs, cons_expr_rhs), lt_rhs));
+      lte_eqns = ATinsert(lte_eqns, (ATerm) gsMakeDataEqn(args, gsMakeNil(), gsMakeDataExprLTE(cons_expr_lhs, cons_expr_rhs), lte_rhs));
+    }
+  }
+  //Add equations to data_eqns
+  p_data_decls->data_eqns =
+    ATconcat(ATreverse(eq_eqns),
+    ATconcat(ATreverse(lt_eqns),
+    ATconcat(ATreverse(lte_eqns),
+    ATconcat(ATreverse(proj_eqns),
+    ATconcat(ATreverse(rec_eqns),
+      p_data_decls->data_eqns
+    )))));
+
+  return sort_id;
+}
+
 void implement_bool_test()
 {
   t_data_decls data_decls_old;
@@ -1689,7 +1909,11 @@ void implement_pos_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_nat_test()
@@ -1704,7 +1928,11 @@ void implement_nat_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_int_test()
@@ -1719,7 +1947,11 @@ void implement_int_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_real_test()
@@ -1734,7 +1966,11 @@ void implement_real_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_list_test()
@@ -1754,7 +1990,11 @@ void implement_list_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_set_test()
@@ -1775,6 +2015,11 @@ void implement_set_test()
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_bag_test()
@@ -1795,6 +2040,11 @@ void implement_bag_test()
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_standard_functions_test()
@@ -1807,42 +2057,87 @@ void implement_standard_functions_test()
   old_impl_standard_functions_sort(s, &data_decls_old);
   impl_standard_functions_sort(s, &data_decls_new);
 
-  std::cerr << "old constructors:" << std::endl;
+  std::clog << "old constructors:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_old.cons_ops).begin(); i != aterm_list(data_decls_old.cons_ops).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
-  std::cerr << "new constructors:" << std::endl;
+  std::clog << "new constructors:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_new.cons_ops).begin(); i != aterm_list(data_decls_new.cons_ops).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
-  std::cerr << "old functions:" << std::endl;
+  std::clog << "old functions:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_old.ops).begin(); i != aterm_list(data_decls_old.ops).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
-  std::cerr << "new functions:" << std::endl;
+  std::clog << "new functions:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_new.ops).begin(); i != aterm_list(data_decls_new.ops).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
-  std::cerr << "old equations:" << std::endl;
+  std::clog << "old equations:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
-  std::cerr << "new equations:" << std::endl;
+  std::clog << "new equations:" << std::endl;
   for(aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
   {
-    std::cerr << *i << std::endl;
+    std::clog << *i << std::endl;
   }
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+}
 
+void implement_structured_sort_test()
+{
+  t_data_decls data_decls_old;
+  t_data_decls data_decls_new;
+  initialize_data_decls(&data_decls_old);
+  initialize_data_decls(&data_decls_new);
+  // TODO: Clean up
+  ATermList old_substs = ATmakeList0();
+  ATermList new_substs = ATmakeList0();
+  atermpp::vector< data::structured_sort_constructor_argument > arguments;
+  arguments.push_back(data::structured_sort_constructor_argument("a0", basic_sort("A")));
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("B")));
+  arguments.push_back(data::structured_sort_constructor_argument("n0", sort_nat::nat()));
+
+  atermpp::vector< data::structured_sort_constructor > constructors;
+  // without arguments or recogniser
+  constructors.push_back(data::structured_sort_constructor("c0"));
+  // without arguments, with recogniser
+  constructors.push_back(data::structured_sort_constructor("c1", std::string("is_one")));
+  // with arguments, without recogniser
+  constructors.push_back(data::structured_sort_constructor("a",
+     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  // two arguments, with recogniser
+  constructors.push_back(data::structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+  constructors.push_back(data::structured_sort_constructor("c",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.end()), "is_c"));
+
+  data::structured_sort ls(boost::make_iterator_range(constructors));
+  old_impl_sort_struct(ls, &old_substs, &data_decls_old);
+  impl_exprs_appl(ls, &new_substs, &data_decls_new);
+
+  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.sorts) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.sorts) << std::endl;
+  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.cons_ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.cons_ops) << std::endl;
+  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
+  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
 }
 
 void implement_data_specification_test()
@@ -1872,6 +2167,7 @@ int test_main(int argc, char** argv)
   implement_list_test();
   implement_set_test();
   implement_bag_test();
+  implement_structured_sort_test();
   implement_standard_functions_test();
   implement_data_specification_test();
 

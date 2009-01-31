@@ -8,10 +8,10 @@
 //
 /// \file dataimpl.cpp
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <limits.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <climits>
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -21,13 +21,13 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core::detail;
 using namespace atermpp;
 
@@ -108,7 +108,7 @@ static ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr);
 //     result sort sort_expr
 
 static ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+  t_data_decls *p_data_decls, bool recursive = true);
 //Pre: sort_struct is a structured sort
 //     p_substs is a pointer to a list of substitutions induced by the context
 //     of sort_struct
@@ -667,7 +667,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   //implement expressions in the arguments of part
   if (recursive) {
     AFun head = ATgetAFun(part);
-    int nr_args = ATgetArity(head);      
+    int nr_args = ATgetArity(head);
     if (nr_args > 0) {
       DECL_A(args,ATerm,nr_args);
       for (int i = 0; i < nr_args; i++) {
@@ -757,21 +757,23 @@ ATermAppl impl_bag_enum(ATermList elts, ATermAppl sort_expr)
   return result;
 }
 
-ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
+ATermList create_op_id_args(ATermAppl op_id,
   ATermList *p_vars, ATerm context)
 {
   ATermAppl sort = gsGetSort(op_id);
   assert(gsIsSortId(sort) || gsIsSortArrow(sort));
-  *p_args = ATmakeList0();
+
+  // sort identifier case
   if (gsIsSortId(sort)) {
-    return op_id;
+    return ATmakeList0();
   }
-  
+
+  // sort arrow case
   assert(gsIsSortArrow(sort));
-  
-  ATermAppl t = op_id;
+
+  ATermList args = ATmakeList0(); // Args contains the result in reverse order
   ATermList tmpvars = *p_vars; // We only use variables once in a term
- 
+
   ATermList sort_dom = ATLgetArgument(sort, 0);
   while ( !ATisEmpty(sort_dom) )
   {
@@ -791,199 +793,73 @@ ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
     if ( v == NULL )
     {
       v = gsMakeDataVarId(gsFreshString2ATermAppl("v",
-            (ATerm) ATmakeList2((ATerm) (*p_vars),context),false), sort_dom_elt);                      
+            (ATerm) ATmakeList2((ATerm) (*p_vars),context),false), sort_dom_elt);
       // Add it to *p_vars
       *p_vars = ATinsert(*p_vars,(ATerm) v);
     }
     assert(v != NULL);
- 
-    // Add v to *p_args
-    *p_args = ATinsert(*p_args,(ATerm) v);
+
+    // Add v to *args
+    args = ATinsert(args,(ATerm) v);
 
     // Next
     sort_dom = ATgetNext(sort_dom);
   }
-  
-  // Apply t to p_args
-  *p_args = ATreverse(*p_args);
-  t = gsMakeDataAppl(t, *p_args);
+
+  // reverse *p_args
   *p_vars = ATreverse(*p_vars);
-  return t;
-}     
+
+  // return arguments in reverse order
+  return ATreverse(args);
+}
 
 ATermAppl impl_sort_struct(ATermAppl sort_struct, ATermList *p_substs,
-  t_data_decls *p_data_decls)
+                                t_data_decls *p_data_decls, bool recursive)
 {
   assert(gsIsSortStruct(sort_struct));
-  //declare fresh sort identifier for sort_struct
+
+  // declare fresh sort identifier for sort_struct 
   ATermAppl sort_id = make_fresh_struct_sort_id((ATerm) p_data_decls->sorts);
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
-  //add substitution for this identifier
+
+  structured_sort element_sort(static_cast< sort_expression >(sort_struct));
+
+  // add substitution for sort_set
   ATermAppl subst = gsMakeSubst_Appl(sort_struct, sort_id);
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
-  //store constructor, projection and recogniser operations for this identifier
-  ATermList cons_ops = ATmakeList0();
-  ATermList proj_ops = ATmakeList0();
-  ATermList projs = ATmakeList0();
-  ATermList rec_ops = ATmakeList0();
-  ATermList recs = ATmakeList0();
-  ATermList struct_conss = ATLgetArgument(sort_struct, 0);
-  while (!ATisEmpty(struct_conss))
-  {
-    ATermAppl struct_cons = ATAgetFirst(struct_conss);
-    ATermAppl cons_name = ATAgetArgument(struct_cons, 0);
-    ATermList struct_projs = ATLgetArgument(struct_cons, 1);
-    ATermAppl rec_name = ATAgetArgument(struct_cons, 2);
-    ATermList struct_cons_sorts = ATmakeList0();
-    //store projection operations in proj_ops and store the implementations of
-    //the sorts in struct_cons_sorts
-    int i = 0;
-    while (!ATisEmpty(struct_projs))
-    {
-      ATermAppl struct_proj = ATAgetFirst(struct_projs);
-      ATermAppl proj_name = ATAgetArgument(struct_proj, 0);
-      ATermAppl proj_sort = impl_exprs_appl(ATAgetArgument(struct_proj, 1),
-        p_substs, p_data_decls);
-      struct_cons_sorts = ATinsert(struct_cons_sorts, (ATerm) proj_sort);
-      //store projection operation in proj_ops and projs
-      if (!gsIsNil(proj_name)) {
-        ATermAppl proj_op = gsMakeOpId(proj_name, gsMakeSortArrow1(sort_id, proj_sort));
-        proj_ops = ATinsert(proj_ops, (ATerm) proj_op);
-        projs = ATinsert(projs, (ATerm) ATmakeList2((ATerm) proj_op, (ATerm) ATmakeInt(i)));
-      }
-      struct_projs = ATgetNext(struct_projs);
-      i++;
-    }
-    struct_cons_sorts = ATreverse(struct_cons_sorts);
-    //store constructor operation in cons_ops
-    ATermAppl cons_op;
-    if (ATisEmpty(struct_cons_sorts))
-    {
-      cons_op = gsMakeOpId(cons_name, sort_id);
-    } else {
-      cons_op = gsMakeOpId(cons_name, gsMakeSortArrow(struct_cons_sorts, sort_id));
-    }
-    cons_ops = ATinsert(cons_ops, (ATerm) cons_op);
-    //store recogniser in rec_ops and recs
-    if (!gsIsNil(rec_name)) {
-      ATermAppl rec_op = gsMakeOpId(rec_name, gsMakeSortArrow1(sort_id, gsMakeSortExprBool()));
-      rec_ops = ATinsert(rec_ops, (ATerm) rec_op);
-      recs = ATinsert(recs, (ATerm) ATmakeList2((ATerm) rec_op, (ATerm) cons_op));
-    }
-    //add constructor to projs
-    ATermList tmpl = ATmakeList0();
-    for (; !ATisEmpty(projs); projs=ATgetNext(projs))
-    {
-      tmpl = ATinsert(tmpl, (ATerm) ATappend(ATLgetFirst(projs), (ATerm) cons_op));
-    }
-    projs = ATreverse(tmpl);
-    struct_conss = ATgetNext(struct_conss);
+
+  function_symbol_list constructors = element_sort.constructor_functions(element_sort);
+  function_symbol_list functions;
+  function_symbol_list projection_functions = element_sort.projection_functions(element_sort);
+  function_symbol_list recogniser_functions = element_sort.recogniser_functions(element_sort);
+
+  // implement argument sorts 
+  for (function_symbol_list::const_iterator i = projection_functions.begin();
+                                        recursive && i != projection_functions.end(); ++i) {
+    impl_exprs_appl(function_sort(i->sort()).codomain(), p_substs, p_data_decls);
   }
-  //add declarations for the constructor, projection and recogniser operations
-  p_data_decls->cons_ops = ATconcat(ATreverse(cons_ops), p_data_decls->cons_ops);
-  p_data_decls->ops = ATconcat(ATconcat(ATreverse(proj_ops), ATreverse(rec_ops)),
-    p_data_decls->ops);
-  //Declare data equations for structured sort
-  ATermList op_eqns = ATmakeList0();
-  ATermAppl nil = gsMakeNil();
-  //ATermAppl t = gsMakeDataExprTrue();
-  //ATermAppl f = gsMakeDataExprFalse();
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
-  // XXX more intelligent variable names would be nice
-  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort_id);
-  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort_id);
-  ATermList vars = ATmakeList3((ATerm) b, (ATerm) x, (ATerm) y);
-  ATermList rhsv = ATmakeList0();
-  ATermList lhsv = ATmakeList0();
-  ATermList id_ctx = ATconcat(p_data_decls->sorts,
-                      ATconcat(p_data_decls->ops,p_data_decls->cons_ops));
-  //store equations for projections in op_eqns
-  for (; !ATisEmpty(projs); projs=ATgetNext(projs))
-  {
-    ATermList l = ATLgetFirst(projs);
-    ATermAppl proj_op = ATAgetFirst(l);
-    l = ATgetNext(l);
-    int proj_op_index = ATgetInt((ATermInt) ATgetFirst(l));
-    l = ATgetNext(l);
-    ATermAppl cons_op = ATAgetFirst(l);
-    //Apply constructor cons_op to (fresh) variables and store its arguments in lhsv
-    ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
-    //Add equation for projection function proj_op
-    op_eqns = ATinsert(op_eqns,
-      (ATerm) gsMakeDataEqn(lhsv, nil,
-        gsMakeDataAppl1(proj_op, cons_expr),
-        ATAelementAt(lhsv, proj_op_index)));
-  }
-  //store equations for recognition in op_eqns
-  for (; !ATisEmpty(recs); recs=ATgetNext(recs))
-  {
-    ATermList l = ATLgetFirst(recs);
-    ATermAppl rec_op = ATAgetFirst(l);
-    l = ATgetNext(l);
-    ATermAppl rec_cons_op = ATAgetFirst(l);
-    // Add equation for every constructor
-    for (ATermList m = cons_ops; !ATisEmpty(m); m=ATgetNext(m))
-    {
-      ATermAppl cons_op = ATAgetFirst(m);
-      // Apply constructor cons_op to (fresh) variables and store its
-      // arguments in lhsv
-      ATermAppl cons_expr = apply_op_id_to_vars(cons_op, &lhsv, &vars, (ATerm) id_ctx);
-      // Add right equation to op_eqns
-      op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(lhsv, nil,
-         gsMakeDataAppl1(rec_op, cons_expr),
-         ATisEqual(ATAgetFirst(m), rec_cons_op)?gsMakeDataExprTrue():gsMakeDataExprFalse()));
-    }
-  }
-  //store equations for equalities in op_eqns
-  //one equation for every pair of constructors
-  for (ATermList l=cons_ops; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    for (ATermList m=cons_ops; !ATisEmpty(m); m=ATgetNext(m))
-    {
-      ATermAppl cons_op_lhs = ATAgetFirst(l);
-      ATermAppl cons_op_rhs = ATAgetFirst(m);
-      // Save vars list
-      // Apply constructor cons_op_lhs to (fresh) variables and store its
-      // arguments in lhsv
-      ATermAppl cons_expr_lhs = apply_op_id_to_vars(cons_op_lhs, &lhsv, &vars, (ATerm) id_ctx);
-      // Apply constructor cons_op_rhs to (fresh) variables and store its
-      // arguments in rhsv (making sure we don't use the vars that occur in t)
-      ATermList tmpvars = subtract_list(vars, lhsv);
-      ATermAppl cons_expr_rhs = apply_op_id_to_vars(ATAgetFirst(m), &rhsv, &tmpvars, (ATerm) ATconcat(lhsv, id_ctx));
-      // Update vars
-      vars = merge_list(vars, rhsv);
-      // Combine variable lists of lhs and rhs
-      ATermList vs = ATconcat(lhsv, rhsv);
-      // Create right result
-      ATermAppl result_expr = NULL;
-      if ( ATisEqual(cons_op_lhs, cons_op_rhs) )
-      {
-        // Constructors are the same, so match all variables
-        if (ATisEmpty(lhsv)) {
-          result_expr = gsMakeDataExprTrue();
-        } else {
-          for (; !ATisEmpty(lhsv); lhsv = ATgetNext(lhsv), rhsv = ATgetNext(rhsv))
-          {
-            if ( result_expr == NULL )
-            {
-              result_expr = gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv));
-            } else {
-              result_expr = gsMakeDataExprAnd(result_expr,
-                gsMakeDataExprEq(ATAgetFirst(lhsv), ATAgetFirst(rhsv)));
-            }
-          }
-        }
-      } else {
-        // Different constructor, so not equal
-        result_expr = gsMakeDataExprFalse();
-      }
-      // Add equation to op_eqns
-      op_eqns = ATinsert(op_eqns, (ATerm) gsMakeDataEqn(vs, nil,
-        gsMakeDataExprEq(cons_expr_lhs, cons_expr_rhs), result_expr));
-    }
-  }
-  //Add op_eqns to data_eqns
-  p_data_decls->data_eqns = ATconcat(op_eqns, p_data_decls->data_eqns);
+
+  std::copy(projection_functions.begin(), projection_functions.end(),
+                                std::back_insert_iterator< function_symbol_list >(functions));
+  std::copy(recogniser_functions.begin(), recogniser_functions.end(),
+                                std::back_insert_iterator< function_symbol_list >(functions));
+
+  variable_list        context;
+  data_equation_list   equations; // = element_sort.constructor_equations(element_sort, context);
+  data_equation_list   projection_equations = element_sort.projection_equations(element_sort);
+  data_equation_list   recogniser_equations = element_sort.recogniser_equations(element_sort);
+
+  std::copy(projection_equations.begin(), projection_equations.end(),
+                                std::back_insert_iterator< data_equation_list >(equations));
+  std::copy(recogniser_equations.begin(), recogniser_equations.end(),
+                                std::back_insert_iterator< data_equation_list >(equations));
+
+  ATermList new_data_eqns = atermpp::term_list<data_equation>(equations.begin(), equations.end());
+  new_data_eqns = impl_exprs_list(new_data_eqns, p_substs, p_data_decls);
+
+  p_data_decls->cons_ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true), p_data_decls->cons_ops);
+  p_data_decls->ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true), p_data_decls->ops);
+  p_data_decls->data_eqns = ATconcat(gsSubstValues_List(*p_substs, new_data_eqns, true), p_data_decls->data_eqns);
 
   return sort_id;
 }
@@ -1200,7 +1076,7 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
   //Declare operations for sort
   function_symbol_list ops = standard_generate_functions_code(sort_expression(sort));
   data_equation_list eqns = standard_generate_equations_code(sort_expression(sort));
- 
+
   p_data_decls->ops = ATconcat(aterm_list(ops.begin(), ops.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(aterm_list(eqns.begin(), eqns.end()), p_data_decls->data_eqns);
 }
@@ -1220,7 +1096,7 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
     }
     sort_decls = ATgetNext(sort_decls);
   }
-  *p_sort_ids = ATreverse(sort_ids);  
+  *p_sort_ids = ATreverse(sort_ids);
   *p_sort_refs = ATreverse(sort_refs);
 }
 
