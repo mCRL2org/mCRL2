@@ -320,6 +320,18 @@ namespace lps {
       {
         assert(core::detail::check_term_ProcessAssignment(m_term));
       }
+
+      process_identifier identifier() const
+      {
+        using namespace atermpp;
+        return arg1(*this);
+      }
+
+      data::data_assignment_list assignments() const
+      {
+        using namespace atermpp;
+        return list_arg2(*this);
+      }
   };
 
   /// \brief Delta
@@ -544,6 +556,18 @@ namespace lps {
       {
         assert(core::detail::check_term_AtTime(m_term));
       }
+
+      process_expression expression() const
+      {
+        using namespace atermpp;
+        return arg1(*this);
+      }
+
+      data::data_expression time() const
+      {
+        using namespace atermpp;
+        return arg2(*this);
+      }
   };
 
   // Seq(<ProcExpr>, <ProcExpr>)
@@ -609,6 +633,12 @@ namespace lps {
         : process_expression(term)
       {
         assert(core::detail::check_term_IfThenElse(m_term));
+      }
+
+      data::data_expression condition() const
+      {
+        using namespace atermpp;
+        return arg1(*this);
       }
 
       process_expression left() const
