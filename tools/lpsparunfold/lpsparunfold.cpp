@@ -13,7 +13,7 @@
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 #endif
 
 //C++
@@ -116,7 +116,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
  
   specification lps_specification;
 
-  lps_specification.load(c.get_input(lps_file_for_input).get_location());
+  lps_specification.load(c.get_input(lps_file_for_input).location());
 
   linear_process lps = lps_specification.process();
 
@@ -125,7 +125,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   layout::horizontal_box& m = d.create< horizontal_box >().set_default_margins(margins(0, 5, 0, 5));
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   return true;
 }
