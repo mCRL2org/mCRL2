@@ -724,7 +724,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   //implement expressions in the arguments of part
   if (recursive) {
     AFun head = ATgetAFun(part);
-    int nr_args = ATgetArity(head);      
+    int nr_args = ATgetArity(head);
     if (nr_args > 0) {
       DECL_A(args,ATerm,nr_args);
       for (int i = 0; i < nr_args; i++) {
@@ -788,13 +788,13 @@ ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context)
   if (gsIsSortId(sort)) {
     return ATmakeList0();
   }
-  
+
   //sort arrow case...
   assert(gsIsSortArrow(sort));
-  
+
   ATermList args = ATmakeList0(); //args contains the result in reverse order
   ATermList tmpvars = *p_vars; // We only use variables once in a term
- 
+
   ATermList sort_dom = ATLgetArgument(sort, 0);
   while ( !ATisEmpty(sort_dom) )
   {
@@ -814,25 +814,25 @@ ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context)
     if ( v == NULL )
     {
       v = gsMakeDataVarId(gsFreshString2ATermAppl("v",
-            (ATerm) ATmakeList2((ATerm) (*p_vars),context),false), sort_dom_elt);                      
+            (ATerm) ATmakeList2((ATerm) (*p_vars),context),false), sort_dom_elt);
       // Add it to *p_vars
       *p_vars = ATinsert(*p_vars,(ATerm) v);
     }
     assert(v != NULL);
- 
+
     // Add v to args
     args = ATinsert(args, (ATerm) v);
 
     // Next
     sort_dom = ATgetNext(sort_dom);
   }
-  
+
   // reverse *p_vars
   *p_vars = ATreverse(*p_vars);
 
   // return args in reversed order
   return ATreverse(args);
-}     
+}
 
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   ATermList *p_substs, t_data_decls *p_data_decls, bool recursive)
@@ -3442,7 +3442,7 @@ ATermAppl make_fresh_struct_sort_id(ATerm term)
 {
   return gsMakeSortId(gsFreshString2ATermAppl(gsSortStructPrefix(), term, false));
 }
- 
+
 ATermAppl make_fresh_list_sort_id(ATerm term)
 {
   return gsMakeSortId(gsFreshString2ATermAppl(gsSortListPrefix(), term, false));
@@ -3522,7 +3522,7 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
     }
     sort_decls = ATgetNext(sort_decls);
   }
-  *p_sort_ids = ATreverse(sort_ids);  
+  *p_sort_ids = ATreverse(sort_ids);
   *p_sort_refs = ATreverse(sort_refs);
 }
 
