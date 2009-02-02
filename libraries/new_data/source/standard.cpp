@@ -258,6 +258,10 @@ namespace mcrl2 {
       result.push_back(equal_to(s));
       result.push_back(not_equal_to(s));
       result.push_back(if_(s));
+      result.push_back(less(s));
+      result.push_back(less_equal(s));
+      result.push_back(greater(s));
+      result.push_back(greater_equal(s));
 
       return result;
     }

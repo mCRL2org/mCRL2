@@ -18,12 +18,15 @@
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2 {
 
 namespace core {
 
 /// \brief Returns the set of all identifier strings occurring in the term t
+/// \param t A term
+/// \return The set of all identifier strings occurring in the term t
 template <typename Term>
 std::set<core::identifier_string> find_identifiers(Term t)
 {
