@@ -12,7 +12,6 @@
 #ifndef MCRL2_LPS_LIN_TYPES_H
 #define MCRL2_LPS_LIN_TYPES_H
 
-#include <stdbool.h>
 #include <string>
 #include "mcrl2/data/rewrite.h"
 

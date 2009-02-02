@@ -37,22 +37,23 @@ struct ns_info {
 class NextStateGeneratorStandard : public NextStateGenerator
 {
 	public:
-		NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier);
+		NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false);
 		~NextStateGeneratorStandard();
 
 		bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
 		bool errorOccurred();
-		
-		void reset(ATerm State);
 
-		ATerm get_state();
+		void reset(ATerm State, size_t SummandIndex = 0);
+
+		ATerm get_state() const;
 
 	private:
 		ns_info info;
 		unsigned int id;
 
 		bool error;
+                bool single_summand;
 
 		int sum_idx;
 
@@ -83,7 +84,11 @@ class NextStateStandard : public NextState
 
 		ATerm getInitialState();
 		NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
+		NextStateGenerator *getNextStates(ATerm state, int group, NextStateGenerator *old = NULL);
 
+                void gatherGroupInformation();
+
+		int getGroupCount() const;
 		int getStateLength();
 		ATermAppl getStateArgument(ATerm state, int index);
 		ATermAppl makeStateVector(ATerm state);
@@ -96,7 +101,7 @@ class NextStateStandard : public NextState
 		ns_info info;
 		unsigned int next_id;
 		unsigned int current_id;
-		
+
 		bool stateAFun_made;
 
 		bool clean_up_enum_obj;

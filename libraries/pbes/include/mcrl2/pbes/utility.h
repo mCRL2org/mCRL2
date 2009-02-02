@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink and Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -326,11 +326,11 @@ inline pbes_expression give_the_instantiated_rhs(
     assert(elist!=current_variable_instantiation.parameters().end());
 
     if (use_internal_rewriter_format)
-    { rewriter->setSubstitution(*vlist,(atermpp::aterm)*elist);
+    { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
     }
     else
     { 
-      rewriter->setSubstitution(*vlist,rewriter->toRewriteFormat(*elist));
+      rewriter->setSubstitution(*vlist,*elist);
     }
     elist++;
   }
@@ -418,13 +418,13 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 /// I.e. if S is a constructorsort (which means that there exists at least one constructor 
 /// with S as target sort), then an expression of the form forall x:S.p(x) is replaced
 /// by forall x1..xn.p(f1(x1..xn) &&  forall x1..xm.p(f2(x1..xm)) && .... for all
-/// constructors fi with S as targetsort (this is done similarly for the exists). 
+/// \brief Constructors fi with S as targetsort (this is done similarly for the exists). 
 /// if the constructors are constants (i.e. n=0, m=0, etc.), no new quantifications
 /// will be generated. And if the expressions are not constant, expressions such as
 /// p(f1(x1..xn)) are simplified, which can lead to the situation that certain 
 /// variables x1..xn do not occur anymore. In that case the quantors can be removed
 /// also. The function pbes_expression_substitute_and_rewrite will continue substituting
-/// constructors for quantified variables until there are no variables left, or
+/// \brief Constructors for quantified variables until there are no variables left, or
 /// until there are only quantifications over non constructor sorts. In the last case,
 /// the function will halt with an exit(1). For every 100 new variables being used
 /// in new quantifications, a message is printed.
@@ -553,7 +553,19 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=domain_sorts(f->sort());
+                  data::sort_expression_list dsorts;
+                  if (f->sort().is_arrow())
+                  { 
+                    data::sort_arrow sa=f->sort();
+                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                                                           // then the function below does not work correctly.
+                                                           // This code must be replaced by enumerator code,
+                                                           // developed by Wieger.
+                    dsorts=sa.argument_sorts();
+                  }
+                  // else dsorts is empty.
+                    
+                  // XXXXXXXXXXXXXX argument_sorts(), result_sort()  =source(f->sort());
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; s++ )
@@ -571,7 +583,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  rewriter->setSubstitution(*i,d);
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_false(r)) /* the resulting expression is false, so we can terminate */
@@ -652,7 +664,18 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
                 { 
-                  data::sort_expression_list dsorts=domain_sorts(f->sort());
+                  data::sort_expression_list dsorts;
+                  if (f->sort().is_arrow())
+                  { 
+                    data::sort_arrow sa=f->sort();
+                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                                                           // then the function below does not work correctly.
+                                                           // This code must be replaced by enumerator code,
+                                                           // developed by Wieger.
+                    dsorts=sa.argument_sorts();
+                  }
+                  // else dsorts is empty.
+                    
                   // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
@@ -671,7 +694,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments=push_front(function_arguments,new_data_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,rewriter->toRewriteFormat(d));
+                  rewriter->setSubstitution(*i,d);
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
@@ -740,6 +763,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     { 
       data::data_expression d = rewriter->rewrite(p);
       // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
+      // ATfprintf(stderr,"FORMAT: %t\n",(ATermAppl)(d));
       if (data::data_expr::is_true(d))
       { result = pbes_expr::true_();
       }

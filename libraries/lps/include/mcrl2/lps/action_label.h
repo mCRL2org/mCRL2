@@ -25,23 +25,24 @@ namespace lps {
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
 /// \brief Represents a label of an action.
-///
 // <ActId>        ::= ActId(<String>, <SortExpr>*)
 class action_label: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The name of the label
     core::identifier_string m_name;
+
+    /// \brief The sorts of the label
     data::sort_expression_list m_sorts;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     action_label()
       : atermpp::aterm_appl(mcrl2::core::detail::constructActId())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     action_label(atermpp::aterm_appl t)
      : atermpp::aterm_appl(t)
     {
@@ -51,31 +52,35 @@ class action_label: public atermpp::aterm_appl
       m_sorts = *i;
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param name A
+    /// \param sorts A sequence of sort expressions
     action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}
 
-    /// Returns the name of the action label.
-    ///
+    /// \brief Returns the name of the action label.
+    /// \return The name of the action label.
     core::identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the sorts of the action label
-    ///
+    /// \brief Returns the sorts of the action label
+    /// \return The sorts of the action label
     data::sort_expression_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Applies a substitution to this action label and returns the result
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action_label substitute(Substitution f)
     {
@@ -83,15 +88,17 @@ class action_label: public atermpp::aterm_appl
     }     
 };
 
-/// \brief singly linked list of action labels
+/// \brief Read-only singly linked list of action labels
 typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label
+/// \param t A term
+/// \return True if the term t is an action label
 inline
 bool is_action_label(atermpp::aterm_appl t)
 {
   return core::detail::gsIsActId(t);
-};
+}
 
 } // namespace lps
 

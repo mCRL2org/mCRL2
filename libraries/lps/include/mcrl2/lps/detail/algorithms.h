@@ -37,6 +37,9 @@ namespace lps {
 
 namespace detail {
 
+  /// \brief Reads a specification from an input stream
+  /// \param from An input stream
+  /// \return A term in an undocumented format
   inline
   ATermAppl parse_specification(std::istream& from)
   {
@@ -46,6 +49,9 @@ namespace detail {
     return result;
   }
   
+  /// \brief Type checks a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
@@ -55,6 +61,9 @@ namespace detail {
     return result;
   }
   
+  /// \brief Applies alpha reduction to a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
@@ -64,6 +73,9 @@ namespace detail {
     return result;
   }
   
+  /// \brief Applies data implementation to a specification
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
@@ -73,6 +85,10 @@ namespace detail {
     return result;
   }
   
+  /// \brief Applies linearization to a specification
+  /// \param spec A term
+  /// \param options Options for the algorithm
+  /// \return The linearized specification
   inline
   specification linearise(ATermAppl spec, t_lin_options options)
   {
@@ -82,6 +98,9 @@ namespace detail {
     return atermpp::aterm_appl(result);
   }
 
+  /// \brief Reads a state formula from an input stream
+  /// \param from An input stream
+  /// \return A term in an undocumented format
   inline
   ATermAppl parse_state_formula(std::istream& from)
   {
@@ -91,8 +110,11 @@ namespace detail {
     return result;
   }
 
-  /// \pre spec is a {lps specification, pbes specification, data specification}
-  /// before data implementation
+  /// \brief Type checks state formula
+  /// \pre spec is a {lps specification, pbes specification, data specification} before data implementation
+  /// \param formula A term
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
@@ -102,8 +124,12 @@ namespace detail {
     return result;
   }
  
+  /// \brief Applies data implementation to a state formula
   /// \pre spec is a {lps specification, pbes specification, data specification}
   /// before data implementation
+  /// \param formula A term
+  /// \param spec A term
+  /// \return A term in an undocumented format
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
@@ -113,6 +139,9 @@ namespace detail {
     return result;
   }
   
+  /// \brief Converts a regular formula to a state formula
+  /// \param formula A term
+  /// \return The converted regular formula
   inline
   modal::state_formula translate_regular_formula(ATermAppl formula)
   {

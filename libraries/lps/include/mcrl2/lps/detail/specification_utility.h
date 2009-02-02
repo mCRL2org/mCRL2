@@ -21,8 +21,9 @@ namespace lps {
 
 namespace detail {
 
-  /// Create a list containing the left hand sides of the initial assignments.
-  ///
+  /// \brief Returns the left hand sides of the assignments.
+  /// \param assignments A sequence of assignments to data variables
+  /// \return The left hand sides of the assignments.
   inline
   data::data_variable_list compute_initial_variables(data::data_assignment_list assignments)
   {
@@ -35,8 +36,9 @@ namespace detail {
     return data::data_variable_list(variables.begin(), variables.end());
   }
   
-  /// Create a list containing the right hand sides of the initial assignments.
-  ///
+  /// \brief Returns the right hand sides of the assignments.
+  /// \param assignments A sequence of assignments to data variables
+  /// \return The right hand sides of the assignments.
   inline
   data::data_expression_list compute_initial_state(data::data_assignment_list assignments)
   {
@@ -49,8 +51,10 @@ namespace detail {
     return data::data_expression_list(expressions.begin(), expressions.end());
   }
 
-  /// Create assignments for the initial state.
-  ///
+  /// \brief Returns assignments for the initial state.
+  /// \param variables A sequence of data variables
+  /// \param initial_state A sequence of data expressions
+  /// \return Assignments for the initial state.
   inline
   data::data_assignment_list compute_initial_assignments(data::data_variable_list variables, data::data_expression_list initial_state)
   {

@@ -26,11 +26,14 @@ template <typename ReplaceFunction>
 struct replace_propositional_variables_helper
 {
   const ReplaceFunction& r_;
-  
+
   replace_propositional_variables_helper(const ReplaceFunction& r)
     : r_(r)
   {}
-  
+
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
     if (is_propositional_variable_instantiation(t))
@@ -45,13 +48,15 @@ struct replace_propositional_variables_helper
 };
 /// \endcond
 
-/// Recursively traverses the given term, and applies the replace function to
-/// each propositional variable instantiation that is encountered during the
-/// traversal.
+/// \brief Recursively traverses the given term, and applies the replace function to
+/// each propositional variable instantiation that is encountered during the traversal.
+/// \param t A term
+/// \param r A replace function
+/// \return The replacement result
 template <typename Term, typename ReplaceFunction>
 Term replace_propositional_variables(Term t, ReplaceFunction r)
 {
-  return atermpp::partial_replace(t, replace_propositional_variables_helper<ReplaceFunction>(r)); 
+  return atermpp::partial_replace(t, replace_propositional_variables_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
@@ -60,7 +65,7 @@ struct propositional_variable_sequence_replace_helper
 {
   const VariableContainer& variables_;
   const ExpressionContainer& replacements_;
-  
+
   propositional_variable_sequence_replace_helper(const VariableContainer& variables,
                                         const ExpressionContainer& replacements
                                        )
@@ -68,7 +73,10 @@ struct propositional_variable_sequence_replace_helper
   {
     assert(variables.size() == replacements.size());
   }
-  
+
+  /// \brief Function call operator
+  /// \param t A propositional variable instantiation
+  /// \return The function result
   pbes_expression operator()(propositional_variable_instantiation t) const
   {
     typename VariableContainer::const_iterator i = variables_.begin();
@@ -85,9 +93,13 @@ struct propositional_variable_sequence_replace_helper
 };
 /// \endcond
 
-/// Replaces all propositional_variables in the term t using the specified sequence of replacements.
-/// \param variables The sequence of variables that need to be replaced.
-/// \param replacements The corresponding replacements.
+/// \brief Replaces propositional variable instantiations in the term \p t using the specified sequence of replacements.
+/// \param t A term
+/// \param variables A sequence of propositional variable instantiations
+/// \param replacements A sequence of expressions
+/// \return The replacement result. Each propositional variable in \p t that occurs as the i-th element
+/// of \p variables is replaced by the i-th element of \p expressions. If the sequence
+/// \p variables contains duplicates, the first match is selected.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
 Term propositional_variable_sequence_replace(Term t,
                                     const VariableContainer& variables,
@@ -102,16 +114,16 @@ template <typename MapContainer>
 struct propositional_variable_map_replace_helper
 {
   const MapContainer& replacements_;
-  
-  /// Constructor.
-  ///
+
+  /// \brief Constructor.
+  /// \param replacements A mapping of replacements
   propositional_variable_map_replace_helper(const MapContainer& replacements)
     : replacements_(replacements)
   {}
-  
-  /// Returns s if a substitution of the form t := s is present in the replacement map,
-  /// otherwise t.
-  ///
+
+  /// \brief Returns s if a substitution of the form t := s is present in the replacement map, otherwise t.
+  /// \param t A propositional variable instantiation
+  /// \return S if a substitution of the form t := s is present in the replacement map, otherwise t.
   pbes_expression operator()(const propositional_variable_instantiation& t) const
   {
     typename MapContainer::const_iterator i = replacements_.find(t);
@@ -127,7 +139,11 @@ struct propositional_variable_map_replace_helper
 };
 /// \endcond
 
-/// Replaces all propositional_variable_instantiations in the term t using the specified map of replacements.
+/// \brief Replaces all propositional variable instantiations in the term \p t using the specified map of replacements.
+/// \param t A term
+/// \param replacements A map of replacements
+/// \return The replacement result. Each propositional variable \p v in t that occurs as key in the map
+/// \p replacements is replaced by \p replacements[\p v].
 template <typename Term, typename MapContainer>
 Term propositional_variable_map_replace(Term t, const MapContainer& replacements)
 {
@@ -139,13 +155,16 @@ struct substitute_propositional_variable_helper
 {
   const propositional_variable& variable_;
   const pbes_expression& replacement_;
-  
+
   substitute_propositional_variable_helper(const propositional_variable& variable,
                                            const pbes_expression& replacement
                                           )
     : variable_(variable), replacement_(replacement)
   { }
-  
+
+  /// \brief Function call operator
+  /// \param t A propositional variable instantiation
+  /// \return The function result
   pbes_expression operator()(propositional_variable_instantiation t) const
   {
     if (variable_.name() != t.name())
@@ -160,14 +179,17 @@ struct substitute_propositional_variable_helper
 };
 /// \endcond
 
-/// Applies the substitution X := phi to the pbes expression t.
+/// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
+/// \param t A pbes expression
+/// \param X A propositional variable
+/// \param phi A pbes expression
 /// \return The result of the substitution.
 inline
 pbes_expression substitute_propositional_variable(pbes_expression t,
                                                   const propositional_variable& X,
                                                   const pbes_expression& phi)
 {
-  return replace_propositional_variables(t, substitute_propositional_variable_helper(X, phi)); 
+  return replace_propositional_variables(t, substitute_propositional_variable_helper(X, phi));
 }
 
 } // namespace pbes_system

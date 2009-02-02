@@ -34,6 +34,9 @@ namespace modal {
 
 namespace detail {
 
+  /// \brief Parse a state formula
+  /// \param from An input stream
+  /// \return A state formula in an undocumented format
   inline
   ATermAppl parse_state_formula(std::istream& from)
   {
@@ -43,10 +46,12 @@ namespace detail {
     return result;
   }
   
-  /// type check a state formula against spec,
-  /// spec is a lps specification before data implementation, or
+  /// \brief Type checks a state formula against spec
+  /// \param formula A term
+  /// \param spec A term
   /// a pbes specification before data implementation, or
   /// a data specification before data implementation.
+  /// \return The type checked formula
   inline
   ATermAppl type_check_state_formula(ATermAppl formula, ATermAppl spec)
   {
@@ -56,11 +61,14 @@ namespace detail {
     return result;
   }
   
-  /// implement sorts and data expressions in formula,
-  /// using the data from spec. 
-  /// spec is a lps specification before data implementation, or
+  /// \brief Implements sorts and data expressions in formula,
+  /// using the data from spec.
+  /// \param formula A term
+  /// \param spec A term
+  /// lps specification before data implementation, or
   /// a pbes specification before data implementation, or
   /// a data specification before data implementation.
+  /// \return The transformed formula
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
@@ -70,6 +78,9 @@ namespace detail {
     return result;
   }
   
+  /// \brief Converts a regular formula to a state formula
+  /// \param formula A term
+  /// \return The converted formula
   inline
   state_formula translate_regular_formula(ATermAppl formula)
   {
@@ -79,8 +90,12 @@ namespace detail {
     return result;
   }
 
+  /// \brief Converts a modal formula to a state formula
   // spec may be updated as the data implementation of the state formula
   // may cause internal names to change.
+  /// \param formula_text A string
+  /// \param spec A linear process specification
+  /// \return The converted modal formula
   inline
   state_formula mcf2statefrm(const std::string& formula_text, lps::specification& spec)
   {

@@ -311,7 +311,7 @@ void test_equal_multi_actions()
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_lps2pbes();
   test_lps2pbes2();

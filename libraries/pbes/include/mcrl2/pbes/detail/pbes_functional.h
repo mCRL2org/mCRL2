@@ -32,6 +32,9 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
    : v_(v)
   {}
   
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   template <typename Term>
   bool operator()(Term t) const
   {
@@ -42,6 +45,9 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
 /// \brief Function object that returns the name of the binding variable of a pbes equation
 struct pbes_equation_variable_name: public std::unary_function<data::data_variable, core::identifier_string>
 {
+  /// \brief Function call operator
+  /// \param e A PBES equation
+  /// \return The function result
   core::identifier_string operator()(const pbes_equation& e) const
   {
     return e.variable().name();

@@ -1,4 +1,4 @@
-// Author(s): Alexander van Dam, Wieger Wesselink
+// Author(s): Alexander van Dam
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -31,6 +31,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \cond INTERNAL_DOCS
 struct t_instantiations {
   data::data_variable_list finite_var;     // List of all finite variables
   data::data_variable_list infinite_var;   // List of all infinite variables
@@ -52,6 +53,7 @@ struct t_instantiations {
     finite_exp.unprotect();
     infinite_exp.unprotect();
   }
+
   void mark()
   {
     finite_var.mark();
@@ -60,10 +62,10 @@ struct t_instantiations {
     infinite_exp.mark();
   }
 };
+/// \endcond
 
-//function sort_names
-//-------------------
 /// \brief Sort the equation system with respect to the order of predicate variables in the original equation system
+/// \param to_sort A sequence of PBES equations
 inline
 atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string > names_order, atermpp::vector<pbes_equation> to_sort)
 {
@@ -98,9 +100,9 @@ atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string >
   return result;
 }
 
-//function create_propvar_name
-//----------------------------
 /// \brief Create a new propositional variable name
+/// \param propvar_name A
+/// \param del A sequence of data expressions
 inline
 core::identifier_string create_propvar_name(core::identifier_string propvar_name, data::data_expression_list del)
 {
@@ -114,24 +116,17 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
-      else if (is_data_variable(*del_i))
-      { // If p is a freevar
-        core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
-        core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
-        core::gsErrorMsg("Computation aborted.\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*del_i) << std::endl;
-        throw mcrl2::runtime_error("exit!");
-      }
       else if (is_data_application(*del_i))
       { // If p is a data application
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
+      // else if (is_data_variable(*del_i))
+      // { // If p is a freevar
+      // }
       else
       {
-        core::gsErrorMsg("Can not rewrite the name of the propositional_variable\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*del_i) << std::endl;
-        throw mcrl2::runtime_error("exit!");
+        throw mcrl2::runtime_error(std::string("pbes2bes: could not rename the variable ") + core::pp(propositional_variable_instantiation(propvar_name, del)));
       }
     }
   }
@@ -139,9 +134,8 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
   return propvar_name_current;
 }
 
-//function create_naive_propositional_variable_instantiation
-//----------------------------------------------------------
 /// \brief Create a new propositional variable instantiation with instantiated values and infinite variables
+/// \param propvarinst A propositional variable instantiation
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
 {
   data::data_expression_list finite_expression;
@@ -160,7 +154,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
         core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
         core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
         core::gsErrorMsg("Computation aborted.\n");
-        std::cout << "Problematic Term: " << mcrl2::core::pp(*p) << std::endl;
+        std::cerr << "Problematic Term: " << mcrl2::core::pp(*p) << std::endl;
         throw mcrl2::runtime_error("exit!");
       }
     }
@@ -173,9 +167,9 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
   return propositional_variable_instantiation(create_propvar_name(propvarinst.name(), finite_expression), infinite_expression);
 }
 
-//function do_lazy_algorithm
-//--------------------------
 /// \brief Create a BES, using the lazy approach
+/// \param pbes_spec A PBES
+/// \param rewrite A PBES rewriter
 template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
@@ -263,7 +257,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
     // Create resulting pbes_equation and add it to equation system
     new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
-    
+
     if (++nr_of_equations % 1000 == 0)
       core::gsVerboseMsg("At equation %d\n", nr_of_equations);
   }
@@ -279,9 +273,9 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   return result;
 }
 
-//function do_finite_algorithm
-//---------------------------
-// \brief Create a PBES without finite data sorts, using the finite approach
+/// \brief Create a PBES without finite data sorts, using the finite approach
+/// \param pbes_spec A PBES
+/// \param rewrite A PBES rewriter
 template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
@@ -424,7 +418,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
 } // namespace mcrl2
 
-// Specify how the ATerms in t_instantiations need to be protected using a traits class
+/// \cond INTERNAL_DOCS
 namespace atermpp {
   using mcrl2::pbes_system::t_instantiations;
 
@@ -436,5 +430,6 @@ namespace atermpp {
     static void mark(t_instantiations t) { t.mark(); }
   };
 } // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_PBES_PBES2BES_H

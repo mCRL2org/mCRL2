@@ -1,6 +1,10 @@
 \begin{array}{lrl}
-\varphi & ::= &  c \:
-              \mid \: \varphi \wedge \varphi \:\mid \: \varphi \vee \varphi
-              \: \mid \: \forall x{:}D .\:\varphi \:|\: \exists{x{:}D}.\: \varphi
-             \:|\: X(d)
+\varphi & ::= &  c
+             \: \mid \: \neg \varphi
+             \: \mid \: \varphi \wedge \varphi
+             \: \mid \: \varphi \vee \varphi
+             \: \mid \: \varphi \Rightarrow \varphi
+             \: \mid \: \forall d{:}D .\:\varphi
+             \: \mid \: \exists d{:}D .\:\varphi
+             \: \mid \: X(e)
 \end{array}

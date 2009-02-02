@@ -9,6 +9,8 @@
 /// \file pbes_rewrite.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include "pbes_rewrite.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
@@ -21,7 +23,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 // parameterised boolean expression
@@ -213,7 +214,7 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 	return result;
 }
 
-///\ret variable v occurs in l.
+///\return variable v occurs in l.
 bool occurs_inL(atermpp::aterm_appl l, data_variable v)
 {
   return find_if(l, mcrl2::data::detail::compare_data_variable(v)) != atermpp::aterm_appl();

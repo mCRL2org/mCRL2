@@ -33,10 +33,10 @@
 
 namespace mcrl2 {
 
+/// \brief The main namespace for the LPS library.
 namespace lps {
 
 /// \brief Linear process specification.
-///
 // sort ...;
 //
 // cons ...;
@@ -53,13 +53,20 @@ namespace lps {
 class specification: public atermpp::aterm_appl
 {
   protected:
-    data::data_specification   m_data;
-    action_label_list    m_action_labels;
-    linear_process       m_process;
-    process_initializer  m_initial_process;
+    /// \brief The data specification of the specification
+    data::data_specification m_data;
 
-    /// Initialize the specification with an atermpp::aterm_appl.
-    ///
+    /// \brief The action specification of the specification
+    action_label_list m_action_labels;
+
+    /// \brief The linear process of the specification
+    linear_process m_process;
+
+    /// \brief The initial state of the specification
+    process_initializer m_initial_process;
+
+    /// \brief Initializes the specification with an ATerm.
+    /// \param t A term
     void init_term(atermpp::aterm_appl t)
     {
       m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
@@ -72,13 +79,12 @@ class specification: public atermpp::aterm_appl
 
   public:
     /// \brief Constructor.
-    ///
     specification()
       : atermpp::aterm_appl(mcrl2::core::detail::constructLinProcSpec())
     { }
 
     /// \brief Constructor.
-    ///
+    /// \param t A term
     specification(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -87,13 +93,11 @@ class specification: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    ///
-    specification(
-        data::data_specification  data         ,
-        action_label_list   action_labels,
-        linear_process      lps          ,
-        process_initializer initial_process
-       )
+    /// \param data A data specification
+    /// \param action_labels A sequence of action labels
+    /// \param lps A linear process
+    /// \param initial_process A process initializer
+    specification(data::data_specification  data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
       :
         m_data(data),
         m_action_labels(action_labels),
@@ -111,10 +115,9 @@ class specification: public atermpp::aterm_appl
     }
 
     /// \brief Reads the specification from file.
-    /// \param[in] filename
+    /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from stdin.
-    ///
+    /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
@@ -131,14 +134,13 @@ class specification: public atermpp::aterm_appl
     }
 
     /// \brief Writes the specification to file.
-    /// \param[in] filename
+    /// \param filename A string
     /// If filename is nonempty, output is written to the file named filename.
     /// If filename is empty, output is written to stdout.
-    /// \param[in] binary
+    /// \param binary
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    ///
     void save(const std::string& filename, bool binary = true)
     {
       if (!is_well_typed())
@@ -149,46 +151,42 @@ class specification: public atermpp::aterm_appl
     }
 
     /// \brief Returns the linear process of the specification.
-    ///
+    /// \return The linear process of the specification.
     linear_process process() const
     {
       return m_process;
     }
 
     /// \brief Returns the data specification.
-    ///
+    /// \return The data specification.
     data::data_specification data() const
     { return m_data; }
 
-    /// \brief Returns a sequence of action labels containing all action
-    /// labels occurring in the specification (but it can have more).
-    ///
+    /// \brief Returns a sequence of action labels.
+    /// This sequence contains all action labels occurring in the specification (but it can have more).
+    /// \return A sequence of action labels.
     action_label_list action_labels() const
     { return m_action_labels; }
 
     /// \brief Returns the initial process.
-    ///
+    /// \return The initial process.
     process_initializer initial_process() const
     {
       return m_initial_process;
     }
 
     /// \brief Indicates whether the specification is well typed.
-    ///
-    /// Returns true if
+    /// \return True if
     /// <ul>
     /// <li>the sorts occurring in the summation variables are declared in the data specification</li>
     /// <li>the sorts occurring in the process parameters are declared in the data specification </li>
     /// <li>the sorts occurring in the free variables are declared in the data specification     </li>
     /// <li>the sorts occurring in the action labels are declared in the data specification      </li>
-    ///
     /// <li>the action labels occurring in the process are contained in action_labels()          </li>
-    ///
     /// <li>the process is well typed                                                            </li>
     /// <li>the data specification is well typed                                                 </li>
     /// <li>the initial process is well typed                                                    </li>
     /// </ul>
-    ///
     bool is_well_typed() const
     {
       std::set<data::sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
@@ -258,6 +256,9 @@ class specification: public atermpp::aterm_appl
 };
 
 /// \brief Sets the data specification of spec and returns the result
+/// \param spec A linear process specification
+/// \param data A data specification
+/// \return The modified specification
 inline
 specification set_data_specification(specification spec, data::data_specification data)
 {
@@ -269,6 +270,9 @@ specification set_data_specification(specification spec, data::data_specificatio
 }
 
 /// \brief Sets the action labels of spec and returns the result
+/// \param spec A linear process specification
+/// \param action_labels A sequence of action labels
+/// \return The modified specification
 inline
 specification set_action_labels(specification spec, action_label_list action_labels)
 {
@@ -280,6 +284,9 @@ specification set_action_labels(specification spec, action_label_list action_lab
 }
 
 /// \brief Sets the linear process of spec and returns the result
+/// \param spec A linear process specification
+/// \param lps A linear process
+/// \return The modified specification
 inline
 specification set_lps(specification spec, linear_process lps)
 {
@@ -291,6 +298,9 @@ specification set_lps(specification spec, linear_process lps)
 }
 
 /// \brief Sets the initial process of spec and returns the result
+/// \param spec A linear process specification
+/// \param initial_process A process initializer
+/// \return The modified specification
 inline
 specification set_initial_process(specification spec, process_initializer initial_process)
 {
@@ -302,6 +312,8 @@ specification set_initial_process(specification spec, process_initializer initia
 }
 
 /// \brief Replaces the free variables of the process and the initial state by the union of them.
+/// \param spec A linear process specification
+/// \return The modified specification
 inline
 specification repair_free_variables(const specification& spec)
 {

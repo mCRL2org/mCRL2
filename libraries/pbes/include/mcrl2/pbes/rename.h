@@ -20,9 +20,12 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Renames quantifier variables in the expression p, such that within the scope
+/// \brief Renames quantifier variables in the expression p, such that within the scope
 /// of a quantifier variable, no other quantifier variables or free variables
 /// with the same name occur.
+/// \param p A PBES expression
+/// \param free_variables A sequence of data variables
+/// \return The rename result
 inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::data_variable_list& free_variables)
 {

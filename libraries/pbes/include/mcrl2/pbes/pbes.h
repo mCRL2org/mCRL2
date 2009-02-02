@@ -38,7 +38,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/pbes_initializer.h"
+#include "mcrl2/pbes/detail/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
@@ -46,28 +46,37 @@
 
 namespace mcrl2 {
 
+/// \brief The main namespace for the PBES library.
 namespace pbes_system {
 
 using mcrl2::core::pp;
 
 /// \cond INTERNAL_DOCS
-struct normalize_pbes_equation
-{
-  pbes_equation operator()(const pbes_equation& e) const
+
+  /// \brief Normalizes a PBES equation
+  struct normalize_pbes_equation
   {
-    return normalize(e);
-  }
-};
+    /// \brief Function call operator
+    /// \param e A PBES equation
+    /// \return The function result
+    pbes_equation operator()(const pbes_equation& e) const
+    {
+      return normalize(e);
+    }
+  };
+
 /// \endcond
 
-/// Computes the free variables that occur in the sequence [first, last[
-/// of pbes equations.
+/// \brief Computes the free variables that occur in the sequence [first, last) of pbes equations.
+/// \param first Start of a range of pbes equations
+/// \param last End of a range of pbes equations
+/// \return The free variables in the sequence [first, last) of pbes equations.
 template <typename Iterator>
 std::set<data::data_variable> compute_free_variables(Iterator first, Iterator last)
 {
   using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-  detail::free_variable_visitor visitor;
+  detail::free_variable_visitor<pbes_expression> visitor;
 
   for (Iterator i = first; i != last; ++i)
   {
@@ -78,9 +87,10 @@ std::set<data::data_variable> compute_free_variables(Iterator first, Iterator la
   return visitor.result;
 }
 
-/// Computes the quantifier variables that occur in the sequence [first, last[
-/// of pbes equations.
-///
+/// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
+/// \param first Start of a range of pbes equations
+/// \param last End of a range of pbes equations
+/// \return The quantifier variables in the sequence [first, last) of pbes equations.
 template <typename Iterator>
 std::set<data::data_variable> compute_quantifier_variables(Iterator first, Iterator last)
 {
@@ -96,34 +106,41 @@ std::set<data::data_variable> compute_quantifier_variables(Iterator first, Itera
 }
 
 /// \brief parameterized boolean equation system
-///
 // <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
-
 template <typename Container = atermpp::vector<pbes_equation> >
 class pbes
 {
   friend struct atermpp::aterm_traits<pbes<Container> >;
 
   protected:
+    /// \brief The data specification
     data::data_specification m_data;
+
+    /// \brief The sequence of pbes equations
     Container m_equations;
+
+    /// \brief The set of free (don't care) variables
     atermpp::set<data::data_variable> m_free_variables;
+
+    /// \brief The initial state
     propositional_variable_instantiation m_initial_state;
 
+    /// \brief Conversion to ATerm
+    /// \return The pbes converted to ATerm
     ATerm term() const
     {
       return reinterpret_cast<ATerm>(ATermAppl(*this));
     }
 
-    /// Initialize the pbes with an atermpp::aterm_appl.
-    ///
+    /// \brief Initialize the pbes from an ATerm
+    /// \param t A term
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data          = atermpp::aterm_appl(*i++);
       atermpp::aterm_appl eqn_spec = *i++;
-      pbes_initializer init = pbes_initializer(*i);
+      detail::pbes_initializer init = detail::pbes_initializer(*i);
 
       m_initial_state = init.variable();
       data::data_variable_list freevars = eqn_spec(0);
@@ -138,7 +155,8 @@ class pbes
       m_equations = Container(eqn.begin(), eqn.end());
     }
 
-    /// Returns the predicate variables appearing in the left hand side of an equation.
+    /// \brief Returns the predicate variables appearing in the left hand side of an equation.
+    /// \return The predicate variables appearing in the left hand side of an equation.
     atermpp::set<propositional_variable> compute_declared_variables() const
     {
       atermpp::set<propositional_variable> result;
@@ -149,7 +167,10 @@ class pbes
       return result;
     }
 
-    /// Checks if the sorts of the variables in both lists are equal.
+    /// \brief Checks if the sorts of the variables/expressions in both lists are equal.
+    /// \param v A sequence of data variables
+    /// \param w A sequence of data expressions
+    /// \return True if the sorts match pairwise
     bool equal_sorts(data::data_variable_list v, data::data_expression_list w) const
     {
       if (v.size() != w.size())
@@ -168,7 +189,12 @@ class pbes
       return true;
     }
 
-    /// Checks if the variable instantiation v appears with the right type in the sequence of variable declarations [first, last[.
+    /// \brief Checks if the propositional variable instantiation v appears with the right type in the
+    /// sequence of propositional variable declarations [first, last).
+    /// \param first Start of a sequence of propositional variable declarations
+    /// \param last End of a sequence of propositional variable declarations
+    /// \return True if the type of \p v is matched correctly
+    /// \param v A propositional variable instantiation
     template <typename Iter>
     bool is_declared_in(Iter first, Iter last, propositional_variable_instantiation v) const
     {
@@ -183,7 +209,12 @@ class pbes
     }
 
 
-    /// Checks if the variable instantiation v has a conflict with the sequence of variable declarations [first, last[.
+    /// \brief Checks if the propositional variable instantiation v has a conflict with the
+    /// sequence of propositional variable declarations [first, last).
+    /// \param first Start of a sequence of propositional variable declarations
+    /// \param last End of a sequence of propositional variable declarations
+    /// \return True if a conflict has been detected
+    /// \param v A propositional variable instantiation
     template <typename Iter>
     bool has_conflicting_type(Iter first, Iter last, propositional_variable_instantiation v) const
     {
@@ -197,7 +228,8 @@ class pbes
       return false;
     }
 
-    /// Computes the unbound variables that occur in the pbes.
+    /// \brief Computes the unbound variables that occur in the pbes.
+    /// \return The unbound variables that occur in the pbes.
     std::set<data::data_variable> compute_unbound_variables() const
     {
       std::set<data::data_variable> result = compute_free_variables(equations().begin(), equations().end());
@@ -207,20 +239,25 @@ class pbes
     }
 
   public:
-    /// Constructor.
-    ///
+    /// \brief The container type for the equations
+    typedef Container container_type;
+
+    /// \brief Constructor.
     pbes()
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     pbes(atermpp::aterm_appl t)
     {
       init_term(t);
       assert(core::detail::check_rule_PBES(term()));
     }
-    /// Constructor.
-    ///
+
+    /// \brief Constructor.
+    /// \param data A data specification
+    /// \param equations A sequence of pbes equations
+    /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification data,
          const Container& equations,
          propositional_variable_instantiation initial_state)
@@ -233,8 +270,11 @@ class pbes
       assert(core::detail::check_rule_PBES(term()));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param data A data specification
+    /// \param equations A sequence of pbes equations
+    /// \param free_variables A sequence of free variables
+    /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification data,
          const Container& equations,
          const atermpp::set<data::data_variable>& free_variables,
@@ -248,64 +288,66 @@ class pbes
       assert(core::detail::check_rule_PBES(term()));
     }
 
-    /// Returns the data specification.
-    ///
+    /// \brief Returns the data specification.
+    /// \return The data specification of the pbes
     const data::data_specification& data() const
     {
       return m_data;
     }
 
-    /// Returns the data specification.
-    ///
+    /// \brief Returns the data specification.
+    /// \return The data specification of the pbes
     data::data_specification& data()
     {
       return m_data;
     }
 
-    /// Returns the equations.
-    ///
+    /// \brief Returns the equations.
+    /// \return The equations.
     const Container& equations() const
     {
       return m_equations;
     }
 
-    /// Returns the equations.
-    ///
+    /// \brief Returns the equations.
+    /// \return The equations.
     Container& equations()
     {
       return m_equations;
     }
 
-    /// Returns the declared free variables of the pbes.
-    ///
+    /// \brief Returns the declared free variables of the pbes.
+    /// \return The declared free variables of the pbes.
     const atermpp::set<data::data_variable>& free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the declared free variables of the pbes.
-    ///
+    /// \brief Returns the declared free variables of the pbes.
+    /// \return The declared free variables of the pbes.
     atermpp::set<data::data_variable>& free_variables()
     {
       return m_free_variables;
     }
 
-    /// Returns the initial state.
-    ///
+    /// \brief Returns the initial state.
+    /// \return The initial state.
     propositional_variable_instantiation initial_state() const
     {
       return m_initial_state;
     }
 
-    /// Returns the initial state.
-    ///
+    /// \brief Returns the initial state.
+    /// \return The initial state.
     propositional_variable_instantiation& initial_state()
     {
       return m_initial_state;
     }
 
-    /// Reads the pbes from file. Returns true if the operation succeeded.
-    ///
+    /// \brief Reads the pbes from file.
+    /// \param filename A string
+    /// If filename is nonempty, input is read from the file named filename.
+    /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
     {
       atermpp::aterm t = core::detail::load_aterm(filename);
@@ -320,8 +362,8 @@ class pbes
       }
     }
 
-    /// Returns true if the PBES is a BES (boolean equation system).
-    ///
+    /// \brief Returns true if the PBES is a BES (boolean equation system).
+    /// \return True if the PBES is a BES (boolean equation system).
     bool is_bes() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -334,11 +376,11 @@ class pbes
       return true;
     }
 
-    /// Attempts to eliminate the free variables of the pbes, by substituting a default
+    /// \brief Attempts to eliminate the free variables of the pbes, by substituting a default
     /// value for them. Variables for which no default value can be found are untouched.
     /// So, upon return the sequence of free variables of the pbes contains exactly those
     /// variables for which no default value could be found.
-    /// Returns true if all free variables were eliminated.
+    /// \return true if all free variables were eliminated.
     bool instantiate_free_variables()
     {
       std::set<data::data_variable> free_variables = compute_unbound_variables();
@@ -368,11 +410,12 @@ class pbes
       return m_free_variables.empty();
     }
 
-    /// Writes the pbes to file.
+    /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    ///
+    /// \param filename A string
+    /// \param binary If true the file is saved in binary format
     void save(const std::string& filename, bool binary = true) const
     {
       if (!is_well_typed())
@@ -383,19 +426,19 @@ class pbes
       core::detail::save_aterm(t, filename, binary);
     }
 
-    /// Conversion to ATermAppl.
-    ///
+    /// \brief Conversion to ATermAppl.
+    /// \return The PBES converted to ATerm format.
     operator ATermAppl() const
     {
       // convert the equation system to ATerm format
       data::data_variable_list free_variables(m_free_variables.begin(), m_free_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
-      return core::detail::gsMakePBES(m_data, core::detail::gsMakePBEqnSpec(free_variables, equations), pbes_initializer(free_variables, m_initial_state));
+      return core::detail::gsMakePBES(m_data, core::detail::gsMakePBEqnSpec(free_variables, equations), detail::pbes_initializer(free_variables, m_initial_state));
     }
 
-    /// Returns the set of binding variables of the pbes, i.e. the
-    /// variables that occur on the left hand side of an equation.
-    ///
+    /// \brief Returns the set of binding variables of the pbes.
+    /// This is the set variables that occur on the left hand side of an equation.
+    /// \return The set of binding variables of the pbes.
     atermpp::set<propositional_variable> binding_variables() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -408,9 +451,9 @@ class pbes
       return result;
     }
 
-    /// Returns the set of occurring variable instantiations of the pbes, i.e.
-    /// the variables that occur in the right hand side of an equation.
-    ///
+    /// \brief Returns the set of occurring propositional variable instantiations of the pbes.
+    /// This is the set of variables that occur in the right hand side of an equation.
+    /// \return The occurring propositional variable instantiations of the pbes
     atermpp::set<propositional_variable_instantiation> occurring_variable_instantiations() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -425,9 +468,9 @@ class pbes
       return result;
     }
 
-    /// Returns the set of occurring variables of the pbes, i.e.
-    /// the variables that occur in the right hand side of an equation.
-    ///
+    /// \brief Returns the set of occurring propositional variable declarations of the pbes, i.e.
+    /// the propositional variable declarations that occur in the right hand side of an equation.
+    /// \return The occurring propositional variable declarations of the pbes
     atermpp::set<propositional_variable> occurring_variables() const
     {
       atermpp::set<propositional_variable> result;
@@ -444,8 +487,8 @@ class pbes
       return result;
     }
 
-    /// Returns true if all occurring variables are binding variables, and the initial state variable is a binding variable.
-    ///
+    /// \brief True if the pbes is closed
+    /// \return Returns true if all occurring variables are binding variables, and the initial state variable is a binding variable.
     bool is_closed() const
     {
       atermpp::set<propositional_variable> bnd = binding_variables();
@@ -453,24 +496,21 @@ class pbes
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
     }
 
-    /// Applies normalization to the equations of the pbes.
-    ///
+    /// \brief Applies normalization to the equations of the pbes.
     void normalize()
     {
       std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
     }
 
-    /// Returns true if the pbes is normalized.
-    ///
+    /// \brief Returns true if the pbes is normalized.
+    /// \return True if the pbes is normalized.
     bool is_normalized() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        is_normalized_visitor visitor;
-        visitor.visit(i->formula());
-        if (visitor.result == false)
+        if (!pbes_system::is_normalized(i->formula()))
         {
           return false;
         }
@@ -478,39 +518,39 @@ class pbes
       return true;
     }
 
-    /// Applies a substitution to the pbes equations.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
     template <typename Substitution>
     void substitute(Substitution f)
     {
       std::transform(equations().begin(), equations().end(), equations().begin(), f);
     }
 
-    /// Protects the term from being freed during garbage collection.
-    ///
+    /// \brief Protects the term from being freed during garbage collection.
     void protect()
     {
       m_initial_state.protect();
     }
 
-    /// Unprotect the term.
+    /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    ///
     void unprotect()
     {
       m_initial_state.unprotect();
     }
 
-    /// Mark the term for not being garbage collected.
-    ///
+    /// \brief Mark the term for not being garbage collected.
     void mark()
     {
       m_initial_state.mark();
     }
 
-    /// Returns true if
+    /// \brief Checks if the PBES is well typed
+    /// \return True if
     /// <ul>
     /// <li>the sorts occurring in the free variables of the equations are declared in the data specification</li>
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
@@ -523,7 +563,6 @@ class pbes
     /// <li>the predicate variable instantiation occurring in the initial state matches with the declaration</li>
     /// <li>the data specification is well typed</li>
     /// </ul>
-    ///
     /// N.B. Conflicts between the types of instantiations and declarations of binding variables are not checked!
     bool is_well_typed() const
     {
@@ -659,7 +698,9 @@ class pbes
     }
 };
 
-/// Computes the free variables that occur in the pbes.
+/// \brief Computes the free variables that occur in the pbes.
+/// \param p A pbes
+/// \return The free variables that occur in the pbes.
 template <typename Container>
 std::set<data::data_variable> compute_free_variables(const pbes<Container>& p)
 {

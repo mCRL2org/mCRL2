@@ -9,19 +9,18 @@
 /// \file source/invariant_checker.cpp
 /// \brief Add your file description here.
 
-// Implementation of class Invariant_Checker
-// file: invariant_checker.cpp
+#include "boost.hpp" // precompiled headers
 
 #include <sstream>
+#include <cstring>
 
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/exception.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
 // Class Invariant_Checker ------------------------------------------------------------------------

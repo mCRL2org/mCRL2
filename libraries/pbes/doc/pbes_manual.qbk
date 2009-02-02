@@ -1,29 +1,42 @@
-[library mCRL2 Library
+[library PBES Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2005-2007 Technische Universiteit Eindhoven]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
     [category string-text]
+    [id pbes]
+    [dirname pbes]
     [purpose
-        The mCRL2 library contains data structures and algorithms
-        for the mCRL2 toolset.
-    ]
-    [license
-        Distributed under the Boost Software License, Version 1.0.
+        The PBES library contains data structures and algorithms
+        for parameterized boolean equation systems.
     ]
 ]
 
 [/  Images   ]
 
-[def __note__              [$images/note.png]]
-[def __alert__             [$images/caution.png]]
-[def __detail__            [$images/note.png]]
-[def __tip__               [$images/tip.png]]
-[def __pbes__              [$images/pbes.gif]]
-[def __pbes_expression__   [$images/pbes_expression.gif]]
+[def __note__               [$images/note.png]]
+[def __alert__              [$images/caution.png]]
+[def __detail__             [$images/note.png]]
+[def __tip__                [$images/tip.png]]
+[def __pbes__               [$images/pbes.gif]]
+[def __pbes_expression__    [$images/pbes_expression.gif]]
+[def __boolean_expression__ [$images/boolean_expression.gif]]
 
 [def __mu     [' '''&mu;''']]
 [def __nu     [' '''&nu;''']]
+[def __sigma  [' '''&sigma;''']]
+[def __szlig  [' '''&szlig;''']]
+
+[def __not     [' '''&not;''']]
+[def __and     [' '''&and;''']]
+[def __or      [' '''&or;''']]
+[def __implies [' '''&rArr;''']]
+[def __forall  [' '''&forall;''']]
+[def __exist   [' '''&exist;''']]
+
+[def __rArr   [' '''&rArr;''']]
+
 [def __sigmai [' '''&sigma;<subscript>i</subscript>''']]
+[def __phi    [' '''&#x03C6;''']]
 [def __phii   [' '''&#x03C6;<subscript>i</subscript>''']]
 [def __ai     [' '''a<subscript>i</subscript>''']]
 [def __ci     [' '''c<subscript>i</subscript>''']]
@@ -44,6 +57,8 @@
 [def __mcrl2__                 [@http://mcrl2.org mCRL2]]
 [def __mcrl__                  mCRL]
 [def __atermlib__              [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
+[def __pbes_implementation__   [@http://mcrl2.org/mcrl2/wiki/images/6/6c/Pbes_implementation_notes.pdf PBES implementation notes]]
+[def __pbes_introduction__     [@http://mcrl2.org/mcrl2/wiki/index.php/PBES_library PBES introduction]]
 
 [include pbes.qbk]
-[xinclude pbesdoc.xml]
+[include bes.qbk]

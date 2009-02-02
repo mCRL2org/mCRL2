@@ -17,6 +17,7 @@
 #include <boost/program_options.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/constelm.h"
@@ -30,9 +31,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  typedef data::rewriter my_data_rewriter;
-  typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-  typedef simplify_rewriter<data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
 
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
@@ -99,7 +98,7 @@ int main(int argc, char* argv[])
     p.load(infile);
 
     // data rewriter
-    my_data_rewriter datar(p.data());
+    data::rewriter datar(p.data());
 
     // name generator
     std::string prefix = "UNIQUE_PREFIX"; // unique_prefix(p);
@@ -109,10 +108,10 @@ int main(int argc, char* argv[])
     my_pbes_rewriter pbesr(datar);    
 
     // constelm algorithm
-    pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+    pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
     // run the algorithm
-    algorithm.run(p, p.initial_state(), name_generator, compute_conditions);
+    algorithm.run(p, name_generator, compute_conditions);
     
     // save the result
     p.save(outfile);

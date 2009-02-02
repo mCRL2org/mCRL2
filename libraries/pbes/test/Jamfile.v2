@@ -1,6 +1,7 @@
 project libraries/pbes/test
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lps
        <source>/libraries//pbes
        <source>/site-config//boost_program_options
@@ -10,15 +11,22 @@ project libraries/pbes/test
 
 include $(TOP)/build/testing/header_test.jam ;
 
-exe generate_lps2pbes_result : generate_lps2pbes_result.cpp ;
-
 test-suite pbes
     :
+      [ run parity_game_test.cpp ]
+      [ run pbes2bes_test.cpp ]
+      [ run pbes2bes_test2.cpp ]
+      #[ run pbes2bes_test3.cpp ]
+      [ run boolean_expression_test.cpp ]
+      [ run boolean_operator_test.cpp ]
+      [ run parse_test.cpp ]
+      [ run txt2pbes_test.cpp ]
       [ run constelm_test.cpp ]
       [ run remove_parameters_test.cpp ]
       #[ run pbes_solve_test.cpp ]
       [ run parelm_test.cpp ]
       [ run lps2pbes_test.cpp ]
+      #[ run lps2pbes_test2.cpp ]
       [ run pbes_test.cpp ]
       [ run bisimulation_test.cpp ]
       [ run rewriter_test.cpp ]
@@ -27,12 +35,3 @@ test-suite pbes
       [ run normalize_test.cpp ]
       [ compile-headers ../include ]
     ;
-
-install dist
-    :
-      generate_lps2pbes_result
-    :
-      <location>dist
-    ;
-
-explicit dist ;

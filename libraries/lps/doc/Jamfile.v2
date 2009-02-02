@@ -1,13 +1,13 @@
 import quickbook ;
 
-xml lps
+xml lps_manual
     :
-        lps.qbk
+        lps_manual.qbk
     ;
 
 boostbook standalone
     :
-        lps
+        lps_manual
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png

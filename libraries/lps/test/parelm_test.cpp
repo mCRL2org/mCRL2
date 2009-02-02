@@ -76,13 +76,13 @@ int test_main(int argc, char** argv)
 
   specification s0;
   specification s1;
-  data_variable_list v0;  
+  data_variable_list v0;
   data_variable_list v1;
 
   // case 1
  s0 = mcrl22lps(case_1);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
  v1 = s1.process().process_parameters();
  BOOST_CHECK(v1.empty());
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
@@ -90,7 +90,7 @@ int test_main(int argc, char** argv)
  // case 2
  s0 = mcrl22lps(case_2);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
  v1 = s1.process().process_parameters();
  BOOST_CHECK((v1.size() == 1)); // && (v1.front() == data_variable("i:Nat")))
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
@@ -98,24 +98,24 @@ int test_main(int argc, char** argv)
 //  // case 3
  s0 = mcrl22lps(case_3);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
- v1 = s1.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
+ v1 = s1.process().process_parameters();
  BOOST_CHECK((v1.size() == 1)); // && v1.front() == data_variable("i:Nat"));
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
 
 //  // case 4
  s0 = mcrl22lps(case_4);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
- v1 = s1.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
+ v1 = s1.process().process_parameters();
  BOOST_CHECK((v1.size() == 1));
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
 
 //  // case 5
  s0 = mcrl22lps(case_5);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
- v1 = s1.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
+ v1 = s1.process().process_parameters();
  BOOST_CHECK(v0.size() == v1.size());
  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
@@ -124,8 +124,8 @@ int test_main(int argc, char** argv)
  // case 6
  s0 = mcrl22lps(case_6);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
- v1 = s1.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
+ v1 = s1.process().process_parameters();
  BOOST_CHECK(v0.size() == v1.size());
  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
@@ -134,8 +134,8 @@ int test_main(int argc, char** argv)
  // case 7
  s0 = mcrl22lps(case_7);
  s1 = parelm(s0);
- v0 = s0.process().process_parameters(); 
- v1 = s1.process().process_parameters(); 
+ v0 = s0.process().process_parameters();
+ v1 = s1.process().process_parameters();
  BOOST_CHECK(v0.size() == v1.size());
  BOOST_CHECK(s0.process().summands().size() == s1.process().summands().size());
  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());

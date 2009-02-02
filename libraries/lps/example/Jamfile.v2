@@ -1,6 +1,6 @@
 project libraries/lps/example
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
        <source>/libraries//core
        <source>/libraries//lps
        <source>/site-config//boost_program_options

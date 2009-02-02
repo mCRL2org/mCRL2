@@ -1,6 +1,10 @@
-#include <iostream>
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+
+// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
+
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -11,9 +15,10 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/core/text_utility.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/parser.h"
+#include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace std;
@@ -23,9 +28,9 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
-typedef data::data_enumerator<data::rewriter, number_postfix_generator> my_enumerator;
-typedef simplify_rewriter<data::rewriter> my_simplify_rewriter;
-typedef enumerate_quantifiers_rewriter<data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
+typedef data::data_enumerator<number_postfix_generator> my_enumerator;
+typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_simplify_rewriter;
+typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
 typedef boost::variant<my_simplify_rewriter,
@@ -155,11 +160,11 @@ std::vector<int> parse_integers(std::string text)
   return result; 
 }
 
-void run(std::map<std::string, rewriter_variant>& rewriters, const std::vector<pbes_expression>& expressions)
+void run(std::map<std::string, rewriter_variant>& rewriters, const atermpp::vector<pbes_expression>& expressions)
 {
   for (std::map<std::string, rewriter_variant>::iterator i = rewriters.begin(); i != rewriters.end(); ++i)
   {
-    for (std::vector<pbes_expression>::const_iterator j = expressions.begin(); j != expressions.end(); ++j)
+    for (atermpp::vector<pbes_expression>::const_iterator j = expressions.begin(); j != expressions.end(); ++j)
     {
       pbes_expression result = boost::apply_visitor(rewriter_visitor(*j), i->second);
       std::cout << i->first << " " << pp(*j) << " -> " << pp(result) << std::endl;
@@ -191,7 +196,7 @@ int main(int argc, char* argv[])
       "Reads a file containing pbes expressions, and applies the rewriter to it.\n"
       "\n"
       "The following choices of the pbes rewriter are available:\n"
-      "  0 : simplify_rewriter\n"
+      "  0 : simplifying_rewriter\n"
       "  1 : enumerate_quantifiers_rewriter\n"
       "  2 : simplify_rewriter_jfg\n"
       "  3 : substitute_rewriter_jfg\n"
@@ -243,8 +248,8 @@ int main(int argc, char* argv[])
 
     // parse the input file
     std::string text = core::read_text(infile);
-    std::pair<std::vector<pbes_expression>, data_specification> parse_result = parse_pbes_expressions(text);
-    const std::vector<pbes_expression>& expressions = parse_result.first;
+    std::pair<atermpp::vector<pbes_expression>, data_specification> parse_result = parse_pbes_expressions(text);
+    const atermpp::vector<pbes_expression>& expressions = parse_result.first;
     const data_specification& data_spec = parse_result.second;
 
     // parse the program options

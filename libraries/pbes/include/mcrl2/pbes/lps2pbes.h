@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file tools.h
+/// \file mcrl2/pbes/lps2pbes.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_PBES_LPS2PBES_H
@@ -23,12 +23,22 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+  /// \brief Applies the lps2pbes algorithm
+  /// \param spec A linear process specification
+  /// \param formula A modal formula
+  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+  /// \return The result of the algorithm
   inline
   pbes<> lps2pbes(const lps::specification& spec, const modal::state_formula& formula, bool timed)
   {
     return pbes_translate(formula, spec, timed);
   }
 
+  /// \brief Applies the lps2pbes algorithm
+  /// \param spec_text A string
+  /// \param formula_text A string
+  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+  /// \return The result of the algorithm
   inline
   pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {

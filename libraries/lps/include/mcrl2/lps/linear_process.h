@@ -35,6 +35,9 @@ namespace lps {
 /// \cond INTERNAL_DOCS
 struct is_non_delta_summand
 {
+  /// \brief Function call operator
+  /// \param s A linear process summand
+  /// \return True if the summand is not delta
   bool operator()(const summand& s) const
   {
     return !s.is_delta();
@@ -53,23 +56,25 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
 /// \brief linear process.
-///
 class linear_process: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The free variables of the process
     data::data_variable_list m_free_variables;
+
+    /// \brief The process parameters of the process
     data::data_variable_list m_process_parameters;
-    summand_list       m_summands;
+
+    /// \brief The summands of the process
+    summand_list m_summands;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     linear_process()
       : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcess())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     linear_process(data::data_variable_list free_variables,
         data::data_variable_list process_parameters,
         summand_list       summands
@@ -80,8 +85,8 @@ class linear_process: public atermpp::aterm_appl
        m_summands          (summands          )
     { }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param lps A term
     linear_process(atermpp::aterm_appl lps)
       : atermpp::aterm_appl(lps)
     {
@@ -94,36 +99,36 @@ class linear_process: public atermpp::aterm_appl
       m_summands           = summand_list(*i);
     }
 
-    /// Returns the sequence of LPS summands.
-    ///
+    /// \brief Returns the sequence of LPS summands.
+    /// \return The sequence of LPS summands.
     summand_list summands() const
     {
       return m_summands;
     }
 
-    /// Returns the sequence of non delta summands.
-    ///
+    /// \brief Returns the sequence of non delta summands.
+    /// \return The sequence of non delta summands.
     non_delta_summand_list non_delta_summands() const
     {
       return non_delta_summand_list(m_summands, is_non_delta_summand());
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables.
+    /// \return The sequence of free variables.
     data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of process parameters.
-    ///
+    /// \brief Returns the sequence of process parameters.
+    /// \return The sequence of process parameters.
     data::data_variable_list process_parameters() const
     {
       return m_process_parameters;
     }
 
-    /// Returns true if time is available in at least one of the summands.
-    ///
+    /// \brief Returns true if time is available in at least one of the summands.
+    /// \return True if time is available in at least one of the summands.
     bool has_time() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -135,9 +140,12 @@ class linear_process: public atermpp::aterm_appl
       return false;
     }
 
-    /// Applies a substitution to this LPS and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
@@ -147,9 +155,9 @@ class linear_process: public atermpp::aterm_appl
       return linear_process(d, p, s);
     }
 
-    /// Returns the set of free variables that appear in the process.
+    /// \brief Returns the set of free variables that appear in the process.
     /// This set is a subset of <tt>free_variables()</tt>.
-    ///
+    /// \return The set of free variables that appear in the process.
     std::set<data::data_variable> find_free_variables()
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -168,17 +176,16 @@ class linear_process: public atermpp::aterm_appl
       return result;
     }
 
-    /// Returns true if
+    /// \brief Checks if the linear process is well typed
+    /// \return True if
     /// <ul>
     /// <li>the free variables occurring in the process are declared in free_variables()</li>
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
     /// <li>process parameters and summation variables have different names</li>
     /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
-    ///
     /// <li>the summands are well typed</li>
     /// </ul>
-    ///
     bool is_well_typed() const
     {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
@@ -258,7 +265,9 @@ class linear_process: public atermpp::aterm_appl
     }
   };
 
-/// \brief Computes the free variables that occur in the specification
+/// \brief Returns the free variables that occur in the specification
+/// \param process A linear process
+/// \return The free variables that occur in the specification
 inline
 std::set<data::data_variable> compute_free_variables(const linear_process& process)
 {
@@ -271,7 +280,9 @@ std::set<data::data_variable> compute_free_variables(const linear_process& proce
   return result;
 }
 
-/// \brief Computes the action labels that occur in the process
+/// \brief Returns the action labels that occur in the process
+/// \param process A linear process
+/// \return The action labels that occur in the process
 inline
 std::set<action_label> compute_action_labels(const linear_process& process)
 {
@@ -281,6 +292,9 @@ std::set<action_label> compute_action_labels(const linear_process& process)
 }
 
 /// \brief Sets the free variables of l and returns the result
+/// \param l A linear process
+/// \param free_variables A sequence of data variables
+/// \return The modified linear process
 inline
 linear_process set_free_variables(linear_process l, data::data_variable_list free_variables)
 {
@@ -291,6 +305,9 @@ linear_process set_free_variables(linear_process l, data::data_variable_list fre
 }
 
 /// \brief Sets the process parameters of l and returns the result
+/// \param l A linear process
+/// \param process_parameters A sequence of data variables
+/// \return The modified linear process
 inline
 linear_process set_process_parameters(linear_process l, data::data_variable_list process_parameters)
 {
@@ -301,6 +318,9 @@ linear_process set_process_parameters(linear_process l, data::data_variable_list
 }
 
 /// \brief Sets the summands of l and returns the result
+/// \param l A linear process
+/// \param summands A sequence of summands
+/// \return The modified linear process
 inline
 linear_process set_summands(linear_process l, summand_list summands)
 {

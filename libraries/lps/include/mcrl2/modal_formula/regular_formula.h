@@ -28,29 +28,36 @@ namespace modal {
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula
 /// \brief regular formula expression.
-///
 class regular_formula: public atermpp::aterm_appl
 {
   public:
+    /// \brief Constructor
     regular_formula()
       : atermpp::aterm_appl(mcrl2::core::detail::constructRegFrm())
     {}
 
+    /// \brief Constructor
+    /// \param t A term
     regular_formula(ATermAppl t)
       : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
+    /// \brief Constructor
+    /// \param t A term
     regular_formula(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
     }
 
-    /// Applies a substitution to this regular formula and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     regular_formula substitute(Substitution f) const
     {
@@ -60,8 +67,7 @@ class regular_formula: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula_list
-/// \brief singly linked list of regular expressions
-///
+/// \brief Read-only singly linked list of regular expressions
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 } // namespace modal

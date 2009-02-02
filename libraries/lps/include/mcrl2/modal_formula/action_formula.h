@@ -28,7 +28,6 @@ namespace modal {
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula
 /// \brief action formula expression.
-///
 //<ActFrm>       ::= <MultAct>
 //                 | <DataExpr>
 //                 | ActTrue
@@ -43,25 +42,34 @@ namespace modal {
 class action_formula: public atermpp::aterm_appl
 {
   public:
+
+    /// \brief Constructor
     action_formula()
       : atermpp::aterm_appl(mcrl2::core::detail::constructActFrm())
     {}
 
+    /// \brief Constructor
+    /// \param t A term
     action_formula(ATermAppl t)
       : atermpp::aterm_appl(atermpp::aterm_appl(t))
     {
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
+    /// \brief Constructor
+    /// \param t A term
     action_formula(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
       assert(mcrl2::core::detail::check_rule_ActFrm(m_term));
     }
 
-    /// \brief Applies a substitution to this action_formula and returns the result
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
@@ -71,58 +79,73 @@ class action_formula: public atermpp::aterm_appl
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula_list
-/// \brief singly linked list of data expressions
-///
+/// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<action_formula> action_formula_list;
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm
 { 
 
-  /// \brief Returns the expression true
+  /// \brief Make the value true
+  /// \return The value \p true
   inline
   action_formula true_()
   {
     return action_formula(core::detail::gsMakeActTrue());
   }
   
-  /// \brief Returns the expression false
+  /// \brief Make the value false
+  /// \return The value \p false
   inline
   action_formula false_()
   {
     return action_formula(core::detail::gsMakeActFalse());
   }
   
-  /// \brief Returns not applied to p
+  /// \brief Make a negation
+  /// \param p An action formula
+  /// \return The value <tt>!p</tt>
   inline
   action_formula not_(action_formula p)
   {
     return action_formula(core::detail::gsMakeActNot(p));
   }
   
-  /// \brief Returns and applied to p and q
+  /// \brief Make a conjunction
+  /// \param p An action formula
+  /// \param q An action formula
+  /// \return The value <tt>p && q</tt>
   inline
   action_formula and_(action_formula p, action_formula q)
   {
     return action_formula(core::detail::gsMakeActAnd(p,q));
   }
   
-  /// \brief Returns or applied to p and q
+  /// \brief Make a disjunction
+  /// \param p An action formula
+  /// \param q An action formula
+  /// \return The value <tt>p || q</tt>
   inline
   action_formula or_(action_formula p, action_formula q)
   {
     return action_formula(core::detail::gsMakeActOr(p,q));
   }
   
-  /// \brief Returns imp applied to p and q
+  /// \brief Make an implication
+  /// \param p An action formula
+  /// \param q An action formula
+  /// \return The value <tt>p => q</tt>
   inline
   action_formula imp(action_formula p, action_formula q)
   {
     return action_formula(core::detail::gsMakeActImp(p,q));
   }
   
-  /// \brief Returns the universal quantification of the formula p over the variables in l
+  /// \brief Make a universal quantification
   /// \pre l may not be empty
+  /// \param l A sequence of data variables
+  /// \param p An action formula
+  /// \return The value <tt>forall l.p</tt>
   inline
   action_formula forall(data::data_variable_list l, action_formula p)
   {
@@ -130,8 +153,11 @@ namespace act_frm
     return action_formula(core::detail::gsMakeActForall(l, p));
   }
 
-  /// \brief Returns the existential quantification of the formula p over the variables in l
+  /// \brief Make an existential quantification
   /// \pre l may not be empty
+  /// \param l A sequence of data variables
+  /// \param p An action formula
+  /// \return The value <tt>exists l.p</tt>
   inline
   action_formula exists(data::data_variable_list l, action_formula p)
   {
@@ -139,7 +165,10 @@ namespace act_frm
     return action_formula(core::detail::gsMakeActExists(l, p));
   }
 
-  /// \brief Returns the 'p at d'
+  /// \brief Returns the operation 'p at d'
+  /// \param p An action formula
+  /// \param d A data expression
+  /// \return The operation 'p at d'
   inline
   action_formula at(action_formula p, data::data_expression d)
   {
@@ -184,6 +213,8 @@ namespace act_frm
 namespace accessors
 {
   /// \brief Returns the parameters of an action formula
+  /// \param t An action formula
+  /// \return The parameters of an action formula
   inline
   lps::action_list mult_params(action_formula t)
   {
@@ -191,8 +222,9 @@ namespace accessors
     return atermpp::list_arg1(t);
   }
   
-  /// \brief Returns the action formula argument of an expression of
-  /// type not, at, exists or forall.
+  /// \brief Returns the action formula argument of an expression of type not, at, exists or forall.
+  /// \param t An action formula
+  /// \return The action formula argument of an expression of type not, at, exists or forall.
   inline
   action_formula arg(action_formula t)
   {
@@ -205,6 +237,8 @@ namespace accessors
   }
   
   /// \brief Returns the left hand side of an expression of type and/or/imp
+  /// \param t An action formula
+  /// \return The left hand side of an expression of type and/or/imp
   inline
   action_formula left(action_formula t)
   {
@@ -213,6 +247,8 @@ namespace accessors
   }
   
   /// \brief Returns the right hand side of an expression of type and/or/imp.
+  /// \param t An action formula
+  /// \return The right hand side of an expression of type and/or/imp.
   inline
   action_formula right(action_formula t)
   {
@@ -221,6 +257,8 @@ namespace accessors
   }
   
   /// \brief Returns the variables of a quantification expression
+  /// \param t An action formula
+  /// \return The variables of a quantification expression
   inline
   data::data_variable_list var(action_formula t)
   {
@@ -229,6 +267,8 @@ namespace accessors
   }
   
   /// \brief Returns the time of an at expression
+  /// \param t An action formula
+  /// \return The time of an at expression
   inline
   data::data_expression time(action_formula t)
   {

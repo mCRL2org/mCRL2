@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
@@ -36,30 +37,35 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
 {
   protected:
+    /// \brief The graph type of the dependency graph
     typedef boost::adjacency_list<boost::setS, boost::vecS, boost::directedS> graph;
-    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
-    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
-    
-    template <class Iter, class T>
-    void iota(Iter first, Iter last, T value) const
-    {
-      while (first != last)
-      {
-        *first++ = value++;
-      }
-    }
 
+    /// \brief The vertex type of the dependency graph
+    typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
+
+    /// \brief The edge type of the dependency graph
+    typedef boost::graph_traits<graph>::edge_descriptor edge_descriptor;
+
+    /// \brief Finds unbound variables in a pbes expression
+    /// \param t A PBES expression
+    /// \param bound_variables A sequence of data variables
+    /// \return The unbound variables in \p t that are not contained in \p bound_variables
     std::set<data::data_variable> unbound_variables(pbes_expression t, data::data_variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
-      detail::free_variable_visitor visitor(bound_variables, search_propositional_variables);
+      detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
       visitor.visit(t);
-      return visitor.result;      
+      return visitor.result;
     }
-    
+
+    /// \brief Finds the index of a variable in a sequence
+    /// \param v A sequence of data variables
+    /// \param d A data variable
+    /// \return The index of \p d in \p v, or -1 if the variable wasn't found
     int variable_index(data::data_variable_list v, data::data_variable d) const
     {
       int index = 0;
@@ -74,47 +80,70 @@ class pbes_parelm_algorithm
       return -1;
     }
 
+    /// \cond INTERNAL_DOCS
+    
+    /// \brief Prints a container of terms to standard error
+    /// \param v A container
+    /// \param message A string
+    /// \param print_index If true, an index is written in front of each term
     template <typename Container>
     void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       int index = 0;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
         if (print_index)
         {
-          std::cout << index++ << " " << mcrl2::core::pp(*i) << std::endl;
+          std::cerr << index++ << " " << mcrl2::core::pp(*i) << std::endl;
         }
         else
         {
-          std::cout << mcrl2::core::pp(*i) << " ";
+          std::cerr << mcrl2::core::pp(*i) << " ";
         }
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
+    /// \brief FUNCTION_DESCRIPTION
+    // \brief Prints a container to standard error
+    // \param v A container
+    // \param message A string
+    /// \param v PARAM_DESCRIPTION
+    /// \param message A string
     template <typename Container>
     void print_container(const Container& v, std::string message = "<variables>") const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cout << *i << " ";
+        std::cerr << *i << " ";
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
+    /// \brief Prints a map to standard error
+    /// \param v A map container
+    /// \param message A string
     template <typename Container>
     void print_map(const Container& v, std::string message = "<variables>") const
     {
-      std::cout << message << std::endl;
+      std::cerr << message << std::endl;
       for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
       {
-        std::cout << i->first << " -> " << i->second << std::endl;
+        std::cerr << i->first << " -> " << i->second << std::endl;
       }
-      std::cout << std::endl;
+      std::cerr << std::endl;
     }
 
+    /// \endcond
+    
+    /// \brief Finds the predicate variable to which the data parameter with the given index belongs.
+    /// Here index refers to the cumulative index in the array obtained by concatening all parameters
+    /// of the predicate variables in the pbes \p p.
+    /// \param p A pbes
+    /// \param index A positive number
+    /// \return The name of the predicate variable that corresponds with \p index
     template <typename Container>
     core::identifier_string find_predicate_variable(const pbes<Container>& p, int index) const
     {
@@ -132,12 +161,15 @@ class pbes_parelm_algorithm
     }
 
   public:
+    
+    /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
+    /// \param p A pbes
     template <typename Container>
     void run(pbes<Container>& p) const
     {
       data::data_variable_list fvars(p.free_variables().begin(), p.free_variables().end());
       std::vector<data::data_variable> predicate_variables;
-      
+
       // compute a mapping from propositional variable names to offsets
       int offset = 0;
       std::map<core::identifier_string, int> propvar_offsets;
@@ -206,7 +238,7 @@ class pbes_parelm_algorithm
       std::vector<int> r = core::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
       std::vector<int> q(N);
-      iota(q.begin(), q.end(), 0);
+      core::detail::iota(q.begin(), q.end(), 0);
       std::vector<int> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
 
@@ -231,18 +263,18 @@ class pbes_parelm_algorithm
       // print debug output
       if (mcrl2::core::gsDebug)
       {
-        std::cout << "\ninfluential parameters:" << std::endl;
+        std::cerr << "\ninfluential parameters:" << std::endl;
         for(std::set<int>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::data_variable v1 = predicate_variables[*i];
-          std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+          std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
-        std::cout << "\ndependencies:" << std::endl;
+        std::cerr << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
-        edge_iterator last  = e.second;       
+        edge_iterator last  = e.second;
         for( ; first != last; ++first)
         {
           edge_descriptor e = *first;
@@ -254,22 +286,22 @@ class pbes_parelm_algorithm
           data::data_variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
           std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
-          std::cout << left << " -> " << right << std::endl;
+          std::cerr << left << " -> " << right << std::endl;
         }
       }
 
       // print verbose output
       if (mcrl2::core::gsVerbose)
       {
-        std::cout << "\nremoving the following parameters:" << std::endl;
+        std::cerr << "\nremoving the following parameters:" << std::endl;
         for (std::map<core::identifier_string, std::vector<int> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
 
           for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
-            data::data_variable v1 = predicate_variables[*j];
-            std::cout << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+            data::data_variable v1 = predicate_variables[*j + propvar_offsets[X1]];
+            std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
       }

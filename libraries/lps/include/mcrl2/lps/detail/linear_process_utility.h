@@ -24,6 +24,9 @@ namespace lps {
 
 namespace detail {
 
+  /// \brief Returns the process parameter names of a linear process
+  /// \param p A linear process
+  /// \return The process parameter names of a linear process
   inline
   std::set<core::identifier_string> process_parameter_names(const linear_process& p)
   {
@@ -33,6 +36,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Returns the free variable names of a linear process
+  /// \param p A linear process
+  /// \return The free variable names of a linear process
   inline
   std::set<core::identifier_string> free_variable_names(const linear_process& p)
   {
@@ -42,6 +48,9 @@ namespace detail {
     return result;
   }
 
+  /// \brief Returns the summation variable names of a linear process
+  /// \param p A linear process
+  /// \return The summation variable names of a linear process
   inline
   std::set<core::identifier_string> summand_variable_names(const linear_process& p)
   {

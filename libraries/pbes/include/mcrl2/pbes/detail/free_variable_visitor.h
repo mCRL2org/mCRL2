@@ -22,8 +22,14 @@ namespace pbes_system {
 
 namespace detail {
 
-struct free_variable_visitor: public pbes_expression_visitor
+template <typename Term>
+struct free_variable_visitor: public pbes_expression_visitor<Term>
 {
+  typedef pbes_expression_visitor<Term> super;
+  typedef typename super::term_type term_type;
+  typedef typename super::data_term_type data_term_type;
+  typedef typename super::propositional_variable_type propositional_variable_type;
+  
   data::data_variable_list bound_variables;
   std::vector<data::data_variable_list> quantifier_stack;
   std::set<data::data_variable> result;
@@ -37,7 +43,9 @@ struct free_variable_visitor: public pbes_expression_visitor
     : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
   {}
 
-  // returns true if v is an element of bound_variables or quantifier_stack
+  /// \brief Returns true if v is an element of bound_variables or quantifier_stack
+  /// \param v A data variable
+  /// \return True if v is an element of bound_variables or quantifier_stack
   bool is_bound(const data::data_variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())
@@ -54,39 +62,56 @@ struct free_variable_visitor: public pbes_expression_visitor
     return false;
   }
 
+  /// \brief Pushes v on the stack of quantifier variables
+  /// \param v A sequence of data variables
   void push(const data::data_variable_list& v)
   {
     quantifier_stack.push_back(v);
   }
 
+  /// \brief Pops the stack of quantifier variables
   void pop()
   {
     quantifier_stack.pop_back();
   }
 
-  bool visit_forall(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
+  /// \brief Visit forall node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
+  bool visit_forall(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave forall node
   void leave_forall()
   {
     pop();
   }
 
-  bool visit_exists(const pbes_expression& e, const data::data_variable_list& v, const pbes_expression&)
+  /// \brief Visit exists node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
+  bool visit_exists(const term_type& e, const data::data_variable_list& v, const term_type&)
   {
     push(v);
     return true;
   }
 
+  /// \brief Leave exists node
   void leave_exists()
   {
     pop();
   }
 
-  bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \param v A propositional variable instantiation
+  /// \return The result of visiting the node
+  bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
   {
     if (search_propositional_variables)
     {
@@ -102,7 +127,11 @@ struct free_variable_visitor: public pbes_expression_visitor
     return true;
   }
 
-  bool visit_data_expression(const pbes_expression& e, const data::data_expression& d)
+  /// \brief Visit data_expression node
+  /// \param e A term
+  /// \param d A data term
+  /// \return The result of visiting the node
+  bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
     std::set<data::data_variable> variables = data::find_all_data_variables(d);
     for (std::set<data::data_variable>::iterator i = variables.begin(); i != variables.end(); ++i)
@@ -123,4 +152,3 @@ struct free_variable_visitor: public pbes_expression_visitor
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
-

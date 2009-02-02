@@ -9,16 +9,14 @@
 /// \file source/invariant_eliminator.cpp
 /// \brief Add your file description here.
 
-// Implementation of class Invariant_Eliminator
-// file: invariant_eliminator.cpp
+#include "boost.hpp" // precompiled headers
 
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/bdd_prover.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

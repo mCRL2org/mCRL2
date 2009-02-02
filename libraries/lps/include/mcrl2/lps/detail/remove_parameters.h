@@ -24,7 +24,10 @@ namespace lps {
 
 namespace detail {
 
-/// Removes the parameters in to_be_removed from l.
+/// \brief Removes the parameters in to_be_removed from l.
+/// \param l A sequence of assignments to data variables
+/// \param to_be_removed A subset of parameters of l
+/// \return The removal result
 inline
 data::data_assignment_list remove_parameters(const data::data_assignment_list& l, const std::set<data::data_variable>& to_be_removed)
 {
@@ -33,7 +36,10 @@ data::data_assignment_list remove_parameters(const data::data_assignment_list& l
   return data::data_assignment_list(a.begin(), a.end()); 
 }
 
-/// Removes the parameters in to_be_removed from p.
+/// \brief Removes the parameters in to_be_removed from p.
+/// \param p A linear process
+/// \param to_be_removed A subset of the process parameters of p
+/// \return The removal result
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<data::data_variable>& to_be_removed)
 {
@@ -58,13 +64,14 @@ linear_process remove_parameters(const linear_process& p, const std::set<data::d
   return result;
 }
 
-/// Removes the parameters in to_be_removed from spec.
+/// \brief Removes the parameters in to_be_removed from spec.
+/// \param spec A linear process specification
+/// \param to_be_removed A set of data variables
+/// \return The removal result
 inline
 specification remove_parameters(const specification& spec, const std::set<data::data_variable>& to_be_removed)
 {
-  process_initializer new_initial_state(spec.initial_process().free_variables(),
-                                        remove_parameters(spec.initial_process().assignments(), to_be_removed)
-                                       );
+  process_initializer new_initial_state(spec.initial_process().free_variables(), remove_parameters(spec.initial_process().assignments(), to_be_removed));
   linear_process p = remove_parameters(spec.process(), to_be_removed);
   specification result = set_lps(spec, p);
   result = set_initial_process(result, new_initial_state);

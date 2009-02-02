@@ -9,6 +9,8 @@
 /// \file lpsbinary.cpp
 /// \brief 
 
+#include "boost.hpp" // precompiled headers
+
 //Aterms
 #include <mcrl2/atermpp/algorithm.h>
 #include <mcrl2/atermpp/aterm.h>
@@ -23,7 +25,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/detail/specification_utility.h>
 #include <mcrl2/core/messaging.h>
-#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/core/aterm_ext.h>
 //Enumerator
 #include <mcrl2/data/detail/enum/standard.h>
 #include <mcrl2/lps/nextstate.h>
@@ -31,7 +33,6 @@
 #include <mcrl2/lps/binary.h>
 
 // For Aterm library extension functions
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace atermpp;
 using namespace mcrl2::data;
@@ -47,7 +48,7 @@ namespace lps {
 //////////////////////////////////////////////////////
 
 ///\pre n>0
-///\ret ceil(log_2(n))
+///\return ceil(log_2(n))
 int log2(int n)
 {
   int result = 0;
@@ -65,7 +66,7 @@ int log2(int n)
   return result;
 }
 
-///\ret 2^n
+///\return 2^n
 int powerof2_(int n)
 {
   int result = 1;
@@ -78,7 +79,7 @@ int powerof2_(int n)
 }
 
 ///\pre cl is a list of constructors
-///\ret all sorts s in sl that are finite and not bool
+///\return all sorts s in sl that are finite and not bool
 sort_expression_list get_finite_sorts_not_bool(const data_operation_list& cl, const sort_expression_list& sl)
 {
   sort_expression_list result;
@@ -95,7 +96,7 @@ sort_expression_list get_finite_sorts_not_bool(const data_operation_list& cl, co
 
 ///\pre 0 <= n <= list.size() = m, list is [0..m), list == original list
 ///\post list contains elements [n..m)
-///\ret list containing elements [0..n)
+///\return list containing elements [0..n)
 data_expression_list split_at(data_expression_list& list, unsigned int n)
 {
   assert (n <= list.size());
@@ -118,7 +119,7 @@ data_expression_list split_at(data_expression_list& list, unsigned int n)
 ///////////////////////////////////////////////////////////////////////////////
 
 ///\pre enumerated_elements.size() <= 2^new_parameters.size()
-///\ret if then else tree from enumerated_elements in terms of new_parameters
+///\return if then else tree from enumerated_elements in terms of new_parameters
 data_expression make_if_tree(const data_variable_list& new_parameters,
                              const data_expression_list& enumerated_elements)
 {
@@ -169,7 +170,7 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
 // Take a specification and calculate a vector of boolean variables for each process
 // parameter of a finite sort. A mapping variable -> vector of booleans is stored in new_parameters_table
 // a mapping variable -> enumerated elements is stored in enumerated_elements_table
-/// \ret data variable list with the new process parameters (i.e. with all variables of a
+/// \return data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
 data_variable_list replace_enumerated_parameters(const lps::specification& specification,
                                                  EnumeratorStandard& enumerator,

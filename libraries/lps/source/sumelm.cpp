@@ -9,6 +9,8 @@
 /// \file lpsbinary.cpp
 /// \brief 
 
+#include "boost.hpp" // precompiled headers
+
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 #include <mcrl2/atermpp/aterm_list.h>
@@ -23,12 +25,11 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 #include "mcrl2/lps/sumelm.h"
 
 // For Aterm library extension functions
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
@@ -46,11 +47,11 @@ namespace lps {
   struct sumelm_replace_helper
   {
     const std::map<data_expression, data_expression>& m_replacements;
-    
+
     sumelm_replace_helper(const std::map<data_expression, data_expression>& replacements)
       : m_replacements(replacements)
     {}
-    
+
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (is_sort_expression(t))
@@ -61,7 +62,7 @@ namespace lps {
       {
         std::map<data_expression, data_expression>::const_iterator i = m_replacements.find(t);
         if (i == m_replacements.end())
-        {         
+        {
           return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
         }
         else
@@ -121,8 +122,8 @@ namespace lps {
     replacements[lhs] = new_rhs;
   }
 
-  ///pre: is_and(t) || is_equal_to(t)
-  ///ret: lefthandside of t
+  ///\pre is_and(t) || is_equal_to(t)
+  ///\return lefthandside of t
   static inline
   data_expression lhs(const data_expression t)
   {
@@ -130,8 +131,8 @@ namespace lps {
     return *(static_cast<const data_application&>(t).arguments().begin());
   }
 
-  ///pre: is_and(t) || is_equal_to(t)
-  ///ret: righthandside of t
+  ///\pre is_and(t) || is_equal_to(t)
+  ///\return righthandside of t
   static inline
   data_expression rhs(const data_expression t)
   {
@@ -139,8 +140,8 @@ namespace lps {
     return *(++static_cast<const data_application&>(t).arguments().begin());
   }
 
-  ///pre: is_equal_to(t); t is of form a == b
-  ///ret: b == a
+  ///\pre is_equal_to(t); t is of form a == b
+  ///\return b == a
   static inline
   data_expression swap_equality(const data_expression t)
   {

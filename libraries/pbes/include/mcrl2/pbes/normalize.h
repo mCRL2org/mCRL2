@@ -12,39 +12,56 @@
 #ifndef MCRL2_PBES_NORMALIZE_H
 #define MCRL2_PBES_NORMALIZE_H
 
+#include "mcrl2/exception.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
-#include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-/// Visitor for checking if a pbes expression is normalized.
-struct is_normalized_visitor : public pbes_expression_visitor
+/// \cond INTERNAL_DOCS
+// \brief Visitor for checking if a pbes expression is normalized.
+struct is_normalized_visitor : public pbes_expression_visitor<pbes_expression>
 {
   bool result;
-  
+
   is_normalized_visitor()
     : result(true)
   {}
-  
+
+  /// \brief Visit not node
+  /// \return The result of visiting the node
   bool visit_not(const pbes_expression& /* e */, const pbes_expression& /* arg */)
   {
     result = false;
     return stop_recursion;
   }
 
-  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */) 
+  /// \brief Visit imp node
+  /// \return The result of visiting the node
+  bool visit_imp(const pbes_expression& /* e */, const pbes_expression& /* left */, const pbes_expression& /* right */)
   {
     result = false;
     return stop_recursion;
   }
 };
+/// \endcond
 
+/// \brief Checks if a pbes expression is normalized
+/// \param t A PBES expression
+/// \return True if the pbes expression is normalized
+inline
+bool is_normalized(pbes_expression t)
+{
+  is_normalized_visitor visitor;
+  visitor.visit(t);
+  return visitor.result;
+}
 
-/// The function normalize brings a pbes expression into positive normal form,
+/// \brief The function normalize brings a pbes expression into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
+/// \param f A PBES expression
 /// \return The result of the normalization.
 inline
 pbes_expression normalize(pbes_expression f)
@@ -105,9 +122,9 @@ pbes_expression normalize(pbes_expression f)
   return pbes_expression();
 }
 
-/// Applies normalization to the right hand side of the equation.
+/// \brief Applies normalization to the right hand side of the equation.
+/// \param e A PBES equation
 /// \return The result of the normalization.
-/// 
 inline
 pbes_equation normalize(const pbes_equation& e)
 {

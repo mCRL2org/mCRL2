@@ -9,13 +9,14 @@
 /// \file source/disjointness_checker.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

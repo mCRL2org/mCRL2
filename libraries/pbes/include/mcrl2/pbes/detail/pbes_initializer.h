@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/pbes_initializer.h
+/// \file mcrl2/pbes/detail/pbes_initializer.h
 /// \brief The class pbes_initializer.
 
-#ifndef MCRL2_PBES_PBES_INITIALIZER_H
-#define MCRL2_PBES_PBES_INITIALIZER_H
+#ifndef MCRL2_PBES_DETAIL_PBES_INITIALIZER_H
+#define MCRL2_PBES_DETAIL_PBES_INITIALIZER_H
 
 #include <cassert>
 #include <string>
@@ -24,24 +24,27 @@
 namespace mcrl2 {
 
 namespace pbes_system {
+  
+namespace detail {
 
 /// \brief The initial state of a pbes.
 // <PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
 class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
+    /// \brief The free variables of the PBES initializer
     data::data_variable_list   m_free_variables;
+
+    /// \brief The value of the PBES initializer
     propositional_variable_instantiation m_variable;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_initializer()
       : atermpp::aterm_appl(core::detail::constructPBInit())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     pbes_initializer(data::data_variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
@@ -51,8 +54,8 @@ class pbes_initializer: public atermpp::aterm_appl
     {
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     pbes_initializer(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
@@ -62,43 +65,48 @@ class pbes_initializer: public atermpp::aterm_appl
       m_variable = propositional_variable_instantiation(*i);
     }
 
-    /// Returns the sequence of free variables.
-    ///
+    /// \brief Returns the sequence of free variables.
+    /// \return The sequence of free variables.
     data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of variables.
-    ///
+    /// \brief Returns the sequence of variables.
+    /// \return The sequence of variables.
     propositional_variable_instantiation variable() const
     {
       return m_variable;
     }
 
-    /// Applies a substitution to this pbes initializer and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     pbes_initializer substitute(Substitution f)
     {
       return pbes_initializer(f(atermpp::aterm(*this)));
-    }     
+    }
 
-    /// Returns true (there are no well typedness checks defined yet).
-    ///
+    /// \brief Checks if the PBES initializer is well typed.
+    /// \return Always returns true.
     bool is_well_typed() const
     {
       return true;
     }
 };
 
+} // namespace detail
+
 } // namespace pbes_system
 
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_initializer)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::detail::pbes_initializer)
 /// \endcond
 
-#endif // MCRL2_PBES_PBES_INITIALIZER_H
+#endif // MCRL2_PBES_DETAIL_PBES_INITIALIZER_H

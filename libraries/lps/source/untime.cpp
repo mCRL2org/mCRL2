@@ -6,7 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// file: mcrl2/lps/untime.cpp
+// \file: mcrl2/lps/untime.cpp
+
+#include "boost.hpp" // precompiled headers
+
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 
@@ -18,12 +21,11 @@
 #include "mcrl2/data/utility.h"
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 #include "mcrl2/lps/untime.h"
 
 // For Aterm library extension functions
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
@@ -34,7 +36,7 @@ namespace mcrl2 {
 
 namespace lps {
 
-///\ret specification, in which all delta summands have been removed, and replaced with a single true->delta
+///\return specification, in which all delta summands have been removed, and replaced with a single true->delta
 lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;

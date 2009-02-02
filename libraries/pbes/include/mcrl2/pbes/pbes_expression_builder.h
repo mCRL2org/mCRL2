@@ -13,188 +13,222 @@
 #define MCRL2_PBES_PBES_EXPRESSION_BUILDER_H
 
 #include "mcrl2/exception.h"
-#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/term_traits.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
+
+// this is only needed because of the data_true <-> pbes_true problems
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-inline
-bool is_finished(const pbes_expression& x)
-{
-  return x != pbes_expression();
-}
-
-/// Visitor class for visiting the nodes of a pbes expression. During traversal
+/// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
-/// If a visit_<node> function returns pbes_expression(), the recursion is continued
+/// If a visit_<node> function returns term_type(), the recursion is continued
 /// in the children of this node, otherwise not.
+/// An arbitrary additional argument may be passed during the recursion.
 // TODO: rebuilding expressions with ATerms is very expensive. So it is probably
 // more efficient to  check if the children of a node have actually changed,
 // before rebuilding it.
-template <typename Arg>
-struct pbes_builder
+template <typename Term, typename Arg = void>
+struct pbes_expression_builder
 {
+  /// \brief The type of the additional argument for the recursion
   typedef Arg argument_type;
-  
-  /// Destructor.
-  ///
-  virtual ~pbes_builder()
+
+  /// \brief The term type
+  typedef typename core::term_traits<Term>::term_type term_type;
+
+  /// \brief The data term type
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+  /// \brief The variable sequence type
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+
+  /// \brief The propositional variable instantiation type
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
+
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
+  bool is_finished(const term_type& x)
+  {
+    return x != term_type();
+  }
+
+  /// \brief Destructor.
+  virtual ~pbes_expression_builder()
   { }
 
-  /// Visit data expression node.
-  ///
-  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */, Arg& /* arg */)
+  /// \brief Visit data_expression node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit true node.
-  ///
-  virtual pbes_expression visit_true(const pbes_expression& x, Arg& /* arg */)
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_true(const term_type& x, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit false node.
-  ///
-  virtual pbes_expression visit_false(const pbes_expression& x, Arg& /* arg */)
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_false(const term_type& x, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit not node.
-  ///
-  virtual pbes_expression visit_not(const pbes_expression& x, const pbes_expression& /* arg */, Arg& /* arg */)
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_not(const term_type& x, const term_type& /* arg */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit and node.
-  ///
-  virtual pbes_expression visit_and(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit or node.
-  ///
-  virtual pbes_expression visit_or(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
-    return pbes_expression();
-  }    
-
-  /// Visit imp node.
-  ///
-  virtual pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */, Arg& /* arg */)
-  {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit forall node.
-  ///
-  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit exists node.
-  ///
-  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */, Arg& /* arg */)
+  /// \brief Visit forall node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit propositional variable node.
-  ///
-  virtual pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& /* v */, Arg& /* arg */)
+  /// \brief Visit exists node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */, Arg& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
-  
-  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+
+  /// \brief Visit propositional_variable node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */, Arg& /* arg */)
+  {
+    return term_type();
+  }
+
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
-  virtual pbes_expression visit_unknown(const pbes_expression& e, Arg& /* arg */)
+  /// \param e A term
+  /// \return The result of visiting the node
+  virtual term_type visit_unknown(const term_type& e, Arg& /* arg */)
   {
-    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
-    return pbes_expression();
+    throw mcrl2::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
+    return term_type();
   }
 
-  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
-  /// member functions. If the return value of a visit function equals pbes_expression(),
+  /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  pbes_expression visit(pbes_expression e, Arg& arg1)
+  /// \param e A term
+  /// \param arg1 An additional argument for the recursion
+  /// \return The visit result
+  term_type visit(term_type e, Arg& arg1)
   {
-    using namespace pbes_expr_optimized;
-    using namespace accessors;
+    typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit>" << pp(e) << " " << e << std::endl;
+std::cerr << "<visit>" << tr::pp(e) << std::endl;
 #endif
 
-    pbes_expression result;
+    term_type result;
 
-    if (is_data(e)) {
-      result = visit_data_expression(e, val(e), arg1);
+    if (tr::is_data(e)) {
+      result = visit_data_expression(e, tr::term2dataterm(e), arg1);
       if (!is_finished(result)) {
         result = e;
       }
-    } else if (is_pbes_true(e)) {
+    } else if (tr::is_true(e)) {
       result = visit_true(e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
-    } else if (is_pbes_false(e)) {
+    } else if (tr::is_false(e)) {
       result = visit_false(e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
-    } else if (is_pbes_not(e)) {
-      pbes_expression n = arg(e);
+    } else if (tr::is_not(e)) {
+      term_type n = tr::arg(e);
       result = visit_not(e, n, arg1);
       if (!is_finished(result)) {
-        result = not_(visit(n, arg1));
+        result = core::optimized_not(visit(n, arg1));
       }
-    } else if (is_pbes_and(e)) {
-      pbes_expression l = left(e);
-      pbes_expression r = right(e);
+    } else if (tr::is_and(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
       result = visit_and(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = and_(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
       }
-    } else if (is_pbes_or(e)) {
-      pbes_expression l = left(e);
-      pbes_expression r = right(e);
+    } else if (tr::is_or(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
       result = visit_or(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = or_(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
       }
-    } else if (is_pbes_imp(e)) {
-      pbes_expression l = left(e);
-      pbes_expression r = right(e);
+    } else if (tr::is_imp(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
       result = visit_imp(e, l, r, arg1);
       if (!is_finished(result)) {
-        result = imp(visit(l, arg1), visit(r, arg1));
+        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
-    } else if (is_pbes_forall(e)) {
-      data::data_variable_list qvars = var(e);
-      pbes_expression qexpr = arg(e);
+    } else if (tr::is_forall(e)) {
+      variable_sequence_type qvars = tr::var(e);
+      term_type qexpr = tr::arg(e);
       result = visit_forall(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = forall(qvars, visit(qexpr, arg1));
+        result = core::optimized_forall(qvars, visit(qexpr, arg1));
       }
-    } else if (is_pbes_exists(e)) {
-      data::data_variable_list qvars = var(e);
-      pbes_expression qexpr = arg(e);
+    } else if (tr::is_exists(e)) {
+      variable_sequence_type qvars = tr::var(e);
+      term_type qexpr = tr::arg(e);
       result = visit_exists(e, qvars, qexpr, arg1);
       if (!is_finished(result)) {
-        result = exists(qvars, visit(qexpr, arg1));
+        result = core::optimized_exists(qvars, visit(qexpr, arg1));
       }
     }
-    else if(is_propositional_variable_instantiation(e)) {
-      result = visit_propositional_variable(e, propositional_variable_instantiation(e), arg1);
+    else if(tr::is_prop_var(e)) {
+      result = visit_propositional_variable(e, e, arg1);
       if (!is_finished(result)) {
         result = e;
       }
@@ -206,186 +240,250 @@ std::cout << "<visit>" << pp(e) << " " << e << std::endl;
       }
     }
 
+    // TODO: this is a hack, to deal with the data_true <-> pbes_true issue
+    if (tr::is_true(result))
+    {
+      result = data::data_expr::true_();
+    }
+    if (tr::is_false(result))
+    {
+      result = data::data_expr::false_();
+    }
+
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cout << "<visit result>" << pp(result) << std::endl;
+std::cerr << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
   }
 };
 
-// for backwards compatibility
-struct pbes_expression_builder: public pbes_builder<int>
+/// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
+/// of the nodes, the expression is rebuilt from scratch.
+/// If a visit_<node> function returns term_type(), the recursion is continued
+/// in the children of this node, otherwise not.
+template <typename Term>
+struct pbes_expression_builder<Term, void>
 {
-  typedef pbes_builder<int> super;
-  
-  int dummy;
-  
-  /// Visit data expression node.
-  ///
-  virtual pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& /* d */)
+  /// \brief The type of the additional argument for the recursion
+  typedef void argument_type;
+
+  /// \brief The term type
+  typedef typename core::term_traits<Term>::term_type term_type;
+
+  /// \brief The data term type
+  typedef typename core::term_traits<Term>::data_term_type data_term_type;
+
+  /// \brief The variable sequence type
+  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
+
+  /// \brief The propositional variable instantiation type
+  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
+
+  /// \brief Returns true if the term is not equal to term_type().
+  /// This is used to determine if the recursion in a node needs to be continued.
+  /// \param x A term
+  /// \return True if the term is not equal to term_type()
+  bool is_finished(const term_type& x)
   {
-    return pbes_expression();
+    return x != term_type();
   }
 
-  /// Visit true node.
-  ///
-  virtual pbes_expression visit_true(const pbes_expression& x)
+  /// \brief Destructor.
+  virtual ~pbes_expression_builder()
+  { }
+
+  /// \brief Visit data_expression node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_data_expression(const term_type& x, const data_term_type& /* d */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit false node.
-  ///
-  virtual pbes_expression visit_false(const pbes_expression& x)
+  /// \brief Visit true node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_true(const term_type& x)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit not node.
-  ///
-  virtual pbes_expression visit_not(const pbes_expression& x, const pbes_expression& /* arg */)
+  /// \brief Visit false node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_false(const term_type& x)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit and node.
-  ///
-  virtual pbes_expression visit_and(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  /// \brief Visit not node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_not(const term_type& x, const term_type& /* arg */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit or node.
-  ///
-  virtual pbes_expression visit_or(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
+  /// \brief Visit and node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_and(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
-    return pbes_expression();
-  }    
-
-  /// Visit imp node.
-  ///
-  virtual pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
-  {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit forall node.
-  ///
-  virtual pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  /// \brief Visit or node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_or(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit exists node.
-  ///
-  virtual pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& /* variables */, const pbes_expression& /* expression */)
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_imp(const term_type& x, const term_type& /* left */, const term_type& /* right */)
   {
-    return pbes_expression();
+    return term_type();
   }
 
-  /// Visit propositional variable node.
-  ///
-  virtual pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& /* v */)
+  /// \brief Visit forall node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_forall(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
   {
-    return pbes_expression();
+    return term_type();
   }
-  
-  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
+
+  /// \brief Visit exists node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_exists(const term_type& x, const variable_sequence_type& /* variables */, const term_type& /* expression */)
+  {
+    return term_type();
+  }
+
+  /// \brief Visit propositional_variable node
+  /// \param x A term
+  /// \return The result of visiting the node
+  virtual term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& /* v */)
+  {
+    return term_type();
+  }
+
+  /// \brief Visit unknown node
   /// By default a mcrl2::runtime_error exception will be generated.
-  ///
-  virtual pbes_expression visit_unknown(const pbes_expression& e)
+  /// \param e A term
+  /// \return The result of visiting the node
+  virtual term_type visit_unknown(const term_type& e)
   {
-    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
-    return pbes_expression();
+    throw mcrl2::runtime_error(std::string("error in pbes_expression_builder::visit() : unknown pbes expression ") + e.to_string());
+    return term_type();
   }
 
-  /// Visit data expression node.
-  ///
-  pbes_expression visit_data_expression(const pbes_expression& x, const data::data_expression& d, int&)
-  {
-    return visit_data_expression(x, d);
-  }
-
-  /// Visit true node.
-  ///
-  pbes_expression visit_true(const pbes_expression& x, int&)
-  {
-    return visit_true(x);
-  }
-
-  /// Visit false node.
-  ///
-  pbes_expression visit_false(const pbes_expression& x, int&)
-  {
-    return visit_false(x);
-  }
-
-  /// Visit not node.
-  ///
-  pbes_expression visit_not(const pbes_expression& x, const pbes_expression& n, int&)
-  {
-    return visit_not(x, n);
-  }
-
-  /// Visit and node.
-  ///
-  pbes_expression visit_and(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
-  {
-    return visit_and(x, left, right);
-  }
-
-  /// Visit or node.
-  ///
-  pbes_expression visit_or(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
-  {
-    return visit_or(x, left, right);
-  }    
-
-  /// Visit imp node.
-  ///
-  pbes_expression visit_imp(const pbes_expression& x, const pbes_expression& left, const pbes_expression& right, int&)
-  {
-    return visit_imp(x, left, right);
-  }
-
-  /// Visit forall node.
-  ///
-  pbes_expression visit_forall(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
-  {
-    return visit_forall(x, variables, expression);
-  }
-
-  /// Visit exists node.
-  ///
-  pbes_expression visit_exists(const pbes_expression& x, const data::data_variable_list& variables, const pbes_expression& expression, int&)
-  {
-    return visit_exists(x, variables, expression);
-  }
-
-  /// Visit propositional variable node.
-  ///
-  pbes_expression visit_propositional_variable(const pbes_expression& x, const propositional_variable_instantiation& v, int&)
-  {
-    return visit_propositional_variable(x, v);
-  }
-  
-  /// Visit unknown node. This function is called whenever a node of unknown type is encountered.
-  /// By default a mcrl2::runtime_error exception will be generated.
-  ///
-  pbes_expression visit_unknown(const pbes_expression& e, int&)
-  {
-    throw mcrl2::runtime_error(std::string("error in pbes_builder::visit() : unknown pbes expression ") + e.to_string());
-    return visit_unknown(e);
-  }
-
-  /// Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
-  /// member functions. If the return value of a visit function equals pbes_expression(),
+  /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
+  /// member functions. If the return value of a visit function equals term_type(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  pbes_expression visit(pbes_expression e)
+  /// \param e A term
+  /// \return The visit result
+  term_type visit(term_type e)
   {
-    return super::visit(e, dummy);
+    typedef core::term_traits<term_type> tr;
+
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
+#endif
+
+    term_type result;
+
+    if (tr::is_data(e)) {
+      result = visit_data_expression(e, tr::term2dataterm(e));
+      if (!is_finished(result)) {
+        result = e;
+      }
+    } else if (tr::is_true(e)) {
+      result = visit_true(e);
+      if (!is_finished(result)) {
+        result = e;
+      }
+    } else if (tr::is_false(e)) {
+      result = visit_false(e);
+      if (!is_finished(result)) {
+        result = e;
+      }
+    } else if (tr::is_not(e)) {
+      term_type n = tr::arg(e);
+      result = visit_not(e, n);
+      if (!is_finished(result)) {
+        result = core::optimized_not(visit(n));
+      }
+    } else if (tr::is_and(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_and(e, l, r);
+      if (!is_finished(result)) {
+        result = core::optimized_and(visit(l), visit(r));
+      }
+    } else if (tr::is_or(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_or(e, l, r);
+      if (!is_finished(result)) {
+        result = core::optimized_or(visit(l), visit(r));
+      }
+    } else if (tr::is_imp(e)) {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_imp(e, l, r);
+      if (!is_finished(result)) {
+        result = core::optimized_imp(visit(l), visit(r));
+      }
+    } else if (tr::is_forall(e)) {
+      variable_sequence_type qvars = tr::var(e);
+      term_type qexpr = tr::arg(e);
+      result = visit_forall(e, qvars, qexpr);
+      if (!is_finished(result)) {
+        result = core::optimized_forall(qvars, visit(qexpr));
+      }
+    } else if (tr::is_exists(e)) {
+      variable_sequence_type qvars = tr::var(e);
+      term_type qexpr = tr::arg(e);
+      result = visit_exists(e, qvars, qexpr);
+      if (!is_finished(result)) {
+        result = core::optimized_exists(qvars, visit(qexpr));
+      }
+    }
+    else if(tr::is_prop_var(e)) {
+      result = visit_propositional_variable(e, e);
+      if (!is_finished(result)) {
+        result = e;
+      }
+    }
+    else {
+      result = visit_unknown(e);
+      if (!is_finished(result)) {
+        result = e;
+      }
+    }
+
+    // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
+    if (tr::is_true(result))
+    {
+      result = data::data_expr::true_();
+    }
+    if (tr::is_false(result))
+    {
+      result = data::data_expr::false_();
+    }
+
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+#endif
+
+    return result;
   }
 };
 

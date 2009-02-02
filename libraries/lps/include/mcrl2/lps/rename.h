@@ -31,11 +31,11 @@ namespace mcrl2 {
 namespace lps {
 
 /// \cond INTERNAL_DOCS
+//
 /// Generates a renaming of process parameters of the process p. The parameters are
 /// renamed according to the given identifier generator, and well typedness constraints
 /// are taken into account. The result consists of two vectors (src, dest) that specify
 /// the renaming src[i] := dest[i].
-///
 template <typename IdentifierGenerator>
 std::pair<std::vector<data::data_variable>, std::vector<data::data_variable> >
 rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& generator)
@@ -63,7 +63,10 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
 }
 /// \endcond
 
-/// Renames the process parameters in the process p using the given identifier generator.
+/// \brief Renames the process parameters in the process p using the given identifier generator.
+/// \param p A linear process
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 linear_process rename_process_parameters(const linear_process& p, IdentifierGenerator& generator)
 {
@@ -71,8 +74,12 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
   return atermpp::partial_replace(p, lps::detail::make_data_variable_replacer(r.first, r.second));
 }
 
-/// Renames the process parameters in the process p, such that none of them
+/// \brief Renames the process parameters in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
+/// \param p A linear process
+/// \param forbidden_names A set of names
+/// \param postfix A string
+/// \return The rename result
 inline
 linear_process rename_process_parameters(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
@@ -81,7 +88,10 @@ linear_process rename_process_parameters(const linear_process& p, const std::set
   return rename_process_parameters(p, generator);
 }
 
-/// Renames the process parameters in the specification spec using the given identifier generator.
+/// \brief Renames the process parameters in the specification spec using the given identifier generator.
+/// \param spec A linear process specification
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 specification rename_process_parameters(const specification& spec, IdentifierGenerator& generator)
 {
@@ -96,8 +106,12 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
   return result;
 }
 
-/// Renames the process parameters in the specification spec, such that none of them
+/// \brief Renames the process parameters in the specification spec, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
+/// \param spec A linear process specification
+/// \param forbidden_names A set of names
+/// \param postfix A string
+/// \return The rename result
 inline
 specification rename_process_parameters(const specification& spec, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
@@ -106,7 +120,10 @@ specification rename_process_parameters(const specification& spec, const std::se
   return rename_process_parameters(spec, generator);
 }
 
-/// Renames the free variables in the process p using the given identifier generator.
+/// \brief Renames the free variables in the process p using the given identifier generator.
+/// \param p A linear process
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 linear_process rename_free_variables(const linear_process& p, IdentifierGenerator& generator)
 {
@@ -132,8 +149,12 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
   return atermpp::partial_replace(p, lps::detail::make_data_variable_replacer(src, dest));
 }
 
-/// Renames the free variables in the process p, such that none of them
+/// \brief Renames the free variables in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
+/// \param p A linear process
+/// \param forbidden_names A set of names
+/// \param postfix A string
+/// \return The rename result
 inline
 linear_process rename_free_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
@@ -142,7 +163,10 @@ linear_process rename_free_variables(const linear_process& p, const std::set<cor
   return rename_free_variables(p, generator);
 }
 
-/// Renames the summation variables in the process p using the given identifier generator.
+/// \brief Renames the summation variables in the process p using the given identifier generator.
+/// \param p A linear process
+/// \param generator A generator for fresh identifiers
+/// \return The rename result
 template <typename IdentifierGenerator>
 linear_process rename_summation_variables(const linear_process& p, IdentifierGenerator& generator)
 {
@@ -175,8 +199,12 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
   return set_summands(p, summand_list(new_summands.begin(), new_summands.end()));
 }
 
-/// Renames the summation variables in the process p, such that none of them
+/// \brief Renames the summation variables in the process p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
+/// \param p A linear process
+/// \param forbidden_names A set of names
+/// \param postfix A string
+/// \return The rename result
 inline
 linear_process rename_summation_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
