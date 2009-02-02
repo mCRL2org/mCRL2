@@ -22,8 +22,8 @@ namespace data {
 
 namespace detail {
 
-/// Function object that adds a data variable to result if it doesn't exist
-/// in the two ranges [first1, last1[ and [first2, last2[.
+/// \brief Function object that adds a data variable to result if it doesn't exist
+/// in the two ranges [first1, last1) and [first2, last2).
 template <typename InputIterator1, typename InputIterator2, typename OutputIterator>
 struct data_variable_collector
 {
@@ -47,6 +47,9 @@ struct data_variable_collector
       m_dest(dest)
   {}
   
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   bool operator()(atermpp::aterm_appl t)
   {
     if (is_data_variable(t))

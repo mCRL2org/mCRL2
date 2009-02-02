@@ -14,10 +14,12 @@
 
 #include <cassert>
 #include <string>
+#include <set>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -27,29 +29,28 @@ namespace data {
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable
-/// \brief data variable
-///
+/// \brief Data variable
 // DataVarId(<String>, <SortExpr>)
 class data_variable: public data_expression
 {
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_variable()
       : data_expression(core::detail::constructDataVarId())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
+    /// \param t A term
     data_variable(atermpp::aterm_appl t)
      : data_expression(t)
     {
       assert(core::detail::check_rule_DataVarId(m_term));
     }
 
-    /// Constructor for strings like "d:D".
+    /// \brief Constructor for strings like "d:D".
     /// Only works for constant sorts.
-    ///
+    /// \param s A string
     data_variable(const std::string& s)
     {
       std::string::size_type idx = s.find(':');
@@ -59,50 +60,55 @@ class data_variable: public data_expression
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), mcrl2::data::sort_expression(type)));
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
+    /// \param name A
+    /// \param s A sort expression
     data_variable(core::identifier_string name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(name, s))
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
+    /// \param name A string
+    /// \param s A sort expression
     data_variable(const std::string& name, const sort_expression& s)
      : data_expression(core::detail::gsMakeDataVarId(core::detail::gsString2ATermAppl(name.c_str()), s))
     {}
 
-    /// Returns the name of the data_variable.
-    ///
+    /// \brief Returns the name of the data_variable.
+    /// \return The name of the data variable.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
 
-    /// Returns the sort of the data_variable.
-    ///
+    /// \brief Returns the sort of the data_variable.
+    /// \return The sort of the data variable.
     data::sort_expression sort() const
     {
       return atermpp::arg2(*this);
     }
   };
-                                                            
-/// \brief singly linked list of data variables
-///
-typedef atermpp::term_list<data_variable> data_variable_list;
 
-/// \brief Returns true if the term t is a data variable
-inline
-bool is_data_variable(atermpp::aterm_appl t)
-{
-  return core::detail::gsIsDataVarId(t);
-}
+  /// \brief Read-only singly linked list of data variables
+  typedef atermpp::term_list<data_variable> data_variable_list;
 
-/// \brief Converts a data_variable_list to a data_expression_list.
-inline
-data_expression_list make_data_expression_list(data_variable_list l)
-{
-  return ATermList(l);
-}
+  /// \brief Returns true if the term t is a data variable
+  /// \param t A term
+  /// \return True if the term is a data variable.
+  inline
+  bool is_data_variable(atermpp::aterm_appl t)
+  {
+    return core::detail::gsIsDataVarId(t);
+  }
+
+  /// \brief Converts a data_variable_list to a data_expression_list.
+  /// \param l A sequence of data variables
+  /// \return The conversion of the sequence to data expressions.
+  inline
+  data_expression_list make_data_expression_list(data_variable_list l)
+  {
+    return ATermList(l);
+  }
 
 } // namespace data
 

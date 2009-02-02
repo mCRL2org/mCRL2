@@ -14,10 +14,15 @@
 
 #include "aterm2.h"
 
-  /// \brief A base class for classes that simplify binary decision diagrams. These classes take
-  /// \brief a BDD as input and try to simplify this BDD.
-  /// The method BDD_Simplifier::simplify receives a BDD as parameter a_bdd and tries to find an equivalent BDD that is
-  /// smaller. It returns the reduced BDD if such a BDD is found. If a reduced BDD is not found, the original BDD is returned.
+  /** \brief A base class for simplifying binary decision diagrams.
+   *
+   * \detail
+   * These classes take a BDD as input and try to simplify this BDD.
+   * The method BDD_Simplifier::simplify receives a BDD as parameter
+   * a_bdd and tries to find an equivalent BDD that is smaller. It
+   * returns the reduced BDD if such a BDD is found. If a reduced BDD is
+   * not found, the original BDD is returned.
+  */
 
 class BDD_Simplifier {
   protected:

@@ -21,68 +21,60 @@ namespace data {
 
 class sort_identifier;
 
-/// \brief singly linked list of sorts
-///
+/// \brief Read-only singly linked list of sorts
 typedef atermpp::term_list<sort_identifier> sort_identifier_list;
 
 /// \brief sort id.
-///
 //<SortId>       ::= SortId(<String>)
 class sort_identifier: public sort_expression
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     sort_identifier()
       : sort_expression(core::detail::constructSortId())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_identifier(ATermAppl t)
       : sort_expression(t)
     {
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_identifier(atermpp::aterm_appl t)
       : sort_expression(t)
     {
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param name A
     sort_identifier(core::identifier_string name)
       : sort_expression(core::detail::gsMakeSortId(name))
     {
       assert(core::detail::check_rule_SortId(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param s A string
     sort_identifier(std::string s)
       : sort_expression(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
 
-    /// Returns the name of the sort identifier.
-    ///
+    /// \brief Returns the name of the sort identifier.
+    /// \return The name of the sort identifier.
     core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
-    
-    /// \overload
-    ///
-    bool is_arrow() const
-    {
-      return false;
-    }
 };
 
 /// \brief Returns true if the term t is a sort identifier.
+/// \param t A term
+/// \return True if the term t is a sort identifier.
 inline
 bool is_sort_identifier(atermpp::aterm_appl t)
 {

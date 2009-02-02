@@ -73,7 +73,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     void translate_add_c(ATermAppl a_clause);
     void translate_c_nat(ATermAppl a_clause);
     void translate_c_int(ATermAppl a_clause);
-    void translate_c_real(ATermAppl a_clause);
+    //void translate_c_real(ATermAppl a_clause);
     void translate_unknown_operator(ATermAppl a_clause);
     void translate_variable(ATermAppl a_clause);
     void translate_nat_variable(ATermAppl a_clause);
@@ -141,6 +141,7 @@ namespace mcrl2 {
 }
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 # include "mcrl2/core/messaging.h"
+# include <unistd.h>
 
 namespace mcrl2 {
   namespace data {

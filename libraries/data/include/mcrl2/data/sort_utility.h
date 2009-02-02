@@ -50,6 +50,18 @@ data::sort_expression_list get_sorts(data::data_variable_list v)
 
 /// Undocumented function.
 inline
+data::sort_expression_list get_sorts(data::data_expression_list v)
+{
+	data::sort_expression_list result;
+	for (data::data_expression_list::iterator i = v.begin(); i != v.end(); i++)
+	{
+		result = push_back(result, i->sort());
+	}
+	return reverse(result);
+}
+
+/// Undocumented function.
+inline
 bool check_finite(data::data_operation_list fl, data::sort_expression s)
 {
 	return is_finite(fl, s);

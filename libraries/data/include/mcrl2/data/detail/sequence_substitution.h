@@ -9,8 +9,8 @@
 /// \file sequence_substitution.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
-#define MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#ifndef MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#define MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
 
 #include <algorithm>
 #include <utility>
@@ -41,6 +41,9 @@ struct sequence_substitution
       : m_variable(variable)
     {}
     
+    /// \brief Function call operator
+    /// \param a A pair of data variables
+    /// \return The function result
     bool operator()(const std::pair<data_variable, data_variable>& a) const
     {
       return m_variable == a.first;
@@ -55,6 +58,9 @@ struct sequence_substitution
       : m_assignments(assignments)
     {}
     
+    /// \brief Function call operator
+    /// \param t A term
+    /// \return The function result
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
       if (!is_data_variable(t))
@@ -79,14 +85,18 @@ struct sequence_substitution
     : m_assignments(assignments)
   {}
   
-  /// Applies the assignments to the term t and returns the result.
-  ///
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
   atermpp::aterm operator()(atermpp::aterm t) const
   {
     return atermpp::partial_replace(t, sequence_substitution_helper(m_assignments));
   }
 };
 
+/// \brief Convenience function for creating a sequence_substitution
+/// \param c A container
+/// \return A sequence_substitution
 template <typename Container>
 sequence_substitution<Container> make_sequence_substitution(const Container& c)
 {
@@ -99,4 +109,4 @@ sequence_substitution<Container> make_sequence_substitution(const Container& c)
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H
+#endif // MCRL2_DATA_DETAIL_SEQUENCE_SUBSTITUTION_H

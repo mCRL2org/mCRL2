@@ -11,10 +11,13 @@
 #ifndef __REWR_JITTYC_H
 #define __REWR_JITTYC_H
 
+#include "mcrl2/data/rewrite.h"
+
+#ifdef MCRL2_JITTYC_AVAILABLE
+
 //#define _JITTYC_STORE_TREES
 #include <utility>
 #include <string>
-#include "mcrl2/data/rewrite.h"
 
 typedef unsigned int* nfs_array;
 
@@ -33,12 +36,11 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm rewriteInternal(ATerm Term);
 		ATermList rewriteInternalList(ATermList Terms);
 
-		void setSubstitution(ATermAppl Var, ATerm Expr);
-		ATerm getSubstitution(ATermAppl Var);
+		void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
 
-#ifndef NO_DYNLOAD
 	private:
 		int num_opids;
 
@@ -92,7 +94,8 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);
 		ATermAppl fromInner(ATerm Term);
-#endif
 };
+
+#endif
 
 #endif

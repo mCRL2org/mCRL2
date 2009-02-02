@@ -24,45 +24,47 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Data application.
-///
 // DataAppl(<DataExpr>, <DataExpr>+)
 class data_application: public data_expression
 {
   public:
-    /// Constructor.
-    ///
+
+    /// \brief Constructor.
     data_application()
       : data_expression(core::detail::constructDataAppl())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     data_application(atermpp::aterm_appl t)
      : data_expression(t)
     {
       assert(core::detail::check_term_DataAppl(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param expr A data expression
+    /// \param args A sequence of data expressions
     data_application(data_expression expr, data_expression_list args)
      : data_expression(core::detail::gsMakeDataAppl(expr, args))
     {}
 
-    /// Returns the head of the data application.
-    ///
+    /// \brief Returns the head of the data application.
+    /// \return The head of the data application.
     data_expression head() const
     {
       return core::detail::gsGetDataExprHead(*this);
     }
 
-    /// Returns the arguments of the data expression.
-    ///
+    /// \brief Returns the arguments of the data application.
+    /// \return The arguments of the data application.
     data_expression_list arguments() const
     {
       return core::detail::gsGetDataExprArgs(*this);
     }
 
+    /// \brief Returns the sort of the data application.
+    /// \return The sort of the data application.
     sort_expression sort() const
     {
       sort_expression s = this->head().sort();
@@ -72,11 +74,12 @@ class data_application: public data_expression
 
   };
 
-/// \brief singly linked list of data applications
-///
+/// \brief Read-only singly linked list of data applications
 typedef atermpp::term_list<data_application> data_application_list;
 
 /// \brief Returns true if the term t is a data application
+/// \param t A term
+/// \return True if the term is a data application.
 inline
 bool is_data_application(atermpp::aterm_appl t)
 {

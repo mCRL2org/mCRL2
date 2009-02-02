@@ -21,7 +21,7 @@
   /// \brief of sort Bool in the mCRL2 format and determines whether or not these expersions are tautologies or
   /// \brief contradictions.
   /// The class Formula_Checker is initialized with a specification of data equations in internal mCRL2 format using the
-  /// constructor Formula_Checker::Formula_Checker. After initialization, the function Formula_Checker::check_formulas can
+  /// \brief Constructor Formula_Checker::Formula_Checker. After initialization, the function Formula_Checker::check_formulas can
   /// be called any number of times to check whether the expressions of sort Bool in internal mCRL2 format in the list
   /// passed as parameter a_formulas are tautologies or contradictions.
   ///

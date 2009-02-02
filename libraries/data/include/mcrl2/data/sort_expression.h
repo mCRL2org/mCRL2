@@ -28,14 +28,11 @@ namespace data {
 
 class sort_expression;
 
-/// \brief singly linked list of sort expressions
-///
+/// \brief Read-only singly linked list of sort expressions
 typedef atermpp::term_list<sort_expression> sort_expression_list;
 
-/// \brief sort expression.
-///
+/// \brief Sort expression.
 /// A sort expression can either be a sort identifier or a sort arrow.
-/// 
 //<SortExpr>    ::= <SortId>
 //                | SortList(<SortExpr>)                                   (- di)
 //                | SortSet(<SortExpr>)                                    (- di)
@@ -48,36 +45,35 @@ typedef atermpp::term_list<sort_expression> sort_expression_list;
 class sort_expression: public atermpp::aterm_appl
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     sort_expression()
       : atermpp::aterm_appl(core::detail::constructSortId())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_expression(ATermAppl t)
       : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_SortExpr(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_expression(atermpp::aterm_appl t)
       : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_SortExpr(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param s A string
     sort_expression(std::string s)
       : atermpp::aterm_appl(core::detail::gsMakeSortId(core::detail::gsString2ATermAppl(s.c_str())))
     {}
-    
-    /// Returns true if it is a sort_expression of type A -> B.
-    ///
+
+    /// \brief Returns true if it is a sort_expression of type A -> B.
+    /// \return True if the sort is an arrow sort.
     bool is_arrow() const
     {
       return core::detail::gsIsSortArrow(*this);
@@ -85,97 +81,81 @@ class sort_expression: public atermpp::aterm_appl
 };
 
 /// \brief Returns true if the term t is a sort_expression
+/// \param t A term
+/// \return True if the term is a sort expression.
 inline
 bool is_sort_expression(atermpp::aterm_appl t)
 {
   return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
 }
 
-/// Returns the sort_expression 'domain -> range'.
+/// \brief Returns the sort_expression 'domain -> range'.
+/// \param domain A sequence of sort expressions
+/// \param range A sort expression
+/// \return The arrow sort corresponding to the given domain and range.
 inline
 sort_expression arrow(sort_expression_list domain, sort_expression range)
 {
   return core::detail::gsMakeSortArrow(domain, range);
 }
 
-/// Returns the domain sorts of s.
+/// \brief Returns the domain sorts of s.
 /// \deprecated
+/// \param s A sort expression
+/// \return The domain sorts of the given sort.
 inline
 sort_expression_list domain_sorts(sort_expression s)
 {
   return core::detail::gsGetSortExprDomain(s);
 }
 
-/// Returns the range sort of s.
+/// \brief Returns the range sort of s.
 /// \deprecated
+/// \param s A sort expression
+/// \return The range sort of the given sort.
 inline
 sort_expression result_sort(sort_expression s)
 {
   return core::detail::gsGetSortExprResult(s);
 }
 
-/// Returns the source of the sort.
-/// <ul>
-/// <li>source(A) = []</li>
-/// <li>source(A->B) = [A]</li>
-/// </ul>
-/// \deprecated
-inline
-sort_expression_list source(sort_expression s)
-{
-  if (s.is_arrow())
-    return atermpp::list_arg1(s);
-  else
-    return atermpp::make_list(s);
-}
-
-/// Returns the target of the sort.
-/// <ul>
-/// <li>target(A) = A</li>
-/// <li>target(A->B) = B</li>
-/// </ul>
-/// \deprecated
-inline
-sort_expression target(sort_expression s)
-{
-  if (s.is_arrow())
-    return atermpp::arg2(s);
-  else
-    return s;
-}
-
-/// Accessor functions and predicates for sort expressions.
+/// \brief Accessor functions and predicates for sort expressions.
 namespace sort_expr {
 
-  /// Returns the predefined sort_expression real.
+  /// \brief Returns the predefined sort_expression real.
+  /// \return The predefined sort Real.
   inline
   sort_expression real()
   {
     return core::detail::gsMakeSortExprReal();
   }
-  
-  /// Returns the predefined sort_expression int.
+
+  /// \brief Returns the predefined sort_expression int.
+  /// \return The predefined sort Int.
   inline
   sort_expression int_()
   {
     return core::detail::gsMakeSortExprInt();
   }
-  
-  /// Returns the predefined sort_expression pos.
+
+  /// \brief Returns the predefined sort_expression pos.
+  /// \return The predefined sort Pos.
   inline
   sort_expression pos()
   {
     return core::detail::gsMakeSortExprPos();
   }
-  
-  /// Returns the predefined sort_expression nat.
+
+  /// \brief Returns the predefined sort_expression nat.
+  /// \return The predefined sort Nat.
   inline
   sort_expression nat()
   {
     return core::detail::gsMakeSortExprNat();
   }
-  
-  /// Returns the predefined sort_expression bool.
+
+  /// \brief Returns the predefined sort_expression bool.
+  /// \return The predefined sort Bool.
   inline
   sort_expression bool_()
   {
@@ -192,10 +172,10 @@ namespace sort_expr {
   inline bool is_pos (atermpp::aterm_appl t) { return t == pos(); }
 
   /// \brief Returns true if the term t equals the sort_expression nat
-  inline bool is_nat (atermpp::aterm_appl t) { return t == nat(); }                                 
+  inline bool is_nat (atermpp::aterm_appl t) { return t == nat(); }
 
   /// \brief Returns true if the term t equals the sort_expression bool
-  inline bool is_bool(atermpp::aterm_appl t) { return t == bool_(); }                                 
+  inline bool is_bool(atermpp::aterm_appl t) { return t == bool_(); }
 
 } // namespace sort_expr
 

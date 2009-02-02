@@ -9,8 +9,8 @@
 /// \file sorted_sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_OLD_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
-#define MCRL2_OLD_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
+#define MCRL2_DATA_DETAIL_SORTED_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
@@ -22,6 +22,10 @@ namespace data {
 
 namespace detail {
 
+/// \brief Returns the union of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The union of two sets.
 template <typename T>
 std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
 {
@@ -30,6 +34,10 @@ std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
+/// \brief Returns the difference of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The difference of two sets.
 template <typename T>
 std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
 {
@@ -38,6 +46,10 @@ std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
   return result;
 }
 
+/// \brief Returns the intersection of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The intersection of two sets.
 template <typename T>
 std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 {
@@ -52,4 +64,4 @@ std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_SORTED_DETAIL_SEQUENCE_ALGORITHM_H
+#endif // MCRL2_DATA_SORTED_DETAIL_SEQUENCE_ALGORITHM_H

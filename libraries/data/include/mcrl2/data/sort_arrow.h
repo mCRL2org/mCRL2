@@ -20,14 +20,11 @@ namespace data {
 
 class sort_arrow;
 
-/// \brief singly linked list of sorts
-///
+/// \brief Read-only singly linked list of sorts
 typedef atermpp::term_list<sort_arrow> sort_arrow_list;
 
 /// \brief sort arrow.
-///
 /// Models sorts of shape <tt>A -\> B</tt>.
-/// 
 //<SortExpr>    ::= <SortId>
 //                | SortList(<SortExpr>)                                   (- di)
 //                | SortSet(<SortExpr>)                                    (- di)
@@ -38,59 +35,54 @@ typedef atermpp::term_list<sort_arrow> sort_arrow_list;
 class sort_arrow: public sort_expression
 {
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     sort_arrow()
       : sort_expression(core::detail::constructSortArrow())
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_arrow(ATermAppl t)
       : sort_expression(t)
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     sort_arrow(atermpp::aterm_appl t)
       : sort_expression(t)
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
-   
-    /// Constructor.
-    ///
+
+    /// \brief Constructor.
+    /// \param arguments A sequence of sort expressions
+    /// \param result A sort expression
     sort_arrow(sort_expression_list arguments, sort_expression result)
       : sort_expression(core::detail::gsMakeSortArrow(arguments, result))
     {
       assert(core::detail::check_term_SortArrow(m_term));
     }
-   
-    /// \overload
-    ///
-    bool is_arrow() const
-    {
-      return true;
-    }
 
-    /// Returns the argument sorts.
-    ///
+    /// \brief Returns the argument sorts.
+    /// \return The arguments of the sort arrow.
     sort_expression_list argument_sorts() const
     {
       return atermpp::list_arg1(*this);
     }
 
-    /// Returns the result sort.
-    ///
+    /// \brief Returns the result sort.
+    /// \return The target sort of the sort arrow.
     sort_expression result_sort() const
     {
       return atermpp::arg2(*this);
-    }   
+    }
 };
 
 /// \brief Returns true if the term t is a sort arrow.
+/// \param t A term
+/// \return True if the term is a sort arrow.
 inline
 bool is_sort_arrow(atermpp::aterm_appl t)
 {

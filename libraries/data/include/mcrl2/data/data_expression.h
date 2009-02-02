@@ -9,60 +9,93 @@
 /// \file mcrl2/data/data_expression.h
 /// \brief The class data_expression.
 
-#ifndef MCRL2_OLD_DATA_DATA_EXPRESSION_H
-#define MCRL2_OLD_DATA_DATA_EXPRESSION_H
+//#define MCRL2_DATA_EXPRESSION_DEBUG
 
+#ifndef MCRL2_DATA_DATA_EXPRESSION_H
+#define MCRL2_DATA_DATA_EXPRESSION_H
+
+#include <iostream>
 #include <string>
 #include <cassert>
+#include <stdexcept>
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/join.h"
+#include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/sort_arrow.h"
 
 namespace mcrl2 {
 
+/// \brief The main namespace for the Data library.
 namespace data {
 
 // prototypes
 class data_expression;
 
-/// \brief singly linked list of data expressions
-///
+/// \cond INTERNAL_DOCS
+namespace detail {
+  bool check_data_application_sorts(atermpp::aterm_appl t);
+}
+/// \endcond
+
+/// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<data_expression> data_expression_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
-/// \brief data expression
-/// Represents a data expression or nil.
-/// Before using a data expression, the user must make sure that it is not nil.
+/// \brief Data expression
+/// Represents a data expression or nil. The user must make sure that the
+/// expression is not nil before using it.
 class data_expression: public atermpp::aterm_appl
 {
+  protected:
+    /// \brief This function checks if the data applications contained in this term
+    /// are well defined, using the function data_application::check_sorts.
+    void check_data_applications() const
+    {
+#ifdef MCRL2_DATA_EXPRESSION_DEBUG
+      try
+      {
+        atermpp::for_each(*this, detail::check_data_application_sorts);
+      }
+      catch(std::runtime_error e)
+      {
+        std::cerr << e.what() << std::endl;
+        assert(false);
+      }
+#endif
+    }
+
   public:
-    /// Constructor.
-    ///             
+
+    /// \brief Constructor.
     data_expression()
       : atermpp::aterm_appl(core::detail::constructDataExpr())
     {}
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
+    /// \param term A term
     data_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
+      check_data_applications();
     }
 
-    /// Constructor.
-    ///             
+    /// \brief Constructor.
+    /// \param term A term
     data_expression(ATermAppl term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_rule_DataExprOrNil(m_term));
+      check_data_applications();
     }
 
-    /// Returns the sort of the data expression.
-    ///
+    /// \brief Returns the sort of the data expression.
+    /// \return The sort of the data expression.
     sort_expression sort() const
     {
       ATermAppl result = core::detail::gsGetSort(*this);
@@ -70,9 +103,12 @@ class data_expression: public atermpp::aterm_appl
       return sort_expression(result);
     }
 
-    /// Applies a substitution to this data expression and returns the result.
-    /// The Substitution object must supply the method atermpp::aterm operator()(atermpp::aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
@@ -81,29 +117,15 @@ class data_expression: public atermpp::aterm_appl
 };
 
 /// \brief Returns true if the term t is a data expression
+/// \param t A term
+/// \return True if the term is a data expression.
 inline
 bool is_data_expression(atermpp::aterm_appl t)
 {
   return core::detail::gsIsDataExpr(t);
 }
 
-/// Returns the head of the data expression t.
-/// \deprecated
-inline
-data_expression DEPRECATED_FUNCTION_HEAD(data_expression t)
-{
-  return core::detail::gsGetDataExprHead(t);
-}
-
-/// Returns the arguments of the data expression t.
-/// \deprecated
-inline
-data_expression_list DEPRECATED_FUNCTION_ARGUMENTS(data_expression t)
-{
-  return core::detail::gsGetDataExprArgs(t);
-}
-
-/// Accessor functions and predicates for data expressions.
+/// \brief Accessor functions and predicates for data expressions.
 namespace data_expr {
   // //data expression
   // <DataExpr>     ::= Id(<String>)                                          (- tc)
@@ -164,25 +186,27 @@ namespace data_expr {
   // that we know we are working with a Binder before we take the binding operator.
 
   /// \brief Returns true if the term t is an existial quantification
-  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsExists(atermpp::aterm_appl(t(0))); }
+  inline bool is_exists(atermpp::aterm_appl t) { return core::detail::gsIsDataExprExists(t); }
 
   /// \brief Returns true if the term t is a universal quantification
-  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsForall(atermpp::aterm_appl(t(0))); }
+  inline bool is_forall(atermpp::aterm_appl t) { return core::detail::gsIsDataExprForall(t); }
 
   /// \brief Returns true if the term t is a lambda expression
-  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsBinder(t) && core::detail::gsIsLambda(atermpp::aterm_appl(t(0))); }
+  inline bool is_lambda(atermpp::aterm_appl t) { return core::detail::gsIsLambdaOpId(t); }
 
   /// \brief Returns a real with value i
-  // TODO: a function gsMakaDataExprReal_int will be added by Aad
-  // Perhaps even real(double d) will become possible?
+  /// \param i An integer value
+  /// \return A real with value i
   inline
   data_expression real(int i)
   {
-    return core::detail::gsMakeDataExprCReal(core::detail::gsMakeDataExprInt_int(i));
+    return core::detail::gsMakeDataExprReal_int(i);
   }
 
   /// \brief Returns a pos with value i
-  /// Precondition: i > 0
+  /// \pre i > 0
+  /// \param i A positive integer
+  /// \return A pos with value i
   inline
   data_expression pos(unsigned int i)
   {
@@ -191,6 +215,8 @@ namespace data_expr {
   }
 
   /// \brief Returns a nat with value i
+  /// \param i A positive integer
+  /// \return A nat with value i
   inline
   data_expression nat(unsigned int i)
   {
@@ -198,58 +224,76 @@ namespace data_expr {
   }
 
   /// \brief Returns an int with value i
+  /// \param i An integer value
+  /// \return An int with value i
   inline
   data_expression int_(int i)
   {
     return core::detail::gsMakeDataExprInt_int(i);
   }
 
-  /// \brief Returns the expression true
+  /// \brief Make the value true
+  /// \return The value \p true
   inline
   data_expression true_()
   {
     return data_expression(core::detail::gsMakeDataExprTrue());
   }
 
-  /// \brief Returns the expression false
+  /// \brief Make the value false
+  /// \return The value \p false
   inline
   data_expression false_()
   {
     return data_expression(core::detail::gsMakeDataExprFalse());
   }
 
-  /// \brief Returns not applied to p
+  /// \brief Make a negation
   /// This function contains optimizations for true and false arguments.
+  /// \param p A data expression
+  /// \return The value <tt>!p</tt>
   inline
   data_expression not_(data_expression p)
   {
     return data_expression(core::detail::gsMakeDataExprNot(p));
   }
 
-  /// \brief Returns and applied to p and q
+  /// \brief Make a conjunction
   /// This function contains optimizations for true and false arguments.
+  /// \param p A data expression
+  /// \param q A data expression
+  /// \return The value <tt>p && q</tt>
   inline
   data_expression and_(data_expression p, data_expression q)
   {
     return data_expression(core::detail::gsMakeDataExprAnd(p,q));
   }
 
-  /// \brief Returns or applied to p and q
+  /// \brief Make a disjunction
   /// This function contains optimizations for true and false arguments.
+  /// \param p A data expression
+  /// \param q A data expression
+  /// \return The value <tt>p || q</tt>
   inline
   data_expression or_(data_expression p, data_expression q)
   {
     return data_expression(core::detail::gsMakeDataExprOr(p,q));
   }
 
-  /// \brief Returns or applied to the sequence of data expressions [first, last[
+  /// \brief Returns or applied to the sequence of data expressions [first, last)
+  /// \param first Start of a sequence of data expressions
+  /// \param last End of a sequence of data expressions
+  /// \return Or applied to the sequence of data expressions [first, last)
   template <typename FwdIt>
   data_expression join_or(FwdIt first, FwdIt last)
   {
     return core::detail::join(first, last, or_, false_());
   }
-  
-  /// \brief Returns and applied to the sequence of data expressions [first, last[
+
+  /// \brief Returns and applied to the sequence of data expressions [first, last)
+  /// \param first Start of a sequence of data expressions
+  /// \param last End of a sequence of data expressions
+  /// \return And applied to the sequence of data expressions [first, last)
   template <typename FwdIt>
   data_expression join_and(FwdIt first, FwdIt last)
   {
@@ -302,6 +346,8 @@ namespace data_expr {
   inline bool is_abs(data_expression t) { return core::detail::gsIsDataExprAbs(t); }
 
   /// \brief Returns the expression d - e
+  /// \param d A data expression
+  /// \return The expression d - e
   inline
   data_expression negate(data_expression d)
   {
@@ -309,6 +355,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d + e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d + e
   inline
   data_expression plus(data_expression d, data_expression e)
   {
@@ -316,6 +365,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d - e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d - e
   inline
   data_expression minus(data_expression d, data_expression e)
   {
@@ -323,6 +375,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d * e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d * e
   inline
   data_expression multiplies(data_expression d, data_expression e)
   {
@@ -330,6 +385,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d / e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d / e
   inline
   data_expression divides(data_expression d, data_expression e)
   {
@@ -337,6 +395,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d % e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d % e
   inline
   data_expression modulus(data_expression d, data_expression e)
   {
@@ -344,6 +405,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d = e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d = e
   inline
   data_expression equal_to(data_expression d, data_expression e)
   {
@@ -351,6 +415,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d != e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d != e
   inline
   data_expression not_equal_to(data_expression d, data_expression e)
   {
@@ -358,6 +425,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d < e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d < e
   inline
   data_expression less(data_expression d, data_expression e)
   {
@@ -365,6 +435,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d > e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d < e
   inline
   data_expression greater(data_expression d, data_expression e)
   {
@@ -372,6 +445,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d <= e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d <= e
   inline
   data_expression less_equal(data_expression d, data_expression e)
   {
@@ -379,6 +455,9 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression d >= e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return The expression d >= e
   inline
   data_expression greater_equal(data_expression d, data_expression e)
   {
@@ -386,6 +465,9 @@ namespace data_expr {
   }
 
   /// \brief Returns an expression for the minimum of d and e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return An expression for the minimum of d and e
   inline
   data_expression min_(data_expression d, data_expression e)
   {
@@ -393,6 +475,9 @@ namespace data_expr {
   }
 
   /// \brief Returns an expression for the maximum of d and e
+  /// \param d A data expression
+  /// \param e A data expression
+  /// \return An expression for the maximum of d and e
   inline
   data_expression max_(data_expression d, data_expression e)
   {
@@ -400,6 +485,8 @@ namespace data_expr {
   }
 
   /// \brief Returns an expression for the absolute value of d
+  /// \param d A data expression
+  /// \return An expression for the absolute value of d
   inline
   data_expression abs(data_expression d)
   {
@@ -407,6 +494,10 @@ namespace data_expr {
   }
 
   /// \brief Returns the expression 'if i then t else e'
+  /// \param i A data expression
+  /// \param t A data expression
+  /// \param e A data expression
+  /// \return The expression 'if i then t else e'
   inline
   data_expression if_(data_expression i, data_expression t, data_expression e)
   {
@@ -414,23 +505,31 @@ namespace data_expr {
   }
 
   namespace optimized {
-    /// \brief Returns not applied to p, and simplifies the result.
+    /// \brief Make a negation
+    /// \param p A data expression
+    /// \return The value <tt>!p</tt>
     inline
     data_expression not_(data_expression p)
     {
       namespace d = data_expr;
       return core::detail::optimized_not(p, d::not_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
-    
-    /// \brief Returns and applied to p and q, and simplifies the result.
+
+    /// \brief Make a conjunction
+    /// \param p A data expression
+    /// \param q A data expression
+    /// \return The value <tt>p && q</tt>
     inline
     data_expression and_(data_expression p, data_expression q)
     {
       namespace d = data_expr;
       return core::detail::optimized_and(p, q, d::and_, d::true_(), d::is_true, d::false_(), d::is_false);
     }
-    
-    /// \brief Returns or applied to p and q, and simplifies the result.
+
+    /// \brief Make a disjunction
+    /// \param p A data expression
+    /// \param q A data expression
+    /// \return The value <tt>p || q</tt>
     inline
     data_expression or_(data_expression p, data_expression q)
     {
@@ -439,6 +538,9 @@ namespace data_expr {
     }
 
     /// \brief Returns the expression d = e
+    /// \param d A data expression
+    /// \param e A data expression
+    /// \return The expression d = e
     inline
     data_expression equal_to(data_expression d, data_expression e)
     {
@@ -448,8 +550,11 @@ namespace data_expr {
       }
       return core::detail::gsMakeDataExprEq(d, e);
     }
-    
+
     /// \brief Returns the expression d != e
+    /// \param d A data expression
+    /// \param e A data expression
+    /// \return The expression d != e
     inline
     data_expression not_equal_to(data_expression d, data_expression e)
     {
@@ -459,18 +564,24 @@ namespace data_expr {
       }
       return core::detail::gsMakeDataExprNeq(d, e);
     }
-    
-    /// \brief Returns or applied to the sequence of data expressions [first, last[
+
+    /// \brief Returns or applied to the sequence of data expressions [first, last)
+    /// \param first Start of a sequence of data expressions
+    /// \param last End of a sequence of data expressions
+    /// \return Or applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
-    inline data_expression join_or(FwdIt first, FwdIt last)
+    data_expression join_or(FwdIt first, FwdIt last)
     {
       namespace d = data_expr;
       return core::detail::join(first, last, optimized::or_, d::false_());
     }
-    
-    /// \brief Returns and applied to the sequence of data expressions [first, last[
+
+    /// \brief Returns and applied to the sequence of data expressions [first, last)
+    /// \param first Start of a sequence of data expressions
+    /// \param last End of a sequence of data expressions
+    /// \return And applied to the sequence of data expressions [first, last)
     template <typename FwdIt>
-    inline data_expression join_and(FwdIt first, FwdIt last)
+    data_expression join_and(FwdIt first, FwdIt last)
     {
       namespace d = data_expr;
       return core::detail::join(first, last, optimized::and_, d::true_());
@@ -478,6 +589,59 @@ namespace data_expr {
   } // namespace optimized
 
 } // namespace data_expr
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  /// \brief Checks if the sorts of the arguments of a data application match
+  /// with the head.
+  /// \return True if the sorts match.
+  //
+  // Comments by Aad:
+  // Bij het checken van een data expressie van de vorm
+  //
+  //   DataAppl(e, [e_0,...,e_n])
+  //
+  // dient te worden nagegaan of de sort van e matcht met die van
+  // e_0,...,e_n. Dat wil zeggen dat als e_0,...,e_n sorts s_0,...,s_n
+  // hebben, dan dient data expressie e sort
+  //
+  //   SortArrow([s_0,...,s_n], s)
+  //
+  /// \param t A term
+  inline
+  bool check_data_application_sorts(atermpp::aterm_appl t)
+  {
+    if (core::detail::gsIsDataAppl(t))
+    {
+      data_expression f = atermpp::arg1(t);
+      data_expression_list x = atermpp::list_arg2(t);
+      if (!data::is_sort_arrow(f.sort()))
+      {
+        std::cerr << "f.sort() = " << core::pp(f.sort()) << std::endl;
+        throw std::runtime_error("Error: ill-formed data_application detected (1): " + core::pp(t) + " " + core::pp(f.sort()));
+      }
+      sort_arrow fsort = f.sort();
+      sort_expression_list s = fsort.argument_sorts();
+      if (s.size() != x.size())
+      {
+        std::cerr << "s = " << core::pp(s) << " x = " << core::pp(x) << std::endl;
+        throw std::runtime_error("Error: ill-formed data_application detected (2): " + core::pp(t) + " " + core::pp(fsort));
+      }
+      sort_expression_list::iterator i = s.begin();
+      data_expression_list::iterator j = x.begin();
+      for (; i != s.end(); ++i, ++j)
+      {
+        if (*i != j->sort())
+        {
+          std::cerr << "*i = " << core::pp(*i) << " j->sort() = " << core::pp(j->sort()) << std::endl;
+          throw std::runtime_error("Error: ill-formed data_application detected (3): " + core::pp(t) + " " + core::pp(fsort));
+        }
+      }
+    }
+    return true;
+  }
+} // namespace detail
+/// \endcond
 
 } // namespace data
 

@@ -36,15 +36,15 @@ struct compare_sort
   }
 };
 
-///pre: l is a list type of some sort (e.g. sort_expression_list)
-///ret: sort s occurs in l.
+///\pre l is a list type of some sort (e.g. sort_expression_list)
+///\return sort s occurs in l.
 template <typename list_type>
 bool occurs_in(list_type l, sort_expression s)
 {
   return atermpp::find_if(l, compare_sort(s)) != atermpp::aterm();
 }
 
-///\ret the list of all functions f of sort s in fl
+///\return the list of all functions f of sort s in fl
 inline data_operation_list get_constructors(const data_operation_list& fl, const sort_expression& s)
 {
   data_operation_list result;
@@ -59,7 +59,7 @@ inline data_operation_list get_constructors(const data_operation_list& fl, const
   return result;
 }
 
-///\ret true if f has 1 or more arguments, false otherwise
+///\return true if f has 1 or more arguments, false otherwise
 inline bool has_arguments(const data_operation& f)
 {
   return !core::detail::gsIsSortId(atermpp::aterm_appl(f.argument(1)));
@@ -68,12 +68,12 @@ inline bool has_arguments(const data_operation& f)
 //prototype
 bool is_finite(const data_operation_list& fl, const sort_expression& s, const mcrl2::data::sort_expression_list visited);
 
-///\ret true if all sorts in sl are finite, false otherwise
+///\return true if all sorts in sl are finite, false otherwise
 ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
 inline bool is_finite(const data_operation_list& fl, const mcrl2::data::sort_expression_list& sl, const mcrl2::data::sort_expression_list visited = mcrl2::data::sort_expression_list())
 {
   bool result = true;
-  
+
   // A list of sorts is finite if all sorts in the list are finite
   // If a sort is in "visited" that means that we have already seen the sort
   // during our calculation. We now get loops of the sort D = d1(E), sort E=e1(D),
@@ -93,7 +93,7 @@ inline bool is_finite(const data_operation_list& fl, const mcrl2::data::sort_exp
 }
 
 ///\pre fl is a list of constructors
-///\ret sort s is finite
+///\return sort s is finite
 inline bool is_finite(const data_operation_list& fl, const sort_expression& s, const mcrl2::data::sort_expression_list visited = mcrl2::data::sort_expression_list())
 {
   bool result = true;

@@ -87,19 +87,28 @@ class Enumerator
 		 * \brief Enumerate all valuations that (might) make an
 		 *        expression true.
 		 * \param Vars      A list of the variables to be instantiated.
-		 * \param Expr      The expression for which to find the
+		 * \param Expr      A boolean expression, in the internal
+		 *                  rewriter format, for which to find the
 		 *                  valuations.
 		 * \param true_only Boolean to indicate whether only those
-		 *                  valuations that make expr true should be
-		 *                  returned or those that do not make expr
-		 *                  false.
+		 *                  valuations such that Expr is equivalent to
+		 *                  true should be returned or also those for
+		 *                  which expr cannot be determined to be true
+		 *                  or false.
 		 * \param old       An EnumeratorSolutions object which can be
 		 *                  used to retreive the satisfying valuations.
 		 *                  If NULL, a new object is created.
 		 * \return An EnumeratorSolutions object which can be used to
 		 *         retreive all valuations of the variables in Var such
-		 *         that expr becomes true. If old is not NULL, old
-		 *         itself is returned (reinitialised for the new state).
+		 *         that Expr becomes true. If old is not NULL, old
+		 *         itself is returned (reinitialised for the new
+		 *         enumeration).
+		 *
+		 * Calling findSolutions(v,e,true,es) is equivalent to calling
+		 * findSolutions(v,e,es) and means that an error will be
+		 * generated if there is a valuation of Vars for which Expr
+		 * cannot be determined to be equivalent to either true or
+		 * false.
 		 *
 		 * The optional argument old allows one to reuse
 		 * EnumeratorSolutions objects (avoiding superfluous allocation
@@ -119,14 +128,16 @@ class Enumerator
 		/**
 		 * \brief Enumerate all valuations that make an expression true.
 		 * \param Vars A list of the variables to be instantiated.
-		 * \param Expr The expression for which to find all solutions.
+		 * \param Expr A boolean expression, in the internal rewriter
+		 *             format, for which to find all solutions.
 		 * \param old An EnumeratorSolutions object which can be used to
 		 *            retreive the satisfying valuations. If NULL, a new
 		 *            object is created.
 		 * \return An EnumeratorSolutions object which can be used to
 		 *         retreive all valuations of the variables in Var such
-		 *         that expr becomes true. If old is not NULL, old
-		 *         itself is returned (reinitialised for the new state).
+		 *         that Expr is equivalent to true. If old is not NULL,
+		 *         old itself is returned (reinitialised for the new
+		 *         enumeration).
 		 *
 		 * The optional argument old allows one to reuse
 		 * EnumeratorSolutions objects (avoiding superfluous allocation
