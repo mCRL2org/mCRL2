@@ -10,8 +10,8 @@
 /// \brief Conversion utilities for converting between the old aterm format
 ///        and the new c++ implementation.
 
-#ifndef MCRL2_DATA_DETAIL_CONVERT_H
-#define MCRL2_DATA_DETAIL_CONVERT_H
+#ifndef MCRL2_NEW_DATA_DETAIL_CONVERT_H
+#define MCRL2_NEW_DATA_DETAIL_CONVERT_H
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
@@ -54,5 +54,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_DETAIL_CONVERT_H
+#endif //MCRL2_NEW_DATA_DETAIL_CONVERT_H
 

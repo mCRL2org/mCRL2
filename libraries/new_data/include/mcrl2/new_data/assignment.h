@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/assignment.h
 /// \brief The class assignment.
 
-#ifndef MCRL2_DATA_ASSIGNMENT_H
-#define MCRL2_DATA_ASSIGNMENT_H
+#ifndef MCRL2_NEW_DATA_ASSIGNMENT_H
+#define MCRL2_NEW_DATA_ASSIGNMENT_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -77,5 +77,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::assignment)
 /// \endcond
 
-#endif // MCRL2_DATA_ASSIGNMENT_H
+#endif // MCRL2_NEW_DATA_ASSIGNMENT_H
 

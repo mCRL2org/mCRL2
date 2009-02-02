@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/application.h
 /// \brief The class application.
 
-#ifndef MCRL2_DATA_APPLICATION_H
-#define MCRL2_DATA_APPLICATION_H
+#ifndef MCRL2_NEW_DATA_APPLICATION_H
+#define MCRL2_NEW_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -188,5 +188,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::application)
 /// \endcond
 
-#endif // MCRL2_DATA_APPLICATION_H
+#endif // MCRL2_NEW_DATA_APPLICATION_H
 

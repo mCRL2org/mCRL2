@@ -10,8 +10,8 @@
 ///
 /// \brief Implement new_data types in type checked mCRL2 specifications and expressions.
 
-#ifndef MCRL2_DATA_DATAIMPL_H
-#define MCRL2_DATA_DATAIMPL_H
+#ifndef MCRL2_NEW_DATA_DATAIMPL_H
+#define MCRL2_NEW_DATA_DATAIMPL_H
 
 #include <aterm2.h>
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
@@ -255,4 +255,4 @@ inline ATermAppl implement_data_action_rename_spec(ATermAppl ar_spec, ATermAppl&
     } // namespace detail
   } // namespace new_data
 } // namespace mcrl2
-#endif // MCRL2_DATA_DATAIMPL_H
+#endif // MCRL2_NEW_DATA_DATAIMPL_H

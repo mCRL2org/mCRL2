@@ -1,5 +1,5 @@
-#ifndef MCRL2_DATA_NAT_H
-#define MCRL2_DATA_NAT_H
+#ifndef MCRL2_NEW_DATA_NAT_H
+#define MCRL2_NEW_DATA_NAT_H
 
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/function_sort.h"
@@ -1589,4 +1589,4 @@ namespace mcrl2 {
   } // namespace new_data
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_NAT_H
+#endif // MCRL2_NEW_DATA_NAT_H

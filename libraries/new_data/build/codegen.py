@@ -37,8 +37,8 @@ import Parsing
 import copy
 
 # MACROS
-FILE_HEADER = '''#ifndef MCRL2_DATA_%(uppercasename)s_H
-#define MCRL2_DATA_%(uppercasename)s_H
+FILE_HEADER = '''#ifndef MCRL2_NEW_DATA_%(uppercasename)s_H
+#define MCRL2_NEW_DATA_%(uppercasename)s_H
 
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/function_sort.h"
@@ -61,7 +61,7 @@ FILE_FOOTER = '''    } // namespace %(name)s
   } // namespace new_data
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_%(uppercasename)s_H
+#endif // MCRL2_NEW_DATA_%(uppercasename)s_H
 '''
 
 SORT_EXPRESSION_CONSTRUCTORS = '''      // Sort expression %(fullname)s

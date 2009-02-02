@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/variable.h
 /// \brief The class variable.
 
-#ifndef MCRL2_DATA_VARIABLE_H
-#define MCRL2_DATA_VARIABLE_H
+#ifndef MCRL2_NEW_DATA_VARIABLE_H
+#define MCRL2_NEW_DATA_VARIABLE_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -102,5 +102,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::variable)
 /// \endcond
 
-#endif // MCRL2_DATA_VARIABLE_H
+#endif // MCRL2_NEW_DATA_VARIABLE_H
 

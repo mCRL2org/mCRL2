@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/basic_sort.h
 /// \brief The class basic_sort.
 
-#ifndef MCRL2_DATA_BASIC_SORT_H
-#define MCRL2_DATA_BASIC_SORT_H
+#ifndef MCRL2_NEW_DATA_BASIC_SORT_H
+#define MCRL2_NEW_DATA_BASIC_SORT_H
 
 #include <string>
 #include "mcrl2/atermpp/aterm_access.h"
@@ -77,5 +77,5 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::basic_sort);
 /// \endcond
 
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_NEW_DATA_SORT_EXPRESSION_H
 

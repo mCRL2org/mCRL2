@@ -10,8 +10,8 @@
 /// \brief Conversion utilities for transforming between 
 ///        new_data specifications in the old and the new format.
 
-#ifndef MCRL2_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
-#define MCRL2_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
+#ifndef MCRL2_NEW_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
+#define MCRL2_NEW_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/new_data/data_specification.h"
@@ -61,5 +61,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
+#endif //MCRL2_NEW_DATA_DETAIL_DATA_SPECIFICATION_COMPATIBILITY_H
 

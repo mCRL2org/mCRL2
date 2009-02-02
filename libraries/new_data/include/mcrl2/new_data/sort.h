@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/sort.h
 /// \brief Contains includes of frequently used header files for sorts.
 
-#ifndef MCRL2_DATA_SORT_H
-#define MCRL2_DATA_SORT_H
+#ifndef MCRL2_NEW_DATA_SORT_H
+#define MCRL2_NEW_DATA_SORT_H
 
 #include "alias.h"
 #include "basic_sort.h"
@@ -18,4 +18,4 @@
 #include "function_sort.h"
 #include "structured_sort.h"
 
-#endif // MCRL2_DATA_SORT_H
+#endif // MCRL2_NEW_DATA_SORT_H

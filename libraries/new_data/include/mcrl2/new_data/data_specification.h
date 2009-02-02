@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/data_specification.h
 /// \brief The class data_specification.
 
-#ifndef MCRL2_DATA_DATA_SPECIFICATION_H
-#define MCRL2_DATA_DATA_SPECIFICATION_H
+#ifndef MCRL2_NEW_DATA_DATA_SPECIFICATION_H
+#define MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 
 #include <iostream>
 #include <algorithm>
@@ -819,5 +819,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DATA_SPECIFICATION_H
+#endif // MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 

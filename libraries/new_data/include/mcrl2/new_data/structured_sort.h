@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/structured_sort.h
 /// \brief The class structured_sort.
 
-#ifndef MCRL2_DATA_STRUCTURED_SORT_H
-#define MCRL2_DATA_STRUCTURED_SORT_H
+#ifndef MCRL2_NEW_DATA_STRUCTURED_SORT_H
+#define MCRL2_NEW_DATA_STRUCTURED_SORT_H
 
 #include <string>
 #include <iterator>
@@ -552,5 +552,5 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::structured_sort);
 /// \endcond
 
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_NEW_DATA_SORT_EXPRESSION_H
 

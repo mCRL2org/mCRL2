@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/lambda.h
 /// \brief The class lambda.
 
-#ifndef MCRL2_DATA_LAMBDA_H
-#define MCRL2_DATA_LAMBDA_H
+#ifndef MCRL2_NEW_DATA_LAMBDA_H
+#define MCRL2_NEW_DATA_LAMBDA_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -92,5 +92,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::lambda)
 /// \endcond
 
-#endif // MCRL2_DATA_LAMBDA_H
+#endif // MCRL2_NEW_DATA_LAMBDA_H
 

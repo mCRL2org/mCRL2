@@ -10,8 +10,8 @@
 /// \brief Conversion utilities for transforming between terms in the old
 //         datatype format and the new format.
 
-#ifndef MCRL2_DATA_DETAIL_COMPATIBILITY_H
-#define MCRL2_DATA_DETAIL_COMPATIBILITY_H
+#ifndef MCRL2_NEW_DATA_DETAIL_COMPATIBILITY_H
+#define MCRL2_NEW_DATA_DETAIL_COMPATIBILITY_H
 
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -149,5 +149,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_DETAIL_COMPATIBILITY_H
+#endif //MCRL2_NEW_DATA_DETAIL_COMPATIBILITY_H
 

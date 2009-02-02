@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/alias.h
 /// \brief The class alias.
 
-#ifndef MCRL2_DATA_ALIAS_H
-#define MCRL2_DATA_ALIAS_H
+#ifndef MCRL2_NEW_DATA_ALIAS_H
+#define MCRL2_NEW_DATA_ALIAS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -81,5 +81,5 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::alias);
 /// \endcond
 
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_NEW_DATA_SORT_EXPRESSION_H
 

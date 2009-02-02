@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/container_sort.h
 /// \brief The class container_sort.
 
-#ifndef MCRL2_DATA_CONTAINER_SORT_H
-#define MCRL2_DATA_CONTAINER_SORT_H
+#ifndef MCRL2_NEW_DATA_CONTAINER_SORT_H
+#define MCRL2_NEW_DATA_CONTAINER_SORT_H
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
@@ -173,5 +173,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::container_sort)
 /// \endcond
 
-#endif // MCRL2_DATA_CONTAINER_SORT_H
+#endif // MCRL2_NEW_DATA_CONTAINER_SORT_H
 

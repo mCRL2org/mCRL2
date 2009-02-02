@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/parser.h
 /// \brief Parser for new_data specifications.
 
-#ifndef MCRL2_DATA_PARSER_H
-#define MCRL2_DATA_PARSER_H
+#ifndef MCRL2_NEW_DATA_PARSER_H
+#define MCRL2_NEW_DATA_PARSER_H
 
 #include <sstream>
 #include <climits>
@@ -119,4 +119,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_PARSER_H
+#endif // MCRL2_NEW_DATA_PARSER_H

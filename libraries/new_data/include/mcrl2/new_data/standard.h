@@ -1,5 +1,5 @@
-#ifndef MCRL2_DATA_STANDARD_H
-#define MCRL2_DATA_STANDARD_H
+#ifndef MCRL2_NEW_DATA_STANDARD_H
+#define MCRL2_NEW_DATA_STANDARD_H
 
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/application.h"
@@ -102,4 +102,4 @@ namespace mcrl2 {
   } // namespace new_data
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_STANDARD__H
+#endif // MCRL2_NEW_DATA_STANDARD__H

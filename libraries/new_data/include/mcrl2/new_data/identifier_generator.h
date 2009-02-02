@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/identifier_generator.h
 /// \brief The class identifier_generator.
 
-#ifndef MCRL2_DATA_IDENTIFIER_GENERATOR_H
-#define MCRL2_DATA_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_NEW_DATA_IDENTIFIER_GENERATOR_H
+#define MCRL2_NEW_DATA_IDENTIFIER_GENERATOR_H
 
 #include <set>
 #include <string>
@@ -143,4 +143,4 @@ class number_postfix_generator
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_NEW_DATA_IDENTIFIER_GENERATOR_H

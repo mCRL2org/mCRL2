@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/detail/utility.h
 /// \brief Provides utilities for working with lists.
 
-#ifndef MCRL2_DATA_UTILITY_H
-#define MCRL2_DATA_UTILITY_H
+#ifndef MCRL2_NEW_DATA_UTILITY_H
+#define MCRL2_NEW_DATA_UTILITY_H
 
 #include "mcrl2/atermpp/vector.h"
 
@@ -78,5 +78,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_UTILITY_H
+#endif //MCRL2_NEW_DATA_UTILITY_H
 

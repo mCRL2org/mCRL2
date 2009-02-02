@@ -10,8 +10,8 @@
 /// \brief Contains includes of frequently used header files for new_data
 ///        expressions.
 
-#ifndef MCRL2_DATA_DATA_H
-#define MCRL2_DATA_DATA_H
+#ifndef MCRL2_NEW_DATA_DATA_H
+#define MCRL2_NEW_DATA_DATA_H
 
 #include "abstraction.h"
 #include "application.h" 
@@ -25,4 +25,4 @@
 #include "variable.h"
 #include "where_clause.h"
 
-#endif // MCRL2_DATA_DATA_H
+#endif // MCRL2_NEW_DATA_DATA_H

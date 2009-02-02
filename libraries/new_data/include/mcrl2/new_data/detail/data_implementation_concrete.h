@@ -8,8 +8,8 @@
 //
 /// \file data_implementation_concrete.h
 
-#ifndef MCRL2_DATA_IMPLEMENTATION_CONCRETE_H
-#define MCRL2_DATA_IMPLEMENTATION_CONCRETE_H
+#ifndef MCRL2_NEW_DATA_IMPLEMENTATION_CONCRETE_H
+#define MCRL2_NEW_DATA_IMPLEMENTATION_CONCRETE_H
 
 #include <aterm2.h>
 #include "mcrl2/core/detail/data_common.h"
@@ -242,5 +242,5 @@ ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context);
   }
 }
 
-#endif //MCRL2_DATA_RECONSTRUCT_CONCRETE_H
+#endif //MCRL2_NEW_DATA_RECONSTRUCT_CONCRETE_H
 

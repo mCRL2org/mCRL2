@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/data_expression.h
 /// \brief The class data_expression.
 
-#ifndef MCRL2_DATA_DATA_EXPRESSION_H
-#define MCRL2_DATA_DATA_EXPRESSION_H
+#ifndef MCRL2_NEW_DATA_DATA_EXPRESSION_H
+#define MCRL2_NEW_DATA_DATA_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -139,5 +139,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::data_expression)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_EXPRESSION_H
+#endif // MCRL2_NEW_DATA_DATA_EXPRESSION_H
 

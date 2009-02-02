@@ -11,8 +11,8 @@
 /// old internal new_data format after new_data implementation, to accommodate legacy
 /// code that relies on this.
 
-#ifndef MCRL2_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
-#define MCRL2_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
+#ifndef MCRL2_NEW_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
+#define MCRL2_NEW_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/new_data/detail/data_implementation.h"
@@ -35,5 +35,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
+#endif //MCRL2_NEW_DATA_DETAIL_IMPLEMENT_DATA_TYPES_H
 

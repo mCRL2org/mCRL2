@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/data_equation.h
 /// \brief The class data_equation.
 
-#ifndef MCRL2_DATA_DATA_EQUATION_H
-#define MCRL2_DATA_DATA_EQUATION_H
+#ifndef MCRL2_NEW_DATA_DATA_EQUATION_H
+#define MCRL2_NEW_DATA_DATA_EQUATION_H
 
 
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -133,5 +133,5 @@ namespace mcrl2 {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::data_equation)
 /// \endcond
 
-#endif // MCRL2_DATA_DATA_EQUATION_H
+#endif // MCRL2_NEW_DATA_DATA_EQUATION_H
 
