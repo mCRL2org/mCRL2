@@ -34,7 +34,7 @@
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/data_common.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/new_data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -47,6 +47,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2;
 
 #define STRINGLENGTH 256
@@ -650,10 +651,6 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
   }
   //add sort Nat, if needed
   if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr) || gsIsSortExprNat(sort_expr)) {
-    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
-      impl_standard_functions_sort(gsMakeSortIdNatPair(), &data_decls);
-      impl_sort_nat_pair(&data_decls);
-    }
     if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
       impl_standard_functions_sort(gsMakeSortIdNat(), &data_decls);
       impl_sort_nat(&data_decls, false);

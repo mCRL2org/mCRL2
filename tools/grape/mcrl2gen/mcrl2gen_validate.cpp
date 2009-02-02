@@ -29,7 +29,7 @@
 // mCRL2 core/detail libraries
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort_identifier.h"
 
@@ -43,6 +43,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2;
 using namespace std;
 

@@ -18,7 +18,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
@@ -328,7 +328,7 @@ namespace lps {
     inline
     ATermAppl implement_action_rename_specification(ATermAppl ar_spec, ATermAppl& lps_spec)
     {
-      ATermAppl result = core::implement_data_action_rename_spec(ar_spec, lps_spec);
+      ATermAppl result = new_data::detail::implement_data_action_rename_spec(ar_spec, lps_spec);
       if (result == NULL)
         throw runtime_error("process data implementation error");
       return result;

@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/core/data_implementation.h>
+#include <mcrl2/new_data/detail/data_implementation.h>
 #include <mcrl2/core/detail/struct.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/core/aterm_ext.h>
@@ -24,6 +24,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 using namespace mcrl2::data;
+using namespace mcrl2::new_data::detail;
 
 
 //Prototype

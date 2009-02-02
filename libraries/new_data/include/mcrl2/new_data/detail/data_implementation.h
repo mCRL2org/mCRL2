@@ -75,7 +75,7 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 **/
 inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
 {
-  assert(detail::gsIsLinProcSpec(spec));
+  assert(core::detail::gsIsLinProcSpec(spec));
   return detail::implement_data_spec(spec);
 }
 

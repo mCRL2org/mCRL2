@@ -15,7 +15,7 @@
 #include "mcrl2/core/detail/data_common.h"
 
 namespace mcrl2 {
-  namespace core {
+  namespace new_data {
     namespace detail {
 
 //\pre spec represents an mCRL2 data, linear process, process or PBES
@@ -54,7 +54,7 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
 //     - each substituted element is implemented, where the new data
 //       declarations are stored in *p_data_decls
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+  core::detail::t_data_decls *p_data_decls);
 
 //Pre: parts consists of parts of a specification that adheres to the internal
 //     syntax after type checking
@@ -67,7 +67,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
 //     - each substituted element is implemented, where the new data
 //       declarations are stored in *p_data_decls
 ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+  core::detail::t_data_decls *p_data_decls);
 
 /** \brief     Implement data types of a type checked mCRL2 action rename
  *             specification with respect to a type checked mCRL2 linear
@@ -103,7 +103,7 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
 ///       *p_data_decls and new induced substitutions are added *p_substs
 ///       if recursive, then the sorts of the projection functions are also implemented
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre sort_elt and sort_list are sort expressions.
 /// \return the list of data equations belonging to the list sort sort_list, with
@@ -119,7 +119,7 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_lis
 /// \post an implementation of sort_list represented by sort sort_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
 void impl_sort_list(ATermAppl sort_expression_list, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls);
 
 /// \pre sort_elt and sort_fset are sort expressions
 /// \return the list of data equations belonging to the finite set sort_fset, with elements
@@ -136,7 +136,7 @@ ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset);
 ///       represented by sort sort_id is added to *p_data_decls and new
 ///       induced substitutions are added *p_substs
 void impl_sort_fset(ATermAppl sort_elt, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls);
 
 /// \pre sort_elt, sort_fset and sort_set are sort expressions
 /// \return the list of data equations belonging to the set sort_set, with elements
@@ -152,7 +152,7 @@ ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl
 /// \post an implementation of sort_set represented by sort sort_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
 void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls);
 
 /// \pre sort_elt, sort_fset, sort_fbag_elt and sort_fbag are sort expressions
 /// \return the list of data equations belonging to the finite bag sort_fbag, with elements
@@ -170,7 +170,7 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermApp
 ///       with finite sets of sort sort_fset represented by sort sort_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
 void impl_sort_fbag(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls);
 
 /// \pre sort_elt and sort_list are sort expressions
 /// \return the list of data equations belonging to the set sort_set, with elements
@@ -186,41 +186,37 @@ ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl
 /// \post an implementation of sort_bag represented by sort sort_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
 void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Bool is added to *p_data_decls
-void impl_sort_bool(t_data_decls *p_data_decls);
+void impl_sort_bool(core::detail::t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Pos is added to *p_data_decls
-void impl_sort_pos(t_data_decls *p_data_decls);
+void impl_sort_pos(core::detail::t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Nat is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_nat(t_data_decls *p_data_decls, bool recursive = true);
-
-/// \pre p_data_decls represents a pointer to new data declarations
-/// \post an implementation of sort PairNat is added to *p_data_decls
-void impl_sort_nat_pair(t_data_decls *p_data_decls);
+void impl_sort_nat(core::detail::t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Int is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_int(t_data_decls *p_data_decls, bool recursive = true);
+void impl_sort_int(core::detail::t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Real is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_real(t_data_decls *p_data_decls, bool recursive = true);
+void impl_sort_real(core::detail::t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre sort is a sort expression that adheres to the internal syntax after
 ///     data implementation
 ///     p_data_decls represents a pointer to data declarations
 /// \post an implementation of equality, inequality and if for sort expression
 ///     sort is added to *p_data_decls
-void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
+void impl_standard_functions_sort(ATermAppl sort, core::detail::t_data_decls *p_data_decls);
 
 /// \pre    op_id is an operation identifier of sort s_op_id; here s_op_id is:
 ///         - either a sort identifier

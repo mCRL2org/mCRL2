@@ -18,7 +18,7 @@
 #include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/new_data/detail/data_implementation_concrete.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -26,6 +26,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
+using namespace mcrl2::new_data::detail;
 
 inline
 sort_expression comp()

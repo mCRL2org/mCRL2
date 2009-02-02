@@ -28,7 +28,10 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
+#include "workarounds.h" //DECL_A
+
 using namespace mcrl2::core::detail;
+using namespace mcrl2::core;
 using namespace atermpp;
 
  namespace mcrl2 {
@@ -865,8 +868,6 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   p_data_decls->cons_ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(gsSubstValues_List(*p_substs, new_data_eqns, true), p_data_decls->data_eqns);
-
-  return sort_id;
 }
 
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
