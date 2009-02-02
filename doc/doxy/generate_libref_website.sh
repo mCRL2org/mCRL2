@@ -373,6 +373,7 @@ if [ ! $OFFLINE ] ; then
     TAGFILES="$TAGFILES $3/$2.tag=../$2"
     DOXYCONFIG="
       GENERATE_TAGFILE = $3/$2.tag
+      HTML_FILE_EXTENSION = .php
       INPUT = $DOXYINPUT"
     if [ -e $3/doc/Doxyfile ] ; then
       ( cat $DOXYMASTER $3/doc/Doxyfile ; echo "$DOXYCONFIG" ) | doxygen -

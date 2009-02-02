@@ -1034,8 +1034,4 @@ namespace mcrl2 {
   }
 }
 
-#ifdef __LIBREWRITE_H // std::wstring is not available for Cygwin
-# include "mcrl2/utilities/command_line_rewriting.h" //temporarily
-#endif
-
 #endif

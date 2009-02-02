@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pnml>
+  <net type="http://www.yasper.org/specs/epnml-1.1" id="dc23">
+    <graphics />
+    <toolspecific tool="Yasper" version="2.0.5.0">
+      <mcrl2prelude xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+        <text>map nPhils:Int;
+eqn nPhils=5;
+</text>
+      </mcrl2prelude>
+    </toolspecific>
+    <transition id="tr1">
+      <name>
+        <text>FE</text>
+      </name>
+      <graphics>
+        <position x="66" y="78" />
+        <dimension x="32" y="32" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2predicate xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>x==e &amp;&amp; t==e &amp;&amp; ((e&lt;nPhils &amp;&amp; y==e+1) || (e==nPhils &amp;&amp; y==1))</text>
+        </mcrl2predicate>
+      </toolspecific>
+    </transition>
+    <transition id="tr2">
+      <name>
+        <text>retf</text>
+      </name>
+      <graphics>
+        <position x="239" y="16" />
+        <dimension x="32" y="32" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2predicate xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>y==x</text>
+        </mcrl2predicate>
+      </toolspecific>
+    </transition>
+    <transition id="tr3">
+      <name>
+        <text>Hungry</text>
+      </name>
+      <graphics>
+        <position x="146" y="142" />
+        <dimension x="32" y="32" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2predicate xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>f==t &amp;&amp; x==f</text>
+        </mcrl2predicate>
+      </toolspecific>
+    </transition>
+    <transition id="tr4">
+      <name>
+        <text>StE</text>
+      </name>
+      <graphics>
+        <position x="240" y="210" />
+        <dimension x="32" y="32" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2predicate xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>((w&lt;nPhils &amp;&amp; f==w+1) || (w==nPhils &amp;&amp; f==1)) &amp;&amp; e==w</text>
+        </mcrl2predicate>
+      </toolspecific>
+    </transition>
+    <place id="pl1">
+      <name>
+        <text>eating</text>
+      </name>
+      <graphics>
+        <position x="10" y="202" />
+        <dimension x="20" y="20" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2sort xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>Int</text>
+        </mcrl2sort>
+      </toolspecific>
+    </place>
+    <place id="pl2">
+      <name>
+        <text>fork</text>
+      </name>
+      <description>
+        <text>Int</text>
+      </description>
+      <graphics>
+        <position x="239" y="81" />
+        <dimension x="20" y="20" />
+      </graphics>
+      <initialMarking>
+        <toolspecific tool="Yasper" version="2.0.5.0">
+          <mcrl2marking xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+            <text>{1:1,2:1,3:1,4:1,5:1}</text>
+          </mcrl2marking>
+        </toolspecific>
+        <text>5</text>
+      </initialMarking>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2sort xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>Int</text>
+        </mcrl2sort>
+      </toolspecific>
+    </place>
+    <place id="pl3">
+      <name>
+        <text>tmpf</text>
+      </name>
+      <graphics>
+        <position x="66" y="16" />
+        <dimension x="20" y="20" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2sort xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>Int</text>
+        </mcrl2sort>
+      </toolspecific>
+    </place>
+    <place id="pl4">
+      <name>
+        <text>thinking</text>
+      </name>
+      <graphics>
+        <position x="67" y="142" />
+        <dimension x="20" y="20" />
+      </graphics>
+      <initialMarking>
+        <toolspecific tool="Yasper" version="2.0.5.0">
+          <mcrl2marking xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+            <text>{1:1,2:1,3:1,4:1,5:1}</text>
+          </mcrl2marking>
+        </toolspecific>
+        <text>5</text>
+      </initialMarking>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2sort xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>Int</text>
+        </mcrl2sort>
+      </toolspecific>
+    </place>
+    <place id="pl5">
+      <name>
+        <text>w2nd</text>
+      </name>
+      <description>
+        <text>Int</text>
+      </description>
+      <graphics>
+        <position x="147" y="212" />
+        <dimension x="20" y="20" />
+      </graphics>
+      <toolspecific tool="Yasper" version="2.0.5.0">
+        <mcrl2sort xmlns="http://www.yasper.org/specs/epnml-1.1/toolspec">
+          <text>Int</text>
+        </mcrl2sort>
+      </toolspecific>
+    </place>
+    <arc id="a1" source="pl1" target="tr1">
+      <name>
+        <text>e</text>
+      </name>
+      <graphics>
+        <position x="9" y="118" />
+      </graphics>
+    </arc>
+    <arc id="a2" source="tr1" target="pl2">
+      <name>
+        <text>x</text>
+      </name>
+    </arc>
+    <arc id="a15" source="tr1" target="pl3">
+      <name>
+        <text>y</text>
+      </name>
+    </arc>
+    <arc id="a16" source="pl3" target="tr2">
+      <name>
+        <text>x</text>
+      </name>
+    </arc>
+    <arc id="a17" source="tr2" target="pl2">
+      <name>
+        <text>y</text>
+      </name>
+    </arc>
+    <arc id="a18" source="tr1" target="pl4">
+      <name>
+        <text>t</text>
+      </name>
+    </arc>
+    <arc id="a19" source="pl4" target="tr3">
+      <name>
+        <text>t</text>
+      </name>
+    </arc>
+    <arc id="a20" source="pl2" target="tr3">
+      <name>
+        <text>f</text>
+      </name>
+    </arc>
+    <arc id="a21" source="tr3" target="pl5">
+      <name>
+        <text>x</text>
+      </name>
+    </arc>
+    <arc id="a22" source="tr4" target="pl1">
+      <name>
+        <text>e</text>
+      </name>
+      <graphics>
+        <position x="164" y="256" />
+      </graphics>
+    </arc>
+    <arc id="a23" source="pl5" target="tr4">
+      <name>
+        <text>w</text>
+      </name>
+    </arc>
+    <arc id="a24" source="pl2" target="tr4">
+      <name>
+        <text>f</text>
+      </name>
+    </arc>
+  </net>
+</pnml>

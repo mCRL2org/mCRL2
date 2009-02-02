@@ -1,4 +1,4 @@
-The mCRL2 Trace Format is given by the followin syntax.
+The mCRL2 Trace Format is given by the following syntax.
 
  Bytes      Information
 

@@ -10,7 +10,7 @@
 #define __COMMAND_LINE_REWRITING_H
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "../../../../data/include/mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewrite.h"
 
 namespace mcrl2 {
   namespace utilities {

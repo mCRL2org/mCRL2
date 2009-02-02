@@ -90,8 +90,13 @@
                  | Lambda
 
 //where clause declaration
-<WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)                         [- tc]
+<WhrDecl>      ::= <IdInit>                                              [- tc]
                  | <DataVarIdInit>                                       [+ tc]  
+
+//data variable identifier and initialisation
+<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
+
+<IdInit>       ::= IdInit(<String>, <DataExpr>)
 
 //Data specifications
 //-------------------
@@ -149,8 +154,10 @@
 
 //process expression
 <ProcExpr>     ::= <ParamId>                                             [- tc]
+                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
                  | <Action>                                              [+ tc]
                  | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
+                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
                  | Delta
                  | Tau 
                  | Sum(<DataVarId>+, <ProcExpr>) 
@@ -250,9 +257,6 @@
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
 
-//data variable identifier and initialisation
-<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
-
 //regular formula
 <RegFrm>       ::= <ActFrm>
                  | RegNil                                                [-rft]
@@ -335,3 +339,24 @@
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+
+//Boolean expressions
+//-------------------
+
+// BES specification (equations + initialization)
+<BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
+
+// boolean equation
+<BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
+
+// boolean variable
+<BooleanVariable>   ::= BooleanVariable(<String>)
+
+// boolean expression
+<BooleanExpression> ::= BooleanTrue
+                      | BooleanFalse
+                      | <BooleanVariable>
+                      | BooleanNot(<BooleanExpression>)
+                      | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanOr(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanImp(<BooleanExpression>, <BooleanExpression>)
