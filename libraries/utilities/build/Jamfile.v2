@@ -3,10 +3,6 @@ project libraries/utilities
        : requirements
           <use>/site-config//boost
           <include>../include
-          <include>../../data/include                   # temporary
-          <include>../../atermpp/include                    # temporary
-          <include>../../core/include                       # temporary
-          <include>../../../3rd-party/aterm/include/aterm   # temporary
        : usage-requirements
           <use>/site-config//boost
        ;
