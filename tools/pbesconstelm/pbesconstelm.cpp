@@ -66,10 +66,10 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
     {
       if (mcrl2::core::gsVerbose)
       {
-        std::cout << "pbesconstelm parameters:" << std::endl;
-        std::cout << "  input file:         " << m_input_filename << std::endl;
-        std::cout << "  output file:        " << m_output_filename << std::endl;
-        std::cout << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
+        std::cerr << "pbesconstelm parameters:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
       }
     
       // load the pbes
