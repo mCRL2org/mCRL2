@@ -25,6 +25,8 @@ namespace mcrl2 {
 namespace core {
 
   /// \brief Split a string into paragraphs.
+  /// \param text A string
+  /// \return The paragraphs of <tt>text</tt>
   std::vector<std::string> split_paragraphs(const std::string& text)
   {
     std::vector<std::string> result;
@@ -49,7 +51,22 @@ namespace core {
     return result;
   }
 
+  /// \brief Split the text.
+  /// \param line A string
+  /// \param separators A string
+  /// \return The splitted text
+  inline
+  std::vector<std::string> split(const std::string& line, const std::string& separators)
+  {
+    std::vector<std::string> result;
+    boost::algorithm::split(result, line, boost::algorithm::is_any_of(separators));
+    return result;
+  }
+
   /// \brief Read text from a file.
+  /// \param filename A string
+  /// \param warn If true, a warning is printed to standard error if the file is not found
+  /// \return The contents of the file
   inline
   std::string read_text(const std::string& filename, bool warn=false)
   {
@@ -73,6 +90,8 @@ namespace core {
   }
 
   /// \brief Remove comments from a text (everything from '%' until end of line).
+  /// \param text A string
+  /// \return The removal result
   inline
   std::string remove_comments(const std::string& text)
   {
@@ -81,6 +100,53 @@ namespace core {
 
     std::string dest( "\n" );
     return boost::xpressive::regex_replace(text, src, dest);
+  }
+
+  /// \brief Removes whitespace from a string.
+  /// \param text A string
+  /// \return The removal result
+  inline
+  std::string remove_whitespace(const std::string& text)
+  {
+    boost::xpressive::sregex src = boost::xpressive::sregex::compile("\\s");
+    std::string dest("");
+    return boost::xpressive::regex_replace(text, src, dest);
+  }
+
+  /// \brief Regular expression replacement in a string.
+  /// \param src A string
+  /// \param dest A string
+  /// \param text A string
+  /// \return The transformed string
+  inline
+  std::string regex_replace(const std::string& src, const std::string& dest, const std::string& text)
+  {
+    return boost::xpressive::regex_replace(text, boost::xpressive::sregex::compile(src), dest);
+  }
+
+  /// \brief Split a string using a regular expression separator.
+  /// \param text A string
+  /// \param sep A string
+  /// \return The splitted string
+  std::vector<std::string> regex_split(const std::string& text, const std::string& sep)
+  {
+    std::vector<std::string> result;
+    // find multiple line endings
+    boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile(sep);
+    // the -1 below directs the token iterator to display the parts of
+    // the string that did NOT match the regular expression.
+    boost::xpressive::sregex_token_iterator cur( text.begin(), text.end(), paragraph_split, -1 );
+    boost::xpressive::sregex_token_iterator end;
+    for( ; cur != end; ++cur )
+    {
+      std::string word = *cur;
+      boost::trim(word);
+      if (word.size() > 0)
+      {
+        result.push_back(word);
+      }
+    }
+    return result;
   }
 
 } // namespace core

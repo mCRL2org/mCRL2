@@ -21,21 +21,20 @@
 #include <string.h>
 
 #include <aterm2.h>
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 //Global precondition: the ATerm library has been initialised
 
-//external declarations from mcrl2lexer.l
+//external declarations from mcrl2lexer.ll
 void mcrl2yyerror(const char *s);
 int mcrl2yylex(void);
-extern ATermAppl spec_tree;
-extern ATermIndexedSet parser_protect_table;
+extern ATerm mcrl2_spec_tree;
+extern ATermIndexedSet mcrl2_parser_protect_table;
 
 #ifdef _MSC_VER
 #define yyfalse 0
@@ -74,13 +73,14 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //     data equation, action and parameterised boolean equation specification,
 //     and one parameterised boolean initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(parser_protect_table, (ATerm) lhs, &b); }
+#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (ATerm) lhs, &b); }
 %}
 
 %union {
+  ATerm term;
   ATermAppl appl;
   ATermList list;
-}
+};
 
 //generate a GLR parser
 %glr-parser
@@ -91,19 +91,20 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //start token
 %start start
 
-//enable debug output
-%debug
+//Uncomment the line below to enable the bison debug facilities.
+//To produce traces, yydebug needs to be set to 1 (see mcrl2lexer.ll)
+//%debug
 
 //terminals
 //---------
 
-%token <appl> TAG_SORT_EXPR TAG_DATA_EXPR TAG_DATA_SPEC TAG_MULT_ACT
-%token <appl> TAG_PROC_EXPR TAG_PROC_SPEC TAG_PBES_SPEC TAG_STATE_FRM
-%token <appl> TAG_ACTION_RENAME
+%token <appl> TAG_IDENTIFIER TAG_SORT_EXPR TAG_DATA_EXPR TAG_DATA_SPEC
+%token <appl> TAG_MULT_ACT TAG_PROC_EXPR TAG_PROC_SPEC TAG_PBES_SPEC
+%token <appl> TAG_STATE_FRM TAG_DATA_VARS TAG_ACTION_RENAME
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
-%token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
-%token <appl> HASH BAR
+%token <appl> SLASH STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK 
+%token <appl> EXCLAM AT HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
@@ -116,13 +117,14 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //-------------
 
 //start
-%type <appl> start
+%type <term> start
+
 //sort expressions
 %type <appl> sort_expr sort_expr_arrow domain_no_arrow_elt sort_expr_struct
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
 %type <appl> sort_constant sort_constructor
 //data expressions
-%type <appl> data_expr data_expr_whr whr_decl data_expr_quant data_expr_imp
+%type <appl> data_expr data_expr_whr id_init data_expr_quant data_expr_imp
 %type <appl> data_expr_imp_rhs data_expr_and data_expr_and_rhs data_expr_eq
 %type <appl> data_expr_eq_rhs data_expr_rel data_expr_cons data_expr_snoc
 %type <appl> data_expr_concat data_expr_add data_expr_div data_expr_mult
@@ -142,7 +144,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> proc_expr_at proc_expr_at_wo_cond proc_expr_sync
 %type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
 %type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
-%type <appl> proc_quant ren_expr comm_expr comm_expr_lhs mult_act_name
+%type <appl> id_assignment proc_quant ren_expr comm_expr comm_expr_lhs
+%type <appl> mult_act_name
 //process specifications
 %type <appl> proc_spec proc_spec_elt act_spec proc_eqn_spec proc_eqn_decl
 %type <appl> proc_init
@@ -171,7 +174,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <list> struct_projections_cs
 //data expressions
 %type <list> bag_enum_elt
-%type <list> whr_decls_cs data_exprs_cs bag_enum_elts_cs data_vars_decls_cs
+%type <list> id_inits_cs data_exprs_cs bag_enum_elts_cs data_vars_decls_cs
 %type <list> data_vars_decl
 //data specifications
 %type <list> data_spec_elts ids_cs sorts_decls_scs sorts_decl domain
@@ -201,50 +204,60 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 //start
 start:
-  TAG_SORT_EXPR sort_expr
+  TAG_IDENTIFIER ID
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
+    }
+  | TAG_SORT_EXPR sort_expr
+    {
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_DATA_EXPR data_expr
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_DATA_SPEC data_spec
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_MULT_ACT mult_act
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_PROC_SPEC proc_spec
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_STATE_FRM state_frm
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_ACTION_RENAME action_rename_spec
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   | TAG_PBES_SPEC pbes_spec
     {
-      safe_assign($$, $2);
-      spec_tree = $$;
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
+    }
+  | TAG_DATA_VARS data_vars_decls_scs
+    {
+      safe_assign($$, (ATerm) $2);
+      mcrl2_spec_tree = $$;
     }
   ;
 
@@ -469,33 +482,33 @@ data_expr_whr:
     {
       safe_assign($$, $1);
     }
-  | data_expr_whr WHR whr_decls_cs END
+  | data_expr_whr WHR id_inits_cs END
     {
       safe_assign($$, gsMakeWhr($1, ATreverse($3)));
       gsDebugMsg("parsed where clause\n  %T\n", $$);
     }
   ;
 
-//declaration of one or more where clauses, separated by comma's
-whr_decls_cs:
-  whr_decl
+//declaration of one or more identifier initialisations, separated by comma's
+id_inits_cs:
+  id_init
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed where clause declarations\n  %T\n", $$);
+      gsDebugMsg("parsed identifier initialisations\n  %T\n", $$);
     }
-  | whr_decls_cs COMMA whr_decl
+  | id_inits_cs COMMA id_init
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed where clause declarations\n  %T\n", $$);
+      gsDebugMsg("parsed identifier initialisations\n  %T\n", $$);
     }
   ;
 
-//where clause declaration
-whr_decl:
+//identifier initialisation
+id_init:
   ID EQUALS data_expr
     {
-      safe_assign($$, gsMakeWhrDecl($1, $3));
-      gsDebugMsg("parsed where clause declaration\n  %T\n", $$);
+      safe_assign($$, gsMakeIdInit($1, $3));
+      gsDebugMsg("parsed identifier initialisation\n  %T\n", $$);
     }
   ;
 
@@ -646,6 +659,11 @@ data_expr_eq_rhs:
     {
       safe_assign($$, $1);
     }
+  | LAMBDA data_vars_decls_cs DOT data_expr_eq_rhs
+    {
+      safe_assign($$, gsMakeBinder(gsMakeLambda(), $2, $4));
+      gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
+    }
   | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
@@ -775,6 +793,12 @@ data_expr_div:
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
       gsDebugMsg("parsed mod expression\n  %T\n", $$);
+    }
+  | data_expr_div SLASH data_expr_mult
+    {
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
+      gsDebugMsg("parsed division expression\n  %T\n", $$);
     }
   ;
 
@@ -1549,6 +1573,12 @@ proc_expr_primary:
     {
       safe_assign($$, $1);
     }
+  | id_assignment
+    {
+      mcrl2yyerror("process assignments are not yet supported");
+      YYABORT
+      //XXX safe_assign($$, $1);
+    }
   | proc_quant
     {
       safe_assign($$, $1);
@@ -1570,6 +1600,20 @@ proc_constant:
     {
       safe_assign($$, gsMakeTau());
       gsDebugMsg("parsed process constant\n  %T\n", $$);
+    }
+  ;
+
+//identifier assignment
+id_assignment:
+  ID LPAR RPAR
+    {
+      safe_assign($$, gsMakeIdAssignment($1, ATmakeList0()));
+      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
+    }
+  | ID LPAR id_inits_cs RPAR
+    {
+      safe_assign($$, gsMakeIdAssignment($1, ATreverse($3)));
+      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
     }
   ;
 

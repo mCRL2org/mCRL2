@@ -1,17 +1,25 @@
-#define NAME "libalpha"
+// Author(s): Yaroslav Usenko
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file alpha.cpp
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
@@ -1086,12 +1094,14 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
   }
   else if ( gsIsProcess(a) ){
     ATermAppl pn=ATAgetArgument(a,0);
+    ATbool full_alpha_know=ATtrue;
     ATermList l = ATLtableGet(alphas,(ATerm)pn);
     if(!l){
       unsigned max_len=get_max_allowed_length(V);
       //l = ATLtableGet(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(max_len)),(ATerm)pn));
       //if(!l)
       l = gsaGetAlpha(a,max_len,get_allow_list(V));
+      full_alpha_know=ATfalse;
     }
     else
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
@@ -1099,7 +1109,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     
     ATermList ll=l;
     l = filter_allow_list(ll,V);
-    if(ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
+    if(full_alpha_know && ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
       ATtablePut(alphas,(ATerm) a,(ATerm) l); // not to forget: put the list in the table!!!
       return a; 
     }
@@ -1130,6 +1140,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 	p=PushAllow(V,p);
 	
 	ATtablePut(procs,(ATerm)new_pn,(ATerm)p);
+        ATtablePut(props,(ATerm)new_pn,(ATerm)ATAtableGet(props,(ATerm)pn));
 	l=ATLtableGet(alphas,(ATerm)p);
 	ATtablePut(alphas,(ATerm)new_pn,(ATerm)l);
 	
@@ -1568,7 +1579,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
   }
   else if ( gsIsHide(a) ){
     ATermAppl p = ATAgetArgument(a,1);
-    l=gsaGetAlpha(p,length);
+    l=gsaGetAlpha(p);
     
     l=filter_hide_list(l,ATLgetArgument(a,0)); 
   } 

@@ -6,16 +6,17 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file libstruct_ir.cpp
+/// \file data_common.cpp
 
 #include <aterm2.h>
 
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
-using namespace ::mcrl2::utilities;
+#include "workarounds.h" // DECL_A
+
 using namespace mcrl2::core;
 
 namespace mcrl2 {

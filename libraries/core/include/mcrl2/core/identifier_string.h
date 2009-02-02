@@ -15,22 +15,27 @@
 #include "mcrl2/atermpp/aterm_string.h"
 
 namespace mcrl2 {
-  namespace core {
 
-  /// String type of the LPS library.
+namespace core {
+
+  /// \brief String type of the LPS library.
   /// Identifier strings are represented internally as ATerms.
   typedef atermpp::aterm_string identifier_string;
   
   /// \brief Tests if a term is an identifier string.
-  /// \param[in] t an ATerm
-  /// \returns Whether t is an identifier string.
+  /// \param t A term
+  /// \return Whether t is an identifier string.
   inline
   bool is_identifier_string(atermpp::aterm t)
   {
     return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
   }
 
-  }
-} 
+  /// \brief Read-only singly linked list of identifier strings
+  typedef atermpp::term_list<identifier_string> identifier_string_list;
+
+} // namespace core
+
+} // namespace mcrl2
 
 #endif // MCRL2_BASIC_IDENTIFIER_STRING_H

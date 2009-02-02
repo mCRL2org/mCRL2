@@ -8,14 +8,15 @@
 //
 /// \file print_c.cpp
 
-#include <stdint.h>
-#include <stddef.h>
+#include <boost/cstdint.hpp>
+#include <cstddef>
 #include "mcrl2/core/print.h"
 
 #define PRINT_C
 #include "mcrl2/core/detail/print_implementation.h"
 
 using namespace mcrl2::core::detail;
+using boost::intmax_t;
 
 namespace mcrl2 {
   namespace core {

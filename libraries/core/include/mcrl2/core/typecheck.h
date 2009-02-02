@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file typecheck.h
+/// \file mcrl2/core/typecheck.h
 /// \brief Type check parsed mCRL2 specifications and expressions.
 
 #ifndef PARSER_TYPECHECK_H
@@ -88,7 +88,10 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec);
  *  \param[in] spec An ATerm representation of an mCRL2 process specification,
  *             LPS, PBES or data specification that adheres to the
  *             internal ATerm structure after type checking.
- *  \param[in] Vars A table of variables that may occur in the data expression.
+ *  \param[in] Vars A table of variables that may occur in the data expression, where:
+ *             \li each key is an mCRL2 identifier
+ *             \li each value is an mCRL2 sort expression that adheres to
+ *                 the internal ATerm structure after type checking
  *  \post      data_expr is type checked using the declaration from spec
  *             and, if sort_expr is not NULL, it is type checked as
  *             being of type sort_expr.
@@ -167,6 +170,23 @@ ATermAppl type_check_state_frm(ATermAppl state_formula, ATermAppl spec);
  **/
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl spec);
 
+
+/** \brief     Type check parsed mCRL2 data variables
+ *             with respect to a type checked mCRL2 specification.
+ *  \param[in] data_vars An ATerm representation of a list of
+ *             data variables that adheres to the initial internal
+ *             ATerm structure.
+ *  \param[in] spec An ATerm representation of an mCRL2 process specification,
+ *             LPS, PBES or data specification that adheres to the
+ *             internal ATerm structure after type checking.
+ *  \post      data_var_decl is type checked using the declaration from spec.
+ *  \return    If type checking went well, an equivalent version of
+ *             data_vars is returned that adheres to the internal ATerm
+ *             structure after type checking. if something went wrong,
+ *             an appropriate error message is printed and NULL is
+ *             returned.
+ **/
+ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec);
 
   }
 }

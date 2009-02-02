@@ -401,6 +401,28 @@ bool gsIsAtTime(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunAtTime();
 }
 
+// BES
+inline
+AFun initAFunBES(AFun& f)
+{
+  f = ATmakeAFun("BES", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBES()
+{
+  static AFun AFunBES = initAFunBES(AFunBES);
+  return AFunBES;
+}
+
+inline
+bool gsIsBES(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBES();
+}
+
 // BInit
 inline
 AFun initAFunBInit(AFun& f)
@@ -487,6 +509,182 @@ inline
 bool gsIsBlock(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunBlock();
+}
+
+// BooleanAnd
+inline
+AFun initAFunBooleanAnd(AFun& f)
+{
+  f = ATmakeAFun("BooleanAnd", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanAnd()
+{
+  static AFun AFunBooleanAnd = initAFunBooleanAnd(AFunBooleanAnd);
+  return AFunBooleanAnd;
+}
+
+inline
+bool gsIsBooleanAnd(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanAnd();
+}
+
+// BooleanEquation
+inline
+AFun initAFunBooleanEquation(AFun& f)
+{
+  f = ATmakeAFun("BooleanEquation", 3, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanEquation()
+{
+  static AFun AFunBooleanEquation = initAFunBooleanEquation(AFunBooleanEquation);
+  return AFunBooleanEquation;
+}
+
+inline
+bool gsIsBooleanEquation(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanEquation();
+}
+
+// BooleanFalse
+inline
+AFun initAFunBooleanFalse(AFun& f)
+{
+  f = ATmakeAFun("BooleanFalse", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanFalse()
+{
+  static AFun AFunBooleanFalse = initAFunBooleanFalse(AFunBooleanFalse);
+  return AFunBooleanFalse;
+}
+
+inline
+bool gsIsBooleanFalse(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanFalse();
+}
+
+// BooleanImp
+inline
+AFun initAFunBooleanImp(AFun& f)
+{
+  f = ATmakeAFun("BooleanImp", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanImp()
+{
+  static AFun AFunBooleanImp = initAFunBooleanImp(AFunBooleanImp);
+  return AFunBooleanImp;
+}
+
+inline
+bool gsIsBooleanImp(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanImp();
+}
+
+// BooleanNot
+inline
+AFun initAFunBooleanNot(AFun& f)
+{
+  f = ATmakeAFun("BooleanNot", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanNot()
+{
+  static AFun AFunBooleanNot = initAFunBooleanNot(AFunBooleanNot);
+  return AFunBooleanNot;
+}
+
+inline
+bool gsIsBooleanNot(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanNot();
+}
+
+// BooleanOr
+inline
+AFun initAFunBooleanOr(AFun& f)
+{
+  f = ATmakeAFun("BooleanOr", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanOr()
+{
+  static AFun AFunBooleanOr = initAFunBooleanOr(AFunBooleanOr);
+  return AFunBooleanOr;
+}
+
+inline
+bool gsIsBooleanOr(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanOr();
+}
+
+// BooleanTrue
+inline
+AFun initAFunBooleanTrue(AFun& f)
+{
+  f = ATmakeAFun("BooleanTrue", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanTrue()
+{
+  static AFun AFunBooleanTrue = initAFunBooleanTrue(AFunBooleanTrue);
+  return AFunBooleanTrue;
+}
+
+inline
+bool gsIsBooleanTrue(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanTrue();
+}
+
+// BooleanVariable
+inline
+AFun initAFunBooleanVariable(AFun& f)
+{
+  f = ATmakeAFun("BooleanVariable", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunBooleanVariable()
+{
+  static AFun AFunBooleanVariable = initAFunBooleanVariable(AFunBooleanVariable);
+  return AFunBooleanVariable;
+}
+
+inline
+bool gsIsBooleanVariable(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunBooleanVariable();
 }
 
 // Choice
@@ -817,6 +1015,50 @@ inline
 bool gsIsId(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunId();
+}
+
+// IdAssignment
+inline
+AFun initAFunIdAssignment(AFun& f)
+{
+  f = ATmakeAFun("IdAssignment", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunIdAssignment()
+{
+  static AFun AFunIdAssignment = initAFunIdAssignment(AFunIdAssignment);
+  return AFunIdAssignment;
+}
+
+inline
+bool gsIsIdAssignment(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunIdAssignment();
+}
+
+// IdInit
+inline
+AFun initAFunIdInit(AFun& f)
+{
+  f = ATmakeAFun("IdInit", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunIdInit()
+{
+  static AFun AFunIdInit = initAFunIdInit(AFunIdInit);
+  return AFunIdInit;
+}
+
+inline
+bool gsIsIdInit(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunIdInit();
 }
 
 // IfThen
@@ -1565,6 +1807,28 @@ inline
 bool gsIsProcess(ATermAppl Term)
 {
   return ATgetAFun(Term) == gsAFunProcess();
+}
+
+// ProcessAssignment
+inline
+AFun initAFunProcessAssignment(AFun& f)
+{
+  f = ATmakeAFun("ProcessAssignment", 2, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunProcessAssignment()
+{
+  static AFun AFunProcessAssignment = initAFunProcessAssignment(AFunProcessAssignment);
+  return AFunProcessAssignment;
+}
+
+inline
+bool gsIsProcessAssignment(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunProcessAssignment();
 }
 
 // ProcessInit
@@ -2601,28 +2865,6 @@ bool gsIsWhr(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunWhr();
 }
 
-// WhrDecl
-inline
-AFun initAFunWhrDecl(AFun& f)
-{
-  f = ATmakeAFun("WhrDecl", 2, ATfalse);
-  ATprotectAFun(f);
-  return f;
-}
-
-inline
-AFun gsAFunWhrDecl()
-{
-  static AFun AFunWhrDecl = initAFunWhrDecl(AFunWhrDecl);
-  return AFunWhrDecl;
-}
-
-inline
-bool gsIsWhrDecl(ATermAppl Term)
-{
-  return ATgetAFun(Term) == gsAFunWhrDecl();
-}
-
 inline
 ATermAppl gsMakeActAnd(ATermAppl ActFrm_0, ATermAppl ActFrm_1)
 {
@@ -2726,6 +2968,12 @@ ATermAppl gsMakeAtTime(ATermAppl ProcExpr_0, ATermAppl DataExpr_1)
 }
 
 inline
+ATermAppl gsMakeBES(ATermList BooleanEquation_0, ATermAppl BooleanExpression_1)
+{
+  return ATmakeAppl2(gsAFunBES(), (ATerm) BooleanEquation_0, (ATerm) BooleanExpression_1);
+}
+
+inline
 ATermAppl gsMakeBInit(ATermAppl ProcExpr_0, ATermAppl ProcExpr_1)
 {
   return ATmakeAppl2(gsAFunBInit(), (ATerm) ProcExpr_0, (ATerm) ProcExpr_1);
@@ -2747,6 +2995,54 @@ inline
 ATermAppl gsMakeBlock(ATermList String_0, ATermAppl ProcExpr_1)
 {
   return ATmakeAppl2(gsAFunBlock(), (ATerm) String_0, (ATerm) ProcExpr_1);
+}
+
+inline
+ATermAppl gsMakeBooleanAnd(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
+{
+  return ATmakeAppl2(gsAFunBooleanAnd(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+}
+
+inline
+ATermAppl gsMakeBooleanEquation(ATermAppl FixPoint_0, ATermAppl BooleanVariable_1, ATermAppl BooleanExpression_2)
+{
+  return ATmakeAppl3(gsAFunBooleanEquation(), (ATerm) FixPoint_0, (ATerm) BooleanVariable_1, (ATerm) BooleanExpression_2);
+}
+
+inline
+ATermAppl gsMakeBooleanFalse()
+{
+  return ATmakeAppl0(gsAFunBooleanFalse());
+}
+
+inline
+ATermAppl gsMakeBooleanImp(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
+{
+  return ATmakeAppl2(gsAFunBooleanImp(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+}
+
+inline
+ATermAppl gsMakeBooleanNot(ATermAppl BooleanExpression_0)
+{
+  return ATmakeAppl1(gsAFunBooleanNot(), (ATerm) BooleanExpression_0);
+}
+
+inline
+ATermAppl gsMakeBooleanOr(ATermAppl BooleanExpression_0, ATermAppl BooleanExpression_1)
+{
+  return ATmakeAppl2(gsAFunBooleanOr(), (ATerm) BooleanExpression_0, (ATerm) BooleanExpression_1);
+}
+
+inline
+ATermAppl gsMakeBooleanTrue()
+{
+  return ATmakeAppl0(gsAFunBooleanTrue());
+}
+
+inline
+ATermAppl gsMakeBooleanVariable(ATermAppl String_0)
+{
+  return ATmakeAppl1(gsAFunBooleanVariable(), (ATerm) String_0);
 }
 
 inline
@@ -2837,6 +3133,18 @@ inline
 ATermAppl gsMakeId(ATermAppl String_0)
 {
   return ATmakeAppl1(gsAFunId(), (ATerm) String_0);
+}
+
+inline
+ATermAppl gsMakeIdAssignment(ATermAppl String_0, ATermList IdInit_1)
+{
+  return ATmakeAppl2(gsAFunIdAssignment(), (ATerm) String_0, (ATerm) IdInit_1);
+}
+
+inline
+ATermAppl gsMakeIdInit(ATermAppl String_0, ATermAppl DataExpr_1)
+{
+  return ATmakeAppl2(gsAFunIdInit(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 
 inline
@@ -3045,6 +3353,12 @@ ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
   return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+}
+
+inline
+ATermAppl gsMakeProcessAssignment(ATermAppl ProcVarId_0, ATermList DataVarIdInit_1)
+{
+  return ATmakeAppl2(gsAFunProcessAssignment(), (ATerm) ProcVarId_0, (ATerm) DataVarIdInit_1);
 }
 
 inline
@@ -3327,12 +3641,6 @@ inline
 ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 {
   return ATmakeAppl2(gsAFunWhr(), (ATerm) DataExpr_0, (ATerm) WhrDecl_1);
-}
-
-inline
-ATermAppl gsMakeWhrDecl(ATermAppl String_0, ATermAppl DataExpr_1)
-{
-  return ATmakeAppl2(gsAFunWhrDecl(), (ATerm) String_0, (ATerm) DataExpr_1);
 }
 //--- end generated code
 

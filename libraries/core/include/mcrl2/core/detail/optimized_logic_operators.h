@@ -18,8 +18,16 @@ namespace core {
 
 namespace detail {
 
-  template <typename T, typename UnaryFunction, typename UnaryPredicate>
-  T optimized_not(T arg, UnaryFunction not_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  /// \brief Make a negation
+  /// \param arg A term
+  /// \param not_ The operation not
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The value <tt>!arg</tt>
+  template <typename T1, typename T2, typename UnaryFunction, typename UnaryPredicate>
+  T1 optimized_not(T1 arg, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(arg))
       return false_;
@@ -29,8 +37,17 @@ namespace detail {
       return not_(arg);
   }
 
-  template <typename T, typename UnaryPredicate, typename BinaryFunction>
-  T optimized_and(T left, T right, BinaryFunction and_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  /// \brief Make a conjunction
+  /// \param left A term
+  /// \param right A term
+  /// \param and_ The operation and
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The value <tt>left && right</tt>
+  template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  T1 optimized_and(T1 left, T1 right, BinaryFunction and_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;
@@ -46,8 +63,17 @@ namespace detail {
       return and_(left, right);
   }
 
-  template <typename T, typename UnaryPredicate, typename BinaryFunction>
-  T optimized_or(T left, T right, BinaryFunction or_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  /// \brief Make a disjunction
+  /// \param left A term
+  /// \param right A term
+  /// \param or_ The operation or
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The value <tt>left || right</tt>
+  template <typename T1, typename T2, typename UnaryPredicate, typename BinaryFunction>
+  T1 optimized_or(T1 left, T1 right, BinaryFunction or_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return true_;
@@ -63,8 +89,18 @@ namespace detail {
       return or_(left, right);
   }
 
-  template <typename T, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
-  T optimized_imp(T left, T right, BinaryFunction imp, UnaryFunction not_, T true_, UnaryPredicate is_true, T false_, UnaryPredicate is_false)
+  /// \brief Make an implication
+  /// \param left A term
+  /// \param right A term
+  /// \param imp The implication operator
+  /// \param not_ The operation not
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The value <tt>left => right</tt>
+  template <typename T1, typename T2, typename UnaryPredicate, typename UnaryFunction, typename BinaryFunction>
+  T1 optimized_imp(T1 left, T1 right, BinaryFunction imp, UnaryFunction not_, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
   {
     if(is_true(left))
       return right;
@@ -78,6 +114,46 @@ namespace detail {
       return true_;
     else
       return imp(left, right);
+  }
+
+  /// \brief Make a universal quantification
+  /// \param v A sequence of variables
+  /// \param arg A term
+  /// \param forall The universal quantification operator
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The universal quantification <tt>forall v.arg</tt>
+  template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Forall>
+  T1 optimized_forall(VariableSequence v, T1 arg, Forall forall, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  {
+    if(is_true(arg))
+      return true_;
+    else if(is_false(arg))
+      return false_;
+    else
+      return forall(v, arg);
+  }
+
+  /// \brief Make an existential quantification
+  /// \param v A sequence of variables
+  /// \param arg A term
+  /// \param exists The existential quantification operator
+  /// \param true_ The value true
+  /// \param is_true Function that tests for the value true
+  /// \param false_ The value false
+  /// \param is_false Function that tests for the value false
+  /// \return The existential quantification <tt>exists v.arg</tt>
+  template <typename T1, typename T2, typename VariableSequence, typename UnaryPredicate, typename Exists>
+  T1 optimized_exists(VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPredicate is_true, T2 false_, UnaryPredicate is_false)
+  {
+    if(is_true(arg))
+      return true_;
+    else if(is_false(arg))
+      return false_;
+    else
+      return exists(v, arg);
   }
 
 } // namespace detail

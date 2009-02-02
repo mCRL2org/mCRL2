@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parse.h
+/// \file mcrl2/core/parse.h
 ///
 /// \brief Parse mCRL2 specifications and expressions.
 
@@ -14,12 +14,22 @@
 #define MCRL2_PARSE_H
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <aterm2.h>
 
 namespace mcrl2 {
   namespace core {
   
+/** \brief  Parse an mCRL2 identifier.
+  * \param[in] se_stream An input stream from which can be read.
+  * \post   The content of se_stream is parsed as an mCRL2 identifier.
+  * \return The parsed identifier, if everything went well;
+  *         NULL, otherwise.
+**/ 
+ATermAppl parse_identifier(std::istream &se_stream);
+
+
 /** \brief  Parse an mCRL2 sort expression.
   * \param[in] se_stream An input stream from which can be read.
   * \post   The content of se_stream is parsed as an mCRL2 sort expression.
@@ -103,6 +113,17 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
   *         NULL, otherwise.
 **/ 
 ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
+
+
+/** \brief  Parse mCRL2 data variables, according to the syntax of
+  *         data variable declarations following the var keyword
+  * \param[in] sf_stream An input stream from which can be read.
+  * \post   The content of sf_stream is parsed as a list of mCRL2 data
+  *         variables
+  * \return The parsed list of data variables, if everything went well;
+  *         NULL, otherwise.
+**/ 
+ATermList parse_data_vars(std::istream &sf_stream);
 
   }
 }

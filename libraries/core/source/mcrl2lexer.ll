@@ -35,22 +35,23 @@ extern int mcrl2yydebug;         /* declared in mcrl2parser.cpp */
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
-ATermAppl spec_tree = NULL;      /* the parse tree */
-ATermIndexedSet parser_protect_table = NULL; /* table to protect parsed ATerms */
+ATerm mcrl2_spec_tree = NULL;      /* the parse tree */
+ATermIndexedSet mcrl2_parser_protect_table = NULL; /* table to protect parsed ATerms */
 
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
 public:
-  mcrl2_lexer(void);             /* constructor */
+  mcrl2_lexer(bool print_parse_errors); /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
   int yywrap(void);              /* wrap function */
-  ATermAppl parse_streams(std::vector<std::istream*> &streams);
+  ATerm parse_streams(std::vector<std::istream*> &streams);
 protected:
   std::vector<std::istream*> *cur_streams;/* current input streams */
   int cur_index;                 /* current index in current streams */
   int line_nr;                   /* line number in cur_streams[cur_index] */
   int col_nr;                    /* column number in cu_streams[cur_index] */
+  bool show_errors;
   void process_string(void);     /* update position, provide token to parser */
 };
 
@@ -59,7 +60,7 @@ protected:
 #define YY_DECL int mcrl2_lexer::yylex()
 int mcrl2yyFlexLexer::yylex(void) { return 1; }
 
-mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
+mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
@@ -77,6 +78,7 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { col_nr += YYLeng(); /* comment */ }
 
+"identifier"    { process_string(); return TAG_IDENTIFIER; }
 "sort_expr"     { process_string(); return TAG_SORT_EXPR; }
 "data_expr"     { process_string(); return TAG_DATA_EXPR; }
 "data_spec"     { process_string(); return TAG_DATA_SPEC; }
@@ -86,6 +88,7 @@ Number     "0"|([1-9][0-9]*)
 "state_frm"     { process_string(); return TAG_STATE_FRM; }
 "action_rename" { process_string(); return TAG_ACTION_RENAME; }
 "pbes_spec"     { process_string(); return TAG_PBES_SPEC; }
+"data_vars"     { process_string(); return TAG_DATA_VARS; }
 
 "||_"      { process_string(); return LMERGE; }
 "->"       { process_string(); return ARROW; }
@@ -101,6 +104,7 @@ Number     "0"|([1-9][0-9]*)
 "=>"       { process_string(); return IMP; }
 "<<"       { process_string(); return BINIT; }
 "<>"       { process_string(); return ELSE; }
+"/"        { process_string(); return SLASH; }
 "*"        { process_string(); return STAR; }
 "+"        { process_string(); return PLUS; }
 "-"        { process_string(); return MINUS; }
@@ -185,10 +189,10 @@ nil        { process_string(); return NIL; }
 
 //Implementation of parse_streams
 
-ATermAppl parse_streams(std::vector<std::istream*> &streams) {
-  lexer = new mcrl2_lexer();
-  ATermAppl result = lexer->parse_streams(streams);
-  delete lexer;
+ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors) {
+  an_mcrl2_lexer = new mcrl2_lexer(print_parse_errors);
+  ATerm result = an_mcrl2_lexer->parse_streams(streams);
+  delete an_mcrl2_lexer;
   return result;
 }
 
@@ -196,11 +200,11 @@ ATermAppl parse_streams(std::vector<std::istream*> &streams) {
 //Implementation of global functions
 
 int mcrl2yylex(void) {
-  return lexer->yylex();
+  return an_mcrl2_lexer->yylex();
 }
 
 void mcrl2yyerror(const char *s) {
-  return lexer->yyerror(s);
+  return an_mcrl2_lexer->yyerror(s);
 }
 
 int mcrl2yyFlexLexer::yywrap(void) {
@@ -210,22 +214,26 @@ int mcrl2yyFlexLexer::yywrap(void) {
 
 //Implementation of mcrl2_lexer
 
-mcrl2_lexer::mcrl2_lexer(void) : mcrl2yyFlexLexer(NULL, NULL) {
+mcrl2_lexer::mcrl2_lexer(bool print_parse_errors) : mcrl2yyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
   cur_streams = NULL;
   cur_index = -1;
+  show_errors = print_parse_errors;
 }
 
 void mcrl2_lexer::yyerror(const char *s) {
-  int oldcol_nr = col_nr - YYLeng();
-  if (oldcol_nr < 0) {
-    oldcol_nr = 0;
+  if ( show_errors )
+  {
+    int oldcol_nr = col_nr - YYLeng();
+    if (oldcol_nr < 0) {
+      oldcol_nr = 0;
+    }
+    gsErrorMsg(
+      "token '%s' at position %d, %d caused the following error: %s\n", 
+      YYText(), line_nr, oldcol_nr, s
+    ); 
   }
-  gsErrorMsg(
-    "token '%s' at position %d, %d caused the following error: %s\n", 
-    YYText(), line_nr, oldcol_nr, s
-  ); 
 }
 
 int mcrl2_lexer::yywrap(void) {
@@ -249,17 +257,17 @@ void mcrl2_lexer::process_string(void) {
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
 }
 
-ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
+ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   //uncomment the line below to let bison generate debug information 
   //mcrl2yydebug = 1;
-  ATermAppl result = NULL;
+  ATerm result = NULL;
   if (streams.size() == 0) {
     return result;
   }
   //streams.size() > 0
-  spec_tree = NULL;
-  ATprotectAppl(&spec_tree);
-  parser_protect_table = ATindexedSetCreate(10000, 50);
+  mcrl2_spec_tree = NULL;
+  ATprotect(&mcrl2_spec_tree);
+  mcrl2_parser_protect_table = ATindexedSetCreate(10000, 50);
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
@@ -268,11 +276,11 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   if (mcrl2yyparse() != 0) {
     result = NULL;
   } else {
-    //spec_tree contains the parsed specification
-    result = spec_tree;
-    spec_tree = NULL;
+    //mcrl2_spec_tree contains the parsed specification
+    result = mcrl2_spec_tree;
+    mcrl2_spec_tree = NULL;
   }
-  ATindexedSetDestroy(parser_protect_table);
-  ATunprotectAppl(&spec_tree);
+  ATindexedSetDestroy(mcrl2_parser_protect_table);
+  ATunprotect(&mcrl2_spec_tree);
   return result;
 }

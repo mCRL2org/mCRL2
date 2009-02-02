@@ -1,19 +1,20 @@
 project libraries/core/test
    : source-location .
    : requirements
-      <use>/libraries/utilities//headers
-      <use>/libraries/atermpp//headers
-      <use>/libraries/core//headers
-      <use>/site-config//boost_headers 
+      <use>/libraries//utilities
+      <use>/libraries//atermpp
+      <use>/libraries//core
+      <use>/site-config//boost
+      <toolset>msvc:<asynch-exceptions>on
       <library>/libraries//core
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
 
-use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
-use-project /tools/lpspp : $(TOP)/tools/lpspp ;
+use-project /tools/mcrl22lps : ../../../tools/mcrl22lps ;
+use-project /tools/lpspp : ../../../tools/lpspp ;
 
-for file in [ glob-tree *.mcrl2 ] {
+for file in [ glob-tree *.mcrl2 : .svn ] {
   tests-with-files += [
         run /tools/mcrl22lps//mcrl22lps
               : -D

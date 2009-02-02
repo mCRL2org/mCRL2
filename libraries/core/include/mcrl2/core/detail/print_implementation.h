@@ -29,8 +29,8 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/data_reconstruct.h"
 
 using namespace mcrl2::utilities;
@@ -336,6 +336,10 @@ static bool gsIsOpIdPrefix(ATermAppl Term);
 static bool gsIsOpIdInfix(ATermAppl Term);
 //Ret: DataExpr is an infix operation identifier
 
+static int gsPrecOpIdPrefix();
+//Ret: Precedence of prefix operators
+//     (higher than all infix operators and arguments thereof)
+
 static int gsPrecOpIdInfix(ATermAppl OpIdName);
 //Pre: OpIdName is the name of an infix operation identifier
 //Ret: Precedence of the operation itself
@@ -360,7 +364,7 @@ inline static void PRINT_FUNC(fprints)(PRINT_OUTTYPE OutStream,
   assert(false);
 #endif
 #if defined(PRINT_C)
-  fprintf(OutStream, Value);
+  fprintf(OutStream, "%s", Value);
 #elif defined(PRINT_CXX)
   OutStream << Value;
 #endif
@@ -469,9 +473,9 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing data expression\n");
     PRINT_FUNC(PrintDataExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
 
-  } else if (gsIsWhrDecl(Part)) {
-    //print where declaration element
-    PRINT_FUNC(dbg_prints)("printing where declaration\n");
+  } else if (gsIsIdInit(Part)) {
+    //print identifier initialisation
+    PRINT_FUNC(dbg_prints)("printing identifier initialisation\n");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, " = ");
@@ -1142,12 +1146,10 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
-        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, 11);
-        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
+          pp_format, ShowSorts, gsPrecOpIdPrefix());
       } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
         //print infix expression
         PRINT_FUNC(dbg_prints)("printing infix expression\n");
@@ -1157,8 +1159,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
           pp_format, ShowSorts, gsPrecOpIdInfixLeft(HeadName));
         PRINT_FUNC(fprints)(OutStream, " ");
-        PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
-          pp_format, ShowSorts, PrecLevel);
+        PRINT_FUNC(PrintPart_Appl)(OutStream, Head, pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(fprints)(OutStream, " ");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
           pp_format, ShowSorts, gsPrecOpIdInfixRight(HeadName));
@@ -1182,14 +1183,10 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       } else {
         //print data application
         PRINT_FUNC(dbg_prints)("printing data application\n");
-        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintDataExpr)(OutStream, Head,
-          pp_format, ShowSorts, 11);
+        PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecOpIdPrefix());
         PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintPart_List)(OutStream, Args,
-          pp_format, ShowSorts, 0, NULL, ", ");
+        PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ")");
-        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
   } else if (gsIsBinder(DataExpr)) {
@@ -1252,6 +1249,15 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, 0, NULL, ", ");
       PRINT_FUNC(fprints)(OutStream, ")");
     }
+  } else if (gsIsIdAssignment(ProcExpr) || gsIsProcessAssignment(ProcExpr)) {
+    //print process assignment
+    PRINT_FUNC(dbg_prints)("printing process assignment\n");
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(ProcExpr, 0),
+      pp_format, ShowSorts, PrecLevel);
+    PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(ProcExpr, 1),
+      pp_format, ShowSorts, 0, NULL, ", ");
+    PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsDelta(ProcExpr)) {
     //print delta
     PRINT_FUNC(dbg_prints)("printing delta\n");
@@ -1310,7 +1316,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing if then\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " -> ");
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 5);
@@ -1320,7 +1326,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing if then else\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " -> ");
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 5);
@@ -1347,7 +1353,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 6);
     PRINT_FUNC(fprints)(OutStream, " @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
     if (PrecLevel > 6) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSync(ProcExpr)) {
     //print sync
@@ -1415,13 +1421,13 @@ static void PRINT_FUNC(PrintStateFrm)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing timed yaled\n");
     PRINT_FUNC(fprints)(OutStream, "yaled @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(StateFrm, 0),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
   } else if (gsIsStateDelayTimed(StateFrm)) {
     //print timed delay
     PRINT_FUNC(dbg_prints)("printing timed delay\n");
     PRINT_FUNC(fprints)(OutStream, "delay @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(StateFrm, 0),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
   } else if (gsIsStateVar(StateFrm)) {
     //print fixpoint variable
     PRINT_FUNC(dbg_prints)("printing fixpoint variable\n");
@@ -1640,7 +1646,7 @@ static void PRINT_FUNC(PrintActFrm)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 3);
     PRINT_FUNC(fprints)(OutStream, " @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ActFrm, 1),
-      pp_format, ShowSorts, 11);
+      pp_format, ShowSorts, gsPrecOpIdPrefix());
     if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsActNot(ActFrm)) {
     //print negation
@@ -1749,7 +1755,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   //print condition
   ATermAppl Cond = ATAgetArgument(Summand, 1);
   if (!gsIsNil(Cond)) {
-    PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 11);
+    PRINT_FUNC(PrintDataExpr)(OutStream, Cond, pp_format, ShowSorts, gsPrecOpIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " ->\n         ");
   }
   //print multiaction
@@ -1761,7 +1767,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   //print time
   if (IsTimed) {
     PRINT_FUNC(fprints)(OutStream, " @ ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, Time, pp_format, ShowSorts, 11);
+    PRINT_FUNC(PrintDataExpr)(OutStream, Time, pp_format, ShowSorts, gsPrecOpIdPrefix());
   }
   //print process reference
   if (!gsIsDelta(MultAct)) {
@@ -1925,11 +1931,19 @@ bool gsIsOpIdPrefix(ATermAppl Term)
   if (!gsIsOpId(Term)) {
     return false;
   }
+  ATermAppl TermSort = ATAgetArgument(Term, 1);
+  if (!gsIsSortArrow(TermSort)) {
+    return false;
+  }
+  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 1) {
+    return false;
+  }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 1) && (
-    (OpIdName == gsMakeOpIdNameNot()) || (OpIdName == gsMakeOpIdNameNeg()) ||
-    (OpIdName == gsMakeOpIdNameListSize()) || (OpIdName == gsMakeOpIdNameSetCompl())
-    );
+  return
+     (OpIdName == gsMakeOpIdNameNot())      ||
+     (OpIdName == gsMakeOpIdNameNeg())      ||
+     (OpIdName == gsMakeOpIdNameListSize()) ||
+     (OpIdName == gsMakeOpIdNameSetCompl()); 
 }
 
 bool gsIsOpIdInfix(ATermAppl Term)
@@ -1937,9 +1951,16 @@ bool gsIsOpIdInfix(ATermAppl Term)
   if (!gsIsOpId(Term)) {
     return false;
   }
+  ATermAppl TermSort = ATAgetArgument(Term, 1);
+  if (!gsIsSortArrow(TermSort)) {
+    return false;
+  }
+  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 2) {
+    return false;
+  }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 2) &&
-    ((OpIdName == gsMakeOpIdNameImp())          ||
+  return
+     (OpIdName == gsMakeOpIdNameImp())          ||
      (OpIdName == gsMakeOpIdNameAnd())          ||
      (OpIdName == gsMakeOpIdNameOr())           ||
      (OpIdName == gsMakeOpIdNameEq())           ||
@@ -1960,14 +1981,20 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameSubt())         ||
      (OpIdName == gsMakeOpIdNameSetUnion())     ||
      (OpIdName == gsMakeOpIdNameSetDiff())      ||
-     (OpIdName == gsMakeOpIdNameBagUnion())     ||
+     (OpIdName == gsMakeOpIdNameBagJoin())     ||
      (OpIdName == gsMakeOpIdNameBagDiff())      ||
      (OpIdName == gsMakeOpIdNameDiv())          ||
      (OpIdName == gsMakeOpIdNameMod())          ||
+     (OpIdName == gsMakeOpIdNameDivide())       ||
      (OpIdName == gsMakeOpIdNameMult())         ||
      (OpIdName == gsMakeOpIdNameEltAt())        ||
      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-     (OpIdName == gsMakeOpIdNameBagIntersect()));
+     (OpIdName == gsMakeOpIdNameBagIntersect());
+}
+
+int gsPrecOpIdPrefix()
+{
+  return 13;
 }
 
 int gsPrecOpIdInfix(ATermAppl OpIdName)
@@ -1995,10 +2022,11 @@ int gsPrecOpIdInfix(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
@@ -2037,10 +2065,11 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
@@ -2079,10 +2108,11 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
       (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
       ) {
     return 10;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
+      (OpIdName == gsMakeOpIdNameDivide())) {
     return 11;
   } else if (
       (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||

@@ -14,8 +14,8 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/messaging.h"
 
 using namespace ::mcrl2::utilities;
