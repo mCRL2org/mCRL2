@@ -431,18 +431,7 @@ static ATermList get_lps_params(ATerm lps)
 
 static ATermList get_lps_params(lps::linear_process &lps)
 {
-  ATermList params = ATmakeList0();
-
-  data::data_variable_list pars = lps.process_parameters();
-  data::data_variable_list::iterator pb = pars.begin();
-  data::data_variable_list::iterator pe = pars.end();
-  for (; pb != pe; pb++)
-  {
-    ATermAppl p = *pb;
-    params = ATinsert(params,(ATerm) ATmakeList2((ATerm) p,(ATerm) gsGetSort(p)));
-  }
-
-  return ATreverse(params);
+  return lps.process_parameters();
 }
 
 static bool isATermString(ATerm a)

@@ -2,7 +2,8 @@ import testing ;
 
 project libraries/trace/test
    : requirements
-       <use>/site-config//boost_headers
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//core
        <source>/libraries//trace
    ;

@@ -254,7 +254,7 @@ void test_quantifier_rename_builder()
   pbes_expression f = d::equal_to(mN, nN);
   pbes_expression g = d::not_equal_to(mN, nN);
 
-  new_data::multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
+  multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
   pbes_expression p1 = 
   and_(

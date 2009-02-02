@@ -30,8 +30,8 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/multi_action_equality.h"
-#include "mcrl2/new_data/xyz_identifier_generator.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/xyz_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
@@ -252,12 +252,12 @@ class pbes_translate_algorithm
       std::set<core::identifier_string> spec_names = core::find_identifiers(spec);
 
       // rename data variables in f, to prevent name clashes with data variables in spec
-      new_data::set_identifier_generator generator;
+      data::set_identifier_generator generator;
       generator.add_identifiers(spec_variable_names);
       f = modal::rename_data_variables(f, generator);
 
       // rename predicate variables in f, to prevent name clashes
-      new_data::xyz_identifier_generator xyz_generator;
+      data::xyz_identifier_generator xyz_generator;
       xyz_generator.add_identifiers(spec_names);
       xyz_generator.add_identifiers(formula_variable_names);
       f = rename_predicate_variables(f, xyz_generator);

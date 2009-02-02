@@ -29,7 +29,7 @@ namespace pbes_system {
 inline
 pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::data_variable_list& free_variables)
 {
-  new_data::multiset_identifier_generator generator(free_variables);
+  data::multiset_identifier_generator generator(free_variables);
   return detail::make_quantifier_rename_builder(generator).visit(p);
 }
 
