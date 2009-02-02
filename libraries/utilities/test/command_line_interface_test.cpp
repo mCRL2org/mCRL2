@@ -16,8 +16,8 @@
 #include <boost/test/included/unit_test_framework.hpp> 
 
 #define MCRL2_REVISION "xXxXx"
-#include "mcrl2/old_data/rewrite.h"
-#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"

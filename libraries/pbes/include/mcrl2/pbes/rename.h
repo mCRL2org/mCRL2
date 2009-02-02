@@ -24,9 +24,9 @@ namespace pbes_system {
 /// of a quantifier variable, no other quantifier variables or free variables
 /// with the same name occur.
 inline
-pbes_expression rename_quantifier_variables(const pbes_expression& p, const old_data::data_variable_list& free_variables)
+pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::data_variable_list& free_variables)
 {
-  data::multiset_identifier_generator generator(free_variables);
+  new_data::multiset_identifier_generator generator(free_variables);
   return detail::make_quantifier_rename_builder(generator).visit(p);
 }
 

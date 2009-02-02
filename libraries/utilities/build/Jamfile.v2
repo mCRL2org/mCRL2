@@ -3,7 +3,7 @@ project libraries/utilities
        : requirements
           <use>/site-config//boost
           <include>../include
-          <include>../../old_data/include                   # temporary
+          <include>../../data/include                   # temporary
           <include>../../atermpp/include                    # temporary
           <include>../../core/include                       # temporary
           <include>../../../3rd-party/aterm/include/aterm   # temporary
@@ -47,7 +47,7 @@ mcrl2-library utilities
       : <use>/site-config//boost
         <library>/libraries//atermpp
         <include>../../core/include      # Circular dependency
-        <include>../../old_data/include      # Circular dependency
+        <include>../../data/include      # Circular dependency
       :
       : <include>../include
       ;

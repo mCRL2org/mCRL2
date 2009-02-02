@@ -20,7 +20,7 @@ mcrl2-library core
          source/numeric_string.cpp
        : <library>/libraries//atermpp
          <library>/libraries//utilities
-         <include>../../data/include
+         <include>../../new_data/include
          <include>../include
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic

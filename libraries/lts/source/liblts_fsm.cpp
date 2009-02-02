@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lts.h"
@@ -29,7 +29,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
@@ -433,9 +433,9 @@ static ATermList get_lps_params(lps::linear_process &lps)
 {
   ATermList params = ATmakeList0();
 
-  old_data::data_variable_list pars = lps.process_parameters();
-  old_data::data_variable_list::iterator pb = pars.begin();
-  old_data::data_variable_list::iterator pe = pars.end();
+  data::data_variable_list pars = lps.process_parameters();
+  data::data_variable_list::iterator pb = pars.begin();
+  data::data_variable_list::iterator pe = pars.end();
   for (; pb != pe; pb++)
   {
     ATermAppl p = *pb;

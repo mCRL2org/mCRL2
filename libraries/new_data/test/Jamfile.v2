@@ -1,0 +1,23 @@
+project libraries/new_data/test
+   : requirements
+       <use>/site-config//boost
+       <library>/libraries//new_data
+       <library>/libraries//core
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+   ;
+
+include $(TOP)/build/testing/header_test.jam ;
+
+test-suite new_data
+    :
+      [ run sort_expression_test.cpp ]
+      [ run data_expression_test.cpp ]
+      [ run data_equation_test.cpp ]
+      [ run data_specification_test.cpp ]
+      [ run bool_test.cpp ]
+      [ run compatibility_test.cpp ]
+      [ run parser_test.cpp ]
+      [ run implement_data_types_test.cpp ]
+      [ compile-headers ../include ]
+    ;

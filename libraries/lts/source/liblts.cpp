@@ -1734,14 +1734,14 @@ bool lts::has_data_specification()
          !gsIsNil(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-old_data::data_specification lts::get_data_specification()
+data::data_specification lts::get_data_specification()
 {
   assert(has_data_specification());
 
-  return old_data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
+  return data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-void lts::set_data_specification(old_data::data_specification spec)
+void lts::set_data_specification(data::data_specification spec)
 {
   assert( type == lts_mcrl2 );
 

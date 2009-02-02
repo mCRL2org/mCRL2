@@ -19,12 +19,12 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)

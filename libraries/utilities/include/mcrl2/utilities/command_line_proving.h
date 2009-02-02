@@ -10,7 +10,7 @@
 #define __MCRL2_UTILITIES_COMMAND_LINE_PROVING_
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/prover/bdd_path_eliminator.h"
 
 namespace mcrl2 {
   namespace utilities {
