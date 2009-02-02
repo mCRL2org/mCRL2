@@ -9,8 +9,8 @@
 /// \file mcrl2/data/sort_utility.h
 /// \brief Utility functions for sorts.
 
-#ifndef MCRL2_OLD_DATA_SORT_UTILITY_H
-#define MCRL2_OLD_DATA_SORT_UTILITY_H
+#ifndef MCRL2_DATA_SORT_UTILITY_H
+#define MCRL2_DATA_SORT_UTILITY_H
 
 #include <vector>
 #include <cassert>
@@ -145,4 +145,4 @@ data::data_expression_list enumerate_constructors(data::data_operation_list fl, 
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_SORT_UTILITY_H
+#endif // MCRL2_DATA_SORT_UTILITY_H

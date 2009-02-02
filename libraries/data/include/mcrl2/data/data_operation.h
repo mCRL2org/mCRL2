@@ -9,8 +9,8 @@
 /// \file mcrl2/data/data_operation.h
 /// \brief The class data_operation.
 
-#ifndef MCRL2_OLD_DATA_DATA_OPERATION_H
-#define MCRL2_OLD_DATA_DATA_OPERATION_H
+#ifndef MCRL2_DATA_DATA_OPERATION_H
+#define MCRL2_DATA_DATA_OPERATION_H
 
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -99,4 +99,4 @@ bool is_data_operation(atermpp::aterm_appl t)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_operation)
 /// \endcond
 
-#endif // MCRL2_OLD_DATA_DATA_OPERATION_H
+#endif // MCRL2_DATA_DATA_OPERATION_H

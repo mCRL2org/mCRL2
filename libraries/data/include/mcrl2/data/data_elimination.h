@@ -9,8 +9,8 @@
 /// \file mcrl2/data/data_elimination.h
 /// \brief The files provides the class data_elimination.
 
-#ifndef MCRL2_OLD_DATA_DATA_ELIMINATION_H
-#define MCRL2_OLD_DATA_DATA_ELIMINATION_H
+#ifndef MCRL2_DATA_DATA_ELIMINATION_H
+#define MCRL2_DATA_DATA_ELIMINATION_H
 
 #include <cassert>
 #include <mcrl2/data/data_specification.h>

@@ -9,8 +9,8 @@
 /// \file mcrl2/data/data_operators.h
 /// \brief Some operators for list concatenation.
 
-#ifndef MCRL2_OLD_DATA_DATA_OPERATORS_H
-#define MCRL2_OLD_DATA_DATA_OPERATORS_H
+#ifndef MCRL2_DATA_DATA_OPERATORS_H
+#define MCRL2_DATA_DATA_OPERATORS_H
 
 #include "mcrl2/data/data.h"
 
@@ -58,4 +58,4 @@ data_expression_list operator+(data_expression_list l, data_variable v)
 
 } // namespace mcrl2
 
-#endif // MCRL2_OLD_DATA_DATA_OPERATORS_H
+#endif // MCRL2_DATA_DATA_OPERATORS_H

@@ -651,4 +651,4 @@ namespace detail {
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_expression)
 /// \endcond
 
-#endif // MCRL2_OLD_DATA_DATA_EXPRESSION_H
+#endif // MCRL2_DATA_DATA_EXPRESSION_H

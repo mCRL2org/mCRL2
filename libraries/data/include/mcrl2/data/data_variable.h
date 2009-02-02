@@ -9,8 +9,8 @@
 /// \file mcrl2/data/data_variable.h
 /// \brief The class data_variable.
 
-#ifndef MCRL2_OLD_DATA_DATA_VARIABLE_H
-#define MCRL2_OLD_DATA_DATA_VARIABLE_H
+#ifndef MCRL2_DATA_DATA_VARIABLE_H
+#define MCRL2_DATA_DATA_VARIABLE_H
 
 #include <cassert>
 #include <string>
@@ -118,4 +118,4 @@ class data_variable: public data_expression
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_variable)
 /// \endcond
 
-#endif // MCRL2_OLD_DATA_DATA_VARIABLE_H
+#endif // MCRL2_DATA_DATA_VARIABLE_H

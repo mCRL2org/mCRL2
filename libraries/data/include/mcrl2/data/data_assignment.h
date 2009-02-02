@@ -9,8 +9,8 @@
 /// \file mcrl2/data/data_assignment.h
 /// \brief The class data_assignment.
 
-#ifndef MCRL2_OLD_DATA_DATA_ASSIGNMENT_H
-#define MCRL2_OLD_DATA_DATA_ASSIGNMENT_H
+#ifndef MCRL2_DATA_DATA_ASSIGNMENT_H
+#define MCRL2_DATA_DATA_ASSIGNMENT_H
 
 #include <algorithm>
 #include <cassert>
@@ -236,4 +236,4 @@ struct assignment_list_substitution
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_assignment)
 /// \endcond
 
-#endif // MCRL2_OLD_DATA_DATA_ASSIGNMENT_H
+#endif // MCRL2_DATA_DATA_ASSIGNMENT_H
