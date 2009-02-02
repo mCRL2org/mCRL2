@@ -15,14 +15,12 @@
 #include "mcrl2/core/detail/data_common.h"
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace core {
     namespace detail {
 
-using namespace mcrl2::core::detail;
-using namespace mcrl2::core;
-
-//\pre spec represents an mCRL2 data, process or PBES specification that
-//     adheres to the internal ATerm structure after the type checking phase.
+//\pre spec represents an mCRL2 data, linear process, process or PBES
+//     specification that adheres to the internal ATerm structure after the
+//     type checking phase.
 //\post The datatypes of spec are implemented as higher-order abstract data
 //     types.
 //\return if the data implementation went well, an equivalent version of spec is
@@ -95,53 +93,100 @@ ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
 **/
 ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_spec);
 
+/// \pre  sort_struct is a structured sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_struct
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_struct
+/// \post an implementation of sort_struct represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+///       if recursive, then the sorts of the projection functions are also implemented
+void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true);
+
 /// \pre sort_elt and sort_list are sort expressions.
 /// \return the list of data equations belonging to the list sort sort_list, with
 //     elements sort_elt.
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_list);
 
-/// \pre sort_list is a list sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_expression_list
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_expression_list
-/// \post an implementation of sort_list is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_list
-ATermAppl impl_sort_list(ATermAppl sort_expression_list, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+/// \pre  sort_list is a list sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_expression_list
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_expression_list
+/// \post an implementation of sort_list represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_list(ATermAppl sort_expression_list, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
+
+/// \pre sort_elt and sort_fset are sort expressions
+/// \return the list of data equations belonging to the finite set sort_fset, with elements
+///     of sort sort_elt
+ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset);
+
+/// \pre  sort_elt is a sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of a finite set of elements of sort sort_elt
+///       represented by sort sort_id is added to *p_data_decls and new
+///       induced substitutions are added *p_substs
+void impl_sort_fset(ATermAppl sort_elt, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
+
+/// \pre sort_elt, sort_fset and sort_set are sort expressions
+/// \return the list of data equations belonging to the set sort_set, with elements
+///     of sort sort_elt and finite sets of sort sort_fset
+ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_set);
+
+/// \pre  sort_set is a set sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of sort_set represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
+
+/// \pre sort_elt, sort_fset, sort_fbag_elt and sort_fbag are sort expressions
+/// \return the list of data equations belonging to the finite bag sort_fbag, with elements
+///     of sort sort_elt, finite sets of sort sort_fset, and finite bag elements of sort sort_fbag_elt
+ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_fbag_elt, ATermAppl sort_fbag);
+
+/// \pre  sort_elt is a sort expression
+///       sort_fset is a sort expression
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of a finite bag of elements of sort sort_elt
+///       with finite sets of sort sort_fset represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_fbag(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre sort_elt and sort_list are sort expressions
 /// \return the list of data equations belonging to the set sort_set, with elements
 ///     of sort_elt
-ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_set);
+ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_fbag, ATermAppl sort_set, ATermAppl sort_bag);
 
-/// \pre sort_set is a set sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_set
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_set
-/// \post an implementation of sort_set is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_set
-ATermAppl impl_sort_set(ATermAppl sort_set, ATermList *p_substs,
-  t_data_decls *p_data_decls);
-
-/// \pre sort_elt and sort_list are sort expressions
-/// \return the list of data equations belonging to the set sort_set, with elements
-///     of sort_elt
-ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_bag, ATermAppl sort_set);
-
-/// \pre sort_bag is a bag sort
-///     p_substs is a pointer to a list of substitutions induced by the context
-///     of sort_bag
-///     p_data_decls represents a pointer to new data declarations, induced by
-///     the context of sort_bag
-/// \post an implementation of sort_bag is added to *p_data_decls and new induced
-///     substitutions are added *p_substs
-/// \return a sort identifier which is the implementation of sort_bag
-ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
-  t_data_decls *p_data_decls);
+/// \pre  sort_bag is a bag sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_bag
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_bag
+/// \post an implementation of sort_bag represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Bool is added to *p_data_decls
@@ -153,7 +198,8 @@ void impl_sort_pos(t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Nat is added to *p_data_decls
-void impl_sort_nat(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_nat(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort PairNat is added to *p_data_decls
@@ -161,11 +207,13 @@ void impl_sort_nat_pair(t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Int is added to *p_data_decls
-void impl_sort_int(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_int(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Real is added to *p_data_decls
-void impl_sort_real(t_data_decls *p_data_decls);
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_real(t_data_decls *p_data_decls, bool recursive = true);
 
 /// \pre sort is a sort expression that adheres to the internal syntax after
 ///     data implementation
@@ -174,68 +222,21 @@ void impl_sort_real(t_data_decls *p_data_decls);
 ///     sort is added to *p_data_decls
 void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls);
 
-/// \pre op_id is an operation identifier of sort s_op_id; here s_op_id is:
-///     - either a sort identifier
-///     - or it is of the form s_0 x ... x s_n -> s, where the s_i and s are
-///       sort expressions
-///     p_args points to a list
-///     p_vars points to a list of DataVarIds
-///     context is some term
-/// \return [v_0,...,v_n] if s_op_id is a sort identifier
-///     op_id(v_0,...,v_n), if s_op_id is of the form s_0 x ... x s_n -> s;
-///     here for 1 <= i <= n, v_i is a data variable of sort s_i different from
-///     the other v_j, and either
-///     - v_i occurs in *p_vars
-///     - v_i does not occur in *p_vars and context
+/// \pre    op_id is an operation identifier of sort s_op_id; here s_op_id is:
+///         - either a sort identifier
+///         - or it is of the form s_0 x ... x s_n -> s, where the s_i and s are
+///           sort expressions
+///         p_vars points to a list of DataVarIds
+///         context is some term
+/// \return [], if s_op_id is a sort identifier
+///         [v_0,...,v_n], if s_op_id is of the form s_0 x ... x s_n -> s;
+///         here for 1 <= i <= n, v_i is a data variable of sort s_i different from
+///         the other v_j, and either
+///         - v_i occurs in *p_vars
+///         - v_i does not occur in *p_vars and context
+/// \post   *p_vars is extended with newly introduced v_i
+///         (which did not occur in *p_vars and context)
 ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context);
-
-//Pre: term is not NULL
-//Ret: sort identifier for the implementation of a structured sort with prefix
-//     struct_prefix, that does not occur in term
-inline
-ATermAppl make_fresh_struct_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix(), term, false));
-}
-
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a list sort with prefix
-//     list_prefix, that does not occur in term
-inline
-ATermAppl make_fresh_list_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix(), term, false));
-}
-
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a set sort with prefix
-//     set_prefix, that does not occur in term
-inline
-ATermAppl make_fresh_set_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix(), term, false));
-}
-
-//Pre: term is not NULL
-//Ret: fresh sort identifier for the implementation of a bag sort with prefix
-//     bag_prefix, that does not occur in term
-inline
-ATermAppl make_fresh_bag_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix(), term, false));
-}
-
-//Pre: sort_expr is a sort expression
-//     term is not NULL
-//Ret: operation identifier op_id(n, s) for the implementation of a lambda
-//     abstraction, where s is sort_expr and n is a name with prefix
-//     lambda_prefix, that does not occur in term
-inline
-ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
-{
-  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix(), term, false),
-    sort_expr);
-}
 
     }
   }
