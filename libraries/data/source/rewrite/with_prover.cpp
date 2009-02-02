@@ -6,6 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "rewr_prover"
 
 #include <cstdio>
@@ -19,6 +21,8 @@
 #include "mcrl2/data/bdd_prover.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/detail/rewrite/with_prover.h"
+
+#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 
@@ -73,14 +77,34 @@ ATermAppl RewriterProver::fromRewriteFormat(ATerm Term)
   return rewr_obj->fromRewriteFormat(Term);
 }
 
-void RewriterProver::setSubstitution(ATermAppl Var, ATerm Expr)
+void RewriterProver::setSubstitution(ATermAppl Var, ATermAppl Expr)
 {
   return rewr_obj->setSubstitution(Var,Expr);
 }
 
-ATerm RewriterProver::getSubstitution(ATermAppl Var)
+void RewriterProver::setSubstitutionList(ATermList Substs)
+{
+  return rewr_obj->setSubstitutionList(Substs);
+}
+
+void RewriterProver::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
+{
+  return rewr_obj->setSubstitutionInternal(Var,Expr);
+}
+
+void RewriterProver::setSubstitutionInternalList(ATermList Substs)
+{
+  return rewr_obj->setSubstitutionInternalList(Substs);
+}
+
+ATermAppl RewriterProver::getSubstitution(ATermAppl Var)
 {
   return rewr_obj->getSubstitution(Var);
+}
+
+ATerm RewriterProver::getSubstitutionInternal(ATermAppl Var)
+{
+  return rewr_obj->getSubstitutionInternal(Var);
 }
 
 void RewriterProver::clearSubstitution(ATermAppl Var)
@@ -93,6 +117,11 @@ void RewriterProver::clearSubstitutions()
   return rewr_obj->clearSubstitutions();
 }
 
+void RewriterProver::clearSubstitutions(ATermList Vars)
+{
+  return rewr_obj->clearSubstitutions(Vars);
+}
+
 RewriteStrategy RewriterProver::getStrategy()
 {
   switch ( rewr_obj->getStrategy() )
@@ -101,10 +130,14 @@ RewriteStrategy RewriterProver::getStrategy()
       return GS_REWR_INNER_P;
     case GS_REWR_JITTY:
       return GS_REWR_JITTY_P;
+#ifdef MCRL2_INNERC_AVAILABLE
     case GS_REWR_INNERC:
       return GS_REWR_INNERC_P;
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
       return GS_REWR_JITTYC_P;
+#endif
     default:
       return GS_REWR_INVALID;
   }

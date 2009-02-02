@@ -6,17 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <stdlib.h>
+#include "boost.hpp" // precompiled headers
+
+#include <cstdlib>
 #include <sstream>
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
-using namespace ::mcrl2::utilities;
+#include "workarounds.h" // DECL_A
+
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -238,7 +241,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr *e)
 	while ( !ATisEmpty(vars) && (this->*info.FindEquality)(expr,vars,&var,&val) )
 	{
 		vars = ATremoveElement(vars, var);
-		info.rewr_obj->setSubstitution((ATermAppl) var,val);
+		info.rewr_obj->setSubstitutionInternal((ATermAppl) var,val);
 		vals = ATinsert(vals,(ATerm) ATmakeAppl2(info.tupAFun,var,val));		
 		expr = info.rewr_obj->rewriteInternal(expr);
 		info.rewr_obj->clearSubstitution((ATermAppl) var);
@@ -431,7 +434,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 				}
 				ATerm term_rf = info.rewr_obj->rewriteInternal(info.rewr_obj->toRewriteFormat(cons_term));
 			
-				info.rewr_obj->setSubstitution(var,term_rf);
+				info.rewr_obj->setSubstitutionInternal(var,term_rf);
 				ATerm new_expr = info.rewr_obj->rewriteInternal(e.expr);
 				if ( !ATisEqual(new_expr,info.rewr_false) )
 				{

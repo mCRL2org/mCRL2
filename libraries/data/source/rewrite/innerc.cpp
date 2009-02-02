@@ -6,90 +6,34 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#ifdef NO_DYNLOAD
+#include "boost.hpp" // precompiled headers
 
-#include "mcrl2/data/detail/rewrite/innerc.h"
+#include "mcrl2/data/rewrite.h"
 
-#include <cstdlib>
-#include "mcrl2/core/messaging.h"
+#ifdef MCRL2_INNERC_AVAILABLE
 
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-
-RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specification DataSpec)
-{
-	gsErrorMsg("compiling Innermost rewriter is not available\n");
-	exit(1);
-}
-
-RewriterCompilingInnermost::~RewriterCompilingInnermost()
-{
-}
-
-ATermAppl RewriterCompilingInnermost::rewrite(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingInnermost::toRewriteFormat(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
-{
-	return NULL;
-}
-
-ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList Terms)
-{
-	return NULL;
-}
-
-void RewriterCompilingInnermost::setSubstitution(ATermAppl Var, ATerm Expr)
-{
-}
-
-ATerm RewriterCompilingInnermost::getSubstitution(ATermAppl Var)
-{
-	return NULL;
-}
-
-void RewriterCompilingInnermost::clearSubstitution(ATermAppl Var)
-{
-}
-
-void RewriterCompilingInnermost::clearSubstitutions()
-{
-}
-
-#else
+#include "workarounds.h" // DECL_A
 
 #define NAME "rewr_innerc"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 #include <string.h>
 #include <dlfcn.h>
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
+#include <stdexcept>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/innerc.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -1514,7 +1458,16 @@ gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
 static int getArity(ATermAppl op)
 {
   ATermAppl sort = ATAgetArgument(op,1);
-  return ATgetLength(gsGetSortExprDomain(sort));
+  int arity = 0;
+
+  while ( gsIsSortArrow(sort) )
+  {
+    ATermList sort_dom = ATLgetArgument(sort, 0);
+    arity += ATgetLength(sort_dom);
+    sort = ATAgetArgument(sort, 1);
+  }
+
+  return arity;
 }
 
 void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specification DataSpec)
@@ -2266,11 +2219,13 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(mcrl2::data::data_specifi
   term2int = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifdef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+#ifndef NDEBUG
+  if (!gsDebug)
 #endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 }
 
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
@@ -2278,9 +2233,11 @@ RewriterCompilingInnermost::~RewriterCompilingInnermost()
   finalise_common();
   ATtableDestroy(term2int);
 #ifndef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+  if (gsDebug)
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 #endif
 }
 
@@ -2305,12 +2262,12 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
   return (ATerm) so_rewr((ATermAppl) Term);
 }
 
-void RewriterCompilingInnermost::setSubstitution(ATermAppl Var, ATerm Expr)
+void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
 }
 
-ATerm RewriterCompilingInnermost::getSubstitution(ATermAppl Var)
+ATerm RewriterCompilingInnermost::getSubstitutionInternal(ATermAppl Var)
 {
   return so_get_subst(Var);
 }
@@ -2325,9 +2282,9 @@ void RewriterCompilingInnermost::clearSubstitutions()
   so_clear_substs();
 }
 
-#endif
-
 RewriteStrategy RewriterCompilingInnermost::getStrategy()
 {
 	return GS_REWR_INNERC;
 }
+
+#endif

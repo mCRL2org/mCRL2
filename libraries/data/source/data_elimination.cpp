@@ -8,22 +8,22 @@
 //
 /// \file data_elimination.cpp
 
-#include <mcrl2/new_data/detail/data_implementation.h>
+#include "boost.hpp" // precompiled headers
+
+#include <mcrl2/core/data_implementation.h>
 #include <mcrl2/core/detail/struct.h>
 #include <mcrl2/core/messaging.h>
-#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/core/aterm_ext.h>
 #include <mcrl2/data/data_specification.h>
 #include <mcrl2/data/sort.h>
 #include <mcrl2/data/data_operation.h>
 #include <mcrl2/data/data_variable.h>
 #include <mcrl2/data/data_elimination.h>
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 using namespace mcrl2::data;
-using namespace mcrl2::new_data::detail;
 
 
 //Prototype

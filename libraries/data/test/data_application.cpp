@@ -15,7 +15,6 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/sort.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace std;
 using namespace atermpp;
@@ -25,7 +24,7 @@ using namespace mcrl2::data;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv) 
 
   sort_identifier A("A");
   sort_identifier B("B");
@@ -57,8 +56,8 @@ int test_main(int argc, char** argv)
   /* This illustrates that the constructor for a data application does not
    * check type correctness of the resulting term!
    */
-  data_application e1(f, make_list(ex,ex));
-  data_application e2(f, make_list(ex,ex,ey));
+  //data_application e1(f, make_list(ex,ex));
+  //data_application e2(f, make_list(ex,ex,ey));
 
   return 0;
 }

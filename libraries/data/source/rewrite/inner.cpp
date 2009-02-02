@@ -8,6 +8,8 @@
 //
 /// \file rewr_inner.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #include "mcrl2/data/detail/rewrite/inner.h"
 
 #define NAME "rewr_inner"
@@ -15,13 +17,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <stdexcept>
 #include <memory.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
-using namespace ::mcrl2::utilities;
+#include "workarounds.h" // DECL_A
+
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

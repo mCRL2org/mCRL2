@@ -6,13 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <cstdlib>
 
 #include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

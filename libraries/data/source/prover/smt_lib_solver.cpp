@@ -6,20 +6,26 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost.hpp" // precompiled headers
+
 #include <cstdlib>
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
+
+#ifdef HAVE_CVC
+# include "mcrl2/data/detail/prover/smt_lib_solver_fast.ipp"
+#endif // HAVE_CVC
 
 // Class SMT_LIB_Solver ---------------------------------------------------------------------------
   // Class SMT_LIB_Solver - Functions declared private --------------------------------------------
@@ -505,12 +511,17 @@ using namespace std;
 
     // --------------------------------------------------------------------------------------------
 
-    void SMT_LIB_Solver::translate_c_real(ATermAppl a_clause) {
-      ATermAppl v_clause;
+    //void SMT_LIB_Solver::translate_c_real(ATermAppl a_clause) {
+    //  ATermAppl v_clause_1, v_clause_2;
 
-      v_clause = f_expression_info.get_argument(a_clause, 0);
-      translate_clause(v_clause, false);
-    }
+    //  v_clause_1 = f_expression_info.get_argument(a_clause, 0);
+    //  v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+    //  f_formula = f_formula + "(/ ";
+    //  translate_clause(v_clause_1, false);
+    //  f_formula = f_formula + " ";
+    //  translate_clause(v_clause_2, false);
+    //  f_formula = f_formula + ")";
+    //}
 
     // --------------------------------------------------------------------------------------------
 
@@ -689,8 +700,8 @@ using namespace std;
         translate_c_nat(a_clause);
       } else if (gsIsDataExprCInt(a_clause)) {
         translate_c_int(a_clause);
-      } else if (gsIsDataExprCReal(a_clause)) {
-        translate_c_real(a_clause);
+      //} else if (gsIsDataExprCReal(a_clause)) {
+      //  translate_c_real(a_clause);
       } else if (gsIsIntConstant(a_clause)) {
         translate_int_constant(a_clause);
       } else if (gsIsNatConstant(a_clause)) {

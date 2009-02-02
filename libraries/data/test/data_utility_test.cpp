@@ -19,7 +19,6 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/utilities/aterm_ext.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;
@@ -29,7 +28,7 @@ using namespace mcrl2::data::data_expr;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   data_variable d("d:D");
   data_variable d0("d0:D");

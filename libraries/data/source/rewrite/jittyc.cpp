@@ -8,6 +8,12 @@
 //
 /// \file rewr_jittyc.cpp
 
+#include "boost.hpp" // precompiled headers
+
+#include "mcrl2/data/rewrite.h"
+
+#ifdef MCRL2_JITTYC_AVAILABLE
+
 #define USE_NEW_CALCTERM 1
 #define EXTEND_NFS 1
 #define F_DONT_TEST_ISAPPL 1
@@ -16,93 +22,31 @@
 #define USE_INT2ATERM_VALUE 1
 #define USE_REWRAPPL_VALUE 1
 
-#ifdef NO_DYNLOAD
-
-#include "mcrl2/data/detail/rewrite/jittyc.h"
-
-#include <cstdlib>
-#include "mcrl2/core/messaging.h"
-
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-
-RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification DataSpec)
-{
-	gsErrorMsg("compiling JITty rewriter is not available\n");
-	exit(1);
-}
-
-RewriterCompilingJitty::~RewriterCompilingJitty()
-{
-}
-
-ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl Term)
-{
-	return NULL;
-}
-
-ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm Term)
-{
-	return NULL;
-}
-
-ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
-{
-	return NULL;
-}
-
-ATermList RewriterCompilingJitty::rewriteInternalList(ATermList Terms)
-{
-	return NULL;
-}
-
-void RewriterCompilingJitty::setSubstitution(ATermAppl Var, ATerm Expr)
-{
-}
-
-ATerm RewriterCompilingJitty::getSubstitution(ATermAppl Var)
-{
-	return NULL;
-}
-
-void RewriterCompilingJitty::clearSubstitution(ATermAppl Var)
-{
-}
-
-void RewriterCompilingJitty::clearSubstitutions()
-{
-}
-
-#else
+#include "workarounds.h" // DECL_A
 
 #define NAME "rewr_jittyc"
 
 #include <utility>
 #include <string>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdexcept>
+#include <cstdio>
+#include <cstdlib>
 #include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 #include <dlfcn.h>
-#include <assert.h>
+#include <cassert>
 #include <aterm2.h>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
@@ -3709,11 +3653,13 @@ RewriterCompilingJitty::RewriterCompilingJitty(mcrl2::data::data_specification D
   term2int = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifdef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+#ifndef NDEBUG
+  if (!gsDebug)
 #endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
@@ -3721,9 +3667,11 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   finalise_common();
   ATtableDestroy(term2int);
 #ifndef NDEBUG
-  cleanup_file(file_c);
-  cleanup_file(file_o);
-  cleanup_file(file_so);
+  if (gsDebug)
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+  }
 #endif
 }
 
@@ -3758,12 +3706,12 @@ gsfprintf(stderr,"out: %P\n",fromRewriteFormat(a));*/
   return a;
 }
 
-void RewriterCompilingJitty::setSubstitution(ATermAppl Var, ATerm Expr)
+void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
 }
 
-ATerm RewriterCompilingJitty::getSubstitution(ATermAppl Var)
+ATerm RewriterCompilingJitty::getSubstitutionInternal(ATermAppl Var)
 {
   return so_get_subst(Var);
 }
@@ -3778,9 +3726,9 @@ void RewriterCompilingJitty::clearSubstitutions()
   so_clear_substs();
 }
 
-#endif
-
 RewriteStrategy RewriterCompilingJitty::getStrategy()
 {
 	return GS_REWR_JITTYC;
 }
+
+#endif
