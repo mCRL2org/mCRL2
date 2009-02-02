@@ -525,7 +525,7 @@ namespace mcrl2 {
                     variables.push_back(variable(generator("a"), k->sort()));
                   }
 
-                  result.push_back(data_equation(application(j->recogniser_function(s),
+                  result.push_back(data_equation(boost::make_iterator_range(variables), application(j->recogniser_function(s),
                     application(i->constructor_function(s), boost::make_iterator_range(variables))), right));
                 }
               }
