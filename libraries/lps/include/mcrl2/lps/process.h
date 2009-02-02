@@ -13,6 +13,9 @@
 #define MCRL2_LPS_PROCESS_H
 
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/term_traits.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/algorithms.h"
@@ -783,5 +786,203 @@ MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::merge)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::lmerge)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::choice)
 /// \endcond
+
+namespace mcrl2 {
+
+namespace core {
+
+  /// \brief Contains type information for process expressions.
+  template <>
+  struct term_traits<lps::process_expression>
+  {
+    typedef lps::process_expression process_expression;
+
+//--- start generated text ---//
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_action(const process_expression& t)
+    {
+      return core::detail::gsIsAction(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_process(const process_expression& t)
+    {
+      return core::detail::gsIsProcess(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_process_assignment(const process_expression& t)
+    {
+      return core::detail::gsIsProcessAssignment(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_delta(const process_expression& t)
+    {
+      return core::detail::gsIsDelta(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_tau(const process_expression& t)
+    {
+      return core::detail::gsIsTau(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_sum(const process_expression& t)
+    {
+      return core::detail::gsIsSum(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_block(const process_expression& t)
+    {
+      return core::detail::gsIsBlock(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_hide(const process_expression& t)
+    {
+      return core::detail::gsIsHide(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_rename(const process_expression& t)
+    {
+      return core::detail::gsIsRename(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_comm(const process_expression& t)
+    {
+      return core::detail::gsIsComm(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_allow(const process_expression& t)
+    {
+      return core::detail::gsIsAllow(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_sync(const process_expression& t)
+    {
+      return core::detail::gsIsSync(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_at_time(const process_expression& t)
+    {
+      return core::detail::gsIsAtTime(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_seq(const process_expression& t)
+    {
+      return core::detail::gsIsSeq(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_if_then(const process_expression& t)
+    {
+      return core::detail::gsIsIfThen(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_if_then_else(const process_expression& t)
+    {
+      return core::detail::gsIsIfThenElse(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_binit(const process_expression& t)
+    {
+      return core::detail::gsIsBInit(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_merge(const process_expression& t)
+    {
+      return core::detail::gsIsMerge(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_lmerge(const process_expression& t)
+    {
+      return core::detail::gsIsLMerge(t);
+    }
+
+    /// \brief Test for the value true
+    /// \param t A term
+    /// \return True if it is the value \p true
+    static inline
+    bool is_choice(const process_expression& t)
+    {
+      return core::detail::gsIsChoice(t);
+    }
+//--- end generated text ---//
+  };
+
+} // namespace core
+
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_PROCESS_H

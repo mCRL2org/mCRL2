@@ -14,6 +14,7 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/process.h"
+#include "mcrl2/lps/process_expression_visitor.h"
 
 using namespace atermpp;
 using namespace mcrl2;
