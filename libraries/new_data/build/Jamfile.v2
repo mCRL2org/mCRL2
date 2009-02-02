@@ -1,8 +1,8 @@
-project data
+project new_data
        : source-location ..
        ;
 
-mcrl2-library data
+mcrl2-library new_data
        : source/data_implementation_concrete.cpp 
          source/standard.cpp
        : <library>/libraries//core

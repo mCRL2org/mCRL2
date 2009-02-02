@@ -38,7 +38,7 @@
 #include "mcrl2/lps/specification.h"
 
 //DATA
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/new_data/data_specification.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -49,7 +49,7 @@ using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 
 /* Name of the file to read input from (or standard input if empty) */
 std::string file_name;
@@ -57,7 +57,7 @@ std::string file_name;
 void parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
                            "Unfolds complex sorts of a linear process specification (LPS) in INFILE.");
-      
+
   command_line_parser parser(clinterface, ac, av);
 
   if (0 < parser.arguments.size()) {

@@ -19,7 +19,7 @@
 
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
@@ -35,7 +35,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 
   /// \mainpage lpsconfcheck
   /// \section section_introduction Introduction

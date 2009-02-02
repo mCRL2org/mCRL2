@@ -25,26 +25,26 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/aterm_ext.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/old_data/find.h"
-#include "mcrl2/old_data/rewrite.h"
-#include "mcrl2/old_data/sort_identifier.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/sort_identifier.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/old_data/data_expression.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data::detail;
-using namespace mcrl2::old_data::data_expr;
-using namespace mcrl2::old_data;
+using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::data_expr;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace std;
 
@@ -446,7 +446,7 @@ ATermAppl rename(
   action_list lps_new_actions = action_list();;
 
   std::set<identifier_string> s;
-  mcrl2::data::postfix_identifier_generator generator("");
+  mcrl2::new_data::postfix_identifier_generator generator("");
   generator.add_identifiers(s);
 
   bool to_tau=false;

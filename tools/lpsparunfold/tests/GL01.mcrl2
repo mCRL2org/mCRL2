@@ -7,7 +7,7 @@ cons frame: D#Bit -> Frame;
      d2: D;
      b0: Bit;
      b1: Bit;
-map  data: Frame -> D;
+map  new_data: Frame -> D;
      bit: Frame -> Bit;
 var  d:D;
      b:Bit; 

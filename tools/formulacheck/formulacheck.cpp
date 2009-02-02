@@ -16,14 +16,14 @@
 #include <fstream>
 
 #include "mcrl2/formula_checker.h"
-#include "mcrl2/old_data/data_specification.h"
-#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -87,7 +87,7 @@ using namespace mcrl2::core;
       ///  LPS or PBES, the data specification of this LPS or PBES is
       ///  returned;
       ///  if infilename is empty, a minimal data specification is returned
-      mcrl2::old_data::data_specification load_specification(const std::string &infilename);
+      mcrl2::data::data_specification load_specification(const std::string &infilename);
 
     public:
       /// \brief Constructor setting all flags to their default values.
@@ -184,12 +184,12 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
     
-    mcrl2::old_data::data_specification Form_Check::load_specification(const std::string &infilename)
+    mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
     {
       ATermAppl raw_specification;
       if (infilename.empty()) {
         //use empty data specification
-        raw_specification = mcrl2::data::detail::implement_data_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
+        raw_specification = mcrl2::new_data::detail::implement_data_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
       } else {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
@@ -199,7 +199,7 @@ using namespace mcrl2::core;
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
       }
-      mcrl2::old_data::data_specification spec(raw_specification);
+      mcrl2::data::data_specification spec(raw_specification);
       return spec;
     }
 
@@ -212,7 +212,7 @@ using namespace mcrl2::core;
     void Form_Check::check_formula() {
 
       //Load data specification
-      mcrl2::old_data::data_specification spec = load_specification(f_spec_file_name);
+      mcrl2::data::data_specification spec = load_specification(f_spec_file_name);
 
       // typechecking and data implementation use a specification before data
       // implementation.
@@ -243,13 +243,13 @@ using namespace mcrl2::core;
         throw mcrl2::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       //implement data in the formula
-      f_formula = mcrl2::data::detail::implement_data_data_expr(f_formula,v_reconstructed_spec);
+      f_formula = mcrl2::new_data::detail::implement_data_data_expr(f_formula,v_reconstructed_spec);
       if(!f_formula){
         throw mcrl2::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       
       //update spec with the contents of v_reconstructed_spec
-      spec = mcrl2::old_data::data_specification(v_reconstructed_spec);
+      spec = mcrl2::data::data_specification(v_reconstructed_spec);
 
       //check formula
       Formula_Checker v_formula_checker(

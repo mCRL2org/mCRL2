@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/old_data/parser.h"
+#include "mcrl2/data/parser.h"
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
@@ -35,9 +35,9 @@ void compatibility_test()
   data_stream << text;
   data_stream << "init delta;\n";
 
-  aterm_appl lps_spec(old_data::detail::parse_specification(data_stream));
-  lps_spec = old_data::detail::type_check_specification(lps_spec);
-  lps_spec = old_data::detail::alpha_reduce(lps_spec);
+  aterm_appl lps_spec(data::detail::parse_specification(data_stream));
+  lps_spec = data::detail::type_check_specification(lps_spec);
+  lps_spec = data::detail::alpha_reduce(lps_spec);
 
   aterm_appl spec_old_format = atermpp::arg1(lps_spec);
   new_data::data_specification spec_new_format(spec_old_format);

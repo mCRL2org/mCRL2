@@ -20,9 +20,9 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/data_reconstruct.h"
-#include "mcrl2/old_data/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/invariant_eliminator.h"
@@ -36,7 +36,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction

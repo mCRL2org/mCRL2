@@ -10,7 +10,7 @@ mcrl2-library pbes
          gauss.cpp
          sort_instantiator.cpp
          data_elimination.cpp
-       : <library>/libraries//old_data
+       : <library>/libraries//data
          <library>/libraries//lps
          <include>../include
          <use>/site-config//boost

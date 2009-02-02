@@ -16,7 +16,7 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewrite.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
 #include "exploration.h"

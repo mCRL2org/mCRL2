@@ -27,7 +27,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
 
@@ -36,7 +36,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data::detail;
 
 //Functions used by the main program
 static t_lin_options parse_command_line(int argc, char *argv[]);
