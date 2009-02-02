@@ -8,6 +8,8 @@
 /// \file pbes2bool.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 // ======================================================================
 //
 // file          : pbes2bool
@@ -50,8 +52,10 @@
 
 //MCRL2-specific
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
 //Tool-specific
 // #include "pbes_rewrite_jfg.h"
@@ -68,7 +72,7 @@ using atermpp::make_substitution;
 
 //Function declarations used by main program
 //------------------------------------------
-static t_tool_options parse_command_line(int argc, char** argv);
+static bool parse_command_line(int argc, char** argv, t_tool_options&);
 //Post: The command line options are parsed.
 //      The program has aborted with a suitable error code, if:
 //    - errors were encounterd
@@ -77,7 +81,7 @@ static t_tool_options parse_command_line(int argc, char** argv);
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
@@ -91,15 +95,15 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
 
     static bool initialise_types() {
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-    
+
       transformation_strategy_enumeration.
         add(lazy, "lazy").
         add(optimize, "optimize").
         add(on_the_fly, "on-the-fly").
         add(on_the_fly_with_fixed_points, "on-the-fly-with-fixed-points");
-    
+
       tipi::datatype::enumeration< bes_output_format > output_format_enumeration;
-    
+
       output_format_enumeration.
         add(none, "none").
         add(vasy, "vasy").
@@ -153,19 +157,19 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout::elements;
 
   if (!c.option_exists(option_precompile)) {
-    c.add_option(option_precompile).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_precompile).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_counter)) {
-    c.add_option(option_counter).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_counter).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_hash_table)) {
-    c.add_option(option_hash_table).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_hash_table).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_tree)) {
-    c.add_option(option_tree).set_argument_value< 0, datatype::boolean >(false);
+    c.add_option(option_tree).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_unused_data)) {
-    c.add_option(option_unused_data).set_argument_value< 0, datatype::boolean >(true);
+    c.add_option(option_unused_data).set_argument_value< 0 >(true);
   }
   if (!c.option_exists(option_rewrite_strategy)) {
     c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);
@@ -200,9 +204,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
                 append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
                 append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
                 append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")),
+#else
+                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")),
+#endif
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
@@ -245,7 +255,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
@@ -259,11 +269,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     /* Add output file to the configuration */
     if (c.output_exists(bes_file_for_output)) {
       tipi::configuration::object& output_file = c.get_output(bes_file_for_output);
-   
-      output_file.set_location(c.get_output_name(".txt"));
+
+      output_file.location(c.get_output_name(".txt"));
     }
     else {
-      c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::application), 
+      c.add_output(bes_file_for_output, tipi::mime_type("txt", tipi::mime_type::application),
                    c.get_output_name(".txt"));
     }
   }
@@ -308,7 +318,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   if (tool_options.opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
 
-    c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text), 
+    c.add_output(counter_example_file_for_output, tipi::mime_type("txt", tipi::mime_type::text),
                  tool_options.opt_counter_example_file);
   }
 
@@ -316,16 +326,16 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   tool_options.opt_strategy = c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0);
 
-  tool_options.infilename       = c.get_input(pbes_file_for_input).get_location();
+  tool_options.infilename       = c.get_input(pbes_file_for_input).location();
 
   if (c.output_exists(bes_file_for_output)) {
-    tool_options.outfilename = c.get_output(bes_file_for_output).get_location();
+    tool_options.outfilename = c.get_output(bes_file_for_output).location();
   }
 
   send_clear_display();
 
   process(tool_options);
- 
+
   return true;
 }
 #endif
@@ -333,10 +343,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 //function parse_command_line
 //---------------------------
-t_tool_options parse_command_line(int ac, char** av)
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
 {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
-      "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is\n"
+      "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is "
       "not present, stdin is used. If OUTFILE is not present, stdout is used.");
 
   clinterface.add_rewriting_options();
@@ -371,11 +381,11 @@ t_tool_options parse_command_line(int ac, char** av)
     add_option("counter",
       "print at the end a tree labelled with instantiations "
       "of the left hand side of equations; this tree is an "
-      "indication of how pbes2bool came to the validity or\n"
+      "indication of how pbes2bool came to the validity or "
       "invalidity of the PBES",
       'c').
     add_option("precompile",
-      "precompile the pbes for faster rewriting; does not"
+      "precompile the pbes for faster rewriting; does not "
       "work when the toolset is compiled in debug mode",
       'p').
     add_option("hashtables",
@@ -399,64 +409,64 @@ t_tool_options parse_command_line(int ac, char** av)
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
-
-  tool_options.opt_precompile_pbes           = 0 < parser.options.count("precompile");
-  tool_options.opt_use_hashtables            = 0 < parser.options.count("hashtables");
-  tool_options.opt_construct_counter_example = 0 < parser.options.count("counter");
-  tool_options.opt_store_as_tree             = 0 < parser.options.count("tree");
-  tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
-  tool_options.opt_outputformat              = "none";
-  tool_options.opt_strategy                  = lazy;
-  tool_options.infilename                    = "";
-  tool_options.outfilename                   = "";
-  
-  if (parser.options.count("output")) { // Output format
-    std::string format = parser.option_argument("output");
-
-    if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
-      parser.error("unknown output format specified (got `" + format + "')");
+  if (parser.continue_execution()) {
+    tool_options.opt_precompile_pbes           = 0 < parser.options.count("precompile");
+    tool_options.opt_use_hashtables            = 0 < parser.options.count("hashtables");
+    tool_options.opt_construct_counter_example = 0 < parser.options.count("counter");
+    tool_options.opt_store_as_tree             = 0 < parser.options.count("tree");
+    tool_options.opt_data_elm                  = parser.options.count("unused-data") == 0;
+    tool_options.opt_outputformat              = "none";
+    tool_options.opt_strategy                  = lazy;
+    tool_options.infilename                    = "";
+    tool_options.outfilename                   = "";
+    
+    if (parser.options.count("output")) { // Output format
+      std::string format = parser.option_argument("output");
+ 
+      if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
+        parser.error("unknown output format specified (got `" + format + "')");
+      }
+ 
+      tool_options.opt_outputformat = format;
     }
-
-    tool_options.opt_outputformat = format;
+    
+    if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
+      int strategy = parser.option_argument_as< int >("strategy");
+ 
+      switch (strategy) {
+        case 0:
+         tool_options.opt_strategy = lazy;
+         break;
+        case 1:
+         tool_options.opt_strategy = optimize;
+         break;
+        case 2:
+         tool_options.opt_strategy = on_the_fly;
+         break;
+        case 3:
+         tool_options.opt_strategy = on_the_fly_with_fixed_points;
+         break;
+        default:
+          parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+      }
+    }
+    
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        tool_options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        tool_options.outfilename = parser.arguments[1];
+      }
+    }
+    
+    tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   }
   
-  if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
-    int strategy = parser.option_argument_as< int >("strategy");
-
-    switch (strategy) {
-      case 0:
-       tool_options.opt_strategy = lazy;
-       break;
-      case 1:
-       tool_options.opt_strategy = optimize;
-       break;
-      case 2:
-       tool_options.opt_strategy = on_the_fly;
-       break;
-      case 3:
-       tool_options.opt_strategy = on_the_fly_with_fixed_points;
-       break;
-      default:
-        parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
-    }
-  }
-  
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[1];
-    }
-  }
-  
-  tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-  
-  return tool_options;
+  return parser.continue_execution();
 }
 
 //Main Program
@@ -472,14 +482,17 @@ int main(int argc, char** argv)
     }
 #endif
 
-    process(parse_command_line(argc, argv));
+    t_tool_options options;
 
-    return EXIT_SUCCESS;
+    if (parse_command_line(argc, argv, options)) {
+      process(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 

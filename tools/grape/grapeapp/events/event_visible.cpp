@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for visible property
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/textdialog.h"
@@ -135,7 +136,7 @@ grape_event_remove_visible::grape_event_remove_visible( grape_frame *p_main_fram
   m_width = p_vis->get_width();
   m_height = p_vis->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_vis->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_vis->count_comment(); ++i )
   {
     comment* comm_ptr = p_vis->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );

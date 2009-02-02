@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -29,12 +29,33 @@ action::~action(void)
   m_parameters.Clear();
 }
 
+wxString action::get_text( void )
+{
+  wxString result = wxEmptyString;
+  result += m_name;
+  int count = m_parameters.GetCount();
+  if ( count > 0 )
+  {
+    result += _T( "(" );
+    for ( int j = 0; j < count; ++j )
+    {
+      result += m_parameters.Item( j ).get_expression();
+      if ( j < count - 1 )
+      {
+        result += _T( "," );
+      }
+    }
+    result += _T( ")" );
+  }
+  return result;
+}
+
 wxString action::get_name( void )
 {
   return m_name;
 }
 
-void action::set_name( wxString &p_name )
+void action::set_name( const wxString &p_name )
 {
   m_name = p_name;
 }

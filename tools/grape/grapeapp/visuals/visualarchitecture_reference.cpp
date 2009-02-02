@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -8,13 +8,18 @@
 //
 // Implements the visualarchitecture_reference class.
 
+#include <string>
 #include <math.h>
+#include "grape_glcanvas.h"
 #include "architecturereference.h"
 #include "visualarchitecture_reference.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities::wx;
 
 visualarchitecture_reference::visualarchitecture_reference( architecture_reference* p_architecture_reference )
 {
@@ -45,7 +50,7 @@ void visualarchitecture_reference::draw( void )
   draw_filled_rectangle( m_object->get_coordinate(), width, height, selected, g_color_architecture_reference);
 
   //draw architecture reference name
-  render_text(name, x, y+height-g_text_space, width, height+g_text_space);
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(name.fn_str()), x, x+width, y+height, y, 0.0015f, al_center, al_center );
 
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), width, height, selected);
@@ -65,3 +70,6 @@ coordinate visualarchitecture_reference::move_to_border( libgrape::coordinate &p
 {
   return move_to_border_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord );
 }
+
+}
+

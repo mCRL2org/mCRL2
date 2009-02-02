@@ -144,7 +144,6 @@ private:
     void OnPlayRandom( wxCommandEvent &event );
     void OnTimer( wxTimerEvent &event );
     void OnStop( wxCommandEvent &event );
-    void OnAbout( wxCommandEvent &event );
     void OnTraceClose( wxCloseEvent &event );
     void OnCloseWindow( wxCloseEvent &event );
     void stateOnListItemSelected( wxListEvent &event );

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -9,10 +9,12 @@
 // Implements the event handlers of the main frame.
 
 #include <wx/msgdlg.h>
+#include <wx/textdlg.h>
 
 #include "grape_frame.h"
 #include "grape_events.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 #include "grape_ids.h"
 
 using namespace grape::grapeapp;
@@ -99,6 +101,7 @@ void grape_frame::event_tool_selected(wxCommandEvent& p_event)
   // deselect all objects
   grape_event_deselect_all *event = new grape_event_deselect_all(this);
   m_event_handler->Submit(event, false);
+  m_glcanvas->SetFocus();
   update_bars();
 }
 
@@ -186,6 +189,7 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
   {
     set_mode(GRAPE_MODE_SPEC);
     m_event_handler->Undo();
+    m_statusbar->SetStatusText(wxEmptyString);
     update_bars();
 
     // mark as modified
@@ -198,6 +202,8 @@ void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
   // redo last event
   set_mode(GRAPE_MODE_SPEC);
   m_event_handler->Redo();
+  m_statusbar->PopStatusText();
+  m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
   update_bars();
 
   // mark as modified
@@ -283,6 +289,8 @@ void grape_frame::event_menu_about(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_select_diagram( wxCommandEvent &p_event )
 {
+  m_architecture_diagram_list->SetStringSelection(p_event.GetString());
+  m_process_diagram_list->SetStringSelection(p_event.GetString());
   grape_event_select_diagram *event = new grape_event_select_diagram(this, p_event.GetString());
   m_event_handler->Submit(event, false);
   update_bars();
@@ -295,7 +303,7 @@ void grape_frame::event_menu_rename_diagram( wxCommandEvent &p_event)
   update_bars();
 }
 
-void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event)
+void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event )
 {
   diagram* dia_ptr = get_glcanvas()->get_diagram();
 
@@ -304,19 +312,58 @@ void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event)
     return;
   }
 
-  wxString s = _T( "Do you wish to remove the diagram " );
-  s += dia_ptr->get_name();
-  s += _T( "?" );
-  int result = wxMessageBox( s, _T("Question"), wxICON_QUESTION | wxYES_NO, this );
+  int arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
+  int proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+  if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
+  {
+    wxString s = _T( "Do you wish to remove the diagram " );
+    s += dia_ptr->get_name();
+    s += _T( "?" );
+    int result = wxMessageBox( s, _T("Question"), wxICON_QUESTION | wxYES_NO, this );
 
-  if ( result == wxNO )
+    if ( result == wxYES )
+    {
+      grape_event_remove_diagram *event = new grape_event_remove_diagram( this, dia_ptr, false );
+      m_event_handler->Submit( event, true );
+      update_bars();
+    }
+  }
+}
+
+void grape_frame::event_listbox_remove_diagram( int p_diagram_type )
+{
+  diagram* dia_ptr = get_glcanvas()->get_diagram();
+
+  if ( !dia_ptr )
   {
     return;
   }
 
-  grape_event_remove_diagram *event = new grape_event_remove_diagram( this, dia_ptr, false );
-  m_event_handler->Submit( event, true );
-  update_bars();
+  int arch = wxNOT_FOUND;
+  int proc = wxNOT_FOUND;
+  if (p_diagram_type == GRAPE_ARCHITECTURE_DIAGRAM_LIST)
+  {
+    arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
+  }
+  else if (p_diagram_type == GRAPE_PROCESS_DIAGRAM_LIST)
+  {
+    proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+  }
+
+  if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
+  {
+    wxString s = _T( "Do you wish to remove the diagram " );
+    s += dia_ptr->get_name();
+    s += _T( "?" );
+    int result = wxMessageBox( s, _T("Question"), wxICON_QUESTION | wxYES_NO, this );
+
+    if ( result == wxYES )
+    {
+      grape_event_remove_diagram *event = new grape_event_remove_diagram( this, dia_ptr, false );
+      m_event_handler->Submit( event, true );
+      update_bars();
+    }
+  }
 }
 
 void grape_frame::event_splitter_dclick( wxSplitterEvent& WXUNUSED(p_event) )
@@ -361,3 +408,5 @@ void grape_frame::dataspec_modified( wxCommandEvent & WXUNUSED(p_event) )
 {
   set_is_modified( true );
 }
+
+

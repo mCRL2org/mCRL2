@@ -1,11 +1,9 @@
 project toolset/mcrl22lps/test ;
 
-import set ;
+use-project /tools/mcrl22lps : .. ;
+use-project /tools/lpspp : ../../lpspp ;
 
-use-project /tools/mcrl22lps : $(TOP)/tools/mcrl22lps ;
-use-project /tools/lpspp : $(TOP)/tools/lpspp ;
-
-test-cases = [ glob-tree *.mcrl2 ] ;
+test-cases = [ glob-tree *.mcrl2 : .svn ] ;
 
 for file in $(test-cases) {
   tests-with-files += [

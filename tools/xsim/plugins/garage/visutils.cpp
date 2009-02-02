@@ -8,6 +8,8 @@
 //
 /// \file visutils.cpp
 
+#include "wx.hpp" // precompiled headers
+
 // ---------------------------------
 //
 // This function provides utility

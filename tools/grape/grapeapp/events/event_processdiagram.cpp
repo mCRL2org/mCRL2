@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,8 +8,10 @@
 //
 // Defines GraPE events for process diagrams
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 #include "dialogs/preambledialog.h"
 
 #include "event_diagram.h"
@@ -40,7 +42,7 @@ bool grape_event_add_process_diagram::Do( void )
   m_main_frame->set_mode( GRAPE_MODE_PROC );
 
   // update process diagram listbox
-  wxListBox *proc_listbox = m_main_frame->get_process_diagram_listbox();
+  grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
   int pos = proc_listbox->Append( new_proc_ptr->get_name() );
   proc_listbox->Select( pos );
 
@@ -62,7 +64,7 @@ bool grape_event_add_process_diagram::Undo( void )
   spec->check_references( del_proc_ptr->get_name(), dummy_ptr );
 
   // update process listbox
-  wxListBox *proc_listbox = m_main_frame->get_process_diagram_listbox();
+  grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
   int pos = proc_listbox->FindString( del_proc_ptr->get_name() );
   proc_listbox->Delete( pos );
   if ( pos != 0 )

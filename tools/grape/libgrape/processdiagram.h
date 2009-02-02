@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -84,7 +84,7 @@ namespace grape
          * @param p_def_height The default height of a state.
          * @return Returns a pointer to the newly created state.
          */
-        state* add_state( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height );
+        state* add_state( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height );
 
         /**
          * state removal function.
@@ -97,7 +97,7 @@ namespace grape
          * State count function.
          * @return Returns the number of states in the process diagram.
          */
-        uint count_state( void );
+        unsigned int count_state( void );
 
         /**
          * State retrieval function.
@@ -121,7 +121,7 @@ namespace grape
          * @param p_def_height The default height of a reference state.
          * @return Returns a pointer to the newly created reference state.
          */
-        reference_state* add_reference_state( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height );
+        reference_state* add_reference_state( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height );
 
         /**
          * Reference state removal function.
@@ -134,7 +134,7 @@ namespace grape
          * Reference state count function.
          * @return Returns the number of reference states in the process diagram.
          */
-        uint count_reference_state( void );
+        unsigned int count_reference_state( void );
 
         /**
          * Reference state retrieval function.
@@ -156,10 +156,9 @@ namespace grape
          * @param p_id The id of the nonterminating transition.
          * @param p_beginstate The state in which the nonterminating transition begins.
          * @param p_endstate The state in which the nonterminating transition ends.
-         * @param p_label The label of this nonterminating transition.
          * @return Returns a pointer to the newly created nonterminating trannsition
          */
-        nonterminating_transition* add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate, wxString p_label = wxEmptyString );
+        nonterminating_transition* add_nonterminating_transition( unsigned int p_id, compound_state* p_beginstate, compound_state* p_endstate );
 
         /**
          * Nonterminating Transition removal function.
@@ -172,7 +171,7 @@ namespace grape
          * Nonterminating transition count function.
          * @return Returns the number of nonterminating transitions in the process diagram.
          */
-        uint count_nonterminating_transition( void );
+        unsigned int count_nonterminating_transition( void );
 
         /**
          * Nonerminating transition retrieval function.
@@ -194,10 +193,9 @@ namespace grape
          * @param p_id The id of the terminating transition.
          * @param p_beginstate The state in which the terminating transition begins.
          * @param p_endcoordinate The state in which the terminating transition ends.
-         * @param p_label The label of this terminating transition.
          * @return Returns a pointer to the newly created terminating transition.
          */
-        terminating_transition* add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate, wxString p_label = wxEmptyString );
+        terminating_transition* add_terminating_transition( unsigned int p_id, compound_state* p_beginstate, coordinate &p_endcoordinate );
 
         /**
          * Terminating Transition removal function.
@@ -210,7 +208,7 @@ namespace grape
          * Terminating transition count function.
          * @return Returns the number of terminating transitions in the process diagram.
          */
-        uint count_terminating_transition( void );
+        unsigned int count_terminating_transition( void );
 
         /**
          * Terminating transition retrieval function.
@@ -270,7 +268,7 @@ namespace grape
          * @param p_coord The coordinate at which the initial designator is to be added.
          * @return Returns a pointer to the newly created initial designator.
          */
-        initial_designator* add_initial_designator( uint p_id, compound_state* p_state, float p_def_width, float p_def_height, coordinate &p_coord );
+        initial_designator* add_initial_designator( unsigned int p_id, compound_state* p_state, float p_def_width, float p_def_height, coordinate &p_coord );
 
         /**
          * Initial designator removal function.
@@ -283,7 +281,7 @@ namespace grape
          * Initial designator count function.
          * @return Returns the number of intial designators in the process diagram.
          */
-        uint count_initial_designator( void );
+        unsigned int count_initial_designator( void );
 
         /**
          * Initial designator retrieval function.
@@ -336,7 +334,7 @@ namespace grape
          * @param p_type The type of the object you want to retrieve.
          * @return Returns the object that has the specified id, if it exists (0 if not).
          */
-        static object* find_object( process_diagram* p_proc_dia, uint p_id, object_type p_type = ANY );
+        static object* find_object( process_diagram* p_proc_dia, unsigned int p_id, object_type p_type = ANY );
       private:
         /**
          * Transition removal function.

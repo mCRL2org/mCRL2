@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -28,7 +28,7 @@ architecture_reference::architecture_reference( const architecture_reference &p_
 architecture_reference::~architecture_reference(void)
 {
   // Remove all references to this object.
-  for ( uint i = 0; i < m_has_channel.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();

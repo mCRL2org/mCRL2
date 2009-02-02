@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -96,7 +96,7 @@ namespace grape
          * Channel count function.
          * @return Returns the number of channels associated with the reference.
          */
-        uint count_channel( void );
+        unsigned int count_channel( void );
     };
 
   } // namespace libgrape

@@ -8,6 +8,8 @@
 //
 /// \file lpssuminst.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpssuminst"
 #define AUTHOR "Jeroen Keiren"
 
@@ -22,8 +24,10 @@
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
 using namespace std;
 using namespace mcrl2::utilities;
@@ -37,13 +41,13 @@ struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
   t_suminst_options suminst_opts; ///< Options of the algorithm
-  
+
   tool_options() {}
 };
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration because do_suminst() is called within squadt_interactor class
 int do_suminst(const tool_options& options);
@@ -60,7 +64,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
     static const char*  option_rewrite_strategy;
 
   public:
-    
+
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities&) const;
 
@@ -91,7 +95,6 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   /* Set defaults where the supplied configuration does not have values */
@@ -100,11 +103,11 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   }
   if (!configuration.option_exists(option_tau_only)) {
     configuration.add_option(option_tau_only).
-       set_argument_value< 0, tipi::datatype::boolean >(true, false);
+       set_argument_value< 0 >(true, false);
   }
   if (!configuration.option_exists(option_finite_only)) {
     configuration.add_option(option_finite_only).
-       set_argument_value< 0, tipi::datatype::boolean >(true, false);
+       set_argument_value< 0 >(true, false);
   }
 
   /* Create display */
@@ -118,9 +121,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
                 append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
                 append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
-                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
                 append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+#else
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+#endif
 
   /* Prepare user interaction */
   checkbox& tau_only = d.create< checkbox >().set_status(configuration.get_option_argument< bool >(option_tau_only));
@@ -139,16 +148,16 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
   if (configuration.option_exists(option_rewrite_strategy)) {
     strategy_selector.set_selection(configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
-  
-  send_display_layout(d.set_manager(m));
+
+  send_display_layout(d.manager(m));
 
   okay_button.await_change();
-  
+
   /* Update configuration */
   configuration.get_option(option_tau_only).
-     set_argument_value< 0, tipi::datatype::boolean >(tau_only.get_status());
+     set_argument_value< 0 >(tau_only.get_status());
   configuration.get_option(option_finite_only).
-     set_argument_value< 0, tipi::datatype::boolean >(finite_only.get_status());
+     set_argument_value< 0 >(finite_only.get_status());
 
   configuration.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
 }
@@ -167,12 +176,11 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   using namespace tipi;
   using namespace tipi::layout;
-  using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
   options.suminst_opts.tau_only = configuration.option_exists(option_tau_only);
   options.suminst_opts.finite_only = configuration.option_exists(option_finite_only);
   options.suminst_opts.strategy = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
@@ -180,13 +188,13 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
   /* Create display */
   tipi::tool_display d;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text("Declustering in progress"), layout::left)));
 
   //Perform instantiation
   bool result = do_suminst(options) == 0;
 
-  send_display_layout(d.set_manager(d.create< vertical_box >().
+  send_display_layout(d.manager(d.create< vertical_box >().
                 append(d.create< label >().set_text(std::string("Declustering ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
   return result;
@@ -212,7 +220,7 @@ int do_suminst(const tool_options& options)
 }
 
 ///Parses command line and sets settings from command line switches
-tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, tool_options& t_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Instantiate the summation variables of the linear process specification (LPS) "
     "in INFILE and write the result to OUTFILE. If INFILE is not present, stdin is "
@@ -225,25 +233,26 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options;
-  t_options.suminst_opts.tau_only = (0 < parser.options.count("tau"));
-  t_options.suminst_opts.finite_only = (0 < parser.options.count("finite"));
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      t_options.input_file  = parser.arguments[0];
+  if (parser.continue_execution()) {
+    t_options.suminst_opts.tau_only = (0 < parser.options.count("tau"));
+    t_options.suminst_opts.finite_only = (0 < parser.options.count("finite"));
+ 
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      t_options.output_file = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        t_options.input_file  = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        t_options.output_file = parser.arguments[1];
+      }
     }
+ 
+    t_options.suminst_opts.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   }
 
-  t_options.suminst_opts.strategy = RewriteStrategyFromString(parser.option_argument("rewriter").c_str());
-
-  return t_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv) {
@@ -256,11 +265,16 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    return do_suminst(parse_command_line(argc,argv));
+    tool_options options;
+
+    if (parse_command_line(argc, argv, options)) {
+      do_suminst(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

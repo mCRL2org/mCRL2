@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -9,16 +9,66 @@
 // Implements the visualcomment class.
 
 #include <algorithm>
+#include <string>
 
+#include "grape_glcanvas.h"
 #include "geometric.h"
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
+#include "workarounds.h" // for M_PI{_X}
+#include <cmath>
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities::wx;
 
-const float DEG2RAD = M_PI/180;
-const uint ELLIPSE_POINTS = 360; //pre: shouldn't be zero
+const float DEG2RAD = static_cast<float> ( M_PI/180 );
+const unsigned int ELLIPSE_POINTS = 360; //pre: shouldn't be zero
+
+
+coordinate grape::grapeapp::get_coordinate_from_controlpoints(coordinate p_startp, coordinate p_cp, coordinate p_endp, float pos)
+{
+  float neg_pos = 1-pos;
+  coordinate point = {pos*pos*p_endp.m_x + 2*pos*neg_pos*p_cp.m_x + neg_pos*neg_pos*p_startp.m_x, pos*pos*p_endp.m_y + 2*pos*neg_pos*p_cp.m_y + neg_pos*neg_pos*p_startp.m_y};
+  return point;
+}
+
+coordinate grape::grapeapp::get_coordinate_on_edge_ellipse(coordinate p_start, float p_ex, float p_ey, float p_width, float p_height)
+{
+    // calculate x, y around begin state
+    float px = p_start.m_x;
+    float py = p_start.m_y;
+
+    float npx;
+    float npy;
+    float s = (py-p_ey)/(px-p_ex);
+
+    if (px != p_ex) {
+      if (px > py) {
+        npx = p_width*sqrt(1/(1+pow(s*p_width/p_height,2)));
+      } else {
+        npx = -p_width*sqrt(1/(1+pow(s*p_width/p_height,2)));
+      }
+     npy = s*npx;
+    } else {
+      npx = 0;
+      if (py > p_ex) {
+        npy = p_height;
+      } else {
+        npy = -p_height;
+      }
+    }
+
+    coordinate coord;
+    if (px > p_ex) {
+      coord.m_x = p_ex+npx;
+      coord.m_y = p_ey+npy;
+    } else {
+      coord.m_x = p_ex-npx;
+      coord.m_y = p_ey-npy;
+    }
+    return coord;
+}
 
 coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_state* p_compound_state)
 {
@@ -27,19 +77,7 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
   state* astate = dynamic_cast<state*> ( p_compound_state );
   if ( astate != 0 ) // Cast succesful
   {
-    // calculate x, y around begin state
-    float bx = p_start.m_x;
-    float by = p_start.m_y;
-    float erw = astate->get_width()/2;
-    float erh = astate->get_height()/2;
-    float ex = astate->get_coordinate().m_x;
-    float ey = astate->get_coordinate().m_y;
-    float r1 = atan2((bx-ex)/(erh), (by-ey)/(erw));
-    float fx = ex+(erw)*sin(r1);
-    float fy = ey+(erh)*cos(r1);
-
-    coordinate coord = {fx, fy};
-    return coord;
+    return get_coordinate_on_edge_ellipse(p_start, astate->get_coordinate().m_x, astate->get_coordinate().m_y, astate->get_width()/2, astate->get_height()/2);    
   }
   else // Cast failed
   {
@@ -49,26 +87,32 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
     float half_width = 0.5 * areference_state->get_width();
     float half_height = 0.5 * areference_state->get_height();
 
+  // get radius of corner ellipse depending on percentage of rounding in x-axis direction
+  float corner_radius_x = ( areference_state->get_width() * g_rounded_corner_percentage ) / 2;
+
+  // get radius of corner ellipse depending on percentage of rounding in y-axis direction.
+  float corner_radius_y = ( areference_state->get_height() * g_rounded_corner_percentage ) / 2;
+
+
     coordinate result;
     //  Determine which of the nine cases applies
-    if ( p_start.m_x < center.m_x - half_width ) // point is to the left of the rectangle
+    if ( p_start.m_x < center.m_x - half_width + corner_radius_x ) // point is to the left of the rectangle
     {
-      result.m_x = center.m_x - half_width;
-      if ( p_start.m_y < center.m_y - half_height )
+      if ( p_start.m_y < center.m_y - half_height + corner_radius_y )
       // point is to the left of and below the rectangle
       // _|_|_
       // _|_|_
       // x| |
       {
-        result.m_y = center.m_y - half_height;
+        result = get_coordinate_on_edge_ellipse(p_start, center.m_x - half_width + corner_radius_x, center.m_y - half_height + corner_radius_y, corner_radius_x, corner_radius_y);    
       }
-      else if ( p_start.m_y > center.m_y + half_height ) 
+      else if ( p_start.m_y > center.m_y + half_height - corner_radius_y ) 
       // point is to the left of and above the rectangle
       // x|_|_
       // _|_|_
       //  | |
       {
-        result.m_y = center.m_y + half_height;
+        result = get_coordinate_on_edge_ellipse(p_start, center.m_x - half_width + corner_radius_x, center.m_y + half_height - corner_radius_y, corner_radius_x, corner_radius_y);    
       }
       else 
       // point is to the left the rectangle at the same height of the rectangle
@@ -76,27 +120,27 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
       // x|_|_
       //  | |
       {
+        result.m_x = center.m_x - half_width;
         result.m_y = p_start.m_y;
       }
     }
-    else if ( p_start.m_x > center.m_x + half_width ) // point is to the rigth of the rectangle
+    else if ( p_start.m_x > center.m_x + half_width - corner_radius_x ) // point is to the rigth of the rectangle
     {
-      result.m_x = center.m_x + half_width;
       if ( p_start.m_y < center.m_y - half_height ) 
       // point is to the right of and below the rectangle
       // _|_|_
       // _|_|_
       //  | |x
       {
-        result.m_y = center.m_y - half_height;
+        result = get_coordinate_on_edge_ellipse(p_start, center.m_x + half_width - corner_radius_x, center.m_y - half_height + corner_radius_y, corner_radius_x, corner_radius_y);    
       }
-      else if ( p_start.m_y > center.m_y + half_height ) 
+      else if ( p_start.m_y > center.m_y + half_height - corner_radius_y ) 
       // point is to the right of and above the rectangle
       // _|_|x
       // _|_|_
       //  | |
       {
-        result.m_y = center.m_y + half_height;
+        result = get_coordinate_on_edge_ellipse(p_start, center.m_x + half_width - corner_radius_x, center.m_y + half_height - corner_radius_y, corner_radius_x, corner_radius_y);    
       }
       else 
       // point is to the right of the rectangle at the same height of the rectangle
@@ -104,6 +148,7 @@ coordinate grape::grapeapp::get_coordinate_on_edge(coordinate p_start, compound_
       // _|_|x
       //  | |
       {
+        result.m_x = center.m_x + half_width;
         result.m_y = p_start.m_y;
       }
     }
@@ -158,8 +203,6 @@ bool grape::grapeapp::is_inside(coordinate p_poly[], int p_count, const coordina
   }
   return inside;
 }
-
-// NOTE: Checked methods from here
 
 void grape::grapeapp::set_color(const color p_color, bool p_selected)
 {
@@ -223,6 +266,11 @@ bool grape::grapeapp::is_nearest_beginpoint( const coordinate &p_begin, const co
   float distance_to_beginpoint = sqrt( pow( p_coord.m_y - p_begin.m_y, 2 ) + pow( p_coord.m_x - p_begin.m_x, 2 ) );
   float distance_to_endpoint = sqrt( pow( p_coord.m_y - p_end.m_y, 2 ) + pow( p_coord.m_x - p_end.m_x, 2 ) );
   return ( distance_to_beginpoint < distance_to_endpoint );
+}
+
+float grape::grapeapp::distance( const coordinate &p_begin, const coordinate &p_end )
+{
+  return sqrt( pow( p_end.m_y - p_begin.m_y, 2 ) + pow( p_end.m_x - p_begin.m_x, 2 ) );
 }
 
 bool grape::grapeapp::is_inside_ellipse( const coordinate &p_center, float p_radius_x, float p_radius_y, const coordinate &p_coord, bool p_minus_margin )
@@ -484,23 +532,20 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
 
 void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color )
 {
-  glPushMatrix();
   // set color of line
   set_color( p_color, p_selected );
 
   // draw line
-  glBegin(GL_LINES);
+  glBegin(GL_LINE_STRIP);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
     glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
+    glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
+    glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
   glEnd();
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width, float p_height, bool p_selected )
 {
-  glPushMatrix();
-
   // set color of the designator
   set_color(g_color_designator, p_selected);
 
@@ -551,8 +596,6 @@ void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width,
     glVertex3f( sixth.m_x, sixth.m_y, 0.0f );
     glVertex3f( third.m_x, third.m_y, 0.0f );
   glEnd();
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, const coordinate &p_end, bool p_selected )
@@ -574,7 +617,7 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   // fill ellipse
   glBegin(GL_POLYGON);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {
       float radians = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( radians ) * p_radius_x, sin( radians ) * p_radius_y , 0.0f );
@@ -587,7 +630,7 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   // draw outer line of ellipse
   glBegin(GL_LINE_LOOP);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {      
       float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius_x, sin( degInRad ) * p_radius_y, 0.0f );
@@ -619,6 +662,85 @@ bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coor
   return is_inside_line( p_ntt_coord, sum_base, p_coord ) || is_inside_line( p_ntt_coord, sum_head, p_coord );
 }
 
+void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text )
+{
+  float distance_begin_to_control = sqrt( pow( p_control.m_y - p_begin.m_y, 2 ) + pow( p_control.m_x - p_begin.m_x, 2 ) );
+  float distance_control_to_end = sqrt( pow( p_end.m_y - p_control.m_y, 2 ) + pow( p_end.m_x - p_control.m_x, 2 ) );
+  float strength = distance_begin_to_control/(distance_begin_to_control + distance_control_to_end);
+  float distance_min;
+  if (distance_begin_to_control < distance_control_to_end) distance_min = distance_begin_to_control; else distance_min = distance_control_to_end;
+
+  coordinate p_right = {(1-strength)*p_begin.m_x + strength*p_control.m_x, (1-strength)*p_begin.m_y + strength*p_control.m_y};
+  coordinate p_left = {(1-strength)*p_control.m_x + strength*p_end.m_x, (1-strength)*p_control.m_y + strength*p_end.m_y};
+  float angle_control = atan2(( p_left.m_x - p_right.m_x), ( p_left.m_y - p_right.m_y));
+
+  coordinate p_control_left = {p_control.m_x + distance_min * sin( angle_control - M_PI ), p_control.m_y + distance_min * cos( angle_control - M_PI )};
+  coordinate p_control_right = {p_control.m_x + distance_min * sin( angle_control - M_PI*2 ), p_control.m_y + distance_min * cos( angle_control - M_PI*2 )};
+
+  //draw bezier
+  coordinate pre_pnt;
+  coordinate pnt = p_begin;
+  for(unsigned int i=1;i<=40;++i) 
+  {
+    pre_pnt = pnt;
+    if (i <= 20)
+    {
+      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));
+    } 
+    else
+    {
+      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05));
+    };
+    draw_line(pre_pnt, pnt, p_selected, g_color_black);
+  }
+
+  // calculate rotation of arrow
+  float angle_arrow = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x));
+
+  // draw arrow head based on calculated angle
+  float one_side_x = pnt.m_x + 0.03 * cos( angle_arrow - M_PI/4 );
+  float one_side_y = pnt.m_y + 0.03 * sin( angle_arrow - M_PI/4 );
+  float other_side_x = pnt.m_x + 0.03 * cos( angle_arrow + M_PI/4 );
+  float other_side_y = pnt.m_y + 0.03 * sin( angle_arrow + M_PI/4 );
+
+  // draw transition arrow
+  glBegin(GL_TRIANGLES);
+    glVertex3f( pnt.m_x, pnt.m_y, 0.0f);
+    glVertex3f( one_side_x, one_side_y, 0.0f);
+    glVertex3f( other_side_x, other_side_y, 0.0f);
+  glEnd();
+
+  // draw text
+  // calculate midpoint
+  coordinate midpoint;
+  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
+  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
+
+  set_color(g_color_black, true);
+  // render text based on the calculated angle
+  if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
+  {
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x - 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
+  }
+  else // text should be rendered to the right of and above the transition
+  {
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
+  }
+
+  //draw control point
+  if (p_selected)
+  {
+    draw_line_rectangle(p_control, static_cast<float>(0.03), static_cast<float>(0.03), false, g_color_black);
+  } 
+  else
+  {
+    draw_filled_rectangle(p_control, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  };
+
+  draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+}
+
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text )
 {
   coordinate end_coord = { p_begin.m_x + p_width, p_begin.m_y + p_height };
@@ -626,13 +748,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
 
   // calculate rotation of arrow
   // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_x - end_coord.m_x), ( p_begin.m_y - end_coord.m_y));
+  float angle = atan2(( p_begin.m_y - end_coord.m_y), ( p_begin.m_x - end_coord.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = end_coord.m_x + 0.03 * sin( angle - M_PI_4 );
-  float one_side_y = end_coord.m_y + 0.03 * cos( angle - M_PI_4 );
-  float other_side_x = end_coord.m_x + 0.03 * sin( angle + M_PI_4 );
-  float other_side_y = end_coord.m_y + 0.03 * cos( angle + M_PI_4 );
+  float one_side_x = end_coord.m_x + 0.03 * cos( angle - M_PI/4 );
+  float one_side_y = end_coord.m_y + 0.03 * sin( angle - M_PI/4 );
+  float other_side_x = end_coord.m_x + 0.03 * cos( angle + M_PI/4 );
+  float other_side_y = end_coord.m_y + 0.03 * sin( angle + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
@@ -646,19 +768,19 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+
+  set_color(g_color_black, true);
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-    render_text(p_label_text, p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-    render_text(p_label_text, p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text )
@@ -679,13 +801,13 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
 
   // calculate rotation of arrow
   // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_x - end_coord.m_x), ( p_begin.m_y - end_coord.m_y));
+  float angle = atan2(( p_begin.m_y - end_coord.m_y), ( p_begin.m_x - end_coord.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = end_coord.m_x + 0.03 * sin( angle - M_PI_4 );
-  float one_side_y = end_coord.m_y + 0.03 * cos( angle - M_PI_4 );
-  float other_side_x = end_coord.m_x + 0.03 * sin( angle + M_PI_4 );
-  float other_side_y = end_coord.m_y + 0.03 * cos( angle + M_PI_4 );
+  float one_side_x = end_coord.m_x + 0.03 * cos( angle - M_PI/4 );
+  float one_side_y = end_coord.m_y + 0.03 * sin( angle - M_PI/4 );
+  float other_side_x = end_coord.m_x + 0.03 * cos( angle + M_PI/4 );
+  float other_side_y = end_coord.m_y + 0.03 * sin( angle + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
@@ -699,19 +821,19 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+
+  set_color(g_color_black, true);
   // render text based on the calculated angle
   if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
   {
-    render_text(p_label_text, midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
   else // text should be rendered to the right of and above the transition
   {
-    render_text(p_label_text, midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 999, 999, true);
+      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
-
-  glPopMatrix();
 }
 
 void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected )
@@ -726,7 +848,7 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   // fill ellipse
   glBegin(GL_POLYGON);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {
       float radians = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( radians ) * p_radius, sin( radians ) * p_radius , 0.0f );
@@ -739,13 +861,12 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   // draw outer line of ellipse
   glBegin(GL_LINE_LOOP);
     // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
+    for (unsigned int i=0; i < ELLIPSE_POINTS; ++i)
     {      
       float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
       glVertex3f( cos( degInRad ) * p_radius, sin( degInRad ) * p_radius, 0.0f );
     }
   glEnd();
-
   glPopMatrix();
 }
 
@@ -793,6 +914,7 @@ void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_w
     glVertex3f(p_width, p_height, 0.0f);
     glVertex3f(0,   p_height, 0.0f);
   glEnd();
+
   glPopMatrix();
 }
 
@@ -809,6 +931,7 @@ void grape::grapeapp::draw_cross( const coordinate &p_center, float p_width, flo
     glVertex3f(p_width, 0,   0.0f);
     glVertex3f(0,   p_height, 0.0f);
   glEnd();
+
   glPopMatrix();
 }
 
@@ -831,112 +954,178 @@ void grape::grapeapp::draw_tick( const coordinate &p_center, float p_width, floa
   glEnd();
 }
 
-void grape::grapeapp::draw_process_reference_corner(const coordinate &p_center, float p_radius_x, float p_radius_y, bool p_selected)
-{
-  glPushMatrix();
-
-  // set the correct color
-  set_color( g_color_process_reference, p_selected);
-
-  // draw ellipse
-  glTranslatef( p_center.m_x, p_center.m_y, 0.0f);
-  glBegin( GL_POLYGON );
-    // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
-    {
-      float degInRad = i * DEG2RAD*( 360.0f / ELLIPSE_POINTS );
-      glVertex3f( cos( degInRad ) * p_radius_x,sin ( degInRad ) * p_radius_y, 0.0f);
-    }
-  glEnd();
-
-  // set black color
-  glColor3f(0.0f, 0.0f, 0.0f);
-
-  // draw line
-  glBegin(GL_LINE_LOOP);
-    // for each point in the ellipse
-    for (uint i=0; i < ELLIPSE_POINTS; ++i)
-    {      
-      float degInRad = i * DEG2RAD * ( 360.0f / ELLIPSE_POINTS );
-      glVertex3f( cos( degInRad ) * p_radius_x, sin( degInRad ) * p_radius_y, 0.0f);
-    }
-  glEnd();
-  glPopMatrix();
-}
-
-void grape::grapeapp::draw_process_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected)
-{
-  glPushMatrix();
-
+void grape::grapeapp::draw_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected)
+{   
   // get radius of corner ellipse depending on percentage of rounding in x-axis direction
   float corner_radius_x = ( p_width * g_rounded_corner_percentage ) / 2;
 
   // get radius of corner ellipse depending on percentage of rounding in y-axis direction.
-  float corner_radius_y = ( p_height * g_rounded_corner_percentage )/2;
+  float corner_radius_y = ( p_height * g_rounded_corner_percentage ) / 2;
 
-  float lower_x = p_center.m_x - 0.5 * p_width + corner_radius_x;
-  float upper_x = lower_x + p_width - 2 * corner_radius_x;
-  float lower_y = p_center.m_y + 0.5 * p_height - corner_radius_y;
-  float upper_y = lower_y - p_height + 2 * corner_radius_y;
-
-  // draw corners.
-  coordinate corner_center = { lower_x, lower_y };
-  draw_process_reference_corner( corner_center, corner_radius_x, corner_radius_y, p_selected );
-  corner_center.m_y = upper_y;
-  draw_process_reference_corner( corner_center, corner_radius_x, corner_radius_y, p_selected );
-  corner_center.m_x = upper_x;
-  draw_process_reference_corner( corner_center, corner_radius_x, corner_radius_y, p_selected );
-  corner_center.m_y = lower_y;
-  draw_process_reference_corner( corner_center, corner_radius_x, corner_radius_y, p_selected );
-
-  glTranslatef( p_center.m_x - 0.5 * p_width, p_center.m_y - 0.5 * p_height, 0.0f);
+  coordinate points[36];
+                   
+    // top right corner
+  for (unsigned int i=0; i < 90; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }    
+  // top left corner
+  for (unsigned int i=90; i < 180; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }
+  // bottom left corner
+  for (unsigned int i=180; i < 270; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }
+  // bottom right corner
+  for (unsigned int i=270; i < 360; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width  + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }    
+       
   // set color of rounded rectangle
-  set_color( g_color_process_reference, p_selected);
-
-  // draw rectangle
-   glBegin(GL_QUADS);
-    glVertex3f(corner_radius_x, 0.0f, 0.0f);
-    glVertex3f(p_width - corner_radius_x, 0.0f, 0.0f);
-    glVertex3f(p_width - corner_radius_x, p_height,  0.0f);
-    glVertex3f(corner_radius_x, p_height,  0.0f);
+  set_color( g_color_process_reference, p_selected );
+    
+  // draw process reference
+  glBegin(GL_POLYGON);    
+    for (unsigned int i=0; i < 36; ++i)
+    {     
+      glVertex3f(points[i].m_x, points[i].m_y, 0.0f);     
+    }
   glEnd();
-
-  // draw rectangle
-  glBegin(GL_QUADS);
-    glVertex3f(0,   corner_radius_y,     0.0f);
-    glVertex3f(p_width, corner_radius_y,     0.0f);
-    glVertex3f(p_width, p_height - corner_radius_y, 0.0f);
-    glVertex3f(0,   p_height - corner_radius_y, 0.0f);
-  glEnd();
-
-  // set black color
+  
+  // draw process reference line
   glColor3f(0.0f, 0.0f, 0.0f);
+  glBegin(GL_LINE_LOOP);    
+    for (unsigned int i=0; i < 36; ++i)
+    {     
+      glVertex3f(points[i].m_x, points[i].m_y, 0.0f);     
+    }
+  glEnd();  
 
-  // draw lines
+  // draw process reference separation line
   glBegin(GL_LINES);
-    glVertex3f( corner_radius_x, 0.0f, 0.0f);
-    glVertex3f( p_width - corner_radius_x, 0.0f, 0.0f);
-    glVertex3f( corner_radius_x, p_height, 0.0f);
-    glVertex3f( p_width - corner_radius_x, p_height, 0.0f);
-    glVertex3f( 0.0f, corner_radius_y, 0.0f);
-    glVertex3f( 0.0f, p_height - corner_radius_y, 0.0f);
-    glVertex3f( p_width, corner_radius_y,     0.0f);
-    glVertex3f( p_width, p_height - corner_radius_y, 0.0f);
+    glVertex3f( p_center.m_x - 0.5 * p_width, p_center.m_y + 0.25 * p_height, 0.0f );
+    glVertex3f( p_center.m_x + 0.5 * p_width, p_center.m_y + 0.25 * p_height, 0.0f );
   glEnd();
+  
+}
 
-  glBegin(GL_LINES);
-    glVertex3f( 0.0f, 0.75 * p_height, 0.0f );
-    glVertex3f( p_width, 0.75 * p_height, 0.0f );
-  glEnd();
-  glPopMatrix();
+bool grape::grapeapp::is_inside_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord)
+{ 
+  // get radius of corner ellipse depending on percentage of rounding in x-axis direction
+  float corner_radius_x = ( p_width * g_rounded_corner_percentage ) / 2;
+
+  // get radius of corner ellipse depending on percentage of rounding in y-axis direction.
+  float corner_radius_y = ( p_height * g_rounded_corner_percentage ) / 2;
+
+  coordinate points[36];
+                   
+    // top right corner
+  for (unsigned int i=0; i < 90; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }    
+  // top left corner
+  for (unsigned int i=90; i < 180; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }
+  // bottom left corner
+  for (unsigned int i=180; i < 270; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }
+  // bottom right corner
+  for (unsigned int i=270; i < 360; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width  + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }    
+         
+  return is_inside(points, 36, p_coord);
+}
+
+
+grape_direction grape::grapeapp::is_on_border_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord)
+{ 
+  // get radius of corner ellipse depending on percentage of rounding in x-axis direction
+  float corner_radius_x = ( p_width * g_rounded_corner_percentage ) / 2;
+
+  // get radius of corner ellipse depending on percentage of rounding in y-axis direction.
+  float corner_radius_y = ( p_height * g_rounded_corner_percentage ) / 2;
+
+  coordinate points[36];
+                   
+  // top right corner
+  for (unsigned int i=0; i < 90; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }    
+  // top left corner
+  for (unsigned int i=90; i < 180; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y + 0.5 * p_height + sin( degInRad ) * corner_radius_y - corner_radius_y;
+  }
+  // bottom left corner
+  for (unsigned int i=180; i < 270; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x - 0.5 * p_width + cos( degInRad ) * corner_radius_x + corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }
+  // bottom right corner
+  for (unsigned int i=270; i < 360; i+=10)
+  {      
+    float degInRad = i * DEG2RAD;
+    points[i/10].m_x = p_center.m_x + 0.5 * p_width  + cos( degInRad ) * corner_radius_x - corner_radius_x;
+    points[i/10].m_y = p_center.m_y - 0.5 * p_height + sin( degInRad ) * corner_radius_y + corner_radius_y;
+  }    
+ 
+  //bool is_on_border = false
+  for (unsigned int i=1; i < 36; ++i)
+  {             
+     //is_on_border = is_on_border || 
+     if (is_inside_line(points[i-1], points[i], p_coord)) {
+       if (i >= 1 && i < 9) return GRAPE_DIR_NORTHEAST;
+       if (i == 9) return GRAPE_DIR_NORTH;
+       if (i >= 10 && i < 18) return GRAPE_DIR_NORTHWEST;
+       if (i == 18) return GRAPE_DIR_WEST;
+       if (i >= 19 && i < 27) return GRAPE_DIR_SOUTHWEST;
+       if (i == 27) return GRAPE_DIR_SOUTH;
+       if (i >= 28 && i < 36) return GRAPE_DIR_SOUTHEAST;
+     } 
+  }
+  if (is_inside_line(points[0], points[36], p_coord)) return GRAPE_DIR_EAST;
+  
+  return GRAPE_DIR_NONE;  
 }
 
 void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_width, float p_height, bool p_selected)
 {
   if ( p_selected )
   {
-    glPushMatrix();
-
     // Draw the eight rectangles
     coordinate left_low = { p_center.m_x - 0.5 * p_width - 2 * g_cursor_margin, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
     draw_line_rectangle( left_low, g_cursor_margin, g_cursor_margin, false, g_color_black );
@@ -956,7 +1145,17 @@ void grape::grapeapp::draw_bounding_box( const coordinate &p_center, float p_wid
     coordinate center_low = { p_center.m_x, p_center.m_y - 0.5 * p_height - 2 * g_cursor_margin };
     draw_line_rectangle( center_low, g_cursor_margin, g_cursor_margin, false, g_color_black );
 
-    glPopMatrix();
+    //draw dashed rectangle
+    glLineStipple(1, 0x3F07);
+    glEnable(GL_LINE_STIPPLE);  
+    glColor3f( 0.5, 0.5, 0.5 );
+    glBegin(GL_LINE_LOOP);
+      glVertex3f(left_low.m_x,   left_low.m_y,   0.0f);
+      glVertex3f(left_up.m_x, left_up.m_y,   0.0f);
+      glVertex3f(right_up.m_x, right_up.m_y, 0.0f);
+      glVertex3f(right_low.m_x, right_low.m_y, 0.0f);
+    glEnd();
+    glDisable(GL_LINE_STIPPLE);   
   } // end if
 }
 
@@ -998,5 +1197,5 @@ float grape::grapeapp::get_width_hint( const wxString &p_string )
   int length = p_string.Length();
   int num_chars = length < 20 ? length : 20;
   wxString truncated = p_string.Left( num_chars );
-  return g_size * num_chars;
+  return CHARWIDTH * 0.0030f * num_chars;
 }

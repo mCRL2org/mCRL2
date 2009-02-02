@@ -8,11 +8,13 @@
 //
 /// \file xsimtracedll.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimtracedll.h"
 #endif
 
-#include <wx/wxprec.h>
+#include <wx/wx.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -26,10 +28,9 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace std;
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -50,6 +50,12 @@ namespace grape
         ~action( void );
 
         /**
+         * Text retrieval function.
+         * @return Returns the text of the action.
+         */
+        wxString get_text( void );
+
+        /**
          * Name retrieval function.
          * @return Returns the name of the action.
          */
@@ -59,7 +65,7 @@ namespace grape
          * Name assignment function.
          * @param p_name The new name of the action.
          */
-        void set_name( wxString &p_name );
+        void set_name( const wxString &p_name );
 
         /**
          * Parameter retrieval function.

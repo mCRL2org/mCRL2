@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,6 +13,8 @@
 #include "geometric.h"
 #include "compoundstate.h" 
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualinitial_designator::visualinitial_designator( initial_designator* p_initial_designator )
@@ -52,7 +54,7 @@ void visualinitial_designator::draw( void )
   }
 
   // draw bounding box; only drawn if the object is selected
-  draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
+ // draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }
 
 bool visualinitial_designator::is_inside( libgrape::coordinate &p_coord )
@@ -60,14 +62,15 @@ bool visualinitial_designator::is_inside( libgrape::coordinate &p_coord )
   initial_designator *init_ptr = static_cast<initial_designator*>(m_object);
   compound_state * state_ptr = init_ptr->get_attached_state();
   if ( state_ptr )
-  {
+  {            
+    // get intersection coordinate
     coordinate state_coord = get_coordinate_on_edge( m_object->get_coordinate(), state_ptr);
     // test if inside arrow
-    return is_inside_designator( m_object->get_coordinate(), state_coord, p_coord) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
+    return is_inside_designator( m_object->get_coordinate(), state_coord, p_coord);
   }
 
   // test if inside arrow
-  return is_inside_designator( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord)  || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
+  return is_inside_designator( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord);
 }
 
 grape_direction visualinitial_designator::is_on_border( libgrape::coordinate &p_coord )
@@ -75,3 +78,6 @@ grape_direction visualinitial_designator::is_on_border( libgrape::coordinate &p_
   // test if a coordinate is on the border of an arrow
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
+
+}
+

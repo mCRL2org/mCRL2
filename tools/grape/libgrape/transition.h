@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -66,6 +66,8 @@ namespace grape
          * Frees allocated memory  and removes all references to the object.
          */
         virtual ~transition( void );
+
+        void set_label( const label& p_label );
 
         /**
          * Label retrieval function.
@@ -137,6 +139,12 @@ namespace grape
          * @return @c true if the coordinate of the transition can be changed, otherwise @c false
          */
         bool movable( void ) const;
+        
+        /**
+         * Transition get begin coordinate
+         * Get the begin coordinate of a transition
+         */
+        virtual coordinate get_begin_coordinate( void );
     };
 
     /**

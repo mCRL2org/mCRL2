@@ -8,6 +8,8 @@
 //
 /// \file ./lpsconstelm.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsconstelm"
 #define AUTHOR "Frank Stappers"
 
@@ -31,11 +33,14 @@
 //Aterm
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/vector.h"
 
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 using namespace atermpp;
 using namespace mcrl2::utilities;
@@ -52,7 +57,17 @@ inline std::string to_string (const T& t)
   return ss.str();
 }
 
-class lpsConstElm {
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+#endif
+
+class lpsConstElm
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+: public mcrl2::utilities::squadt::mcrl2_tool_interface
+#endif
+                  {
+
   private:
     ATermTable                            safeguard;
     std::string                           p_outputfile;
@@ -93,12 +108,11 @@ class lpsConstElm {
   public:
 
     lpsConstElm();
-    lpsConstElm(int argc, char** argv);
     ~lpsConstElm();
 
   private:
 
-    void parse_command_line(int argc, char** argv);
+    bool parse_command_line(int argc, char** argv);
     void getDatVarRec(aterm_appl t);
     atermpp::set< mcrl2::data::data_variable > getUsedFreeVars(aterm_appl input);
     ATermAppl rewrite(ATermAppl t);
@@ -126,7 +140,7 @@ class lpsConstElm {
 
   public:
 
-    bool execute();
+    bool execute(int argc, char** argv);
     void removeSingleton(int n);
     bool output();
     void loadFile(std::string const& x);
@@ -136,82 +150,80 @@ class lpsConstElm {
     void setDebug(bool b);
     void setNoSingleton(bool b);
     void setAllTrue(bool b);
+    void setRewriteStrategy(RewriteStrategy s);
     void setReachable(bool b);
     void setShow(bool b);
     void printSetVar();
     bool filter();
-};
 
-// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-// Squadt protocol interface and utility pseudo-library
-#include <mcrl2/utilities/squadt_interface.h>
-
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
-  private:
-
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
-    static const char*  lps_file_for_output; ///< file used to write the output to
-
-    static const char*  option_remove_single_element_sorts;
-    static const char*  option_remove_unvisited_summands;
-    static const char*  option_ignore_summand_conditions;
-
-  public:
-
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration("lps_in", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+    }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
     void user_interactive_configuration(tipi::configuration&);
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+    bool check_configuration(tipi::configuration const& c) const {
+      return c.input_exists("lps_in") && c.output_exists("lps_out");
+    }
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration&);
+#endif
 };
 
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-const char* squadt_interactor::lps_file_for_output = "lps_out";
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+char const* option_remove_single_element_sorts = "remove_single_element_sorts";
+char const* option_remove_unvisited_summands   = "remove_unvisited_summands";
+char const* option_ignore_summand_conditions   = "ignore_summand_conditions";
+char const* option_rewrite_strategy            = "rewrite_strategy";
 
-const char* squadt_interactor::option_remove_single_element_sorts = "remove_single_element_sorts";
-const char* squadt_interactor::option_remove_unvisited_summands   = "remove_unvisited_summands";
-const char* squadt_interactor::option_ignore_summand_conditions   = "ignore_summand_conditions";
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+void lpsConstElm::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
 
   /* Set defaults where the supplied configuration does not have values */
-  if (!c.output_exists(lps_file_for_output)) {
+  if (!c.output_exists("lps_out")) {
     /* Add output file to the configuration */
-    c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
+    c.add_output("lps_out", tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
 
   if (!c.option_exists(option_remove_single_element_sorts)) {
     c.add_option(option_remove_single_element_sorts, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
   if (!c.option_exists(option_remove_unvisited_summands)) {
     c.add_option(option_remove_unvisited_summands, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
   if (!c.option_exists(option_ignore_summand_conditions)) {
     c.add_option(option_ignore_summand_conditions, false).
-        set_argument_value< 0, tipi::datatype::boolean >(true, false);
+        set_argument_value< 0 >(true, false);
   }
 
   /* Create display */
   tipi::tool_display d;
 
-  layout::horizontal_box& m = d.create< horizontal_box >();
+  tipi::layout::vertical_box& m = d.create< vertical_box >();
+
+  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
+
+  m.append(d.create< label >().set_text("Rewrite strategy")).
+    append(d.create< horizontal_box >().
+                append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
+#ifdef MCRL2_INNERC_AVAILABLE
+                append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
+                append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+#else
+                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+#endif
 
   checkbox& remove_single_element_sorts = d.create< checkbox >().
                         set_status(c.get_option_argument< bool >(option_remove_single_element_sorts));
@@ -226,61 +238,54 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
       append(ignore_summand_conditions.set_label("take summand conditions into account")),
     margins(0,5,0,5));
 
+  if (c.option_exists(option_rewrite_strategy)) {
+    strategy_selector.set_selection(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+  }
+
   button& okay_button = d.create< button >().set_label("OK");
 
   m.append(d.create< label >().set_text(" ")).
     append(okay_button, layout::right);
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait until the ok button was pressed */
   okay_button.await_change();
 
   /* Update configuration */
   c.get_option(option_remove_single_element_sorts).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_single_element_sorts.get_status());
+      set_argument_value< 0 >(remove_single_element_sorts.get_status());
   c.get_option(option_remove_unvisited_summands).
-      set_argument_value< 0, tipi::datatype::boolean >(remove_unvisited_summands.get_status());
+      set_argument_value< 0 >(remove_unvisited_summands.get_status());
   c.get_option(option_ignore_summand_conditions).
-      set_argument_value< 0, tipi::datatype::boolean >(ignore_summand_conditions.get_status());
+      set_argument_value< 0 >(ignore_summand_conditions.get_status());
+  c.get_option(option_rewrite_strategy).
+      set_argument_value< 0 >(strategy_selector.get_selection());
+
+  send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  bool result = true;
-
-  result &= c.input_exists(lps_file_for_input);
-  result &= c.output_exists(lps_file_for_output);
-
-  return (result);
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& c) {
-  lpsConstElm constelm;
-
+bool lpsConstElm::perform_task(tipi::configuration& c) {
   /* Set with options from the current configuration object */
-  constelm.setNoSingleton(c.option_exists(option_remove_single_element_sorts));
-  constelm.setReachable(c.option_exists(option_remove_unvisited_summands));
-  constelm.setAllTrue(c.option_exists(option_remove_unvisited_summands));
+  setNoSingleton(c.option_exists(option_remove_single_element_sorts));
+  setReachable(c.option_exists(option_remove_unvisited_summands));
+  setAllTrue(c.option_exists(option_remove_unvisited_summands));
+  setRewriteStrategy(c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
 
   send_hide_display();
 
-  constelm.loadFile(c.get_input(lps_file_for_input).get_location());
-  constelm.setSaveFile(c.get_output(lps_file_for_output).get_location());
+  loadFile(c.get_input("lps_in").location());
+  setSaveFile(c.get_output("lps_out").location());
 
-  constelm.filter();
-  constelm.output();
+  filter();
+  output();
 
   return true;
 }
 #endif
 
-lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) { 
+lpsConstElm::lpsConstElm() : safeguard(ATtableCreate(10000,50)), rewr(NULL) {
   p_spec.protect();
-}
-
-lpsConstElm::lpsConstElm(int argc, char** argv) : safeguard(ATtableCreate(10000,50)), rewr(NULL) {
-  p_spec.protect();
-  parse_command_line(argc, argv);
 }
 
 lpsConstElm::~lpsConstElm() {
@@ -358,7 +363,7 @@ inline ATermAppl lpsConstElm::rewrite(ATermAppl t) {
 //
 inline ATermAppl lpsConstElm::p_substitute(ATermAppl t, atermpp::vector< mcrl2::data::data_assignment > &y ) {
   for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
-    rewr->setSubstitution(i->lhs() ,rewr->toRewriteFormat(i->rhs()));
+    rewr->setSubstitution(i->lhs() ,i->rhs());
   }
   ATermAppl result = rewr->rewrite(t);
   for(atermpp::vector< mcrl2::data::data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
@@ -398,9 +403,9 @@ inline bool lpsConstElm::inFreeVarList(data_expression dexpr) {
 // value which is not constant
 //
 inline mcrl2::data::data_assignment lpsConstElm::newExpression(mcrl2::data::data_assignment ass) {
-  char buffer [99];
-  sprintf(buffer, "%s^%d", std::string(ass.lhs().name()).c_str(), p_newVarCounter++);
-  data_variable w(buffer, ass.lhs().sort() );
+  std::ostringstream s;
+  s << ass.lhs().name() << "^" << p_newVarCounter++;
+  data_variable w(s.str() , ass.lhs().sort() );
   data_assignment a(ass.lhs() , w);
   return a;
 }
@@ -565,7 +570,7 @@ void lpsConstElm::findSingleton() {
           if (result_sort(j->sort()) == *i){
             sort_expression_list sorts = domain_sorts(j->sort());
             for(sort_expression_list::iterator k = sorts.begin() ; k != sorts.end() ; k++ ){
-              b = std::max(p_countSort[*k], b);
+              b = (std::max)(p_countSort[*k], b);
             }
           }
         }
@@ -791,7 +796,7 @@ inline bool lpsConstElm::output() {
      {
        gsVerboseMsg("lpsconstelm: Cannot write to the CSV log-file: %s. Writing of the log-file is omitted.\n", p_logfile.c_str() ); 
      } else {
-       fprintf (pFile, p_logstring.c_str() );
+       fprintf (pFile, "%s", p_logstring.c_str() );
        fclose (pFile);
      }
     }
@@ -974,6 +979,10 @@ inline void lpsConstElm::printSet() {
 //
 inline void lpsConstElm::setNoSingleton(bool b) {
   p_nosingleton = b;
+}
+
+inline void lpsConstElm::setRewriteStrategy(RewriteStrategy s) {
+  p_strategy = s;
 }
 
 // Sets all conditions to true
@@ -1204,7 +1213,7 @@ bool lpsConstElm::filter() {
   return true;
 }
 
-void lpsConstElm::parse_command_line(int ac, char** av) {
+bool lpsConstElm::parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Remove constant process parameters from the LPS in INFILE and write the result "
     "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
@@ -1218,45 +1227,59 @@ void lpsConstElm::parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  setNoSingleton(0 < parser.options.count("no-singleton"));
-  setAllTrue(0 < parser.options.count("no-condition"));
-  setReachable(0 == parser.options.count("no-reachable"));
+  if (parser.continue_execution()) {
+    setNoSingleton(0 < parser.options.count("no-singleton"));
+    setAllTrue(0 < parser.options.count("no-condition"));
+    setReachable(0 == parser.options.count("no-reachable"));
 
-  p_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+    p_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if(parser.options.count("csv"))
-  {
-    setShow(true); 
-
-    p_logfile = parser.option_argument("csv");
-  
-    gsDebugMsg( "Output file %s", p_logfile.c_str() );
-  } else {
-    setShow(false);
-  }
-
-  std::string name_for_input;
-  std::string name_for_output;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      name_for_input = parser.arguments[0];
+    if(parser.options.count("csv"))
+    {
+      setShow(true); 
+ 
+      p_logfile = parser.option_argument("csv");
+    
+      gsDebugMsg( "Output file %s", p_logfile.c_str() );
+    } else {
+      setShow(false);
     }
-    if (1 < parser.arguments.size()) {
-      name_for_output = parser.arguments[1];
+
+    std::string name_for_input;
+    std::string name_for_output;
+
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
+    else {
+      if (0 < parser.arguments.size()) {
+        name_for_input = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        name_for_output = parser.arguments[1];
+      }
+    }
+    loadFile(name_for_input);
+    setSaveFile(name_for_output);
   }
-  loadFile(name_for_input);
-  setSaveFile(name_for_output);
+
+  return parser.continue_execution();
 }
 
-bool lpsConstElm::execute() {
-  bool b1 = filter();
-  bool b2 = output();
-  return (b1 && b2);
+bool lpsConstElm::execute(int argc, char** argv) {
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
+    return true;
+  }
+#endif
+
+  if (parse_command_line(argc, argv)) {
+    bool b1 = filter();
+    bool b2 = output();
+    return (b1 && b2);
+  }
+
+  return true;
 }
 
 int main(int argc, char** argv)
@@ -1264,19 +1287,14 @@ int main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return 0;
-    }
-#endif
-
-    lpsConstElm(argc, argv).execute();
-
-    return EXIT_SUCCESS;
+    lpsConstElm tool;
+    
+    tool.execute(argc, argv);
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -79,6 +79,18 @@ namespace grape
          * Calculates the new center coordinate of the transition, based on the coordinates of the compound states it is attached to.
          */
         void set_center_coordinate( void );
+        
+        /**
+         * Transition get end coordinate
+         * Get the end coordinate of a transition
+         */
+        coordinate get_end_coordinate( void );
+        
+        /**
+         * Transition get begin coordinate
+         * Get the begin coordinate of a transition
+         */
+        virtual coordinate get_begin_coordinate( void );
     };
 
     /**

@@ -8,6 +8,8 @@
 //
 /// \file tracepp.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "tracepp"
 #define AUTHOR "Muck van Weerdenburg"
 
@@ -19,8 +21,10 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/exception.h"
 
 using namespace std;
 using namespace mcrl2::utilities;
@@ -53,19 +57,20 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   os << "nodesep = 0.05;" << endl;
   ATermAppl act;
   int i = 0;
+  os << i << " [label=\"";
+  if ( trace.currentState() != NULL )
+  {
+    print_state(os,trace.currentState());
+  }
+  os << "\",peripheries=2];" << endl;
   while ( (act = trace.nextAction()) != NULL )
   {
-    os << i << " [label=\"";
+    os << i+1 << " [label=\"";
     if ( trace.currentState() != NULL )
     {
       print_state(os,trace.currentState());
     }
-    if ( i == 0 )
-    {
-      os << "\",peripheries=2];" << endl;
-    } else {
-      os << "\"];" << endl;
-    }
+    os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
     if ( mcrl2::core::detail::gsIsMultAct(act) )
     {
@@ -77,12 +82,6 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
     os << "\"];" << endl;
     i++;
   }
-  os << i << " [label=\"";
-  if ( trace.currentState() != NULL )
-  {
-    print_state(os,trace.currentState());
-  }
-  os << "\"];" << endl;
   os << "}" << endl;
 }
 
@@ -198,7 +197,7 @@ void process(t_tool_options const& tool_options) {
   }
 }
 
-t_tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [[INFILE] OUTFILE]\n",
     "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
@@ -216,36 +215,36 @@ t_tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  t_tool_options tool_options;
+  if (parser.continue_execution()) {
+    tool_options.format_for_output = otPlain;
 
-  tool_options.format_for_output = otPlain;
+    if (parser.options.count("format")) {
+      std::string eq_name(parser.option_argument("format"));
+      if (eq_name == "plain") {
+        tool_options.format_for_output = otPlain;
+      } else if (eq_name == "mcrl2") {
+        tool_options.format_for_output = otMcrl2;
+      } else if (eq_name == "dot") {
+        tool_options.format_for_output = otDot;
+      } else if (eq_name == "aut") {
+        tool_options.format_for_output = otAut;
+      } else {
+        parser.error("option -f/--format has illegal argument '" + eq_name + "'");
+      }
+    }
 
-  if (parser.options.count("format")) {
-    std::string eq_name(parser.option_argument("format"));
-    if (eq_name == "plain") {
-      tool_options.format_for_output = otPlain;
-    } else if (eq_name == "mcrl2") {
-      tool_options.format_for_output = otMcrl2;
-    } else if (eq_name == "dot") {
-      tool_options.format_for_output = otDot;
-    } else if (eq_name == "aut") {
-      tool_options.format_for_output = otAut;
-    } else {
-      parser.error("option -f/--format has illegal argument '" + eq_name + "'");
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    if (0 < parser.arguments.size()) {
+      tool_options.name_for_input = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      tool_options.name_for_output = parser.arguments[1];
     }
   }
 
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  if (0 < parser.arguments.size()) {
-    tool_options.name_for_input = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    tool_options.name_for_output = parser.arguments[1];
-  }
-
-  return tool_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char **argv)
@@ -253,13 +252,16 @@ int main(int argc, char **argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-    process(parse_command_line(argc, argv));
-
-    return EXIT_SUCCESS;
+    t_tool_options options;
+    
+    if (parse_command_line(argc, argv, options)) {
+       process(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

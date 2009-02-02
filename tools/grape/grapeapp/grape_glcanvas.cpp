@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,7 +14,7 @@
 #include "grape_glcanvas.h"
 #include "grape_frame.h"
 #include "architecturereference.h"
-#include "visuals/font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "visuals/visualobject.h"
 #include "visuals/visualblocked.h"
 #include "visuals/visualchannel_communication.h"
@@ -32,10 +32,11 @@
 #include "visuals/visualvisibilityframe.h"
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities;
 
 const float g_frame_border_space = 0.4f;
 
-grape_glcanvas::grape_glcanvas(wxWindow *p_parent, int *p_args, grape_frame* p_main_frame) : wxGLCanvas(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, _T("grape_glcanvas"), p_args, wxNullPalette)
+grape_glcanvas::grape_glcanvas(wxWindow *p_parent, int *p_args, grape_frame* p_main_frame) : wxGLCanvas(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL, _T("grape_glcanvas"), p_args, wxNullPalette)
 {
   m_main_frame = p_main_frame;
 
@@ -80,8 +81,8 @@ void grape_glcanvas::update_scrollbars(void)
   int v_thumb = m_viewport_height;
   int h_pos = int(((float)m_h_scroll_pos / (float)m_h_scroll_range) * h_range);
   int v_pos = int(((float)m_v_scroll_pos / (float)m_v_scroll_range) * v_range);
-  SetScrollbar(wxHORIZONTAL, h_pos, h_thumb, h_range);
-  SetScrollbar(wxVERTICAL, v_pos, v_thumb, v_range);
+  SetScrollbar(wxHORIZONTAL, h_pos, h_thumb, h_range, true);
+  SetScrollbar(wxVERTICAL, v_pos, v_thumb, v_range, true);
 
   m_h_scroll_range = h_range;
   m_v_scroll_range = v_range;
@@ -92,7 +93,7 @@ void grape_glcanvas::update_scrollbars(void)
 grape_glcanvas::~grape_glcanvas(void)
 {
   // free textures in video memory
-  glDeleteTextures(256, &g_pool.m_textures[0]);
+//  glDeleteTextures(256, &g_pool.m_textures[0]);
 
   m_visual_objects.Clear();
 }
@@ -118,18 +119,61 @@ void grape_glcanvas::init_gl(void)
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
   // load used textures
-  init_textures();
+//  init_textures();
 
   m_initialized = true;
 }
 
+void grape_glcanvas::reset()
+{
+  // initialize glcanvas
+  m_viewport_width = 1;
+  m_viewport_height = 1;
+  m_canvas_state = IDLE;
+  m_initialized = false;
+  m_scroll_x = 0.0f;
+  m_scroll_y = 0.0f;
+
+  // 1.0f GL coords correspond to 300 viewport pixels
+  // initial diagram dimensions: [0.0f, 10.0f] x [0.0f, -10.0f]
+  m_min_size_x = 0.0f;
+  m_max_size_x = 10.0f;
+  m_min_size_y = 0.0f;
+  m_max_size_y = 10.0f;
+
+  m_h_scroll_range = 1;
+  m_v_scroll_range = 1;
+  m_h_scroll_pos = 0;
+  m_v_scroll_pos = 0;
+
+  update_scrollbars();
+  m_visual_objects.Empty();
+  m_touched_visual_object = 0;
+  m_dragging = false;
+  m_mousedown = false;
+  m_diagram = 0;
+
+  m_visibility_frame_height = m_max_size_y - 0.5 * g_frame_border_space;
+  m_visibility_frame_width = m_max_size_x - 2 * g_frame_border_space;
+  m_visibility_frame_coordinate.m_x = m_min_size_x + g_frame_border_space + 0.5 * m_visibility_frame_width;
+  m_visibility_frame_coordinate.m_y = -1 * ( m_min_size_y + 0.1f + 0.5 * m_visibility_frame_height );
+}
 void grape_glcanvas::draw_visual_objects()
 {
-  for ( uint i = 0; i < m_visual_objects.GetCount(); ++i )
+  // draw all objects
+  for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
   {
     visual_object* vis_obj_ptr = m_visual_objects.Item( i );
     vis_obj_ptr->draw();
   }
+    
+  // draw terminating transition if we are dragging a transition
+  if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) && (m_mousedown))
+  {
+    wxString label_text = _T("");
+    // draw transition
+    draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, label_text);
+  }        
 }
 
 void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
@@ -141,7 +185,6 @@ void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
   }
 
   SetCurrent();
-
 
   if( !m_initialized )
   {
@@ -163,9 +206,8 @@ void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
   // draw objects
   draw_visual_objects();
 
-  // flush GL pipeline and swap buffers
+  // flush GL pipeline and don't swap the buffers (hiding this action)
   glFlush();
-  SwapBuffers();
 }
 
 void grape_glcanvas::paint( wxDC &dc )
@@ -265,12 +307,11 @@ void grape_glcanvas::event_size(wxSizeEvent &p_event)
     float new_x = (((float)m_viewport_width)/((float)300));
     float new_y = (((float)m_viewport_height)/((float)300));
     gluOrtho2D(0, new_x, -new_y, 0);
+
+    glMatrixMode(GL_MODELVIEW);
   }
-
-  glMatrixMode(GL_MODELVIEW);
-
+  
   update_scrollbars();
-
   Refresh();
 }
 
@@ -359,6 +400,11 @@ void grape_glcanvas::event_scroll_thumbtrack(wxScrollWinEvent &p_event)
   Refresh();
 }
 
+void grape_glcanvas::event_scroll_thumbrelease(wxScrollWinEvent &p_event)
+{
+  SetScrollPos(p_event.GetOrientation(), p_event.GetPosition(), true);
+}
+
 void grape_glcanvas::event_scroll_pageup(wxScrollWinEvent &p_event)
 {
   if(p_event.GetOrientation() == wxHORIZONTAL)
@@ -408,23 +454,33 @@ void grape_glcanvas::event_scroll_pagedown(wxScrollWinEvent &p_event)
 void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 {
   if ( p_event.Dragging() )
-  {
-    coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
+  { 
+    coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() );
+    m_mouse_coordinate = clicked_coord;
 
-    if ( m_touched_visual_object )
+    if ( m_lmouse_down_coordinate.m_x != clicked_coord.m_x || m_lmouse_down_coordinate.m_y != clicked_coord.m_y ) //we are only dragging if there was a displacement
     {
-      // select object
-      object *obj_ptr = m_touched_visual_object->get_selectable_object();
-      if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
+      if ( m_touched_visual_object )
       {
-        m_diagram->select_object( obj_ptr );
+        // update canvas if we are dragging a transition
+        if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)
+        {
+          draw();
+        }
+        
+        // select object
+        object *obj_ptr = m_touched_visual_object->get_selectable_object();
+        if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
+        {
+          m_diagram->select_object( obj_ptr );
+        }
+
+        m_dragging = true;
+        
+        m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
+        // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
+        m_touched_visual_object = get_visual_object( obj_ptr );
       }
-
-      m_dragging = true;
-
-      m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
-      // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
-      m_touched_visual_object = get_visual_object( obj_ptr );
     }
   }
 }
@@ -432,6 +488,7 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 {
   coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
+    m_mouse_coordinate = clicked_coord;
 
   if ( !m_mousedown ) // first mousedown event
   {
@@ -462,6 +519,14 @@ void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 
 void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
 {
+  // update statusbar
+  if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) {
+    if ( ( m_main_frame->get_mode() == GRAPE_MODE_ARCH ) || ( m_main_frame->get_mode() == GRAPE_MODE_PROC ) )
+    {
+      m_main_frame->get_statusbar()->PopStatusText();
+    }
+  }
+
   coordinate released_coordinate = get_canvas_coordinate( p_event.GetX(), p_event.GetY() );
   // if the released_coordinate was outside of the canvas, put it back inside the canvas
   // g_cursor_margin is defined in visuals/geometric.h
@@ -481,10 +546,11 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   {
     released_coordinate.m_y = -1 * ( m_max_size_y - g_cursor_margin );
   }
-
+      
   // Determine if we had touched an object upon mouse down
   if ( m_touched_visual_object && m_touched_visual_object_id >= 0 )
   {
+   // m_dragging = false;
     if ( m_dragging ) // if touched an object and then dragged
     {
       // inform the frame of the performed event.
@@ -509,6 +575,9 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   m_mousedown = false;
   m_dragging = false;
   m_touched_visual_object = 0;
+  
+  // update canvas
+  draw();
 }
 
 void grape_glcanvas::event_lmouse_doubleclick( wxMouseEvent &p_event )
@@ -532,7 +601,7 @@ void grape_glcanvas::set_canvas_state( const canvas_state &p_canvas_state )
   m_canvas_state = p_canvas_state;
 }
 
-uint grape_glcanvas::count_visual_object( void )
+unsigned int grape_glcanvas::count_visual_object( void )
 {
   return m_visual_objects.GetCount();
 }
@@ -544,8 +613,8 @@ visual_object* grape_glcanvas::get_visual_object( int p_i )
 
 visual_object *grape_glcanvas::get_visual_object( object *p_obj )
 {
-  uint count = m_visual_objects.GetCount();
-  for ( uint i = 0; i < count; ++i )
+  unsigned int count = m_visual_objects.GetCount();
+  for ( unsigned int i = 0; i < count; ++i )
   {
     visual_object* vis_obj = m_visual_objects.Item( i );
     if ( vis_obj->get_selectable_object() == p_obj )
@@ -580,8 +649,8 @@ void grape_glcanvas::add_visual_object( visual_object* p_obj )
 
 void grape_glcanvas::clear_visual_objects( void )
 {
-  uint count = m_visual_objects.GetCount();
-  for ( uint i = 0; i < count; ++i )
+  unsigned int count = m_visual_objects.GetCount();
+  for ( unsigned int i = 0; i < count; ++i )
   {
     visual_object* del_obj = m_visual_objects.Item( i );
     delete del_obj;
@@ -592,7 +661,7 @@ void grape_glcanvas::clear_visual_objects( void )
 int grape_glcanvas::count_selected_objects( void )
 {
   int result = 0;
-  for ( uint i = 0; i < m_visual_objects.GetCount(); ++i)
+  for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i)
   {
     visual_object* count_obj = m_visual_objects.Item( i );
     result += count_obj->get_selected() ? 1 : 0;
@@ -613,7 +682,7 @@ void grape_glcanvas::reload_visual_objects( void )
       add_visual_object( new_frame );
 
       // add visuals comment
-      for ( uint i = 0; i < arch_dia->count_comment(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_comment(); ++i )
       {
         comment* comm_ptr = arch_dia->get_comment( i );
         visualcomment* visual_comm = new visualcomment( comm_ptr );
@@ -621,14 +690,14 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals blocked
-      for ( uint i = 0; i < arch_dia->count_blocked(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_blocked(); ++i )
       {
         blocked* block_ptr = arch_dia->get_blocked( i );
         visualblocked* visual_block = new visualblocked( block_ptr );
         add_visual_object( visual_block );
       }
       // add visuals visible
-      for ( uint i = 0; i < arch_dia->count_visible(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_visible(); ++i )
       {
         // pass the coordinate, width and height of the visibility frame to the visibles.
         visible* vis_ptr = arch_dia->get_visible( i );
@@ -638,7 +707,7 @@ void grape_glcanvas::reload_visual_objects( void )
 
       // Draw a reference and its own channels immediately thereafter so that no other objects can be placed between them.
       // add visuals architecture reference
-      for ( uint i = 0; i < arch_dia->count_architecture_reference(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_architecture_reference(); ++i )
       {
         architecture_reference* arch_ref_ptr = arch_dia->get_architecture_reference( i );
         visualarchitecture_reference* vis_arch_ref = new visualarchitecture_reference( arch_ref_ptr );
@@ -646,7 +715,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals process reference
-      for ( uint i = 0; i < arch_dia->count_process_reference(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_process_reference(); ++i )
       {
         process_reference* proc_ref_ptr = arch_dia->get_process_reference( i );
         visualprocess_reference* vis_proc_ref = new visualprocess_reference( proc_ref_ptr );
@@ -654,7 +723,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals channel communication
-      for ( uint i = 0; i < arch_dia->count_channel_communication(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_channel_communication(); ++i )
       {
         channel_communication* c_comm_ptr = arch_dia->get_channel_communication( i );
         visualchannel_communication* visual_c_comm = new visualchannel_communication( c_comm_ptr );
@@ -662,7 +731,7 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals channel
-      for ( uint i = 0; i < arch_dia->count_channel(); ++i )
+      for ( unsigned int i = 0; i < arch_dia->count_channel(); ++i )
       {
         channel* chan_ptr = arch_dia->get_channel( i );
         visualchannel* visual_chan = new visualchannel( chan_ptr );
@@ -679,7 +748,7 @@ void grape_glcanvas::reload_visual_objects( void )
       add_visual_object( vis_pre );
 
       // add visuals comment
-      for ( uint i = 0; i < proc_dia->count_comment(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_comment(); ++i )
       {
         comment* comm_ptr = proc_dia->get_comment( i );
         visualcomment* visual_comm = new visualcomment( comm_ptr );
@@ -687,35 +756,35 @@ void grape_glcanvas::reload_visual_objects( void )
       }
 
       // add visuals initial designator
-      for ( uint i = 0; i < proc_dia->count_initial_designator(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_initial_designator(); ++i )
       {
         initial_designator* init_ptr = proc_dia->get_initial_designator( i );
         visualinitial_designator* vis_init = new visualinitial_designator( init_ptr );
         add_visual_object( vis_init );
       }
       // add visuals terminating transition
-      for ( uint i = 0; i < proc_dia->count_terminating_transition(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_terminating_transition(); ++i )
       {
         terminating_transition* trans_ptr = proc_dia->get_terminating_transition( i );
         visualterminating_transition* vis_trans = new visualterminating_transition( trans_ptr );
         add_visual_object( vis_trans );
       }
       // add visuals nonterminating transition
-      for ( uint i = 0; i < proc_dia->count_nonterminating_transition(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_nonterminating_transition(); ++i )
       {
         nonterminating_transition* ntt_ptr = proc_dia->get_nonterminating_transition( i );
         visualnonterminating_transition* vis_ntt = new visualnonterminating_transition( ntt_ptr );
         add_visual_object( vis_ntt );
       }
       // add visuals reference state
-      for ( uint i = 0; i < proc_dia->count_reference_state(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_reference_state(); ++i )
       {
         reference_state* ref_state_ptr = proc_dia->get_reference_state( i );
         visualreference_state* vis_ref_state = new visualreference_state( ref_state_ptr );
         add_visual_object( vis_ref_state );
       }
       // add visuals state
-      for ( uint i = 0; i < proc_dia->count_state(); ++i )
+      for ( unsigned int i = 0; i < proc_dia->count_state(); ++i )
       {
         state* state_ptr = proc_dia->get_state( i );
         visualstate* vis_state = new visualstate( state_ptr );
@@ -758,6 +827,12 @@ bool grape_glcanvas::is_inside_visibility_frame( coordinate &p_coord )
   return is_inside_rectangle( m_visibility_frame_coordinate, m_visibility_frame_width, m_visibility_frame_height, p_coord );
 }
 
+font_renderer* grape_glcanvas::get_font_renderer( void )
+{
+  static font_renderer  font_renderer;           /**< A pointer to the font renderer for the text on the visual objects. */
+  return &font_renderer;
+}
+
 BEGIN_EVENT_TABLE(grape_glcanvas, wxGLCanvas)
   EVT_SIZE(grape_glcanvas::event_size)
   EVT_PAINT(grape_glcanvas::event_paint)
@@ -766,6 +841,7 @@ BEGIN_EVENT_TABLE(grape_glcanvas, wxGLCanvas)
   EVT_SCROLLWIN_LINEUP(grape_glcanvas::event_scroll_lineup)
   EVT_SCROLLWIN_LINEDOWN(grape_glcanvas::event_scroll_linedown)
   EVT_SCROLLWIN_THUMBTRACK(grape_glcanvas::event_scroll_thumbtrack)
+  EVT_SCROLLWIN_THUMBRELEASE(grape_glcanvas::event_scroll_thumbrelease)
   EVT_SCROLLWIN_PAGEUP(grape_glcanvas::event_scroll_pageup)
   EVT_SCROLLWIN_PAGEDOWN(grape_glcanvas::event_scroll_pagedown)
   EVT_MOTION(grape_glcanvas::event_mouse_move)

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -51,6 +51,12 @@ namespace grape
          * @param p_expression The text of the sort expression
          */
         void set_expression( const wxString &p_expression );
+
+        /**
+         * The sort expression text retreival function
+         * @return The text of the sort expression
+         */
+        wxString get_expression( void ) const;
     };
 
     /**

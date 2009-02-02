@@ -8,6 +8,8 @@
 //
 /// \file lpsuntime.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpsuntime"
 #define AUTHOR "Jeroen Keiren"
 
@@ -19,8 +21,9 @@
 #include <mcrl2/atermpp/aterm.h>
 
 #include <mcrl2/core/messaging.h>
-#include <mcrl2/utilities/command_line_interface.h> // must come after mcrl2/core/messaging.h
-#include <mcrl2/utilities/aterm_ext.h>
+#include <mcrl2/utilities/command_line_interface.h>
+#include <mcrl2/utilities/command_line_messaging.h>
+#include <mcrl2/core/aterm_ext.h>
 
 //LPS framework
 #include <mcrl2/lps/untime.h>
@@ -36,7 +39,7 @@ struct tool_options {
 
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration needed for use within squadt_interactor class
 int do_untime(const tool_options& options);
@@ -89,8 +92,8 @@ bool squadt_interactor::check_configuration(tipi::configuration const& configura
 bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
   return (do_untime(options)==0);
 }
 
@@ -100,11 +103,11 @@ int do_untime(const tool_options& options)
 {
   mcrl2::lps::specification lps_specification;
   lps_specification.load(options.input_file);
-  mcrl2::lps::untime(lps_specification).save(options.output_file); 
+  mcrl2::lps::untime(lps_specification).save(options.output_file);
   return 0;
 }
 
-tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, tool_options& t_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
                               "Remove time from the linear process specification (LPS) in INFILE and write the\n"
                               "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not\n"
@@ -112,21 +115,21 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      t_options.input_file = parser.arguments[0];
+  if (parser.continue_execution()) {
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      t_options.output_file = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        t_options.input_file = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        t_options.output_file = parser.arguments[1];
+      }
     }
   }
 
-  return t_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv)
@@ -139,12 +142,16 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
     }
 #endif
+    tool_options options;
 
-    return do_untime(parse_command_line(argc, argv));
+    if (parse_command_line(argc, argv, options)) {
+      return do_untime(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

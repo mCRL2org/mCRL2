@@ -8,6 +8,8 @@
 //
 /// \file lpssumelm.cpp
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "lpssumelm"
 #define AUTHOR "Jeroen Keiren"
 
@@ -18,8 +20,9 @@
 //Aterms
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 //LPS Framework
 #include <mcrl2/lps/sumelm.h>
@@ -33,10 +36,10 @@ struct tool_options {
   std::string input_file; ///< Name of the file to read input from
   std::string output_file; ///< Name of the file to write output to (or stdout)
 };
-  
+
 //Squadt connectivity
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 //Forward declaration because do_sumelm() is called within squadt_interactor class
 int do_sumelm(const tool_options& options);
@@ -76,7 +79,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& conf
 {
   gsDebugMsg("squadt_interactor: User interactive configuration\n");
 
-  if (configuration.is_fresh()) {
+  if (configuration.fresh()) {
     if (!configuration.output_exists(lps_file_for_output)) {
       configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
     }
@@ -96,8 +99,8 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 {
   gsDebugMsg("squadt_interactor: Performing task\n");
   tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).get_location();
-  options.output_file = configuration.get_output(lps_file_for_output).get_location();
+  options.input_file = configuration.get_input(lps_file_for_input).location();
+  options.output_file = configuration.get_output(lps_file_for_output).location();
 
   gsDebugMsg("Calling do_sumelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
   return (do_sumelm(options)==0);
@@ -123,7 +126,7 @@ int do_sumelm(const tool_options& options)
 }
 
 ///Parses command line and sets settings from command line switches
-tool_options parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av, tool_options& t_options) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
                              "Remove superfluous summations from the linear process specification (LPS) in "
                              "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
@@ -131,21 +134,21 @@ tool_options parse_command_line(int ac, char** av) {
 
   command_line_parser parser(clinterface, ac, av);
 
-  tool_options t_options;
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      t_options.input_file = parser.arguments[0];
+  if (parser.continue_execution()) {
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
     }
-    if (1 < parser.arguments.size()) {
-      t_options.output_file = parser.arguments[1];
+    else {
+      if (0 < parser.arguments.size()) {
+        t_options.input_file = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        t_options.output_file = parser.arguments[1];
+      }
     }
   }
 
-  return t_options;
+  return parser.continue_execution();
 }
 
 int main(int argc, char** argv)
@@ -158,12 +161,16 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
     }
 #endif
+    tool_options options;
 
-    return do_sumelm(parse_command_line(argc, argv));
+    if (parse_command_line(argc, argv, options)) {
+      return do_sumelm(options);
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

@@ -9,6 +9,8 @@
 /// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "mcrl22lps"
 #define AUTHOR "Jan Friso Groote"
 
@@ -23,13 +25,15 @@
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/utilities/command_line_interface.h" // after messaging.h and rewrite.h
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lps"
@@ -39,13 +43,13 @@ using namespace mcrl2::core;
 using namespace mcrl2::new_data::detail;
 
 //Functions used by the main program
-static t_lin_options parse_command_line(int argc, char *argv[]);
+static bool parse_command_line(int argc, char *argv[], t_lin_options& options);
 static ATermAppl linearise_file(t_lin_options &lin_options);
 static char const* lin_method_to_string(t_lin_method lin_method);
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
@@ -124,41 +128,41 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
-  std::string infilename = c.get_input(mcrl2_file_for_input).get_location();
+  std::string infilename = c.get_input(mcrl2_file_for_input).location();
 
   // Set defaults for options
   if (!c.option_exists(option_final_cluster)) {
-    c.add_option(option_final_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_final_cluster).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_intermediate_cluster)) {
-    c.add_option(option_no_intermediate_cluster).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_intermediate_cluster).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_alpha)) {
-    c.add_option(option_no_alpha).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_alpha).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_newstate)) {
-    c.add_option(option_newstate).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_newstate).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_binary)) {
-    c.add_option(option_binary).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_binary).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_statenames)) {
-    c.add_option(option_statenames).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_statenames).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_rewrite)) {
-    c.add_option(option_no_rewrite).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_rewrite).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_freevars)) {
-    c.add_option(option_no_freevars).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_freevars).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_sumelm)) {
-    c.add_option(option_no_sumelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_sumelm).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_no_deltaelm)) {
-    c.add_option(option_no_deltaelm).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_no_deltaelm).set_argument_value< 0 >(false);
   }
   if (!c.option_exists(option_add_delta)) {
-    c.add_option(option_add_delta).set_argument_value< 0, tipi::datatype::boolean >(false);
+    c.add_option(option_add_delta).set_argument_value< 0 >(false);
   }
 
   /* Create display */
@@ -231,7 +235,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     method_selector.set_selection(c.get_option_argument< t_lin_method >(option_linearisation_method, 0));
   }
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait for the OK button to be pressed */
   okay_button.await_change();
@@ -251,19 +255,17 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.remove_output(lps_file_for_output);
   }
 
-  using tipi::datatype::boolean;
-
-  c.get_option(option_final_cluster).set_argument_value< 0, boolean >(clusterfinal.get_status());
-  c.get_option(option_no_intermediate_cluster).set_argument_value< 0, boolean >(!clusterintermediate.get_status());
-  c.get_option(option_no_alpha).set_argument_value< 0, boolean >(!alpha.get_status());
-  c.get_option(option_newstate).set_argument_value< 0, boolean >(newstate.get_status());
-  c.get_option(option_binary).set_argument_value< 0, boolean >(binary.get_status());
-  c.get_option(option_statenames).set_argument_value< 0, boolean >(statenames.get_status());
-  c.get_option(option_no_rewrite).set_argument_value< 0, boolean >(!rewrite.get_status());
-  c.get_option(option_no_freevars).set_argument_value< 0, boolean >(!freevars.get_status());
-  c.get_option(option_no_sumelm).set_argument_value< 0, boolean >(!sumelm.get_status());
-  c.get_option(option_no_deltaelm).set_argument_value< 0, boolean >(!deltaelm.get_status());
-  c.get_option(option_add_delta).set_argument_value< 0, boolean >(add_delta.get_status());
+  c.get_option(option_final_cluster).set_argument_value< 0 >(clusterfinal.get_status());
+  c.get_option(option_no_intermediate_cluster).set_argument_value< 0 >(!clusterintermediate.get_status());
+  c.get_option(option_no_alpha).set_argument_value< 0 >(!alpha.get_status());
+  c.get_option(option_newstate).set_argument_value< 0 >(newstate.get_status());
+  c.get_option(option_binary).set_argument_value< 0 >(binary.get_status());
+  c.get_option(option_statenames).set_argument_value< 0 >(statenames.get_status());
+  c.get_option(option_no_rewrite).set_argument_value< 0 >(!rewrite.get_status());
+  c.get_option(option_no_freevars).set_argument_value< 0 >(!freevars.get_status());
+  c.get_option(option_no_sumelm).set_argument_value< 0 >(!sumelm.get_status());
+  c.get_option(option_no_deltaelm).set_argument_value< 0 >(!deltaelm.get_status());
+  c.get_option(option_add_delta).set_argument_value< 0 >(add_delta.get_status());
 
   send_clear_display();
 }
@@ -282,7 +284,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   bool result = true;
 
   if (c.input_exists(mcrl2_file_for_input)) {
-    task_options.infilename = c.get_input(mcrl2_file_for_input).get_location();
+    task_options.infilename = c.get_input(mcrl2_file_for_input).location();
   }
   else {
     send_error("Configuration does not contain an input object\n");
@@ -291,7 +293,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   }
 
   if (c.output_exists(lps_file_for_output) ) {
-    task_options.outfilename = c.get_output(lps_file_for_output).get_location();
+    task_options.outfilename = c.get_output(lps_file_for_output).location();
   }
   else {
     send_error("Configuration does not contain an output object\n");
@@ -306,7 +308,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
     send_error("Configuration does not contain a linearisation method\n");
 
     result = false;
-  } 
+  }
 
   task_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
   task_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
@@ -319,7 +321,7 @@ bool squadt_interactor::extract_task_options(tipi::configuration const& c, t_lin
   task_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
   task_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
   task_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
-  
+
   task_options.end_phase = c.get_option_argument< t_phase >(option_end_phase, 0);
 
   task_options.check_only = (task_options.end_phase != phNone);
@@ -337,7 +339,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   t_lin_options task_options;
-  
+
   // Extract configuration
   extract_task_options(c, task_options);
 
@@ -345,8 +347,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::tool_display d;
 
   label& message = d.create< label >();
- 
-  d.set_manager(d.create< vertical_box >().
+
+  d.manager(d.create< vertical_box >().
                         append(message.set_text("Linearisation in progress"), layout::left));
 
   send_display_layout(d);
@@ -355,7 +357,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   ATermAppl linearisation_result = linearise_file(task_options);
 
   if (linearisation_result == 0) {
-    message.set_text("Linearisation in failed");
+    message.set_text("Linearisation failed");
 
     result = false;
   }
@@ -389,7 +391,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 #endif
 
-static t_lin_options parse_command_line(int argc, char *argv[])
+static bool parse_command_line(int argc, char *argv[], t_lin_options& options)
 { 
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
@@ -452,86 +454,86 @@ static t_lin_options parse_command_line(int argc, char *argv[])
 
   command_line_parser parser(clinterface, argc, argv);
 
-  t_lin_options options;
+  if (parser.continue_execution()) {
+    options.final_cluster           = 0 < parser.options.count("cluster");
+    options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
+    options.noalpha                 = 0 < parser.options.count("no-alpha");
+    options.newstate                = 0 < parser.options.count("newstate");
+    options.binary                  = 0 < parser.options.count("binary");
+    options.statenames              = 0 < parser.options.count("statenames");
+    options.norewrite               = 0 < parser.options.count("no-rewrite");
+    options.nofreevars              = 0 < parser.options.count("no-freevars");
+    options.nosumelm                = 0 < parser.options.count("no-sumelm");
+    options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
+    options.add_delta               = 0 < parser.options.count("delta");
+    options.pretty                  = 0 < parser.options.count("pretty");
+    options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
+    options.lin_method = lmRegular;
 
-  options.final_cluster           = 0 < parser.options.count("cluster");
-  options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
-  options.noalpha                 = 0 < parser.options.count("no-alpha");
-  options.newstate                = 0 < parser.options.count("newstate");
-  options.binary                  = 0 < parser.options.count("binary");
-  options.statenames              = 0 < parser.options.count("statenames");
-  options.norewrite               = 0 < parser.options.count("no-rewrite");
-  options.nofreevars              = 0 < parser.options.count("no-freevars");
-  options.nosumelm                = 0 < parser.options.count("no-sumelm");
-  options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
-  options.add_delta               = 0 < parser.options.count("delta");
-  options.pretty                  = 0 < parser.options.count("pretty");
-  options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
-  options.lin_method = lmRegular;
-
-  if (0 < parser.options.count("check-only")) {
-    options.check_only = true;
-    options.end_phase  = phTypeCheck;
-  }
-
-  if (0 < parser.options.count("lin-method")) {
-    if (1 < parser.options.count("lin-method")) {
-      parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
+    if (0 < parser.options.count("check-only")) {
+      options.check_only = true;
+      options.end_phase  = phTypeCheck;
     }
-    std::string lin_method_str(parser.option_argument("lin-method"));
-    if (lin_method_str == "stack") {
-      options.lin_method = lmStack;
-    } else if (lin_method_str == "regular") {
-      options.lin_method = lmRegular;
-    } else if (lin_method_str == "regular2") {
-      options.lin_method = lmRegular2;
-    } else {
-      parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
+
+    if (0 < parser.options.count("lin-method")) {
+      if (1 < parser.options.count("lin-method")) {
+        parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
+      }
+      std::string lin_method_str(parser.option_argument("lin-method"));
+      if (lin_method_str == "stack") {
+        options.lin_method = lmStack;
+      } else if (lin_method_str == "regular") {
+        options.lin_method = lmRegular;
+      } else if (lin_method_str == "regular2") {
+        options.lin_method = lmRegular2;
+      } else {
+        parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
+      }
+    }
+
+    if (parser.options.count("end-phase")) {
+      if (1 < parser.options.count("end-phase")) {
+        parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
+      }
+      std::string phase(parser.option_argument("end-phase"));
+      if (phase == "pa") {
+        options.end_phase = phParse;
+      } else if (phase == "tc") {
+        options.end_phase = phTypeCheck;
+      } else if (phase == "ar") {
+        options.end_phase = phAlphaRed;
+      } else if (phase == "di") {
+        options.end_phase = phDataImpl;
+      } else {
+        parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
+      }
+    }
+
+    //check for dangerous and illegal option combinations
+    if (options.newstate && options.lin_method == lmStack) {
+      parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
+    }
+    if (options.check_only && options.end_phase != phTypeCheck) {
+      parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
+    }
+    if (options.noalpha && options.end_phase == phAlphaRed) {
+      parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
+    }
+
+    if (2 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
+    else {
+      if (0 < parser.arguments.size()) {
+        options.infilename = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        options.outfilename = parser.arguments[1];
+      }
     }
   }
 
-  if (parser.options.count("end-phase")) {
-    if (1 < parser.options.count("end-phase")) {
-      parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
-    }
-    std::string phase(parser.option_argument("end-phase"));
-    if (phase == "pa") {
-      options.end_phase = phParse;
-    } else if (phase == "tc") {
-      options.end_phase = phTypeCheck;
-    } else if (phase == "ar") {
-      options.end_phase = phAlphaRed;
-    } else if (phase == "di") {
-      options.end_phase = phDataImpl;
-    } else {
-      parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
-    }
-  }
-
-  //check for dangerous and illegal option combinations
-  if (options.newstate && options.lin_method == lmStack) {
-    parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
-  }
-  if (options.check_only && options.end_phase != phTypeCheck) {
-    parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
-  }
-  if (options.noalpha && options.end_phase == phAlphaRed) {
-    parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
-  }
-
-  if (2 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
-  else {
-    if (0 < parser.arguments.size()) {
-      options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      options.outfilename = parser.arguments[1];
-    }
-  }
-
-  return options;
+  return parser.continue_execution();
 }
 
 ATermAppl linearise_file(t_lin_options &lin_options)
@@ -629,49 +631,53 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    t_lin_options lin_options = parse_command_line(argc, argv);
+    t_lin_options lin_options;
+   
+    if (parse_command_line(argc, argv, lin_options)) {
 
-    //linearise infilename with options lin_options
-    ATermAppl result = linearise_file(lin_options);
-    if (result == NULL) {
-      return EXIT_FAILURE;
-    }
-    //report on well-formedness (if needed)
-    if (lin_options.check_only) {
-      if (lin_options.infilename == "") {
-        fprintf(stdout, "stdin");
-      } else {
-        fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
+      //linearise infilename with options lin_options
+      ATermAppl result = linearise_file(lin_options);
+      if (result == NULL) {
+        return EXIT_FAILURE;
       }
-      fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
-      return EXIT_SUCCESS;
-    }
-    //store the result
-    if (lin_options.outfilename.empty()) {
-      gsVerboseMsg("saving result to stdout...\n");
-    } else {
-      gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
-    }
-    if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
-      mcrl2::lps::specification spec(result);
-      spec.save(lin_options.outfilename);
-    } else {
-      if (lin_options.outfilename.empty()) {
-        PrintPart_CXX(std::cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
-        std::cout << std::endl;
-      } else {
-        std::ofstream outstream(lin_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
-        if (!outstream.is_open()) {
-          throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
+      //report on well-formedness (if needed)
+      if (lin_options.check_only) {
+        if (lin_options.infilename == "") {
+          fprintf(stdout, "stdin");
+        } else {
+          fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
         }
-        PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
-        outstream.close();
-      }     
+        fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+        return EXIT_SUCCESS;
+      }
+      //store the result
+      if (lin_options.outfilename.empty()) {
+        gsVerboseMsg("saving result to stdout...\n");
+      } else {
+        gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
+      }
+      if ((lin_options.end_phase == phNone) && (!lin_options.pretty)) {
+        mcrl2::lps::specification spec(result);
+        spec.save(lin_options.outfilename);
+      } else {
+        if (lin_options.outfilename.empty()) {
+          PrintPart_CXX(std::cout, (ATerm) result, (lin_options.pretty)?ppDefault:ppInternal);
+          std::cout << std::endl;
+        } else {
+          std::ofstream outstream(lin_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
+          if (!outstream.is_open()) {
+            throw mcrl2::runtime_error("could not open output file '" + lin_options.outfilename + "' for writing");
+          }
+          PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
+          outstream.close();
+        }     
+      }
     }
-    return EXIT_SUCCESS;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  return EXIT_SUCCESS;
 }

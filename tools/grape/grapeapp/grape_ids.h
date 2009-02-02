@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -81,6 +81,18 @@ namespace grape
       GRAPE_MENU_DATATYPESPEC,
 
       GRAPE_DATASPEC_TEXT,
+
+      // dialog events 
+      GRAPE_GRID_TEXT, 
+      GRAPE_PARAMETER_GRID_TEXT,
+      GRAPE_LOCALVAR_GRID_TEXT,
+      
+      GRAPE_VAR_DECLS_GRID_TEXT,
+      GRAPE_VAR_UPDATES_GRID_TEXT,
+      GRAPE_MULTIACTION_GRID_TEXT,
+      
+      GRAPE_TIMESTAMP_INPUT_TEXT,
+      GRAPE_CONDITION_INPUT_TEXT
     };
 
   }

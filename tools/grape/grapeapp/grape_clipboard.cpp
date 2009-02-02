@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,6 +12,8 @@
 #include "grape_frame.h"
 #include "specification.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
@@ -35,3 +37,6 @@ arr_object_ptr grape_clipboard::get( void )
 {
   return m_objects;
 }
+
+}
+

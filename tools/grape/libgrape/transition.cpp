@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,6 +10,7 @@
 
 #include "transition.h"
 #include "compoundstate.h"
+#include "visuals/geometric.h"
 
 using namespace grape::libgrape;
 
@@ -39,6 +40,11 @@ transition::transition( const transition &p_transition )
 
 transition::~transition( void )
 {
+}
+
+void transition::set_label( const label& p_label )
+{
+  m_label = p_label;
 }
 
 label * transition::get_label( void )
@@ -102,3 +108,21 @@ bool transition::movable( void ) const
 {
   return m_beginstate == 0;
 }
+
+coordinate transition::get_begin_coordinate( void )
+{   
+  coordinate tail_coordinate;  
+  compound_state *beginstate = get_beginstate();
+ 
+  // if the transition has an beginstate
+  if ( beginstate != 0 )
+  {
+    tail_coordinate = grape::grapeapp::get_coordinate_on_edge( get_coordinate(), beginstate ) - get_coordinate();
+  } else
+  {
+    tail_coordinate.m_x = 0;
+    tail_coordinate.m_y = 0;
+  }
+  
+  return tail_coordinate;
+} 

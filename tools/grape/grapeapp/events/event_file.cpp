@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -15,7 +15,9 @@
 
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 
+#include "event_diagram.h"
 #include "event_file.h"
 
 using namespace grape::libgrape;
@@ -111,22 +113,46 @@ bool grape_event_open::Do( void )
   // load architecture and process diagram lists
   arr_architecture_diagram *arr_arch_dia = new_spec->get_architecture_diagram_list();
   arr_process_diagram *arr_proc_dia = new_spec->get_process_diagram_list();
-  for ( uint i = 0; i < arr_arch_dia->GetCount(); ++i )
+  for ( unsigned int i = 0; i < arr_arch_dia->GetCount(); ++i )
   {
     m_main_frame->get_architecture_diagram_listbox()->Append( arr_arch_dia->Item( i ).get_name() );
   }
-  for ( uint i = 0; i < arr_proc_dia->GetCount(); ++i )
+  for ( unsigned int i = 0; i < arr_proc_dia->GetCount(); ++i )
   {
     m_main_frame->get_process_diagram_listbox()->Append( arr_proc_dia->Item( i ).get_name() );
   }
 
   // set grape specification
   m_main_frame->set_grape_specification( new_spec );
+
+  // update process listbox
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  if ( arch_listbox->GetCount() >= 1 )
+  {
+    arch_listbox->Select( 0 );
+  }
+  else
+  {
+    // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
+    m_main_frame->get_process_diagram_listbox()->Select( 0 );
+  }
+
+  // update grape mode
+  wxString m_selected_diagram = arch_listbox->GetStringSelection();
+  if ( m_selected_diagram == wxEmptyString )
+  {
+    // if this is also empty there will be no selection; grape_event_select_diagram will process according to that.
+    m_selected_diagram = m_main_frame->get_process_diagram_listbox()->GetStringSelection();
+  }
+
+  // select new diagram
+  grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
+  m_main_frame->get_event_handler()->Submit(event, false);
+
   // set filename
   m_main_frame->set_filename( m_filename );
 
   m_main_frame->set_is_modified( false );
-  m_main_frame->set_mode( GRAPE_MODE_SPEC );
 
   return true;
 }

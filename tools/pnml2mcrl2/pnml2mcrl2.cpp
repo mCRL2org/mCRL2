@@ -9,6 +9,8 @@
 /// \file pnml2mcrl2.cpp
 /// \brief Add your file description here.
 
+#include "boost.hpp" // precompiled headers
+
 #define NAME "pnml2mcrl2"
 #define AUTHOR "Johfra Kamphuis and Yaroslav Usenko"
 
@@ -24,9 +26,13 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/numeric_string.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/exception.h"
+
+#include "workarounds.h" // for DECL_A
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -122,22 +128,22 @@ bool perform_task(tool_options_type const& tool_options) {
 
   if (!tool_options.outfilename.empty()) {
     OutStream = fopen(tool_options.outfilename.c_str(),"w");
-  
+
     if (OutStream == 0) {
       throw mcrl2::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
     }
   }
-  
+
   bool result = perform_task(tool_options.infilename.c_str(), OutStream);
-  
+
   fclose(OutStream);
-  
+
   return (result);
 }
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 static const char* pnml_file_for_input   = "pnml_in";
 static const char* mcrl2_file_for_output = "mcrl2_out";
@@ -168,7 +174,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
    * that mcrl22lps can be restarted later with exactly
    * the same parameters
    */
-  if (c.is_fresh()) {
+  if (c.fresh()) {
     if (!c.output_exists(mcrl2_file_for_output)) {
       c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
     }
@@ -189,8 +195,8 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   rec_par=ATfalse;
 
-  tool_options_type tool_options = { c.get_input(pnml_file_for_input).get_location().c_str(),
-                                     c.get_output(mcrl2_file_for_output).get_location().c_str()};
+  tool_options_type tool_options = { c.get_input(pnml_file_for_input).location().c_str(),
+                                     c.get_output(mcrl2_file_for_output).location().c_str()};
 
   return ::perform_task(tool_options);
 }
@@ -2376,7 +2382,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
-  tool_options_type parse_command_line(int ac, char** av) {
+  bool parse_command_line(int ac, char** av, tool_options_type& tool_options) {
     interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
       "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
       "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
@@ -2400,31 +2406,31 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     command_line_parser parser(clinterface, ac, av);
 
-    tool_options_type tool_options;
-
-    if (parser.options.count("error")) {
-      error = parser.option_argument_as< unsigned long >("error");
-    }
-    if (parser.options.count("hide")) {
-      hide = ATtrue;
-    }
-    if (parser.options.count("no-rec-par")) {
-      rec_par = ATfalse;
-    }
-
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        tool_options.infilename = parser.arguments[0];
+    if (parser.continue_execution()) {
+      if (parser.options.count("error")) {
+        error = parser.option_argument_as< unsigned long >("error");
       }
-      if (1 < parser.arguments.size()) {
-        tool_options.outfilename = parser.arguments[1];
+      if (parser.options.count("hide")) {
+        hide = ATtrue;
+      }
+      if (parser.options.count("no-rec-par")) {
+        rec_par = ATfalse;
+      }
+
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
+      }
+      else {
+        if (0 < parser.arguments.size()) {
+          tool_options.infilename = parser.arguments[0];
+        }
+        if (1 < parser.arguments.size()) {
+          tool_options.outfilename = parser.arguments[1];
+        }
       }
     }
 
-    return tool_options;
+    return parser.continue_execution();
   }
 
   //==================================================
@@ -2440,13 +2446,19 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
         return EXIT_SUCCESS;
       }
 #endif
-      return perform_task(parse_command_line(argc, argv));
+
+      tool_options_type options;
+
+      if (parse_command_line(argc, argv, options)) {
+        return perform_task(options);
+      }
     }
     catch (std::exception& e) {
       std::cerr << e.what() << std::endl;
+      return EXIT_FAILURE;
     }
 
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
   }
 
 // Added by Yarick: alternative generation of Places:
@@ -3103,7 +3115,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
     }
     ParamList=ATreverse(ParamList);
     SumList=ATreverse(SumList);
-    
+
     //add the monitor action
     Actions=ATinsert(Actions,(ATerm)ATmakeAppl0(ATappendAFun(ATprependAFun("t_",CurrentTransId),"_mon"))); //MonitorAction
     ParamList=ATinsert(ParamList,(ATerm)ATmakeList0());

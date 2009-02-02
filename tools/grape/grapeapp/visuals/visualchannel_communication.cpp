@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,6 +12,8 @@
 #include "visualchannel_communication.h"
 #include "geometric.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualchannel_communication::visualchannel_communication( channel_communication* p_channel_communication )
@@ -33,7 +35,7 @@ void visualchannel_communication::draw( void )
   channel_communication* comm = static_cast<channel_communication*>( m_object );
 
   //for all communications
-  for ( uint i = 0; i < comm->count_channel(); ++i )
+  for ( unsigned int i = 0; i < comm->count_channel(); ++i )
   {
     channel* chan = comm->get_attached_channel( i );
 
@@ -52,7 +54,7 @@ bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
   channel_communication* comm = static_cast<channel_communication*>( m_object );
 
   //for all communications
-  for ( uint i = 0; i < comm->count_channel(); ++i )
+  for ( unsigned int i = 0; i < comm->count_channel(); ++i )
   {
     channel* chan = comm->get_attached_channel( i );
     // test is inside line
@@ -67,3 +69,6 @@ grape_direction visualchannel_communication::is_on_border( libgrape::coordinate 
 {
   return GRAPE_DIR_NONE;
 }
+
+}
+

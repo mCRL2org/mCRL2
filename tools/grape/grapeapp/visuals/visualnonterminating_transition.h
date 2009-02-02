@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -77,7 +77,7 @@ namespace grape
          * @param p_coord The to be tested coordinate.
          * @return Returns whether the specified coordinate is nearest to the head of the arrow (true) or nearest to the other end of the arrow (false).
          */
-        bool is_nearest_head( libgrape::coordinate &p_coord );
+        bool is_nearest_head( libgrape::coordinate &p_coord );        
     };
   } // namespace grapeapp
 } // namespace grape

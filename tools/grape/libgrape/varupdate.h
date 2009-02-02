@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -29,9 +29,8 @@ namespace grape
     class varupdate
     {
       protected:
-        wxString m_varupdate;              /**< full string declaration of variable update. */
-        dataexpression *m_dataexpression;   /**< data expression declaration of variable update. */
-        var *m_var;                         /**< variable declaration of variable update. */
+        dataexpression   m_dataexpression;   /**< data expression declaration of variable update. */
+        var              m_var;              /**< variable declaration of variable update. */
       public:
         /**
          * Default constructor.
@@ -61,20 +60,33 @@ namespace grape
         /**
          * Variable update text assignment function.
          * @param p_varupdate The text of the variable update.
+         * @return Returns wether the variable update had a correct syntax.
          */
-        void set_varupdate( const wxString &p_varupdate );
+        bool set_varupdate( const wxString &p_varupdate );
 
         /**
          * Left hand side retrieval function.
          * @return The variable of the variable update.
          */
-        var * get_lhs( void );
+        wxString get_lhs( void ) const;
+
+        /**
+         * Left hand side assignment function.
+         * @param p_var The text of the left hand side, a variable
+         */
+        void set_lhs( const wxString& p_var );
 
         /**
          * Right hand side retrieval function.
          * @return The data expression of the variable update.
          */
-        dataexpression * get_rhs( void );
+        wxString get_rhs( void ) const;
+
+        /**
+         * Right hand side assignment function.
+         * @param p_update The text of the right hand side, a data expression
+         */
+        void set_rhs( const wxString& p_update );
     };
 
     /**

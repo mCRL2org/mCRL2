@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,6 +12,8 @@
 #define grape_reference_dialog_H
 
 #include <wx/dialog.h>
+#include <wx/grid.h>
+#include <wx/event.h>
 
 #include "architecturereference.h"
 #include "processreference.h"
@@ -23,7 +25,7 @@ class wxTextCtrl;
 
 using namespace grape::libgrape;
 
-WX_DECLARE_HASH_MAP( int, int, wxIntegerHash, wxIntegerEqual, diagramhash );
+WX_DECLARE_STRING_HASH_MAP( int, diagramhash );
 
 namespace grape
 {
@@ -36,9 +38,8 @@ namespace grape
     {
       private:
         wxComboBox    *m_combo; /**< Combobox with all diagrams. */
-        wxTextCtrl    *m_input; /**< The input field shown in the dialog, used for parameter declarations.*/
-        diagramhash   m_pos2diagramid; /**< Maps the combobox positions to references. */
-
+        diagramhash   m_name2diagramid; /**< Maps the combobox positions to references. */
+        wxGrid        *m_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
         /**
          * Private default constructor.
          */
@@ -48,16 +49,19 @@ namespace grape
          * Initializes the dialog to choose process diagrams.
          * @param p_diagram The diagram the reference to be editted points to. This will be preselected
          * in the combobox.
-         * @param p_text The initialization text for the process reference.
+         * @param p_list_of_varupdate varupdate pointer list
          * @param p_spec The specification containing the diagrams the reference @p p_ref could point to.
          */
-        void init_for_processes( diagram *p_diagram, const wxString &p_text, grape_specification *p_spec );
+        void init_for_processes( diagram *p_diagram, list_of_varupdate p_list_of_varupdate, grape_specification *p_spec );
 
         /**
          * Initializes the dialog, using the panel @p p_panel
          * @param p_panel The panel used to show above the OK and Cancel buttons.
          */
         void init( wxPanel *p_panel );
+
+        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+
       public:
 
         /**
@@ -100,6 +104,19 @@ namespace grape
 
         /** @return The variable initializations entered in the input field. */
         wxString get_initializations() const;
+        
+        /**
+         * Check wether the text is valid.
+         * If not, the OK button is disabled
+         */
+        void check_text();         
+
+	    /**
+	     * Change grid event handler.
+	     * Appending grid rows.
+	     * @param p_event The generated event.
+    	 */
+        void event_change_text( wxGridEvent &p_event );
     };
   }
 }

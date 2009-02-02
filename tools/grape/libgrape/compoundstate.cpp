@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -97,7 +97,7 @@ transition* compound_state::get_transition_beginstate( int p_index )
   return m_beginstate.Item( p_index );
 }
 
-uint compound_state::count_transition_beginstate( void )
+unsigned int compound_state::count_transition_beginstate( void )
 {
   return m_beginstate.GetCount();
 }
@@ -122,7 +122,7 @@ nonterminating_transition* compound_state::get_transition_endstate( int p_index 
   return m_endstate.Item( p_index );
 }
 
-uint compound_state::count_transition_endstate( void )
+unsigned int compound_state::count_transition_endstate( void )
 {
   return m_endstate.GetCount();
 }
@@ -157,7 +157,7 @@ initial_designator* compound_state::get_initial_designator( int p_index )
   return m_designates.Item( p_index );
 }
 
-uint compound_state::count_initial_designator( void )
+unsigned int compound_state::count_initial_designator( void )
 {
   return m_designates.GetCount();
 }

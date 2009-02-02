@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -189,7 +189,7 @@ namespace grape
      * @param p_parent The parent node of the element tree.
      * @param p_id The id.
      */
-    void write_id( wxXmlNode *p_parent, uint p_id );
+    void write_id( wxXmlNode *p_parent, unsigned int p_id );
 
     /**
      * Writes an element tree representing a name.

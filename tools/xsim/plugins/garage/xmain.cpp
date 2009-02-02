@@ -8,6 +8,8 @@
 //
 /// \file xmain.cpp
 
+#include "wx.hpp" // precompiled headers
+
 // ---------------------------------
 //
 // This class initializes the 
@@ -37,17 +39,17 @@ bool Bremen::OnInit()
 // ^^^^^^^^^^^^^^^^^^
 {
   //initiliase frame
-  frame = new GarageFrame( wxT("Garage State"), 
-  			 -1, 
-  			 -1, 
-  			 800, 
-  			 600 );
-  
+  frame = new GarageFrame( wxT("Garage State"),
+			 -1,
+			 -1,
+			 800,
+			 600 );
+
   frame->Show( TRUE );
   SetTopWindow( frame );
-  
+
   frame->Update();
-  
+
   return true;
 }
 

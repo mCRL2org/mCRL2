@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -53,7 +53,7 @@ void process_diagram::set_preamble( const preamble &p_preamble )
   m_preamble = p_preamble;
 }
 
-state* process_diagram::add_state( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height )
+state* process_diagram::add_state( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )
 {
   // deselect all objects
   deselect_all_objects();
@@ -80,33 +80,25 @@ void process_diagram::remove_state( state* p_state )
   deselect_object( p_state );
 
   // Remove all transitions that have this state as beginstate
-  int count = p_state->count_transition_beginstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_beginstate() )
   {
-    transition* trans_ptr = p_state->get_transition_beginstate( i );
+    transition* trans_ptr = p_state->get_transition_beginstate( 0 );
     p_state->detach_transition_beginstate( trans_ptr );
     delete_transition( trans_ptr );
-  } // end for
+  } // end while
 
   // Remove all transitions that have this state as endstate
-  count = p_state->count_transition_endstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_endstate() )
   {
-    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( i );
+    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( 0 );
     p_state->detach_transition_endstate( ntt_ptr );
-    int n = m_nonterminating_transitions.Index ( *ntt_ptr );
-    if ( n != wxNOT_FOUND )
-    {
-      m_nonterminating_transitions.Detach( n );
-      delete ntt_ptr;
-    }
-  } // end for
+    delete_transition( ntt_ptr );
+  } // end while
 
   // Remove all initial designators that designate this state
-  count = p_state->count_initial_designator();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_initial_designator() )
   {
-    initial_designator* init_ptr = p_state->get_initial_designator( i );
+    initial_designator* init_ptr = p_state->get_initial_designator( 0 );
     p_state->detach_initial_designator( init_ptr );
     int m = m_initial_designators.Index( *init_ptr );
     if ( m != wxNOT_FOUND )
@@ -114,7 +106,7 @@ void process_diagram::remove_state( state* p_state )
       m_initial_designators.Detach( m );
     }
     delete init_ptr;
-  } // end for
+  } // end while
 
   // Remove the state itself
   int i = m_states.Index( *p_state );
@@ -125,7 +117,7 @@ void process_diagram::remove_state( state* p_state )
   }
 }
 
-uint process_diagram::count_state( void )
+unsigned int process_diagram::count_state( void )
 {
   return m_states.GetCount();
 }
@@ -142,7 +134,7 @@ arr_state* process_diagram::get_state_list( void )
 
 
 
-reference_state* process_diagram::add_reference_state( uint p_id, coordinate &p_coord, float p_def_width, float p_def_height )
+reference_state* process_diagram::add_reference_state( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )
 {
   // deselect all objects
   deselect_all_objects();
@@ -166,33 +158,25 @@ void process_diagram::remove_reference_state( reference_state* p_state )
   deselect_object( p_state );
 
   // Remove all transitions that have this state as beginstate
-  int count = p_state->count_transition_beginstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_beginstate() )
   {
-    transition* trans_ptr = p_state->get_transition_beginstate( i );
+    transition* trans_ptr = p_state->get_transition_beginstate( 0 );
     p_state->detach_transition_beginstate( trans_ptr );
     delete_transition( trans_ptr );
-  } // end for
+  } // end while
 
   // Remove all transitions that have this state as endstate
-  count = p_state->count_transition_endstate();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_transition_endstate() )
   {
-    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( i );
+    nonterminating_transition* ntt_ptr = p_state->get_transition_endstate( 0 );
     p_state->detach_transition_endstate( ntt_ptr );
-    int n = m_nonterminating_transitions.Index( *ntt_ptr );
-    if ( n != wxNOT_FOUND )
-    {
-      m_nonterminating_transitions.Detach( n );
-      delete ntt_ptr;
-    }
-  } // end for
+    delete_transition( ntt_ptr );
+  } // end while
 
   // Remove all initial designators that designate this state
-  count = p_state->count_initial_designator();
-  for (int i = 0; i < count; ++i)
+  while ( p_state->count_initial_designator() )
   {
-    initial_designator* init_ptr = p_state->get_initial_designator( i );
+    initial_designator* init_ptr = p_state->get_initial_designator( 0 );
     p_state->detach_initial_designator( init_ptr );
     int m = m_initial_designators.Index( *init_ptr );
     if ( m != wxNOT_FOUND )
@@ -200,7 +184,7 @@ void process_diagram::remove_reference_state( reference_state* p_state )
       m_initial_designators.Detach( m );
       delete init_ptr;
     }
-  } // end for
+  } // end while
 
   // Remove the state itself
   int i = m_reference_states.Index( *p_state );
@@ -211,7 +195,7 @@ void process_diagram::remove_reference_state( reference_state* p_state )
   }
 }
 
-uint process_diagram::count_reference_state( void )
+unsigned int process_diagram::count_reference_state( void )
 {
   return m_reference_states.GetCount();
 }
@@ -227,7 +211,7 @@ arr_reference_state* process_diagram::get_reference_state_list( void )
 }
 
 
-nonterminating_transition* process_diagram::add_nonterminating_transition( uint p_id, compound_state* p_beginstate, compound_state* p_endstate, wxString p_label )
+nonterminating_transition* process_diagram::add_nonterminating_transition( unsigned int p_id, compound_state* p_beginstate, compound_state* p_endstate )
 {
   // deselect all objects
   deselect_all_objects();
@@ -235,7 +219,6 @@ nonterminating_transition* process_diagram::add_nonterminating_transition( uint 
   // Create new nonterminating_transition
   nonterminating_transition* new_ntt = new nonterminating_transition(p_beginstate, p_endstate);
   new_ntt->set_id( p_id );
-  new_ntt->get_label()->set_text(p_label);
 
   // Calculate coordinate of transition based on average between beginstate and endstate
   coordinate new_coord;
@@ -282,7 +265,7 @@ void process_diagram::remove_nonterminating_transition( nonterminating_transitio
   }
 }
 
-uint process_diagram::count_nonterminating_transition( void )
+unsigned int process_diagram::count_nonterminating_transition( void )
 {
   return m_nonterminating_transitions.GetCount();
 }
@@ -298,7 +281,7 @@ arr_nonterminating_transition* process_diagram::get_nonterminating_transition_li
 }
 
 
-terminating_transition* process_diagram::add_terminating_transition( uint p_id, compound_state* p_beginstate, coordinate &p_endcoordinate, wxString p_label )
+terminating_transition* process_diagram::add_terminating_transition( unsigned int p_id, compound_state* p_beginstate, coordinate &p_endcoordinate )
 {
   // deselect all objects
   deselect_all_objects();
@@ -306,7 +289,6 @@ terminating_transition* process_diagram::add_terminating_transition( uint p_id, 
   //Create new terminating transition
   terminating_transition* new_tt = new terminating_transition( p_beginstate );
   new_tt->set_id( p_id );
-  new_tt->get_label()->set_text(p_label);
   select_object( new_tt );
 
   // Calculate coordinate and width of transition based on beginstate and endstate
@@ -348,7 +330,7 @@ void process_diagram::remove_terminating_transition( terminating_transition* p_t
   }
 }
 
-uint process_diagram::count_terminating_transition( void )
+unsigned int process_diagram::count_terminating_transition( void )
 {
   return m_terminating_transitions.GetCount();
 }
@@ -412,7 +394,7 @@ void process_diagram::detach_nonterminating_transition_endstate( nonterminating_
   p_ntt->detach_endstate();
 }
 
-initial_designator* process_diagram::add_initial_designator( uint p_id, compound_state* p_state, float p_def_width, float p_def_height, coordinate &p_coord )
+initial_designator* process_diagram::add_initial_designator( unsigned int p_id, compound_state* p_state, float p_def_width, float p_def_height, coordinate &p_coord )
 {
   // deselect all objects
   deselect_all_objects();
@@ -451,7 +433,7 @@ void process_diagram::remove_initial_designator( initial_designator* p_init )
   }
 }
 
-uint process_diagram::count_initial_designator( void )
+unsigned int process_diagram::count_initial_designator( void )
 {
   return m_initial_designators.GetCount();
 }
@@ -608,10 +590,10 @@ void process_diagram::delete_transition( transition* p_trans )
   } // end if p_trans
 }
 
-object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, object_type p_type )
+object* process_diagram::find_object( process_diagram* p_proc_dia, unsigned int p_id, object_type p_type )
 {
   bool b = p_type == ANY || p_type == COMMENT;
-  for ( uint i = 0; b && i < p_proc_dia->count_comment(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_comment(); ++i )
   {
     comment* comm_ptr = p_proc_dia->get_comment( i );
     if ( comm_ptr->get_id() == p_id )
@@ -621,7 +603,7 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, ob
   }
 
   b = p_type == ANY || p_type == STATE;
-  for ( uint i = 0; b && i < p_proc_dia->count_state(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_state(); ++i )
   {
     state* state_ptr = p_proc_dia->get_state( i );
     if ( state_ptr->get_id() == p_id )
@@ -631,7 +613,7 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, ob
   }
 
   b = p_type == ANY || p_type == REFERENCE_STATE;
-  for ( uint i = 0; b && i < p_proc_dia->count_reference_state(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_reference_state(); ++i )
   {
     reference_state* ref_state_ptr = p_proc_dia->get_reference_state( i );
     if ( ref_state_ptr->get_id() == p_id )
@@ -641,7 +623,7 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, ob
   }
 
   b = p_type == ANY || p_type == NONTERMINATING_TRANSITION;
-  for ( uint i = 0; b && i < p_proc_dia->count_nonterminating_transition(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_nonterminating_transition(); ++i )
   {
     nonterminating_transition* ntt_ptr = p_proc_dia->get_nonterminating_transition( i );
     if ( ntt_ptr->get_id() == p_id )
@@ -651,7 +633,7 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, ob
   }
 
   b = p_type == ANY || p_type == TERMINATING_TRANSITION;
-  for ( uint i = 0; b && i < p_proc_dia->count_terminating_transition(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_terminating_transition(); ++i )
   {
     terminating_transition* tt_ptr = p_proc_dia->get_terminating_transition( i );
     if ( tt_ptr->get_id() == p_id )
@@ -661,7 +643,7 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, uint p_id, ob
   }
 
   b = p_type == ANY || p_type == INITIAL_DESIGNATOR;
-  for ( uint i = 0; b && i < p_proc_dia->count_initial_designator(); ++i )
+  for ( unsigned int i = 0; b && i < p_proc_dia->count_initial_designator(); ++i )
   {
     initial_designator* init_ptr = p_proc_dia->get_initial_designator( i );
     if ( init_ptr->get_id() == p_id )

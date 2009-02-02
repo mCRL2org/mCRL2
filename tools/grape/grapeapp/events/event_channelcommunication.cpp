@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for channel communications
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
@@ -170,7 +171,7 @@ grape_event_remove_channel_communication::grape_event_remove_channel_communicati
   m_width = p_c_comm->get_width();
   m_height = p_c_comm->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_c_comm->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_c_comm->count_comment(); ++i )
   {
     comment* comm_ptr = p_c_comm->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -181,7 +182,7 @@ grape_event_remove_channel_communication::grape_event_remove_channel_communicati
   m_blocked.Empty();
 
   // Remember the channels the channel communication was attached to.
-  for ( uint i = 0; i < p_c_comm->count_channel(); ++i )
+  for ( unsigned int i = 0; i < p_c_comm->count_channel(); ++i )
   {
     channel* chan_ptr = p_c_comm->get_attached_channel( i );
     m_channels.Add( chan_ptr->get_id() );
@@ -222,12 +223,12 @@ grape_event_remove_channel_communication::~grape_event_remove_channel_communicat
 bool grape_event_remove_channel_communication::Do( void )
 {
   // Perform remove event Do for visible and blocked.
-  for ( uint i = 0; i < m_visible.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
   {
     grape_event_remove_visible event = m_visible.Item( i );
     event.Do();
   }
-  for ( uint i = 0; i < m_blocked.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
   {
     grape_event_remove_blocked event = m_blocked.Item( i );
     event.Do();
@@ -265,19 +266,19 @@ bool grape_event_remove_channel_communication::Undo( void )
   channel_communication* new_comm = dia_ptr->add_channel_communication( m_c_comm, m_coordinate, chan_1, chan_2 );
 
   // Reattach channels
-  for ( uint i = 2; i < m_channels.GetCount(); ++i )
+  for ( unsigned int i = 2; i < m_channels.GetCount(); ++i )
   {
     channel* chan =  dynamic_cast<channel*> ( find_object( m_channels.Item( i ), CHANNEL, dia_ptr->get_id() ) );
     dia_ptr->attach_channel_communication_to_channel( new_comm, chan );
   }
 
   // Perform remove event Undo for visible and blocked.
-  for ( uint i = 0; i < m_visible.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
   {
     grape_event_remove_visible event = m_visible.Item( i );
     event.Undo();
   }
-  for ( uint i = 0; i < m_blocked.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
   {
     grape_event_remove_blocked event = m_blocked.Item( i );
     event.Undo();
@@ -319,17 +320,14 @@ grape_event_attach_channel_communication::grape_event_attach_channel_communicati
     m_detach_channel_communication = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, p_channel );
   }
 
-  diagram* chan_diag_ptr = p_channel->get_diagram();
-  diagram* c_diag_ptr = p_channel_communication->get_diagram();
-
-  assert( ( chan_diag_ptr == dia_ptr ) && ( c_diag_ptr == dia_ptr ) );
+  assert( ( p_channel->get_diagram() == dia_ptr ) && ( p_channel_communication->get_diagram() == dia_ptr ) );
 }
 
 grape_event_attach_channel_communication::~grape_event_attach_channel_communication(  void  )
 {
 }
 
-bool grape_event_attach_channel_communication::grape_event_attach_channel_communication::Do(  void  )
+bool grape_event_attach_channel_communication::Do(  void  )
 {
   if ( m_remove_channel_visible )
   {
@@ -356,7 +354,7 @@ bool grape_event_attach_channel_communication::grape_event_attach_channel_commun
   return true;
 }
 
-bool grape_event_attach_channel_communication::grape_event_attach_channel_communication::Undo(  void  )
+bool grape_event_attach_channel_communication::Undo(  void  )
 {
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
   channel* chan_ptr = static_cast<channel*> ( find_object( m_channel ) );

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -92,7 +92,7 @@ namespace grape
          * Transition count function
          * @return The length of the list of transitions that begin in this state.
          */
-        uint count_transition_beginstate( void );
+        unsigned int count_transition_beginstate( void );
 
         /**
          * Beginstate dissociation function.
@@ -117,7 +117,7 @@ namespace grape
          * Transition count function
          * @return The length of the list of transitions that end in this state.
          */
-        uint count_transition_endstate( void );
+        unsigned int count_transition_endstate( void );
 
         /**
          * Endstate dissociation function.
@@ -142,7 +142,7 @@ namespace grape
          * Initial designator count function
          * @return The length of the list of initial designators that designate this state.
          */
-        uint count_initial_designator( void );
+        unsigned int count_initial_designator( void );
 
         /**
          * Endstate dissociation function.

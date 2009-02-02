@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for comments.
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/textdialog.h"
@@ -73,7 +74,7 @@ grape_event_remove_comment::grape_event_remove_comment( grape_frame *p_main_fram
   m_width = p_comm->get_width();
   m_height = p_comm->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_comm->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_comm->count_comment(); ++i )
   {
     comment* comm_ptr = p_comm->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -110,9 +111,9 @@ bool grape_event_remove_comment::Undo(  void  )
       dia_ptr->attach_comment_to_object( new_comm, obj_ptr );
     }
   }
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_comm );
   }

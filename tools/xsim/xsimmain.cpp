@@ -8,11 +8,11 @@
 //
 /// \file xsimmain.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsimmain.h"
 #endif
-
-#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -30,7 +30,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -38,10 +38,7 @@
 # define wxFD_CHANGE_DIR wxCHANGE_DIR
 #endif
 
-std::string get_about_message();
-
 using namespace std;
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -68,7 +65,6 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_PLAYRI, XSimMain::OnResetAndPlayRandom)
     EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
     EVT_MENU(ID_STOP, XSimMain::OnStop)
-    EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
     EVT_TIMER(-1, XSimMain::OnTimer)
     EVT_CLOSE(XSimMain::OnCloseWindow)
     EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
@@ -182,7 +178,9 @@ void XSimMain::CreateMenu()
     menu->Append( views, wxT("&Views") );
     
     wxMenu *help = new wxMenu;
-    help->Append( wxID_ABOUT, wxT("&About"), wxT("") );
+    help->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
+    help->AppendSeparator();
+    help->Append( wxID_ABOUT, wxT("&About"));
     menu->Append( help, wxT("&Help") );
 
     SetMenuBar( menu );
@@ -377,6 +375,7 @@ void XSimMain::Unregistered()
 void XSimMain::Initialise(ATermList Pars)
 {
     state_varnames = ATmakeList0();
+    stateview->DeleteAllItems();
     for (int i=0; !ATisEmpty(Pars); Pars=ATgetNext(Pars), i++)
     {
 	    wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(Pars),0)))
@@ -696,13 +695,6 @@ void XSimMain::StopAutomation()
 void XSimMain::OnStop( wxCommandEvent& /* event */ )
 {
 	StopAutomation();
-}
-
-void XSimMain::OnAbout( wxCommandEvent& /* event */ )
-{
-  wxMessageDialog(this,
-        wxString(get_about_message().c_str(), wxConvLocal),
-                wxT("About XSim"), wxOK|wxICON_INFORMATION).ShowModal();
 }
 
 void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )

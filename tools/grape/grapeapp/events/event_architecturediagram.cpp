@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,8 +8,10 @@
 //
 // Defines GraPE events for architecture diagrams
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 
 #include "event_diagram.h"
 
@@ -39,7 +41,7 @@ bool grape_event_add_architecture_diagram::Do( void )
   m_main_frame->set_mode( GRAPE_MODE_ARCH );
 
   // update architecture diagram listbox
-  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   int pos = arch_listbox->Append( new_arch_ptr->get_name() );
   arch_listbox->Select( pos );
 
@@ -61,7 +63,7 @@ bool grape_event_add_architecture_diagram::Undo( void )
   spec->check_references( del_arch_ptr->get_name(), dummy_ptr );
 
   // update process listbox
-  wxListBox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+  grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   int pos = arch_listbox->FindString( del_arch_ptr->get_name() );
   arch_listbox->Delete( pos );
   if ( pos != 0 )

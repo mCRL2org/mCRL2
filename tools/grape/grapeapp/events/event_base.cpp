@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,8 +8,10 @@
 //
 // Implements the base class for GraPE events
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
+#include "grape_listbox.h"
 #include "grape_logpanel.h"
 
 #include "event_file.h"
@@ -37,7 +39,7 @@ void grape_event_base::finish_modification( void )
   m_main_frame->get_glcanvas()->reload_visual_objects();
 }
 
-object* grape_event_base::find_object( uint p_obj_id, object_type p_obj_type, int p_dia_id )
+object* grape_event_base::find_object( unsigned int p_obj_id, object_type p_obj_type, int p_dia_id )
 {
   if ( p_dia_id == -1 ) // no diagram id was supplied, search the whole spec
   {
@@ -69,7 +71,7 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
   {
-    for ( uint i = 0; i < spec->count_process_diagram(); ++i )
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
       if ( proc_dia_ptr->get_name() == p_dia_name )
@@ -81,7 +83,7 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   }
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
   {
-    for ( uint i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
     {
       architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
       if ( arch_dia_ptr->get_name() == p_dia_name )
@@ -94,13 +96,13 @@ diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type
   return result;
 }
 
-diagram* grape_event_base::find_diagram( uint p_dia_id, grape_diagram_type p_dia_type )
+diagram* grape_event_base::find_diagram( unsigned int p_dia_id, grape_diagram_type p_dia_type )
 {
   diagram* result = 0;
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
   {
-    for ( uint i = 0; i < spec->count_process_diagram(); ++i )
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
       if ( proc_dia_ptr->get_id() == p_dia_id )
@@ -112,7 +114,7 @@ diagram* grape_event_base::find_diagram( uint p_dia_id, grape_diagram_type p_dia
   }
   if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
   {
-    for ( uint i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
     {
       architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
       if ( arch_dia_ptr->get_id() == p_dia_id )
@@ -154,22 +156,6 @@ bool grape_event_base::close_specification()
 
   // get specification
   grape_specification* del_spec = m_main_frame->get_grape_specification();
-  if ( del_spec )
-  {
-    // Remove all diagrams
-    for ( uint i = 0; i < del_spec->count_architecture_diagram(); ++i )
-    {
-      architecture_diagram* arch_dia_ptr = del_spec->get_architecture_diagram( i );
-      grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, arch_dia_ptr, false );
-      m_main_frame->get_event_handler()->Submit( event, false );
-    }
-    for ( uint i = 0; i < del_spec->count_process_diagram(); ++i )
-    {
-      process_diagram* proc_dia_ptr = del_spec->get_process_diagram( i );
-      grape_event_remove_diagram* event = new grape_event_remove_diagram( m_main_frame, proc_dia_ptr, false );
-      m_main_frame->get_event_handler()->Submit( event, false );
-    }
-  }
 
   // reset listboxes
   m_main_frame->get_process_diagram_listbox()->Clear();
@@ -182,6 +168,10 @@ bool grape_event_base::close_specification()
   // reset logpanel
   m_main_frame->get_logpanel()->Clear();
 
+  // reset canvas
+  m_main_frame->get_glcanvas()->set_diagram( 0 );
+  m_main_frame->get_glcanvas()->reset();
+
   // reset frame (variables)
   m_main_frame->set_filename( wxFileName( wxEmptyString ) );
   m_main_frame->set_is_modified( false );
@@ -193,7 +183,6 @@ bool grape_event_base::close_specification()
 
   //Destroy grapespecification
   delete del_spec;
-
   m_main_frame->set_grape_specification( 0 );
 
   // closing was successful

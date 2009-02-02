@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -23,9 +23,9 @@ namespace grape
     class grape_event_attach_transition_beginstate : public grape_event_base
     {
       private:
-        uint    m_trans; /**< Identifier of the to be attached transition. */
-        uint    m_state; /**< Identifier of the state the transition is to be attached to. */
-        uint    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_trans; /**< Identifier of the to be attached transition. */
+        unsigned int    m_state; /**< Identifier of the state the transition is to be attached to. */
+        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.
@@ -60,9 +60,9 @@ namespace grape
     class grape_event_detach_transition_beginstate : public grape_event_base
     {
       private:
-        uint    m_trans; /**< Identifier of the to be detached transition. */
+        unsigned int    m_trans; /**< Identifier of the to be detached transition. */
         int     m_state; /**< Identifier of the state the transition is to be detached from. */
-        uint    m_diagram; /**< Identifier of the diagram the event occurs in. */
+        unsigned int    m_diagram; /**< Identifier of the diagram the event occurs in. */
       public:
         /**
          * Initializes the event.
@@ -97,8 +97,8 @@ namespace grape
     {
       private:
         unsigned int  m_trans;      /**< The identifier of the transition to be changed. */
-        wxString      m_old_text;   /**< A string containing the previous text of the label. */
-        wxString      m_new_text;   /**< A string containing the new text of the label. */
+        label         m_old_label;  /**< Containing the previous label of the transition. */
+        label         m_new_label;  /**< Containing the new label of the transition. */
         bool          m_pressed_ok; /**< A flag indicating whether the user has confirmed changing the label. */
       public:
 

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -26,14 +26,13 @@ process_reference::process_reference( const process_reference &p_process_ref )
 {
   m_parameter_assignments = p_process_ref.m_parameter_assignments;
   m_refers_to_process = p_process_ref.m_refers_to_process;
-  m_text = p_process_ref.m_text;
 }
 
 process_reference::~process_reference( void )
 {
 
   // Remove all references to this object.
-  for ( uint i = 0; i < m_has_channel.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();
@@ -54,32 +53,43 @@ void process_reference::set_relationship_refers_to( process_diagram* p_proc_diag
   m_refers_to_process = p_proc_diagram;
 }
 
-list_of_varupdate* process_reference::get_varupdate( void )
+list_of_varupdate process_reference::get_parameter_updates( void ) const
 {
-  return &m_parameter_assignments;
+  return m_parameter_assignments;
+}
+
+void process_reference::set_parameter_updates( const list_of_varupdate& p_parameter_assignments )
+{
+  m_parameter_assignments = p_parameter_assignments;
 }
 
 bool process_reference::set_text( const wxString &p_text )
 {
-  m_text = p_text;
-  // Do processing, i.e. make parameter declarations
-
+  bool valid = true;
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw(m_text, _T(","));
-  varupdate p_upd;
-  while(tkw.HasMoreTokens())
+  wxStringTokenizer tkw( p_text, _T(";") );
+  varupdate var_update;
+  while( tkw.HasMoreTokens() )
   {
     wxString token = tkw.GetNextToken();
-    p_upd.set_varupdate(token);
-    m_parameter_assignments.Add(p_upd);
+    valid &= var_update.set_varupdate( token );
+    if (valid)
+    {
+      m_parameter_assignments.Add( var_update );
+    }
   }
-
-  return true;
+  return valid;
 }
 
 wxString process_reference::get_text() const
 {
-  return m_text;
+  wxString result;
+  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  {
+    varupdate parameter_assignment = m_parameter_assignments.Item( i );
+    result += parameter_assignment.get_varupdate() + _T( ";\n" );
+  }
+  return result;
 }
 
 // WxWidgets dynamic array implementation.

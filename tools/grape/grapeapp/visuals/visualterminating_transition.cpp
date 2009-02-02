@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,11 +11,12 @@
 #include "terminatingtransition.h"
 #include "visualterminating_transition.h"
 #include "compoundstate.h"
-#include "font_renderer.h"
 #include "transition.h"
 #include "label.h"
 #include "geometric.h"
 
+namespace grape {
+	
 using namespace grape::grapeapp;
 
 visualterminating_transition::visualterminating_transition( terminating_transition* p_terminating_transition )
@@ -122,3 +123,6 @@ grape_direction visualterminating_transition::is_on_border( libgrape::coordinate
 {
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
+
+}
+

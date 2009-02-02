@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -19,7 +19,7 @@
 
 class wxCommandProcessor;
 class wxToggleButton;
-class wxHelpController;
+class wxHtmlHelpController;
 
 namespace grape
 {
@@ -30,6 +30,7 @@ namespace grape
     class grape_glcanvas;
     class grape_logpanel;
     class grape_clipboard;
+    class grape_listbox;
 
     /**
       * Describes several modes the window can have.
@@ -50,8 +51,8 @@ namespace grape
     {
       private:
         grape_menubar   *m_menubar;                   /**< The main menubar. */
-        wxListBox   *m_process_diagram_list;      /**< Listbox used to list process diagrams of the current specification. */
-        wxListBox   *m_architecture_diagram_list; /**< Listbox used to list architecture diagrams of the current specification. */
+        grape_listbox   *m_process_diagram_list;      /**< Listbox used to list process diagrams of the current specification. */
+        grape_listbox   *m_architecture_diagram_list; /**< Listbox used to list architecture diagrams of the current specification. */
         grape_glcanvas  *m_glcanvas;                  /**< Canvas used for drawing diagrams. */
         wxSplitterWindow *m_splitter;                  /**< Splitter used to attach the logpanel. */
         grape_logpanel  *m_logpanel;                  /**< Logpanel used to display messages. */
@@ -63,11 +64,11 @@ namespace grape
         wxFileName          m_filename;                   /**< full path to the file containing this specification. */
         bool                m_modified;                   /**< The flag to point if the file is modified */
         libgrape::grape_specification *m_specification; /**< The GraPE specification that is being modified */
-        wxHelpController    *m_help_controller;            /**< The help controller. */
+        wxHtmlHelpController    *m_help_controller;            /**< The help controller. */
         wxToggleButton      *m_dataspecbutton;             /**< The button to switch to datatype specification.*/
         wxTextCtrl          *m_datatext;                   /**< The text control for entering the datatype specification. */
         grape_mode            m_mode;                       /**< The frame's mode. */
-        uint                  m_counter;                    /**< The counter for new id's. */
+        unsigned int                  m_counter;                    /**< The counter for new id's. */
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
 
         DECLARE_EVENT_TABLE();                        /**< The event table of this frame. */
@@ -138,13 +139,13 @@ namespace grape
          * Get a pointer to the process diagram list.
          * @return Returns a pointer to the process diagram list
          */
-        wxListBox* get_process_diagram_listbox( void );
+        grape_listbox * get_process_diagram_listbox( void );
 
         /**
          * Get a pointer to the architecture diagram list.
          * @return Returns a pointer to the architecture diagram list
          */
-        wxListBox* get_architecture_diagram_listbox( void );
+        grape_listbox * get_architecture_diagram_listbox( void );
 
         /**
          * Get a pointer to the logpanel.
@@ -405,10 +406,16 @@ namespace grape
         void event_menu_rename_diagram( wxCommandEvent &p_event );
 
         /**
-         * This event is called whenever the user wants to remove a diagram
+         * This event is called whenever the user wants to remove a diagram with the menu
          * @param p_event The generated event.
          */
         void event_menu_remove_diagram( wxCommandEvent &p_event );
+
+        /**
+         * This event is called whenever the user wants to remove a diagram with the keyboard
+         * @param p_diagram_type The diagram type the event is mentioned for.
+         */
+        void event_listbox_remove_diagram( int p_diagram_type );
 
         /**
          * This event is called whenever the user doubleclicks the splitter.
@@ -489,13 +496,13 @@ namespace grape
          * Increments it.
          * @return Returns an unsigned integer with the new object id.
          */
-        uint get_new_id( void );
+        unsigned int get_new_id( void );
 
         /**
          * Retrieve a pointer to the help controller.
          * @return A pointer to the help controller.
          */
-        wxHelpController *get_help_controller( void );
+        wxHtmlHelpController *get_help_controller( void );
 
         /**
          * Whenever the data specification was changed, grab the contents

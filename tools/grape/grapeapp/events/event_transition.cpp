@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,12 +8,14 @@
 //
 // Defines GraPE events for nonterminating transitions.
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
-#include "dialogs/textdialog.h"
-
+#include "dialogs/labeldialog.h"
 #include "event_transition.h"
+#include "grape_events.h"
+
 
 using namespace grape::grapeapp;
 
@@ -52,6 +54,7 @@ bool grape_event_attach_transition_beginstate::Do( void )
       assert( ref_state_ptr );
       dia_ptr->attach_transition_beginstate( tt_ptr, ref_state_ptr );
     }
+    finish_modification();
   }
   else
   {
@@ -69,9 +72,10 @@ bool grape_event_attach_transition_beginstate::Do( void )
       assert( ref_state_ptr );
       dia_ptr->attach_transition_beginstate( ntt_ptr, ref_state_ptr );
     }
+
+    finish_modification();
   }
 
-  finish_modification();
   return true;
 }
 
@@ -121,20 +125,21 @@ bool grape_event_detach_transition_beginstate::Do( void )
 
   process_diagram* dia_ptr = dynamic_cast<process_diagram*> ( find_diagram( m_diagram ) );
   assert( dia_ptr != 0 ); // Should be the case or this event wouldn't be possible.
-
+    
   object* trans_ptr = find_object( m_trans );
   terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
   if ( tt_ptr ) // cast succesful
   {
-    dia_ptr->detach_transition_beginstate( tt_ptr );
+    dia_ptr->detach_transition_beginstate( tt_ptr );  
   }
   else
   {
     nonterminating_transition* ntt_ptr = dynamic_cast<nonterminating_transition*> ( trans_ptr );
-    assert( ntt_ptr );
+    assert( ntt_ptr );    
     dia_ptr->detach_transition_beginstate( ntt_ptr );
   }
   finish_modification();
+    
   return true;
 }
 
@@ -186,11 +191,11 @@ grape_event_change_transition::grape_event_change_transition(grape_frame *p_main
 {
   m_trans = p_transition->get_id();
 
-  m_old_text = p_transition->get_label()->get_text();
-
-  grape_text_dlg dialog( _T("Change transition label"), _T("Enter the new transition label."), m_old_text, false /* no multiline */ );
-
-  m_pressed_ok = dialog.show_modal( m_new_text );
+  m_old_label = *p_transition->get_label();
+  
+  grape_label_dialog dialog( m_old_label );
+  
+  m_pressed_ok = dialog.show_modal( m_new_label );
 }
 
 grape_event_change_transition::~grape_event_change_transition(void)
@@ -210,7 +215,8 @@ bool grape_event_change_transition::Do(void)
   {
     transition_ptr = static_cast<transition*>(find_object(m_trans, TERMINATING_TRANSITION));
   }
-  transition_ptr->get_label()->set_text( m_new_text );
+
+  transition_ptr->set_label( m_new_label );
 
   finish_modification();
   return true;
@@ -223,8 +229,9 @@ bool grape_event_change_transition::Undo(void)
   {
     transition_ptr = static_cast<transition*>(find_object(m_trans, TERMINATING_TRANSITION));
   }
-  transition_ptr->get_label()->set_text( m_old_text );
 
+  transition_ptr->set_label( m_old_label );
+ 
   finish_modification();
   return true;
 }

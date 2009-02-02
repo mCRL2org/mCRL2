@@ -21,16 +21,11 @@
 #define MAIN_H
 
 
-// For compilers that support precompiled headers
-#include <wx/wxprec.h>
-// Else include 'wx/wx.h'
-#ifndef WX_PRECOMP
-	#include <wx/wx.h>
-#endif
+#include <wx/wx.h>
 
 
 #include "garageframe.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
 
 class Bremen : public wxApp

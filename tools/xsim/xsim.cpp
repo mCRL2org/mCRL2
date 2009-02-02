@@ -8,14 +8,14 @@
 //
 /// \file xsim.cpp
 
+#include "wx.hpp" // precompiled headers
+
 #define NAME "xsim"
 #define AUTHOR "Muck van Weerdenburg"
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma implementation "xsim.h"
 #endif
-
-# include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
@@ -30,38 +30,27 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
-
-std::string get_about_message() {
-  static const std::string version_information =
-        mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "").
-                                                        version_information() +
-           std::string("\n"
-           "This tool is part of the mCRL2 toolset.\n"
-           "For information see http://www.mcrl2.org\n"
-           "\n"
-           "For feature requests or bug reports,\n"
-           "please visit http://www.mcrl2.org/issuetracker");
-
-  return version_information;
-}
+#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/wx_tool.h"
 
 /* The optional input file that should contain an LPS */
 std::string lps_file_argument;
- 
+
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/squadt_interface.h>
+#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
 using namespace mcrl2::utilities::squadt;
 
 const char* lps_file_for_input = "lps_in";
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
-  
+
   public:
 
     // Special initialisation
@@ -82,7 +71,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
     // Check an existing configuration object to see if it is usable
     bool check_configuration(tipi::configuration const& c) const {
       bool valid = c.input_exists(lps_file_for_input);
-  
+
       if (!valid) {
         send_error("Invalid input combination!");
       }
@@ -91,7 +80,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
    }
 
     bool perform_task(tipi::configuration& c) {
-      lps_file_argument = c.get_input(lps_file_for_input).get_location();
+      lps_file_argument = c.get_input(lps_file_for_input).location();
 
       return mcrl2_wx_tool_interface::perform_task(c);
     }
@@ -101,15 +90,24 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
-class XSim: public wxApp
+class XSim: public mcrl2::utilities::wx::tool< XSim >
 {
+private:
+    RewriteStrategy rewrite_strategy;
+    bool            dummies;
+
 public:
-    virtual bool OnInit();
-    virtual int OnExit();
+    XSim() : mcrl2::utilities::wx::tool< XSim >("XSim",
+      "Simulator for linear process specifications.",
+      std::vector< std::string >(1, "Muck van Weerdenburg")) {
+    }
+
+    bool DoInit();
+
+    bool parse_command_line(int argc, wxChar** argv);
 };
 
-void parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strategy,
-                        bool& dummies, std::string& lps_file_argument) {
+bool XSim::parse_command_line(int argc, wxChar** argv) {
 
   using namespace ::mcrl2::utilities;
 
@@ -125,16 +123,20 @@ void parse_command_line(int argc, wxChar** argv, RewriteStrategy& rewrite_strate
 
   command_line_parser parser(clinterface, argc, argv);
 
-  dummies = 0 < parser.options.count("dummy");
+  if (parser.continue_execution()) {
+    dummies = 0 < parser.options.count("dummy");
 
-  rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+    rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
 
-  if (0 < parser.arguments.size()) {
-    lps_file_argument = parser.arguments[0];
+    if (0 < parser.arguments.size()) {
+      lps_file_argument = parser.arguments[0];
+    }
+    if (1 < parser.arguments.size()) {
+      parser.error("too many file arguments");
+    }
   }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
+
+  return parser.continue_execution();
 }
 
 static XSim *this_xsim = NULL;
@@ -145,7 +147,7 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 
   if ( this_xsim == NULL )
   {
-    fprintf(stderr,msg);
+    fprintf(stderr,"%s",msg);
     fprintf(stderr,"this message was brought to you by XSim (all rights reserved)\n");
   } else {
     const char *msg_end = msg+std::strlen(msg)-1;
@@ -176,58 +178,28 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
   }
 }
 
-
-bool XSim::OnInit()
+bool XSim::DoInit()
 {
-
-  this_xsim = this;
-
-  /* Whether to replace free variables in the LPS with dummies */
-  bool dummies = false;
- 
-  /* The rewrite strategy that will be used */
-  RewriteStrategy rewrite_strategy = GS_REWR_JITTY;
- 
-  std::string command_line_error;
-
-  try {
-    parse_command_line(argc, argv, rewrite_strategy, dummies, lps_file_argument);
-  }
-  catch (std::exception& e) {
-    command_line_error = e.what();
-  }
-
   XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
   frame->simulator->use_dummies = dummies;
   frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
-
-  if (!command_line_error.empty()) {
-    wxMessageDialog(frame, wxString(command_line_error.
-           append("\n\nNote that other command line options may have been ignored because of this error.").c_str(), wxConvLocal),
-                       wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
-  }
-
+ 
   if (!lps_file_argument.empty()) {
     frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
   }
- 
-  return true;
-}
 
-int XSim::OnExit()
-{
-    return 0;
+  return true;
 }
 
 IMPLEMENT_APP_NO_MAIN(XSim)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
 
   MCRL2_ATERM_INIT(0, lpCmdLine)
 

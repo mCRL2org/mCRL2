@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -44,12 +44,12 @@ namespace grape
          * @param p_tt The terminating transition to copy.
          */
         terminating_transition( const terminating_transition &p_tt );
-
+        
         /**
          * Default destructor.
          * Frees allocated memory and removes all references to the object.
          */
-        ~terminating_transition( void );
+        ~terminating_transition( void );        
     };
 
     /**

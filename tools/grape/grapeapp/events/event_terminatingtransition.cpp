@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+	// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for terminating transitions
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
@@ -26,12 +27,10 @@ grape_event_add_terminating_transition::grape_event_add_terminating_transition( 
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
 
-  process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-  assert( proc_dia_ptr != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
+  assert( dynamic_cast<process_diagram*> ( dia_ptr ) != 0 );// The diagram has to be of the casted type, or else this event could not have been generated.
 
-  process_diagram* b_diag_ptr = dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() );
-  assert( b_diag_ptr != 0 );
-  assert( ( b_diag_ptr == proc_dia_ptr ) ); // Objects have to be in the same diagram.
+  assert( dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() ) != 0 );
+  assert( ( dynamic_cast<process_diagram*> ( p_beginstate->get_diagram() ) == dynamic_cast<process_diagram*> ( dia_ptr ) ) ); // Objects have to be in the same diagram.
 }
 
 grape_event_add_terminating_transition::~grape_event_add_terminating_transition( void )
@@ -79,7 +78,7 @@ grape_event_remove_terminating_transition::grape_event_remove_terminating_transi
 : grape_event_base( p_main_frame, true, _T( "remove terminating transition" ) )
 {
   m_tt = p_tt->get_id();
-  m_label = p_tt->get_label()->get_text();
+  m_label = *p_tt->get_label();
   compound_state* beginstate = p_tt->get_beginstate();
   if ( beginstate != 0 )
   {
@@ -93,7 +92,7 @@ grape_event_remove_terminating_transition::grape_event_remove_terminating_transi
   m_width = p_tt->get_width();
   m_height = p_tt->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_tt->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_tt->count_comment(); ++i )
   {
     comment* comm_ptr = p_tt->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -126,13 +125,13 @@ bool grape_event_remove_terminating_transition::Undo( void )
 
   compound_state* beginstate = dynamic_cast<compound_state*> ( find_object( m_beginstate ) );
   terminating_transition* new_tt = dia_ptr->add_terminating_transition( m_tt, beginstate, m_coordinate);
-  new_tt->get_label()->set_text( m_label );
+  new_tt->set_label( m_label );
   new_tt->set_width( m_width );
   new_tt->set_height( m_height );
   new_tt->set_coordinate( m_coordinate );
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_tt );
   }

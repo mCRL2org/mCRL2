@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for the initial designator
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 
@@ -30,10 +31,8 @@ grape_event_add_initial_designator::grape_event_add_initial_designator( grape_fr
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
 
-  process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-  process_diagram* state_dia_ptr = dynamic_cast<process_diagram*> ( p_state->get_diagram() );
-  assert( state_dia_ptr != 0 );
-  assert( ( state_dia_ptr == proc_dia_ptr ) ); // Both have to be in the same diagram.
+  assert( dynamic_cast<process_diagram*> ( p_state->get_diagram() ) != 0 );
+  assert( ( dynamic_cast<process_diagram*> ( p_state->get_diagram() ) == dynamic_cast<process_diagram*> ( dia_ptr ) ) ); // Both have to be in the same diagram.
 }
 
 grape_event_add_initial_designator::~grape_event_add_initial_designator( void )
@@ -83,7 +82,7 @@ grape_event_remove_initial_designator::grape_event_remove_initial_designator( gr
   m_width = p_init->get_width();
   m_height = p_init->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_init->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_init->count_comment(); ++i )
   {
     comment* comm_ptr = p_init->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -117,9 +116,9 @@ bool grape_event_remove_initial_designator::Undo( void )
   compound_state* designated = static_cast<compound_state*> ( find_object( m_designates ) );
   initial_designator* new_init = dia_ptr->add_initial_designator( m_init, designated, m_width, m_height, m_coord );
   new_init->set_coordinate( m_coordinate );
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_init );
   }

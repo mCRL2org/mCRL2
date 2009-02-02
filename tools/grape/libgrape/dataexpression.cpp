@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -35,6 +35,16 @@ void dataexpression::set_expression( const wxString &p_expression )
 wxString dataexpression::get_expression( void ) const
 {
   return m_expression;
+}
+
+void dataexpression::set_type( const wxString &p_type )
+{
+  m_sortexpression.set_expression( p_type );
+}
+
+wxString dataexpression::get_type( void ) const
+{
+  return m_sortexpression.get_expression();
 }
 
 // WxWidgets dynamic array implementation.

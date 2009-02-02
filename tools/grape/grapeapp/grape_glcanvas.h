@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,12 +13,15 @@
 
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
+#include "mcrl2/utilities/font_renderer.h"
 #include "visuals/visualobject.h"
 
 namespace grape
 {
   namespace grapeapp
   {
+
+    using mcrl2::utilities::wx::font_renderer;
 
     class grape_frame;
 
@@ -69,6 +72,7 @@ namespace grape
         arr_visual_object_ptr m_visual_objects; /**< The current list of pointers to visual objects that are drawn on the canvas. */
 
         coordinate      m_lmouse_down_coordinate;    /**< The last coordinate at which the left mouse button was pressed down. */
+        coordinate      m_mouse_coordinate;    /**< Current mouse coordinate. */
         visual_object*  m_touched_visual_object; /**< The object that has been clicked last. */
         int             m_touched_visual_object_id; /**< The ID of the object that has been clicked. */
         grape_direction m_touched_click_location; /**< When a border of a visual is clicked, it is stored which border was clicked. This is needed for grape_event_drag to determine to which direction to resize. */
@@ -142,6 +146,11 @@ namespace grape
          */
         ~grape_glcanvas(void);
 
+		/**
+		 * Reset function
+		 * Resets the scrollbars
+		 */
+		void reset();
         /**
          * Drawing function.
          * (Re-)draws the canvas.
@@ -225,7 +234,7 @@ namespace grape
          * @param p_event The generated event.
          */
         void event_scroll_thumbtrack(wxScrollWinEvent &p_event);
-
+        void event_scroll_thumbrelease(wxScrollWinEvent &p_event);
         /**
          * Scroll pageup event handler.
          * Processes the scroll pageup events.
@@ -283,7 +292,7 @@ namespace grape
          * Visual object count function.
          * @return Returns the number of visual objects on the canvas.
          */
-        uint count_visual_object( void );
+        unsigned int count_visual_object( void );
 
         /**
          * Visual object retrieval function.
@@ -352,6 +361,14 @@ namespace grape
          * @return Returns whether the coordinate is inside the visibility frame.
          */
         bool is_inside_visibility_frame( coordinate &p_coord );
+
+        /**
+         * Font renderer retrieval function.
+         * Returns the font renderer.
+         */
+        static font_renderer* get_font_renderer( void );
+
+
     };
 
   } // namespace grapeapp

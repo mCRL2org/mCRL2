@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -8,6 +8,7 @@
 //
 // Defines GraPE events for architecture references.
 
+#include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/referencedialog.h"
@@ -44,7 +45,7 @@ bool grape_event_add_architecture_reference::Do( void )
 
   // Check if a diagram exists that has the same name as the reference.
   grape_specification* spec = m_main_frame->get_grape_specification();
-  for ( uint i = 0; i < spec->count_architecture_diagram(); ++i)
+  for ( unsigned int i = 0; i < spec->count_architecture_diagram(); ++i)
   {
     architecture_diagram* arch_dia = spec->get_architecture_diagram( i );
     if ( arch_dia->get_name() == new_arch_ref->get_name() )
@@ -80,7 +81,7 @@ grape_event_remove_architecture_reference::grape_event_remove_architecture_refer
   m_width = p_arch_ref->get_width();
   m_height = p_arch_ref->get_height();
   m_comments.Empty();
-  for ( uint i = 0; i < p_arch_ref->count_comment(); ++i )
+  for ( unsigned int i = 0; i < p_arch_ref->count_comment(); ++i )
   {
     comment* comm_ptr = p_arch_ref->get_comment( i );
     m_comments.Add( comm_ptr->get_id() );
@@ -91,7 +92,7 @@ grape_event_remove_architecture_reference::grape_event_remove_architecture_refer
   if ( p_normal )
   {
     // Create remove event for all channels that are to be deleted.
-    for ( uint i = 0; i < p_arch_ref->count_channel(); ++i )
+    for ( unsigned int i = 0; i < p_arch_ref->count_channel(); ++i )
     {
       channel* chan_ptr = p_arch_ref->get_channel( i );
       // pass the flag to the channels
@@ -111,7 +112,7 @@ grape_event_remove_architecture_reference::~grape_event_remove_architecture_refe
 bool grape_event_remove_architecture_reference::Do( void )
 {
   // Perform remove event Do for channels
-  for ( uint i = 0; i < m_channels.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
   {
     grape_event_remove_channel event = m_channels.Item( i );
     event.Do();
@@ -137,15 +138,15 @@ bool grape_event_remove_architecture_reference::Undo( void )
   new_arch_ref->set_name( m_name );
   new_arch_ref->set_diagram( dia_ptr );
   // Restore comment connections.
-  for ( uint i = 0; i < m_comments.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {
-    uint identifier = m_comments.Item( i );
+    unsigned int identifier = m_comments.Item( i );
     comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
     dia_ptr->attach_comment_to_object( comm_ptr, new_arch_ref );
   }
 
   // Perform remove event Undo for channels
-  for ( uint i = 0; i < m_channels.GetCount(); ++i )
+  for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
   {
     grape_event_remove_channel event = m_channels.Item( i );
     event.Undo();

@@ -1,4 +1,4 @@
-// Author(s): VitaminB100
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -23,7 +23,7 @@ namespace grape
     class grape_event_add_architecture_diagram : public grape_event_base
     {
       private:
-        uint    m_arch; /**< Identifier of the created architecture diagram. */
+        unsigned int    m_arch; /**< Identifier of the created architecture diagram. */
       public:
 
         /**
