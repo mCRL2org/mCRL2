@@ -16,7 +16,8 @@ eqn  data(frame(d,b)) = d;
      data(void)       = d1;
      bit(void)        = b0;
 
+proc P(f: Frame)=
+      sum d0:D. ((data(f) == d2) || (bit(f) == b0 ))-> tau . P(frame(d0, bit(f)))
+    + sum b:Bit.(b == b0) -> tau . P(frame(data(f),b));
 
-
-
-init delta;
+init P(frame(d1,b0));

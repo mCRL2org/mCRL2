@@ -148,10 +148,9 @@ int main(int argc, char** argv)
     lps_specification.load(file_name);
     linear_process lps = lps_specification.process();
     data_specification data_spec = lps_specification.data();
-    Sorts sorts( data_spec );
+    Sorts sorts( data_spec, lps );
     //Debug-hack
     sorts.unfoldParameter = basic_sort( "Frame" );
-
     sorts.algorithm();
 
     assert(false);
