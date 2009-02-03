@@ -640,21 +640,6 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   glPopMatrix();
 }
 
-void grape::grapeapp::draw_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, bool p_selected, const wxString &p_label_text )
-{
-
-  // calculate sum here, because overloaded + operator requires copy constructor, which implies requirement of default constructor, which implies that the initialization with curly brackets is no longer possible ( and replacing all of them is just too much work right now )
-  coordinate sum = { p_ntt_coord.m_x + p_base_coordinate.m_x, p_ntt_coord.m_y + p_base_coordinate.m_y };
-  draw_line( p_ntt_coord, sum, p_selected, g_color_black );
-  float width = p_head_coordinate.m_x;
-  float height = p_head_coordinate.m_y;
-  draw_nonterminating_transition( p_ntt_coord, width, height, p_selected, p_label_text );
-
-  // do not draw the bounding box, this is already done in visualnonterminating transition
-
-
-}
-
 bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord )
 {
   coordinate sum_base = { p_ntt_coord.m_x + p_base_coordinate.m_x, p_ntt_coord.m_y + p_base_coordinate.m_y };
@@ -741,24 +726,23 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
 }
 
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, const wxString &p_label_text )
+void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
-  coordinate end_coord = { p_begin.m_x + p_width, p_begin.m_y + p_height };
-  draw_line( p_begin, end_coord, p_selected, g_color_black );
+  draw_line( p_begin, p_end, p_selected, g_color_black );
 
   // calculate rotation of arrow
   // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_y - end_coord.m_y), ( p_begin.m_x - end_coord.m_x));
+  float angle = atan2(( p_begin.m_y - p_end.m_y), ( p_begin.m_x - p_end.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = end_coord.m_x + 0.03 * cos( angle - M_PI/4 );
-  float one_side_y = end_coord.m_y + 0.03 * sin( angle - M_PI/4 );
-  float other_side_x = end_coord.m_x + 0.03 * cos( angle + M_PI/4 );
-  float other_side_y = end_coord.m_y + 0.03 * sin( angle + M_PI/4 );
+  float one_side_x = p_end.m_x + 0.03 * cos( angle - M_PI/4 );
+  float one_side_y = p_end.m_y + 0.03 * sin( angle - M_PI/4 );
+  float other_side_x = p_end.m_x + 0.03 * cos( angle + M_PI/4 );
+  float other_side_y = p_end.m_y + 0.03 * sin( angle + M_PI/4 );
 
   // draw transition arrow
   glBegin(GL_TRIANGLES);
-    glVertex3f( end_coord.m_x, end_coord.m_y, 0.0f);
+    glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
     glVertex3f( one_side_x, one_side_y, 0.0f);
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
@@ -766,8 +750,8 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   // draw text
   // calculate midpoint
   coordinate midpoint;
-  midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
-  midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
+  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
 
   set_color(g_color_black, true);
   // render text based on the calculated angle
@@ -781,13 +765,6 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   }
 
   // do not draw the bounding box, this is already done in visualnonterminating transition
-}
-
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
-{
-  float width = p_end.m_x - p_begin.m_x;
-  float height = p_end.m_y - p_begin.m_y;
-  draw_nonterminating_transition( p_begin, width, height, p_selected, p_label_text );
 }
 
 

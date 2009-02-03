@@ -285,16 +285,6 @@ namespace grape
     void draw_state( const coordinate &p_center, float p_radius_x, float p_radius_y, bool p_selected  );
 
     /**
-     * Nonterminating transition with same begin and endstate (circle) draw function.
-     * @param p_ntt_coord The coordinate of the nonterminating transtition.
-     * @param p_base_coordinate The coordinate where the arrow should start.
-     * @param p_head_coordinate The coordinate where the arrow should end.
-     * @param p_selected A flag indicating whether the object is selected.
-     * @param p_label_text The label's text
-     */
-    void draw_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, bool p_selected, const wxString &p_label_text );
-
-    /**
      * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.
      * @param p_ntt_coord The coordinate of the nonterminating transtition.
      * @param p_base_coordinate The coordinate where the arrow should start.
@@ -321,16 +311,6 @@ namespace grape
      * @param p_label_text The label of the object.
      */
     void draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString &p_label_text );
-
-    /**
-     * Nonterminating transition (arrow) draw function.
-     * @param p_begin The begin coordinate of the arrow.
-     * @param p_width The width of the arrow.
-     * @param p_height The width of the arrow.
-     * @param p_selected A flag indicating whether the object is selected.
-     * @param p_label_text The label of the object.
-     */
-    void draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, const wxString &p_label_text );
 
     /**
      * Nonterminating transition (arrow) draw function.

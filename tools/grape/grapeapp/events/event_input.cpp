@@ -520,8 +520,7 @@ bool grape_event_drag::Do( void )
         } else
         {  
           // set length of dynamic array 
-          s_orig_ntt = new coordinate[0];
-         
+          s_orig_ntt = new coordinate[0];         
         }
         
         if (new_drag == true) 
@@ -626,11 +625,10 @@ bool grape_event_drag::Do( void )
         grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );        
         m_main_frame->get_event_handler()->Submit( event, !m_mousedown );   
         
-        //also move the nonterminating transitions attached to the state
-        visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
-        if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
+        //also move the nonterminating transitions attached to the state               
+        if ((begin_object_ptr != 0) && (begin_object_ptr->get_type() == STATE || begin_object_ptr->get_type() == REFERENCE_STATE))
         {
-          compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
+          compound_state* state = static_cast<libgrape::compound_state*> (begin_object_ptr);
                 
           for ( unsigned int i = 0; i < state->count_transition_endstate(); ++i )
           {
