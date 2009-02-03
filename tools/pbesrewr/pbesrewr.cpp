@@ -50,10 +50,10 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       
       if (core::gsVerbose)
       {
-        std::cout << "pbesrewr parameters:" << std::endl;
-        std::cout << "  input file:         " << m_input_filename << std::endl;
-        std::cout << "  output file:        " << m_output_filename << std::endl;
-        std::cout << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
+        std::cerr << "pbesrewr parameters:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
     
       // load the pbes

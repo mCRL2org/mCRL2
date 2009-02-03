@@ -215,11 +215,11 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     {
       if (core::gsVerbose)
       {
-        std::cout << "pbes2bes parameters:" << std::endl;
-        std::cout << "  input file:         " << m_input_filename << std::endl;
-        std::cout << "  output file:        " << m_output_filename << std::endl;
-        std::cout << "  strategy:           " << strategy_string() << std::endl;
-        std::cout << "  output format:      " << output_format_string() << std::endl;
+        std::cerr << "pbes2bes parameters:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  strategy:           " << strategy_string() << std::endl;
+        std::cerr << "  output format:      " << output_format_string() << std::endl;
       }
 
       // load the pbes
