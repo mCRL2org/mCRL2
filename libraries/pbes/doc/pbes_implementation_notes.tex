@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, January 09, 2009 17:38:05}
+%TCIDATA{LastRevised=Monday, February 02, 2009 16:08:21}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -960,6 +960,7 @@ c_{X}:=\bot  \\
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
+visited:=todo \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X\} \\ 
@@ -973,8 +974,10 @@ _{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\
 \textbf{then}} \\ 
 \qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
 \qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
-redundant\_variables=\{X\in \mathsf{occ}(\mathcal{E)}\ |\ c_{X}=\bot \} \\ 
-redundant\_parameters=\{(X,i)\ |\ c_{X}[i]\in D_{X}[i]\} \\ 
+\qquad \qquad \qquad \qquad visited:=visited\cup \{Y\} \\ 
+redundant\_variables:=\{X\in \mathsf{occ}(\mathcal{E)\setminus }visited\ |\
+c_{X}=\bot \} \\ 
+redundant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
 \text{\textbf{return }}\{redundant\_variables\text{, }redundant\_parameters\}%
 \end{array}%
 \end{equation*}
@@ -983,11 +986,11 @@ where $update_{X}$ is defined as follows:%
 \begin{equation*}
 update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
 \begin{array}{ll}
-e[i] & \text{if }c=\bot  \\ 
+e[i] & \text{if }c=\bot \\ 
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an
@@ -1017,8 +1020,8 @@ c_{F}(\varphi \Rightarrow \psi ) & = & c_{T}(\varphi )\wedge c_{F}(\psi )%
 and let the multi sets $cond_{T}$ and $cond_{F}$ be defined as%
 \begin{equation*}
 \begin{array}{lll}
-cond_{\Gamma }(X(e),c) & = & \emptyset  \\ 
-cond_{\Gamma }(X(e),Y(f)) & = & \emptyset  \\ 
+cond_{\Gamma }(X(e),c) & = & \emptyset \\ 
+cond_{\Gamma }(X(e),Y(f)) & = & \emptyset \\ 
 cond_{\Gamma }(X(e),\lnot \varphi ) & = & cond_{\Gamma }(X(e),\varphi ) \\ 
 cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{ 
 \begin{array}{cc}
@@ -1026,33 +1029,33 @@ cond_{\Gamma }(X(e),\varphi \oplus \psi ) & = & \left\{
 \text{if }X(e)\in \mathsf{iocc}(\varphi ) \\ 
 \{c_{\Gamma }(\varphi \oplus \psi )\}\cup cond_{\Gamma }(X(e),\psi ) & \text{%
 if }X(e)\in \mathsf{iocc}(\psi ) \\ 
-\emptyset  & \text{otherwise}%
+\emptyset & \text{otherwise}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 cond_{T}(X(e),\mathsf{Q}d:{D}.\varphi ) & = & \left\{ 
 \begin{array}{cc}
 \{c_{T}(\mathsf{Q}d:{D}.\varphi )\}\cup \{\mathsf{Q}d:{D}.\theta \ |\ \theta
 \ \in cond_{\Gamma }(X(e),\varphi )\} & \text{if }X(e)\in \mathsf{iocc}%
 (\varphi ) \\ 
-\emptyset  & \text{otherwise}%
+\emptyset & \text{otherwise}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 cond_{T}(X(e),\mathsf{\forall }d:{D}.\varphi ) & = & \left\{ 
 \begin{array}{cc}
 \{c_{F}(\mathsf{\forall }d:{D}.\varphi )\}\cup \{\mathsf{\exists }d:{D}%
 .\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
 \mathsf{iocc}(\varphi ) \\ 
-\emptyset  & \text{otherwise}%
+\emptyset & \text{otherwise}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 cond_{T}(X(e),\mathsf{\exists }d:{D}.\varphi ) & = & \left\{ 
 \begin{array}{cc}
 \{c_{F}(\mathsf{\exists }d:{D}.\varphi )\}\cup \{\mathsf{\forall }d:{D}%
 .\theta \ |\ \theta \ \in cond_{F}(X(e),\varphi )\} & \text{if }X(e)\in 
 \mathsf{iocc}(\varphi ) \\ 
-\emptyset  & \text{otherwise}%
+\emptyset & \text{otherwise}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
 \end{equation*}%
 with $\Gamma \in \{T,F\}$. Then we define%
@@ -1066,7 +1069,7 @@ Note that a direct implementation of this function is extremely inefficient.
 It is expected that a more suitable representation can be found.
 \end{remark}
 
-\newpage 
+\newpage
 
 \section{Gau\ss\ Elimination}
 

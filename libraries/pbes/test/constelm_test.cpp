@@ -81,7 +81,7 @@ std::string t6 =
 "                                                                                      \n"
 "init X(5);                                                                            \n"
 ;
-std::string x6 = "Y n2";
+std::string x6 = "Y";
 
 std::string t7 =
 "% multiple edges from one vertex, one edge invalidates the assertion of the other: no constants should be found \n"
@@ -158,7 +158,19 @@ std::string t12 =
 ;
 std::string x12 = "X1 o1\nX2 n2\nX4 n4 o4";
 
-void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions)
+std::string t13 =
+"pbes nu X =           \n"
+"        Y(true);      \n"
+"      mu Y(b: Bool) = \n"
+"        X;            \n"
+"                      \n"
+"init X;               \n"
+;
+std::string x13 = "Y b";
+
+// volgens constelm kan vergelijking X verwijderd worden (waarschijnlijk omdat de set van asserties leeg is); dit is echter onjuist: de vergelijking van X is noodzakelijk; parameter b van Y kan wel verwijderd worden.
+  
+void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
@@ -181,15 +193,16 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
-  algorithm.run(q, compute_conditions);
+  algorithm.run(q, compute_conditions, remove_equations);
+  std::map<propositional_variable, std::vector<data_variable> > removed_parameters = algorithm.redundant_parameters();
+  std::set<propositional_variable> removed_equations = algorithm.redundant_equations();
 
   std::set<std::string> lines1;
-  const std::map<propositional_variable, std::set<data_variable> >& removed = algorithm.removed_variables();
-  for (std::map<propositional_variable, std::set<data_variable> >::const_iterator i = removed.begin(); i != removed.end(); ++i)
+  for (std::map<propositional_variable, std::vector<data_variable> >::const_iterator i = removed_parameters.begin(); i != removed_parameters.end(); ++i)
   {
     std::string line = core::pp(i->first.name());
     std::set<std::string> v;
-    for (std::set<data_variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+    for (std::vector<data_variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
     {
       v.insert(core::pp(*j));
     }
@@ -199,6 +212,11 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
     }
     lines1.insert(line);
   }
+  for (std::set<propositional_variable>::iterator i = removed_equations.begin(); i != removed_equations.end(); ++i)
+  {
+    lines1.insert(core::pp(i->name()));
+  }
+
   std::set<std::string> lines2;
   boost::algorithm::split(lines2, expected_result, boost::algorithm::is_any_of("\n"));  
   lines2.erase("");
@@ -241,6 +259,7 @@ int test_main(int argc, char** argv)
   test_pbes(t10, x10, true);
   test_pbes(t11, x11, true);
   test_pbes(t12, x12, false);
+  test_pbes(t13, x13, false);
   
   return 0;
 }
