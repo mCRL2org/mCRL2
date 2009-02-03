@@ -43,16 +43,16 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 
     void parse_options(const command_line_parser& parser)
     {
-    	super::parse_options(parser);
+      super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
       m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
     }
 
     void add_options(interface_description& desc)
     {
-    	super::add_options(desc);
+      super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
-      desc.add_option("remove-equations", "remove redundant equations", 'r');
+      desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
   public:
