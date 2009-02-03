@@ -2315,7 +2315,7 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                 else
                 {
                   /* invalid! NB: linetype */
-                  return false;
+//                  return false;
                 }
 
                 // find the next piece of information about the state

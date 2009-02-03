@@ -7,251 +7,8 @@
     </datatypespecificationlist>
     <processdiagramlist>
         <processdiagram>
-            <objectlist>
-                <nonterminatingtransitionlist>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.955000</y>
-                            <x>2.004167</x>
-                        </coord>
-                        <id>63</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>x</param>
-                                    <name>s4</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>48</to>
-                        <from>47</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.833333</y>
-                            <x>1.515833</x>
-                        </coord>
-                        <id>62</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates>
-                                <variableupdate>b:=!b</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>b</param>
-                                    <name>s5</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>46</to>
-                        <from>48</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.590000</y>
-                            <x>1.238333</x>
-                        </coord>
-                        <id>60</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates>
-                                <variableupdate>x:=d</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>d</param>
-                                    <param>b</param>
-                                    <name>r3</name>
-                                </action>
-                            </actions>
-                            <condition>b</condition>
-                            <variabledeclarations>
-                                <variabledeclaration>d:D</variabledeclaration>
-                            </variabledeclarations>
-                        </label>
-                        <to>47</to>
-                        <from>46</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.886667</y>
-                            <x>0.225000</x>
-                        </coord>
-                        <id>59</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>!b</param>
-                                    <name>s5</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>46</to>
-                        <from>49</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.973333</y>
-                            <x>0.935000</x>
-                        </coord>
-                        <id>58</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates>
-                                <variableupdate>x:=d</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>d</param>
-                                    <param>!b</param>
-                                    <name>r3</name>
-                                </action>
-                            </actions>
-                            <condition>!b</condition>
-                            <variabledeclarations>
-                                <variabledeclaration>d:D</variabledeclaration>
-                            </variabledeclarations>
-                        </label>
-                        <to>49</to>
-                        <from>46</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.040000</y>
-                            <x>0.481667</x>
-                        </coord>
-                        <id>57</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>e</param>
-                                    <name>r3</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>49</to>
-                        <from>46</from>
-                    </nonterminatingtransition>
-                </nonterminatingtransitionlist>
-                <terminatingtransitionlist/>
-                <statelist>
-                    <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.576667</width>
-                        </size>
-                        <coord>
-                            <y>-1.310000</y>
-                            <x>0.483333</x>
-                        </coord>
-                        <id>49</id>
-                        <name>receive failed</name>
-                    </state>
-                    <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.613333</width>
-                        </size>
-                        <coord>
-                            <y>-1.340000</y>
-                            <x>2.001667</x>
-                        </coord>
-                        <id>48</id>
-                        <name>value transmitted</name>
-                    </state>
-                    <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.603333</width>
-                        </size>
-                        <coord>
-                            <y>-0.583333</y>
-                            <x>1.996667</x>
-                        </coord>
-                        <id>47</id>
-                        <name>receive successful</name>
-                    </state>
-                    <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.556667</width>
-                        </size>
-                        <coord>
-                            <y>-0.596667</y>
-                            <x>0.480000</x>
-                        </coord>
-                        <id>46</id>
-                        <name>idle</name>
-                    </state>
-                </statelist>
-                <referencestatelist/>
-                <initialdesignatorlist>
-                    <initialdesignator>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.200000</width>
-                        </size>
-                        <coord>
-                            <y>-0.600000</y>
-                            <x>0.053333</x>
-                        </coord>
-                        <id>50</id>
-                        <propertyof>46</propertyof>
-                    </initialdesignator>
-                </initialdesignatorlist>
-                <commentlist/>
-            </objectlist>
+            <id>4</id>
+            <name>R</name>
             <preambledeclarations>
                 <parameterlist>
                     <param>b:Bool</param>
@@ -260,440 +17,473 @@
                     <var>x:D=d1</var>
                 </localvariablelist>
             </preambledeclarations>
-            <name>R</name>
-            <id>4</id>
-        </processdiagram>
-        <processdiagram>
             <objectlist>
                 <nonterminatingtransitionlist>
                     <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
+                        <id>63</id>
                         <coord>
-                            <y>-0.676667</y>
-                            <x>1.069167</x>
+                            <x>2.004167</x>
+                            <y>-0.955000</y>
                         </coord>
-                        <id>83</id>
-                        <breakpointlist/>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>47</from>
+                        <to>48</to>
                         <label>
-                            <variableupdates/>
-                            <timestamp/>
+                            <variabledeclarations/>
+                            <condition/>
                             <actions>
                                 <action>
+                                    <name>s4</name>
                                     <param>x</param>
-                                    <name>s6</name>
                                 </action>
                             </actions>
-                            <condition/>
-                            <variabledeclarations/>
+                            <timestamp/>
+                            <variableupdates/>
                         </label>
-                        <to>74</to>
-                        <from>75</from>
                     </nonterminatingtransition>
                     <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
+                        <id>62</id>
                         <coord>
-                            <y>-1.001667</y>
-                            <x>0.457500</x>
+                            <x>1.515833</x>
+                            <y>-0.833333</y>
                         </coord>
-                        <id>82</id>
-                        <breakpointlist/>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>48</from>
+                        <to>46</to>
                         <label>
-                            <variableupdates>
-                                <variableupdate>x:=b</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
+                            <variabledeclarations/>
+                            <condition/>
                             <actions>
                                 <action>
+                                    <name>s5</name>
                                     <param>b</param>
-                                    <name>r5</name>
                                 </action>
                             </actions>
-                            <condition/>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>60</id>
+                        <coord>
+                            <x>1.238333</x>
+                            <y>-0.590000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>46</from>
+                        <to>47</to>
+                        <label>
                             <variabledeclarations>
-                                <variabledeclaration>b:Bool</variabledeclaration>
+                                <variabledeclaration>d:D</variabledeclaration>
                             </variabledeclarations>
-                        </label>
-                        <to>76</to>
-                        <from>74</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.000000</y>
-                            <x>1.073333</x>
-                        </coord>
-                        <id>81</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
+                            <condition>b</condition>
                             <actions>
                                 <action>
+                                    <name>r3</name>
+                                    <param>d</param>
+                                    <param>b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>59</id>
+                        <coord>
+                            <x>0.225000</x>
+                            <y>-0.886667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>49</from>
+                        <to>46</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>s5</name>
+                                    <param>!b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>58</id>
+                        <coord>
+                            <x>0.935000</x>
+                            <y>-0.973333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>46</from>
+                        <to>49</to>
+                        <label>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                            </variabledeclarations>
+                            <condition>!b</condition>
+                            <actions>
+                                <action>
+                                    <name>r3</name>
+                                    <param>d</param>
+                                    <param>!b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>57</id>
+                        <coord>
+                            <x>0.481667</x>
+                            <y>-1.040000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>46</from>
+                        <to>49</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r3</name>
                                     <param>e</param>
-                                    <name>s6</name>
                                 </action>
                             </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>74</to>
-                        <from>77</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.045000</y>
-                            <x>1.683333</x>
-                        </coord>
-                        <id>80</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
                             <timestamp/>
-                            <actions>
-                                <action>
-                                    <name>i</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>75</to>
-                        <from>76</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.331667</y>
-                            <x>1.074167</x>
-                        </coord>
-                        <id>79</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
                             <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <name>i</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
                         </label>
-                        <to>77</to>
-                        <from>76</from>
                     </nonterminatingtransition>
                 </nonterminatingtransitionlist>
                 <terminatingtransitionlist/>
                 <statelist>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.503333</width>
-                        </size>
+                        <id>49</id>
                         <coord>
-                            <y>-1.330000</y>
-                            <x>1.690000</x>
+                            <x>0.483333</x>
+                            <y>-1.310000</y>
                         </coord>
-                        <id>77</id>
-                        <name>corrupt value</name>
+                        <size>
+                            <width>0.576667</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>receive failed</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.486667</width>
-                        </size>
+                        <id>48</id>
                         <coord>
-                            <y>-1.333333</y>
-                            <x>0.458333</x>
+                            <x>2.001667</x>
+                            <y>-1.340000</y>
                         </coord>
-                        <id>76</id>
-                        <name>received</name>
+                        <size>
+                            <width>0.613333</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>value transmitted</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.500000</width>
-                        </size>
+                        <id>47</id>
                         <coord>
-                            <y>-0.683333</y>
-                            <x>1.681667</x>
+                            <x>1.996667</x>
+                            <y>-0.583333</y>
                         </coord>
-                        <id>75</id>
-                        <name>transfer value</name>
+                        <size>
+                            <width>0.603333</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>receive successful</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.463333</width>
-                        </size>
+                        <id>46</id>
                         <coord>
-                            <y>-0.680000</y>
-                            <x>0.450000</x>
+                            <x>0.480000</x>
+                            <y>-0.596667</y>
                         </coord>
-                        <id>74</id>
+                        <size>
+                            <width>0.556667</width>
+                            <height>0.200000</height>
+                        </size>
                         <name>idle</name>
                     </state>
                 </statelist>
                 <referencestatelist/>
                 <initialdesignatorlist>
                     <initialdesignator>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.200000</width>
-                        </size>
+                        <id>50</id>
                         <coord>
-                            <y>-0.676667</y>
-                            <x>0.080000</x>
+                            <x>0.053333</x>
+                            <y>-0.600000</y>
                         </coord>
-                        <id>78</id>
-                        <propertyof>74</propertyof>
+                        <size>
+                            <width>0.200000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <propertyof>46</propertyof>
                     </initialdesignator>
                 </initialdesignatorlist>
                 <commentlist/>
             </objectlist>
+        </processdiagram>
+        <processdiagram>
+            <id>3</id>
+            <name>L</name>
             <preambledeclarations>
                 <parameterlist/>
                 <localvariablelist>
                     <var>x:Bool=true</var>
                 </localvariablelist>
             </preambledeclarations>
-            <name>L</name>
-            <id>3</id>
-        </processdiagram>
-        <processdiagram>
             <objectlist>
                 <nonterminatingtransitionlist>
                     <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
+                        <id>83</id>
                         <coord>
-                            <y>-1.020000</y>
-                            <x>1.028333</x>
+                            <x>1.069167</x>
+                            <y>-0.676667</y>
                         </coord>
-                        <id>73</id>
-                        <breakpointlist/>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>75</from>
+                        <to>74</to>
                         <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>e</param>
-                                    <name>s3</name>
-                                </action>
-                            </actions>
-                            <condition/>
                             <variabledeclarations/>
-                        </label>
-                        <to>64</to>
-                        <from>66</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.106667</y>
-                            <x>1.605833</x>
-                        </coord>
-                        <id>72</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <name>i</name>
-                                </action>
-                            </actions>
                             <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>65</to>
-                        <from>67</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.356667</y>
-                            <x>1.031667</x>
-                        </coord>
-                        <id>71</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
                             <actions>
                                 <action>
-                                    <name>i</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>66</to>
-                        <from>67</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.670000</y>
-                            <x>1.035833</x>
-                        </coord>
-                        <id>70</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
+                                    <name>s6</name>
                                     <param>x</param>
-                                    <param>y</param>
-                                    <name>s3</name>
                                 </action>
                             </actions>
-                            <condition/>
-                            <variabledeclarations/>
+                            <timestamp/>
+                            <variableupdates/>
                         </label>
-                        <to>64</to>
-                        <from>65</from>
                     </nonterminatingtransition>
                     <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
+                        <id>82</id>
                         <coord>
-                            <y>-1.006667</y>
-                            <x>0.470000</x>
+                            <x>0.457500</x>
+                            <y>-1.001667</y>
                         </coord>
-                        <id>69</id>
-                        <breakpointlist/>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>74</from>
+                        <to>76</to>
                         <label>
-                            <variableupdates>
-                                <variableupdate>x:=d</variableupdate>
-                                <variableupdate>y:=b</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>d</param>
-                                    <param>b</param>
-                                    <name>r2</name>
-                                </action>
-                            </actions>
-                            <condition/>
                             <variabledeclarations>
-                                <variabledeclaration>d:D</variabledeclaration>
                                 <variabledeclaration>b:Bool</variabledeclaration>
                             </variabledeclarations>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r5</name>
+                                    <param>b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>x:=b</variableupdate>
+                            </variableupdates>
                         </label>
-                        <to>67</to>
-                        <from>64</from>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>81</id>
+                        <coord>
+                            <x>1.073333</x>
+                            <y>-1.000000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>77</from>
+                        <to>74</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>s6</name>
+                                    <param>e</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>80</id>
+                        <coord>
+                            <x>1.683333</x>
+                            <y>-1.045000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>76</from>
+                        <to>75</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>79</id>
+                        <coord>
+                            <x>1.074167</x>
+                            <y>-1.331667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>76</from>
+                        <to>77</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
                     </nonterminatingtransition>
                 </nonterminatingtransitionlist>
                 <terminatingtransitionlist/>
                 <statelist>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.456667</width>
-                        </size>
+                        <id>77</id>
                         <coord>
-                            <y>-1.343333</y>
-                            <x>0.473333</x>
+                            <x>1.690000</x>
+                            <y>-1.330000</y>
                         </coord>
-                        <id>67</id>
-                        <name>received</name>
-                    </state>
-                    <state>
                         <size>
+                            <width>0.503333</width>
                             <height>0.200000</height>
-                            <width>0.510000</width>
                         </size>
-                        <coord>
-                            <y>-1.370000</y>
-                            <x>1.590000</x>
-                        </coord>
-                        <id>66</id>
                         <name>corrupt value</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.500000</width>
-                        </size>
+                        <id>76</id>
                         <coord>
-                            <y>-0.670000</y>
-                            <x>1.605000</x>
+                            <x>0.458333</x>
+                            <y>-1.333333</y>
                         </coord>
-                        <id>65</id>
+                        <size>
+                            <width>0.486667</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>received</name>
+                    </state>
+                    <state>
+                        <id>75</id>
+                        <coord>
+                            <x>1.681667</x>
+                            <y>-0.683333</y>
+                        </coord>
+                        <size>
+                            <width>0.500000</width>
+                            <height>0.200000</height>
+                        </size>
                         <name>transfer value</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.456667</width>
-                        </size>
+                        <id>74</id>
                         <coord>
-                            <y>-0.670000</y>
-                            <x>0.466667</x>
+                            <x>0.450000</x>
+                            <y>-0.680000</y>
                         </coord>
-                        <id>64</id>
+                        <size>
+                            <width>0.463333</width>
+                            <height>0.200000</height>
+                        </size>
                         <name>idle</name>
                     </state>
                 </statelist>
                 <referencestatelist/>
                 <initialdesignatorlist>
                     <initialdesignator>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.200000</width>
-                        </size>
+                        <id>78</id>
                         <coord>
-                            <y>-0.670000</y>
-                            <x>0.103333</x>
+                            <x>0.080000</x>
+                            <y>-0.676667</y>
                         </coord>
-                        <id>68</id>
-                        <propertyof>64</propertyof>
+                        <size>
+                            <width>0.200000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <propertyof>74</propertyof>
                     </initialdesignator>
                 </initialdesignatorlist>
                 <commentlist/>
             </objectlist>
+        </processdiagram>
+        <processdiagram>
+            <id>2</id>
+            <name>K</name>
             <preambledeclarations>
                 <parameterlist/>
                 <localvariablelist>
@@ -701,211 +491,222 @@
                     <var>y:Bool=true</var>
                 </localvariablelist>
             </preambledeclarations>
-            <name>K</name>
-            <id>2</id>
-        </processdiagram>
-        <processdiagram>
             <objectlist>
                 <nonterminatingtransitionlist>
                     <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
+                        <id>73</id>
                         <coord>
-                            <y>-0.568333</y>
-                            <x>0.865000</x>
+                            <x>1.028333</x>
+                            <y>-1.020000</y>
                         </coord>
-                        <id>29</id>
-                        <breakpointlist/>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>66</from>
+                        <to>64</to>
                         <label>
-                            <variableupdates>
-                                <variableupdate>x:=d</variableupdate>
-                            </variableupdates>
-                            <timestamp/>
+                            <variabledeclarations/>
+                            <condition/>
                             <actions>
                                 <action>
-                                    <param>d</param>
-                                    <name>r1</name>
+                                    <name>s3</name>
+                                    <param>e</param>
                                 </action>
                             </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>72</id>
+                        <coord>
+                            <x>1.605833</x>
+                            <y>-1.106667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>67</from>
+                        <to>65</to>
+                        <label>
+                            <variabledeclarations/>
                             <condition/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>71</id>
+                        <coord>
+                            <x>1.031667</x>
+                            <y>-1.356667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>67</from>
+                        <to>66</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>i</name>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>70</id>
+                        <coord>
+                            <x>1.035833</x>
+                            <y>-0.670000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>65</from>
+                        <to>64</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>s3</name>
+                                    <param>x</param>
+                                    <param>y</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>69</id>
+                        <coord>
+                            <x>0.470000</x>
+                            <y>-1.006667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>64</from>
+                        <to>67</to>
+                        <label>
                             <variabledeclarations>
                                 <variabledeclaration>d:D</variabledeclaration>
+                                <variabledeclaration>b:Bool</variabledeclaration>
                             </variabledeclarations>
-                        </label>
-                        <to>26</to>
-                        <from>25</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.760000</y>
-                            <x>0.858333</x>
-                        </coord>
-                        <id>30</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
+                            <condition/>
                             <actions>
                                 <action>
-                                    <param>x</param>
+                                    <name>r2</name>
+                                    <param>d</param>
                                     <param>b</param>
-                                    <name>s2</name>
                                 </action>
                             </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>27</to>
-                        <from>26</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.883333</y>
-                            <x>1.091667</x>
-                        </coord>
-                        <id>31</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
                             <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>!b</param>
-                                    <name>r6</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>26</to>
-                        <from>27</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.933333</y>
-                            <x>1.328333</x>
-                        </coord>
-                        <id>32</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
-                            <variableupdates/>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>e</param>
-                                    <name>r6</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
-                        </label>
-                        <to>26</to>
-                        <from>27</from>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-0.998333</y>
-                            <x>0.323333</x>
-                        </coord>
-                        <id>33</id>
-                        <breakpointlist/>
-                        <linetype>straight</linetype>
-                        <label>
                             <variableupdates>
-                                <variableupdate>b:=!b</variableupdate>
+                                <variableupdate>x:=d</variableupdate>
+                                <variableupdate>y:=b</variableupdate>
                             </variableupdates>
-                            <timestamp/>
-                            <actions>
-                                <action>
-                                    <param>b</param>
-                                    <name>r6</name>
-                                </action>
-                            </actions>
-                            <condition/>
-                            <variabledeclarations/>
                         </label>
-                        <to>25</to>
-                        <from>27</from>
                     </nonterminatingtransition>
                 </nonterminatingtransitionlist>
                 <terminatingtransitionlist/>
                 <statelist>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.350000</width>
-                        </size>
+                        <id>67</id>
                         <coord>
-                            <y>-0.570000</y>
-                            <x>0.313333</x>
+                            <x>0.473333</x>
+                            <y>-1.343333</y>
                         </coord>
-                        <id>25</id>
-                        <name>idle</name>
-                    </state>
-                    <state>
                         <size>
+                            <width>0.456667</width>
                             <height>0.200000</height>
-                            <width>0.350000</width>
                         </size>
-                        <coord>
-                            <y>-0.566667</y>
-                            <x>1.316667</x>
-                        </coord>
-                        <id>26</id>
                         <name>received</name>
                     </state>
                     <state>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.350000</width>
-                        </size>
+                        <id>66</id>
                         <coord>
-                            <y>-1.173333</y>
-                            <x>0.860000</x>
+                            <x>1.590000</x>
+                            <y>-1.370000</y>
                         </coord>
-                        <id>27</id>
-                        <name>sent</name>
+                        <size>
+                            <width>0.510000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>corrupt value</name>
+                    </state>
+                    <state>
+                        <id>65</id>
+                        <coord>
+                            <x>1.605000</x>
+                            <y>-0.670000</y>
+                        </coord>
+                        <size>
+                            <width>0.500000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>transfer value</name>
+                    </state>
+                    <state>
+                        <id>64</id>
+                        <coord>
+                            <x>0.466667</x>
+                            <y>-0.670000</y>
+                        </coord>
+                        <size>
+                            <width>0.456667</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>idle</name>
                     </state>
                 </statelist>
                 <referencestatelist/>
                 <initialdesignatorlist>
                     <initialdesignator>
-                        <size>
-                            <height>0.200000</height>
-                            <width>0.200000</width>
-                        </size>
+                        <id>68</id>
                         <coord>
-                            <y>-0.570000</y>
-                            <x>0.020000</x>
+                            <x>0.103333</x>
+                            <y>-0.670000</y>
                         </coord>
-                        <id>28</id>
-                        <propertyof>25</propertyof>
+                        <size>
+                            <width>0.200000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <propertyof>64</propertyof>
                     </initialdesignator>
                 </initialdesignatorlist>
                 <commentlist/>
             </objectlist>
+        </processdiagram>
+        <processdiagram>
+            <id>1</id>
+            <name>S</name>
             <preambledeclarations>
                 <parameterlist>
                     <param>b:Bool</param>
@@ -914,322 +715,523 @@
                     <var>x:D=d1</var>
                 </localvariablelist>
             </preambledeclarations>
-            <name>S</name>
-            <id>1</id>
+            <objectlist>
+                <nonterminatingtransitionlist>
+                    <nonterminatingtransition>
+                        <id>29</id>
+                        <coord>
+                            <x>0.865000</x>
+                            <y>-0.568333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>25</from>
+                        <to>26</to>
+                        <label>
+                            <variabledeclarations>
+                                <variabledeclaration>d:D</variabledeclaration>
+                            </variabledeclarations>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r1</name>
+                                    <param>d</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>x:=d</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>30</id>
+                        <coord>
+                            <x>0.858333</x>
+                            <y>-0.760000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>26</from>
+                        <to>27</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>s2</name>
+                                    <param>x</param>
+                                    <param>b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>31</id>
+                        <coord>
+                            <x>1.091667</x>
+                            <y>-0.883333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>27</from>
+                        <to>26</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r6</name>
+                                    <param>!b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>32</id>
+                        <coord>
+                            <x>1.328333</x>
+                            <y>-0.933333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>27</from>
+                        <to>26</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r6</name>
+                                    <param>e</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates/>
+                        </label>
+                    </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>33</id>
+                        <coord>
+                            <x>0.323333</x>
+                            <y>-0.998333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>27</from>
+                        <to>25</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>r6</name>
+                                    <param>b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
+                </nonterminatingtransitionlist>
+                <terminatingtransitionlist/>
+                <statelist>
+                    <state>
+                        <id>25</id>
+                        <coord>
+                            <x>0.313333</x>
+                            <y>-0.570000</y>
+                        </coord>
+                        <size>
+                            <width>0.350000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>idle</name>
+                    </state>
+                    <state>
+                        <id>26</id>
+                        <coord>
+                            <x>1.316667</x>
+                            <y>-0.566667</y>
+                        </coord>
+                        <size>
+                            <width>0.350000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>received</name>
+                    </state>
+                    <state>
+                        <id>27</id>
+                        <coord>
+                            <x>0.860000</x>
+                            <y>-1.173333</y>
+                        </coord>
+                        <size>
+                            <width>0.350000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>sent</name>
+                    </state>
+                </statelist>
+                <referencestatelist/>
+                <initialdesignatorlist>
+                    <initialdesignator>
+                        <id>28</id>
+                        <coord>
+                            <x>0.020000</x>
+                            <y>-0.570000</y>
+                        </coord>
+                        <size>
+                            <width>0.200000</width>
+                            <height>0.200000</height>
+                        </size>
+                        <propertyof>25</propertyof>
+                    </initialdesignator>
+                </initialdesignatorlist>
+                <commentlist/>
+            </objectlist>
         </processdiagram>
     </processdiagramlist>
     <architecturediagramlist>
         <architecturediagram>
+            <id>0</id>
+            <name>ABP</name>
             <objectlist>
                 <processreferencelist>
                     <processreference>
-                        <size>
-                            <height>0.273333</height>
-                            <width>0.613333</width>
-                        </size>
-                        <coord>
-                            <y>-0.780000</y>
-                            <x>1.826667</x>
-                        </coord>
                         <id>5</id>
-                        <parameterassignmentlist/>
+                        <coord>
+                            <x>1.826667</x>
+                            <y>-0.780000</y>
+                        </coord>
+                        <size>
+                            <width>0.613333</width>
+                            <height>0.273333</height>
+                        </size>
+                        <name>K</name>
                         <propertyof>2</propertyof>
                         <channellist>
                             <channel>34</channel>
                             <channel>9</channel>
                             <channel>10</channel>
                         </channellist>
-                        <name>K</name>
+                        <parameterassignmentlist/>
                     </processreference>
                     <processreference>
-                        <size>
-                            <height>0.410000</height>
-                            <width>0.456667</width>
-                        </size>
-                        <coord>
-                            <y>-1.325000</y>
-                            <x>2.691667</x>
-                        </coord>
                         <id>6</id>
-                        <parameterassignmentlist>
-                            <parameterassignment>b:=true</parameterassignment>
-                        </parameterassignmentlist>
+                        <coord>
+                            <x>2.691667</x>
+                            <y>-1.325000</y>
+                        </coord>
+                        <size>
+                            <width>0.456667</width>
+                            <height>0.410000</height>
+                        </size>
+                        <name>R</name>
                         <propertyof>4</propertyof>
                         <channellist>
                             <channel>12</channel>
                             <channel>13</channel>
                             <channel>14</channel>
                         </channellist>
-                        <name>R</name>
+                        <parameterassignmentlist>
+                            <parameterassignment>b:=true</parameterassignment>
+                        </parameterassignmentlist>
                     </processreference>
                     <processreference>
-                        <size>
-                            <height>0.276667</height>
-                            <width>0.600000</width>
-                        </size>
-                        <coord>
-                            <y>-1.921667</y>
-                            <x>1.833333</x>
-                        </coord>
                         <id>7</id>
-                        <parameterassignmentlist/>
+                        <coord>
+                            <x>1.833333</x>
+                            <y>-1.921667</y>
+                        </coord>
+                        <size>
+                            <width>0.600000</width>
+                            <height>0.276667</height>
+                        </size>
+                        <name>L</name>
                         <propertyof>3</propertyof>
                         <channellist>
                             <channel>35</channel>
                             <channel>15</channel>
                             <channel>17</channel>
                         </channellist>
-                        <name>L</name>
+                        <parameterassignmentlist/>
                     </processreference>
                     <processreference>
-                        <size>
-                            <height>0.400000</height>
-                            <width>0.440000</width>
-                        </size>
-                        <coord>
-                            <y>-1.326667</y>
-                            <x>0.880000</x>
-                        </coord>
                         <id>8</id>
-                        <parameterassignmentlist>
-                            <parameterassignment>b:=true</parameterassignment>
-                        </parameterassignmentlist>
+                        <coord>
+                            <x>0.880000</x>
+                            <y>-1.326667</y>
+                        </coord>
+                        <size>
+                            <width>0.440000</width>
+                            <height>0.400000</height>
+                        </size>
+                        <name>S</name>
                         <propertyof>1</propertyof>
                         <channellist>
                             <channel>18</channel>
                             <channel>19</channel>
                             <channel>20</channel>
                         </channellist>
-                        <name>S</name>
+                        <parameterassignmentlist>
+                            <parameterassignment>b:=true</parameterassignment>
+                        </parameterassignmentlist>
                     </processreference>
                 </processreferencelist>
                 <architecturereferencelist/>
                 <channellist>
                     <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.913334</y>
-                            <x>1.533333</x>
-                        </coord>
                         <id>35</id>
-                        <onchannelcommunication/>
-                        <onreference>7</onreference>
+                        <coord>
+                            <x>1.533333</x>
+                            <y>-1.913334</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
                         <name>i</name>
+                        <onreference>7</onreference>
+                        <onchannelcommunication/>
                     </channel>
                     <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-0.643333</y>
-                            <x>1.996667</x>
-                        </coord>
                         <id>34</id>
-                        <onchannelcommunication/>
-                        <onreference>5</onreference>
+                        <coord>
+                            <x>1.996667</x>
+                            <y>-0.643333</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
                         <name>i</name>
+                        <onreference>5</onreference>
+                        <onchannelcommunication/>
                     </channel>
                     <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-0.886667</y>
-                            <x>1.520000</x>
-                        </coord>
                         <id>9</id>
-                        <onchannelcommunication>21</onchannelcommunication>
-                        <onreference>5</onreference>
+                        <coord>
+                            <x>1.520000</x>
+                            <y>-0.886667</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
                         <name>r2</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-0.893333</y>
-                            <x>2.133333</x>
-                        </coord>
-                        <id>10</id>
-                        <onchannelcommunication>22</onchannelcommunication>
                         <onreference>5</onreference>
-                        <name>s3</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.150000</y>
-                            <x>2.463333</x>
-                        </coord>
-                        <id>12</id>
-                        <onchannelcommunication>22</onchannelcommunication>
-                        <onreference>6</onreference>
-                        <name>r3</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.530000</y>
-                            <x>2.546667</x>
-                        </coord>
-                        <id>13</id>
-                        <onchannelcommunication>23</onchannelcommunication>
-                        <onreference>6</onreference>
-                        <name>s5</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.120000</y>
-                            <x>2.816667</x>
-                        </coord>
-                        <id>14</id>
-                        <onchannelcommunication/>
-                        <onreference>6</onreference>
-                        <name>s4</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.813333</y>
-                            <x>2.133333</x>
-                        </coord>
-                        <id>15</id>
-                        <onchannelcommunication>23</onchannelcommunication>
-                        <onreference>7</onreference>
-                        <name>r5</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.783333</y>
-                            <x>1.540000</x>
-                        </coord>
-                        <id>17</id>
-                        <onchannelcommunication>24</onchannelcommunication>
-                        <onreference>7</onreference>
-                        <name>s6</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.500000</y>
-                            <x>1.100000</x>
-                        </coord>
-                        <id>18</id>
-                        <onchannelcommunication>24</onchannelcommunication>
-                        <onreference>8</onreference>
-                        <name>r6</name>
-                    </channel>
-                    <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
-                        <coord>
-                            <y>-1.126667</y>
-                            <x>1.083333</x>
-                        </coord>
-                        <id>19</id>
                         <onchannelcommunication>21</onchannelcommunication>
-                        <onreference>8</onreference>
-                        <name>s2</name>
                     </channel>
                     <channel>
-                        <size>
-                            <height>0.037000</height>
-                            <width>0.037000</width>
-                        </size>
+                        <id>10</id>
                         <coord>
-                            <y>-1.340000</y>
-                            <x>0.660000</x>
+                            <x>2.133333</x>
+                            <y>-0.893333</y>
                         </coord>
-                        <id>20</id>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>s3</name>
+                        <onreference>5</onreference>
+                        <onchannelcommunication>22</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>12</id>
+                        <coord>
+                            <x>2.463333</x>
+                            <y>-1.150000</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>r3</name>
+                        <onreference>6</onreference>
+                        <onchannelcommunication>22</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>13</id>
+                        <coord>
+                            <x>2.546667</x>
+                            <y>-1.530000</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>s5</name>
+                        <onreference>6</onreference>
+                        <onchannelcommunication>23</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>14</id>
+                        <coord>
+                            <x>2.816667</x>
+                            <y>-1.120000</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>s4</name>
+                        <onreference>6</onreference>
                         <onchannelcommunication/>
+                    </channel>
+                    <channel>
+                        <id>15</id>
+                        <coord>
+                            <x>2.133333</x>
+                            <y>-1.813333</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>r5</name>
+                        <onreference>7</onreference>
+                        <onchannelcommunication>23</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>17</id>
+                        <coord>
+                            <x>1.540000</x>
+                            <y>-1.783333</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>s6</name>
+                        <onreference>7</onreference>
+                        <onchannelcommunication>24</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>18</id>
+                        <coord>
+                            <x>1.100000</x>
+                            <y>-1.500000</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>r6</name>
                         <onreference>8</onreference>
+                        <onchannelcommunication>24</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>19</id>
+                        <coord>
+                            <x>1.083333</x>
+                            <y>-1.126667</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
+                        <name>s2</name>
+                        <onreference>8</onreference>
+                        <onchannelcommunication>21</onchannelcommunication>
+                    </channel>
+                    <channel>
+                        <id>20</id>
+                        <coord>
+                            <x>0.660000</x>
+                            <y>-1.340000</y>
+                        </coord>
+                        <size>
+                            <width>0.037000</width>
+                            <height>0.037000</height>
+                        </size>
                         <name>r1</name>
+                        <onreference>8</onreference>
+                        <onchannelcommunication/>
                     </channel>
                 </channellist>
                 <channelcommunicationlist>
                     <channelcommunication>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.000000</y>
-                            <x>1.288333</x>
-                        </coord>
                         <id>21</id>
+                        <coord>
+                            <x>1.288333</x>
+                            <y>-1.000000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <connectionlist>
                             <connectedtochannels>19</connectedtochannels>
                             <connectedtochannels>9</connectedtochannels>
                         </connectionlist>
                     </channelcommunication>
                     <channelcommunication>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.015000</y>
-                            <x>2.285000</x>
-                        </coord>
                         <id>22</id>
+                        <coord>
+                            <x>2.285000</x>
+                            <y>-1.015000</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <connectionlist>
                             <connectedtochannels>10</connectedtochannels>
                             <connectedtochannels>12</connectedtochannels>
                         </connectionlist>
                     </channelcommunication>
                     <channelcommunication>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.671667</y>
-                            <x>2.340000</x>
-                        </coord>
                         <id>23</id>
+                        <coord>
+                            <x>2.340000</x>
+                            <y>-1.671667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <connectionlist>
                             <connectedtochannels>13</connectedtochannels>
                             <connectedtochannels>15</connectedtochannels>
                         </connectionlist>
                     </channelcommunication>
                     <channelcommunication>
-                        <size>
-                            <height>0.250000</height>
-                            <width>0.250000</width>
-                        </size>
-                        <coord>
-                            <y>-1.641667</y>
-                            <x>1.320000</x>
-                        </coord>
                         <id>24</id>
+                        <coord>
+                            <x>1.320000</x>
+                            <y>-1.641667</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
                         <connectionlist>
                             <connectedtochannels>17</connectedtochannels>
                             <connectedtochannels>18</connectedtochannels>
@@ -1238,67 +1240,65 @@
                 </channelcommunicationlist>
                 <visiblelist>
                     <visible>
-                        <size>
-                            <height>0.050000</height>
-                            <width>0.050000</width>
-                        </size>
-                        <coord>
-                            <y>-1.783334</y>
-                            <x>1.603000</x>
-                        </coord>
                         <id>39</id>
+                        <coord>
+                            <x>1.603000</x>
+                            <y>-1.783334</y>
+                        </coord>
+                        <size>
+                            <width>0.050000</width>
+                            <height>0.050000</height>
+                        </size>
+                        <name>i</name>
                         <linetype>straight</linetype>
                         <propertyof>35</propertyof>
-                        <name>i</name>
                     </visible>
                     <visible>
-                        <size>
-                            <height>0.050000</height>
-                            <width>0.050000</width>
-                        </size>
-                        <coord>
-                            <y>-1.340000</y>
-                            <x>2.883000</x>
-                        </coord>
                         <id>38</id>
+                        <coord>
+                            <x>2.883000</x>
+                            <y>-1.340000</y>
+                        </coord>
+                        <size>
+                            <width>0.050000</width>
+                            <height>0.050000</height>
+                        </size>
+                        <name>s4</name>
                         <linetype>straight</linetype>
                         <propertyof>14</propertyof>
-                        <name>s4</name>
                     </visible>
                     <visible>
-                        <size>
-                            <height>0.050000</height>
-                            <width>0.050000</width>
-                        </size>
-                        <coord>
-                            <y>-0.643333</y>
-                            <x>1.959667</x>
-                        </coord>
                         <id>37</id>
+                        <coord>
+                            <x>1.959667</x>
+                            <y>-0.643333</y>
+                        </coord>
+                        <size>
+                            <width>0.050000</width>
+                            <height>0.050000</height>
+                        </size>
+                        <name>i</name>
                         <linetype>straight</linetype>
                         <propertyof>34</propertyof>
-                        <name>i</name>
                     </visible>
                     <visible>
-                        <size>
-                            <height>0.050000</height>
-                            <width>0.050000</width>
-                        </size>
-                        <coord>
-                            <y>-1.340000</y>
-                            <x>0.623000</x>
-                        </coord>
                         <id>36</id>
+                        <coord>
+                            <x>0.623000</x>
+                            <y>-1.340000</y>
+                        </coord>
+                        <size>
+                            <width>0.050000</width>
+                            <height>0.050000</height>
+                        </size>
+                        <name>r1</name>
                         <linetype>straight</linetype>
                         <propertyof>20</propertyof>
-                        <name>r1</name>
                     </visible>
                 </visiblelist>
                 <blockedlist/>
                 <commentlist/>
             </objectlist>
-            <name>ABP</name>
-            <id>0</id>
         </architecturediagram>
     </architecturediagramlist>
 </grape>

@@ -58,8 +58,8 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
   /* node <processdiagramlist> */
   wxXmlNode* xml_process_diagram_list = new wxXmlNode( p_root, wxXML_ELEMENT_NODE, _T( "processdiagramlist" ) );
   // add properties to the node; iterate over the list of process diagrams
-  int count = p_proc_list->GetCount();
-  for ( int i = 0; i < count; ++i )
+  int p_count = p_proc_list->GetCount();
+  for ( int i = p_count-1; i >= 0; --i )
   {
     /* node <processdiagram> with parent xml_process_diagram_list */
     wxXmlNode* xml_process_diagram = new wxXmlNode( xml_process_diagram_list, wxXML_ELEMENT_NODE,
@@ -69,42 +69,6 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
     preamble* proc_preamble = p_dia.get_preamble();
 
     { // offspring of xml_process_diagram
-      write_id (xml_process_diagram, p_dia.get_id() );
-
-      write_name( xml_process_diagram, p_dia.get_name() );
-
-      /* node <preambledeclarations> */
-      wxXmlNode* xml_preamble_declarations = new wxXmlNode( xml_process_diagram, wxXML_ELEMENT_NODE,
-                                                _T( "preambledeclarations" ) );
-
-      { // offspring of xml_preamble_declarations
-
-        /* node <localvariablelist> */
-	list_of_decl_init local_vars = proc_preamble->get_local_variable_declarations_list();
-        wxXmlNode* xml_loc_var_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE,
-                                                _T( "localvariablelist" ) );
-        
-	for (unsigned int i = 0; i < local_vars.GetCount(); ++i)
-        {
-          decl_init local_var = local_vars.Item( i );
-          wxString text = local_var.get_decl_init();
-          wxXmlNode* xml_loc_var = new wxXmlNode( xml_loc_var_list, wxXML_ELEMENT_NODE, _T( "var" ) );
-          new wxXmlNode( xml_loc_var, wxXML_TEXT_NODE, _T( "value" ), text );
-        }
-
-        /* node <parameterlist> */
-        list_of_decl params = proc_preamble->get_parameter_declarations_list();
-        wxXmlNode* xml_parameter_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE, _T( "parameterlist" ) );
-
-        for (unsigned int i = 0; i < params.GetCount(); ++i)
-        {
-          decl param = params.Item( i );
-          wxString text = param.get_decl();
-          wxXmlNode* xml_param = new wxXmlNode( xml_parameter_list, wxXML_ELEMENT_NODE, _T( "param" ) );
-          new wxXmlNode( xml_param, wxXML_TEXT_NODE, _T( "value" ), text );
-        }
-
-      } // end offspring xml_preamble_declarations
 
       /* node <objectlist> */
       wxXmlNode* xml_objectlist = new wxXmlNode( xml_process_diagram, wxXML_ELEMENT_NODE,
@@ -122,6 +86,44 @@ void grape::libgrape::add_process_diagram_list( wxXmlNode* p_root, arr_process_d
 
       } // end children xml_objectlist
 
+      /* node <preambledeclarations> */
+      wxXmlNode* xml_preamble_declarations = new wxXmlNode( xml_process_diagram, wxXML_ELEMENT_NODE,
+                                                _T( "preambledeclarations" ) );
+
+      { // offspring of xml_preamble_declarations
+
+        /* node <localvariablelist> */
+	      list_of_decl_init local_vars = proc_preamble->get_local_variable_declarations_list();
+        wxXmlNode* xml_loc_var_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE,
+                                                _T( "localvariablelist" ) );
+        int count = local_vars.GetCount();
+	      for (int i = count-1; i >= 0; --i)
+        {
+          decl_init local_var = local_vars.Item( i );
+          wxString text = local_var.get_decl_init();
+          wxXmlNode* xml_loc_var = new wxXmlNode( xml_loc_var_list, wxXML_ELEMENT_NODE, _T( "var" ) );
+          new wxXmlNode( xml_loc_var, wxXML_TEXT_NODE, _T( "value" ), text );
+        }
+
+        /* node <parameterlist> */
+        list_of_decl params = proc_preamble->get_parameter_declarations_list();
+        wxXmlNode* xml_parameter_list = new wxXmlNode( xml_preamble_declarations, wxXML_ELEMENT_NODE, _T( "parameterlist" ) );
+
+        count = params.GetCount();
+        for (int i = count-1; i >= 0; --i)
+        {
+          decl param = params.Item( i );
+          wxString text = param.get_decl();
+          wxXmlNode* xml_param = new wxXmlNode( xml_parameter_list, wxXML_ELEMENT_NODE, _T( "param" ) );
+          new wxXmlNode( xml_param, wxXML_TEXT_NODE, _T( "value" ), text );
+        }
+
+      } // end offspring xml_preamble_declarations
+
+      write_name( xml_process_diagram, p_dia.get_name() );
+
+      write_id (xml_process_diagram, p_dia.get_id() );
+
     } // end offspring xml_process_diagram
 
   } // end for
@@ -136,7 +138,7 @@ void grape::libgrape::add_comment_list( wxXmlNode* p_objectlist, diagram* p_dia 
 
     // iterate over all comments in the process diagram
     int comment_count = p_dia->count_comment();
-    for ( int i = 0; i < comment_count; ++i)
+    for ( int i = comment_count-1; i >= 0; --i)
     {
 
       wxXmlNode* xml_comment = new wxXmlNode( xml_commentlist, wxXML_ELEMENT_NODE, _T( "comment" ) );
@@ -180,7 +182,7 @@ void grape::libgrape::add_initial_designator_list( wxXmlNode* p_objectlist, proc
 
     // iterate over all initial designators in the process diagram
     int init_count = p_proc_dia->count_initial_designator();
-    for ( int i = 0; i < init_count; ++i )
+    for ( int i = init_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_initial_designator = new wxXmlNode( xml_initial_designator_list, wxXML_ELEMENT_NODE,
@@ -217,14 +219,24 @@ void grape::libgrape::add_reference_state_list( wxXmlNode* p_objectlist, process
 
     // iterate over all reference states in the process diagram
     int ref_state_count = p_proc_dia->count_reference_state();
-    for ( int i = 0; i < ref_state_count; ++i )
+    for ( int i = ref_state_count-1; i >= 0; --i )
     {
-
       wxXmlNode* xml_reference_state = new wxXmlNode( xml_reference_state_list, wxXML_ELEMENT_NODE,
                                           _T( "referencestate" ) );
       reference_state* ref_state_ptr = p_proc_dia->get_reference_state( i );
 
-      write_name( xml_reference_state, ref_state_ptr->get_name() );
+      /* node <parameterassignmentlist> */
+      wxXmlNode* xml_reference_state_parameterlist = new wxXmlNode( xml_reference_state, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
+      list_of_varupdate parameter_assignments = ref_state_ptr->get_parameter_updates();
+      int param_ass_count = parameter_assignments.GetCount();
+      for ( int j = param_ass_count-1; j >= 0; --j )
+      {
+        varupdate parameter_assignment = parameter_assignments.Item( j );
+        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
+
+        wxXmlNode* xml_reference_state_parameter = new wxXmlNode( xml_reference_state_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
+        new wxXmlNode( xml_reference_state_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
+      }
 
       /* node <propertyof> */
       wxXmlNode* xml_reference_state_prop = new wxXmlNode( xml_reference_state, wxXML_ELEMENT_NODE, _T( "propertyof" ) );
@@ -237,17 +249,7 @@ void grape::libgrape::add_reference_state_list( wxXmlNode* p_objectlist, process
       }
       new wxXmlNode( xml_reference_state_prop, wxXML_TEXT_NODE, _T( "value" ), ref_state_prop );
 
-      /* node <parameterassignmentlist> */
-      wxXmlNode* xml_reference_state_parameterlist = new wxXmlNode( xml_reference_state, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
-      list_of_varupdate parameter_assignments = ref_state_ptr->get_parameter_updates();
-      for ( unsigned int j = 0; j < parameter_assignments.GetCount(); ++j )
-      {
-        varupdate parameter_assignment = parameter_assignments.Item( j );
-        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
-
-        wxXmlNode* xml_reference_state_parameter = new wxXmlNode( xml_reference_state_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
-        new wxXmlNode( xml_reference_state_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
-      }
+      write_name( xml_reference_state, ref_state_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_reference_state, ref_state_ptr );
@@ -265,7 +267,7 @@ void grape::libgrape::add_state_list( wxXmlNode* p_objectlist, process_diagram* 
 
     // iterate over all states in the process diagram
     int state_count = p_proc_dia->count_state();
-    for ( int i = 0; i < state_count; ++i )
+    for ( int i = state_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_state = new wxXmlNode( xml_state_list, wxXML_ELEMENT_NODE,
@@ -274,9 +276,7 @@ void grape::libgrape::add_state_list( wxXmlNode* p_objectlist, process_diagram* 
 
       write_name( xml_state, state_ptr->get_name() );
 
-
       /* Inherited */
-
       write_object_attributes( xml_state, state_ptr );
     }
 
@@ -293,15 +293,99 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
 
     // iterate over all terminating transitions in the process diagram
     int tt_count = p_proc_dia->count_terminating_transition();
-    for ( int i = 0; i < tt_count; ++i )
+    for ( int i = tt_count-1; i >= 0; --i )
     {
       wxXmlNode* xml_terminating_transition = new wxXmlNode( xml_terminating_transition_list, wxXML_ELEMENT_NODE,
                                                   _T( "terminatingtransition" ) );
 
       terminating_transition* tt_ptr = p_proc_dia->get_terminating_transition( i );
 
-      /* node <from> */
+      /* node <label> */
+      wxXmlNode* xml_terminating_trans_label = new wxXmlNode( xml_terminating_transition, wxXML_ELEMENT_NODE, _T( "label" ) );
 
+      /* node <variableupdates> */
+      wxXmlNode* xml_terminating_trans_label_var_updates = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
+
+      list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
+      int varupdate_count = tt_label_var_updates.GetCount();
+      for ( int j = varupdate_count-1; j >= 0; --j )
+      {
+        varupdate tt_label_var_update = tt_label_var_updates.Item( j );
+        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
+
+        /* node <variableupdate> */
+        wxXmlNode* xml_terminating_trans_label_var_update = new wxXmlNode( xml_terminating_trans_label_var_updates, wxXML_ELEMENT_NODE, _T( "variableupdate" ) );
+        new wxXmlNode( xml_terminating_trans_label_var_update, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_update_text );
+      }
+   
+      /* node <timestamp> */
+      wxXmlNode* xml_terminating_trans_label_timestamp = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
+
+      wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
+      if (!tt_label_timestamp_text.IsEmpty())
+      {
+        new wxXmlNode( xml_terminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
+      }
+
+      /* node <actions> */
+      wxXmlNode* xml_terminating_trans_label_actions = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
+
+      list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
+      int action_count = tt_label_actions.GetCount();
+      for ( int j = action_count-1; j >= 0; --j )
+      {
+        action tt_label_action = tt_label_actions.Item( j );
+        wxString tt_label_action_name_text = tt_label_action.get_name();
+
+        /* node <action> */
+        wxXmlNode* xml_terminating_trans_label_action = new wxXmlNode( xml_terminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
+
+        wxString tt_label_action_params_text;
+        list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
+        if (tt_label_action_params.GetCount() > 0)
+        {
+          int action_param_count = tt_label_action_params.GetCount();
+          for ( int k = action_param_count-1; k >= 0; --k )
+          {
+            dataexpression tt_label_action_param = tt_label_action_params.Item( k );
+            wxString tt_label_action_param_text = tt_label_action_param.get_expression();
+
+            /* node <param> */
+            wxXmlNode* xml_terminating_trans_label_action_param = new wxXmlNode( xml_terminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "param" ) );
+            new wxXmlNode( xml_terminating_trans_label_action_param, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_param_text );
+          }
+        }
+
+        /* node <name> */
+        wxXmlNode* xml_terminating_trans_label_action_name = new wxXmlNode( xml_terminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "name" ) );
+        new wxXmlNode( xml_terminating_trans_label_action_name, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_name_text );
+      }
+
+      /* node <condition> */
+      wxXmlNode* xml_terminating_trans_label_condition = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
+
+      wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
+      if (!tt_label_condition_text.IsEmpty())
+      {
+        new wxXmlNode( xml_terminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
+      }
+
+      /* node <variabledeclarations> */
+      wxXmlNode* xml_terminating_trans_label_var_decls = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
+
+      list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
+      int var_decl_count = tt_label_var_decls.GetCount();
+      for ( int j = var_decl_count-1; j >= 0; --j )
+      {
+        decl tt_label_var_decl = tt_label_var_decls.Item( j );
+        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
+
+        /* node <variabledeclaration> */
+        wxXmlNode* xml_terminating_trans_label_var_decl = new wxXmlNode( xml_terminating_trans_label_var_decls, wxXML_ELEMENT_NODE, _T( "variabledeclaration" ) );
+        new wxXmlNode( xml_terminating_trans_label_var_decl, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_decl_text );
+      }
+
+      /* node <from> */
       wxXmlNode* xml_terminating_trans_from = new wxXmlNode( xml_terminating_transition, wxXML_ELEMENT_NODE, _T( "from" ) );
 
       wxString tt_from = _T( "-1" );
@@ -311,113 +395,21 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         tt_from = wxString::Format( _T( "%u"), begin_ptr->get_id() );
       }
       new wxXmlNode( xml_terminating_trans_from, wxXML_TEXT_NODE, _T( "value" ), tt_from );
-
-      /* node <label> */
-
-      wxXmlNode* xml_terminating_trans_label = new wxXmlNode( xml_terminating_transition, wxXML_ELEMENT_NODE, _T( "label" ) );
-
-      /* node <variabledeclarations> */
-
-      wxXmlNode* xml_terminating_trans_label_var_decls = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
-
-      list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
-      for ( unsigned int j = 0; j < tt_label_var_decls.GetCount(); ++j )
-      {
-        decl tt_label_var_decl = tt_label_var_decls.Item( j );
-        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
-
-        /* node <variabledeclaration> */
-
-        wxXmlNode* xml_terminating_trans_label_var_decl = new wxXmlNode( xml_terminating_trans_label_var_decls, wxXML_ELEMENT_NODE, _T( "variabledeclaration" ) );
-        new wxXmlNode( xml_terminating_trans_label_var_decl, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_decl_text );
-      }
-
-      /* node <condition> */
-
-      wxXmlNode* xml_terminating_trans_label_condition = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
-
-      wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      if (!tt_label_condition_text.IsEmpty())
-      {
-        new wxXmlNode( xml_terminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
-      }
-
-      /* node <actions> */
-
-      wxXmlNode* xml_terminating_trans_label_actions = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
-
-      list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
-      for ( unsigned int j = 0; j < tt_label_actions.GetCount(); ++j )
-      {
-        action tt_label_action = tt_label_actions.Item( j );
-        wxString tt_label_action_name_text = tt_label_action.get_name();
-
-        /* node <action> */
-
-        wxXmlNode* xml_terminating_trans_label_action = new wxXmlNode( xml_terminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
-
-        /* node <name> */
-
-        wxXmlNode* xml_terminating_trans_label_action_name = new wxXmlNode( xml_terminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "name" ) );
-        new wxXmlNode( xml_terminating_trans_label_action_name, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_name_text );
-
-        wxString tt_label_action_params_text;
-        list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
-        if (tt_label_action_params.GetCount() > 0)
-        {
-          for ( unsigned int k = 0; k < tt_label_action_params.GetCount(); ++k )
-          {
-            dataexpression tt_label_action_param = tt_label_action_params.Item( k );
-            wxString tt_label_action_param_text = tt_label_action_param.get_expression();
-
-            /* node <param> */
-
-            wxXmlNode* xml_terminating_trans_label_action_param = new wxXmlNode( xml_terminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "param" ) );
-            new wxXmlNode( xml_terminating_trans_label_action_param, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_param_text );
-          }
-        }
-      }
-
-      /* node <timestamp> */
-
-      wxXmlNode* xml_terminating_trans_label_timestamp = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
-
-      wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      if (!tt_label_timestamp_text.IsEmpty())
-      {
-        new wxXmlNode( xml_terminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
-      }
-
-      /* node <variableupdates> */
-
-      wxXmlNode* xml_terminating_trans_label_var_updates = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
-
-      list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
-      for ( unsigned int j = 0; j < tt_label_var_updates.GetCount(); ++j )
-      {
-        varupdate tt_label_var_update = tt_label_var_updates.Item( j );
-        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
-
-        /* node <variableupdate> */
-
-        wxXmlNode* xml_terminating_trans_label_var_update = new wxXmlNode( xml_terminating_trans_label_var_updates, wxXML_ELEMENT_NODE, _T( "variableupdate" ) );
-        new wxXmlNode( xml_terminating_trans_label_var_update, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_update_text );
-      }
-   
-      write_linetype( xml_terminating_transition, tt_ptr->get_linetype() );
-
+      
       /* node <breakpointlist> */
       wxXmlNode* xml_terminating_trans_breakpointlist = new wxXmlNode( xml_terminating_transition, wxXML_ELEMENT_NODE, _T( "breakpointlist" ) );
 
           int breakpoints_count = tt_ptr->get_breakpoints()->GetCount();
-          for ( int j = 0; j < breakpoints_count; ++j )
+          for ( int j = breakpoints_count-1; j >= 0; --j )
           {
             coordinate &break_ptr = tt_ptr->get_breakpoints()->Item( j );
 
             write_coordinate( xml_terminating_trans_breakpointlist, break_ptr.m_x, break_ptr.m_y );
           }
-      /* Inherited */
 
+      write_linetype( xml_terminating_transition, tt_ptr->get_linetype() );
+
+      /* Inherited */
       write_object_attributes( xml_terminating_transition, tt_ptr );
     }
   }
@@ -433,26 +425,98 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
 
     // iterate over all terminating transitions in the process diagram
     int ntt_count = p_proc_dia->count_nonterminating_transition();
-    for ( int i = 0; i < ntt_count; ++i )
+    for ( int i = ntt_count-1; i >= 0; --i )
     {
       wxXmlNode* xml_nonterminating_transition = new wxXmlNode( xml_nonterminating_transition_list, wxXML_ELEMENT_NODE,
                                                   _T( "nonterminatingtransition" ) );
       nonterminating_transition* tt_ptr = p_proc_dia->get_nonterminating_transition( i );
 
-      /* node <from> */
+      /* node <label> */
+      wxXmlNode* xml_nonterminating_trans_label = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "label" ) );
 
-      wxXmlNode* xml_nonterminating_trans_from = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "from" ) );
+      /* node <variableupdates> */
+      wxXmlNode* xml_nonterminating_trans_label_var_updates = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
 
-      wxString tt_from = _T( "-1" );
-      compound_state* begin_ptr = tt_ptr->get_beginstate();
-      if ( begin_ptr != 0 )
+      list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
+      int varupdate_count = tt_label_var_updates.GetCount();
+      for ( int j = varupdate_count-1; j >= 0; --j )
       {
-        tt_from = wxString::Format( _T( "%u" ), begin_ptr->get_id() );
+        varupdate tt_label_var_update = tt_label_var_updates.Item( j );
+        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
+
+        /* node <variableupdate> */
+        wxXmlNode* xml_nonterminating_trans_label_var_update = new wxXmlNode( xml_nonterminating_trans_label_var_updates, wxXML_ELEMENT_NODE, _T( "variableupdate" ) );
+        new wxXmlNode( xml_nonterminating_trans_label_var_update, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_update_text );
       }
-      new wxXmlNode( xml_nonterminating_trans_from, wxXML_TEXT_NODE, _T( "value" ), tt_from );
+
+      /* node <timestamp> */
+      wxXmlNode* xml_nonterminating_trans_label_timestamp = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
+
+      wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
+      if (!tt_label_timestamp_text.IsEmpty())
+      {
+        new wxXmlNode( xml_nonterminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
+      }
+
+      /* node <actions> */
+      wxXmlNode* xml_nonterminating_trans_label_actions = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
+
+      list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
+      int action_count = tt_label_actions.GetCount();
+      for ( int j = action_count-1; j >= 0; --j )
+      {
+        action tt_label_action = tt_label_actions.Item( j );
+        wxString tt_label_action_name_text = tt_label_action.get_name();
+
+        /* node <action> */
+        wxXmlNode* xml_nonterminating_trans_label_action = new wxXmlNode( xml_nonterminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
+
+        wxString tt_label_action_params_text;
+        list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
+        if (tt_label_action_params.GetCount() > 0)
+        {
+          int action_param_count = tt_label_action_params.GetCount();
+          for ( int k = action_param_count-1; k >= 0; --k )
+          {
+            dataexpression tt_label_action_param = tt_label_action_params.Item( k );
+            wxString tt_label_action_param_text = tt_label_action_param.get_expression();
+
+            /* node <param> */
+            wxXmlNode* xml_nonterminating_trans_label_action_param = new wxXmlNode( xml_nonterminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "param" ) );
+            new wxXmlNode( xml_nonterminating_trans_label_action_param, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_param_text );
+          }
+        }
+
+       /* node <name> */
+        wxXmlNode* xml_nonterminating_trans_label_action_name = new wxXmlNode( xml_nonterminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "name" ) );
+        new wxXmlNode( xml_nonterminating_trans_label_action_name, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_name_text );
+      }
+
+      /* node <condition> */
+      wxXmlNode* xml_nonterminating_trans_label_condition = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
+
+      wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
+      if (!tt_label_condition_text.IsEmpty())
+      {
+        new wxXmlNode( xml_nonterminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
+      }
+
+      /* node <variabledeclarations> */
+      wxXmlNode* xml_nonterminating_trans_label_var_decls = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
+
+      list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
+      int var_decl_count = tt_label_var_decls.GetCount();
+      for ( int j = var_decl_count-1; j >= 0; --j )
+      {
+        decl tt_label_var_decl = tt_label_var_decls.Item( j );
+        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
+
+        /* node <variabledeclaration> */
+        wxXmlNode* xml_nonterminating_trans_label_var_decl = new wxXmlNode( xml_nonterminating_trans_label_var_decls, wxXML_ELEMENT_NODE, _T( "variabledeclaration" ) );
+        new wxXmlNode( xml_nonterminating_trans_label_var_decl, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_decl_text );
+      }
 
       /* node <to> */
-
       wxXmlNode* xml_nonterminating_trans_to = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "to" ) );
 
       wxString tt_to = _T( "-1" );
@@ -463,113 +527,31 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       }
       new wxXmlNode( xml_nonterminating_trans_to, wxXML_TEXT_NODE, _T( "value" ), tt_to );
 
-      /* node <label> */
+      /* node <from> */
+      wxXmlNode* xml_nonterminating_trans_from = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "from" ) );
 
-      wxXmlNode* xml_nonterminating_trans_label = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "label" ) );
-
-      /* node <variabledeclarations> */
-
-      wxXmlNode* xml_nonterminating_trans_label_var_decls = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variabledeclarations" ) );
-
-      list_of_decl tt_label_var_decls = tt_ptr->get_label()->get_declarations();
-      for ( unsigned int j = 0; j < tt_label_var_decls.GetCount(); ++j )
+      wxString tt_from = _T( "-1" );
+      compound_state* begin_ptr = tt_ptr->get_beginstate();
+      if ( begin_ptr != 0 )
       {
-        decl tt_label_var_decl = tt_label_var_decls.Item( j );
-        wxString tt_label_var_decl_text = tt_label_var_decl.get_decl();
-
-        /* node <variabledeclaration> */
-
-        wxXmlNode* xml_nonterminating_trans_label_var_decl = new wxXmlNode( xml_nonterminating_trans_label_var_decls, wxXML_ELEMENT_NODE, _T( "variabledeclaration" ) );
-        new wxXmlNode( xml_nonterminating_trans_label_var_decl, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_decl_text );
+        tt_from = wxString::Format( _T( "%u" ), begin_ptr->get_id() );
       }
-
-      /* node <condition> */
-
-      wxXmlNode* xml_nonterminating_trans_label_condition = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
-
-      wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      if (!tt_label_condition_text.IsEmpty())
-      {
-        new wxXmlNode( xml_nonterminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
-      }
-
-      /* node <actions> */
-
-      wxXmlNode* xml_nonterminating_trans_label_actions = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "actions" ) );
-
-      list_of_action tt_label_actions = tt_ptr->get_label()->get_actions();
-      for ( unsigned int j = 0; j < tt_label_actions.GetCount(); ++j )
-      {
-        action tt_label_action = tt_label_actions.Item( j );
-        wxString tt_label_action_name_text = tt_label_action.get_name();
-
-        /* node <action> */
-
-        wxXmlNode* xml_nonterminating_trans_label_action = new wxXmlNode( xml_nonterminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
-
-       /* node <name> */
-
-        wxXmlNode* xml_nonterminating_trans_label_action_name = new wxXmlNode( xml_nonterminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "name" ) );
-        new wxXmlNode( xml_nonterminating_trans_label_action_name, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_name_text );
-
-        wxString tt_label_action_params_text;
-        list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
-        if (tt_label_action_params.GetCount() > 0)
-        {
-          for ( unsigned int k = 0; k < tt_label_action_params.GetCount(); ++k )
-          {
-            dataexpression tt_label_action_param = tt_label_action_params.Item( k );
-            wxString tt_label_action_param_text = tt_label_action_param.get_expression();
-
-            /* node <param> */
-
-            wxXmlNode* xml_nonterminating_trans_label_action_param = new wxXmlNode( xml_nonterminating_trans_label_action, wxXML_ELEMENT_NODE, _T( "param" ) );
-            new wxXmlNode( xml_nonterminating_trans_label_action_param, wxXML_TEXT_NODE, _T( "value" ), tt_label_action_param_text );
-          }
-        }
-      }
-
-      /* node <timestamp> */
-
-      wxXmlNode* xml_nonterminating_trans_label_timestamp = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
-
-      wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      if (!tt_label_timestamp_text.IsEmpty())
-      {
-        new wxXmlNode( xml_nonterminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
-      }
-
-      /* node <variableupdates> */
-
-      wxXmlNode* xml_nonterminating_trans_label_var_updates = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "variableupdates" ) );
-
-      list_of_varupdate tt_label_var_updates = tt_ptr->get_label()->get_variable_updates();
-      for ( unsigned int j = 0; j < tt_label_var_updates.GetCount(); ++j )
-      {
-        varupdate tt_label_var_update = tt_label_var_updates.Item( j );
-        wxString tt_label_var_update_text = tt_label_var_update.get_varupdate();
-
-        /* node <variableupdate> */
-
-        wxXmlNode* xml_nonterminating_trans_label_var_update = new wxXmlNode( xml_nonterminating_trans_label_var_updates, wxXML_ELEMENT_NODE, _T( "variableupdate" ) );
-        new wxXmlNode( xml_nonterminating_trans_label_var_update, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_update_text );
-      }
-
-      write_linetype( xml_nonterminating_transition, tt_ptr->get_linetype() );
+      new wxXmlNode( xml_nonterminating_trans_from, wxXML_TEXT_NODE, _T( "value" ), tt_from );
 
       /* node <breakpointlist> */
       wxXmlNode* xml_nonterminating_trans_breakpointlist = new wxXmlNode( xml_nonterminating_transition, wxXML_ELEMENT_NODE, _T( "breakpointlist" ) );
 
           int breakpoints_count = tt_ptr->get_breakpoints()->GetCount();
-          for ( int j = 0; j < breakpoints_count; ++j )
+          for ( int j = breakpoints_count-1; j >= 0; --j )
           {
             coordinate& break_ptr = tt_ptr->get_breakpoints()->Item( i );
 
             write_coordinate( xml_nonterminating_trans_breakpointlist, break_ptr.m_x, break_ptr.m_y );
           }
 
-      /* Inherited */
+      write_linetype( xml_nonterminating_transition, tt_ptr->get_linetype() );
 
+      /* Inherited */
       write_object_attributes( xml_nonterminating_transition, tt_ptr );
     }
   }
@@ -582,7 +564,7 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
                                                 _T( "architecturediagramlist" ) );
   // add properties to the node; iterate over the list of architecture diagrams
   int count = p_arch_list->GetCount();
-  for ( int i = 0; i < count; ++i )
+  for ( int i = count-1; i >= 0; --i )
   {
     /* node <architecturediagram> with parent xml_architecture_diagram_list */
     wxXmlNode* xml_architecture_diagram = new wxXmlNode( xml_architecture_diagram_list, wxXML_ELEMENT_NODE,
@@ -592,15 +574,9 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
 
 
     { // offspring of xml_architecture_diagram
-     /* node <id> */
-     write_id( xml_architecture_diagram, arch_dia.get_id() ) ;
-
-     write_name( xml_architecture_diagram, arch_dia.get_name() );
-
       /* node <objectlist> */
       wxXmlNode* xml_objectlist = new wxXmlNode( xml_architecture_diagram, wxXML_ELEMENT_NODE,
                                                 _T( "objectlist" ) );
-
       { // children of xml_objectlist
 
         add_comment_list( xml_objectlist, &arch_dia );
@@ -612,6 +588,11 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
         add_process_reference_list( xml_objectlist, &arch_dia );
 
       } // end children xml_objectlist
+
+      write_name( xml_architecture_diagram, arch_dia.get_name() );
+
+      /* node <id> */
+      write_id( xml_architecture_diagram, arch_dia.get_id() ) ;
 
     } // end offspring
 
@@ -628,9 +609,8 @@ void grape::libgrape::add_blocked_list( wxXmlNode* p_objectlist, architecture_di
 
     // iterate over all blocked in the architecture diagram
     int blocked_count = p_arch_dia->count_blocked();
-    for ( int i = 0; i < blocked_count; ++i )
+    for ( int i = blocked_count-1; i >= 0; --i )
     {
-
       wxXmlNode* xml_blocked = new wxXmlNode( xml_blocked_list, wxXML_ELEMENT_NODE,
                                           _T( "blocked" ) );
       blocked* blocked_ptr = p_arch_dia->get_blocked( i );
@@ -665,15 +645,12 @@ void grape::libgrape::add_visible_list( wxXmlNode* p_objectlist, architecture_di
 
     // iterate over all visible in the architecture diagram
     int visible_count = p_arch_dia->count_visible();
-    for ( int i = 0; i < visible_count; ++i )
+    for ( int i = visible_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_visible = new wxXmlNode( xml_visible_list, wxXML_ELEMENT_NODE,
                                           _T( "visible" ) );
       visible* visible_ptr = p_arch_dia->get_visible( i );
-
-      /*node <name> */
-      write_name( xml_visible, visible_ptr->get_name() );
 
       /* node <propertyof> */
       wxXmlNode* xml_visible_prop = new wxXmlNode( xml_visible, wxXML_ELEMENT_NODE, _T( "propertyof" ) );
@@ -689,8 +666,10 @@ void grape::libgrape::add_visible_list( wxXmlNode* p_objectlist, architecture_di
       /*node <linetype>*/
       write_linetype( xml_visible, visible_ptr->get_linetype() );
 
-      /* Inherited */
+      /*node <name> */
+      write_name( xml_visible, visible_ptr->get_name() );
 
+      /* Inherited */
       write_object_attributes( xml_visible, visible_ptr );
     }
   }
@@ -706,7 +685,7 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
 
     // iterate over all channel communication in the architecture diagram
     int c_comm_count = p_arch_dia->count_channel_communication();
-    for ( int i = 0; i < c_comm_count; ++i )
+    for ( int i = c_comm_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_channel_communication = new wxXmlNode( xml_channel_communication_list, wxXML_ELEMENT_NODE,
@@ -719,7 +698,7 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
 
       int conn_count = c_comm_ptr->count_channel();
 
-      for ( int j = 0; j < conn_count; ++j )
+      for ( int j = conn_count-1; j >= 0; --j )
       {
         /* node <connectedtochannels> */
         wxXmlNode* xml_channel_communication_connected = new wxXmlNode( xml_channel_communication_conn_list, wxXML_ELEMENT_NODE,
@@ -732,7 +711,6 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
       }
 
       /* Inherited */
-
       write_object_attributes( xml_channel_communication, c_comm_ptr );
     }
 
@@ -749,21 +727,12 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
 
     // iterate over all channel in the architecture diagram
     int chan_count = p_arch_dia->count_channel();
-    for ( int i = 0; i < chan_count; ++i )
+    for ( int i = chan_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_channel = new wxXmlNode( xml_channel_list, wxXML_ELEMENT_NODE,
                                           _T( "channel" ) );
       channel* channel_ptr = p_arch_dia->get_channel( i );
-
-      write_name( xml_channel, channel_ptr->get_name() );
-
-      /* node <onreference> */
-      wxXmlNode* xml_channel_prop = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onreference" ) );
-
-      wxString prop = wxString::Format( _T( "%u" ), channel_ptr->get_reference()->get_id() );
-
-      new wxXmlNode( xml_channel_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
 
       /* node <onchannelcommunication> */
       wxXmlNode* xml_channel_comm = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onchannelcommunication" ) );
@@ -776,9 +745,16 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
         new wxXmlNode( xml_channel_comm, wxXML_TEXT_NODE, _T( "value" ), comm );
       }
 
+      /* node <onreference> */
+      wxXmlNode* xml_channel_prop = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onreference" ) );
+
+      wxString prop = wxString::Format( _T( "%u" ), channel_ptr->get_reference()->get_id() );
+
+      new wxXmlNode( xml_channel_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
+
+      write_name( xml_channel, channel_ptr->get_name() );
 
       /* Inherited */
-
       write_object_attributes( xml_channel, channel_ptr );
     }
   }
@@ -794,7 +770,7 @@ void grape::libgrape::add_architecture_reference_list( wxXmlNode* p_objectlist, 
 
     // iterate over all architecture references in the architecture diagram
     int arch_ref_count = p_arch_dia->count_architecture_reference();
-    for ( int i = 0; i < arch_ref_count; ++i )
+    for ( int i = arch_ref_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_architecture_reference = new wxXmlNode( xml_architecture_reference_list, wxXML_ELEMENT_NODE,
@@ -802,14 +778,11 @@ void grape::libgrape::add_architecture_reference_list( wxXmlNode* p_objectlist, 
       architecture_reference* arch_ref_ptr = p_arch_dia->get_architecture_reference( i );
 
 
-      /* node <name> */
-      write_name( xml_architecture_reference, arch_ref_ptr->get_name() );
-
       /* node <channellist> */
       wxXmlNode* xml_architecture_reference_channellist = new wxXmlNode( xml_architecture_reference, wxXML_ELEMENT_NODE, _T( "channellist" ) );
 
           int channel_count = arch_ref_ptr->count_channel();
-          for ( int k = 0; k < channel_count; ++k )
+          for ( int k = channel_count-1; k >= 0; --k )
           {
             channel* channel_ptr = arch_ref_ptr->get_channel( k );
 
@@ -832,8 +805,10 @@ void grape::libgrape::add_architecture_reference_list( wxXmlNode* p_objectlist, 
 
       new wxXmlNode( xml_architecture_reference_prop, wxXML_TEXT_NODE, _T( "value" ), arch_ref_prop );
 
-      /* Inherited */
+      /* node <name> */
+      write_name( xml_architecture_reference, arch_ref_ptr->get_name() );
 
+      /* Inherited */
       write_object_attributes( xml_architecture_reference, arch_ref_ptr );
     }
   }
@@ -849,22 +824,32 @@ void grape::libgrape::add_process_reference_list( wxXmlNode* p_objectlist, archi
 
     // iterate over all process references in the architecture diagram
     int proc_ref_count = p_arch_dia->count_process_reference();
-    for ( int i = 0; i < proc_ref_count; ++i )
+    for ( int i = proc_ref_count-1; i >= 0; --i )
     {
 
       wxXmlNode* xml_process_reference = new wxXmlNode( xml_process_reference_list, wxXML_ELEMENT_NODE,
                                                   _T( "processreference" ) );
       process_reference* proc_ref_ptr = p_arch_dia->get_process_reference( i );
 
-      /* node <name> */
-      write_name( xml_process_reference, proc_ref_ptr->get_name() );
+      /* node <parameterassignmentlist> */
+      wxXmlNode* xml_process_reference_parameterlist = new wxXmlNode( xml_process_reference, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
 
+      list_of_varupdate parameter_assignments = proc_ref_ptr->get_parameter_updates();
+      int param_ass_count = parameter_assignments.GetCount();
+      for ( int j = param_ass_count-1; j >= 0; --j )
+      {
+        varupdate parameter_assignment = parameter_assignments.Item( j );
+        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
+
+        wxXmlNode* xml_process_reference_parameter = new wxXmlNode( xml_process_reference_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
+        new wxXmlNode( xml_process_reference_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
+      }
 
       /* node <channellist> */
       wxXmlNode* xml_process_reference_channellist = new wxXmlNode( xml_process_reference, wxXML_ELEMENT_NODE, _T( "channellist" ) );
 
           int channel_count = proc_ref_ptr->count_channel();
-          for ( int k = 0; k < channel_count; ++k )
+          for ( int k = channel_count-1; k >= 0; --k )
           {
             channel* channel_ptr = proc_ref_ptr->get_channel( k );
 
@@ -888,18 +873,8 @@ void grape::libgrape::add_process_reference_list( wxXmlNode* p_objectlist, archi
 
       new wxXmlNode( xml_process_reference_prop, wxXML_TEXT_NODE, _T( "value" ), proc_ref_prop );
 
-      /* node <parameterassignmentlist> */
-      wxXmlNode* xml_process_reference_parameterlist = new wxXmlNode( xml_process_reference, wxXML_ELEMENT_NODE, _T( "parameterassignmentlist" ) );
-
-      list_of_varupdate parameter_assignments = proc_ref_ptr->get_parameter_updates();
-      for ( unsigned int j = 0; j < parameter_assignments.GetCount(); ++j )
-      {
-        varupdate parameter_assignment = parameter_assignments.Item( j );
-        wxString parameter_assignment_text = parameter_assignment.get_varupdate();
-
-        wxXmlNode* xml_process_reference_parameter = new wxXmlNode( xml_process_reference_parameterlist, wxXML_ELEMENT_NODE, _T( "parameterassignment" ) );
-        new wxXmlNode( xml_process_reference_parameter, wxXML_TEXT_NODE, _T( "value" ), parameter_assignment_text );
-      }
+      /* node <name> */
+      write_name( xml_process_reference, proc_ref_ptr->get_name() );
 
       /* Inherited */
       write_object_attributes( xml_process_reference, proc_ref_ptr );
@@ -917,28 +892,28 @@ void grape::libgrape::write_coordinate( wxXmlNode *p_parent, float p_x, float p_
   /* node <coord> */
   wxXmlNode* xml_coord = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "coord" ) );
 
-    /* node <x> */
-    wxXmlNode* xml_coord_x = new wxXmlNode( xml_coord, wxXML_ELEMENT_NODE, _T( "x" ) );
-
-    wxString coord_x;
-    coord_x = wxString::Format( _T( "%f" ), p_x );
-    new wxXmlNode( xml_coord_x, wxXML_TEXT_NODE, _T( "value" ), coord_x );
-
     /* node <y> */
     wxXmlNode* xml_coord_y = new wxXmlNode( xml_coord, wxXML_ELEMENT_NODE, _T( "y" ) );
 
     wxString coord_y;
     coord_y = wxString::Format( _T( "%f" ),  p_y );
     new wxXmlNode( xml_coord_y, wxXML_TEXT_NODE, _T( "value" ), coord_y );
+
+    /* node <x> */
+    wxXmlNode* xml_coord_x = new wxXmlNode( xml_coord, wxXML_ELEMENT_NODE, _T( "x" ) );
+
+    wxString coord_x;
+    coord_x = wxString::Format( _T( "%f" ), p_x );
+    new wxXmlNode( xml_coord_x, wxXML_TEXT_NODE, _T( "value" ), coord_x );
 }
 
 void grape::libgrape::write_object_attributes( wxXmlNode *p_parent, object* p_object)
 {
-      write_id( p_parent, p_object->get_id() );
+      write_size( p_parent, p_object->get_width(), p_object->get_height() );
 
       write_coordinate( p_parent, p_object->get_coordinate().m_x, p_object->get_coordinate().m_y );
 
-      write_size( p_parent, p_object->get_width(), p_object->get_height() );
+      write_id( p_parent, p_object->get_id() );
 }
 
 void grape::libgrape::write_size( wxXmlNode *p_parent, float p_width, float p_height )
@@ -946,19 +921,19 @@ void grape::libgrape::write_size( wxXmlNode *p_parent, float p_width, float p_he
   /* node <size> */
   wxXmlNode* xml_size = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "size" ) );
 
-    /* node <width> */
-    wxXmlNode* xml_process_reference_width = new wxXmlNode( xml_size, wxXML_ELEMENT_NODE, _T( "width" ) );
-
-    wxString width;
-    width = wxString::Format( _T( "%f" ), p_width );
-    new wxXmlNode( xml_process_reference_width, wxXML_TEXT_NODE, _T( "value" ), width );
-
     /* node <height> */
     wxXmlNode* xml_process_reference_height = new wxXmlNode( xml_size, wxXML_ELEMENT_NODE, _T( "height" ) );
 
     wxString height;
     height = wxString::Format( _T( "%f" ), p_height );
     new wxXmlNode( xml_process_reference_height, wxXML_TEXT_NODE, _T( "value" ), height );
+
+    /* node <width> */
+    wxXmlNode* xml_process_reference_width = new wxXmlNode( xml_size, wxXML_ELEMENT_NODE, _T( "width" ) );
+
+    wxString width;
+    width = wxString::Format( _T( "%f" ), p_width );
+    new wxXmlNode( xml_process_reference_width, wxXML_TEXT_NODE, _T( "value" ), width );
 }
 
 void grape::libgrape::write_id( wxXmlNode *p_parent, unsigned int p_id )
