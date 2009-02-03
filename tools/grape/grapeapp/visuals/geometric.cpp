@@ -343,7 +343,7 @@ bool grape::grapeapp::is_inside_designator( const coordinate &p_begin, float p_w
   coordinate fourth = { halfway.m_x + sin( angle ) * 0.025, halfway.m_y - cos( angle ) * 0.025 };
 
   // The head of the arrow is made up of the coordinates fifth, end and sixth, in that order.
-  coordinate fifth = {  halfway.m_x + sin( angle ) * 0.05, halfway.m_y - cos( angle ) * 0.05 };
+  coordinate fifth = { halfway.m_x + sin( angle ) * 0.05, halfway.m_y - cos( angle ) * 0.05 };
   coordinate sixth = { halfway.m_x - sin( angle ) * 0.05, halfway.m_y + cos( angle ) * 0.05 };
 
   // assign test points for arrow base
@@ -383,7 +383,7 @@ bool grape::grapeapp::is_on_border_designator( const coordinate &p_begin, const 
   coordinate fourth = { halfway.m_x + sin( angle ) * 0.25 * p_width, halfway.m_y - cos( angle ) * 0.25 * p_width };
 
   // The head of the arrow is made up of the coordinates fifth, end and sixth, in that order.
-  coordinate fifth = {  halfway.m_x + sin( angle ) * 0.5 * p_width, halfway.m_y - cos( angle ) * 0.5 * p_width };
+  coordinate fifth = { halfway.m_x + sin( angle ) * 0.5 * p_width, halfway.m_y - cos( angle ) * 0.5 * p_width };
   coordinate sixth = { halfway.m_x - sin( angle ) * 0.5 * p_width, halfway.m_y + cos( angle ) * 0.5 * p_width };
 
   // lines are traversed in the same way that they are traced in draw_designator (when drawing the outline)
@@ -640,7 +640,7 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   glPopMatrix();
 }
 
-void grape::grapeapp::draw_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, bool p_selected, wxString &p_label_text )
+void grape::grapeapp::draw_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, bool p_selected, const wxString &p_label_text )
 {
 
   // calculate sum here, because overloaded + operator requires copy constructor, which implies requirement of default constructor, which implies that the initialization with curly brackets is no longer possible ( and replacing all of them is just too much work right now )
@@ -662,7 +662,7 @@ bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coor
   return is_inside_line( p_ntt_coord, sum_base, p_coord ) || is_inside_line( p_ntt_coord, sum_head, p_coord );
 }
 
-void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text )
+void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, bool p_selected, const wxString &p_label_text )
 {
   float distance_begin_to_control = sqrt( pow( p_control.m_y - p_begin.m_y, 2 ) + pow( p_control.m_x - p_begin.m_x, 2 ) );
   float distance_control_to_end = sqrt( pow( p_end.m_y - p_control.m_y, 2 ) + pow( p_end.m_x - p_control.m_x, 2 ) );
@@ -741,7 +741,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
 }
 
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text )
+void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, const wxString &p_label_text )
 {
   coordinate end_coord = { p_begin.m_x + p_width, p_begin.m_y + p_height };
   draw_line( p_begin, end_coord, p_selected, g_color_black );
@@ -783,7 +783,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text )
+void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
   float width = p_end.m_x - p_begin.m_x;
   float height = p_end.m_y - p_begin.m_y;
@@ -791,7 +791,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
 }
 
 
-void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text )
+void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
   float width = p_end.m_x - p_begin.m_x;
   float height = p_end.m_y - p_begin.m_y;

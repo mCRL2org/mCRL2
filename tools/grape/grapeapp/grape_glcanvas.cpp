@@ -167,12 +167,13 @@ void grape_glcanvas::draw_visual_objects()
     vis_obj_ptr->draw();
   }
     
-  // draw terminating transition if we are dragging a transition
-  if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) && (m_mousedown))
+  if (m_mousedown)
   {
-    wxString label_text = _T("");
-    // draw transition
-    draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, label_text);
+    // draw terminating transition if we are dragging
+    if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
+           
+    // draw channel communication if we are dragging 
+    if ((m_canvas_state == ADD_CHANNEL_COMMUNICATION) && (m_mousedown)) draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
   }        
 }
 
@@ -462,11 +463,8 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
     {
       if ( m_touched_visual_object )
       {
-        // update canvas if we are dragging a transition
-        if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)
-        {
-          draw();
-        }
+        // update canvas if we are dragging a transition or channel communication
+        if (m_canvas_state == ADD_CHANNEL_COMMUNICATION || m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) draw();
         
         // select object
         object *obj_ptr = m_touched_visual_object->get_selectable_object();

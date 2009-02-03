@@ -63,7 +63,7 @@ bool visualprocess_reference::is_inside( coordinate &p_coord )
 
 grape_direction visualprocess_reference::is_on_border( coordinate &p_coord )
 {
-  return is_on_border_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord );
+  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
 
 coordinate visualprocess_reference::move_to_border( coordinate &p_coord )
