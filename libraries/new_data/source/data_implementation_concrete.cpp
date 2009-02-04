@@ -22,6 +22,7 @@
 #include "mcrl2/new_data/set.h"
 #include "mcrl2/new_data/bag.h"
 #include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/new_data/standard.h"
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
@@ -854,9 +855,124 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
 
   variable_list        context;
   data_equation_list   equations; // = element_sort.constructor_equations(element_sort, context);
+  data_equation_list   equations_equal;
+  data_equation_list   equations_smaller;
+  data_equation_list   equations_smaller_equal;
+
+  boost::iterator_range<structured_sort_constructor_list::const_iterator>
+                                        cl(element_sort.struct_constructors());
+
+  for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
+  {
+    for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
+    {
+      data_expression right_equal         = (i == j) ? sort_bool_::true_() : sort_bool_::false_();
+      data_expression right_smaller       = (i < j)  ? sort_bool_::true_() : sort_bool_::false_();
+      data_expression right_smaller_equal = (i <= j) ? sort_bool_::true_() : sort_bool_::false_();
+
+      if (i->argument_sorts().empty() && j->argument_sorts().empty())
+      {
+        data_expression operand_left  = i->constructor_function(element_sort);
+        data_expression operand_right = j->constructor_function(element_sort);
+
+        equations_equal.push_back(data_equation(equal_to(operand_left, operand_right), right_equal));
+        equations_smaller.push_back(data_equation(less(operand_left, operand_right), right_smaller));
+        equations_smaller_equal.push_back(data_equation(less_equal(operand_left, operand_right), right_smaller_equal));
+      }
+      else { // at least one constructor take arguments
+        typedef boost::iterator_range< structured_sort_constructor_argument_list::const_iterator > argument_range;
+
+        data_expression operand_left;
+        data_expression operand_right;
+
+        number_postfix_generator generator("v");
+
+        // Create variables for equation
+        variable_list variables;
+
+        if (i->argument_sorts().empty())
+        {
+          operand_left  = i->constructor_function(element_sort);
+        }
+        else
+        {
+          for (argument_range k(i->arguments()); k.begin() != k.end(); k.advance_begin(1))
+          {
+            variables.push_back(variable(generator(), k.front().sort()));
+          }
+
+          // create first operand of ==, < or <=
+          operand_left = application(i->constructor_function(element_sort),
+                                                                boost::make_iterator_range(variables));
+        }
+
+        if (j->argument_sorts().empty())
+        {
+          operand_right = j->constructor_function(element_sort);
+        }
+        else
+        {
+          for (argument_range k(j->arguments()); k.begin() != k.end(); k.advance_begin(1))
+          {
+            variables.push_back(variable(generator(), k.front().sort()));
+          }
+
+          // create second operand of ==, < or <=
+          operand_right = application(j->constructor_function(element_sort),
+                     boost::make_iterator_range(variables.begin() + i->arguments().size(), variables.end()));
+        }
+
+        if (i == j)
+        { // constructors are the same
+          variable_list::const_reverse_iterator k(variables.rbegin() + i->arguments().size());
+          variable_list::const_reverse_iterator l(variables.rbegin());
+
+          right_equal         = equal_to(*k, *l);
+          right_smaller       = less(*k, *l);
+          right_smaller_equal = less_equal(*k, *l);
+
+          for (++l, ++k; k != variables.rend(); ++l, ++k)
+          {
+            // Constructors have one or more arguments:
+            // - rhs for c(x0,...,xn) == c(y0,..,yn):
+            //     x0 == y0 && ... && xn == yn
+            right_equal         = sort_bool_::and_(equal_to(*k, *l), right_equal);
+            // - rhs for c(x0,...,xn) < c(y0,..,yn):
+            //     x0 < y0                                                     , when n = 0
+            //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
+            //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 < y2))) , when n = 2
+            //     etcetera
+            right_smaller       = sort_bool_::or_(less(*k, *l),
+                sort_bool_::and_(equal_to(*k, *l), right_smaller));
+            // - rhs for c(x0,...,xn) <= c(y0,..,yn):
+            //     x0 <= y0                                                    , when n = 0
+            //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
+            //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 <= y2))), when n = 2
+            //     etcetera
+            right_smaller_equal = sort_bool_::or_(less(*k, *l),
+                sort_bool_::and_(equal_to(*k, *l), right_smaller_equal));
+          }
+        }
+
+        equations_equal.push_back(data_equation(boost::make_iterator_range(variables),
+          equal_to(operand_left, operand_right), right_equal));
+        equations_smaller.push_back(data_equation(boost::make_iterator_range(variables),
+          less(operand_left, operand_right), right_smaller));
+        equations_smaller_equal.push_back(data_equation(boost::make_iterator_range(variables),
+          less_equal(operand_left, operand_right), right_smaller_equal));
+      }
+    }
+  }
+
   data_equation_list   projection_equations = element_sort.projection_equations(element_sort);
   data_equation_list   recogniser_equations = element_sort.recogniser_equations(element_sort);
 
+  std::copy(equations_equal.begin(), equations_equal.end(),
+                                std::back_insert_iterator< data_equation_list >(equations));
+  std::copy(equations_smaller.begin(), equations_smaller.end(),
+                                std::back_insert_iterator< data_equation_list >(equations));
+  std::copy(equations_smaller_equal.begin(), equations_smaller_equal.end(),
+                                std::back_insert_iterator< data_equation_list >(equations));
   std::copy(projection_equations.begin(), projection_equations.end(),
                                 std::back_insert_iterator< data_equation_list >(equations));
   std::copy(recogniser_equations.begin(), recogniser_equations.end(),

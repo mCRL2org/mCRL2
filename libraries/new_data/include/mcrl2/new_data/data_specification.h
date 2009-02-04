@@ -36,7 +36,7 @@
 #include "mcrl2/new_data/detail/compatibility.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief new_data specification.
@@ -447,7 +447,6 @@ namespace mcrl2 {
         add_equation(e);
         m_sys_equations.put(e,e);
       }
-      
 
       /// \brief Adds sorts to this specification
       ///
@@ -598,7 +597,7 @@ namespace mcrl2 {
         {
           m_sys_constructors.remove(f);
         }
-        
+
         sort_expression s;
         if (f.sort().is_function_sort())
         {
@@ -610,7 +609,7 @@ namespace mcrl2 {
         }
 
         atermpp::map<sort_expression, function_symbol_list>::iterator i = m_constructors.find(s);
-        i->second.erase(std::find(i->second.begin(), i->second.end(), f));        
+        i->second.erase(std::find(i->second.begin(), i->second.end(), f));
       }
 
       /// \brief Removes constructors from specification.
@@ -653,7 +652,7 @@ namespace mcrl2 {
           remove_function(*i);
         }
       }
-      
+
       /// \brief Removes equation from specification.
       ///
       /// \param[in] e An equation.

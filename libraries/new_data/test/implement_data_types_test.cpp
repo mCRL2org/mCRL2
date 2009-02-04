@@ -2019,6 +2019,8 @@ void implement_pos_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+
+  std::clog << "== POS COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2038,6 +2040,8 @@ void implement_nat_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+
+  std::clog << "== NAT COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2057,6 +2061,8 @@ void implement_int_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+
+  std::clog << "== INT COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2076,6 +2082,8 @@ void implement_real_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+
+  std::clog << "== REAL COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2101,6 +2109,8 @@ void implement_list_test()
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
+
+  std::clog << "== LIST COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2127,6 +2137,8 @@ void implement_set_test()
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+
+  std::clog << "== SET COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2153,6 +2165,8 @@ void implement_bag_test()
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+
+  std::clog << "== BAG COMPARISON ==" << std::endl;
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
@@ -2239,6 +2253,7 @@ void implement_structured_sort_test()
   old_impl_sort_struct(ls, &old_substs, &data_decls_old);
   impl_exprs_appl(ls, &new_substs, &data_decls_new);
 
+  std::clog << "== STRUCTURED SORT COMPARISON ==" << std::endl;
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.sorts) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.sorts) << std::endl;

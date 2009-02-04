@@ -29,7 +29,7 @@
 #include "mcrl2/new_data/variable.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/standard.h"
-#include "mcrl2/new_data/postfix_identifier_generator.h"
+#include "mcrl2/new_data/identifier_generator.h"
 #include "mcrl2/new_data/data_expression_utility.h"
 
 namespace mcrl2 {
@@ -187,8 +187,8 @@ namespace mcrl2 {
         structured_sort_constructor(const std::string& name,
                                     const boost::iterator_range<structured_sort_constructor_argument_list::const_iterator>& arguments)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                                               atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
-                                                               core::detail::gsMakeNil())),
+                   atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
+                   core::detail::gsMakeNil())),
             m_arguments        (arguments.begin(), arguments.end())
         {
           assert(!name.empty());
@@ -467,20 +467,21 @@ namespace mcrl2 {
 
               argument_range arguments(i.front().arguments());
 
-              postfix_identifier_generator generator("");
+              number_postfix_generator generator("v");
 
               variable_list variables;
 
               // Create variables for equation
               for (argument_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
               {
-                variables.push_back(variable(generator("a"), j->sort()));
+                variables.push_back(variable(generator(), j->sort()));
               }
 
               for (argument_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
               {
                 if (!j->name().empty()) {
-                  application lhs(function_symbol(j->name(), function_sort(s, j->sort())), boost::make_iterator_range(variables));
+                  application lhs(function_symbol(j->name(), function_sort(s, j->sort())),
+                        application(i.front().constructor_function(s), boost::make_iterator_range(variables)));
 
                   result.push_back(data_equation(boost::make_iterator_range(variables), lhs, variables[j - arguments.begin()]));
                 }
@@ -498,7 +499,7 @@ namespace mcrl2 {
 
           for(structured_sort_constructor_list::const_iterator i = m_struct_constructors.begin(); i != m_struct_constructors.end(); ++i)
           {
-            for(structured_sort_constructor_list::const_iterator j = i; j != m_struct_constructors.end(); ++j)
+            for(structured_sort_constructor_list::const_iterator j = m_struct_constructors.begin(); j != m_struct_constructors.end(); ++j)
             {
               if(!j->recogniser().empty())
               {
@@ -513,7 +514,7 @@ namespace mcrl2 {
                 {
                   typedef boost::iterator_range< structured_sort_constructor_argument_list::const_iterator > argument_range;
 
-                  postfix_identifier_generator generator("");
+                  number_postfix_generator generator("v");
 
                   argument_range arguments(i->arguments());
 
@@ -522,7 +523,7 @@ namespace mcrl2 {
 
                   for (argument_range::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
                   {
-                    variables.push_back(variable(generator("a"), k->sort()));
+                    variables.push_back(variable(generator(), k->sort()));
                   }
 
                   result.push_back(data_equation(boost::make_iterator_range(variables), application(j->recogniser_function(s),

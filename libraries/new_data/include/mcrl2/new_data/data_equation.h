@@ -111,7 +111,7 @@ namespace mcrl2 {
         {
           return atermpp::arg3(*this);
         }
-        
+
         /// \brief Returns the right hand side of the new_data equation.
         inline
         data_expression rhs() const
