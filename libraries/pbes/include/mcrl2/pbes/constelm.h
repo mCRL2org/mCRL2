@@ -330,7 +330,7 @@ namespace detail {
     std::vector<typename Container::iterator> to_be_removed;
     for (typename Container::iterator i = container.begin(); i != container.end(); ++i)
     {
-      if (!pred(*i))
+      if (pred(*i))
       {
         to_be_removed.push_back(i);
       }
