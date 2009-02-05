@@ -399,53 +399,117 @@ namespace mcrl2 {
           return result;
         }
 
+        /// \brief Returns the equations for ==, < and <= for this sort, such that the
+        ///        result can be used by the rewriter
+        /// \param s The sort expression as which this sort is treated
+        //         internally
         inline
-        data_equation_list constructor_equations(const sort_expression& s, variable_list& variable_context) const
+        data_equation_list constructor_equations(const sort_expression& s) const
         {
           data_equation_list result;
-          function_symbol_list cl(constructor_functions(s));
-          for(function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
+
+          boost::iterator_range<structured_sort_constructor_list::const_iterator>
+                                                cl(struct_constructors());
+
+          for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
           {
-            for(function_symbol_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
+            for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
             {
-              variable_list variables;
-              data_expression left = apply_function_symbol_to_variables(*i, variable_context, variables);
-              variable_list left_variables = variables;
-              data_expression right = apply_function_symbol_to_variables(*j, variable_context, variables);
-              variable_list right_variables;
-              std::set_difference(variables.begin(), variables.end(),
-                              left_variables.begin(), left_variables.end(), std::back_insert_iterator< variable_list >(right_variables));
-              data_expression result_expr;
-              if(left == right)
+              data_expression right_equal         = (i == j) ? sort_bool_::true_() : sort_bool_::false_();
+              data_expression right_smaller       = (i < j)  ? sort_bool_::true_() : sort_bool_::false_();
+              data_expression right_smaller_equal = (i <= j) ? sort_bool_::true_() : sort_bool_::false_();
+
+              if (i->argument_sorts().empty() && j->argument_sorts().empty())
               {
-                if(variables.empty())
+                data_expression operand_left  = i->constructor_function(s);
+                data_expression operand_right = j->constructor_function(s);
+
+                result.push_back(data_equation(equal_to(operand_left, operand_right), right_equal));
+                result.push_back(data_equation(less(operand_left, operand_right), right_smaller));
+                result.push_back(data_equation(less_equal(operand_left, operand_right), right_smaller_equal));
+              }
+              else { // at least one constructor take arguments
+                typedef boost::iterator_range< structured_sort_constructor_argument_list::const_iterator > argument_range;
+
+                data_expression operand_left;
+                data_expression operand_right;
+
+                number_postfix_generator generator("v");
+
+                // Create variables for equation
+                variable_list variables;
+
+                if (i->argument_sorts().empty())
                 {
-                  result_expr = sort_bool_::true_();
+                  operand_left  = i->constructor_function(s);
                 }
                 else
                 {
-                  variable_list::const_iterator l = left_variables.begin();
-                  variable_list::const_iterator r = right_variables.begin();
-                  while(l != left_variables.end() && r != right_variables.end()){
-                    if(result_expr == data_expression())
-                    {
-                      result_expr = equal_to(*l, *r);
-                    }
-                    else
-                    {
-                      result_expr = sort_bool_::and_(result_expr, equal_to(*l, *r));
-                    }
+                  for (argument_range k(i->arguments()); k.begin() != k.end(); k.advance_begin(1))
+                  {
+                    variables.push_back(variable(generator(), k.front().sort()));
                   }
-                  assert(l == left_variables.end());
-                  assert(r == right_variables.end());
-                }
-              }
-              else
-              {
-                result_expr = sort_bool_::false_();
-              }
 
-              result.push_back(data_equation(boost::make_iterator_range(variables), left, right));
+                  // create first operand of ==, < or <=
+                  operand_left = application(i->constructor_function(s),
+                                                                        boost::make_iterator_range(variables));
+                }
+
+                if (j->argument_sorts().empty())
+                {
+                  operand_right = j->constructor_function(s);
+                }
+                else
+                {
+                  for (argument_range k(j->arguments()); k.begin() != k.end(); k.advance_begin(1))
+                  {
+                    variables.push_back(variable(generator(), k.front().sort()));
+                  }
+
+                  // create second operand of ==, < or <=
+                  operand_right = application(j->constructor_function(s),
+                             boost::make_iterator_range(variables.begin() + i->arguments().size(), variables.end()));
+                }
+
+                if (i == j)
+                { // constructors are the same
+                  variable_list::const_reverse_iterator k(variables.rbegin() + i->arguments().size());
+                  variable_list::const_reverse_iterator l(variables.rbegin());
+
+                  right_equal         = equal_to(*k, *l);
+                  right_smaller       = less(*k, *l);
+                  right_smaller_equal = less_equal(*k, *l);
+
+                  for (++l, ++k; k != variables.rend(); ++l, ++k)
+                  {
+                    // Constructors have one or more arguments:
+                    // - rhs for c(x0,...,xn) == c(y0,..,yn):
+                    //     x0 == y0 && ... && xn == yn
+                    right_equal         = sort_bool_::and_(equal_to(*k, *l), right_equal);
+                    // - rhs for c(x0,...,xn) < c(y0,..,yn):
+                    //     x0 < y0                                                     , when n = 0
+                    //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
+                    //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 < y2))) , when n = 2
+                    //     etcetera
+                    right_smaller       = sort_bool_::or_(less(*k, *l),
+                        sort_bool_::and_(equal_to(*k, *l), right_smaller));
+                    // - rhs for c(x0,...,xn) <= c(y0,..,yn):
+                    //     x0 <= y0                                                    , when n = 0
+                    //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
+                    //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 <= y2))), when n = 2
+                    //     etcetera
+                    right_smaller_equal = sort_bool_::or_(less(*k, *l),
+                        sort_bool_::and_(equal_to(*k, *l), right_smaller_equal));
+                  }
+                }
+
+                result.push_back(data_equation(boost::make_iterator_range(variables),
+                  equal_to(operand_left, operand_right), right_equal));
+                result.push_back(data_equation(boost::make_iterator_range(variables),
+                  less(operand_left, operand_right), right_smaller));
+                result.push_back(data_equation(boost::make_iterator_range(variables),
+                  less_equal(operand_left, operand_right), right_smaller_equal));
+              }
             }
           }
 
@@ -458,8 +522,7 @@ namespace mcrl2 {
           data_equation_list result;
 
           for (boost::iterator_range< structured_sort_constructor_list::const_iterator > i(
-                        static_cast< structured_sort const& >(s).struct_constructors());
-                                                        i.begin() != i.end(); i.advance_begin(1))
+                        struct_constructors()); i.begin() != i.end(); i.advance_begin(1))
           {
             if (!i.front().argument_sorts().empty())
             {
