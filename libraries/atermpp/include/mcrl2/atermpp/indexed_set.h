@@ -27,9 +27,9 @@ namespace atermpp
     {
       ATindexedSetDestroy(s);
     }
-  }; 
+  };
   /// \endcond
-  
+
   /// \brief Indexed set. N.B. Copies of an indexed_set refer to the same object.
   class indexed_set
   {
@@ -44,7 +44,7 @@ namespace atermpp
       indexed_set(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
         : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
       {}
-      
+
       /// \brief Clear the hash table in the set.
       /// This function clears the hash table in the set, but does not release the memory.
       /// Using indexed_set_reset instead of indexed_set_destroy is preferable when indexed sets of
@@ -53,7 +53,7 @@ namespace atermpp
       {
         ATindexedSetReset(m_set.get());
       }
-      
+
       /// \brief Enter elem into the set.
       /// This functions enters elem into the set. If elem was already in the set the previously
       /// assigned index of elem is returned, and new is set to false. If elem did not yet occur in set a
@@ -69,7 +69,7 @@ namespace atermpp
         long l = ATindexedSetPut(m_set.get(), elem, &b);
         return std::make_pair(l, b == ATtrue);
       }
-      
+
       /// \brief Find the index of elem in set.
       /// The index assigned to elem is returned, except when elem is not in the set, in
       /// which case the return value is a negative number.
@@ -79,7 +79,7 @@ namespace atermpp
       {
         return ATindexedSetGetIndex(m_set.get(), elem);
       }
-      
+
       /// \brief Retrieve the element at index in set.
       /// This function must be invoked with a valid index and it returns the elem assigned
       /// to this index. If it is invoked with an invalid index, effects are not predictable.
@@ -89,7 +89,7 @@ namespace atermpp
       {
         return ATindexedSetGetElem(m_set.get(), index);
       }
-      
+
       /// \brief Remove elem from set.
       /// The elem is removed from the indexed set, and if a number was assigned to elem,
       /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
@@ -98,7 +98,7 @@ namespace atermpp
       {
         ATindexedSetRemove(m_set.get(), elem);
       }
-      
+
       /// \brief Retrieve all elements in set.
       /// A list with all valid elements stored in the indexed set is returned.  The list is
       /// ordered from element with index 0 onwards.

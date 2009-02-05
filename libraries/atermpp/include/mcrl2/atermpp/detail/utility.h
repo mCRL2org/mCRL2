@@ -19,7 +19,7 @@
 namespace atermpp {
 
   namespace detail {
-    
+
     /// \brief Converts a string to an ATerm string
     /// \param s A string
     /// \return The converted string

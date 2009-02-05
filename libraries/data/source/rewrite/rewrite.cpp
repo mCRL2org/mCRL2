@@ -110,11 +110,11 @@ void Rewriter::setSubstitutionList(ATermList Substs)
 void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
 	long n = ATgetAFun(ATgetArgument(Var,0));
-	
+
 	if ( n >= substs_size )
 	{
 		long newsize;
-		
+
 		if ( n >= 2*substs_size )
 		{
 			if ( n < 1024 )
@@ -126,19 +126,19 @@ void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 		} else {
 			newsize = 2*substs_size;
 		}
-		
+
 		if ( substs_size > 0 )
 		{
 			ATunprotectArray(substs);
 		}
 		substs = (ATerm *) realloc(substs,newsize*sizeof(ATerm));
-		
+
 		if ( substs == NULL )
 		{
 			gsErrorMsg("Failed to increase the size of a substitution array to %d\n",newsize);
 			exit(1);
 		}
-		
+
 		for (long i=substs_size; i<newsize; i++)
 		{
 			substs[i]=NULL;
@@ -199,19 +199,19 @@ void Rewriter::clearSubstitutions(ATermList Vars)
 ATerm Rewriter::lookupSubstitution(ATermAppl Var)
 {
 	long n = ATgetAFun(ATgetArgument(Var,0));
-	
+
 	if ( n >= substs_size )
 	{
 		return (ATerm) Var;
 	}
-	
+
 	ATerm r = substs[n];
-	
+
 	if ( r == NULL )
 	{
 		return (ATerm) Var;
 	}
-	
+
 	return r;
 }
 

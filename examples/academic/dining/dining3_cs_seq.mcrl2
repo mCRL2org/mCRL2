@@ -22,7 +22,7 @@ proc P_Phil(p: Phil) =
                     put(p,lf(p)) . put(p,rf(p)) . P_Phil(p);
      P_Fork(f: Fork) = sum p:Phil. up(p,f) . down(p,f) . P_Fork(f);
 
-init allow( { lock, free, eat },     
+init allow( { lock, free, eat },
        comm( { get|up->lock, put|down->free },
          P_Fork(f1) || P_Fork(f2) || P_Fork(f3) ||
          P_Phil(p1) || P_Phil(p2) || P_Phil(p3)

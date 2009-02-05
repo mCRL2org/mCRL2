@@ -352,7 +352,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   bool result = true;
 
   t_lin_options task_options;
-  
+
   // Extract configuration
   extract_task_options(c, task_options);
 
@@ -360,7 +360,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tipi::tool_display d;
 
   label& message = d.create< label >();
- 
+
   d.set_manager(d.create< vertical_box >().
                         append(message.set_text("Linearisation in progress"), layout::left));
 
@@ -444,9 +444,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       clinterface.add_prover_options();
 
       clinterface.
-        add_option("invariant", make_mandatory_argument("INVFILE"), 
+        add_option("invariant", make_mandatory_argument("INVFILE"),
           "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
-        add_option("summand", make_mandatory_argument("NUM"), 
+        add_option("summand", make_mandatory_argument("NUM"),
           "eliminate or simplify the summand with number NUM only", 's').
         add_option("check-all",
           "check the confluence of tau-summands regarding all other summands, instead of "
@@ -489,7 +489,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         }
         if (parser.options.count("summand")) {
           f_summand_number = parser.option_argument_as< size_t >("summand");
-      
+
           if (f_summand_number < 1) {
             parser.error("The summand number must be greater than or equal to 1.\n");
           }
@@ -533,10 +533,10 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     /// LPS_Conf_Check::f_lps. If no input file name was specified, the LPS is read from stdin.
 
     void LPS_Conf_Check::read_input() {
-      
+
       if (!f_invariant_file_name.empty()) {
         std::ifstream instream(f_invariant_file_name.c_str());
-      
+
         //XXX commented out because it always raised exceptions, rendering the program useless
         //instream.exceptions(std::ifstream::eofbit|std::ifstream::failbit|std::ifstream::badbit);
 
@@ -558,7 +558,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       }
 
       specification lps_specification;
-      
+
       lps_specification.load(f_input_file_name);
 
       // temporary measure, until the invariant and confluence checkers use the lps framework
@@ -581,7 +581,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       if (!f_invariant) {
         throw mcrl2::runtime_error("Typechecking of the invariant formula failed.\n");
       }
-     
+
       //data implement the invariant formula
       f_invariant = implement_data_data_expr(f_invariant, f_reconstructed_lps);
       if (!f_invariant) {

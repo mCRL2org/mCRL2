@@ -11,10 +11,10 @@
 #include "initialdesignator.h"
 #include "visualinitial_designator.h"
 #include "geometric.h"
-#include "compoundstate.h" 
+#include "compoundstate.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 
 visualinitial_designator::visualinitial_designator( initial_designator* p_initial_designator )
@@ -62,7 +62,7 @@ bool visualinitial_designator::is_inside( libgrape::coordinate &p_coord )
   initial_designator *init_ptr = static_cast<initial_designator*>(m_object);
   compound_state * state_ptr = init_ptr->get_attached_state();
   if ( state_ptr )
-  {            
+  {
     // get intersection coordinate
     coordinate state_coord = get_coordinate_on_edge( m_object->get_coordinate(), state_ptr);
     // test if inside arrow

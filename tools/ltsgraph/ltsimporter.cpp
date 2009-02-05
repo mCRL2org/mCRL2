@@ -22,8 +22,8 @@ Graph* LTSImporter::importFile(std::string fn)
   lts fileLTS;
   if(fileLTS.read_from(fn))
   {
-    unsigned int initialState = fileLTS.initial_state(); 
-    
+    unsigned int initialState = fileLTS.initial_state();
+
     std::map<unsigned int, State*> numsToStates;
     bool hasParams = fileLTS.has_state_parameters();
     std::vector<std::string> parameters;
@@ -32,7 +32,7 @@ Graph* LTSImporter::importFile(std::string fn)
         parameters.push_back(fileLTS.state_parameter_name_str(i));
       }
     }
-  
+
 
     for(state_iterator si = fileLTS.get_states(); si.more(); ++si)
     {
@@ -42,7 +42,7 @@ Graph* LTSImporter::importFile(std::string fn)
       State* s = new State(stNum,
                         stNum == initialState);
       result->addState(s);
-      
+
       std::pair<unsigned int, State*> pNumToState(stNum, s);
       numsToStates.insert(pNumToState);
 
@@ -50,11 +50,11 @@ Graph* LTSImporter::importFile(std::string fn)
       {
         result->setInitialState(s);
       }
-      
+
       if(hasParams) {
         for(size_t i = 0; i < parameters.size(); ++i) {
           std::pair<std::string, std::string> stateValue(
-              parameters[i], 
+              parameters[i],
               fileLTS.get_state_parameter_value_str(stNum, i));
           stateValues.insert(stateValue);
         }
@@ -74,7 +74,7 @@ Graph* LTSImporter::importFile(std::string fn)
 
     for(transition_iterator ti = fileLTS.get_transitions(); ti.more(); ++ti)
     {
-      unsigned int idFrom, idTo; 
+      unsigned int idFrom, idTo;
       State *stFrom, *stTo;
 
       std::string label = fileLTS.label_value_str(
@@ -104,7 +104,7 @@ Graph* LTSImporter::importFile(std::string fn)
     int numLabels = fileLTS.num_labels();
     int numTrans = fileLTS.num_transitions();
 
-    result->setInfo(initialState, numStates, numTrans, numLabels); 
+    result->setInfo(initialState, numStates, numTrans, numLabels);
   }
   else
   {

@@ -26,7 +26,7 @@ public:
     Cluster( const std::vector< int > &crd );
     Cluster( const Cluster &clst );
     virtual ~Cluster();
-	
+
     // -- set functions ---------------------------------------------
     void setCoord( const std::vector< int > &crd  );
     void setIndex( const int &idx );
@@ -43,7 +43,7 @@ public:
     void setInBundles( const std::vector< Bundle* > b );
     void addOutBundle( Bundle* b );
     void setOutBundles( const std::vector< Bundle* > b );
-    
+
     // -- get functions ---------------------------------------------
     int getSizeCoord();
     int getCoord( const int &idx );
@@ -55,7 +55,7 @@ public:
     int getSizeNodes();
     Node* getNode( const int &idx );
     int getSizeDescNodes();
-    
+
     Attribute* getAttribute();
     int getAttrValIdx();
 
@@ -63,7 +63,7 @@ public:
     Bundle* getInBundle( const int &idx );
     int getSizeOutBundles();
     Bundle* getOutBundle( const int &idx );
-    
+
     // -- clear functions -------------------------------------------
     void clearParent();
     void clearChildren();
@@ -83,7 +83,7 @@ protected:
     std::vector< Cluster* > children;  // association
     std::vector< Node* >    nodes;     // association
     Attribute*         attribute; // association
-    int                attrValIdx; 
+    int                attrValIdx;
     std::vector< Bundle* >  inBundles;  // association
     std::vector< Bundle* >  outBundles; // association
 };

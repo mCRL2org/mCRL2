@@ -8,7 +8,7 @@
  **/
 namespace utility {
   /**
-   * Trivial deleter for use with boost::shared_ptr 
+   * Trivial deleter for use with boost::shared_ptr
    **/
   template < typename T >
   class trivial_deleter {

@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 
   // note that the newline characters are significant
   data_specification data_spec = parse_data_specification(
-    "sort                      \n" 
+    "sort                      \n"
     "  Bit   = struct b0 | b1; \n"
     "                          \n"
     "map                       \n"

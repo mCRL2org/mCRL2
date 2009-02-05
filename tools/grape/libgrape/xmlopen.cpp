@@ -774,7 +774,7 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                   ntt_label.set_variable_updates( variable_update_list );
                 }
                 else
-                { 
+                {
                   /* invalid!  NB: breakpointlist + linetype*/
 //                  return false;
                 }
@@ -1051,7 +1051,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                   tt_label.set_variable_updates( variable_update_list );
                 }
                 else
-                { 
+                {
                   /* invalid!  NB: breakpointlist + linetype */
 //                  return false;
                 }
@@ -1087,7 +1087,7 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
     }
   }
   else
-  { 
+  {
     /* invalid node name! */
     return false;
   }
@@ -1736,7 +1736,7 @@ bool grape::libgrape::open_architecture_references( grape_specification* p_spec,
     }
   }
   else
-  { 
+  {
     /* invalid node name! */
     return false;
   }

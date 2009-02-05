@@ -164,7 +164,7 @@ ATermAppl Trace::currentTime()
 ATermAppl Trace::nextAction()
 {
 	ATermAppl act = actions[pos];
-	
+
 	if ( pos < len )
 	{
 		pos++;
@@ -342,7 +342,7 @@ void Trace::loadPlain(istream &is)
 	while ( !is.eof() )
 	{
 		is.getline(buf,MAX_LINE_SIZE);
-		if ( is.bad() ) 
+		if ( is.bad() )
 		{
 			throw runtime_error("error while reading from stream");
 		}

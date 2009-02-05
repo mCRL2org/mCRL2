@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file 
+/// \file
 /// \brief Contains the LTSView application class.
 
 #ifndef LTSVIEW_H
@@ -73,7 +73,7 @@ class LTSView : public mcrl2::utilities::wx::tool< LTSView >, public Mediator {
     void selectCluster(const int rank, const int pos);
     void deselect();
     int getNumberOfObjects();
-    
+
     void zoomInBelow();
     void zoomInAbove();
     void zoomOutTillTop();

@@ -23,14 +23,14 @@
 
 class Transition
 {
-  public: 
+  public:
     Transition(State* from, State* to, std::string label);
 
     // Setters
     void setControl(const double x, const double y);
     void setControlAlpha(const double alpha);
     void setLabelPos(const double x, const double y);
-    
+
     // Getters
     State* getFrom() const;
     State* getTo() const;
@@ -40,7 +40,7 @@ class Transition
     double getControlAlpha() const;
     double getControlDist() const;
     void getLabelPos(double &x, double &y);
-    
+
     void select();
     void deselect();
     bool isSelected();
@@ -49,9 +49,9 @@ class Transition
     State* fromState;
     State* toState;
     std::string label;
-    
+
     // The position of the control point relative to fromState
-    double controlAlpha;  
+    double controlAlpha;
     double controlDist;
     double labelX;
     double labelY;

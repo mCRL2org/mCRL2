@@ -123,7 +123,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
     {
       parser.error("multiple use of option -e/--equivalence; only one occurrence is allowed");
     }
-  
+
     if (parser.options.count("preorder") > 1)
     {
       parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
@@ -145,10 +145,10 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
 
       tool_options.equivalence = lts::parse_equivalence(
           parser.option_argument("equivalence"));
-    
+
       if ( allowed_eqs().count(tool_options.equivalence) == 0 )
       {
-        parser.error("option -e/--equivalence has illegal argument '" + 
+        parser.error("option -e/--equivalence has illegal argument '" +
             parser.option_argument("equivalence") + "'");
       }
     }
@@ -159,10 +159,10 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
 
       tool_options.preorder = lts::parse_preorder(
           parser.option_argument("preorder"));
-    
+
       if (tool_options.preorder == lts_pre_none)
       {
-        parser.error("option -p/--preorder has illegal argument '" + 
+        parser.error("option -p/--preorder has illegal argument '" +
             parser.option_argument("preorder") + "'");
       }
     }
@@ -264,7 +264,7 @@ int process(t_tool_options const & tool_options) {
 
     result = l1.compare(l2,tool_options.preorder,tool_options.eq_opts);
 
-    gsMessage("LTS in %s is %s%s LTS in %s\n", 
+    gsMessage("LTS in %s is %s%s LTS in %s\n",
         tool_options.name_for_first.c_str(),
         ((result) ? "" : "not "),
         preorder_string(tool_options.preorder),

@@ -22,14 +22,14 @@ namespace atermpp
     public:
       /// \brief Constructor.
       aterm_int()
-      {} 
+      {}
 
       /// \brief Constructor.
       /// \param t An integer term
       aterm_int(ATermInt t)
         : aterm_base(t)
       {}
-  
+
       /// Allow construction from an aterm. The aterm must be of the right type.
       /// \param t A term.
       aterm_int(aterm t)

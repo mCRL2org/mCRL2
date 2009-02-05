@@ -79,7 +79,7 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
 
     // Disconnect the channel from channel communications.
     channel_communication* c_comm_ptr = channel_ptr->get_channel_communication();
-    if ( c_comm_ptr != 0 )	
+    if ( c_comm_ptr != 0 )
     {
       channel_ptr->detach_channel_communication();
       c_comm_ptr->detach_channel( channel_ptr );

@@ -129,16 +129,16 @@ namespace mcrl2 {
             //set documenters
             std::for_each(m_documenters.begin(), m_documenters.end(),
                  boost::bind(&about_information::add_documenter, &information, _1));
-     
+
             //set license
             information.SetLicense(wxT("This is free software.\n"
               "You may redistribute copies of it under the terms of the Boost Software License "
               "<http://www.boost.org/LICENSE_1_0.txt>.\n"
               "There is NO WARRANTY, to the extent permitted by law."));
-     
+
             //set website
             information.SetWebSite(wxT("http://www.mcrl2.org"), wxT("mCRL2 home page"));
-     
+
             //show the about box
             ::wxAboutBox(information);
           }

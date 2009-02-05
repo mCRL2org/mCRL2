@@ -28,11 +28,11 @@ using namespace std;
 
 
 // ------------------------
-Frame::Frame( 
+Frame::Frame(
     Mediator* m,
     wxString title )
-    : Colleague( m ), 
-      wxFrame( 
+    : Colleague( m ),
+      wxFrame(
         NULL,
         wxID_ANY,
         wxString( title ) )
@@ -196,7 +196,7 @@ void Frame::displNumEdges( const int &val )
 
 
 // ---------------------------------
-void Frame::displAttrInfo( 
+void Frame::displAttrInfo(
     const vector< int > &indices,
     const vector< string > &names,
     const vector< string > &types,
@@ -212,24 +212,24 @@ void Frame::displAttrInfo(
     {
         // add row
         listCtrlAttr->InsertItem( i, wxString( wxT("") ) );
-        
+
         // associate index with item
         listCtrlAttr->SetItemData( indices[i], i );
-        
+
         // column 0, do nothing
         // column 1
-        listCtrlAttr->SetItem( 
-            i, 
-            1, 
+        listCtrlAttr->SetItem(
+            i,
+            1,
             wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ) );
         // column 2
         listCtrlAttr->SetItem( i, 2, wxString( names[i].c_str(), wxConvUTF8 ) );
         // column 3
         listCtrlAttr->SetItem( i, 3, wxString( types[i].c_str(), wxConvUTF8 ) );
         // column 4
-        listCtrlAttr->SetItem( 
-            i, 
-            4, 
+        listCtrlAttr->SetItem(
+            i,
+            4,
 			wxString( Utils::intToStr( cards[i] ).c_str(), wxConvUTF8 ) );
         // column 5
         listCtrlAttr->SetItem(
@@ -267,14 +267,14 @@ void Frame::displAttrInfo(
 
     // get attribute index
     listCtrlAttr->SetItemState(
-        (long)selectIdx, 
+        (long)selectIdx,
         wxLIST_STATE_SELECTED,
         wxLIST_STATE_SELECTED );
 }
 
 
 // ---------------------------------
-void Frame::displDomainInfo( 
+void Frame::displDomainInfo(
     const vector< int > &indices,
     const vector< string > &values,
     const vector< int > &number,
@@ -289,27 +289,27 @@ void Frame::displDomainInfo(
     {
         // add row
         listCtrlDomain->InsertItem( indices[i], wxString( wxT("") ) );
-        
+
         // associate index with item
         listCtrlDomain->SetItemData( indices[i], i );
-        
+
         // column 0, do nothing
         // column 1
-        listCtrlDomain->SetItem( 
-            i, 
-            1, 
+        listCtrlDomain->SetItem(
+            i,
+            1,
             wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ) );
         // column 2
         listCtrlDomain->SetItem( i, 2, wxString( values[i].c_str(), wxConvUTF8 ) );
         // column 3
-        listCtrlDomain->SetItem( 
-            i, 
-            3, 
+        listCtrlDomain->SetItem(
+            i,
+            3,
             wxString( Utils::intToStr( number[i] ).c_str(), wxConvUTF8 ));
         // column 4
-        listCtrlDomain->SetItem( 
-            i, 
-            4, 
+        listCtrlDomain->SetItem(
+            i,
+            4,
             wxString( Utils::dblToStr( perc[i] ).c_str(), wxConvUTF8 ) );
     }
 
@@ -342,7 +342,7 @@ void Frame::displDOFInfo(
     // make sure frame exists
     if ( frameDOF == NULL )
         initFrameDOF();
-    
+
     // clear all previous items
     listCtrlDOF->DeleteAllItems();
 
@@ -351,15 +351,15 @@ void Frame::displDOFInfo(
     {
         // add row
         listCtrlDOF->InsertItem( i, wxString( wxT("") ) );
-    
+
         // associate index with item
         listCtrlDOF->SetItemData( i, degsOfFrdmIndcs[i] );
-    
+
         // column 0, do nothing
         // column 1
-        listCtrlDOF->SetItem( 
-            i, 
-            0, 
+        listCtrlDOF->SetItem(
+            i,
+            0,
             wxString( Utils::intToStr( i ).c_str(), wxConvUTF8 ) );
         // column 2
         listCtrlDOF->SetItem( i, 1, wxString( degsOfFrdm[i].c_str(), wxConvUTF8 ) );
@@ -370,13 +370,13 @@ void Frame::displDOFInfo(
     // select
     if ( degsOfFrdmIndcs.size() > 0 )
     {
-        long item = listCtrlDOF->FindItem( 
-            -1, 
+        long item = listCtrlDOF->FindItem(
+            -1,
             selIdx );
         if ( item >= 0 )
         {
             listCtrlDOF->SetItemState(
-                item, 
+                item,
                 wxLIST_STATE_SELECTED,
                 wxLIST_STATE_SELECTED );
 
@@ -401,9 +401,9 @@ void Frame::displShapeMenu(
     const bool &copy,
     const bool &paste,
     const bool &clear,
-    const bool &bringToFront, 
+    const bool &bringToFront,
     const bool &sendToBack,
-    const bool &bringForward, 
+    const bool &bringForward,
     const bool &sendBackward,
     const bool &editDOF,
     const int  &checkedItemId )
@@ -411,17 +411,17 @@ void Frame::displShapeMenu(
 {
     wxMenu menu;
     dofMenu = false;
-    		
+
     addAttributeMenu = new wxMenu();
     int i;
     int id = wxID_LOWEST; // Event id's for Attributes
 
-    // List All the Attributes in a Menu         
+    // List All the Attributes in a Menu
     for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
     {
     	wxListItem rowInfo;
-    	wxString   celInfo;            	
-            	              
+    	wxString   celInfo;
+
     	// set row
     	rowInfo.m_itemId = i;
     	// set column
@@ -433,12 +433,12 @@ void Frame::displShapeMenu(
        	wxString helpString;
        	helpString << i; // Convert int to wxString
        	wxMenuItem* item = new wxMenuItem( addAttributeMenu, id, celInfo, helpString, wxITEM_CHECK );
-        addAttributeMenu->Append( item );   
+        addAttributeMenu->Append( item );
         if( id == checkedItemId)
         {
         	addAttributeMenu->Check( id, true );
-        }         	
-        Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
+        }
+        Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));
         id--;
     }
 
@@ -446,41 +446,41 @@ void Frame::displShapeMenu(
     			wxT( "Show Variable" ),
     			addAttributeMenu,
     			wxT( "Show variables values on this shape" ) );
-    			
+
     menu.Append(ID_MENU_ITEM_SHOW_NOTE,
     			wxT( "Edit Note" ),
     			wxT( "Edit or add note to this shape" ) );
     menu.Append(ID_MENU_ITEM_TEXT_SIZE,
     			wxT( "Text Size" ),
     			wxT( "Change the size of the text displayed on the shape" ) );
-    
+
     menu.AppendSeparator();
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_SHAPE_CUT,
         wxT( "Cut" ),
         wxT( "Cut this shape" ) );
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_SHAPE_COPY,
         wxT( "Copy" ),
         wxT( "Copy this shape" ) );
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_SHAPE_PASTE,
         wxT( "Paste" ),
         wxT( "Paste shape" ) );
 
     menu.AppendSeparator();
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_SHAPE_DELETE,
         wxT( "Delete" ),
         wxT( "Delete this shape" ) );
-    
+
     menu.AppendSeparator();
     menu.Append(
-        ID_MENU_ITEM_SHAPE_BRING_TO_FRONT, 
+        ID_MENU_ITEM_SHAPE_BRING_TO_FRONT,
         wxT( "Bring to front" ),
         wxT( "Bring this shape to front" ) );
     menu.Append(
-        ID_MENU_ITEM_SHAPE_SEND_TO_BACK, 
+        ID_MENU_ITEM_SHAPE_SEND_TO_BACK,
         wxT( "Send to back" ),
         wxT( "Send this shape to back" ) );
     menu.Append(
@@ -493,17 +493,17 @@ void Frame::displShapeMenu(
         wxT( "Send this shape backward" ) );
     menu.AppendSeparator();
     menu.Append(
-        ID_MENU_ITEM_SHAPE_EDIT_DOF, 
+        ID_MENU_ITEM_SHAPE_EDIT_DOF,
         wxT( "Edit DOF" ),
         wxT( "Edit this shape's degrees of freedom" ) );
 
-    if ( cut != true )    
-        menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );    
+    if ( cut != true )
+        menu.Enable( ID_MENU_ITEM_SHAPE_CUT, false );
     if ( copy != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_COPY, false );
     if ( paste != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_PASTE, false );
-            
+
     if ( clear != true )
         menu.Enable( ID_MENU_ITEM_SHAPE_DELETE, false );
     if ( bringToFront != true )
@@ -523,26 +523,26 @@ void Frame::displShapeMenu(
         menu.Enable( ID_MENU_ITEM_SHAPE_EDIT_DOF, false );
         menu.Enable( ID_MENU_ITEM_SHOW_VARIABLES, false );
     }
-        
+
     PopupMenu( &menu );
-        
+
 }
 
 
 void Frame::displClusterMenu()
-{	
+{
 	if( clustMenu == NULL )
 	{
 		clustMenu = new wxMenu();
-		
+
 		int i;
-		int id = wxID_LOWEST; // Event id's for Attributes	
-		// List All the Attributes in a Menu         
+		int id = wxID_LOWEST; // Event id's for Attributes
+		// List All the Attributes in a Menu
 		for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
 		{
 			wxListItem rowInfo;
-			wxString   celInfo;            	
-					
+			wxString   celInfo;
+
 			// set row
 			rowInfo.m_itemId = i;
 			// set column
@@ -564,7 +564,7 @@ void Frame::displClusterMenu()
 			wxT( "Cluster nodes" ),
 			wxT( "Subcluster this cluster based on selected attributes" ) );
 		clustMenu->Enable( ID_MENU_ITEM_CLUSTER, false );
-	}	
+	}
 	PopupMenu( clustMenu );
 }
 
@@ -579,34 +579,34 @@ void Frame::displDgrmMenu(
 // ----------------------------
 {
 	wxMenu menu;
-	
-	menu.Append( 
+
+	menu.Append(
 	ID_MENU_ITEM_DGRM_SGL_TO_SIML,
 	wxT( "Send this to simulator" ),
 	wxT( "Send this diagram to simulator" ) );
-	
+
 	menu.AppendSeparator();
-	
-	menu.Append( 
+
+	menu.Append(
 		ID_MENU_ITEM_DGRM_SGL_TO_TRACE,
 		wxT( "Mark this in trace" ),
 		wxT( "Mark this diagram in trace view" ) );
-	menu.Append( 
+	menu.Append(
 	ID_MENU_ITEM_DGRM_SET_TO_TRACE,
 	wxT( "Mark all in trace" ),
 	wxT( "Mark set of diagrams in trace view" ) );
-	
+
 	menu.AppendSeparator();
-	
-	menu.Append( 
+
+	menu.Append(
 	ID_MENU_ITEM_DGRM_SGL_TO_EXNR,
 	wxT( "Send this to examiner" ),
 	wxT( "Send this diagram to examiner" ) );
-	menu.Append( 
+	menu.Append(
 	ID_MENU_ITEM_DGRM_SET_TO_EXNR,
 	wxT( "Send all to examiner" ),
 	wxT( "Send set of diagrams to examiner" ) );
-	
+
 	if ( sendSglToSiml != true )
 		menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_SIML, false );
 	if ( sendSglToTrace != true )
@@ -617,10 +617,10 @@ void Frame::displDgrmMenu(
 		menu.Enable( ID_MENU_ITEM_DGRM_SGL_TO_EXNR, false );
 	if ( sentSetToExnr != true )
 		menu.Enable( ID_MENU_ITEM_DGRM_SET_TO_EXNR, false );
-	
+
 	PopupMenu( &menu );
 }
-    
+
 
 // -----------------------
 void Frame::clearDOFInfo()
@@ -641,11 +641,11 @@ void Frame::displClustMenu()
     wxMenu menu;
 
     // group & ungroup
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_CLUST_DISTR_PLOT,
         wxT( "Distribution plot" ),
         wxT( "Visualize the distribution of values" ) );
-    menu.Append( 
+    menu.Append(
         ID_MENU_ITEM_CLUST_CORRL_PLOT,
         wxT( "Correlation plot" ),
         wxT( "Visualize the correlation of values" ) );
@@ -653,21 +653,21 @@ void Frame::displClustMenu()
         ID_MENU_ITEM_CLUST_COMBN_PLOT,
         wxT( "Combination plot" ),
         wxT( "Visualize the combinations of values" ) );
-        
+
     menu.AppendSeparator();
     menu.Append(
-        ID_MENU_ITEM_CLUST_SUBCLUST, 
+        ID_MENU_ITEM_CLUST_SUBCLUST,
         wxT( "Cluster" ),
         wxT( "Subcluster this cluster based on selected attributes" ) );
     menu.Enable( ID_MENU_ITEM_CLUST_SUBCLUST, false );
     menu.Append(
-        ID_MENU_ITEM_CLUST_UNCLUST, 
+        ID_MENU_ITEM_CLUST_UNCLUST,
         wxT( "Uncluster" ),
         wxT( "Remove this cluster" ) );
     menu.Enable( ID_MENU_ITEM_CLUST_UNCLUST, false );
-        
+
     PopupMenu( &menu );
-        
+
 }
 
 
@@ -687,15 +687,15 @@ void Frame::displAttrInfoClust(
         {
             // add row
             listCtrlClust->InsertItem( indices[i], wxString( wxT("") ) );
-        
+
             // associate index with item
             listCtrlClust->SetItemData( indices[i], i );
-        
+
             // column 0, do nothing
             // column 1
-            listCtrlClust->SetItem( 
-                i, 
-                1, 
+            listCtrlClust->SetItem(
+                i,
+                1,
                 wxString( Utils::intToStr( indices[i] ).c_str(), wxConvUTF8 ));
             // column 2
             listCtrlClust->SetItem( i, 2, wxString( names[i].c_str(), wxConvUTF8 ) );
@@ -727,10 +727,10 @@ void Frame::displSimClearDlg()
 // ---------------------------
 {
     wxString msg( wxT("Are you sure you want to clear the simulator?") );
-    wxMessageDialog dialog( 
-        this, 
-        msg, 
-        wxString( wxT("Confirm simulator clear") ), 
+    wxMessageDialog dialog(
+        this,
+        msg,
+        wxString( wxT("Confirm simulator clear") ),
         wxOK | wxCANCEL );
 
     // delete attribute
@@ -746,10 +746,10 @@ void Frame::displExnrClearDlg()
 // ----------------------------
 {
     wxString msg( wxT("Are you sure you want to clear the examiner history?") );
-    wxMessageDialog dialog( 
-        this, 
-        msg, 
-        wxString( wxT("Confirm examiner clear") ), 
+    wxMessageDialog dialog(
+        this,
+        msg,
+        wxString( wxT("Confirm examiner clear") ),
         wxOK | wxCANCEL );
 
     // delete attribute
@@ -765,7 +765,7 @@ void Frame::displExnrFrameMenu( const bool &clear )
 // ------------------------------------------------
 {
     wxMenu* menu = new wxMenu();
-    
+
     menu->Append(
         ID_MENU_ITEM_EXNR_CLEAR,
         wxT( "Delete" ),
@@ -789,13 +789,13 @@ void Frame::selectAttribute( const int &idx )
     {
         // select idx'th item
         long item = -1;
-            
+
         item = listCtrlAttr->FindItem( item, idx );
 
         if ( item >= 0 )
         {
             listCtrlAttr->SetItemState(
-                item, 
+                item,
                 wxLIST_STATE_SELECTED,
                 wxLIST_STATE_SELECTED );
         }
@@ -811,12 +811,12 @@ void Frame::selectDomainVal( const int &idx )
     {
         // select idx'th item
         long item = -1;
-            
+
         item = listCtrlDomain->FindItem( item, idx );
 
         if ( item >= 0 )
             listCtrlDomain->SetItemState(
-                item, 
+                item,
                 wxLIST_STATE_SELECTED,
                 wxLIST_STATE_SELECTED );
     }
@@ -832,7 +832,7 @@ void Frame::handleDragDrop(
     const vector< int > &data )
 // ----------------------------
 {
-    if ( srcId == ID_LIST_CTRL_ATTR && 
+    if ( srcId == ID_LIST_CTRL_ATTR &&
          tgtId == ID_LIST_CTRL_ATTR )
     {
         int idxFr = -1;
@@ -902,19 +902,19 @@ void Frame::closePopupFrames()
         framePartition->Close();
         framePartition = NULL;
     }
-    
+
     if ( frameDOF != NULL )
     {
         frameDOF->Close();
         frameDOF = NULL;
     }
-    
+
     if ( framePlot != NULL )
     {
         framePlot->Close();
         framePlot = NULL;
     }
-    
+
     if ( frameClust != NULL )
     {
         frameClust->Close();
@@ -1065,16 +1065,16 @@ void Frame::clearOuput()
 {
     lblNumNodes->SetLabel( wxT("") );
     lblNumEdges->SetLabel( wxT("") );
-    
+
     //buttonClustAttr->Enable( false );
     //buttonTraceAttr->Enable( false );
 
     listCtrlAttr->DeleteAllItems();
     listCtrlDomain->DeleteAllItems();
 
-    
+
     //textCtrl->Clear();
-   
+
 }
 
 
@@ -1098,25 +1098,25 @@ void Frame::initFrame()
 {
     wxSize maximum_size = wxGetClientDisplayRect().GetSize();
     size_t hCur;
-    
+
     // set min and max size
     SetSizeHints(
-        800, 
-        600, 
-        maximum_size.GetWidth(), 
+        800,
+        600,
+        maximum_size.GetWidth(),
         maximum_size.GetHeight() );
-    
+
     // init sizer for frame
     sizerFrame = new wxBoxSizer( wxVERTICAL );
     SetSizer( sizerFrame );
     sizerFrame->Fit( this );
-    
+
     // init contents of frame
     initIcon();
     initMenuBar();
     initSplitterFrame();
     CreateStatusBar();
-    
+
     // maximize and center
     Maximize();
     Center();
@@ -1142,7 +1142,7 @@ void Frame::initFrame()
     framePlot = NULL;
     // cluster frame only shown on request
     frameClust = NULL;
-	
+
 	// fit everything after positioning sash positions
 	Layout();
     Fit();
@@ -1171,24 +1171,24 @@ void Frame::initMenuBar()
 {
     // menu bar
     menuBar = new wxMenuBar();
-    
+
     // file menu
     fileMenu = new wxMenu();
-    fileMenu->Append( 
+    fileMenu->Append(
         wxID_OPEN,
         wxString( wxT( "&Open..." ) ),
         wxString( wxT( "Opens an FSM file") ) );
-    fileMenu->Append( 
+    fileMenu->Append(
         wxID_SAVE,
         wxString( wxT( "&Save" ) ),
         wxString( wxT( "Saves the FSM file") ) );
     fileMenu->Enable( wxID_SAVE, false );
-    fileMenu->Append( 
+    fileMenu->Append(
         wxID_SAVEAS,
         wxString( wxT( "&Save as..." ) ),
         wxString( wxT( "Saves the FSM file with a new name" )) );
     fileMenu->Enable( wxID_SAVEAS, false );
-    
+
     fileMenu->AppendSeparator();
     fileMenu->Append(
         ID_MENU_ITEM_LOAD_CONFIG,
@@ -1200,25 +1200,25 @@ void Frame::initMenuBar()
         wxString( wxT( "Save attribute config" ) ),
         wxString( wxT( "Saves user-defined attribute configuration" ) ) );
     fileMenu->Enable( ID_MENU_ITEM_SAVE_CONFIG, false );
-    
+
     fileMenu->AppendSeparator();
     fileMenu->Append(
         ID_MENU_ITEM_LOAD_DIAGRAM,
-        wxString( wxT( "Load diagram") ), 
+        wxString( wxT( "Load diagram") ),
         wxString( wxT( "&Loads user-defined diagram" ) ) );
     fileMenu->Enable( ID_MENU_ITEM_LOAD_DIAGRAM, false );
     fileMenu->Append(
         ID_MENU_ITEM_SAVE_DIAGRAM,
-        wxString( wxT( "Save &diagram") ), 
+        wxString( wxT( "Save &diagram") ),
         wxString( wxT( "Saves user-defined diagram" ) ) );
     fileMenu->Enable( ID_MENU_ITEM_SAVE_DIAGRAM, false );
-    
+
     fileMenu->AppendSeparator();
-    fileMenu->Append( 
+    fileMenu->Append(
         wxID_CLOSE,
         wxString( wxT( "E&xit" ) ),
         wxString( wxT( "Quits the program" ) ) );
-    menuBar->Append( 
+    menuBar->Append(
         fileMenu,
         wxString( wxT( "&File" ) ) );
 
@@ -1229,7 +1229,7 @@ void Frame::initMenuBar()
         wxString( wxT( "&Analysis mode" ) ),
         wxString( wxT( "Changes to analysis mode" ) ) );
     modeMenu->Check( ID_MENU_ITEM_MODE_ANALYSIS, true );
-    modeMenu->AppendRadioItem( 
+    modeMenu->AppendRadioItem(
         ID_MENU_ITEM_MODE_EDIT,
         wxString( wxT( "&Edit mode" ) ),
         wxString( wxT( "Changes to edit mode" ) ) );
@@ -1258,22 +1258,22 @@ void Frame::initMenuBar()
     // attribute menu
     attributeMenu = new wxMenu();
     attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_CLUST, 
+        ID_MENU_ITEM_ATTR_CLUST,
         wxString( wxT( "Cluster nodes" ) ),
         wxString( wxT( "Cluster nodes based on selected attributes" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_CLUST, false );
     attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_TRACE, 
+        ID_MENU_ITEM_ATTR_TRACE,
         wxString( wxT( "View trace" ) ),
         wxString( wxT( "View trace based on selected attributes" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, false );
     attributeMenu->AppendSeparator();
-    attributeMenu->Append( 
+    attributeMenu->Append(
         ID_MENU_ITEM_ATTR_DISTR_PLOT,
         wxString( wxT( "Distribution plot" ) ),
         wxString( wxT( "Visualize the distribution of values" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
-    attributeMenu->Append( 
+    attributeMenu->Append(
         ID_MENU_ITEM_ATTR_CORRL_PLOT,
         wxString( wxT( "Correlation plot" ) ),
         wxString( wxT( "Visualize the correlation of values" ) ) );
@@ -1285,21 +1285,21 @@ void Frame::initMenuBar()
     attributeMenu->AppendSeparator();
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, false );
     attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_DUPL, 
+        ID_MENU_ITEM_ATTR_DUPL,
         wxString( wxT( "Duplicate" ) ),
         wxString( wxT( "Duplicate attribute" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_DUPL, false );
     attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_RENAME, 
+        ID_MENU_ITEM_ATTR_RENAME,
         wxString( wxT( "Rename" ) ),
         wxString( wxT( "Rename attribute" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_RENAME, false );
     attributeMenu->Append(
-        ID_MENU_ITEM_ATTR_DELETE, 
+        ID_MENU_ITEM_ATTR_DELETE,
         wxString( wxT( "Delete" ) ),
         wxString( wxT( "Delete attribute" ) ) );
     attributeMenu->Enable( ID_MENU_ITEM_ATTR_DELETE, false );
-    attributeMenu->AppendSeparator();    
+    attributeMenu->AppendSeparator();
     attributeMenu->Append(
         ID_MENU_ITEM_ATTR_PARTITION,
         wxString( wxT( "Partition" ) ),
@@ -1317,18 +1317,18 @@ void Frame::initMenuBar()
 
     // domain menu
     domainMenu = new wxMenu();
-    domainMenu->Append( 
-        ID_MENU_ITEM_DOM_GROUP, 
+    domainMenu->Append(
+        ID_MENU_ITEM_DOM_GROUP,
         wxString( wxT( "Group" ) ),
         wxString( wxT( "Group selected domain values" ) ) );
     domainMenu->Enable( ID_MENU_ITEM_DOM_GROUP, false );
-    domainMenu->Append( 
+    domainMenu->Append(
         ID_MENU_ITEM_DOM_UNGROUP,
         wxString( wxT( "Ungroup" ) ),
         wxString( wxT( "Ungroup domain values" ) ) );
     domainMenu->Enable( ID_MENU_ITEM_DOM_UNGROUP, false );
-    domainMenu->Append( 
-        ID_MENU_ITEM_DOM_RENAME, 
+    domainMenu->Append(
+        ID_MENU_ITEM_DOM_RENAME,
         wxString( wxT( "Rename" ) ),
         wxString( wxT( "Rename selected domain value" ) ) );
     domainMenu->Enable( ID_MENU_ITEM_DOM_RENAME, false );
@@ -1383,7 +1383,7 @@ void Frame::initMenuBar()
     menuBar->Append(
         helpMenu,
         wxString( wxT( "&Help" ) ) );
-    
+
     // add menubar
     SetMenuBar( menuBar );
 }
@@ -1407,7 +1407,7 @@ void Frame::initSplitterFrame()
     // init children
     initSplitterLft();
     initSplitterRgt();
-	
+
     // split window
     splitterFrame->SplitVertically(
         splitterLft,
@@ -1425,11 +1425,11 @@ void Frame::initSplitterLft()
         ID_SPLITTER_LFT, wxDefaultPosition, wxDefaultSize, wxSP_3D|wxSP_LIVE_UPDATE );
     splitterLft->SetSashGravity( 1.0 );
     splitterLft->SetMinimumPaneSize( 200 );
-	
+
     // init children
     initSplitterTopLft();
     initPanelBotLft();
-    
+
     // split window
     splitterLft->SplitHorizontally(
         splitterTopLft,
@@ -1451,7 +1451,7 @@ void Frame::initSplitterTopLft()
     // init children
     initPanelTopTopLft();
     initPanelBotTopLft();
-    
+
     // split window
     splitterTopLft->SplitHorizontally(
         panelTopTopLft,
@@ -1476,7 +1476,7 @@ void Frame::initPanelTopTopLft()
 	panelTopTopLft->SetSizer( sizerTopTopLft );
 	sizerTopTopLft->Fit(panelTopTopLft);
     panelTopTopLft->SetScrollRate( 10, 10 );
-    
+
     // init children
     initLabelsGraphInfo();
     initListCtrlAttr();
@@ -1506,25 +1506,25 @@ void Frame::initLabelsGraphInfo()
         2,        // cols
         0,        // vgap
         0 );      // hgap
-    
+
     // nodes label
     wxStaticText* nodesLbl = new wxStaticText(
         panelTopTopLft,
         wxID_ANY,
         wxString( wxT( "Number nodes:\t" ) ) );
-    lblSizer->Add( 
+    lblSizer->Add(
         nodesLbl,
         0,        // vert no stretch
         wxGROW |  // hori stretch
         wxLEFT,   // border left
         5 );
-    
+
     // num nodes label
     lblNumNodes = new wxStaticText(
         panelTopTopLft,
         wxID_ANY,
         wxString( wxT("                   " ) ) );
-    lblSizer->Add( 
+    lblSizer->Add(
         lblNumNodes,
         0,        // vert no stretch
         wxGROW ); // hori stretch
@@ -1534,20 +1534,20 @@ void Frame::initLabelsGraphInfo()
         panelTopTopLft,
         wxID_ANY,
         wxString( wxT( "Number edges:\t" ) ) );
-    lblSizer->Add( 
+    lblSizer->Add(
         edgesLbl,
         0,        // vert not stretch
         wxGROW |  // hori stretch
         wxTOP |   // border top
         wxLEFT,   // border left
         5 );
-    
+
     // num edges label
     lblNumEdges =new wxStaticText(
         panelTopTopLft,
         wxID_ANY,
         wxString( wxT( "                   " ) ) );
-    lblSizer->Add( 
+    lblSizer->Add(
         lblNumEdges,
         0,        // vert not stretchable
         wxGROW |  // hori stretch
@@ -1555,7 +1555,7 @@ void Frame::initLabelsGraphInfo()
         5 );
 
     // add grid sizer
-    box->Add( 
+    box->Add(
         lblSizer,
         0,        // vert not stretchable
         wxGROW ); // hori stretchable
@@ -1596,19 +1596,19 @@ void Frame::initListCtrlAttr()
 
 	sizerTopTopLft->Add(
         listCtrlAttr,
-        1,	
+        1,
 		wxEXPAND | wxBOTTOM |wxLEFT,	// vert & hori stretch, border all around
         10 );
 
     // add drop target
-    listCtrlAttr->SetDropTarget( 
-        new DropTarget( 
+    listCtrlAttr->SetDropTarget(
+        new DropTarget(
             listCtrlAttr,
             mediator ) );
-    
+
     // columns
     wxListItem colItem;
-    
+
     // dummy column
     colItem.SetText( wxT( "")  );
     listCtrlAttr->InsertColumn( 0, colItem );
@@ -1638,7 +1638,7 @@ void Frame::initListCtrlAttr()
     colItem.SetAlign( wxLIST_FORMAT_LEFT );
     listCtrlAttr->InsertColumn( 5, colItem );
     listCtrlAttr->SetColumnWidth( 5, wxLIST_AUTOSIZE_USEHEADER );
-	
+
     // reset ptr
     lbl = NULL;
 }
@@ -1659,7 +1659,7 @@ void Frame::initButtonsAttr()
         0,        // vert no stretch
 		wxALL,  // border around
         0 );
-		
+
 	// cluster button
     buttonClustAttr = new wxButton(
         panelTopTopLft,
@@ -1669,7 +1669,7 @@ void Frame::initButtonsAttr()
         wxDefaultSize );
     buttonClustAttr->Enable( false );
 
-    box->Add( 
+    box->Add(
         buttonClustAttr,
         0,                           // vert stretch
         wxALIGN_RIGHT |              // hori stretch
@@ -1685,13 +1685,13 @@ void Frame::initButtonsAttr()
         wxDefaultSize );
     buttonTraceAttr->Enable( false );
 
-    box->Add( 
+    box->Add(
         buttonTraceAttr,
-        0,                    
-        wxALIGN_RIGHT |             
+        0,
+        wxALIGN_RIGHT |
         wxLEFT | wxRIGHT | wxBOTTOM, // border
         2 );
-		
+
 	*/
 }
 
@@ -1744,22 +1744,22 @@ void Frame::initListCtrlDomain()
         wxLC_REPORT |
         wxLC_HRULES |
         wxLC_VRULES );
-    sizerBotTopLft->Add( 
+    sizerBotTopLft->Add(
         listCtrlDomain,
         1,         // vert stretch
         wxEXPAND | // hori stretch
         wxLEFT,     // border
         5 );
-    
+
     // add drop target
-    listCtrlDomain->SetDropTarget( 
+    listCtrlDomain->SetDropTarget(
         new DropTarget(
             listCtrlDomain,
             mediator ) );
-    
+
     // columns
     wxListItem colItem;
-    
+
     // dummy column
     colItem.SetText( wxT( "" ) );
     listCtrlDomain->InsertColumn( 0, colItem );
@@ -1816,7 +1816,7 @@ void Frame::initCanvasThree()
         mediator,
         panelBotLft,
         ID_CANVAS_RGT );
-		
+
     sizerBotLft->Add(
         canvasThree,
         1,
@@ -1838,7 +1838,7 @@ void Frame::initSplitterRgt()
     // init children
     initPanelTopRgt();
     initPanelBotRgt();
-    
+
     // split window
     splitterRgt->SplitHorizontally(
         panelTopRgt,
@@ -1882,12 +1882,12 @@ void Frame::initCanvasOne()
         panelTopRgt,
         ID_CANVAS_MAIN );
     //canvasOne->SetMinSize( panelTopRgt->GetSize() );
-    
+
     sizerTopRgt->Add(
         canvasOne,
         1,
         wxEXPAND | wxALL, 10 );
-	
+
 }
 
 
@@ -1903,7 +1903,7 @@ void Frame::initToolbarEdit()
         wxDefaultSize,
         wxTB_VERTICAL |
         wxTB_FLAT );
-      
+
     // add tools, figures defined in 'figures.xpm'
     // selection
     wxBitmap selectBmp( select_icon );
@@ -1929,7 +1929,7 @@ void Frame::initToolbarEdit()
     // double arrow
     wxBitmap darrowBmp( darrow );
     toolBarEdit->AddTool( ID_TOOL_DARROW, wxString( wxT( "Double arrow" ) ), darrowBmp );
-    
+
     toolBarEdit->AddSeparator();
     // fill color
     wxBitmap fillColBmp( fillcol );
@@ -1991,7 +1991,7 @@ void Frame::initCanvasTwo()
         panelBotRgt,
         ID_CANVAS_LFT );
     canvasTwo->SetMinSize( panelBotRgt->GetSize() );
-    
+
     sizerBotRgt->Add(
         canvasTwo,
         1,         // vert stretch
@@ -2004,7 +2004,7 @@ void Frame::initCanvasTwo()
 void Frame::initTextCtrl()
 // -----------------------
 {
-    textCtrl = new wxTextCtrl( 
+    textCtrl = new wxTextCtrl(
         panelRgtBotRgt,
         ID_TEXTCTRL,
         wxString( wxT("") ),
@@ -2013,13 +2013,13 @@ void Frame::initTextCtrl()
         wxTE_MULTILINE | // multiline
         wxTE_RICH |      // allow more text
         wxTE_READONLY ); // read-only
-    
-    sizerRgtBotRgt->Add( 
+
+    sizerRgtBotRgt->Add(
         textCtrl,
         0,         // vert stretch
         wxEXPAND | // hori stretch
         wxALL,     // border
-        5 ); 
+        5 );
 }
 
 /* commented dead code (jwulp)
@@ -2032,13 +2032,13 @@ void Frame::initAboutFrameOld()
         wxID_ANY,
         wxString( wxT( "About DiaGraphica" ) ),
         wxDefaultPosition,
-        wxSize( 
-            400 + 2*wxSystemSettings::GetMetric( wxSYS_EDGE_X, this ), 
+        wxSize(
+            400 + 2*wxSystemSettings::GetMetric( wxSYS_EDGE_X, this ),
             300 ),
-        wxRESIZE_BORDER | 
-        wxSYSTEM_MENU | 
-        wxCAPTION | 
-        wxCLOSE_BOX | 
+        wxRESIZE_BORDER |
+        wxSYSTEM_MENU |
+        wxCAPTION |
+        wxCLOSE_BOX |
         wxCLIP_CHILDREN |
         wxFRAME_FLOAT_ON_PARENT |
         wxFRAME_NO_TASKBAR |
@@ -2054,12 +2054,12 @@ void Frame::initAboutFrameOld()
     }
     catch ( ... )
     {}
-    
+
     // contents of frame
     wxBoxSizer* sizerFrame = new wxBoxSizer( wxVERTICAL );
     frameAbout->SetSizer( sizerFrame );
 
-    BitmapPanel* bitmap = new BitmapPanel( 
+    BitmapPanel* bitmap = new BitmapPanel(
         frameAbout,
         wxSize( 400, 111 ),
         logo ); // logo defined in 'figures.xpm'
@@ -2067,7 +2067,7 @@ void Frame::initAboutFrameOld()
 
     wxPanel* panel = new wxPanel( frameAbout );
     sizerFrame->Add( panel, 1, wxEXPAND );
-    
+
     wxBoxSizer* sizer = new wxBoxSizer( wxVERTICAL );
     panel->SetSizer( sizer );
 
@@ -2094,17 +2094,17 @@ void Frame::initAboutFrameOld()
     wxString msg = wxString(s_msg.c_str(), wxConvLocal);
 
     wxTextCtrl* textCtrl = new wxTextCtrl(
-        panel, 
-        wxID_ANY, 
-        msg, 
-        wxDefaultPosition, 
-        wxDefaultSize, 
+        panel,
+        wxID_ANY,
+        msg,
+        wxDefaultPosition,
+        wxDefaultSize,
         wxTE_MULTILINE | // multiline
         wxTE_RICH |      // allow more text
         wxTE_READONLY );
     sizer->Add(
         textCtrl,
-        1, 
+        1,
         wxEXPAND |
         wxALL,
         5 );
@@ -2138,7 +2138,7 @@ void Frame::initFrameSettings()
 
 
 // ----------------------------
-void Frame::initFramePartition( 
+void Frame::initFramePartition(
     wxString attrName,
     int minParts,
     int maxParts,
@@ -2157,7 +2157,7 @@ void Frame::initFramePartition(
         minParts,
         maxParts,
         curParts );
-        
+
     // show
     framePartition->Show();
 }
@@ -2175,14 +2175,14 @@ void Frame::initFrameDOF()
         ID_FRAME_DOF,
         wxString( wxT( "Degrees of freedom" ) ),
         wxPoint(350,250),
-        wxSize( 
+        wxSize(
             (int)(0.27*this->GetSize().GetWidth()),
             (int)(0.50*this->GetSize().GetHeight()) ) );
     frameDOF->SetSizer( sizerFrameDOF );
 
     // init children
     initPanelDOF();
-    
+
     frameDOF->Layout();
     frameDOF->Fit();
 
@@ -2205,14 +2205,14 @@ void Frame::initFrameNote()
 		    ID_FRAME_NOTE,
 		    wxString( wxT( "Add Note" ) ),
 		    wxPoint(350,300),
-		    wxSize( 
+		    wxSize(
 		        (int)(0.27*this->GetSize().GetWidth()),
 		        (int)(0.50*this->GetSize().GetHeight()) ) );
 
 		frameNote->SetSizer( sizerFrameNote );
 
 		// create children
-		
+
 		// create textbox
 		noteText = new wxTextCtrl( frameNote, -1, wxT(""), wxPoint(-1, -1), wxSize(150, 100), wxTE_MULTILINE);
 		const char *msg = currentShapeNote.c_str();
@@ -2220,12 +2220,12 @@ void Frame::initFrameNote()
 		textValue = textValue.FromAscii( msg );
 		noteText->SetValue( textValue ); // Initialize the text field with the current note of the shape
 		sizerFrameNote->Add ( noteText, 0, wxEXPAND | wxALL, 5 );
-		
-		initPanelNote();    
-		
+
+		initPanelNote();
+
 		frameNote->Layout();
 		frameNote->Fit();
-		
+
 		frameNote->SetMinSize(frameNote->GetSize());
 		frameNote->SetMaxSize(frameNote->GetSize());
 		toolBarEdit->EnableTool( ID_TOOL_NOTE, true );
@@ -2252,15 +2252,15 @@ void Frame::initFrameTextSize()
 		    ID_FRAME_TEXT_SIZE,
 		    wxString( wxT( "Change Text Size" ) ),
 		    wxPoint(350,250),
-		    wxSize( 
+		    wxSize(
 		        (int)(0.27*this->GetSize().GetWidth()),
 		        (int)(0.50*this->GetSize().GetHeight()) ) );
 
 		frameTextSize->SetSizer( sizerTextSize );
 
 		// create children
-		
-		
+
+
 		wxString initials[7];
 		for( int i = 0; i < 7; i++ )
 		{
@@ -2274,11 +2274,11 @@ void Frame::initFrameTextSize()
 		sizerTextSize->Add ( okButton, 0, wxEXPAND | wxALL, 5 );
 
     		// handle event for buttons
-    		Connect( ID_OK_BUTTON_TEXT_SIZE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));  		
-		
+    		Connect( ID_OK_BUTTON_TEXT_SIZE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));
+
 		frameTextSize->Layout();
 		frameTextSize->Fit();
-		
+
 		frameTextSize->SetMinSize(frameTextSize->GetSize());
 		frameTextSize->SetMaxSize(frameTextSize->GetSize());
 
@@ -2309,7 +2309,7 @@ void Frame::initPanelDOF()
     sizerFrameDOF->Add(
         panelDOF,
         1,
-        wxEXPAND );   
+        wxEXPAND );
 
     // init children
     initListCtrlDOF();
@@ -2336,18 +2336,18 @@ void Frame::initPanelNote()
         wxRAISED_BORDER );
     panelNote->SetSizer( sizerNote );
     panelNote->SetScrollRate( 10, 10 );
-    sizerFrameNote->Add( panelNote, 0, wxEXPAND );  
-        
+    sizerFrameNote->Add( panelNote, 0, wxEXPAND );
+
     // create buttons
-    wxButton* addButton = new wxButton( panelNote, ID_ADD_BUTTON_NOTE, wxT("Add"));  
+    wxButton* addButton = new wxButton( panelNote, ID_ADD_BUTTON_NOTE, wxT("Add"));
     wxButton* clearButton = new wxButton( panelNote, ID_CLEAR_BUTTON_NOTE, wxT("Clear"));
-    sizerNote->Add( addButton, 0, wxALL, 5);     
-    sizerNote->Add( clearButton, 0, wxALL, 5); 
+    sizerNote->Add( addButton, 0, wxALL, 5);
+    sizerNote->Add( clearButton, 0, wxALL, 5);
     sizerNote->Fit(panelNote);
-    
+
     // handle event for buttons
-    Connect( ID_ADD_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));   
-    Connect( ID_CLEAR_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton)); 
+    Connect( ID_ADD_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));
+    Connect( ID_CLEAR_BUTTON_NOTE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(Frame::onButton));
 }
 
 
@@ -2365,24 +2365,24 @@ void Frame::initListCtrlDOF()
         wxLC_REPORT |
         wxLC_HRULES |
         wxLC_VRULES |
-        wxLC_SINGLE_SEL ); 
-        
+        wxLC_SINGLE_SEL );
+
     sizerDOF->Add(
        listCtrlDOF,
        0,
        wxEXPAND |
        wxALL,
-       5 );  
+       5 );
 
     // init as drop target
-    listCtrlDOF->SetDropTarget( 
-        new DropTarget( 
+    listCtrlDOF->SetDropTarget(
+        new DropTarget(
             listCtrlDOF,
             mediator ) );
 
     // columns
     wxListItem colItem;
-    
+
     // dummy column
     /*colItem.SetText( wxT( "" ) );
     listCtrlDOF->InsertColumn( 0, colItem );
@@ -2433,8 +2433,8 @@ void Frame::initCanvasColDOF()
 
     sizerDOF->Add(
         canvasColDOF,
-        1, 
-        wxEXPAND | 
+        1,
+        wxEXPAND |
         wxALL,
         5 );
 
@@ -2470,8 +2470,8 @@ void Frame::initCanvasOpaDOF()
 
     sizerDOF->Add(
         canvasOpaDOF,
-        1, 
-        wxEXPAND | 
+        1,
+        wxEXPAND |
         wxALL,
         5 );
 
@@ -2492,7 +2492,7 @@ void Frame::initFramePlot()
         ID_FRAME_PLOT,
         wxString( wxT( "Attribute plot" ) ),
         wxDefaultPosition,
-        wxSize( 
+        wxSize(
             (int)(0.33*this->GetSize().GetWidth()),
             (int)(0.33*this->GetSize().GetHeight()) ) );
     framePlot->SetMinSize(wxSize(200,200));
@@ -2540,7 +2540,7 @@ void Frame::initCanvasPlot()
         mediator,
         panelPlot,
         ID_CANVAS_PLOT );
-    
+
     sizerPlot->Add(
         canvasPlot,
         1,
@@ -2560,7 +2560,7 @@ void Frame::initFrameClust()
         ID_FRAME_CLUST,
         wxString( wxT( "Select attributes" ) ),
         wxDefaultPosition,
-        wxSize( 
+        wxSize(
             (int)(0.25*this->GetSize().GetWidth()),
             (int)(0.25*this->GetSize().GetHeight()) ) );
     frameClust->SetSizer( sizerFrameClust );
@@ -2623,7 +2623,7 @@ void Frame::initListCtrlClust()
 
       // columns
     wxListItem colItem;
-    
+
     // dummy column
     colItem.SetText( wxT( "" ) );
     listCtrlClust->InsertColumn( 0, colItem );
@@ -2679,7 +2679,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
 	    "|All files (*.*)|*.*").c_str(),
 	    wxConvLocal);
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2690,7 +2690,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->openFile( 
+            mediator->openFile(
                 string(filePath.fn_str() ) );
         }
 
@@ -2704,7 +2704,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT( "Save the FSM file" ) );
         wxString wildcard = wxString( wxT( "FSM file (*.fsm)|*.fsm" ) );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2735,7 +2735,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT( "Save the FSM file with a new name") );
         wxString wildcard = wxString( wxT( "FSM file (*.fsm)|*.fsm") );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT("") ), // default directory
@@ -2766,7 +2766,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT("Load attribute configuration") );
         wxString wildcard = wxString( wxT("DGD file (*.dgc)|*.dgc") );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2777,7 +2777,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->handleLoadAttrConfig( 
+            mediator->handleLoadAttrConfig(
                 string( string(filePath.fn_str()) ) );
         }
 
@@ -2792,7 +2792,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT( "Save attribute configuration") );
         wxString wildcard = wxString( wxT( "DGC file (*.dgc)|*.dgc") );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2823,7 +2823,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT( "Load diagram" ) );
         wxString wildcard = wxString( wxT( "DGD file (*.dgd)|*.dgd") );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2834,7 +2834,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         if ( fileDialog->ShowModal() == wxID_OK )
         {
             filePath = fileDialog->GetPath();
-            mediator->handleLoadDiagram( 
+            mediator->handleLoadDiagram(
                string( filePath.fn_str() ) );
         }
 
@@ -2848,7 +2848,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         wxString caption  = wxString( wxT( "Save diagram" ) );
         wxString wildcard = wxString( wxT( "DGD file (*.dgd)|*.dgd") );
 
-        wxFileDialog* fileDialog = new wxFileDialog( 
+        wxFileDialog* fileDialog = new wxFileDialog(
             this,
             caption,
             wxString( wxT( "" ) ), // default directory
@@ -2866,7 +2866,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
 	    {
 		s.append(".dgd");
 	    }
-            mediator->handleSaveDiagram( 
+            mediator->handleSaveDiagram(
                 string( s ) );
         }
 
@@ -2890,7 +2890,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
                 buttonTraceAttr->Enable( true );
 			*/
         }
-        
+
         // hide toolbar
         toolBarEdit->Show( false );
 
@@ -2915,7 +2915,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
                 item,
                 wxLIST_NEXT_ALL,
                 wxLIST_STATE_SELECTED );
-            
+
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, true );
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
@@ -2961,18 +2961,18 @@ void Frame::onMenuBar( wxCommandEvent &e )
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
         }
-        
+
         // show 2nd panel (panelBotRgt)
         int w, h;
         splitterRgt->GetSize( &w, &h );
-        splitterRgt->SplitHorizontally( 
+        splitterRgt->SplitHorizontally(
             panelTopRgt,
             panelBotRgt );
         splitterRgt->SetSashPosition( (int)(sashRatioRgt*h) );
-		
+
 		 // show panelBotLft panel
         splitterLft->GetSize( &w, &h );
-        splitterLft->SplitHorizontally( 
+        splitterLft->SplitHorizontally(
             splitterTopLft,
             panelBotLft );
         splitterLft->SetSashPosition( (int)(sashRatioLft*h) );
@@ -2985,13 +2985,13 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // show view menu
 //        menuBar->Remove( 2 );
         menuBar->EnableTop( 2, false );
-        
-        
+
+
 
         // disable cluster & trace buttons
         //buttonClustAttr->Enable( false );
         //buttonTraceAttr->Enable( false );
-        
+
         // show toolbar
         toolBarEdit->Show( true );
 
@@ -3011,7 +3011,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         splitterRgt->GetSize( &w, &h );
         sashRatioRgt = splitterRgt->GetSashPosition()/(double)h;
         splitterRgt->Unsplit( panelBotRgt );
-		
+
 		// hide panelBotLft panel
         splitterLft->GetSize( &w, &h );
         sashRatioLft = splitterLft->GetSashPosition()/(double)h;
@@ -3035,7 +3035,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
             attributeMenu->Enable( ID_MENU_ITEM_ATTR_TRACE, true );
             //buttonTraceAttr->Enable( true );
         }
-        
+
         // update visualizers
         mediator->handleSetViewTrace();
         canvasTwo->Refresh();
@@ -3094,7 +3094,7 @@ void Frame::onMenuBar( wxCommandEvent &e )
         // shut down app
         Close();
     }
-	
+
 	// fit everything after handling the request
 	Fit();
 	Layout();
@@ -3125,12 +3125,12 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 if ( (int) listCtrlAttr->GetItemData( item ) != e.GetIndex() )
                 {
                     listCtrlAttr->SetItemState(
-                        item, 
-                        0, 
-                        wxLIST_STATE_SELECTED | 
+                        item,
+                        0,
+                        wxLIST_STATE_SELECTED |
                         wxLIST_STATE_FOCUSED );
                 }
-                
+
                 item = listCtrlAttr->GetNextItem(
                     item,
                     wxLIST_NEXT_ALL,
@@ -3227,7 +3227,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
             else
             {
                 clearDomainInfo();
-                
+
                 // update menubar
                 attributeMenu->Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, false );
                 attributeMenu->Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
@@ -3293,12 +3293,12 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                 if ( (int) listCtrlClust->GetItemData( item ) != e.GetIndex() )
                 {
                     listCtrlClust->SetItemState(
-                        item, 
-                        0, 
-                        wxLIST_STATE_SELECTED | 
+                        item,
+                        0,
+                        wxLIST_STATE_SELECTED |
                         wxLIST_STATE_FOCUSED );
                 }
-                
+
                 item = listCtrlClust->GetNextItem(
                     item,
                     wxLIST_NEXT_ALL,
@@ -3309,11 +3309,11 @@ void Frame::onListCtrlSelect( wxListEvent &e )
         {
             // get idx of last selected item
             int attrIdx2 = -1;
-            
+
             // deselect all but second last item & get its idx
             int  selCount = listCtrlClust->GetSelectedItemCount();
             long item = -1;
-            item = listCtrlClust->GetNextItem( 
+            item = listCtrlClust->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
                 wxLIST_STATE_SELECTED );
@@ -3324,8 +3324,8 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                     if ( selCount > 2 )
                     {
                         listCtrlClust->SetItemState(
-                            item, 
-                            0, 
+                            item,
+                            0,
                             wxLIST_STATE_SELECTED |
                             wxLIST_STATE_FOCUSED );
                         --selCount;
@@ -3333,7 +3333,7 @@ void Frame::onListCtrlSelect( wxListEvent &e )
                     else if ( selCount == 2 )
                         attrIdx2 = listCtrlClust->GetItemData( item );
                 }
-                
+
                 item = listCtrlClust->GetNextItem(
                     item,
                     wxLIST_NEXT_ALL,
@@ -3353,11 +3353,11 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
         int    srcId  = -1;
         int    attrIdx = -1;
         string msg    = "";
-        
+
         // prepare data
         srcId  = ID_LIST_CTRL_ATTR;
         attrIdx = e.GetIndex();
-        
+
 		// init data
         wxTextDataObject data( wxString::Format(wxT("%d %d"), srcId, attrIdx));
 
@@ -3372,7 +3372,7 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
         int    attrIdx = -1;
         int    domIdx  = -1;
         string msg     = "";
-        
+
         // prepare data
         srcId  = ID_LIST_CTRL_DOMAIN;
         attrIdx = listCtrlAttr->GetNextItem(
@@ -3380,13 +3380,13 @@ void Frame::onListCtrlBeginDrag( wxListEvent &e )
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );;
         domIdx = e.GetIndex();
-        
+
         msg.append( Utils::intToStr( srcId ) );
         msg.append( " " );
         msg.append( Utils::intToStr( attrIdx ) );
         msg.append( " " );
         msg.append( Utils::intToStr( domIdx ) );
-        
+
         // init data
         wxTextDataObject data( wxString( msg.c_str(), wxConvUTF8 ) );
 
@@ -3407,22 +3407,22 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
         if ( mediator->getMode() == Mediator::MODE_ANALYSIS )
         {
             wxMenu menu;
-        
+
             // group & ungroup
             menu.Append(
-                ID_MENU_ITEM_ATTR_CLUST, 
+                ID_MENU_ITEM_ATTR_CLUST,
                 wxT( "Cluster nodes" ),
                 wxT( "Cluster nodes based on selected attributes" ) );
             menu.Append(
-                ID_MENU_ITEM_ATTR_TRACE, 
+                ID_MENU_ITEM_ATTR_TRACE,
                 wxT( "View trace" ),
                 wxT( "View trace based on selected attributes" ) );
             menu.AppendSeparator();
-            menu.Append( 
+            menu.Append(
                 ID_MENU_ITEM_ATTR_DISTR_PLOT,
                 wxT( "Distribution plot" ),
                 wxT( "Visualize the distribution of values" ) );
-            menu.Append( 
+            menu.Append(
                 ID_MENU_ITEM_ATTR_CORRL_PLOT,
                 wxT( "Correlation plot" ),
                 wxT( "Visualize the correlation of values" ) );
@@ -3432,18 +3432,18 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 wxT( "Visualize the combinations of values" ) );
             menu.AppendSeparator();
             menu.Append(
-                ID_MENU_ITEM_ATTR_DUPL, 
+                ID_MENU_ITEM_ATTR_DUPL,
                 wxT( "Duplicate" ),
                 wxT( "Duplicate attribute" ) );
             menu.Append(
-                ID_MENU_ITEM_ATTR_RENAME, 
+                ID_MENU_ITEM_ATTR_RENAME,
                 wxT( "Rename" ),
                 wxT( "Rename attribute" ) );
             menu.Append(
-                ID_MENU_ITEM_ATTR_DELETE, 
+                ID_MENU_ITEM_ATTR_DELETE,
                 wxT( "Delete" ),
                 wxT( "Delete attribute" ) );
-            menu.AppendSeparator();            
+            menu.AppendSeparator();
             menu.Append(
                 ID_MENU_ITEM_ATTR_PARTITION,
                 wxString( wxT( "Partition" ) ),
@@ -3454,7 +3454,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 wxString( wxT( "Remove partitioning" ) ),
                 wxString( wxT( "Remove current partitioning of continuous domain" ) ) );
             menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
-            
+
             int selCnt = listCtrlAttr->GetSelectedItemCount();
             if ( selCnt == 0 )
             {
@@ -3477,7 +3477,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                     item,
                     wxLIST_NEXT_ALL,
                     wxLIST_STATE_SELECTED );
-     
+
                 menu.Enable( ID_MENU_ITEM_ATTR_DISTR_PLOT, true );
                 menu.Enable( ID_MENU_ITEM_ATTR_CORRL_PLOT, false );
                 menu.Enable( ID_MENU_ITEM_ATTR_COMBN_PLOT, true );
@@ -3535,30 +3535,30 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 menu.Enable( ID_MENU_ITEM_ATTR_PARTITION, false );
                 menu.Enable( ID_MENU_ITEM_ATTR_DEPARTITION, false );
             }
-        
+
             PopupMenu( &menu );
-        
+
         }
     }
     else if ( e.GetId() == ID_LIST_CTRL_DOMAIN )
     {
         wxMenu menu;
-        
+
         // group & ungroup
-        menu.Append( 
-            ID_MENU_ITEM_DOM_GROUP, 
+        menu.Append(
+            ID_MENU_ITEM_DOM_GROUP,
             wxT( "Group" ),
             wxT( "Group selected domain values") );
-        menu.Append( 
+        menu.Append(
             ID_MENU_ITEM_DOM_UNGROUP,
             wxT( "Ungroup"),
             wxT( "Ungroup domain values") );
         // rename
-        menu.Append( 
-            ID_MENU_ITEM_DOM_RENAME, 
+        menu.Append(
+            ID_MENU_ITEM_DOM_RENAME,
             wxT( "Rename"),
             wxT( "Rename selected domain value") );
-        
+
         int selCnt = listCtrlDomain->GetSelectedItemCount();
         if ( selCnt == 0 )
         {
@@ -3569,7 +3569,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             menu.Enable( ID_MENU_ITEM_DOM_GROUP, false );
         else
             menu.Enable( ID_MENU_ITEM_DOM_RENAME, false );
-        
+
         PopupMenu( &menu );
 
     }
@@ -3579,7 +3579,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
         int  idxDOF = -1;
         idxDOF = listCtrlDOF->HitTest( e.GetPoint(), flag );
         dofMenu = true;
-        
+
         if ( 0 <= idxDOF && idxDOF < listCtrlDOF->GetItemCount() )
         {
             wxMenu menu;
@@ -3588,17 +3588,17 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 ID_MENU_ITEM_DOF_UNLINK,
                 wxT( "Remove attribute" ),
                 wxT( "Remove attribute" ) );
-                
+
             addAttributeMenu = new wxMenu();
             int i;
             int id = wxID_LOWEST; // Event id's for Attributes
 
-            // List All the Attributes in a Menu         
+            // List All the Attributes in a Menu
             for(i = 0; i < listCtrlAttr->GetItemCount(); i++)
             {
             	wxListItem rowInfo;
-            	wxString   celInfo;            	
-            	              
+            	wxString   celInfo;
+
                 // set row
                 rowInfo.m_itemId = i;
                  // set column
@@ -3611,21 +3611,21 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
             	helpString << i; // Convert int to wxString
             	wxMenuItem* item = new wxMenuItem(addAttributeMenu, id, celInfo, helpString, wxITEM_NORMAL);
                 addAttributeMenu->Append(
-            	 	item);            	
-            	Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));   
-            	id--;         	
+            	 	item);
+            	Connect( id, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(Frame::onPopupMenu));
+            	id--;
             }
-            	 
+
            menu.Append(ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
            			wxT( "Select attribute" ),
            			addAttributeMenu,
            			wxT( "Select attribute" ) );
-        
+
             // determine of an attribute has been linked
             // code thanks to 'www.wxwidgets.org/wiki'
             wxListItem rowInfo;
             wxString   celInfo;
-        
+
             // set row
             rowInfo.m_itemId = idxDOF;
             // set column
@@ -3641,7 +3641,7 @@ void Frame::onListCtrlRgtClick( wxListEvent &e )
                 menu.Enable( ID_MENU_ITEM_DOF_UNLINK, false );
 
             PopupMenu( &menu );
-            
+
         }
     }
 }
@@ -3678,13 +3678,13 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         // get idx of 2 selected items
         int attrIdx1 = -1;
         int attrIdx2 = -1;
-            
+
         long item = -1;
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );
         attrIdx1 = listCtrlAttr->GetItemData( item );
-        
+
         item = listCtrlAttr->GetNextItem( item,
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );
@@ -3699,7 +3699,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         if ( framePlot != NULL )
             framePlot->Close();
         initFramePlot();
-        
+
         // get idcs of selected (multiple) items
         vector< int > indcs;
         long item = -1;
@@ -3709,7 +3709,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -3730,7 +3730,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -3761,18 +3761,18 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Enter new name"),
                 wxT("Rename attribute") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
-            {                
+            {
                 name = string(dlg->GetValue().fn_str());
-            
+
                 if ( name.size() > 0 )
                 {
-                    mediator->handleAttributeRename( 
-                        attrIdx, 
+                    mediator->handleAttributeRename(
+                        attrIdx,
                         name );
                     break;
                 }
             }
-            
+
             delete dlg;
             dlg = NULL;
         }
@@ -3788,7 +3788,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -3807,10 +3807,10 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 msg.Append( wxT(", ") );
         }
         msg.Append( wxString( wxT("\' ?") ) );
-        wxMessageDialog dialog( 
-            this, 
-            msg, 
-            wxString( wxT("Confirm attribute delete") ), 
+        wxMessageDialog dialog(
+            this,
+            msg,
+            wxString( wxT("Confirm attribute delete") ),
             wxOK | wxCANCEL );
 
         // delete attribute
@@ -3830,7 +3830,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -3851,7 +3851,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -3865,7 +3865,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         long   item    = -1;
         int    attrIdx = -1;
-        
+
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3879,7 +3879,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         long   item    = -1;
         int    attrIdx = -1;
-        
+
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3890,7 +3890,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         mediator->handleAttrDepartition( attrIdx );
 
         listCtrlAttr->SetItemState(
-            item, 
+            item,
             wxLIST_STATE_SELECTED,
             wxLIST_STATE_SELECTED );
     }
@@ -3900,7 +3900,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         int    attrIdx = -1;
         string name    = "";
         vector< int > domIdcs;
-        
+
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3931,19 +3931,19 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Enter group name"),
                 wxT("Group domain values") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
-            {                
+            {
                 name = string(dlg->GetValue().fn_str());
-            
+
                 if ( name.size() > 0 )
                 {
-                    mediator->handleDomainGroup( 
-                        attrIdx, 
-                        domIdcs, 
+                    mediator->handleDomainGroup(
+                        attrIdx,
+                        domIdcs,
                         name );
                     break;
                 }
             }
-            
+
             delete dlg;
             dlg = NULL;
         }
@@ -3952,7 +3952,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
         long item    = -1;
         int  attrIdx = -1;
-        
+
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3974,7 +3974,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         int    attrIdx = -1;
         string name    = "";
         vector< int > domIdcs;
-        
+
         // get attribute index
         item = listCtrlAttr->GetNextItem(
             item,
@@ -3989,7 +3989,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );
         domIdcs.push_back( item );
-        
+
         if ( attrIdx >= 0 )
         {
             // get new value
@@ -3998,19 +3998,19 @@ void Frame::onPopupMenu( wxCommandEvent &e )
                 wxT("Enter new name"),
                 wxT("Rename domain value") );
             while ( dlg->ShowModal() == wxID_OK && name.size() <= 0)
-            {                
+            {
                 name = string(dlg->GetValue().fn_str());
-            
+
                 if ( name.size() > 0 )
                 {
-                    mediator->handleDomainGroup( 
-                        attrIdx, 
-                        domIdcs, 
+                    mediator->handleDomainGroup(
+                        attrIdx,
+                        domIdcs,
                         name );
                     break;
                 }
             }
-            
+
             delete dlg;
             dlg = NULL;
         }
@@ -4158,7 +4158,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
     {
     	long item   = -1;
         int  idDOF  = -1;
-        int idxAttr = -1; 
+        int idxAttr = -1;
 
         if(addAttributeMenu != NULL)
         {
@@ -4166,13 +4166,13 @@ void Frame::onPopupMenu( wxCommandEvent &e )
         	if( x != NULL)
         	{
         		wxString name = x->GetHelp(); // Get the index of the selected attribute
-		    	name.ToLong((long *)&idxAttr); // Converting String to int    
-		    	
+		    	name.ToLong((long *)&idxAttr); // Converting String to int
+
 		    	name = x->GetLabelFromText(x->GetText());
 		    	int checkedItemId = -1;
 
         		if(dofMenu == true)
-        		{		 
+        		{
 		    		item = listCtrlDOF->GetNextItem(
 		        			item,
 		        			wxLIST_NEXT_ALL,
@@ -4188,7 +4188,7 @@ void Frame::onPopupMenu( wxCommandEvent &e )
 		    	}
 		    	else
 		    	{
-				bool hasDomain = true;		
+				bool hasDomain = true;
 		    		string name = "";
 		    		if( !x->IsChecked())
 		    		{
@@ -4242,7 +4242,7 @@ void Frame::onClusterMenu( wxCommandEvent &e )
 				{
 					indcs.push_back( i );
 				}
-			}		
+			}
 			// handle selections
 			mediator->handleAttributeCluster( indcs );
 			clustMenu = NULL;
@@ -4256,7 +4256,7 @@ void Frame::onClusterMenu( wxCommandEvent &e )
 				{
 					wxMenuItem* item = clustMenu->FindItemByPosition( i );
 					if( item->IsChecked() )
-					{				
+					{
 						checked = true;
 					}
 				}
@@ -4302,7 +4302,7 @@ void Frame::onTool( wxCommandEvent &e )
     else if ( e.GetId() == ID_TOOL_LINE )
         mediator->handleEditModeLine();
     else if ( e.GetId() == ID_TOOL_ARROW )
-        mediator->handleEditModeArrow();    
+        mediator->handleEditModeArrow();
     else if ( e.GetId() == ID_TOOL_DARROW )
         mediator->handleEditModeDArrow();
     else if ( e.GetId() == ID_TOOL_FILL_COL )
@@ -4314,7 +4314,7 @@ void Frame::onTool( wxCommandEvent &e )
     else if ( e.GetId() == ID_TOOL_SNAP_GRID )
         mediator->handleEditSnapGrid( toolBarEdit->GetToolState( ID_TOOL_SNAP_GRID ) );
 
-    
+
 }
 
 
@@ -4333,7 +4333,7 @@ void Frame::onButton( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -4354,7 +4354,7 @@ void Frame::onButton( wxCommandEvent &e )
         while( item != -1 )
         {
             indcs.push_back( listCtrlAttr->GetItemData( item ) );
-                
+
             item = listCtrlAttr->GetNextItem(
                 item,
                 wxLIST_NEXT_ALL,
@@ -4387,7 +4387,7 @@ void Frame::onButton( wxCommandEvent &e )
 
                 mediator->handleClustPlotFrameDisplay( attrIdx );
             }
-        
+
             if ( frameClust != NULL )
             {
                 frameClust->Destroy();
@@ -4421,7 +4421,7 @@ void Frame::onButton( wxCommandEvent &e )
 
                 mediator->handleClustPlotFrameDisplay( attrIdx1, attrIdx2 );
             }
-        
+
             if ( frameClust != NULL )
             {
                 frameClust->Destroy();
@@ -4434,7 +4434,7 @@ void Frame::onButton( wxCommandEvent &e )
             if ( framePlot != NULL )
                 framePlot->Close();
             initFramePlot();
-        
+
             // get idcs of selected (multiple) items
             vector< int > indcs;
             long item = -1;
@@ -4444,7 +4444,7 @@ void Frame::onButton( wxCommandEvent &e )
             while( item != -1 )
             {
                 indcs.push_back( listCtrlClust->GetItemData( item ) );
-                
+
                 item = listCtrlClust->GetNextItem(
                     item,
                     wxLIST_NEXT_ALL,
@@ -4453,7 +4453,7 @@ void Frame::onButton( wxCommandEvent &e )
 
             // handle selections
             mediator->handleClustPlotFrameDisplay( indcs );
-            
+
             if ( frameClust != NULL )
             {
                 frameClust->Destroy();
@@ -4482,8 +4482,8 @@ void Frame::onButton( wxCommandEvent &e )
     {
 	if( textSizeBox->GetValue().IsNumber() ) // Check whether user entered a number or not
 	{
-		double size;		
-		textSizeBox->GetValue().ToDouble( &size );		
+		double size;
+		textSizeBox->GetValue().ToDouble( &size );
 		int textSize = (int) size;
 		if( textSize < 8 ) // Font size can be between 8 and 40
 		{
@@ -4520,12 +4520,12 @@ void Frame::onRadioBox( wxCommandEvent &e )
             item,
             wxLIST_NEXT_ALL,
             wxLIST_STATE_SELECTED );
-    
+
         if ( item != -1 )
         {
             idx = listCtrlDOF->GetItemData( item );
             int sel = radioBoxTextDOF->GetSelection();
-            
+
             if ( 0 <= idx && idx < listCtrlDOF->GetItemCount() )
             {
                 if ( sel == 0 )
@@ -4567,7 +4567,7 @@ void Frame::onSplitterDoubleClick( wxSplitterEvent &e)
 		// minimize the panelBotRgt pane
 		splitterRgt->SetSashPosition( ( 0 - splitterRgt->GetMinimumPaneSize() ), true );
 	}
-	
+
 	// fit everything after minimizing panes
 	Layout();
     Fit();

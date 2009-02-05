@@ -44,7 +44,7 @@ class Cluster {
     Cluster* getDescendant(int i) const;
     int getNumDescendants() const;
     bool hasDescendants() const;
-    
+
     // Lets the cluster pretend that it does not have descendant i (for
     // zooming)
     void severDescendant(int i);
@@ -84,7 +84,7 @@ class Cluster {
     void addActionLabel(int l);
     bool hasMarkedTransition() const;
     int setActionMark(int l,bool b);
-    
+
     // General cluster information
     void center();
     void computeSizeAndPositions();
@@ -108,7 +108,7 @@ class Cluster {
     int getNumBranchVisObjects() const;
     void addBranchVisObject(int vo);
     void clearBranchVisObjects();
-    
+
     // Methods for selection
     void select();
     void deselect();

@@ -24,12 +24,12 @@ namespace tipi {
 
     /** \brief Minimal interface for a logger component */
     class logger {
- 
+
       public:
- 
+
         /** \brief Type for log level specification */
         typedef unsigned char log_level;
- 
+
       protected:
 
         /** \brief Target for writing the log messages */
@@ -37,49 +37,49 @@ namespace tipi {
 
         /** \brief The log level below which all messages are printed */
         log_level                        m_filter_level;
- 
+
       protected:
- 
+
         /** \brief The default log level */
         static log_level& default_filter_level() {
           static logger::log_level default_level = 1;
 
           return default_level;
         }
- 
+
       public:
- 
+
         /** \brief Constructor */
         logger() : m_filter_level(default_filter_level()) { }
- 
+
         /** \brief Constructor */
         logger(const log_level l);
- 
+
         /** \brief Adds a log message with a string and a log level */
         void log(log_level, std::string const&);
- 
+
         /** \brief Adds a log message with a format object and a log level */
         void log(log_level, boost::format const&);
 
         /** \brief Redirects output to ostream */
         void redirect(std::ostream&);
- 
+
         /** \brief Redirects output to file */
         void redirect(boost::filesystem::path const& p);
- 
+
         /** \brief Sets default filter level */
         static void set_default_filter_level(log_level l);
- 
+
         /** \brief Sets default filter level */
         static log_level get_default_filter_level();
- 
+
         /** \brief Sets filter level below which messages are logged */
         void set_filter_level(log_level l);
- 
+
         /** \brief Returns filter level below which messages are logged */
         log_level get_filter_level() const;
     };
- 
+
     /**
      * \param[in] l log level
      **/
@@ -102,18 +102,18 @@ namespace tipi {
     inline void logger::redirect(boost::filesystem::path const& p) {
       m_sink.open(p.string().c_str(), std::ios::out);
     }
- 
+
     /**
      * \param[in] l log level
      **/
     inline void logger::set_default_filter_level(log_level l) {
       default_filter_level() = l;
     }
- 
+
     inline logger::log_level logger::get_default_filter_level() {
       return default_filter_level();
     }
- 
+
     /**
      * @param[in] l the log level of the message
      * @param[in] m the message content
@@ -123,7 +123,7 @@ namespace tipi {
         m_sink << m;
       }
     }
- 
+
     /**
      * @param[in] l the log level of the message
      * @param[in] m the message content
@@ -133,14 +133,14 @@ namespace tipi {
         m_sink << m;
       }
     }
- 
+
     /**
      * \param[in] l log level
      **/
     inline void logger::set_filter_level(log_level l) {
       m_filter_level = l;
     }
- 
+
     inline logger::log_level logger::get_filter_level() const {
       return m_filter_level;
     }

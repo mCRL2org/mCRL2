@@ -17,7 +17,7 @@
 #include "mcrl2/utilities/font_renderer.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 

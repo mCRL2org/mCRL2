@@ -1,8 +1,8 @@
 % This specification describes the game `Snake', which is a two
 % player board game. There is a board of N by M.
-% One player has white pieces (W) and the 
+% One player has white pieces (W) and the
 % other has black pieces (B). Initially, the board is set up as:
-% 
+%
 %      . . . B . . . .
 %      . . . . . . . .
 %      . . . . . . . .
@@ -11,7 +11,7 @@
 %      . . . . . . . .
 %      . . . . . . . .
 %      . . . . W . . .
-% 
+%
 % Black makes the first move, and players each do a move in turn.
 % Each player can put a piece at the head of the snake in vertical
 % or horizontal direction (not vertically) on an empty field of the
@@ -68,13 +68,13 @@ eqn At(x,y,Up,b)=At(x,y+1,b);
 
     PossibleMove(x,y,Up,b)=
        y+1<=M && At(x,y,Up,b)==Empty;
-       
+
     PossibleMove(x,y,Right,b)=
        x+1<=N && At(x,y,Right,b)==Empty;
-       
+
     PossibleMove(x,y,Down,b)=
        y>1 && At(x,y,Down,b)==Empty;
-       
+
     PossibleMove(x,y,Left,b)=
        x>1 && At(x,y,Left,b)==Empty;
 
@@ -88,25 +88,25 @@ eqn At(x,y,Up,b)=At(x,y+1,b);
     Xchange(x,Right)=x+1;
     Xchange(x,Down)=x;
     Xchange(x,Left)=Int2Pos(x-1);
-       
+
     Ychange(y,Up)=y+1;
     Ychange(y,Right)=y;
     Ychange(y,Down)=Int2Pos(y-1);
     Ychange(y,Left)=y;
-       
+
 
 act WhiteMove,BlackMove:Pos#Pos#Direction;
     WhiteWins,BlackWins;
 
 proc Snake(xblack,yblack,xwhite,ywhite:Pos,b:Board,WhiteMoves:Bool)=
        sum dir:Direction.
-                    (WhiteMoves && 
+                    (WhiteMoves &&
                      PossibleMove(xwhite,ywhite,dir,b)) ->
            WhiteMove(xwhite,ywhite,dir).
              Snake(xblack,yblack,Xchange(xwhite,dir),Ychange(ywhite,dir),
                     Put(White,xwhite,ywhite,dir,b),false)+
        sum dir:Direction.
-                    (!WhiteMoves && 
+                    (!WhiteMoves &&
                      PossibleMove(xblack,yblack,dir,b)) ->
            BlackMove(xwhite,ywhite,dir).
              Snake(Xchange(xblack,dir),Ychange(yblack,dir),xwhite,ywhite,

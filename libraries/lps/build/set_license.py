@@ -76,7 +76,7 @@ def process_dir(year, author, dir, ext):
         text = old_text
         text = remove_license(text)
         text = replace_include_guards(text, file)
-        text = add_license(text, filename, year, author)       
+        text = add_license(text, filename, year, author)
         if text != old_text:
             file.write_text(text)
 

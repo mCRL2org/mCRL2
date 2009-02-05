@@ -317,7 +317,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         wxXmlNode* xml_terminating_trans_label_var_update = new wxXmlNode( xml_terminating_trans_label_var_updates, wxXML_ELEMENT_NODE, _T( "variableupdate" ) );
         new wxXmlNode( xml_terminating_trans_label_var_update, wxXML_TEXT_NODE, _T( "value" ), tt_label_var_update_text );
       }
-   
+
       /* node <timestamp> */
       wxXmlNode* xml_terminating_trans_label_timestamp = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
 
@@ -395,7 +395,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         tt_from = wxString::Format( _T( "%u"), begin_ptr->get_id() );
       }
       new wxXmlNode( xml_terminating_trans_from, wxXML_TEXT_NODE, _T( "value" ), tt_from );
-      
+
       /* node <breakpointlist> */
       wxXmlNode* xml_terminating_trans_breakpointlist = new wxXmlNode( xml_terminating_transition, wxXML_ELEMENT_NODE, _T( "breakpointlist" ) );
 

@@ -183,7 +183,7 @@ using namespace mcrl2::core;
     }
 
     // --------------------------------------------------------------------------------------------
-    
+
     mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
     {
       ATermAppl raw_specification;
@@ -247,7 +247,7 @@ using namespace mcrl2::core;
       if(!f_formula){
         throw mcrl2::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
-      
+
       //update spec with the contents of v_reconstructed_spec
       spec = mcrl2::data::data_specification(v_reconstructed_spec);
 

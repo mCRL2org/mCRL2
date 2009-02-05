@@ -43,8 +43,8 @@ namespace lts
    * \details This enumerated type defines the various formats in which an LTS
    * can be stored. */
   enum lts_type
-  { 
-    lts_none,  /**< unknown or no format */ 
+  {
+    lts_none,  /**< unknown or no format */
     lts_mcrl2, /**< mCRL2 SVC format */
     lts_aut,   /**< Ald&eacute;baran format (CADP) */
     lts_mcrl,  /**< muCRL SVC format */
@@ -65,7 +65,7 @@ namespace lts
   };
 
   /** \brief LTS equivalence relations.
-   * \details This enumerated type defines equivalence relations on 
+   * \details This enumerated type defines equivalence relations on
    * LTSs. They can be used to reduce an LTS or decide whether two LTSs
    * are equivalent. */
   enum lts_equivalence
@@ -123,7 +123,7 @@ namespace lts
          * \details
          * If \a false, the reduction algorithm reduces the LTS by mapping
          * equivalent states onto each other.
-         * 
+         *
          * If \a true, the LTS is \b not reduced. Instead, the algorithm adds a
          * parameter to the state vector of every state. The value of this
          * parameter indicates the equivalence class to which that state belongs.
@@ -158,14 +158,14 @@ namespace lts
    * \details This struct stores options for the Dot format of the GraphViz
    * package. */
   typedef struct
-  { 
-    /** \brief Name of the graph. 
+  {
+    /** \brief Name of the graph.
      * \details Points to the name that is given to the graph in the Dot file. */
     std::string const *name;
     /** \brief Indicates whether to label states in the graph.
      * \details
      * If \a true, the states in the Dot file are labelled by the state values,
-     * if available. 
+     * if available.
      *
      * If \a false, the states are not labelled. */
     bool print_states;
@@ -203,11 +203,11 @@ namespace lts
    * \pre                  The LTS in filename is a mCRL2 SVC without extra
    *                       information. */
   void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec);
-  
+
   /** \cond */
   #include "detail/liblts_private.h"
   /** \endcond */
-  
+
   /** \brief Stores additional LTS information.
    * \details This class is provided for storing additional information with an
    * LTS. This can be either a muCRL specification, an mCRL2 specificiation, or
@@ -233,15 +233,15 @@ namespace lts
        * \retval le_mcrl2 if this object contains an mCRL2 specification;
        * \retval le_dot if this object contains options for the Dot format. */
       lts_extra_type get_type();
-      /** \brief Gets the muCRL specification stored in this object. 
+      /** \brief Gets the muCRL specification stored in this object.
        * \pre This object contains a muCRL specification.
        * \return The muCRL specification stored in this object.*/
       ATerm get_mcrl1_spec();
-      /** \brief Gets the mCRL2 specification stored in this object. 
+      /** \brief Gets the mCRL2 specification stored in this object.
        * \pre This object contains an mCRL2 specification.
        * \return The mCRL2 specification stored in this object.*/
       lps::specification *get_mcrl2_spec();
-      /** \brief Gets the Dot format options stored in this object. 
+      /** \brief Gets the Dot format options stored in this object.
        * \pre This object contains options for the Dot format.
        * \return The Dot format options stored in this object.*/
       lts_dot_options get_dot_options();
@@ -272,7 +272,7 @@ namespace lts
       /** \brief Dereferences the iterator.
        * \return The state to which this iterator points.*/
       unsigned int operator *();
-      /** \brief Increments the iterator. 
+      /** \brief Increments the iterator.
        * \details Makes this iterator point to the next state of the LTS. */
       void operator ++();
   };
@@ -289,7 +289,7 @@ namespace lts
        * \param[in] l The LTS for which the transition label iterator will be
        * created. */
       label_iterator(lts *l);
-      
+
       /** \brief Checks whether there are more transition labels to iterate over.
        * \retval true if there are more labels to iterate over;
        * \retval false otherwise. */
@@ -315,7 +315,7 @@ namespace lts
        * \param[in] l The LTS for which the transition iterator will be created.
        */
       transition_iterator(lts *l);
-      
+
       /** \brief Checks whether there are more transitions to iterate over.
        * \retval true if there are more transitions to iterate over;
        * \retval false otherwise. */
@@ -370,7 +370,7 @@ namespace lts
        */
       static lts_type parse_format(std::string const& s);
 
-      /** \brief Gives a string representation of an LTS format. 
+      /** \brief Gives a string representation of an LTS format.
        * \details This is the "inverse" of \ref parse_format.
        * \param[in] type The LTS format.
        * \return The name of the LTS format specified by \a type. */
@@ -401,7 +401,7 @@ namespace lts
        * \return The equivalence type specified by \a s.
        * If \a s is none of the above values then \a lts_eq_none is returned. */
       static lts_equivalence parse_equivalence(std::string const& s);
-      
+
       /** \brief Gives the short name of an equivalence.
        * \param[in] eq The equivalence type.
        * \return A short string representing the equivalence specified by \a
@@ -424,7 +424,7 @@ namespace lts
        * \return The preorder type specified by \a s.
        * If \a s is none of the above values then \a lts_pre_none is returned. */
       static lts_preorder parse_preorder(std::string const& s);
-      
+
       /** \brief Gives the short name of a preorder.
        * \param[in] pre The preorder type.
        * \return A short string representing the preorder specified by \a
@@ -481,7 +481,7 @@ namespace lts
        *                      formats in \a supported, separated by \a ','.
        *                      E.g. "*.aut,*.lts" */
       static std::string lts_extensions_as_string(const std::set<lts_type> &supported);
-     
+
       /** \brief Gives a textual list describing supported equivalences on LTSs.
        * \param[in] default_equivalence The equivalence that should be marked
        *                                as default (or \a lts_eq_none for no
@@ -555,7 +555,7 @@ namespace lts
       /** \brief Frees the memory occupied by this LTS. */
       ~lts();
 
-      /** \brief Clears the LTS data. 
+      /** \brief Clears the LTS data.
        * \param[in] state_info Indicates whether state parameter information
        * will be present.
        * \param[in] label_info Indicates whether label information will be
@@ -612,7 +612,7 @@ namespace lts
       /** \brief Gets the number of labels of this LTS.
        * \return The number of labels of this LTS. */
       unsigned int num_labels();
-      
+
       /** \brief Gets the initial state number of this LTS.
        * \return The number of the initial state of this LTS. */
       unsigned int initial_state();
@@ -621,14 +621,14 @@ namespace lts
        * \param[in] state The number of the state that will become the initial
        * state. */
       void set_initial_state(unsigned int state);
-      
+
       /** \brief Adds a state to this LTS.
-       * \param[in] value The value of the state. 
+       * \param[in] value The value of the state.
        * \return The number of the added state. */
       unsigned int add_state(ATerm value = NULL);
 
       /** \brief Adds a label to this LTS.
-       * \param[in] value The value of the label. 
+       * \param[in] value The value of the label.
        * \param[in] is_tau Indicates whether the label is a tau action.
        * \return The number of the added label. */
       unsigned int add_label(ATerm value = NULL, bool is_tau = false);
@@ -659,37 +659,37 @@ namespace lts
       void set_label(unsigned int label, ATerm value, bool is_tau = false);
 
       /** \brief Gets the value of a state.
-       * \param[in] state The number of the state. 
+       * \param[in] state The number of the state.
        * \return The value of the state. */
       ATerm state_value(unsigned int state);
 
       /** \brief Gets the value of a label.
-       * \param[in] label The number of the label. 
+       * \param[in] label The number of the label.
        * \return The value of the label. */
       ATerm label_value(unsigned int label);
 
       /** \brief Gets the value of a state as a string.
-       * \param[in] state The number of the state. 
+       * \param[in] state The number of the state.
        * \return A string representation of the value of the state. */
       std::string state_value_str(unsigned int state);
 
       /** \brief Gets the value of a label as a string.
-       * \param[in] label The number of the label. 
+       * \param[in] label The number of the label.
        * \return A string representation of the value of the label. */
       std::string label_value_str(unsigned int label);
 
       /** \brief Gets the source state of a transition.
-       * \param[in] transition The number of the transition. 
+       * \param[in] transition The number of the transition.
        * \return The number of the transition's source state. */
       unsigned int transition_from(unsigned int transition);
 
       /** \brief Gets the label of a transition.
-       * \param[in] transition The number of the transition. 
+       * \param[in] transition The number of the transition.
        * \return The number of the transition's label. */
       unsigned int transition_label(unsigned int transition);
 
       /** \brief Gets the target state of a transition.
-       * \param[in] transition The number of the transition. 
+       * \param[in] transition The number of the transition.
        * \return The number of the transition's target state. */
       unsigned int transition_to(unsigned int transition);
 
@@ -706,7 +706,7 @@ namespace lts
       transition_iterator get_transitions();
 
       /** \brief Checks whether a label is a tau action.
-       * \param[in] label The number of the label. 
+       * \param[in] label The number of the label.
        * \retval true if the label is a tau action;
        * \retval false otherwise.  */
       bool is_tau(unsigned int label);
@@ -716,7 +716,7 @@ namespace lts
        * \param[in] is_tau Indicates whether the label should become a tau action. */
       void set_tau(unsigned int label, bool is_tau = true);
 
-      
+
       /** \brief Checks whether this LTS has a creator.
        * \retval true if the label has a creator;
        * \retval false otherwise.  */
@@ -729,7 +729,7 @@ namespace lts
       /** \brief Sets the creator of this LTS.
        * \param[in] creator The creator string.*/
       void set_creator(std::string creator);
-      
+
       /** \brief Gets the file type of the last successful call to load.
        * \details Note that this does not mean that the information
        * currently in the object is still in this format.
@@ -848,22 +848,22 @@ namespace lts
        * \return The extra information stored in this LTS or NULL if there
        *         is none. */
       ATerm get_extra_data();
-      
+
       /** \brief Set (or remove) the extra information for this LTS.
        * \param[in] data  The extra information for this LTS or NULL to
        *                  remove any possible extra information. */
       void set_extra_data(ATerm data);
-      
+
       /** \brief Check whether this LTS has an mCRL2 data specification.
        * \return A boolean indicating whether this LTS has an mCRL2 data
        *         specification. */
       bool has_data_specification();
-      
+
       /** \brief Return the mCRL2 data specification of this LTS.
        * \return The mCRL2 data specification of this LTS.
        * \pre    This LTS has an mCRL2 data specification. */
       data::data_specification get_data_specification();
-      
+
       /** \brief Set the mCRL2 data specification of this LTS.
        * \param[in] spec  The mCRL2 data specification for this LTS.
        * \pre             This is an mCRL2 LTS. */
@@ -877,23 +877,23 @@ namespace lts
        * \details Gets an array specifying for each state, the range of
        * transitions of which that state is the source state.
        * \pre The transitions are sorted on source state number.
-       * \return An array \e A of size \ref num_states()+1 such that 
-       * for every state <em>s</em>: 
-       * [ \e A[\e s] .. \e A[<em>s</em>+1] ) 
+       * \return An array \e A of size \ref num_states()+1 such that
+       * for every state <em>s</em>:
+       * [ \e A[\e s] .. \e A[<em>s</em>+1] )
        * are all transitions of which \e s is the source state. */
       unsigned int* get_transition_indices();
 
-      /** \brief Gets the predecessors of each state, per label. 
+      /** \brief Gets the predecessors of each state, per label.
        * \details Gets a table specifying for each state and label number, the
        * range of transitions having that label and target state.
        * \pre The transitions are sorted first on label number, then on
        * target state number.
-       * \return A table \e A of size \ref num_labels() * (\ref num_states()+1) 
-       * such that for every label <em>l</em> and state <em>t</em>: 
-       * [ \e A[\e l][\e t] .. \e A[\e l][<em>t</em>+1] ) 
+       * \return A table \e A of size \ref num_labels() * (\ref num_states()+1)
+       * such that for every label <em>l</em> and state <em>t</em>:
+       * [ \e A[\e l][\e t] .. \e A[\e l][<em>t</em>+1] )
        * are all <em>l</em>-labelled transitions of which \e t is the target state. */
       unsigned int** get_transition_pre_table();
-      
+
       /** \brief Applies a reduction algorithm to this LTS.
        * \param[in] eq The equivalence with respect to which the LTS will be
        * reduced.
@@ -915,7 +915,7 @@ namespace lts
        * similarly for the LTS \a l.
        */
       bool compare(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
-      
+
       /** \brief Checks whether this LTS is smaller than another LTS according
        * to a preorder.
        * \param[in] l The LTS to which this LTS will be compared.
@@ -936,9 +936,9 @@ namespace lts
 
       /** \brief Determinises this LTS. */
       void determinise();
-      
+
       /** \brief Checks whether all states in this LTS are reachable
-       * from the initial state. 
+       * from the initial state.
        * \details Runs in O(\ref num_states * \ref num_transitions) time.
        * \param[in] remove_unreachable Indicates whether all unreachable states
        *            should be removed from the LTS. This option does not

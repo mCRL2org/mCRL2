@@ -46,7 +46,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   while ( *s == ' ' )
     s++;
 
-  if ( strncmp(s,"des",3) ) 
+  if ( strncmp(s,"des",3) )
     return false;
   s += 3;
 
@@ -56,7 +56,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != '(' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -71,7 +71,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -86,7 +86,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -101,7 +101,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ')' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -126,7 +126,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != '(' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -141,7 +141,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -169,7 +169,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -184,7 +184,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ')' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -207,14 +207,14 @@ bool p_lts::read_from_aut(istream &is)
   #define READ_FROM_AUT_BUF_SIZE 8196
   char buf[READ_FROM_AUT_BUF_SIZE];
   char *s1,*s2,*s3;
-  
+
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
   if ( read_aut_header(buf,&s1,&s2,&s3) )
   {
     init_state = strtoul(s1,NULL,10);
     ntrans = strtoul(s2,NULL,10);
     nstate = strtoul(s3,NULL,10);
-  } else { 
+  } else {
     gsErrorMsg("cannot parse AUT input! (invalid header)\n");
     return false;
   }

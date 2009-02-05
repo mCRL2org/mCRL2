@@ -34,7 +34,7 @@ std::set<core::identifier_string> find_identifiers(Term t)
   find_all_if(atermpp::aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
   return result;
 }
- 
+
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param t A term
 /// \param d A data variable

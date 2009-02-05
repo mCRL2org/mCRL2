@@ -95,12 +95,12 @@ methods =parse_options= and =add_options=:
   {
     protected:
       bool m_compute_conditions;
-  
+
       void parse_options(const command_line_parser& parser)
       {
         m_compute_conditions = parser.options.count("compute-conditions") > 0;
       }
-  
+
       void add_options(interface_description& clinterface)
       {
         clinterface.add_option("compute-conditions", "compute propagation conditions", 'c');
@@ -121,27 +121,27 @@ An example is given below:
   {
     public:
       void set_capabilities(tipi::tool::capabilities&) const;
-      
+
       void user_interactive_configuration(tipi::configuration&);
-      
+
       bool check_configuration(tipi::configuration const&) const;
-      
+
       bool perform_task(tipi::configuration&);
-      
+
       int execute(int argc, char** argv)
       {
         if (squadt::free_activation(*this, argc, argv)) {
           return EXIT_SUCCESS;
         }
         return pbes2bes_tool::execute(argc, argv);
-      }     
+      }
   };
   #endif
 
   int main(int argc, char* argv[])
   {
     MCRL2_ATERMPP_INIT(argc, argv)
-  
+
     try {
   #ifdef ENABLE_SQUADT_CONNECTIVITY
       squadt_pbes2bes_tool tool;
@@ -153,7 +153,7 @@ An example is given below:
     catch (std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-  
+
     return EXIT_FAILURE;
   }
 

@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg 
+// Author(s): Muck van Weerdenburg
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -124,7 +124,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 		ATbool n,m;
 		ATindexedSetPut(used_data,(ATerm) s,&n);
 		ATindexedSetPut(used_sorts,(ATerm) s,&m);
-	
+
 		bool b = false;
 		if ( m == ATtrue )
 		{
@@ -133,13 +133,13 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 			for (; fb != fe; fb++)
 			{
 				sort_expression range = result_sort(fb->sort());
-	
+
 				if ( range == s )
 				{
 					ATbool n;
-				
+
 					ATindexedSetPut(used_data,(ATerm) ((ATermAppl) (*fb)),&n);
-	
+
 					sort_expression_list domain = domain_sorts(fb->sort());
 					sort_expression_list::iterator db = domain.begin();
 					sort_expression_list::iterator de = domain.end();
@@ -150,7 +150,7 @@ static bool add_sort(ATermAppl s, ATermIndexedSet used_data, ATermIndexedSet use
 					}
 				}
 			}
-	
+
 		}
 
 		return (n == ATtrue) || b;
@@ -285,9 +285,9 @@ static data_specification build_reduced_data_spec(data_specification dspec, ATer
 		}
 	}
 	new_eqns = reverse(new_eqns);
-	
+
 	ATtableDestroy(used_sorts);
-	
+
 	data_specification new_data(new_sort,new_cons,new_maps,new_eqns);
 
 	return new_data;

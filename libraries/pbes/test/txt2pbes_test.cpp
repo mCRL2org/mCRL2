@@ -20,7 +20,7 @@ const std::string PBESSPEC =
   "     mu Y(n: Nat)  = X(n >= 10);                    \n"
   "                                                    \n"
   "init X(true);                                       \n"
-  ;  
+  ;
 
 void test_txt2pbes()
 {

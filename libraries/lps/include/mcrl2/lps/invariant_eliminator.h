@@ -59,7 +59,7 @@
   ///    P(d: D) = ...
   ///            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
   ///            + ...;
-  ///  
+  ///
   /// an instance of the class Invariant_Eliminator will generate a formula of the form
   ///
   ///    inv(d) /\ ci(d, ei)
@@ -67,7 +67,7 @@
   /// for each of the summands or for the chosen summand only, where inv() is the invariant passed as parameter a_invariant.
   /// If such a formula is a contradiction according to the prover, the corresponding summand will be eliminated. If the
   /// parameter a_simplify_all is set, the condition of each summand is replaced by the BDD obtained from the prover after
-  /// proving that summand's formula. 
+  /// proving that summand's formula.
 
 class Invariant_Eliminator {
   private:

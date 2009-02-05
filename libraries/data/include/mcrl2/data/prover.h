@@ -39,7 +39,7 @@
   ///
   /// If a formula is neither a tautology nor a contradiction according to the prover, a so called witness or counter
   /// example can be returned by the methods Prover::get_witness and Prover::get_counter_example. A witness is a valuation
-  /// for which the formula holds, a counter example is a valuation for which it does not hold. 
+  /// for which the formula holds, a counter example is a valuation for which it does not hold.
 
 enum Answer {
   answer_yes,

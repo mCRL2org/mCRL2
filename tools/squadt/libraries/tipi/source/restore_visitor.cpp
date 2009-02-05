@@ -438,7 +438,7 @@ namespace utility {
         }
       }
     }
-  }  
+  }
 
   /**
    * \param[in] c a tipi::report object to restore
@@ -526,7 +526,7 @@ namespace utility {
     c.m_label = tree->GetText(false);
 
     display::element_identifier id = reinterpret_cast < display::element_identifier > (&c);
-    
+
     tree->GetAttribute("connected", &id, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
@@ -658,7 +658,7 @@ namespace utility {
     tree->GetAttribute("horizontal-alignment", &s, false);
 
     if (!s.empty()) {
-      c.m_alignment_horizontal = text_to_horizontal_alignment(s); 
+      c.m_alignment_horizontal = text_to_horizontal_alignment(s);
     } else {
       s.clear();
     }
@@ -666,7 +666,7 @@ namespace utility {
     tree->GetAttribute("vertical-alignment", &s, false);
 
     if (!s.empty()) {
-      c.m_alignment_vertical = text_to_vertical_alignment(s); 
+      c.m_alignment_vertical = text_to_vertical_alignment(s);
     } else {
       s.clear();
     }
@@ -674,7 +674,7 @@ namespace utility {
     tree->GetAttribute("visibility",&s , false);
 
     if (!s.empty()) {
-      c.m_visible = text_to_visibility(s); 
+      c.m_visible = text_to_visibility(s);
     }
 
     tree->GetAttribute("margin-top", &c.m_margin.m_top, false);
@@ -838,12 +838,12 @@ namespace utility {
         if (name == "box-layout-manager") {
           if (tree->GetAttribute("variant", false) == "vertical") {
             d.create< tipi::layout::vertical_box >(c, id);
-       
+
             visit(static_cast < tipi::layout::vertical_box& > (*c), d);
           }
           else {
             d.create< tipi::layout::horizontal_box >(c, id);
-       
+
             visit(static_cast < tipi::layout::horizontal_box& > (*c), d);
           }
         }
@@ -866,7 +866,7 @@ namespace utility {
       c.impl.reset(new tipi::display_impl);
 
       tree->GetAttribute("visible", &c.m_visible, false);
-     
+
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
         if (e->Value() == "layout-manager" && !e->NoChildren()) {
           visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.impl->get_manager(), static_cast < tipi::display& > (c));

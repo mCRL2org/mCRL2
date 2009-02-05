@@ -88,7 +88,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     {
       ATprotectProtectedATerm(this);
     }
-   
+
     /// Destructor.
     ~map()
     {
@@ -177,7 +177,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     {
       ATprotectProtectedATerm(this);
     }
-   
+
     /// Destructor.
     ~multimap()
     {

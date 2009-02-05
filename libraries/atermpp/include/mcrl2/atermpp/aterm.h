@@ -140,7 +140,7 @@ namespace atermpp
     static ATerm* ptr(aterm_base& t)         { return &t.term(); }
   };
   /// \endcond
-  
+
   /// \brief Returns true if x has the default value of an aterm. In the ATerm Library
   /// this value is given by ATfalse.
   /// \param x A term.
@@ -236,7 +236,7 @@ namespace atermpp
     static ATerm* ptr(aterm& t)         { return &t.term(); }
   };
   /// \endcond
-  
+
   /// \brief Read an aterm from string.
   /// This function parses a character string into an aterm.
   /// \param s A string

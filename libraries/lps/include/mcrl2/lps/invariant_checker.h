@@ -53,14 +53,14 @@
   ///    P(d: D) = ...
   ///            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
   ///            + ...;
-  ///  
+  ///
   /// an instance of the class Invariant_Checker will generate a formula of the form
   ///
   ///    inv(d) /\ ci(d, ei) => inv(gi(d, ei))
   ///
   /// for each of the summands, where inv() is the expression passed as parameter a_invariant. If this expression passed as
   /// parameter a_invariant holds for the initial state and all the generated formulas are tautologies according to the
-  /// prover, it is an invariant. 
+  /// prover, it is an invariant.
 
 class Invariant_Checker {
   private:

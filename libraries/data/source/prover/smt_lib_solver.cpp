@@ -846,12 +846,12 @@ namespace mcrl2 {
         int pipe_stdin[2];
         int pipe_stdout[2];
         int pipe_stderr[2];
-     
+
         // Create pipes (two pairs r/w)
         ::pipe(&pipe_stdin[0]);
         ::pipe(&pipe_stdout[0]);
         ::pipe(&pipe_stderr[0]);
-     
+
         // fork process
         pid_t pid = ::fork();
 
@@ -865,7 +865,7 @@ namespace mcrl2 {
           ::close(pipe_stderr[0]);
 
           T::exec();
-     
+
           ::_exit(errno);
         }
         else if (pid < 0) {
@@ -877,17 +877,17 @@ namespace mcrl2 {
           ::close(pipe_stdout[1]);
           ::close(pipe_stderr[0]);
           ::close(pipe_stderr[1]);
-     
+
           return false;
         }
         else {
           ::write(pipe_stdin[1], benchmark.c_str(), benchmark.size());
-         
+
           ::close(pipe_stdin[0]);
           ::close(pipe_stdin[1]);
           ::close(pipe_stdout[1]);
           ::close(pipe_stderr[1]);
-         
+
           char output[64];
 
           int status;
@@ -926,7 +926,7 @@ namespace mcrl2 {
 
           ::wait(&status);
         }
-     
+
         return false;
       }
 

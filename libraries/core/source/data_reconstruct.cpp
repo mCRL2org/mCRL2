@@ -717,7 +717,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
           Part = gsMakeOpId(name, gsMakeSortExprReal());
         }
       }
-    } else { 
+    } else {
       Part = gsMakeDataExprDivide(ArgNumerator, gsMakeDataExprPos2Int(ArgDenominator));
       if (gsIsOpId(ArgDenominator)) {
         ATermAppl name = ATAgetArgument(ArgDenominator, 0);
@@ -858,15 +858,15 @@ ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
       return PosArg;
     } else if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
       //Mult*v(b) = Mult
-      return gsMakeDataExprAdd(PosArg, 
+      return gsMakeDataExprAdd(PosArg,
                gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
     } else if (strcmp(Mult, "1") == 0) {
       //Mult*v(b) = v(b)
       return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
     } else {
       //Mult*v(b)
-      return gsMakeDataExprAdd(PosArg, 
-               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprNat()), 
+      return gsMakeDataExprAdd(PosArg,
+               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprNat()),
                                   bool_to_numeric(BoolArg, gsMakeSortExprNat())));
     }
   } else {
@@ -875,7 +875,7 @@ ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
       return PosExpr;
     } else {
       return gsMakeDataExprMult(
-               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()), 
+               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()),
                PosExpr);
     }
   }
@@ -1100,7 +1100,7 @@ void reconstruct_data_decls(t_data_decls* p_data_decls, ATermList* p_substs)
 
 //  gsDebugMsg("Reconstructing structured sorts\n");
 
-  t_reconstruct_context ctx; 
+  t_reconstruct_context ctx;
 
   calculate_lambda_expressions(p_data_decls, p_substs);
   // TODO: use hashtable for substitutions
@@ -1513,7 +1513,7 @@ bool match_appl(ATermAppl aterm_ann, const ATermAppl aterm, ATermList* p_substs)
     if (ATgetAnnotation((ATerm) aterm_ann, dummy_str) != NULL) {
       *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(aterm_ann, aterm), *p_substs);
       return true;
-    } 
+    }
   }
 
   if (gsIsBinder(aterm_ann) && gsIsBinder(aterm)) {
@@ -1536,8 +1536,8 @@ bool match_appl(ATermAppl aterm_ann, const ATermAppl aterm, ATermList* p_substs)
         // match(lambda x:S_a.e, lambda y:T.e') = [S_a := T] match(e[x:=y], e')
         *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort_ann, sort), *p_substs);
         if (!ATisEqual(gsGetName(var_ann), gsGetName(var))) {
-          expr_ann = capture_avoiding_substitutions(expr_ann, 
-            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann, 
+          expr_ann = capture_avoiding_substitutions(expr_ann,
+            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann,
                                             (ATerm) var)));
         }
       } else if (!ATisEqual(sort_ann, sort)) {
@@ -1547,8 +1547,8 @@ bool match_appl(ATermAppl aterm_ann, const ATermAppl aterm, ATermList* p_substs)
       } else {
         // match(lambda x:S.e, lambda y:S.e') = match(e[x:=y], e')
         if (!ATisEqual(gsGetName(var_ann), gsGetName(var))) {
-          expr_ann = capture_avoiding_substitutions(expr_ann, 
-            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann, 
+          expr_ann = capture_avoiding_substitutions(expr_ann,
+            ATmakeList1((ATerm) ATmakeList2((ATerm) var_ann,
                                             (ATerm) var)));
         }
       }
@@ -1914,7 +1914,7 @@ void initialise_mappings(const t_data_decls* p_data_decls, t_reconstruct_context
               gsMakeSubst_Appl(sort_fbag,
                                gsMakeSortExprBag(element_sort)),
               *p_substs);
-          } 
+          }
         */
         }
       }
@@ -2074,7 +2074,7 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
         p_ctx->recognises.erase(data_eqn_lhs);
         remove_mapping_not_list(data_eqn_lhs, sort, p_ctx);
       }
-    } 
+    }
   }
 }
 
@@ -2413,7 +2413,7 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
     ATermAppl sort = ATAgetFirst(l);
     ATermList constructors = p_ctx->sort_constructors[sort].elements();
 
-    if(p_ctx->num_sort_constructors[sort] != 0) { 
+    if(p_ctx->num_sort_constructors[sort] != 0) {
       if(p_ctx->num_sort_constructors[sort] == 2 &&
          (ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)) {
         // sort is a list sort
@@ -2525,7 +2525,7 @@ bool is_set_bag_list_sort(ATermAppl sort, t_reconstruct_context* p_ctx)
   if (p_ctx->sort_mappings[sort].index(gsMakeOpIdEmptySet(sort)) >= 0 ||
       p_ctx->sort_mappings[sort].index(gsMakeOpIdEmptyBag(sort)) >= 0 ||
       p_ctx->sort_mappings[sort].index(gsMakeOpIdFSetEmpty(sort)) >= 0 ||
-      p_ctx->sort_mappings[sort].index(gsMakeOpIdFBagEmpty(sort)) >= 0) 
+      p_ctx->sort_mappings[sort].index(gsMakeOpIdFBagEmpty(sort)) >= 0)
   {
     return true;
   }
@@ -2544,7 +2544,7 @@ ATermAppl get_element_sort(ATermAppl data_expr)
   {
     ATermList domain = ATLgetArgument(gsGetSort(data_expr), 0);
     assert((gsIsOpIdFSetInsert(data_expr) && ATgetLength(domain) == 2) ||
-           ((gsIsOpIdFBagInsert(data_expr) && ATgetLength(domain) == 3) && 
+           ((gsIsOpIdFBagInsert(data_expr) && ATgetLength(domain) == 3) &&
               gsIsSortExprPos(ATAgetFirst(ATgetNext(domain)))));
     return ATAgetFirst(domain);
   }

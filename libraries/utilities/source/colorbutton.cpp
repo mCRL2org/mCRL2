@@ -33,7 +33,7 @@ namespace mcrl2 {
           coldat = coldlg->GetColourData();
           SetBackgroundColour( coldat.GetColour() );
           ClearBackground();
-          
+
           wxCommandEvent cmdEvent( wxEVT_COMMAND_BUTTON_CLICKED, GetId() );
           cmdEvent.SetEventObject( this );
           GetParent()->ProcessEvent( cmdEvent );

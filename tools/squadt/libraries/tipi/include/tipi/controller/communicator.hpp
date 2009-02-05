@@ -69,25 +69,25 @@ namespace tipi {
 
         /** \brief Get the controller_capabilities object that is send to tools */
         const controller::capabilities& get_controller_capabilities();
- 
+
         /** \brief Request the list of basic input configurations */
         void request_tool_capabilities();
 
         /** \brief Send a specification of a (perhaps partial) configuration */
         void send_configuration(boost::shared_ptr < tipi::configuration > const&);
- 
+
         /** \brief Sends a message to a tool that it may start processing */
         void send_start_signal();
- 
+
         /** \brief Request the tool to terminate itself */
         void request_termination();
- 
+
         /** \brief Set the current (perhaps partial) configuration */
         void set_configuration(boost::shared_ptr < tipi::configuration >);
 
         /** \brief Creates a new configuration object based on a given input_configuration */
         static boost::shared_ptr < configuration > new_configuration(tipi::tool::capabilities::input_configuration const&);
- 
+
         /** \brief Get the current (perhaps partial) configuration */
         boost::shared_ptr < configuration > get_configuration() const;
 
@@ -103,7 +103,7 @@ namespace tipi {
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_status_message_handler(status_message_handler_function&);
     };
- 
+
     inline const controller::capabilities& communicator::get_controller_capabilities() {
       return (m_controller_capabilities);
     }

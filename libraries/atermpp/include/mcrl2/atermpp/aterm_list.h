@@ -28,7 +28,7 @@ namespace {
   // #define   ATgetFirst(l) ((l)->head)
   //
   // So we need to turn them into proper functions.
-  
+
   /// \brief Function that calls the macro ATgetNext
   /// \param l A sequence of terms
   /// \return The result of calling ATgetNext

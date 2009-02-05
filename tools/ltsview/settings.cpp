@@ -36,7 +36,7 @@ Setting::Setting(SettingID i) {
 }
 
 void Setting::notify_all() {
-  for (vector<Subscriber*>::iterator sub_it = subscribers.begin(); 
+  for (vector<Subscriber*>::iterator sub_it = subscribers.begin();
        sub_it != subscribers.end(); ++sub_it) {
     (**sub_it).notify(id);
   }
@@ -58,7 +58,7 @@ class Setting_Int: public Setting {
     void reset();
 };
 
-Setting_Int::Setting_Int(SettingID i,int dv): Setting(i) { 
+Setting_Int::Setting_Int(SettingID i,int dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -93,7 +93,7 @@ class Setting_Bool: public Setting {
     void reset();
 };
 
-Setting_Bool::Setting_Bool(SettingID i,bool dv): Setting(i) { 
+Setting_Bool::Setting_Bool(SettingID i,bool dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -128,7 +128,7 @@ class Setting_Float: public Setting {
     void reset();
 };
 
-Setting_Float::Setting_Float(SettingID i,float dv): Setting(i) { 
+Setting_Float::Setting_Float(SettingID i,float dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -198,7 +198,7 @@ class Setting_RGB: public Setting {
     void reset();
 };
 
-Setting_RGB::Setting_RGB(SettingID i,RGB_Color dv): Setting(i) { 
+Setting_RGB::Setting_RGB(SettingID i,RGB_Color dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -268,7 +268,7 @@ Settings::~Settings() {
   settings.clear();
 }
 
-void Settings::subscribe(SettingID st,Subscriber* ss) { 
+void Settings::subscribe(SettingID st,Subscriber* ss) {
   settings[st]->subscribe(ss);
 }
 

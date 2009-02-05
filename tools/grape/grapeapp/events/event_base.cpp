@@ -163,7 +163,7 @@ bool grape_event_base::close_specification()
 
   // reset eventhandler
   m_main_frame->get_event_handler()->ClearCommands();
-  m_main_frame->get_event_handler()->Initialize(); 
+  m_main_frame->get_event_handler()->Initialize();
 
   // reset logpanel
   m_main_frame->get_logpanel()->Clear();

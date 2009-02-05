@@ -110,10 +110,10 @@ bool transition::movable( void ) const
 }
 
 coordinate transition::get_begin_coordinate( void )
-{   
-  coordinate tail_coordinate;  
+{
+  coordinate tail_coordinate;
   compound_state *beginstate = get_beginstate();
- 
+
   // if the transition has an beginstate
   if ( beginstate != 0 )
   {
@@ -123,6 +123,6 @@ coordinate transition::get_begin_coordinate( void )
     tail_coordinate.m_x = 0;
     tail_coordinate.m_y = 0;
   }
-  
+
   return tail_coordinate;
-} 
+}

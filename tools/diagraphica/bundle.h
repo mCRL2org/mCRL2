@@ -28,7 +28,7 @@ public:
     Bundle( const int &idx );
     Bundle( const Bundle &bdl );
     virtual ~Bundle();
-	
+
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setParent( Bundle* p );
@@ -40,7 +40,7 @@ public:
     void updateLabel(
         const std::string &lbl,
         const std::string &status );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     Bundle* getParent();
@@ -51,13 +51,13 @@ public:
     int getSizeEdges();
     Edge* getEdge( const size_t &idx );
     void getLabels( std::vector< std::string > &lbls );
-    void getLabels( 
+    void getLabels(
         std::vector< std::string > &lbls,
         std::vector< std::string > &status );
-    void getLabels( 
+    void getLabels(
         std::string &separator,
         std::string &lbls );
-    
+
     // -- clear functions -------------------------------------------
     void clearParent();
     void clearChildren();

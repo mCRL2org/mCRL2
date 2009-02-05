@@ -1,8 +1,8 @@
 % This specification serves as an example of the use of
 % formulacheck. The file "formulas" contains a list of
 % formulas in internal mCRL2 format. These formulas can
-% be checked using the data specification of this 
-% specification as context. 
+% be checked using the data specification of this
+% specification as context.
 %
 %
 % The following commands illustrate the use of

@@ -44,7 +44,7 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
     detail::free_variable_names(p),
     detail::summand_variable_names(p)
   );
-  
+
   std::vector<data::data_variable> src;  // contains the variables that need to be renamed
   std::vector<data::data_variable> dest; // contains the corresponding replacements
   generator.add_identifiers(forbidden_names);
@@ -99,7 +99,7 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
 
   linear_process new_process              = atermpp::partial_replace(spec.process()        , lps::detail::make_data_variable_replacer(r.first, r.second));
   process_initializer new_initial_process = atermpp::partial_replace(spec.initial_process(), lps::detail::make_data_variable_replacer(r.first, r.second));
-    
+
   specification result = spec;
   result = set_lps(result, new_process);
   result = set_initial_process(result, new_initial_process);
@@ -195,7 +195,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
     }
     new_summands.push_back(atermpp::partial_replace(*i, lps::detail::make_data_variable_replacer(src, dest)));
   }
-  
+
   return set_summands(p, summand_list(new_summands.begin(), new_summands.end()));
 }
 

@@ -29,7 +29,7 @@ namespace tipi {
      **/
     std::ostream& operator << (std::ostream& s, tool::capabilities const& t) {
       visitors::store(t, s);
- 
+
       return (s);
     }
 
@@ -37,7 +37,7 @@ namespace tipi {
 
     capabilities::capabilities(const version v) : m_protocol_version(v) {
     }
- 
+
     /**
      * \param[in] id a unique identifier for the input object
      * \param[in] f mime-type for the object
@@ -45,10 +45,10 @@ namespace tipi {
      **/
     void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category::standard_category_type c) {
       boost::shared_ptr< const input_configuration > ic(new input_configuration(tool::category::standard_categories()[c], f, id));
- 
+
       m_input_configurations.insert(ic);
     }
- 
+
     /**
      * \param[in] id a unique identifier for the input object
      * \param[in] f mime-type for the object
@@ -56,32 +56,32 @@ namespace tipi {
      **/
     void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category& c) {
       boost::shared_ptr< const input_configuration > ic(new input_configuration(c, f, id));
- 
+
       m_input_configurations.insert(ic);
     }
- 
+
     /**
      * \param[in] id a unique identifier for the output object
      * \param[in] f mime-type for the object
      **/
     void capabilities::add_output_configuration(std::string const& id, mime_type const& f) {
       boost::shared_ptr< const output_configuration > oc(new output_configuration(f, id));
- 
+
       m_output_configurations.insert(oc);
     }
- 
+
     version capabilities::get_version() const {
       return (m_protocol_version);
     }
- 
+
     capabilities::input_configuration_range capabilities::get_input_configurations() const {
       return (boost::make_iterator_range(m_input_configurations));
     }
- 
+
     capabilities::output_configuration_range capabilities::get_output_configurations() const {
       return (boost::make_iterator_range(m_output_configurations));
     }
- 
+
     /**
      * \param[in] f the storage format
      * \param[in] t the category in which the tool operates

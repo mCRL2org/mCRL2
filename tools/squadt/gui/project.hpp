@@ -55,7 +55,7 @@ namespace squadt {
          * arbitrary functors as event handler.
          **/
         class dispatch_event;
-       
+
       private:
 
         /** \brief The view on processors and their interdependencies */

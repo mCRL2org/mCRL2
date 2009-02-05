@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     cout << "- " << *i << endl;
   }
   cin.get();
-  
+
   summand summand_ = *lps.summands().begin();
   data_expression d = summand_.condition();
   cout << "d = " << d << endl;

@@ -25,22 +25,22 @@ bool ExporterXML::export_to(wxString _filename)
   {
 
     ticpp::Document xmlDoc(_filename.fn_str());
-  
+
     ticpp::Declaration* decl = new ticpp::Declaration("1.0", "", "");
     xmlDoc.LinkEndChild(decl);
-    
+
 
     // Add a graph element to the document
     ticpp::Element* graphEl = new ticpp::Element("Graph");
     xmlDoc.LinkEndChild(graphEl);
-    
+
     // A Graph has two types of children, states and transitions.
     for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
     {
       State* s = graph->getState(i);
       wxColour c = s->getColour();
       ticpp::Element* state = new ticpp::Element("State");
-      
+
       size_t fromVal = s->getValue();
 
       state->SetAttribute("value", fromVal);
@@ -50,7 +50,7 @@ bool ExporterXML::export_to(wxString _filename)
       state->SetAttribute("red", (int)c.Red());
       state->SetAttribute("green", (int)c.Green());
       state->SetAttribute("blue", (int)c.Blue());
-      
+
       std::map<std::string, std::string> params = s->getParameters();
       std::map<std::string, std::string>::iterator it;
 
@@ -60,21 +60,21 @@ bool ExporterXML::export_to(wxString _filename)
         parameter->SetText(it->second);
         state->LinkEndChild(parameter);
       }
-      
+
 
       graphEl->LinkEndChild(state);
-      
+
       for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
       {
         Transition* t = s->getTransition(j);
         ticpp::Element* transition = new ticpp::Element("Transition");
-        
+
         size_t toVal = t->getTo()->getValue();
 
         transition->SetAttribute("from", fromVal);
         transition->SetAttribute("to", toVal);
         transition->SetAttribute("label", t->getLabel());
-        
+
         double x, y;
         t->getControl(x, y);
         transition->SetAttribute("x", x);
@@ -100,7 +100,7 @@ bool ExporterXML::export_to(wxString _filename)
         graphEl->LinkEndChild(transition);
       }
     }
-    
+
     xmlDoc.SaveFile();
 
     return true;

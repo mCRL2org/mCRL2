@@ -26,17 +26,17 @@ void test_dictionary()
   aterm a = make_term("a");
   aterm b = make_term("b");
   aterm c = make_term("c");
-  
+
   dictionary dict;
   dict.put(a, b);
-  BOOST_CHECK(dict.get(a) == b); 
+  BOOST_CHECK(dict.get(a) == b);
   dict.put(b, b);
-  BOOST_CHECK(dict.get(a) == b); 
-  BOOST_CHECK(dict.get(b) == b); 
+  BOOST_CHECK(dict.get(a) == b);
+  BOOST_CHECK(dict.get(b) == b);
   dict.put(a, c);
-  BOOST_CHECK(dict.get(a) == c); 
+  BOOST_CHECK(dict.get(a) == c);
   dict.remove(a);
-  BOOST_CHECK(dict.get(a) == aterm()); 
+  BOOST_CHECK(dict.get(a) == aterm());
 }
 
 int test_main(int argc, char* argv[])

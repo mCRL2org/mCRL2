@@ -179,7 +179,7 @@ namespace grape
      * @return Returns whether the coordinate is on the edge of the ellipse.
      */
     grape_direction is_on_border_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord);
-        
+
     /**
      * Function to see if a coordinate is inside a rectangle with the upper left corner at the specified coordinate, and with the specified width and height. Note that the y-axis is negative and the origin is the upper left corner.
      * @param p_rect_coord The center coordinate of the rectangle.
@@ -192,9 +192,9 @@ namespace grape
     bool is_inside_rectangle( const coordinate &p_rect_coord, float p_rect_width, float p_rect_height, const coordinate &p_coord, bool p_minus_margin = true );
 
     /**
-     * Function to see if a coordinate is on the border of a rectangle with the upper left corner at the specified 
+     * Function to see if a coordinate is on the border of a rectangle with the upper left corner at the specified
      * coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the rectangle at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the rectangle at each side.
      * @param p_rect_coord The center coordinate of the rectangle.
      * @param p_rect_width The width of the rectangle.
      * @param p_rect_height The height of the rectangle.
@@ -206,7 +206,7 @@ namespace grape
     /**
      * Function to see if a coordinate is inside an initial designator with the specified begin *
       coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side.
      * @param p_begin The begin coordinate of the designator.
      * @param p_width The width of the designator.
      * @param p_height The height of the designator.
@@ -218,7 +218,7 @@ namespace grape
     /**
      * Function to see if a coordinate is inside an initial designator with the specified end
      * coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side.
      * @param p_width The width of the designator.
      * @param p_height The height of the designator.
      * @param p_end The begin coordinate of the designator.
@@ -384,7 +384,7 @@ namespace grape
      * @param p_selected A flag indicating whether the process reference is selected.
      */
     void draw_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected);
-        
+
     /**
      * Bounding box draw function.
      * @param p_center The center coordinate of the bounding box.
@@ -395,7 +395,7 @@ namespace grape
     void draw_bounding_box( const coordinate &p_center, float p_width, float p_height, bool p_selected);
 
     /**
-     * Bounding box touch function. Returns whether one of the points ( squares ) of the bounding box is touched, 
+     * Bounding box touch function. Returns whether one of the points ( squares ) of the bounding box is touched,
      * @param p_center The center coordinate of the bounding box.
      * @param p_width The width of the bounding box.
      * @param p_height The height of the bounding box.

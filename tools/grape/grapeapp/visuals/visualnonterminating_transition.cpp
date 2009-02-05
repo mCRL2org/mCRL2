@@ -16,7 +16,7 @@
 #include "label.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 
 visualnonterminating_transition::visualnonterminating_transition( nonterminating_transition* p_nonterminating_transition )
@@ -26,7 +26,7 @@ visualnonterminating_transition::visualnonterminating_transition( nonterminating
   compound_state *endstate = p_nonterminating_transition->get_endstate();
 
   m_same_begin_end = ( ( beginstate != 0 ) && ( endstate != 0 ) && ( beginstate == endstate ) );
-  
+
   m_arrow_base = p_nonterminating_transition->get_begin_coordinate();
   m_arrow_head = p_nonterminating_transition->get_end_coordinate();
 }

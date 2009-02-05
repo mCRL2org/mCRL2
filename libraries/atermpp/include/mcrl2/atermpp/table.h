@@ -52,7 +52,7 @@ namespace atermpp
       table(unsigned int initial_size = 100, unsigned int max_load_pct = 75)
         : m_table(ATtableCreate(initial_size, max_load_pct), table_deleter())
       {}
-      
+
       /// \brief Resets a table.
       /// This function resets an atermtable, without freeing the memory it occupies. Its
       /// effect is the same as the subsequent execution of a destroy and a create of a table, but as no
@@ -64,7 +64,7 @@ namespace atermpp
       {
         ATtableReset(m_table.get());
       }
-      
+
       /// \brief Add / update a (key, value)-pair in a table.
       /// If key does not already exist in the table, this function adds the (key, value)-pair
       /// to the table. Otherwise, it updates the value to value.
@@ -74,7 +74,7 @@ namespace atermpp
       {
         ATtablePut(m_table.get(), key, value);
       }
-      
+
       /// \brief Get the value belonging to a given key in a table.
       /// \param key A key value.
       /// \return The corresponding value.
@@ -82,14 +82,14 @@ namespace atermpp
       {
         return ATtableGet(m_table.get(), key);
       }
-      
+
       /// \brief Remove the (key, value)-pair from table.
       /// \param key A key value.
       void remove(aterm key)
       {
         ATtableRemove(m_table.get(), key);
       }
-      
+
       /// \brief Get a list of all the keys in a table.
       /// This function can be useful if you need to iterate over all elements in a table. It
       /// returns an term_list containing all the keys in the table. The corresponding values of each key

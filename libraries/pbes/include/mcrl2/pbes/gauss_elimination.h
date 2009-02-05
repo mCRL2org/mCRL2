@@ -49,7 +49,7 @@ class gauss_elimination_algorithm
     }
 
   public:
-    
+
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
     /// \param last End of a range of pbes equations

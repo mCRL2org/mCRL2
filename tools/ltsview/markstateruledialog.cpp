@@ -31,12 +31,12 @@ END_EVENT_TABLE()
 MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
     Mediator* owner, LTS *alts)
  : wxDialog(parent,wxID_ANY,wxT("Add mark state rule"),
-     wxDefaultPosition,wxDefaultSize,wxDEFAULT_DIALOG_STYLE | 
+     wxDefaultPosition,wxDefaultSize,wxDEFAULT_DIALOG_STYLE |
      wxRESIZE_BORDER) {
 
   mediator = owner;
   lts = alts;
-  
+
   int numParams = lts->getNumParameters();
   wxArrayString paramChoices;
   wxString str;
@@ -49,7 +49,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   paramChoices.Sort();
   wxString relChoices[2] = { wxT("is an element of"),
     wxT("is not an element of") };
-  
+
   int f = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int b = 5;
 
@@ -108,12 +108,12 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   mainSizer->Add(spLeft,1,wxEXPAND|wxALL,b);
   mainSizer->Add(new wxStaticLine(this,wxID_ANY),0,wxEXPAND|wxALL,b);
   mainSizer->Add(CreateButtonSizer(wxOK|wxCANCEL),0,wxEXPAND|wxALL,b);
-  
+
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
   SetMinSize(GetClientSize());
-  
+
   if (paramChoices.Count() > 0) {
     loadValues(paramChoices[0]);
   }
@@ -202,7 +202,7 @@ wxString MarkStateRuleDialog::getMarkRuleString() {
   if (parIndex == wxNOT_FOUND) {
     return wxEmptyString;
   }
-  
+
   wxString result = parameterListBox->GetString(parIndex);
   if (relationListBox->GetSelection() == 0) {
     result += wxT(" in { ");

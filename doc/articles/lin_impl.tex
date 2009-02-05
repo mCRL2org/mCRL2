@@ -8,7 +8,7 @@
 
 \institute{
   Department of Theoretical Cybernetics, \\
-  National Taras Shevchenko University of Kyiv, Ukraine 
+  National Taras Shevchenko University of Kyiv, Ukraine
   \and
   Laboratory for Quality Software, \\
   Technical University of Eindhoven, The Netherlands }
@@ -33,7 +33,7 @@ For the implementation we use the program-transformation system
 application strategies, and to generate efficient C code from them,
 which can be further compiled and executed. The implementation has
 been tested on a set of examples of \mcrl\ specifications, and the
-results were compared with an existing implementation of \mcrl\ 
+results were compared with an existing implementation of \mcrl\
 linearization in C~\cite{Wou01}.
 
 \mcrl\ is an algebraic specification language based of ACP style
@@ -63,7 +63,7 @@ one. Each transformation step is, in essence, an equivalent
 transformation of a system of process equations.  The steps are
 formally described using term rewriting systems and different forms of
 their extensions to equation rewriting systems. In some steps extra
-equations or data types are added to the original \mcrl\ 
+equations or data types are added to the original \mcrl\
 specification.
 
 For the implementation of the linearization algorithm we chose
@@ -115,9 +115,9 @@ corresponding list operations will have the following form:
 \begin{gather*}
 \seq{\act{a}_1, \act{a}_2,\dots, \act{a}_n, [\act{b}_1, \act{b}_2,\dots,\act{b}_k],\act{a}_{n+2},\dots, \act{a}_m} \to\\
 \t2\seq{\act{a}_1, \act{a}_2, \dots, \act{a}_n, [\seq{\act{b}_1, \act{a}_n,\dots,\act{a}_m},\seq{\act{b}_2,\act{a}_n,\dots,\act{a}_m},\dots,\seq{\act{b}_k,\act{a}_n,\dots,\act{a}_m}]}\\
-[\act{a}_1, \act{a}_2,\dots,\act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m] \to 
+[\act{a}_1, \act{a}_2,\dots,\act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m] \to
 [\act{a}_1, \act{a}_2, \dots, \act{a}_m]\\
-\seq{\act{a}_1, \act{a}_2,\dots, \act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m} \to 
+\seq{\act{a}_1, \act{a}_2,\dots, \act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m} \to
 \seq{\act{a}_1, \act{a}_2, \dots \act{a}_n}
 \end{gather*}
 

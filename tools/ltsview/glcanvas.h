@@ -77,7 +77,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     Visualizer *visualizer;
     Utils::PickState selectedType;
     bool      stop_force_directed;
-    
+
     void      determineCurrentTool(wxMouseEvent& event);
     void      setMouseCursor();
 
@@ -87,7 +87,7 @@ class GLCanvas: public wxGLCanvas, public Subscriber, public simReader {
     // Functions for processing hits
     void processHits(const GLint hits, GLuint *buffer, bool doubleC);
     void pickObjects(int x, int y, bool doubleC);
-    
+
     DECLARE_EVENT_TABLE()
 };
 

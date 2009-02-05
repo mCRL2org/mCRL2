@@ -160,7 +160,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
    FILE *outstream = fopen(options.outfilename.c_str(), "w");
    if (outstream != NULL) {
-       fputs (mcrl2spec.c_str(), outstream); 
+       fputs (mcrl2spec.c_str(), outstream);
        fclose(outstream);
     }
     else {
@@ -179,7 +179,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 #endif
 
 bool parse_command_line(int argc, char *argv[], t_options& options)
-{ 
+{
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Translates the Chi specifiation in INFILE and writes the resulting mCRL2 "
     "OUTFILE. if OUTFILE is not present, stdout is used. If INFILE is not present "
@@ -211,7 +211,7 @@ bool parse_command_line(int argc, char *argv[], t_options& options)
 ATermAppl translate_file(t_options &options)
 {
   ATermAppl result = NULL;
-  
+
   //parse specification
   if (options.infilename == "")
   {
@@ -228,16 +228,16 @@ ATermAppl translate_file(t_options &options)
 	result = parse_stream(instream);
     instream.close();
   }
-  
-  if (result == NULL) 
+
+  if (result == NULL)
   {
     throw mcrl2::runtime_error("parsing failed");
   }
 
-  return result; 
+  return result;
 }
 
-// Main 
+// Main
 
 int main(int argc, char *argv[])
 {
@@ -254,20 +254,20 @@ int main(int argc, char *argv[])
 
     if (parse_command_line(argc,argv, options)) {
 
-      std::string mcrl2spec; 
+      std::string mcrl2spec;
       CAsttransform asttransform;
 
       ATermAppl result = translate_file(options);
 
       gsDebugMsg("Set options");
       asttransform.set_options(options);
- 
+
       gsDebugMsg("Transforming AST to mcrl2 specification\n");
       if (asttransform.translator(result))
         {
           mcrl2spec = asttransform.getResult();
         }
-        
+
       //store the result
       if (options.outfilename == "") {
         gsVerboseMsg("saving result to stdout...\n");
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
           throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
         }
         gsVerboseMsg("saving result to '%s'...\n", options.outfilename.c_str());
-        fputs (mcrl2spec.c_str(), outstream); 
+        fputs (mcrl2spec.c_str(), outstream);
         fclose(outstream);
       }
     }

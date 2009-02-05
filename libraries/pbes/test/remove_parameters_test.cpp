@@ -55,8 +55,8 @@ void test_pbes_expression()
 
   data_expression_list e1 = make_list(plus(nat("m"), nat("n")), bool_("b"));
   data_expression_list e2 = make_list(multiplies(nat("m"), nat("n")), bool_("b"), nat("p"));
-  propositional_variable_instantiation x1 = propvarinst("X1", e1); 
-  propositional_variable_instantiation x2 = propvarinst("X2", e2); 
+  propositional_variable_instantiation x1 = propvarinst("X1", e1);
+  propositional_variable_instantiation x2 = propvarinst("X2", e2);
 
   pbes_expression p = pbes_expr::and_(X1, X2);
 
@@ -70,21 +70,21 @@ void test_pbes_expression()
   to_be_removed[X2.name()] = v2;
 
   pbes_expression q = remove_parameters(p, to_be_removed);
-  
+
   pbes_expression r;
   {
     data_variable_list d1 = atermpp::make_list(sort_expr::nat());
     data_variable_list d2 = atermpp::make_list(sort_expr::bool_());
     propositional_variable X1 = propvar("X1", d1);
     propositional_variable X2 = propvar("X2", d2);
-    
+
     data_expression_list e1 = make_list(plus(nat("m"), nat("n")));
     data_expression_list e2 = make_list(bool_("b"));
-    propositional_variable_instantiation x1 = propvarinst("X1", e1); 
+    propositional_variable_instantiation x1 = propvarinst("X1", e1);
     propositional_variable_instantiation x2 = propvarinst("X2", e2);
-    
+
     r = pbes_expr::and_(X1, X2);
-  } 
+  }
   BOOST_CHECK(q == r);
 }
 

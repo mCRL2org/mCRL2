@@ -24,7 +24,7 @@ using namespace mcrl2::data;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   ATermAppl T = gsMakeDataExprTrue();
   ATermAppl F = gsMakeDataExprFalse();
@@ -32,7 +32,7 @@ int test_main(int argc, char** argv)
 
   BOOST_CHECK(data_expr::is_true(d));
   BOOST_CHECK(!data_expr::is_false(d));
-  
+
   data_variable v("d:D");
   data_expression e(v);
   BOOST_CHECK(v.sort() == e.sort());

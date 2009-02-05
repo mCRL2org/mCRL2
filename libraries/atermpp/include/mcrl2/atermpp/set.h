@@ -88,7 +88,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     {
       ATprotectProtectedATerm(this);
     }
-   
+
     /// Destructor.
     ~set()
     {
@@ -184,7 +184,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     {
       ATprotectProtectedATerm(this);
     }
-   
+
     /// Destructor.
     ~multiset()
     {

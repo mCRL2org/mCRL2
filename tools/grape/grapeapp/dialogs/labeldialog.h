@@ -32,28 +32,28 @@ namespace grape
     class grape_label_dialog : public wxDialog
     {
       private:
-        wxGrid         *m_var_decls_grid;   /**< Grid shown in the dialog, used for variable declarations.*/ 
+        wxGrid         *m_var_decls_grid;   /**< Grid shown in the dialog, used for variable declarations.*/
         wxTextCtrl     *m_condition_input;  /**< Input shown in the dialog, used for condition.*/
         wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
-        
+
         wxGrid         *m_multiaction_grid; /**< Grid shown in the dialog, used for a multi action.*/
         wxGrid         *m_timestamp_grid;   /**< Grid shown in the dialog, used for time.*/
         wxGrid         *m_var_updates_grid; /**< Grid shown in the dialog, used for variable updates.*/
-         
+
         wxStaticText   *m_preview_text;     /**< Preview text.*/
-         
+
         wxNotebook     *m_notebook;         /**< Notebook shown in the dialog, used for all the grids.*/
-        
+
         wxNotebookPage *m_var_decls_page;   /**< Notebook variable declaration page used in the dialog.*/
         wxNotebookPage *m_condition_page;   /**< Notebook condition page used in the dialog.*/
         wxNotebookPage *m_multiaction_page; /**< Notebook multiaction page used in the dialog.*/
         wxNotebookPage *m_timestamp_page;   /**< Notebook timestamp page used in the dialog.*/
         wxNotebookPage *m_var_updates_page; /**< Notebook variable update page used in the dialog.*/
-        
+
         label          *m_label;            /**< label for temporarily storage.*/
         /** Default constructor. */
         grape_label_dialog();
-        
+
         DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
       public:
         /**
@@ -71,14 +71,14 @@ namespace grape
          * @param p_event The generated event.
          */
         void event_change_var_decls_text( wxGridEvent &p_event );
-        
+
         /**
          * Change var update grid event handler.
          * Appending grid rows.
          * @param p_event The generated event.
          */
         void event_change_var_updates_text( wxGridEvent &p_event );
-        
+
         /**
          * Change multi action grid event handler.
          * Appending grid rows.
@@ -92,21 +92,21 @@ namespace grape
          * @param p_event The generated event.
          */
         void event_change_condition_text( wxCommandEvent &p_event );
-        
+
         /**
          * Change timestamp grid event handler.
          * Appending grid rows.
          * @param p_event The generated event.
          */
         void event_change_timestamp_text( wxCommandEvent &p_event );
-        
+
         /**
          * Shows the dialog.
          * @param p_label Shall contain the value of the label.
          * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
          */
         bool show_modal( label &p_label );
-        
+
         void update_preview();
     };
   }

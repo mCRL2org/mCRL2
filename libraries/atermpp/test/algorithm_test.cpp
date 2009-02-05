@@ -45,7 +45,7 @@ void test_algorithm()
   BOOST_CHECK(t == make_term("f(y)"));
   aterm_appl t1 = find_if(b, is_f());
   BOOST_CHECK(t1 == aterm_appl());
-  
+
   atermpp::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
@@ -55,11 +55,11 @@ void test_algorithm()
 struct for_each_proc
 {
   std::set<std::string>& m_names;
-  
+
   for_each_proc(std::set<std::string>& names)
     : m_names(names)
   {}
-  
+
   bool operator()(aterm_appl t)
   {
     m_names.insert(t.function().name());

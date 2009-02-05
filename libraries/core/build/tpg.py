@@ -68,7 +68,7 @@ tab = " "*4
 
 class Error(Exception):
     """ Error((line, row), msg)
-    
+
     Error is the base class for TPG exceptions.
 
     Attributes:
@@ -84,7 +84,7 @@ class Error(Exception):
 
 class WrongToken(Error):
     """ WrongToken()
-    
+
     WrongToken is raised when the parser can not continue in order to backtrack.
     """
     def __init__(self):
@@ -192,7 +192,7 @@ class NamedGroupLexer(LexerOptions):
 
     def def_token(self, name, expr, value=_id):
         """ add a new token to the lexer
-        
+
         Parameters:
             name : name of the token
             expr : regular expression of the token
@@ -211,7 +211,7 @@ class NamedGroupLexer(LexerOptions):
 
     def def_separator(self, name, expr, value=_id):
         """ add a new separator to the lexer
-        
+
         Parameters:
             name : name of the separator
             expr : regular expression of the separator
@@ -355,7 +355,7 @@ class Lexer(NamedGroupLexer):
 
     def def_token(self, name, expr, value=_id):
         """ adds a new token to the lexer
-        
+
         Parameters:
             name : name of the token
             expr : regular expression of the token
@@ -370,10 +370,10 @@ class Lexer(NamedGroupLexer):
             self.tokens.append((name, self.re_compile(self.word_bounded(expr)), value, True))
         else:
             raise SemanticError("Duplicate token definition (%s)"%name)
-    
+
     def def_separator(self, name, expr, value=_id):
         """ add a new separator to the lexer
-        
+
         Parameters:
             name : name of the separator
             expr : regular expression of the separator
@@ -627,7 +627,7 @@ class ContextSensitiveLexer(LexerOptions):
 
     def def_token(self, name, expr, value=_id):
         """ add a new token to the lexer
-        
+
         Parameters:
             name : name of the token
             expr : regular expression of the token
@@ -645,7 +645,7 @@ class ContextSensitiveLexer(LexerOptions):
 
     def def_separator(self, name, expr, value=_id):
         """ add a new separator to the lexer
-        
+
         Parameters:
             name : name of the separator
             expr : regular expression of the separator
@@ -887,10 +887,10 @@ class Parser:
 
     def __init__(self):
         """ Parser is the base class for parsers.
-       
+
         This class can not have a doc string otherwise it would be considered as a grammar.
         The metaclass of this class is ParserMetaClass.
-        
+
         Attributes:
             lexer : lexer build from the grammar
 
@@ -1041,18 +1041,18 @@ class VerboseParser(Parser):
 
     def __init__(self):
         """ VerboseParser is the base class for debugging parsers.
-       
+
         This class can not have a doc string otherwise it would be considered as a grammar.
         The metaclass of this class is ParserMetaClass.
         It extends the Parser class to log the activity of the lexer.
-       
+
         Attributes:
           lexer   : lexer build from the grammar
           verbose : level of information
                       0 : no information
                       1 : print tokens successfully matched
                       2 : print tokens matched and not matched
-       
+
         Methods added to the generated parsers:
           init_lexer(self) : return a lexer object to scan the tokens defined by the grammar
           <rule>           : each rule is translated into a method with the same name
@@ -1509,7 +1509,7 @@ class TPGParser(tpg.Parser):
                         min = self.PY_EXPR()
                     except tpg.WrongToken:
                         self.lexer.back(_p2)
-                        min = self.PY_Ident("0") 
+                        min = self.PY_Ident("0")
                     _p3 = self.lexer.token()
                     try:
                         self.eat('_tok_16') # ','
@@ -1518,10 +1518,10 @@ class TPGParser(tpg.Parser):
                             max = self.PY_EXPR()
                         except tpg.WrongToken:
                             self.lexer.back(_p4)
-                            max = self.PY_Ident("None") 
+                            max = self.PY_Ident("None")
                     except tpg.WrongToken:
                         self.lexer.back(_p3)
-                        max = min 
+                        max = min
                     self.eat('rcbra') # '\}'
                     a = self.Rep(a, min, max)
         except tpg.WrongToken:
@@ -1550,7 +1550,7 @@ class TPGParser(tpg.Parser):
             args = self.ARGS()
         except tpg.WrongToken:
             self.lexer.back(_p1)
-            args = self.Args() 
+            args = self.Args()
         return args
 
     def ARGS(self, ):
@@ -1614,7 +1614,7 @@ class TPGParser(tpg.Parser):
             ret = self.PY_EXPR()
         except tpg.WrongToken:
             self.lexer.back(_p1)
-            ret = None 
+            ret = None
         return ret
 
     def PY_EXPR(self, ):

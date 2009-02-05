@@ -28,7 +28,7 @@ const std::string SPECIFICATION =
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv) 
+  MCRL2_ATERM_INIT(argc, argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   data_specification data = spec.data();

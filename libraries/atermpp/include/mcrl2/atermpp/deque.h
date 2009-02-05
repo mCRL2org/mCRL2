@@ -45,7 +45,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     {
       ATprotectProtectedATerm(this);
     }
-    
+
     /// \brief Constructor.
     /// \param count A positive number.
     /// \param val A value.

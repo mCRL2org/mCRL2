@@ -67,13 +67,13 @@ public:
     virtual ATermAppl GetNextTransitionFromTrace();
     virtual bool SetTrace(ATermList Trace, unsigned int From);
     virtual void InitialiseViews();
-    
+
 private:
     void traceReset(ATerm state);
     void traceSetNext(ATermList transition);
     ATermList traceUndo();
     ATermList traceRedo();
-    
+
 private:
     bool tau_prior;
     bool error;
@@ -87,7 +87,7 @@ private:
     ATermIndexedSet seen_states;
     NextState *nextstate;
     NextStateGenerator *nextstategen;
-    
+
 private:
     void SetCurrentState(ATerm state);
     void UpdateTransitions();

@@ -95,8 +95,8 @@ double Utils::degrToRad( const double &d )
 
 
 // -----------------------
-double Utils::calcAngleDg( 
-    const double &x, 
+double Utils::calcAngleDg(
+    const double &x,
     const double &y )
 // -----------------------
 // ------------------------------------------------------------------
@@ -110,8 +110,8 @@ double Utils::calcAngleDg(
 
 
 // -----------------------
-double Utils::calcAngleRd( 
-    const double &x, 
+double Utils::calcAngleRd(
+    const double &x,
     const double &y )
 // -----------------------
 // ------------------------------------------------------------------
@@ -159,12 +159,12 @@ int Utils::rndToInt( const double &f )
 {
    double intpart;
    modf( f + 0.5, &intpart );
-   return static_cast< int > ( intpart ); 
+   return static_cast< int > ( intpart );
 }
 
 
 // ----------------------------
-double Utils::rndToNearestMult( 
+double Utils::rndToNearestMult(
     const double &value,
     const double &factor )
 // ----------------------------
@@ -181,10 +181,10 @@ double Utils::rndToNearestMult(
         result = intPtVal*factor;
     else
     {
-        if ( dblPtVal < 0 )		
+        if ( dblPtVal < 0 )
             result = (intPtVal-1)*factor;
         else
-            result = (intPtVal+1)*factor;	
+            result = (intPtVal+1)*factor;
     }
 
     return result;
@@ -192,7 +192,7 @@ double Utils::rndToNearestMult(
 
 
 // -------------------------------------
-double Utils::dist( 
+double Utils::dist(
     const double &x1, const double &y1,
     const double &x2, const double &y2 )
 // -------------------------------------
@@ -217,7 +217,7 @@ double Utils::abs( const double &val )
 
 // -------------------
 double Utils::maxx(
-    const double &d0, 
+    const double &d0,
     const double &d1 )
 // -------------------
 {
@@ -247,7 +247,7 @@ double Utils::perc(
     const int &denm )
 // ------------------
 {
-    return Utils::perc( 
+    return Utils::perc(
         (double)numr,
         (double)denm );
 }
@@ -264,13 +264,13 @@ double Utils::perc(
 
 
 // -------------------
-double Utils::fishEye( 
+double Utils::fishEye(
     const double &distortion,
     const double &value )
 // -------------------
 // ------------------------------------------------------------------
 // Graphical Fisheye Function (Sarkar and Brown,1994)
-// In: dist the distortion factor 
+// In: dist the distortion factor
 //     value in [0, 1]
 // Out: return value in [0, 1]
 // Focus is at 0.
@@ -313,7 +313,7 @@ double Utils::variance( const vector< double > vals )
             result += (vals[i]-mean)*(vals[i]-mean);
         result = result/(double)(vals.size()-1);
     }
-    
+
     return result;
 }
 
@@ -339,7 +339,7 @@ void Utils::classEqualIntervals(
     map< double, int > &valuesToClasses )
 // --------------------------------------
 {
-    if ( ( 0 < values.size() ) && 
+    if ( ( 0 < values.size() ) &&
          ( 0 < numClasses && numClasses < values.size() ) )
     {
         double low, high;
@@ -349,7 +349,7 @@ void Utils::classEqualIntervals(
         // first clear return results
         legendClasses.clear();
         valuesToClasses.clear();
-        
+
         // init low, high and range
         low = high = values[0];
         for ( size_t i = 0; i < values.size(); ++i )
@@ -379,7 +379,7 @@ void Utils::classEqualIntervals(
 
             legendClasses.push_back( lbl );
         }
-        
+
         // calc mapping of values to classes
         int idx;
         for ( size_t i = 0; i < values.size(); ++i )
@@ -403,7 +403,7 @@ void Utils::classifyQuantiles(
     map< double, int > &valuesToClasses )
 // --------------------------------------
 {
-    if ( ( 0 < values.size() ) && 
+    if ( ( 0 < values.size() ) &&
          ( 0 < numClasses && numClasses < values.size() ) )
     {
         double numInClass;
@@ -425,11 +425,11 @@ void Utils::classifyQuantiles(
         {
             if ( it == values.begin() )
                 min = max = *it;
-            
+
             if ( ctr > (idx+1)*numInClass )
             {
                 ++idx;
-                
+
                 lbl  = "[";
                 lbl += Utils::dblToStr( min );
                 lbl += " ,";
@@ -439,7 +439,7 @@ void Utils::classifyQuantiles(
                 else
                     lbl += ")";
                 legendClasses.push_back( lbl );
-                
+
                 min = max = *it;
             }
             else if ( ctr == values.size()-1 )
@@ -475,7 +475,7 @@ void Utils::classifyMeanStandardDeviation(
     map< double, int > &valuesToClasses )
 // ---------------------------------------
 {
-    if ( ( 0 < values.size() ) && 
+    if ( ( 0 < values.size() ) &&
          ( 0 < numClasses && numClasses < values.size() ) )
     {
         // first clear return results
@@ -497,7 +497,7 @@ void Utils::classifyMeanStandardDeviation(
                 idx = 0;
             else if ( idx > numClasses-1 )
                 idx = numClasses-1;
-            
+
             valuesToClasses.insert( pair< double, int >( values[i], idx ) );
         }
 

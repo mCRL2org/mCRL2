@@ -54,7 +54,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     LTSGraph();
 
     bool DoInit();
-    
+
     void openFile(std::string const &path);
     void display();
 
@@ -78,7 +78,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     void setCurves(bool value);
     void setBrushColour(wxColour colour);
     void setTool(bool isColour);
-    
+
     // Getters
     Graph* getGraph();
     size_t getNumberOfAlgorithms() const;

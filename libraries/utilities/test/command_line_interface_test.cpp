@@ -13,7 +13,7 @@
 
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
-#include <boost/test/included/unit_test_framework.hpp> 
+#include <boost/test/included/unit_test_framework.hpp>
 
 #define MCRL2_REVISION "xXxXx"
 #include "mcrl2/data/rewrite.h"
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(conformance) {
 BOOST_AUTO_TEST_CASE(rewriting_options) {
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
 
-  // testing rewriter strategy extraction 
+  // testing rewriter strategy extraction
   string_to_strategy_test< true >("jitty");
   string_to_strategy_test< false >("ijitty");
   string_to_strategy_test< false >("jitta");
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
 BOOST_AUTO_TEST_CASE(prover_options) {
   interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "description");
 
-  // testing smt prover type extraction 
+  // testing smt prover type extraction
   string_to_prover_type_test< true >("ario");
   string_to_prover_type_test< false >("arion");
   string_to_prover_type_test< false >("aario");
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
 
   {
     command_line_parser parser(test_interface, "test -v --debug -d --verbose");
- 
+
     BOOST_CHECK(parser.options.size() == 4);
     BOOST_CHECK(parser.options.count("verbose") == 2);
     BOOST_CHECK(first_of(parser, "verbose").empty());
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(result_browsing) {
 
   {
     command_line_parser parser(test_interface, "test /bin/ls -v \\or\\more:1234567890|,<>.:;[]}{+-_=~!@#$%^&*()");
- 
+
     BOOST_CHECK(parser.options.size() == 1);
     BOOST_CHECK(first_of(parser, "verbose").empty());
     BOOST_CHECK(parser.arguments.size() == 2);

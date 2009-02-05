@@ -30,7 +30,7 @@ grape_event_add_channel_communication::grape_event_add_channel_communication( gr
   m_in_diagram = dia_ptr->get_id();
 
   if (m_chan_1 != m_chan_2)
-  {   
+  {
     m_removed_visible_channel_1 = 0;
     m_removed_blocked_channel_1 = 0;
     connection_property* prop_ptr_1 = p_chan_1->get_property();
@@ -66,7 +66,7 @@ grape_event_add_channel_communication::grape_event_add_channel_communication( gr
       m_removed_blocked_channel_2 = new grape_event_remove_blocked( m_main_frame, block_ptr, dia_ptr );
     }
   }
-  
+
 
   m_detached_comm_1 = 0;
   channel_communication* comm_ptr_1 = p_chan_1->get_channel_communication();
@@ -81,7 +81,7 @@ grape_event_add_channel_communication::grape_event_add_channel_communication( gr
   {
     m_detached_comm_2 = new grape_event_detach_channel_communication( m_main_frame, comm_ptr_2, p_chan_2 );
   }
-  
+
 }
 
 grape_event_add_channel_communication::~grape_event_add_channel_communication( void )

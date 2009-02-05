@@ -123,7 +123,7 @@ namespace detail {
       }
       std::cout << std::endl;
     }
-    
+
     /// \brief Prints the expression stack
     /// \param msg A string
     void print(std::string msg = "") const
@@ -196,7 +196,7 @@ namespace detail {
       expression_stack.pop_back();
 
       std::vector<quantifier> q = concat(boost::get<0>(left), boost::get<0>(right));
-        
+
       pbes_expression h_phi = boost::get<1>(left);
       pbes_expression h_psi = boost::get<1>(right);
 
@@ -291,7 +291,7 @@ namespace detail {
       std::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_type>(1, X)));
       expression_stack.push_back(boost::make_tuple(q, h, g));
       return super::continue_recursion;
-    }    
+    }
   };
 
 } // namespace detail

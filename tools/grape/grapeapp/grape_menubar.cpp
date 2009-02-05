@@ -69,7 +69,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item = new wxMenuItem( m_menu_file, wxID_PRINT );
   m_menu_file->Append( item );
   m_menu_file->Enable(wxID_PRINT, false);
-  
+
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_EXIT );
@@ -133,7 +133,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // diagram menu
   m_menu_diagram = new wxMenu;
-  
+
   item = new wxMenuItem( m_menu_diagram, GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add &Architecture diagram"), _T("Add Architecture diagram") );
   item->SetBitmap( g_icons[ _T("newarch") ] );
   m_menu_diagram->Append( item );
@@ -167,7 +167,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // tools menu
   m_menu_tools = new wxMenu;
-  
+
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_SELECT, _T("Selection"), _T("Select objects in current diagram") );
   item->SetBitmap( g_icons[ _T("toolselect") ] );
   m_menu_tools->Append( item );
@@ -238,7 +238,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   // help menu
   m_menu_help = new wxMenu;
-  
+
   item = new wxMenuItem( m_menu_help, wxID_HELP, _T("&Contents\tF1"), _T("Show help contents") );
   item->SetBitmap( g_icons[ _T("helpcontents") ] );
   m_menu_help->Append( item );

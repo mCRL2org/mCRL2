@@ -64,14 +64,14 @@ namespace grape
 
         /**
          * Test if coordinate is inside the object
-         * @param p_coord test coordinate 
+         * @param p_coord test coordinate
          * @return Returns whether the specified coordinate is inside the drawn object.
          */
         bool is_inside( libgrape::coordinate &p_coord );
 
         /**
          * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate 
+         * @param p_coord test coordinate
          * @return Returns whether the specified coordinate on the border of a drawn object.
          */
         grape_direction is_on_border( libgrape::coordinate &p_coord );

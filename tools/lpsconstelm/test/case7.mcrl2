@@ -1,8 +1,8 @@
 % Test Case 7 -- Free Variables
-%  
+%
 % Process parameters s3, j and i are marked constant and all occurrences are
-% substituted. 
-% 
+% substituted.
+%
 % If "--no-condition" is used only j is marked constant and all occurrences of j
 % are substituted.
 

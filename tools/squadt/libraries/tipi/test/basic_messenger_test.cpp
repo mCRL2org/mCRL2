@@ -49,7 +49,7 @@ class messenger_impl_type : public tipi::messaging::basic_messenger_impl< tipi::
 
     boost::shared_ptr< const tipi::message > pop_message() {
       boost::shared_ptr< const tipi::message > m(messages.front());
-      
+
       messages.pop_front();
 
       return m;

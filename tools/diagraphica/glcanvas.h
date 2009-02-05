@@ -59,20 +59,20 @@ public:
         double &y );
 
     void disableMouseMotion();
-    
+
     double getWidth();
     double getHeight();
     void getSize(
         double &width,
         double &height );
-    
+
     double getPixelSize();
     void getWorldCoords(
         const double &deviceX,
         const double &deviceY,
         double &worldX,
         double &worldY );
-    
+
     // -- drawing and interaction functions -------------------------
     void clear();
     void display();
@@ -83,7 +83,7 @@ public:
     void onEvtPaint( wxPaintEvent &event );
     void onEvtSize( wxSizeEvent &event );
     void OnEraseBackground( wxEraseEvent &event );
-    
+
     void onLftMouseDown( wxMouseEvent &event );
     void onLftMouseUp( wxMouseEvent &event );
 	void onLftMouseDClick( wxMouseEvent &event );
@@ -105,7 +105,7 @@ private:
     bool handleMouseMotion;
 
     wxString tooltip;
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

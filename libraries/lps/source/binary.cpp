@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsbinary.cpp
-/// \brief 
+/// \brief
 
 #include "boost.hpp" // precompiled headers
 

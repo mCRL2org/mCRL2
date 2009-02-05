@@ -15,12 +15,12 @@ struct to_rewriter_format_builder: public pbes_expression_builder
   to_rewriter_format_builder(optimized_rewriter& r0)
     : r(r0)
   {}
-  
+
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
   {
 std::cout << "<data>" << d << std::endl;
     return pbes_expression(r.to_rewriter_format(d));
-  } 
+  }
 };
 
 struct to_data_format_builder: public pbes_expression_builder
@@ -30,11 +30,11 @@ struct to_data_format_builder: public pbes_expression_builder
   to_data_format_builder(optimized_rewriter& r0)
     : r(r0)
   {}
-  
+
   pbes_expression visit_unknown(const pbes_expression& e)
   {
     return r.to_data_format(aterm_traits<pbes_expression>::term(e));
-  } 
+  }
 };
 
 /// Transforms all data expressions that are a subterm of x into

@@ -64,7 +64,7 @@ mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
-Number     "0"|([1-9][0-9]*) 
+Number     "0"|([1-9][0-9]*)
 
 %option c++
 %option prefix="mcrl2yy"
@@ -180,7 +180,7 @@ nil        { process_string(); return NIL; }
 
 {Number}   { process_string(); return NUMBER; }
 
-.          { 
+.          {
              col_nr += YYLeng(); yyerror("unknown character");
              /* remaining characters */
 	   }
@@ -230,9 +230,9 @@ void mcrl2_lexer::yyerror(const char *s) {
       oldcol_nr = 0;
     }
     gsErrorMsg(
-      "token '%s' at position %d, %d caused the following error: %s\n", 
+      "token '%s' at position %d, %d caused the following error: %s\n",
       YYText(), line_nr, oldcol_nr, s
-    ); 
+    );
   }
 }
 
@@ -258,7 +258,7 @@ void mcrl2_lexer::process_string(void) {
 }
 
 ATerm mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
-  //uncomment the line below to let bison generate debug information 
+  //uncomment the line below to let bison generate debug information
   //mcrl2yydebug = 1;
   ATerm result = NULL;
   if (streams.size() == 0) {

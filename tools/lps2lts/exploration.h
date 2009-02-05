@@ -26,8 +26,8 @@
 
 #define DEFAULT_MAX_STATES ULLONG_MAX
 #define DEFAULT_MAX_TRACES ULONG_MAX
-#define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB 
-#define DEFAULT_INIT_TSIZE 10000UL 
+#define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
+#define DEFAULT_INIT_TSIZE 10000UL
 
 enum exploration_strategy { es_none, es_breadth, es_depth, es_random };
 
@@ -100,7 +100,7 @@ inline lts_generation_options::lts_generation_options() :
 
   generate_filename_for_trace = boost::bind(
         &lts_generation_options::generate_trace_file_name, this, _1, _2);
-  display_status              = boost::bind( 
+  display_status              = boost::bind(
         &lts_generation_options::update_status_display, this, _1, _2, _3, _4, _5);
 }
 

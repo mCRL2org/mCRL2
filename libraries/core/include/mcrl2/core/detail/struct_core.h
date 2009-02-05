@@ -3347,7 +3347,7 @@ ATermAppl gsMakeProcVarId(ATermAppl String_0, ATermList SortExpr_1)
 
 inline
 ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
-{    
+{
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
@@ -3655,7 +3655,7 @@ ATermAppl gsString2ATermAppl(const char *s)
   if (s != NULL) {
     return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
   } else {
-    return gsMakeNil();   
+    return gsMakeNil();
   }
 }
 

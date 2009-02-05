@@ -65,12 +65,12 @@ void sim_partitioner::partitioning_algorithm()
      * The advantage of using swap() is that it is executed in constant
      * time. */
     P.swap(Q);
-    
+
     if (gsDebug)
     {
       gsMessage("--------------------- ITERATION %u ----------------------------------\n",i);
     }
-     
+
     gsVerboseMsg("  iteration %u; number of blocks: %u\n",i,s_Sigma);
 
     refine(change);
@@ -99,7 +99,7 @@ void sim_partitioner::initialise_datastructures()
 {
   aut->sort_transitions(mcrl2::lts::lbl_tgt_src);
   trans_index = aut->get_transition_pre_table();
-  
+
   uint N = aut->num_states();
 
   match  = new hash_table3(1000);
@@ -121,7 +121,7 @@ void sim_partitioner::initialise_datastructures()
     {
       state_buckets[i].prev = i-1;
     }
-    else 
+    else
     {
       state_buckets[i].prev = LIST_END;
     }
@@ -129,7 +129,7 @@ void sim_partitioner::initialise_datastructures()
     {
       state_buckets[i].next = i+1;
     }
-    else 
+    else
     {
       state_buckets[i].next = LIST_END;
     }
@@ -216,13 +216,13 @@ void sim_partitioner::refine(bool &change)
     children[alpha].push_back(alpha);
     parent[alpha] = alpha;
   }
-    
+
   if (gsDebug)
   {
     gsMessage("--------------------- Refine ---------------------------------------\n");
     print_Sigma_P();
   }
-  
+
   /* Compute a reverse topological sorting of Sigma w.r.t. P */
   std::vector<uint> Sort;
   Sort.reserve(s_Sigma);
@@ -413,7 +413,7 @@ void sim_partitioner::update()
   std::vector<uint>::iterator alphai, last;
 
   induce_P_on_Pi();
-  
+
   initialise_pre_EA();
 
   /* Compute the pre_exists and pre_forall functions */
@@ -442,7 +442,7 @@ void sim_partitioner::update()
       pre_forall[l].push_back(forall->get_num_elements());
     }
   }
-  
+
   if (gsDebug)
   {
     gsMessage("------ Filter(false) ------\nExists: ");
@@ -455,8 +455,8 @@ void sim_partitioner::update()
 
   /* Apply the first filtering to Q */
   filter(s_Sigma,P,false);
-  
-  
+
+
   initialise_pre_EA();
 
   /* Compute the pre_exists and pre_forall functions */
@@ -541,7 +541,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
   for (l = 0; l < aut->num_labels(); ++l)
   {
     for (delta = 0; delta < S; ++delta)
-    { 
+    {
       etrans.set_end(pre_exists[l][delta+1]);
       for (etrans.set(pre_exists[l][delta]); !etrans.is_end(); ++etrans)
       {
@@ -562,7 +562,7 @@ void sim_partitioner::filter(uint S,std::vector< std::vector<bool> > &R,
   for (l = 0; l < aut->num_labels(); ++l)
   {
     for (gamma = 0; gamma < S; ++gamma)
-    { 
+    {
       atrans.set_end(pre_forall[l][gamma+1]);
       for (atrans.set(pre_forall[l][gamma]); !atrans.is_end(); ++atrans)
       {
@@ -755,7 +755,7 @@ void sim_partitioner::update_nfa()
   std::vector<bool> *final = new std::vector<bool> ();
 
   // Do a breadth first search over the computed graph to assign ids to
-  // the reachable blocks and construct the final transition relation 
+  // the reachable blocks and construct the final transition relation
   std::vector<uint>::iterator post_it,post_last;
   std::queue<uint> todo;
   std::vector<uint> block_id(s_Pi,s_Pi);
@@ -911,7 +911,7 @@ void sim_partitioner::print_structure(hash_table3 *struc)
   hash_table3_iterator i(struc);
   for ( ; !i.is_end(); ++i)
   {
-    gsMessage("(%u,%s,%u),", i.get_x(), 
+    gsMessage("(%u,%s,%u),", i.get_x(),
         aut->label_value_str(i.get_y()).c_str(), i.get_z());
   }
   gsMessage("}");
@@ -929,7 +929,7 @@ void sim_partitioner::read_partition_from_file(char *fn)
     exit(1);
   }
   char c = 0;
-  
+
   s_Pi = 0;
   uint s;
   int prev;
@@ -964,7 +964,7 @@ void sim_partitioner::read_partition_from_file(char *fn)
       }
       state_buckets[s].prev = prev;
       prev = s;
-      
+
       if (!(f >> c))
       {
         std::cerr << "error: could not read ',' or ')' ";

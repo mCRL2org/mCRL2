@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/option.hpp
-/// \brief Type used to represent an option in a configuration (protocol concept) 
+/// \brief Type used to represent an option in a configuration (protocol concept)
 
 #ifndef _TIPI_CONFIGURATION_OPTION_HPP__
 #define _TIPI_CONFIGURATION_OPTION_HPP__
@@ -164,7 +164,7 @@ namespace tipi {
         return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
       }
 
-      /** 
+      /**
        * \brief Append type and instance ...
        * \param[in] t smart pointer to the data type definition
        * \param[in] d data that must be an instance of the chosen data type

@@ -68,7 +68,7 @@ extern void dotyyerror(const char* s);
 %option nounput
 Quoted	   \"[^\"]*\"
 Name	   [a-zA-Z_][a-zA-Z0-9_]*
-Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?)) 
+Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))
 
 %x COMMENT
 %%
@@ -84,12 +84,12 @@ Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))
 
 [ \t]	  { posNo += YYLeng(); }
 \r?\n     { lineNo++; posNo=1; }
-[dD][iI][gG][rR][aA][pP][hH]     { posNo += YYLeng(); return DIGRAPH; } 
-[gG][rR][aA][pP][hH]             { posNo += YYLeng(); return GRAPH; } 
-[sS][tT][rR][iI][cC][tT]         { posNo += YYLeng(); return STRICT; } 
-[sS][uU][bB][gG][rR][aA][pP][hH] { posNo += YYLeng(); return SUBGRAPH; } 
-[nN][oO][dD][eE]                 { posNo += YYLeng(); return NODE; } 
-[eE][dD][gG][eE]                 { posNo += YYLeng(); return EDGE; } 
+[dD][iI][gG][rR][aA][pP][hH]     { posNo += YYLeng(); return DIGRAPH; }
+[gG][rR][aA][pP][hH]             { posNo += YYLeng(); return GRAPH; }
+[sS][tT][rR][iI][cC][tT]         { posNo += YYLeng(); return STRICT; }
+[sS][uU][bB][gG][rR][aA][pP][hH] { posNo += YYLeng(); return SUBGRAPH; }
+[nN][oO][dD][eE]                 { posNo += YYLeng(); return NODE; }
+[eE][dD][gG][eE]                 { posNo += YYLeng(); return EDGE; }
 ","	  { posNo += YYLeng(); return COMMA; }
 ":"	  { posNo += YYLeng(); return COLON; }
 ";"	  { posNo += YYLeng(); return SEMICOLON; }
@@ -110,7 +110,7 @@ Number     [-]?((\.[0-9]+)|([0-9]+(\.[0-9]+)?))
 void concrete_dot_lexer::processId()
 {
   posNo += YYLeng();
-  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) ); 
+  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
 }
 
 void concrete_dot_lexer::processQuoted()
@@ -119,7 +119,7 @@ void concrete_dot_lexer::processQuoted()
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
   dotyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
-} 
+}
 
 //Implementation of parse_dot
 
@@ -157,9 +157,9 @@ concrete_dot_lexer::concrete_dot_lexer(void) : dotyyFlexLexer(NULL, NULL) {
 void concrete_dot_lexer::yyerror(const char *s) {
   fprintf(
     stderr,
-    "token '%s' at position %d,%d caused the following error: %s\n", 
+    "token '%s' at position %d,%d caused the following error: %s\n",
     YYText(), lineNo, posNo, s
-  ); 
+  );
 }
 
 bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
@@ -171,7 +171,7 @@ bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
 
   // INITIALISE
   dot_lts = &l;
-  
+
   protect_table = ATindexedSetCreate(10000,50);
 
   // PARSE
@@ -181,7 +181,7 @@ bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
   } else {
     result = true;
   }
-    
+
   // CLEAN UP
   ATindexedSetDestroy( protect_table );
 

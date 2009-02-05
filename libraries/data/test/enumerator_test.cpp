@@ -39,18 +39,18 @@ const std::string DATA_SPEC1 =
   "                            \n"
   "cons s1: S1;                \n"
   "cons s2: S2;                \n"
-;  
+;
 
 // This is no longer allowed:
-// sort S3 = A -> (B -> C);    
+// sort S3 = A -> (B -> C);
 // sort S4 = A # (A -> B) -> C;
-// sort S5 = A # A -> B -> C;  
+// sort S5 = A # A -> B -> C;
 
 
 /*
 enumerator make_enumerator(rewriter& datar, const data_specification& data_spec)
 {
-  enumerator result(datar, data_spec); 
+  enumerator result(datar, data_spec);
   return result;
 }
 
@@ -99,35 +99,35 @@ void test_data_enumerator()
   {
     std::cout << pp(*i) << " " << pp(i->variables()) << std::endl;
   }
-  
+
   data_expression_with_variables expr(x, make_list(x));
   atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
   for (atermpp::vector<data_expression_with_variables>::iterator i = y.begin(); i != y.end(); ++i)
   {
-    atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);   
+    atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
     for (atermpp::vector<data_expression_with_variables>::iterator j = z.begin(); j != z.end(); ++j)
     {
       std::cout << pp(*j) << " " << pp(j->variables()) << std::endl;
     }
-  } 
+  }
 }
 
 class A: public data_expression
 {
   public:
     /// Constructor.
-    ///             
+    ///
     A()
     {}
 
     /// Constructor.
-    ///             
+    ///
     A(atermpp::aterm_appl term)
       : data_expression(term)
     {}
 
     /// Constructor.
-    ///             
+    ///
     A(ATermAppl term)
       : data_expression(term)
     {}
@@ -141,7 +141,7 @@ void f(data_expression d)
 
 void test2()
 {
-  data_variable n = parse_data_expression("n", "n: Pos;\n"); 
+  data_variable n = parse_data_expression("n", "n: Pos;\n");
   A a = n;
   f(a);
   std::cout << "a = " << pp(a) << std::endl;
@@ -156,7 +156,7 @@ void test3()
 
   data_variable   n = parse_data_expression("n", "n: Pos;\n");
   data_expression c = parse_data_expression("n < 10", "n: Pos;\n");
-  data_expression_with_variables x(c, atermpp::make_list(n)); 
+  data_expression_with_variables x(c, atermpp::make_list(n));
 }
 
 int test_main(int argc, char* argv[])

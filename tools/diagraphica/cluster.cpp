@@ -67,9 +67,9 @@ Cluster::~Cluster()
     clearOutBundles();
 }
 
-	
+
 // -- set functions -------------------------------------------------
-    
+
 
 // ----------------------------------------------
 void Cluster::setCoord( const vector< int> &crd )
@@ -198,7 +198,7 @@ int Cluster::getCoord( const int &idx )
     if ( 0 <= idx && static_cast <size_t> (idx) < coord.size() )
         result = coord[idx];
     return result;
-}   
+}
 
 
 // -----------------------------------------
@@ -241,7 +241,7 @@ Cluster* Cluster::getChild( const int &idx )
         return children[idx];
     else
         throw new string( "Error retrieving cluster child." );
-}   
+}
 
 
 // ------------------------
@@ -263,7 +263,7 @@ Node* Cluster::getNode( const int &idx )
         return nodes[idx];
     else
         throw new string( "Error retrieving cluster node." );
-}   
+}
 
 
 // ----------------------------

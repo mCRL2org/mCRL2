@@ -65,7 +65,7 @@ namespace transport {
         inline void run() {
           if (!active) {
             active = true;
-         
+
             thread.reset(new boost::thread(boost::bind(&socket_scheduler::task, this)));
           }
         }
@@ -74,7 +74,7 @@ namespace transport {
         inline void stop() {
           if (active) {
             io_service.stop();
-         
+
             thread->join();
           }
         }

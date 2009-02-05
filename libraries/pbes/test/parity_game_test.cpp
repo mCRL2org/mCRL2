@@ -29,27 +29,27 @@ std::string BES1 =
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES2 =
   "pbes nu X = X;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES3 =
   "pbes mu X = Y;                                           \n"
   "     nu Y = X;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES4 =
   "pbes nu Y = X;                                           \n"
   "     mu X = Y;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES5 =
   "pbes mu X1 = X2;                                         \n"
   "     nu X2 = X1 || X3;                                   \n"
@@ -59,7 +59,7 @@ std::string BES5 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES6 =
   "pbes nu X1 = X2 && X1;                                   \n"
   "     mu X2 = X1 || X3;                                   \n"
@@ -67,7 +67,7 @@ std::string BES6 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES7 =
   "pbes nu X1 = X2 && X3;                                   \n"
   "     nu X2 = X4 && X5;                                   \n"
@@ -78,7 +78,7 @@ std::string BES7 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES8 =
   "pbes nu X1 = X2 && X1;                                   \n"
   "     mu X2 = X1;                                         \n"
@@ -96,14 +96,14 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
 #ifdef MCRL2_PARITY_GAME_CREATE_FILES
     std::ofstream to(output_file.c_str());
     to << text << std::endl;
-#endif      
+#endif
   }
   {
     std::string text = pgg.pgsolver_graph();
 #ifdef MCRL2_PARITY_GAME_CREATE_FILES
     std::ofstream to((output_file + "1").c_str());
     to << text << std::endl;
-#endif      
+#endif
   }
 }
 

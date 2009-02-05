@@ -75,7 +75,7 @@ namespace squadt {
       static boost::shared_ptr < project_manager > create();
 
     public:
- 
+
       /** \brief Factory function */
       static boost::shared_ptr < project_manager > create(const boost::filesystem::path&, bool);
 
@@ -90,7 +90,7 @@ namespace squadt {
 
       /** \brief Recursively add all files in a directory to the project */
       void import_directory(const boost::filesystem::path&);
- 
+
       /** \brief Add a file to the project under a new name */
       boost::shared_ptr< processor > import_file(const boost::filesystem::path&, const std::string& = "");
 
@@ -108,7 +108,7 @@ namespace squadt {
 
       /** \brief Read project information from project_store */
       void read();
- 
+
       /** \brief Writes project configuration to the project file */
       void store() const;
 
@@ -132,7 +132,7 @@ namespace squadt {
 
       /** \brief Given a processor, it produces a list of object_descriptors that conflict with its outputs */
       std::auto_ptr < conflict_list > get_conflict_list(boost::shared_ptr< processor > const& p) const;
- 
+
       /** \brief Removes all files that cannot be recreated by any of the processors */
       void clean_store(boost::shared_ptr< processor > const& p, bool b);
 

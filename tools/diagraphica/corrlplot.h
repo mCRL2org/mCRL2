@@ -39,7 +39,7 @@ public:
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
-        
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void drawAxes(
@@ -49,7 +49,7 @@ public:
     void drawLabels( const bool &inSelectMode );
     void drawPlot( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -58,7 +58,7 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void initLabels();
@@ -76,12 +76,12 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
-    
+
     // data
     int attrIdx1;
     int attrIdx2;
@@ -89,12 +89,12 @@ protected:
     std::string yLabel;
     std::vector< std::vector< int > > mapXToY; // for each x idx, 1 or more y indices
     std::vector< std::vector< int > > number;  // number associated with every entry in mapXToY
-    std::vector< int > maxNumX;   // for every column, the largest number 
+    std::vector< int > maxNumX;   // for every column, the largest number
     int sumMaxNumX;          // sum of entries in maxNumX
-    std::vector< int > maxNumY;   // for every row, the largest number 
+    std::vector< int > maxNumY;   // for every row, the largest number
     int sumMaxNumY;          // sum of entries in maxNumY
     int maxNumber;           // overall largest number
-    
+
     // vis settings
     int minRadHintPx; // min radius cannot be smaller than this
     int maxRadHintPx; // max radius cannot be smaller than this

@@ -22,11 +22,11 @@ class DropTarget : public Colleague, public wxTextDropTarget
 {
 public:
 	// -- constructors and destructor -------------------------------
-    DropTarget( 
-        wxWindow* ownr, 
+    DropTarget(
+        wxWindow* ownr,
         Mediator* m );
 	virtual ~DropTarget();
-	
+
     // -- overridden functions from wxTextDropTarget ----------------
     virtual bool OnDropText(
         wxCoord x,

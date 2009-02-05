@@ -45,7 +45,7 @@ namespace detail {
       throw mcrl2::runtime_error("parse error in parse_state_frm()");
     return result;
   }
-  
+
   /// \brief Type checks a state formula against spec
   /// \param formula A term
   /// \param spec A term
@@ -60,7 +60,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error");
     return result;
   }
-  
+
   /// \brief Implements sorts and data expressions in formula,
   /// using the data from spec.
   /// \param formula A term
@@ -77,7 +77,7 @@ namespace detail {
       throw mcrl2::runtime_error("data implementation error");
     return result;
   }
-  
+
   /// \brief Converts a regular formula to a state formula
   /// \param formula A term
   /// \return The converted formula

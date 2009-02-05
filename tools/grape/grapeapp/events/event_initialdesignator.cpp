@@ -182,7 +182,7 @@ grape_event_detach_initial_designator::grape_event_detach_initial_designator( gr
 {
   m_init = p_init->get_id();
   compound_state* state_ptr = p_init->get_attached_state();
-  m_state = state_ptr ? state_ptr->get_id() : -1; 
+  m_state = state_ptr ? state_ptr->get_id() : -1;
   diagram* dia_ptr = m_main_frame->get_glcanvas()->get_diagram();
   assert( dia_ptr != 0 );// The diagram has to exist, or else this event could not have been generated.
   m_diagram = dia_ptr->get_id();

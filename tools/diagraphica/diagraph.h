@@ -55,7 +55,7 @@ public:
 	// -- functions inherited from wxApp ----------------------------
 	bool DoInit();
 	int OnExit();
-	
+
 	// -- load & save data ------------------------------------------
 	void openFile( const std::string &path );
 	void saveFile( const std::string &path );
@@ -63,7 +63,7 @@ public:
 	void handleSaveAttrConfig( const std::string &path );
 	void handleLoadDiagram( const std::string &path );
 	void handleSaveDiagram( const std::string &path );
-	
+
 	// -- general input & output ------------------------------------
 	void initProgress(
 	const std::string &title,
@@ -71,18 +71,18 @@ public:
 	const int &max );
 	void updateProgress( const int &val );
 	void closeProgress();
-	
+
 	void setOutputText( const std::string &msg );
 	void setOutputText( const int &msg );
 	void appOutputText( const std::string &msg );
 	void appOutputText( const int &msg );
-	
+
 	void getColor( ColorRGB &col );
 	void handleCloseFrame( PopupFrame* f );
-	
+
 	// -- interaction with attributes & domains ---------------------
 	void handleAttributeSel( const int &idx );
-	void handleMoveAttr( 
+	void handleMoveAttr(
 	const int &idxFr,
 	const int &idxTo );
 	void handleAttributeDuplicate( const std::vector< int > &indcs );
@@ -90,11 +90,11 @@ public:
 	void handleAttributeDelete( const std::vector< int > &indcs );
 	*/
 	void handleAttributeDelete( const int &idx );
-	void handleAttributeRename( 
+	void handleAttributeRename(
 	const int &idx,
 	const std::string &name );
 	void handleAttributeCluster( const std::vector< int > &indcs );
-	
+
 	// -*- //
 	void handleAttrPartition( const int &attrIdx );
 	void handleAttrPartition(
@@ -102,7 +102,7 @@ public:
 	const int &method );
 	void handleAttrDepartition( const int &attrIdx );
 	void handleAttrPartitionCloseFrame();
-	
+
 	void getAttrValues(
 	const int &attrIdx,
 	std::vector< double > &vals );
@@ -110,7 +110,7 @@ public:
 	const int &attrIdx,
 	std::set< double > &vals );
 	// -*- //
-	
+
 	void handleMoveDomVal(
 	const int &idxAttr,
 	const int &idxFr,
@@ -120,31 +120,31 @@ public:
 	const std::vector< int > domIndcs,
 	const std::string &newValue );
 	void handleDomainUngroup( const int &attrIdx );
-	
-	void getAttributeNames( 
+
+	void getAttributeNames(
 	const std::vector< int > &indcs,
 	std::vector< wxString > &names );
 	int getAttributeType( const int &idx );
 	int getAttrSizeCurDomain( const int &idx );
-	
+
 	// -- attribute plots -------------------------------------------
 	void handleAttributePlot( const int &idx );
-	void handleAttributePlot( 
+	void handleAttributePlot(
 	const int &idx1,
 	const int &idx2 );
 	void handleAttributePlot( const std::vector< int > &indcs );
 	void handlePlotFrameDestroy();
-	
+
 	void handleEditClust( Cluster* c );
 	void handleClustFrameDisplay();
 	void handleClustPlotFrameDisplay( const int &idx );
-	void handleClustPlotFrameDisplay( 
+	void handleClustPlotFrameDisplay(
 	const int &idx1,
 	const int &idx2 );
 	void handleClustPlotFrameDisplay( const std::vector< int > &indcs );
 	void setClustMode( const int &m );
 	int getClustMode();
-	
+
 	// -- global mode changes ---------------------------------------
 	void handleSetModeAnalysis();
 	void handleSetModeEdit();
@@ -153,9 +153,9 @@ public:
 	void handleSetViewTrace();
 	int getView();
 	bool getClustered();
-	
+
 	// -- diagram editor --------------------------------------------
-	
+
 	void* getGraph();
 	void handleNote( const int &shapeId, const std::string &msg );
 	void handleEditModeSelect();
@@ -170,15 +170,15 @@ public:
 	void handleEditModeLineCol();
 	void handleEditShowGrid( const bool &flag );
 	void handleEditSnapGrid( const bool &flag );
-	
+
 	void handleEditShape(
 	const bool &cut,
 	const bool &copy,
 	const bool &paste,
 	const bool &clear,
-	const bool &bringToFront, 
+	const bool &bringToFront,
 	const bool &sendToBack,
-	const bool &bringForward, 
+	const bool &bringForward,
 	const bool &sendBackward,
 	const bool &editDOF,
 	const int  &checkedItem );
@@ -198,22 +198,22 @@ public:
 	void handleEditDOFShape();
 	void handleSetDOF( const int &attrIdx );
 	void handleCheckedVariable( const int &idDOF, const int &variableId );
-	
-	void handleEditDOF( 
+
+	void handleEditDOF(
 	const std::vector< int > &degsOfFrdmIds,
 	const std::vector< std::string > &degsOfFrdm,
 	const std::vector< int > &attrIndcs,
 	const int &selIdx );
 	void handleDOFSel( const int &DOFIdx );
-	
+
 	void setDOFColorSelected();
 	void setDOFOpacitySelected();
-	
-	void handleSetDOFTextStatus( 
+
+	void handleSetDOFTextStatus(
 	const int &DOFIdx,
 	const int &status );
 	int handleGetDOFTextStatus( const int &DOFIdx );
-	
+
 	void handleDOFColActivate();
 	void handleDOFColDeactivate();
 	void handleDOFColAdd(
@@ -228,7 +228,7 @@ public:
 	void handleDOFColSetValuesEdt(
 	const std::vector< double > &hue,
 	const std::vector< double > &y );
-	
+
 	void handleDOFOpaActivate();
 	void handleDOFOpaDeactivate();
 	void handleDOFOpaAdd(
@@ -243,34 +243,34 @@ public:
 	void handleDOFOpaSetValuesEdt(
 	const std::vector< double > &opa,
 	const std::vector< double > &y );
-	
+
 	void handleLinkDOFAttr(
 	const int DOFIdx,
 	const int attrIdx );
 	void handleUnlinkDOFAttr( const int DOFIdx );
 	void handleDOFFrameDestroy();
 	void handleDOFDeselect();
-	
+
 	// -- simulator, time series & examiner -------------------------
 	void initSimulator(
 	Cluster* currFrame,
 	const std::vector< Attribute* > &attrs );
-	
+
 	void initTimeSeries( const std::vector< int > attrIdcs );
-	void markTimeSeries( 
+	void markTimeSeries(
 	Colleague* sender,
 	Cluster* currFrame );
-	void markTimeSeries( 
+	void markTimeSeries(
 	Colleague* sender,
 	const std::vector< Cluster* > frames );
-	
+
 	void addToExaminer(
 	Cluster* currFrame,
 	const std::vector< Attribute* > &attrs );
 	void addToExaminer(
 	const std::vector< Cluster* > frames,
 	const std::vector< Attribute* > &attrs );
-	
+
 	void handleShowClusterMenu();
 	void handleSendDgrm(
 	Colleague* sender,
@@ -284,45 +284,45 @@ public:
 	void handleSendDgrmSetToTrace();
 	void handleSendDgrmSglToExnr();
 	void handleSendDgrmSetToExnr();
-	
+
 	void handleClearSim( Colleague* sender );
 	void handleClearExnr( Colleague* sender );
 	void handleClearExnrCur( Colleague* sender );
-	
+
 	//void handleAnimFrameBundl( Colleague* sender );
 	void handleAnimFrameClust( Colleague* sender );
-	
+
 	void handleMarkFrameClust( Colleague* sender );
 	void handleUnmarkFrameClusts( Colleague* sender );
-	
+
 	void handleShowFrame(
 	Cluster* frame,
 	const std::vector< Attribute* > &attrs,
 	ColorRGB &col );
 	void handleUnshowFrame();
-	
+
 	// -- visualization settings ------------------------------------
-	void setSettingsGeneral( 
+	void setSettingsGeneral(
 	const wxColour &colClr,
 	const wxColour &colTxt,
 	const int &szeTxt,
 	const double &spdAnim );
-	void setSettingsClustTree( 
+	void setSettingsClustTree(
 	const bool &show,
 	const bool &annotate,
 	const int &colMap );
-	void setSettingsBarTree( 
+	void setSettingsBarTree(
 	const bool &show,
 	const double &magn );
 	void setSettingsSimulator( const int &blendType );
 	void setSettingsTrace( const bool &useShading );
-	void setSettingsArcDiagram( 
+	void setSettingsArcDiagram(
 	const bool &showNodes,
 	const bool &showArcs,
 	const wxColour &colArcs,
 	const double &trspArcs );
-	
-	void getSettingsGeneral( 
+
+	void getSettingsGeneral(
 	wxColour &colClr,
 	wxColour &colTxt,
 	int &szeTxt,
@@ -331,24 +331,24 @@ public:
 	bool &show,
 	bool &annotate,
 	int &colMap );
-	void getSettingsBarTree( 
+	void getSettingsBarTree(
 	bool &show,
 	double &magn );
 	void getSettingsSimulator( int &blendType );
 	void getSettingsTrace( bool &useShading );
-	void getSettingsArcDiagram( 
+	void getSettingsArcDiagram(
 	bool &showNodes,
 	bool &showArcs,
 	wxColour &colArcs,
 	double &trspArcs );
 	void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom);
-	
+
 	// -- visualization ---------------------------------------------
 	void handlePaintEvent( GLCanvas* c );
 	void handleSizeEvent( GLCanvas* c );
-	
+
 	void updateDependancies( GLCanvas* c );
-	
+
 	// -- input event handlers --------------------------------------
 	void handleDragDrop(
 	const int &srcWindowId,
@@ -356,10 +356,10 @@ public:
 	const int &tgtX,
 	const int &tgtY,
 	const std::vector< int > &data );
-	
-	void handleMouseLftDownEvent( 
-	GLCanvas* c, 
-	const int &x, 
+
+	void handleMouseLftDownEvent(
+	GLCanvas* c,
+	const int &x,
 	const int &y );
 	void handleMouseLftUpEvent(
 		GLCanvas* c,
@@ -369,9 +369,9 @@ public:
 	GLCanvas* c,
 	const int &x,
 	const int &y );
-	void handleMouseRgtDownEvent( 
-	GLCanvas* c, 
-	const int &x, 
+	void handleMouseRgtDownEvent(
+	GLCanvas* c,
+	const int &x,
 	const int &y );
 	void handleMouseRgtUpEvent(
 		GLCanvas* c,
@@ -403,7 +403,7 @@ public:
 	GLCanvas* c,
 	const int &keyCode,
 	const int &specialKey );
-	
+
 	// -- overloaded operators --------------------------------------
 	void operator<<( const std::string &msg );
 	void operator<<( const int &msg );
@@ -413,7 +413,7 @@ protected:
     void initColleagues();
     void initVisualizers();
     void clearColleagues();
-    
+
     void displAttributes();
     void displAttributes( const int &selAttrIdx );
     void displAttrDomain( const int &attrIdx );
@@ -430,17 +430,17 @@ private:
     int               view;
     bool              critSect;
     bool			  clustered;
-    
+
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association
     ArcDiagram* arcDgrm;   // composition
-    
+
     GLCanvas* canvasSiml;  // association
     Simulator* simulator;  // composition
 
     GLCanvas* canvasTrace; // association
     TimeSeries* timeSeries;// composition
-    
+
     GLCanvas* canvasExnr;  // association
     Examiner* examiner;    // composition
 
@@ -449,10 +449,10 @@ private:
 
     GLCanvas* canvasDistr; // association
     DistrPlot* distrPlot;  // composition
-    
+
     GLCanvas* canvasCorrl; // association
     CorrlPlot* corrlPlot;  // composition
-    
+
     GLCanvas* canvasCombn; // association
     CombnPlot* combnPlot;  // composition
 

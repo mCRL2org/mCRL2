@@ -30,11 +30,11 @@ void solve_formula(std::string title, std::string spec_text, std::string formula
 
   bool result = pbes2bool(p);
   BOOST_CHECK(result = expected_result);
-  
+
   int result2 = bes_gauss_elimination(p);
   std::cout << "<result2>" << result2 << std::endl;
   BOOST_CHECK((result2 == 2) || (expected_result == (result2 == 1)));
-  
+
   pbes<> p3 = pbes2bes(p, false);
   bool result3 = pbes2bool(p3);
   BOOST_CHECK(result3 = expected_result);
@@ -125,7 +125,7 @@ void test_hblc()
     "%Q(1,3,true);                                                                                                                       \n"
     "%Channel_p2q;                                                                                                                       \n"
   ;
-  
+
   std::string R4 = "[true][sent_by_p(hb0)] false";
   bool expected_result = false;
   solve_formula("HBLC", HBLC, R4, expected_result);

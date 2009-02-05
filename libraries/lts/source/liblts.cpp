@@ -74,7 +74,7 @@ static int compare_transitions_slt(const void *t1, const void *t2) {
     return int(((transition*)t1)->label) - int(((transition*)t2)->label);
   } else  {
     return int(((transition*)t1)->to) - int(((transition*)t2)->to);
-  } 
+  }
 }
 
 static int compare_transitions_lts(const void *t1, const void *t2) {
@@ -203,7 +203,7 @@ void p_lts::init(bool state_info, bool label_info)
 
   extra_data = NULL;
   ATprotect(&extra_data);
-  
+
   this->type = lts_none;
   this->state_info = state_info;
   this->label_info = label_info;
@@ -221,14 +221,14 @@ void p_lts::init(p_lts const &l)
 
   transitions_size = l.ntransitions;
   ntransitions = l.ntransitions;
-  
+
   type = l.type;
   state_info = l.state_info;
   label_info = l.label_info;
 
   extra_data = l.extra_data;
   ATprotect(&extra_data);
- 
+
   if ( state_info )
   {
     state_values = (ATerm *) malloc(states_size * sizeof(ATerm));
@@ -241,7 +241,7 @@ void p_lts::init(p_lts const &l)
   } else {
     state_values = NULL;
   }
-  
+
   taus = (bool *) malloc(labels_size * sizeof(bool));
   if ( taus == NULL )
   {
@@ -339,7 +339,7 @@ void p_lts::merge(lts *l)
 {
   unsigned int new_nstates = nstates + l->num_states();
   unsigned int new_ntransitions = ntransitions + l->num_transitions();
-  
+
   // The resulting LTS will have state information only if BOTH LTSs
   // currently have state information.
   if ( state_info && l->has_state_info() )
@@ -350,7 +350,7 @@ void p_lts::merge(lts *l)
     }
     states_size = new_nstates;
     state_values = (ATerm*)realloc(state_values,states_size*sizeof(ATerm));
-    if ( state_values == NULL ) 
+    if ( state_values == NULL )
     {
       gsErrorMsg("insufficient memory\n");
       exit(1);
@@ -470,7 +470,7 @@ void p_lts::merge(lts *l)
     ATindexedSetDestroy(labs);
   }
   else
-  { 
+  {
     // One of the LTSs does not have label info, so the resulting LTS
     // will not have label info either. Moreover, we consider the sets
     // of labels of the LTSs to be disjoint
@@ -723,7 +723,7 @@ lts_type p_lts::detect_type(istream &is)
       }
       // if we are not at the end of the buffer, then we expect a opening
       // parenthesis
-      if ( (i >= r) || (buf[i] == '(') ) 
+      if ( (i >= r) || (buf[i] == '(') )
       {
         gsVerboseMsg("detected AUT input file\n");
         return lts_aut;
@@ -749,7 +749,7 @@ lts_type p_lts::detect_type(istream &is)
       return lts_dot;
     }
   }
-  
+
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
   {
@@ -838,7 +838,7 @@ lts_type p_lts::detect_type(istream &is)
           valid = false;
           break;
         }
-        
+
         unsigned int pointer = 0; is.read((char *) &pointer,4);
         if ( pointer >= size )
         {
@@ -1636,7 +1636,7 @@ std::string lts::get_state_parameter_value_str(unsigned int state, unsigned int 
 atermpp::set<ATerm> lts::get_label_values()
 {
   atermpp::set<ATerm> r;
-  
+
   for (unsigned int i=0; i<nlabels; i++)
   {
     r.insert(label_values[i]);
@@ -1648,7 +1648,7 @@ atermpp::set<ATerm> lts::get_label_values()
 atermpp::set<ATerm> lts::get_state_values()
 {
   atermpp::set<ATerm> r;
-  
+
   for (unsigned int i=0; i<nstates; i++)
   {
     r.insert(state_values[i]);
@@ -1660,7 +1660,7 @@ atermpp::set<ATerm> lts::get_state_values()
 atermpp::set<ATerm> lts::get_state_parameter_values(unsigned int idx)
 {
   atermpp::set<ATerm> r;
-  
+
   for (unsigned int i=0; i<nstates; i++)
   {
     r.insert(get_state_parameter_value(i,idx));
@@ -1890,7 +1890,7 @@ bool lts::reachability_check(bool remove_unreachable)
     // We're doing the slower algorithm: just loop over all transitions and add
     // target states from transitions that have a source that we have already
     // reached.
-    
+
     add_visited(init_state);
 
     bool notdone = true;
@@ -1919,7 +1919,7 @@ bool lts::reachability_check(bool remove_unreachable)
     // the todo list
     add_visited(init_state);
     todo_stack[0] = init_state;
-    unsigned int todo_stack_num = 1; // number of elements on the stack 
+    unsigned int todo_stack_num = 1; // number of elements on the stack
 
     while ( todo_stack_num > 0 )
     {
@@ -2134,7 +2134,7 @@ void transition_iterator::operator ++()
 
 lts_type lts::guess_format(string const& s) {
   string::size_type pos = s.find_last_of('.');
-  
+
   if ( pos != string::npos )
   {
     string ext = s.substr(pos+1);
@@ -2440,7 +2440,7 @@ std::string lts::supported_lts_formats_text(lts_type default_format, const std::
       r += " (default)";
     }
 
-    
+
     if ( i+2 == types.end() )
     {
       r += ", or\n";
@@ -2504,7 +2504,7 @@ std::string lts::supported_lts_equivalences_text(lts_equivalence default_equival
       r += " (default)";
     }
 
-    
+
     if ( i+2 == types.end() )
     {
       r += ", or\n";
@@ -2537,7 +2537,7 @@ std::string lts::supported_lts_preorders_text(lts_preorder default_preorder, con
       r += " (default)";
     }
 
-    
+
     if ( i+2 == types.end() )
     {
       r += ", or\n";

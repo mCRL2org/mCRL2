@@ -88,7 +88,7 @@ namespace pbes_system {
       bool m_print_equations;
 
     public:
-      
+
       /// \brief Constructor.
       /// \param data_spec A data specification
       /// \param rewriter_strategy A strategy for the data rewriter

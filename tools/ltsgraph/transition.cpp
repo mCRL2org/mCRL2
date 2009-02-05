@@ -19,7 +19,7 @@ Transition::Transition(State* from, State* to, std::string lbl)
   fromState = from;
   toState = to;
   label = lbl;
-  
+
   controlAlpha = 0;
   controlDist = 0.5;
   labelX = 0.0;
@@ -59,7 +59,7 @@ void Transition::getControl(double& x, double& y)
     double xFrom = fromState->getX();
     double yFrom = fromState->getY();
     double xTo = toState->getX();
-    double yTo = toState->getY();  
+    double yTo = toState->getY();
 
     double yDiff = yTo - yFrom;
     double xDiff = xTo - xFrom;
@@ -134,7 +134,7 @@ void Transition::setControl(const double x, const double y)
 
     double yDiff1 = newY - yFrom;
     double xDiff1 = newX - xFrom;
-    
+
     double stateDist = sqrt(xDiff * xDiff + yDiff * yDiff);
 
     double beta = atan2(yDiff, xDiff);

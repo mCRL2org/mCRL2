@@ -6,12 +6,12 @@
 % With two data elements, the generated transition system has 464 states.
 %
 % It is interesting to see the clustering of this statespace in ltsgraph.
-% The statespace after branching bisimulation contains 3 states and is 
+% The statespace after branching bisimulation contains 3 states and is
 % exactly the same as the reduced statespace of the alternating bit protocol.
-% 
+%
 % Note that it is interesting to compare the differences of the alternating
 % bit protocol (abp), concurrent alternating bit protocol (cabp), one bit
-% sliding window protocol (onebit) and the alternating bit protocol with 
+% sliding window protocol (onebit) and the alternating bit protocol with
 % independent acknowledgements (par), regarding the implementation, the
 % the number of states and the external behaviour.
 
@@ -74,9 +74,9 @@ proc  S = RM(bit0);
                    + r7(b).s8(ac).AR(invert(b));
 
 init
-   hide({c3,c4,c5,c6,c7,c8,skip}, 
-     allow({c3,c4,c5,c6,c7,c8,skip,r1,s2}, 
-       comm({r3|s3->c3, r4|s4->c4, r5|s5->c5, r6|s6->c6, 
+   hide({c3,c4,c5,c6,c7,c8,skip},
+     allow({c3,c4,c5,c6,c7,c8,skip,r1,s2},
+       comm({r3|s3->c3, r4|s4->c4, r5|s5->c5, r6|s6->c6,
                 r7|s7->c7, r8|s8->c8},
                S || K || R || AS || L || AR )));
 

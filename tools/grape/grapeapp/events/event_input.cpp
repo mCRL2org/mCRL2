@@ -253,18 +253,18 @@ bool grape_event_click::Do( void )
     {
       if ( m_vis_obj != 0 ) // Only do something if the mouse clicked on a state.
       {
-        object* begin_object_ptr = m_vis_obj->get_selectable_object();        
+        object* begin_object_ptr = m_vis_obj->get_selectable_object();
         if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == STATE ) )  // If it is a state
         {
           libgrape::state* designated_state_ptr = static_cast<libgrape::state*> ( begin_object_ptr );
-          
+
           // Initial values
-          coordinate coord = { designated_state_ptr->get_coordinate().m_x, designated_state_ptr->get_coordinate().m_y + designated_state_ptr->get_height()*0.5 + 0.1 };          
+          coordinate coord = { designated_state_ptr->get_coordinate().m_x, designated_state_ptr->get_coordinate().m_y + designated_state_ptr->get_height()*0.5 + 0.1 };
           coordinate end_coord = get_coordinate_on_edge(coord, designated_state_ptr);
           coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
           double displacement = 0.01;
-          
-          // Find a decent coordinate to place the designator           
+
+          // Find a decent coordinate to place the designator
           while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)
           {
             displacement = -displacement*1.1;
@@ -273,22 +273,22 @@ bool grape_event_click::Do( void )
             end_coord = get_coordinate_on_edge(coord, designated_state_ptr);
             mid_coord.m_x = (coord.m_x + end_coord.m_x)*0.5;
             mid_coord.m_y = (coord.m_y + end_coord.m_y)*0.5;
-          }          
-                 
+          }
+
           grape_event_add_initial_designator* event = new grape_event_add_initial_designator( m_main_frame, designated_state_ptr, coord );
           m_main_frame->get_event_handler()->Submit( event, true );
         }
         else if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == REFERENCE_STATE ) )  // If it is a reference state
         {
           libgrape::reference_state* designated_reference_ptr = static_cast<libgrape::reference_state*> ( begin_object_ptr );
-          
+
           // Initial values
-          coordinate coord = { designated_reference_ptr->get_coordinate().m_x, designated_reference_ptr->get_coordinate().m_y + designated_reference_ptr->get_height()*0.5 + 0.1 };          
+          coordinate coord = { designated_reference_ptr->get_coordinate().m_x, designated_reference_ptr->get_coordinate().m_y + designated_reference_ptr->get_height()*0.5 + 0.1 };
           coordinate end_coord = get_coordinate_on_edge(coord, designated_reference_ptr);
           coordinate mid_coord = { (coord.m_x + end_coord.m_x)*0.5, (coord.m_y + end_coord.m_y)*0.5 };
           double displacement = 0.01;
-          
-          // Find a decent coordinate to place the designator           
+
+          // Find a decent coordinate to place the designator
           while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( mid_coord ) != 0)
           {
             displacement = -displacement*1.1;
@@ -297,8 +297,8 @@ bool grape_event_click::Do( void )
             end_coord = get_coordinate_on_edge(coord, designated_reference_ptr);
             mid_coord.m_x = (coord.m_x + end_coord.m_x)*0.5;
             mid_coord.m_y = (coord.m_y + end_coord.m_y)*0.5;
-          }          
-                
+          }
+
           grape_event_add_initial_designator* event = new grape_event_add_initial_designator( m_main_frame, designated_reference_ptr, coord );
           m_main_frame->get_event_handler()->Submit( event, true );
         }
@@ -308,7 +308,7 @@ bool grape_event_click::Do( void )
     case ADD_VISIBLE:
     {
       if ( m_vis_obj != 0 ) // Only do something if the mouse clicked on a state.
-      {        
+      {
         object* begin_object_ptr = m_vis_obj->get_selectable_object();
         if ( ( begin_object_ptr != 0 ) && ( begin_object_ptr->get_type() == CHANNEL ) )
         {
@@ -456,7 +456,7 @@ grape_event_drag::~grape_event_drag( void )
 }
 
 bool grape_event_drag::Do( void )
-{    
+{
   canvas_state state = m_main_frame->get_glcanvas()->get_canvas_state();
 
   // only add objects when the mousebutton is up again.
@@ -488,12 +488,12 @@ bool grape_event_drag::Do( void )
       static coordinate s_coord_mousedown;
       static coordinate s_orig_center;
       static coordinate s_dif;
-      // dynamic array containing initial transition coordinates     
-      static coordinate* s_orig_ntt = NULL; 
+      // dynamic array containing initial transition coordinates
+      static coordinate* s_orig_ntt = NULL;
       static float s_orig_width;
       static float s_orig_height;
-      static int s_flag;  
-      
+      static int s_flag;
+
       // if we started a new drag
       if ( m_mousedown && new_drag )
       {
@@ -502,28 +502,28 @@ bool grape_event_drag::Do( void )
         s_orig_height = begin_object_ptr->get_height();
         s_coord_mousedown = m_up;
         s_dif = s_orig_center - s_coord_mousedown;
-        
+
         // store the initial position of the nonterminating transitions attached to the state
         visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( s_orig_center );
         if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
         {
-          compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );        
+          compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
           // set length of dynamic array
-          s_orig_ntt = new coordinate[state->count_transition_endstate()];  
-         
+          s_orig_ntt = new coordinate[state->count_transition_endstate()];
+
           // fill dynamic array with initial coordinates
           for ( unsigned int i = 0; i < state->count_transition_endstate(); ++i )
           {
-            nonterminating_transition* ntt = state->get_transition_endstate( i );        
+            nonterminating_transition* ntt = state->get_transition_endstate( i );
             s_orig_ntt[i] = ntt->get_coordinate();
           }
         } else
-        {  
-          // set length of dynamic array 
-          s_orig_ntt = new coordinate[0];         
+        {
+          // set length of dynamic array
+          s_orig_ntt = new coordinate[0];
         }
-        
-        if (new_drag == true) 
+
+        if (new_drag == true)
         {
           s_flag = -1;
           new_drag = false;
@@ -543,7 +543,7 @@ bool grape_event_drag::Do( void )
       } else if ( !m_mousedown ) new_drag = true;
 
       coordinate delta = m_up - s_coord_mousedown;
-      
+
       // only update up coordinate with initial coordinate difference if the type is not a NONTERMINATING_TRANSITION
       if (begin_object_ptr->get_type() != NONTERMINATING_TRANSITION)
       {
@@ -552,88 +552,88 @@ bool grape_event_drag::Do( void )
       }
 
       if ( m_click_location == GRAPE_DIR_NONE ) // no border clicked, thus a move
-      {        
+      {
         if (begin_object_ptr->get_type() == NONTERMINATING_TRANSITION)
-        {                 
+        {
           nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( begin_object_ptr );
           visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
 
           //detach or attach begin state
-          if (s_flag == 1) 
-          {    
+          if (s_flag == 1)
+          {
             if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
             {
               if (ntt_ptr->get_beginstate() == 0)
               {
                 compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
                 grape_event_attach_transition_beginstate* attach_event = new grape_event_attach_transition_beginstate( m_main_frame, ntt_ptr, state);
-                m_main_frame->get_event_handler()->Submit( attach_event, true );    
-                
-                // if there is a begin and end state set the coordinate of the transition in the middle of the begin and end coordinate 
+                m_main_frame->get_event_handler()->Submit( attach_event, true );
+
+                // if there is a begin and end state set the coordinate of the transition in the middle of the begin and end coordinate
                 if ((ntt_ptr->get_beginstate() != 0) && (ntt_ptr->get_endstate() != 0))
                 {
                   coordinate new_coordinate;
-                  if ( ntt_ptr->get_beginstate() == ntt_ptr->get_endstate() ) 
+                  if ( ntt_ptr->get_beginstate() == ntt_ptr->get_endstate() )
                   {
                     // if it is a loop
                     new_coordinate.m_x = ntt_ptr->get_beginstate()->get_coordinate().m_x - ntt_ptr->get_beginstate()->get_width() * 0.5 - 0.2;
                     new_coordinate.m_y = ntt_ptr->get_beginstate()->get_coordinate().m_y;
-                    
-                    // Find a decent coordinate to place the transition           
+
+                    // Find a decent coordinate to place the transition
                     while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0) new_coordinate.m_x = new_coordinate.m_x - 0.1;
-                                        
+
                   } else {
                     // if the begin and endstate are different
                     new_coordinate.m_x = (ntt_ptr->get_beginstate()->get_coordinate().m_x + ntt_ptr->get_endstate()->get_coordinate().m_x) * 0.5;
                     new_coordinate.m_y = (ntt_ptr->get_beginstate()->get_coordinate().m_y + ntt_ptr->get_endstate()->get_coordinate().m_y) * 0.5;
                   }
-                  ntt_ptr->set_coordinate(new_coordinate);                  
+                  ntt_ptr->set_coordinate(new_coordinate);
                 }
               }
             } else {
               if (ntt_ptr->get_beginstate() != 0)
               {
                 grape_event_detach_transition_beginstate* detach_event = new grape_event_detach_transition_beginstate( m_main_frame, ntt_ptr);
-                m_main_frame->get_event_handler()->Submit( detach_event, true );            
-              }  
-            }  
+                m_main_frame->get_event_handler()->Submit( detach_event, true );
+              }
+            }
           }
 
           //detach or attach endstate
-          if (s_flag == 0) 
-          { 
+          if (s_flag == 0)
+          {
             visual_object* v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_up );
             if ((v_obj != 0) && (v_obj->get_type() == STATE || v_obj->get_type() == REFERENCE_STATE))
             {
               //attach endstate
-              if ( ntt_ptr->get_endstate() == 0 ) 
+              if ( ntt_ptr->get_endstate() == 0 )
               {
                 compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
                 grape_event_attach_nonterminating_transition_endstate* attach_event = new grape_event_attach_nonterminating_transition_endstate( m_main_frame, ntt_ptr, state);
                 m_main_frame->get_event_handler()->Submit( attach_event, true );
               }
-            } else {             
+            } else {
               //detach endstate
-              if ( ntt_ptr->get_endstate() != 0 ) 
+              if ( ntt_ptr->get_endstate() != 0 )
               {
                 grape_event_detach_nonterminating_transition_endstate* detach_event = new grape_event_detach_nonterminating_transition_endstate( m_main_frame, ntt_ptr);
-                m_main_frame->get_event_handler()->Submit( detach_event, true );  
+                m_main_frame->get_event_handler()->Submit( detach_event, true );
               }
-            }           
-          }            
+            }
+          }
         } else {
           //other object
-        }   
-        
+        }
+
         //move object
-        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );        
-        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );   
-        
-        //also move the nonterminating transitions attached to the state               
+        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+
+        //also move the nonterminating transitions attached to the state
         if ((begin_object_ptr != 0) && (begin_object_ptr->get_type() == STATE || begin_object_ptr->get_type() == REFERENCE_STATE))
         {
           compound_state* state = static_cast<libgrape::compound_state*> (begin_object_ptr);
-                
+
           for ( unsigned int i = 0; i < state->count_transition_endstate(); ++i )
           {
             nonterminating_transition* ntt = state->get_transition_endstate( i );
@@ -642,10 +642,10 @@ bool grape_event_drag::Do( void )
               coordinate c = s_orig_ntt[i]+m_up-s_orig_center;
               //move the nonterminating transition object
               grape_event_move *event = new grape_event_move( m_main_frame, ntt, s_orig_ntt[i], c, !m_mousedown, s_flag );
-              m_main_frame->get_event_handler()->Submit( event, !m_mousedown );                
-            }          
+              m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+            }
           }
-        } 
+        }
       }
       else // a border was selected, thus a resize
       {
@@ -782,7 +782,7 @@ bool grape_event_drag::Do( void )
           switch( endobject->get_type() )
           {
             case INITIAL_DESIGNATOR:
-            {              
+            {
               grape_event_attach_initial_designator* event = new grape_event_attach_initial_designator( m_main_frame, static_cast<initial_designator*> ( endobject ), static_cast<libgrape::state*> ( begin_object_ptr ) );
               m_main_frame->get_event_handler()->Submit( event, true );
               break;
@@ -1098,7 +1098,7 @@ bool grape_event_drag::Do( void )
             grape_event_add_channel_communication( m_main_frame,
             coord, chan_1, chan_2 );
           // Only do something if the two channels are not on the same reference; note this check has been disabled because attach DOES allow it
-          //if ( chan_1->get_reference() != chan_2->get_reference() ) 
+          //if ( chan_1->get_reference() != chan_2->get_reference() )
           m_main_frame->get_event_handler()->Submit( event, true );
         }
         // or ended in a channel communication

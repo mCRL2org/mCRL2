@@ -87,7 +87,7 @@ class state_formula: public atermpp::aterm_appl
     state_formula substitute(Substitution f) const
     {
       return state_formula(f(atermpp::aterm(*this)));
-    }     
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 
 /// Accessor functions and predicates for state formulas.
 namespace state_frm
-{ 
+{
   /// \brief Make the value false
   /// \return The value \p false
   inline
@@ -105,7 +105,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateFalse());
   }
-  
+
   /// \brief Make the value true
   /// \return The value \p true
   inline
@@ -113,7 +113,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateTrue());
   }
-  
+
   /// \brief Make a negation
   /// \param p A modal formula
   /// \return The value <tt>!p</tt>
@@ -122,7 +122,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateNot(p));
   }
-  
+
   /// \brief Make a conjunction
   /// \param p A modal formula
   /// \param q A modal formula
@@ -132,7 +132,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateAnd(p,q));
   }
-  
+
   /// \brief Make a disjunction
   /// \param p A modal formula
   /// \param q A modal formula
@@ -142,7 +142,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateOr(p,q));
   }
-  
+
   /// \brief Make an implication
   /// \param p A modal formula
   /// \param q A modal formula
@@ -152,7 +152,7 @@ namespace state_frm
   {
     return state_formula(core::detail::gsMakeStateImp(p,q));
   }
-  
+
   /// \brief Make an existential quantification
   /// \pre l may not be empty
   /// \param l A sequence of data variables
@@ -164,7 +164,7 @@ namespace state_frm
     assert(!l.empty());
     return state_formula(core::detail::gsMakeStateExists(l, p));
   }
-  
+
   /// \brief Make a universal quantification
   /// \pre l may not be empty
   /// \param l A sequence of data variables
@@ -380,7 +380,7 @@ namespace state_frm
     assert(core::detail::gsIsDataExpr(t));
     return t;
   }
-  
+
   /// \brief Returns the state formula argument of an expression of type
   /// not, mu, nu, exists, forall, must or may.
   /// \param t A modal formula
@@ -401,9 +401,9 @@ namespace state_frm
            core::detail::gsIsStateMust(t)   ||
            core::detail::gsIsStateMay(t)
           );
-    return atermpp::arg2(t);   
+    return atermpp::arg2(t);
   }
-  
+
   /// \brief Returns the left hand side of an expression of type and/or/imp
   /// \param t A modal formula
   /// \return The left hand side of an expression of type and/or/imp
@@ -413,7 +413,7 @@ namespace state_frm
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the right hand side of an expression of type and/or/imp.
   /// \param t A modal formula
   /// \return The right hand side of an expression of type and/or/imp.
@@ -423,7 +423,7 @@ namespace state_frm
     assert(core::detail::gsIsStateAnd(t) || core::detail::gsIsStateOr(t) || core::detail::gsIsStateImp(t));
     return atermpp::arg2(t);
   }
-  
+
   /// \brief Returns the variables of a quantification expression
   /// \param t A modal formula
   /// \return The variables of a quantification expression
@@ -433,7 +433,7 @@ namespace state_frm
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
     return atermpp::list_arg1(t);
   }
-  
+
   /// \brief Returns the time of a delay or yaled expression
   /// \param t A modal formula
   /// \return The time of a delay or yaled expression
@@ -443,7 +443,7 @@ namespace state_frm
     assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the name of a variable expression
   /// \param t A modal formula
   /// \return The name of a variable expression
@@ -456,7 +456,7 @@ namespace state_frm
           );
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the parameters of a variable expression
   /// \param t A modal formula
   /// \return The parameters of a variable expression
@@ -466,7 +466,7 @@ namespace state_frm
     assert(core::detail::gsIsStateVar(t));
     return atermpp::list_arg2(t);
   }
-  
+
   /// \brief Returns the parameters of a mu or nu expression
   /// \param t A modal formula
   /// \return The parameters of a mu or nu expression
@@ -476,7 +476,7 @@ namespace state_frm
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
     return atermpp::list_arg2(t);
   }
-  
+
   /// \brief Returns the regular formula of a must or may expression
   /// \param t A modal formula
   /// \return The regular formula of a must or may expression

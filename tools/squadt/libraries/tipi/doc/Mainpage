@@ -4,7 +4,7 @@
  * a communication protocol, that is used to remotely control software tools.
  * The protocol is tied to the DeskSQuADT application that uses it as the
  * primary means to control software tools.
- * 
+ *
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a

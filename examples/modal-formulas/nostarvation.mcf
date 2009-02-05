@@ -1,7 +1,7 @@
 % This formula expresses that there is no starvation: for all reachable
 % states it should be possible to eventually perform an eat(p) for each
 % possible value of p: Phil.
-% 
+%
 % This example can be used with all dining philosophers examples.
 
 [true*](forall p: Phil. mu Y. ([!eat(p)]Y && <true>true))

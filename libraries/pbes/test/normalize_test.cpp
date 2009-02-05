@@ -31,7 +31,7 @@ void test_normalize1()
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
   pbes_expression z = propositional_variable_instantiation("z:Z");
-  pbes_expression f; 
+  pbes_expression f;
   pbes_expression f1;
   pbes_expression f2;
 
@@ -186,7 +186,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_normalize1(); 
+  test_normalize1();
   test_normalize2();
   test_normalize3();
   test_pfnf_visitor();

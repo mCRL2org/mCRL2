@@ -137,10 +137,10 @@ std::vector<int> parse_integers(std::string text)
 {
   using namespace boost;
   using namespace boost::xpressive;
-   
+
   std::vector<int> result;
   sregex splitter = sregex::compile(",");
-  
+
   // the -1 below directs the token iterator to display the parts of
   // the string that did NOT match the regular expression.
   sregex_token_iterator cur( text.begin(), text.end(), splitter, -1 );
@@ -157,7 +157,7 @@ std::vector<int> parse_integers(std::string text)
       std::cerr << "Error: could not parse integer value " << *cur << std::endl;
     }
   }
-  return result; 
+  return result;
 }
 
 void run(std::map<std::string, rewriter_variant>& rewriters, const atermpp::vector<pbes_expression>& expressions)
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
     // store the corresponding data enumerators
     std::vector<my_enumerator> data_enumerators;
 
-    // create a mapping of rewriters   
+    // create a mapping of rewriters
     for (std::vector<int>::iterator i = data_rewriter_indices.begin(); i != data_rewriter_indices.end(); ++i)
     {
       // Make sure the references to data rewriters stay valid after exiting the loop.
@@ -285,17 +285,17 @@ int main(int argc, char* argv[])
         switch (*j)
         {
           case 0: {
-            my_simplify_rewriter pbesr(datar);    
+            my_simplify_rewriter pbesr(datar);
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 1: {
-            my_enumerate_quantifiers_rewriter pbesr(datar, datae);    
+            my_enumerate_quantifiers_rewriter pbesr(datar, datae);
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
           case 2: {
-            substitute_rewriter_jfg pbesr(datar, data_spec);            
+            substitute_rewriter_jfg pbesr(datar, data_spec);
             rewriters.insert(std::make_pair(rewriter_name(*i, *j, -1), pbesr));
             break;
           }
@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
         }
       }
     }
-    
+
     // apply the rewriters to the sequence of expressions
     run(rewriters, expressions);
   }

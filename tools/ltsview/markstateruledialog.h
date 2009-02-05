@@ -23,7 +23,7 @@ class LTS;
 class wxCheckListBox;
 class Mediator;
 
-class MarkStateRuleDialog : public wxDialog { 
+class MarkStateRuleDialog : public wxDialog {
   public:
     MarkStateRuleDialog(wxWindow* parent,Mediator* owner,LTS* alts);
     ~MarkStateRuleDialog();

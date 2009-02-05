@@ -39,7 +39,7 @@ may be converted into each other:
     aterm y = x;
     aterm_int z = y;                    // will be type-checked in debug mode
     assert(z.value() == 10);
-    aterm_appl f = make_term("f(x,y)"); // will be type-checked in debug mode 
+    aterm_appl f = make_term("f(x,y)"); // will be type-checked in debug mode
 
 In the third and fifth statement the user is responsible for assuring
 that the right hand side of the assignment has the right type. If the types

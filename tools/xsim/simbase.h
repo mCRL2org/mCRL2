@@ -250,7 +250,7 @@ class SimulatorViewDLLInterface: public SimulatorViewInterface
 		SimViewsDLL *simdll;
 	public:
 		virtual ~SimulatorViewDLLInterface();
-		
+
 		void Registered(SimulatorInterface *Simulator);
 		void Unregistered();
 

@@ -34,10 +34,10 @@ void foo()
 
   list[0] = make_term("[]");
   list[1] = make_term("[1,<int>,<real>]", i, r);
-  list[2] = make_term("[<int>,<list>]", i+1, list[1]); 
+  list[2] = make_term("[<int>,<list>]", i+1, list[1]);
 
   appl[0] = make_term("<appl>", func);
-  appl[1] = make_term("<appl(<int>)>", func, i); 
+  appl[1] = make_term("<appl(<int>)>", func, i);
   appl[2] = make_term("<appl(<int>, <term>, <list>)>", func, 42, term[3], list[2]);
 
   std::cout << "appl[2] = " << appl[2] << std::endl;

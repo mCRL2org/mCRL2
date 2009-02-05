@@ -64,7 +64,7 @@ void OpacityChooser::setPoints(
     positionsX.clear();
     for ( size_t i = 0; i < opa.size(); ++i )
         positionsX.push_back( (2.0*opa[i])-1.0 );
-    
+
     positionsY = y;
 }
 
@@ -92,7 +92,7 @@ void OpacityChooser::visualize( const bool &inSelectMode )
             selectBuf,
             2.0,
             2.0 );
-        
+
         drawPoints( inSelectMode );
 
         finishSelectMode(
@@ -107,14 +107,14 @@ void OpacityChooser::visualize( const bool &inSelectMode )
         drawPoints( inSelectMode );
     }
 }
-    
+
 
 // -- event handlers ------------------------------------------------
 
 
 // ------------------------------------------
-void OpacityChooser::handleMouseLftDownEvent( 
-    const int &x, 
+void OpacityChooser::handleMouseLftDownEvent(
+    const int &x,
     const int &y )
 // ------------------------------------------
 {
@@ -135,16 +135,16 @@ void OpacityChooser::handleMouseLftDownEvent(
             double xLft, xRgt;
             double yBot, yTop;
             double xCur, yCur;
-    
+
             // get size of sides
             canvas->getSize( w, h );
-    
+
             // calc size of bounding box
             xLft = -0.5*w;
             xRgt =  0.5*w;
             yTop =  0.5*h;
             yBot = -0.5*h;
-    
+
             // get cur mouse position
             canvas->getWorldCoords( xMouseCur, yMouseCur, xCur, yCur );
 
@@ -163,8 +163,8 @@ void OpacityChooser::handleMouseLftDownEvent(
 
 
 // ----------------------------------------
-void OpacityChooser::handleMouseLftUpEvent( 
-    const int &x, 
+void OpacityChooser::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -174,11 +174,11 @@ void OpacityChooser::handleMouseLftUpEvent(
         dragIdx = -1;
     }
 }
-    
+
 
 // ------------------------------------------
-void OpacityChooser::handleMouseRgtDownEvent( 
-    const int &x, 
+void OpacityChooser::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // ------------------------------------------
 {
@@ -195,8 +195,8 @@ void OpacityChooser::handleMouseRgtDownEvent(
 
 
 // ----------------------------------------
-void OpacityChooser::handleMouseRgtUpEvent( 
-    const int &x, 
+void OpacityChooser::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -205,11 +205,11 @@ void OpacityChooser::handleMouseRgtUpEvent(
         Visualizer::handleMouseRgtUpEvent( x, y );
     }
 }
-	
+
 
 // -----------------------------------------
-void OpacityChooser::handleMouseMotionEvent( 
-    const int &x, 
+void OpacityChooser::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // -----------------------------------------
 {
@@ -243,10 +243,10 @@ void OpacityChooser::drawGrayScale()
     double yBot, yTop;
     double xItv;
     ColorRGB col;
-    
+
     // get size of sides
     canvas->getSize( w, h );
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -260,8 +260,8 @@ void OpacityChooser::drawGrayScale()
     {
         col.a = pow( (i/255.0), 2 );
         /*
-        VisUtils::mapColorGrayScale( 
-            1.0-i/255.0, 
+        VisUtils::mapColorGrayScale(
+            1.0-i/255.0,
             col );
         */
         VisUtils::setColor( col );
@@ -272,7 +272,7 @@ void OpacityChooser::drawGrayScale()
     VisUtils::disableBlending();
 }
 
-    
+
 // ------------------------------------------------------
 void OpacityChooser::drawPath( const bool &inSelectMode )
 // ------------------------------------------------------
@@ -287,7 +287,7 @@ void OpacityChooser::drawPath( const bool &inSelectMode )
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -316,7 +316,7 @@ void OpacityChooser::drawPath( const bool &inSelectMode )
                 positionsX[i]*xRgt, positionsX[i+1]*xRgt,
                 positionsY[i]*yTop, positionsY[i+1]*yTop );
         }
-        
+
         VisUtils::disableLineAntiAlias();
     }
 }
@@ -337,7 +337,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -378,7 +378,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
             // arrow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt,
                 positionsY[size-1]*yTop,
                 0.0 );
@@ -386,11 +386,11 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
                 glPushName( size-1 );
                 VisUtils::fillTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 glPopName();
-            
+
             glPopMatrix();
         }
     }
@@ -431,7 +431,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
                 positionsX[size-1]*xRgt-4.0*pix, positionsX[size-1]*xRgt+6.0*pix,
                 positionsY[size-1]*yTop-6.0*pix, positionsY[size-1]*yTop+4.0*pix );
 
-            
+
             if ( active == true )
                 VisUtils::setColorRed();
             else
@@ -452,7 +452,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
             // drop shadow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt+pix,
                 positionsY[size-1]*yTop-pix,
                 0.0 );
@@ -460,7 +460,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
                 VisUtils::setColorBlack();
                 VisUtils::drawTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 VisUtils::drawLine(
@@ -471,7 +471,7 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
 
             // arrow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt,
                 positionsY[size-1]*yTop,
                 0.0 );
@@ -482,19 +482,19 @@ void OpacityChooser::drawPoints( const bool &inSelectMode )
                 else
                     VisUtils::setColorWhite();
                 VisUtils::fillTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
-            
+
                 VisUtils::setColorMdGray();
                 VisUtils::drawTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 VisUtils::drawLine(
                    -2.0*hdlDOF, 2.0*hdlDOF,
                     0.0, 0.0 );
-            
+
             glPopMatrix();
         }
         VisUtils::disableLineAntiAlias();
@@ -539,16 +539,16 @@ void OpacityChooser::handleDrag()
         double xLft, xRgt;
         double yBot, yTop;
         double xCur, yCur;
-    
+
         // get size of sides
         canvas->getSize( w, h );
-    
+
         // calc size of bounding box
         xLft = -0.5*w;
         xRgt =  0.5*w;
         yTop =  0.5*h;
         yBot = -0.5*h;
-    
+
         // get cur mouse position
         canvas->getWorldCoords( xMouseCur, yMouseCur, xCur, yCur );
 
@@ -567,20 +567,20 @@ void OpacityChooser::handleDrag()
     }
 }
 
-    
+
 // -- hit detection -------------------------------------------------
 
 
 // ------------------------------
-void OpacityChooser::processHits( 
-    GLint hits, 
+void OpacityChooser::processHits(
+    GLint hits,
     GLuint buffer[] )
 // ------------------------------
 {
     GLuint *ptr;
     int number;
     vector< int > ids;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -612,7 +612,7 @@ void OpacityChooser::processHits(
         }
 
         handleHits( ids );
-    }   
+    }
 
     ptr = NULL;
 }

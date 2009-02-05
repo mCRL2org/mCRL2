@@ -18,12 +18,12 @@
 InfoDialog::InfoDialog(wxWindow* parent) :
   wxDialog(parent,wxID_ANY,wxT("Info"),wxDefaultPosition,wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER) {
-  
+
   int lf = wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
-  
+
   wxNotebook* topNotebook = new wxNotebook(this, wxID_ANY);
   wxPanel* panel = new wxPanel(topNotebook, wxID_ANY);
-  
+
   lts_info = new wxListCtrl(panel,wxID_ANY,wxDefaultPosition,wxDefaultSize,
       wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_NO_HEADER);
   lts_info->InsertColumn(0, wxT(""));
@@ -44,10 +44,10 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   panel->Fit();
   panel->Layout();
   topNotebook->AddPage(panel, wxT("LTS info"), false);
-    
+
   wxPanel* clus_panel = new wxPanel(topNotebook, wxID_ANY);
-  cluster_info = new wxListCtrl(clus_panel, wxID_ANY, wxDefaultPosition, 
-      wxDefaultSize, 
+  cluster_info = new wxListCtrl(clus_panel, wxID_ANY, wxDefaultPosition,
+      wxDefaultSize,
       wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES | wxLC_NO_HEADER);
   cluster_info->InsertColumn(0, wxT(""));
   cluster_info->InsertColumn(1, wxT(""), wxLIST_FORMAT_RIGHT);
@@ -124,7 +124,7 @@ void InfoDialog::setParameterValues(int i, std::vector<std::string> vs)
   for (size_t j = 0; j < vs.size(); ++j)
   {
     values += wxString(vs[j].c_str(), wxConvLocal);
-    
+
     if (j != vs.size() - 1)
     {
       values += wxT(", ");
@@ -153,8 +153,8 @@ void InfoDialog::resetParameterValues() {
     state_info->SetItem(j,1,wxEmptyString);
   }
   setStateInfoColWidth(1);
-  
-  for(int j = 0; j < cluster_info->GetItemCount(); ++j) 
+
+  for(int j = 0; j < cluster_info->GetItemCount(); ++j)
   {
     cluster_info->SetItem(j, 1, wxEmptyString);
   }

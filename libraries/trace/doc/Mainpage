@@ -1,8 +1,8 @@
 /** \mainpage Trace reference manual
  *
- * The Trace library provides functionality for storing, retrieving and 
+ * The Trace library provides functionality for storing, retrieving and
  * manipulating traces. A trace consists of a sequence of triples with
- * a state, an outgoing action and optionally a time tag. 
+ * a state, an outgoing action and optionally a time tag.
  *
  * These pages contain the reference manual for this library.
  *

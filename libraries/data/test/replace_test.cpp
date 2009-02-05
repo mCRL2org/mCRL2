@@ -48,7 +48,7 @@ struct compare_lhs
   compare_lhs(const data_variable& variable)
     : m_variable(variable)
   {}
-  
+
   bool operator()(const data_assignment& a) const
   {
     return m_variable == a.lhs();
@@ -59,11 +59,11 @@ struct compare_lhs
 struct data_assignment_list_replacer
 {
   const data_assignment_list& l;
-  
+
   data_assignment_list_replacer(const data_assignment_list& l_)
     : l(l_)
   {}
-  
+
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
     if (!is_data_variable(t))
@@ -98,7 +98,7 @@ void test_replace()
   data_expression h = replace(g, add_zero());
   BOOST_CHECK(h == and_(equal_to(d0, e0), not_equal_to(e0, f0)));
 
-  data_expression i = replace(g, d, e); 
+  data_expression i = replace(g, d, e);
   BOOST_CHECK(i == and_(equal_to(e, e), not_equal_to(e, f)));
 }
 
@@ -173,7 +173,7 @@ void test_data_variable_replace()
 void test_data_expression_replace()
 {
   // y:Real
-  data_variable y("y",sort_expr::real()); 
+  data_variable y("y",sort_expr::real());
   data_expression e(y);
   // 4:Real
   data_expression x(data_expr::real(4));
@@ -204,7 +204,7 @@ void test_data_expression_replace()
   std::cerr << "v = " << mcrl2::core::pp(v) << std::endl;
   data_expression v_ = data_expression_map_replace(v, replacements);
   std::cerr << "v_ = " << mcrl2::core::pp(v_) << std::endl;
-  BOOST_CHECK(v_ != u); 
+  BOOST_CHECK(v_ != u);
 }
 
 int test_main(int argc, char** argv)

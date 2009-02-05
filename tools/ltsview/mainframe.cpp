@@ -94,7 +94,7 @@ MainFrame::MainFrame(Mediator* owner,Settings* ss)
   CreateStatusBar(2);
   setupMenuBar();
   setupMainArea();
-  
+
   SetSize(800,600);
   CentreOnScreen();
 }
@@ -113,7 +113,7 @@ void MainFrame::setupMenuBar() {
   wxMenu* viewMenu = new wxMenu;
   toolMenu = new wxMenu;
   wxMenu* helpMenu = new wxMenu;
-  
+
   fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
     wxT("Load an LTS from file"));
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
@@ -128,7 +128,7 @@ void MainFrame::setupMenuBar() {
   fileMenu->AppendSubMenu(exportMenu,wxT("Export"),wxT("Export picture"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
-    
+
   viewMenu->Append(wxID_RESET, wxT("&Reset viewpoint\tF2"),
       wxT("Set the viewpoint to the default position"));
   viewMenu->AppendSeparator();
@@ -146,7 +146,7 @@ void MainFrame::setupMenuBar() {
   viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem(myID_DISPLAY_STATES, wxT("Display &states\tF3"),
       wxT("Show/hide individual states"));
-  viewMenu->AppendCheckItem(myID_DISPLAY_TRANSITIONS, 
+  viewMenu->AppendCheckItem(myID_DISPLAY_TRANSITIONS,
     wxT("Display &transitions\tF4"), wxT("Show/hide individual transitions"));
   viewMenu->AppendCheckItem(myID_DISPLAY_BACKPOINTERS,
     wxT("Display &backpointers\tF5"), wxT("Show/hide backpointers"));
@@ -189,16 +189,16 @@ void MainFrame::setupMenuBar() {
   toolMenu->Append(myID_RESET_STATE_POSITIONS,wxT("R&eset state positions"),
     wxT("Assign states to their default positions"));
   toolMenu->Enable(myID_STOP_FORCE_DIRECTED,false);
-  
+
   helpMenu->Append(wxID_HELP,wxT("&Contents"),wxT("Show help contents"));
   helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT,wxT("&About"));
-  
+
   menuBar->Append(fileMenu, wxT("&File"));
   menuBar->Append(viewMenu, wxT("&View"));
   menuBar->Append(toolMenu, wxT("&Tools"));
   menuBar->Append(helpMenu, wxT("&Help"));
-  
+
   SetMenuBar(menuBar);
 }
 
@@ -210,9 +210,9 @@ void MainFrame::setupMainArea() {
 
   int attribList[] = { WX_GL_RGBA,WX_GL_DOUBLEBUFFER,0 };
   glCanvas = new GLCanvas(mediator,this,settings,wxDefaultSize,attribList);
-  
+
   mainSizer->Add(glCanvas,1,wxALIGN_CENTER|wxEXPAND|wxALL,0);
-  
+
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
@@ -392,7 +392,7 @@ void MainFrame::onSim(wxCommandEvent& /*event*/)
 void MainFrame::onZoomInBelow(wxCommandEvent& event)
 {
   mediator->zoomInBelow();
-  glCanvas->display(); 
+  glCanvas->display();
 }
 
 void MainFrame::onZoomInAbove(wxCommandEvent& event)
@@ -479,7 +479,7 @@ void MainFrame::addMarkRule(wxString str,int mr) {
 void MainFrame::replaceMarkRule(wxString str,int mr) {
   markDialog->replaceMarkRule(str,mr);
 }
-  
+
 void MainFrame::resetMarkRules() {
   markDialog->resetMarkRules();
 }

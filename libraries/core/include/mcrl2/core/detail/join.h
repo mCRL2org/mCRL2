@@ -37,7 +37,7 @@ namespace detail {
     {
       *i++ = t;
     }
-  } 
+  }
 
   /// \brief Given a sequence [t1, t2, ..., tn] of elements of type T, returns
   /// op(t1, op(t2, ...), tn)))).

@@ -17,7 +17,7 @@
 #include "boost/foreach.hpp"
 #include "boost/shared_ptr.hpp"
 
-// Workaround for building with Cygwin 
+// Workaround for building with Cygwin
 #if defined(__CYGWIN__)
 #include "boost/asio.hpp"
 #endif
@@ -40,21 +40,21 @@ namespace tipi {
       friend class basic_event_handler;
 
       private:
-   
+
         /** \brief Basic type of event handler functions */
         typedef basic_event_handler::handler_function                 handler_function;
 
         /** \brief Type for the map that associates a number of handlers to a pointer */
         typedef std::multimap< T, handler_function >                  handler_map;
-   
+
         /** \brief Type for the map that associates a number of handlers to a pointer */
         typedef std::map< T, boost::shared_ptr < boost::condition > > waiter_map;
-   
+
         /** \brief Type for the queue of events to be processed */
         typedef std::deque< std::pair< T, bool > >                    event_queue;
-   
+
       private:
-   
+
         /** \brief For waiter events, and for processing events in a mutual exclusive manner */
         boost::mutex      m_wait_lock;
 
@@ -63,13 +63,13 @@ namespace tipi {
 
         /** \brief The global (default) handler */
         handler_function  m_global_handler;
-   
+
         /** \brief The list of functions that are to be executed  */
         handler_map       m_handlers;
-   
+
         /** \brief The synchronisation constructs for waking up waiters */
         waiter_map        m_waiters;
-   
+
         /** \brief Thread activity flag for handler execution */
         bool              m_handler_execution_thread;
 
@@ -91,7 +91,7 @@ namespace tipi {
 
         /** \brief Set a global handler */
         void add(handler_function);
-   
+
         /** \brief Register an arbitrary handler for a specific object */
         void add(T, handler_function);
 
@@ -109,13 +109,13 @@ namespace tipi {
 
         /** \brief Process an event for a specific object */
         void process(boost::shared_ptr< basic_event_handler_impl > p, T, bool = true, bool = false);
-   
+
         /** \brief Execute handlers for a specific object */
         void execute_handlers(boost::shared_ptr < basic_event_handler_impl > p);
 
         /** \brief Execute handlers for a specific object */
         void execute_handlers(const T id, bool b);
-   
+
         /** \brief Block until the next event has been processed */
         void await_change(T);
 
@@ -134,24 +134,24 @@ namespace tipi {
     template < typename T >
     inline void basic_event_handler_impl< T >::wake(T id) {
       typename waiter_map::iterator w = m_waiters.find(id);
-   
+
       if (w != m_waiters.end()) {
         (*w).second->notify_all();
-   
+
         m_waiters.erase(w);
       }
     }
-   
+
     /**
      * \param[in] h a function object that is to be invoked at an event
      **/
     template < typename T >
     inline void basic_event_handler_impl< T >::add(handler_function h) {
       boost::mutex::scoped_lock l(m_wait_lock);
-   
+
       m_global_handler = h;
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] h a function object that is to be invoked at an event
@@ -159,10 +159,10 @@ namespace tipi {
     template < typename T >
     inline void basic_event_handler_impl< T >::add(T id, handler_function h) {
       boost::mutex::scoped_lock l(m_wait_lock);
-   
+
       m_handlers.insert(std::make_pair(id, h));
     }
-   
+
     template < typename T >
     inline bool basic_event_handler_impl< T >::has_handler(T id) const {
       return m_handlers.count(id) != 0;
@@ -177,24 +177,24 @@ namespace tipi {
       if (&e != this) {
         boost::mutex::scoped_lock l(m_wait_lock);
         boost::mutex::scoped_lock k(e.m_wait_lock);
-      
+
         std::pair< typename handler_map::iterator, typename handler_map::iterator > p = m_handlers.equal_range(id);
-      
+
         e.m_handlers.insert(p.first, p.second);
-      
+
         m_handlers.erase(p.first, p.second);
-      
+
         typename waiter_map::iterator w = m_waiters.find(id);
-      
+
         if (w != m_waiters.end()) {
           /* Transfer m_waiters */
           e.m_waiters.insert(*w);
-      
+
           m_waiters.erase(w);
         }
       }
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
@@ -231,18 +231,18 @@ namespace tipi {
 
         try {
           m_events.pop_front();
-         
+
           if (event.second && !m_global_handler.empty()) {
             m_global_handler(event.first);
           }
-         
+
           std::pair < typename handler_map::const_iterator,
                       typename handler_map::const_iterator > range(m_handlers.equal_range(event.first));
-        
+
           BOOST_FOREACH(typename handler_map::value_type p, range) {
             p.second(event.first);
           }
-         
+
           wake(event.first);
         }
         catch (std::exception& e) {
@@ -260,21 +260,21 @@ namespace tipi {
       if (b && !m_global_handler.empty()) {
         m_global_handler(id);
       }
-      
+
       std::pair < typename handler_map::const_iterator,
                   typename handler_map::const_iterator > range(m_handlers.equal_range(id));
-      
+
       BOOST_FOREACH(typename handler_map::value_type p, range) {
         p.second(id);
       }
-      
+
       wake(id);
     }
-   
+
     template < typename T >
     inline void basic_event_handler_impl< T >::remove() {
       boost::mutex::scoped_lock l(m_wait_lock);
-   
+
       m_global_handler.clear();
     }
 
@@ -284,14 +284,14 @@ namespace tipi {
     template < typename T >
     inline void basic_event_handler_impl< T >::remove(T id) {
       boost::mutex::scoped_lock l(m_wait_lock);
-   
+
       std::pair < typename handler_map::iterator, typename handler_map::iterator > p = m_handlers.equal_range(id);
-   
+
       m_handlers.erase(p.first, p.second);
 
       wake(id);
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \throw std::runtime_error on wake after shutdown
@@ -300,11 +300,11 @@ namespace tipi {
     template < typename T >
     inline void basic_event_handler_impl< T >::await_change(T id) {
       boost::mutex::scoped_lock l(m_wait_lock);
-   
+
       boost::shared_ptr < boost::condition > anchor;
 
       typename waiter_map::iterator w = m_waiters.find(id);
-   
+
       if (w == m_waiters.end()) {
         /* Create new waiter */
         anchor = boost::shared_ptr < boost::condition > (new boost::condition);
@@ -314,7 +314,7 @@ namespace tipi {
       else {
         anchor = (*w).second;
       }
-   
+
       /* The condition with which synchronisation is performed */
       anchor->wait(l);
 
@@ -322,7 +322,7 @@ namespace tipi {
         throw std::runtime_error("Waiting for event failed due to premature shutdown.");
       }
     }
-   
+
     template < typename T >
     inline void basic_event_handler_impl< T >::clear() {
       boost::mutex::scoped_lock l(m_wait_lock);
@@ -356,7 +356,7 @@ namespace tipi {
     void basic_event_handler::add(handler_function h) {
       impl->add(h);
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] h a function object that is to be invoked at an event
@@ -364,7 +364,7 @@ namespace tipi {
     void basic_event_handler::add(const void* id, handler_function h) {
       impl->add(id, h);
     }
-   
+
     bool basic_event_handler::has_handler(const void* id) const {
       return impl->has_handler(id);
     }
@@ -376,7 +376,7 @@ namespace tipi {
     void basic_event_handler::transfer(basic_event_handler& e, const void* id) {
       impl->transfer(*e.impl, id);
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      * \param[in] b whether or not to execute the global handler
@@ -393,7 +393,7 @@ namespace tipi {
     void basic_event_handler::execute_handlers(const void* id, bool b) {
       impl->execute_handlers(id, b);
     }
-   
+
     void basic_event_handler::remove() {
       impl->remove();
     }
@@ -404,7 +404,7 @@ namespace tipi {
     void basic_event_handler::remove(const void* id) {
       impl->remove(id);
     }
-   
+
     /**
      * \param[in] id a pointer that serves as an identifier for the originator of the event
      *
@@ -413,7 +413,7 @@ namespace tipi {
     void basic_event_handler::await_change(const void* id) {
       impl->await_change(id);
     }
-   
+
     void basic_event_handler::clear() {
       impl->clear();
     }

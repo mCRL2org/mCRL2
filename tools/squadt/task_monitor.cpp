@@ -230,7 +230,7 @@ namespace squadt {
       };
 
       bool result = false;
- 
+
       boost::mutex::scoped_lock l(register_lock);
 
       add_handler(tipi::message_task, boost::bind(&local::handle_task_completion, p, _1, boost::ref(result)));
@@ -318,13 +318,13 @@ namespace squadt {
      **/
     void task_monitor_impl::service_handlers(boost::shared_ptr < task_monitor_impl >& m, const event_type e) {
       std::vector< handler_map::iterator > handlers_to_remove;
-      
+
       for (std::pair < handler_map::iterator, handler_map::iterator > r(m->handlers.equal_range(e)); r.first != r.second; ++r.first) {
         if (r.first->second()) {
           handlers_to_remove.push_back(r.first);
         }
       }
-      
+
       // works because iterators of std::multimap are not invalidated by std::multimap::erase()
       for (std::vector< handler_map::iterator >::const_iterator i = handlers_to_remove.begin(); i != handlers_to_remove.end(); ++i) {
         m->handlers.erase(*i);

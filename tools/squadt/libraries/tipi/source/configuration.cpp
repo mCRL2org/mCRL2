@@ -86,7 +86,7 @@ namespace tipi {
 
     id_parameter_map::const_iterator j = std::find_if(m_parameter_by_id.begin(), m_parameter_by_id.end(),
             boost::bind(std::equal_to< size_t >(), i - m_positions.begin(), boost::bind(&id_parameter_map::value_type::second, _1)));
-    
+
     if (j == m_parameter_by_id.end()) {
       throw (false);
     }

@@ -33,7 +33,7 @@ const std::string DATA_SPEC1 =
   "                            \n"
   "cons s1: S1;                \n"
   "cons s2: S2;                \n"
-;  
+;
 
 void test_sort()
 {
@@ -53,7 +53,7 @@ void test_sort()
   sort_expression s;
   sort_expression_list domain;
   sort_expression range;
-  
+
   s      = arrow(lA, BC);   // A->(B->C)
   domain = domain_sorts(s); // [A,B]
   range  = result_sort(s);   // C
@@ -93,7 +93,7 @@ void test_sort_equality()
 
   data_operation s1 = find_constructor(data, "s1");
   data_operation s2 = find_constructor(data, "s2");
-  
+
   BOOST_CHECK(s1.sort() != sort_expression());
   BOOST_CHECK(s2.sort() != sort_expression());
 
@@ -102,7 +102,7 @@ void test_sort_equality()
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_sort();
   test_sort_equality();

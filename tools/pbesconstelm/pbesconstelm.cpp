@@ -37,7 +37,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 {
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
-    
+
     bool m_compute_conditions;
     bool m_remove_redundant_equations;
 
@@ -74,11 +74,11 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
       }
-    
+
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
-      
+
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());
 
@@ -88,7 +88,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
         case simplify:
         {
           typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
-          my_pbes_rewriter pbesr(datar);    
+          my_pbes_rewriter pbesr(datar);
           pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
@@ -109,11 +109,11 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
         }
         default:
         { }
-      }     
-      
+      }
+
       // save the result
       p.save(m_output_filename);
-      
+
       return true;
     }
 };

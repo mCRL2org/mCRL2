@@ -31,15 +31,15 @@ PartitionFrame::PartitionFrame(
     : PopupFrame(
         m,
         parent,
-        id, 
+        id,
         title,
-        position, 
+        position,
         size )
 // ----------------------------
 {
     SetMinSize( size );
     SetMaxSize( size );
-    
+
     initFrame( attrName, minParts, maxParts, curParts );
 }
 
@@ -73,7 +73,7 @@ void PartitionFrame::onButton( wxCommandEvent &e )
             method = Attribute::PART_METH_QUANTILES;
         else if ( comboBoxMethod->GetValue() == wxT("Mean-Standard deviation") )
             method = Attribute::PART_METH_MEAN_STANDARD_DEVIATION;
- 
+
         mediator->handleAttrPartition( numParts, method );
         this->Close();
     }
@@ -123,9 +123,9 @@ void PartitionFrame::initFrame(
 {
     sizerFrame = new wxBoxSizer( wxVERTICAL );
     this->SetSizer( sizerFrame );
-    
-    panelFrame = new wxScrolledWindow( 
-        this, 
+
+    panelFrame = new wxScrolledWindow(
+        this,
         wxID_ANY,
         wxDefaultPosition,
         wxDefaultSize,
@@ -133,7 +133,7 @@ void PartitionFrame::initFrame(
         wxVSCROLL |
         wxRAISED_BORDER );
     sizerFrame->Add( panelFrame, 1 , wxEXPAND );
-    
+
     sizerPanel = new wxBoxSizer( wxVERTICAL );
     panelFrame->SetSizer( sizerPanel );
 
@@ -176,9 +176,9 @@ void PartitionFrame::initWidgets(
         2,        // rows
         2,        // cols
         0,        // vgap
-        0 );      // hgap        
+        0 );      // hgap
     // add grid sizer
-    box->Add( 
+    box->Add(
         lblSizer,
         0,        // vert not stretchable
         wxGROW ); // hori stretchable
@@ -186,28 +186,28 @@ void PartitionFrame::initWidgets(
     // number of partitions
     wxStaticText* label = new wxStaticText( panelFrame, wxID_ANY, wxT("Number of partitions: ") );
     lblSizer->Add( label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
-    spinCtrlNumber = new wxSpinCtrl( 
-        panelFrame, 
+    spinCtrlNumber = new wxSpinCtrl(
+        panelFrame,
         ID_SPIN_CTRL_NUMBER,
         wxString( Utils::intToStr( curParts ).c_str(), wxConvUTF8 ),
         wxDefaultPosition,
         wxDefaultSize,
-        wxSP_ARROW_KEYS, 
-        minParts, 
-        maxParts, 
+        wxSP_ARROW_KEYS,
+        minParts,
+        maxParts,
         curParts );
     lblSizer->Add( spinCtrlNumber, 0, wxALL, 5 );
-    
+
     // method
     label = new wxStaticText( panelFrame, wxID_ANY, wxT("Calculate using: ") );
     lblSizer->Add( label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5 );
-    
+
     wxArrayString vals;
     vals.Add( wxString( wxT("Equal intervals") ) );
     vals.Add( wxString( wxT("Quantiles") ) );
     vals.Add( wxString( wxT("Mean-Standard deviation") ) );
-    comboBoxMethod = new wxComboBox( 
-        panelFrame, 
+    comboBoxMethod = new wxComboBox(
+        panelFrame,
         ID_COMBO_BOX_METHOD,
         wxString( wxT("Equal intervals") ),
         wxDefaultPosition,
@@ -244,7 +244,7 @@ void PartitionFrame::initButtons()
         0 );      // hgap
     lblSizer->AddGrowableCol( 0 );
     // add grid sizer
-    sizerPanel->Add( 
+    sizerPanel->Add(
         lblSizer,
         0,        // vert not stretchable
         wxGROW ); // hori stretchable

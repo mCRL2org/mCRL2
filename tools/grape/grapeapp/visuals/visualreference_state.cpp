@@ -46,7 +46,7 @@ void visualreference_state::draw( void )
   // draw reference state
   draw_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 
-  // draw reference state name 
+  // draw reference state name
   grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_name().fn_str()), x, x+width, y+height, y+height*0.75, 0.0015f, al_center, al_center );
 
   // draw reference state text

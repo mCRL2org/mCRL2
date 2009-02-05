@@ -39,8 +39,8 @@ int test_main(int argc, char** argv)
   aterm_appl a = data_variable("d:D");
   aterm_list l = make_term("[3]");
   ATerm T      = t;
-  ATermAppl A  = a; 
-  ATermList L  = l;  
+  ATermAppl A  = a;
+  ATermList L  = l;
 
   data_variable v;
   f(v);

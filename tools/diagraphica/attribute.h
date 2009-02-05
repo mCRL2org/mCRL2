@@ -42,7 +42,7 @@ public:
     virtual void moveValue(
         const size_t &idxFr,
         const size_t &idxTo );
-    
+
     // functions overridden by AttrDiscr
     virtual void configValues(
         const std::vector< std::string > &curDomain,

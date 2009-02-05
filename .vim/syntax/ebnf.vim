@@ -19,7 +19,7 @@ syntax region  ebnfRange      start=+\[+  skip=+\\\]+ end=+\]+
 syntax region  ebnfComment    start=+/\*+ end=+\*/+ contains=ebnfTodo,ebnfString
 syntax region  ebnfComment    start=+//+  end=+$+   contains=ebnfTodo,ebnfString
 
-highlight link ebnfTodo       Todo 
+highlight link ebnfTodo       Todo
 highlight link ebnfIdentifier Identifier
 highlight link ebnfOperator   Operator
 highlight link ebnfRange      Constant

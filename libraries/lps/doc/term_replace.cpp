@@ -24,7 +24,7 @@ struct replace_variables
   replace_variables(const data_variable& src_, const data_variable& dest_)
     : src(src_), dest(dest_)
   {}
-  
+
   aterm_appl operator()(aterm_appl t)
   {
     return atermpp::replace(t, src, dest);
@@ -58,9 +58,9 @@ int main(int argc, char **argv)
 
   // replace using a list of substitutions
   data_variable_list src  = make_list(d, e);
-  data_variable_list dest = make_list(d0, e0); 
+  data_variable_list dest = make_list(d0, e0);
   t = d_e.substitute(make_list_substitution(src, dest));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   // use atermpp::replace directly
   t = atermpp::replace(d_e, d, d0);
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
   data_assignment b(e, e0);
   data_assignment_list l = make_list(a, b);
   t = d_e.substitute(assignment_list_substitution(l));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   return 0;
 }

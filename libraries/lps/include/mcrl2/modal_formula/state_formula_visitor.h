@@ -43,7 +43,7 @@ struct state_formula_visitor
 {
   virtual ~state_formula_visitor()
   { }
-  
+
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
@@ -85,14 +85,14 @@ struct state_formula_visitor
   virtual bool visit_or(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return true;
-  }    
+  }
 
   /// \brief Visit imp node
   /// \return The result of visiting the node
   virtual bool visit_imp(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return true;
-  }    
+  }
 
   /// \brief Visit forall node
   /// \return The result of visiting the node
@@ -193,11 +193,11 @@ struct state_formula_visitor
 
   /// \brief Leave or node
   virtual void leave_or()
-  {}    
+  {}
 
   /// \brief Leave imp node
   virtual void leave_imp()
-  {}    
+  {}
 
   /// \brief Leave forall node
   virtual void leave_forall()

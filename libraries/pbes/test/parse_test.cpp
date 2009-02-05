@@ -21,7 +21,7 @@ const std::string PBESSPEC =
   "     mu Y(n: Nat)  = X(n >= 10);                    \n"
   "                                                    \n"
   "init X(true);                                       \n"
-  ;  
+  ;
 
 const std::string VARSPEC =
   "datavar         \n"
@@ -37,7 +37,7 @@ void test_parse()
   pbes<> p;
   std::stringstream s(PBESSPEC);
   s >> p;
-  
+
   pbes_expression x = parse_pbes_expression("X(true, 2) && Y(n+1)", VARSPEC);
   std::cout << "x = " << mcrl2::core::pp(x) << std::endl;
 }

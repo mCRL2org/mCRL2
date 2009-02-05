@@ -49,7 +49,7 @@ protected:
     void onCheckBox( wxCommandEvent &e );
     void onComboBox( wxCommandEvent &e );
     void onSpinCtrl( wxSpinEvent &e );
-    
+
 private:
     // -- utility functions -----------------------------------------
     void updateSettingsGeneral();
@@ -75,13 +75,13 @@ private:
     wxBoxSizer*       sizerNotebook;
     wxNotebook*       notebook;
     wxButton*	      submitButton;
-    
+
     wxScrolledWindow* panelGeneral;
     wxColorButton*    buttonColorBG;
     wxColorButton*    buttonColorTxt;
     wxComboBox*       comboBoxSizeTxt;
     wxSpinCtrlFloat*  spinCtrlAnimSpd;
-    
+
     wxScrolledWindow* panelClustTree;
     wxCheckBox*       checkBoxShowCT;
     wxCheckBox*       checkBoxAnnotateCT;
@@ -90,7 +90,7 @@ private:
     wxScrolledWindow* panelBarTree;
     wxCheckBox*       checkBoxShowBT;
     wxSpinCtrlFloat*  spinCtrlMagnBT;
-    
+
     wxScrolledWindow* panelArcDiagram;
     wxCheckBox*       checkBoxShowNodes;
     wxCheckBox*       checkBoxShowArcs;
@@ -114,16 +114,16 @@ private:
         ID_BUTTON_COL_TXT,
         ID_COMBO_BOX_SIZE_TXT,
         ID_SPIN_CTRL_ANIM_SPD,
-        
+
         ID_PANEL_CLUST_TREE,
         ID_CHECK_BOX_SHOW_CT,
         ID_CHECK_BOX_ANNOTATE_CT,
         ID_COMBO_BOX_COL_MAP,
-        
+
         ID_PANEL_BAR_TREE,
         ID_CHECK_BOX_SHOW_BT,
         ID_SPIN_CTRL_MAGN_BT,
-        
+
         ID_PANEL_ARC_DIAGRAM,
         ID_CHECK_BOX_SHOW_NODES,
         ID_CHECK_BOX_SHOW_ARCS,
@@ -135,10 +135,10 @@ private:
 
         ID_PANEL_TRACE,
         ID_CHECK_BOX_USE_SHADING,
-        
+
         ID_PANEL_DGRM_EDITOR
     };
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

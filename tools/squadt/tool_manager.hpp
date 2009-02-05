@@ -59,15 +59,15 @@ namespace squadt {
 
     template < typename R, typename S >
     friend class utility::visitor;
- 
+
     public:
- 
+
       /** \brief Convenience type alias the list of tools, indexed by main input format */
       typedef std::multimap < build_system::storage_format, boost::shared_ptr < tool > > tool_map;
 
       /** \brief Convenience type alias the list of tools */
       typedef std::list < boost::shared_ptr < tool > >                                   tool_list;
- 
+
       /** \brief Constant tool sequence type */
       typedef boost::iterator_range < tool_list::const_iterator >                        const_tool_sequence;
 
@@ -77,13 +77,13 @@ namespace squadt {
       boost::shared_ptr < tool_manager_impl > impl;
 
     public:
- 
+
       /** \brief Constructor */
       tool_manager();
- 
+
       /** \brief Constructor */
       tool_manager(tipi::tcp_port port);
- 
+
       /** \brief Establishes whether the named tool is among the known tools or not */
       bool exists(std::string const&) const;
 
@@ -95,10 +95,10 @@ namespace squadt {
 
       /** \brief Add a new tool to the catalog */
       bool add_tool(std::string const&, boost::filesystem::path const&);
- 
+
       /** \brief Add a new tool to the catalog */
       bool add_tool(tool const&);
- 
+
       /** \brief Get the tool_capabilities object for all known tools */
       void query_tools();
 
@@ -107,7 +107,7 @@ namespace squadt {
 
       /** \brief Get the list of known tools */
       const_tool_sequence get_tools() const;
- 
+
       /** \brief Get the number of known tools */
       unsigned int number_of_tools() const;
 

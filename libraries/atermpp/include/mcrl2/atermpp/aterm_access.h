@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/atermpp/aterm_access.h
-/// \brief Convenience functions for accessing the child nodes of aterm_appl and aterm_list. 
+/// \brief Convenience functions for accessing the child nodes of aterm_appl and aterm_list.
 
 #ifndef MCRL2_ATERMPP_ATERM_ACCESS_H
 #define MCRL2_ATERMPP_ATERM_ACCESS_H
@@ -26,7 +26,7 @@ namespace atermpp
   {
     return aterm_appl(t)(0);
   }
-  
+
   /// \brief Returns the second child of t casted to an aterm_appl.
   /// \param t A term
   /// \return The second child of t casted to an aterm_appl.
@@ -35,7 +35,7 @@ namespace atermpp
   {
     return aterm_appl(t)(1);
   }
-  
+
   /// \brief Returns the third child of t casted to an aterm_appl.
   /// \param t A term
   /// \return The third child of t casted to an aterm_appl.
@@ -44,7 +44,7 @@ namespace atermpp
   {
     return aterm_appl(t)(2);
   }
-  
+
   /// \brief Returns the fourth child of t casted to an aterm_appl.
   /// \param t A term
   /// \return The fourth child of t casted to an aterm_appl.
@@ -53,7 +53,7 @@ namespace atermpp
   {
     return aterm_appl(t)(3);
   }
-  
+
   /// \brief Returns the first child of t casted to an aterm_list.
   /// \param t A term
   /// \return The first child of t casted to an aterm_list.
@@ -62,7 +62,7 @@ namespace atermpp
   {
     return aterm_list(aterm_appl(t)(0));
   }
-  
+
   /// \brief Returns the second child of t casted to an aterm_list.
   /// \param t A term
   /// \return The second child of t casted to an aterm_list.
@@ -71,7 +71,7 @@ namespace atermpp
   {
     return aterm_list(aterm_appl(t)(1));
   }
-  
+
   /// \brief Returns the third child of t casted to an aterm_list.
   /// \param t A term
   /// \return The third child of t casted to an aterm_list.

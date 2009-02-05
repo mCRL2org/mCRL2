@@ -119,7 +119,7 @@ using namespace mcrl2::core::detail;
     ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
     bool v_next_1 = true, v_next_2 = true;
 
-    while (!ATisEmpty(a_variables)) 
+    while (!ATisEmpty(a_variables))
     {
       v_variable = ATAgetFirst(a_variables);
       a_variables = ATgetNext(a_variables);
@@ -184,7 +184,7 @@ using namespace mcrl2::core::detail;
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables) 
+  ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables)
   {
     assert(is_tau_summand(a_summand_1));
     assert(!is_delta_summand(a_summand_2));
@@ -359,16 +359,16 @@ using namespace mcrl2::core::detail;
       bool v_is_confluent = true;
       bool v_current_summands_are_confluent;
 
-      // Add here that the sum variables of a_summand must be empty otherwise 
-      // the confluence of the summand must be checked with respect to itself, 
+      // Add here that the sum variables of a_summand must be empty otherwise
+      // the confluence of the summand must be checked with respect to itself,
       // which requires quantification. Otherwise tau.a+tau.b will be designated
-      // tau-confluent, if linearised with summand clustering. 
-          
-      ATermList a_summand_sum_variables=ATLgetArgument(a_summand,0); 
-      if (!ATisEmpty(a_summand_sum_variables)) 
-      { v_is_confluent = false; 
-        gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number); 
-      } 
+      // tau-confluent, if linearised with summand clustering.
+
+      ATermList a_summand_sum_variables=ATLgetArgument(a_summand,0);
+      if (!ATisEmpty(a_summand_sum_variables))
+      { v_is_confluent = false;
+        gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number);
+      }
 
       while (!ATisEmpty(v_summands) && (v_is_confluent || f_check_all)) {
         v_summand = ATAgetFirst(v_summands);

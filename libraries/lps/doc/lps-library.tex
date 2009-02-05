@@ -51,7 +51,7 @@ and $I$ and $J$ are disjoint and finite index sets, and for $i\in I\cup J$:
 \item $c_{i}:D\times E_{i}\rightarrow \mathbb{B}$ is the condition function,
 
 \item $a_{i}(d,e)$ is a multi-action $a_{i}^{1}(f_{i}^{1}(d,e))|\cdots
-|a_{i}^{n_{i}}(f_{i}^{n_{i}}(d,e))$, where $f_{i}:D\times E_{i}\rightarrow 
+|a_{i}^{n_{i}}(f_{i}^{n_{i}}(d,e))$, where $f_{i}:D\times E_{i}\rightarrow
 \mathcal{D}$ is the action parameter function,
 
 \item $t_{i}:D\times E_{i}\rightarrow \mathbb{R}$ is the time stamp function,
@@ -148,7 +148,7 @@ A more formal definition of this is welcome.}.
 
 Let $X(d:D)$ be an linear process as defined in \ref{eq:lps_untimed}, or \ref%
 {eq:lps_timed} and let $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ be a set of
-constant parameters of $X$, given the state $\overline{d}:D$. Then we define 
+constant parameters of $X$, given the state $\overline{d}:D$. Then we define
 \textsc{RemoveConstantParameters}($p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},%
 \overline{d}$) as a linear process obtained from $X(d:D)$ by removing $%
 \{d_{j_{1}},\cdots ,d_{j_{m}}\}$ from the process parameters of $X$, and by
@@ -164,9 +164,9 @@ values, and possibly applying the rewriter to it?}.
 \section{Parelm}
 
 Let $p$ be a linear process as defined in \ref{eq:lps_untimed}, or \ref%
-{eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns 
+{eq:lps_timed}. A \emph{parelm} algorithm is an algorithm that returns
 \textsc{RemoveParameters(}$p,\{d_{j_{1}},\cdots ,d_{j_{m}}\}$\textsc{)} for
-some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of 
+some subset $\{d_{j_{1}},\cdots ,d_{j_{m}}\}$ of insignificant parameters of
 $p$.
 
 \subsection{Parelm implementations}
@@ -176,15 +176,15 @@ We define the following implementations of parelm:
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Parelm1(}$p$\textsc{)} \\ 
+\textsc{Parelm1(}$p$\textsc{)} \\
 $G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}%
 ar(c_{i}(d,e))\cup \mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$
-\\ 
-$\text{\textbf{do}}$ \\ 
+\\
+$\text{\textbf{do}}$ \\
 $\qquad \Delta G:=\{k\in \lbrack 1,\ldots ,n]\ |\ \exists _{l\in G}\ \exists
-_{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\ 
-$\qquad G:=G\cup \Delta G$ \\ 
-$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+_{i\in I}:d_{k}\in \mathcal{V}ar(g_{i}(d,e)_{l}\}$ \\
+$\qquad G:=G\cup \Delta G$ \\
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\
 $\text{\textbf{return} \textsc{RemoveParameters(}}p,\{d_{j_{1}},\cdots
 ,d_{j_{m}}\}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
@@ -194,15 +194,15 @@ the $l$-th component of the vector of terms $g_{i}(d,e)$.%
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Parelm2(}$p$\textsc{)} \\ 
-$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}ar(c_{i}(d,e))\cup 
-\mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$ \\ 
-$V:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+\textsc{Parelm2(}$p$\textsc{)} \\
+$W:=\{d_{k}\ |\ \exists _{i\in I}:d_{k}\in \mathcal{V}ar(c_{i}(d,e))\cup
+\mathcal{V}ar(f_{i}(d,e))\cup \mathcal{V}ar(t_{i}(d,e))\}$ \\
+$V:=\{d_{1},\ldots ,d_{n}\}$ \\
 $E:=\{(d_{j},d_{k})\ |\ \exists _{i\in I}:d_{j}\in \mathcal{V}%
-ar(g_{i}(d,e)_{k}\}$ \\ 
+ar(g_{i}(d,e)_{k}\}$ \\
 $R:=\{d_{k}\ |\ $graph $G=(V,E)$ contains a directed path $w,\cdots ,d_{k}$
-for some $w\in W\}$ \\ 
-$\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\ 
+for some $w\in W\}$ \\
+$\text{\textbf{return} \textsc{RemoveParameters(}}p,R\text{\textsc{)}},$ \\
 \hline
 \end{tabular}%
 \]
@@ -229,17 +229,17 @@ Then we define the following implementations of constelm:
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Constelm1(}$p,\overline{d},R$\textsc{)} \\ 
-$x:=\overline{d}$ \\ 
-$G:=\{1,\ldots ,n\}$ \\ 
-$\text{\textbf{do}}$ \\ 
+\textsc{Constelm1(}$p,\overline{d},R$\textsc{)} \\
+$x:=\overline{d}$ \\
+$G:=\{1,\ldots ,n\}$ \\
+$\text{\textbf{do}}$ \\
 $\qquad \Delta G:=\{j\in G|\exists _{i\in I}.R(c_{i}(x))\neq false\wedge
-R(g_{i}(x)_{j})\neq R(\overline{d}_{j})\}$ \\ 
-$\qquad G:=G\backslash \Delta G$ \\ 
-$\qquad \text{\textbf{for }}(j\in \Delta G):$ \\ 
-$\qquad \qquad x_{j}:=d_{j}$ \\ 
-$\qquad $\textbf{rof} \\ 
-$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
+R(g_{i}(x)_{j})\neq R(\overline{d}_{j})\}$ \\
+$\qquad G:=G\backslash \Delta G$ \\
+$\qquad \text{\textbf{for }}(j\in \Delta G):$ \\
+$\qquad \qquad x_{j}:=d_{j}$ \\
+$\qquad $\textbf{rof} \\
+$\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\
 $\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
 p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
@@ -249,17 +249,17 @@ where $\{j_{1},\cdots ,j_{m}\}=G$.
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\ 
-$R:=\overline{\{d\}}$ \\ 
-$G:=\{1,\ldots ,n\}$ \\ 
-$\text{\textbf{do}}$ \\ 
-$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\ 
+\textsc{Constelm2(}$p,\overline{d}$\textsc{)} \\
+$R:=\overline{\{d\}}$ \\
+$G:=\{1,\ldots ,n\}$ \\
+$\text{\textbf{do}}$ \\
+$\qquad \Delta R:=next\_states(p,R)\backslash R$ \\
 $\qquad \text{\textbf{if }}\exists _{i\in I}.\exists _{j\in G}.\exists
-_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\ 
-$\qquad \qquad G:=G\backslash \{j\}$ \\ 
-$\qquad \text{\textbf{fi}}$ \\ 
-$\qquad R:=R\cup \Delta R$ \\ 
-$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\ 
+_{r\in \Delta R}.r_{j}\neq \overline{d}_{j}$ \\
+$\qquad \qquad G:=G\backslash \{j\}$ \\
+$\qquad \text{\textbf{fi}}$ \\
+$\qquad R:=R\cup \Delta R$ \\
+$\text{\textbf{while }}(\Delta R\neq \emptyset )$ \\
 $\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
 p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
 \end{tabular}%

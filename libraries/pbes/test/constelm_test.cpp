@@ -169,7 +169,7 @@ std::string t13 =
 std::string x13 = "Y b";
 
 // volgens constelm kan vergelijking X verwijderd worden (waarschijnlijk omdat de set van asserties leeg is); dit is echter onjuist: de vergelijking van X is noodzakelijk; parameter b van Y kan wel verwijderd worden.
-  
+
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
@@ -187,7 +187,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   data::rewriter datar(q.data());
 
   // pbes rewriter
-  my_pbes_rewriter pbesr(datar);    
+  my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
   pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
@@ -218,7 +218,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   }
 
   std::set<std::string> lines2;
-  boost::algorithm::split(lines2, expected_result, boost::algorithm::is_any_of("\n"));  
+  boost::algorithm::split(lines2, expected_result, boost::algorithm::is_any_of("\n"));
   lines2.erase("");
 
   std::string s1;
@@ -240,7 +240,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   }
   BOOST_CHECK(s1 == s2);
 
-  std::cout << core::pp(q) << std::endl; 
+  std::cout << core::pp(q) << std::endl;
 }
 
 int test_main(int argc, char** argv)
@@ -260,6 +260,6 @@ int test_main(int argc, char** argv)
   test_pbes(t11, x11, true);
   test_pbes(t12, x12, false);
   test_pbes(t13, x13, false);
-  
+
   return 0;
 }

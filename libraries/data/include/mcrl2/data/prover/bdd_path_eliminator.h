@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/bdd_manipulator.h"
 #include "mcrl2/utilities/bdd_info.h"
 
-  /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers. 
+  /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
 enum SMT_Solver_Type {
   solver_type_ario,
   solver_type_cvc,
@@ -46,7 +46,7 @@ enum SMT_Solver_Type {
 
    * The method BDD_Path_Eliminator::simplify receives a BDD as
    * parameter a_bdd and returns the equivalent BDD from which all
-   * inconsistent paths have been removed. 
+   * inconsistent paths have been removed.
   */
 
 class BDD_Path_Eliminator: public BDD_Simplifier {

@@ -33,7 +33,7 @@ namespace core {
 
     // find multiple line endings
     boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile( "\\n\\s*\\n" );
-  
+
     // the -1 below directs the token iterator to display the parts of
     // the string that did NOT match the regular expression.
     boost::xpressive::sregex_token_iterator cur( text.begin(), text.end(), paragraph_split, -1 );
@@ -78,14 +78,14 @@ namespace core {
       return "";
     }
     in.unsetf(std::ios::skipws); //  Turn of white space skipping on the stream
-  
+
     std::string s;
     std::copy(
       std::istream_iterator<char>(in),
       std::istream_iterator<char>(),
       std::back_inserter(s)
     );
-  
+
     return s;
   }
 

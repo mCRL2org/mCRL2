@@ -34,7 +34,7 @@ public:
     virtual ~AttrConti();
 
     // -- set functions ---------------------------------------------
-    
+
     void clusterValues(
         const std::vector< int > &indices,
         const std::string &newValue );

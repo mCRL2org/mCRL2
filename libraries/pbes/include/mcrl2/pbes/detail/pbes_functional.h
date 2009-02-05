@@ -27,11 +27,11 @@ namespace detail {
 struct compare_propositional_variable_instantiation: public std::unary_function<atermpp::aterm, bool>
 {
   const propositional_variable_instantiation& v_;
-  
+
   compare_propositional_variable_instantiation(const propositional_variable_instantiation& v)
    : v_(v)
   {}
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result

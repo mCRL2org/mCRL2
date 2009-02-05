@@ -173,7 +173,7 @@ void test_simplifying_rewriter()
   test_expressions(R, "Y(n+p)"                                                          , "Y(n+p)");
   test_expressions(R, "forall m:Nat. false"                                             , "false");
   test_expressions(R, "X && X"                                                          , "X");
-  test_expressions(R, "val(true)"                                                       , "true");  
+  test_expressions(R, "val(true)"                                                       , "true");
   test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat. val(m < 0 && m > 3)"                               , "false");
@@ -188,7 +188,7 @@ void test_simplifying_rewriter()
   // test_expressions(R, "X || (Y(p) && X)"                                                , "X");
   // test_expressions(R, "val(b || !b)"                                                    , "val(true)");
   // test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
-  
+
   // pbes_expression p = R(expr("Y(n)"));
   // BOOST_CHECK(!core::term_traits<pbes_expression>::is_constant(p));
 }
@@ -208,7 +208,7 @@ void test_enumerate_quantifiers_rewriter()
   data::data_expression_with_variables dv(d);
 
   pbes_system::pbes_expression y = expr("Y(n)");
-  pbes_system::pbes_expression_with_variables yv(y, data::data_variable_list()); 
+  pbes_system::pbes_expression_with_variables yv(y, data::data_variable_list());
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
@@ -239,7 +239,7 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "Y(n+p)"                                                          , "Y(n+p)");
   test_expressions(R, "forall m:Nat. false"                                             , "false");
   test_expressions(R, "X && X"                                                          , "X");
-  test_expressions(R, "val(true)"                                                       , "true");  
+  test_expressions(R, "val(true)"                                                       , "true");
   test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
@@ -289,7 +289,7 @@ void test_substitutions1()
   data::rewriter  datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
-  data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma; 
+  data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma;
   sigma[data::parse_data_variable("m: Pos")] = r(data::parse_data_expression("3"));
   sigma[data::parse_data_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
@@ -319,7 +319,7 @@ void test_substitutions2()
   std::string sigma;
   std::string expr1;
   std::string expr2;
-  
+
   //------------------------//
   var_decl =
     "datavar         \n"
@@ -330,8 +330,8 @@ void test_substitutions2()
     ;
 	expr1 = "X(m+n)";
 	expr2 = "X(7)";
-  sigma = "m: Pos := 3; n: Pos := 4"; 
-  test_expressions(R, expr1, expr2, var_decl, sigma); 
+  sigma = "m: Pos := 3; n: Pos := 4";
+  test_expressions(R, expr1, expr2, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -344,7 +344,7 @@ void test_substitutions2()
 	expr1 = "forall c: Bool. X(c, n)";
 	expr2 = "X(true, 0) && X(false, 0)";
   sigma = "b: Bool := true; n: Nat := 0";
-  test_expressions(R, expr1, expr2, var_decl, sigma); 
+  test_expressions(R, expr1, expr2, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -355,7 +355,7 @@ void test_substitutions2()
 	expr1 = "exists b: Bool, c: Bool. val(b && c)";
 	expr2 = "val(true)";
   sigma = "";
-  test_expressions(R, expr1, expr2, var_decl, sigma); 
+  test_expressions(R, expr1, expr2, var_decl, sigma);
 
   //------------------------//
   var_decl =
@@ -409,7 +409,7 @@ void test_substitutions3()
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
-    
+
   data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > sigma;
   sigma[data::parse_data_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_data_variable("m_S:Nat")]             = data::parse_data_expression("0");
@@ -451,7 +451,7 @@ void test_pfnf_rewriter()
   pfnf_rewriter<pbes_expression> R;
   pbes_expression x = expr("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)");
   pbes_expression y = R(x);
-  
+
   // TODO: add real test cases for PFNF rewriter
 }
 

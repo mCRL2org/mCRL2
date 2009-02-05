@@ -266,7 +266,7 @@ bool grape_specification::exists_process_diagram( const wxString &p_name, int p_
       if ( proc_dia->get_name() == p_name )
       {
         return true;
-      }   
+      }
     } // end if
     else
     {

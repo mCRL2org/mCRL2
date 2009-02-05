@@ -29,7 +29,7 @@ using namespace mcrl2::core::detail;
 int second_lts_states_offset;
 
 unsigned int Pi_pt = 0, n_partitions = 0;
-       
+
 int nstate=0, nlabel=0, npar=0;
 ATbool *mark;
 int *blockref;
@@ -40,7 +40,7 @@ BLOK *blok;
 BLOCKS blocks;
 
 ATermTable *lab_src_tgt, *lab_tgt_src, graph, graph_i;
-ATerm *label_name, *par_name; 
+ATerm *label_name, *par_name;
 /* End data definition */
 
 static int n_transitions = 0, n_states = 0;
@@ -60,7 +60,7 @@ static void reset_data()
   reset_dfsn();
 
   Pi_pt = 0;
-  n_partitions = 0;     
+  n_partitions = 0;
   nstate=0;
   nlabel=0;
   npar=0;
@@ -87,7 +87,7 @@ static ATerm *MakeArrayOfATerms(int n)
      ATprotectArray(result, n);
      return result;
      }
-          
+
 static void AllocData(void)
      {
      int i;
@@ -101,45 +101,45 @@ static void AllocData(void)
      ATerror("Cannot allocate array with state numbers of size %d\n", nstate);
      if (!(lab = (ATermList*) calloc(nstate,  sizeof(ATermList))))
      ATerror("Cannot allocate array with [labels] of size %d\n", nstate);
-     ATprotectArray((ATerm*) lab, nstate); 
+     ATprotectArray((ATerm*) lab, nstate);
      if (!(Pi = (INTERVAL*) calloc(2*nstate, sizeof(INTERVAL))))
         ATerror("Indexed array Pi is not allocated (%d)\n",2*nstate);
      if (!(lab_src_tgt = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
-           ATerror("Array of tables is not allocated (%d)\n",nlabel); 
+           ATerror("Array of tables is not allocated (%d)\n",nlabel);
      if (!(lab_tgt_src = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
            ATerror("Array of tables is not allocated (%d)\n",nlabel);
      if (!(blok = (BLOK*) malloc(2*nstate * sizeof(BLOK))))
-        ATerror("BLOK is not allocated (%d)\n",nstate); 
+        ATerror("BLOK is not allocated (%d)\n",nstate);
      for (i=0;i<nlabel;i++) {
           if (!(lab_src_tgt[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
                ATerror("Not possible to create table (%d)",i);
           if (!(lab_tgt_src[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
                ATerror("Not possible to create table (%d)",i);
-          } 
+          }
      label_name = MakeArrayOfATerms(nlabel);
      for (i=0;i<nstate;i++)
-          { 
+          {
           lab[i] = ATempty;
           }
      if (classes) {
           if (!(par = (ATermList*) calloc(nstate,  sizeof(ATermList))))
           ATerror("Cannot allocate array with [parameters] of size %d\n", nstate);
           ATprotectArray((ATerm*) par, nstate);
-          par_name = MakeArrayOfATerms(npar); 
-          for (i=0;i<nstate;i++) { 
+          par_name = MakeArrayOfATerms(npar);
+          for (i=0;i<nstate;i++) {
               par[i] = ATempty;
               }
           }
-     blocks.pt = 0; 
-     /* StartSplitting(); */         
+     blocks.pt = 0;
+     /* StartSplitting(); */
      }
 
 void StartSplitting(void) {
      int i, nstate2 = 2* nstate;
-     Pi_pt = 0; 
-     n_partitions = 0;     
+     Pi_pt = 0;
+     n_partitions = 0;
      for (i=0;i<nstate;i++)
-          { 
+          {
           mark[i] = ATfalse;
           s[i] = i;
           blockref[i] = Pi_pt;
@@ -150,10 +150,10 @@ void StartSplitting(void) {
           }
      blok[Pi_pt].action = -1;
      blok[Pi_pt].parent = 0;
-     blok[Pi_pt].splitter = 0;     
+     blok[Pi_pt].splitter = 0;
      Pi_pt = Push(STABLE,0,nstate);
      n_partitions++;
-     } 
+     }
 /*
 --------------- Strongly Connected Components -------------------------
 */
@@ -170,13 +170,13 @@ static void ExtraNode(void) {
      ATermList states = ATempty;
      for (i=0;i<nstate;i++) states = ATinsert(states, (ATerm) ATmakeInt(i));
      ATtablePut(graph, (ATerm) ATmakeInt(nstate), (ATerm) ATreverse(states));
-} 
+}
 
 static void RemoveExtraNode(void) {
      /* Remove extra node which is connected to each point */
      ATtableRemove(graph, (ATerm) ATmakeInt(nstate));
-     dfsn--; 
-} 
+     dfsn--;
+}
 
 void DfsNumbering(ATerm t) {
      int d = ATgetInt((ATermInt) t);
@@ -196,7 +196,7 @@ void DfsNumbering(ATerm t) {
      dfsn2state[dfsn] = d;
      dfsn++;
      }
-} 
+}
 
 int TakeComponent(ATerm t) {
      int d = ATgetInt((ATermInt) t);
@@ -220,8 +220,8 @@ int TakeComponent(ATerm t) {
      s[s_pt] = d; s_pt++;
      blockref[d] = Pi_pt;
      return s_pt;
-     }    
-} 
+     }
+}
 
 static void MakeUnitPartition(void) {
      int i;
@@ -241,7 +241,7 @@ void SCC(void) {
      if (label_tau<0) {MakeUnitPartition(); return;}
      graph = lab_src_tgt[label_tau];
      graph_i = lab_tgt_src[label_tau];
-     ExtraNode(); 
+     ExtraNode();
      if (!(visited = (int*) calloc(nstate+1, sizeof(int))))
         ATerror("Visited is not allocated (%d)\n",nstate);
      for (i=0;i<=nstate;i++) visited[i] = -1;
@@ -250,7 +250,7 @@ void SCC(void) {
      DfsNumbering((ATerm) ATmakeInt(nstate));
      RemoveExtraNode();
      dfsn--;
-     while (dfsn>=0) { 
+     while (dfsn>=0) {
           Pi[Pi_pt].left = left;
           left = Pi[Pi_pt].right = TakeComponent(
                (ATerm) ATmakeInt(dfsn2state[dfsn]));
@@ -259,16 +259,16 @@ void SCC(void) {
           }
      /* for (i=0;i<Pi_pt;i++) ATwarning("(%d,%d)\n",Pi[i].left, Pi[i].right); */
      free(visited);
-     free(dfsn2state);                 
+     free(dfsn2state);
 }
 /*
 --------------- End Strongly Connected Components -------------------------
-*/     
-               
+*/
+
 static void UpdateTable(ATermTable db, int key, int val) {
      ATerm newkey = (ATerm) ATmakeInt(key);
-     ATermList newval = (ATermList) ATtableGet(db , newkey); 
-     if (!newval) 
+     ATermList newval = (ATermList) ATtableGet(db , newkey);
+     if (!newval)
           newval = ATmakeList1((ATerm) ATmakeInt(val));
      else
           newval = ATinsert(newval, (ATerm) ATmakeInt(val));
@@ -280,7 +280,7 @@ static void UpdateLabArray(int state, int label) {
      ATerm labno = (ATerm) ATmakeInt(label);
      if (!newval) newval = ATmakeList1(labno);
      else
-     if (ATindexOf(newval, labno,0)<0) 
+     if (ATindexOf(newval, labno,0)<0)
           newval = ATinsert(newval, labno);
      lab[state] = newval;
 }
@@ -356,25 +356,25 @@ static int get_label_index(lts &l, unsigned int idx, int tau_idx, int offset = 0
   return label;
 }
 
-int ReadData(lts &l) 
+int ReadData(lts &l)
    {
    reset_data();
-   nstate = l.num_states(); 
+   nstate = l.num_states();
    nlabel = l.num_labels() + 1; // +1 for tau label
    AllocData();
    label_tau = nlabel-1;
    label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
    transition_iterator i(&l);
-   for (; i.more(); ++i) 
+   for (; i.more(); ++i)
       {
       int label = get_label_index(l,i.label(),label_tau);
       UpdateLabArray(i.to(), label);
       UpdateTable(lab_src_tgt[label], i.from(), i.to());
       UpdateTable(lab_tgt_src[label], i.to(), i.from());
-      }   
-   return l.initial_state(); 
+      }
+   return l.initial_state();
    }
-   
+
 static void pp_lts(lts &l)
 {
   for (unsigned int i=0; i<l.num_labels(); i++)
@@ -386,17 +386,17 @@ static void pp_lts(lts &l)
   }
 }
 
-void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2) 
+void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
    {
    pp_lts(l1);
    pp_lts(l2);
 
    second_lts_states_offset = l1.num_states();
    int offset = second_lts_states_offset;
-   
+
    reset_data();
-   nstate = l1.num_states()+l2.num_states(); 
-   nlabel = l1.num_labels()+l2.num_labels()+1; 
+   nstate = l1.num_states()+l2.num_states();
+   nlabel = l1.num_labels()+l2.num_labels()+1;
    AllocData();
    label_tau = nlabel-1;
    label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
@@ -408,7 +408,7 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
       UpdateTable(lab_src_tgt[label], i.from(), i.to());
       UpdateTable(lab_tgt_src[label], i.to(), i.from());
       }
-   *init1 = l1.initial_state(); 
+   *init1 = l1.initial_state();
 
    /* Second file */
    for (transition_iterator i(&l2); i.more(); ++i)
@@ -419,12 +419,12 @@ void ReadCompareData(lts &l1, int *init1, lts &l2, int *init2)
       UpdateTable(lab_tgt_src[label], i.to() + offset, i.from() +offset);
       }
    *init2 = l2.initial_state() + offset;
-   } 
-     
+   }
+
 static ATermList Union(ATermList t1s, ATermList t2s)
      {
      ATermList result = t2s;
-     /* ATwarning("Arguments union %t %t",t1s,t2s); */ 
+     /* ATwarning("Arguments union %t %t",t1s,t2s); */
      for (;!ATisEmpty(t1s);t1s=ATgetNext(t1s))
           {ATerm t1 = ATgetFirst(t1s);
           if (ATindexOf(t2s, t1,0)<0) result = ATinsert(result, t1);
@@ -443,7 +443,7 @@ static ATerm BlockCode(int b) {
           indeks = ATindexedSetCreate(INITSIZE, MAX_LOAD_PCT);
           }
     /*  ATwarning("ATindexedSetPut %d %d\n",indeks, b); */
-     d = ATindexedSetPut(indeks, (ATerm) ATmakeInt(b), &nnew);   
+     d = ATindexedSetPut(indeks, (ATerm) ATmakeInt(b), &nnew);
      return (ATerm) ATmakeInt(d);
 }
 
@@ -454,16 +454,16 @@ static ATermList  BlockNumbers(ATermList sources)
           {
           int source = ATgetInt((ATermInt) ATgetFirst(sources));
           ATerm block = BlockCode(blockref[source]);
-          if (ATindexOf(result, block,0)<0) result = ATinsert(result, block); 
+          if (ATindexOf(result, block,0)<0) result = ATinsert(result, block);
           }
      return result;
      }
-      
+
 void GetBlockBoundaries(int b, int *left, int *right)
      {
      *left = Pi[b].left; *right = Pi[b].right;
      }
-      
+
 static void TransitionsGoingToBlock(int b, ATermList *newlab) {
    int left, right, i;
    int newb = ATgetInt((ATermInt) BlockCode(b));
@@ -474,21 +474,21 @@ static void TransitionsGoingToBlock(int b, ATermList *newlab) {
    "--------------------------- block %d --------------------------\n", (int) b);
    /* ATwarning("TransitionGoingTo b = %d newb = %d\n",b, newb); */
    for (i = left; i < right;i++) {
-        ATermList labels = lab[s[i]], pars = ATempty; 
+        ATermList labels = lab[s[i]], pars = ATempty;
         ATerm ss = (ATerm) ATmakeInt(s[i]);
         for (;!ATisEmpty(labels);labels = ATgetNext(labels)) {
-             int label = ATgetInt((ATermInt) ATgetFirst(labels));            
+             int label = ATgetInt((ATermInt) ATgetFirst(labels));
              ATermList val = (ATermList) ATtableGet(lab_src_tgt[label], bb);
              ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], ss);
              ATermList newsources = BlockNumbers(sources);
-             if (val) 
+             if (val)
                     newsources = Union(val, newsources);
-             if (omitTauLoops && label_tau == label) 
+             if (omitTauLoops && label_tau == label)
                   newsources = ATremoveElement(newsources, bb);
              if (!val || !ATisEqual(val, newsources))
-                  ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources); 
+                  ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources);
              if (ATindexOf(newlabels, ATgetFirst(labels),0)<0)
-                  newlabels = ATinsert(newlabels, ATgetFirst(labels));                  
+                  newlabels = ATinsert(newlabels, ATgetFirst(labels));
              }
         if (classes && npar > 1) {
              pars = par[s[i]];
@@ -499,13 +499,13 @@ static void TransitionsGoingToBlock(int b, ATermList *newlab) {
                         par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
                   }
              ATfprintf(stdout, "\n");
-             }        
+             }
         }
-     newlab[newb] = newlabels;    
-}    
+     newlab[newb] = newlabels;
+}
 
 static void SwapClearTables(void) {
-     int i; 
+     int i;
      for (i=0;i<nlabel;i++) {
           ATermTable swap = lab_tgt_src[i];
           ATtableReset(swap);
@@ -513,8 +513,8 @@ static void SwapClearTables(void) {
           lab_src_tgt[i] = swap;
           }
      }
-       
-static int MakeEquivalenceClasses(int initState, 
+
+static int MakeEquivalenceClasses(int initState,
      ATermList blocks) {
      int i;
      ATermList *newlab = NULL;
@@ -536,12 +536,12 @@ static int MakeEquivalenceClasses(int initState,
          {
          ATerm bb = (ATerm) ATmakeInt(i);
          ATermList labels = lab[i];
-         
+
          for (;!ATisEmpty(labels);labels=ATgetNext(labels))
            {int label = ATgetInt((ATermInt) ATgetFirst(labels));
            ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], bb);
            for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
-           ATermList tgts = (ATermList) 
+           ATermList tgts = (ATermList)
                 ATtableGet(lab_src_tgt[label],ATgetFirst(sources));
            if (!tgts)
                 ATtablePut(lab_src_tgt[label], ATgetFirst(sources),
@@ -554,7 +554,7 @@ static int MakeEquivalenceClasses(int initState,
            }
            }
          }
-     result = ATgetInt((ATermInt) BlockCode(blockref[initState]));     
+     result = ATgetInt((ATermInt) BlockCode(blockref[initState]));
      nstate = n_states;
      /* Pi_pt = 0;
      n_partitions = 0; */
@@ -565,7 +565,7 @@ static int MakeEquivalenceClasses(int initState,
           }
      return (int) result;
      }
-     
+
 static int WriteTransitions(lts &l) {
    int b, n_tau_transitions = 0;
    DECL_A(label2new,int,nlabel);
@@ -581,7 +581,7 @@ static int WriteTransitions(lts &l) {
                label2new[label] = l.add_label(label_name[label],label==label_tau);
                label_name[label] = NULL;
              }
-             ATermList sources = 
+             ATermList sources =
              (ATermList) ATtableGet(lab_tgt_src[label], (ATerm) ATmakeInt(b));
 	     if (!ATisEmpty(sources))
 	     {
@@ -590,21 +590,21 @@ static int WriteTransitions(lts &l) {
                  l.add_transition(fromState,label2new[label],b);
                  n_transitions++;
                  if (label == label_tau) n_tau_transitions++;
-                 }    
+                 }
              }
              }
         }
    FREE_A(label2new);
    return n_tau_transitions;
    }
-   
-/*static void TestTransitions(void) { 
+
+/*static void TestTransitions(void) {
 int label;
 for (label=0;label<nlabel;label++) {
 ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
 }
 }*/
-  
+
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */
      {
@@ -628,16 +628,16 @@ int ReturnEquivalenceClasses(int initState, ATbool
      /* ATwarning("Block number of initial state: %d\n", result); */
      BlockCode(-1);
      return result;
-     }   
+     }
 }
-       
+
 int WriteData(lts &l, int initState, bool omit_tauloops)
     {
     int newState = ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse);
     l.reset(false);
     WriteTransitions(l);
     l.set_initial_state(newState);
-    return 1;     
+    return 1;
     }
 
 
@@ -670,7 +670,7 @@ int WriteDataAddParam(lts &l, bool is_branching)
 {
   ReturnEquivalenceClasses(l.initial_state(),is_branching?ATtrue:ATfalse);
 
-  set_new_state(l,l.initial_state()); 
+  set_new_state(l,l.initial_state());
   for (unsigned int i=0; i<l.num_states(); i++)
   {
     set_new_state(l,i);

@@ -36,20 +36,20 @@ namespace mcrl2 {
        * \param[in] size the size of this widget
        **/
       wxSpinCtrlFloat::wxSpinCtrlFloat(
-          wxWindow* parent, 
-          wxWindowID id, 
-          double p_Min, 
-          double p_Max, 
-          double p_Rate, 
-          double p_Init, 
-          const wxPoint& pos, 
+          wxWindow* parent,
+          wxWindowID id,
+          double p_Min,
+          double p_Max,
+          double p_Rate,
+          double p_Init,
+          const wxPoint& pos,
           const wxSize&  size)
           : wxPanel(
-              parent, 
-              wxID_ANY, 
-              pos, 
-              size, 
-              wxNO_BORDER ), 
+              parent,
+              wxID_ANY,
+              pos,
+              size,
+              wxNO_BORDER ),
             m_Rate(p_Rate)
       {
         wxBoxSizer* Sizer = new wxBoxSizer( wxHORIZONTAL );

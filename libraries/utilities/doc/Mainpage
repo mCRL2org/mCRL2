@@ -3,7 +3,7 @@
  * The Utilities library holds functionality that does not (yet) fit into any of
  * the other libraries. The purpose of bundling this functionality is to
  * encourage reuse of code.
- * 
+ *
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a

@@ -33,8 +33,8 @@
 %
 % For each train there is a process and an auxiliary process (Train_p and Guard_p,
 % Train_q and Guard_q). Furthermore there are three variables. A common boolean variable
-% V and boolean variables Xp and Xq that can only be set by p, resp. q. 
-% 
+% V and boolean variables Xp and Xq that can only be set by p, resp. q.
+%
 % In variant 1 the variable V is the only one that is used to determine access to
 % the critical section. If V is true, train p can enter, and if V is false, train
 % q can enter. Using the actions p1 and q1 trains indicate that they have left
@@ -53,7 +53,7 @@
 % Xp and Xq. Trains indicate their desire to enter the critical region through
 % p0 (resp. q0) setting Xp (resp. Xq) to true. In the guard they check whether
 % the other train did not indicate the desire to enter the critical region. If
-% so, the train can safely enter (i.e. pass the Guard). 
+% so, the train can safely enter (i.e. pass the Guard).
 %   There is an awkward situation in this case. If both trains indicate their
 % desire to enter the critical region simultaneously, they both block the entrance
 % for the other train, and the whole system will end up in deadlock. This is also
@@ -90,11 +90,11 @@ eqn  Variant=2;
 proc Train_p= ((Variant==4) -> p1 . p0 <> p0 . p1 ). Guard_p . enter_p . leave_p . p2 . Train_p;
      Train_q= q0 . q1 . Guard_q . enter_q . leave_q . q2 . Train_q;
 
-     Guard_p= 
+     Guard_p=
        (Variant!=1) -> get_xq(false)<>delta+
        (Variant!=2) -> get_v(true)<>delta;
 
-     Guard_q= 
+     Guard_q=
        (Variant!=1) -> get_xp(false)<>delta+
        (Variant!=2) -> get_v(false)<>delta;
 
@@ -108,7 +108,7 @@ proc Train_p= ((Variant==4) -> p1 . p0 <> p0 . p1 ). Guard_p . enter_p . leave_p
        reset_xq_ . Xq(false)+
        get_xq_(b) . Xq(b);
 
-     V(b:Bool)= 
+     V(b:Bool)=
        set_v_ . V(true)+
        reset_v_ . V(false)+
        get_v_(b) . V(b);

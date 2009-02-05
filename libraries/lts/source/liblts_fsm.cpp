@@ -117,7 +117,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
 
     spec = lps::specification(reconstructed_lps);
 
-    state_args[i] = (ATerm) expr; 
+    state_args[i] = (ATerm) expr;
   }
 
   ATerm r = (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args);
@@ -235,14 +235,14 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
       } else { // type == mcrl2
         state_pars = ATgetArguments((ATermAppl) state_values[i]);
       }
-      
+
       assert( ((unsigned int) ATgetLength(state_pars)) >= num_params );
       if ( ((unsigned int) ATgetLength(state_pars)) < num_params )
       {
         gsErrorMsg("invalid state in LTS (it does not have as much parameters as the LPS)\n");
         exit(1);
       }
-  
+
       for (unsigned int j=0; !ATisEmpty(state_pars); state_pars=ATgetNext(state_pars),j++)
       {
         ATbool is_new;
@@ -346,7 +346,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
     os << std::endl;
   }
-  
+
 
   // print transitions
   gsVerboseMsg("writing transitions...\n");
@@ -473,7 +473,7 @@ static bool isFSMState(ATerm a)
   if ( ATisList(a) )
   {
     ATermList l = (ATermList) a;
-  
+
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       if ( ATisAppl(ATgetFirst(l)) )

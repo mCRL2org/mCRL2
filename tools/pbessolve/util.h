@@ -14,9 +14,9 @@ bool var_in_list(mcrl2::data::data_variable vx, mcrl2::data::data_variable_list 
 //======================================================================
 {
   // comparing only the variable name
-  
+
  //  gsVerboseMsg("\n============= vx.name=%s, y=%s\n",pp(vx.name()).c_str(),pp(y).c_str());
-  
+
   mcrl2::data::data_variable_list::iterator i = y.begin();
   for ( ; i != y.end(); i++)
     if (i->name() == vx.name()) break;
@@ -46,7 +46,7 @@ mcrl2::data::data_variable_list dunion(mcrl2::data::data_variable_list x, mcrl2:
   mcrl2::data::data_variable_list result(y);
   for (mcrl2::data::data_variable_list::iterator vx = x.begin(); vx != x.end(); vx++)
     if (!var_in_list(*vx,y))
-      result = push_back(result,*vx);    
+      result = push_back(result,*vx);
   return result;
 }
 
@@ -57,7 +57,7 @@ void dunion(mcrl2::data::data_variable_list* x, mcrl2::data::data_variable_list 
 {
   for (mcrl2::data::data_variable_list::iterator vy = y.begin(); vy != y.end(); vy++)
     if (!var_in_list(*vy,*x))
-      (*x) = push_back(*x,*vy);    
+      (*x) = push_back(*x,*vy);
 }
 
 //======================================================================

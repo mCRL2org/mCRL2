@@ -25,8 +25,8 @@ typedef struct {
   mcrl2::data::sort_expression s;
   mcrl2::data::data_expression_list del;
 } t_sdel;
-  
-  
+
+
 class sort_instantiator {
  private:
   std::vector<t_sdel> instantiated_sorts;
@@ -35,6 +35,6 @@ class sort_instantiator {
   sort_instantiator() {};
   void set_data_operation_list(mcrl2::data::data_operation_list flist);
   void instantiate_sorts(mcrl2::data::sort_expression_list sl);
-  mcrl2::data::data_expression_list get_enumeration(mcrl2::data::sort_expression s);    
+  mcrl2::data::data_expression_list get_enumeration(mcrl2::data::sort_expression s);
   bool is_finite(mcrl2::data::sort_expression s);
 } ;

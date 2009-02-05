@@ -24,11 +24,11 @@ namespace modal {
 struct state_variable_negation
 {
   core::identifier_string X;
-  
+
   state_variable_negation(core::identifier_string X_)
     : X(X_)
   {}
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The result of the function

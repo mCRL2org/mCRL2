@@ -74,7 +74,7 @@ lps::specification untime(const lps::specification& spec) {
   data::data_assignment_list untime_initial_assignments; // Updated initial assignments
 
   gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
-  
+
   //If an lps has got no time at the initialization, return the original lps with all present delta's removed, and replaced with one true->delta.
   if (!lps.has_time())
   {
@@ -86,13 +86,13 @@ lps::specification untime(const lps::specification& spec) {
   // last_action_time is used later on in the code
   last_action_time = fresh_variable(spec, mcrl2::data::sort_expr::real(), "last_action_time");
   untime_process_parameters = push_back(lps.process_parameters(), last_action_time);
-      
+
   // Transpose the original summand list, and see if there are summands with time
   // If a summand has time, remove it, create new conditions for time, and add it to the new summand list (untime_summand_list)
   // If a summand does not contain time, first introduce time, and then untime it.
   int j = 0; //Counter only used for verbose output (keep track of the summand number
   for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i,++j)
-  { 
+  {
     gsVerboseMsg("Untiming summand %d\n", j);
 
     // Declarations within scope of for-loop
@@ -104,8 +104,8 @@ lps::specification untime(const lps::specification& spec) {
     // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
     if (!(i->is_delta())){
 
-      if (i->has_time()) 
-      { 
+      if (i->has_time())
+      {
 	// The summand is already timed, therefor there is no need to add an extra summation variable for time
 	untime_summation_variables = i->summation_variables();
 
@@ -158,10 +158,10 @@ lps::specification untime(const lps::specification& spec) {
                                );
 
   untime_summand_list = push_front(untime_summand_list, untime_summand);
-  
+
   // Reverse summand list, because it is the wrong way round now.
   untime_summand_list = atermpp::reverse(untime_summand_list);
-      
+
   // Create new LPS, this equals lps, except for the new summand list and the additional process parameter.
   untime_lps = lps::linear_process(lps.free_variables(), untime_process_parameters, untime_summand_list);
 
@@ -169,7 +169,7 @@ lps::specification untime(const lps::specification& spec) {
   untime_initial_assignments = push_back(spec.initial_process().assignments(), data_assignment(last_action_time, real(0)));
 
   // Create new specification, this equals original specification, except for the new LPS.
-  untime_specification = lps::specification(spec.data(), 
+  untime_specification = lps::specification(spec.data(),
 			                    spec.action_labels(),
 					    untime_lps, //new LPS
 					    process_initializer(spec.initial_process().free_variables(),

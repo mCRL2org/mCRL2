@@ -16,14 +16,14 @@
 #include <wx/notebook.h>
 
 AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
-  : wxDialog(parent, wxID_ANY, wxT("Layout optimization"), wxDefaultPosition, 
+  : wxDialog(parent, wxID_ANY, wxT("Layout optimization"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
 
 {
   app = owner;
-  
+
   size_t nrAlgos = app->getNumberOfAlgorithms();
-  
+
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
   if (nrAlgos > 1)
@@ -36,11 +36,11 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
     {
       LayoutAlgorithm* algo = app->getAlgorithm(i);
       wxPanel* algoWindow = new wxPanel(nb, wxID_ANY);
-      
+
       algo->setupPane(algoWindow);
 
       //TODO: Get algorithm name
-      nb->AddPage(algoWindow, wxT("Spring embedder"));       
+      nb->AddPage(algoWindow, wxT("Spring embedder"));
     }
     sizer->Add(nb, 0, wxEXPAND|wxALL, 5);
   }
@@ -50,14 +50,14 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
     LayoutAlgorithm* algo = app->getAlgorithm(0);
 
     wxPanel* algoWindow = new wxPanel(this, wxID_ANY);
-    
+
     algo->setupPane(algoWindow);
     PushEventHandler(algo);
 
     sizer->Add(algoWindow, 0, wxEXPAND|wxALL, 5);
   }
 
-    
+
   SetSizer(sizer);
   Fit();
   Layout();

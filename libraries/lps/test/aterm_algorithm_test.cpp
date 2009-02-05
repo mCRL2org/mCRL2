@@ -27,7 +27,7 @@ using namespace mcrl2::data::data_expr;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-std::string SPECIFICATION = 
+std::string SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"
@@ -105,7 +105,7 @@ void test_find_variable()
 {
   data_variable d("d:D");
   data_variable e("e:E");
-  data_expression d_e = and_(d, e); 
+  data_expression d_e = and_(d, e);
   data_variable v = find_variable(d_e);
   BOOST_CHECK(v == d);
 }
@@ -118,7 +118,7 @@ int test_main(int argc, char** argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
- 
+
   // find all action labels in lps
   std::set<action_label> labels;
   find_all_if(lps, is_action_label, inserter(labels, labels.end()));

@@ -27,12 +27,12 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
-  
+
 class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
-     
+
   public:
     pbes_rewr_tool()
       : super(
@@ -47,7 +47,7 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
     {
       using namespace pbes_system;
       using namespace utilities;
-      
+
       if (core::gsVerbose)
       {
         std::cerr << "pbesrewr parameters:" << std::endl;
@@ -55,11 +55,11 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
-    
+
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
-      
+
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());
 
@@ -68,7 +68,7 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       {
         case simplify:
         {
-          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);    
+          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
           pbesrewr(p, pbesr);
           break;
         }
@@ -99,10 +99,10 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           break;
         }
       }
-      
+
       // save the result
       p.save(m_output_filename);
-      
+
       return true;
     }
 };
@@ -127,7 +127,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface,
 
     static const char* option_transformation_strategy;
 
-    static bool initialise_types() 
+    static bool initialise_types()
     {
       tipi::datatype::enumeration< pbes_rewriter_type > storage_types;
 
@@ -183,12 +183,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::layout::elements;
   using namespace utilities;
 
-  if (!c.option_exists(option_rewrite_strategy)) 
+  if (!c.option_exists(option_rewrite_strategy))
   { c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);
   }
 
-  if (!c.option_exists(option_pbes_rewrite_strategy)) 
-  { c.add_option(option_pbes_rewrite_strategy).set_argument_value< 0 >(simplify); 
+  if (!c.option_exists(option_pbes_rewrite_strategy))
+  { c.add_option(option_pbes_rewrite_strategy).set_argument_value< 0 >(simplify);
   }
 
 
@@ -232,12 +232,12 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   /// Copy values from options specified in the configuration
 
-  if (c.option_exists(option_rewrite_strategy)) 
+  if (c.option_exists(option_rewrite_strategy))
   { rewrite_strategy_selector.set_selection(
         c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
   }
 
-  if (c.option_exists(option_pbes_rewrite_strategy)) 
+  if (c.option_exists(option_pbes_rewrite_strategy))
   { pbes_rewrite_strategy_selector.set_selection(
         c.get_option_argument< pbes_rewriter_type >(option_pbes_rewrite_strategy, 0));
   }
@@ -294,16 +294,16 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  try 
+  try
   {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
      squadt_interactor tool;
-#else 
+#else
      pbes_rewr_tool tool;
 #endif
     return tool.execute(argc, argv);
   }
-  catch (std::exception& e) 
+  catch (std::exception& e)
   {
     std::cerr << e.what() << std::endl;
   }

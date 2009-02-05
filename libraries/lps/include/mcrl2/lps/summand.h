@@ -43,19 +43,19 @@ class summand: public atermpp::aterm_appl
   protected:
     /// \brief The summation variables of the summand
     data::data_variable_list m_summation_variables;
-    
+
     /// \brief The condition of the summand
     data::data_expression m_condition;
 
     /// \brief If m_delta is true the summand is a delta summand
     bool m_delta;
-    
+
     /// \brief The actions of the summand
     action_list m_actions;
 
     /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
     /// the summand has no time.
-    data::data_expression m_time; 
+    data::data_expression m_time;
 
     /// \brief The assignments of the summand. These assignments are an encoding of
     /// the 'next states' of the summand.
@@ -152,7 +152,7 @@ class summand: public atermpp::aterm_appl
     bool is_tau() const
     {
       // return !is_delta() && actions().size() == 1 && core::detail::gsIsTau(actions().front());
-      
+
       /*
       // Written by Luc Engelen; no idea what it does.
       ATermAppl v_multi_action_or_delta = ATAgetArgument(*this, 2);
@@ -231,7 +231,7 @@ class summand: public atermpp::aterm_appl
       data::data_expression time = m_time.substitute(f);
 
       return summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
-    }     
+    }
 
     /// \brief Checks if the summand is well typed
     /// \return Returns true if
@@ -301,7 +301,7 @@ summand set_summation_variables(summand s, data::data_variable_list summation_va
                      s.is_delta           (),
                      s.actions            (),
                      s.time               (),
-                     s.assignments        () 
+                     s.assignments        ()
                     );
 }
 
@@ -317,7 +317,7 @@ summand set_condition(summand s, data::data_expression condition)
                  s.is_delta           (),
                  s.actions            (),
                  s.time               (),
-                 s.assignments        () 
+                 s.assignments        ()
                 );
 }
 
@@ -332,7 +332,7 @@ summand set_delta(summand s)
                  false,
                  s.actions            (),
                  s.time               (),
-                 s.assignments        () 
+                 s.assignments        ()
                 );
 }
 
@@ -348,7 +348,7 @@ summand set_actions(summand s, action_list actions)
                  s.is_delta           (),
                  actions,
                  s.time               (),
-                 s.assignments        () 
+                 s.assignments        ()
                 );
 }
 
@@ -364,7 +364,7 @@ summand set_time(summand s, data::data_expression time)
                      s.is_delta           (),
                      s.actions            (),
                      time,
-                     s.assignments        () 
+                     s.assignments        ()
                     );
 }
 
@@ -380,7 +380,7 @@ summand set_assignments(summand s, data::data_assignment_list assignments)
                  s.is_delta           (),
                  s.actions            (),
                  s.time               (),
-                 assignments 
+                 assignments
                 );
 }
 

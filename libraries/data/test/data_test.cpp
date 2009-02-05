@@ -24,11 +24,11 @@ using namespace mcrl2::data::data_expr;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   data_variable v;
   std::string name = v.name();
-  BOOST_CHECK(name == "@NoValue"); 
+  BOOST_CHECK(name == "@NoValue");
 
   data_expression d;
   data_expression d1 = pos(2);

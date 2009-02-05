@@ -164,7 +164,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
   } else {
     //implement expressions in the arguments of part
     AFun head = ATgetAFun(part);
-    int nr_args = ATgetArity(head);      
+    int nr_args = ATgetArity(head);
     if (nr_args > 0) {
       DECL_A(args,ATerm,nr_args);
       for (int i = 0; i < nr_args; i++) {
@@ -244,8 +244,8 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
     //check if the new variable occurs in terms
     done = !gsOccurs((ATerm) result, (ATerm) terms);
   }
-  return result;  
-} 
+  return result;
+}
 
   }   // namespace core
 }     // namespace mcrl2

@@ -18,7 +18,7 @@ using namespace std;
 
 
 // --------------------
-Value::Value( 
+Value::Value(
     const int &idx,
     const string &val )
 // --------------------
@@ -41,7 +41,7 @@ Value::Value( const Value &val )
 Value::~Value()
 // ------------
 {}
-	
+
 
 // -- set functions -------------------------------------------------
 
@@ -60,7 +60,7 @@ void Value::setValue( const string &val )
 {
     value = val;
 }
-    
+
 
 // -- get functions -------------------------------------------------
 

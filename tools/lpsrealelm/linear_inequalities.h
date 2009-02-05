@@ -45,7 +45,7 @@ inline std::string pp_vector(const std::vector < linear_inequality > &inequaliti
 
 class linear_inequality
 {
-  public: 
+  public:
     enum comparison_t { equal, less, less_eq };
     typedef atermpp::map < mcrl2::data::data_variable, mcrl2::data::data_expression > lhs_t;
     // void set_factor_for_a_variable(const data_variable x,const data_expression e);
@@ -66,7 +66,7 @@ class linear_inequality
     comparison_t m_comparison;
 
     void parse_and_store_expression(
-                      const data_expression e, 
+                      const data_expression e,
                       const rewriter& r,
                       bool negate=false,
                       const data_expression factor=real_one())
@@ -95,9 +95,9 @@ class linear_inequality
       }
       else if (is_data_variable(e))
       { if (e.sort()=sort_expr::real())
-        { 
+        {
           if(m_lhs.find(e) == m_lhs.end())
-          { 
+          {
             set_factor_for_a_variable(e,(negate?r(data_expr::negate(factor)):r(factor)));
           }
           else
@@ -146,15 +146,15 @@ class linear_inequality
       { m_comparison=less_eq;
         negate=true;
       }
-      else throw mcrl2::runtime_error("Unexpected equality or inequality: " + pp(e)) ; 
-      
+      else throw mcrl2::runtime_error("Unexpected equality or inequality: " + pp(e)) ;
+
       data_expression lhs=lhs_(e);
       data_expression rhs=rhs_(e);
-  
+
       parse_and_store_expression(lhs,r,negate);
       parse_and_store_expression(rhs,r,!negate);
     }
- 
+
     linear_inequality(const data_expression lhs,
                       const data_expression rhs,
                       const comparison_t cmp,
@@ -167,7 +167,7 @@ class linear_inequality
 
 
     ~linear_inequality()
-    { 
+    {
     }
 
     lhs_t::const_iterator lhs_begin() const
@@ -178,7 +178,7 @@ class linear_inequality
     { return m_lhs.end();
     }
 
-    lhs_t &lhs() 
+    lhs_t &lhs()
     { return m_lhs;
     }
 
@@ -188,7 +188,7 @@ class linear_inequality
     }
 
     void swap(linear_inequality &l)
-    { 
+    {
       m_rhs.swap(l.m_rhs);
       m_lhs.swap(l.m_lhs);
       const comparison_t c(m_comparison);
@@ -200,7 +200,7 @@ class linear_inequality
     { assert(is_number(e));
       m_rhs[0]=e;
     }
- 
+
     void set_factor_for_a_variable(const data_variable x,const data_expression e)
     { assert(is_number(e));
       if (e==real_zero())
@@ -212,7 +212,7 @@ class linear_inequality
       else m_lhs[x]=e;
     }
 
-    data_expression get_factor_for_a_variable(const data_variable x) 
+    data_expression get_factor_for_a_variable(const data_variable x)
     {
       if (m_lhs.find(x) == m_lhs.end())
       { return real_zero();
@@ -223,29 +223,29 @@ class linear_inequality
     comparison_t comparison() const
     { return m_comparison;
     }
-    
+
     void set_comparison(comparison_t c)
     { m_comparison=c;
     }
 
     bool is_false() const
-    { 
-      return m_lhs.empty() && 
+    {
+      return m_lhs.empty() &&
         ((m_comparison==less_eq)?is_negative(rhs()):
         ((m_comparison==equal)?!is_zero(rhs()):!is_positive(rhs())));
-    } 
+    }
 
     bool is_true() const
-    { return m_lhs.empty() && 
+    { return m_lhs.empty() &&
         ((m_comparison==less_eq)?!is_negative(rhs()):
         ((m_comparison==equal)?is_zero(rhs()):is_positive(rhs())));
-    } 
+    }
 
     /// \brief Subtract the given equality, multiplied by f1/f2.
-    /// 
+    ///
     void subtract(const linear_inequality &e,
                   const rewriter &r)
-    { 
+    {
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
       { set_factor_for_a_variable(i->first,r(minus(get_factor_for_a_variable(i->first),i->second)));
@@ -255,10 +255,10 @@ class linear_inequality
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
     /// \brief Subtract the given equality, multiplied by f1/f2.
-    /// 
+    ///
     void subtract(const linear_inequality &e,
                   const data_expression f1,
-                  const data_expression f2, 
+                  const data_expression f2,
                   const rewriter &r)
     { data_expression f=r(mcrl2::data::divide(f1,f2));
       for(lhs_t::const_iterator i=e.lhs_begin();
@@ -270,18 +270,18 @@ class linear_inequality
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
     void typical_pair(
-            data_expression &lhs_expression, 
-            data_expression &rhs_expression, 
+            data_expression &lhs_expression,
+            data_expression &rhs_expression,
             const rewriter &r) const
-    { 
+    {
       if (lhs_begin()==lhs_end())
       { lhs_expression=real_zero();
         rhs_expression=rhs();
         return;
       }
-      
+
       data_expression factor=lhs_begin()->second;
-      
+
       for(lhs_t::const_iterator i=lhs_begin(); i!=lhs_end(); ++i)
       { data_variable v=i->first;
         data_expression e=multiply(r(mcrl2::data::divide(i->second,factor)),
@@ -306,13 +306,13 @@ class linear_inequality
         m_lhs[i->first]=r(mcrl2::data::divide(m_lhs[i->first],e));
       }
       set_rhs(r(mcrl2::data::divide(rhs(),e)));
-    }   
+    }
 
     void invert(const rewriter &r)
-    { 
+    {
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
-      { 
+      {
         m_lhs[i->first]=r(negate(m_lhs[i->first]));
       }
       set_rhs(r(negate(rhs())));
@@ -324,15 +324,15 @@ class linear_inequality
       }
 
     }
- 
+
     void add_variables(set < data_variable > & variable_set) const
-    { 
+    {
       for(lhs_t::const_iterator i=m_lhs.begin(); i!=m_lhs.end(); ++i)
       { variable_set.insert(i->first);
       }
     }
 
-};    
+};
 
 //static set < unsigned int > linear_inequality::m_empty_spots_in_rhss;
 //static atermpp::vector < mcrl2::data::data_expression > linear_inequality::m_rhss;
@@ -350,7 +350,7 @@ std::string string(const linear_inequality &l)
     else if (i->second==real_minus_one())
     { s=s + "-" + pp(i->first);
     }
-    else 
+    else
     { s=s + pp(i->second) + "*" + pp(i->first);
     }
   }
@@ -379,14 +379,14 @@ static data_expression init_real_zero(data_expression &real_zero)
 }
 
 static data_expression init_real_one(data_expression &real_one)
-{ real_one=gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprC1())), 
+{ real_one=gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprC1())),
                                        gsMakeDataExprC1());
   ATprotect(reinterpret_cast<ATerm*>(&real_one));
   return real_one;
 }
 
 static data_expression init_real_minus_one(data_expression &real_minus_one)
-{ real_minus_one=gsMakeDataExprNeg(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprC1())), 
+{ real_minus_one=gsMakeDataExprNeg(gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprC1())),
                               gsMakeDataExprC1()));
   ATprotect(reinterpret_cast<ATerm*>(&real_minus_one));
   return real_minus_one;
@@ -437,7 +437,7 @@ inline bool is_positive(const data_expression e)
 { // Assume data_expression is in normal form.
   assert(is_number(e));
   // std::cerr << "Is positive internal " << lhs_(e) << "\n";
-  
+
   return (e!=real_zero()) && (gsIsDataExprCInt(e) || (gsIsDataExprCReal(e) && is_positive(lhs_(e))));
 }
 
@@ -466,7 +466,7 @@ inline data_expression lhs_(const data_expression e)
 /// \param e A data expression
 /// \pre e is a data application d(x,y) with two arguments
 /// \ret y
-  
+
 inline data_expression rhs_(const data_expression e)
 {
   assert(is_data_application(e));
@@ -493,7 +493,7 @@ bool is_inconsistent(
 /// \brief Eliminate variables from inequalities using Gauss elimination and
 ///        Fourier-Motzkin elimination.
 /// \details Deliver a set of inequalities equivalent to exists variables.inequalities.
-//           If the resulting list of inequalities is inconsistent, then [false] is 
+//           If the resulting list of inequalities is inconsistent, then [false] is
 //           returned. Furthermore, the list of resulting inequalities is minimal in
 //           the sense that no individual inequality can be removed, without altering the
 //           set of solutions of the inequalities.
@@ -506,8 +506,8 @@ bool is_inconsistent(
 
 template < class Data_variable_iterator >
 void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
-                     Data_variable_iterator variables_begin, 
-                     Data_variable_iterator variables_end, 
+                     Data_variable_iterator variables_begin,
+                     Data_variable_iterator variables_end,
                      std::vector < linear_inequality > &resulting_inequalities,
                      const rewriter& r)
 {
@@ -524,11 +524,11 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   std::vector < linear_inequality > inequalities;
   std::vector < linear_inequality > equalities;
   atermpp::vector < data_variable > vars=
-             gauss_elimination (inequalities_in, 
+             gauss_elimination (inequalities_in,
                                 equalities,      // Store all resulting equalities here.
                                 inequalities,    // Store all resulting non equalities here.
-                                variables_begin, 
-                                variables_end, 
+                                variables_begin,
+                                variables_end,
                                 r);
 
   // At this stage, the variables that should be eliminated only occur in
@@ -539,7 +539,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     vector < linear_inequality > new_inequalities;
     // The vectors below contain references for efficiency.
     // It is important that "inequalities" is not touched while using the arrays below.
-    vector < linear_inequality *> inequalities_with_positive_variable;  
+    vector < linear_inequality *> inequalities_with_positive_variable;
     vector < linear_inequality *> inequalities_with_negative_variable;  // Idem.
 
     for(std::vector < linear_inequality >::iterator j = inequalities.begin();
@@ -548,7 +548,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
       if (factor_it==j->lhs_end()) // variable *i does not occur in inequality *j.
       { new_inequalities.push_back(*j);
       }
-      else 
+      else
       { data_expression f=factor_it->second;
         j->lhs().erase(*i);
         j->divide(f,r);
@@ -573,13 +573,13 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     // Given inequalities x1 + bi * x <= ci
     //                   -x1 + bj * x <= cj
     // This is equivalent to bj * x + bi * x <= ci + cj
-    for(std::vector < linear_inequality *>::iterator j = inequalities_with_positive_variable.begin(); 
+    for(std::vector < linear_inequality *>::iterator j = inequalities_with_positive_variable.begin();
                     j != inequalities_with_positive_variable.end(); ++j)
-    { for(std::vector < linear_inequality *>::iterator k = inequalities_with_negative_variable.begin(); 
+    { for(std::vector < linear_inequality *>::iterator k = inequalities_with_negative_variable.begin();
                     k != inequalities_with_negative_variable.end(); ++k)
       { linear_inequality e= *(*j);
         e.subtract(*(*k),r);
-        e.set_comparison(((*j)->comparison()==linear_inequality::less_eq) && 
+        e.set_comparison(((*j)->comparison()==linear_inequality::less_eq) &&
                          ((*k)->comparison()==linear_inequality::less_eq)?
                                 linear_inequality::less_eq:
                                 linear_inequality::less);
@@ -597,7 +597,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     }
     inequalities.swap(new_inequalities);
   }
-  
+
   resulting_inequalities.swap(inequalities);
   // Add the equalities to the inequalities and return the result
   for(std::vector < linear_inequality > :: const_iterator i=equalities.begin();
@@ -611,7 +611,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   { std::cerr << "Fourier-Motzkin elimination yields " + pp_vector(resulting_inequalities) + "\n";
   }
 }
- 
+
 
 
 /// \brief Remove every redundant inequality from a set of inequalities.
@@ -620,12 +620,12 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 ///          be removed without changing the set of solutions of the inequalities.
 ///          Redundancy of equalities is not checked, because this is quite expensive.
 /// \param inequalities A list of inequalities
-/// \param resulting_inequalities A list of inequalities to which the result is stored. 
+/// \param resulting_inequalities A list of inequalities to which the result is stored.
 //                                Initially this list must be empty.
 /// \param r A rewriter
 
 inline void remove_redundant_inequalities(
-              const std::vector < linear_inequality > &inequalities, 
+              const std::vector < linear_inequality > &inequalities,
               std::vector < linear_inequality > &resulting_inequalities,
               const rewriter &r)
 {
@@ -650,7 +650,7 @@ inline void remove_redundant_inequalities(
       i++;
       /* resulting_inequalities[i].set_comparison(linear_inequality::less);
       if (is_inconsistent(resulting_inequalities,r))
-      { 
+      {
         resulting_inequalities[i].invert(r);
         resulting_inequalities[i].set_comparison(linear_inequality::less);
         if (is_inconsistent(resulting_inequalities,r))
@@ -661,31 +661,31 @@ inline void remove_redundant_inequalities(
           }
           resulting_inequalities.pop_back();
         }
-        else 
-        { 
+        else
+        {
           resulting_inequalities[i].invert(r);
           resulting_inequalities[i].set_comparison(linear_inequality::equal);
           ++i;
-        } 
+        }
       }
       else
       { resulting_inequalities[i].set_comparison(linear_inequality::equal);
         ++i;
       } */
     }
-    else 
-    { 
+    else
+    {
       resulting_inequalities[i].invert(r);
       if (is_inconsistent(resulting_inequalities,r))
-      { 
+      {
         if (i+1<resulting_inequalities.size())
         { // Copy the last element to the current position.
           resulting_inequalities[i].swap(resulting_inequalities.back());
         }
         resulting_inequalities.pop_back();
       }
-      else 
-      { 
+      else
+      {
         resulting_inequalities[i].invert(r);
         ++i;
       }
@@ -697,7 +697,7 @@ inline void remove_redundant_inequalities(
 /// \brief Determine whether a list of data expressions is inconsistent
 /// \details First it is checked whether false is among the input. If
 ///          not, Fourier-Motzkin is applied to all variables in the
-///          inequalities. If the empty set of equalities is the result, 
+///          inequalities. If the empty set of equalities is the result,
 ///          the input was consistent. Otherwise the resulting set contains
 ///          an inconsistent inequality.
 /// \param inequalities A list of inequalities
@@ -710,15 +710,15 @@ inline bool is_inconsistent(
               const rewriter& r)
 {
   // If false is among the inequalities, [false] is the minimal result.
-  for(std::vector < linear_inequality >::const_iterator i=inequalities.begin(); 
+  for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
   { if(i->is_false())
     { return true;
     }
   }
-  
+
   atermpp::set<data_variable> dvs;
-  for(std::vector < linear_inequality >::const_iterator i=inequalities.begin(); 
+  for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
   { i->add_variables(dvs);
   }
@@ -733,12 +733,12 @@ inline bool is_inconsistent(
   }
   // Check if result contains false
 
-  for(std::vector < linear_inequality >::const_iterator i=resulting_inequalities.begin(); 
+  for(std::vector < linear_inequality >::const_iterator i=resulting_inequalities.begin();
                  i!=resulting_inequalities.end(); ++i)
   { if(i->is_false())
     { return true;
     }
-    else 
+    else
     { assert(0); // All inequalities in resulting_inequalities must be false;
     }
   }
@@ -767,11 +767,11 @@ inline bool is_inconsistent(
 
 template < class Variable_iterator >
 atermpp::vector < data_variable > gauss_elimination(
-                         const std::vector < linear_inequality > &inequalities, 
+                         const std::vector < linear_inequality > &inequalities,
                          std::vector < linear_inequality > &resulting_equalities,
                          std::vector < linear_inequality > &resulting_inequalities,
-                         Variable_iterator variables_begin, 
-                         Variable_iterator variables_end, 
+                         Variable_iterator variables_begin,
+                         Variable_iterator variables_end,
                          const rewriter& r)
 {
   // gsDebugMsg("Trying to eliminate variables %P from system %P using gauss elimination\n", (ATermList)variables, (ATermList)inequalities);
@@ -835,7 +835,7 @@ atermpp::vector < data_variable > gauss_elimination(
           else ++k;
         }
 
-        for(unsigned int k = 0; k<resulting_equalities.size(); ) 
+        for(unsigned int k = 0; k<resulting_equalities.size(); )
         { if (k==j)
           { ++k;
           }
@@ -862,7 +862,7 @@ atermpp::vector < data_variable > gauss_elimination(
                 // that are true.
                 check_equalities_for_redundant_inequalities=true;
               }
-              else 
+              else
               { if ((k+1)<resulting_equalities.size())
                 { resulting_equalities[k].swap(resulting_equalities.back());
                 }
@@ -898,12 +898,12 @@ atermpp::vector < data_variable > gauss_elimination(
     remaining_variables.push_back(*i);
   }
 
-  // gsDebugMsg("Gauss elimination eliminated variables %P, resulting in the system %P\n", 
+  // gsDebugMsg("Gauss elimination eliminated variables %P, resulting in the system %P\n",
   //                       (ATermList)eliminated_variables, (ATermList)inequalities);
 
   return remaining_variables;
 }
-  
+
 
 } // namespace data
 

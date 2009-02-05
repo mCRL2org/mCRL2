@@ -171,25 +171,25 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
   ATermAppl sort_spec  = ATAgetArgument(data_spec, 0);
   ATermList sort_decls = ATLgetArgument(sort_spec, 0);
   sort_decls = ATconcat(data_decls.sorts, sort_decls);
-  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_decls, 0);  
+  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_decls, 0);
   data_spec = ATsetArgument(data_spec, (ATerm) sort_spec, 0);
   //add constructor operation declarations
   ATermAppl cons_spec  = ATAgetArgument(data_spec, 1);
   ATermList cons_decls = ATLgetArgument(cons_spec, 0);
   cons_decls = ATconcat(data_decls.cons_ops, cons_decls);
-  cons_spec = ATsetArgument(cons_spec, (ATerm) cons_decls, 0);  
+  cons_spec = ATsetArgument(cons_spec, (ATerm) cons_decls, 0);
   data_spec = ATsetArgument(data_spec, (ATerm) cons_spec, 1);
   //add operation declarations
   ATermAppl map_spec  = ATAgetArgument(data_spec, 2);
   ATermList map_decls = ATLgetArgument(map_spec, 0);
   map_decls = ATconcat(data_decls.ops, map_decls);
-  map_spec = ATsetArgument(map_spec, (ATerm) map_decls, 0);  
+  map_spec = ATsetArgument(map_spec, (ATerm) map_decls, 0);
   data_spec = ATsetArgument(data_spec, (ATerm) map_spec, 2);
   //add data equation declarations
   ATermAppl data_eqn_spec  = ATAgetArgument(data_spec, 3);
   ATermList data_eqn_decls = ATLgetArgument(data_eqn_spec, 0);
   data_eqn_decls = ATconcat(data_decls.data_eqns, data_eqn_decls);
-  data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);  
+  data_eqn_spec = ATsetArgument(data_eqn_spec, (ATerm) data_eqn_decls, 0);
   data_spec = ATsetArgument(data_spec, (ATerm) data_eqn_spec, 3);
   //return the new specification
   if (gsIsDataSpec(spec)) {

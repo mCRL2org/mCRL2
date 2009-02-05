@@ -28,7 +28,7 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss) {
   settings = ss;
   settings->subscribe(Quality,this);
 	settings->subscribe(BranchTilt,this);
-  
+
   cos_theta = NULL;
   sin_theta = NULL;
   coneDB = new ConeDB();
@@ -125,12 +125,12 @@ void PrimitiveFactory::notify(SettingID s) {
 			break;
 	}
 }
-  
+
 void PrimitiveFactory::update_geom_tables() {
   int qlt = settings->getInt(Quality);
   cos_theta = (float*)realloc(cos_theta,2*qlt*sizeof(float));
   sin_theta = (float*)realloc(sin_theta,2*qlt*sizeof(float));
-  
+
   float d_theta = PI / qlt;
   float theta = 0.0f;
   for (int i = 0; i < 2*qlt; ++i) {

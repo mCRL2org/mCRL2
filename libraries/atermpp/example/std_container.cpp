@@ -37,7 +37,7 @@ class A
 
     const ATerm& term() const
     { return x; }
-    
+
     ATerm& term()
     { return x; }
 
@@ -61,7 +61,7 @@ class A
     {
       return value() < other.value();
     }
-    
+
     void protect()
     {
       ATprotect(&x);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   d.push_front(make_term("f(3)"));
   copy(d.begin(), d.end(), ostream_iterator<aterm_appl>(cout, "\n"));
   cout << endl;
- 
+
   // vector
   atermpp::vector<aterm_appl> v;
   v.reserve(5);
@@ -147,8 +147,8 @@ int main(int argc, char* argv[])
     m1.insert(make_pair(i, aterm_int(i)));
   m1.insert(make_pair(1, aterm_int(2)));
 
-  AT_collect(); // force garbage collection 
-  AT_collect(); // force garbage collection 
- 
+  AT_collect(); // force garbage collection
+  AT_collect(); // force garbage collection
+
   return 0;
 }

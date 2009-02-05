@@ -74,7 +74,7 @@ class action_formula: public atermpp::aterm_appl
     action_formula substitute(Substitution f) const
     {
       return action_formula(f(atermpp::aterm(*this)));
-    }     
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ typedef atermpp::term_list<action_formula> action_formula_list;
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm
-{ 
+{
 
   /// \brief Make the value true
   /// \return The value \p true
@@ -93,7 +93,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActTrue());
   }
-  
+
   /// \brief Make the value false
   /// \return The value \p false
   inline
@@ -101,7 +101,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActFalse());
   }
-  
+
   /// \brief Make a negation
   /// \param p An action formula
   /// \return The value <tt>!p</tt>
@@ -110,7 +110,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActNot(p));
   }
-  
+
   /// \brief Make a conjunction
   /// \param p An action formula
   /// \param q An action formula
@@ -120,7 +120,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActAnd(p,q));
   }
-  
+
   /// \brief Make a disjunction
   /// \param p An action formula
   /// \param q An action formula
@@ -130,7 +130,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActOr(p,q));
   }
-  
+
   /// \brief Make an implication
   /// \param p An action formula
   /// \param q An action formula
@@ -140,7 +140,7 @@ namespace act_frm
   {
     return action_formula(core::detail::gsMakeActImp(p,q));
   }
-  
+
   /// \brief Make a universal quantification
   /// \pre l may not be empty
   /// \param l A sequence of data variables
@@ -221,7 +221,7 @@ namespace accessors
     assert(core::detail::gsIsMultAct(t));
     return atermpp::list_arg1(t);
   }
-  
+
   /// \brief Returns the action formula argument of an expression of type not, at, exists or forall.
   /// \param t An action formula
   /// \return The action formula argument of an expression of type not, at, exists or forall.
@@ -235,7 +235,7 @@ namespace accessors
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return atermpp::arg2(t);
   }
-  
+
   /// \brief Returns the left hand side of an expression of type and/or/imp
   /// \param t An action formula
   /// \return The left hand side of an expression of type and/or/imp
@@ -245,7 +245,7 @@ namespace accessors
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return atermpp::arg1(t);
   }
-  
+
   /// \brief Returns the right hand side of an expression of type and/or/imp.
   /// \param t An action formula
   /// \return The right hand side of an expression of type and/or/imp.
@@ -255,7 +255,7 @@ namespace accessors
     assert(core::detail::gsIsActAnd(t) || core::detail::gsIsActOr(t) || core::detail::gsIsActImp(t));
     return atermpp::arg2(t);
   }
-  
+
   /// \brief Returns the variables of a quantification expression
   /// \param t An action formula
   /// \return The variables of a quantification expression
@@ -265,7 +265,7 @@ namespace accessors
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
     return atermpp::list_arg1(t);
   }
-  
+
   /// \brief Returns the time of an at expression
   /// \param t An action formula
   /// \return The time of an at expression

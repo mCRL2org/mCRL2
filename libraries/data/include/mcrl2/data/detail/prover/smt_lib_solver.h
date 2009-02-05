@@ -116,7 +116,7 @@ namespace mcrl2 {
        *    inline static char* name() {
        *      return "CVC3";
        *    }
-       * 
+       *
        *    inline static void exec() {
        *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
        *    }
@@ -125,7 +125,7 @@ namespace mcrl2 {
        **/
       template < typename T >
       class binary_smt_solver {
-      
+
         protected:
 
           // \brief Calls one of the exec functions
@@ -155,22 +155,22 @@ namespace mcrl2 {
       /// The static method usable can be used to check checks if CVC's executable is indeed available.
       ///
       /// The method SMT_Solver_CVC::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
-      /// indicates whether or not this formula is satisfiable. 
+      /// indicates whether or not this formula is satisfiable.
       class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_solver > {
         friend class binary_smt_solver< cvc_smt_solver >;
-      
+
         private:
-      
+
           inline static char const* name() {
             return "CVC3";
           }
-      
+
           inline static void exec() {
             ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
           }
-      
+
         public:
-      
+
           /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
           /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
           /// clauses
@@ -188,22 +188,22 @@ namespace mcrl2 {
       /// The static method usable can be used to check checks if CVC's executable is indeed available.
       ///
       /// The method is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
-      /// indicates whether or not this formula is satisfiable. 
+      /// indicates whether or not this formula is satisfiable.
       class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_smt_solver > {
         friend class binary_smt_solver< ario_smt_solver >;
-      
+
         private:
-      
+
           inline static char const* name() {
             return "Ario";
           }
-      
+
           inline static void exec() {
             ::execlp("ario", "ario", (char*)0);
           }
-      
+
         public:
-      
+
           /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
           /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
           /// clauses

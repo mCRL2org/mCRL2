@@ -460,7 +460,7 @@ struct process_expression_visitor
       }
       leave_choice();
     }
-    
+
   }
 };
 
@@ -902,7 +902,7 @@ struct process_expression_visitor<void>
       }
       leave_choice();
     }
-    
+
   }
 };
 //--- end generated text ---//

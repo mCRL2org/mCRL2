@@ -174,9 +174,9 @@ using namespace mcrl2::core;
       clinterface.add_prover_options();
 
       clinterface.
-        add_option("invariant", make_mandatory_argument("INVFILE"), 
+        add_option("invariant", make_mandatory_argument("INVFILE"),
           "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
-        add_option("summand", make_mandatory_argument("NUM"), 
+        add_option("summand", make_mandatory_argument("NUM"),
           "eliminate or simplify the summand with number NUM only", 's').
         add_option("no-check",
           "do not check if the invariant holds before eliminating unreachable summands", 'n').
@@ -221,7 +221,7 @@ using namespace mcrl2::core;
         }
         if (parser.options.count("summand")) {
           f_summand_number = parser.option_argument_as< size_t >("summand");
- 
+
           if (f_summand_number < 1) {
             parser.error("The summand number must be greater than or equal to 1.\n");
           }
@@ -271,7 +271,7 @@ using namespace mcrl2::core;
 
       // type checking and data implementation of data expressions use an lps
       // before data implementation
-      ATermAppl f_reconstructed_spec = reconstruct_spec(lps_specification);      
+      ATermAppl f_reconstructed_spec = reconstruct_spec(lps_specification);
 
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name.c_str());
@@ -284,21 +284,21 @@ using namespace mcrl2::core;
       if(!f_invariant){
         exit(1);
       }
-      
+
       //typecheck the invariant formula
       ATermList vars = ATLgetArgument(ATAgetArgument(f_reconstructed_spec, 2), 1);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
-      } 
+      }
       f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_spec, var_table);
       ATtableDestroy(var_table);
       if(!f_invariant){
         gsErrorMsg("Typechecking of the invariant formula failed.\n");
         exit(1);
       }
-     
+
       //data implement the invariant formula
       f_invariant = implement_data_data_expr(f_invariant,f_reconstructed_spec);
       if(!f_invariant){
@@ -367,7 +367,7 @@ using namespace mcrl2::core;
 
     try {
       LPS_Inv_Elm v_lps_inv_elm;
-     
+
       if (v_lps_inv_elm.get_options(argc, argv)) {
         v_lps_inv_elm.read_input();
         if (v_lps_inv_elm.check_invariant()) {

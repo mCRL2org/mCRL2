@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsbinary.cpp
-/// \brief The binary tool, this runs the binary algorithm. 
+/// \brief The binary tool, this runs the binary algorithm.
 
 #include "boost.hpp" // precompiled headers
 

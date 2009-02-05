@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/core/messaging.h
-/// \brief Controlling and printing of messages.  
+/// \brief Controlling and printing of messages.
 
 #ifndef __MCRL2_MESSAGING_H__
 #define __MCRL2_MESSAGING_H__
@@ -19,26 +19,26 @@
 namespace mcrl2 {
   /// \brief The main namespace for the Core library.
   namespace core {
-  
+
       //Message printing options
       //------------------------
 
       /// \brief Printing of warnings, verbose information and extended debugging
       ///      information during program execution is disabled.
       void gsSetQuietMsg();
-  
+
       /// \brief Printing of warnings during program execution is enabled. Printing of
       ///      verbose information and extended debugging information is disabled.
       void gsSetNormalMsg();
-  
+
       /// \brief Printing of warnings and verbose information during program execution
       ///      is enabled. Printing of extended debugging information is disabled.
       void gsSetVerboseMsg();
-  
+
       /// \brief Printing of warnings, verbose information and extended debugging
       ///      information during program execution is enabled.
       void gsSetDebugMsg();
-  
+
       /// \brief If gsQuiet is set, printing of warnings, verbose information and extended debugging
       /// information during program execution is disabled.
       extern bool gsQuiet;
@@ -54,10 +54,10 @@ namespace mcrl2 {
       /// \brief If gsDebug is set, printing of warnings, verbose information and extended debugging
       /// information during program execution is enabled.
       extern bool gsDebug;
-  
+
       /// \brief Type for message distinction (by purpose).
       enum messageType {gs_notice, gs_warning, gs_error};
- 
+
       /// \brief Function for printing regular messages  .
       void gsMessage(const char *Format, ...);
       /// \brief Function for printing error messages.

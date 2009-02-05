@@ -31,12 +31,12 @@ class State
     // Constructor & destructor
     State(unsigned int value, bool isInitial);
     ~State();
- 
+
     // Methods
     void addOutTransition(Transition* ot);
     void addInTransition(Transition* it);
     void addSelfLoop(Transition* sl);
-    void select(); 
+    void select();
     void deselect();
     void lock();
     void drag();
@@ -84,7 +84,7 @@ class State
     bool selected;
     bool locked;
     bool dragged;
-  
+
     double outCurve;
 
     unsigned int value;

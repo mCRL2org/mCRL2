@@ -50,9 +50,9 @@ StandardSimulator::StandardSimulator()
     ATprotectList(&trace);
     ecart = ATmakeList0();
     ATprotectList(&ecart);
-    
+
     seen_states = ATindexedSetCreate(100,80);
-    
+
     tau_prior = false;
     error = false;
 
@@ -66,7 +66,7 @@ StandardSimulator::~StandardSimulator()
 	{
 		(*i)->Unregistered();
 	}
-	
+
 	if ( initial_state != NULL )
 	{
 		delete nextstategen;
@@ -92,7 +92,7 @@ void StandardSimulator::LoadSpec(ATermAppl spec)
 	    state_vars = ATinsert(state_vars,ATgetFirst(l));
     }
     state_vars = ATreverse(state_vars);
-    
+
     delete nextstategen;
     delete nextstate;
     nextstate = createNextState(spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
@@ -175,7 +175,7 @@ bool StandardSimulator::Undo()
 
 		SetCurrentState(state);
 		UpdateTransitions();
-		
+
 		for (viewlist::iterator i = views.begin(); i != views.end(); i++)
 		{
 			(*i)->Undo(1);
@@ -268,7 +268,7 @@ bool StandardSimulator::ChooseTransition(unsigned int index)
 			} // else
 			ATindexedSetReset(seen_states);
 		}
-		
+
 		return true;
 	} else {
 		return false;
@@ -486,7 +486,7 @@ void StandardSimulator::LoadTrace(const string &filename)
                             ss << "could not perform action " << idx << " (" << ATwriteToString((ATerm) act) << ") from trace";
                             throw ss.str();
 		    }
-	    }	    
+	    }
 	}
 
 	for (ATermList l=newtrace; !ATisEmpty(l); l=ATgetNext(l) )

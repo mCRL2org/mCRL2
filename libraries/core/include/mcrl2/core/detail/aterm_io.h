@@ -39,7 +39,7 @@ namespace detail {
         stream = fopen(filename.c_str(), "rb");
       }
       if (stream == NULL) {
-        std::string err_msg(strerror(errno)); 
+        std::string err_msg(strerror(errno));
         if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
           err_msg.replace(err_msg.length()-1, 1, "");
         }
@@ -72,7 +72,7 @@ namespace detail {
         stream = fopen(filename.c_str(), binary?"wb":"w");
       }
       if (stream == NULL) {
-        std::string err_msg(strerror(errno)); 
+        std::string err_msg(strerror(errno));
         if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
           err_msg.replace(err_msg.length()-1, 1, "");
         }

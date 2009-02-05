@@ -32,7 +32,7 @@ using namespace boost;
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   cout << "check_term_LinProcSpec(spec) = " << check_term_LinProcSpec(spec) << endl;
 
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
   {
 //    cout << "summand " << pp(*i) << endl;
   }
-  
+
   summand s = spec.process().summands().front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
   o1 << lps.to_string();
 
   ofstream o2("lps2.txt");
-  o2 << lps.substitute(a).to_string(); 
+  o2 << lps.substitute(a).to_string();
 
   return 0;
 }

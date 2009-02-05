@@ -92,7 +92,7 @@ namespace utility {
     out << "<message type=\"" << o.m_type << "\">";
 
     size_t i = 0;
-    size_t j = o.m_content.find(']', 0); 
+    size_t j = o.m_content.find(']', 0);
     bool   f = true;
 
     while (j < o.m_content.size() - 3) {
@@ -110,7 +110,7 @@ namespace utility {
         }
       }
 
-      j = o.m_content.find(']', j); 
+      j = o.m_content.find(']', j);
     }
 
     if (!o.m_content.substr(i).empty()) {
@@ -180,7 +180,7 @@ namespace utility {
     for (tipi::configuration::position_list::const_iterator i = c.m_positions.begin(); i != c.m_positions.end(); ++i) {
       if (c.is_option(**i)) {
         out << "<option id=\"" << c.get_identifier(**i) << "\"";
-    
+
         do_visit(static_cast < tipi::configuration::option const& >(**i));
 
         out << "</option>";
@@ -188,9 +188,9 @@ namespace utility {
       else {
         out << "<object id=\"" << c.get_identifier(**i) << "\" type=\""
             << std::string((c.is_input(**i)) ? "in" : "out") << "put\"";
-     
+
         do_visit(static_cast < tipi::configuration::object const& >(**i));
-     
+
         out << "/>";
       }
     }
@@ -206,7 +206,7 @@ namespace utility {
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::boolean const& e, std::string const& s) {
     out << "<boolean";
-    
+
     if (s.compare("true") == 0) {
       out << " value=\"" << s << "\"";
     }
@@ -254,7 +254,7 @@ namespace utility {
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_enumeration const& e, std::string const& s) {
     out << "<enumeration";
-   
+
     if (!s.empty()) {
       out << " value=\"" << s << "\"";;
     }
@@ -333,7 +333,7 @@ namespace utility {
       out << "<output-configuration format=\"" << (*i)->get_format()
           << "\" id=\"" << (*i)->m_identifier << "\"/>";
     }
- 
+
     out << "</capabilities>";
   }
 

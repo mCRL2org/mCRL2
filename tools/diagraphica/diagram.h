@@ -24,7 +24,7 @@ public:
 	// -- constructors and destructor -------------------------------
     Diagram( Mediator* m );
 	virtual ~Diagram();
-	
+
     // -- set functions ---------------------------------------------
     void addShape( Shape *s );
     void moveShapeToFront( const size_t &idx );
@@ -34,7 +34,7 @@ public:
 
     void setShowGrid( const bool &flag );
     void setSnapGrid( const bool &flag );
-    
+
     // -- get functions ---------------------------------------------
     int getSizeShapes();
     Shape* getShape( const size_t &idx );
@@ -48,7 +48,7 @@ public:
     void deleteShape( const size_t &idx );
 
     // -- vis functions ---------------------------------------------
-    void visualize( 
+    void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas );
     void visualize(
@@ -73,27 +73,27 @@ public:
 protected:
     // -- private utility functions ---------------------------------
     void initGridSettings();
-    
-    void drawAxes( 
-        const bool &inSelectMode, 
-        GLCanvas* canvas );
-    void drawBorder( 
-        const bool &inSelectMode, 
-        GLCanvas* canvas );
-    void drawBorderFlush( 
-        const bool &inSelectMode, 
-        GLCanvas* canvas );
-    void drawBorderFlush( 
-        const bool &inSelectMode, 
-        GLCanvas* canvas,
-        const double &opacity );
-    void drawGrid( 
-        const bool &inSelectMode, 
-        GLCanvas* canvas );
-    void drawShapes( 
+
+    void drawAxes(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    
+    void drawBorder(
+        const bool &inSelectMode,
+        GLCanvas* canvas );
+    void drawBorderFlush(
+        const bool &inSelectMode,
+        GLCanvas* canvas );
+    void drawBorderFlush(
+        const bool &inSelectMode,
+        GLCanvas* canvas,
+        const double &opacity );
+    void drawGrid(
+        const bool &inSelectMode,
+        GLCanvas* canvas );
+    void drawShapes(
+        const bool &inSelectMode,
+        GLCanvas* canvas );
+
     // -- data members ----------------------------------------------
     std::vector< Shape* > shapes; // composition
 
@@ -102,8 +102,8 @@ protected:
     double gridXLeft;
     double gridXRight;
     double gridYTop;
-    double gridYBottom;	
-    
+    double gridYBottom;
+
     // constants
     int SIZE_BORDER;
     int GRID_NUM_INTERV_HINT;

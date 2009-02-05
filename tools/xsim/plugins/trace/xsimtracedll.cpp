@@ -210,7 +210,7 @@ void XSimTraceDLL::Redo(unsigned int Count)
 void XSimTraceDLL::TraceChanged(ATermList Trace, unsigned int From)
 {
 	unsigned int l = traceview->GetItemCount();
-	
+
 	while ( l > From )
 	{
 		l--;

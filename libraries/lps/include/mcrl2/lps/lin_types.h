@@ -43,7 +43,7 @@ struct t_lin_options {
   RewriteStrategy rewrite_strategy;
   std::string infilename;
   std::string outfilename;
-  
+
   t_lin_options()
     : lin_method(lmRegular),
       no_intermediate_cluster(false),

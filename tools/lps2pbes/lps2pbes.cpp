@@ -166,7 +166,7 @@ class lps2pbes_tool
         "\n"
         "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>.");
 
-      clinterface.add_option("formula", make_mandatory_argument("FILE"), 
+      clinterface.add_option("formula", make_mandatory_argument("FILE"),
           "use the state formula from FILE", 'f');
       clinterface.add_option("timed",
           "use the timed version of the algorithm, even for untimed LPS's", 't');
@@ -189,7 +189,7 @@ class lps2pbes_tool
 
         if (parser.options.count("end-phase")) {
           std::string phase = parser.option_argument("end-phase");
-       
+
           if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
             end_phase = PH_PARSE;
           } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
@@ -398,7 +398,7 @@ class lps2pbes_tool
       /* Add output file to the configuration */
       if (c.output_exists("pbes_out")) {
         tipi::configuration::object& output_file = c.get_output("pbes_out");
-    
+
         output_file.location(c.get_output_name(".pbes"));
       }
       else {

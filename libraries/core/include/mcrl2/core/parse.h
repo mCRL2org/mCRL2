@@ -20,13 +20,13 @@
 
 namespace mcrl2 {
   namespace core {
-  
+
 /** \brief  Parse an mCRL2 identifier.
   * \param[in] se_stream An input stream from which can be read.
   * \post   The content of se_stream is parsed as an mCRL2 identifier.
   * \return The parsed identifier, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_identifier(std::istream &se_stream);
 
 
@@ -35,7 +35,7 @@ ATermAppl parse_identifier(std::istream &se_stream);
   * \post   The content of se_stream is parsed as an mCRL2 sort expression.
   * \return The parsed sort expression, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_sort_expr(std::istream &se_stream);
 
 
@@ -44,7 +44,7 @@ ATermAppl parse_sort_expr(std::istream &se_stream);
   * \post   The content of de_stream is parsed as an mCRL2 data expression.
   * \return The parsed data expression, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_data_expr(std::istream &de_stream);
 
 
@@ -53,7 +53,7 @@ ATermAppl parse_data_expr(std::istream &de_stream);
   * \post   The content of ps_stream is parsed as an mCRL2 data specification.
   * \return The parsed data specification, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_data_spec(std::istream &ps_stream);
 
 
@@ -62,7 +62,7 @@ ATermAppl parse_data_spec(std::istream &ps_stream);
   * \post   The content of ma_stream is parsed as an mCRL2 multiaction.
   * \return The parsed multiaction, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_mult_act(std::istream &ma_stream);
 
 
@@ -71,7 +71,7 @@ ATermAppl parse_mult_act(std::istream &ma_stream);
   * \post   The content of pe_stream is parsed as an mCRL2 process expression.
   * \return The parsed process expression, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_proc_expr(std::istream &pe_stream);
 
 
@@ -81,7 +81,7 @@ ATermAppl parse_proc_expr(std::istream &pe_stream);
   *         specification.
   * \return the parsed process specification, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_proc_spec(std::istream &ps_stream);
 
 
@@ -90,7 +90,7 @@ ATermAppl parse_proc_spec(std::istream &ps_stream);
   * \post   The content of sf_stream is parsed as an mCRL2 state formula.
   * \return The parsed state formula, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_state_frm(std::istream &sf_stream);
 
 
@@ -100,7 +100,7 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
   *         specification.
   * \return The parsed rename rule file, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_action_rename_spec(std::istream &sf_stream);
 
 
@@ -111,7 +111,7 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
   *         PBES specification.
   * \return The parsed PBES specification, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
 
 
@@ -122,7 +122,7 @@ ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
   *         variables
   * \return The parsed list of data variables, if everything went well;
   *         NULL, otherwise.
-**/ 
+**/
 ATermList parse_data_vars(std::istream &sf_stream);
 
   }

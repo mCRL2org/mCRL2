@@ -37,14 +37,14 @@ data_variable nat(std::string name)
 
 data::rewriter make_data_rewriter(const data_specification& data_spec)
 {
-  data::rewriter datar(data_spec); 
+  data::rewriter datar(data_spec);
   return datar;
 }
 
 struct A
 {
   data::rewriter& r_;
-  
+
   A(data::rewriter& r)
     : r_(r)
   { }
@@ -59,7 +59,7 @@ A make_A(data::rewriter& d)
 void test1()
 {
   using namespace data_expr;
-  
+
   std::string DATA_SPEC1 =
   "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
   ;
@@ -67,11 +67,11 @@ void test1()
   rewriter datar(data);
   data_variable x = nat("x");
   data_variable y = nat("y");
-  data_variable z = nat("z"); 
+  data_variable z = nat("z");
   data_expression t = datar(greater(min_(x,y), z));
 
   BOOST_CHECK(datar(plus(nat(1), nat(2))) == nat(3));
-  
+
   // copy a rewriter
   data::rewriter datar1 = datar;
   t = datar1(greater(min_(x,y), z));
@@ -79,26 +79,26 @@ void test1()
   // rewriter as return value
   data::rewriter datar2 = make_data_rewriter(data);
   t = datar2(greater(min_(x,y), z));
-  
+
   A a(datar);
   data_expression qa = a.r_(t);
 
   A b = a;
   data_expression qb = b.r_(t);
-  
+
   A c = make_A(datar);
   data_expression qc = c.r_(t);
 }
 
 void test2()
 {
-  rewriter r; 
+  rewriter r;
   data_expression d1 = parse_data_expression("2+7");
   data_expression d2 = parse_data_expression("4+5");
   assert(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<atermpp::map<data_variable, data_expression> > sigma; 
+  rewriter_map<atermpp::map<data_variable, data_expression> > sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -120,19 +120,19 @@ void test3()
     "    dummy5:Int;  \n"
     "    dummy6:Real; \n"
     "eqn dummy1 = 1;  \n"
-  ); 
+  );
   rewriter_with_variables r(data_spec);
   data_expression x = parse_data_expression("b == b", "b: Bool;\n");
   std::set<data_variable> v = find_all_data_variables(x);
   BOOST_CHECK(v.size() == 1);
-  
+
   data_expression_with_variables y(x, data_variable_list(v.begin(), v.end()));
   data_expression_with_variables z = r(y);
   std::cout << "y = " << pp(y) << " " << pp(y.variables()) << std::endl;
   BOOST_CHECK(z.variables().empty());
 
   std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<substitution_map> sigma; 
+  rewriter_map<substitution_map> sigma;
   data_variable m = parse_data_variable("m:Pos");
   data_variable n = parse_data_variable("n:Pos");
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
@@ -143,7 +143,7 @@ void test3()
   data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
   data_expression_with_variables d2(parse_data_expression("7"));
   BOOST_CHECK(r(d1, sigma) == r(d2));
-  
+
   BOOST_CHECK(d1.variables().size() == 0);
   data_expression_with_variables rd1 = r(d1);
   BOOST_CHECK(rd1.variables().size() == 2);
@@ -195,12 +195,12 @@ void test4()
 	std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
 	std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, core::pp(data_spec), sigma); 
+  test_expressions(R, expr1, expr2, core::pp(data_spec), sigma);
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
   test1();
   test2();
   test3();

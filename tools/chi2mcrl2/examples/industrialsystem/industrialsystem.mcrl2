@@ -14,20 +14,20 @@ act Send_Bool, Recv_Bool, Comm_Bool: Nat#Nat#Bool;
 act Send_Nat, Recv_Nat, Comm_Nat: Nat#Nat#Nat;
 act Send_s0, Recv_s0, Comm_s0: Nat#Nat#s0;
 
-act Terminator; 
- 
-proc 
-  Din(es: Nat, es_hash: Nat, state_0: Nat)= 
+act Terminator;
+
+proc
+  Din(es: Nat, es_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> Send_Nat(es, es_hash, 1).Din(es, es_hash, 0) <> delta
 	;
 
-proc 
-  Dout(store: s0, se: Nat, se_hash: Nat, state_0: Nat)= 
+proc
+  Dout(store: s0, se: Nat, se_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> sum se0:s0. Recv_s0(se, se_hash, se0).Dout(se0, se, se_hash, 0) <> delta
 	;
 
-proc 
-  S(x: Nat, y: s0, xs: s0, ys: s1, es: Nat, es_hash: Nat, st: Nat, st_hash: Nat, ts: Nat, ts_hash: Nat, se: Nat, se_hash: Nat, state_0: Nat)= 
+proc
+  S(x: Nat, y: s0, xs: s0, ys: s1, es: Nat, es_hash: Nat, st: Nat, st_hash: Nat, ts: Nat, ts_hash: Nat, se: Nat, se_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> tau.S(x, y, [], ys, es, es_hash, st, st_hash, ts, ts_hash, se, se_hash, 1) <> delta
 	+ ( state_0 == 1) -> tau.S(x, y, xs, [], es, es_hash, st, st_hash, ts, ts_hash, se, se_hash, 2) <> delta
 	+ ( state_0 == 2) -> sum es0:Nat. Recv_Nat(es, es_hash, es0).S(es0, y, xs, ys, es, es_hash, st, st_hash, ts, ts_hash, se, se_hash, 3) <> delta
@@ -40,8 +40,8 @@ proc
 	+ ( state_0 == 9) -> tau.S(x, y, xs, tail(ys), es, es_hash, st, st_hash, ts, ts_hash, se, se_hash, 2) <> delta
 	;
 
-proc 
-  T(x: Nat, xs: s0, z: Bool, st: Nat, st_hash: Nat, tm: Nat, tm_hash: Nat, mt: Nat, mt_hash: Nat, ts: Nat, ts_hash: Nat, ct: Nat, ct_hash: Nat, state_0: Nat)= 
+proc
+  T(x: Nat, xs: s0, z: Bool, st: Nat, st_hash: Nat, tm: Nat, tm_hash: Nat, mt: Nat, mt_hash: Nat, ts: Nat, ts_hash: Nat, ct: Nat, ct_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> tau.T(x, [], z, st, st_hash, tm, tm_hash, mt, mt_hash, ts, ts_hash, ct, ct_hash, 1) <> delta
 	+ ( state_0 == 1) -> tau.T(x, xs, true, st, st_hash, tm, tm_hash, mt, mt_hash, ts, ts_hash, ct, ct_hash, 2) <> delta
 	+ ( z && state_0 == 2) -> sum st0:Nat. Recv_Nat(st, st_hash, st0).T(st0, xs, z, st, st_hash, tm, tm_hash, mt, mt_hash, ts, ts_hash, ct, ct_hash, 3) <> delta
@@ -54,8 +54,8 @@ proc
 	+ ( state_0 == 9) -> sum ct0:Bool. Recv_Bool(ct, ct_hash, ct0).T(x, xs, ct0, st, st_hash, tm, tm_hash, mt, mt_hash, ts, ts_hash, ct, ct_hash, 2) <> delta
 	;
 
-proc 
-  M(x: Nat, xs: s0, z: Bool, tm: Nat, tm_hash: Nat, mt: Nat, mt_hash: Nat, cm: Nat, cm_hash: Nat, state_0: Nat)= 
+proc
+  M(x: Nat, xs: s0, z: Bool, tm: Nat, tm_hash: Nat, mt: Nat, mt_hash: Nat, cm: Nat, cm_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> tau.M(x, [], z, tm, tm_hash, mt, mt_hash, cm, cm_hash, 1) <> delta
 	+ ( state_0 == 1) -> tau.M(x, xs, true, tm, tm_hash, mt, mt_hash, cm, cm_hash, 2) <> delta
 	+ ( z && state_0 == 2) -> sum tm0:Nat. Recv_Nat(tm, tm_hash, tm0).M(tm0, xs, z, tm, tm_hash, mt, mt_hash, cm, cm_hash, 3) <> delta
@@ -65,15 +65,15 @@ proc
 	+ ( state_0 == 6) -> sum cm0:Bool. Recv_Bool(cm, cm_hash, cm0).M(x, xs, cm0, tm, tm_hash, mt, mt_hash, cm, cm_hash, 2) <> delta
 	;
 
-proc 
-  C(s: Nat, i: Nat, cm: Nat, cm_hash: Nat, ct: Nat, ct_hash: Nat, state_0: Nat)= 
+proc
+  C(s: Nat, i: Nat, cm: Nat, cm_hash: Nat, ct: Nat, ct_hash: Nat, state_0: Nat)=
 	  ( state_0 == 0) -> tau.C(s, 0, cm, cm_hash, ct, ct_hash, 1) <> delta
 	+ ( state_0 == 1) -> Send_Bool(ct, ct_hash, (i+1!=s)).C(s, i, cm, cm_hash, ct, ct_hash, 2) <> delta
 	+ ( state_0 == 2) -> Send_Bool(cm, cm_hash, (i+1!=s)).C(s, i, cm, cm_hash, ct, ct_hash, 3) <> delta
 	+ ( state_0 == 3) -> tau.C(s, ((i+1) mod (s+1)), cm, cm_hash, ct, ct_hash, 1) <> delta
 	;
 
-init 
+init
  block({Send_Bool, Recv_Bool,Send_Nat, Recv_Nat,Send_s0, Recv_s0},
   allow({ Terminator,Send_Bool, Recv_Bool, Comm_Bool,Send_Nat, Recv_Nat, Comm_Nat,Send_s0, Recv_s0, Comm_s0},
    comm({Send_Bool| Recv_Bool->Comm_Bool,Send_Nat| Recv_Nat->Comm_Nat,Send_s0| Recv_s0->Comm_s0},

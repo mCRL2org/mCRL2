@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     my_enumerator datae(p.data(), datar, name_generator);
 
     // pbes rewriter
-    my_pbes_rewriter pbesr(datar, datae);    
+    my_pbes_rewriter pbesr(datar, datae);
 
     switch (type)
     {
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cout << "UNKNOWN" << std::endl;
-    }   
+    }
   }
   catch(mcrl2::runtime_error e)
   {

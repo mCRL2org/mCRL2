@@ -18,8 +18,8 @@ using namespace std;
 
 
 // --------------------
-DropTarget::DropTarget( 
-    wxWindow* ownr, 
+DropTarget::DropTarget(
+    wxWindow* ownr,
     Mediator* m )
     : Colleague( m )
 // --------------------
@@ -37,7 +37,7 @@ DropTarget::~DropTarget()
 
 
 // -- overridden functions from wxTextDropTarget --------------------
-  
+
 
 // -------------------------
 bool DropTarget::OnDropText(
@@ -50,7 +50,7 @@ bool DropTarget::OnDropText(
     int    srcId;
     vector< int > data;
 
-    wxStringTokenizer tkz( 
+    wxStringTokenizer tkz(
         text,         // string
         wxString( wxT(" ") ) ); // delimiters
     while( tkz.HasMoreTokens() )
@@ -62,7 +62,7 @@ bool DropTarget::OnDropText(
     // get remaining data
     for ( size_t i = 1; i < tokens.size(); ++i )
         data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ));
- 
+
     mediator->handleDragDrop(
         srcId,
         owner->GetId(),

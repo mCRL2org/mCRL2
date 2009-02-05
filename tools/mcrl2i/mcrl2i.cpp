@@ -133,7 +133,7 @@ static bool parse_var_decl(string decl, ATermList *varlist, data_specification &
     }
 
     stringstream ss(decl.substr(semi_pos+1));
-    
+
     ATermAppl sort = parse_sort_expr(ss);
     if ( sort == NULL )
       return false;
@@ -205,7 +205,7 @@ static ATermList parse_varlist_from_string(string &s, data_specification &spec)
   ATermList result = ATmakeList0();
   if ( !parse_var_decl_list(varlist,&result,spec) )
     return NULL;
-    
+
   gsDebugMsg("variable list: %T\n",result);
 
   return result;
@@ -344,48 +344,48 @@ int main(int argc, char **argv)
 
     if (parse_command_line(argc, argv, options)) {
       data_specification spec = load_specification(options.infilename);
- 
+
       gsMessage("mCRL2 interpreter (type :h for help)\n");
-  
+
       rewr = createRewriter(spec, options.strategy);
       e = createEnumerator(spec,rewr);
       variables = ATtableCreate(50,50);
       assignments = ATtableCreate(50,50);
-  
+
       bool notdone = true;
       while ( notdone )
       {
         while ( true )
         {
           string s;
-  
+
           (cout << "? ").flush();
           getline(cin, s);
           if ( (s.length() > 0) && (s[s.length()-1] == '\r') )
           { // remove CR
             s.resize(s.length()-1);
           }
-          
+
           if ( cin.eof() )
           {
             cout << endl;
             notdone = false;
             break;
           }
-  
+
           if ( s.substr(0,1) == ":" )
           {
             s = s.substr(1);
             if ( (s == "q") || (s == "quit") )
             {
               if ( cin.eof() )
-                cout << endl;  
+                cout << endl;
               notdone = false;
               break;
             } else if ( (s == "h") || (s == "help") )
             {
               cout << help_message;
-            } else if ( (s.substr(0,2) == "r ") || (s.substr(0,9) == "rewriter ") ) 
+            } else if ( (s.substr(0,2) == "r ") || (s.substr(0,9) == "rewriter ") )
             {
               if ( s.substr(0,2) == "r " )
                 s = s.substr(2);
@@ -488,7 +488,7 @@ int main(int argc, char **argv)
           }
         }
       }
-  
+
       delete rewr;
     }
   }

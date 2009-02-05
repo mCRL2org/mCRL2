@@ -36,7 +36,7 @@ struct occurring_variable_visitor: public pbes_expression_visitor<pbes_expressio
     variables.insert(v);
     return stop_recursion;
   }
-};  
+};
 
 } // namespace detail
 

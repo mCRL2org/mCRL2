@@ -33,13 +33,13 @@ Note that in general the computation of [^r(d,__sigma)] can be done more efficie
 computation of [^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
 
 An example of rewriting with a substitution function is given below. It uses the
-predefined wrapper class =rewriter_map= to create a substitution function based on a =std::map=. 
+predefined wrapper class =rewriter_map= to create a substitution function based on a =std::map=.
 
   rewriter r = default_data_rewriter();
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
   std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<atermpp::map<data_variable, data_expression> > sigma; 
+  rewriter_map<atermpp::map<data_variable, data_expression> > sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 

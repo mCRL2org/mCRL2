@@ -36,7 +36,7 @@ class Frame : public Colleague, public wxFrame
 {
 public:
     // -- constructors and destructors ------------------------------
-    Frame( 
+    Frame(
         Mediator* m,
         wxString title );
     virtual ~Frame();
@@ -47,12 +47,12 @@ public:
     void setOutputText( const std::string &msg );
     void appOutputText( const std::string &msg );
     void enableEditMode( const bool &enable);
-    
+
     void setFileOptionsActive();
     void setEditModeSelect();
     void setEditModeNote();
     void setEditModeDOF();
-    
+
     void setDOFColorSelected();
 	void setDOFOpacitySelected();
 
@@ -61,7 +61,7 @@ public:
     void handleTextSize( const int &shapeId, const int &textSize );
     void displNumNodes( const int &val );
     void displNumEdges( const int &val );
-    void displAttrInfo( 
+    void displAttrInfo(
         const std::vector< int > &indices,
         const std::vector< std::string > &names,
         const std::vector< std::string > &types,
@@ -74,21 +74,21 @@ public:
         const std::vector< std::string > &types,
         const std::vector< int > &cards,
         const std::vector< std::string > &range );
-    void displDomainInfo( 
+    void displDomainInfo(
         const std::vector< int > &indices,
         const std::vector< std::string > &values,
         const std::vector< int > &number,
         const std::vector< double > &perc );
     void clearDomainInfo();
-    
+
     void displShapeMenu(
         const bool &cut,
         const bool &copy,
         const bool &paste,
         const bool &clear,
-        const bool &bringToFront, 
+        const bool &bringToFront,
         const bool &sendToBack,
-        const bool &bringForward, 
+        const bool &bringForward,
         const bool &sendBackward,
         const bool &editDOF,
         const int  &checkedItemId );
@@ -99,7 +99,7 @@ public:
         const bool &sendSetToTrace,
         const bool &sendSglToExnr,
         const bool &sentSetToExnr );
-    
+
     void displDOFInfo(
         const std::vector< int > &degsOfFrdmIndcs,
         const std::vector< std::string > &degsOfFrdm,
@@ -112,7 +112,7 @@ public:
         const std::vector< int > &indices,
         const std::vector< std::string > &names );
 
-    void displAttrInfoPart( 
+    void displAttrInfoPart(
         std::string attrName,
         int minParts,
         int maxParts,
@@ -146,7 +146,7 @@ public:
     GLCanvas* getCanvasCombn();
     GLCanvas* getCanvasColDOF();
     GLCanvas* getCanvasOpaDOF();
-    
+
     // -- clear functions -------------------------------------------
     void clearOuput();
 
@@ -159,11 +159,11 @@ private:
     void initIcon();            // 1
     void initMenuBar();         // 1
     void initSplitterFrame();   // 1
-    
+
     void initSplitterLft();     // 2
-    
+
     void initSplitterTopLft();  // 3
-    
+
     void initPanelTopTopLft();  // 4
     void initLabelsGraphInfo(); // 5
     void initListCtrlAttr();    // 5
@@ -174,14 +174,14 @@ private:
 
     void initPanelBotLft();     // 3
     void initTextCtrl();        // 4
-    
+
     void initSplitterRgt();     // 2
     void initSplitterTopRgt();  // 3
-    
+
     void initPanelTopRgt();     // 3
     void initCanvasOne();       // 4
     void initToolbarEdit();     // 4
-    
+
     void initSplitterBotRgt();  // 3
 
     void initPanelBotRgt();  // 4
@@ -190,14 +190,14 @@ private:
     void initCanvasThree();     // 5
 
 //    void initAboutFrameOld();   // 1
-    
+
     void initFrameSettings();
     void initFramePartition(
         wxString attrName,
         int minParts,
         int maxParts,
         int curParts );
-    
+
     void initFrameDOF();
     void initFrameNote();
     void initFrameTextSize();
@@ -208,7 +208,7 @@ private:
     void initCanvasColDOF();
     void initCanvasOpaDOF();
     void initNoteButtons();
-    
+
     void initFramePlot();
     void initPanelPlot();
     void initCanvasPlot();
@@ -217,7 +217,7 @@ private:
     void initPanelClust();
     void initListCtrlClust();
     void initButtonsClust();
-    
+
     // -- event handlers --------------------------------------------
     void onMenuBar( wxCommandEvent &e );
     void onListCtrlSelect( wxListEvent &e );
@@ -229,7 +229,7 @@ private:
     void onButton( wxCommandEvent &e );
     void onRadioBox( wxCommandEvent &e );
     void onSplitterDoubleClick( wxSplitterEvent &e);
-    
+
     // -- menu bar --------------------------------------------------
     wxMenuBar* menuBar;
     wxMenu*    fileMenu;
@@ -243,7 +243,7 @@ private:
     // -- frame -----------------------------------------------------
     wxBoxSizer*       sizerFrame;
     wxSplitterWindow* splitterFrame;
-    
+
     // -- note -----------------------------------------------------
     int			  	  currentShapeId;
     std::string			  currentShapeNote;
@@ -253,7 +253,7 @@ private:
     wxSplitterWindow* splitterLft;
 
     wxSplitterWindow* splitterTopLft;
-    
+
     wxBoxSizer*       sizerTopTopLft;
     wxScrolledWindow* panelTopTopLft;
     wxStaticText*     lblNumNodes;
@@ -261,7 +261,7 @@ private:
     wxListCtrl*       listCtrlAttr;
     wxButton*         buttonClustAttr;
     wxButton*         buttonTraceAttr;
-    
+
     wxBoxSizer*       sizerBotTopLft;
     wxScrolledWindow* panelBotTopLft;
     wxListCtrl*       listCtrlDomain;
@@ -269,32 +269,32 @@ private:
     wxBoxSizer*       sizerBotLft;
     wxScrolledWindow* panelBotLft;
     GLCanvas*         canvasThree;
-    
+
     // -- right panel -----------------------------------------------
     wxSplitterWindow* splitterRgt;
     double            sashRatioRgt;
     double	      sashRatioLft;
-    
+
     wxBoxSizer*       sizerTopRgt;
     wxScrolledWindow* panelTopRgt;
     GLCanvas*         canvasOne;
     wxToolBar*        toolBarEdit;
 
-    
+
     wxBoxSizer*       sizerBotRgt;
     wxScrolledWindow* panelBotRgt;
     GLCanvas*         canvasTwo;
-    
+
     wxBoxSizer*       sizerRgtBotRgt;
     wxScrolledWindow* panelRgtBotRgt;
     wxTextCtrl*       textCtrl;
-    
+
     // -- settings frame --------------------------------------------
     SettingsFrame*    frameSettings;
 
     // -- partition frame -------------------------------------------
     PartitionFrame*   framePartition;
-    
+
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;
     PopupFrame*	      frameNote;
@@ -307,13 +307,13 @@ private:
     wxBoxSizer*       sizerNote;
     wxBoxSizer*       sizerTextSize;
     wxTextCtrl*	      noteText;
-    wxComboBox*	      textSizeBox;	
+    wxComboBox*	      textSizeBox;
     wxListCtrl*       listCtrlDOF;
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
     GLCanvas*         canvasOpaDOF;
     bool	      dofMenu;
-    
+
     // -- Plot frame ------------------------------------------------
     PopupFrame*       framePlot;
     wxBoxSizer*       sizerFramePlot;
@@ -331,12 +331,12 @@ private:
 
     // -- about frame -----------------------------------------------
     wxFrame*	frameAbout;
-    
+
     // -- menus -----------------------------------------------------
     wxMenu	*addAttributeMenu;
     wxMenu	*showVariableMenu;
     wxMenu      *clustMenu;
-    
+
     // -- ID's ------------------------------------------------------
     enum
     {
@@ -379,9 +379,9 @@ private:
         ID_TOOL_NOTE,
         ID_TOOL_DOF,
         ID_TOOL_RECT,
-        ID_TOOL_ELLIPSE,             
+        ID_TOOL_ELLIPSE,
         ID_TOOL_LINE,
-        ID_TOOL_ARROW,        
+        ID_TOOL_ARROW,
         ID_TOOL_DARROW,
         ID_TOOL_FILL_COL,
         ID_TOOL_LINE_COL,
@@ -393,7 +393,7 @@ private:
         ID_CANVAS_LFT,
         ID_PANEL_BOT_RGT,
         ID_CANVAS_RGT,
-        
+
         ID_FRAME_SETTINGS,
         ID_FRAME_PARTITION,
         ID_FRAME_DOF,

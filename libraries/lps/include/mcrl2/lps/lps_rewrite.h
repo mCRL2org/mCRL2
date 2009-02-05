@@ -38,22 +38,22 @@ namespace mcrl2 {
 namespace lps {
 
 /// \brief Rewrite the linear process and the initial state of an lps
-/// \details This routine rewrites all expressions in the init section 
+/// \details This routine rewrites all expressions in the init section
 /// of the given linear specification, as well as all data expressions
 /// occuring in all summands of the linear process equation in the lps.
 
 template <typename Rewriter>
 specification rewrite_lps(const specification &spec, const Rewriter &r)
-{ 
+{
   // Rewrite the righthandsides of the assignments
-  
+
   data_assignment_list initial_assignments=spec.initial_process().assignments();
   data_assignment_list new_initial_assignments;
-  for(data_assignment_list::iterator i=initial_assignments.begin(); 
+  for(data_assignment_list::iterator i=initial_assignments.begin();
          i!=initial_assignments.end(); ++i)
   { new_initial_assignments=
          push_front(new_initial_assignments,
-                data_assignment(i->lhs(),r(i->rhs()))); 
+                data_assignment(i->lhs(),r(i->rhs())));
   }
   new_initial_assignments=atermpp::reverse(new_initial_assignments);
 
@@ -84,14 +84,14 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
                       new_arguments));
     }
     new_actions=reverse(new_actions);
-    
+
     // Rewrite the assignments in the next state of the summand.
     data_assignment_list new_assignments, assignments=i->assignments();
-    for(data_assignment_list::iterator j=assignments.begin(); 
+    for(data_assignment_list::iterator j=assignments.begin();
            j!=assignments.end(); ++j)
     { new_assignments=
            push_front(new_assignments,
-                  data_assignment(j->lhs(),r(j->rhs()))); 
+                  data_assignment(j->lhs(),r(j->rhs())));
     }
     new_assignments=reverse(new_assignments);
 
@@ -102,7 +102,7 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
     { new_summand=summand(i->summation_variables(),
                           new_condition,
                           i->is_delta(),
-                          new_actions, 
+                          new_actions,
                           r(i->time()),
                           new_assignments);
     }
@@ -110,13 +110,13 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
     { new_summand=summand(i->summation_variables(),
                           new_condition,
                           i->is_delta(),
-                          new_actions, 
+                          new_actions,
                           new_assignments);
     }
     new_summands=push_front(new_summands,new_summand);
   }
   new_summands=reverse(new_summands);
-  
+
   return specification(
                 spec.data(),
                 spec.action_labels(),

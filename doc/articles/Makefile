@@ -1,5 +1,5 @@
 #Make rules
-all     : 
+all     :
 
 clean   :
 	rm -f *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.pdf

@@ -39,7 +39,7 @@ public:
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
-        
+
     // -- set vis settings functions --------------------------------
 
     // -- visualization functions  ----------------------------------
@@ -55,7 +55,7 @@ public:
     void drawPlotCP( const bool &inSelectMode );
     void drawMousePos( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -64,7 +64,7 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void initLabels();
@@ -83,15 +83,15 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(  
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
     enum
     {
     };
-    
+
     // data
     std::vector< std::string >        attributeLabels;
     std::vector< int >           attributeIndcs;

@@ -73,20 +73,20 @@ public:
 
     void setDiagram( Diagram *dgrm );
     void hideAllDiagrams();
-    
+
     void markLeaf(
         const int &leafIdx,
         ColorRGB &col );
     void unmarkLeaves();
     void markBundle( const size_t &idx );
     void unmarkBundles();
-    
+
     void handleSendDgrmSglToSiml();
     void handleSendDgrmSglToTrace();
     void handleSendDgrmSetToTrace();
     void handleSendDgrmSglToExnr();
     void handleSendDgrmSetToExnr();
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void drawBundles( const bool &inSelectMode );
@@ -96,25 +96,25 @@ public:
     void drawBarTree( const bool &inSelectMode );
     void drawMarkedLeaves( const bool &inSelectMode );
     void drawDiagrams( const bool &inSelectMode );
-        
+
     // -- input event handlers --------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
 
     void updateDiagramData();
@@ -122,17 +122,17 @@ public:
 protected:
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor( 
+    void calcColor(
         const int &iter,
         const int &numr,
         ColorRGB &col );
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
-    
+
     void calcSettingsLeaves();
     void calcSettingsBundles();
     void calcSettingsTree();
-    void calcPositionsTree( 
+    void calcPositionsTree(
         Cluster* c,
         const int &maxLvl,
         const double &itvHgt );
@@ -143,20 +143,20 @@ protected:
         const double &height );
     void calcSettingsDiagram();
     void updateMarkBundles();
-    
+
     void clearSettings();
     void clearSettingsLeaves();
     void clearSettingsBundles();
     void clearSettingsTree();
     void clearSettingsBarTree();
     void clearSettingsDiagram();
-    
+
     // -- utility event handlers ------------------------------------
     void onTimer( wxTimerEvent &e );
 
     void handleHits( const std::vector< int > &ids );
-    
-    void handleHoverCluster( 
+
+    void handleHoverCluster(
         const int &i,
         const int &j );
     void handleHoverBundle( const int &bndlIdx );
@@ -174,14 +174,14 @@ protected:
 
     void showDiagram( const int &dgrmIdx );
     void hideDiagram( const size_t &dgrmIdx );
-    
+
     // -- hit detection ---------------------------------------------
-    void processHits(  
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- static variables ------------------------------------------
-    
+
     // general
     static ColorRGB colClr;
     static ColorRGB colTxt;
@@ -197,33 +197,33 @@ protected:
     static bool showLeaves;
     static bool showBundles;
     static ColorRGB colBundles;
-    
+
     // -- data members ----------------------------------------------
-    
+
     // vis settings bundles
     std::vector< Position2D > posBundles;
     std::vector< double >     radiusBundles;
     std::vector< double >     widthBundles;
     std::vector< int >        orientBundles;
     std::vector< bool >       markBundles;
-    
+
     // vis settings leaves
     std::vector< Position2D > posLeaves;
     double               radLeaves;
     int                  idxInitStLeaves;
-    
+
     // vis settings hierarchy
     std::vector< Attribute* >           attrsTree;
     std::vector< std::vector< Position2D > > posTreeTopLft;
     std::vector< std::vector< Position2D > > posTreeBotRgt;
     std::vector< std::vector< Cluster* > >   mapPosToClust;
-    
+
     // vis settings bar tree
     std::vector< std::vector< Position2D > > posBarTreeTopLft;
     std::vector< std::vector< Position2D > > posBarTreeBotRgt;
-    
+
     // diagrams
-    Diagram*                       diagram;         // association, user-defined diagram   
+    Diagram*                       diagram;         // association, user-defined diagram
     std::vector< bool >                 showDgrm;        // show/hide diagram for every leaf node
     std::vector< std::vector< Attribute* > > attrsDgrm;       // association, attributes linked to shown diagrams
     std::vector< std::vector< Cluster* > >   framesDgrm;      // composition, clusters of identical states for shown diagrams
@@ -232,13 +232,13 @@ protected:
     int                            dragIdxDgrm;     // diagram currently being dragged
     size_t                         animIdxDgrm;     // diagram currently being animated
     size_t                         currIdxDgrm;
-    
+
     // simulator
     int prevFrameIdxClust;
     int currFrameIdxClust;
     int nextFrameIdxClust;
     std::map< int, std::vector< ColorRGB > > markLeaves;
-    
+
     // animation
     wxTimer* timerAnim;
     static int itvAnim;
@@ -265,7 +265,7 @@ protected:
     static int MAX_RAD_HINT_PX; // radius cannot be larger than this
     static int SEGM_HINT_HQ;
     static int SEGM_HINT_LQ;
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

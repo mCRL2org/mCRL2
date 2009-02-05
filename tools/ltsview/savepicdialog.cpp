@@ -87,7 +87,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
       {
         fts.Add(name + wxT(" (.") + extension + wxT(")"));
       }
-      
+
       if (extension == wxT("png"))
       {
         png_id = f_exts.Count();
@@ -101,7 +101,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,wxDefaultSize,
     fts);
   ft_choice->SetSelection(png_id);
-  
+
   f_name.Assign(filename);
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
   f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,
@@ -139,7 +139,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   mainSizer->Add(controlSizer,0,wxEXPAND|wxALL,5);
   mainSizer->Add(new wxStaticLine(this,-1),0,wxEXPAND|wxALL,5);
   mainSizer->Add(CreateButtonSizer(wxOK|wxCANCEL),0,wxEXPAND|wxALL,5);
-  
+
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
@@ -180,7 +180,7 @@ void SavePicDialog::update_w_spin()
   w_spin->SetValue(Utils::round_to_int(h_spin->GetValue() * ar));
 }
 
-void SavePicDialog::onARCheck(wxCommandEvent &event) 
+void SavePicDialog::onARCheck(wxCommandEvent &event)
 {
   if (event.IsChecked())
   {
@@ -265,12 +265,12 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
 
   int w = w_spin->GetValue();
   int h = h_spin->GetValue();
-  
+
   statusbar->SetStatusText(wxT("Collecting picture data..."));
   statusbar->Update();
   unsigned char* data = glcanvas->getPictureData(w,h);
   wxImage img(w,h,data);
-  
+
   // order of image pixels is row major from bottom to top, but wxWidgets
   // assumes it to be from top to bottom, so we mirror the image vertically
   statusbar->SetStatusText(wxT("Mirroring image..."));
@@ -288,7 +288,7 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
   {
     statusbar->SetStatusText(wxT("Done"));
     statusbar->Update();
-    wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") + 
+    wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") +
         f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
     msgDialog.ShowModal();
   }
@@ -303,8 +303,8 @@ void SavePicDialog::update_file_name()
   wxString text = f_name.GetFullPath();
   if (text.Len() > MAX_LABEL_LENGTH)
   {
-    text = text.Left((MAX_LABEL_LENGTH - 3) / 2) 
-      + wxT("...") 
+    text = text.Left((MAX_LABEL_LENGTH - 3) / 2)
+      + wxT("...")
       + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
   }
   f_text->SetLabel(text);

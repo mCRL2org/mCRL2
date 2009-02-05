@@ -51,7 +51,7 @@ public:
     void setCenter( const double &xC, const double &yC );
     void setDFC( const double &xD, const double &yD );
     void setAngleCtr( const double &a );
-    
+
     void setHinge( const double &xH, const double &yH );
     void addDOFColYValue( const double &y );
     void setDOFColYValue( const int &idx, const double &y );
@@ -61,7 +61,7 @@ public:
     void setDOFOpaYValue( const int &idx, const double &y );
     void clearDOFOpaYValue( const int &idx );
     void clearDOFOpaYValues();
-    
+
     void setType( const int &typ );
     void setTypeNote();
     void setTypeLine();
@@ -82,19 +82,19 @@ public:
     void setModeEdtDOFCol();
     void setModeEdtDOFOpa();
     void setModeEdtDOFText();
-    
+
     void setLineWidth( const double &w );
     void setLineColor( const ColorRGB &c );
-    void setLineColor( 
-        const double &r, 
-        const double &g, 
+    void setLineColor(
+        const double &r,
+        const double &g,
         const double &b,
         const double &a );
     void setLineTransp( const double &a );
     void setFillColor( const ColorRGB &c );
-    void setFillColor( 
-        const double &r, 
-        const double &g, 
+    void setFillColor(
+        const double &r,
+        const double &g,
         const double &b,
         const double &a );
     void setFillTransp( const double &a );
@@ -108,7 +108,7 @@ public:
     std::string getVariable();
     std::string getVariableName();
     int getTextSize();
-    
+
     void getCenter( double &x, double &y );
     double getXCtr();
     double getYCtr();
@@ -145,7 +145,7 @@ public:
     void getDOFAttrs( std::vector< Attribute* > &attrs );
 
     // -- visualization ---------------------------------------------
-    void visualize( 
+    void visualize(
         const bool &inSelectMode,
         GLCanvas* canvas );
     void visualize(
@@ -162,7 +162,7 @@ public:
         const double &opacity,
         const std::vector< Attribute* > attrs,
         const std::vector< double > attrValIdcs );
-    
+
     void setTransf();
     void clrTransf();
 
@@ -178,7 +178,7 @@ public:
         TYPE_ARROW,
         TYPE_DARROW,
         TYPE_NOTE,
-        
+
         MODE_NORMAL,
         MODE_EDIT,
         MODE_EDT_DOF_XCTR,
@@ -209,7 +209,7 @@ public:
     };
     static double hdlSzeHnt;
     static double minSzeHnt;
-    static int    segNumHnt;    
+    static int    segNumHnt;
     static ColorRGB colTxt;
 
 protected:
@@ -218,59 +218,59 @@ protected:
     void clearDOF();
 
     void handleHitEdtDOFAgl( const int &hdlIdx );
-    
+
     // -- private visualization functions ---------------------------
-    void drawNormal( 
+    void drawNormal(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEdit( 
+    void drawEdit(
         const bool &inSelectMode,
         GLCanvas* canvas );
     void drawText( GLCanvas* canvas );
     void drawText( GLCanvas* canvas, double pix );
-    void drawEditDOF( 
+    void drawEditDOF(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEditDOFXCtr( 
+    void drawEditDOFXCtr(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawDOFXCtr( 
+    void drawDOFXCtr(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEditDOFYCtr( 
+    void drawEditDOFYCtr(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawDOFYCtr( 
+    void drawDOFYCtr(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEditDOFWth( 
+    void drawEditDOFWth(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawDOFWth( 
+    void drawDOFWth(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEditDOFHgt( 
+    void drawEditDOFHgt(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawDOFHgt( 
+    void drawDOFHgt(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawEditDOFAgl( 
+    void drawEditDOFAgl(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    void drawDOFAgl( 
+    void drawDOFAgl(
         const bool &inSelectMode,
         GLCanvas* canvas );
-    
+
     // -- data members ----------------------------------------------
-    
+
     int index;
-    
+
     // geometry
     double xCtr,   yCtr;   // center,             [-1,1]
     double xDFC,   yDFC;   // bound dist from ctr,norm
     double aglCtr;         // rotation & incline, degrees
-    
+
     // properties
     int      type;      // type of shape
     int      mode;      // drawing mode

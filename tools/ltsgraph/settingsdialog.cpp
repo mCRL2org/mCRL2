@@ -29,7 +29,7 @@ SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
   app = owner;
-  
+
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
 
@@ -40,40 +40,40 @@ SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
   wxFlexGridSizer* radiusSizer = new wxFlexGridSizer(0, 2, 0, 0);
   radiusSizer->AddGrowableCol(0);
 
-  wxSpinCtrl* radiusControl = new wxSpinCtrl(this, myID_RADIUS_SPIN, 
+  wxSpinCtrl* radiusControl = new wxSpinCtrl(this, myID_RADIUS_SPIN,
     wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 20, 10);
-  
-  radiusSizer->Add(new wxStaticText(this, wxID_ANY, wxT("State radius")), 0, 
+
+  radiusSizer->Add(new wxStaticText(this, wxID_ANY, wxT("State radius")), 0,
              lflags, 4);
 
   radiusSizer->Add(radiusControl, 0, rflags, 3);
-  
+
   sizer->Add(radiusSizer, wxEXPAND|wxALL);
 
 
-  
+
   wxFlexGridSizer* colourSizer = new wxFlexGridSizer(0, 2, 0, 0);
-  colourSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Brush colour")), 0, 
+  colourSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Brush colour")), 0,
               lflags, 4);
-  
+
   wxColourPickerCtrl* colourControl = new wxColourPickerCtrl(this, myID_COLOUR,
   *wxRED);
   colourSizer->Add(colourControl, 0, rflags, 3);
-  
+
   sizer->Add(colourSizer);
-  wxCheckBox* showTransLabels = new wxCheckBox(this, myID_TRANS_CHECK, 
+  wxCheckBox* showTransLabels = new wxCheckBox(this, myID_TRANS_CHECK,
     wxT("Show transition labels"));
   showTransLabels->SetValue(true);
   wxCheckBox* showStateLabels = new wxCheckBox(this, myID_STATE_CHECK,
     wxT("Show state labels"));
   showStateLabels->SetValue(true);
-  
+
   sizer->Add(showTransLabels);
   sizer->Add(showStateLabels);
 
-  wxCheckBox* allowCurves = new wxCheckBox(this, myID_CURVES_CHECK, 
+  wxCheckBox* allowCurves = new wxCheckBox(this, myID_CURVES_CHECK,
     wxT("Edit transition curves"));
-  
+
   sizer->Add(allowCurves);
 
   SetSizer(sizer);

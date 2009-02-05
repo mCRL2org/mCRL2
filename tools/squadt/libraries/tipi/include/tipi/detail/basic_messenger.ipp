@@ -36,7 +36,7 @@
 /**
  * Workaround for older compilers to force instantiation of
  * boost::recursive_mutex::scoped_lock::unlock
- * 
+ *
  *  The problem is that the indirect use of this method through boost::bind
  *  does not cause some compilers to instantiate this method
  */
@@ -508,7 +508,7 @@ namespace tipi {
 
       while (i != data.end()) {
         std::string::const_iterator j = i;
- 
+
         if (message_open) {
           /* The start message tag was matched before */
 
@@ -531,7 +531,7 @@ namespace tipi {
           if (message_open) {
             /* Continuing search for the end of the current message; next: try to match close tag */
             size_t n = data.find(tag_message_close, i - data.begin());
-           
+
             if (n != std::string::npos) {
               /* End message sequence matched; signal message close */
               message_open = false;
@@ -552,9 +552,9 @@ namespace tipi {
 
               if (n != std::string::npos) {
                 const std::string::const_iterator k = data.begin() + s + n;
-               
+
                 j = std::mismatch(k, b, tag_message_close.begin()).first;
-               
+
                 if (j == b) {
                   partially_matched = (j - k);
                 }
@@ -606,11 +606,11 @@ namespace tipi {
 
           if (!message_open) {
             size_t n = data.find(tag_message_open, i - data.begin());
-           
+
             if (n != std::string::npos) {
               /* Skip message tag */
               i = data.begin() + n;
-           
+
               message_open = true;
             }
             else {
@@ -621,10 +621,10 @@ namespace tipi {
 
               if (n != std::string::npos) {
                 const std::string::const_iterator k = data.begin() + s + n;
-               
+
                 /* End message sequence not matched look for partial match in data[(i - tag_close.size())..i] */
                 j = std::mismatch(k, b, tag_message_open.begin()).first;
-               
+
                 if (j == b) {
                   partially_matched = (j - k);
                 }
@@ -636,7 +636,7 @@ namespace tipi {
         }
       }
     }
- 
+
     /**
      * \param t the type of the message
      **/
@@ -688,9 +688,9 @@ namespace tipi {
     inline void basic_messenger_impl< M >::service_handlers() {
       while (0 < m_delivery_data->size()) {
         boost::shared_ptr< const M > m(m_delivery_data->pop());
-      
+
         typename M::message_type id = m->get_type();
-      
+
         boost::recursive_mutex::scoped_lock ww(waiter_lock);
 
         if (handlers.count(id)) {
@@ -707,21 +707,21 @@ namespace tipi {
             h(m);
           }
         }
-       
+
         if (0 < waiters.count(id)) {
           waiters[id]->wake(m);
-       
+
           waiters.erase(id);
         }
         if (id != M::any() && 0 < waiters.count(M::any())) {
           waiters[M::any()]->wake(m);
-       
+
           waiters.erase(M::any());
         }
         else if (waiters.count(id) == 0) {
           /* Put message into queue */
           message_queue.push_back(m);
-       
+
           if (maximum_buffer_size < message_queue.size()) {
             message_queue.pop_front();
           }

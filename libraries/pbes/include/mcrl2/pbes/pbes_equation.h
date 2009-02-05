@@ -41,7 +41,7 @@ class pbes_equation: public atermpp::aterm_appl
   public:
     /// \brief The expression type of the equation.
     typedef pbes_expression term_type;
-    
+
     /// \brief Constructor.
     pbes_equation()
       : atermpp::aterm_appl(core::detail::constructPBEqn())

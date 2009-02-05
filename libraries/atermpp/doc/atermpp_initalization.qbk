@@ -3,7 +3,7 @@ The `main` function of each program that uses the ATerm Library
 must start with the following initialization code:
 
    #include "atermpp/atermpp.h"
-   
+
    int main(int argc, char* argv[])
    {
      MCRL2_ATERMPP_INIT(argc, argv)
@@ -11,7 +11,7 @@ must start with the following initialization code:
 
 The macro `MCRL2_ATERMPP_INIT` must be the first statement of the
 main function. The garbage collector uses `argc` and `argv` to guess
-the bottom of the program stack, that is used to determine which 
+the bottom of the program stack, that is used to determine which
 terms are candidates to be destroyed.
 
 [endsect]

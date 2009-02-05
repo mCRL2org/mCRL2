@@ -22,7 +22,7 @@ namespace mcrl2 {
 namespace bes {
 
 namespace detail {
-  
+
   struct no_substitution
   {
   };

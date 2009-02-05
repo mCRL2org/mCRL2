@@ -19,7 +19,7 @@
 
 
 // --------------------
-Visualizer::Visualizer( 
+Visualizer::Visualizer(
     Mediator* m,
     Graph* g,
     GLCanvas* c )
@@ -70,7 +70,7 @@ void Visualizer::setClearColor(
     clearColor.b = b;
     clearColor.a = 1.0;
 }
- 
+
 // -- helper functions ----------------------------------------------
 void Visualizer::printMouseVariables()
 {
@@ -78,7 +78,7 @@ void Visualizer::printMouseVariables()
     char const* ms = "LEFT";
     char const* mc = "SINGLE";
     char const* md = "DRAG";
-  
+
     if(mouseButton == MSE_BUTTON_UP)
     	mb = "UP";
     if(mouseSide == MSE_SIDE_RGT)
@@ -89,7 +89,7 @@ void Visualizer::printMouseVariables()
     	mc = "DOUBLE";
     if(mouseDrag == MSE_DRAG_FALSE)
     	md = "NOT_DRAG";
-    	 
+
     std::clog << "Mouse Button: " << mb << std::endl;
     std::clog << "Mouse Side: " << ms << std::endl;
     std::clog << "Mouse Click: " << mc << std::endl;
@@ -129,11 +129,11 @@ void Visualizer::handleSizeEvent()
 
 
 // --------------------------------------
-void Visualizer::handleMouseLftDownEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftDownEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
-{	
+{
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_LFT;
     mouseClick  = MSE_CLICK_SINGLE;
@@ -148,11 +148,11 @@ void Visualizer::handleMouseLftDownEvent(
 
 
 // ------------------------------------
-void Visualizer::handleMouseLftUpEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
-{   
+{
     mouseButton = MSE_BUTTON_UP;
     mouseSide   = MSE_SIDE_LFT;
     if ( mouseClick != MSE_CLICK_DOUBLE )
@@ -165,8 +165,8 @@ void Visualizer::handleMouseLftUpEvent(
 
 
 // ----------------------------------------
-void Visualizer::handleMouseLftDClickEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftDClickEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -183,11 +183,11 @@ void Visualizer::handleMouseLftDClickEvent(
 
 
 // --------------------------------------
-void Visualizer::handleMouseRgtDownEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
-{	
+{
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_RGT;
     mouseClick  = MSE_CLICK_SINGLE;
@@ -201,8 +201,8 @@ void Visualizer::handleMouseRgtDownEvent(
 
 
 // ------------------------------------
-void Visualizer::handleMouseRgtUpEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -218,8 +218,8 @@ void Visualizer::handleMouseRgtUpEvent(
 
 
 // ----------------------------------------
-void Visualizer::handleMouseRgtDClickEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtDClickEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -227,7 +227,7 @@ void Visualizer::handleMouseRgtDClickEvent(
     mouseSide   = MSE_SIDE_RGT;
     mouseClick  = MSE_CLICK_DOUBLE;
     mouseDrag   = MSE_DRAG_FALSE;
-    
+
     xMouseDragBeg = x;
     yMouseDragBeg = y;
     xMouseCur     = x;
@@ -236,17 +236,17 @@ void Visualizer::handleMouseRgtDClickEvent(
 
 
 // -------------------------------------
-void Visualizer::handleMouseMotionEvent( 
-    const int &x, 
+void Visualizer::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // -------------------------------------
 {
     if ( mouseButton == MSE_BUTTON_DOWN )
-    {  
+    {
     	 mouseDrag  = MSE_DRAG_TRUE;
-         mouseClick = MSE_CLICK_SINGLE; 
+         mouseClick = MSE_CLICK_SINGLE;
     }
-    else 
+    else
     {
 	mouseDrag  = MSE_DRAG_FALSE;
 	mouseClick = -1;
@@ -258,16 +258,16 @@ void Visualizer::handleMouseMotionEvent(
 
 
 // ---------------------------------------
-void Visualizer::handleMouseWheelIncEvent( 
-    const int &x, 
+void Visualizer::handleMouseWheelIncEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {}
 
 
 // ---------------------------------------
-void Visualizer::handleMouseWheelDecEvent( 
-    const int &x, 
+void Visualizer::handleMouseWheelDecEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {}
@@ -322,7 +322,7 @@ void Visualizer::initMouse()
     mouseSide   = MSE_SIDE_LFT;
     mouseClick  = MSE_CLICK_SINGLE;
     mouseDrag   = MSE_DRAG_FALSE;
-    
+
     xMouseDragBeg = 0.0;
     yMouseDragBeg = 0.0;
     xMouseCur     = 0.0;
@@ -374,13 +374,13 @@ void Visualizer::startSelectMode(
     else
 	    // height >= width
 		gluOrtho2D( -1, 1, (1/aspect)*(-1), (1/aspect)*1 );
-            
+
     glMatrixMode( GL_MODELVIEW );
 }
 
 
 // -------------------------------
-void Visualizer::finishSelectMode( 
+void Visualizer::finishSelectMode(
     GLint hits,
     GLuint selectBuf[] )
 // -------------------------------

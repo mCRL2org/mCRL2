@@ -1,14 +1,14 @@
 % Test Case 8 -- Free Variables
-%  
+%
 % No constant parameters are found
-% 
+%
 % lpsconstelm cannot detect (i==5)
 
 act action: Nat;
 
 proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +
                    (i == 5) -> action(i).Y(i, i);
-     Y(i,j: Nat) = action(j).Y(i,j);               
+     Y(i,j: Nat) = action(j).Y(i,j);
 
 init X(0);
 

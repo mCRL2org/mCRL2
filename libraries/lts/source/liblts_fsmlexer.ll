@@ -72,7 +72,7 @@ void processNumber();
 %option nounput
 Quoted	   \"[^\"]*\"
 Id	   [a-zA-Z_][a-zA-Z0-9_'@]*
-Number     [0]|([1-9][0-9]*) 
+Number     [0]|([1-9][0-9]*)
 
 %%
 
@@ -92,7 +92,7 @@ Number     [0]|([1-9][0-9]*)
 void concrete_fsm_lexer::processId()
 {
   posNo += YYLeng();
-  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) ); 
+  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
 }
 
 void concrete_fsm_lexer::processQuoted()
@@ -101,7 +101,7 @@ void concrete_fsm_lexer::processQuoted()
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
   fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
-} 
+}
 
 void concrete_fsm_lexer::processNumber()
 {
@@ -145,9 +145,9 @@ concrete_fsm_lexer::concrete_fsm_lexer(void) : fsmyyFlexLexer(NULL, NULL) {
 void concrete_fsm_lexer::yyerror(const char *s) {
   fprintf(
     stderr,
-    "token '%s' at position %d,%d caused the following error: %s\n", 
+    "token '%s' at position %d,%d caused the following error: %s\n",
     YYText(), lineNo, posNo, s
-  ); 
+  );
 }
 
 bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
@@ -159,7 +159,7 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
 
   // INITIALISE
   fsm_lts = &l;
-  
+
   protect_table = ATindexedSetCreate(10000,50);
 
   const_ATtype = ATmakeAFun( "Type", 2, ATfalse );
@@ -177,7 +177,7 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   typeId = NULL;
   ATprotectAppl( &typeId );
   labelTable = ATtableCreate(100,50);
-  
+
 
   // PARSE
   bool result;
@@ -186,7 +186,7 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   } else {
     result = true;
   }
-    
+
   // CLEAN UP
   ATunprotectAFun( const_ATtype );
   ATunprotectAFun( const_ATvalue );
@@ -196,7 +196,7 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   ATunprotectList( &typeValues );
   ATunprotectAppl( &typeId );
   ATtableDestroy( labelTable );
-  
+
   ATindexedSetDestroy( protect_table );
 
   fsm_lts = NULL;

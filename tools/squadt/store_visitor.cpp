@@ -320,11 +320,11 @@ namespace utility {
     if (!p.description.empty()) {
       out << "<description>" << p.description << "</description>\n";
     }
- 
+
     BOOST_FOREACH(project_manager::processor_list::value_type i, p.processors) {
       do_visit(*i);
     }
- 
+
     out << "</squadt-project>\n";
   }
 

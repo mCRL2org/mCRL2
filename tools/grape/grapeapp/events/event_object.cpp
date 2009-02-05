@@ -67,9 +67,9 @@ bool grape_event_move::Do( void )
   switch ( obj_ptr->get_type() )
   {
     // If the object is a compound reference, move all its channels as well.
-    case PROCESS_REFERENCE: 
+    case PROCESS_REFERENCE:
     {
-      obj_ptr->set_coordinate( m_new_coord ); 
+      obj_ptr->set_coordinate( m_new_coord );
       process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
       for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
       {
@@ -82,7 +82,7 @@ bool grape_event_move::Do( void )
     }
     case ARCHITECTURE_REFERENCE:
     {
-      obj_ptr->set_coordinate( m_new_coord ); 
+      obj_ptr->set_coordinate( m_new_coord );
       architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
       for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
       {
@@ -94,9 +94,9 @@ bool grape_event_move::Do( void )
       break;
     }
     // If the object is a compound state, move the initial designator and terminating transitions as well
-    case STATE: 
+    case STATE:
     {
-      obj_ptr->set_coordinate( m_new_coord ); 
+      obj_ptr->set_coordinate( m_new_coord );
       state* state_ptr = static_cast<state*> ( obj_ptr );
       for ( unsigned int i = 0; i < state_ptr->count_initial_designator(); ++i )
       {
@@ -121,9 +121,9 @@ bool grape_event_move::Do( void )
       }
       break;
     }
-    case REFERENCE_STATE: 
+    case REFERENCE_STATE:
     {
-      obj_ptr->set_coordinate( m_new_coord ); 
+      obj_ptr->set_coordinate( m_new_coord );
       reference_state* ref_state_ptr = static_cast<reference_state*> ( obj_ptr );
       for ( unsigned int i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
       {
@@ -148,7 +148,7 @@ bool grape_event_move::Do( void )
       }
       break;
     }
-    case CHANNEL: 
+    case CHANNEL:
     {
       // Determine if the move was on the border of the reference the channel is on.
       channel* chan_ptr = static_cast<channel*> ( obj_ptr );
@@ -158,7 +158,7 @@ bool grape_event_move::Do( void )
         if ( is_on_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), m_new_coord ) != GRAPE_DIR_NONE )
         {
           coordinate new_coord = move_to_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), m_new_coord );
-          chan_ptr->set_coordinate( new_coord ); 
+          chan_ptr->set_coordinate( new_coord );
         }
       }
       else
@@ -168,39 +168,39 @@ bool grape_event_move::Do( void )
         if ( is_on_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), m_new_coord ) != GRAPE_DIR_NONE )
         {
           coordinate new_coord = move_to_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), m_new_coord );
-          chan_ptr->set_coordinate( new_coord ); 
+          chan_ptr->set_coordinate( new_coord );
         }
       }
       break;
     }
-    case NONTERMINATING_TRANSITION: 
+    case NONTERMINATING_TRANSITION:
     {
       nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( obj_ptr );
 
       if (m_flag == -1) //if we selected the transition
-      { 
+      {
         ntt_ptr->set_coordinate( m_new_coord );
       } else if (m_flag == 0) //if we selected the end state
       {
-        coordinate delta = m_new_coord - m_old_coord; 
+        coordinate delta = m_new_coord - m_old_coord;
 
         ntt_ptr->set_width(delta.m_x);
         ntt_ptr->set_height(delta.m_y);
-      } else if (m_flag == 1) //if we selected the begin state 
-      {   
+      } else if (m_flag == 1) //if we selected the begin state
+      {
       	 // dragging is only possible when the begin state doesn't exist
          if (ntt_ptr->get_beginstate() == 0) ntt_ptr->set_coordinate( m_new_coord );
       }
       break;
     }
-    case VISIBLE: 
+    case VISIBLE:
     {
       // Determine if the visible is attached to a channel. If so, it cannot be moved.
       visible* vis_ptr = static_cast<visible*> ( obj_ptr );
       connection* conn_ptr = vis_ptr->get_attached_connection();
       if ( conn_ptr == 0 )
       {
-        vis_ptr->set_coordinate( m_new_coord ); 
+        vis_ptr->set_coordinate( m_new_coord );
       }
       break;
     }
@@ -218,9 +218,9 @@ bool grape_event_move::Undo( void )
   switch ( obj_ptr->get_type() )
   {
     // If the object is a compound reference, move all its channels as well.
-    case PROCESS_REFERENCE: 
+    case PROCESS_REFERENCE:
     {
-      obj_ptr->set_coordinate( m_old_coord ); 
+      obj_ptr->set_coordinate( m_old_coord );
       process_reference* proc_ref_ptr = static_cast<process_reference*> ( obj_ptr );
       for ( unsigned int i = 0; i < proc_ref_ptr->count_channel(); ++i )
       {
@@ -233,7 +233,7 @@ bool grape_event_move::Undo( void )
     }
     case ARCHITECTURE_REFERENCE:
     {
-      obj_ptr->set_coordinate( m_old_coord ); 
+      obj_ptr->set_coordinate( m_old_coord );
       architecture_reference* arch_ref_ptr = static_cast<architecture_reference*> ( obj_ptr );
       for ( unsigned int i = 0; i < arch_ref_ptr->count_channel(); ++i )
       {
@@ -245,9 +245,9 @@ bool grape_event_move::Undo( void )
       break;
     }
     // If the object is a compound state, move the initial designator and terminating transitions as well
-    case STATE: 
+    case STATE:
     {
-      obj_ptr->set_coordinate( m_old_coord ); 
+      obj_ptr->set_coordinate( m_old_coord );
       state* state_ptr = static_cast<state*> ( obj_ptr );
       for ( unsigned int i = 0; i < state_ptr->count_initial_designator(); ++i )
       {
@@ -272,9 +272,9 @@ bool grape_event_move::Undo( void )
       }
       break;
     }
-    case REFERENCE_STATE: 
+    case REFERENCE_STATE:
     {
-      obj_ptr->set_coordinate( m_old_coord ); 
+      obj_ptr->set_coordinate( m_old_coord );
       reference_state* ref_state_ptr = static_cast<reference_state*> ( obj_ptr );
       for ( unsigned int i = 0; i < ref_state_ptr->count_initial_designator(); ++i )
       {
@@ -299,7 +299,7 @@ bool grape_event_move::Undo( void )
       }
       break;
     }
-    case CHANNEL: 
+    case CHANNEL:
     {
       // Determine if the move was on the border of the reference the channel is on.
       channel* chan_ptr = static_cast<channel*> ( obj_ptr );
@@ -309,7 +309,7 @@ bool grape_event_move::Undo( void )
         if ( is_on_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), m_old_coord ) != GRAPE_DIR_NONE )
         {
           coordinate new_coord = move_to_border_rectangle( proc_ref_ptr->get_coordinate(), proc_ref_ptr->get_width(), proc_ref_ptr->get_height(), m_old_coord );
-          chan_ptr->set_coordinate( new_coord ); 
+          chan_ptr->set_coordinate( new_coord );
         }
       }
       else
@@ -319,25 +319,25 @@ bool grape_event_move::Undo( void )
         if ( is_on_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), m_old_coord ) != GRAPE_DIR_NONE )
         {
           coordinate new_coord = move_to_border_rectangle( arch_ref_ptr->get_coordinate(), arch_ref_ptr->get_width(), arch_ref_ptr->get_height(), m_old_coord );
-          chan_ptr->set_coordinate( new_coord ); 
+          chan_ptr->set_coordinate( new_coord );
         }
       }
       break;
     }
-    case NONTERMINATING_TRANSITION: 
+    case NONTERMINATING_TRANSITION:
     {
       nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( obj_ptr );
-      ntt_ptr->set_coordinate( m_old_coord ); 
+      ntt_ptr->set_coordinate( m_old_coord );
       break;
     }
-    case VISIBLE: 
+    case VISIBLE:
     {
       // Determine if the visible is attached to a channel. If so, it cannot be moved.
       visible* vis_ptr = static_cast<visible*> ( obj_ptr );
       connection* conn_ptr = vis_ptr->get_attached_connection();
       if ( conn_ptr == 0 )
       {
-        vis_ptr->set_coordinate( m_old_coord ); 
+        vis_ptr->set_coordinate( m_old_coord );
       }
       break;
     }
@@ -532,7 +532,7 @@ bool grape_event_properties::Do( void )
         m_main_frame->get_event_handler()->Submit( event, true );
         break;
       }
-      case VISIBLE: 
+      case VISIBLE:
       {
         grape_event_change_visible* event = new grape_event_change_visible( m_main_frame, static_cast<visible*> ( m_obj_ptr ) );
         m_main_frame->get_event_handler()->Submit( event, true );

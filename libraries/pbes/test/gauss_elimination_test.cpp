@@ -34,27 +34,27 @@ std::string BES1 =
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES2 =
   "pbes nu X = X;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES3 =
   "pbes mu X = Y;                                           \n"
   "     nu Y = X;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES4 =
   "pbes nu Y = X;                                           \n"
   "     mu X = Y;                                           \n"
   "                                                         \n"
   "init X;                                                  \n"
   ;
-  
+
 std::string BES5 =
   "pbes mu X1 = X2;                                         \n"
   "     nu X2 = X1 || X3;                                   \n"
@@ -64,7 +64,7 @@ std::string BES5 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES6 =
   "pbes nu X1 = X2 && X1;                                   \n"
   "     mu X2 = X1 || X3;                                   \n"
@@ -72,7 +72,7 @@ std::string BES6 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES7 =
   "pbes nu X1 = X2 && X3;                                   \n"
   "     nu X2 = X4 && X5;                                   \n"
@@ -83,7 +83,7 @@ std::string BES7 =
   "                                                         \n"
   "init X1;                                                 \n"
   ;
-  
+
 std::string BES8 =
   "pbes nu X1 = X2 && X1;                                   \n"
   "     mu X2 = X1;                                         \n"
@@ -100,7 +100,7 @@ void test_bes(std::string bes_spec, bool expected_result)
     case 1: std::cout << "TRUE" << std::endl; break;
     case 2: std::cout << "UNKNOWN" << std::endl; break;
   }
-  BOOST_CHECK( (expected_result == false && result == 0) || (expected_result == true && result == 1) );  
+  BOOST_CHECK( (expected_result == false && result == 0) || (expected_result == true && result == 1) );
 
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
@@ -186,28 +186,28 @@ void test_bes()
 
   // empty boolean equation system
   atermpp::vector<boolean_equation> empty;
-    
+
   pbes_system::fixpoint_symbol mu = pbes_system::fixpoint_symbol::mu();
   pbes_system::fixpoint_symbol nu = pbes_system::fixpoint_symbol::nu();
 
   // pbes mu X = X;
-  //               
-  // init X;       
+  //
+  // init X;
   boolean_equation e1(mu, X, X);
   boolean_equation_system<> bes1(empty , X);
   bes1.equations().push_back(e1);
 
   // pbes nu X = X;
-  //               
-  // init X;       
+  //
+  // init X;
   boolean_equation e2(nu, X, X);
   boolean_equation_system<> bes2(empty , X);
   bes2.equations().push_back(e2);
 
   // pbes mu X = Y;
   //      nu Y = X;
-  //               
-  // init X;       
+  //
+  // init X;
   boolean_equation e3(mu, X, Y);
   boolean_equation e4(nu, Y, X);
   boolean_equation_system<> bes3(empty, X);
@@ -216,8 +216,8 @@ void test_bes()
 
   // pbes nu Y = X;
   //      mu X = Y;
-  //               
-  // init X;       
+  //
+  // init X;
   boolean_equation_system<> bes4(empty, X);
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);

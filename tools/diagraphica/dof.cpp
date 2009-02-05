@@ -18,7 +18,7 @@ using namespace std;
 
 
 // --------------------
-DOF::DOF( 
+DOF::DOF(
     const int &idx,
     const string &lbl )
 // --------------------
@@ -63,7 +63,7 @@ DOF::~DOF()
     // association
     attr = NULL;
 }
-	
+
 
 // -- set functions -------------------------------------------------
 
@@ -116,7 +116,7 @@ void DOF::setMinMax( const double &mn, const double &mx )
 
 
 // --------------------
-void DOF::setValue( 
+void DOF::setValue(
     const int &idx,
     const double &val )
 // --------------------
@@ -141,10 +141,10 @@ void DOF::clearValue( const int &idx )
     if ( values.size() > 2 &&
          ( 0 <= idx && static_cast <size_t> (idx) < values.size() ) )
     {
-        values.erase( values.begin() + idx );    
+        values.erase( values.begin() + idx );
     }
 }
-        
+
 
 // ------------------------------
 void DOF::setDir( const int &dr )
@@ -166,7 +166,7 @@ void DOF::setAttribute( Attribute* a )
 void DOF::setTextStatus( const int &status )
 // -----------------------------------------
 {
-    if ( status == ID_TEXT_NONE || 
+    if ( status == ID_TEXT_NONE ||
          status == ID_TEXT_ALL  ||
          status == ID_TEXT_ATTR ||
          status == ID_TEXT_VAL )
@@ -177,7 +177,7 @@ void DOF::setTextStatus( const int &status )
 
 
 // -- get functions -------------------------------------------------
-    
+
 
 // ----------------
 int DOF::getIndex()

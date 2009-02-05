@@ -360,7 +360,7 @@ fi
 
 AC_ARG_WITH(
   [cadp],
-  AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])  
+  AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])
 )
 if test ! ${with_cadp}; then
   with_cadp="${CADP}"
@@ -377,7 +377,7 @@ if test ${with_cadp}; then
        AC_LINK_IFELSE(
        [
         #include <$with_cadp/incl/bcg_user.h>
-     
+
         int main() {
           return (0);
         }
@@ -393,7 +393,7 @@ AC_MSG_RESULT($USE_BCG)
 
 #AC_ARG_WITH(
 #  [cvc],
-#  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])  
+#  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])
 #)
 #USE_CVC3=no
 #if test ${with_cvc}; then
@@ -409,7 +409,7 @@ AC_MSG_RESULT($USE_BCG)
 #       AC_LINK_IFELSE(
 #       [
 #        #include <$with_cvc/include/cvc3/vc.h>
-#     
+#
 #        int main() {
 #          return (0);
 #        }
@@ -420,7 +420,7 @@ AC_MSG_RESULT($USE_BCG)
 #         AC_LINK_IFELSE(
 #         [
 #          #include <$with_cvc/include/cvc3/vc.h>
-#      
+#
 #          int main() {
 #            return (0);
 #          }
@@ -452,7 +452,7 @@ if test $with_boost; then
        AC_RUN_IFELSE(
        [
         #include "$with_boost/include/boost/version.hpp"
-      
+
         int main() {
           return !(103500 <= BOOST_VERSION);
         }
@@ -476,7 +476,7 @@ if test $with_boost; then
        AC_MSG_RESULT(no (or not usable))
        USE_BOOST=builtin
      ])
-else 
+else
   USE_BOOST=builtin
 fi
 
@@ -652,7 +652,7 @@ AC_MSG_RESULT([
      CADP          :  $USE_BCG
      OpenGL        :  $USE_OPENGL
      wxWidgets     :  $USE_WX
-     
+
    Some tools will not be built if any of these libraries are missing.
 ])
 

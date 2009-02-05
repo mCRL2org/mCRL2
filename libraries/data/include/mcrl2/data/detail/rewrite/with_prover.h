@@ -33,7 +33,7 @@ class RewriterProver: public Rewriter
 
 		bool addRewriteRule(ATermAppl Rule);
 		bool removeRewriteRule(ATermAppl Rule);
-		
+
 		void setSubstitution(ATermAppl Var, ATermAppl Expr);
 		void setSubstitutionList(ATermList Substs);
 		void setSubstitutionInternal(ATermAppl Var, ATerm Expr);

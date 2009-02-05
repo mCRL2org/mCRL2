@@ -94,7 +94,7 @@
       unsigned int p_add_transition(unsigned int from,
                                     unsigned int label,
                                     unsigned int to);
-      
+
       std::string p_state_value_str(unsigned int state);
       std::string p_label_value_str(unsigned int label);
 
@@ -131,7 +131,7 @@
       bool read_from_bcg(std::string const& filename);
       bool write_to_bcg(std::string const& filename);
 #endif
-      
+
       void p_sort_transitions(transition_sort_style ts = src_lbl_tgt);
       unsigned int* p_get_transition_indices();
       unsigned int** p_get_transition_pre_table();

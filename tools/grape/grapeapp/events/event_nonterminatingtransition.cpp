@@ -54,13 +54,13 @@ bool grape_event_add_nonterminating_transition::Do( void )
 
   //get transition coordinate
   coordinate new_coordinate = ntt_ptr->get_coordinate();
- 
-  // Find a empty coordinate to place the transition           
+
+  // Find a empty coordinate to place the transition
   while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0) new_coordinate.m_x = new_coordinate.m_x - 0.1;
-                             
-  // update transition coordiante                                            
+
+  // update transition coordiante
   ntt_ptr->set_coordinate(new_coordinate);
-                      
+
   finish_modification();
   return true;
 }

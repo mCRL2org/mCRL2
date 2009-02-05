@@ -72,7 +72,7 @@ struct t_tool_options {
         } else if (str_format != "default") {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
         }
-      } 
+      }
 
       if (2 < parser.arguments.size()) {
         parser.error("too many file arguments");
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     t_tool_options options;
 
     if (options.parse_command_line(argc, argv)) {
-      //print specification  
+      //print specification
       print_specification_file_name(options);
     }
   }
@@ -128,10 +128,10 @@ void print_specification_file_name(t_tool_options const& tool_options)
   if (tool_options.output_file_name.empty()) {
     output_stream = stdout;
     gsDebugMsg("output to stdout.\n");
-  } else {  
+  } else {
     output_stream = fopen(tool_options.output_file_name.c_str(), "w");
     if (output_stream == NULL) {
-      std::string err_msg(strerror(errno)); 
+      std::string err_msg(strerror(errno));
       if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
         err_msg.replace(err_msg.length()-1, 1, "");
       }

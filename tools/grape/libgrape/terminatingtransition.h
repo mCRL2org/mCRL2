@@ -44,12 +44,12 @@ namespace grape
          * @param p_tt The terminating transition to copy.
          */
         terminating_transition( const terminating_transition &p_tt );
-        
+
         /**
          * Default destructor.
          * Frees allocated memory and removes all references to the object.
          */
-        ~terminating_transition( void );        
+        ~terminating_transition( void );
     };
 
     /**

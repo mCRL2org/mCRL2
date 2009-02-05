@@ -1,13 +1,13 @@
 % This is an MCRL2 description of Fischer's mutual exclusion protocol
 % for two processes. The idea is that two processes communicate within
 % certain time bounds to obtain exclusive access to a mututal resource.
-% This protocol is particularly interesting, because it crucially 
+% This protocol is particularly interesting, because it crucially
 % relies on time, and is quite simple. This version has been made by
 % Yaroslav Usenko using a similar model in UPPAAL and the semantics of
 % Networks of Timed automata with shared variables in
-% [BW04] Timed Automata: Semantics, Algorithms and Tools, 
-% Johan Bengtsson and Wang Yi. In Lecture Notes on Concurrency and 
-% Petri Nets. W. Reisig and G. Rozenberg (eds.), LNCS 3098, 
+% [BW04] Timed Automata: Semantics, Algorithms and Tools,
+% Johan Bengtsson and Wang Yi. In Lecture Notes on Concurrency and
+% Petri Nets. W. Reisig and G. Rozenberg (eds.), LNCS 3098,
 % Springer-Verlag, 2004.
 
 eqn k=2;

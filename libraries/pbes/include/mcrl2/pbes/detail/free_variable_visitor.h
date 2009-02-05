@@ -29,7 +29,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   typedef typename super::term_type term_type;
   typedef typename super::data_term_type data_term_type;
   typedef typename super::propositional_variable_type propositional_variable_type;
-  
+
   data::data_variable_list bound_variables;
   std::vector<data::data_variable_list> quantifier_stack;
   std::set<data::data_variable> result;
@@ -143,7 +143,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
     }
     return true;
   }
-};  
+};
 
 } // namespace detail
 

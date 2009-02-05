@@ -38,7 +38,7 @@ namespace utility {
 
   /**
    * \brief Interface used by visitors to visit
-   * 
+   *
    * A visitable class needs to derive from this class.
    **/
   class visitable {
@@ -246,11 +246,11 @@ namespace utility {
     class type_info_wrapper {
 
       protected:
-  
+
         std::type_info const*             m_info;
 
         boost::shared_ptr< basic_caster > m_caster;
-  
+
       public:
 
         type_info_wrapper(std::type_info const& o) : m_info(&o) {

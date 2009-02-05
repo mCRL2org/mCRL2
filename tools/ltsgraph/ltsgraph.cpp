@@ -123,7 +123,7 @@ bool LTSGraph::DoInit()
 
   glCanvas = mainFrame->getGLCanvas();
   glCanvas->setVisualizer(visualizer);
-  
+
   // Load a provided file.
   if (!lts_file_argument.empty())
   {
@@ -186,7 +186,7 @@ void LTSGraph::openFile(std::string const &path)
   fileName = path;
   // Find out file format based on extension
   std::string ext = path.substr(path.find_last_of( '.' ) + 1);
-  
+
   // Get file's basename
 
   Importer* imp;
@@ -211,7 +211,7 @@ void LTSGraph::openFile(std::string const &path)
 
   mainFrame->setLTSInfo(is, ns, nt, nl);
 
-  // Call the display routines. This is necessary to make sure the graph is 
+  // Call the display routines. This is necessary to make sure the graph is
   // rendered on the Mac
   display();
 
@@ -249,7 +249,7 @@ void LTSGraph::display()
     wxPaintEvent evt;
 
     wxEvtHandler* eh = glCanvas->GetEventHandler();
-    
+
     if(eh)
     {
       eh->ProcessEvent(evt);
@@ -326,11 +326,11 @@ void LTSGraph::deselect()
   if(selectedLabel != NULL) {
     selectedLabel->deselect();
   }
-  
+
   selectedState = NULL;
   selectedTransition = NULL;
   selectedLabel = NULL;
-  display();  
+  display();
 }
 
 void LTSGraph::colourState(size_t selectedObject) {
@@ -361,7 +361,7 @@ void LTSGraph::selectSelfLoop(size_t state, size_t transition)
   selectedTransition = graph->selectSelfLoop(state, transition);
 }
 
-void LTSGraph::selectLabel(size_t state, size_t transition) 
+void LTSGraph::selectLabel(size_t state, size_t transition)
 {
   selectedLabel = graph->selectTransition(state, transition);
 }

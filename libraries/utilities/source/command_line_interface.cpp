@@ -37,7 +37,7 @@ namespace mcrl2 {
     /**
      * Inserts newline characters while reading the input from left to right.
      * When a newline is inserted the next read newline is discarded.
-     *  - if a newline is read the previous line was wrapped the first 
+     *  - if a newline is read the previous line was wrapped the first
      *
      * To force a new-line at some position add two successive newline characters.
      *
@@ -285,7 +285,7 @@ namespace mcrl2 {
      * \verbatim
        tool                     (effect: options("recursive").count() == 0)
        tool --recursive         (effect: parsing fails)
-       tool -r                  (effect: parsing fails) 
+       tool -r                  (effect: parsing fails)
        tool --recursive=3       (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
        tool -r3                 (effect: options("recursive").count() == 1 && option_argument("recursive") == 3)
      **/

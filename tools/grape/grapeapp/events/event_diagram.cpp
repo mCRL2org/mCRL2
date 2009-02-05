@@ -794,15 +794,15 @@ bool grape_event_export_current_diagram_image::Do( void )
       if (vis_obj != 0)
       {
         object* obj = vis_obj->get_selectable_object();
-        if (obj != 0) 
+        if (obj != 0)
         {
           int coordx = int ((obj->get_coordinate().m_x+obj->get_width())*300);
           int coordy = int ((-obj->get_coordinate().m_y+obj->get_height())*300);
-          if (maxx < coordx) 
+          if (maxx < coordx)
           {
             maxx = coordx;
           }
-          if (maxy < coordy) 
+          if (maxy < coordy)
           {
             maxy = coordy;
           }
@@ -841,7 +841,7 @@ bool grape_event_export_current_diagram_image::Do( void )
         wxSafeYield();
 
         for (int y = 0; y < maxy; y+=sub_image_height)
-        { 
+        {
           //set translation coordinate
           coordinate translation_coordinate = {-(float)x/300.0f, (float)y/300.0f};
           //paint translated canvas
@@ -852,12 +852,12 @@ bool grape_event_export_current_diagram_image::Do( void )
           save_image.Paste(sub_image, x, y);
         }
       }
-   
+
       //display message
       cerr << "Saving image" << endl;
       //update application
       wxSafeYield();
-   
+
       bool save_success;
 
       if ( filename.GetExt().Lower() == _T("bmp") )

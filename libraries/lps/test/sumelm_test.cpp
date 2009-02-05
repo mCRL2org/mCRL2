@@ -63,7 +63,7 @@ void test_case_2()
   }
 }
 
-/* 
+/*
  * The sum variable y is equal to 4 in the condition, hence 4 should be
  * substituted for y in the summand, and sum y should be removed
  * In this case, this boils down to removing sum y, and removing 4==y from the
@@ -87,7 +87,7 @@ void test_case_3()
   }
 }
 
-/* 
+/*
  * This is the same as test case 3, except with the equality in different order.
  */
 void test_case_4()
@@ -108,7 +108,7 @@ void test_case_4()
   }
 }
 
-/* 
+/*
  * Test whether sum variables are correctly removed from actions and timing.
  */
 void test_case_5()
@@ -150,9 +150,9 @@ void test_case_5()
   }
 }
 
-/* 
+/*
  * Test that a sum variable is not removed when it occurs in both sides of a
- * variable. 
+ * variable.
  */
 void test_case_6()
 {

@@ -201,7 +201,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   /* Function for updating the configuration (specifics for state space storage) */
   boost::function < void (tipi::configuration&) > update_configuration;
-  
+
   /* Create display */
   tipi::tool_display d;
 
@@ -210,7 +210,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 
   // Helper for rewrite strategy selection
   mcrl2::utilities::squadt::radio_button_helper< RewriteStrategy >      rewrite_strategy_selector(d);
-  
+
   // Helper for rewrite strategy selection
   mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type > lts_type_selector(d);
 
@@ -345,22 +345,22 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   if (cb_trace.get_status() || cb_error_trace.get_status()) {
     c.add_option(option_max_traces).set_argument_value< 0 >(tf_max_traces.get_text());
   }
-  
+
   c.add_option(option_confluence_reduction).set_argument_value< 0 >(cb_confluence.get_status());
 
   if (cb_confluence.get_status()) {
     c.add_option(option_confluent_tau).set_argument_value< 0 >(tf_conf_tau.get_text());
   }
-  
+
   if (cb_max_states.get_status() && !tf_max_states.get_text().empty()) {
     c.add_option(option_max_states).set_argument_value< 0 >(tf_max_states.get_text());
   }
-  
+
   c.add_option(option_bithashing).set_argument_value< 0 >(cb_bithashing.get_status());
   c.add_option(option_bithashsize).set_argument_value< 0 >(tf_bithashsize.get_text());
 
   c.add_option(option_init_tsize).set_argument_value< 0 >(tf_init_tsize.get_text());
-  
+
   send_clear_display();
 }
 
@@ -402,10 +402,10 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
-  
+
   /* Create and add the top layout manager */
   layout::vertical_box& m = display.create< vertical_box >().set_default_margins(margins(0,5,0,5));
-  
+
   m.append(display.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
         append(display.create< vertical_box >().set_default_alignment(layout::left).
           append(display.create< label >().set_text("Level:")).
@@ -472,10 +472,10 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     lgopts.stateformat  = (configuration.get_option_argument< bool >(option_state_format_tree))?GS_STATE_TREE:GS_STATE_VECTOR;
     lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   }
-  
+
   lgopts.strat      = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy);
   lgopts.expl_strat = configuration.get_option_argument< exploration_strategy >(option_exploration_strategy);
-  
+
   lgopts.detect_deadlock  = configuration.get_option_argument< bool >(option_detect_deadlock);
 
   if (configuration.option_exists(option_detect_actions)) {
@@ -489,11 +489,11 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   if (lgopts.trace) {
     lgopts.max_traces = strtoul(configuration.get_option_argument< std::string >(option_max_traces).c_str(),0,0);
   }
-  
+
   if (configuration.get_option_argument< bool >(option_confluence_reduction)) {
     lgopts.priority_action = strdup(configuration.get_option_argument< std::string >(option_confluent_tau).c_str());
   }
-  
+
   lgopts.max_states = (configuration.option_exists(option_max_states)) ?
      boost::lexical_cast < boost::uint64_t > (configuration.get_option_argument< std::string >(option_max_states)) :
      DEFAULT_MAX_STATES;
@@ -506,7 +506,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     lgopts.bithashsize = (bithashsize_as_string.empty()) ?
           0 : boost::lexical_cast < boost::uint64_t > (bithashsize_as_string);
   }
-  
+
   lgopts.initial_table_size = strtoul(configuration.get_option_argument< std::string >(option_init_tsize).c_str(),0,0);
 
   /* Register trace add function */
@@ -520,7 +520,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
 
     ok &= finalise_lts_generation();
   }
-  
+
   return ok;
 }
 

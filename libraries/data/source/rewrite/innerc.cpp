@@ -185,7 +185,7 @@ ATerm RewriterCompilingInnermost::toInner(ATermAppl Term, bool add_opids)
                 if(ATisList(arg0))
                 {
                         l = ATconcat((ATermList) arg0, l);
-                } else {                                        
+                } else {
                         l = ATinsert(l, arg0);
                 }
         }
@@ -215,8 +215,8 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
 		exit(1);
 	}
-	
-        //Reconstruct term structure 
+
+        //Reconstruct term structure
 	l = (ATermList) Term;
 	t = ATgetFirst(l);
 	if ( ATisInt(t) )
@@ -226,7 +226,7 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 		a = (ATermAppl) t;
 	}
 
-        
+
 	l = ATgetNext(l);
         if(gsIsOpId(a) || gsIsDataVarId(a))
         {
@@ -256,7 +256,7 @@ static ATerm Apply(ATermList l)
   char c[10];
   int n=ATgetLength(l);
   sprintf(c,"appl#%d",n);
-  
+
   return (ATerm)ATmakeApplList(ATmakeAFun(c,n,ATfalse),l);
 }
 
@@ -266,8 +266,8 @@ static ATerm toInnerc(ATerm Term)
   {
     if ( ATisInt(Term) )
     { return Apply(ATinsert(ATempty,Term));
-    } 
-    else 
+    }
+    else
     if (gsIsDataVarId((ATermAppl)Term))
     { return Term;
     }
@@ -285,8 +285,8 @@ static ATerm toInnerc(ATerm Term)
   }
 
   ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));
-  for( ATermList l1=ATgetNext((ATermList)Term) ; 
-       l1!=ATempty ; 
+  for( ATermList l1=ATgetNext((ATermList)Term) ;
+       l1!=ATempty ;
        l1=ATgetNext(l1))
   { l=ATinsert(l,toInnerc(ATgetFirst(l1)));
   }
@@ -297,7 +297,7 @@ static ATerm toInnerc(ATerm Term)
 }
 
 ATerm RewriterCompilingInnermost::toRewriteFormat(ATermAppl t)
-{ 
+{
   int old_opids = num_opids;
   ATerm r = toInnerc(toInner(t,true));
 
@@ -577,7 +577,7 @@ static ATermList create_sequence(ATermList rule, int *var_cnt)
 	ATerm rslt = ATelementAt(rule,3);
 	ATermList pars = ATmakeList0();
 	ATermList rseq = ATmakeList0();
-	
+
 	pars = (ATermList) pat;
 	//ATfprintf(stderr,"pattern pars: %t\n",pars);
 	for (; !ATisEmpty(pars); pars=ATgetNext(pars))
@@ -645,7 +645,7 @@ static ATermList add_to_stack(ATermList stack, ATermList seqs, ATermAppl *r, ATe
 			*cr = ATinsert(*cr,ATgetFirst(e));
 		}
 	}
-	
+
 	return ATinsert(add_to_stack(ATgetNext(stack),l,r,cr),(ATerm) h);
 }
 
@@ -775,7 +775,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		ATermList l,m;
 
 		int k = i;
-		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i); 
+		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i);
 		treevars_usedcnt[k] = 0;
 
 		l = ATmakeList0();
@@ -790,7 +790,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 			l = ATinsert(l,ATgetFirst(e));
 			m = ATinsert(m,(ATerm) ATgetNext(e));
 		}
-		
+
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
@@ -882,7 +882,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 				l = ATinsert(l,ATgetFirst(pars.Flist));
 			}
 		}
-		
+
 		pars.Flist = l;
 		false_tree = build_tree(pars,i);
 		pars.Flist = ATmakeList0();
@@ -897,7 +897,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		}
 	} else if ( !ATisEmpty(pars.upstack) ) {
 		ATermList l;
-		
+
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
@@ -905,7 +905,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		l = pars.upstack;
 		pars.upstack = ATmakeList0();
 		add_to_build_pars(&pars,l,&r,&readies);
-		
+
 
 		if ( r == NULL )
 		{
@@ -956,7 +956,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 				inc_usedcnt((ATermList) ATgetArgument(r,1));
 				tree = ATmakeAppl(afunR,ATgetArgument(r,0));
 			}
-	
+
 			print_return("",ATmakeAppl1(afunN,(ATerm) tree));
 		}
 	}
@@ -1018,7 +1018,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity)
 		tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
 	}
 	//ATprintf("tree: %t\n",tree);
-	
+
 #ifdef _INNERC_STORE_TREES
 	char s[100],t[100];
 	sprintf(s,"tree_%i_%s_%i",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))),arity);
@@ -1127,7 +1127,7 @@ void RewriterCompilingInnermost::calcTerm(FILE *f, ATerm t, int startarg)
       i++;
     }
     fprintf(f,")");
-    
+
     if ( v )
     {
       fprintf(f,")");
@@ -1241,7 +1241,7 @@ static int peekn_st(int n)
 //#define IT_DEBUG
 #define IT_DEBUG_INLINE
 #ifdef IT_DEBUG_INLINE
-#define IT_DEBUG_FILE f,"//" 
+#define IT_DEBUG_FILE f,"//"
 #else
 #define IT_DEBUG_FILE stderr,
 #endif
@@ -1478,7 +1478,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
   int j;
   FILE *f;
   char *s,*t;
-  void *h;        
+  void *h;
 
 
   tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
@@ -1491,12 +1491,12 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
 //  gsfprintf(stderr,"OPIDEQNS %T\n\n",l);
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    // XXX only adds the last rule where lhs is an opid; this might go "wrong" if 
+    // XXX only adds the last rule where lhs is an opid; this might go "wrong" if
     // this rule is removed later
     ATtablePut(
       tmp_eqns,
       OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),
-      (ATerm) ATmakeList1((ATerm) 
+      (ATerm) ATmakeList1((ATerm)
                 ATmakeList4(
                   (ATerm) ATmakeList0(),
                   toInner(ATAgetArgument(ATAgetFirst(l),1),true),   // condition.
@@ -1616,7 +1616,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
 
       for (int a=0; a<=arity; a++)
       {
-    /*  
+    /*
         l = innerc_eqns[j];
         for (; !ATisEmpty(l); l=ATgetNext(l))
         {
@@ -1644,7 +1644,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
   //
   // Print defs
   //
-  fprintf(f,  
+  fprintf(f,
       "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
       "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
       "\n"
@@ -1806,14 +1806,14 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
       "}\n"
       "\n"
          );
-        
+
   for (int i=1; i<=max_arity; i++)
-  { fprintf(f, 
+  { fprintf(f,
       "static ATermAppl varFunc%i(ATermAppl a",i);
     for (int j=0; j<i; j++)
-    { fprintf(f, ", ATermAppl arg%i",j); 
+    { fprintf(f, ", ATermAppl arg%i",j);
     }
-    fprintf(f, ")\n" 
+    fprintf(f, ")\n"
       "{\n" );
     fprintf(f,
 //      "  ATprintf(\"%%t\\n\",a);\n"
@@ -1830,8 +1830,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
     {
       if ( j == 0 )
       { fprintf(f,"(ATermAppl) arg%i",j);
-      } 
-      else 
+      }
+      else
       { fprintf(f, ", (ATermAppl) arg%i",j);
       }
     }
@@ -1855,7 +1855,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
       "      args[i] = ATgetArgument(a,i);\n"
       "    }\n",i);
     for (int j=0; j<i; j++)
-    {        
+    {
       fprintf(f,
       "    args[arity+%i] = (ATerm) arg%i;\n",j,j);
     }
@@ -1874,13 +1874,13 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
       for (int k=0; k<j; k++)
       {
         if ( k == 0 )
-        {  
+        {
           fprintf(f,"(ATermAppl) args[%i]",k+1);
-        }   
-        else 
-        {        
+        }
+        else
+        {
           fprintf(f,", (ATermAppl) args[%i]",k+1);
-        } 
+        }
       }
       fprintf(f,");\n"
         "          }\n"
@@ -1914,8 +1914,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
     { fprintf(f,  "  int arity=ATgetArity(ATgetAFun(t))-1;\n");
     }
     for (int a=arity; a>=0; a--)
-    { 
-      if (a>0) 
+    {
+      if (a>0)
       { fprintf(f,  "  if (arity==%i)\n"
                   "  { ",a);
       }
@@ -1924,19 +1924,19 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
       }
       fprintf(f,  "return rewr_%i_%i(",j,a);
       for(int i=0; i<a; i++)
-      { if (i>0) 
+      { if (i>0)
         { fprintf(f,",");
         }
         fprintf(f,  "rewrite((ATermAppl)ATgetArgument(t,%i))",i+1);
       }
       fprintf(f,  ");\n");
-      if (a>0) 
+      if (a>0)
       { fprintf(f,  "  }\n");
       }
     }
     fprintf(f,  "}\n"
                 "\n");
-            
+
     for (int a=0; a<=arity; a++)
     {
       fprintf(f,  "static ATermAppl rewr_%i_%i(",j,a);
@@ -1959,7 +1959,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(mcrl2::data::data_specific
         fprintf(f,  ", arg%i",i);
       }
       fprintf(f,  ");\n");*/
- 
+
 
       // Implement tree
       if ( innerc_eqns[j] != NULL )

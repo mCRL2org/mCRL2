@@ -57,7 +57,7 @@ class NextStateGenerator
 		 * \param prioritised A place to store a boolean indicating
 		 *                    whether or not this transition was
 		 *                    prioritised. (Unless this is NULL).
-		 * \return Whether or not a transition was found and stored in 
+		 * \return Whether or not a transition was found and stored in
 		 *         the variables pointed to by the arguments.
 		 *
 		 * Once this function returns false, it will continue to return

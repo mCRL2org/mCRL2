@@ -63,7 +63,7 @@ namespace squadt {
    * \param b whether or not to (re)create a project
    *
    * \pre l should be a path to a directory
-   * 
+   *
    * If the directory does not exist then it is created and an initial project
    * description file is written to it. If the directory exists but there is no
    * project description file in it, then such a file is created and all files

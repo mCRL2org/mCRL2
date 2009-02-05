@@ -41,7 +41,7 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(x == data_variable("d02:D"));
 
   data_variable a = fresh_variable(e, sort_expression("D"), "d");
-  BOOST_CHECK(a == data_variable("d01:D")); 
+  BOOST_CHECK(a == data_variable("d01:D"));
 
   std::set<identifier_string> ids = find_identifiers(e);
   BOOST_CHECK(ids.size() == 8);
@@ -69,7 +69,7 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("d_01:D")) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("e_01:E")) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), data_variable("f_01:F")) != w1.end());
-    
+
   bool bb = (d < d0);
 
   return 0;

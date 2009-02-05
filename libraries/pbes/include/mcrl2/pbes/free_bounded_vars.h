@@ -38,11 +38,11 @@ mcrl2::pbes_system::pbes_expression newnames(mcrl2::pbes_system::pbes_expression
 
 
 /// Renames some bounded variable occurences with new variables,
-/// such that, in the returned expression: 
+/// such that, in the returned expression:
 ///  . every variable is bounded by only one quantifier
 ///  . no variable occurs both bounded and free
-/// If necessary, more than one new names for the same old name will be introduced. 
-/// For instance, forall x.A(x) /\ exists x.B(x) 
+/// If necessary, more than one new names for the same old name will be introduced.
+/// For instance, forall x.A(x) /\ exists x.B(x)
 /// becomes forall x0.A(x0) /\ exists x1.B(x1).
 ///
 /// As side effect, two variable lists are returned:
@@ -67,13 +67,13 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
     pbes_expression pleft_ok = newnames(pleft,toreplace);
     toreplace = intersect(bvr,fvl);
     pbes_expression pright_ok = newnames(pright,toreplace);
-    *fv = dunion(fvl,fvr); // the free vars are never renamed 
+    *fv = dunion(fvl,fvr); // the free vars are never renamed
     *bv = dunion(bvl,bvr); // no need to add the new names, because they will
                            // not occur again later
     //   std::cout<<"RDV: end "<<pp(pleft_ok).c_str()<<"     *     "<<pp(pright_ok).c_str()<<"\n";
-   
+
     if (is_and(p)) return and_(pleft_ok,pright_ok);
-    else if (is_or(p)) return or_(pleft_ok,pright_ok);    
+    else if (is_or(p)) return or_(pleft_ok,pright_ok);
     else return imp(pleft_ok,pright_ok);
   }
   else if ((is_forall(p))||(is_exists(p))) {
@@ -107,11 +107,11 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
 
 
 /// Renames some bounded variable occurences with new variables,
-/// such that, in the returned expression: 
+/// such that, in the returned expression:
 ///  . every variable is bounded by only one quantifier
 ///  . no variable occurs both bounded and free
-/// If necessary, more than one new names for the same old name will be introduced. 
-/// For instance, forall x.A(x) /\ exists x.B(x) 
+/// If necessary, more than one new names for the same old name will be introduced.
+/// For instance, forall x.A(x) /\ exists x.B(x)
 /// becomes forall x0.A(x0) /\ exists x1.B(x1).
 ///
 /// As side effect, two variable lists are returned:
@@ -129,12 +129,12 @@ mcrl2::pbes_system::pbes_expression remove_double_variables(mcrl2::pbes_system::
 
 
 /// Same effect as remove_double_variables,
-/// but differently implemented (BRUTE FORCE): 
-/// all quantified variables are simply renamed with new names, 
+/// but differently implemented (BRUTE FORCE):
+/// all quantified variables are simply renamed with new names,
 /// within the scope of their quantifier.
 mcrl2::pbes_system::pbes_expression remove_double_variables_fast(mcrl2::pbes_system::pbes_expression p)
 {
- 
+
   // !!!! IMPLEMENT THIS
 
  return p;

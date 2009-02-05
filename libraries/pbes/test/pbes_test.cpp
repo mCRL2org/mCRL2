@@ -226,14 +226,14 @@ void test_free_variables()
 }
 
 // No longer valid due to that the order of and_ and or_ may be changed.
-// 
+//
 // void test_pbes_expression_builder()
 // {
 //   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
 //   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
 //   bool timed = false;
 //   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
-// 
+//
 //   for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
 //   {
 //     const pbes_expression& q = i->formula();
@@ -246,7 +246,7 @@ void test_free_variables()
 void test_quantifier_rename_builder()
 {
   using namespace pbes_system::pbes_expr;
-  namespace d = data::data_expr; 
+  namespace d = data::data_expr;
 
   data_variable mN("m:N");
   data_variable nN("n:N");
@@ -256,16 +256,16 @@ void test_quantifier_rename_builder()
 
   multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
-  pbes_expression p1 = 
+  pbes_expression p1 =
   and_(
     forall(make_list(nN), exists(make_list(nN), f)),
     forall(make_list(mN), exists(make_list(mN, nN), g))
   );
-  pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1); 
+  pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
   std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
   std::cout << "q1 = " << mcrl2::core::pp(q1) << std::endl;
 
-  pbes_expression p2 = 
+  pbes_expression p2 =
   and_(
     forall(make_list(nN), exists(make_list(nN), p1)),
     forall(make_list(mN), exists(make_list(mN, nN), q1))
@@ -302,7 +302,7 @@ void test_pbes_expression()
   pbes_expression e = x1;
   data_expression x2 = mcrl2::pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);
-  
+
   pbes_expression v_expr = propositional_variable_instantiation("v:V");
   propositional_variable_instantiation v1 = v_expr;
   propositional_variable_instantiation v2(v_expr);
@@ -319,7 +319,7 @@ void test_trivial()
 
 void test_instantiate_free_variables()
 {
-  std::string spec_text = 
+  std::string spec_text =
     "act a,b:Nat;             \n"
     "    d;                   \n"
     "proc P(n:Nat)=a(n).delta;\n"
@@ -330,11 +330,11 @@ void test_instantiate_free_variables()
   state_formula formula = mcf2statefrm(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;  
-  std::cout << "<lps>" << mcrl2::core::pp(spec) << std::endl;  
+  std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
+  std::cout << "<lps>" << mcrl2::core::pp(spec) << std::endl;
   bool result = p.instantiate_free_variables();
-  std::cout << "<result>" << result << std::endl;  
-  std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;  
+  std::cout << "<result>" << result << std::endl;
+  std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
 }
 
 int test_main(int argc, char** argv)

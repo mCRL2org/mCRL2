@@ -2,7 +2,7 @@
 
 % title and author
 \title{Operation Identifiers for mCRL2}
-\author{Aad Mathijssen} 
+\author{Aad Mathijssen}
 
 % packages
 \usepackage[english]{babel}
@@ -110,7 +110,7 @@
     }
   }
   {\end{list}}
-  
+
 % entry: list of entries where:
 % - the optional argument denotes the space between successive items
 %   (default 0.15em);
@@ -120,7 +120,7 @@
   {\begin{list}{}%
     {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
      \settowidth{\labelwidth}{\textsf{#2:}}%
-     \setlength{\leftmargin}{\labelwidth+\labelsep}%     
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%
      \setlength{\parsep}{0pt}%
      \setlength{\itemsep}{#1}%
     }%
@@ -258,7 +258,7 @@
 % function composition: o
 \newcommand{\fcomp}{\ensuremath{%
   \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
-  
+
 % function mapping
 \newcommand{\fmap}{
   \hspace{0.08em}\raisebox{0.2ex}{%
@@ -324,7 +324,7 @@
 
 % cons: |>
 \newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
-  
+
 % snoc: <|
 \newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
 
@@ -391,17 +391,17 @@
 
 %inference rule with 0 premises and 1 conclusion
 \newcommand{\infC}[1]{\ensuremath{
-  \begin{array}{c} 
-    \\\hline 
-    #1 
+  \begin{array}{c}
+    \\\hline
+    #1
   \end{array}
 }}
 
 %inference rule with 1 premise and 1 conclusion
 \newcommand{\infPC}[2]{\ensuremath{
-  \begin{array}{c} 
-    #1 \\\hline 
-    #2 
+  \begin{array}{c}
+    #1 \\\hline
+    #2
   \end{array}
 }}
 
@@ -550,7 +550,7 @@
 \newcommand{\sft}{{\sf t}}
 \newcommand{\sff}{{\sf f}}
 \newcommand{\nul}{{\bf 0}}
-\font \aap cmmi10        
+\font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 \newcommand{\before}{\mbox{\footnotesize{\frm{\ll}}}}
 \newcommand{\ap}{{:}}
@@ -659,7 +659,7 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
 \verb+@last+$^*$   & \srtnatpair \to \srtnat & last element of the pair   & functional\\
 \verb+@divmod+$^*$ & \srtpos \times \srtpos \to \srtnatpair
                                            & div/mod  & functional\\
-\verb+@gdivmod+$^*$ & \srtnatpair \times \srtbool \times \srtpos 
+\verb+@gdivmod+$^*$ & \srtnatpair \times \srtbool \times \srtpos
                                            & generalised div/mod  & functional\\
                     & \hfill \to \srtnatpair & &\\
 \verb+@ggdivmod+$^*$ & \srtnat \times \srtnat \times \srtpos \to \srtnatpair
@@ -683,14 +683,14 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
 \verb+@cNeg+$^*$  & \srtpos \to \srtint    & negate positive      & number\\
 \verb+@cInt+$^*$  & \srtnat \to \srtint    & create integer from natural
                                                                   & number\\
-\verb+@cReal+$^*$ & \srtint \times \srtpos \to \srtreal   & irreducible fraction 
+\verb+@cReal+$^*$ & \srtint \times \srtpos \to \srtreal   & irreducible fraction
                                                                   & number\\
 \verb+A2B+        & A \to B                & convert \frm{A} to \frm{B}
                                                                   & functional\\
 \verb+max+        & \sub{A}{\f{PNI}} \times \sub{B}{\f{PNI}} \to
                     \sub{A}{\f{PNI}} \cap \sub{B}{\f{PNI}}
                                            & maximum              & functional\\
-\verb+max+        & \srtreal \times \srtreal \to \srtreal      
+\verb+max+        & \srtreal \times \srtreal \to \srtreal
                                            & maximum              & functional\\
 \verb+min+        & A \times A \to A       & minimum              & functional\\
 \verb+abs+        & \sub{A}{\f{PNR}} \to \sub{A}{\f{PNR}}

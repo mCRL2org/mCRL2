@@ -35,10 +35,10 @@ namespace tipi {
         boost::shared_ptr< basic_event_handler_impl< const void* > > impl;
 
       public:
-   
+
         /** \brief Basic type of event handler functions */
         typedef boost::function < void (const void*) > handler_function;
-   
+
       public:
 
         /** \brief Constructor */
@@ -46,7 +46,7 @@ namespace tipi {
 
         /** \brief Set a global handler */
         void add(handler_function);
-   
+
         /** \brief Register an arbitrary handler for a specific object */
         void add(const void*, handler_function);
 
@@ -64,10 +64,10 @@ namespace tipi {
 
         /** \brief Process an event for a specific object */
         void process(const void*, bool = true, bool = false);
-   
+
         /** \brief Execute handlers for a specific object */
         void execute_handlers(const void*, bool);
-   
+
         /** \brief Block until the next event has been processed */
         void await_change(const void*);
 

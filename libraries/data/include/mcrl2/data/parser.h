@@ -125,7 +125,7 @@ namespace detail {
 
 } // namespace detail
   /// \endcond
-  
+
   /// \brief Parses a data specification.
   /// \param text A string
   /// \return A data specification

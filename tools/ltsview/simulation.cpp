@@ -46,11 +46,11 @@ void Simulation::start() {
   {
     chosenTrans = 0;
   }
-  else 
+  else
   {
     chosenTrans = -1;
   }
-  
+
   started = true;
   //Fire signal
   signal();
@@ -59,7 +59,7 @@ void Simulation::stop()
 {
   // Set started to false
   started = false;
-  
+
   for (size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
@@ -78,27 +78,27 @@ void Simulation::stop()
   currState = NULL;
   // Fire signal
   signal();
-  
+
 }
-  
+
 Simulation::~Simulation() {
   //Stop simulation
   stop();
 
   transHis.clear();
-  
+
   for(size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
-  
+
   stateHis.clear();
 
   for(size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
   }
-  
+
   posTrans.clear();
 }
 
@@ -164,9 +164,9 @@ void Simulation::followTrans() {
   {
     Transition* toFollow = posTrans[chosenTrans];
     State* nextState = toFollow->getEndState();
-  
+
     transHis.push_back(posTrans[chosenTrans]);
-   
+
     for(size_t i = 0; i < posTrans.size(); ++i)
     {
       posTrans[i]->getEndState()->setSimulated(false);
@@ -178,7 +178,7 @@ void Simulation::followTrans() {
     }
 
     nextState->setSimulated(true);
-  
+
     stateHis.push_back(nextState);
     currState = nextState;
 
@@ -213,19 +213,19 @@ void Simulation::chooseTrans(int i) {
 
 void Simulation::undoStep() {
   State* lastState;
-  
+
   // Remove last transition, state from history
   transHis.pop_back();
 
   stateHis.back()->setSimulated(false);
   stateHis.pop_back();
-  
+
   for(size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
     posTrans[i]->getEndState()->deselect();
   }
-  
+
   // Set new states
   lastState = stateHis.back();
   currState = lastState;
@@ -239,7 +239,7 @@ void Simulation::undoStep() {
   for (int i = 0; i < currState->getNumLoops(); ++i) {
     posTrans.push_back(currState->getLoop(i));
   }
-  
+
   if (posTrans.size() > 0)
   {
     chosenTrans = 0;
@@ -256,19 +256,19 @@ void Simulation::undoStep() {
 
 void Simulation::resetSim() {
   State* firstState = stateHis.front();
-  
+
   transHis.clear();
   for (size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
-  
+
   stateHis.clear();
 
   firstState->setSimulated(true);
-  
+
   stateHis.push_back(firstState);
-  
+
   currState = firstState;
 
   posTrans.clear();
@@ -279,12 +279,12 @@ void Simulation::resetSim() {
   for (int i = 0; i < currState->getNumLoops(); ++i) {
     posTrans.push_back(currState->getLoop(i));
   }
-  
+
   if (posTrans.size() > 0)
   {
     chosenTrans = 0;
   }
-  else 
+  else
   {
     chosenTrans = -1;
   }
@@ -305,7 +305,7 @@ Simulation::simConnection Simulation::connectSel(
   return result;
 }
 
-Simulation::simConnection Simulation::connect( 
+Simulation::simConnection Simulation::connect(
               simulationSignal::slot_function_type subscriber
             )
 {

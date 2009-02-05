@@ -11,7 +11,7 @@
 
 // ======================================================================
 //
-// file          : pbesinfo 
+// file          : pbesinfo
 // date          : 11-04-2007
 // version       : 0.1.0
 //
@@ -87,7 +87,7 @@ class info_tool {
       /// - Show number of mu's / nu's.
       /// - Show which predicate variables have mu's and which predicate variables have nu's
       /// - Show predicate variables and their type
-      /// else 
+      /// else
       /// - Give error
 
       pbes_specification.load(file_name);
@@ -95,7 +95,7 @@ class info_tool {
       // Get PBES equations. Makes a lot of function calls more readable.
       atermpp::vector<pbes_equation> eqsys;
       eqsys = pbes_specification.equations();
-     
+
       bool pbes_well_formed = pbes_specification.is_well_typed();
       bool pbes_closed = pbes_specification.is_closed();
 
@@ -103,17 +103,17 @@ class info_tool {
       vector<identifier_string> predvar_mu;
       vector<identifier_string> predvar_nu;
       vector<propositional_variable> predvar_data;
-     		
+
       // Integers for showing totals
       int mu = 0;
       int nu = 0;
       int fp_errors = 0;
-     
+
       for (atermpp::vector<pbes_equation>::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
       {
          // - Store data_variables
          predvar_data.push_back(fp_i->variable());
-     	
+
          // Check on mu or nu
          if (fp_i->symbol().is_mu())
          {
@@ -139,25 +139,25 @@ class info_tool {
            fp_errors++;
          }
       }
-      		
+
       // Show file from which PBES was read
       cout << "Input read from '" << ((file_name == "") ? "standard input" : file_name) << "'" << endl << endl;
-     
+
       // Check if errors occurred in reading PBEs
       if (fp_errors != 0)
       {
       	cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
       }
-     
+
       // Show if PBES is closed and well formed
       cout << "The PBES is " << (pbes_closed ? "" : "not ") << "closed and " << (pbes_well_formed ? "" : "not ") << "well formed" << endl;
-     
+
       // Show number of equations
       cout << "Number of equations: " << eqsys.size() << endl;
-     
+
       // Show number of mu's with the predicate variables from the mu's
       cout << "Number of mu's:      " << mu;
-      int size_mu = predvar_mu.size();	
+      int size_mu = predvar_mu.size();
       int mu_done = 1;
       if (size_mu > 0)
         cout << "   (";
@@ -167,10 +167,10 @@ class info_tool {
      	mu_done++;
       }
       cout << endl;
-     		
+
       // Show number of nu's with the predicate variables from the nu's
       cout << "Number of nu's:      " << nu;
-      int size_nu = predvar_nu.size();	
+      int size_nu = predvar_nu.size();
       int nu_done = 1;
       if (size_nu > 0)
       	cout << "   (";
@@ -180,7 +180,7 @@ class info_tool {
       	nu_done++;
       }
       cout << endl;
-      
+
      // Show binding variables with their signature
       if (opt_full)
       {

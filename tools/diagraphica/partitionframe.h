@@ -43,7 +43,7 @@ protected:
     void onComboBox( wxCommandEvent &e );
     void onSpinCtrl( wxSpinEvent &e );
     void onSpinCtrlText( wxCommandEvent &e );
-    
+
 private:
     // -- utility functions -----------------------------------------
     // INSERT
@@ -67,7 +67,7 @@ private:
 
     wxBoxSizer*       sizerPanel;
     wxFlexGridSizer*  sizerTop;
-    
+
     wxSpinCtrl*       spinCtrlNumber;
     wxComboBox*       comboBoxMethod;
     GLCanvas*         canvas;
@@ -82,7 +82,7 @@ private:
         ID_BUTTON_CANCEL,
         ID_BUTTON_OK
     };
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

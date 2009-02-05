@@ -1,9 +1,9 @@
 % Test Case 5 -- No Free Variables
-%  
-% Process parameter i will not be removed. Occurrences of process parameter j are 
+%
+% Process parameter i will not be removed. Occurrences of process parameter j are
 % substituted by "x" and removed from the process parameter list.
 %
-% If "--nosingleton" is used, process parameter j are not substituted and 
+% If "--nosingleton" is used, process parameter j are not substituted and
 % not removed from the process parameter list.
 
 sort Singleton = struct x;

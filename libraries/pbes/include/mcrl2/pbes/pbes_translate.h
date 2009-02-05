@@ -108,12 +108,12 @@ class pbes_translate_algorithm
       protected:
         /// \brief The actions of the multi action
         lps::action_list m_actions;
-          
+
         /// \brief The time of the multi action
         data::data_expression m_time;
 
       public:
-        
+
         /// \brief Constructor
         /// \param actions A sequence of actions
         /// \param time A data expression

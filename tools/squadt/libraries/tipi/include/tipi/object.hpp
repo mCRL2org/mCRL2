@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file tipi/object.hpp
-/// \brief Type used to represent an object in a configuration (protocol concept) 
+/// \brief Type used to represent an object in a configuration (protocol concept)
 
 #ifndef TIPI_OBJECT_H
 #define TIPI_OBJECT_H

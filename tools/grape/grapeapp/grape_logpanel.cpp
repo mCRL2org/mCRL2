@@ -82,7 +82,7 @@ class message_relay {
 
     static bool initialise(wxTextCtrl& control) {
       static bool initialised = initialise_once(control);
- 
+
       return initialised;
     }
 

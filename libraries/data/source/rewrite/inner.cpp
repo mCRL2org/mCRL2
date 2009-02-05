@@ -73,7 +73,7 @@ static void initialise_common()
 		ATprotectAFun(opidAFun);
 		ruleAFun = ATmakeAFun("@RULE@",4,ATfalse);
 		ATprotectAFun(ruleAFun);
-	
+
 		afunS = ATmakeAFun("@@S",2,ATfalse); // Store term ( target_variable, result_tree )
 		ATprotectAFun(afunS);
 		afunM = ATmakeAFun("@@M",3,ATfalse); // Match term ( match_variable, true_tree , false_tree )
@@ -125,7 +125,7 @@ static void finalise_common()
 		ATunprotectAFun(afunF);
 		ATunprotectAFun(afunM);
 		ATunprotectAFun(afunS);
-		
+
 		ATunprotectAFun(ruleAFun);
 		ATunprotectAFun(opidAFun);
 		ATunprotectAFun(nilAFun);
@@ -304,7 +304,7 @@ static ATermList create_sequence(ATermAppl rule, int *var_cnt)
 	ATerm rslt = ATgetArgument(rule,3);
 	ATermList pars = ATmakeList0();
 	ATermList rseq = ATmakeList0();
-	
+
 	pars = (ATermList) pat;
 	//ATfprintf(stderr,"pattern pars: %t\n",pars);
 	for (; !ATisEmpty(pars); pars=ATgetNext(pars))
@@ -386,7 +386,7 @@ static ATermList add_to_stack(ATermList stack, ATermList seqs, ATermAppl *r, ATe
 			*cr = ATinsert(*cr,ATgetFirst(e));
 		}
 	}
-	
+
 	return ATinsert(add_to_stack(ATgetNext(stack),l,r,cr),(ATerm) h);
 }
 
@@ -516,7 +516,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		ATermList l,m;
 
 		int k = i;
-		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i); 
+		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i);
 		treevars_usedcnt[k] = 0;
 
 		l = ATmakeList0();
@@ -531,7 +531,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 			l = ATinsert(l,ATgetFirst(e));
 			m = ATinsert(m,(ATerm) ATgetNext(e));
 		}
-		
+
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
@@ -623,7 +623,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 				l = ATinsert(l,ATgetFirst(pars.Flist));
 			}
 		}
-		
+
 		pars.Flist = l;
 		false_tree = build_tree(pars,i);
 		pars.Flist = ATmakeList0();
@@ -638,7 +638,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		}
 	} else if ( !ATisEmpty(pars.upstack) ) {
 		ATermList l;
-		
+
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
@@ -646,7 +646,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 		l = pars.upstack;
 		pars.upstack = ATmakeList0();
 		add_to_build_pars(&pars,l,&r,&readies);
-		
+
 
 		if ( r == NULL )
 		{
@@ -697,7 +697,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 				inc_usedcnt((ATermList) ATgetArgument(r,1));
 				tree = ATmakeAppl(afunR,ATgetArgument(r,0));
 			}
-	
+
 			print_return("",ATmakeAppl1(afunN,(ATerm) tree));
 		}
 	}
@@ -795,9 +795,9 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
 		tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
 	}
 	//ATfprintf(stderr,"tree(%t): %t\n",int2term[opid],tree);
-	
+
 	finalise_build_pars(&init_pars);
-	
+
 	int max_tree_vars = 0;
 	tree = optimise_tree(tree,&max_tree_vars);
 	if ( max_tree_vars > *max_vars )
@@ -1076,8 +1076,8 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
 		exit(1);
 	}
-	
-        //Reconstruct term structure 
+
+        //Reconstruct term structure
 	l = (ATermList) Term;
 	t = ATgetFirst(l);
 	if ( ATisInt(t) )
@@ -1087,7 +1087,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 		a = (ATermAppl) t;
 	}
 
-        
+
 	l = ATgetNext(l);
         if(gsIsOpId(a) || gsIsDataVarId(a))
         {
@@ -1188,7 +1188,7 @@ RewriterInnermost::RewriterInnermost(mcrl2::data::data_specification DataSpec)
 		i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 		int2term[ATgetInt(i)] = ATAgetFirst(l);
 	}
-	
+
 	l = ATtableKeys(term2int);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -1199,7 +1199,7 @@ RewriterInnermost::RewriterInnermost(mcrl2::data::data_specification DataSpec)
 			inner_trees[ATgetInt(i)] = create_tree(m,ATgetInt(i),&max_vars);
 		}
 	}
-			
+
 	ATtableDestroy(tmp_eqns);
 
 	need_rebuild = false;
@@ -1215,7 +1215,7 @@ RewriterInnermost::~RewriterInnermost()
 	free(int2term);
 	free(inner_eqns);
 	free(inner_trees);
-	
+
 	finalise_common();
 }
 
@@ -1451,7 +1451,7 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
 				assert(ATisAppl(head) && gsIsDataVarId((ATermAppl) head));
 
 				ATerm a = lookupSubstitution((ATermAppl) head);
-			
+
 				// if a is a list, concatenate the arguments
 				// always set head again, as 'a' might have been changed
 				if ( ATisList(a) )
@@ -1463,7 +1463,7 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
 				}
 			}
 		}
-		
+
 		// head is should be a int or a var
 		if ( ATisInt(head) )
 		{

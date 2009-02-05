@@ -27,9 +27,9 @@ BEGIN_EVENT_TABLE(SimDialog, wxDialog)
   EVT_BUTTON(myID_SIM_RESET_BUTTON, SimDialog::onSimResetButton)
   EVT_BUTTON(myID_SIM_STOP_BUTTON, SimDialog::onSimStopButton)
 
-  EVT_LIST_ITEM_SELECTED(myID_SIM_TRANSITIONS_VIEW, 
+  EVT_LIST_ITEM_SELECTED(myID_SIM_TRANSITIONS_VIEW,
                          SimDialog::onSimTransitionSelected)
-  EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW, 
+  EVT_LIST_ITEM_ACTIVATED(myID_SIM_TRANSITIONS_VIEW,
                           SimDialog::onSimTransitionActivated)
   EVT_CHAR(SimDialog::onKeyDown)
   EVT_BUTTON(myID_SIM_TRIGGER_BUTTON, SimDialog::onSimTriggerButton)
@@ -38,8 +38,8 @@ BEGIN_EVENT_TABLE(SimDialog, wxDialog)
 END_EVENT_TABLE()
 
 SimDialog::SimDialog(wxWindow* parent, Mediator* owner)
-  : wxDialog(parent, wxID_ANY, wxT("Simulation"), wxDefaultPosition, 
-             wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER), 
+  : wxDialog(parent, wxID_ANY, wxT("Simulation"), wxDefaultPosition,
+             wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER),
     simReader(NULL)
 {
   mediator = owner;
@@ -76,18 +76,18 @@ SimDialog::SimDialog(wxWindow* parent, Mediator* owner)
   simButtonSizer->Add(simStopButton,  0, flags, border);
   simButtonSizer->Add(simBTButton, 0, flags, border);
   simButtonSizer->Add(simResetButton, 0, flags, border);
-  
+
 
   simSizer->Add(simButtonSizer, 1, flags, border);
 
   // List of transitions and buttons to fire these transitions and go back one
   // step
-  wxStaticBoxSizer* simTransSizer = new wxStaticBoxSizer(wxVERTICAL, this, 
+  wxStaticBoxSizer* simTransSizer = new wxStaticBoxSizer(wxVERTICAL, this,
     wxT("Transitions"));
   int listViewStyle = wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|
                       wxLC_SINGLE_SEL;
 
-  simTransView = new wxListView(this, myID_SIM_TRANSITIONS_VIEW, 
+  simTransView = new wxListView(this, myID_SIM_TRANSITIONS_VIEW,
     wxDefaultPosition, wxSize(200, 100), listViewStyle);
   //simTransView->SetMaxSize(wxSize(200, 100));
   simTransView->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
@@ -111,10 +111,10 @@ SimDialog::SimDialog(wxWindow* parent, Mediator* owner)
 
 
   // Information about current state
-  /*wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel, 
+  /*wxStaticBoxSizer* simStateSizer = new wxStaticBoxSizer(wxVERTICAL, panel,
                                                          wxT("Current state"));
-  simStateView = new wxListView(panel, myID_SIM_STATE_VIEW, 
-                                         wxDefaultPosition, wxSize(200, 100), 
+  simStateView = new wxListView(panel, myID_SIM_STATE_VIEW,
+                                         wxDefaultPosition, wxSize(200, 100),
                                          listViewStyle);
   simStateView->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
   simStateView->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
@@ -122,15 +122,15 @@ SimDialog::SimDialog(wxWindow* parent, Mediator* owner)
 
   simStateSizer->Add(simStateView, 1, flags|wxEXPAND, border);
   simSizer->Add(simStateSizer, 0, wxEXPAND|wxALL, border);*/
-  
+
   SetSizer(simSizer);
   Fit();
   Layout();
 
   // Now the panel has been laid out, we can get fill up the columns
-  simTransView->SetColumnWidth(1, simTransView->GetClientSize().GetWidth() - 
+  simTransView->SetColumnWidth(1, simTransView->GetClientSize().GetWidth() -
                                simTransView->GetColumnWidth(0));
-  /*simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() - 
+  /*simStateView->SetColumnWidth(1, simStateView->GetClientSize().GetWidth() -
                                simStateView->GetColumnWidth(0));*/
 }
 
@@ -153,7 +153,7 @@ void SimDialog::onSimTransitionSelected(wxListEvent& event) {
 
   // Choose trans to be the next transition
   sim->chooseTrans(trans);
-  
+
 }
 
 void SimDialog::onSimTransitionActivated(wxListEvent& event) {
@@ -200,7 +200,7 @@ void SimDialog::refresh() {
       simTransView->DeleteAllItems();
     }
     else {
-      // The simluation has been started, disable start button, enable stop and 
+      // The simluation has been started, disable start button, enable stop and
       // reset buttons
       simStartButton->Disable();
 
@@ -213,9 +213,9 @@ void SimDialog::refresh() {
       simTransView->DeleteAllItems();
 
       vector<Transition*> posTrans = sim->getPosTrans();
-      
+
       State* currState = sim->getCurrState();
-      
+
       // Get the possible transitions
       for(size_t i = 0; i < posTrans.size(); ++i) {
         int labelId = posTrans[i]->getLabel();
@@ -225,34 +225,34 @@ void SimDialog::refresh() {
 
         // Determine the state change this action will effectuate.
         State* nextState = posTrans[i]->getEndState();
-        
+
         wxString stateChange = wxT("");
         if ((nextState != NULL) && (currState != NULL)) {
           for(int j = 0; j < mediator->getNumberOfParams(); ++j) {
             string nextVal = mediator->getParValue(nextState,j);
             if (mediator->getParValue(currState,j) != nextVal) {
-              stateChange += wxString(mediator->getParName(j).c_str(), 
-                               wxConvLocal) +  
-                            wxT(":=") + 
+              stateChange += wxString(mediator->getParName(j).c_str(),
+                               wxConvLocal) +
+                            wxT(":=") +
                             wxString(nextVal.c_str(), wxConvLocal) +
                             wxT(",");
             }
           }
-          // Remove last comma. There always is one since an empty transition 
+          // Remove last comma. There always is one since an empty transition
           // does not exist
           stateChange.RemoveLast();
         }
         // Add stateChange value to the list
         simTransView->SetItem(i, 1, stateChange);
       }
-      
+
       // Display selected transition
       int chosenTrans = sim->getChosenTransi();
 
       if(chosenTrans != -1) {
         simTransView->Select(chosenTrans);
       }
-      
+
       // Trigger and undo buttons
       if(chosenTrans != -1) {
         simTriggerButton->Enable();
@@ -276,12 +276,12 @@ void SimDialog::selChange() {
   // There always is a simulation to inform us of a selection change.
   int j = sim->getChosenTransi();
 
-  if(j != -1) 
+  if(j != -1)
   {
     simTransView->Select(j);
     simTriggerButton->Enable();
   }
-  else 
+  else
   {
     simTriggerButton->Disable();
   }

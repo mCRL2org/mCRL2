@@ -2,7 +2,7 @@ import re
 import string
 from path import *
 
-TEXT = '''action(const action_label& l, const data::data_expression_list& v) (label, arguments) 
+TEXT = '''action(const action_label& l, const data::data_expression_list& v) (label, arguments)
 process(const process_identifier pi, const data::data_expression_list& v) (identifier, expressions)
 process_assignment(const process_identifier pi, const data::data_assignment_list& v) (identifier, assignments)
 delta() ()
@@ -208,7 +208,7 @@ TERM_TRAITS_TEXT = r'''
     {
       return core::detail::gsIs%s(t);
     }
-'''    
+'''
 
 terms = [
   ('action'             , 'Action'           ),

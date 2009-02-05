@@ -302,7 +302,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
 
       if ( allowed_eqs().count(tool_options.equivalence) == 0 )
       {
-        parser.error("option -e/--equivalence has illegal argument '" + 
+        parser.error("option -e/--equivalence has illegal argument '" +
             parser.option_argument("equivalence") + "'");
       }
     }

@@ -49,20 +49,20 @@ using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
-  
+
 /// The pbes2bes tool.
 class pbes2bes_tool: public rewriter_tool<input_output_tool>
 {
   protected:
     typedef rewriter_tool<input_output_tool> super;
-    
+
     /// The output formats of the tool.
     enum pbes_output_format {
       of_binary,
       of_internal,
       of_cwi
     };
-    
+
     /// The transformation strategies of the tool.
     enum transformation_strategy {
       ts_lazy,
@@ -242,18 +242,18 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       {
         // data rewriter
         data::rewriter datar = create_rewriter(p.data());
-        
+
         // name generator
         std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
         data::number_postfix_generator name_generator(prefix);
-        
+
         // data enumerator
         data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
-        
+
         // pbes rewriter
         data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);   
-        
+        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
+
         if (m_strategy == ts_finite)
         {
           p = do_finite_algorithm(p, pbesr);
@@ -289,13 +289,13 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
 
     static bool initialise_types() {
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-    
+
       transformation_strategy_enumeration.
         add(ts_oldlazy, "oldlazy").
         add(ts_finite, "finite");
-    
+
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
-    
+
       output_format_enumeration.
         add(of_binary, "binary").
         add(of_internal, "internal").
@@ -335,7 +335,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
         return EXIT_SUCCESS;
       }
       return super::execute(argc, argv);
-    }     
+    }
 };
 
 const char* squadt_pbes2bes_tool::pbes_file_for_input  = "pbes_in";

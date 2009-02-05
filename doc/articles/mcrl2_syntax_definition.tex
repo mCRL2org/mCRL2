@@ -246,7 +246,7 @@
 
 % cons: |>
 \newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
-  
+
 % snoc: <|
 \newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
 
@@ -288,7 +288,7 @@
 \newcommand{\comm}[1]{\Gamma_{#1}}
 
 % at
-\font \aap cmmi10        
+\font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 % initialisation
@@ -366,7 +366,7 @@ As opposed to real EBNF, we do not use quotes to separate the terminals from the
 We defined the notions of identifiers, numbers, whitespace and comments:
 \begin{itemize}
 \item
-An \emph{identifier} is a string matching the pattern ``$[A{-}Za{-}z\_][A{-}Za{-}z\_0{-}9]*$'', excluding the following reserved words: 
+An \emph{identifier} is a string matching the pattern ``$[A{-}Za{-}z\_][A{-}Za{-}z\_0{-}9]*$'', excluding the following reserved words:
 \[\begin{tightarray}{L}
 sort
 cons
@@ -432,15 +432,15 @@ A $\%$-sign indicates the beginning of a \emph{comment} that extends to the end 
 
 Sort expressions $s$:
 \[\begin{tightarray}{lrl}
-s      & \mb{::=} & b\ \mb{|}\ s \to s\ \mb{|}\ 
+s      & \mb{::=} & b\ \mb{|}\ s \to s\ \mb{|}\
                \sbool\ \mb{|}\ \spos\ \mb{|}\ \snat\ \mb{|}\ \sint\ \mb{|}\ \sreal\\
        & \mb{|}   &
-               \kwstruct\ \f{scs}\,|\,\mb{\cdots}\,|\,\f{scs}\ \mb{|}\ 
-               \mathsf{List}(s)\ \mb{|}\ \mathsf{Set}(s)\ \mb{|}\ \mathsf{Bag}(s)\ \mb{|}\ 
+               \kwstruct\ \f{scs}\,|\,\mb{\cdots}\,|\,\f{scs}\ \mb{|}\
+               \mathsf{List}(s)\ \mb{|}\ \mathsf{Set}(s)\ \mb{|}\ \mathsf{Bag}(s)\ \mb{|}\
                ( s )\\
-\f{scs} & \mb{::=} & f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})\ \mb{|}\ 
+\f{scs} & \mb{::=} & f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})\ \mb{|}\
                 f ? f\ \mb{|}\ f(\f{spj},\mb{\ldots},\f{spj})?f \\
-\f{spj} & \mb{::=} & s\ \mb{|}\ s \times \mb{\cdots} \times s \to s\ \mb{|}\ 
+\f{spj} & \mb{::=} & s\ \mb{|}\ s \times \mb{\cdots} \times s \to s\ \mb{|}\
                 f: s\ \mb{|}\ f: s \times \mb{\cdots} \times s \to s
 \end{tightarray}\]
 Here $\f{scs}$ and $\f{spj}$ stand for the constructor and projection functions of a structured sort.
@@ -448,25 +448,25 @@ The binary operator $\to$ associates to the right.
 
 Data expressions $d$:
 \[\begin{tightarray}{lrl}
-d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\ 
+d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\
                \lnot d\ \mb{|}\ -d\ \mb{|}\ \overline{d}\ \mb{|}\ \#d\ \mb{|}\ d\ \oplus\ d\\
-       & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\ 
+       & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\
                \set{d: d,\mb{\ldots},d: d}\ \mb{|}\ \scompr{x: s}{d}\\
-       & \mb{|} & \lambda_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ 
-               \forall_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ \exists_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ 
+       & \mb{|} & \lambda_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\
+               \forall_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\ \exists_{\f{mvd},\mb{\ldots},\f{mvd}} d\ \mb{|}\
                d\ \kwwhr\ x=d,\mb{\ldots},x=d\ \kwend\\
         & \mb{|} & ( d )\\
 \f{mvd}& \mb{::=} & x,\mb{\ldots},x: s\\
-\oplus & \mb{::=} & *\ \mb{|}\ .\ \mb{|}\ \cap\ \mb{|}\ 
-               /\ \mb{|}\  \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\ 
-               +\ \mb{|}\ -\ \mb{|}\ \cup\ \mb{|}\ 
-               \concat\ \mb{|}\ 
-               \snoc\ \mb{|}\ 
+\oplus & \mb{::=} & *\ \mb{|}\ .\ \mb{|}\ \cap\ \mb{|}\
+               /\ \mb{|}\  \kwdiv\ \mb{|}\ \kwmod\ \mb{|}\
+               +\ \mb{|}\ -\ \mb{|}\ \cup\ \mb{|}\
+               \concat\ \mb{|}\
+               \snoc\ \mb{|}\
                \cons\\
        & \mb{|} &
-               <\ \mb{|}\ \leq\ \mb{|}\ \geq\ \mb{|}\ >\ \mb{|}\ \subset\ \mb{|}\ \subseteq\ \mb{|}\ \in\ \mb{|}\ 
-               \approx\ \mb{|}\ \not\approx\ \mb{|}\ 
-               \land\ \mb{|}\ \lor\ \mb{|}\ 
+               <\ \mb{|}\ \leq\ \mb{|}\ \geq\ \mb{|}\ >\ \mb{|}\ \subset\ \mb{|}\ \subseteq\ \mb{|}\ \in\ \mb{|}\
+               \approx\ \mb{|}\ \not\approx\ \mb{|}\
+               \land\ \mb{|}\ \lor\ \mb{|}\
                \limp
 \end{tightarray}\]
 Here $\f{mvd}$ stands for a multiple data variable declaration, $\oplus$ for a binary operator, and $N$ for a number.
@@ -502,19 +502,19 @@ and $\f{ad}$ for action declaration.
 
 Process expressions $p$:
 \[\begin{tightarray}{lrl}
-p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \seq p\ \mb{|}\ P\ \mb{|}\ 
+p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \seq p\ \mb{|}\ P\ \mb{|}\
             p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
-    & \mb{|} & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\ 
-            \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\ 
-            \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\ 
-            \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\ 
+    & \mb{|} & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
+            \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+            \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+            \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
             \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
-    & \mb{|} & a(d, \mb{\ldots}, d)\ \mb{|}\ 
-            P(d, \mb{\ldots}, d)\ \mb{|}\ 
-            c \to p \diamond p\ \mb{|}\ 
-            c \to p\ \mb{|}\  
+    & \mb{|} & a(d, \mb{\ldots}, d)\ \mb{|}\
+            P(d, \mb{\ldots}, d)\ \mb{|}\
+            c \to p \diamond p\ \mb{|}\
+            c \to p\ \mb{|}\
             \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
-     & \mb{|} & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\ 
+     & \mb{|} & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
      & \mb{|} & ( p )\\
 as  & \mb{::=} & a |\,\mb{\cdots} | a\\
 ar  & \mb{::=} & a \to a\\
@@ -555,17 +555,17 @@ Here, $\f{pa}$ represents a parameterised action.
 
 Action formulae $\alpha$:
 \[\begin{tightarray}{lrl}
-\alpha & \mb{::=} & \f{ma}\ \mb{|}\ 
-                    \alpha\at t\ \mb{|}\ 
-                    \mathsf{val}(c)\ \mb{|}\ 
-                    ( \alpha )\\ 
-       & \mb{|}   & \mathsf{true}\ \mb{|}\ 
-                    \mathsf{false}\ \mb{|}\ 
-                    \neg \alpha\ \mb{|}\ 
-                    \alpha \land \alpha\ \mb{|}\ 
-                    \alpha \lor  \alpha\ \mb{|}\ 
-                    \alpha \limp \alpha\ \mb{|}\ 
-                    \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\ \mb{|}\ 
+\alpha & \mb{::=} & \f{ma}\ \mb{|}\
+                    \alpha\at t\ \mb{|}\
+                    \mathsf{val}(c)\ \mb{|}\
+                    ( \alpha )\\
+       & \mb{|}   & \mathsf{true}\ \mb{|}\
+                    \mathsf{false}\ \mb{|}\
+                    \neg \alpha\ \mb{|}\
+                    \alpha \land \alpha\ \mb{|}\
+                    \alpha \lor  \alpha\ \mb{|}\
+                    \alpha \limp \alpha\ \mb{|}\
+                    \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\ \mb{|}\
                     \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \alpha\\
 \end{tightarray}\]
 Here, $c$ and $t$ stand for data expressions of sort $\sbool$ and $\sreal$,
@@ -580,12 +580,12 @@ right.
 
 Regular formulae $\varphi_r$:
 \[\begin{tightarray}{lrl}
-\varphi_r & \mb{::=} & \alpha\ \mb{|}\ 
-                       \epsilon\ \mb{|}\ 
-                       \varphi_r \cdot \varphi_r\ \mb{|}\ 
-                       \varphi_r + \varphi_r\ \mb{|}\ 
-                       \varphi_r^{*} \ \mb{|}\ 
-                       \varphi_r^{+} \ \mb{|}\ 
+\varphi_r & \mb{::=} & \alpha\ \mb{|}\
+                       \epsilon\ \mb{|}\
+                       \varphi_r \cdot \varphi_r\ \mb{|}\
+                       \varphi_r + \varphi_r\ \mb{|}\
+                       \varphi_r^{*} \ \mb{|}\
+                       \varphi_r^{+} \ \mb{|}\
                        ( \varphi_r )
 \end{tightarray}\]
 The postfix operators ${}^{*}$ and ${}^{+}$ have the highest priority, followed
@@ -593,27 +593,27 @@ by $\cdot$, followed by infix $+$. The infix operators associate to the right.
 
 State formulae $\varphi_s$:
 \[\begin{tightarray}{lrl}
-\varphi_s & \mb{::=} & [\varphi_r]\varphi_s\ \mb{|}\ 
-                       \langle\varphi_r\rangle\varphi_s\ \mb{|}\ 
-                       \nabla(t)\ \mb{|}\ 
-                       \Delta(t)\ \mb{|}\ 
-                       \nabla\ \mb{|}\ 
-                       \Delta\ \mb{|}\ 
-                       \mathsf{val}(c)\ \mb{|}\ 
+\varphi_s & \mb{::=} & [\varphi_r]\varphi_s\ \mb{|}\
+                       \langle\varphi_r\rangle\varphi_s\ \mb{|}\
+                       \nabla(t)\ \mb{|}\
+                       \Delta(t)\ \mb{|}\
+                       \nabla\ \mb{|}\
+                       \Delta\ \mb{|}\
+                       \mathsf{val}(c)\ \mb{|}\
                        ( \varphi_s )\\
-          & \mb{|}   & \nu X. \varphi_s\ \mb{|}\ 
-                       \mu X.\varphi_s\ \mb{|}\ 
-                       \nu X(\f{vdi},\mb{\ldots},\f{vdi}). \varphi_s\ \mb{|}\ 
-                       \mu X(\f{vdi},\mb{\ldots},\f{vdi}).\varphi_s\ \mb{|}\ 
-                       X\ \mb{|}\ 
+          & \mb{|}   & \nu X. \varphi_s\ \mb{|}\
+                       \mu X.\varphi_s\ \mb{|}\
+                       \nu X(\f{vdi},\mb{\ldots},\f{vdi}). \varphi_s\ \mb{|}\
+                       \mu X(\f{vdi},\mb{\ldots},\f{vdi}).\varphi_s\ \mb{|}\
+                       X\ \mb{|}\
                        X(d,\mb{\ldots},d)\\
-          & \mb{|}   & \mathsf{true}\ \mb{|}\ 
-                       \mathsf{false}\ \mb{|}\ 
-                       \neg \varphi_s\ \mb{|}\ 
-                       \varphi_s \land \varphi_s\ \mb{|}\ 
-                       \varphi_s \lor  \varphi_s\ \mb{|}\ 
-                       \varphi_s \limp \varphi_s\ \mb{|}\ 
-                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\ 
+          & \mb{|}   & \mathsf{true}\ \mb{|}\
+                       \mathsf{false}\ \mb{|}\
+                       \neg \varphi_s\ \mb{|}\
+                       \varphi_s \land \varphi_s\ \mb{|}\
+                       \varphi_s \lor  \varphi_s\ \mb{|}\
+                       \varphi_s \limp \varphi_s\ \mb{|}\
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\ \mb{|}\
                        \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_s\\
 \f{vdi}  & \mb{::=} & x: s = d\\
 \end{tightarray}\]
@@ -633,21 +633,21 @@ associate to the right.
 
 Parameterised boolean expressions $\varphi_e$:
 \[\begin{tightarray}{lrl}
-\varphi_e & \mb{::=} & \f{pvo}\ \mb{|}\ 
-                       \mathsf{val}(c)\ \mb{|}\ 
-                       ( \varphi_e )\\ 
-          & \mb{|}   & \mathsf{true}\ \mb{|}\ 
-                       \mathsf{false}\ \mb{|}\ 
-                       \neg \varphi_e\ \mb{|}\ 
-                       \varphi_e \land \varphi_e\ \mb{|}\ 
-                       \varphi_e \lor \varphi_e\ \mb{|}\ 
-                       \varphi_e \limp \varphi_e\ \mb{|}\ 
-                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\ \mb{|}\ 
-                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\\ 
+\varphi_e & \mb{::=} & \f{pvo}\ \mb{|}\
+                       \mathsf{val}(c)\ \mb{|}\
+                       ( \varphi_e )\\
+          & \mb{|}   & \mathsf{true}\ \mb{|}\
+                       \mathsf{false}\ \mb{|}\
+                       \neg \varphi_e\ \mb{|}\
+                       \varphi_e \land \varphi_e\ \mb{|}\
+                       \varphi_e \lor \varphi_e\ \mb{|}\
+                       \varphi_e \limp \varphi_e\ \mb{|}\
+                       \forall_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\ \mb{|}\
+                       \exists_{\f{mvd},\mb{\ldots},\f{mvd}} \varphi_e\\
 \f{pvo}  & \mb{::=} & X\ \mb{|}\ X(d,\mb{\ldots},d)\\
 \end{tightarray}\]
 Here $\f{pvo}$ stands for a propositional variable occurrence,
-The descending order of operator precedence is: $\neg, \set{\land, \lor}, \limp, \set{\forall, \exists}$.  
+The descending order of operator precedence is: $\neg, \set{\land, \lor}, \limp, \set{\forall, \exists}$.
 The infix operators $\land$, $\lor$ and $\limp$ associate to the right.
 
 Parameterised boolean equations $\f{pb\_eqn}$:

@@ -30,9 +30,9 @@ class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          LTSGraph* app, 
-          wxWindow* parent, 
-          const wxSize &size = wxDefaultSize, 
+          LTSGraph* app,
+          wxWindow* parent,
+          const wxSize &size = wxDefaultSize,
           int* attribList = NULL);
 
     ~GLCanvas();
@@ -45,7 +45,7 @@ class GLCanvas : public wxGLCanvas
     void onSize(wxSizeEvent& event);
     void onEraseBackground(wxEraseEvent& event);
     void reshape();
-   
+
     // Mouse event handlers
     void onMouseEnter(wxMouseEvent& event);
     void onMouseLeave(wxFocusEvent& event);
@@ -62,9 +62,9 @@ class GLCanvas : public wxGLCanvas
     LTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
-    double scaleFactor; 
+    double scaleFactor;
     int oldX, oldY;
-    
+
     void getSize(double & width, double & height);
 
     void pickObjects(int x, int y, bool ctrl);

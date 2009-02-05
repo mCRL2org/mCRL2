@@ -87,14 +87,14 @@ void grape_listbox::event_select( wxCommandEvent &p_event )
     }
     m_main_frame->get_statusbar()->PushStatusText(wxEmptyString);
   }
-  
+
   // process further
   p_event.Skip();
 }
 
 BEGIN_EVENT_TABLE(grape_listbox, wxListBox)
   EVT_LISTBOX( GRAPE_ARCHITECTURE_DIAGRAM_LIST, grape_listbox::event_select )
-  EVT_LISTBOX( GRAPE_PROCESS_DIAGRAM_LIST, grape_listbox::event_select ) 
+  EVT_LISTBOX( GRAPE_PROCESS_DIAGRAM_LIST, grape_listbox::event_select )
   EVT_KEY_UP( grape_listbox::event_delete )
 #ifndef __WINDOWS__
   EVT_LEFT_UP( grape_listbox::event_click )

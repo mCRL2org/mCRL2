@@ -34,7 +34,7 @@ typedef struct {
 		ATerm opidAnd;
 		ATermIndexedSet eqs;
 		AFun tupAFun;
-		
+
 		bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
 		ATerm (EnumeratorSolutionsStandard::*build_solution_aux)(ATerm,ATermList);
 } enumstd_info;
@@ -51,7 +51,7 @@ class EnumeratorStandard : public Enumerator
 		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old = NULL);
 
 		Rewriter *getRewriter();
-		
+
 	private:
 		bool clean_up_rewr_obj;
 
@@ -80,7 +80,7 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 	private:
 		enumstd_info info;
 		bool check_true;
-		
+
 		ATermList enum_vars;
 		ATerm enum_expr;
 

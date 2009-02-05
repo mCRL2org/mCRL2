@@ -79,7 +79,7 @@ class summand_information
     vector < vector < linear_inequality > > nextstate_context_combinations;
     atermpp::vector < data_expression_list > nextstate_value_combinations;
     // context_type local_context;
-    
+
 
   public:
     summand_information(
@@ -93,7 +93,7 @@ class summand_information
       summand_real_nextstate_map(srnm),
       nextstate_context_combinations(1,vector < linear_inequality >()),
       nextstate_value_combinations(1,data_expression_list())
-    { 
+    {
     }
 
     mcrl2::lps::summand get_summand() const
@@ -101,12 +101,12 @@ class summand_information
     }
 
     atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
-    { 
+    {
       return new_values_for_xi_variables.begin();
     }
 
     atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
-    { 
+    {
       return new_values_for_xi_variables.end();
     }
 
@@ -138,7 +138,7 @@ class summand_information
     { return nextstate_value_combinations.end();
     }
 
-    
+
 
     /// \brief Update the new_values_for_xi_variables given that a new xi variable
     ///        has been added to context.
@@ -146,13 +146,13 @@ class summand_information
     ///          First check whether 1) t[x:=g(x)] and u[x:=g(x)] are smaller, equal or greater and
     ///          if so, store this value as the default value for xi in this summand.
     ///          Or 2) check whether t[:=g(x)] and u[x:=g(x)] form the bounds of another
-    ///          variable xi' and substitute xi' for xi. 
+    ///          variable xi' and substitute xi' for xi.
     ///          If neither 1) or 2) applies subsitute the default data_expression() as an
     ///          indication that no fixed value for xi can be used in this summand.
     ///          Secondly, check whether the bounds for xi imply the substituted bounds for
     ///          the other variables xi' and substitute xi for xi'.
     void add_a_new_next_state_argument(const context_type &context, const rewriter &r)
-    { 
+    {
       assert(context.size()==new_values_for_xi_variables.size()+1);
       real_representing_variable new_xi_variable=context.back();
       data_expression xi_t=new_xi_variable.get_lowerbound();
@@ -163,7 +163,7 @@ class summand_information
       linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
       e.typical_pair(substituted_lowerbound,substituted_upperbound,r);
 
-     
+
       // First check whether this new next state argument follows from an existing argument
       if (r(core::detail::gsMakeDataExprLT(substituted_lowerbound,substituted_upperbound))==true_())
       { new_values_for_xi_variables.push_back(smaller());
@@ -174,7 +174,7 @@ class summand_information
       else if (r(core::detail::gsMakeDataExprLT(substituted_upperbound,substituted_lowerbound))==true_())
       { new_values_for_xi_variables.push_back(larger());
       }
-      else 
+      else
       { bool success(false);
         // Second check whether this new next state argument follows from an existing argument
         for(context_type::const_reverse_iterator c=context.rbegin();
@@ -200,7 +200,7 @@ class summand_information
       // At this point a data_expression has been pushed to the back of the new_values_for_xi_variables
       // Now it must be checked whether the newly added xi variable can lead to a standard value of
       // existing xi variables.
-      
+
       context_type::const_iterator c=context.begin();
       for(atermpp::vector < mcrl2::data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
                        (cxi+1)!=new_values_for_xi_variables.end(); ++cxi, ++c)
@@ -231,7 +231,7 @@ class summand_information
 
       // Update the nextstate_context_combinations if new_values_for_xi_variables for this summand
       // does not get a concrete variable for this context variable.
-      
+
       if (new_values_for_xi_variables.back()==data_expression())
       { data_expression t=realelm_data_expression_map_replace(
                              context.back().get_lowerbound(),
@@ -239,7 +239,7 @@ class summand_information
         data_expression u=realelm_data_expression_map_replace(
                              context.back().get_upperbound(),
                              summand_real_nextstate_map);
-  
+
         vector < vector < linear_inequality > > new_nextstate_context_combinations;
         atermpp::vector < data_expression_list > new_nextstate_value_combinations;
         atermpp::vector < data_expression_list >::const_iterator j=nextstate_value_combinations.begin();
@@ -260,7 +260,7 @@ class summand_information
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
           }
-  
+
           vec_lin_eq[old_size]=linear_inequality(t,u,linear_inequality::less,r);
           new_condition_list.clear();
           remove_redundant_inequalities(
@@ -273,7 +273,7 @@ class summand_information
           { new_nextstate_context_combinations.push_back(new_condition_list);
             new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
           }
-          
+
           vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
           new_condition_list.clear();
           remove_redundant_inequalities(

@@ -6,7 +6,7 @@
 % it must be the leader. More efficient versions of this protocol
 % exist, such as the Dolev, Klawe and Rodeh leader election protocol.
 % An important feature of this protocol is that the links between
-% the nodes are modelled by unbounded queues. As processes work in 
+% the nodes are modelled by unbounded queues. As processes work in
 % parallel, the number of states of this protocol is exponential
 % in the number of processes. However, applying confluence will
 % reduce this number back to a linear number. As a consequence
@@ -16,7 +16,7 @@
 % the state space using confluence reduction.
 
 % mcrl22lps -nv leader.mcrl2 leader.lps
-% lps2lts -v leader.lps                  // This indicates the 
+% lps2lts -v leader.lps                  // This indicates the
 %                                        // size of the non-reduced
 %                                        // state space
 % lpsconstelm -v leader.lps temp.lps     // find and eliminate the
@@ -41,10 +41,10 @@ eqn N=5;
 
 act rN,sN,rQ,sQ,c : Pos#Pos;
     leader;
-    
+
 proc N(i:Pos,v:Pos)=sN((i mod N)+1,v).M(i,v);
-           
-     M(i:Pos,v:Pos)=   
+
+     M(i:Pos,v:Pos)=
         sum w:Pos.rN(i,w).
                (w==v) -> leader.delta
                       <> (w<v) -> sN((i mod N)+1,w).M(i,v)

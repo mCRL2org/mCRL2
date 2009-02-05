@@ -26,19 +26,19 @@ namespace atermpp
       /// \brief Constructor.
       aterm_real()
       {}
-      
+
       /// \brief Constructor.
       /// \param value A value.
       aterm_real(double value)
         : aterm_base(ATmakeReal(value))
       {}
-      
+
       /// \brief Constructor.
       /// \param t A real-valued term
       aterm_real(ATermReal t)
         : aterm_base(t)
       {}
-  
+
       /// \brief Constructor.
       /// \param t A term
       aterm_real(ATerm t)
@@ -46,7 +46,7 @@ namespace atermpp
       {
         assert(type() == AT_REAL);
       }
-  
+
       /// Allow construction from an aterm. The aterm must be of the right type.
       /// \param t A term.
       aterm_real(aterm t)
@@ -77,7 +77,7 @@ namespace atermpp
       {
         return ATgetReal(reinterpret_cast<ATermReal>(m_term));
       }
-  }; 
+  };
 
   /// \cond INTERNAL_DOCS
   template <>

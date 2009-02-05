@@ -13,7 +13,7 @@ act  binary_operations: Real # Real # Bool # Bool # Bool # Bool # Real # Real # 
      left_operand: Real;
 proc Test_binary_operations =
        sum x: Int, p: Pos, r: Real. (x >= -5 && x <= 5 && p <= 10 && r == x/p) ->
-         left_operand(r) . 
+         left_operand(r) .
          (sum y: Int, q: Pos, s: Real. (y >= -5 && y <= 5 && q <= 10 && s == y/q)
          -> binary_operations(r, s, r < s, r <= s, r >= s, r > s, min(r, s), max(r, s), r + s, r - s, r * s, r / s)
          <> delta

@@ -27,9 +27,9 @@ The following program illustrates the usage of `make_term`.
 
   #include <iostream>
   #include "atermpp/atermpp.h"
-  
+
   using namespace atermpp;
-  
+
   void foo()
   {
     const int i       = 42;
@@ -37,21 +37,21 @@ The following program illustrates the usage of `make_term`.
     const char* blob  = "12345678";
     const double r    = 3.14;
     const char *func  = "f";
-  
+
     aterm_int  t0 = make_term("<int>" , i);         // integer value: 42
     aterm      t1 = make_term("<str>" , func);      // quoted application: "f", no args
     aterm_real t2 = make_term("<real>", r);         // real value: 3.14
     aterm_blob t3 = make_term("<blob>", 8, blob);   // blob of size 8, data: 12345678
-  
+
     aterm_list l0 = make_term("[]");
     aterm_list l1 = make_term("[1,<int>,<real>]", i, r);
-    aterm_list l2 = make_term("[<int>,<list>]", i+1, l1); 
-  
+    aterm_list l2 = make_term("[<int>,<list>]", i+1, l1);
+
     aterm_appl a0 = make_term("<appl>", func);
-    aterm_appl a1 = make_term("<appl(<int>)>", func, i); 
+    aterm_appl a1 = make_term("<appl(<int>)>", func, i);
     aterm_appl a2 = make_term("<appl(<int>, <term>, <list>)>", func, 42, t3, l2);
   }
-  
+
   int main(int argc, char* argv[])
   {
     MCRL2_ATERMPP_INIT(argc, argv)

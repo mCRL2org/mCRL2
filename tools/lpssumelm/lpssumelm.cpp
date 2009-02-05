@@ -108,12 +108,12 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
-///Reads a specification from input_file, 
+///Reads a specification from input_file,
 ///applies sum elimination to it and writes the result to output_file.
 int do_sumelm(const tool_options& options)
 {
   specification lps_specification;
-    
+
   lps_specification.load(options.input_file);
 
   // Untime lps_specification and save the output to a binary file

@@ -1,4 +1,4 @@
-% This formula expresses that there is no livelock 
+% This formula expresses that there is no livelock
 % for all reachable states.
 
 [true*]mu X.[tau]X

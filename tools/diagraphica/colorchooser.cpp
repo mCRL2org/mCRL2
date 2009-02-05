@@ -63,7 +63,7 @@ void ColorChooser::setPoints(
     positionsX.clear();
     for ( size_t i = 0; i < hue.size(); ++i )
         positionsX.push_back( (2.0*hue[i])-1.0 );
-    
+
     positionsY = y;
 }
 
@@ -91,7 +91,7 @@ void ColorChooser::visualize( const bool &inSelectMode )
             selectBuf,
             2.0,
             2.0 );
-        
+
         drawPoints( inSelectMode );
 
         finishSelectMode(
@@ -106,14 +106,14 @@ void ColorChooser::visualize( const bool &inSelectMode )
         drawPoints( inSelectMode );
     }
 }
-    
+
 
 // -- event handlers ------------------------------------------------
 
 
 // ----------------------------------------
-void ColorChooser::handleMouseLftDownEvent( 
-    const int &x, 
+void ColorChooser::handleMouseLftDownEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -134,16 +134,16 @@ void ColorChooser::handleMouseLftDownEvent(
             double xLft, xRgt;
             double yBot, yTop;
             double xCur, yCur;
-    
+
             // get size of sides
             canvas->getSize( w, h );
-    
+
             // calc size of bounding box
             xLft = -0.5*w;
             xRgt =  0.5*w;
             yTop =  0.5*h;
             yBot = -0.5*h;
-    
+
             // get cur mouse position
             canvas->getWorldCoords( xMouseCur, yMouseCur, xCur, yCur );
 
@@ -162,8 +162,8 @@ void ColorChooser::handleMouseLftDownEvent(
 
 
 // --------------------------------------
-void ColorChooser::handleMouseLftUpEvent( 
-    const int &x, 
+void ColorChooser::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
@@ -173,11 +173,11 @@ void ColorChooser::handleMouseLftUpEvent(
         dragIdx = -1;
     }
 }
-    
+
 
 // ----------------------------------------
-void ColorChooser::handleMouseRgtDownEvent( 
-    const int &x, 
+void ColorChooser::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -194,8 +194,8 @@ void ColorChooser::handleMouseRgtDownEvent(
 
 
 // --------------------------------------
-void ColorChooser::handleMouseRgtUpEvent( 
-    const int &x, 
+void ColorChooser::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
@@ -204,11 +204,11 @@ void ColorChooser::handleMouseRgtUpEvent(
         Visualizer::handleMouseRgtUpEvent( x, y );
     }
 }
-	
+
 
 // ---------------------------------------
-void ColorChooser::handleMouseMotionEvent( 
-    const int &x, 
+void ColorChooser::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {
@@ -242,10 +242,10 @@ void ColorChooser::drawColorSpectrum()
     double yBot, yTop;
     double xItv, yItv;
     ColorRGB col;
-    
+
     // get size of sides
     canvas->getSize( w, h );
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -256,8 +256,8 @@ void ColorChooser::drawColorSpectrum()
     yItv = (yTop-yBot)/255.0;
     for ( int i = 0; i < 255; ++i )
     {
-        VisUtils::mapColorSpectral( 
-            i/255.0, 
+        VisUtils::mapColorSpectral(
+            i/255.0,
             col );
         VisUtils::setColor( col );
         VisUtils::fillRect(
@@ -281,7 +281,7 @@ void ColorChooser::drawPath( const bool &inSelectMode )
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -310,7 +310,7 @@ void ColorChooser::drawPath( const bool &inSelectMode )
                 positionsX[i]*xRgt, positionsX[i+1]*xRgt,
                 positionsY[i]*yTop, positionsY[i+1]*yTop );
         }
-        
+
         VisUtils::disableLineAntiAlias();
     }
 }
@@ -331,7 +331,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w;
     xRgt =  0.5*w;
@@ -372,7 +372,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
             // arrow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt,
                 positionsY[size-1]*yTop,
                 0.0 );
@@ -380,11 +380,11 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
                 glPushName( size-1 );
                 VisUtils::fillTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 glPopName();
-            
+
             glPopMatrix();
         }
     }
@@ -425,7 +425,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
                 positionsX[size-1]*xRgt-4.0*pix, positionsX[size-1]*xRgt+6.0*pix,
                 positionsY[size-1]*yTop-6.0*pix, positionsY[size-1]*yTop+4.0*pix );
 
-            
+
             if ( active == true )
                 VisUtils::setColorRed();
             else
@@ -446,7 +446,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
             // drop shadow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt+pix,
                 positionsY[size-1]*yTop-pix,
                 0.0 );
@@ -454,7 +454,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
                 VisUtils::setColorBlack();
                 VisUtils::drawTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 VisUtils::drawLine(
@@ -465,7 +465,7 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
 
             // arrow
             glPushMatrix();
-            glTranslatef( 
+            glTranslatef(
                 positionsX[size-1]*xRgt,
                 positionsY[size-1]*yTop,
                 0.0 );
@@ -476,19 +476,19 @@ void ColorChooser::drawPoints( const bool &inSelectMode )
                 else
                     VisUtils::setColorWhite();
                 VisUtils::fillTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
-            
+
                 VisUtils::setColorMdGray();
                 VisUtils::drawTriangle(
-                   -hdlDOF, 2.0*hdlDOF, 
+                   -hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                     hdlDOF, 2.0*hdlDOF );
                 VisUtils::drawLine(
                    -2.0*hdlDOF, 2.0*hdlDOF,
                     0.0, 0.0 );
-            
+
             glPopMatrix();
         }
         VisUtils::disableLineAntiAlias();
@@ -533,16 +533,16 @@ void ColorChooser::handleDrag()
         double xLft, xRgt;
         double yBot, yTop;
         double xCur, yCur;
-    
+
         // get size of sides
         canvas->getSize( w, h );
-    
+
         // calc size of bounding box
         xLft = -0.5*w;
         xRgt =  0.5*w;
         yTop =  0.5*h;
         yBot = -0.5*h;
-    
+
         // get cur mouse position
         canvas->getWorldCoords( xMouseCur, yMouseCur, xCur, yCur );
 
@@ -553,7 +553,7 @@ void ColorChooser::handleDrag()
 
         positionsX[dragIdx] = xCur;
         positionsY[dragIdx] = yCur;
-        
+
         mediator->handleDOFColUpdate(
             dragIdx,
             0.5*(xCur+1),
@@ -561,20 +561,20 @@ void ColorChooser::handleDrag()
     }
 }
 
-    
+
 // -- hit detection -------------------------------------------------
 
 
 // ----------------------------
-void ColorChooser::processHits( 
-    GLint hits, 
+void ColorChooser::processHits(
+    GLint hits,
     GLuint buffer[] )
 // ----------------------------
 {
     GLuint *ptr;
     int number;
     vector< int > ids;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -606,7 +606,7 @@ void ColorChooser::processHits(
         }
 
         handleHits( ids );
-    }   
+    }
 
     ptr = NULL;
 }

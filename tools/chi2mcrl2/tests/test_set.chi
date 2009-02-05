@@ -1,9 +1,9 @@
 model tst()=
-|[ dummy() 
+|[ dummy()
 ]|
 
 proc dummy()=
-|[ var a: {nat} = {0,2,3,2,4}, 
+|[ var a: {nat} = {0,2,3,2,4},
        b: nat = 0 ,
        c: bool
 :: a := {1,2,3,4,2 }

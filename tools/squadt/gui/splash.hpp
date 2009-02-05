@@ -57,7 +57,7 @@ namespace squadt {
      * progess.
      **/
     class splash : public wxFrame {
-      friend class squadt::GUI::detail::picture; 
+      friend class squadt::GUI::detail::picture;
 
       private:
 

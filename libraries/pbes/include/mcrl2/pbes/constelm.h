@@ -345,11 +345,11 @@ namespace detail {
   struct equation_is_contained_in
   {
     const std::set<Variable>& m_variables;
-    
+
     equation_is_contained_in(const std::set<Variable>& variables)
       : m_variables(variables)
     {}
-    
+
     template <typename Equation>
     bool operator()(const Equation& e)
     {
@@ -542,7 +542,7 @@ namespace detail {
             }
           }
           else
-          {        
+          {
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
               typename constraint_map::iterator k = constraints.find(*j);
@@ -606,7 +606,7 @@ namespace detail {
       }
 
     public:
-      
+
       /// \brief Constructor.
       /// \param datar A data rewriter
       /// \param pbesr A PBES rewriter
@@ -636,7 +636,7 @@ namespace detail {
         }
         return result;
       }
-      
+
       /// \brief Returns the propositional variables that have optionally been removed by the constelm algorithm
       /// \return The removed variables
       const std::set<propositional_variable_decl_type>& redundant_equations() const
@@ -659,7 +659,7 @@ namespace detail {
         m_edges.clear();
         m_redundant_parameters.clear();
         m_redundant_equations.clear();
-        
+
         // compute the vertices and edges of the dependency graph
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
@@ -822,7 +822,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
 
         // print the parameters and equation that are removed
         if (mcrl2::core::gsVerbose)
-        {        
+        {
           std::cerr << "\nremoved the following constant parameters:" << std::endl;
           std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
           for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)

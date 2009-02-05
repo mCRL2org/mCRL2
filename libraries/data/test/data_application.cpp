@@ -24,7 +24,7 @@ using namespace mcrl2::data;
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   sort_identifier A("A");
   sort_identifier B("B");

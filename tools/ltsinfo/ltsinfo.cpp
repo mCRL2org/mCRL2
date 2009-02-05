@@ -61,7 +61,7 @@ class info_tool
     mcrl2::lts::lts_equivalence determinism_equivalence;
 
   public:
-    
+
     info_tool() :
                          intype(mcrl2::lts::lts_none),
                          determinism_equivalence(mcrl2::lts::lts_eq_isomorph) {
@@ -105,11 +105,11 @@ class info_tool
       clinterface.
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME for deterministic check:\n"
-          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for "
                 + lts::name_of_equivalence(lts_eq_isomorph) + " (default),\n"
-          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
-          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
           "  'none' for not performing the check at all",
           'e').

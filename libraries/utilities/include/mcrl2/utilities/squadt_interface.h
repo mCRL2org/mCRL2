@@ -125,7 +125,7 @@ namespace mcrl2 {
       };
 
 #ifdef __WXWINDOWS__
-      /** 
+      /**
        * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
        **/
       class entry_wrapper {

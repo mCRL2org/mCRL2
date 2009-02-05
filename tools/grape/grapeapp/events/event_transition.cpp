@@ -125,21 +125,21 @@ bool grape_event_detach_transition_beginstate::Do( void )
 
   process_diagram* dia_ptr = dynamic_cast<process_diagram*> ( find_diagram( m_diagram ) );
   assert( dia_ptr != 0 ); // Should be the case or this event wouldn't be possible.
-    
+
   object* trans_ptr = find_object( m_trans );
   terminating_transition* tt_ptr = dynamic_cast<terminating_transition*> ( trans_ptr );
   if ( tt_ptr ) // cast succesful
   {
-    dia_ptr->detach_transition_beginstate( tt_ptr );  
+    dia_ptr->detach_transition_beginstate( tt_ptr );
   }
   else
   {
     nonterminating_transition* ntt_ptr = dynamic_cast<nonterminating_transition*> ( trans_ptr );
-    assert( ntt_ptr );    
+    assert( ntt_ptr );
     dia_ptr->detach_transition_beginstate( ntt_ptr );
   }
   finish_modification();
-    
+
   return true;
 }
 
@@ -192,9 +192,9 @@ grape_event_change_transition::grape_event_change_transition(grape_frame *p_main
   m_trans = p_transition->get_id();
 
   m_old_label = *p_transition->get_label();
-  
+
   grape_label_dialog dialog( m_old_label );
-  
+
   m_pressed_ok = dialog.show_modal( m_new_label );
 }
 
@@ -231,7 +231,7 @@ bool grape_event_change_transition::Undo(void)
   }
 
   transition_ptr->set_label( m_old_label );
- 
+
   finish_modification();
   return true;
 }

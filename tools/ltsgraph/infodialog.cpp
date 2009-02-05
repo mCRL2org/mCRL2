@@ -24,7 +24,7 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 
   lts_info = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                             lcf|wxLC_NO_HEADER);
-  
+
   lts_info->InsertColumn(0, wxT(""));
   lts_info->InsertColumn(1, wxT(""), wxLIST_FORMAT_RIGHT);
   lts_info->InsertItem(0, wxT("Initial state:"));
@@ -32,7 +32,7 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   lts_info->InsertItem(2, wxT("Transitions:"));
   lts_info->InsertItem(3, wxT("Labels:"));
   lts_info->SetColumnWidth(0, wxLIST_AUTOSIZE);
-  
+
   wxFlexGridSizer* infoSizer = new wxFlexGridSizer(1, 1, 0, 0);
   infoSizer->AddGrowableRow(0);
   infoSizer->AddGrowableCol(0);
@@ -51,7 +51,7 @@ void InfoDialog::setLTSInfo(int is, int ns, int nt, int nl)
   lts_info->SetItem(2, 1, wxString::Format(wxT("%d"), nt));
   lts_info->SetItem(3, 1, wxString::Format(wxT("%d"), nl));
   lts_info->SetColumnWidth(1, wxLIST_AUTOSIZE);
-    
+
   Fit();
   Layout();
 }

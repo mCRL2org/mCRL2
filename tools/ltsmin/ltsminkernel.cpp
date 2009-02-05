@@ -17,11 +17,11 @@ static ATbool branching = ATfalse;
 static int offset = -1;
 
 static int IndexOf(ATermList ls, int k, int i) {
-     for (;!ATisEmpty(ls);ls=ATgetNext(ls),i++) 
+     for (;!ATisEmpty(ls);ls=ATgetNext(ls),i++)
      if (ATgetInt((ATermInt) ATgetFirst(ls))==k) return i;
      return -1;
 }
-     
+
 static ATermList GetLabels(INTERVAL *p)
    {
    SVCstateIndex left = p->left, right = p->right;
@@ -36,18 +36,18 @@ static ATermList GetLabels(INTERVAL *p)
           if (IndexOf(result, ATgetInt((ATermInt) ATgetFirst(labels)),0)<0)
                result = ATinsert (result, ATgetFirst(labels));
           }
-       } 
+       }
        return result;
    }
 
 /* static ATbool AllTausAreExitting(SVCstateIndex p) {
-     ATermList 
+     ATermList
      targets = (ATermList) ATtableGet(lab_src_tgt[label_tau],(ATerm) ATmakeInt(p));
      int b = blockref[p];
      if (!targets) return ATtrue;
      for (;!ATisEmpty(targets);targets=ATgetNext(targets))
           {ATerm target = ATgetFirst(targets);
-          
+
           if (blockref[ATgetInt((ATermInt) target)] != b) return ATfalse;
           }
     return ATtrue;
@@ -64,14 +64,14 @@ static void AddBlock(int b) {
 static void Unstable(int a, INTERVAL *p)
      {
      ATermTable act = lab_tgt_src[a];
-/* Returns a set of blocks which are candidates for splitting */     
+/* Returns a set of blocks which are candidates for splitting */
      SVCstateIndex left = p->left, right = p->right, i;
      for (i=left;i<right;i++)
-        { 
+        {
         SVCstateIndex target = s[i];
         if (IndexOf(lab[target],a,0)<0) continue;
         {
-        ATermList sources = 
+        ATermList sources =
              (ATermList) ATtableGet(act, (ATerm) ATmakeInt(target));
         /* if (!sources) sources = ATmakeList0(); */
         for (;!ATisEmpty(sources);sources = ATgetNext(sources))
@@ -84,7 +84,7 @@ static void Unstable(int a, INTERVAL *p)
         }
         }
      }
-     
+
 static int partition(SVCstateIndex left, SVCstateIndex right)
 /* returns the left boundary of the second interval */
      {
@@ -93,18 +93,18 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
           for (;!mark[s[left]];left++) if (left == right) return left+1;
           for (;mark[s[right]];right--)
                {
-               /* mark[s[right]] = ATfalse; */ 
+               /* mark[s[right]] = ATfalse; */
                if (left == right) return right;
-               } 
+               }
                {
                SVCstateIndex swap = s[left];
                s[left] = s[right];
                s[right] = swap;
                /* mark[swap] = ATfalse; */
-               right--; left++;   
+               right--; left++;
                }
           }
-      if (left == right) 
+      if (left == right)
            {
            SVCstateIndex swap = s[left];
            if (mark[swap])
@@ -116,7 +116,7 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
            }
       return left;
       }
-          
+
 static ATbool split(INTERVAL *p, INTERVAL *p1, INTERVAL *p2)
      {
      SVCstateIndex left = p->left, right = p->right, left_bound_p2;
@@ -132,41 +132,41 @@ static ATbool split(INTERVAL *p, INTERVAL *p1, INTERVAL *p2)
      p1->mode = p2->mode = UNSTABLE;
      return ATtrue;
      }
-     
+
 static ATbool isParentOf(int parent, int b) {
      for (;b>0&&b!=parent;b=blok[b].parent);
      return (b==parent)?ATtrue:ATfalse;
 }
-          
+
 static void UpdateBlock(int b, INTERVAL *p)
      {
      SVCstateIndex i = p->left, right = p->right;
      for (;i<right;i++)
          blockref[s[i]] = b;
      }
-     
+
 static void PushUnstableMark(int action, int splitter, int parent, INTERVAL *p)
      {
      /* Push the new interval on the unstable stack,
      and assign to the belonging states a new block number,
      which is the (relative) address of the block on stack */
-     Pi_pt = n_partitions; 
-     /* while (!isEmpty(Pi + Pi_pt)) Pi_pt++; */ 
-     /* ATwarning("QQQ: PushUnstableMark %d\n", Pi_pt); */  
+     Pi_pt = n_partitions;
+     /* while (!isEmpty(Pi + Pi_pt)) Pi_pt++; */
+     /* ATwarning("QQQ: PushUnstableMark %d\n", Pi_pt); */
      Pi[Pi_pt] = *p;
      blok[Pi_pt].action = action;
      blok[Pi_pt].splitter = splitter;
-     blok[Pi_pt].parent = parent; 
+     blok[Pi_pt].parent = parent;
      UpdateBlock(Pi_pt, p);
      if (action>=0) {
           int i = p->left, right = p->right;
           for (;i<right;i++) mark[s[i]] = ATfalse;
      }
-     Pi_pt++; 
+     Pi_pt++;
      if (n_partitions < Pi_pt) n_partitions = Pi_pt;
      }
-     
-static void ClearMarks(int k) {    
+
+static void ClearMarks(int k) {
      for (;k<blocks.pt;k++) {
           INTERVAL *p = Pi + blocks.b[k];
           int i = p->left;
@@ -174,10 +174,10 @@ static void ClearMarks(int k) {
           }
      blocks.pt = 0;
      }
-                                          
+
 static ATbool Refine(int action, int splitter)
      {
-     
+
 /* Splits the blocks in "blocks" into two blocks.
 One contains the marked states, the other contains the unmarked states.
 Both block become unstable blocks. They will later used as occasion to
@@ -191,20 +191,20 @@ split blocks.  */
           INTERVAL p1[1], p2[1];
           int b = blocks.b[i];
           /* fprintf(stderr, "b = %d: ",b); */
-          
-          if (!split(Pi+b, p1, p2)) continue; 
+
+          if (!split(Pi+b, p1, p2)) continue;
           /* Removals */
           PushUnstableMark(-1, splitter, b, p1);
           PushUnstableMark(action, splitter, b, p2);
-          /* {int i;for (i=0;i<p2->right;i++) if (mark[s[i]]) 
+          /* {int i;for (i=0;i<p2->right;i++) if (mark[s[i]])
                ATerror("Mark is not cleared %d\n",i);} */
-          RemoveInterval(Pi+b); 
-	  if (!result) result = ATtrue;        
+          RemoveInterval(Pi+b);
+	  if (!result) result = ATtrue;
           }
      ClearMarks(i);
      return result;
      }
-                 
+
 static ATbool CheckUnstableBlock(int splitter)
 /* for all labels while p not splitted */
      {
@@ -218,12 +218,12 @@ static ATbool CheckUnstableBlock(int splitter)
           Unstable(a, p);
           if (branching)
                {if (RefineBranching(a, splitter)) result = ATtrue;}
-          else 
-	       {if (Refine(a, splitter)) result = ATtrue;}   
+          else
+	       {if (Refine(a, splitter)) result = ATtrue;}
           }
      return result;
      }
-    
+
 static int NumberOfPartitions(void) {
      unsigned int i, cnt = 0;
      for (i=0;i<n_partitions;i++) {
@@ -233,15 +233,15 @@ static int NumberOfPartitions(void) {
 	     cnt++;
 	     }
      }
-     return cnt; 
-} 
-   
+     return cnt;
+}
+
 static ATbool ReduceKernel(void)
-/* 
+/*
 For all unstable blocks refine partition until there are no unstable
 blocks */
      {
-     ATbool result = ATfalse; 
+     ATbool result = ATfalse;
      Pi_pt = n_partitions;
      while (Pi_pt > 0)
        {
@@ -250,36 +250,36 @@ blocks */
        if (p->mode == UNSTABLE)
             {
             p->mode = STABLE;
-            if (CheckUnstableBlock(Pi_pt)) result = ATtrue; 
+            if (CheckUnstableBlock(Pi_pt)) result = ATtrue;
             }
        }
      return result;
      }
-          
+
 void Reduce(void)
-/* 
+/*
 For all unstable blocks refine partition until there are no unstable
 blocks */
      {
      int cnt = 0, nBlocks = 0, last_nBlocks = 0;
      StartSplitting();
      do {
-       nBlocks = NumberOfPartitions(); 
-       if (traceLevel && cnt>=2 && last_nBlocks != nBlocks) 
-     ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n", 
-           last_nBlocks, nBlocks); 
-       cnt++; last_nBlocks = nBlocks; 
-     } while (ReduceKernel() && branching); 
+       nBlocks = NumberOfPartitions();
+       if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
+     ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n",
+           last_nBlocks, nBlocks);
+       cnt++; last_nBlocks = nBlocks;
+     } while (ReduceKernel() && branching);
      /*
     if (traceLevel && branching) ATwarning("Cycle %d finished. Number of partitions: %d\n",
-       cnt, nBlocks); 
-     */     
+       cnt, nBlocks);
+     */
      }
 
 void ReduceBranching(void) {
      if (label_tau >= 0) branching = ATtrue;
      Reduce();
-}     
+}
 /* ------------------- Branching bisimulation ----------------------------*/
 
 static ATbool MarkTau(int b,  INTERVAL *p2) {
@@ -287,25 +287,25 @@ static ATbool MarkTau(int b,  INTERVAL *p2) {
      ATbool result = ATfalse;
      /* ATwarning("Entry MarkTau b = %d left = %d right = %d\n", b, left, right); */
      for (i=left;i<right;i++) {
-          ATermList sources = (ATermList) 
+          ATermList sources = (ATermList)
                ATtableGet(lab_tgt_src[label_tau],(ATerm) ATmakeInt(s[i]));
-               
+
           if (!sources) continue;
           /* ATwarning("Sources = %t\n",sources); */
           for (;!ATisEmpty(sources);sources=ATgetNext(sources))
                {ATerm source = ATgetFirst(sources);
                int d = ATgetInt((ATermInt) source);
                if (blockref[d] == b && !mark[d]) result = mark[d] = ATtrue;
-               }      
+               }
      }
      return result;
 }
-     
+
 static ATbool RefineBranching(int action, int splitter)
      {
      INTERVAL *p = Pi+splitter;
      ATbool result = ATfalse;
-     int i = 0; 
+     int i = 0;
      for (;i<blocks.pt && !isRemoved(p); i++)
           {
           ATbool stop = ATfalse;
@@ -323,7 +323,7 @@ static ATbool RefineBranching(int action, int splitter)
           while (MarkTau(b, p2)) {
           /* ATwarning("Inside Mark Tau: %d %d\n",p1->left, p1->right); */
                r=p1;
-               if (!split(r, p1, p2) /* No nonmarked states */ 
+               if (!split(r, p1, p2) /* No nonmarked states */
                /* && p1->left == p1->right */ ) {
                     int i;
                     for (i = p2->left;i < q->right;i++) mark[s[i]]= ATfalse;
@@ -337,19 +337,19 @@ static ATbool RefineBranching(int action, int splitter)
 	  if (!result) result = ATtrue;
           PushUnstableMark(-1, splitter, b, p1);
           PushUnstableMark(action, splitter, b, q);
-          RemoveInterval(Pi+b);         
+          RemoveInterval(Pi+b);
           }
      ClearMarks(i);
      return result;
      }
-     
+
 static void Parent(int *b1, int *b2) {
      while (blok[*b1].parent != blok[*b2].parent) {
           if (blok[*b1].parent > blok[*b2].parent) *b1 = blok[*b1].parent;
           if (blok[*b2].parent > blok[*b1].parent) *b2 = blok[*b2].parent;
           }
      }
-     
+
 static int InsideSplitter(ATermList tgt, int splitter) {
        int b = -1, d = -1;
        for (;!ATisEmpty(tgt);tgt = ATgetNext(tgt)) {
@@ -359,7 +359,7 @@ static int InsideSplitter(ATermList tgt, int splitter) {
 	   }
        return d;
        }
-       
+
 static void PrintTransition(ATerm p, ATbool tp, int action, ATerm q, ATbool tq)  {
      static char buf[80];
      int pt = 0;
@@ -376,15 +376,15 @@ static void PrintTransition(ATerm p, ATbool tp, int action, ATerm q, ATbool tq) 
      strcat(buf, (tq?"'!":"'"));
      ATfprintf(stderr,"%s\n",buf);
 }
-       
-static ATbool PrintNonBisimilarStates(int *p, int *q) { 
+
+static ATbool PrintNonBisimilarStates(int *p, int *q) {
      int b1 = blockref[*p], b2 = blockref[*q], splitter = -1, action = -1;
      ATermList tgt1 = NULL, tgt2 = NULL;
-     ATerm 
+     ATerm
      p_lab = (ATerm) ATmakeInt(*p),
-     q_lab = (ATerm) ATmakeInt(*q-offset);  
+     q_lab = (ATerm) ATmakeInt(*q-offset);
      Parent(&b1, &b2);
-     /* 
+     /*
      ATfprintf(stderr,"QQ2: b1 = %d b2 = %d %t %t\n",b1, b2, p_lab, q_lab);
      */
      splitter = blok[b1].splitter;
@@ -414,11 +414,11 @@ static ATbool PrintNonBisimilarStates(int *p, int *q) {
 		  *p = InsideSplitter(tgt1, splitter);
 		  return ATtrue;
 		  }
-	    }	        
+	    }
        return ATfalse;
      }
-                                         
-static ATbool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1, 
+
+static ATbool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
                               SVCstateIndex init2, ATbool *different)
 /* for all labels while p is not splitted */
      {
@@ -443,25 +443,25 @@ static ATbool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
 	       while (PrintNonBisimilarStates((int*) &init1, (int*) &init2));
 	       }
                *different = ATtrue;
-               return result; 
+               return result;
                }
-          } 
+          }
      *different = ATfalse;
      return result;
      }
-     
-static ATbool CompareKernel(SVCstateIndex init1,SVCstateIndex init2, 
+
+static ATbool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
      ATbool *different)
      {
      ATbool result = ATfalse;
-     Pi_pt = n_partitions;   
+     Pi_pt = n_partitions;
      while (Pi_pt-- > 0)
        {
        INTERVAL *p = Pi+ Pi_pt;
        if (p->mode == UNSTABLE)
             {
             p->mode = STABLE;
-            if (CompareCheckUnstableBlock(Pi_pt, init1, init2, different)) { 
+            if (CompareCheckUnstableBlock(Pi_pt, init1, init2, different)) {
                 result = ATtrue;
                 if (*different) return ATfalse;
                 }
@@ -469,7 +469,7 @@ static ATbool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
        }
      return result;
      }
-     
+
 int Compare(SVCstateIndex init1, SVCstateIndex init2)
      {
      int cnt = 0, nBlocks = 0, last_nBlocks = 0;
@@ -477,18 +477,18 @@ int Compare(SVCstateIndex init1, SVCstateIndex init2)
      StartSplitting();
      do {
        nBlocks = NumberOfPartitions();
-       if (traceLevel && cnt>=2 && last_nBlocks != nBlocks) 
-     ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n", 
-           last_nBlocks, nBlocks);   
+       if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
+     ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n",
+           last_nBlocks, nBlocks);
        cnt++; last_nBlocks = nBlocks;
        } while (CompareKernel(init1, init2, &different) && branching);
      /*
      if (traceLevel && branching) ATwarning("Cycle %d finished. Number of partitions: %d\n",
        cnt, nBlocks);
-     */         
+     */
      return different?EXIT_NOTOK:EXIT_OK;
      }
-          
+
 int CompareBranching(SVCstateIndex init1,SVCstateIndex init2)
      {
      if (label_tau>=0) branching = ATtrue;

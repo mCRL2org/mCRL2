@@ -74,7 +74,7 @@ namespace tipi {
 
       private:
 
-        /** 
+        /**
          * \ brief Factory function for elements
          **/
         template < typename T >

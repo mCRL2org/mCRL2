@@ -38,7 +38,7 @@ namespace grape
 
         /** Default constructor. */
         grape_preamble_dialog();
-        
+
         DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
       public:
         /**
@@ -69,7 +69,7 @@ namespace grape
          * @param p_event The generated event.
          */
         void event_change_parameter_text( wxGridEvent &p_event );
-        
+
         /**
          * Change localvar grid event handler.
          * Appending grid rows.

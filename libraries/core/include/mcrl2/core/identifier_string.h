@@ -21,7 +21,7 @@ namespace core {
   /// \brief String type of the LPS library.
   /// Identifier strings are represented internally as ATerms.
   typedef atermpp::aterm_string identifier_string;
-  
+
   /// \brief Tests if a term is an identifier string.
   /// \param t A term
   /// \return Whether t is an identifier string.

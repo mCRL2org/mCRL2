@@ -16,8 +16,8 @@ Rewriter Concept.
       "                \n"
       "predvar         \n"
       "  X(p: Pos);    \n"
-      ;   
-    
+      ;
+
     pbes_expression d1 = parse_pbes_expression("X(1) || (false || X(1))", var_decl);
     pbes_expression d2 = parse_pbes_expression("X(1)", var_decl);
     assert(r(d1) == r(d2));
@@ -29,7 +29,7 @@ following example.
     data::data_specification data_spec = default_data_specification();
     data::rewriter datar(data_spec);
     data::number_postfix_generator generator("UNIQUE_PREFIX");
-    data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);   
+    data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);
     enumerate_quantifiers_rewriter<pbes_expression, data::rewriter, data::data_enumerator<> > r(datar, datae);
 
     pbes_expression d1 = parse_pbes_expression("exists m:Nat.val(m > 3)");
@@ -65,11 +65,11 @@ example.
 
     data::rewriter datar = data::default_data_rewriter();
     pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
-  
-    data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma; 
+
+    data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma;
     sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
     sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));
-  
+
     std::string var_decl =
       "datavar         \n"
       "  m, n:  Pos;   \n"

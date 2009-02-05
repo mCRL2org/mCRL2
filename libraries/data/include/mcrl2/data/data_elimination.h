@@ -28,7 +28,7 @@ namespace data {
     public:
       /// \brief Default constructor.
       data_elimination();
-      
+
       /// \brief Destructor.
       ~data_elimination();
 
@@ -36,7 +36,7 @@ namespace data {
       /// \brief       Ensure that data elemination does not remove sort s.
       /// \param[in] s An mCRL2 data sort expression.
       void keep_sort(sort_expression s);
-      
+
       /// \brief        Ensure that data elemination does not remove mapping op.
       /// \param[in] op An mCRL2 data operation.
       void keep_function(data_operation op);

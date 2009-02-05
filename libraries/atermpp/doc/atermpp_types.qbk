@@ -24,7 +24,7 @@ A `term_list<T>` models a read-only singly linked list with elements of type
 `T`. The element type should be `aterm` or one of its derivatives, or a user
 defined aterm (see section [link mcrl2_atermpp.programming.user_defined User defined terms]).
 A `term_appl<T>` is a function application with leafs of type `T`.
- 
+
 Besides this the library contains a few more data types that use
 ATerms internally.
 

@@ -37,11 +37,11 @@ struct data_assignment_lhs: public std::unary_function<data_assignment, data_var
 struct has_left_hand_side
 {
   const data_variable& m_variable;
-  
+
   has_left_hand_side(const data_variable& variable)
    : m_variable(variable)
   {}
-  
+
   /// \brief Function call operator
   /// \param a An assignment to a data variable
   /// \return The function result
@@ -55,11 +55,11 @@ struct has_left_hand_side
 struct has_left_hand_side_in
 {
   const std::set<data_variable>& m_variables;
-  
+
   has_left_hand_side_in(const std::set<data_variable>& variables)
     : m_variables(variables)
   {}
-  
+
   /// \brief Function call operator
   /// \param a An assignment to a data variable
   /// \return The function result

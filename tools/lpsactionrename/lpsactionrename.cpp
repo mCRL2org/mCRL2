@@ -60,12 +60,12 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
 {
   //Type definitions
   //----------------
-  
-  protected: 
+
+  protected:
     //t_phase represents the phases at which the program should be able to stop
    typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL} t_phase;
-  
-    //t_tool_options represents the options of the tool 
+
+    //t_tool_options represents the options of the tool
 
     bool            m_pretty;
     bool            m_rewrite;
@@ -77,7 +77,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     {
       return "[OPTION]... --renamefile=NAME [INFILE [OUTFILE]]\n";
     }
-  
+
     void add_options(interface_description& desc)
     {
       rewriter_tool<input_output_tool>::add_options(desc);
@@ -103,21 +103,21 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     {
       rewriter_tool<input_output_tool>::parse_options(parser);
 
-      m_rewrite = (parser.options.count("rewrite")==0); 
-      m_sumelm  = (parser.options.count("sumelm")==0); 
-      m_pretty = (parser.options.count("pretty")); 
+      m_rewrite = (parser.options.count("rewrite")==0);
+      m_sumelm  = (parser.options.count("sumelm")==0);
+      m_pretty = (parser.options.count("pretty"));
 
-      if (parser.options.count("end-phase")>0) 
+      if (parser.options.count("end-phase")>0)
       {
         std::string phase = parser.option_argument("end-phase");
-  
-        if (std::strncmp(phase.c_str(), "pa", 3) == 0) 
+
+        if (std::strncmp(phase.c_str(), "pa", 3) == 0)
         { m_end_phase = PH_PARSE;
-        } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) 
+        } else if (std::strncmp(phase.c_str(), "tc", 3) == 0)
         { m_end_phase = PH_TYPE_CHECK;
-        } else if (std::strncmp(phase.c_str(), "di", 3) == 0) 
+        } else if (std::strncmp(phase.c_str(), "di", 3) == 0)
         { m_end_phase = PH_DATA_IMPL;
-        } else 
+        } else
         { parser.error("option -p has illegal argument '" + phase + "'");
         }
       }
@@ -133,36 +133,36 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
           "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
           "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
         ),
-        m_pretty(false), 
-        m_rewrite(true), 
+        m_pretty(false),
+        m_rewrite(true),
         m_sumelm(true),
         m_end_phase(PH_NONE)
     {}
 
   //Functions used by the main program
   //----------------------------------
-  
+
   // static bool parse_command_line(int argc, char **argv, t_tool_options&);
   //Post: The command line options are parsed.
   //      The program has aborted with a suitable error code, if:
   //      - errors were encountered
   //      - non-standard behaviour was requested (help or version)
   //Ret:  the parsed command line options
-  
+
   // static specification rename_actions(t_tool_options tool_options); XXXXXXXXXXXXXXXXXXXXXXX
   //Pre:  tool_options.action_rename_filename contains a action rename
   //      specification
   //      tool_options.infilename contains an LPS ("" indicates stdin)
   //      tool_options.end_phase indicates at which phase conversion stops
-  //Ret:  if end_phase == PH_NONE, the new LPS generated from the action rename 
+  //Ret:  if end_phase == PH_NONE, the new LPS generated from the action rename
   //      file and the old LPS
   //      if end_phase != PH_NONE, the state formula after phase end_phase
   //      NULL, if something went wrong
-  
+
   bool run()
   {
     //process action rename specfication
-  
+
     if (core::gsVerbose)
     {
       std::cerr << "lpsactionrename parameters:" << std::endl;
@@ -176,22 +176,22 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     //open infilename
     specification lps_old_spec;
     lps_old_spec.load(m_input_filename);
-  
+
     //parse the action rename file
     ifstream rename_stream(m_action_rename_filename.c_str());
-    if (!rename_stream.is_open()) 
+    if (!rename_stream.is_open())
     {
       mcrl2::runtime_error("cannot open rename file " + m_action_rename_filename);
     }
-   
+
     // Parse the rename spec in rename_stream.
     // Note that all parsed data and action declarations in rename_stream are
     // added to lps_old_spec.
-    action_rename_specification action_rename_spec = 
+    action_rename_specification action_rename_spec =
                     parse_action_rename_specification(rename_stream,lps_old_spec);
     rename_stream.close();
-  
-    
+
+
     /* if (action_rename_spec == NULL) {
       gsErrorMsg("parsing failed\n");
       return NULL;
@@ -200,10 +200,10 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     if (end_phase == PH_PARSE) {
       return action_rename_spec;
     }
-  
+
     //type check formula against a reconstructed lps specification
     ATermAppl reconstructed_lps_old_spec = reconstruct_spec(lps_old_spec);
-  
+
     gsVerboseMsg("type checking...\n");
     action_rename_spec = type_check_action_rename_spec(action_rename_spec, reconstructed_lps_old_spec);
     if (action_rename_spec == NULL) {
@@ -213,7 +213,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     if (end_phase == PH_TYPE_CHECK) {
       return action_rename_spec;
     }
-  
+
     //implement standard data types and type constructors on the result
     gsVerboseMsg("implementing standard data types and type constructors...\n");
     action_rename_spec = implement_data_action_rename_spec(action_rename_spec, reconstructed_lps_old_spec);
@@ -226,32 +226,32 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     }
     lps_old_spec = specification(reconstructed_lps_old_spec);
     */
-  
+
     //rename all assigned actions
     gsVerboseMsg("renaming actions...\n");
     specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
     data::rewriter datar;
-    if (m_rewrite) 
+    if (m_rewrite)
     { datar = create_rewriter(lps_new_spec.data());
       lps_new_spec = rewrite_lps(lps_new_spec,datar);
       // lps_new_spec = lpsrewr(lps_new_spec, datar);
       // lps_new_spec = rewrite_lps(lps_new_spec, tool_options.rewrite_strategy);
     }
-    if(m_sumelm)  
+    if(m_sumelm)
     { lps_new_spec = sumelm(lps_new_spec);
-      if(m_rewrite) 
-      { 
+      if(m_rewrite)
+      {
         lps_new_spec = rewrite_lps(lps_new_spec,datar);
       }
     }
     // return lps_new_spec;
-  
+
     lps_new_spec.save(m_output_filename);
     return true;
-    
+
     //store the result
     /* string outfilename = tool_options.outfilename;
-    if (outfilename.empty()) 
+    if (outfilename.empty())
     {
       gsVerboseMsg("saving result to stdout...\n");
     } else {
@@ -259,14 +259,14 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     }
     if (tool_options.end_phase == PH_NONE && !tool_options.pretty) {
       lps_new_spec.save(outfilename);
-    } else 
+    } else
     {
       if (outfilename.empty()) {
         PrintPart_CXX(cout, (ATerm) lps_new_spec, (tool_options.pretty)?ppDefault:ppInternal);
         cout << endl;
       } else {
         ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
-        if (!outstream.is_open()) { 
+        if (!outstream.is_open()) {
           throw mcrl2::runtime_error("could not open output file '" + outfilename + "' for writing");
         }
         PrintPart_CXX(outstream, (ATerm) lps_new_spec, (tool_options.pretty)?ppDefault:ppInternal);
@@ -289,7 +289,7 @@ const char* lps_file_for_output   = "lps_out";
 const char* option_rewrite        = "rewrites";
 const char* option_sumelm         = "sumelm";
 
-class squadt_interactor 
+class squadt_interactor
               : public mcrl2::utilities::squadt::mcrl2_tool_interface,
                 public action_rename_tool
 {
@@ -392,7 +392,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const
 {
   bool result = true;
 

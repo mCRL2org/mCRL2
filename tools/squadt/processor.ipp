@@ -113,7 +113,7 @@ namespace squadt {
 
       /** \brief Weak pointer to this object for passing */
       boost::weak_ptr < processor >                         interface_object;
- 
+
       /** \brief Identifies the tool that is required to run the command */
       boost::shared_ptr < const tool >                      tool_descriptor;
 
@@ -125,13 +125,13 @@ namespace squadt {
 
       /** \brief The information about outputs of this processor */
       output_list                                           outputs;
- 
+
       /** \brief The current task that is running or about to run */
       boost::shared_ptr< monitor >                          current_monitor;
 
       /** \brief The associated project manager */
       boost::weak_ptr< project_manager >                    manager;
- 
+
       /** \brief The directory from which tools should be run on behalf of this object */
       std::string                                           output_directory;
 

@@ -26,7 +26,7 @@ ATerm parse_tagged_stream(const string &tag, istream &stream);
   Post:the content of tag followed by stream is parsed
   Ret: the parsed content, if everything went ok
        NULL, otherwise
-*/ 
+*/
 
 ATermAppl parse_identifier(istream &se_stream) {
   return (ATermAppl) parse_tagged_stream("identifier", se_stream);

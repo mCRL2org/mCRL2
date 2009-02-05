@@ -2,7 +2,7 @@
 
 % title and author
 \title{Higher-Order Algebraic Specifications}
-\author{Aad Mathijssen} 
+\author{Aad Mathijssen}
 
 % packages
 \usepackage[english]{babel}
@@ -110,7 +110,7 @@
     }
   }
   {\end{list}}
-  
+
 % entry: list of entries where:
 % - the optional argument denotes the space between successive items
 %   (default 0.15em);
@@ -120,7 +120,7 @@
   {\begin{list}{}%
     {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
      \settowidth{\labelwidth}{\textsf{#2:}}%
-     \setlength{\leftmargin}{\labelwidth+\labelsep}%     
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%
      \setlength{\parsep}{0pt}%
      \setlength{\itemsep}{#1}%
     }%
@@ -261,7 +261,7 @@
 % function composition: o
 \newcommand{\fcomp}{\ensuremath{%
   \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
-  
+
 % function mapping
 \newcommand{\fmap}{
   \hspace{0.08em}\raisebox{0.2ex}{%
@@ -327,7 +327,7 @@
 
 % cons: |>
 \newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
-  
+
 % snoc: <|
 \newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
 
@@ -394,17 +394,17 @@
 
 %inference rule with 0 premises and 1 conclusion
 \newcommand{\infC}[1]{\ensuremath{
-  \begin{array}{c} 
-    \\\hline 
-    #1 
+  \begin{array}{c}
+    \\\hline
+    #1
   \end{array}
 }}
 
 %inference rule with 1 premise and 1 conclusion
 \newcommand{\infPC}[2]{\ensuremath{
-  \begin{array}{c} 
-    #1 \\\hline 
-    #2 
+  \begin{array}{c}
+    #1 \\\hline
+    #2
   \end{array}
 }}
 
@@ -536,7 +536,7 @@
 % inference rule of EC: Inf_{EC}
 \newcommand{\infEC}{\ensuremath{\f{Inf}_{_{\mathrm{EC}}}}}
 
-% match of a sequence of equations s and an equation e with an inference rule 
+% match of a sequence of equations s and an equation e with an inference rule
 % and a set of formulas E in calculus EC: match_{EC}(s,e,E)
 \newcommand{\matchEC}[2]{\ensuremath{\faa{\f{match}_{_{\mathrm{EC}}}}{#1}{#2}}}
 
@@ -586,7 +586,7 @@
 % inference rule of ND: Inf_{ND}
 \newcommand{\infND}{\ensuremath{\f{Inf}_{_{\mathrm{ND}}}}}
 
-% match of a sequence s and an element e with an inference rule 
+% match of a sequence s and an element e with an inference rule
 % in the calculus ND: match_{ND}(s,e)
 \newcommand{\matchND}[2]{\ensuremath{\faa{\f{match}_{_{\mathrm{ND}}}}{#1}{#2}}}
 
@@ -693,7 +693,7 @@ To increase readability, the outer parentheses of a sort \frm{s \in \hos{S}} may
 
 An operation is a pair \frm{n: s}, where \frm{s \in \hos{S}}. Here \frm{n} is called the operation name, and \frm{s} its sort. If no ambiguity arises, we will write \frm{n} instead of \frm{n: s}. Note that in contrast to first-order algebraic specifications, each operation is a constant. Also note that each constant \frm{n: \to s} from first-order specifications is written as \frm{n: s} in higher-order specifications.
 
-A many-sorted algebra assigns a meaning to a signature. A total algebra \frm{A} for a signature \frm{\Sigma = (S,\ops)} assigns a carrier set \frm{\amean{s}{A}} to each sort \frm{s \in \hos{S}} and a total function \frm{\amean{n: s}{A}}, yielding an element of type \frm{\amean{s}{A}}, to each operation \frm{n: s \in \ops}. This algebra is also called a \frm{\Sigma}-algebra. We may write \frm{\amean{n}{A}} for \frm{\amean{n: s}{A}} when \frm{s} is clear from the context. 
+A many-sorted algebra assigns a meaning to a signature. A total algebra \frm{A} for a signature \frm{\Sigma = (S,\ops)} assigns a carrier set \frm{\amean{s}{A}} to each sort \frm{s \in \hos{S}} and a total function \frm{\amean{n: s}{A}}, yielding an element of type \frm{\amean{s}{A}}, to each operation \frm{n: s \in \ops}. This algebra is also called a \frm{\Sigma}-algebra. We may write \frm{\amean{n}{A}} for \frm{\amean{n: s}{A}} when \frm{s} is clear from the context.
 
 Carrier sets for purely higher-order sorts are required to behave as monotonic functions. For this purpose, we introduce function \frm{\mean{\_}^{A}_{s}} for each \frm{s \in \hos{S}}. For these functions, we have the following requirements:
 \begin{edefinitions}
@@ -757,7 +757,7 @@ In order to define the semantics of terms, we introduce the notion of an \emph{a
 
 A meaning is given to a term \frm{t \in \termv{\Sigma}{X}} using a \frm{\Sigma}-algebra \frm{A} and an assignment \frm{\alpha: X \to A}. It is called the \emph{value} of \frm{t} for \frm{\alpha} and it is denoted by \frm{\ameanv{t}{A}{\alpha}}. We define this notion inductively on the structure of \frm{t}:
 \begin{edefinitions}
-\item \frm{\ameanv{x}{A}{\alpha} = \alpha_{s}(x)}, 
+\item \frm{\ameanv{x}{A}{\alpha} = \alpha_{s}(x)},
   where \frm{x \in \frm{X_{s}}} and \frm{s \in S^\to};
 \item \frm{\ameanv{n}{A}{\alpha} = \amean{\op}{A}}, where \frm{\op = n: s \in \ops};
 \item \frm{\ameanv{t(u)}{A}{\alpha} = \mean{\amean{t}{A}}^{A}_{s' \to s}(\amean{u}{A})}, where \frm{t \in \tsx{s' \to s}} and \frm{u \in \tsx{s'}}.
@@ -837,24 +837,24 @@ There are many possibilities in defining the set of inference rules \frm{\infEC}
 \[\begin{tightarray}{Ll@{\hspace{1.5em}}L}
   (axiom)
     & \infC{\,e\,}
-      & \frm{e \in E}\\    
-  (reflexivity)  
+      & \frm{e \in E}\\
+  (reflexivity)
     & \infC{t = t}
       & \frm{t \in \termv{\Sigma}{X}}\\
-  (symmetry)     
+  (symmetry)
     & \infPC{t = u}{u = t}
       & \frm{t,u \in \termv{\Sigma}{X}}\\
-  (transitivity) 
+  (transitivity)
     & \infPPC{t = u}{u = v}{t = v}
       & \frm{t,u,v \in \termv{\Sigma}{X}}\\
-  (substitution) 
+  (substitution)
     & \infPC{t = u}{t\sigma = u\sigma}
       & \frm{t,u \in \termv{\Sigma}{X}} and \frm{\sigma:X \to \termv{\Sigma}{Y}}\\
-  (congruence)   
-    & \infPC{t = u}{v[t/y] = v[u/y]} 
-      & \frm{t,u \in \termv{\Sigma}{X}}, \frm{v \in \termv{\Sigma}{X \cup \{y\}}} and 
+  (congruence)
+    & \infPC{t = u}{v[t/y] = v[u/y]}
+      & \frm{t,u \in \termv{\Sigma}{X}}, \frm{v \in \termv{\Sigma}{X \cup \{y\}}} and
         \frm{y \not \in X}\\
-  (extensionality)     
+  (extensionality)
     & \infPC{t(x) = u(x)}{t = u}
       & \frm{t,u \in \termv{\Sigma}{X}}, \frm{x \in X}\\
 \end{tightarray}\]
@@ -881,7 +881,7 @@ The set \frm{E} serves the same purpose as in the logical consequence \frm{E \vE
 %\end{derivation}
 %
 %\noindent
-%The goal of this derivation is to show \frm{E \dEC t_{0} = t_{n}}. This is done as follows. Each hint explains why \frm{E \dEC t_{i} = t_{i+1}}, for all \frm{i} with \frm{0 \leq i < n}. Then we can derive \frm{t_{0} = t_{n}} by applying the transitivity rule \frm{n-1} times. 
+%The goal of this derivation is to show \frm{E \dEC t_{0} = t_{n}}. This is done as follows. Each hint explains why \frm{E \dEC t_{i} = t_{i+1}}, for all \frm{i} with \frm{0 \leq i < n}. Then we can derive \frm{t_{0} = t_{n}} by applying the transitivity rule \frm{n-1} times.
 %
 %In order to control the size of derivations, the applications of the reflexivity, symmetry, substitution and congruence rules are left implicit in the hints. We also allow multiple applications of the transitivity rule in one derivation step.
 %

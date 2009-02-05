@@ -60,12 +60,12 @@ namespace mcrl2 {
 
           /// \brief Constructor
           wxSpinCtrlFloat(
-              wxWindow* parent, 
-              wxWindowID id, 
-              double p_Min, 
+              wxWindow* parent,
+              wxWindowID id,
+              double p_Min,
               double p_Max,
-              double p_Rate, 
-              double p_Init, 
+              double p_Rate,
+              double p_Init,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize );
 

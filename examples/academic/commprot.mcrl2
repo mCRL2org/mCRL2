@@ -1,23 +1,23 @@
-% This is a translation to mCRL2 of the mCRL specification of the 
-% conference protocol that originally was specified in LOTOS. 
-% The translation to mCRL2 was done by Jan Friso Groote in 
-% February 2006. 
+% This is a translation to mCRL2 of the mCRL specification of the
+% conference protocol that originally was specified in LOTOS.
+% The translation to mCRL2 was done by Jan Friso Groote in
+% February 2006.
 %
 % A description of the protocol can be found on http://fmt.cs.utwente.nl/tools/torx/confcase.html.
 % The description below is a summary from this page.
 %
-% The conference service provides a multicast service, resembling a `chatbox', to users 
-% participating in a conference. A conference is a group of users that can exchange messages 
-% to all conference partners in that conference. So, every user can send messages to, or 
+% The conference service provides a multicast service, resembling a `chatbox', to users
+% participating in a conference. A conference is a group of users that can exchange messages
+% to all conference partners in that conference. So, every user can send messages to, or
 % receive messages from, all its conference partners.
 %
 % The actions of each user are to join or leave a conference and to send a message
 % (datareq) or to receive a message (dataind).
-% 
+%
 % This conference service protocol has extensively been used for testing software using
 % Torx. The first paper on this topic is: Formal Test Automation: A Simple Experiment, by
-% A. Belinfante, J. Feenstra, R.G. de Vries, J. Tretmans, N. Goga, L. Feijs, S. Mauw and 
-% L. Heerink. In: G. Csopaki and S. Dibuz and K. Tarnay, editors, Int. Workshop on Testing 
+% A. Belinfante, J. Feenstra, R.G. de Vries, J. Tretmans, N. Goga, L. Feijs, S. Mauw and
+% L. Heerink. In: G. Csopaki and S. Dibuz and K. Tarnay, editors, Int. Workshop on Testing
 % of Communicating Systems XII, Kluwer Academic Publishers, pages: 179 - 196, published in 1999.
 %
 % Note: on 13/2/2006 Axel Belinfante detected a flaw in the datatypes by testing the
@@ -46,7 +46,7 @@ sort Pair=struct Pair(fst:CFsp,snd:PDU);
 %************************ type definitions **************************************************
 %********************************************************************************************
 
-sort PduType = struct J | A | L | D; 
+sort PduType = struct J | A | L | D;
 sort UserTitleOpt = struct noUt | yesUt(UtOf:UserTitle);
 sort ConfIdentOpt = struct noCi | yesCi(CiOf:ConfIdent);
 
@@ -54,9 +54,9 @@ sort ConfIdentOpt = struct noCi | yesCi(CiOf:ConfIdent);
 %****************** Definition of Service Primitives and PDUs *******************************
 %********************************************************************************************
 
-sort CFsp = struct datareq(MsgOf1:DataField)?IsDataReq     
-                |  dataind(UtOf1:UserTitle,MsgOf2:DataField)?IsDataInd 
-                |  join(UtOf2:UserTitle,CiOf:ConfIdent)?IsJoin                            
+sort CFsp = struct datareq(MsgOf1:DataField)?IsDataReq
+                |  dataind(UtOf1:UserTitle,MsgOf2:DataField)?IsDataInd
+                |  join(UtOf2:UserTitle,CiOf:ConfIdent)?IsJoin
                 |  leave?IsLeave;
 
 map UtOf:CFsp -> UserTitle;
@@ -65,7 +65,7 @@ var u:CFsp;
 eqn UtOf(u)=if(IsDataInd(u),UtOf1(u),UtOf2(u));
     MsgOf(u)=if(IsDataReq(u),MsgOf1(u),MsgOf2(u));
 
-% definition of PDUs and operations on these PDUs 
+% definition of PDUs and operations on these PDUs
 
 sort PDU = struct PDU_J(UtOf_J:UserTitle,CiOf_J:ConfIdent)?IsPDU_J
                |  PDU_A(UtOf_A:UserTitle,CiOf_A:ConfIdent)?IsPDU_A
@@ -116,7 +116,7 @@ var  a, b : UDPAddress;
      c,c' : CFPartner;
      xs : List(CFPartner);
      u:UserTitle;
-eqn  RemovePartnerByUDPaddr(a, Pair(b, u)|>xs)= 
+eqn  RemovePartnerByUDPaddr(a, Pair(b, u)|>xs)=
                   if(a==b,xs,Pair(b,u)|>RemovePartnerByUDPaddr(a, xs));
      RemovePartnerByUDPaddr(a, []) = [];
      IsIn(c,[])=false;
@@ -135,7 +135,7 @@ var u:UDPAddress;
 eqn MakeRemoteAddrSet(x|>xs) = AddrOf(x)|>MakeRemoteAddrSet(xs);
     MakeRemoteAddrSet([]) = [];
     MakeRemoteAddrSet2(u, []) = [];
-    MakeRemoteAddrSet2(u, y|>ys) = 
+    MakeRemoteAddrSet2(u, y|>ys) =
             if(u==UDPaddrOf(y), MakeRemoteAddrSet2(u, ys),
                                 UDPaddrOf(y)|>MakeRemoteAddrSet2(u, ys));
 
@@ -165,7 +165,7 @@ eqn ChooseConfig(ap|>r) = ap;
     IsIn(u,u'|>xs)= u==u' || IsIn(u,xs);
     Remove(u,[])=[];
     Remove(u,u'|>xs)= if(u==u',xs,u'|>Remove(u,xs));
-    
+
 
 
 map  TestSet : List(UDPAddress);
@@ -184,21 +184,21 @@ act  UTin_buffer, UTin_LSI, UTin : CFAddress # CFsp;
      CFSAP_in_UpperLSI, CFSAP_in_ProtocolFunctions, Xin_Buffer, Xin,
 		tempabXin, tempacXin : CFAddress # CFsp;
      Yin_UDPLC_Y, Yin_UDP, udp_in_LowerLSI , udp_in_ProtocolFunctions,
- 		tempabYin, tempacYin, tempadYin, tempbcYin, tempbdYin, tempcdYin, 
+ 		tempabYin, tempacYin, tempadYin, tempbcYin, tempbdYin, tempcdYin,
                 tempabcYin, tempabdYin, tempbcdYin, Yin : UDPAddress # UDPsp;
      Yout_UDPLC_Y , Yout_UDP, udp_out_LowerLSI , udp_out_ProtocolFunctions,
- 		tempabYout, tempacYout, tempadYout, tempbcYout, tempbdYout, tempcdYout, 
+ 		tempabYout, tempacYout, tempadYout, tempbcYout, tempbdYout, tempcdYout,
                 tempabcYout, tempabdYout, tempbcdYout, Yout : UDPAddress # UDPsp;
      udp_in,udp_out : UDPAddress # UDPsp;
      CFSAP_in, CFSAP_out  : CFAddress # CFsp;
-     
+
 init rename(
        { LTout_LowerTestContext->udp_out,
          LTin_LowerTestContext->udp_in,
          UTin->CFSAP_in, UTout->CFSAP_out},
        SystemUnderTest);
 
-proc SystemUnderTest= 
+proc SystemUnderTest=
   hide({Xin, Yin, Yout},
     allow({Xin, Yin, Yout, UTin, UTout, LTin_LowerTestContext, LTout_LowerTestContext},
       comm({
@@ -210,22 +210,22 @@ proc SystemUnderTest=
         Yin_UDPLC_Y | Yin_UDP | udp_in_LowerLSI | udp_in_ProtocolFunctions -> Yin,
         Yout_UDPLC_Y | Yout_UDP | udp_out_LowerLSI | udp_out_ProtocolFunctions -> Yout},
 
-    UpperTestContext||    
-    ConferenceProtocolEntity(cf1, udp1)|| 
-    LowerTestContext   
+    UpperTestContext||
+    ConferenceProtocolEntity(cf1, udp1)||
+    LowerTestContext
   )));
 
 
 proc ConferenceProtocolEntity(myCFaddr:CFAddress, myUDPaddr:UDPAddress)=
-       UpperLSI(myCFaddr)||  
+       UpperLSI(myCFaddr)||
        LowerLSI(myUDPaddr)||
        ProtocolFunctions([], [], [], noUt, noCi, myCFaddr, myUDPaddr);
- 
-proc UpperLSI(myCFaddr:CFAddress)=  
+
+proc UpperLSI(myCFaddr:CFAddress)=
      sum addr:CFAddress,sp:CFsp.(IsJoin(sp) && myCFaddr==addr)->
                      CFSAP_in_UpperLSI(addr,sp).EngagedUpperLSI(myCFaddr);
- 
-proc EngagedUpperLSI(myCFaddr:CFAddress)=         
+
+proc EngagedUpperLSI(myCFaddr:CFAddress)=
      sum addr:CFAddress, sp:CFsp.(IsDataReq(sp) && myCFaddr==addr)->
                      CFSAP_in_UpperLSI(addr,sp).EngagedUpperLSI(myCFaddr)+
      sum addr:CFAddress, sp:CFsp.(IsDataInd(sp) &&  myCFaddr==addr)->
@@ -252,28 +252,28 @@ proc ProtocolFunctions(Qyo:LOQ, Qxo:UOQ, CPs:List(CFPartner), myUt:UserTitleOpt,
             ( IsJoin(sp)->
                ( (MakeRemoteAddrSet2(myUDPaddr, ConfigurationSet)!=[])->
                    ProtocolFunctions(Pair(MakeRemoteAddrSet2(myUDPaddr, ConfigurationSet),
-                      PDU_J(UtOf(sp), CiOf(sp)))|>Qyo,Qxo, CPs, yesUt(UtOf(sp)), 
+                      PDU_J(UtOf(sp), CiOf(sp)))|>Qyo,Qxo, CPs, yesUt(UtOf(sp)),
                           yesCi(CiOf(sp)), myCFaddr, myUDPaddr) <>
-                   ProtocolFunctions(Qyo, Qxo, CPs, yesUt(UtOf(sp)), 
-                          yesCi(CiOf(sp)), myCFaddr, myUDPaddr) 
-               )+ 
+                   ProtocolFunctions(Qyo, Qxo, CPs, yesUt(UtOf(sp)),
+                          yesCi(CiOf(sp)), myCFaddr, myUDPaddr)
+               )+
              IsLeave(sp)->
                ( (MakeRemoteAddrSet(CPs)!=[])->
-                   ProtocolFunctions(Pair(MakeRemoteAddrSet(CPs),PDU_L(UtOf(myUt), CiOf(myCi)))|>Qyo, 
+                   ProtocolFunctions(Pair(MakeRemoteAddrSet(CPs),PDU_L(UtOf(myUt), CiOf(myCi)))|>Qyo,
                                Qxo, [], noUt, noCi, myCFaddr, myUDPaddr) <>
                    ProtocolFunctions(Qyo, Qxo, [], noUt, noCi, myCFaddr, myUDPaddr)
                ) +
              IsDataReq(sp)->
                ( (MakeRemoteAddrSet(CPs)!=[])->
-                   ProtocolFunctions(Pair(MakeRemoteAddrSet(CPs), PDU_D(l_1, MsgOf(sp)))|>Qyo, 
+                   ProtocolFunctions(Pair(MakeRemoteAddrSet(CPs), PDU_D(l_1, MsgOf(sp)))|>Qyo,
                         Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr) <>
                    ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr)
-               ) 
+               )
              ) +
 
      sum addr:UDPAddress, sp:UDPsp.
        (IsDataInd(sp) && addr==myUDPaddr) -> udp_in_ProtocolFunctions(addr,sp).
-         ( (myCi==noCi) -> ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr) + 
+         ( (myCi==noCi) -> ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr) +
 
            ( TypeOf(PduOf(sp))==J && myCi!=noCi)->
               ( (CiOf(PduOf(sp))==CiOf(myCi))->
@@ -282,7 +282,7 @@ proc ProtocolFunctions(Qyo:LOQ, Qxo:UOQ, CPs:List(CFPartner), myUt:UserTitleOpt,
                                CiOf(myCi)))|>Qyo, Qxo, CPs, myUt, myCi,
 			       myCFaddr, myUDPaddr) <>
                       ProtocolFunctions(Pair([SrcOf(sp)],PDU_A(UtOf(myUt),
-                               CiOf(myCi)))|>Qyo, Qxo, Pair(SrcOf(sp),UtOf(PduOf(sp)))|>CPs, 
+                               CiOf(myCi)))|>Qyo, Qxo, Pair(SrcOf(sp),UtOf(PduOf(sp)))|>CPs,
                                        myUt, myCi, myCFaddr, myUDPaddr)
                   ) <>
                   ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr)
@@ -290,7 +290,7 @@ proc ProtocolFunctions(Qyo:LOQ, Qxo:UOQ, CPs:List(CFPartner), myUt:UserTitleOpt,
 
            ( TypeOf(PduOf(sp))==L && myCi!=noCi)->
               ( (CiOf(PduOf(sp))==CiOf(myCi))->
-                  ProtocolFunctions(Qyo, Qxo, RemovePartnerByUDPaddr(SrcOf(sp), CPs), 
+                  ProtocolFunctions(Qyo, Qxo, RemovePartnerByUDPaddr(SrcOf(sp), CPs),
                          myUt, myCi, myCFaddr, myUDPaddr) <>
                   ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr)
               )+
@@ -300,7 +300,7 @@ proc ProtocolFunctions(Qyo:LOQ, Qxo:UOQ, CPs:List(CFPartner), myUt:UserTitleOpt,
                  ( IsUDPaddrIn(SrcOf(sp),CPs)->
                      ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr,
 		     myUDPaddr) <>
-                     ProtocolFunctions(Qyo, Qxo, Pair(SrcOf(sp), UtOf(PduOf(sp)))|>CPs, 
+                     ProtocolFunctions(Qyo, Qxo, Pair(SrcOf(sp), UtOf(PduOf(sp)))|>CPs,
                                    myUt, myCi, myCFaddr, myUDPaddr)
                  ) <>
                  ProtocolFunctions(Qyo, Qxo, CPs, myUt, myCi, myCFaddr, myUDPaddr)
@@ -308,9 +308,9 @@ proc ProtocolFunctions(Qyo:LOQ, Qxo:UOQ, CPs:List(CFPartner), myUt:UserTitleOpt,
 
            ( TypeOf(PduOf(sp))==D && myCi!=noCi)->
                ( (IsUDPaddrIn(SrcOf(sp),CPs))->
-                 ( sum p:CFPartner. %receive from a conference partner 
+                 ( sum p:CFPartner. %receive from a conference partner
                      (IsIn(p,CPs) && AddrOf(p)==SrcOf(sp))->
-                        ProtocolFunctions(Qyo, dataind(UtOf(p), DataFieldOf(PduOf(sp)))|>Qxo, 
+                        ProtocolFunctions(Qyo, dataind(UtOf(p), DataFieldOf(PduOf(sp)))|>Qxo,
                                  CPs, myUt, myCi, myCFaddr, myUDPaddr)
                  ) <>
                  ProtocolFunctions(Pair([SrcOf(sp)], PDU_J(UtOf(myUt),

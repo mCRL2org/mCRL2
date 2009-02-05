@@ -1,4 +1,4 @@
-% This file describes a small puzzle. 
+% This file describes a small puzzle.
 % Given a chess board filled with black and white knights as indicated
 % below by initialBoard. Can the knights change place, without
 % capturing opponent's pieces. This is modelled by the situation
@@ -6,7 +6,7 @@
 %  The process X below models two moves in a row, one for black and
 % one for white via the action jump. The action ready takes place
 % if the final situation has been reached.
-%  The most effective way to do a state space search is using 
+%  The most effective way to do a state space search is using
 %
 % mcrl22lps -n knights.mcrl2 | lpsuntime > temp.lps
 % lpssuminst temp.lps temp1.lps
@@ -15,12 +15,12 @@
 % lps2lts -Rjittyc -t -v -aready temp2.lps | less
 %
 % There are 35144889 states at 19 levels. The action ready
-% is found at the end. There are 36 moves necessary to 
+% is found at the end. There are 36 moves necessary to
 % exchange the positions of the black and white horses.
 
 
 %------------------------------------------------------------------
-%  differ1 and differ2 are used to check whether a move of a 
+%  differ1 and differ2 are used to check whether a move of a
 %  knight is valid
 %------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ sort Piece = struct black | white | empty;
 
 map getPiece:Pos#Pos#Board -> Piece;
     setPiece:Pos#Pos#Piece#Board->Board;
-var p:Pos; 
-    r1,r2,r3,r4,r5:Row; 
+var p:Pos;
+    r1,r2,r3,r4,r5:Row;
     pc:Piece;
 eqn getPiece(1,p,col(r1,r2,r3,r4,r5))=getPiece(p,r1);
     getPiece(2,p,col(r1,r2,r3,r4,r5))=getPiece(p,r2);
@@ -97,7 +97,7 @@ eqn initialBoard=col(row(black,black,black,black,black),
                    row(black,black,black,black,black));
 
 map isOccupied:Pos#Pos#Board->Bool;
-var p1,p2:Pos;  
+var p1,p2:Pos;
     f:Board;
 eqn isOccupied(p1,p2,f)= getPiece(p1,p2,f)!=empty;
 
@@ -107,7 +107,7 @@ var p1,p2,q1,q2:Pos;
 eqn isKnight'sMove(p1,p2,q1,q2)=
        (differ1(p1,q1) && differ2(p2,q2)) ||
        (differ2(p1,q1) && differ1(p2,q2));
- 
+
 %------------------------------------------------------------------
 
 act  jump, ready;
