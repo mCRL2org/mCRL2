@@ -285,13 +285,13 @@ namespace grape
     void draw_state( const coordinate &p_center, float p_radius_x, float p_radius_y, bool p_selected  );
 
     /**
-     * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.
+     * Function to see if a coordinate is inside a nonterminating transition.
      * @param p_ntt_coord The coordinate of the nonterminating transtition.
      * @param p_base_coordinate The coordinate where the arrow should start.
      * @param p_head_coordinate The coordinate where the arrow should end.
      * @param p_coord The to be checked coordinate.
      */
-    bool is_inside_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord );
+    bool is_inside_nonterminating_transition( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord );
 
     /**
      * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.

@@ -58,12 +58,11 @@ void visualnonterminating_transition::draw( void )
 
 bool visualnonterminating_transition::is_inside( libgrape::coordinate &p_coord )
 {
-  return is_inside_nonterminating_transition_same_state( m_object->get_coordinate(), m_arrow_base, m_arrow_head, p_coord );
+  return is_inside_nonterminating_transition( m_object->get_coordinate(), m_arrow_base, m_arrow_head, p_coord );
 }
 
 grape_direction visualnonterminating_transition::is_on_border( libgrape::coordinate &p_coord )
 {
-  // is_on_border for a transition has not been defined
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
 

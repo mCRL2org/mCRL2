@@ -640,11 +640,13 @@ void grape::grapeapp::draw_state( const coordinate &p_center, float p_radius_x, 
   glPopMatrix();
 }
 
-bool grape::grapeapp::is_inside_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord )
+bool grape::grapeapp::is_inside_nonterminating_transition( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord )
 {
   coordinate sum_base = { p_ntt_coord.m_x + p_base_coordinate.m_x, p_ntt_coord.m_y + p_base_coordinate.m_y };
   coordinate sum_head = { p_ntt_coord.m_x + p_head_coordinate.m_x, p_ntt_coord.m_y + p_head_coordinate.m_y };
-  return is_inside_line( p_ntt_coord, sum_base, p_coord ) || is_inside_line( p_ntt_coord, sum_head, p_coord );
+  return is_inside_rectangle( p_ntt_coord, 2 * g_cursor_margin, 2 * g_cursor_margin, p_coord, false ) ||
+         is_inside_rectangle( sum_base, 2 * g_cursor_margin, 2 * g_cursor_margin, p_coord, false ) ||
+         is_inside_rectangle( sum_head, 2 * g_cursor_margin, 2 * g_cursor_margin, p_coord, false );
 }
 
 void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, bool p_selected, const wxString &p_label_text )
