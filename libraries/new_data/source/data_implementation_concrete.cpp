@@ -827,20 +827,24 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   ATermList *p_substs, t_data_decls *p_data_decls, bool recursive)
 {
   assert(gsIsSortStruct(sort_struct));
+  assert(gsIsSortId(sort_id));
+  assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
+  gsVerboseMsg("Implementing structured sort %T with name %T\n", sort_struct, sort_id);
 
   // declare fresh sort identifier for sort_struct 
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
 
-  structured_sort element_sort(static_cast< sort_expression >(sort_struct));
+  // structured sort
+  structured_sort element_sort(static_cast<sort_expression>(sort_struct));
 
-  // add substitution for sort_set
+  // add substitution sort_struct -> sort_id
   ATermAppl subst = gsMakeSubst_Appl(sort_struct, sort_id);
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
-  function_symbol_list constructors = element_sort.constructor_functions(element_sort);
+  function_symbol_list constructors = element_sort.constructor_functions(sort_expression(sort_id));
   function_symbol_list functions;
-  function_symbol_list projection_functions = element_sort.projection_functions(element_sort);
-  function_symbol_list recogniser_functions = element_sort.recogniser_functions(element_sort);
+  function_symbol_list projection_functions = element_sort.projection_functions(sort_expression(sort_id));
+  function_symbol_list recogniser_functions = element_sort.recogniser_functions(sort_expression(sort_id));
 
   // implement argument sorts 
   for (function_symbol_list::const_iterator i = projection_functions.begin();
@@ -883,14 +887,14 @@ void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
   assert(gsIsSortId(sort_id));
   assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
 
-  //declare sort sort_id as representative of sort sort_list
-  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
-
   //implement the sort of the elements of sort_list
   //this needs to be done first in order to keep the substitutions sound!
   ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
-  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
+  // Data implementation needs to use the original definition, otherwise strange
+  // things happen after substitution
   sort_expression element_sort(sort_elt);
+
+  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
   //add substitution for sort_list
   ATermAppl subst = gsMakeSubst_Appl(sort_list, sort_id);
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
@@ -898,14 +902,16 @@ void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
   function_symbol_list functions = sort_list::list_generate_functions_code(element_sort);
   data_equation_list equations = sort_list::list_generate_equations_code(element_sort);
 
-  //perform substitutions
-//  constructors = gsSubstValues_List(*p_substs, constructors, true);
-//  functions = gsSubstValues_List(*p_substs, functions, true);
-//  equations = gsSubstValues_List(*p_substs, equations, true);
+  //declare sort sort_id as representative of sort sort_list
+  p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
 
-  p_data_decls->cons_ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true), p_data_decls->cons_ops);
-  p_data_decls->ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true), p_data_decls->ops);
-  p_data_decls->data_eqns = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<data_equation>(equations.begin(), equations.end()), true), p_data_decls->data_eqns);
+  //perform substitutions
+  ATermList new_constructors = gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true);
+  p_data_decls->cons_ops = ATconcat(new_constructors, p_data_decls->cons_ops);
+  ATermList new_mappings = gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true);
+  p_data_decls->ops = ATconcat(new_mappings, p_data_decls->ops);
+  ATermList new_equations = gsSubstValues_List(*p_substs, atermpp::term_list<data_equation>(equations.begin(), equations.end()), true);
+  p_data_decls->data_eqns = ATconcat(new_equations, p_data_decls->data_eqns);
 
   //add implementation of sort Nat, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {

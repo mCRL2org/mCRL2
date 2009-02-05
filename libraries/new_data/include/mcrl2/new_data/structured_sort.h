@@ -428,7 +428,7 @@ namespace mcrl2 {
                 result.push_back(data_equation(less(operand_left, operand_right), right_smaller));
                 result.push_back(data_equation(less_equal(operand_left, operand_right), right_smaller_equal));
               }
-              else { // at least one constructor take arguments
+              else { // at least one constructor takes arguments
                 typedef boost::iterator_range< structured_sort_constructor_argument_list::const_iterator > argument_range;
 
                 data_expression operand_left;
