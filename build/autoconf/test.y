@@ -7,4 +7,4 @@ void yyerror(const char *);
 %%
 test:
     ;
-%%
+%% 
