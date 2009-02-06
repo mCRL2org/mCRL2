@@ -168,7 +168,13 @@ std::string t13 =
 ;
 std::string x13 = "Y b";
 
-// volgens constelm kan vergelijking X verwijderd worden (waarschijnlijk omdat de set van asserties leeg is); dit is echter onjuist: de vergelijking van X is noodzakelijk; parameter b van Y kan wel verwijderd worden.
+std::string t14 =
+"pbes nu X(m:Nat) =           \n"
+"        forall n:Nat . X(n); \n"
+"                             \n"
+"init X(0);                   \n"
+;
+std::string x14 = "";
 
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
@@ -260,6 +266,7 @@ int test_main(int argc, char** argv)
   test_pbes(t11, x11, true);
   test_pbes(t12, x12, false);
   test_pbes(t13, x13, false);
+  test_pbes(t14, x14, false);
 
   return 0;
 }

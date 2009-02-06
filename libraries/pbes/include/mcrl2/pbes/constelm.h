@@ -327,18 +327,15 @@ namespace detail {
   /// Note: this implementation is very inefficient!
   void remove_elements(Container& container, Predicate pred)
   {
-    std::vector<typename Container::iterator> to_be_removed;
+    std::vector<typename Container::value_type> result;
     for (typename Container::iterator i = container.begin(); i != container.end(); ++i)
     {
-      if (pred(*i))
+      if (!pred(*i))
       {
-        to_be_removed.push_back(i);
+        result.push_back(*i);
       }
     }
-    for (typename std::vector<typename Container::iterator>::iterator j = to_be_removed.begin(); j != to_be_removed.end(); ++j)
-    {
-      container.erase(*j);
-    }
+    container = Container(result.begin(), result.end());
   }
 
   template <typename Variable>
@@ -356,6 +353,17 @@ namespace detail {
       return m_variables.find(e.variable()) != m_variables.end();
     }
   };
+
+  template <typename MapContainer>
+  void print_constraint_map(const MapContainer& constraints)
+  {
+    for (typename MapContainer::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
+    {
+      std::string lhs = mcrl2::core::pp(i->first);
+      std::string rhs = mcrl2::core::pp(i->second);
+      std::cout << "{" << lhs << " := " << rhs << "} ";
+    }
+  }
 
 } // namespace detail
 /// \endcond
@@ -517,7 +525,7 @@ namespace detail {
           for (typename constraint_map::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
           {
             std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = core::term_traits<data_term_type>::is_variable(i->second) ? "NaC" : mcrl2::core::pp(i->second);
+            std::string rhs = mcrl2::core::pp(i->second);
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -535,11 +543,19 @@ namespace detail {
 
           if (constraints.empty())
           {
-            changed = !e.empty();
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
-              constraints[*j] = datar(data::data_variable_map_replace(*i, e_constraints));
+              data_term_type e1 = datar(data::data_variable_map_replace(*i, e_constraints));
+              if (core::term_traits<data_term_type>::is_constant(e1))
+              {
+                constraints[*j] = e1;
+              }
+              else
+              {
+              	constraints[*j] = *j;
+              }
             }
+            changed = true;
           }
           else
           {
@@ -550,7 +566,7 @@ namespace detail {
               data_term_type& ci = k->second;
               if (ci == *j)
               {
-                      continue;
+                continue;
               }
               data_term_type ei = datar(data::data_variable_map_replace(*i, e_constraints));
               if (ci != ei)
