@@ -877,7 +877,13 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
 {
   data_equation_list equations = sort_list::list_generate_equations_code(sort_expression(sort_elt));
-  return atermpp::term_list<data_equation>(equations.begin(), equations.end());
+  // Workaround to keep data reconstruction happy
+  // Apply substitution sort_list::list(sort_elt) := sort_list
+  ATerm subst1 = (ATerm)gsMakeSubst_Appl(aterm_appl(sort_list::list(sort_expression(sort_elt))), sort_list);
+  ATerm subst2 = (ATerm)gsMakeSubst_Appl(aterm_appl(sort_expression(sort_elt)), sort_elt);
+  ATermList result = atermpp::term_list<data_equation>(equations.begin(), equations.end());
+  result = gsSubstValues_List(ATmakeList2(subst1, subst2), result, true);
+  return result;
 }
 
 void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
@@ -887,23 +893,21 @@ void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
   assert(gsIsSortId(sort_id));
   assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
 
-  //implement the sort of the elements of sort_list
-  //this needs to be done first in order to keep the substitutions sound!
   ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
-  // Data implementation needs to use the original definition, otherwise strange
-  // things happen after substitution
   sort_expression element_sort(sort_elt);
 
-  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
-  //add substitution for sort_list
-  ATermAppl subst = gsMakeSubst_Appl(sort_list, sort_id);
-  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
   function_symbol_list constructors = sort_list::list_generate_constructors_code(element_sort);
   function_symbol_list functions = sort_list::list_generate_functions_code(element_sort);
   data_equation_list equations = sort_list::list_generate_equations_code(element_sort);
 
   //declare sort sort_id as representative of sort sort_list
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
+
+  // Do not implement the element sort too soon, as this breaks substitutions
+  sort_elt = impl_exprs_appl(sort_elt, p_substs, p_data_decls);
+  //add substitution for sort_list
+  ATermAppl subst = gsMakeSubst_Appl(sort_list, sort_id);
+  *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
   //perform substitutions
   ATermList new_constructors = gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), true);

@@ -412,18 +412,14 @@ void test_data_reconstruct_list_struct()
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
   identifier_string d_name("d");
-  identifier_string D_name("D");
   identifier_string ListD_name("ListD");
-  sort_identifier D_id(D_name);
   aterm_appl d = gsMakeStructCons(d_name, aterm_list(), gsMakeNil());
   aterm_appl s1 = gsMakeSortStruct(make_list(d));
   aterm_appl list_s1 = gsMakeSortExprList(s1);
-  aterm_appl ListD = gsMakeSortRef(ListD_name, s1);
+  aterm_appl ListD = gsMakeSortRef(ListD_name, list_s1);
 
   BOOST_CHECK(find_term(rec_data(0), d_name));
-  BOOST_CHECK(find_term(rec_data(0), D_name));
   BOOST_CHECK(find_term(rec_data(0), ListD_name));
-  BOOST_CHECK(find_term(rec_data(0), D_id));
   BOOST_CHECK(find_term(rec_data(0), d));
   BOOST_CHECK(find_term(rec_data(0), s1));
   BOOST_CHECK(find_term(rec_data(0), list_s1));
