@@ -232,45 +232,6 @@ void test_data_reconstruct_struct_nest()
   BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
-void test_data_reconstruct_list_struct()
-{
-  std::clog << "test_data_reconstruct_list_struct" << std::endl;
-
-  std::string text =
-  "sort ListD = List(struct d);\n"
-  ;
-
-  std::clog << "IN: " << text << std::endl;
-
-  data_specification data = parse_data_specification(text);
-  aterm_appl rec_data = reconstruct_spec(data);
-
-  std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
-
-  identifier_string d_name("d");
-  identifier_string D_name("D");
-  identifier_string ListD_name("ListD");
-  sort_identifier D_id(D_name);
-  aterm_appl d = gsMakeStructCons(d_name, aterm_list(), gsMakeNil());
-  aterm_appl s1 = gsMakeSortStruct(make_list(d));
-  aterm_appl list_s1 = gsMakeSortExprList(s1);
-  aterm_appl ListD = gsMakeSortRef(ListD_name, s1);
-
-  BOOST_CHECK(find_term(rec_data(0), d_name));
-  BOOST_CHECK(find_term(rec_data(0), D_name));
-  BOOST_CHECK(find_term(rec_data(0), ListD_name));
-  BOOST_CHECK(find_term(rec_data(0), D_id));
-  BOOST_CHECK(find_term(rec_data(0), d));
-  BOOST_CHECK(find_term(rec_data(0), s1));
-  BOOST_CHECK(find_term(rec_data(0), list_s1));
-  BOOST_CHECK(find_term(rec_data(0), ListD));
-
-  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
-  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
-  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
-}
-
-
 void test_data_reconstruct_simple_constructor()
 {
   std::clog << "test_data_reconstruct_simple_constructor" << std::endl;
@@ -379,6 +340,98 @@ void test_data_reconstruct_bool_function_one_eq()
 
   BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
   BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+}
+
+void test_data_reconstruct_list()
+{
+  std::clog << "test_data_reconstruct_list" << std::endl;
+
+  std::string text =
+  "map f:List(Bool);\n"
+  ;
+
+  std::clog << "IN: " << text << std::endl;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
+
+  identifier_string f_name("f");
+  sort_expression b = sort_expr::bool_();
+  aterm_appl list_bool = gsMakeSortExprList(b);
+  aterm_appl f = gsMakeOpId(f_name, list_bool);
+
+  BOOST_CHECK(find_term(rec_data(2), f_name));
+  BOOST_CHECK(find_term(rec_data(2), list_bool));
+  BOOST_CHECK(find_term(rec_data(2), f));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+void test_data_reconstruct_list_alias()
+{
+  std::clog << "test_data_reconstruct_list_alias" << std::endl;
+
+  std::string text =
+  "sort S = List(Bool);\n"
+  ;
+
+  std::clog << "IN: " << text << std::endl;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
+
+  sort_expression b = sort_expr::bool_();
+  aterm_appl list_bool = gsMakeSortExprList(b);
+
+  BOOST_CHECK(find_term(rec_data(0), list_bool));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+void test_data_reconstruct_list_struct()
+{
+  std::clog << "test_data_reconstruct_list_struct" << std::endl;
+
+  std::string text =
+  "sort ListD = List(struct d);\n"
+  ;
+
+  std::clog << "IN: " << text << std::endl;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
+
+  identifier_string d_name("d");
+  identifier_string D_name("D");
+  identifier_string ListD_name("ListD");
+  sort_identifier D_id(D_name);
+  aterm_appl d = gsMakeStructCons(d_name, aterm_list(), gsMakeNil());
+  aterm_appl s1 = gsMakeSortStruct(make_list(d));
+  aterm_appl list_s1 = gsMakeSortExprList(s1);
+  aterm_appl ListD = gsMakeSortRef(ListD_name, s1);
+
+  BOOST_CHECK(find_term(rec_data(0), d_name));
+  BOOST_CHECK(find_term(rec_data(0), D_name));
+  BOOST_CHECK(find_term(rec_data(0), ListD_name));
+  BOOST_CHECK(find_term(rec_data(0), D_id));
+  BOOST_CHECK(find_term(rec_data(0), d));
+  BOOST_CHECK(find_term(rec_data(0), s1));
+  BOOST_CHECK(find_term(rec_data(0), list_s1));
+  BOOST_CHECK(find_term(rec_data(0), ListD));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(2))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
 void test_data_reconstruct_bag()
@@ -497,10 +550,12 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_struct();
   test_data_reconstruct_struct_complex();
   test_data_reconstruct_struct_nest();
-  test_data_reconstruct_list_struct();
   test_data_reconstruct_simple_constructor();
   test_data_reconstruct_bool_function();
   test_data_reconstruct_bool_function_one_eq();
+  test_data_reconstruct_list();
+  test_data_reconstruct_list_alias();
+  test_data_reconstruct_list_struct();
   test_data_reconstruct_bag();
   test_data_reconstruct_set();
   test_data_reconstruct_bag_alias();
