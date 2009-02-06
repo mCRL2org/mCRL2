@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jan Friso Groote and Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -109,6 +109,32 @@ Term realelm_data_expression_map_replace(Term t, const MapContainer& replacement
 // End of replace substitute
 
 
+static data_expression negate_inequality(const data_expression e)
+{
+  if (is_equal_to(e))
+  { return not_equal_to(lhs_(e),rhs_(e));
+  }
+  if (is_not_equal_to(e))
+  { return equal_to(lhs_(e),rhs_(e));
+  }
+  else if (is_less(e))
+  { return greater_equal(lhs_(e),rhs_(e));
+  }
+  else if (is_less_equal(e)) 
+  { return greater(lhs_(e),rhs_(e));
+  }
+  else if (is_greater(e))
+  { return less_equal(lhs_(e),rhs_(e));
+  }
+  else if (is_greater_equal(e))
+  { return less(lhs_(e),rhs_(e));
+  }
+  else 
+  { throw mcrl2::runtime_error("Expression " + pp(e) + " is expected to be an inequality over sort Real");
+  }
+}
+
+
 /// \brief Determine whether the variables in two data expressions are lexicographically ordered.
 /// \param e1 A data expression containing a single variable
 /// \param e2 A data expression also containing at most a single
@@ -164,7 +190,7 @@ bool less_or_equal(const data_expression& e1, const data_expression& e2)
 /// \pre l1 and l2 are sorted
 /// \ret The sorted list of data expressions consisting of all elements in l1
 ///      and l2
-static
+/* static
 data_expression_list merge(const data_expression_list& l1, const data_expression_list& l2)
 {
   data_expression_list r;
@@ -191,13 +217,13 @@ data_expression_list merge(const data_expression_list& l1, const data_expression
   }
   r = reverse(r);
   return r;
-}
+} */
 
 /// \brief Sort a data expression
 /// \param e A data expression of the form c1 * x1 + ... + cn * xn
 /// \ret The list of data expressions ci * xi, such that it is sorted
 ///      in lexicographic order of the names of xi
-static inline
+/* static inline
 data_expression_list sort(const data_expression& e)
 {
   data_expression_list r;
@@ -210,7 +236,7 @@ data_expression_list sort(const data_expression& e)
     r = push_front(r, e);
   }
   return r;
-}
+} */
 
 /// \brief Order the variables in the lhs_ of an inequality, using a lexicographic order.
 /// \param inequality An inequality
@@ -219,7 +245,7 @@ data_expression_list sort(const data_expression& e)
 //         in true, the data expression has been negated.
 /// \ret A version of the inequality in which the variables occur in
 ///      lexicographically sorted order.
-static inline
+/* static inline
 data_expression order_lhs_inequality(const data_expression left, const rewriter& r,bool &negated)
 {
   data_expression_list sorted = sort(left);
@@ -240,7 +266,7 @@ data_expression order_lhs_inequality(const data_expression left, const rewriter&
   { result=negate(result);
   }
   return r(result);
-}
+} */
 
 /// \brief Split constant and variable parts of a data expression
 /// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
@@ -417,35 +443,132 @@ data_assignment_list get_nonreal_assignments(const data_assignment_list& l)
   return r;
 }
 
-/// \brief Splits a conjunct in a conjunct ranging over inequalities of reals
-///        and a conjunct ranging over other expressions.
-/// \param e A data expression
-/// \pre e is a conjunct
-/// \ret Pair (r,x) such that r is a list of expressions over real numbers and
-///      x is a list of expressions not over real numbers.
-static
-std::pair<data_expression_list, data_expression_list> split_conjunct(data_expression e)
+// Functions below should have been defined in the data library.
+static data_expression condition_part(const data_expression e)
 {
-  data_expression_list real_conjuncts;
-  data_expression_list nonreal_conjuncts;
+  assert(is_data_application(e));
+  assert(gsIsDataExprIf(e));
+  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
+  assert(arguments.size() == 3); 
+  return *(arguments.begin());
+}
 
-  while(is_and(e))
+static data_expression then_part(const data_expression e)
+{
+  assert(is_data_application(e));
+  assert(gsIsDataExprIf(e));
+  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
+  assert(arguments.size() == 3); 
+  return *(++arguments.begin());
+}
+
+static data_expression else_part(const data_expression e)
+{
+  assert(is_data_application(e));
+  assert(gsIsDataExprIf(e));
+  data_expression_list arguments = static_cast<const data_application&>(e).arguments();
+  assert(arguments.size() == 3); // Allow application to be applied on unary functions!
+  return *(++(++arguments.begin()));
+}
+
+
+/// \brief Splits a condition in expressions ranging over reals and the others
+/// \details Conceptually, the condition is first transformed to conjunctive
+///          normalform. For each conjunct, there will be an entry in both
+///          resulting vectors, where the real conditions are in "real_conditions",
+///          and the others in non_real_conditions. If there are conjuncts with
+///          both real and non-real variables an exception is thrown. If negate
+///          is true the result will be negated.
+/// \param e A data expression of sort bool.
+/// \param real_condition Those parts of e with only variables over sort Real.
+/// \param non_real_condition Those parts of e with only variables not of sort Real.
+/// \param negate A boolean variable that indicates whether the result must be negated.
+/// \pre The parameter e must be of sort Bool.
+
+static void split_condition(
+                const data_expression e,
+                atermpp::vector < data_expression_list > &real_conditions,
+                atermpp::vector < data_expression_list > &non_real_conditions,
+                const bool negate=false)
+{ // std::cerr << "Split condition " << pp(e) << "\n";
+  real_conditions.clear();
+  non_real_conditions.clear();
+
+  if ((!negate && is_and(e))  || (negate && is_or(e)))
   {
-    std::pair<data_expression_list, data_expression_list> c = split_conjunct(lhs_(e));
-    real_conjuncts = real_conjuncts + c.first;
-    nonreal_conjuncts = nonreal_conjuncts + c.second;
-    e = rhs_(e);
+    atermpp::vector < data_expression_list > 
+                 real_conditions_aux1, non_real_conditions_aux1;
+    split_condition(lhs_(e),real_conditions_aux1,non_real_conditions_aux1,negate);
+    atermpp::vector < data_expression_list > 
+                 real_conditions_aux2, non_real_conditions_aux2;
+    split_condition(rhs_(e),real_conditions_aux2,non_real_conditions_aux2,negate);
+    for (atermpp::vector < data_expression_list >::const_iterator 
+                       i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
+                       i1r!=real_conditions_aux1.end(); ++i1r, ++i1n) 
+    { for (atermpp::vector < data_expression_list >::const_iterator 
+                         i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
+                         i2r!=real_conditions_aux2.end(); ++i2r, ++i2n) 
+      { real_conditions.push_back(*i1r + *i2r);
+        non_real_conditions.push_back(*i1n + *i2n);
+      }
+    }
   }
-
-  if(is_inequality(e) && (lhs_(e).sort() == sort_expr::real() || rhs_(e).sort() == sort_expr::real()))
+  else if ((!negate && is_or(e))  || (negate && is_and(e)))
   {
-    real_conjuncts = push_front(real_conjuncts, e);
+    split_condition(lhs_(e),real_conditions,non_real_conditions,negate);
+    atermpp::vector < data_expression_list > 
+                 real_conditions_aux, non_real_conditions_aux;
+    split_condition(rhs_(e),real_conditions_aux,non_real_conditions_aux,negate);
+    for (atermpp::vector < data_expression_list >::const_iterator 
+                       i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
+                       i_r!=real_conditions_aux.end(); ++i_r, ++i_n) 
+    { real_conditions.push_back(*i_r);
+      non_real_conditions.push_back(*i_n);
+    }
+  }
+  else if (gsIsDataExprIf(e))
+  { split_condition(or_(and_(condition_part(e),then_part(e)),
+                        and_(not_(condition_part(e)),else_part(e))),
+                        real_conditions,non_real_conditions,negate);
+  }
+  else if (is_not(e))
+  { split_condition(lhs_(e),real_conditions,non_real_conditions,!negate);
+  }
+  else if(is_inequality(e) && (lhs_(e).sort() == sort_expr::real() || rhs_(e).sort() == sort_expr::real()))
+  { std::set < data_variable > vars=find_all_data_variables(e);
+    for(std::set < data_variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+    { if (i->sort()!=sort_expr::real())
+      { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " + 
+                                         pp(*i) + " not of sort Real.");
+      }
+    }
+    if (negate)
+    { real_conditions.push_back(push_front(data_expression_list(),negate_inequality(e)));
+      non_real_conditions.push_back(data_expression_list());
+    }
+    else 
+    { real_conditions.push_back(push_front(data_expression_list(),e));
+      non_real_conditions.push_back(data_expression_list());
+    }
   }
   else
-  {
-    nonreal_conjuncts = push_front(nonreal_conjuncts, e);
+  { // e is assumed to be a non_real expression.
+    std::set < data_variable > vars=find_all_data_variables(e);
+    for(std::set < data_variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+    { if (i->sort()==sort_expr::real())
+      { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +                                          pp(*i) + " of sort Real.");
+      }
+    }
+    if (negate)
+    { non_real_conditions.push_back(push_front(data_expression_list(),not_(e)));
+      real_conditions.push_back(data_expression_list());
+    }
+    else 
+    { non_real_conditions.push_back(push_front(data_expression_list(),e));
+      real_conditions.push_back(data_expression_list());
+    }
   }
-  return std::make_pair(real_conjuncts, nonreal_conjuncts);
+  assert(non_real_conditions.size()==real_conditions.size());
 }
 
 /// \brief Normalize all inequalities in the summands of the specification
@@ -460,30 +583,75 @@ std::pair<data_expression_list, data_expression_list> split_conjunct(data_expres
 /// \param variable_generator A variable generator
 /// \ret A specification equivalent to s, but of which all inequalities have
 ///      been normalized.
-static
-specification normalize_specification(specification s, rewriter& r, identifier_generator& variable_generator)
+
+static void normalize_specification(
+                    const specification s, 
+                    const data_variable_list real_parameters,
+                    const rewriter& r, 
+                    identifier_generator& variable_generator,
+                    std::vector < summand_information > &summand_info)
 {
   //s = remove_real_constants_from_nextstate(s, variable_generator);
-  linear_process lps = s.process();
-  summand_list sl;
-  for(summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+  summand_list smds = s.process().summands();
+  // summand_list sl;
+  for(summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
-    std::pair<data_expression_list, data_expression_list> conjuncts = split_conjunct(i->condition());
+    atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
+    // std::cerr << "Condition in: " << pp(i->condition()) << "\n";
+    split_condition(i->condition(),real_conditions,non_real_conditions);
 
-    data_expression non_real = join_and(conjuncts.second.begin(), conjuncts.second.end());
-    data_expression_list real_inequalities = conjuncts.first;
-    // data_expression_list real_inequalities = normalize_inequalities(conjuncts.first, r);
-    data_expression real = join_and(real_inequalities.begin(), real_inequalities.end());
-    data_expression condition = and_(non_real, real);
+    for(atermpp::vector <data_expression_list>::const_iterator 
+                   j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
+                   j_r!=real_conditions.end(); ++j_r, ++j_n)
+    {
+      summand t(*i);
+      const data_expression c=r(join_and(j_n->begin(), j_n->end()));
+      if (!is_false(c))
+      { t=set_condition(t,c);
+      // std::cerr << "Non real condition " << pp(*j_n) << "\n";
+      // std::cerr << "Real condition " << pp(*j_r) << "\n";
 
-    summand t = set_condition(*i, condition);
-    sl = push_front(sl, set_condition(*i, condition));
+        // data_expression_list real_inequalities = conjuncts.first;
+        // data_expression_list real_inequalities = normalize_inequalities(conjuncts.first, r);
+        // data_expression real = join_and(real_inequalities.begin(), real_inequalities.end());
+        // data_expression condition = and_(non_real, real);
+    
+        // sl = push_front(sl, set_condition(*i, condition));
+        vector < linear_inequality > inequalities;
+        for(data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
+        { inequalities.push_back(linear_inequality(*k,r));
+        }
+        for(data_variable_list::const_iterator k=real_parameters.begin(); k!=real_parameters.end(); k++)
+        { data_expression e=(atermpp::aterm_appl)*k;
+          inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less_eq,r));
+        }
+        const data_variable_list real_sum_variables=get_real_variables(i->summation_variables());
+        for(data_variable_list::const_iterator k=real_sum_variables.begin(); k!=real_sum_variables.end(); k++)
+        { const data_expression e=(atermpp::aterm_appl)*k;
+          inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
+        }
+        // std::cerr << "Determine real inequalities " << pp_vector(inequalities) << "\n";
+        // Replacements is the nextstate vector in a map
+        atermpp::map<data_expression, data_expression> replacements;
+        for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+        {
+          if(j->lhs().sort() == sort_expr::real())
+          {
+            replacements[j->lhs()] = j->rhs();
+          }
+        }
+        const summand_information s(t,
+                                  inequalities,
+                                  replacements);
+        summand_info.push_back(s);
+      }
+    }
   }
-  sl = reverse(sl);
-  lps = set_summands(lps, sl);
+  // sl = reverse(sl);
+  // lps = set_summands(lps, sl);
 
-  s = set_lps(s, lps);
-  return s;
+  // s = set_lps(s, lps);
+  //return s;
 }
 
 /// \brief Determine the inequalities ranging over real numbers in a data expression.
@@ -678,9 +846,9 @@ summand generate_summand(const summand_information &summand_info,
                                          // Used to recall which may actions labels have been
                                          // introduced, in order to re-use them.
   const summand s=summand_info.get_summand();
-  std::pair<data_expression_list, data_expression_list> real_nonreal_condition = split_conjunct(s.condition());
-  data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
-  condition=and_(condition,xi_condition);
+  // std::pair<data_expression_list, data_expression_list> real_nonreal_condition = s.condition();
+  // data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
+  data_expression condition=and_(s.condition(),xi_condition);
 
   data_assignment_list nextstate = get_nonreal_assignments(s.assignments());
   nextstate = reverse(nextstate);
@@ -979,40 +1147,13 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
   rewriter r = rewriter(s.data(), (rewriter::strategy)strategy);
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(s);
-  s = normalize_specification(s, r, variable_generator);
-
-  // Create for each summand a vector with meta information about this summand, including
-  // the summand itself.
-  linear_process lps = s.process();
+  linear_process lps=s.process();
+  const data_variable_list real_parameters = get_real_variables(lps.process_parameters());
+  const data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
-
-  for(summand_list::const_iterator i = lps.summands().begin();
-                      i != lps.summands().end();
-                      ++i)
-  { vector < linear_inequality > inequalities;
-    determine_real_inequalities(i->condition(), inequalities,r);
-    // std::cerr << "Determine real inequalities " << pp_vector(inequalities) << "\n";
-    // Replacements is the nextstate vector in a map
-    atermpp::map<data_expression, data_expression> replacements;
-    for(data_assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
-    {
-      if(j->lhs().sort() == sort_expr::real())
-      {
-        replacements[j->lhs()] = j->rhs();
-      }
-    }
-    const summand_information s(*i,
-                                inequalities,
-                                replacements);
-    summand_info.push_back(s);
-  }
+  normalize_specification(s, real_parameters, r, variable_generator,summand_info);
 
   context_type context; // Contains introduced variables
-  data_variable_list real_parameters = get_real_variables(lps.process_parameters());
-  data_variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
-
-
-  // Compute some context information for each summand.
 
   atermpp::vector < data_expression > new_inequalities; // New inequalities are stored in two consecutive positions;
                                                         // I.e., for t<u, t is at position i, and u at position i+1.
@@ -1049,15 +1190,18 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // process parameters of sort Real.
 
         vector < linear_inequality > condition1;
-        data_variable_list sumvars= i->get_summand().summation_variables();
-
-        fourier_motzkin(condition,
+        data_variable_list sumvars= i->get_summand().summation_variables(); 
+        
+        // std::cerr << "Before  FM: " << pp_vector(condition) << "\n";
+        fourier_motzkin(condition, 
                         sumvars.begin(),
                         sumvars.end(),
                         condition1,
                         r);
         condition.clear();
         remove_redundant_inequalities(condition1,condition,r);
+
+        // std::cerr << "After removing redundant equalities: " << pp_vector(condition) << "\n";
 
         // First check which of these inequalities are equivalent to concrete values of xi variables.
         // Add these values for xi variables as a new condition. Remove these variables from the

@@ -76,7 +76,7 @@ class linear_inequality
       { parse_and_store_expression(lhs_(e),r,negate,factor);
         parse_and_store_expression(rhs_(e),r,!negate,factor);
       }
-      if (is_negate(e))
+      else if (is_negate(e))
       { parse_and_store_expression(lhs_(e),r,!negate,factor);
       }
       else if (is_plus(e))
@@ -84,7 +84,7 @@ class linear_inequality
         parse_and_store_expression(rhs_(e),r,negate,factor);
       }
       else if (is_multiplies(e))
-      { data_expression lhs=lhs_(e),rhs=rhs_(e);
+      { data_expression lhs=r(lhs_(e)), rhs=r(rhs_(e));
         if (is_number(lhs))
         { parse_and_store_expression(rhs,r,negate,multiplies(lhs,factor));
         }
@@ -418,6 +418,10 @@ inline data_expression multiply(const data_expression e1,const data_expression e
 
 inline bool is_number(const data_expression e)
 { // TODO: Check that the number is closed.
+  std::set < data_variable > s=find_all_data_variables(e);
+  if (!s.empty())  // The expression e contains variables.
+  { return false;
+  }
   return core::detail::gsIsDataExprC0(e) ||
          core::detail::gsIsDataExprCDub(e) ||
          core::detail::gsIsDataExprC1(e) ||
@@ -531,6 +535,8 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
                                 variables_end,
                                 r);
 
+  // std::cerr << "Fourier-Motzkin after Gauss elimination elimination on " + pp_vector(equalities) + "\n Inequalities " +
+    //          pp_vector(inequalities) + "\n";
   // At this stage, the variables that should be eliminated only occur in
   // inequalities. Group the inequalities into positive, 0, and negative
   // occurrences of each variable, and create a new system.
