@@ -121,8 +121,8 @@ class info_tool
       if (parser.continue_execution()) {
         if (parser.options.count("equivalence")) {
           determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
-          if (allowed_eqs().count(determinism_equivalence) == 0 ||
-              parser.option_argument("equivalence") == "none")
+          if (allowed_eqs().count(determinism_equivalence) == 0 &&
+              parser.option_argument("equivalence") != "none")
           {
             parser.error("option -e/--equivalence has illegal argument '" +
                 parser.option_argument("equivalence") + "'");
