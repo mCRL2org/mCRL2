@@ -27,122 +27,160 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
 
+/// \brief Name for the sort Comp.
+/// Comp is used as sort indicating relative order in lpsrealelm.
+inline identifier_string comp_name()
+{
+  return identifier_string("Comp");
+}
+
+/// \brief Name for the operator smaller on sort Comp.
+inline
+identifier_string smaller_name()
+{
+  return identifier_string("smaller");
+}
+
+/// \brief Name for the operator equal on sort Comp.
+inline
+identifier_string equal_name()
+{
+  return identifier_string("equation");
+}
+
+/// \brief Name for the operator larger on sort Comp.
+inline
+identifier_string larger_name()
+{
+  return identifier_string("larger");
+}
+
+/// \brief Name for the operator is_smaller on sort Comp.
+inline
+identifier_string is_smaller_name()
+{
+  return identifier_string("is_smaller");
+}
+
+/// \brief Name of the operator is_equal on sort Comp.
+inline
+identifier_string is_equal_name()
+{
+  return identifier_string("is_equal");
+}
+
+/// \brief Name of the operator is_larger on sort Comp.
+inline
+identifier_string is_larger_name()
+{
+  return identifier_string("is_larger");
+}
+
+/// \brief Sort expression for sort Comp.
 inline
 sort_expression comp()
 {
-  return sort_identifier("Comp");
+  return sort_identifier(comp_name());
 }
 
+/// \brief Constructor smaller for sort Comp.
 inline
 data_operation smaller()
 {
-  return data_operation(identifier_string("smaller"), comp());
+  return data_operation(smaller_name(), comp());
 }
 
+/// \brief Constructor equal for sort Comp.
 inline
 data_operation equal()
 {
-  return data_operation(identifier_string("equal"), comp());
+  return data_operation(equal_name(), comp());
 }
 
+/// \brief Constructor larger for sort Comp.
 inline
 data_operation larger()
 {
-  return data_operation(identifier_string("larger"), comp());
+  return data_operation(larger_name(), comp());
 }
 
+/// \brief Sort expression Comp -> Bool
 inline
 sort_expression comp2bool()
 {
   return sort_arrow(make_list(comp()), sort_expr::bool_());
 }
 
+/// \brief Operation is_smaller for sort Comp.
 inline
 data_operation is_smaller()
 {
-  return data_operation(identifier_string("is_smaller"), comp2bool());
+  return data_operation(is_smaller_name(), comp2bool());
 }
 
+/// \brief Operation is_equal for sort Comp.
+inline
+data_operation is_equal()
+{
+  return data_operation(is_equal_name(), comp2bool());
+}
+
+/// \brief Operation is_larger for sort Comp.
+inline
+data_operation is_larger()
+{
+  return data_operation(is_larger_name(), comp2bool());
+}
+
+/// \brief Application of is_smaller on a data expression e.
 inline
 data_application is_smaller(const data_expression& e)
 {
   return data_application(is_smaller(), make_list(e));
 }
 
-inline
-data_operation is_equal()
-{
-  return data_operation(identifier_string("is_equal"), comp2bool());
-}
-
+/// \brief Application of is_equal on a data expression e.
 inline
 data_application is_equal(const data_expression& e)
 {
   return data_application(is_equal(), make_list(e));
 }
 
-inline
-data_operation is_larger()
-{
-  return data_operation(identifier_string("is_larger"), comp2bool());
-}
-
+/// \brief Application of is_larger on a data_expression e.
 inline
 data_application is_larger(const data_expression& e)
 {
   return data_application(is_larger(), make_list(e));
 }
 
+/// \brief Add declarations for sort Comp to data specification s
+/// \param s A data specification.
+/// \ret s to which declarations for sort Comp have been added.
 inline
 data_specification add_comp_sort(const data_specification& s)
 {
-  sort_expression_list sorts = s.sorts();
-  sorts = push_front(sorts, comp());
+  // Constructors
+  aterm_appl comp_smaller = gsMakeStructCons(smaller_name(), aterm_list(), is_smaller_name());
+  aterm_appl comp_equal   = gsMakeStructCons(equal_name(), aterm_list(), is_equal_name());
+  aterm_appl comp_larger  = gsMakeStructCons(larger_name(), aterm_list(), is_larger_name());
+  aterm_list comp_constructors = make_list(comp_smaller, comp_equal, comp_larger);
 
-  data_operation_list constructors = s.constructors();
-  data_operation_list new_constructors;
-  new_constructors = push_front(new_constructors, smaller());
-  new_constructors = push_front(new_constructors, equal());
-  new_constructors = push_front(new_constructors, larger());
-  constructors = new_constructors + constructors;
+  // Build up structured sort
+  aterm_appl comp_struct = gsMakeSortStruct(comp_constructors);
 
-  data_operation_list mappings = s.mappings();
-  mappings = push_front(mappings, data_operation(gsMakeOpIdEq(comp())));
-  mappings = push_front(mappings, data_operation(gsMakeOpIdNeq(comp())));
-  mappings = push_front(mappings, data_operation(gsMakeOpIdIf(comp())));
-  data_operation_list new_mappings;
-  new_mappings = push_front(new_mappings, is_smaller());
-  new_mappings = push_front(new_mappings, is_equal());
-  new_mappings = push_front(new_mappings, is_larger());
-  mappings = new_mappings + mappings;
+  // Empty data declarations and substitutions
+  t_data_decls data_decls;
+  initialize_data_decls(&data_decls);
+  ATermList substitutions = ATmakeList0();
 
-  data_equation_list equations = s.equations();
-  data_variable x("x", comp());
-  data_variable y("y", comp());
-  data_variable b("b", sort_expr::bool_());
-  data_expression nil(gsMakeNil());
-  equations = push_front(equations, data_equation(make_list(x), nil, equal_to(x,x), true_()));
-  equations = push_front(equations, data_equation(make_list(x,y), nil, not_equal_to(x,y), not_(equal_to(x,y))));
-  equations = push_front(equations, data_equation(make_list(x,y), nil, if_(true_(),x,y),x));
-  equations = push_front(equations, data_equation(make_list(x,y), nil, if_(false_(),x,y),y));
-  equations = push_front(equations, data_equation(make_list(b,x), nil, if_(b,x,x),x));
-  for(data_operation_list::const_iterator i = new_constructors.begin(); i != new_constructors.end(); ++i)
-  {
-    for(data_operation_list::const_iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
-    {
-      data_expression right = (*i == *j)?true_():false_();
-      equations = push_front(equations, data_equation(data_variable_list(), nil, equal_to(aterm_appl(*i),aterm_appl(*j)), right));
-    }
-  }
+  // Implement Comp as structured sort, reusing data implementation
+  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls);
 
-  for(data_operation_list::const_iterator i = new_mappings.begin(); i != new_mappings.end(); ++i)
-  {
-    for(data_operation_list::const_iterator j = new_constructors.begin(); j != new_constructors.end(); ++j)
-    {
-      data_expression right = (std::string(i->name()).find(std::string(j->name()))!=std::string::npos)?true_():false_();
-      equations = push_front(equations, data_equation(data_variable_list(), nil, data_application(aterm_appl(*i),make_list(aterm_appl(*j))), right));
-    }
-  }
+  // Add declarations in data_decls to the specification
+  sort_expression_list sorts = ATconcat(s.sorts(), data_decls.sorts);
+  data_operation_list constructors = ATconcat(s.constructors(), data_decls.cons_ops);
+  data_operation_list mappings = ATconcat(s.mappings(), data_decls.ops);
+  data_equation_list equations = ATconcat(s.equations(), data_decls.data_eqns);
 
   return data_specification(sorts, constructors, mappings, equations);
 }
