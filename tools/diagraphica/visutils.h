@@ -82,7 +82,7 @@ class VisUtils
 public:
     // -- clear canvas ----------------------------------------------
     static void clear( const ColorRGB &col );
-    
+
     // -- anti-aliasing & blending ----------------------------------
     static void enableLineAntiAlias();
     static void disableLineAntiAlias();
@@ -94,7 +94,7 @@ public:
 
     // -- color -----------------------------------------------------
     static void setColor( const ColorRGB &colRGB );
-    
+
     static void setColorBlack();
     static void setColorBlue();
     static void setColorCoolBlue();
@@ -112,7 +112,7 @@ public:
     static void setColorWhite();
     static void setColorYellow();
     static void setColorBlueYellow( const double &frac );
-    
+
     static void mapColorBlack( ColorRGB &col );
     static void mapColorBlue( ColorRGB &col );
     static void mapColorCoolBlue( ColorRGB &col );
@@ -128,8 +128,8 @@ public:
     static void mapColorRed( ColorRGB &col );
     static void mapColorCoolRed( ColorRGB &col );
     static void mapColorWhite( ColorRGB &col );
-    
-    static void mapColorBlueYellow( 
+
+    static void mapColorBlueYellow(
         const double &frac,
         ColorRGB &colRGB );
     static void mapColorGrayScale(
@@ -138,7 +138,7 @@ public:
     static void mapColorSpectral(
         const double &frac,
         ColorRGB &colRGB );
-    
+
     static void mapColorQualPast1(
         const int &iter,
         const int &numr,
@@ -194,17 +194,17 @@ public:
     static void mapColorSeqRed(
         const double &alpha,
         ColorRGB &colRGB );
-    
-    static void hlsToRgb( 
+
+    static void hlsToRgb(
         ColorHLS &colHLS,
         ColorRGB &colRGB );
     static double hlsValue(
-        double var1, 
-        double var2, 
+        double var1,
+        double var2,
         double hue );
 
     // -- drawing functions -----------------------------------------
-    static void drawLine( 
+    static void drawLine(
         const double &xFr, const double &xTo,
         const double &yFr, const double &yTo );
     static void drawLineDashed(
@@ -249,7 +249,7 @@ public:
         const double &wthBeg,   const double &wthEnd,
         const ColorRGB &colBeg, const ColorRGB &colEnd,
         const double &radius,   const int &slices );
-    
+
     static void drawTriangle(
         const double &x1, const double &y1,
         const double &x2, const double &y2,
@@ -289,7 +289,7 @@ public:
         const double &yTop,        const double &yBot,
         const ColorRGB &colTopLft, ColorRGB &colTopRgt,
         const ColorRGB &colBotLft, ColorRGB &colBotRgt );
-    
+
     static void drawEllipse(
         const double &xCtr, const double &yCtr,
         const double &xDOF, const double &yDOF,
@@ -311,7 +311,7 @@ public:
         const double   &aglBegDg, const double &aglEndDg,
         const double   &slices,   const ColorRGB &cIn,
         const ColorRGB &cOut );
-    
+
     static void drawArrow(
         const double &xFr,     const double &xTo,
         const double &yFr,     const double &yTo,
@@ -324,7 +324,7 @@ public:
         const double &xFr,   const double   &xTo,
         const double &yFr,   const double   &yTo,
         const double &wBase, const double   &wHead,
-        const double &lHead, const ColorRGB &cFr, 
+        const double &lHead, const ColorRGB &cFr,
         const ColorRGB &cTo );
     static void fillArrow(
         const double &xFr,   const double &xTo,
@@ -335,9 +335,9 @@ public:
         const double &xFr,   const double &xTo,
         const double &yFr,   const double &yTo,
         const double &wBase, const double &wHead,
-        const double &lHead, const ColorRGB &cFr, 
+        const double &lHead, const ColorRGB &cFr,
         const ColorRGB &cTo );
-    
+
     static void drawDArrow(
         const double &xFr,   const double &xTo,
         const double &yFr,   const double &yTo,
@@ -367,7 +367,7 @@ public:
         const double &aglBegDg, const double &aglEndDg,
         const double &radius,   const double &slices,
         const double &wHead,    const double &lHead );
-    
+
     static void drawFwrdIcon(
         const double &xLft, const double &xRgt,
         const double &yTop, const double &yBot );
@@ -462,7 +462,7 @@ public:
         GLuint texCharId[CHARSETSIZE],
         GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH] );
     static int getCharIdx( const char &c );
-    
+
     static void drawLabel(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
@@ -487,7 +487,7 @@ public:
         const double &yCoord,
         const double &scaling,
         const std::string &label );
-    
+
     static void drawLabelVert(
         GLuint texCharId[CHARSETSIZE],
         const double &xCoord,
@@ -523,7 +523,7 @@ public:
         const std::string &label );
 
     // -- cushions --------------------------------------------------
-    
+
     static void genCushTextures(
         GLuint &texCushId,
         float texCush[CUSHSIZE] );
@@ -533,7 +533,7 @@ public:
         const float &h,
         const float &alpha,
         const float &l_ratio );
-    
+
     static void drawCushDiag(
         const GLuint &texCushId,
         const double &xLft,

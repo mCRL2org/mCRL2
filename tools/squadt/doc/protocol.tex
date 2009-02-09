@@ -78,7 +78,7 @@
   simplifying the use of individual tools as well as combinations of tools and
   to automate frequently occurring tasks that involve the use of multiple
   tools.
-  
+
   The \squadt desktop application is a graphical user interface layer around a
   new tool integration framework, within which a central part is played by the
   communication protocol described in this text.  The name \squadt, stands for
@@ -91,17 +91,17 @@
   design of the \squadt graphical user interface as well as much of its
   functionality have, so far been targeted at tools with this specific
   behaviour.
-  
+
   The idea of using a graphical user interface to simplify the use of a toolset
   is is not new. The \squadt application is very much influenced by the
   Eucalyptus application (see \cite{CADP}) in the CADP toolset. Eucalyptus was
   developed (around 1996) in the context of CADP for a very similar purpose as
   \squadt is for the mCRL2 toolset. However, this does not mean that all the
   underlying ideas of \squadt are the same as those of Eucalyptus.
-  
+
   %  Ever since the first version, \squadt communicates with tools using the
   %  communication protocol described in this document.
-  
+
   Contrary to Eucalyptus, in \squadt every action is performed in the context
   of a project. This approach is adapted from integrated development
   environments (IDE), see \cite{Eclipse,NetBeans} for two popular examples.
@@ -166,7 +166,7 @@
 %  output files, and provided that the set of input files is consistent. By
 %  convention user added files are always called consistent. Derived files that
 %  are not consistent are called inconsistent.
-  
+
   Monitoring consistency can help the user to find problems that result from
   the changes made to files in the project. This is not a novel idea. In much
   the same way IDEs monitor changes to files in a project in order to
@@ -188,7 +188,7 @@
 %  input and output.  When tools behave accordingly the set of dependencies
 %  among files in a project is complete and the dependencies together form a
 %  directed acyclic graph.
- 
+
   Integrating tools works better `when tools are aware' of the integration
   context. For example, tools and tool integration framework must cooperate in
   order to maximise the effectiveness of any inconsistency detection mechanism.
@@ -229,7 +229,7 @@
 %%%  not easily possible to read additional input or produce additional output.
 %%%  Several of the mCRL2 tools create new output files based on the input.
 %%%  This is not something that is easily described in WSDL.
-%%%  
+%%%
 %%%  For tools without a graphical user interface
 %%%  it would be possible to create a web service layer around the tool. For tools
 %%%  with a graphical user interface this would only work. Tools with graphical user Our
@@ -259,13 +259,13 @@
    is a meaningful way in which the tools can be used together. The purpose is
    then to obtain a result that cannot be obtained by any of the individual
    tools in isolation.
-   
+
    The tool integration problem can be characterised by the manner in which a
    given set of software tools can be used together in order to achieve a given
    goal. Notice that, when the goal is not compatible with the functionality
    (or any combination thereof) provided by the available tools, then the
    problem does not have a solution.
-   
+
    The \squadt tool integration framework assists the user in solving tool
    integration problems. To this end the framework has functionality for
    execution of individual tools, monitors consistency of files produced as
@@ -274,10 +274,10 @@
    to the communication protocol for interactively controlling software tools,
    which functions as interface between tool and tool integration applications
    such as \squadt.
-   
+
 % The consistency monitoring functionality has profoundly influenced protocol
 % design at several points.
- 
+
 %   The remainder of this section introduces a number of other important
 %   concepts around which a communication protocol will be built later on.
 
@@ -292,7 +292,7 @@
    practise a data source/sink is often a file in the local filesystem, but it
    could also be a stream or data associated with user interaction through
    connected human interface devices. The latter are are treated specially.
-   
+
    Any tool is always used with a particular purpose in mind. Let's assume that
    the use serves the purpose (i.e.\ the tool is right for the job). A tool may
    serve different purposes and for each unique purpose the tool is said to
@@ -329,7 +329,7 @@
 
 %Whether the use actually satisfies the purpose depends on the
 %   functionality the tool provides and how the tool is used.
-   
+
    The process of bringing a tool in the state where it can perform a specified
    task is called \textit{task configuration}. After task configuration is
    complete the state of a tool can be made explicit by capturing it as a task
@@ -355,14 +355,14 @@
    \end{figure}
 
    % creation and manipulation (tool and system)
- 
+
    A tool creates its own task specification and communicates it afterwards
    with the integration framework. The framework can read and modify the part
    that specifies the task input and output, e.g.\ it can rename input files.
    The remainder of the task specification is tool-specific, the framework can
    only store this information but not interpret. The purpose of communicating
    the configuration with the framework is to have a means to preserve it.
-   
+
    Task execution is the process of using a tool to fulfil a configured task.
    To configure a task the tool must create a task specification in cooperation
    with the user and communicate it with the integration framework. To actually
@@ -432,7 +432,7 @@
 %   framework are running tools and directing communication between tools
 %   whether running or not. The integration level functionality that \squadt
 %   provides using the framework are:
-%   
+%
 %    \begin{itemize}
 %     \item help guide users to find tools that offer the desired functionality
 %     \item automate frequently (re)occurring tasks that involves running tools
@@ -458,7 +458,7 @@
    \vspace{-0.3cm}
    \caption{Communication parties}
   \end{figure}
-  
+
   The protocol only concerns framework and tool, and from here on those parties
   are referred to as \textit{controller} and \textit{tool} respectively.  The
   role of a tool is that of a configurable service, that of a controller is to
@@ -511,7 +511,7 @@
    %The combination of message type, direction and whether it contains data,
    %identify the purpose of a message; so message names are only of
    %presentational use.
-   
+
    Message types are introduced on demand; they are names that serve to
    identify message purpose. The type determines the way in which a
    communication partner should interpret the data. The way in which data
@@ -542,7 +542,7 @@
 %   : \mathbb{N}) \] For sets and lists consider $Set(\mathbb{N})$ and
 %   $List(\mathbb{B})$ which represents a set of natural numbers and a list of
 %   Booleans respectively.
-   
+
    The following two tables specify messages named `example request' and
    `example response' respectively. The request is sent by the controller and
    the response by a tool. The idea is that the tool computes distances for a
@@ -600,7 +600,7 @@
    this specific task.
 
   \subsection{Communication behaviour}
-   
+
    State diagrams are used to specify the allowed communication behaviour. An
    action label on a transition is the name of the message being sent. Special
    cases are connection initiation and severing transitions.  An incoming arrow
@@ -635,7 +635,7 @@
    controller must identify the its communication partner as a tool that was
    started previously. Instance identification is the means by which a tool
    (instance) must somehow identify itself to the controller.
-   
+
 %   The integration framework that plays the part of controller starts tools on
 %   demand, e.g.\ to allow a user to configure a task, and waits for each tool to
 %   start communicating. The framework may be waiting for multiple tools to
@@ -705,7 +705,7 @@
    protocol versions. The exchange process follows the basic request-response
    pattern and is symmetric for both communication parties. A request for
    capabilities message looks as follows.
-   
+
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -761,7 +761,7 @@
    \textit{category}, and a non-empty list of names for inputs associated with
    a type (storage format).  The category is a descriptive name for the type of
    functionality that a tool offers for that specific input configuration.
-   
+
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -784,7 +784,7 @@
 
    \noindent The exchange of capabilities follows a request-response sequence
    as illustrated by the following figure.
-   
+
    \begin{figure}[H]
     \vspace{-0.4cm}
     \begin{center}
@@ -800,7 +800,7 @@
    is based on a single input combination. The input combination expresses a
    set of basic input requirements for configuration and abstractly
    characterises what functionality of the tool will be used.
-   
+
 %   It is important to realise that the content of capabilities response
 %   messages described here represent only a bare minimum. Protocol extension
 %   requires extension to contents and therefore the structure of these
@@ -829,7 +829,7 @@
 %   running and every configuration message in $sc$ can be paired to a unique
 %   configuration message in the receiving context then \emph{no} task
 %   configuration is in progress.
-   
+
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -924,7 +924,7 @@
    the language for task specification. A single option is a parametrised
    entity that represents the smallest part of optional configurable behaviour.
    The list of options identifies a combination of functions that make up the
-   task. 
+   task.
 
 %   It is assumed that the task-configuration that is returned in a response has
 %   a strong resemblance to the task-configuration sent in the request. At the
@@ -941,7 +941,7 @@
 
    The following figure depicts the basic (isolated) communication behaviour of
    the task configuration process.
-   
+
    \begin{figure}[H]
     \begin{center}
      \includegraphics{configuration_execution.eps}
@@ -1005,7 +1005,7 @@
    of task execution. In case of failure the user should probably be notified
    of the details of the failure using the display or the reporting facility
    both of which will be discussed shortly.
-   
+
 %%   A side remark on task
 %%   execution: the controller has the responsibility to ensure that the inputs
 %%   in a configuration exist prior to starting a task that depends on them. Also
@@ -1022,7 +1022,7 @@
    notification of some event. The facility is intended as secondary source of
    information (next to the display) that a user may consult to get more
    feedback on configuration or task execution. A report message looks as follows:
-   
+
    \begin{figure}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -1097,8 +1097,8 @@
     \end{center}
     \vspace{-0.5cm}
     \caption{termination behaviour}
-   \end{figure} 
-   
+   \end{figure}
+
    \noindent When a tool fails to respond to a termination request, the
    integration framework may force a tool to terminate by other means.
 
@@ -1114,7 +1114,7 @@
    of constraints of how to position them relative to each other on the space
    made available by the display. A message that looks as follows is used to
    communicate layout specifications.
-   
+
    \begin{table}[H]
     \begin{center}
      \begin{tabular}{|ll|}
@@ -1199,7 +1199,7 @@
    widget on the display and the type of this widget is not the same as that of
    $s$ the state update is ignored.  Otherwise $s$ becomes the new state of the
    widget on the display that is identified by $id$.
-   
+
    \pagebreak
 
    As noted before, changes to widgets on the display as a result of user
@@ -1282,8 +1282,8 @@
    non-empty when a layout change command with a valid non-empty layout
    specification is communicated.  A display interaction notification is
    ignored when the tool cannot identify the widget that was targeted or when
-   the state is not a valid state description for the targeted widget. 
-   
+   the state is not a valid state description for the targeted widget.
+
    \subsubsection*{Widgets and Layouts} \label{subsection:widgets_and_layout}
 
     The display facility shows an arrangement of widgets with which the user
@@ -1303,7 +1303,7 @@
     The top layout manager partitions the available space of the display to its
     child elements. The elements of a layout manager consist of either widgets
     or layout managers that themselves may contain a number of elements.
-    
+
     The following figure shows an example of how widgets can be laid out
     using nested layout managers.
 
@@ -1321,7 +1321,7 @@
     manager that arranges its child elements on the screen either horizontally,
     or vertically and expands elements (to fill space) in the direction
     perpendicular to the chosen direction.
-   
+
     Besides the layout managers that distribute available space among widgets
     there are also layout properties for further control over how elements are
     positioned and whether they are visible/hidden and usable
@@ -1335,7 +1335,7 @@
     properties: alignment, margins (in pixels) one of (top, right, bottom,
     left), vertical alignment (top, middle, bottom), horizontal-alignment
     (left, center, right).
-    
+
   \subsection{Protocol Extension}
 
    Protocol extension is supported in the form of adding new message types and
@@ -1348,7 +1348,7 @@
    mode for compatibility.  Extension to the information exchanged with the
    capabilities facility can be used to provide means and check for even finer
    degrees of compatibility.
-   
+
 
  \section{Implementation details} \label{s:protocol_implementation}
 
@@ -1356,7 +1356,7 @@
    protocol for controlling tools in our integration framework. This section
    focuses on the implementation details and addresses important design
    decisions.
-   
+
    Our communication protocol represents an interface between a our rather
    abstract notion of a tool and a tool integration framework. An important
    design goal was to make the use of this interface as simple as possible
@@ -1384,7 +1384,7 @@
    communication protocol covers the $6^{th}$ (presentation) layer. The
    integration framework that is used as part of the \squadt application covers
    the $7^{th}$ (application) layer.
-   
+
   \subsection{Transport} \label{ss:transport}
 
    For transport of data layers 1 through 5 of the OSI model the Internet (or
@@ -1423,7 +1423,7 @@
    representation of the messages presented in section
    \ref{s:high_level_specification} and their interpretation in the domain of the
    application.
-   
+
 %   XMPP has the notion of a message that can be sent from client to client, on
 %   top of it our protocol can be implemented.   Unfortunately no single
 %   client/server side implementations exist at the time that are usable on all
@@ -1452,7 +1452,7 @@
     \textit{termination}, \textit{task},
     \textit{report}. As an example consider the following message with type
     `termination'.
- 
+
     \begin{verbatim}
      <message type="termination"><![CDATA[message content]]></message>\end{verbatim}
 
@@ -1462,7 +1462,7 @@
     documents. To deal with data that contains fragments that match the
     end-marker \verb']]>', any instance of \verb']]>' in the message content
     \textit{must} be replaced by \verb']]]><![CDATA[]>'.
-    
+
     \noindent Below the message structure is specified for all the message
     types. Usually the structure of an XML document is specified using XML
     Document Type Definition (\cite{Sperberg-McQueen:06:EML}) or the XML Schema
@@ -1477,7 +1477,7 @@
 %   identification scheme. Of course security is something that should be part
 %   of the design of the protocol. Security is not a main concern, so it is
 %   postponed until it can be added as an extension somewhere in the future.
-   
+
 %   The only authentication that is of importance to the functioning of the
 %   system that uses the protocol is identifying the peer as one of the tools
 %   that was started. For this purpose the instance identification message,
@@ -1535,7 +1535,7 @@
    element must contain a non-empty set of input-configurations. An
    input-configuration is represented by means of the
    \textit{input-configuration} element.
-   
+
    \begin{table}[H]
     \begin{center}
     \begin{tabular}{|l|l|}
@@ -1792,7 +1792,7 @@
 %   \textit{configuration} element may contain an arbitrary number of
 %   \textit{object} and \textit{option} elements in any order, they represent
 %   data sources and options respectively.
-   
+
 %   The \textit{id} attributes of \textit{option} and \textit{object} elements
 %   represent the identifiers and all must be unique within the context of a
 %   task specification (the containing \textit{configuration} element).  An
@@ -1831,7 +1831,7 @@
    complex functionality the protocol currently has to offer.  Should the need
    arise, adding new widgets should be easy, however the protocol will have to
    be refined in order to realise this.
-   
+
    \paragraph{Widgets}
 
     We assume that the reader is familiar with the purpose and basic functions
@@ -1844,7 +1844,7 @@
     within the scope of the containing \textit{display-layout} section
     (introduced shortly). The following two tables specify the XML elements
     that correspond with a label and button.
-    
+
     \begin{table}[H]
      \begin{center}
      \begin{tabular}{|l|l|}
@@ -1892,8 +1892,8 @@
     widget specification.
 
     A more interesting widget is the checkbox. The checkbox has a description
-    and is always in one of two states: checked or not. 
-    
+    and is always in one of two states: checked or not.
+
     \begin{table}[H]
      \begin{center}
      \begin{tabular}{|l|l|}
@@ -1961,7 +1961,7 @@
 
    \noindent A text field displays an input widget for the user to input text.
    A specification of the text-field element:
-   
+
     \begin{table}[H]
      \begin{center}
      \begin{tabular}{|l|l|}
@@ -2082,14 +2082,14 @@
 %   previous \textit{properties} element.
 
   \section{Comparison}
-  
+
    How does our approach measure up to other approaches to tool integration?  In
    Eucalyptus, the graphical front-end to CADP, detailed knowledge about the
    capabilities of individual tools as well as file formats seems to be
    integrated. Such coupling is very tight and limits its applicability. For
    \squadt we set the target higher. We have chosen to avoid building in
    knowledge about particular tools or even file formats.
-   
+
    Other approaches we know of are the electronic tool integration platform
    (ETI) \cite{RICVT} and repository (\cite{SFAV}). Both are built around
    web-services technology (using SOAP \cite{SOAP} and WSDL \cite{2001-WSDL}).
@@ -2100,13 +2100,13 @@
    formatted message on tools capabilities. Connected tools are aware of the
    integration context and ETI offers facilities that are usable to tools via
    Java-specific remote procedure calls.
-   
+
    Repository also uses web-services but in contrast to ETI, the connection
    between tool and framework is through specialised scripts. This puts it
    somewhere in between Eucalyptus and ETI. The tools are not aware of the
    integration context so a script is needed to make a tool behave properly in
    the integration context.
- 
+
    For all of the above approaches it seems that tools communicate through
    files.  A serious consideration on our side was that files could grow very
    big and that you do not want to copy those files unnecessarily across a
@@ -2125,7 +2125,7 @@
 %   \cite{rfc3920}) even became an official standard. This protocol offers basic
 %   messaging functionality including a request-response and publish-subscribe
 %   mechanisms.
-%   
+%
 %   Our protocol is tailored to our specific needs but at the core it is very
 %   similar to XMPP core. When a decent multi-platform implementation framework
 %   would have been available we would have liked to have built our protocol top
@@ -2231,7 +2231,7 @@
 %   system. The protocol describes this process.  The most important
 %   functionality offered by the protocol is repeatability of the configuration
 %   process based on a previous configuration.
-   
+
 %   The deskSQuADT application currently uses the protocol as its only method
 %   for controlling tools. The most important features provided by the current
 %   version are:
@@ -2246,7 +2246,7 @@
 %    \end{itemize}
 %   All of these features are the result of functionality purposefully built
 %   into the protocol.
-   
+
 %   Experience so far has told us that the current ability to fill and
 %   manipulate the display is rather limited. Interaction with the user would
 %   improve with a broader choice in controls and more fine-grained control over

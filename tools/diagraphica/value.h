@@ -18,16 +18,16 @@ class Value
 {
 public:
 	// -- constructors and destructor -------------------------------
-    Value( 
+    Value(
         const int &idx,
         const std::string &val );
     Value( const Value &val );
 	virtual ~Value();
-	
+
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setValue( const std::string &val );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     std::string getValue();

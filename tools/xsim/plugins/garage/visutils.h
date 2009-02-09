@@ -38,7 +38,7 @@
 #endif
 
 
-// Used by VisUtils 
+// Used by VisUtils
 //	to specify colors
 struct Color
 {
@@ -82,7 +82,7 @@ public:
                                  int side );
   static void drawWalls( int rows,
                          int cols );
-    
+
   static double getColInterval();
   static double getRowInterval();
 private:

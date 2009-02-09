@@ -45,8 +45,8 @@ class MainFrame : public wxFrame
 {
   public:
     MainFrame(LTSGraph *owner);
-    GLCanvas* getGLCanvas(); 
-    
+    GLCanvas* getGLCanvas();
+
     void setLTSInfo(int is, int ns, int nt, int nl);
 
   private:

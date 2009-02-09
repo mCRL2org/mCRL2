@@ -1,7 +1,7 @@
 % This file contains a description of the physical layer service
 % of the 1394 or firewire protocol and also a description of the link
-% layer protocol entities. This decription has been published 
-% as S.P. Luttik in $\mu$CRL, and adapted to mCRL. Description 
+% layer protocol entities. This decription has been published
+% as S.P. Luttik in $\mu$CRL, and adapted to mCRL. Description
 % and formal specification of the link layer
 % of P1394. Technical Report SEN-R9706, CWI, Amsterdam, 1997.
 % The state space of the description as given, with 2 link
@@ -10,16 +10,16 @@
 % and the domains DATA, ACK and HEADER having only one element
 % the state space has less than 300.000 states.
 %
-% This description has been analysed in M. Sighireanu and R. Mateescu, 
-%  Verification of the Link Layer Protocol of the IEEE-1394 Serial Bus 
+% This description has been analysed in M. Sighireanu and R. Mateescu,
+%  Verification of the Link Layer Protocol of the IEEE-1394 Serial Bus
 % (``FireWire''): an Experiment with E-LOTOS. Springer International
-% Journal on Software Tools for Technology Transfer (STTT), 1998. 
+% Journal on Software Tools for Technology Transfer (STTT), 1998.
 % 1996, where they showed a mistake in the description, which could
 % be trace back to a mistake in the standard.
 %
 % The description in this file differs on a few points from the
 % description by Luttik to facilitate the generation of the state
-% space. 
+% space.
 
 
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,11 +53,11 @@ sort SIGNAL = struct sig(getdest:Nat) ? is_dest |
                      sig(gethead:HEADER,gethcrc:CHECK) ? is_header |
                      sig(getdata:DATA,getdcrc:CHECK) ? is_data |
                      sig(getack:ACK,getacrc:CHECK) ? is_ack |
-                     Start ? is_start | 
-                     End ? is_end | 
-                     Prefix ? is_prefix | 
-                     subactgap ? is_sagap | 
-                     dhead ? is_dhead | 
+                     Start ? is_start |
+                     End ? is_end |
+                     Prefix ? is_prefix |
+                     subactgap ? is_sagap |
+                     dhead ? is_dhead |
                      Dummy ? is_dummy;
 
 map  is_physig,is_terminator : SIGNAL -> Bool;
@@ -86,7 +86,7 @@ eqn  corrupt(sig(h,c)) = sig(h,bottom);
      corrupt(sig(d,c)) = sig(d,bottom);
      corrupt(sig(a,c)) = sig(a,bottom);
 
-sort SIG_TUPLE = 
+sort SIG_TUPLE =
        struct quadruple (first:SIGNAL,
                          second:SIGNAL,
                          third:SIGNAL,
@@ -97,7 +97,7 @@ sort PAR = struct fair | immediate;
 
 sort PAC = struct won | lost;
 
-sort LDC = struct ackrec(ACK) 
+sort LDC = struct ackrec(ACK)
             |     ackmiss
             |     broadsent;
 
@@ -244,7 +244,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
                 sPDreq(id,End).Link0(n,id,buffer) <>
                 sPDreq(id,Prefix).Link7(n,id,buffer)
            );
- 
+
 
      Link7(n,id:Nat,buffer:SIG_TUPLE)=
         rPCind(id).sPDreq(id,Prefix).Link7(n,id,buffer) +
@@ -269,7 +269,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         sum p:SIGNAL.rPDind(id,p).
            ( is_sagap(p) ->
                 Link0(n,id,buffer) <>
-                LinkWSA(n,id,buffer,dest) 
+                LinkWSA(n,id,buffer,dest)
            ) +
         (dest==id) -> rPAcon(id,won).rPCind(id).sPDreq(id,End).Link0(n,id,buffer)<>delta;
 
@@ -327,7 +327,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
           sPAcon(id,lost).BusIdle(n,t);
 
      BusBusy(n:Nat,t,next,destfault:BoolTABLE,busy:Nat)=
-        (busy<n) -> 
+        (busy<n) ->
            ( sPCind(busy).
                 (sum p:SIGNAL.rPDreq(busy,p).Distribute(n,t,next,destfault,busy,p,0))
            ) <>
@@ -348,7 +348,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
         (i<n) ->
         (get(i,next) ->
             sPAcon(i,won).sPCind(i).Resolve(n,t,next,i+1) <>
-            internal.Resolve(n,t,next,i+1) 
+            internal.Resolve(n,t,next,i+1)
         ) <>
         Resolve2(n,t,next);
 
@@ -374,7 +374,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
                sPDind(i,sig(dest)).
                   Distribute(n,t,next,invert(i,destfault),busy,p,i+1)<>delta +
             %% Headers/Data/Acks may be corrupted
-            is_hda(p) ->  
+            is_hda(p) ->
                sPDind(i,corrupt(p)).
                   Distribute(n,t,next,destfault,busy,p,i+1)<>delta +
             %% Headers/Data/Acks may get lost
@@ -401,7 +401,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %%%      SPECIFICATION OF n LINK LAYERS CONNECTED BY A BUS      %%%
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+
 proc LINK(n:Nat,i:Nat)=Link0(n,i,void);
 
      BUS(n:Nat)=BusIdle(n, inita(n));

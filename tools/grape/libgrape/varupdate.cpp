@@ -34,7 +34,7 @@ wxString varupdate::get_varupdate( void ) const
 }
 
 bool varupdate::set_varupdate( const wxString &p_varupdate )
-{                          
+{
   int pos = p_varupdate.Find( _T( ":=" ) );
   wxString variable_update_lhs = p_varupdate.Mid( 0, pos );
   wxString variable_update_rhs = p_varupdate.Mid( pos+2 );

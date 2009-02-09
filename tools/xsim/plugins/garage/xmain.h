@@ -10,8 +10,8 @@
 
 // ---------------------------------
 //
-// This class initializes the 
-//		Bremen parking garage 
+// This class initializes the
+//		Bremen parking garage
 //		visualization module.
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

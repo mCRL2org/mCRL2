@@ -39,7 +39,7 @@ namespace tools {
          prover,
          pfnf
        };
-       
+
        /// \brief Returns a description of a pbes rewriter
        /// \param type A rewriter type
        /// \return A description of the rewriter type
@@ -56,7 +56,7 @@ namespace tools {
          }
          return "  unknown pbes rewriter";
        }
-       
+
        /// \brief Returns the string corresponding to a pbes rewriter type
        /// \param type A string
        /// \return A string corresponding to the pbes rewriter type
@@ -127,7 +127,7 @@ namespace tools {
         // The following alternative doesn't work, it is not clear why.
         // m_pbes_rewriter_type = parser.option_argument_as<pbes_rewriter_tool<Tool>::pbes_rewriter_type>("pbes-rewriter");
       }
-        
+
 
     public:
       /// \brief Constructor.
@@ -140,7 +140,7 @@ namespace tools {
                         )
         : Tool(name, author, tool_description)
       {}
-      
+
       /// \brief Returns the rewriter type
       /// \return The rewriter type
       pbes_rewriter_type rewriter_type() const

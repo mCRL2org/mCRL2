@@ -5,9 +5,9 @@ model z()=
 ]|
 
 proc rcv(chan a?: void, b!: nat) =
-|[ a? ; b!10 
+|[ a? ; b!10
 ]|
 
 proc snd(chan a!: void) =
-|[ a!  
+|[ a!
 ]|

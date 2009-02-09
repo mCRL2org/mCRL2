@@ -45,13 +45,13 @@ char* intToCString(int i);
 
 %%
 
-fsm_file : 
-    { 
+fsm_file :
+    {
       num_pars = 0;
       ignore_par.clear();
     }
   params
-    { 
+    {
       fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
     }
   SECSEP EOLN
@@ -61,10 +61,10 @@ fsm_file :
 
 // --------- Section containing the state vector ----------
 
-params : 
+params :
   /* empty */
   |
-  params param 
+  params param
     {
       ++num_pars;
     }
@@ -85,10 +85,10 @@ cardinality :
       ignore_par.push_back($2 == 0);
     }
   ;
-  
-type_def : 
+
+type_def :
   type_name
-    { 
+    {
       if (!ignore_par[num_pars])
       {
         fsm_lexer_obj->typeValues = ATempty;
@@ -96,7 +96,7 @@ type_def :
       }
     }
   type_values
-    { 
+    {
       if (!ignore_par[num_pars])
       {
         fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
@@ -112,7 +112,7 @@ type_name :
   |
   type_name1
     { safe_assign($$, $1) }
-  | 
+  |
   type_name ARROW type_name1
     {
       std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
@@ -142,11 +142,11 @@ type_values :
 
 type_value :
   QUOTED
-    { 
+    {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues, 
-            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1, 
+        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
+            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1,
             (ATerm)fsm_lexer_obj->typeId ) );
       }
     }
@@ -163,10 +163,10 @@ states :
     }
   state
     {
-      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector ); 
+      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
       unsigned int i = fsm_lexer_obj->fsm_lts->add_state(
           (ATerm) fsm_lexer_obj->stateVector );
-      if ( i == 0 ) 
+      if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
@@ -179,12 +179,12 @@ state :
   /* empty */
   |
   state NUMBER
-    { 
+    {
       if (!ignore_par[par_index])
       {
         if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
         {
-          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector, 
+          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
               ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
                   par_index ), $2 ) );
         }

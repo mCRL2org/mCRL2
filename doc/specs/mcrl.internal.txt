@@ -5,12 +5,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// This document describes the internal format of the mcrl language as close as 
+// This document describes the internal format of the mcrl language as close as
 // possible to the corresponding mCRL2 format. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
 // - (+p)/(-p) at the end of a branch means that this branch is added/removed at
-//   the end of phase p 
+//   the end of phase p
 // - <String> is an arbitrary non-empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> and <NumberString> are represented by a quoted ATermAppl constant
@@ -23,7 +23,7 @@
 //   of an LPESummand:
 //   + the lhs of an element of A should be declared by the LPE
 //   + A may not contain duplicate lhs's
-//   + the lhs's of A should obey the order in which they are declared 
+//   + the lhs's of A should obey the order in which they are declared
 // - the DataVarId's of the Assignment's of an LPEInit should be identical to the
 //   DataVarId's of the corresponding LPE
 // This description uses the theory of higher-order abstract data types, i.e.
@@ -122,7 +122,7 @@
 
 //sort expression or unknown
 <SortExprOrUnknown>
-              ::= <SortExpr> 
+              ::= <SortExpr>
                 | Unknown                                                (- tc)
 
 //process expression
@@ -130,20 +130,20 @@
                 | <Action>                                               (+ tc)
                 | Process(<ProcVarId>, <DataExpr>*)                      (+ tc)
                 | Delta
-                | Tau 
-                | Sum(<DataVarId>+, <ProcExpr>) 
+                | Tau
+                | Sum(<DataVarId>+, <ProcExpr>)
                 | Restrict(<String>*, <ProcExpr>)
                 | Hide(<String>*, <ProcExpr>)
                 | Rename(<RenameExpr>*, <ProcExpr>)
                 | Sync(<ProcExpr>, <ProcExpr>)
                 | AtTime(<ProcExpr>, <DataExpr>)
                 | Seq(<ProcExpr>, <ProcExpr>)
-                | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+                | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>)
                 | BInit(<ProcExpr>, <ProcExpr>)
                 | Merge(<ProcExpr>, <ProcExpr>)
                 | LMerge(<ProcExpr>, <ProcExpr>)
                 | Choice(<ProcExpr>, <ProcExpr>)
 
 //renaming expression
-<RenameExpr>  ::= RenameExpr(<String>, <String>) 
+<RenameExpr>  ::= RenameExpr(<String>, <String>)
 

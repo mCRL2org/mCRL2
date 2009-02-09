@@ -40,7 +40,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
 grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T("Edit architecture reference"), wxDefaultPosition )
 #endif
-{  
+{
   wxPanel *panel = new wxPanel( this );
 
   wxGridSizer *grid = new wxFlexGridSizer( 2, 3, 0 );
@@ -66,7 +66,7 @@ grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, g
   m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND, 0 );
   m_combo->SetSelection( selected );
-  
+
   panel->SetSizer( grid );
 
   init( panel );
@@ -112,13 +112,13 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
   m_grid->CreateGrid( p_list_of_varupdate.GetCount()+1, 2 );
   for ( unsigned int i = 0; i < p_list_of_varupdate.GetCount(); ++i )
-  {     
+  {
     //fill cells
     varupdate parameter_assignment = p_list_of_varupdate.Item( i );
     m_grid->SetCellValue(i, 0, parameter_assignment.get_lhs());
-    m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());    
+    m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());
   }
-  
+
   m_grid->SetColSize( 0, 170 );
   m_grid->SetColSize( 1, 100 );
   m_grid->SetColLabelValue(0, _T("Name"));
@@ -167,7 +167,7 @@ grape_reference_dialog::~grape_reference_dialog()
 
 bool grape_reference_dialog::show_modal()
 {
-  return ShowModal() != wxID_CANCEL;  
+  return ShowModal() != wxID_CANCEL;
 }
 
 int grape_reference_dialog::get_diagram_id()
@@ -198,7 +198,7 @@ wxString grape_reference_dialog::get_initializations() const
 	  result += m_grid->GetCellValue(i, 0) + _T( ":=" ) + m_grid->GetCellValue(i, 1) + _T( ";" );
     }
   }
-  return result;  
+  return result;
 }
 
 void grape_reference_dialog::check_text()
@@ -206,11 +206,11 @@ void grape_reference_dialog::check_text()
   bool valid = true;
   static grape::libgrape::process_reference tmp_reference;
   valid = tmp_reference.set_text( get_initializations() );
-	
+
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
- 
+
 void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
 {
   check_text();
@@ -229,7 +229,7 @@ void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
   }
 */
 }
-     
+
 
 BEGIN_EVENT_TABLE(grape_reference_dialog, wxDialog)
   EVT_GRID_CMD_CELL_CHANGE(GRAPE_GRID_TEXT, grape_reference_dialog::event_change_text)

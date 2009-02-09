@@ -22,7 +22,7 @@ namespace mcrl2 {
     bool gsWarning = true; //indicates if warning messages should be printed
     bool gsVerbose = false;//indicates if verbose messages should be printed
     bool gsDebug   = false;//indicates if debug messages should be printed
- 
+
     void gsSetQuietMsg(void)
     {
       gsQuiet   = true;
@@ -30,7 +30,7 @@ namespace mcrl2 {
       gsVerbose = false;
       gsDebug   = false;
     }
- 
+
     void gsSetNormalMsg(void)
     {
       gsQuiet   = false;
@@ -38,7 +38,7 @@ namespace mcrl2 {
       gsVerbose = false;
       gsDebug   = false;
     }
- 
+
     void gsSetVerboseMsg(void)
     {
       gsQuiet   = false;
@@ -46,7 +46,7 @@ namespace mcrl2 {
       gsVerbose = true;
       gsDebug   = false;
     }
- 
+
     void gsSetDebugMsg(void)
     {
       gsQuiet   = false;
@@ -54,10 +54,10 @@ namespace mcrl2 {
       gsVerbose = true;
       gsDebug   = true;
     }
- 
+
     // Function pointer for a custom message printing routine
     void (*custom_message_handler)(messageType, const char*) = 0;
- 
+
     // Sets custom_message_handler a custom message printing routine
     void gsSetCustomMessageHandler(void (*h)(messageType, const char*)) {
       custom_message_handler = h;
@@ -65,33 +65,33 @@ namespace mcrl2 {
 
     // Helper function (wrapper around gsvfprintf) for printing to string
     static void handler_wrapper(messageType t, const char* Format, va_list args) {
- 
+
       FILE* stream = tmpfile();
- 
+
       assert(stream);
- 
+
       gsvfprintf(stream, Format, args);
- 
+
       size_t n = ftell(stream);
- 
+
       fflush(stream);
       rewind(stream);
- 
+
       char* output  = (char*) malloc((n + 1) * sizeof(char));
       char* current = output;
- 
+
       while (0 < n--) {
         *current = (char) fgetc(stream);
- 
+
         ++current;
       }
- 
+
       *current = '\0';
- 
+
       fclose(stream);
- 
+
       custom_message_handler(t, output);
- 
+
       free(output);
     }
 
@@ -169,14 +169,14 @@ namespace mcrl2 {
       if (gsVerbose) {
         va_list Args;
         va_start(Args, Format);
- 
+
         if (custom_message_handler) {
           handler_wrapper(gs_notice, Format, Args);
         }
         else {
           gsvfprintf(stderr, Format, Args);
         }
- 
+
         va_end(Args);
       }
     }
@@ -193,7 +193,7 @@ namespace mcrl2 {
     //Post: If the printing of debug messages is enabled, the name of the current
     //      function is printed to stderr, followed by the first parameter with the
     //      remaining parameters as gsprintf arguments.
- 
+
     void gsDebugMsgFunc(const char *FuncName, const char *Format, ...)
     //Post: If the printing of debug messages is enabled, the name of FuncName is
     //      printed to stderr, followed by Format where  the remaining parameters

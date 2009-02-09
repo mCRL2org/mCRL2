@@ -1,16 +1,16 @@
 model z()=
 |[ var y: bool
- , chan x: bool 
-:: Send(x) || Recv(x, true) 
+ , chan x: bool
+:: Send(x) || Recv(x, true)
 ]|
 
 proc Recv(chan d?: bool, var f: bool)=
 |[ var e: bool
-:: d?e 
+:: d?e
 ]|
 
 proc Send(chan c!: bool)=
 |[ var a,b: nat
-:: c!(a > b) 
+:: c!(a > b)
 ]|
 

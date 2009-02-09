@@ -32,21 +32,21 @@ struct data_variable_collector
   InputIterator2 m_first2;
   InputIterator2 m_last2;
   OutputIterator m_dest;
-    
+
   data_variable_collector(InputIterator1 first1,
                           InputIterator1 last1,
                           InputIterator2 first2,
                           InputIterator2 last2,
                           OutputIterator dest
                          )
-    : 
+    :
       m_first1(first1),
       m_last1 (last1 ),
       m_first2(first2),
       m_last2 (last2 ),
       m_dest(dest)
   {}
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result

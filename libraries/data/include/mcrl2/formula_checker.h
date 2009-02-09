@@ -54,7 +54,7 @@
   /// The function Formula_Checker::check_formulas prints information to stderr indicating whether the expressions in the
   /// list of formulas passed as parameter a_formulas are tautologies or contradictions. In some cases the BDD based prover
   /// may be unable to determine whether an expression is a tautology or a contradiction. If this is the case, the function
-  /// Formula_Checker::check_formulas will print information to stderr indicating this fact. 
+  /// Formula_Checker::check_formulas will print information to stderr indicating this fact.
 
 class Formula_Checker {
   private:

@@ -32,12 +32,12 @@ class MarkDialog: public wxDialog {
     void onMarkRuleActivate(wxCommandEvent& event);
     void onMarkRuleEdit(wxCommandEvent& event);
     void onMarkTransition(wxCommandEvent& event);
-    
-    void addMarkRule(wxString str,int mr); 
+
+    void addMarkRule(wxString str,int mr);
     void replaceMarkRule(wxString str, int mr);
-    void resetMarkRules();    
+    void resetMarkRules();
     void setActionLabels(std::vector<std::string> &labels);
-    
+
   private:
     Mediator* mediator;
 

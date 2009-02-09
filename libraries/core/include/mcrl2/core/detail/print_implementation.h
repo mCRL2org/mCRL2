@@ -36,13 +36,13 @@
 using namespace mcrl2::utilities;
 
 namespace mcrl2 {
-  namespace core { 
+  namespace core {
     namespace detail {
 
 //declarations
 //------------
 
-//The internal format mentioned below can be found in specs/mcrl2.internal.txt 
+//The internal format mentioned below can be found in specs/mcrl2.internal.txt
 
 static void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
   t_pp_format pp_format);
@@ -1204,7 +1204,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(DataExpr, 2),
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, " }");
-    } else if (gsIsLambda(BindingOperator) || gsIsForall(BindingOperator) 
+    } else if (gsIsLambda(BindingOperator) || gsIsForall(BindingOperator)
             || gsIsExists(BindingOperator)) {
       //print lambda abstraction or universal/existential quantification
       PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
@@ -1312,7 +1312,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 3);
     if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsIfThen(ProcExpr)) {
-    //print if then 
+    //print if then
     PRINT_FUNC(dbg_prints)("printing if then\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
@@ -1887,7 +1887,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   //check consistency in the arguments of Part
   if (Result) {
     AFun Head = ATgetAFun(Part);
-    int NrArgs = ATgetArity(Head);      
+    int NrArgs = ATgetArity(Head);
     for (int i = 0; i < NrArgs && Result; i++) {
       ATerm Arg = ATgetArgument(Part, i);
       if (ATgetType(Arg) == AT_APPL)
@@ -1943,7 +1943,7 @@ bool gsIsOpIdPrefix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameNot())      ||
      (OpIdName == gsMakeOpIdNameNeg())      ||
      (OpIdName == gsMakeOpIdNameListSize()) ||
-     (OpIdName == gsMakeOpIdNameSetCompl()); 
+     (OpIdName == gsMakeOpIdNameSetCompl());
 }
 
 bool gsIsOpIdInfix(ATermAppl Term)

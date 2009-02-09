@@ -60,7 +60,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
   int M = N+2;
 
   GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
-  
+
 
   is_bot[0] = 0;
   is_bot[1] = 1;
@@ -68,9 +68,9 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
 
   for (i=N; i>=1; --i) {
     is_bot[M-i] = i;
-    
+
   }
-  
+
   GLuint* is_mid = (GLuint*)malloc((N-2)*(2*N+2)*sizeof(GLuint));
   i = 0;
   for (j=N+1; j<=(N-2)*N+1; j+=N) {
@@ -83,7 +83,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
     is_mid[i+1] = is_mid[i] - N;
     i += 2;
   }
-  
+
   GLuint* is_top = (GLuint*)malloc(M*sizeof(GLuint));
   j = (N-2)*N;
   is_top[0] = j + N + 1;
@@ -94,7 +94,7 @@ void P_Sphere::reshape(int N,float *coss,float *sins) {
     ++i;
   }
   is_top[i] = j + 1;
-  
+
   if (disp_list == 0) {
     disp_list = glGenLists(1);
   }
@@ -125,28 +125,28 @@ P_SimpleSphere::P_SimpleSphere() {
   GLfloat S = GLfloat(sin(PI/4));
   GLfloat C = GLfloat(cos(PI/4));
   GLfloat vertices[] = { 0,  0, -1,
-                         S,  0, -C, 
-                         0, -S, -C, 
-                        -S,  0, -C, 
+                         S,  0, -C,
+                         0, -S, -C,
+                        -S,  0, -C,
                          0,  S,  -C,
-                         1,  0,   0, 
-                         0, -1,   0, 
-                        -1,  0,   0, 
+                         1,  0,   0,
+                         0, -1,   0,
+                        -1,  0,   0,
                          0,  1,   0,
-                         S,  0,   C, 
-                         0, -S,   C, 
-                        -S,  0,   C, 
+                         S,  0,   C,
+                         0, -S,   C,
+                        -S,  0,   C,
                          0,  S,   C,
                          0,  0,   1 };
 
-  GLfloat texCoords[] = {0.0, 
+  GLfloat texCoords[] = {0.0,
                          S,
-                         0.0, 
+                         0.0,
                         -S,
                          0.0,
                          1.0,
                          0.0,
-                        -1.0, 
+                        -1.0,
                          0.0,
                          S,
                          0.0,
@@ -247,7 +247,7 @@ void P_Hemisphere::reshape(int N,float *coss,float *sins) {
     ++i;
   }
   is_top[i] = j;
-  
+
   if (disp_list == 0) {
     disp_list = glGenLists(1);
   }
@@ -298,7 +298,7 @@ void P_Disc::reshape(int N,float *coss,float *sins) {
     j += 3;
     ++k;
   }
-  
+
   if (disp_list == 0) {
     disp_list = glGenLists(1);
   }

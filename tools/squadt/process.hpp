@@ -39,7 +39,7 @@ namespace squadt {
         enum status {
           stopped,   ///< stopped or not yet started to run
           running,   ///< is running
-          completed, ///< has terminated successfully 
+          completed, ///< has terminated successfully
           aborted    ///< was aborted
         };
 

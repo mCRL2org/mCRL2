@@ -47,18 +47,18 @@ bool ExporterLatex::export_to(wxString filename)
 
     if(s->isInitialState())
     {
-      node = 
+      node =
         boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1%pt, %2%pt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
     }
     else
     {
       node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1%pt, %2%pt) [state, fill=currentcolor] (state%3%) {%3%};\n");
     }
-    
+
     double aspect = owner->getAspectRatio();
     double x = s->getX() / 10.0 * aspect;
     double y = s->getY() / 10.0;
-    
+
     wxColour c = s->getColour();
     double r = static_cast<double>(c.Red()) / 255.0;
     double g = static_cast<double>(c.Green()) / 255.0;
@@ -68,7 +68,7 @@ bool ExporterLatex::export_to(wxString filename)
 
     tikz_code += boost::str(node);
   }
-  tikz_code += "\n"; 
+  tikz_code += "\n";
 
   for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
@@ -114,7 +114,7 @@ bool ExporterLatex::export_to(wxString filename)
   {
     return false;
   }
-  
+
   // Close file
   if(!tikzFile.Close())
   {
@@ -142,7 +142,7 @@ void ExporterLatex::drawBezier(Transition* tr)
   controlX /= 10.0;
   controlX = controlX * aspect;
   controlY /= 10.0;
-  
+
   draw%fromState%toState
       %controlX%controlY
       %tr->getLabel();
@@ -157,7 +157,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   State* s = tr->getFrom();
 
   size_t stateNo = s->getValue();
-  
+
   // Calculate control points for the self loop.
   double beta = .25 * M_PI;
 
@@ -170,7 +170,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
 
   xState = s->getX() / 10.0;
   yState = s->getY() / 10.0;
-  
+
   xVirtual = xState + cos(alpha) * dist * 20.0f;
   yVirtual = yState + sin(alpha) * dist * 20.0f;
 
@@ -201,7 +201,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
     yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
-    
+
     if(fabs(cosGamma + cosDelta) <= .01)
     {
       float additive = tan(beta) * (yControl1 - yState);

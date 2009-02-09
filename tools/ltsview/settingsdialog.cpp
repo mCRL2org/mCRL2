@@ -75,17 +75,17 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
   wxPanel* clrPanel = new wxPanel(nb,wxID_ANY);
   wxPanel* simPanel = new wxPanel(nb,wxID_ANY);
   wxPanel* pfmPanel = new wxPanel(nb,wxID_ANY);
-  
+
   setupParPanel(parPanel);
   setupClrPanel(clrPanel);
   setupSimPanel(simPanel);
   setupPfmPanel(pfmPanel);
-  
+
   nb->AddPage(parPanel,wxT("Parameters"),true);
   nb->AddPage(clrPanel,wxT("Colours"),false);
   nb->AddPage(simPanel,wxT("Simulation"), false);
   nb->AddPage(pfmPanel,wxT("Performance"),false);
-  
+
   sizer->Add(nb,0,wxEXPAND|wxALL,5);
   SetSizerAndFit(sizer);
   Layout();
@@ -94,8 +94,8 @@ SettingsDialog::SettingsDialog(wxWindow* parent,GLCanvas* glc,Settings* ss)
 
 void SettingsDialog::setupParPanel(wxPanel* panel)
 {
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
+  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
+  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
   int bd = 5;
   wxSize spinSize(65,-1);
   wxSize sliderSize(200,-1);
@@ -117,7 +117,7 @@ void SettingsDialog::setupParPanel(wxPanel* panel)
       int(10*settings->getFloat(ClusterHeight)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Cluster height:")),0,lf,bd);
   sizer->Add(chSpin,0,rf,bd);
-  
+
   wxSpinCtrl *brSpin = new wxSpinCtrl(panel,myID_BRANCH_ROTATION,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle|wxSP_WRAP,0,359,
       settings->getInt(BranchRotation));
@@ -128,12 +128,12 @@ void SettingsDialog::setupParPanel(wxPanel* panel)
       wxDefaultPosition,spinSize,spinStyle,0,90,settings->getInt(BranchTilt));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Branch tilt:")),0,lf,bd);
   sizer->Add(btSpin,0,rf,bd);
-  
+
   wxSpinCtrl *qlSpin = new wxSpinCtrl(panel,myID_QUALITY,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle,2,50,settings->getInt(Quality)/2);
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Accuracy:")),0,lf,bd);
   sizer->Add(qlSpin,0,rf,bd);
-  
+
   wxSlider *srSlider = new wxSlider(panel,myID_STATE_REPULSION,
       int(settings->getFloat(StateRepulsion)),0,100,wxDefaultPosition,sliderSize,
       sliderStyle);
@@ -160,8 +160,8 @@ void SettingsDialog::setupParPanel(wxPanel* panel)
 
 void SettingsDialog::setupClrPanel(wxPanel* panel)
 {
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
+  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
+  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
   int bd = 5;
   wxSize spinSize(65,-1);
   long spinStyle = wxSP_ARROW_KEYS;
@@ -170,7 +170,7 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
   wxFlexGridSizer* sizer = new wxFlexGridSizer(9,3,0,0);
   sizer->AddGrowableCol(0);
   sizer->AddGrowableRow(8);
- 
+
   wxSpinCtrl *trSpin = new wxSpinCtrl(panel,myID_TRANSPARENCY,wxEmptyString,
       wxDefaultPosition,spinSize,spinStyle,0,100,
       static_cast<int>((255-settings->getUByte(Alpha))/2.55f));
@@ -205,7 +205,7 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Backpointer:")),0,lf,bd);
   sizer->AddSpacer(0);
   sizer->Add(ueButton,0,rf,bd);
-  
+
   wxColorButton *mkButton = new wxColorButton(panel,this,myID_MARK_CLR,
       wxDefaultPosition,btnSize);
   mkButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(MarkedColor)));
@@ -222,50 +222,50 @@ void SettingsDialog::setupClrPanel(wxPanel* panel)
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Interpolate:")),0,lf,bd);
   sizer->Add(i1Btn,0,rf,bd);
   sizer->Add(i2Btn,0,rf,bd);
-  
+
   wxCheckBox *liCheck = new wxCheckBox(panel,myID_LONG_INTERPOLATION,
       wxT("Long interpolation"));
   liCheck->SetValue(settings->getBool(LongInterpolation));
   sizer->Add(liCheck,0,lf,bd);
   sizer->AddSpacer(0);
   sizer->AddSpacer(0);
-  
+
   panel->SetSizer(sizer);
   panel->Fit();
   panel->Layout();
 }
 
 void SettingsDialog::setupSimPanel(wxPanel* panel)
-{   
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
-  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL; 
+{
+  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
+  int rf = wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL;
   int bd = 5;
 
   wxSize btnSize(25,25);
   wxFlexGridSizer* sizer = new wxFlexGridSizer(5,2,0,0);
   sizer->AddGrowableCol(0);
-  sizer->AddGrowableRow(4);  
-   
+  sizer->AddGrowableRow(4);
+
   wxColorButton *shButton = new wxColorButton(panel,this,myID_SIM_PREV_CLR,
       wxDefaultPosition,btnSize);
   shButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPrevColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,
         wxT("Previous states/transitions:")),0,lf,bd);
-  sizer->Add(shButton,0,rf,bd); 
-  
+  sizer->Add(shButton,0,rf,bd);
+
   wxColorButton *scButton = new wxColorButton(panel,this,myID_SIM_CURR_CLR,
       wxDefaultPosition,btnSize);
   scButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimCurrColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Current state:")),0,lf,bd);
   sizer->Add(scButton,0,rf,bd);
-  
+
   wxColorButton *ssButton = new wxColorButton(panel,this,myID_SIM_SEL_CLR,
       wxDefaultPosition,btnSize);
   ssButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimSelColor)));
   sizer->Add(new wxStaticText(panel,wxID_ANY,wxT("Selected state/transition:")),
       0,lf,bd);
   sizer->Add(ssButton,0,rf,bd);
-  
+
   wxColorButton *spButton = new wxColorButton(panel,this,myID_SIM_POS_CLR,
       wxDefaultPosition,btnSize);
   spButton->SetBackgroundColour(RGB_to_wxC(settings->getRGB(SimPosColor)));
@@ -280,10 +280,10 @@ void SettingsDialog::setupSimPanel(wxPanel* panel)
 
 void SettingsDialog::setupPfmPanel(wxPanel* panel)
 {
-  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL; 
+  int lf = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int bd = 5;
 
-  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL); 
+  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(new wxStaticText(panel,wxID_ANY,
         wxT("While zooming/panning/rotating:")),0,lf,bd);
 

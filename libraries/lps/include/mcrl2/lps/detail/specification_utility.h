@@ -35,7 +35,7 @@ namespace detail {
     }
     return data::data_variable_list(variables.begin(), variables.end());
   }
-  
+
   /// \brief Returns the right hand sides of the assignments.
   /// \param assignments A sequence of assignments to data variables
   /// \return The right hand sides of the assignments.

@@ -88,7 +88,7 @@ void test_struct()
   "                                                   \n"
   "init true->delta;                                  \n"
   ;
-  specification spec = mcrl22lps(text); 
+  specification spec = mcrl22lps(text);
 }
 
 void test_large_specification()
@@ -360,20 +360,20 @@ void test_large_specification()
   "    )                                                                                                                                                                                  \n"
   "  );                                                                                                                                                                                   \n"
   ;
-  
+
   const std::string REQ1_1 =
   "nu X . [true] X &&                                                                     \n"
   "  forall nana:Node .                                                                   \n"
   "    forall trans:Transaction .                                                         \n"
   "      [cUQ(nana,trans)](nu Y . [true]Y && [exists nana2:Node . cUQ(nana2,trans)]false) \n"
   ;
-  
+
   const std::string REQ1_2 =
   "nu X . [true]X && forall n:Node . forall t:Transaction . [cUQ(n,t)](mu Y \n"
   ". [!exists r:Phase . sUR(n,t,r)]Y && <true>true)                         \n"
   ;
-  
-  specification model = mcrl22lps(MODEL);  
+
+  specification model = mcrl22lps(MODEL);
 }
 
 int test_main(int argc, char** argv )

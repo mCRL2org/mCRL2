@@ -24,15 +24,15 @@ class Visualizer
   public:
     Visualizer(LTSGraph* app);
     ~Visualizer();
-    
-    void visualize(double width, double height, double pixelSize, 
+
+    void visualize(double width, double height, double pixelSize,
                    bool inSelectMode);
 
     void initFontRenderer();
 
     // Setters
-    void setWidth(double width); 
-    void setHeight(double height); 
+    void setWidth(double width);
+    void setHeight(double height);
     void setPixelSize(double size);
     void setRadius(int radius);
     void setCurves(bool value);

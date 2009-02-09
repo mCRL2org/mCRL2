@@ -320,6 +320,51 @@ namespace detail {
     }
   };
 
+  template <typename Container, typename Predicate>
+  /// \brief Removes elements from a container
+  /// \param container A container
+  /// \param pred All elements that satisfy the predicate pred are removed
+  /// Note: this implementation is very inefficient!
+  void remove_elements(Container& container, Predicate pred)
+  {
+    std::vector<typename Container::value_type> result;
+    for (typename Container::iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (!pred(*i))
+      {
+        result.push_back(*i);
+      }
+    }
+    container = Container(result.begin(), result.end());
+  }
+
+  template <typename Variable>
+  struct equation_is_contained_in
+  {
+    const std::set<Variable>& m_variables;
+
+    equation_is_contained_in(const std::set<Variable>& variables)
+      : m_variables(variables)
+    {}
+
+    template <typename Equation>
+    bool operator()(const Equation& e)
+    {
+      return m_variables.find(e.variable()) != m_variables.end();
+    }
+  };
+
+  template <typename MapContainer>
+  void print_constraint_map(const MapContainer& constraints)
+  {
+    for (typename MapContainer::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
+    {
+      std::string lhs = mcrl2::core::pp(i->first);
+      std::string rhs = mcrl2::core::pp(i->second);
+      std::cout << "{" << lhs << " := " << rhs << "} ";
+    }
+  }
+
 } // namespace detail
 /// \endcond
 
@@ -480,7 +525,7 @@ namespace detail {
           for (typename constraint_map::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
           {
             std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = core::term_traits<data_term_type>::is_variable(i->second) ? "NaC" : mcrl2::core::pp(i->second);
+            std::string rhs = mcrl2::core::pp(i->second);
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -498,23 +543,31 @@ namespace detail {
 
           if (constraints.empty())
           {
-            changed = true;
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
-              constraints[*j] = datar(data::data_variable_map_replace(*i, e_constraints));
+              data_term_type e1 = datar(data::data_variable_map_replace(*i, e_constraints));
+              if (core::term_traits<data_term_type>::is_constant(e1))
+              {
+                constraints[*j] = e1;
+              }
+              else
+              {
+              	constraints[*j] = *j;
+              }
             }
+            changed = true;
           }
           else
-          {        
+          {
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
               typename constraint_map::iterator k = constraints.find(*j);
               assert(k != constraints.end());
               data_term_type& ci = k->second;
-			  if (ci == *j)
-			  {
+              if (ci == *j)
+              {
                 continue;
-			  }
+              }
               data_term_type ei = datar(data::data_variable_map_replace(*i, e_constraints));
               if (ci != ei)
               {
@@ -524,24 +577,6 @@ namespace detail {
             }
           }
           return changed;
-        }
-
-        /// \brief Removes NaC constraints.
-        void remove_nac_constraints()
-        {
-          // See [Josuttis, "The C++ Standard Library" page 205]
-          typename constraint_map::iterator pos;
-          for (pos = constraints.begin(); pos != constraints.end(); )
-          {
-            if (core::term_traits<data_term_type>::is_variable(pos->second)) // the value is NaC
-            {
-              constraints.erase(pos++);
-            }
-            else
-            {
-              ++pos;
-            }
-          }
         }
       };
 
@@ -559,8 +594,11 @@ namespace detail {
       /// easily access all out-edges corresponding to a particular vertex.
       edge_map m_edges;
 
-      /// \brief Store the removed variables.
-      std::map<propositional_variable_decl_type, std::set<variable_type> > m_removed;
+      /// \brief The redundant parameters.
+      std::map<string_type, std::vector<int> > m_redundant_parameters;
+
+      /// \brief The redundant propositional variables.
+      std::set<propositional_variable_decl_type> m_redundant_equations;
 
       /// \brief Prints the vertices of the dependency graph.
       void print_vertices() const
@@ -584,7 +622,7 @@ namespace detail {
       }
 
     public:
-      
+
       /// \brief Constructor.
       /// \param datar A data rewriter
       /// \param pbesr A PBES rewriter
@@ -592,16 +630,52 @@ namespace detail {
         : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
       {}
 
+      /// \brief Returns the parameters that have been removed by the constelm algorithm
+      /// \return The removed parameters
+      std::map<propositional_variable_decl_type, std::vector<variable_type> > redundant_parameters() const
+      {
+        std::map<propositional_variable_decl_type, std::vector<variable_type> > result;
+        for (typename std::map<string_type, std::vector<int> >::const_iterator i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
+        {
+          const vertex& v = m_vertices.find(i->first)->second;
+          std::vector<variable_type>& variables = result[v.variable];
+          for (std::vector<int>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          {
+            // std::advance doesn't work for aterm lists :-(
+            typename variable_sequence_type::iterator k = v.variable.parameters().begin();
+            for (int i = 0; i < *j; i++)
+            {
+              ++k;
+            }
+            variables.push_back(*k);
+          }
+        }
+        return result;
+      }
+
+      /// \brief Returns the propositional variables that have optionally been removed by the constelm algorithm
+      /// \return The removed variables
+      const std::set<propositional_variable_decl_type>& redundant_equations() const
+      {
+        return m_redundant_equations;
+      }
+
       /// \brief Runs the constelm algorithm
       /// \param p A pbes
       /// \param name_generator A generator for fresh identifiers
+      /// \param remove_redundant_equations If true, redundant equations are removed from the PBES
       /// The call \p name_generator() should return an identifier that doesn't appear
       /// in the pbes \p p
       /// \param compute_conditions If true, propagation conditions are computed. Note
       /// that the currently implementation has exponential behavior.
       template <typename Container>
-      void run(pbes<Container>& p, bool compute_conditions = false)
+      void run(pbes<Container>& p, bool compute_conditions = false, bool remove_redundant_equations = false)
       {
+        m_vertices.clear();
+        m_edges.clear();
+        m_redundant_parameters.clear();
+        m_redundant_equations.clear();
+
         // compute the vertices and edges of the dependency graph
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
@@ -642,6 +716,7 @@ namespace detail {
 
         // initialize the todo list of vertices that need to be processed
         std::deque<propositional_variable_decl_type> todo;
+        std::set<propositional_variable_decl_type> visited;
         std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(p.initial_state());
         for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
         {
@@ -649,6 +724,7 @@ namespace detail {
           vertex& u = m_vertices[i->name()];
           u.update(e, constraint_map(), m_data_rewriter);
           todo.push_back(u.variable);
+          visited.insert(u.variable);
         }
 
         if (mcrl2::core::gsDebug)
@@ -700,6 +776,7 @@ std::cerr << "\nCould not evaluate condition " << core::pp(data::data_variable_m
               if (changed)
               {
                 todo.push_back(v.variable);
+                visited.insert(v.variable);
               }
             }
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
@@ -714,54 +791,33 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
           print_vertices();
         }
 
-        // print the parameters that will be removed
-        if (mcrl2::core::gsVerbose)
-        {
-          std::cerr << "\nremoving the following constant parameters and equations:" << std::endl;
-          for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
-          {
-            const vertex& u = i->second;
-            if (u.constraints.empty())
-            {
-              std::cerr << "  equation " << core::pp(u.variable) << std::endl;
-              m_removed[u.variable].insert(u.variable.parameters().begin(), u.variable.parameters().end());
-            }
-            else
-            {
-              std::vector<variable_type> removed = u.constant_parameters();
-              for (typename std::vector<variable_type>::iterator j = removed.begin(); j != removed.end(); ++j)
-              {
-                std::cerr << "  parameter (" << mcrl2::core::pp(u.variable.name()) << ", " << core::pp(*j) << ")" << std::endl;
-                m_removed[u.variable].insert(*j);
-              }
-            }
-          }
-        }
-
-        // remove the constant parameters
-        std::map<string_type, std::vector<int> > to_be_removed_variables;
+        // compute the redundant parameters and the redundant equations
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type name = i->variable().name();
           vertex& v = m_vertices[name];
-          std::vector<int> r = v.constant_parameter_indices();
-          if (!r.empty())
+          if (v.constraints.empty())
           {
-            to_be_removed_variables[name] = r;
+            if (visited.find(i->variable()) == visited.end())
+            {
+              m_redundant_equations.insert(i->variable());
+            }
+          }
+          else
+          {
+            std::vector<int> r = v.constant_parameter_indices();
+            if (!r.empty())
+            {
+              m_redundant_parameters[name] = r;
+            }
           }
         }
-        remove_parameters(p, to_be_removed_variables);
 
         // Apply the constraints to the equations.
-        // TODO: The equations without constraints may be removed, but then the references
-        // to the propositional variables of this equations should be removed as well.
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type name = i->variable().name();
           vertex& v = m_vertices[name];
-
-          // do not apply NaC constraints
-          v.remove_nac_constraints();
 
           if (!v.constraints.empty())
           {
@@ -772,13 +828,37 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
             );
           }
         }
-      }
 
-      /// \brief Returns the propositional variables that have been removed by the constelm algorithm
-      /// \return The removed variables
-      const std::map<propositional_variable_decl_type, std::set<variable_type> >& removed_variables() const
-      {
-        return m_removed;
+        // remove the redundant parameters and variables/equations
+        remove_parameters(p, m_redundant_parameters);
+        if (remove_redundant_equations)
+        {
+          remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
+        }
+
+        // print the parameters and equation that are removed
+        if (mcrl2::core::gsVerbose)
+        {
+          std::cerr << "\nremoved the following constant parameters:" << std::endl;
+          std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
+          for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
+          {
+            for (typename std::vector<variable_type>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+            {
+              std::cerr << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
+            }
+          }
+
+          if (remove_redundant_equations)
+          {
+            std::cerr << "\nremoved the following equations:" << std::endl;
+            const std::set<propositional_variable_decl_type> r = redundant_equations();
+            for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
+            {
+              std::cerr << "  equation " << core::pp(i->name()) << std::endl;
+            }
+          }
+        }
       }
   };
 

@@ -203,7 +203,7 @@ bool squadt_interactor::perform_task(tipi::configuration& configuration)
 #endif //ENABLE_SQUADT_CONNECTIVITY
 
 
-///Reads a specification from input_file, 
+///Reads a specification from input_file,
 ///applies instantiation of sums to it and writes the result to output_file.
 int do_suminst(const tool_options& options)
 {
@@ -236,7 +236,7 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
   if (parser.continue_execution()) {
     t_options.suminst_opts.tau_only = (0 < parser.options.count("tau"));
     t_options.suminst_opts.finite_only = (0 < parser.options.count("finite"));
- 
+
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
     }
@@ -248,7 +248,7 @@ bool parse_command_line(int ac, char** av, tool_options& t_options) {
         t_options.output_file = parser.arguments[1];
       }
     }
- 
+
     t_options.suminst_opts.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   }
 

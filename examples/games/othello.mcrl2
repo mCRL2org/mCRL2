@@ -1,8 +1,8 @@
 % This specification describes the game `Othello', which is a two
-% player board game. There is a board of N by M 
-% One player has white pieces (W) and the 
+% player board game. There is a board of N by M
+% One player has white pieces (W) and the
 % other has red pieces (R). Initially, the board is set up as:
-% 
+%
 %      . . . . . . . .
 %      . . . . . . . .
 %      . . . . . . . .
@@ -11,10 +11,10 @@
 %      . . . . . . . .
 %      . . . . . . . .
 %      . . . . . . . .
-% 
+%
 % Red makes the first move and the players alternatingly put a piece on
-% the board, unless a player cannot put a piece on the board, 
-% in which case he must skip his turn. 
+% the board, unless a player cannot put a piece on the board,
+% in which case he must skip his turn.
 % A move is made by putting a piece on the board such that at least
 % one piece of the opponent is enclosed with two opposite colors.
 % Subsequently all pieces that are enclosed will change color.
@@ -48,7 +48,7 @@ map  At:Nat#Nat#Board->Position;
      Opposite:Position->Position;
      Swap:Position#Nat#Nat#Int#Int#Board->Board;
      Search:Position#Nat#Nat#Int#Int#Bool#Board->Bool;
-     
+
 
 var b:Board;
     r:Row;
@@ -75,7 +75,7 @@ eqn Opposite(Red)=White;
     x==1 -> Put(p,x,p'|>r)=p|>r;
     x>1 -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
 
-    
+
     x==N && y==M ->
       Count(p,x,y,b)=if(At(x,y,b)==p,1,0);
 
@@ -100,7 +100,7 @@ eqn Opposite(Red)=White;
        Search(p,x,y,dx,dy,othercolorseen,b)=
                  Search(p,Int2Nat(x+dx),Int2Nat(y+dy),dx,dy,true,b);
 
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p -> 
+    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p ->
        Search(p,x,y,dx,dy,othercolorseen,b)=othercolorseen;
 
     At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Empty  ->
@@ -108,7 +108,7 @@ eqn Opposite(Red)=White;
 
     At(x,y,b)==Empty -> Swap(p,x,y,dx,dy,b)=b;
     At(x,y,b)==p -> Swap(p,x,y,dx,dy,b)=b;
-    At(x,y,b)==Opposite(p) -> 
+    At(x,y,b)==Opposite(p) ->
         Swap(p,x,y,dx,dy,b)=
           Put(p,x,y,Swap(p,Int2Nat(x+dx),Int2Nat(y+dy),dx,dy,b));
 
@@ -191,20 +191,20 @@ proc Othello(b:Board,WhiteMoves:Bool)=
                      Enclosing(White,x,y,b))->
            WhiteMove(x,y).
              Othello(PutPiece(White,x,y,b),false)+
-       sum x,y:Pos. ((!WhiteMoves || 
+       sum x,y:Pos. ((!WhiteMoves ||
                        (WhiteMoves && !CanMove(White,b))) &&
                      x<=N && y<=M &&
                      At(x,y,b)==Empty &&
                      Enclosing(Red,x,y,b))->
            RedMove(x,y).
              Othello(PutPiece(Red,x,y,b),true)+
-       (!CanMove(Red,b) && !CanMove(White,b) && 
+       (!CanMove(Red,b) && !CanMove(White,b) &&
                      Count(Red,1,1,b)>Count(White,1,1,b)) ->
            RedWins.Othello(b,WhiteMoves)+
-       (!CanMove(Red,b) && !CanMove(White,b) && 
+       (!CanMove(Red,b) && !CanMove(White,b) &&
                      Count(Red,1,1,b)<Count(White,1,1,b)) ->
            WhiteWins.Othello(b,WhiteMoves)+
-       (!CanMove(Red,b) && !CanMove(White,b) && 
+       (!CanMove(Red,b) && !CanMove(White,b) &&
                      Count(Red,1,1,b)==Count(White,1,1,b)) ->
            Draw.Othello(b,WhiteMoves)+
        delta;

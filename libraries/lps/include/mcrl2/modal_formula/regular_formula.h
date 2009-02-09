@@ -62,7 +62,7 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula substitute(Substitution f) const
     {
       return regular_formula(f(atermpp::aterm(*this)));
-    }     
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -9,10 +9,10 @@
 /// \file ./mediator.h
 
 // ------------------------------------------------------------------
-// This is an ABSTRACT CLASS with a number of PURE VIRUAL FUNCTIONS. 
-// This serves as an INTERFACE that that should be implemented by 
-// subclasses. This allows for the implementation of a MEDIATOR 
-// design pattern where an instance of a subclass serves as the 
+// This is an ABSTRACT CLASS with a number of PURE VIRUAL FUNCTIONS.
+// This serves as an INTERFACE that that should be implemented by
+// subclasses. This allows for the implementation of a MEDIATOR
+// design pattern where an instance of a subclass serves as the
 // mediator or controller.
 // ------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ class Mediator
 public:
 	// -- destructor ------------------------------------------------
 	virtual ~Mediator() {}
-	
+
 	// -- load & save data ------------------------------------------
 	virtual void openFile( const std::string &path ) = 0;
 	virtual void saveFile( const std::string &path ) = 0;
@@ -46,7 +46,7 @@ public:
 	virtual void handleSaveAttrConfig( const std::string &path ) = 0;
 	virtual void handleLoadDiagram( const std::string &path ) = 0;
 	virtual void handleSaveDiagram( const std::string &path ) = 0;
-	
+
 	// -- general input & output ------------------------------------
 	virtual void initProgress(
 		const std::string &title,
@@ -54,18 +54,18 @@ public:
 		const int &max ) = 0;
 	virtual void updateProgress( const int &val ) = 0;
 	virtual void closeProgress() = 0;
-	
+
 	virtual void setOutputText( const std::string &msg ) = 0;
 	virtual void setOutputText( const int &val ) = 0;
 	virtual void appOutputText( const std::string &msg ) = 0;
 	virtual void appOutputText( const int &val ) = 0;
-	
+
 	virtual void getColor( ColorRGB &col ) = 0;
 	virtual void handleCloseFrame( PopupFrame* f ) = 0;
-	
+
 	// -- interaction with attributes & domains ---------------------
 	virtual void handleAttributeSel( const int &idx ) = 0;
-	virtual void handleMoveAttr( 
+	virtual void handleMoveAttr(
 		const int &idxFr,
 		const int &idxTo ) = 0;
 	virtual void handleAttributeDuplicate( const std::vector< int > &indcs ) = 0;
@@ -73,11 +73,11 @@ public:
 	virtual void handleAttributeDelete( const std::vector< int > &indcs ) = 0;
 	*/
 	virtual void handleAttributeDelete( const int &idx ) = 0;
-	virtual void handleAttributeRename( 
+	virtual void handleAttributeRename(
 		const int &idx,
 		const std::string &name ) = 0;
 	virtual void handleAttributeCluster( const std::vector< int > &indcs ) = 0;
-	
+
 	// -*- //
 	virtual void handleAttrPartition( const int &attrIdx ) = 0;
 	virtual void handleAttrPartition(
@@ -85,16 +85,16 @@ public:
 		const int &method ) = 0;
 	virtual void handleAttrDepartition( const int &attrIdx ) = 0;
 	virtual void handleAttrPartitionCloseFrame() = 0;
-	
+
 	virtual void getAttrValues(
 		const int &attrIdx,
 		std::vector< double > &vals ) = 0;
 	virtual void getAttrValues(
 		const int &attrIdx,
 		std::set< double > &vals ) = 0;
-	
+
 	// -*- //
-	
+
 	virtual void handleMoveDomVal(
 		const int &idxAttr,
 		const int &idxFr,
@@ -104,31 +104,31 @@ public:
 		const std::vector< int > domIndcs,
 		const std::string &newValue ) = 0;
 	virtual void handleDomainUngroup( const int &attrIdx ) = 0;
-	
-	virtual void getAttributeNames( 
+
+	virtual void getAttributeNames(
 		const std::vector< int > &indcs,
 		std::vector< wxString > &names ) = 0;
 	virtual int getAttributeType( const int &idx ) = 0;
 	virtual int getAttrSizeCurDomain( const int &idx ) = 0;
-	
+
 	// -- attribute plots -------------------------------------------
 	virtual void handleAttributePlot( const int &idx ) = 0;
-	virtual void handleAttributePlot( 
+	virtual void handleAttributePlot(
 		const int &idx1,
 		const int &idx2 ) = 0;
 	virtual void handleAttributePlot( const std::vector< int > &indcs ) = 0;
 	virtual void handlePlotFrameDestroy() = 0;
-	
+
 	virtual void handleEditClust( Cluster* c ) = 0;
 	virtual void handleClustFrameDisplay() = 0;
 	virtual void handleClustPlotFrameDisplay( const int &idx ) = 0;
-	virtual void handleClustPlotFrameDisplay( 
+	virtual void handleClustPlotFrameDisplay(
 		const int &idx1,
 		const int &idx2 ) = 0;
 	virtual void handleClustPlotFrameDisplay( const std::vector< int > &indcs ) = 0;
 	virtual void setClustMode( const int &m ) = 0;
 	virtual int getClustMode() = 0;
-	
+
 	// -- global mode changes ---------------------------------------
 	virtual void handleSetModeAnalysis() = 0;
 	virtual void handleSetModeEdit() = 0;
@@ -137,7 +137,7 @@ public:
 	virtual void handleSetViewTrace() = 0;
 	virtual int getView() = 0;
 	virtual bool getClustered() = 0;
-	
+
 	// -- diagram editor --------------------------------------------
 	virtual void* getGraph() = 0;
 	virtual void handleNote( const int &shapeId, const std::string &msg ) = 0;
@@ -153,7 +153,7 @@ public:
 	virtual void handleEditModeLineCol() = 0;
 	virtual void handleEditShowGrid( const bool &flag ) = 0;
 	virtual void handleEditSnapGrid( const bool &flag ) = 0;
-	
+
 	virtual void handleEditShape(
 		const bool &cut,
 		const bool &copy,
@@ -181,22 +181,22 @@ public:
 	virtual void handleEditDOFShape() = 0;
 	virtual void handleSetDOF( const int &attrIdx ) = 0;
 	virtual void handleCheckedVariable( const int &idDOF, const int &variableId ) = 0;
-	
-	virtual void handleEditDOF( 
+
+	virtual void handleEditDOF(
 		const std::vector< int > &degsOfFrdmIds,
 		const std::vector< std::string > &degsOfFrdm,
 		const std::vector< int > &attrIndcs,
 		const int &selIdx ) = 0;
 	virtual void handleDOFSel( const int &DOFIdx ) = 0;
-	
+
 	virtual void setDOFColorSelected() = 0;
 		virtual void setDOFOpacitySelected() = 0;
-	
-	virtual void handleSetDOFTextStatus( 
+
+	virtual void handleSetDOFTextStatus(
 		const int &DOFIdx,
 		const int &status ) = 0;
 	virtual int handleGetDOFTextStatus( const int &DOFIdx ) = 0;
-	
+
 	virtual void handleDOFColActivate() = 0;
 	virtual void handleDOFColDeactivate() = 0;
 	virtual void handleDOFColAdd(
@@ -211,7 +211,7 @@ public:
 	virtual void handleDOFColSetValuesEdt(
 		const std::vector< double > &hue,
 		const std::vector< double > &y ) = 0;
-	
+
 	virtual void handleDOFOpaActivate() = 0;
 	virtual void handleDOFOpaDeactivate() = 0;
 	virtual void handleDOFOpaAdd(
@@ -226,34 +226,34 @@ public:
 	virtual void handleDOFOpaSetValuesEdt(
 		const std::vector< double > &hue,
 		const std::vector< double > &y ) = 0;
-	
+
 	virtual void handleLinkDOFAttr(
 		const int DOFIdx,
 		const int attrIdx ) = 0;
 	virtual void handleUnlinkDOFAttr( const int DOFIdx ) = 0;
 	virtual void handleDOFFrameDestroy() = 0;
 	virtual void handleDOFDeselect() = 0;
-	
+
 	// -- simulator, time series & examiner -------------------------
 	virtual void initSimulator(
 		Cluster* currFrame,
 		const std::vector< Attribute* > &attrs ) = 0;
-	
+
 	virtual void initTimeSeries( const std::vector< int > attrIdcs ) = 0;
-	virtual void markTimeSeries( 
+	virtual void markTimeSeries(
 		Colleague* sender,
 		Cluster* currFrame ) = 0;
-	virtual void markTimeSeries( 
+	virtual void markTimeSeries(
 		Colleague* sender,
 		const std::vector< Cluster* > frames ) = 0;
-	
+
 	virtual void addToExaminer(
 		Cluster* currFrame,
 		const std::vector< Attribute* > &attrs ) = 0;
 	virtual void addToExaminer(
 		const std::vector< Cluster* > frames,
 		const std::vector< Attribute* > &attrs ) = 0;
-	
+
 	virtual void handleShowClusterMenu() = 0;
 	virtual void handleSendDgrm(
 		Colleague* sender,
@@ -267,45 +267,45 @@ public:
 	virtual void handleSendDgrmSetToTrace() = 0;
 	virtual void handleSendDgrmSglToExnr() = 0;
 	virtual void handleSendDgrmSetToExnr() = 0;
-	
+
 	virtual void handleClearSim( Colleague* sender ) = 0;
 	virtual void handleClearExnr( Colleague* sender ) = 0;
 	virtual void handleClearExnrCur( Colleague* sender ) = 0;
-	
+
 	//    virtual void handleAnimFrameBundl( Colleague* sender ) = 0;
 	virtual void handleAnimFrameClust( Colleague* sender ) = 0;
-	
+
 	virtual void handleMarkFrameClust( Colleague* sender ) = 0;
 	virtual void handleUnmarkFrameClusts( Colleague* sender ) = 0;
-	
+
 	virtual void handleShowFrame(
 		Cluster* frame,
 		const std::vector< Attribute* > &attrs,
 		ColorRGB &col ) = 0;
 	virtual void handleUnshowFrame() = 0;
-	
+
 	// -- visualization std::settings ------------------------------------
-	virtual void setSettingsGeneral( 
+	virtual void setSettingsGeneral(
 		const wxColour &colClr,
 		const wxColour &colTxt,
 		const int &szeTxt,
 		const double &itvAnim ) = 0;
-	virtual void setSettingsClustTree( 
+	virtual void setSettingsClustTree(
 		const bool &show,
 		const bool &annotate,
 		const int &colMap ) = 0;
-	virtual void setSettingsBarTree( 
+	virtual void setSettingsBarTree(
 		const bool &show,
 		const double &magn ) = 0;
 	virtual void setSettingsSimulator( const int &blendType ) = 0;
 	virtual void setSettingsTrace( const bool &useShading ) = 0;
-	virtual void setSettingsArcDiagram( 
+	virtual void setSettingsArcDiagram(
 		const bool &showNodes,
 		const bool &showArcs,
 		const wxColour &colArcs,
 		const double &trspArcs ) = 0;
-	
-	virtual void getSettingsGeneral( 
+
+	virtual void getSettingsGeneral(
 		wxColour &colClr,
 		wxColour &colTxt,
 		int &szeTxt,
@@ -314,24 +314,24 @@ public:
 		bool &show,
 		bool &annotate,
 		int &colMap ) = 0;
-	virtual void getSettingsBarTree( 
+	virtual void getSettingsBarTree(
 		bool &show,
 		double &magn ) = 0;
 	virtual void getSettingsSimulator( int &blendType ) = 0;
 	virtual void getSettingsTrace( bool &useShading ) = 0;
-	virtual void getSettingsArcDiagram( 
+	virtual void getSettingsArcDiagram(
 		bool &showNodes,
 		bool &showArcs,
 		wxColour &colArcs,
 		double &trspArcs ) = 0;
 	virtual void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom) = 0;
-	
+
 	// -- visualization ---------------------------------------------
 	virtual void handlePaintEvent( GLCanvas* c ) = 0;
 	virtual void handleSizeEvent( GLCanvas* c ) = 0;
-	
+
 	virtual void updateDependancies( GLCanvas* c ) = 0;
-	
+
 	// -- input event handlers --------------------------------------
 	virtual void handleDragDrop(
 		const int &srcWindowId,
@@ -339,10 +339,10 @@ public:
 		const int &tgtX,
 		const int &tgtY,
 		const std::vector< int > &data ) = 0;
-	
-	virtual void handleMouseLftDownEvent( 
-		GLCanvas* c, 
-		const int &x, 
+
+	virtual void handleMouseLftDownEvent(
+		GLCanvas* c,
+		const int &x,
 		const int &y ) = 0;
 	virtual void handleMouseLftUpEvent(
 			GLCanvas* c,
@@ -352,9 +352,9 @@ public:
 		GLCanvas* c,
 		const int &x,
 		const int &y ) = 0;
-		virtual void handleMouseRgtDownEvent( 
-		GLCanvas* c, 
-		const int &x, 
+		virtual void handleMouseRgtDownEvent(
+		GLCanvas* c,
+		const int &x,
 		const int &y ) = 0;
 	virtual void handleMouseRgtUpEvent(
 			GLCanvas* c,
@@ -386,11 +386,11 @@ public:
 		GLCanvas* c,
 		const int &keyCode,
 		const int &specialKey ) = 0;
-	
+
 	// -- overloaded operators --------------------------------------
 	virtual void operator<<( const std::string &msg ) = 0;
 	virtual void operator<<( const int& msg ) = 0;
-	
+
 	// -- public constants ------------------------------------------
 	enum
 	{

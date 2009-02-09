@@ -22,7 +22,7 @@ namespace Utils {
   Vect operator-(Vect v1, Vect v2);
   Vect operator*(double s, Vect v);
   Vect operator/(Vect v, double s);
-  
+
   float vecLength(Vect v);
   float angDiff(Vect v1, Vect v2);
   float signum(float f);

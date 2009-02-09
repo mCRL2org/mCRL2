@@ -47,18 +47,18 @@ private:
     void _add_state(ATermAppl Transition, ATerm State, bool enabled);
     void _reset(ATerm State);
     void _update();
-    
+
 private:
     // WDR: member variable declarations for XSimMain
     wxListView *traceview;
     SimulatorInterface *simulator;
     unsigned int current_pos;
-    
+
 private:
     // WDR: handler declarations for XSimMain
     void OnCloseWindow( wxCloseEvent &event );
     void OnListItemActivated( wxListEvent &event );
-    
+
 private:
 
 private:

@@ -71,7 +71,7 @@ int main(int argc, char** argv)
   catch (mcrl2::runtime_error e)
   {
     std::cerr << e.what() << std::endl;
-  }     
-  
+  }
+
   return 0;
 }

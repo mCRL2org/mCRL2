@@ -347,7 +347,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     AM_Inner::~AM_Inner() {
-      // There's nothing to free here, since there weren't 
+      // There's nothing to free here, since there weren't
       // any new objects created in the constructor.
     }
 

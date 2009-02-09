@@ -42,7 +42,7 @@ struct t_options {
 typedef struct
   {
     std::string Name;
-    std::string Type; 
+    std::string Type;
     std::string InitValue;
   } RecProcessVariable;
 
@@ -82,7 +82,7 @@ typedef struct
      std::set<int>  streams;
      bool parallel;
      bool alternative;
-     
+
    } RecParenthesisInfo;
 
 //Information per transition
@@ -147,8 +147,8 @@ class CAsttransform
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
     std::pair<std::vector<RPV>, std::vector<RPC> > manipulateProcessSpecification(ATermAppl input);
-    std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input); 
-    
+    std::vector<RPV> manipulateProcessVariableDeclarations(ATermList input);
+
     std::vector<std::string> getVariablesNamesFromList(ATermList input);
     std::vector<RPC> manipulateDeclaredProcessChannels(ATermList input);
 
@@ -181,7 +181,7 @@ class CAsttransform
 
     std::map<int, std::set<int> > endstates_per_parenthesis_level;
     std::map<int, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
- 
+
     int determineEndState(std::set<int> org_set, int lvl);
     bool loop;  //Variable to indicate if a parenthesis_level is looped
     bool guardedloop; //Variable to indicatie if a parenthesis_level is a guarded loop
@@ -201,7 +201,7 @@ class CAsttransform
     // std::vector<int> bypass;
     std::vector<RPV> manipulateModelSpecification(ATermAppl input);
     void manipulateModelStatements(ATermAppl input);
-    
+
     std::string initialisation;
     std::map<std::string, RPVS> ProcessForInstantation;
 
@@ -213,10 +213,10 @@ class CAsttransform
 
     //These channels will form define the multi-actions for mCRL2-specification
     // STRING [ChannelID] x INT [HASH] -> RC
-    std::map<std::pair < std::string, int >, RC> Channels; 
+    std::map<std::pair < std::string, int >, RC> Channels;
 
     std::map<std::string, int > instantation_counter;
-   
+
     std::map<ATermAppl, std::string> structset;
     std::string printStructset(ATermAppl input);
     std::string initialValueVariable(std::string Type);
@@ -227,22 +227,22 @@ class CAsttransform
 
     std::set<std::string> takeTypes;
     std::set<std::string> dropTypes;
-    std::set<std::string> union_setTypes;  
-    std::set<std::string> intersection_setTypes;  
-    std::set<std::string> sub_setTypes;  
-    std::set<std::string> dif_setTypes;  
+    std::set<std::string> union_setTypes;
+    std::set<std::string> intersection_setTypes;
+    std::set<std::string> sub_setTypes;
+    std::set<std::string> dif_setTypes;
     std::set<std::string> equal_setTypes;
 
     std::set<std::string> InstantiatedHashedChannels;
 
-    std::set<std::string> DeclaredTypesForChannels; 
+    std::set<std::string> DeclaredTypesForChannels;
 
     bool TypeChecking(ATermAppl arg1, ATermAppl arg2);
 
     //OPTIONS
     bool no_statepar;
 
-} 
+}
 ;
 
 

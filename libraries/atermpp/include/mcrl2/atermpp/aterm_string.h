@@ -20,14 +20,14 @@
 namespace atermpp
 {
   using detail::str2appl;
-  
+
   /// \brief Term containing a string.
   class aterm_string: public aterm_appl
   {
     public:
       /// \brief Constructor.
       aterm_string()
-      {} 
+      {}
 
       /// \brief Constructor.
       /// \param t A term
@@ -36,7 +36,7 @@ namespace atermpp
       {
         assert(aterm_appl(t).size() == 0);
       }
-  
+
       /// \brief Constructor.
       /// \param t A term containing a string.
       aterm_string(aterm_appl t)
@@ -44,7 +44,7 @@ namespace atermpp
       {
         assert(t.size() == 0);
       }
-  
+
       /// Allow construction from an aterm. The aterm must be of the right type, and may have no children.
       /// \param t A term containing a string.
       aterm_string(aterm t)

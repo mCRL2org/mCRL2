@@ -34,7 +34,7 @@ namespace atermpp
       {
         return ATdictGet(*this, key);
       }
-      
+
       /// \brief Add / update a (key, value)-pair in a dictionary.
       /// If key does not already exist in the dictionary, this function adds the (key,
       /// value)-pair to the dictionary. Otherwise, it updates the value to value.
@@ -44,7 +44,7 @@ namespace atermpp
       {
         m_term = ATdictPut(*this, key, value);
       }
-      
+
       /// \brief Remove the (key, value)-pair from the dictionary.
       /// This function can be used to remove an entry from the dictionary.
       /// \param key A key value.

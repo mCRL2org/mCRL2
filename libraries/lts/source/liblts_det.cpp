@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger, Muck van Weerdenburg 
+// Author(s): Bas Ploeger, Muck van Weerdenburg
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -90,15 +90,15 @@ static void get_trans(unsigned int *begin,tree_set_store *tss,unsigned int d,
 
 void lts::determinise() {
   tree_set_store *tss = new tree_set_store();
-  
+
   vector<unsigned int> d_transs;
   vector<unsigned int> d_states;
-  
+
   // create the initial state of the DLTS
   d_states.push_back(initial_state());
   unsigned int d_id = tss->set_set_tag(tss->create_set(d_states));
   d_states.clear();
-  
+
   sort_transitions();
   unsigned int *begin = get_transition_indices();
   unsigned int d_ntransitions = 0;
@@ -108,15 +108,15 @@ void lts::determinise() {
 
   int s;
   unsigned int i,to,lbl,n_t;
-  
+
   while (d_id < tss->get_next_tag()) {
     // collect the outgoing transitions of every state of DLTS state d_id in
     // the vector d_transs
     get_trans(begin,tss,tss->get_set(d_id),d_transs);
-    
+
     // sort d_transs by label and (if labels are equal) by destination
     sort(d_transs.begin(),d_transs.end(),comp_trans_lds(this));
-    
+
     n_t = d_transs.size();
     i = 0;
     for (lbl = 0; lbl < num_labels(); ++lbl) {

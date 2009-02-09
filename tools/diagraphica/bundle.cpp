@@ -59,8 +59,8 @@ Bundle::~Bundle()
     clearOutCluster();
     clearEdges();
 }
-	
-  
+
+
 // -- set functions -------------------------------------------------
 
 
@@ -109,7 +109,7 @@ void Bundle::addEdge( Edge* e )
 // ----------------------------
 {
     edges.push_back( e );
-    
+
     labels.insert( pair< string, string >( e->getLabel(), "MAY" ) );
 }
 
@@ -125,7 +125,7 @@ void Bundle::setEdges( const vector< Edge* > &e )
     for( size_t i = 0; i < edges.size(); ++i )
         labels.insert( pair< string, string >( edges[i]->getLabel(), "MAY" ) );
 }
-    
+
 
 // -----------------------
 void Bundle::updateLabel(
@@ -135,7 +135,7 @@ void Bundle::updateLabel(
 {
     labels[lbl] = status;
 }
-    
+
 
 // -- get functions -------------------------------------------------
 
@@ -146,7 +146,7 @@ int Bundle::getIndex()
 {
     return index;
 }
-    
+
 
 // ------------------------
 Bundle* Bundle::getParent()
@@ -173,7 +173,7 @@ Bundle* Bundle::getChild( const size_t &idx )
         result = children[idx];
     return result;
 }
-        
+
 
 // ----------------------------
 Cluster* Bundle::getInCluster()
@@ -228,7 +228,7 @@ void Bundle::getLabels( vector< string > &lbls )
 
 
 // ---------------------------
-void Bundle::getLabels( 
+void Bundle::getLabels(
     vector< string > &lbls,
     vector< string > &status )
 // ---------------------------
@@ -246,7 +246,7 @@ void Bundle::getLabels(
 
 
 // --------------------
-void Bundle::getLabels( 
+void Bundle::getLabels(
     string &separator,
     string &lbls )
 // --------------------
@@ -255,7 +255,7 @@ void Bundle::getLabels(
 
     int size  = labels.size();
     int count = 0;
-    
+
     map< string, string >::iterator it;
     for( it = labels.begin(); it != labels.end(); ++it )
     {
@@ -270,7 +270,7 @@ void Bundle::getLabels(
     }
 }
 
-  
+
 // -- clear functions -----------------------------------------------
 
 
@@ -298,7 +298,7 @@ void Bundle::clearInCluster()
 {
     inCluster = NULL;
 }
-    
+
 
 // ---------------------------
 void Bundle::clearOutCluster()

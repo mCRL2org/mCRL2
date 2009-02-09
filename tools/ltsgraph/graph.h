@@ -9,7 +9,7 @@
 /// \file graph.h
 /// \brief Graph class.
 
-#ifndef GRAPH_H 
+#ifndef GRAPH_H
 #define GRAPH_H
 
 #include <vector>
@@ -44,7 +44,7 @@ class Graph
     int getNumStates() const;
     int getNumTrans() const;
     int getNumLabels() const;
-  
+
   private:
     std::vector<State*> states;
     std::vector<std::string> parameters;

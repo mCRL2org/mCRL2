@@ -25,7 +25,7 @@ namespace mcrl2 {
  *             terms of state and action formulas.
  **/
 ATermAppl translate_reg_frms(ATermAppl state_frm);
-   
+
   }   // namespace core
 }     // namespace mcrl2
 

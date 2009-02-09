@@ -47,7 +47,7 @@ END_EVENT_TABLE()
 
 MainFrame::MainFrame(LTSGraph* owner)
   : wxFrame(NULL, wxID_ANY, wxT("LTSGraph"),
-    wxDefaultPosition, wxDefaultSize, 
+    wxDefaultPosition, wxDefaultSize,
     wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
   app = owner;
@@ -69,11 +69,11 @@ void MainFrame::setupMenuBar()
 
   // File menu
   wxMenu* fileMenu = new wxMenu;
-  fileMenu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"), 
+  fileMenu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"),
                wxT("Read an LTS from a file."));
-  fileMenu->Append(myID_IMPORT, wxT("&Import...\tCTRL-i"), 
+  fileMenu->Append(myID_IMPORT, wxT("&Import...\tCTRL-i"),
       wxT("Read an LTS Layout from a file."));
-  fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"), 
+  fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"),
                wxT("Export this LTS to file."));
 
   fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph."));
@@ -87,9 +87,9 @@ void MainFrame::setupMenuBar()
   toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
-  toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."), 
+  toolsMenu->Append(wxID_PREFERENCES, wxT("Settings..."),
                    wxT("Display the visualization settings dialog."));
-  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"), 
+  toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"),
                     wxT("Display dialog with information about this LTS."));
 
   // Help menu
@@ -116,7 +116,7 @@ void MainFrame::setupMainArea()
   glCanvas = new GLCanvas(app, this, wxDefaultSize, attribList);
 
   mainSizer->Add(glCanvas, 1, wxALIGN_CENTER|wxEXPAND|wxALL, 0);
-  
+
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
@@ -132,11 +132,11 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
              "|All files (*.*)|*.*").c_str(),
              wxConvLocal),
     wxFD_OPEN|wxFD_CHANGE_DIR);
-  
+
   if (dialog.ShowModal() == wxID_OK)
   {
     wxString path = dialog.GetPath();
-    std::string stPath(path.fn_str()); 
+    std::string stPath(path.fn_str());
 
     app->openFile(stPath);
   }
@@ -154,11 +154,11 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
   wxFileDialog dialog(this, wxT("Select a layout file"), wxEmptyString, wxEmptyString,
     wxT("XML layout file (*.xml)|*.xml|All files (*.*)|*.*"),
     wxFD_OPEN|wxFD_CHANGE_DIR);
-  
+
   if (dialog.ShowModal() == wxID_OK)
   {
     wxString path = dialog.GetPath();
-    std::string stPath(path.fn_str()); 
+    std::string stPath(path.fn_str());
 
     app->openFile(stPath);
   }
@@ -166,13 +166,13 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
 
 void MainFrame::onExport(wxCommandEvent& /*event*/)
 {
-  bool startExport = false; 
+  bool startExport = false;
   wxString caption = wxT("Export layout as");
   wxString wildcard = wxT("Scalable Vector Graphics (*.svg)|*.svg|XML Layout file (*.xml)|*.xml|LaTeX TikZ drawing (*.tex)|*.tex");
   wxString defaultDir = wxEmptyString; // Empty string -> cwd
-  
+
   wxString defaultFileName(app->getFileName().c_str(), wxConvLocal);
-  
+
   // Strip extension from filename
   if(defaultFileName.Find('.') != -1 )
   {
@@ -180,11 +180,11 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 
   wxFileDialog dialog(this, caption, defaultDir, defaultFileName, wildcard,
-                      wxFD_SAVE | wxFD_CHANGE_DIR);      
+                      wxFD_SAVE | wxFD_CHANGE_DIR);
   std::auto_ptr< Exporter > exporter;
   wxString fileName;
 
-  while(!startExport) 
+  while(!startExport)
   {
     if(dialog.ShowModal() == wxID_CANCEL)
     {
@@ -227,9 +227,9 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
       {
         exporter.reset(new ExporterLatex(app->getGraph(), app));
       }
-      else 
+      else
       {
-        // Unknown file format, export to xml 
+        // Unknown file format, export to xml
         exporter.reset(new ExporterXML(app->getGraph()));
       }
     }
@@ -290,7 +290,7 @@ void MainFrame::onSettings(wxCommandEvent& /* event */)
 void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
 {
   infoDlg->setLTSInfo(is, ns, nt, nl);
-  
+
   wxString title(app->getFileName().c_str(), wxConvLocal);
   title = wxT("LTSGraph - ") + title;
   SetTitle(title);

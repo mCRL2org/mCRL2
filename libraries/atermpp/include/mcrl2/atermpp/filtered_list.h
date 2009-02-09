@@ -25,7 +25,7 @@ namespace atermpp {
     protected:
       /// A predicate.
       const Predicate& m_predicate;
-    
+
     public:
       /// The iterator type of the filtered list.
       typedef boost::filter_iterator<Predicate, typename List::const_iterator> iterator;

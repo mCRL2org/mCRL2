@@ -31,7 +31,7 @@ public:
 protected:
     // -- event handlers --------------------------------------------
     virtual void OnClose( wxCloseEvent& event );
-    
+
 private:
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()

@@ -14,13 +14,13 @@
 #include "simulation.h"
 
 class simReader {
-  public: 
+  public:
     simReader(Simulation* s);
     virtual ~simReader();
-    virtual void refresh() = 0; 
+    virtual void refresh() = 0;
     virtual void selChange() = 0;
     virtual void setSim(Simulation* s);
- 
+
   protected:
     Simulation* sim;
 

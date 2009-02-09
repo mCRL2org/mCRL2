@@ -21,13 +21,13 @@ Graph* XMLImporter::importFile(std::string filename)
 
     Graph* g = NULL;
     g = new Graph();
-    
+
     ticpp::Document doc(filename);
     doc.LoadFile();
-    
-    
+
+
     ticpp::Iterator<ticpp::Element> graph("Graph");
-    
+
 
     for( graph = graph.begin(&doc); graph != graph.end(); ++graph)
     {
@@ -35,10 +35,10 @@ Graph* XMLImporter::importFile(std::string filename)
       ticpp::Iterator<ticpp::Element> state("State");
       for(state = state.begin(graph.Get()); state!= state.end(); ++state)
       {
-        size_t value; 
+        size_t value;
         state->GetAttribute("value", &value);
 
-        bool isInitial; 
+        bool isInitial;
         state->GetAttribute("isInitial", &isInitial);
 
         double x;
@@ -57,7 +57,7 @@ Graph* XMLImporter::importFile(std::string filename)
         state->GetAttribute("blue", &blue);
 
         wxColour colour(red, green, blue);
-        
+
         std::map<std::string, std::string> parameters;
 
         ticpp::Iterator<ticpp::Element> param("Parameter");
@@ -66,7 +66,7 @@ Graph* XMLImporter::importFile(std::string filename)
         {
           std::string name;
           param->GetAttribute("name", &name);
-          
+
           std::string parValue;
           param->GetText(&parValue);
           std::pair<std::string, std::string> p(name, parValue);
@@ -84,18 +84,18 @@ Graph* XMLImporter::importFile(std::string filename)
 
       // All states have been created, now iterate over the transitions
       ticpp::Iterator<ticpp::Element> transition("Transition");
-      for(transition  = transition.begin(graph.Get()); 
+      for(transition  = transition.begin(graph.Get());
           transition != transition.end(); ++transition)
       {
         size_t from, to;
         transition->GetAttribute("from", &from);
         transition->GetAttribute("to", &to);
-        
+
         std::string label = transition->GetAttribute("label");
         double x, y;
         transition->GetAttribute("x", &x);
         transition->GetAttribute("y", &y);
-        
+
         if(from == to)
         {
           State* s = g->getState(from);
@@ -109,7 +109,7 @@ Graph* XMLImporter::importFile(std::string filename)
           Transition* t = new Transition(fromState, toState, label);
 
           fromState->addOutTransition(t);
-          // Now set the transitions control, as the state's add method can 
+          // Now set the transitions control, as the state's add method can
           // change this.
           t->setControl(x,y);
           toState->addInTransition(t);

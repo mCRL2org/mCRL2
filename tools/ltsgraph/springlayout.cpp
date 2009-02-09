@@ -40,34 +40,34 @@ SpringLayout::SpringLayout(LTSGraph* owner)
 }
 
 void SpringLayout::setupPane(wxPanel* pane)
-{ 
+{
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
 
   wxFlexGridSizer* sizer = new wxFlexGridSizer(0, 1, 0, 0);
 
   wxSlider* sliderNodeStrength = new wxSlider(
-                                        pane, myID_NS_SLIDER, 
-                                        nodeStrength,10000, 1000000, 
-                                        wxDefaultPosition, wxDefaultSize, 
+                                        pane, myID_NS_SLIDER,
+                                        nodeStrength,10000, 1000000,
+                                        wxDefaultPosition, wxDefaultSize,
                                         wxSL_HORIZONTAL);
   wxSlider* sliderEdgeStiffness = new wxSlider(
                                         pane, myID_ES_SLIDER,
-                                        edgeStiffness, 0, 15, 
+                                        edgeStiffness, 0, 15,
                                         wxDefaultPosition, wxDefaultSize,
                                         wxSL_HORIZONTAL);
   wxSlider* sliderNaturalLength = new wxSlider(
                                         pane, myID_NL_SLIDER,
-                                        naturalLength, 1, 500, 
+                                        naturalLength, 1, 500,
                                         wxDefaultPosition, wxDefaultSize,
                                         wxSL_HORIZONTAL);
 
   optimizeBtn = new wxButton(pane, myID_START_OPTI, wxT("Start"));
-  stopBtn = new wxButton(pane, myID_STOP_OPTI, wxT("Stop")); 
+  stopBtn = new wxButton(pane, myID_STOP_OPTI, wxT("Stop"));
   stopBtn->Enable(false);
-  
-  sizer->Add( 
-    new wxStaticText(pane, wxID_ANY, wxT("State repulsion")), 
+
+  sizer->Add(
+    new wxStaticText(pane, wxID_ANY, wxT("State repulsion")),
     0, lflags, 4);
   sizer->Add(sliderNodeStrength, 0, rflags, 3);
 
@@ -80,7 +80,7 @@ void SpringLayout::setupPane(wxPanel* pane)
     new wxStaticText(pane, wxID_ANY, wxT("Natural transition length")),
     0, lflags, 4);
   sizer->Add(sliderNaturalLength, 0, rflags, 3);
-  
+
   wxFlexGridSizer* btnSizer = new wxFlexGridSizer(0, 2, 0, 0);
   btnSizer->Add(optimizeBtn);
   btnSizer->Add(stopBtn);
@@ -112,14 +112,14 @@ void SpringLayout::onStart(wxCommandEvent& /* event */)
 
       if(app)
       {
-        app->display(); 
+        app->display();
       }
 
       wxYield();
     }
-    
+
     stopped = true;
-    
+
   }
 }
 
@@ -131,7 +131,7 @@ void SpringLayout::onStop(wxCommandEvent& /* event */)
     optimizeBtn->Enable(true);
   }
   if(stopBtn)
-  {  
+  {
     stopBtn->Enable(false);
   }
   stopOpti = true;
@@ -152,7 +152,7 @@ void SpringLayout::layoutGraph(Graph* graph)
     sumFY.push_back(0.0f);
 
     State* s1 = graph->getState(i);
-    
+
     // Calculate forces
     double x1 = s1->getX();
     double y1 = s1->getY();
@@ -193,10 +193,10 @@ void SpringLayout::layoutGraph(Graph* graph)
         }
       }
     }
-    
+
     sumFX[i] += -2 * x1 / windowWidth;
-    sumFY[i] += -2 * y1 / windowHeight;  
-  
+    sumFY[i] += -2 * y1 / windowHeight;
+
     for(size_t j = 0; j < s1->getNumberOfTransitions(); ++j)
     {
       State* s2 = s1->getTransition(j)->getTo();
@@ -248,7 +248,7 @@ void SpringLayout::layoutGraph(Graph* graph)
     {
       newX = s->getX() + sumFX[i];
       newY = s->getY() + sumFY[i];
-      
+
       if(newX > 1000)
       {
         newX = 1000;
@@ -258,7 +258,7 @@ void SpringLayout::layoutGraph(Graph* graph)
       {
         newX = -1000;
       }
-      
+
       if (newY > 1000)
       {
         newY = 1000;
@@ -268,12 +268,12 @@ void SpringLayout::layoutGraph(Graph* graph)
       {
         newY = -1000;
       }
-     
+
       s->setX(newX);
       s->setY(newY);
     }
   }
-  
+
 }
 
 void SpringLayout::onNodeStrength(wxScrollEvent& evt)

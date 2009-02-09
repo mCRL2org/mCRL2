@@ -14,7 +14,7 @@
 
 #include <string>
 
-const std::string ABP_SPECIFICATION = 
+const std::string ABP_SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"

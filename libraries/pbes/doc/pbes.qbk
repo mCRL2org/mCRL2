@@ -8,13 +8,13 @@ They are explained in more detail in the upcoming sections.
 
 [table Overview of PBES Library classes
     [[type] [class]]
-    [[ propositional variable declaration   ] [ `propositional_variable`                  ]] 
-    [[ propositional variable instantiation ] [ `propositional_variable_instantiation`    ]] 
-    [[ predicate formula                    ] [ `pbes_expression`                         ]] 
-    [[ initial state of a PBES              ] [ `pbes_initializer`                        ]] 
-    [[ fixpoint symbol                      ] [ `fixed_point_symbol`                      ]] 
-    [[ PBES equation                        ] [ `pbes_equation`                           ]] 
-    [[ PBES                                 ] [ `template<typename Container> class pbes` ]] 
+    [[ propositional variable declaration   ] [ `propositional_variable`                  ]]
+    [[ propositional variable instantiation ] [ `propositional_variable_instantiation`    ]]
+    [[ predicate formula                    ] [ `pbes_expression`                         ]]
+    [[ initial state of a PBES              ] [ `pbes_initializer`                        ]]
+    [[ fixpoint symbol                      ] [ `fixed_point_symbol`                      ]]
+    [[ PBES equation                        ] [ `pbes_equation`                           ]]
+    [[ PBES                                 ] [ `template<typename Container> class pbes` ]]
 ]
 
 [section: PBES expressions]
@@ -98,7 +98,7 @@ that work both for both BES and PBES expressions.
 [endsect] [/ Operations on PBES expressions]
 
 [section: Algorithms on PBES expressions]
-The following table gives an overview of the available algorithms on PBES expressions. 
+The following table gives an overview of the available algorithms on PBES expressions.
 
 [table Algorithms on PBES expressions
   [ [           algorithm                            ] [               description                                                                            ] [ header ] ]
@@ -172,14 +172,14 @@ conjunctions appearing in a PBES expression.
     struct and_visitor: public pbes_expression_visitor<pbes_expression>
     {
       std::set<pbes_expression> result;
-    
+
       bool visit_and(const pbes_expression& x, const pbes_expression& /* left */, const pbes_expression& /* right */)
       {
         result.insert(x);
         return continue_recursion;
       }
     };
-    
+
     // returns all conjunctions that appear as a subterm of x
     std::set<pbes_expression> find_conjunctions(const pbes_expression& x)
     {
@@ -232,8 +232,8 @@ occurring in the PBES must be defined.
 A PBES must satisfy the following well typedness constraints:
 
 * the sorts occurring in the free variables of the equations are declared in the data specification
-* the sorts occurring in the binding variable parameters are declared in the data specification 
-* the sorts occurring in the quantifier variables of the equations are declared in the data specification 
+* the sorts occurring in the binding variable parameters are declared in the data specification
+* the sorts occurring in the quantifier variables of the equations are declared in the data specification
 * the binding variables of the equations have unique names (well formedness)
 * the free variables occurring in the equations are declared in `free_variables()`
 * the free variables occurring in the equations with the same name are identical
@@ -287,5 +287,5 @@ PBESs can be parsed, using the function `txt2pbes`:
     pbes<> p = txt2pbes(text);
 
 * TODO Add more examples
-    
+
 [endsect] [/ Parameterised Boolean Equation Systems]

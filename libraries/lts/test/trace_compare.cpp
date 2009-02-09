@@ -87,7 +87,7 @@ int test_main(int argc, char **argv)
 
   BOOST_CHECK( ! l1.compare(l4,lts_eq_trace) );
   BOOST_CHECK( ! l4.compare(l1,lts_eq_trace) );
-  
+
   BOOST_CHECK( l2.compare(l3,lts_eq_weak_trace) );
   BOOST_CHECK( l3.compare(l2,lts_eq_weak_trace) );
 

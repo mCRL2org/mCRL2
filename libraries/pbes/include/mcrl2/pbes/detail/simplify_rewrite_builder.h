@@ -22,7 +22,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
 namespace detail {
-  
+
   struct no_substitution
   {
   };
@@ -34,8 +34,8 @@ namespace detail {
     typedef pbes_expression_builder<Term, SubstitutionFunction>                super;
     typedef SubstitutionFunction                                               argument_type;
     typedef typename super::term_type                                          term_type;
-    typedef typename core::term_traits<term_type>::data_term_type              data_term_type;             
-    typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;    
+    typedef typename core::term_traits<term_type>::data_term_type              data_term_type;
+    typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;
     typedef typename core::term_traits<term_type>::variable_sequence_type variable_sequence_type;
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
@@ -53,7 +53,7 @@ namespace detail {
 //std::cerr << m_data_rewriter.type() << "<d>" << core::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
       return m_data_rewriter(d, sigma);
     }
-    
+
     /// \brief Is called in the case rewriting is done without a substitution function.
     /// \param d A data term
     /// \return The rewrite result
@@ -259,7 +259,7 @@ namespace detail {
       term_type result = tr::prop_var(tr::name(v), d.begin(), d.end());
       return result;
     }
-   
+
     /// \brief Applies this builder to the term x.
     /// \param x A term
     /// \return The rewrite result

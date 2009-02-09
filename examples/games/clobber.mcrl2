@@ -1,9 +1,9 @@
 % This specification describes the game `Clobber', which is a two
 % player board game. There is a board of 8 by 8 (although below
 % we describe a board of 4 by 4, as otherwise the state space is
-% prohibitively big). One player has white pieces  (0) and the 
+% prohibitively big). One player has white pieces  (0) and the
 % other has black pieces (X). Initially, the board is set up as:
-% 
+%
 %      0 X 0 X 0 X 0 X
 %      X 0 X 0 X 0 X 0
 %      0 X 0 X 0 X 0 X
@@ -12,12 +12,12 @@
 %      X 0 X 0 X 0 X 0
 %      0 X 0 X 0 X 0 X
 %      X 0 X 0 X 0 X 0
-% 
-% Black makes the first move and players alternatingly make a move. A 
+%
+% Black makes the first move and players alternatingly make a move. A
 % player makes a turn by moving a piece
-% of its own color horizontally or vertically to a position with a 
-% piece of the opposite color and it removes that piece. This is 
-% the only move that is allowed. The first player that cannot do a 
+% of its own color horizontally or vertically to a position with a
+% piece of the opposite color and it removes that piece. This is
+% the only move that is allowed. The first player that cannot do a
 % move looses the game.
 %
 % Thanks go to Mark Winands for explaining the game.
@@ -69,19 +69,19 @@ eqn At(x,y,Up,b)=At(x,y+1,b);
 
     x==N && y==M ->
       CanMove(x,y,p,p',b)=
-         At(x,y,b)==p && 
+         At(x,y,b)==p &&
             ( At(x,y,Down,b)==p' || At(x,y,Left,b)==p');
 
     x==N && y<M ->
       CanMove(x,y,p,p',b)=
-         (At(x,y,b)==p && 
-            (At(x,y,Up,b)==p' || 
+         (At(x,y,b)==p &&
+            (At(x,y,Up,b)==p' ||
              At(x,y,Down,b)==p' || At(x,y,Left,b)==p')) ||
           CanMove(1,y+1,p,p',b);
 
     x<N ->
       CanMove(x,y,p,p',b)=
-         (At(x,y,b)==p && 
+         (At(x,y,b)==p &&
             (At(x,y,Up,b)==p' || At(x,y,Right,b)==p' ||
              At(x,y,Down,b)==p' || At(x,y,Left,b)==p')) ||
           CanMove(x+1,y,p,p',b);
@@ -92,16 +92,16 @@ act WhiteMove,BlackMove:Pos#Pos#Direction;
 
 proc Clobber(b:Board,WhiteMoves:Bool)=
        sum x,y:Pos, dir:Direction.
-                    (WhiteMoves && 
+                    (WhiteMoves &&
                      x<=N && y<=M &&
-                     At(x,y,b)==White && 
+                     At(x,y,b)==White &&
                      At(x,y,dir,b)==Black)->
            WhiteMove(x,y,dir).
              Clobber(Put(White,x,y,dir,Put(Empty,x,y,b)),false)+
        sum x,y:Pos, dir:Direction.
-                    (!WhiteMoves && 
+                    (!WhiteMoves &&
                      x<=N && y<= M &&
-                     At(x,y,b)==Black && 
+                     At(x,y,b)==Black &&
                      At(x,y,dir,b)==White)->
            BlackMove(x,y,dir).
              Clobber(Put(Black,x,y,dir,Put(Empty,x,y,b)),true)+

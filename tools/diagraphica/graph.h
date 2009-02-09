@@ -66,19 +66,19 @@ public:
     void moveAttribute(
         const size_t &idxFr,
         const size_t &idxTo );
-    void configAttributes( 
+    void configAttributes(
         std::map< int, int > &idcsFrTo,
         std::map< int, std::vector< std::string > > &attrCurDomains,
         std::map< int, std::map< int, int  > > &attrOrigToCurDomains );
     void duplAttributes( const std::vector< int > &idcs );
     void deleteAttribute( const int &idx );
-    
+
     void addNode( const std::vector< double > &tpl );
     void addEdge(
         const std::string &lbl,
         const int &inNodeIdx,
         const int &outNodeIdx );
-    
+
     void initGraph();
 
     // -- get functions  --------------------------------------------
@@ -96,16 +96,16 @@ public:
     int getSizeLeaves();
     Bundle* getBundle( const size_t &idx );
     int getSizeBundles();
-    
+
     // -- calculation functions -------------------------------------
-    void calcAttrDistr( 
+    void calcAttrDistr(
         const int &attrIdx,
         std::vector< int > &distr );
     void calcAttrDistr(
         Cluster* clust,
         const int &attrIdx,
         std::vector< int > &distr );
-    
+
     void calcAttrCorrl(
         const int &attrIdx1,
         const int &attrIdx2,
@@ -117,7 +117,7 @@ public:
         const int &attrIdx2,
         std::vector< std::vector< int > > &corrlMap,
         std::vector< std::vector< int > > &number );
-    
+
     void calcAttrCombn(
         const std::vector< int > &attrIndcs,
         std::vector< std::vector< int > > &combs,
@@ -142,23 +142,23 @@ public:
         Cluster* clust,
         const std::vector< Attribute* > &attrs,
         std::vector< Cluster* > &combs );
-    
+
     bool hasMultAttrCombns(
         Cluster* clust,
         const std::vector< int > &attrIndcs );
-    
+
     // -- cluster & bundle functions --------------------------------
     void clustNodesOnAttr( const std::vector< int > &attrIdcs );
     void clearSubClusters( const std::vector< int > &coord );
-    
+
     int sumNodesInCluster( const std::vector< int > &coord );
-    void sumNodesInCluster( 
+    void sumNodesInCluster(
         Cluster* clust,
         int &total );
-    void getDescNodesInCluster( 
+    void getDescNodesInCluster(
         const std::vector< int > &coord,
         std::vector< Node* > &nodes );
-    void getDescNodesInCluster( 
+    void getDescNodesInCluster(
         Cluster* clust,
         std::vector< Node* > &nodes );
     int calcMaxNumCombns( const std::vector< int > &attrIdcs );
@@ -170,9 +170,9 @@ protected:
     void deleteNodes();
     void addEdge( Edge* e );
     void deleteEdges();
-    
+
     void initRoot();
-    
+
     void clustNodesOnAttr(
         Cluster* clust,
         std::vector< int > attrIdcs,
@@ -184,13 +184,13 @@ protected:
         Cluster* clust,
         const int &attrIdx );
     void clearSubClusters( Cluster* clust );
-    
+
     void updateLeaves();
     void updateLeaves( Cluster* clust );
     //void updateLeaves( std::vector< Cluster* > &clusts );
     void clearLeaves();
     void deleteClusters();
-    
+
     void printClusters();
     void printClusters( std::vector< Cluster* > &clusts );
 

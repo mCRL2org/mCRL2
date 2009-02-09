@@ -43,9 +43,9 @@ public:
 
     // -- parsing functions -----------------------------------------
     int getFileSize( const std::string &path );
-    
+
     // fsm files
-    void parseFSMFile( 
+    void parseFSMFile(
         const std::string &path,
         Graph* graph );
     void writeFSMFile(
@@ -73,17 +73,17 @@ public:
         const std::string &path,
         Graph* graph,
         Diagram* diagram );
-            
+
 private:
     // -- private utility functions ---------------------------------
     // fsm files
-    void parseStateVarDescr( 
+    void parseStateVarDescr(
         const std::string &nextLine,
         Graph* graph );
-    void parseStates( 
+    void parseStates(
         const std::string &nextLine,
         Graph* graph );
-    void parseTransitions( 
+    void parseTransitions(
         const std::string &nextLine,
         Graph* graph );
 

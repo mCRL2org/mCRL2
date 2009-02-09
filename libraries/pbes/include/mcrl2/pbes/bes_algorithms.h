@@ -141,13 +141,13 @@ namespace bes {
   {
     /// \brief A bes rewriter
     BesRewriter& m_rewriter;
-  
+
     /// \brief Constructor
     /// \param rewriter A bes rewriter
     bes_equation_solver(BesRewriter& rewriter)
       : m_rewriter(rewriter)
     {}
-  
+
     /// \brief Returns true if e.symbol() == nu(), else false.
     /// \param e A pbes equation
     /// \return True if e.symbol() == nu(), else false.
@@ -157,7 +157,7 @@ namespace bes {
       typedef typename core::term_traits<boolean_expression> tr;
       return e.symbol().is_nu() ? tr::true_() : tr::false_();
     }
-  
+
     /// \brief Applies the substitution X := phi to the bes equation eq.
     /// \param eq A bes equation
     /// \param X A boolean variable
@@ -168,7 +168,7 @@ namespace bes {
       boolean_expression formula = atermpp::replace(eq.formula(), X, phi);
       return boolean_equation(eq.symbol(), eq.variable(), formula);
     }
-  
+
     /// \brief Applies the substitution from a solved bes equation e2 to the bes equation e1.
     /// \param e1 A bes equation
     /// \param e2 A solved bes equation
@@ -176,7 +176,7 @@ namespace bes {
     {
       e1 = substitute(e1, e2.variable(), e2.formula());
     }
-  
+
     /// \brief Solves an equation
     /// \param e A bes equation
     void solve(boolean_equation& e)

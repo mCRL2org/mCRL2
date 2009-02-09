@@ -198,7 +198,7 @@ grape_event_change_visible::grape_event_change_visible( grape_frame *p_main_fram
   {
     // user cancelled
     m_pressed_ok = false;
-  }  
+  }
 }
 
 grape_event_change_visible::~grape_event_change_visible( void )

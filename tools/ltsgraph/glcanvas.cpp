@@ -56,7 +56,7 @@ GLCanvas::~GLCanvas()
 void GLCanvas::initialize()
 {
   SetCurrent();
-  
+
   glLoadIdentity();
 
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -76,15 +76,15 @@ void GLCanvas::display()
   if (GetContext())
   {
     int width, height;
-    
+
     GetClientSize( &width, &height);
     // This is current context
     SetCurrent();
-   
+
     // Set up viewing volume
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    
+
     // Cast to GLdouble for smooth transitions
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
@@ -98,23 +98,23 @@ void GLCanvas::display()
       // height >= width
       gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
     }
-    
+
     glMatrixMode( GL_MODELVIEW);
     glLoadIdentity();
-    
+
     glViewport(0, 0, width, height);
-    
+
     double wwidth, wheight;
 
     getSize(wwidth, wheight);
     double pS = getPixelSize();
-  
+
     if (visualizer)
     {
-      // Draw 
+      // Draw
       visualizer->visualize(wwidth, wheight, pS, false);
     }
-    
+
     glFinish();
     SwapBuffers();
 
@@ -143,9 +143,9 @@ void GLCanvas::reshape()
   {
     int width, height;
     SetCurrent();
-    
+
     GetClientSize(&width, &height);
-    
+
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0,0, width, height);
@@ -165,21 +165,21 @@ void GLCanvas::getSize(
  * Returns viewport width and height in world coordinates.
  *
  * Before scaling, the viewport is set up such that the shortest side has length
- * 2 in world coordinates. Let ratio = width/height be the aspect ration of the 
+ * 2 in world coordinates. Let ratio = width/height be the aspect ration of the
  * window and keep in mind that:
- *   
+ *
  *  Size(viewport)   = Size(world)*scaleFactor
  *  So, Size(world)  = Size(viewport)/ScaleFactor
  *  So, Size(world)  = 2/ScaleFactor
  * There are 2 cases:
  * (1) If aspect > 1, the viewport is wider than tall
- *     So, the starting height was 2: 
+ *     So, the starting height was 2:
  *     world width      = ( aspect*2 ) / scaleFactor
  *     world height     = 2 / scaleFactor
  * (2) If aspect <= 1, the viewport is taller than wide
  *     So, the starting width was 2:
  *     world width      = 2 / scaleFactor;
- *     world height     = ( aspect*2 ) / scaleFactor 
+ *     world height     = ( aspect*2 ) / scaleFactor
  */
 {
   int widthViewPort;
@@ -257,7 +257,7 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldY = event.GetY();
 
   pickObjects(oldX, oldY, event.CmdDown());
-  owner->lockObject(); 
+  owner->lockObject();
   display();
 }
 
@@ -279,7 +279,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 
     double diffX = static_cast<double>(newX - oldX) / static_cast<double>(width) * 2000;
     double diffY = static_cast<double>(oldY - newY) / static_cast<double>(height) * 2000;
-    
+
     if ((x < newX) && (newX < x + width)) {
       oldX = newX;
     }
@@ -297,10 +297,10 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 
 void GLCanvas::pickObjects(int x, int y, bool ctrl)
 {
-  owner->deselect(); 
+  owner->deselect();
 
 
-  if(GetContext()) 
+  if(GetContext())
   {
     GLuint selectBuf[512];
     GLint  hits = 0;
@@ -318,14 +318,14 @@ void GLCanvas::pickObjects(int x, int y, bool ctrl)
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    
+
     // Create picking region near cursor location
-    gluPickMatrix((GLdouble) x, 
-                  (GLdouble)  viewport[3] - y, 
+    gluPickMatrix((GLdouble) x,
+                  (GLdouble)  viewport[3] - y,
                   5.0,
-                  5.0, 
+                  5.0,
                   viewport);
-    
+
     // Get current size of canvas
     int width,height;
     GetClientSize(&width,&height);
@@ -348,7 +348,7 @@ void GLCanvas::pickObjects(int x, int y, bool ctrl)
     double wwidth, wheight;
     getSize(wwidth, wheight);
     double pS = getPixelSize();
-    
+
     visualizer->visualize(wwidth, wheight, pS, true);
 
     glMatrixMode(GL_PROJECTION);
@@ -356,7 +356,7 @@ void GLCanvas::pickObjects(int x, int y, bool ctrl)
     glFlush();
 
     hits = glRenderMode(GL_RENDER);
-    
+
     processHits(hits, selectBuf, ctrl);
     reshape();
     display();
@@ -370,7 +370,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
   // The buffer content per hit is encoded as follows:
   //  buffer[0]: The number of names on the name stack at the moment of the hit
   //  buffer[1]: The minimal depth of the object hit
-  //  buffer[2]: The maximal depth of the object. We are certainly not 
+  //  buffer[2]: The maximal depth of the object. We are certainly not
   //             interested in this.
   //  buffer[3]: The first identifier of the object picked.
   // (buffer[4]: The second identifier of the object picked.)
@@ -379,7 +379,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
   GLuint names; // The number of names on the stack.
   bool stateSelected = false; // Whether we've hit a state
   bool transSelected = false; // Whether we've hit a transition
-  
+
   // Choose the objects hit, and store it. Give preference to states, then
   // to transition handles, then to labels
   using namespace IDS;
@@ -389,14 +389,14 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
     ++buffer; // Buffer points to maximal z value of hit.
     ++buffer; // Buffer points to first name on stack
     GLuint objType = *buffer;
-  
+
     for(GLuint k = 0; k < names; ++k) {
       if(!(stateSelected || transSelected) || objType == STATE) {
         selectedObject[k] = *buffer;
       }
       ++buffer;
     }
-    
+
     stateSelected = objType == STATE;
     transSelected = objType == TRANSITION || objType == SELF_LOOP;
   }
@@ -404,8 +404,8 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
 
   switch(selectedObject[0])
   {
-    case TRANSITION: { 
-      owner->selectTransition(selectedObject[1], selectedObject[2]); 
+    case TRANSITION: {
+      owner->selectTransition(selectedObject[1], selectedObject[2]);
       break;
     }
     case IDS::SELF_LOOP:
@@ -429,14 +429,14 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
       break;
     }
     case IDS::SELF_LABEL:
-    { 
+    {
       owner->selectSelfLabel(selectedObject[1], selectedObject[2]);
       break;
     }
     default: break;
   }
 
-  buffer = NULL; 
+  buffer = NULL;
 }
 
 
@@ -445,5 +445,5 @@ double GLCanvas::getAspectRatio() const {
 
   GetClientSize(&width, &height);
 
-  return static_cast<double>(width) / static_cast<double>(height); 
+  return static_cast<double>(width) / static_cast<double>(height);
 }

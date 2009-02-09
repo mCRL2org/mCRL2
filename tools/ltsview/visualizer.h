@@ -58,11 +58,11 @@ class Visualizer: public Subscriber {
     void resetForces(Cluster* root);
     void resetVelocities(Cluster* root);
     void forceDirectedInitPos(Cluster* root);
-  
+
   public:
     Visualizer(Mediator* owner,Settings* ss);
     ~Visualizer();
-    
+
     void computeBoundsInfo(float &bcw,float &bch);
     float getHalfStructureHeight() const;
     Utils::VisStyle getVisStyle() const;
@@ -74,11 +74,11 @@ class Visualizer: public Subscriber {
     void drawStates(bool simulating);
     void drawSimStates(std::vector<State*> historicStates, State* currState,
                        Transition* chosenTrans);
-    
+
     void drawTransitions(bool draw_fp,bool draw_bp);
-    void drawSimTransitions(bool draw_fp, bool draw_bp, 
+    void drawSimTransitions(bool draw_fp, bool draw_bp,
                             std::vector<Transition*> historicTrans,
-                            std::vector<Transition*> posTrans, 
+                            std::vector<Transition*> posTrans,
                             Transition* chosenTrans);
 
     void drawStructure();

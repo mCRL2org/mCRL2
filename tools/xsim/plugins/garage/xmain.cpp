@@ -12,8 +12,8 @@
 
 // ---------------------------------
 //
-// This class initializes the 
-//		Bremen parking garage 
+// This class initializes the
+//		Bremen parking garage
 //		visualization module.
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -31,7 +31,7 @@
 bool Bremen::OnInit()
 // ------------------
 // This function is
-//		used for 
+//		used for
 //		initializa-
 //		tion during
 //		startup.
@@ -59,10 +59,10 @@ bool Bremen::OnInit()
 // -----------------
 int Bremen::OnExit()
 // -----------------
-// This function is 
-//		used for 
+// This function is
+//		used for
 //		cleanup when
-//		exiting the 
+//		exiting the
 //		app.
 //
 // ^^^^^^^^^^^^^^^
@@ -71,7 +71,7 @@ int Bremen::OnExit()
 }
 
 // --------------------------------------------------------
-// This macro must be defined here for a subclass of wxApp. 
+// This macro must be defined here for a subclass of wxApp.
 //		This creates a 'main()' method, amongst others.
 // --------------------------------------------------------
 
@@ -81,10 +81,10 @@ IMPLEMENT_WX_THEME_SUPPORT
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
 
   MCRL2_ATERM_INIT(0, &lpCmdLine)
 

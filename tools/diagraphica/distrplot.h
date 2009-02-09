@@ -38,14 +38,14 @@ public:
     void clearValues();
 
 	void setDiagram( Diagram* dgrm );
-	        
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void drawAxes( const bool &inSelectMode );
     void drawLabels( const bool &inSelectMode );
     void drawPlot( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -54,11 +54,11 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void calcMaxNumber();
-    
+
     // -- utility drawing functions ---------------------------------
     // ***
     //void clear();
@@ -69,8 +69,8 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------

@@ -21,16 +21,16 @@ class Edge
 {
 public:
 	// -- constructors and destructor -------------------------------
-    Edge( 
+    Edge(
         const int &idx,
         const std::string &lbl );
 	virtual ~Edge();
-	
+
     // -- set functions ---------------------------------------------
     void setInNode( Node* in );
     void setOutNode( Node* out );
     void setBundle( Bundle* b );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     std::string getLabel();

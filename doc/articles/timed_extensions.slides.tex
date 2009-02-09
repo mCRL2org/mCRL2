@@ -118,7 +118,7 @@
   \item Hybrid: HyPA, ACP$^{srt}_{hs}$, BHPC, hybrid $\chi$
   \end{itemize}
 \item Each formalism requires learning
-\item Little compatibility 
+\item Little compatibility
   \begin{itemize}
   \item little reuse of algorithms
   \item difficult to compare the results
@@ -127,7 +127,7 @@
 %###################################################
 %###################################################
 \newslide\section*{Labeled Transition Systems}
-Labeled Transition System (LTS): directed graph; 
+Labeled Transition System (LTS): directed graph;
 vertexes -- states, arcs -- actions.
 \pause
 \begin{center}
@@ -174,7 +174,7 @@ Process equations: $\pr{X}(n\ap\Nat)=\act{a}(n)\seqc\pr{X}(succ(n))+\act{b}(n)$
 %%###################################################
 %###################################################
 \newslide\section*{Linear Process Equations}
-Linear Process Equation (LPE): 
+Linear Process Equation (LPE):
 \begin{itemize}
 \item a restricted form of \mcrl\ equation
 \item a symbolic representation of LTS.
@@ -187,7 +187,7 @@ Form ($I$ and $J$ are disjoint finite sets of indexes):
 \pr{X}(\vect{g_i}(\vect{d,e_i}))\lcond c_i(\vect{d,e_i})\rcond\delta\\
 &+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} \act{a}_j(\vect{f_j}(\vect{d,e_j}))\lcond c_j(\vect{d,e_j})\rcond\delta
 \end{split}
-\end{gather*}   
+\end{gather*}
 %###################################################
 %###################################################
 \newslide\section*{Overview of the \mcrl\ Toolset}
@@ -199,10 +199,10 @@ Form ($I$ and $J$ are disjoint finite sets of indexes):
 \newslide\section*{Discrete time in \mcrl: a simple approach}
 \begin{itemize}
 \item Passage of time: $\act{tick}$ action (one time unit passed)
-\item \emph{All} processes synchronize to $\act{tick}$ 
+\item \emph{All} processes synchronize to $\act{tick}$
 \pause
 \item Technically: use \emph{renaming} and \emph{multi-party} communication:
-$\gamma(\act{tick},\act{tick})=\act{\_tick}$ and 
+$\gamma(\act{tick},\act{tick})=\act{\_tick}$ and
 \end{itemize}
 \vspace{-2ex}
 \begin{gather*}
@@ -280,10 +280,10 @@ Two-phase transition systems have to be saturated to satisfy the last 2 properti
 &  \quad\act{\_\_a}\seqc (x\parc z)+\act{\_b}\seqc\encap{\set{\act{a},\act{\_a}}} (y\parc\act{\_a}\seqc z)\\
 &  \\
 &  \encap{\set{\act{a},\act{\_a}}} ((\act{a}\at 3\seqc x+\act{\_b}\at 5\seqc y)\parc \act{\_a}\at 3\seqc z)\id\\
-&  \quad\act{\_\_a}\at 3\seqc (x\parc z)\\ 
+&  \quad\act{\_\_a}\at 3\seqc (x\parc z)\\
 &  \\
 &  \encap{\set{\act{empty},\act{stop},\act{\_empty},\act{\_stop}}} ((\sum_{t\ap\Time}\act{empty}\at t\seqc x\lcond t<5\rcond\daz+\act{\_stop}\at 5\seqc y)\parc\\
-&\t4 (\sum_{t\ap\Time}\act{stop}\at t\seqc z'\lcond t<5\rcond\daz+\act{\_empty}\at 5\seqc z)\id\delta\at 5 
+&\t4 (\sum_{t\ap\Time}\act{stop}\at t\seqc z'\lcond t<5\rcond\daz+\act{\_empty}\at 5\seqc z)\id\delta\at 5
   \end{align*}
 \end{footnotesize}
 %###################################################
@@ -310,7 +310,7 @@ Future:
 \pause
 \item Continuous probabilistic transition systems (all time models -- two-phase)
   \begin{itemize}
-  \item PTS and Timed PTS -- d'Argenio, 
+  \item PTS and Timed PTS -- d'Argenio,
   \item ISTTS (Interactive Stochastic Timed TS) -- Bravetti's. Weak bisimulation. Parallel composition and hiding.
   \item PTTS (Probabilistic Timed TS): Bravetti and d'Argenio
   \end{itemize}
@@ -318,15 +318,15 @@ Future:
 %###################################################
 %###################################################
 \newslide\section*{Continuous Probabilistic Transition Systems}
-$S$ -- states. ${\cal F}\subseteq 2^S$ -- $\sigma$-algebra of sets of states. 
+$S$ -- states. ${\cal F}\subseteq 2^S$ -- $\sigma$-algebra of sets of states.
 
 A PTS is a structure $(S, {\cal F}, L, \to)$ such that:
 \begin{itemize}
 \item $\to\subseteq S\x L\x(\algb{F}\to[0,1])$
 \item for any $s\in S$ and $a\in L$, if $(s,a,P)\in\to$, then $P$ is a probability measure on $(S,\algb{F})$.
-%\item for any $\sigma\in\algb{F}$, $a\in L$ 
-%and $p\in[0,1]$, we have 
-%\[\set{s\suchthat \exists P ~~ (s,a,P)\in\to~\land~P(\sigma)=p}\in\algb{F} \] 
+%\item for any $\sigma\in\algb{F}$, $a\in L$
+%and $p\in[0,1]$, we have
+%\[\set{s\suchthat \exists P ~~ (s,a,P)\in\to~\land~P(\sigma)=p}\in\algb{F} \]
 \end{itemize}
 \pause
 \begin{center}
@@ -339,8 +339,8 @@ Let $T=(S,\algb{F}, L, \to)$ be a PTS. An equivalence relation\\
 $R$ on $S$, compatible with $\algb{F}$, is a probabilistic bisimulation on $T$ if:
 \[ (s R t\land s\trans{a} P) \to \exists Q~(t\trans{a} Q \land P \equiv_R Q) \]
 \pause
-$P$ and $Q$ are \emph{equal up to} $R$ (notation $P\equiv_R Q$) if 
-for any set $S'\in\algb{F}$ such that 
+$P$ and $Q$ are \emph{equal up to} $R$ (notation $P\equiv_R Q$) if
+for any set $S'\in\algb{F}$ such that
 \[\forall s_1,s_2\in S~~s_1 R s_2 \to (s_1\in S'\leftrightarrow s_2\in S')\]
 we have $P(S')=Q(S')$. ($S'$ are \emph{arbitrary} unions of the equivalence classes of $R$)
 %###################################################
@@ -348,7 +348,7 @@ we have $P(S')=Q(S')$. ($S'$ are \emph{arbitrary} unions of the equivalence clas
 \newslide\section*{Stochastic Systems: status}
 Current:
 \begin{itemize}
-\item Definition of LTS and strong bisimulation 
+\item Definition of LTS and strong bisimulation
 \item Ongoing work on weak and branching bisimulation definition (with d'Argenio, Hermanns, Stoelinga)
 \end{itemize}
 \pause
@@ -387,9 +387,9 @@ Future:
   \item crucial axiom: $\varphi\csins x+\psi\csins y\id \varphi\wedge\psi\csins(x+y)$
   \end{itemize}
 \pause
-\item BHPC: 
+\item BHPC:
   \begin{itemize}
-  \item two-phase, relative time 
+  \item two-phase, relative time
   \item operations: \emph{traj. prefix} $\tpref{\varphi}{t}\seqc x$, \emph{superposition} $\superps$
   \item crucial axiom: $\tpref{\varphi}{t}\seqc x\superps \tpref{\varphi}{t}\seqc y\id \tpref{\varphi}{t}\seqc (x\superps y)$
   \end{itemize}
@@ -406,14 +406,14 @@ Future:
 \end{itemize}
 
 \[(\tpref{\varphi}{t}\seqc x+\tpref{\psi}{u}\seqc y)\parc^A_{\pi(\varphi)}\tpref{\varphi}{t}\seqc z\id \tpref{\varphi}{t}\seqc (x\parc^A_{\pi(\varphi)} z)\]
-\[\varphi\vee\psi\csins(\varphi\cond\delay{t}(x)+\psi\cond\delay{u}(y))\parc\varphi\csins\delay{t}(z)\id \varphi\csins\delay{t}(x\parc z)\] 
+\[\varphi\vee\psi\csins(\varphi\cond\delay{t}(x)+\psi\cond\delay{u}(y))\parc\varphi\csins\delay{t}(z)\id \varphi\csins\delay{t}(x\parc z)\]
 %###################################################
 %###################################################
 \newslide\section*{BHPC and Binders}
 \begin{itemize}
 \item $\superpos{\varphi\ap\Phi}\tpref{\varphi}{}\seqc \pr{Y}(\varphi)$
 \item Difficult to give SOS rules and axioms.
-\item $\pr{A}=\superpos{\varphi\ap\Time}\tpref{\varphi}{}\seqc\act{a}(\varphi)$ 
+\item $\pr{A}=\superpos{\varphi\ap\Time}\tpref{\varphi}{}\seqc\act{a}(\varphi)$
 and $\pr{B}=\superpos{\psi\ap\Time}\tpref{\psi}{}\seqc\act{b}(\psi)$
 \item $\pr{A}\parc\pr{B}=\superpos{\chi\ap\Time}\tpref{\chi}{}\seqc(\act{a}(\varphi)\seqc\superpos{\psi\ap\Time}\tpref{\psi}{}\seqc\act{b}(\psi)+\act{b}(\varphi)\seqc\superpos{\varphi\ap\Time}\tpref{\varphi}{}\seqc\act{a}(\varphi))$
 \end{itemize}
@@ -447,14 +447,14 @@ Future:
 %###################################################
 \newslide\section*{Conclusions}
 \begin{itemize}
-\item We attempt to define an action-based transition system formalism 
+\item We attempt to define an action-based transition system formalism
 where real-time, stochastic and hybrid systems can be specified,
 and that is compatible with the current \mcrl\ Toolset.
 \pause
-\item There are still open ends with respect to the design choices 
+\item There are still open ends with respect to the design choices
 and open fundamental semantic questions.
 \pause
-\item We need characteristic case studies to justify the design choices 
+\item We need characteristic case studies to justify the design choices
 and focus attention to particular aspects.
 \end{itemize}
 %###################################################

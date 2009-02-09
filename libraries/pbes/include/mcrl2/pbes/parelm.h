@@ -81,7 +81,7 @@ class pbes_parelm_algorithm
     }
 
     /// \cond INTERNAL_DOCS
-    
+
     /// \brief Prints a container of terms to standard error
     /// \param v A container
     /// \param message A string
@@ -137,7 +137,7 @@ class pbes_parelm_algorithm
     }
 
     /// \endcond
-    
+
     /// \brief Finds the predicate variable to which the data parameter with the given index belongs.
     /// Here index refers to the cumulative index in the array obtained by concatening all parameters
     /// of the predicate variables in the pbes \p p.
@@ -161,7 +161,7 @@ class pbes_parelm_algorithm
     }
 
   public:
-    
+
     /// \brief Runs the parelm algorithm. The pbes \p is modified by the algorithm
     /// \param p A pbes
     template <typename Container>

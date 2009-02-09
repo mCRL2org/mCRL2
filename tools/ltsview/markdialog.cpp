@@ -47,7 +47,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
 
   int flags = wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL;
   int border = 3;
-  
+
   nomarksRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
       wxT("No marks"),wxDefaultPosition,wxDefaultSize,wxRB_GROUP);
   nomarksRadio->SetValue(true);
@@ -57,7 +57,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
       wxT("Mark states"));
   markTransitionsRadio = new wxRadioButton(this,myID_MARK_RADIOBUTTON,
       wxT("Mark transitions"));
-    
+
   markSizer->Add(nomarksRadio,0,flags,border);
   markSizer->Add(markDeadlocksRadio,0,flags,border);
   markSizer->Add(markStatesRadio,0,flags,border);
@@ -70,7 +70,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
       wxDefaultPosition,wxDefaultSize,2,choices1);
   markClusterChoice->SetSelection(0);
   markSizer->Add(markClusterChoice,0,flags,border);
-  
+
   wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer(wxVERTICAL,
       this,wxT("Mark states"));
 
@@ -82,7 +82,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
       wxDefaultPosition,wxDefaultSize,3,choices2);
   markAnyAllChoice->SetSelection(0);
   markStatesSizer->Add(markAnyAllChoice,0,flags,border);
-  
+
   markStatesListBox = new wxCheckListBox(this,myID_MARK_RULES,
       wxDefaultPosition,wxSize(200,100),0,NULL,
       wxLB_SINGLE|wxLB_NEEDED_SB|wxLB_HSCROLL);
@@ -95,7 +95,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
       0,flags,border);
 
   markStatesSizer->Add(addremoveSizer,0,flags,border);
-  
+
   wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer(
       wxVERTICAL,this,wxT("Mark transitions"));
   markTransitionsListBox = new wxCheckListBox(this,
@@ -104,7 +104,7 @@ MarkDialog::MarkDialog(wxWindow* parent, Mediator* owner)
   markTransitionsListBox->SetMinSize(wxSize(200,-1));
   markTransitionsSizer->Add(markTransitionsListBox,1,flags|wxEXPAND,
       border);
-  
+
   markSizer->Add(markStatesSizer,0,wxEXPAND|wxALL,border);
   markSizer->Add(markTransitionsSizer,0,wxEXPAND|wxALL,border);
   markSizer->Fit(this);
@@ -128,7 +128,7 @@ void MarkDialog::onMarkRadio(wxCommandEvent& event)
     mediator->setMarkStyle(MARK_TRANSITIONS);
 }
 
-void MarkDialog::onMarkRuleActivate(wxCommandEvent& event) 
+void MarkDialog::onMarkRuleActivate(wxCommandEvent& event)
 {
   int i = event.GetInt();
   mediator->activateMarkRule(
@@ -207,7 +207,7 @@ void MarkDialog::onMarkTransition(wxCommandEvent& event)
 void MarkDialog::replaceMarkRule(wxString str,int mr)
 {
   unsigned int i = 0;
-  while (i < markStatesListBox->GetCount() && 
+  while (i < markStatesListBox->GetCount() &&
       mr != *(static_cast<int*>(markStatesListBox->GetClientData(i))))
   {
     ++i;

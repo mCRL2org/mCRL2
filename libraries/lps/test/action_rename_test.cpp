@@ -25,9 +25,9 @@ void test1()
   const std::string SPEC =
   "act a:Nat;                               \n"
   "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-  "init P(0);                               \n"; 
+  "init P(0);                               \n";
 
-  const std::string AR_SPEC = 
+  const std::string AR_SPEC =
   "act b,c:Nat;\n"
   "var n:Nat;\n"
   "rename \n"
@@ -47,9 +47,9 @@ void test2()
   const std::string SPEC =
   "act a,b:Nat;                             \n"
   "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-  "init P(0);                               \n"; 
+  "init P(0);                               \n";
 
-  const std::string AR_SPEC = 
+  const std::string AR_SPEC =
   "map f:Nat->Nat; \n"
   "var n':Nat; \n"
   "eqn f(n')=3; \n"

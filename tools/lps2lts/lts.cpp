@@ -203,7 +203,7 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         int e = SVCclose(svc);
         if ( e )
         {
-          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
+          gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
         add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,2),1),(ATermAppl) ATgetArgument(lts_opts.spec,1));
       }
@@ -255,7 +255,7 @@ void remove_lts()
         int e = SVCclose(svc);
         if ( e )
         {
-          gsErrorMsg("svcerror: %s\n",SVCerror(e)); 
+          gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
       }
       break;

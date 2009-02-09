@@ -22,13 +22,13 @@ namespace Utils {
   enum MatchStyle {MATCH_ANY,MATCH_ALL,MATCH_MULTI};
   enum VisStyle {CONES,TUBES};
   // Allows picking processor to identify type of item picked.
-  enum PickState {STATE, CLUSTER, SIMSTATE, PICKNONE}; 
+  enum PickState {STATE, CLUSTER, SIMSTATE, PICKNONE};
 
   struct RGB_Color {
     unsigned char r;
     unsigned char g;
     unsigned char b;
-  }; 
+  };
 
   const RGB_Color RGB_WHITE = {255,255,255};
   const RGB_Color RGB_BLUE  = {0,0,255};
@@ -57,14 +57,14 @@ namespace Utils {
   float truncate_float(float f); // truncates all digits after the 4th decimal digit of f
   float deg_to_rad(float deg);
   float rad_to_deg(float rad);
-  
+
   bool operator==(RGB_Color c1,RGB_Color c2);
   bool operator!=(RGB_Color c1,RGB_Color c2);
   HSV_Color operator+(HSV_Color c1,HSV_Color c2);
   HSV_Color RGB_to_HSV(RGB_Color c);
   RGB_Color HSV_to_RGB(HSV_Color c);
 
-  // Blends c1 and c2 according to the formula: 
+  // Blends c1 and c2 according to the formula:
   // result = c1 * factor + c2 *(1 - factor)
   RGB_Color blend_RGB(RGB_Color c1, RGB_Color c2, float factor);
 
@@ -82,7 +82,7 @@ namespace Utils {
   float vec_length(Vect v);
   wxColour RGB_to_wxC(Utils::RGB_Color c);
   RGB_Color wxC_to_RGB(wxColour c);
- 
+
   class Interpolater {
     private:
       bool is_long;

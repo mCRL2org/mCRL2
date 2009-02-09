@@ -27,7 +27,7 @@ void test_table()
 {
   table t(100, 75);
   t.put(make_term("a"), make_term("f(a)"));
-  BOOST_CHECK(t.table_keys().size() == 1); 
+  BOOST_CHECK(t.table_keys().size() == 1);
 
   {
     table t1 = t;

@@ -20,7 +20,7 @@ namespace mcrl2 {
 
       //String representations of numbers
       //---------------------------------
-  
+
       /**
        * \pre: '0' <= c < '9'
        * \param[in] c a character that represents a decimal digit
@@ -30,7 +30,7 @@ namespace mcrl2 {
         assert(c >= '0' && c <= '9');
         return c - '0';
       }
-  
+
       /**
        * \pre: '0' <= n < '9'
        * \param[in] n an integer value
@@ -40,7 +40,7 @@ namespace mcrl2 {
         assert(n >= 0 && n <= 9);
         return n + '0';
       }
-  
+
       char *gsStringDiv2(const char *n)
       {
         assert(strlen(n) > 0);
@@ -62,13 +62,13 @@ namespace mcrl2 {
         r[j] = '\0';
         return r;
       }
-  
+
       int gsStringMod2(const char *n)
       {
         assert(strlen(n) > 0);
         return gsChar2Int(n[strlen(n)-1]) % 2;
       }
-  
+
       char *gsStringDub(const char *n, const int inc)
       {
         assert(strlen(n) > 0);
@@ -93,7 +93,7 @@ namespace mcrl2 {
         r[j] = '\0';
         return r;
       }
-  
+
       int NrOfChars(const int n)
       {
         if (n > 0)

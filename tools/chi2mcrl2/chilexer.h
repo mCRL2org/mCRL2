@@ -17,10 +17,10 @@
 
 ATermAppl parse_stream(std::istream &streams);
 /*Pre: streams contains at least one element
-       each element of streams is opened for reading 
+       each element of streams is opened for reading
   Post:the contents of streams is parsed
   Ret: the parsed content, if everything went ok
        NULL, otherwise
-*/ 
+*/
 
 #endif // MCRL2_CHI2LEXER_H

@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 /*--- unfortunately this doesn't work yet ---
 struct substitution_function
 {
-  const std::map<data::data_variable, data::data_expression>& s; 
+  const std::map<data::data_variable, data::data_expression>& s;
 
   substitution_function(const std::map<data::data_variable, data::data_expression>& s_)
     : s(s_)

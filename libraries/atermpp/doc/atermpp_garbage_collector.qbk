@@ -1,5 +1,5 @@
 [section: The garbage collector]
-The ATerm Library uses a very agressive garbage collection scheme. 
+The ATerm Library uses a very agressive garbage collection scheme.
 When the garbage collector is triggered, only the following terms will be
 retained:
 
@@ -24,13 +24,13 @@ The following program illustrates this.
 
     aterm a; // using global aterm variables is in general not a good idea
     aterm b;
-    
+
     aterm f(const std::string& s)
     {
       aterm x = make_term("f(" + s + ")"); // no need to protect x, since it will be created on stack
       return x;
     }
-    
+
     int main(int argc, char* argv[])
     {
       MCRL2_ATERMPP_INIT(argc, argv)

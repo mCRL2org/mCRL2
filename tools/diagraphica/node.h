@@ -23,20 +23,20 @@ class Node
 public:
 	// -- constructors and destructors ------------------------------
     Node( const int &idx );
-    Node( 
+    Node(
         const int &idx,
         const std::vector< double > &tpl );
 	virtual ~Node();
-	
+
     // -- set functions ---------------------------------------------
-    void swapTupleVal( 
+    void swapTupleVal(
         const size_t &idx1,
         const size_t &idx2 );
-    void moveTupleVal( 
+    void moveTupleVal(
         const size_t &idxFr,
         const size_t &idxTo );
     void moveTupleVals( std::map< int, int > &idcsFrTo );
-    void addTupleVal( 
+    void addTupleVal(
         const int &idx,
         const double &val );
     void delTupleVal( const int &idx );
@@ -45,7 +45,7 @@ public:
     void addOutEdge( Edge* e );
     void setOutEdges( const std::vector< Edge* > e );
     void setCluster( Cluster* c );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     int getSizeTuple();
@@ -60,7 +60,7 @@ public:
     void clearInEdges();
     void clearOutEdges();
     void clearCluster();
-    
+
 protected:
     // -- data members ----------------------------------------------
     int index; // index in list of graph nodes

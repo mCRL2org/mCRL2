@@ -38,7 +38,7 @@ namespace pbes_system {
     }
   };
   /// \endcond
-  
+
   /// \brief Applies a rewriter to a PBES.
   /// \param p A PBES
   /// \param pbesr A PBES rewriter

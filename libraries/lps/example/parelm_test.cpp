@@ -38,7 +38,7 @@ std::string SPEC2 =
 ;
 
 std::string SPEC3 =
-"% Test Case 3                               \n" 
+"% Test Case 3                               \n"
 "%                                           \n"
 "% Process parameter j should be removed     \n"
 "                                            \n"

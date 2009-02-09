@@ -46,7 +46,7 @@ struct quantifier_visitor: public pbes_expression_visitor<pbes_expression>
     variables.insert(v.begin(), v.end());
     return stop_recursion;
   }
-};  
+};
 
 /// \brief Visitor for determining if within the scope of a quantifier there are quantifier
 /// variables of free variables with the same name.
@@ -141,7 +141,7 @@ struct quantifier_name_clash_visitor: public pbes_expression_visitor<pbes_expres
   {
     pop();
   }
-};  
+};
 
 } // namespace detail
 

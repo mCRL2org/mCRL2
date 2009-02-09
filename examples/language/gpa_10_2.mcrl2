@@ -7,15 +7,15 @@ act
   pass_k: Nat;
 
 proc
-  P_ik(b:Bag(Nat)) = 
+  P_ik(b:Bag(Nat)) =
     sum n:Nat. put_i(n) . P_ik(b + {n:1}) +
     sum n:Nat. (n in b) -> get_k(n) . P_ik(b - {n:1});
 
-  P_kj(b:Bag(Nat)) = 
+  P_kj(b:Bag(Nat)) =
     sum n:Nat. put_k(n) . P_kj(b + {n:1}) +
     sum n:Nat. (n in b) -> get_j(n) . P_kj(b - {n:1});
 
-  P2 = 
+  P2 =
     hide({pass_k},
       allow({put_i, pass_k, get_j},
         comm({get_k | put_k -> pass_k},

@@ -30,17 +30,17 @@ example:
     #include <algorithm>
     #include <iostream>
     #include "atermpp/atermpp.h"
-    
+
     using namespace std;
     using namespace atermpp;
 
     struct counter
     {
-      int& m_sum;   
+      int& m_sum;
 
       counter(int& sum)
         : m_sum(sum)
-      {}   
+      {}
 
       void operator()(const aterm_int& t)
       {
@@ -56,11 +56,11 @@ example:
       int sum = 0;
       for_each(q.begin(), q.end(), counter(sum));
       assert(sum == 10);
-      
+
       for (term_list<aterm_int>::iterator i = q.begin(); i != q.end(); ++i)
       {
         cout << i->value() << " ";
-      }     
+      }
     }
 
 [endsect]

@@ -162,7 +162,7 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
                 {
                         l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
                 }
-                
+
                 l = ATreverse(l);
         }
 
@@ -182,7 +182,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 //gsprintf("out: %T\n\n",Term);
 		return Term;
 	}
-        
+
         arity = ATgetArity(ATgetAFun(Term));
 	t = ATgetArgument(Term,0);
 	if ( ATisInt(t) )
@@ -416,7 +416,7 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 
 	tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,50);
-	
+
 	num_opids = 0;
 	max_vars = 0;
 
@@ -580,7 +580,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, unsigned
 //		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
 		if ( ATisInt(t) || gsIsDataVarId((ATermAppl) t) )
 		{
-			return false; 
+			return false;
 		}
 /*		ATerm head = ATgetArgument((ATermAppl) t, 0);
 		if ( !ATisInt(head) )
@@ -682,7 +682,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 				args[i] = ATAgetArgument(Term,i-head_arity);
 			}
 		}
-		
+
 		if ( ATisInt(op) && ((strat = jitty_eqns[ATgetInt((ATermInt) op)]) != NULL) )
 		{
 //gsfprintf(stderr,"strat: %T\n\n",strat);
@@ -784,7 +784,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 							} else {
 								i = 0;
 								unsigned int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
-								while ( i < arg0_arity ) 
+								while ( i < arg0_arity )
 								{
 									newargs[i] = ATgetArgument((ATermAppl) arg0,i);
 									i++;

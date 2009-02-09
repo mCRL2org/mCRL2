@@ -62,7 +62,7 @@ class BDD_Info {
     /// \return True, if the root of the BDD is a guard node.
     ///         False, if the BDD equals true or if the BDD equals false.
     inline bool is_if_then_else(ATermAppl a_bdd) {
-      return mcrl2::core::detail::gsIsDataExprIf(a_bdd); 
+      return mcrl2::core::detail::gsIsDataExprIf(a_bdd);
     }
 };
 

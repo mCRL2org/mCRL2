@@ -21,7 +21,7 @@ using namespace atermpp;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-std::string SPECIFICATION = 
+std::string SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"
@@ -66,11 +66,11 @@ int test_main(int argc, char** argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
-  BOOST_CHECK(lps.is_well_typed()); 
-  BOOST_CHECK(!lps.has_time()); 
+  BOOST_CHECK(lps.is_well_typed());
+  BOOST_CHECK(!lps.has_time());
 
   summand s = lps.summands().front();
-  BOOST_CHECK(!s.has_time()); 
+  BOOST_CHECK(!s.has_time());
 
   return 0;
 }

@@ -179,7 +179,7 @@ namespace grape
      * @return Returns whether the coordinate is on the edge of the ellipse.
      */
     grape_direction is_on_border_reference(const coordinate &p_center, float p_width, float p_height, coordinate p_coord);
-        
+
     /**
      * Function to see if a coordinate is inside a rectangle with the upper left corner at the specified coordinate, and with the specified width and height. Note that the y-axis is negative and the origin is the upper left corner.
      * @param p_rect_coord The center coordinate of the rectangle.
@@ -192,9 +192,9 @@ namespace grape
     bool is_inside_rectangle( const coordinate &p_rect_coord, float p_rect_width, float p_rect_height, const coordinate &p_coord, bool p_minus_margin = true );
 
     /**
-     * Function to see if a coordinate is on the border of a rectangle with the upper left corner at the specified 
+     * Function to see if a coordinate is on the border of a rectangle with the upper left corner at the specified
      * coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the rectangle at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the rectangle at each side.
      * @param p_rect_coord The center coordinate of the rectangle.
      * @param p_rect_width The width of the rectangle.
      * @param p_rect_height The height of the rectangle.
@@ -206,7 +206,7 @@ namespace grape
     /**
      * Function to see if a coordinate is inside an initial designator with the specified begin *
       coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side.
      * @param p_begin The begin coordinate of the designator.
      * @param p_width The width of the designator.
      * @param p_height The height of the designator.
@@ -218,7 +218,7 @@ namespace grape
     /**
      * Function to see if a coordinate is inside an initial designator with the specified end
      * coordinate, and with the specified width and height.
-     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side. 
+     * By default, the allowed margin of the cursor is taken into account and therefore subtracted from the size of the designator at each side.
      * @param p_width The width of the designator.
      * @param p_height The height of the designator.
      * @param p_end The begin coordinate of the designator.
@@ -285,23 +285,13 @@ namespace grape
     void draw_state( const coordinate &p_center, float p_radius_x, float p_radius_y, bool p_selected  );
 
     /**
-     * Nonterminating transition with same begin and endstate (circle) draw function.
-     * @param p_ntt_coord The coordinate of the nonterminating transtition.
-     * @param p_base_coordinate The coordinate where the arrow should start.
-     * @param p_head_coordinate The coordinate where the arrow should end.
-     * @param p_selected A flag indicating whether the object is selected.
-     * @param p_label_text The label's text
-     */
-    void draw_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, bool p_selected, wxString &p_label_text );
-
-    /**
-     * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.
+     * Function to see if a coordinate is inside a nonterminating transition.
      * @param p_ntt_coord The coordinate of the nonterminating transtition.
      * @param p_base_coordinate The coordinate where the arrow should start.
      * @param p_head_coordinate The coordinate where the arrow should end.
      * @param p_coord The to be checked coordinate.
      */
-    bool is_inside_nonterminating_transition_same_state( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord );
+    bool is_inside_nonterminating_transition( const coordinate &p_ntt_coord, const coordinate &p_base_coordinate, const coordinate &p_head_coordinate, const coordinate &p_coord );
 
     /**
      * Function to see if a coordinate is inside a nonterminating transition with same begin and endstate.
@@ -320,17 +310,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_label_text The label of the object.
      */
-    void draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString p_label_text );
-
-    /**
-     * Nonterminating transition (arrow) draw function.
-     * @param p_begin The begin coordinate of the arrow.
-     * @param p_width The width of the arrow.
-     * @param p_height The width of the arrow.
-     * @param p_selected A flag indicating whether the object is selected.
-     * @param p_label_text The label of the object.
-     */
-    void draw_nonterminating_transition( const coordinate &p_begin, float p_width, float p_height, bool p_selected, wxString &p_label_text );
+    void draw_nonterminating_transition( const coordinate p_begin, const coordinate p_control, const coordinate p_end, const bool p_selected, const wxString &p_label_text );
 
     /**
      * Nonterminating transition (arrow) draw function.
@@ -339,7 +319,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_label_text The label of the object.
      */
-    void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text );
+    void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text );
 
     /**
      * Terminating transition (arrow) draw function.
@@ -348,7 +328,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_label_text The label of the object.
      */
-    void draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, wxString &p_label_text );
+    void draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text );
 
     /**
      * Channel (circle) draw function.
@@ -404,7 +384,7 @@ namespace grape
      * @param p_selected A flag indicating whether the process reference is selected.
      */
     void draw_reference(const coordinate &p_center, float p_width, float p_height, bool p_selected);
-        
+
     /**
      * Bounding box draw function.
      * @param p_center The center coordinate of the bounding box.
@@ -415,7 +395,7 @@ namespace grape
     void draw_bounding_box( const coordinate &p_center, float p_width, float p_height, bool p_selected);
 
     /**
-     * Bounding box touch function. Returns whether one of the points ( squares ) of the bounding box is touched, 
+     * Bounding box touch function. Returns whether one of the points ( squares ) of the bounding box is touched,
      * @param p_center The center coordinate of the bounding box.
      * @param p_width The width of the bounding box.
      * @param p_height The height of the bounding box.

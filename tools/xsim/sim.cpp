@@ -181,11 +181,11 @@ int main(int argc, char **argv)
     simulator.rewr_strat = options.rewrite_strategy;
     simulator.use_dummies = options.use_dummies;
     simulator.LoadSpec(Spec);
- 
+
     gsMessage("initial state: [ ");
     PrintState(simulator.GetState(),simulator.GetNextState());
     gsMessage(" ]\n\n");
- 
+
     bool notdone = true;
     while ( notdone )
     {
@@ -204,27 +204,27 @@ int main(int argc, char **argv)
       {
         gsMessage("an error occurred while calculating the transitions from this state; this likely means that not all possible transitions are shown\n\n");
       }
- 
+
       if ( ATisEmpty(next_states) )
       {
         printf("deadlock\n\n");
       }
- 
+
       while ( true )
       {
         string s;
- 
+
         (cout << "? ").flush();
         getline(cin, s);
         if ( (s.length() > 0) && (s[s.length()-1] == '\r') )
         { // remove CR
           s.resize(s.length()-1);
         }
-        
+
         if ( cin.eof() || (s == "q") || (s == "quit") )
         {
           if ( cin.eof() )
-            cout << endl; 
+            cout << endl;
           notdone = false;
           break;
         } else if ( (s == "h") || (s == "help") ) {

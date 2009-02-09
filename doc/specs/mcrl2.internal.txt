@@ -12,7 +12,7 @@
 //   di : data implementation
 //   rft: regular formula translation
 // - [+p]/[-p] at the end of a branch means that this branch is added/removed at
-//   the end of phase p 
+//   the end of phase p
 // - [.p] at the end of a branch means that this branch is only used in phase p
 // - <String> is an arbitrary non-empty string excluding the keywords:
 //     sort cons map var eqn act proc init
@@ -40,7 +40,7 @@
 <SortExpr>    ::= <SortId>
                 | SortCons(<SortConsType>, <SortExpr>)                   [- di]
                 | SortStruct(<StructCons>+)                              [- di]
-                | SortArrow(<SortExpr>+, <SortExpr>)                
+                | SortArrow(<SortExpr>+, <SortExpr>)
                 | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
 
@@ -81,7 +81,7 @@
 <OpId>         ::= OpId(<String>, <SortExpr>)
 
 //binding operator
-<BindingOperator> 
+<BindingOperator>
                ::= SetBagComp                                            [- tc]
                  | SetComp                                               [+ tc]
                  | BagComp                                               [+ tc]
@@ -91,7 +91,7 @@
 
 //where clause declaration
 <WhrDecl>      ::= <IdInit>                                              [- tc]
-                 | <DataVarIdInit>                                       [+ tc]  
+                 | <DataVarIdInit>                                       [+ tc]
 
 //data variable identifier and initialisation
 <DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
@@ -159,8 +159,8 @@
                  | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
                  | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
                  | Delta
-                 | Tau 
-                 | Sum(<DataVarId>+, <ProcExpr>) 
+                 | Tau
+                 | Sum(<DataVarId>+, <ProcExpr>)
                  | Block(<String>*, <ProcExpr>)
                  | Hide(<String>*, <ProcExpr>)
                  | Rename(<RenameExpr>*, <ProcExpr>)
@@ -169,8 +169,8 @@
                  | Sync(<ProcExpr>, <ProcExpr>)
                  | AtTime(<ProcExpr>, <DataExpr>)
                  | Seq(<ProcExpr>, <ProcExpr>)
-                 | IfThen(<DataExpr>, <ProcExpr>) 
-                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+                 | IfThen(<DataExpr>, <ProcExpr>)
+                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
                  | BInit(<ProcExpr>, <ProcExpr>)
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
@@ -183,7 +183,7 @@
 <MultActName>  ::= MultActName(<String>+)
 
 //renaming expression
-<RenameExpr>   ::= RenameExpr(<String>, <String>) 
+<RenameExpr>   ::= RenameExpr(<String>, <String>)
 
 //communication expression
 <CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
@@ -199,7 +199,7 @@
 <ActSpec>      ::= ActSpec(<ActId>*)
 
 //process equations or linear processes
-<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*) 
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)
 
 //process equation
 <ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
@@ -225,8 +225,8 @@
                       <LinearProcessSummand>*)
 
 //Linear process summand
-<LinearProcessSummand>   
-                ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, 
+<LinearProcessSummand>
+                ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
                       <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
 
 //process initialisation
@@ -297,7 +297,7 @@
                  | <Action>                                              [+ tc]
                  | Delta
                  | Tau
- 
+
 //Action rename specification
 <ActionRenameSpec>
                ::= ActionRenameSpec(<DataSpec>, <ActSpec>, <ActionRenameRules>)

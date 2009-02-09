@@ -26,7 +26,7 @@ inline const char* bool_to_char_string(bool b) {
   return (b) ? "true" : "false";
 }
 
-inline 
+inline
 ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
 {
   ATprotectAppl(&f);

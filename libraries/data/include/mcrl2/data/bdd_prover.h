@@ -70,7 +70,7 @@
    * counter example can be returned by the methods
    * BDD_Prover::get_witness and BDD_Prover::get_counter_example. A
    * witness is a valuation for which the formula holds, a counter
-   * example is a valuation for which it does not hold. 
+   * example is a valuation for which it does not hold.
   */
 
 class BDD_Prover: public Prover {

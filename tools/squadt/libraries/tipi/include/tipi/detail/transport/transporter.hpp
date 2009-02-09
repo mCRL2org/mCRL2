@@ -55,9 +55,9 @@ namespace transport {
 
       /** \brief Default constructor with no initial connections */
       transporter(boost::shared_ptr < transporter_impl > const&);
- 
+
     public:
-  
+
       /** \brief Creates direct connection to another transporter object */
       void connect(transporter&);
 
@@ -81,10 +81,10 @@ namespace transport {
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
-  
+
       /** \brief Communicate a string with all peers */
       void send(const std::string&);
- 
+
       /** \brief Communicate data from a stream with all peers */
       void send(std::istream&);
 

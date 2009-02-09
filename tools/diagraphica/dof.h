@@ -20,19 +20,19 @@ class DOF
 {
 public:
 	// -- constructors and destructor -------------------------------
-    DOF( 
+    DOF(
         const int &idx,
         const std::string &lbl );
     DOF( const DOF &dof );
 	virtual ~DOF();
-	
+
     // -- std::set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setLabel( const std::string &lbl );
     void setMin( const double &m );
     void setMax( const double &m );
     void setMinMax( const double &mn, const double &mx );
-    void setValue( 
+    void setValue(
         const int &idx,
         const double &val );
     void addValue( const double &val );
@@ -40,7 +40,7 @@ public:
     void setDir( const int &dr );
     void setAttribute( Attribute* a );
     void setTextStatus( const int &status );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     std::string getLabel();
@@ -61,7 +61,7 @@ public:
         ID_TEXT_ATTR,
         ID_TEXT_VAL
     };
-    
+
 protected:
     // -- data members ----------------------------------------------
 	int    index;    // index in attribute

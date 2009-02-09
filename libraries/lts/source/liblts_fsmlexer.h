@@ -17,7 +17,7 @@ class fsm_lexer
     ATermList typeValues;
     ATermAppl typeId;
     ATermTable labelTable;
-    
+
     AFun const_ATtype;
     AFun const_ATvalue;
 

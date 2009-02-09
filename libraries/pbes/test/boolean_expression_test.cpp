@@ -21,9 +21,9 @@ void test_boolean_expressions()
 {
   using namespace bes;
   typedef core::term_traits<boolean_expression> tr;
-  
+
   boolean_variable X1("X1");
-  boolean_variable X2("X2"); 
+  boolean_variable X2("X2");
   boolean_expression t1 = tr::and_(X1, X2);
   boolean_equation e1(fixpoint_symbol::mu(), X1, tr::imp(X1, X2));
   boolean_equation e2(fixpoint_symbol::nu(), X2, tr::or_(X1, X2));
@@ -36,7 +36,7 @@ void test_boolean_expressions()
   p.initial_state() = X1;
   std::cout << "----------------" << std::endl;
   std::cout << pp(p) << std::endl;
-    
+
   std::string filename = "boolean_expression_test.out";
   p.save(filename);
   boolean_equation_system<> q;

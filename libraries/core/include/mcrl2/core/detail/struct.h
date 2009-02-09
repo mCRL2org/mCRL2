@@ -383,7 +383,7 @@ ATermAppl gsMakeOpIdNameDiv();
 ATermAppl gsMakeOpIdNameMod();
 ///Creation of name for the system operation identifier "First"
 ATermAppl gsMakeOpIdNameFirst();
-///Creation of name for the system operation identifier "Last" 
+///Creation of name for the system operation identifier "Last"
 ATermAppl gsMakeOpIdNameLast();
 ///Creation of name for the system operation identifier "DivMod"
 ATermAppl gsMakeOpIdNameDivMod();
@@ -888,17 +888,17 @@ ATermAppl gsMakeOpIdEltIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
 ///\return Operation identifier for the representation of sets, of sort (S -> Bool) # T -> U,
 ///     where S, T and U stand for SortExprElt, SortExprFSet and SortExprSet
 ATermAppl gsMakeOpIdSet(ATermAppl SortExprElt, ATermAppl SortExprFSet, ATermAppl SortExprSet);
-     
+
 ///\pre SortExprFSet and SortExprSet are sort expressions
 ///\return Operation identifier for set comprehension of sort S -> T,
 ///     where S and T stand for SortExprFSet and SortExprSet
 ATermAppl gsMakeOpIdSetFSet(ATermAppl SortExprFSet, ATermAppl SortExprSet);
-     
+
 ///\pre SortExprElt and SortExprSet are sort expressions
 ///\return Operation identifier for set comprehension of sort (S -> Bool) -> T,
 ///     where S and T stand for SortExprElt and SortExprSet
 ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprElt, ATermAppl SortExprSet);
-     
+
 ///\pre SortExpr is a sort expression
 ///\return Operation identifier for the empty set of sort SortExpr
 ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr);
@@ -936,7 +936,7 @@ ATermAppl gsMakeOpIdBag(ATermAppl SortExprElt, ATermAppl SortExprFBag, ATermAppl
 ///\return Operation identifier for set comprehension of sort S -> T,
 ///     where S and T stand for SortExprFBag and SortExprBag
 ATermAppl gsMakeOpIdBagFBag(ATermAppl SortExprFBag, ATermAppl SortExprBag);
-     
+
 ///\pre SortExprElt and SortExprBag are sort expressions
 ///\return Operation identifier for bag comprehension of sort (S -> Nat) -> T,
 ///     where S and T stand for SortExprElt and SortExprBag
@@ -975,7 +975,7 @@ ATermAppl gsMakeOpIdBagIntersect(ATermAppl SortExpr);
 ///     where S and T stand for SortExprDom and SortExprResult
 ATermAppl gsMakeOpIdBag2Set(ATermAppl SortExprDom,
   ATermAppl SortExprResult);
-     
+
 ///\pre SortExprDom and SortExprResult are sort expressions
 ///\return Operation identifier for set to bag conversion of sort S -> T,
 ///     where S and T stand for SortExprDom and SortExprResult
@@ -1162,7 +1162,7 @@ ATermAppl gsMakeDataExprCDub(ATermAppl DataExprBit, ATermAppl DataExprPos);
 ///\return Data expression for `0' of sort Nat
 ATermAppl gsMakeDataExprC0(void);
 
-///\pre DataExpr is a data expression of sort Pos 
+///\pre DataExpr is a data expression of sort Pos
 ///\return DataExpr as a data expression of sort Nat
 ATermAppl gsMakeDataExprCNat(ATermAppl DataExpr);
 
@@ -1170,11 +1170,11 @@ ATermAppl gsMakeDataExprCNat(ATermAppl DataExpr);
 ///\return Data expression for the pair of DataExprFst and DataExprLst
 ATermAppl gsMakeDataExprCPair(ATermAppl DataExprFst, ATermAppl DataExprLst);
 
-///\pre DataExpr is a data expression of sort Pos 
+///\pre DataExpr is a data expression of sort Pos
 ///\return Data expression for the negation of DataExpr
 ATermAppl gsMakeDataExprCNeg(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Nat 
+///\pre DataExpr is a data expression of sort Nat
 ///\return DataExpr as a data expression of sort Int
 ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 
@@ -1183,43 +1183,43 @@ ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 ///\return Data expression for DataExprInt divided by DataExprPos, of sort Real
 ATermAppl gsMakeDataExprCReal(ATermAppl DataExprInt, ATermAppl DataExprPos);
 
-///\pre DataExpr is a data expression of sort Pos 
+///\pre DataExpr is a data expression of sort Pos
 ///\return Data expression for the conversion of DataExpr to Nat
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Pos 
+///\pre DataExpr is a data expression of sort Pos
 ///\return Data expression for the conversion of DataExpr to Int
 ATermAppl gsMakeDataExprPos2Int(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Pos 
+///\pre DataExpr is a data expression of sort Pos
 ///\return Data expression for the conversion of DataExpr to Real
 ATermAppl gsMakeDataExprPos2Real(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Nat 
+///\pre DataExpr is a data expression of sort Nat
 ///\return Data expression for the conversion of DataExpr to Pos
 ATermAppl gsMakeDataExprNat2Pos(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Nat 
+///\pre DataExpr is a data expression of sort Nat
 ///\return Data expression for the conversion of DataExpr to Int
 ATermAppl gsMakeDataExprNat2Int(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Nat 
+///\pre DataExpr is a data expression of sort Nat
 ///\return Data expression for the conversion of DataExpr to Real
 ATermAppl gsMakeDataExprNat2Real(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Int 
+///\pre DataExpr is a data expression of sort Int
 ///\return Data expression for the conversion of DataExpr to Pos
 ATermAppl gsMakeDataExprInt2Pos(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Int 
+///\pre DataExpr is a data expression of sort Int
 ///\return Data expression for the conversion of DataExpr to Nat
 ATermAppl gsMakeDataExprInt2Nat(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Int 
+///\pre DataExpr is a data expression of sort Int
 ///\return Data expression for the conversion of DataExpr to Real
 ATermAppl gsMakeDataExprInt2Real(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Real 
+///\pre DataExpr is a data expression of sort Real
 ///\return Data expression for the conversion of DataExpr to Pos
 ATermAppl gsMakeDataExprReal2Pos(ATermAppl DataExpr);
 
@@ -1268,7 +1268,7 @@ ATermAppl gsMakeDataExprMin(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ///     intersect(SortExpr, Nat)
 ATermAppl gsMakeDataExprAbs(ATermAppl DataExpr);
 
-///\pre DataExpr is a data expression of sort Pos, Nat or Int 
+///\pre DataExpr is a data expression of sort Pos, Nat or Int
 ///\return Data expression for the negation of DataExpr, which has sort Int
 ATermAppl gsMakeDataExprNeg(ATermAppl DataExpr);
 
@@ -1455,7 +1455,7 @@ ATermAppl gsMakeDataExprConcat(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ///     DataExprRHS with result sort SortExpr
 ATermAppl gsMakeDataExprEltAt(ATermAppl DataExprLHS, ATermAppl DataExprRHS,
   ATermAppl SortExpr);
-     
+
 ///\pre DataExpr is a data expression and SortExpr is a sort expression
 ///\return Data expression for the head of DataExpr of result sort SortExpr
 ATermAppl gsMakeDataExprHead(ATermAppl DataExpr, ATermAppl SortExpr);
@@ -1729,17 +1729,17 @@ ATermAppl gsMakeDataExprZeroFunc(ATermAppl SortExprElt);
 ///        which has sort S -> Nat
 ATermAppl gsMakeDataExprOneFunc(ATermAppl SortExprElt);
 
-///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat 
+///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat
 ///\return Data expression for the add function over sort S,
 ///        which has sort (S -> Nat) # (S -> Nat) -> (S -> Nat)
 ATermAppl gsMakeDataExprAddFunc(ATermAppl DataExprArg1, ATermAppl DataExprArg2);
 
-///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat 
+///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat
 ///\return Data expression for the minimum function over sort S,
 ///        which has sort (S -> Nat) # (S -> Nat) -> (S -> Nat)
 ATermAppl gsMakeDataExprMinFunc(ATermAppl DataExprArg1, ATermAppl DataExprArg2);
 
-///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat 
+///\pre DataExprArg1 and DataExprArg2 are data expressions of the same sort S -> Nat
 ///\return Data expression for the monus function over sort S,
 ///        which has sort (S -> Nat) # (S -> Nat) -> (S -> Nat)
 ATermAppl gsMakeDataExprMonusFunc(ATermAppl DataExprArg1, ATermAppl DataExprArg2);
@@ -1749,7 +1749,7 @@ ATermAppl gsMakeDataExprMonusFunc(ATermAppl DataExprArg1, ATermAppl DataExprArg2
 ///        which has sort (S -> Nat) -> (S -> Bool)
 ATermAppl gsMakeDataExprNat2BoolFunc(ATermAppl DataExprArg);
 
-///\pre DataExprArg is a data expression, which has a sort of the form S -> Bool 
+///\pre DataExprArg is a data expression, which has a sort of the form S -> Bool
 ///\return Data expression for the Bool2Nat function over sort S,
 ///        which has sort (S -> Bool) -> (S -> Nat)
 ATermAppl gsMakeDataExprBool2NatFunc(ATermAppl DataExprArg);
@@ -1761,7 +1761,7 @@ ATermAppl gsMakeDataExprBool2NatFunc(ATermAppl DataExprArg);
 ATermAppl gsMakeDataExprBagElt(ATermAppl DataExprElt, ATermAppl DataExprPos, ATermAppl SortExprFBagElt);
 
 
-// Auxiliary functions concerning data expressions 
+// Auxiliary functions concerning data expressions
 
 ///\pre DataExpr and DataExprArg1 are data expressions
 ///\return Internal representation of the data expression

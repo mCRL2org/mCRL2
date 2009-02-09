@@ -102,7 +102,7 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
 
     text = ''
     mtext = '' # gsMake functions
-    
+
     name_keys = names.keys()
     name_keys.sort()
     for name in name_keys:
@@ -128,7 +128,7 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
             'arity'      : arity,
             'parameters' : decls[name],
             'arguments'  : comma + calls[name]
-        } 
+        }
     insert_text_in_file(string.strip(text + mtext), filename, begin, end)
 
 CHECK_RULE = '''template <typename Term>
@@ -191,7 +191,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
             'body'      : body
         }
         ptext = ptext + 'template <typename Term> bool check_rule_%s(Term t);\n' % rule.name()
-    
+
     for f in functions:
         arguments = ', '.join(map(lambda x: x.full_name(), f.arguments))
         name = f.name()
@@ -284,7 +284,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
 
 #        arguments = ', ' + ', '.join(args) if len(args) > 0 else ''
         if len(args) > 0:
-            arguments = ', ' + ', '.join(args) 
+            arguments = ', ' + ', '.join(args)
         else:
             arguments = ''
         text = text + CONSTRUCTOR_FUNCTIONS % {
@@ -306,7 +306,7 @@ def generate_constructor_functions(rules, filename, ignored_phases = []):
                 if f.phase == None or not f.phase.startswith('-') or not f.phase.startswith('.'):
                     fname = f.name()
                     break
-            ptext = ptext + 'ATermAppl construct%s();\n' % name             
+            ptext = ptext + 'ATermAppl construct%s();\n' % name
             text = text + CONSTRUCTOR_RULE % {
                 'name'       : name,
                 'name'       : name,
@@ -325,7 +325,7 @@ def find_functions(rules, ignored_phases):
         for f in rule.functions(ignored_phases):
             if not f.is_rule():
                 function_map[f.name()] = f
-    
+
     # do a recursion step to find additional functions (no longer necessary?)
     functions = map(lambda x: function_map[x], function_map.keys())
     for f in functions:
@@ -364,7 +364,7 @@ def parse_ebnf(filename):
             else:
                 glines.append(line)
         comment = string.join(clines, '\n')
-        
+
         parser = EBNFParser(Mcrl2Actions())
         try:
             newrules = parser(string.join(glines, '\n'))
@@ -389,14 +389,14 @@ def postprocess_libstruct(filename):
 \{
 '''
     dest = '''ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
-{    
+{
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
 '''
     text = path(filename).text()
-    #src = 'gsMakeProcess'    
+    #src = 'gsMakeProcess'
     text = re.sub(re.compile(src, re.M), dest, text)
     path(filename).write_text(text)
 
@@ -419,7 +419,7 @@ def main():
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
         print 'updated %s' % filename
-    
+
     if options.libstruct:
         ignored_phases = []
         filename = '../include/mcrl2/core/detail/struct_core.h'

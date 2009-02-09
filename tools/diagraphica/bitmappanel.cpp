@@ -16,7 +16,7 @@
 
 
 // ---------------------------------------
-BitmapPanel::BitmapPanel( 
+BitmapPanel::BitmapPanel(
     wxWindow* parent,
     wxSize size,
     const char* const* image )
@@ -32,8 +32,8 @@ BitmapPanel::BitmapPanel(
 
     /*
     // load image
-    bitmap = new wxBitmap( 
-        path, 
+    bitmap = new wxBitmap(
+        path,
         wxBITMAP_TYPE_BMP );
     if ( bitmap->Ok() != true )
     {

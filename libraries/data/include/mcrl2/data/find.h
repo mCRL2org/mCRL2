@@ -24,7 +24,7 @@ namespace mcrl2 {
 
 namespace data {
 
- 
+
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param t A term
 /// \param d A data variable

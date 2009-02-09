@@ -32,7 +32,7 @@ namespace detail {
 
   /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// As a side effect propositional variable instantiations are being renamed
-  /// using a rename function. 
+  /// using a rename function.
   template <typename DataRewriter, typename DataEnumerator>
   struct pbes2bes_rewrite_builder: public enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbes2bes_substitution_function>
   {
@@ -84,7 +84,7 @@ namespace detail {
             throw mcrl2::runtime_error(std::string("pbes2bes_rewrite_builder: could not rename the variable ") + core::pp(v));
           }
         }
-      }   
+      }
       return propositional_variable_type(propvar_name_current, data::data_expression_list());
     }
 
@@ -116,7 +116,7 @@ namespace detail {
         }
       }
     }
-  
+
     /// \brief Visit propositional_variable node
     /// Visit propositional variable node.
     /// \param x A term
@@ -143,7 +143,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit true node
     /// Visit true node.
     /// \param x A term
@@ -155,7 +155,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit false node
     /// Visit false node.
     /// \param x A term
@@ -167,7 +167,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit not node
     /// Visit not node.
     /// \param x A term
@@ -180,7 +180,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit and node
     /// Visit and node.
     /// \param x A term
@@ -194,7 +194,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit or node
     /// Visit or node.
     /// \param x A term
@@ -208,7 +208,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit imp node
     /// Visit imp node.
     /// \param x A term
@@ -222,7 +222,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit forall node
     /// Visit forall node.
     /// \param x A term
@@ -236,7 +236,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// \brief Visit exists node
     /// Visit exists node.
     /// \param x A term
@@ -250,7 +250,7 @@ namespace detail {
       check_result(x, result, sigma);
       return result;
     }
-  
+
     /// Visit propositional variable node.
     // term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbes2bes_substitution_function& sigma)
     // {
@@ -258,7 +258,7 @@ namespace detail {
     //   check_result(x, result, sigma);
     //   return result;
     // }
-*/    
+*/
   };
 
   /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
@@ -281,8 +281,8 @@ namespace detail {
          name_generator("UNIQUE_PREFIX"),
          datae(data_spec, datar, name_generator),
          m_print_rewriter_output(print_rewriter_output)
-      {}     
-      
+      {}
+
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
@@ -332,7 +332,7 @@ namespace detail {
         return r.rename(v);
       }
 
-    protected:      
+    protected:
       data::rewriter datar;
       data::rewriter_with_variables datarv;
       data::number_postfix_generator name_generator;

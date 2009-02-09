@@ -34,29 +34,29 @@ namespace data {
   class data_equation: public atermpp::aterm_appl
   {
     protected:
-  
+
       /// \brief The variables that are used in the equation.
       data_variable_list m_variables;
-  
+
       /// \brief The condition of the equation.
       data_expression m_condition;
-  
+
       /// \brief The left hand side of the equation.
       data_expression m_lhs;
-  
+
       /// \brief The right hand side of the equation.
       data_expression m_rhs;
-  
+
     public:
-  
+
       /// \brief An iterator for the variable sequence.
       typedef data_variable_list::iterator variable_iterator;
-  
+
       /// \brief Constructor.
       data_equation()
         : atermpp::aterm_appl(core::detail::constructDataEqn())
       {}
-  
+
       /// \brief Constructor.
       /// \param t A term
       data_equation(atermpp::aterm_appl t)
@@ -70,7 +70,7 @@ namespace data {
         m_rhs       = data_expression(*i);
         assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
       }
-  
+
       /// \brief Constructor.
       /// \param variables The variables that are used in the equation.
       /// \param condition The condition of the equation.
@@ -89,35 +89,35 @@ namespace data {
       {
         assert(data_expr::is_nil(m_condition) || data_expr::is_bool(m_condition));
       }
-  
+
       /// \brief Returns the variables of the equation.
       /// \return The variables of the equation.
       data_variable_list variables() const
       {
         return m_variables;
       }
-  
+
       /// \brief Returns the condition of the equation.
       /// \return The condition of the equation.
       data_expression condition() const
       {
         return m_condition;
       }
-  
+
       /// \brief Returns the left hand side of the equation.
       /// \return The left hand side of the equation.
       data_expression lhs() const
       {
         return m_lhs;
       }
-  
+
       /// \brief Returns the right hand side of the equation.
       /// \return The right hand side of the equation.
       data_expression rhs() const
       {
         return m_rhs;
       }
-  
+
       /// \brief Applies a low level substitution function to this term and returns the result.
       /// \param f A
       /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
@@ -129,7 +129,7 @@ namespace data {
       {
         return data_equation(f(atermpp::aterm(*this)));
       }
-  
+
       /// \brief Returns true if
       /// <ul>
       /// <li>the types of the left and right hand side are equal</li>
@@ -143,14 +143,14 @@ namespace data {
           std::cerr << "data_equation::is_well_typed() failed: the left and right hand sides " << mcrl2::core::pp(m_lhs) << " and " << mcrl2::core::pp(m_rhs) << " have different types." << std::endl;
           return false;
         }
-  
+
         return true;
       }
   };
-  
+
   /// \brief Read-only singly linked list of data equations
   typedef atermpp::term_list<data_equation> data_equation_list;
-  
+
   /// \brief Returns true if the term t is a data equation
   /// \param t A term
   /// \return True if the term is a data equation.

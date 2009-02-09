@@ -89,7 +89,7 @@ for algorithms on BESs. The default container type is =atermpp::vector<boolean_e
   // print the initial state
   boolean_expression init = bes1.initial_state();
   std::cout << "initial state: " << pp(init) << std::endl;
-  
+
   // solve the BES
   bool b = gauss_elimination(bes1);
 

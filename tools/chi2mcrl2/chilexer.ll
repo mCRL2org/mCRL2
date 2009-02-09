@@ -82,7 +82,7 @@ chi_lexer *a_chi_lexer = NULL;       /* lexer object, used by parse_streams */
 %}
 digit       [0-9]
 Number      "0"|([1-9]{digit}*)
-RealNumber  {Number}\.({digit}*) 
+RealNumber  {Number}\.({digit}*)
 exponent    [eE][+-]?{Number}
 letter      [a-zA-Z]
 identifier  {letter}[a-zA-Z0-9\_']*
@@ -138,11 +138,11 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "^"		{ process_string(); return POWER; }
 "mod"	{ process_string(); return MOD; }
 "div"	{ process_string(); return DIV; }
-"/"     { process_string(); return DIVIDE; } 
+"/"     { process_string(); return DIVIDE; }
 "["     { process_string(); return SQLBRACKET; }
 "]"		{ process_string(); return SQRBRACKET; }
 "#"		{ process_string(); return HASH; }
- 
+
 "proc"    { process_string(); return PROC; }
 "model"   { process_string(); return MODEL; }
 "var"		{ process_string(); return VAR; }
@@ -176,7 +176,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 "/\\"	{ process_string(); return INTERSECTION; }
 "\\/"	{ process_string(); return UNION; }
 "sub"   { process_string(); return SUB; }
- 
+
 "bool"	{ process_string(); return BOOL; }
 "nat"    { process_string(); return NAT; }
 "void"  { process_string(); return VOID; }
@@ -188,7 +188,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 
 "val"		{ process_string(); yyerror("The \"val\" operator is not supported\n");}
 "real"	{ process_string(); yyerror("The \"real\" operator is not supported\n");}
-	
+
 
 {identifier}    { process_string(); return ID; }
 {Number} { process_string(); return NUMBER; }
@@ -198,7 +198,7 @@ identifier  {letter}[a-zA-Z0-9\_']*
 
 %%
 
-//Implementation of parse_stream 
+//Implementation of parse_stream
 
 ATermAppl parse_stream ( std::istream &stream ) {
   a_chi_lexer = new chi_lexer();
@@ -239,9 +239,9 @@ void chi_lexer::yyerror(const char *s) {
     oldcol_nr = 0;
   }
   gsErrorMsg(
-    "token '%s' at position %d, %d caused the following error: %s\n", 
+    "token '%s' at position %d, %d caused the following error: %s\n",
     YYText(), line_nr, oldcol_nr, s
-  ); 
+  );
 }
 
 void chi_lexer::getposition()
@@ -251,9 +251,9 @@ void chi_lexer::getposition()
     oldcol_nr = 0;
   }
   gsErrorMsg(
-    "Near position Line: %d, Column: %d:\n", 
-    line_nr, oldcol_nr 
-  ); 
+    "Near position Line: %d, Column: %d:\n",
+    line_nr, oldcol_nr
+  );
 }
 
 void chi_lexer::process_string(void) {
@@ -268,9 +268,9 @@ ATermAppl chi_lexer::parse_stream (std::istream &stream ) {
   * Ret: the parsed content, if everything went ok
   *      NULL, otherwise
   *
-  **/ 
-  
-  //uncomment the line below to let bison generate debug information 
+  **/
+
+  //uncomment the line below to let bison generate debug information
   //chiyydebug = 1;
   ATermAppl result = NULL;
   chi_spec_tree = NULL;
@@ -287,9 +287,9 @@ ATermAppl chi_lexer::parse_stream (std::istream &stream ) {
     result = chi_spec_tree;
     chi_spec_tree = NULL;
   }
-  
+
   ATindexedSetDestroy(chi_parser_protect_table);
   ATunprotectAppl(&chi_spec_tree);
-  
+
   return result;
 }

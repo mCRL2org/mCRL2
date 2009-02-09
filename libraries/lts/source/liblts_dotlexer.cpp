@@ -38,7 +38,7 @@
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types. 
+ * if you want the limit (max/min) macros for int types.
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -55,7 +55,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 #endif /* ! C99 */
@@ -92,7 +92,7 @@ typedef unsigned int flex_uint32_t;
 #endif /* ! FLEXINT_H */
 
 /* begin standard C++ headers. */
-#include <iostream> 
+#include <iostream>
 #include <errno.h>
 #include <cstdlib>
 #include <cstring>
@@ -171,7 +171,7 @@ extern int yyleng;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
-    
+
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
 	do \
@@ -234,7 +234,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -622,7 +622,7 @@ YY_DECL
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    
+
 #line 74 "liblts_dotlexer.ll"
 
 
@@ -758,32 +758,32 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 87 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return DIGRAPH; } 
+{ posNo += YYLeng(); return DIGRAPH; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 88 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return GRAPH; } 
+{ posNo += YYLeng(); return GRAPH; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 89 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return STRICT; } 
+{ posNo += YYLeng(); return STRICT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 90 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return SUBGRAPH; } 
+{ posNo += YYLeng(); return SUBGRAPH; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 91 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return NODE; } 
+{ posNo += YYLeng(); return NODE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 92 "liblts_dotlexer.ll"
-{ posNo += YYLeng(); return EDGE; } 
+{ posNo += YYLeng(); return EDGE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
@@ -1229,7 +1229,7 @@ int yyFlexLexer::yy_get_next_buffer()
 {
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    
+
 	yy_current_state = (yy_start);
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
@@ -1283,7 +1283,7 @@ int yyFlexLexer::yy_get_next_buffer()
     void yyFlexLexer::yyunput( int c, register char* yy_bp)
 {
 	register char *yy_cp;
-    
+
     yy_cp = (yy_c_buf_p);
 
 	/* undo effects of setting up yytext */
@@ -1320,7 +1320,7 @@ int yyFlexLexer::yy_get_next_buffer()
     int yyFlexLexer::yyinput()
 {
 	int c;
-    
+
 	*(yy_c_buf_p) = (yy_hold_char);
 
 	if ( *(yy_c_buf_p) == YY_END_OF_BUFFER_CHAR )
@@ -1386,12 +1386,12 @@ int yyFlexLexer::yy_get_next_buffer()
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
- * 
+ *
  * @note This function does not reset the start condition to @c INITIAL .
  */
     void yyFlexLexer::yyrestart( std::istream* input_file )
 {
-    
+
 	if ( ! YY_CURRENT_BUFFER ){
         yyensure_buffer_stack ();
 		YY_CURRENT_BUFFER_LVALUE =
@@ -1404,11 +1404,11 @@ int yyFlexLexer::yy_get_next_buffer()
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
- * 
+ *
  */
     void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
 {
-    
+
 	/* TODO. We should be able to replace this entire function body
 	 * with
 	 *		yypop_buffer_state();
@@ -1448,13 +1448,13 @@ int yyFlexLexer::yy_get_next_buffer()
 /** Allocate and initialize an input buffer state.
  * @param file A readable stream.
  * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
- * 
+ *
  * @return the allocated buffer state.
  */
     YY_BUFFER_STATE yyFlexLexer::yy_create_buffer( std::istream* file, int size )
 {
 	YY_BUFFER_STATE b;
-    
+
 	b = (YY_BUFFER_STATE) dotyyalloc(sizeof( struct yy_buffer_state )  );
 	if ( ! b )
 		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
@@ -1477,11 +1477,11 @@ int yyFlexLexer::yy_get_next_buffer()
 
 /** Destroy the buffer.
  * @param b a buffer created with yy_create_buffer()
- * 
+ *
  */
     void yyFlexLexer::yy_delete_buffer( YY_BUFFER_STATE b )
 {
-    
+
 	if ( ! b )
 		return;
 
@@ -1504,7 +1504,7 @@ extern "C" int isatty (int );
 
 {
 	int oerrno = errno;
-    
+
 	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
@@ -1525,7 +1525,7 @@ extern "C" int isatty (int );
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
- * 
+ *
  */
     void yyFlexLexer::yy_flush_buffer( YY_BUFFER_STATE b )
 {
@@ -1554,7 +1554,7 @@ extern "C" int isatty (int );
  *  the current state. This function will allocate the stack
  *  if necessary.
  *  @param new_buffer The new state.
- *  
+ *
  */
 void yyFlexLexer::yypush_buffer_state (YY_BUFFER_STATE new_buffer)
 {
@@ -1584,7 +1584,7 @@ void yyFlexLexer::yypush_buffer_state (YY_BUFFER_STATE new_buffer)
 
 /** Removes and deletes the top of the stack, if present.
  *  The next element becomes the new top.
- *  
+ *
  */
 void yyFlexLexer::yypop_buffer_state (void)
 {
@@ -1608,7 +1608,7 @@ void yyFlexLexer::yypop_buffer_state (void)
 void yyFlexLexer::yyensure_buffer_stack(void)
 {
 	int num_to_alloc;
-    
+
 	if (!(yy_buffer_stack)) {
 
 		/* First allocation is just for 2 elements, since we don't know if this
@@ -1621,9 +1621,9 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 								);
 		if ( ! (yy_buffer_stack) )
 			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
-								  
+
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
+
 		(yy_buffer_stack_max) = num_to_alloc;
 		(yy_buffer_stack_top) = 0;
 		return;
@@ -1769,7 +1769,7 @@ void dotyyfree (void * ptr )
 void concrete_dot_lexer::processId()
 {
   posNo += YYLeng();
-  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) ); 
+  dotyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
 }
 
 void concrete_dot_lexer::processQuoted()
@@ -1778,7 +1778,7 @@ void concrete_dot_lexer::processQuoted()
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
   dotyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
-} 
+}
 
 //Implementation of parse_dot
 
@@ -1816,9 +1816,9 @@ concrete_dot_lexer::concrete_dot_lexer(void) : dotyyFlexLexer(NULL, NULL) {
 void concrete_dot_lexer::yyerror(const char *s) {
   fprintf(
     stderr,
-    "token '%s' at position %d,%d caused the following error: %s\n", 
+    "token '%s' at position %d,%d caused the following error: %s\n",
     YYText(), lineNo, posNo, s
-  ); 
+  );
 }
 
 bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
@@ -1830,7 +1830,7 @@ bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
 
   // INITIALISE
   dot_lts = &l;
-  
+
   protect_table = ATindexedSetCreate(10000,50);
 
   // PARSE
@@ -1840,7 +1840,7 @@ bool concrete_dot_lexer::parse_stream(std::istream &stream, lts &l)
   } else {
     result = true;
   }
-    
+
   // CLEAN UP
   ATindexedSetDestroy( protect_table );
 

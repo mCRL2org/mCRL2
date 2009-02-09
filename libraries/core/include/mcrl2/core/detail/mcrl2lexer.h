@@ -19,10 +19,10 @@
 
 ATerm parse_streams(std::vector<std::istream*> &streams, bool print_parse_errors = true);
 /*Pre: streams contains at least one element
-       each element of streams is opened for reading 
+       each element of streams is opened for reading
   Post:the contents of streams is parsed
   Ret: the parsed content, if everything went ok
        NULL, otherwise
-*/ 
+*/
 
 #endif // MCRL2_MCRL2LEXER_H

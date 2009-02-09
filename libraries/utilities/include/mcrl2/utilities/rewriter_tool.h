@@ -18,7 +18,7 @@
 namespace mcrl2 {
 
 namespace utilities {
-  
+
 namespace tools {
 
   /// \brief Base class for tools that use a rewriter.
@@ -63,7 +63,7 @@ namespace tools {
       {
         return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
       }
-      
+
       /// \brief Creates a data rewriter as specified on the command line.
       /// \param data_spec A data specification
       /// \return A data rewriter

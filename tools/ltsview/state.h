@@ -51,7 +51,7 @@ class State {
     bool isDeadlock() const;
     bool isSelected() const;
     bool hasTextures() const;
-    
+
     void addMatchedRule(int mr);
     bool removeMatchedRule(int mr);
     void getMatchedRules(std::vector< int > &mrs);
@@ -63,7 +63,7 @@ class State {
     // Adds mr to the rules matched by this state, and returns the total number
     // of rules matched.
     //int mark(Utils::MarkRule* mr);
-    // Removes mr from the rules matched by this state (if any) and returns the 
+    // Removes mr from the rules matched by this state (if any) and returns the
     // total number of rules matched.
     //int unmark(Utils::MarkRule* mr);
 
@@ -89,7 +89,7 @@ class State {
     Utils::Vect getVelocity();
     void resetVelocity();
     void setVelocity(Utils::Vect v);
-  
+
   private:
     Cluster* cluster;
     int id;

@@ -2,7 +2,7 @@
 
 % title and author
 \title{The Data Implementation Phase of the mCRL2 Parser}
-\author{Aad Mathijssen} 
+\author{Aad Mathijssen}
 
 % packages
 \usepackage[english]{babel}
@@ -109,7 +109,7 @@
     }
   }
   {\end{list}}
-  
+
 % entry: list of entries where:
 % - the optional argument denotes the space between successive items
 %   (default 0.15em);
@@ -119,7 +119,7 @@
   {\begin{list}{}%
     {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
      \settowidth{\labelwidth}{\textsf{#2:}}%
-     \setlength{\leftmargin}{\labelwidth+\labelsep}%     
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%
      \setlength{\parsep}{0pt}%
      \setlength{\itemsep}{#1}%
     }%
@@ -257,7 +257,7 @@
 % function composition: o
 \newcommand{\fcomp}{\ensuremath{%
   \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
-  
+
 % function mapping
 \newcommand{\fmap}{
   \hspace{0.08em}\raisebox{0.2ex}{%
@@ -323,7 +323,7 @@
 
 % cons: |>
 \newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
-  
+
 % snoc: <|
 \newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
 
@@ -393,17 +393,17 @@
 
 %inference rule with 0 premises and 1 conclusion
 \newcommand{\infC}[1]{\ensuremath{
-  \begin{array}{c} 
-    \\\hline 
-    #1 
+  \begin{array}{c}
+    \\\hline
+    #1
   \end{array}
 }}
 
 %inference rule with 1 premise and 1 conclusion
 \newcommand{\infPC}[2]{\ensuremath{
-  \begin{array}{c} 
-    #1 \\\hline 
-    #2 
+  \begin{array}{c}
+    #1 \\\hline
+    #2
   \end{array}
 }}
 
@@ -550,7 +550,7 @@
 \newcommand{\sft}{{\sf t}}
 \newcommand{\sff}{{\sf f}}
 \newcommand{\nul}{{\bf 0}}
-\font \aap cmmi10        
+\font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 \newcommand{\before}{\mbox{\footnotesize{\frm{\ll}}}}
 \newcommand{\ap}{{:}}
@@ -743,7 +743,7 @@ where \frm{p} is an expression of sort \frm{\srtbool}.
 This expression is translated to the implementation of the following
 expression:
 \[\fa{forall}{\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. p}\]
-Here, \frm{\f{forall}} is an operation system identifier of sort 
+Here, \frm{\f{forall}} is an operation system identifier of sort
 \frm{(S_{0} \to \cdots \to S_{n} \to \srtbool) \to \srtbool}. The
 implementation of the lambda abstraction is shown in
 subsection~\ref{subsec:lambda}.

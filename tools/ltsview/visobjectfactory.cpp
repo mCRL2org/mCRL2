@@ -33,7 +33,7 @@ extern "C" {
 using namespace std;
 using namespace Utils;
 
-class VisObject 
+class VisObject
 {
   public:
     VisObject();
@@ -107,7 +107,7 @@ void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
     {
       numColours = numColours << 1;
     }
-    
+
     GLubyte* texture = (GLubyte*)malloc(4*numColours*sizeof(GLubyte));
 
     for(int i = 0; i < numColours; ++i)
@@ -119,7 +119,7 @@ void VisObject::setTextureColours(vector<Utils::RGB_Color>& colours)
       texture[4*i+3] = 255; // alpha value
     }
 
-    glBindTexture(GL_TEXTURE_1D, texName); 
+    glBindTexture(GL_TEXTURE_1D, texName);
     // GL_TEXTURE_1D is now an alias for texName
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -157,13 +157,13 @@ void VisObject::drawWithTexture(PrimitiveFactory *pf, unsigned char alpha)
 {
   if (numColours > 0)
   {
-    
+
     // Recall all settings stored in texName
-    glBindTexture(GL_TEXTURE_1D, texName); 
+    glBindTexture(GL_TEXTURE_1D, texName);
 
     glEnable(GL_TEXTURE_1D);
   }
-  
+
   draw(pf, alpha);
 
   if (numColours > 0)
@@ -211,9 +211,9 @@ void VisObjectFactory::drawObjects(PrimitiveFactory *pf,unsigned char alpha,
   {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    
+
     //glEnable(GL_TEXTURE_1D);
-    for (unsigned int i = 0; i < objects_sorted.size(); ++i) 
+    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
     {
       objects_sorted[i]->drawWithTexture(pf,alpha);
     }
@@ -240,11 +240,11 @@ int VisObjectFactory::makeObject(int primitive, vector<int> &ids) {
 	VisObject *vo = new VisObject();
 	glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
 	vo->setPrimitive(primitive);
-  
+
   for(size_t i = 0; i < ids.size(); ++i) {
     vo->addIdentifier(ids[i]);
   }
-        
+
 	objects.push_back(vo);
 	objects_sorted.push_back(vo);
 	return objects.size()-1;

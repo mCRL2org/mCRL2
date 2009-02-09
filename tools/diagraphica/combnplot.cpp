@@ -70,13 +70,13 @@ void CombnPlot::setValues(
     attributeIndcs = attrIndcs;
     combinations   = combs;
     numberPerComb  = number;
-    
+
     initLabels();
     calcMaxAttrCard();
     calcMaxNumberPerComb();
     calcPositions();
 }
-        
+
 
 // --------------------------
 void CombnPlot::clearValues()
@@ -91,7 +91,7 @@ void CombnPlot::clearValues()
 
 
 // -- visualization functions  --------------------------------------
-    
+
 
 // --------------------------------------------------
 void CombnPlot::visualize( const bool &inSelectMode )
@@ -102,7 +102,7 @@ void CombnPlot::visualize( const bool &inSelectMode )
         genCharTex();
 
     // check if positions are ok
-    if ( geomChanged == true )        
+    if ( geomChanged == true )
         calcPositions();
 
     // selection mode
@@ -115,14 +115,14 @@ void CombnPlot::visualize( const bool &inSelectMode )
             selectBuf,
             2.0,
             2.0 );
-        
+
         //setScalingTransf();
         //drawAxes( inSelectMode );
         drawPlot( inSelectMode );
-        
+
         finishSelectMode(
             hits,
-            selectBuf );        
+            selectBuf );
     }
     // rendering mode
     else
@@ -159,7 +159,7 @@ void CombnPlot::drawAxesBC( const bool &inSelectMode )
     double xLft, xRgt;
     double yBot, yTop;
     double pix;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -175,7 +175,7 @@ void CombnPlot::drawAxesBC( const bool &inSelectMode )
         yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
     else
         yBot = yTop - 0.5*(h - (20+10+10)*pix);
-        
+
     // rendering mode
     if ( inSelectMode != true )
     {
@@ -183,7 +183,7 @@ void CombnPlot::drawAxesBC( const bool &inSelectMode )
         VisUtils::setColorLtGray();
         VisUtils::drawLine( xLft, xRgt, yTop, yTop );
         VisUtils::drawLine( xRgt, xRgt, yBot, yTop );
-        
+
         // x- & y-axis
         VisUtils::setColorMdGray();
         VisUtils::drawLine( xLft, xLft, yBot, yTop );
@@ -201,7 +201,7 @@ void CombnPlot::drawAxesCP( const bool &inSelectMode )
     double xLft, xRgt;
     double yBot, yTop;
     double pix;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -217,16 +217,16 @@ void CombnPlot::drawAxesCP( const bool &inSelectMode )
         yTop = yBot + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
     else
         yTop = yBot + 0.5*(h - (20+10+10)*pix);
-    
+
     // rendering mode
     if ( inSelectMode != true )
     {
         VisUtils::setColorMdGray();
-        
+
         // draw guides
         VisUtils::drawLine( xLft, xRgt, yTop, yTop );
         VisUtils::drawLine( xRgt, xRgt, yBot, yTop );
-        
+
         // x- & y-axis
         VisUtils::drawLine( xLft, xLft, yBot, yTop );
         VisUtils::drawLine( xLft, xRgt, yBot, yBot );
@@ -271,7 +271,7 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
     double pix;
     double scaling;
     string min, max;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -283,7 +283,7 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
 
     // color
     VisUtils::setColorBlack();
-    
+
     // y-axis labels
     xLft = -0.51*w+3*pix;
     xRgt = -0.50*w+12*pix;
@@ -292,13 +292,13 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
         yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
     else
         yBot = yTop - 0.5*(h - (20+10+10)*pix);
-    
+
     VisUtils::drawLabelInBoundBox(
                 texCharId,
                 xLft,      xRgt,
                 yTop,      yBot,
                 scaling,   "Number" );
-    
+
     if ( combinations.size() > 0 )
     {
         // max number
@@ -306,7 +306,7 @@ void CombnPlot::drawLabelsBC( const bool &inSelectMode )
         x   = -0.5*w+13*pix;
         y   =  0.5*h-10*pix;
         VisUtils::drawLabelVertBelow( texCharId, x, y, scaling, max );
-        
+
         // min number
         min = "0";
         y   = yBot;
@@ -327,7 +327,7 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
     double pix;
     double scaling;
     string min, max;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -339,7 +339,7 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
 
     // color
     VisUtils::setColorBlack();
-    
+
     // x-axis label
     x =  0.0;
     y =  -0.5*h+9*pix;
@@ -348,10 +348,10 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
     if ( numAttr > 0 )
     {
         // y-axis labels
-        
+
         xLft = -0.51*w+3*pix;
         xRgt = -0.5*w+12*pix;
-           
+
         for ( size_t i = 0; i < attributeLabels.size(); ++i )
         {
             if ( i > 0 )
@@ -360,8 +360,8 @@ void CombnPlot::drawLabelsCP( const bool &inSelectMode )
                 yTop = -0.5*h+20*pix + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
 
 
-            yBot = posRgtBot[0][i].y; 
-            
+            yBot = posRgtBot[0][i].y;
+
             VisUtils::drawLabelInBoundBox(
                 texCharId,
                 xLft,      xRgt,
@@ -393,7 +393,7 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
     double xLft, xRgt, yTop, yBot;
     double pix;
     ColorRGB col;
-    
+
     hCanv = canvas->getHeight();
     pix = canvas->getPixelSize();
     sizePositions = posBC.size();
@@ -412,7 +412,7 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
             xLft = posBC[i].x - 0.5*widthBC;
             xRgt = posBC[i].x + 0.5*widthBC;
             yTop = posBC[i].y;
-            
+
             glPushName( i );
             VisUtils::fillRect( xLft, xRgt, yTop, yBot );
             glPopName();
@@ -423,15 +423,15 @@ void CombnPlot::drawPlotBC( const bool &inSelectMode )
     {
         VisUtils::mapColorCoolGreen( col );
         col.a = 0.7;
-            
+
         for( int i = 0; i < sizePositions; ++i )
         {
             xLft = posBC[i].x - 0.5*widthBC;
             xRgt = posBC[i].x + 0.5*widthBC;
             yTop = posBC[i].y;
-            
+
             VisUtils::setColor( col );
-                
+
             if ( xRgt-xLft < pix )
                 VisUtils::drawLine( xLft, xLft, yTop, yBot );
             else
@@ -455,9 +455,9 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
     double yBot  = 0;
     double pix   = 0.0;
     ColorRGB col;
-    
+
     pix   = canvas->getPixelSize();
-    
+
     // selection mode
     if ( inSelectMode == true )
     {
@@ -465,10 +465,10 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
         {
             // name per collumn
             glPushName( i );
-            
+
             xLft = posLftTop[i][0].x;
             xRgt = posRgtBot[i][0].x;
-        
+
             yTop = posLftTop[i][0].y;
             yBot = posRgtBot[i][posRgtBot[i].size()-1].y;
 
@@ -489,14 +489,14 @@ void CombnPlot::drawPlotCP( const bool &inSelectMode )
 
                 xRgt = posRgtBot[i][j].x;
                 yBot = posRgtBot[i][j].y;
-                
-                VisUtils::mapColorQualPair( 
+
+                VisUtils::mapColorQualPair(
                     combinations[i][j],
                     maxAttrCard-1,
                     col );
                 col.a = 0.5;
                 VisUtils::setColor( col );
-                
+
                 if ( xRgt - xLft > pix )
                 {
                     VisUtils::enableBlending();
@@ -523,8 +523,8 @@ void CombnPlot::drawMousePos( const bool &inSelectMode )
     if ( inSelectMode != true )
     {
         double xLft, xRgt, yTop, yBot;
-        
-        if ( 0 <= mouseCombnIdx && 
+
+        if ( 0 <= mouseCombnIdx &&
              mouseCombnIdx < combinations.size() )
         {
             // x-coords
@@ -540,7 +540,7 @@ void CombnPlot::drawMousePos( const bool &inSelectMode )
         }
     }
 }
-    
+
 
 // ----------------------------------------------------
 void CombnPlot::drawDiagram( const bool &inSelectMode )
@@ -558,7 +558,7 @@ void CombnPlot::drawDiagram( const bool &inSelectMode )
         glPushMatrix();
         glTranslatef( posDgrm.x, posDgrm.y, 0.0 );
         glScalef( scaleDgrm, scaleDgrm, scaleDgrm );
-        
+
         // drop shadow
         VisUtils::setColorMdGray();
         VisUtils::fillRect(
@@ -582,7 +582,7 @@ void CombnPlot::drawDiagram( const bool &inSelectMode )
 
 
 // -- input event handlers ------------------------------------------
-    
+
 
 // ------------------------------------
 void CombnPlot::handleMouseMotionEvent(
@@ -597,7 +597,7 @@ void CombnPlot::handleMouseMotionEvent(
     // redraw in render mode
     visualize( false );
 }
-    
+
 /*
 // ------------------------------------
 void CombnPlot::handleMouseEnterEvent()
@@ -614,7 +614,7 @@ void CombnPlot::handleMouseLeaveEvent()
 {
     mouseInside = false;
 }
-*/  
+*/
 
 // -- utility data functions ----------------------------------------
 
@@ -625,7 +625,7 @@ void CombnPlot::initLabels()
 {
     attributeLabels.clear();
     for ( size_t i = 0; i < attributeIndcs.size(); ++i )
-        attributeLabels.push_back( 
+        attributeLabels.push_back(
             graph->getAttribute( attributeIndcs[i] )->getName() );
 }
 
@@ -637,9 +637,9 @@ void CombnPlot::calcMaxAttrCard()
     maxAttrCard = 0;
     for ( size_t i = 0; i < attributeIndcs.size(); ++i )
     {
-        if ( graph->getAttribute( 
+        if ( graph->getAttribute(
                 attributeIndcs[i] )->getSizeCurValues() > maxAttrCard )
-            maxAttrCard = graph->getAttribute( 
+            maxAttrCard = graph->getAttribute(
                 attributeIndcs[i] )->getSizeCurValues();
     }
 }
@@ -668,7 +668,7 @@ void CombnPlot::clear()
 {
     VisUtils::clear( clearColor );
 }
-*/  
+*/
 
 // -------------------------------
 void CombnPlot::setScalingTransf()
@@ -678,9 +678,9 @@ void CombnPlot::setScalingTransf()
     glLoadIdentity();
     double f = canvas->getScaleFactor();
     glScalef( f, f, f );
-    glTranslatef( 
-        canvas->getXTranslation(), 
-        canvas->getYTranslation(), 
+    glTranslatef(
+        canvas->getXTranslation(),
+        canvas->getYTranslation(),
         0.0 );
 }
 
@@ -693,7 +693,7 @@ void CombnPlot::displTooltip( const size_t &posIdx )
     {
         Attribute* attr = NULL;
         Value* val      = NULL;
-        
+
         msgDgrm.clear();
         /*
         for ( int i = 0; i < numAttrs; ++i )
@@ -709,7 +709,7 @@ void CombnPlot::displTooltip( const size_t &posIdx )
             }
             else
                 msg.append( " " );
-            
+
             msg.append( "; " );
         }
         */
@@ -717,7 +717,7 @@ void CombnPlot::displTooltip( const size_t &posIdx )
         msgDgrm.append( Utils::dblToStr( numberPerComb[posIdx] ) );
         msgDgrm.append( "nodes; " );
         // percentage
-        msgDgrm.append( Utils::dblToStr( 
+        msgDgrm.append( Utils::dblToStr(
                 Utils::perc( numberPerComb[posIdx], graph->getSizeNodes() ) ) );
         msgDgrm.append( "%" );
 
@@ -732,7 +732,7 @@ void CombnPlot::displTooltip( const size_t &posIdx )
             double xM, yM;
             double xD, yD;
             canvas->getWorldCoords( xMouseCur, yMouseCur, xM, yM );
-            
+
             if ( xM < 0 )
                 xD = xM+1.0*scaleDgrm;
             else
@@ -759,14 +759,14 @@ void CombnPlot::displTooltip( const size_t &posIdx )
     }
 }
 
-    
+
 // ----------------------------
 void CombnPlot::calcPositions()
 // ----------------------------
-{   
+{
     // update flag
     geomChanged = false;
-    
+
     // bar chart
     calcPosBC();
     // combination plot
@@ -790,13 +790,13 @@ void CombnPlot::calcPosBC()
     double fracX;
     double x, y;
     double ratio;
-    
+
     // get size of sides & 1 pixel
     canvas->getSize( w, h );
     pix = canvas->getPixelSize();
     // number of attributes
     numAttr = attributeIndcs.size();
-    
+
     // calc size of bounding box
     xLft = -0.5*w+25*pix;
     xRgt =  0.5*w-10*pix;
@@ -805,35 +805,35 @@ void CombnPlot::calcPosBC()
         yBot = yTop - (h - (20+10+10)*pix)/(double)(numAttr+1);
     else
         yBot = yTop - 0.5*(h - (20+10+10)*pix);
-        
+
     // get number of values per axis
     numX = combinations.size();
 
     // get intervals for x-axis
     if ( numX > 1 )
         fracX = ( 1.0 / (double)numX )*( xRgt-xLft );
-    else 
+    else
         fracX = 1.0;
-        
+
     // calc width
     //if ( fracX < maxWthHintPixBC*pix )
         widthBC = fracX;
     //else
     //    widthBC = maxWthHintPixBC*pix;
-        
+
     // calc positions
     posBC.clear();
     for ( size_t i = 0; i < numberPerComb.size(); ++i )
     {
         // calc ratio
         ratio = (double)numberPerComb[i]/(double)maxNumberPerComb;
-            
+
         // center, top
         x = xLft + 0.5*fracX + i*fracX;
         y = yBot + ratio*( yTop-yBot );
         if ( y-yBot < pix*minHgtHintPixBC )
             y += pix*minHgtHintPixBC;
-            
+
         Position2D pos;
         pos.x = x;
         pos.y = y;
@@ -856,16 +856,16 @@ void CombnPlot::calcPosCP()
     double x2,    y2;
     double numX,  numY;
     double fracX, fracY;
-    
+
     Attribute* attribute = NULL;
     int idx;
     int card;
     double ratio;
-    
+
     canvas->getSize( w, h );
     pix = canvas->getPixelSize();
     numAttr = attributeIndcs.size();
-    
+
     xLft = -0.5*w+25*pix;
     xRgt =  0.5*w-10*pix;
     yBot = -0.5*h+20*pix;
@@ -873,7 +873,7 @@ void CombnPlot::calcPosCP()
         yTop = yBot + numAttr*(h - (20+10+10)*pix)/(double)(numAttr+1);
     else
         yTop = yBot + 0.5*(h - (20+10+10)*pix);
-      
+
     // get number of values per axis
     numX = combinations.size();
     numY = attributeIndcs.size();
@@ -881,11 +881,11 @@ void CombnPlot::calcPosCP()
     // get intervals per axis
     if ( numX > 1 )
         fracX = (double)1 / (double)numX;
-    else 
+    else
         fracX = 1;
-        
+
     if ( numY > 1)
-        fracY = (double)1 / (double)numY; 
+        fracY = (double)1 / (double)numY;
     else
         fracY = 1;
 
@@ -907,7 +907,7 @@ void CombnPlot::calcPosCP()
             {
                 idx   = combinations[i][j];
                 ratio = 1.0; //(double)(idx+1)/(double)(card+1);
-            
+
                 // left
                 x1 = xLft + i*fracX*( xRgt-xLft );
                 // right
@@ -916,7 +916,7 @@ void CombnPlot::calcPosCP()
                 y2 = yTop - (j+1)*fracY*( yTop-yBot );
                 // top
                 y1 = y2   + ratio*fracY*( yTop-yBot );
-            
+
                 Position2D posLT;
                 posLT.x = x1;
                 posLT.y = y1;
@@ -947,15 +947,15 @@ void CombnPlot::clearPositions()
 
 
 // -------------------------
-void CombnPlot::processHits( 
-    GLint hits, 
+void CombnPlot::processHits(
+    GLint hits,
     GLuint buffer[] )
 // -------------------------
-{    
+{
     GLuint *ptr;
     int    number;
     int    name;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )

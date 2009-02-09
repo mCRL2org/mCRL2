@@ -55,10 +55,10 @@ inline double round(double d) {
 # endif
 # ifndef M_PI_2
 #  define M_PI_2 2*M_PI
-# endif 
+# endif
 # ifndef M_PI_4
 #  define M_PI_4 4*M_PI
-# endif 
+# endif
 #elif defined(__CYGWIN__) || defined(__MINGW32__)
 # include <cassert>
 # include <cerrno>

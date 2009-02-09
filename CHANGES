@@ -19,7 +19,7 @@ Changes between toolset releases July 2008 and January 2009:
      of processes with finite sets/bags as parameters, for instance.
    - numerous small improvements to tools and underlying infrastructure
    - lots of bug fixes
- 
+
  Renamed tools:
    - formcheck is now called formulacheck
 
@@ -35,7 +35,7 @@ Changes between toolset releases July 2008 and January 2009:
 ===============================================================================
 Changes between toolset releases January 2008 and July 2008:
 ===============================================================================
- 
+
  General:
    - improved command line interfaces and help information:
      + simplified interfaces of most tools, especially mcrl22lps, lps2lts,
@@ -59,11 +59,11 @@ Changes between toolset releases January 2008 and July 2008:
 
  Removed tools:
    - pbes2bes: most functionality is incorporated in pbes2bool
- 
+
  Renamed tools:
    - lpsdecluster is now called lpssuminst
    - lpsformcheck is now called formcheck
- 
+
  Performance improvements:
    - improved performance of lpspp and pbespp for specifications
      involving many variable declarations
@@ -75,9 +75,9 @@ Changes between toolset releases January 2008 and July 2008:
    - lpssumelm: more time-efficient on specifications involving large
      conditions
    - squadt: more time-efficient initialisation process
- 
+
  New functionality:
-   - ltsview: added new option for marking states: mark separately for 
+   - ltsview: added new option for marking states: mark separately for
      every mark rule
    - ltscompare: added comparison using simulation preorder/equivalence
    - ltsconvert: added minimisation modulo simulation equivalence

@@ -58,6 +58,6 @@ int main(int argc, char** argv)
   }
   if (is_true(e))
   { std::cerr << "Is TRUE: \n";
-  } 
+  }
 }
 

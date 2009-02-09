@@ -206,7 +206,7 @@ struct assignment_list_substitution
     }
   };
   /// \endcond
-  
+
   /// \brief Constructor.
   /// \param assignments A sequence of assignments to data variables
   assignment_list_substitution(const data_assignment_list& assignments)

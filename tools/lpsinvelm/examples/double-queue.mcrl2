@@ -3,7 +3,7 @@
 % and q2 of sort List(D). q1 == q2 holds as an invariant for this
 % specification.
 %
-% The following commands simplify this lps using the given invariant: 
+% The following commands simplify this lps using the given invariant:
 % mcrl22lps -n double-queue.mcrl2 double-queue.lps
 % lpsinvelm -i double-queue.inv double-queue.lps double-queue-elm.lps
 

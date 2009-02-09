@@ -19,7 +19,7 @@ class XMLImporter: public Importer
   public:
     XMLImporter() {};
     ~XMLImporter() {};
-    
+
     Graph* importFile(std::string file);
 };
 

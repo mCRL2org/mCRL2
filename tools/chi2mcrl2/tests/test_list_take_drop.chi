@@ -1,10 +1,10 @@
 model tst()=
-|[ dummy() 
+|[ dummy()
 ]|
 
 proc dummy()=
-|[ var a: [nat] = [0,2,3], 
-       b: nat = 0 
+|[ var a: [nat] = [0,2,3],
+       b: nat = 0
 :: a := take([1,2,3],2)
  ; a := take(a,1)
  ; a := drop([10,5,2,3],1)

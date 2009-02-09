@@ -33,7 +33,7 @@ void p_lts::tau_star_reduce()
     unsigned int t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
-      if ( taus[transitions[t].label] && 
+      if ( taus[transitions[t].label] &&
           (transitions[t].from != transitions[t].to) )
       {
         unsigned int to = transitions[t].to;
@@ -64,7 +64,7 @@ void p_lts::tau_star_reduce()
     t = new_trans_lut[state];
     while ( t < ntransitions )
     {
-      if ( taus[transitions[t].label] && 
+      if ( taus[transitions[t].label] &&
           (transitions[t].from != transitions[t].to) )
       {
         unsigned int to = transitions[t].to;
@@ -113,7 +113,7 @@ void p_lts::tau_star_reduce()
       {
         unsigned int t = trans_lut[i];
         while ( t < trans_lut[i+1] )
-        { 
+        {
           if ( reachable[transitions[t].to] == unknown )
           {
             reachable[transitions[t].to] = reached;
@@ -126,7 +126,7 @@ void p_lts::tau_star_reduce()
         }
         t = new_trans_lut[i];
         while ( t < new_trans_lut[i+1] )
-        { 
+        {
           if ( reachable[transitions[t].to] == unknown )
           {
             reachable[transitions[t].to] = reached;
@@ -190,7 +190,7 @@ void p_lts::tau_star_reduce()
   {
     taus[i] = false;
   }
-  
+
   FREE_A(label_map);
   FREE_A(state_map);
   FREE_A(reachable);

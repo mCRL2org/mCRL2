@@ -27,12 +27,12 @@ void test_make_match()
 
   x = match(make_term("f(16)"), "f(<int>)", i);
   BOOST_CHECK(x);
-  BOOST_CHECK(i == 16); 
+  BOOST_CHECK(i == 16);
 
   x = match(make_term("[1,2,3]"), "[<int>,<list>]", i, a);
 
   BOOST_CHECK(x);
-  BOOST_CHECK(i == 1); 
+  BOOST_CHECK(i == 1);
   BOOST_CHECK(aterm_list(a).size() == 2);
 
   x = match(make_term("[1,2,3]"), "[<list>]", l);
@@ -40,9 +40,9 @@ void test_make_match()
   x = match(make_term("f([1,2,3])"), "f([<list>])", l);
 
   x = match(make_term("f(2,[1,2,3])"), "f(<term>,[<list>])", a, l);
-  
+
   x = match(make_term("PBES(f(x),[1,2,3])"), "PBES(<term>,[<list>])", a, l);
-  
+
   x = match(make_term("PBES(f(0),[1,2,3],g(2),[a,b])"), "PBES(<term>,[<list>],<term>,[<list>])", a, l, b, m);
 }
 

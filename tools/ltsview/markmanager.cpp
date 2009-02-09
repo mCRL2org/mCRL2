@@ -395,7 +395,7 @@ bool MarkManager::isMarked(Cluster* c)
   {
     limit = c->getNumStates();
   }
-  
+
   bool result;
   switch (mark_style)
   {

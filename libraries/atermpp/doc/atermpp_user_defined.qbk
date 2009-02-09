@@ -23,7 +23,7 @@ can be obtained from it. For the class `MyTerm`, the specialization looks like
 this:
 
    namespace atermpp
-   {  
+   {
      template<>
      struct aterm_traits<MyTerm>
      {
@@ -34,13 +34,13 @@ this:
                                                              // when it is inside a protected container
        static ATerm term(MyTerm t)     { return t.term(); }  // return the ATerm corresponding to t
        static ATerm* ptr(MyTerm& t)    { return &t.term(); } // return the address of the ATerm corresponding to t
-     };  
+     };
    } // namespace atermpp
 
 Now that we have defined `aterm_traits<MyTerm>`, it is safe to use `MyTerm` in a protected container:
 
    #include "atermpp/vector.h"
-   
+
    atermpp::vector<MyTerm> v;
    v.push_back(MyTerm("f(x)");
    v.push_back(MyTerm("g(y)");

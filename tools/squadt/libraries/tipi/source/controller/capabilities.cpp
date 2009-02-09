@@ -28,7 +28,7 @@ namespace tipi {
      **/
     std::ostream& operator << (std::ostream& s, controller::capabilities const& c) {
       visitors::store(c, s);
- 
+
       return (s);
     }
   }

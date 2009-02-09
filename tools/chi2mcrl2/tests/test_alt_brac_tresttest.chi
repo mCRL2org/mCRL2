@@ -2,6 +2,6 @@ model x()=
 |[ Test() ]|
 
 proc Test( ) =
-|[ 
-(skip | (skip;skip))|(( skip | skip ) ; skip)  
+|[
+(skip | (skip;skip))|(( skip | skip ) ; skip)
 ]|

@@ -57,7 +57,7 @@ static inline bool is_tau_summand(ATermAppl a_summand) {
 
 static inline int get_number_of_tau_summands(linear_process lps) {
   int numOfTau = 0;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
 	if ( is_tau_summand(*currentSummand)){
 		++numOfTau;
 	}
@@ -67,9 +67,9 @@ static inline int get_number_of_tau_summands(linear_process lps) {
 
 static inline std::set<action_label > get_used_actions(linear_process lps){
   std::set<action_label > actionSet;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	for(action_list::iterator currentAction = currentSummand->actions().begin(); 
-        currentAction != currentSummand->actions().end(); 
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
+	for(action_list::iterator currentAction = currentSummand->actions().begin();
+        currentAction != currentSummand->actions().end();
         ++currentAction)
     {
 		actionSet.insert(currentAction->label());
@@ -80,7 +80,7 @@ static inline std::set<action_label > get_used_actions(linear_process lps){
 
 static inline std::set<action_list > used_multiactions(linear_process lps){
   std::set<action_list > multiActionSet;
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
     if (currentSummand->actions().size() > 1)
     {
     		multiActionSet.insert(currentSummand->actions());
@@ -98,9 +98,9 @@ static inline std::set<action_label > get_unused_actions(specification lps_speci
   }
 
   linear_process lps = lps_specification.process();
-  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){ 
-	for(action_list::iterator currentAction = currentSummand->actions().begin(); 
-        currentAction != currentSummand->actions().end(); 
+  for(summand_list::iterator currentSummand = lps.summands().begin(); currentSummand != lps.summands().end(); ++currentSummand){
+	for(action_list::iterator currentAction = currentSummand->actions().begin();
+        currentAction != currentSummand->actions().end();
         ++currentAction)
     {
 		  actionSet.erase(currentAction->label());
@@ -150,25 +150,25 @@ class info_tool
 #endif
         if (parse_command_line(argc,argv)) {
           specification lps_specification;
- 
+
           lps_specification.load(input_file_name);
           linear_process lps = lps_specification.process();
 
           std::set<action_label > action_labels = get_used_actions(lps);
           std::set<action_label > unused_action_labels = get_unused_actions(lps_specification);
-         
+
           cout << "Input read from " << (input_file_name.empty()?"stdin":("'" + input_file_name + "'")) << endl;
-          cout << endl;   
+          cout << endl;
           cout << "Number of summands                : " << lps.summands().size() << endl;
-          cout << "Number of tau-summands            : " << get_number_of_tau_summands(lps) << endl; 
+          cout << "Number of tau-summands            : " << get_number_of_tau_summands(lps) << endl;
           cout << "Number of free variables          : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
-          cout << "Number of process parameters      : " << lps.process_parameters().size() << endl; 
+          cout << "Number of process parameters      : " << lps.process_parameters().size() << endl;
           cout << "Number of declared actions        : " << lps_specification.action_labels().size() << endl;
           cout << "Number of used actions            : " << action_labels.size() << endl;
           if(  unused_action_labels.size() > 0 )
           {
             cout << "Labels of unused actions : " ;
-            for(std::set<action_label >::iterator i = unused_action_labels.begin(); 
+            for(std::set<action_label >::iterator i = unused_action_labels.begin();
                                              i != unused_action_labels.end();
                                              ++i)
             {
@@ -179,7 +179,7 @@ class info_tool
               cout << pp(*i) ;
             }
             cout << endl;
-          } 
+          }
           cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
           cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
         }

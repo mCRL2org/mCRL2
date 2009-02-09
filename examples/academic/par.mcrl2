@@ -4,7 +4,7 @@
 % University Press, Cambridge 1993.
 %
 % With two data elements, the generated transition system has 91 states.
-% 
+%
 % Note that the protocol is slightly different from the alternating bit protocol.
 % Is is interesting to see the subtle, but definitive differences between the
 % two implementations of the protocols, although the external behaviour is the
@@ -19,7 +19,7 @@ sort DATA = struct d1 | d2;
 %-------------------------------  error  ----------------------------------
 
 sort  error = struct ce | ae;
- 
+
 %-------------------------------  Bit ------------------------------------
 
 sort  Bit = struct bit0 | bit1;
@@ -76,9 +76,9 @@ proc  S = RM(bit0);
       L1 = ( skip.s6(ae) + skip.s6(ac) ). L + skip.L2;
       L2 = s8(eto).L;
 
-      
+
 init
-  hide({c3,c4,c5,c6,c7,c8,c9,skip}, 
+  hide({c3,c4,c5,c6,c7,c8,c9,skip},
     allow({r1,s2,c3,c4,c5,c6,c7,c8,c9,skip},
       comm({r3|s3->c3, r4|s4->c4, r5|s5->c5, r6|s6->c6,
                      r7|s7->c7, r8|s8->c8, r9|s9->c9},

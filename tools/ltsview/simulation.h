@@ -22,11 +22,11 @@ class Simulation {
   public:
     typedef boost::signal<void ()>      simulationSignal;
     typedef boost::signals::connection  simConnection;
-  
+
   public:
     Simulation();
     ~Simulation();
-   
+
     void start();
     void stop();
     void setInitialState(State* initialState);
@@ -38,12 +38,12 @@ class Simulation {
     Transition*                         getChosenTrans()      const;
     int                                 getChosenTransi()     const;
     bool                                getStarted()          const;
-   
-    // Generates a back trace to initState. 
+
+    // Generates a back trace to initState.
     // Pre: initState is the initial state for the entire (top level) LTS
     void                                traceBack(State* initState);
-    
-    
+
+
     void                                chooseTrans(int i);
     void                                followTrans();
     void                                undoStep();
@@ -52,7 +52,7 @@ class Simulation {
     simConnection connect(simulationSignal::slot_function_type subscriber);
     simConnection connectSel(simulationSignal::slot_function_type subscriber);
     void          disconnect(simConnection subscriber);
-   
+
   private:
     bool                        started;
     int                         chosenTrans;
@@ -61,7 +61,7 @@ class Simulation {
     std::vector< Transition* >  posTrans;
     std::vector< State* >       stateHis;
     std::vector< Transition* >  transHis;
-    simulationSignal            signal;  
+    simulationSignal            signal;
     simulationSignal            selChangeSignal;
 };
 

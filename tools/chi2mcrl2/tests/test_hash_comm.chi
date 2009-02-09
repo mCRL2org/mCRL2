@@ -1,6 +1,6 @@
 model z()=
-|[ chan x: 3 # bool 
-:: Send1(x.1) || Send2(x.2) || Recv(x) 
+|[ chan x: 3 # bool
+:: Send1(x.1) || Send2(x.2) || Recv(x)
 ]|
 
 proc Send1(chan c!: 3 # bool)=

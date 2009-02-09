@@ -30,8 +30,8 @@ namespace lps {
 //                 | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
 //                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
 //                 | Delta
-//                 | Tau 
-//                 | Sum(<DataVarId>+, <ProcExpr>) 
+//                 | Tau
+//                 | Sum(<DataVarId>+, <ProcExpr>)
 //                 | Block(<String>*, <ProcExpr>)
 //                 | Hide(<String>*, <ProcExpr>)
 //                 | Rename(<RenameExpr>*, <ProcExpr>)
@@ -40,8 +40,8 @@ namespace lps {
 //                 | Sync(<ProcExpr>, <ProcExpr>)
 //                 | AtTime(<ProcExpr>, <DataExpr>)
 //                 | Seq(<ProcExpr>, <ProcExpr>)
-//                 | IfThen(<DataExpr>, <ProcExpr>) 
-//                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+//                 | IfThen(<DataExpr>, <ProcExpr>)
+//                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
 //                 | BInit(<ProcExpr>, <ProcExpr>)
 //                 | Merge(<ProcExpr>, <ProcExpr>)
 //                 | LMerge(<ProcExpr>, <ProcExpr>)
@@ -55,14 +55,14 @@ namespace lps {
       process_expression()
         : atermpp::aterm_appl(core::detail::constructProcExpr())
       {}
-      
+
       /// \brief Constructor.
       /// \param term A term
       process_expression(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_rule_ProcExpr(m_term));
-      }     
+      }
   };
 
   /// \brief process identifier
@@ -77,7 +77,7 @@ namespace lps {
       {
         assert(core::detail::check_term_ProcVarId(m_term));
       }
-      
+
       core::identifier_string name() const
       {
         using namespace atermpp;
@@ -114,19 +114,19 @@ namespace lps {
       {
         using namespace atermpp;
         return arg2(*this);
-      }     
+      }
 
       data::data_variable_list variables2() const
       {
         using namespace atermpp;
         return list_arg3(*this);
-      }   
+      }
 
       process_expression expression() const
       {
         using namespace atermpp;
         return arg4(*this);
-      }     
+      }
   };
 
   /// \brief Read-only singly linked list of process equations
@@ -155,7 +155,7 @@ namespace lps {
       {
         using namespace atermpp;
         return arg2(*this);
-      }     
+      }
   };
 
   /// \brief Process specification
@@ -188,11 +188,11 @@ namespace lps {
         using namespace atermpp;
         return list_arg1(arg3(*this));
       }
-      
+
       process_initialization init() const
       {
         using namespace atermpp;
-        return arg4(*this);       
+        return arg4(*this);
       }
   };
 
@@ -207,7 +207,7 @@ namespace lps {
   }
 
   /// \brief Renaming expression
-  //<RenameExpr>   ::= RenameExpr(<String>, <String>) 
+  //<RenameExpr>   ::= RenameExpr(<String>, <String>)
   class rename_expression: public atermpp::aterm_appl
   {
     public:
@@ -218,7 +218,7 @@ namespace lps {
       {
         assert(core::detail::check_term_RenameExpr(m_term));
       }
-      
+
       core::identifier_string source() const
       {
         using namespace atermpp;
@@ -352,7 +352,7 @@ namespace lps {
   };
 
   /// \brief Tau
-  // Tau 
+  // Tau
   class tau: public process_expression
   {
     public:
@@ -366,7 +366,7 @@ namespace lps {
   };
 
   /// \brief Sum
-  // Sum(<DataVarId>+, <ProcExpr>) 
+  // Sum(<DataVarId>+, <ProcExpr>)
   class sum: public process_expression
   {
     public:
@@ -403,7 +403,7 @@ namespace lps {
       {
         assert(core::detail::check_term_Block(m_term));
       }
-      
+
       core::identifier_string_list names() const
       {
         using namespace atermpp;
@@ -599,7 +599,7 @@ namespace lps {
       }
   };
 
-  // IfThen(<DataExpr>, <ProcExpr>) 
+  // IfThen(<DataExpr>, <ProcExpr>)
   /// \brief IfThen
   class if_then: public process_expression
   {
@@ -625,7 +625,7 @@ namespace lps {
       }
   };
 
-  // IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+  // IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
   /// \brief IfThenElse
   class if_then_else: public process_expression
   {

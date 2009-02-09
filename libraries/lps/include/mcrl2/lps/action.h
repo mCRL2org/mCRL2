@@ -27,7 +27,7 @@ namespace lps {
 class action: public atermpp::aterm_appl
 {
   protected:
-    
+
     /// \brief The label of the action
     action_label m_label;
 
@@ -84,7 +84,7 @@ class action: public atermpp::aterm_appl
     action substitute(Substitution f)
     {
       return action(f(atermpp::aterm_appl(*this)));
-    }     
+    }
 };
 
 /// Read-only singly linked list of actions
@@ -112,7 +112,7 @@ bool equal_signatures(const action& a, const action& b)
 
   const data::data_expression_list& a_args = a.arguments();
   const data::data_expression_list& b_args = b.arguments();
-  
+
   if (a_args.size() != b_args.size())
     return false;
 

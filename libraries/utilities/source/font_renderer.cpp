@@ -1,6 +1,6 @@
-// Author(s): Carst Tankink, based on font renderers by VitaminB100 and 
+// Author(s): Carst Tankink, based on font renderers by VitaminB100 and
 //            A. J. (Hannes) Pretorius
-//            
+//
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -33,7 +33,7 @@ namespace mcrl2 {
 
       inline GLuint (&font_renderer::character_texture_id())[CHARSETSIZE] {
         static GLuint textures[CHARSETSIZE];
- 
+
         return textures;
       }
 
@@ -43,10 +43,10 @@ namespace mcrl2 {
         int red = 0;
         int green = 0;
         int blue = 0;
- 
+
         // Allocate texture memory
         glGenTextures(CHARSETSIZE, character_texture_id());
- 
+
         // Create the textures from the character set
         for(size_t i = 0; i < CHARSETSIZE; ++i)
         {
@@ -65,9 +65,9 @@ namespace mcrl2 {
               red   = (GLubyte)image.GetRed(w, h);
               green = (GLubyte)image.GetGreen(w, h);
               blue  = (GLubyte)image.GetBlue(w, h);
- 
+
               character_textures()[i][count] = (GLubyte)(255.0 - (red + green + blue) / 3.0);
- 
+
               ++count;
             }
           }
@@ -95,7 +95,7 @@ namespace mcrl2 {
 
         static_cast< void >(initialised); // prevent unused variable warnings
       }
- 
+
       font_renderer::~font_renderer()
       {
         // Free texture resources
@@ -103,7 +103,7 @@ namespace mcrl2 {
 
       void font_renderer::draw_text(
         const std::string s,
-        const double x, 
+        const double x,
         const double y,
         const double scale,
         const Alignment align_horizontal,
@@ -112,10 +112,10 @@ namespace mcrl2 {
         // Render text at the specified location
         double xSLft;
         double ySBot;
- 
+
         switch(align_horizontal)
         {
-          case al_left: 
+          case al_left:
           {
             xSLft = x - (s.length() * CHARWIDTH * scale);
             break;
@@ -126,7 +126,7 @@ namespace mcrl2 {
             break;
           }
           case al_right: // Fall through to default case
-          default: 
+          default:
           {
             xSLft = x;
             break;
@@ -165,13 +165,13 @@ namespace mcrl2 {
             double xRgt = xSLft + (i+1) * scale * CHARWIDTH;
             double yTop = ySBot + .5 * scale * CHARHEIGHT;
             double yBot = ySBot - .5 * scale * CHARHEIGHT;
-            
+
             size_t index = index_from_char(s[i]);
             glBindTexture(GL_TEXTURE_2D, character_texture_id()[index]);
 
             // Setup texture parameters
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            glTexParameterf(GL_TEXTURE_2D, 
+            glTexParameterf(GL_TEXTURE_2D,
                             GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -192,7 +192,7 @@ namespace mcrl2 {
 
       void font_renderer::draw_bounding_box(
         const std::string s,
-        const double x, 
+        const double x,
         const double y,
         const double scale,
         const Alignment align_horizontal,
@@ -205,7 +205,7 @@ namespace mcrl2 {
 
         switch(align_horizontal)
         {
-          case al_left: 
+          case al_left:
           {
             xSLft = x - (s.length() * CHARWIDTH * scale);
             break;
@@ -216,7 +216,7 @@ namespace mcrl2 {
             break;
           }
           case al_right: // Fall through to default case
-          default: 
+          default:
           {
             xSLft = x;
             break;
@@ -263,7 +263,7 @@ namespace mcrl2 {
             glVertex2d(xSRgt, ySBot);
             glVertex2d(xSRgt, ySTop);
             glVertex2d(xSLft, ySTop);
-            glVertex2d(xSLft, ySBot);     
+            glVertex2d(xSLft, ySBot);
           }
           glEnd();
         }
@@ -271,11 +271,11 @@ namespace mcrl2 {
 
       void font_renderer::draw_cropped_text(
         const std::string s,
-        const double x, 
+        const double x,
         const double y,
-        const double xLft, 
+        const double xLft,
         const double xRgt,
-        const double yTop, 
+        const double yTop,
         const double yBot,
         const double scale,
         const Alignment align_horizontal,
@@ -286,15 +286,15 @@ namespace mcrl2 {
 
       void font_renderer::draw_wrapped_text(
         const std::string s,
-        const double xLft, 
+        const double xLft,
         const double xRgt,
-        const double yTop, 
+        const double yTop,
         const double yBot,
         const double scale,
         const Alignment align_horizontal,
         const Alignment align_vertical)
       {
-        // Wrapped text to fit into bounding box. 
+        // Wrapped text to fit into bounding box.
 
         const size_t addpos = static_cast< size_t >((xRgt-xLft)/(CHARWIDTH*scale));
         double transx = 0;
@@ -310,25 +310,25 @@ namespace mcrl2 {
         while (startpos < temps.length())
         {
           std::string::size_type findid = temps.find_first_of('\n');
-        
+
           if ((findid < 0) || (findid > startpos + addpos))
           {
-             // if there is not a new line character 
+             // if there is not a new line character
              // just take the next part of the string
              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
              startpos = startpos + addpos;
-          } 
+          }
           else
           {
-            if (findid <= startpos + addpos) 
+            if (findid <= startpos + addpos)
             {
-              // if we found a new line character 
+              // if we found a new line character
               // cut the string at the new line position
               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
               startpos = 0;
               temps = temps.substr(findid+1);
             }
-          }               
+          }
           y = y - CHARHEIGHT*scale;
 
           //update maximum width and height
@@ -348,16 +348,16 @@ namespace mcrl2 {
 
           if ((findid < 0) || (findid > startpos + addpos))
           {
-             // if there is not a new line character 
+             // if there is not a new line character
              // just take the next part of the string
              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
              startpos = startpos + addpos;
-          } 
+          }
           else
           {
-            if (findid <= startpos + addpos) 
+            if (findid <= startpos + addpos)
             {
-              // if we found a new line character 
+              // if we found a new line character
               // cut the string at the new line position
               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
               startpos = 0;
@@ -372,10 +372,10 @@ namespace mcrl2 {
             subs = subs.append("...");
           }
 
-          // set correct horizontal alignment        
+          // set correct horizontal alignment
           switch(align_horizontal)
           {
-            case al_left: 
+            case al_left:
             {
               transx = xLft;
               break;
@@ -386,7 +386,7 @@ namespace mcrl2 {
               break;
             }
             case al_right: // Fall through to default case
-            default: 
+            default:
             {
               transx = xRgt - CHARWIDTH * scale * subs.length();
               break;
@@ -414,14 +414,14 @@ namespace mcrl2 {
             }
           }
 
-          draw_text(subs, transx, transy , scale, al_right, al_center);  
+          draw_text(subs, transx, transy , scale, al_right, al_center);
 
           // calculate new y position
           y = y - CHARHEIGHT*scale;
 
           // break if we are outside the boundingbox
           if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
-        }      
+        }
       }
 
       size_t font_renderer::index_from_char(const char & c)

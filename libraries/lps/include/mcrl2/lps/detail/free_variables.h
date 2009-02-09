@@ -38,7 +38,7 @@ void collect_free_variables(const summand& s, const std::set<data::data_variable
                                                             s.summation_variables().begin(),
                                                             s.summation_variables().end(),
                                                             dest
-                                                           ));  
+                                                           ));
 }
 
 } // namespace detail

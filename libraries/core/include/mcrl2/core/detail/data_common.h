@@ -193,7 +193,7 @@ ATermAppl capture_avoiding_substitutions(ATermAppl Part, ATermList Substs);
 
     }
   }
-} 
+}
 
 #endif //MCRL2_DATA_COMMON_H
 

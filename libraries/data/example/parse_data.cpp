@@ -30,7 +30,7 @@ data_specification parse_data(const std::string& text)
   result           = data::detail::type_check_specification(result);
   result           = data::detail::alpha_reduce(result);
   result           = data::detail::implement_data_specification(result);
- 
+
   atermpp::aterm_appl lps(result);
   return data_specification(lps(0));
 }

@@ -52,9 +52,9 @@ public:
     static void setColorBdl( const ColorRGB &col );
 
     static void setBlendType( const int &type );
-    
+
     void setDiagram( Diagram *dgrm );
-    void setFrame( 
+    void setFrame(
         Cluster* frme,
         const std::vector< Attribute* > &attrs,
         ColorRGB col );
@@ -75,27 +75,27 @@ public:
 
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
-    
-    void handleMouseLftDownEvent( 
-        const int &x, 
+
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
     void handleKeyDownEvent( const int &keyCode );
 
@@ -105,12 +105,12 @@ protected:
     void initAttributes( const std::vector< Attribute* > &attrs );
     void initFrames();
     void initBundles();
-*/    
+*/
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
     void calcPosFrame();
     void calcPosFramesHist();
-    
+
     void clearAttributes();
     void clearDiagram();
     void clearFrames();
@@ -123,8 +123,8 @@ protected:
     void handleIconPlay();
     */
     void handleIconRgt();
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- utility drawing functions ---------------------------------
@@ -137,9 +137,9 @@ protected:
     // -- utility event handlers ------------------------------------
 /*
     void onTimer( wxTimerEvent &e );
-*/  
+*/
     // -- static variables ------------------------------------------
-    
+
     static ColorRGB colClr;
     static ColorRGB colTxt;
     static int      szeTxt;
@@ -157,7 +157,7 @@ protected:
         ID_FRAME,
         ID_FRAME_HIST
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association

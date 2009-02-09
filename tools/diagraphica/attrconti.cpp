@@ -43,7 +43,7 @@ AttrConti::AttrConti( const AttrConti &attr )
 {
     for ( size_t i = 0; i < attr.curValues.size(); ++i )
         curValues.push_back( new Value( *attr.curValues[i] ) );
-   
+
     map< double, Value* >::const_iterator it;
     int idx;
     Value* val;
@@ -106,7 +106,7 @@ void AttrConti::clusterValues(
 
         // update current map
         map< double, Value* >::iterator it;
-        
+
         for ( it = curMap.begin(); it != curMap.end(); ++it )
         {
             for ( size_t j = 0; j < sorted.size(); ++j )
@@ -163,7 +163,7 @@ void AttrConti::moveValue(
     const size_t &idxTo )
 // -----------------------
 {
-    if ( ( 0 <= idxFr && idxFr < curValues.size() ) && 
+    if ( ( 0 <= idxFr && idxFr < curValues.size() ) &&
          ( 0 <= idxTo && idxTo < curValues.size() ) )
     {
         Value* temp = curValues[idxFr];
@@ -214,7 +214,7 @@ void AttrConti::classifyEqualIntervals( const int &number )
         vector< double > values;
         vector< string > legend;
         map< double, int > valuesToLegend;
-        
+
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
         Utils::classEqualIntervals(
@@ -260,7 +260,7 @@ void AttrConti::classifyQuantiles( const int &number )
         set< double > values;
         vector< string > legend;
         map< double, int > valuesToLegend;
-        
+
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
         Utils::classifyQuantiles(
@@ -305,7 +305,7 @@ void AttrConti::classifyMeanStandardDeviation( const int &number )
         vector< double > values;
         vector< string > legend;
         map< double, int > valuesToLegend;
-        
+
         // calc classification
         mediator->getAttrValues( this->getIndex(), values );
         Utils::classifyMeanStandardDeviation(
@@ -463,7 +463,7 @@ Value* AttrConti::mapToValue( double key )
     it = curMap.find( key );
     if ( it != curMap.end() )
         result = it->second;
-    
+
     return result;
 }
 

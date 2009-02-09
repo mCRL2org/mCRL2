@@ -20,7 +20,7 @@ predicate. The program fragment below illustrates this:
       return (t.type() == AT_APPL) && aterm_appl(t).function().name() == "f";
     }
   };
-  
+
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
   aterm t = find_if(a, is_f());
   assert(t == make_term("f(y)"));
@@ -57,7 +57,7 @@ order. The algorithm `replace_if` makes replacements based on a predicate. There
   assert(b == make_term("f(x)"));
   aterm_appl c = replace(a, make_term("f(x)"), make_term("x"), true);
   assert(c == make_term("x"));
-  
+
   aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
   aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
   assert(e == make_term("h(g(u),f(u),p(u,q(u)))"));
@@ -68,7 +68,7 @@ of a list, and returns the result. The `for_each` algorithm applies
 an operation to each subterm of a term.
 
    #include "atermpp/algorithm.h"
-   
+
    // Applies a function f to the given argument t.
    struct apply_f
    {
@@ -76,18 +76,18 @@ an operation to each subterm of a term.
      {
        return aterm_appl(function_symbol("f", 1), t);
      }
-   };   
-   
+   };
+
    bool print(aterm_appl t) // The return value true indicates that for_each
                               // should recurse into the children of t.
    {
      std::cout << t.function().name() << " ";
      return true;
    }
-   
+
    aterm_appl t = make_term("h(g(x),f(y))");
    atermpp::for_each(t, print);             // prints "h g x f y"
-   
+
    aterm_list l = make_term("[0,1,2,3]");
    l = atermpp::apply(l, apply_f());        // results in [f(0),f(1),f(2),f(3)]
 

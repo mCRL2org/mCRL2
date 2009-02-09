@@ -14,8 +14,8 @@
 #include "visualizer.h"
 #include <cmath>
 #include <cstdlib>
-#include <iostream> 
-#include <fstream> 
+#include <iostream>
+#include <fstream>
 #include "cluster.h"
 #include "lts.h"
 #include "mediator.h"
@@ -249,11 +249,11 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
     if (create_objects) {
       root->clearBranchVisObjects();
     }
-    
+
     glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL) { 
+      if (desc != NULL) {
         if (desc->isCentered()) {
           if (root->getNumDescendants() > 1) {
             traverseTreeC(desc,false,drot);
@@ -272,7 +272,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       }
     }
     glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
-    
+
     float r = root->getBaseRadius() / root->getTopRadius();
     glPushMatrix();
     glTranslatef(0.0f,0.0f,0.5f*settings->getFloat(ClusterHeight));
@@ -281,7 +281,7 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       glRotatef(180.0f,1.0f,0.0f,0.0f);
       glScalef(root->getBaseRadius(),root->getBaseRadius(),
             settings->getFloat(ClusterHeight));
-      
+
       vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
@@ -299,15 +299,15 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
     } else {
       glScalef(root->getTopRadius(),root->getTopRadius(),
           settings->getFloat(ClusterHeight));
-      
+
       vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
-      
+
       if (create_objects) {
         root->setVisObject(visObjectFactory->makeObject(
               primitiveFactory->makeTruncatedCone(r,
-                root->getNumDescendants() > 1 || root->hasSeveredDescendants(), 
+                root->getNumDescendants() > 1 || root->hasSeveredDescendants(),
                 topClosed), ids));
       } else {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
@@ -326,7 +326,7 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
     glScalef(root->getTopRadius(),root->getTopRadius(),
         min(root->getTopRadius(),settings->getFloat(ClusterHeight)));
     if (create_objects) {
-      vector<int> ids; 
+      vector<int> ids;
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
       if (root == lts->getInitialState()->getCluster()) {
@@ -350,7 +350,7 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
     if (create_objects) {
       root->clearBranchVisObjects();
     }
-    
+
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
       if (desc != NULL)
@@ -400,7 +400,7 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
             visObjectFactory->updateObjectMatrix(root->getBranchVisObject(i));
           }
           glPopMatrix();
-          
+
           // recurse into the subtree
           glTranslatef(root->getBaseRadius(),0.0f,
               settings->getFloat(ClusterHeight));
@@ -413,7 +413,7 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
         }
       }
     }
-    
+
     if (baserad <= 0.0f && !root->hasSeveredDescendants()) {
       // root has no centered descendant, so draw it as a hemispheroid
       glPushMatrix();
@@ -522,7 +522,7 @@ void Visualizer::updateColors()
       vector<RGB_Color> rule_colours;
 
       c = RGB_WHITE;
-      if (mediator->isMarked(cl)) 
+      if (mediator->isMarked(cl))
       {
         if (mediator->getMarkStyle() == MARK_STATES &&
             mediator->getMatchStyle() == MATCH_MULTI)
@@ -539,8 +539,8 @@ void Visualizer::updateColors()
         {
           c = settings->getRGB(MarkedColor);
         }
-      } 
-      
+      }
+
       if (cl->isSelected())
       {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
@@ -580,8 +580,8 @@ void Visualizer::drawStates(bool simulating) {
   drawStates(lts->getInitialState()->getCluster(), simulating);
 }
 
-void Visualizer::drawSimStates(vector<State*> historicStates, 
-                               State* currState, Transition* chosenTrans) 
+void Visualizer::drawSimStates(vector<State*> historicStates,
+                               State* currState, Transition* chosenTrans)
 {
   if (lts == NULL) {
     return;
@@ -593,9 +593,9 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   float ns = settings->getFloat(StateSize);
   RGB_Color c;
   Point3D p;
-  
+
   set<State*> drawnStates;
-  
+
   // Draw the current state.
   //RGB_Color hisStateColor = settings->getRGB(SimStateColor);
   if (lts->getZoomLevel() == currState->getZoomLevel())
@@ -608,7 +608,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     {
       c = settings->getRGB(SimCurrColor);
     }
-    
+
     if (currState->isSelected())
     {
       c = blend_RGB(c,RGB_ORANGE,SELECT_BLEND);
@@ -627,7 +627,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
     // simulation
     glScalef(1.5 *ns, 1.5* ns, 1.5 * ns);
     primitiveFactory->drawSimpleSphere();
-    glPopMatrix(); 
+    glPopMatrix();
 
     glPopName();
     glPopName();
@@ -640,7 +640,7 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
   {
     endState = currState->getOutTransition(i)->getEndState();
 
-    if (lts->getZoomLevel() == endState->getZoomLevel() 
+    if (lts->getZoomLevel() == endState->getZoomLevel()
         && drawnStates.find(endState) == drawnStates.end())
     {
       glPushName(SIMSTATE);
@@ -654,12 +654,12 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
       else if (currState->getOutTransition(i) == chosenTrans)
       {
         c = settings->getRGB(SimSelColor);
-      } 
-      else 
+      }
+      else
       {
         c = settings->getRGB(SimPosColor);
       }
-   
+
       if (endState->isSelected())
       {
         c = blend_RGB(c, RGB_ORANGE, SELECT_BLEND);
@@ -679,19 +679,19 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
       }
       primitiveFactory->drawSimpleSphere();
       glPopMatrix();
-    
+
       glPopName();
       glPopName();
       drawnStates.insert(endState);
     }
   }
-  
+
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   State* s;
   for (size_t i = 0; i < historicStates.size() - 1; ++i) {
     s = historicStates[i];
-    
+
     if(lts->getZoomLevel() == s->getZoomLevel()
         && drawnStates.find(s) == drawnStates.end())
     {
@@ -715,12 +715,12 @@ void Visualizer::drawSimStates(vector<State*> historicStates,
       glPushName(s->getID());
 
       p = s->getPositionAbs();
-      glPushMatrix(); 
+      glPushMatrix();
       glTranslatef(p.x, p.y, p.z);
       glScalef(ns, ns, ns);
       primitiveFactory->drawSimpleSphere();
       glPopMatrix();
-      
+
       glPopName();
       glPopName();
       drawnStates.insert(s);
@@ -742,9 +742,9 @@ void Visualizer::computeAbsPos()
 void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 {
 // Does a DFS on the clusters to calculate the `absolute' positions of their
-// states, taking the position of the initial state as (0,0,0). 
-// Secondly, it also assigns the incoming and outgoing control points for the 
-// back pointers to each state. 
+// states, taking the position of the initial state as (0,0,0).
+// Secondly, it also assigns the incoming and outgoing control points for the
+// back pointers to each state.
 
   if (root->getState(0)->getZoomLevel() == lts->getZoomLevel())
   {
@@ -765,7 +765,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
         Point3D p2 = { M[12], M[13], M[14]};
         s->setIncomingControl(p2);
-       
+
         // The incoming vector of the state lies settings->getFloat(ClusterHeight) beneath the state.
         glTranslatef(0.0f, 0.0f, 4 * settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
@@ -778,15 +778,15 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         float M[16];
         glPushMatrix();
         glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
-        
+
         glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Point3D p1 = { M[12], M[13], M[14]};                    
+        Point3D p1 = { M[12], M[13], M[14]};
         s->setPositionAbs(p1);
         glTranslatef(-s->getPositionRadius(), 0.0f, 0.0f);
 
-        // The outgoing vector of the state points out of the cluster, in the 
-        // direction the state itself is positioned. Furthermore, it points 
+        // The outgoing vector of the state points out of the cluster, in the
+        // direction the state itself is positioned. Furthermore, it points
         // settings->getFloat(ClusterHeight) up.
         glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->getFloat(ClusterHeight));
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
@@ -805,15 +805,15 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       glRotatef(-s->getPositionAngle(), 0.0f, 0.0f, 1.0f);
       glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
 
-      glTranslatef(settings->getFloat(StateSize) * 5.0f, 
-                   settings->getFloat(StateSize) * 5.0f, 
+      glTranslatef(settings->getFloat(StateSize) * 5.0f,
+                   settings->getFloat(StateSize) * 5.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
       Point3D p = { M[12], M[13], M[14]};
       s->setLoopControl1(p);
 
-      glTranslatef(0.0f, 
-                   -settings->getFloat(StateSize) * 10.0f, 
+      glTranslatef(0.0f,
+                   -settings->getFloat(StateSize) * 10.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
       p.x = M[12];
@@ -830,11 +830,11 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
       drot -= 360;
     }
     glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-    
+
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL) 
-      { 
+      if (desc != NULL)
+      {
         if (desc->isCentered()) {
           computeStateAbsPos(desc,(root->getNumDescendants()>1)?drot:rot);
         }
@@ -849,7 +849,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         }
       }
     }
-    
+
     glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
   }
 }
@@ -857,11 +857,11 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 void Visualizer::drawStates(Cluster* root, bool simulating) {
   if (lts->getZoomLevel() == root->getState(0)->getZoomLevel())
   {
-    float ns = settings->getFloat(StateSize); 
+    float ns = settings->getFloat(StateSize);
     for (int i = 0; i < root->getNumStates(); ++i) {
       State *s = root->getState(i);
 
-      if(!(simulating && s->isSimulated())) 
+      if(!(simulating && s->isSimulated()))
       {
         RGB_Color c;
         GLuint texName;
@@ -875,23 +875,23 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
           if (mediator->getMatchStyle() != MATCH_MULTI)
           {
             c = settings->getRGB(MarkedColor);
-          } 
+          }
           else
           {
             c = settings->getRGB(StateColor);
             vector< int > state_rules;
             s->getMatchedRules(state_rules);
-            
+
             size_t n_colours = 1;
             size_t n_rules = state_rules.size();
-            
+
             while (n_colours < n_rules)
             {
               n_colours = n_colours << 1;
             }
 
 
-            GLubyte *texture = (GLubyte*)malloc(4 * n_colours * 
+            GLubyte *texture = (GLubyte*)malloc(4 * n_colours *
                 sizeof(GLubyte));
 
             for(unsigned int i = 0; i < n_colours; ++i)
@@ -905,7 +905,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
               texture[4*i+3] = (GLubyte) 255;
             }
             // Bind the texture created above, set textures on. (From Red Book)
-            
+
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             glGenTextures(1, &texName);
@@ -915,15 +915,15 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, n_colours, 0, 
+            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, n_colours, 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, texture);
-            
+
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
             glBindTexture(GL_TEXTURE_1D, texName);
             glEnable(GL_TEXTURE_1D);
             free(texture);
-          } 
+          }
         }
 
         if (s->isSelected()) {
@@ -936,19 +936,19 @@ void Visualizer::drawStates(Cluster* root, bool simulating) {
         glPushMatrix();
         glTranslatef(p.x, p.y, p.z);
         glScalef(ns,ns,ns);
-       
+
         glPushName(s->getID());
 
         primitiveFactory->drawSimpleSphere();
         glPopName();
         glPopMatrix();
-        
+
         if(mediator->isMarked(s))
         {
           glDisable(GL_TEXTURE_1D);
 
         }
- 
+
         glDeleteTextures(1, &texName);
       }
     }
@@ -1031,14 +1031,14 @@ void Visualizer::computeForces(Cluster* root) {
         Point3D d = s->getPositionAbs() - v->getPositionAbs();
         float dl = length(d);
         if (dl > 0.0f) {
-          Point3D force = (0.00001f * settings->getFloat(TransitionAttraction) * 
+          Point3D force = (0.00001f * settings->getFloat(TransitionAttraction) *
             (dl - 0.4f*settings->getFloat(TransitionLength)) / dl) * d;
           force.x = truncate_float(force.x);
           force.y = truncate_float(force.y);
           force.z = truncate_float(force.z);
           v->addForce(force);
           s->addForce(-1.0f * force);
-          
+
     /*cerr << "add force (" << force.x << "," << force.y << "," << force.z
       << ") to " << s->getID() << endl;
     cerr << "add force (" << -force.x << "," << -force.y << "," << -force.z
@@ -1130,7 +1130,7 @@ void Visualizer::applyForces(Cluster* root,int rot) {
             glRotatef(-angle,0.0f,0.0f,1.0f);
             glTranslatef(radius,0.0f,0.0f);
             glGetFloatv(GL_MODELVIEW_MATRIX,M);
-            Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]), 
+            Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]),
               truncate_float(M[14]) };
           glPopMatrix();
           s->setPositionAngle(angle);
@@ -1142,7 +1142,7 @@ void Visualizer::applyForces(Cluster* root,int rot) {
           new_pos.x = 0.0f;
           new_pos.y = 0.0f;
           glGetFloatv(GL_MODELVIEW_MATRIX,M);
-          Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]), 
+          Point3D new_pos = { truncate_float(M[12]), truncate_float(M[13]),
             truncate_float(M[14]) };
           s->setPositionAbs(new_pos);
         }
@@ -1160,11 +1160,11 @@ void Visualizer::applyForces(Cluster* root,int rot) {
     drot -= 360;
   }
   glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-  
+
   for (int i = 0; i < root->getNumDescendants(); ++i) {
     Cluster* desc = root->getDescendant(i);
-    if (desc != NULL) 
-    { 
+    if (desc != NULL)
+    {
       if (desc->isCentered()) {
         applyForces(desc,(root->getNumDescendants()>1)?drot:rot);
       }
@@ -1179,7 +1179,7 @@ void Visualizer::applyForces(Cluster* root,int rot) {
       }
     }
   }
-  
+
   glTranslatef(0.0f,0.0f,-settings->getFloat(ClusterHeight));
 }
 
@@ -1255,18 +1255,18 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp) {
     }
     for (int i = 0; i < root->getNumDescendants(); ++i) {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL) 
-      { 
+      if (desc != NULL)
+      {
         drawTransitions(desc,disp_fp,disp_bp);
       }
     }
   }
 }
 
-void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp, 
-                                 vector<Transition*> transHis, 
+void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
+                                 vector<Transition*> transHis,
                                  vector<Transition*> posTrans,
-                                 Transition* chosenTrans) 
+                                 Transition* chosenTrans)
 {
   computeAbsPos();
 
@@ -1312,14 +1312,14 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     }
   }
 
-  // Draw the possible transitions from the current state, as well as the state 
+  // Draw the possible transitions from the current state, as well as the state
   // they lead into
   for (size_t i = 0; i < posTrans.size(); ++i) {
     Transition* currTrans = posTrans[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
-    
-    
+
+
     if (lts->getZoomLevel() == beginState->getZoomLevel() &&
         lts->getZoomLevel() == endState->getZoomLevel())
     {
@@ -1355,7 +1355,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
           RGB_Color c = settings->getRGB(MarkedColor);
           glColor4ub(c.r, c.g, c.b, 255);
         }
-        
+
         if (currTrans->isSelfLoop())
         {
           drawLoop(beginState);
@@ -1370,7 +1370,7 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
     }
   }
 }
-  
+
 void Visualizer::drawForwardPointer(State* startState, State* endState) {
   Point3D startPoint = startState->getPositionAbs();
   Point3D endPoint = endState->getPositionAbs();
@@ -1396,7 +1396,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
                              {startControl.x, startControl.y, startControl.z},
                              {endControl.x, endControl.y, endControl.z},
                              {endPoint.x, endPoint.y, endPoint.z} };
-  float t,it,b0,b1,b2,b3,x,y,z;       
+  float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->getInt(Quality);
   glBegin(GL_LINE_STRIP);
     for (int k = 0; k < N; ++k) {
@@ -1408,7 +1408,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
       b3 =     it * it * it;
 
       x = b0 * ctrlPts[0][0] +
-          b1 * ctrlPts[1][0] + 
+          b1 * ctrlPts[1][0] +
           b2 * ctrlPts[2][0] +
           b3 * ctrlPts[3][0];
 
@@ -1416,7 +1416,7 @@ void Visualizer::drawBackPointer(State* startState, State* endState) {
           b1 * ctrlPts[1][1] +
           b2 * ctrlPts[2][1] +
           b3 * ctrlPts[3][1];
-                
+
       z = b0 * ctrlPts[0][2] +
           b1 * ctrlPts[1][2] +
           b2 * ctrlPts[2][2] +
@@ -1431,7 +1431,7 @@ void Visualizer::drawLoop(State* state) {
   Point3D startControl = state->getLoopControl1();
   Point3D endControl = state->getLoopControl2();
 
-  float t,it,b0,b1,b2,b3,x,y,z, statesize;       
+  float t,it,b0,b1,b2,b3,x,y,z, statesize;
   int N = settings->getInt(Quality);
   statesize = settings->getFloat(StateSize);
   glBegin(GL_LINE_STRIP);
@@ -1444,7 +1444,7 @@ void Visualizer::drawLoop(State* state) {
       b3 =     it * it * it;
 
       x = b0 * statePoint.x  +
-          b1 * startControl.x + 
+          b1 * startControl.x +
           b2 * endControl.x +
           b3 * statePoint.x;
 
@@ -1452,7 +1452,7 @@ void Visualizer::drawLoop(State* state) {
           b1 * startControl.y +
           b2 * endControl.y +
           b3 * statePoint.y;
-                
+
       z = b0 * statePoint.z +
           b1 * startControl.z +
           b2 * endControl.z +

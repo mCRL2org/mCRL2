@@ -1,10 +1,10 @@
 model blaat()=
-|[ test(false, true, 5) 
+|[ test(false, true, 5)
 ]|
 
 proc test(var a ,aa :bool, g: nat)=
 |[ var e,d: nat = 10, var f, h: nat = 7
-::   
+::
 skip
 ]|
 

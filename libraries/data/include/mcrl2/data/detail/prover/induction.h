@@ -17,7 +17,7 @@
 #include "mcrl2/utilities/expression_info.h"
 #include "mcrl2/utilities/sort_info.h"
 
-  /// The class Induction generates statements corresponding to 
+  /// The class Induction generates statements corresponding to
 
 class Induction {
   private:
@@ -30,7 +30,7 @@ class Induction {
     /// \brief An expression of sort Bool in mCRL2 format.
     ATermAppl f_formula;
 
-    /// \brief 
+    /// \brief
     ATermAppl f_constructors;
 
     /// \brief

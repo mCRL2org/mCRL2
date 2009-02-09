@@ -57,13 +57,13 @@ namespace transport {
 
         /** \brief Constructor */
         inline basic_transceiver(boost::shared_ptr < transporter_impl > const&);
-     
+
         /** \brief Function that facilitates disconnection (on both sides of a connection) */
         virtual void disconnect(boost::shared_ptr < basic_transceiver > const&) = 0;
-     
+
         /** \brief Send a string input stream to the peer */
         virtual void send(const std::string&) = 0;
-     
+
         /** \brief Send the contents of an input stream to the peer */
         virtual void send(std::istream&) = 0;
 

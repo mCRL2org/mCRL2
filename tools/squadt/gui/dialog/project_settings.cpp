@@ -49,7 +49,7 @@ namespace squadt {
       bool project::is_project_directory(wxString p) {
 
         try {
-          boost::shared_ptr < project_manager > m = project_manager::create(std::string(p.fn_str()), false); 
+          boost::shared_ptr < project_manager > m = project_manager::create(std::string(p.fn_str()), false);
 
           return m.get() != 0;
         }

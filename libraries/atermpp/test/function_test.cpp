@@ -23,7 +23,7 @@ void test_aterm_function()
 {
   // create an unquoted function symbol
   function_symbol sym("\"f\"", 1, false);
-  BOOST_CHECK(!sym.is_quoted()); 
+  BOOST_CHECK(!sym.is_quoted());
   aterm x = make_term("x");
 
   aterm_appl a(sym, x);
@@ -41,7 +41,7 @@ void test_aterm_function()
   BOOST_CHECK(c.to_string() == "\"f\"(x)");
   BOOST_CHECK(c.is_quoted());     // this is quite unexpected
   BOOST_CHECK(c.function() != sym); // this is quite unexpected
-  
+
   aterm_appl f = make_term("f(g(a,b),c)");
   aterm_appl g = make_term("g(a,b)");
   BOOST_CHECK(f.argument(0) == g);

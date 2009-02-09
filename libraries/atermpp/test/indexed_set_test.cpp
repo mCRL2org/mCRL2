@@ -43,7 +43,7 @@ void test_indexed_set()
 
   aterm b = t.get(1);
   BOOST_CHECK(b == make_term("b"));
-  
+
   t.remove(a);
   BOOST_CHECK(t.elements().size() == 1);
 
@@ -53,7 +53,7 @@ void test_indexed_set()
 
   t.reset();
   BOOST_CHECK(t.elements().size() == 0);
-  
+
   std::map<int, indexed_set> x;
   x[2] = t;
 }

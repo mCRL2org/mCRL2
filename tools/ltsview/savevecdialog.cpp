@@ -52,7 +52,7 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   f_exts.push_back( wxT("eps") );
   f_exts.push_back( wxT("pdf") );
   f_exts.push_back( wxT("svg") );
-  
+
   wxArrayString fts;
   unsigned int default_id = 0;
   for (unsigned int i = 0; i < f_desc.size(); ++i)
@@ -67,7 +67,7 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,
       wxDefaultSize,fts);
   ft_choice->SetSelection(default_id);
-  
+
   f_name.Assign(filename);
   f_name.SetExt(f_exts[ft_choice->GetSelection()]);
   f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,wxSize(300,-1));
@@ -110,7 +110,7 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   mainSizer->Add(bbox_check,0,wxEXPAND|wxALL,5);
   mainSizer->Add(new wxStaticLine(this,-1),0,wxEXPAND|wxALL,5);
   mainSizer->Add(CreateButtonSizer(wxOK|wxCANCEL),0,wxEXPAND|wxALL,5);
-  
+
   mainSizer->Fit(this);
   SetSizer(mainSizer);
   Layout();
@@ -214,9 +214,9 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
   }
 
   while (endstate == GL2PS_OVERFLOW)
-  { 
+  {
     buffsize += 1024*1024;
-    begstate = 
+    begstate =
       gl2psBeginPage(f_name.GetFullName().fn_str(), "LTSView", NULL,
           f_formats[ft_choice->GetSelection()], GL2PS_BSP_SORT, options,
           GL_RGBA, 0, NULL, 0, 0, 0, buffsize, fp, "" );
@@ -224,10 +224,10 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
     {
       break;
     }
-    glcanvas->display(); 
+    glcanvas->display();
     endstate = gl2psEndPage();
   }
-  
+
   fclose(fp);
 
   if (begstate == GL2PS_ERROR || endstate == GL2PS_ERROR)
@@ -244,7 +244,7 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
     statusbar->SetStatusText(wxT("Done"));
     statusbar->Update();
     wxMessageDialog msgDialog(GetParent(),
-        wxT("The picture was saved to file:\n\n") + 
+        wxT("The picture was saved to file:\n\n") +
         f_name.GetFullPath(), wxT("Picture saved"),
         wxOK | wxICON_INFORMATION);
     msgDialog.ShowModal();
@@ -260,8 +260,8 @@ void SaveVecDialog::update_file_name()
   wxString text = f_name.GetFullPath();
   if (text.Len() > MAX_LABEL_LENGTH)
   {
-    text = text.Left((MAX_LABEL_LENGTH - 3) / 2) 
-      + wxT("...") 
+    text = text.Left((MAX_LABEL_LENGTH - 3) / 2)
+      + wxT("...")
       + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
   }
   f_text->SetLabel(text);

@@ -40,7 +40,7 @@ public:
         const double &r,
         const double &g,
         const double &b );
-    
+
     // -- helper functions ------------------------------------------
     virtual void printMouseVariables();
 
@@ -51,36 +51,36 @@ public:
     /*
     virtual void animate() = 0;
     */
-    
+
     // -- event handlers --------------------------------------------
     virtual void handleSizeEvent();
-    
-    virtual void handleMouseLftDownEvent( 
-        const int &x, 
-        const int &y );
-    virtual void handleMouseLftUpEvent( 
+
+    virtual void handleMouseLftDownEvent(
         const int &x,
         const int &y );
-	virtual void handleMouseLftDClickEvent( 
-        const int &x, 
+    virtual void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    virtual void handleMouseRgtDownEvent( 
-        const int &x, 
+	virtual void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-	virtual void handleMouseRgtUpEvent( 
-        const int &x, 
+    virtual void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-	virtual void handleMouseRgtDClickEvent( 
-        const int &x, 
+	virtual void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    virtual void handleMouseMotionEvent( 
-        const int &x, 
+	virtual void handleMouseRgtDClickEvent(
+        const int &x,
         const int &y );
-    virtual void handleMouseWheelIncEvent( 
-        const int &x, 
+    virtual void handleMouseMotionEvent(
+        const int &x,
         const int &y );
-    virtual void handleMouseWheelDecEvent( 
-        const int &x, 
+    virtual void handleMouseWheelIncEvent(
+        const int &x,
+        const int &y );
+    virtual void handleMouseWheelDecEvent(
+        const int &x,
         const int &y );
     virtual void handleMouseEnterEvent();
     virtual void handleMouseLeaveEvent();
@@ -91,7 +91,7 @@ protected:
     // -- protected utility functions -------------------------------
     virtual void clear();
     virtual void initMouse();
-    
+
     virtual void startSelectMode(
         GLint hits,
         GLuint selectBuf[],
@@ -105,8 +105,8 @@ protected:
     void genCushTex();
 
     // -- hit detection ---------------------------------------------
-    virtual void processHits( 
-        GLint hits, 
+    virtual void processHits(
+        GLint hits,
         GLuint buffer[] ) = 0;
 
     // -- mouse -----------------------------------------------------
@@ -150,7 +150,7 @@ protected:
     bool    texCharOK;
     GLuint  texCharId[CHARSETSIZE];
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH];
-    
+
     // -- cushion texture -------------------------------------------
     bool    texCushOK;
     GLuint  texCushId;

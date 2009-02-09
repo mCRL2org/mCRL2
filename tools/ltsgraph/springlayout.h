@@ -15,7 +15,7 @@
 #include "ltsgraph.h"
 
 // This class defines the "spring layout" algorithm of the original LTSgraph
-class SpringLayout : public LayoutAlgorithm 
+class SpringLayout : public LayoutAlgorithm
 {
   public:
     SpringLayout(LTSGraph* owner);
@@ -40,7 +40,7 @@ class SpringLayout : public LayoutAlgorithm
 
     void onStart(wxCommandEvent& event);
     void onStop(wxCommandEvent& event);
-    
+
     void onNodeStrength(wxScrollEvent& evt);
     void onEdgeStrength(wxScrollEvent& evt);
     void onTransLength(wxScrollEvent& evt);

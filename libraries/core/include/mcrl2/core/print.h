@@ -30,7 +30,7 @@ typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
 /** \brief Extensions of the printf function. The following new
  *         conversion formats are supported:
  *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's 
+ *         - '%T' for normal printing of ATerm's
  *         - '%F' for printing of AFun's
 **/
 int gsprintf(const char *format, ...);
@@ -38,7 +38,7 @@ int gsprintf(const char *format, ...);
 /** \brief Extensions of the fprintf function. The following new
  *         conversion formats are supported:
  *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's 
+ *         - '%T' for normal printing of ATerm's
  *         - '%F' for printing of AFun's
 **/
 int gsfprintf(FILE *stream, const char *format, ...);
@@ -46,7 +46,7 @@ int gsfprintf(FILE *stream, const char *format, ...);
 /** \brief Extensions of the vfprintf functions. The following new
  *         conversion formats are supported:
  *         - '%P' for the pretty printing ATerm's
- *         - '%T' for the normal printing of ATerm's 
+ *         - '%T' for the normal printing of ATerm's
  *         - '%F' for the printing of AFun's
 **/
 int gsvfprintf(FILE *stream, const char *format, va_list args);

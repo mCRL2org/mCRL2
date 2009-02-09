@@ -58,9 +58,9 @@ grape_frame::grape_frame( const wxString &p_filename )
   show_log_panel();
   m_statusbar = new wxStatusBar(this);
   m_menubar = new grape_menubar();
-  
+
   SetBackgroundColour(m_menubar->GetBackgroundColour());
-  
+
   // place widgets in sizers
   wxBoxSizer *main_box = new wxBoxSizer(wxHORIZONTAL);
   main_box->Add(m_splitter, 1, wxEXPAND | wxBOTTOM, 5);
@@ -417,7 +417,7 @@ void grape_frame::toggle_view( grape_mode p_mode )
     if ( m_statusbar->GetStatusText() == _T("In the text field you can enter a datatype specification") )
     {
       m_statusbar->PopStatusText();
-      if ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) 
+      if ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
       {
         m_statusbar->PopStatusText();
       }
@@ -573,7 +573,7 @@ void grape_frame::update_toolbar( void )
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
   GetToolBar()->EnableTool( GRAPE_MENU_PROPERTIES, m_menubar->IsEnabled( GRAPE_MENU_PROPERTIES ) );
 }
-  
+
 void grape_frame::update_menubar( void )
 {
   diagram *dia_ptr = m_glcanvas->get_diagram();

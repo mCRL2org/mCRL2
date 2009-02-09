@@ -60,7 +60,7 @@ public:
     static void setColorClr( const ColorRGB &col );
     static void setColorTxt( const ColorRGB &col );
     static void setSizeTxt( const int &sze );
-    
+
     void setDiagram( Diagram *dgrm );
     void initAttributes( const std::vector< int > attrIdcs );
     void clearData();
@@ -69,39 +69,39 @@ public:
     void markItems( const std::vector< Cluster* > frames );
 
     void handleSendDgrmSglToExnr();
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
-    void handleMouseWheelIncEvent( 
-        const int &x, 
+    void handleMouseWheelIncEvent(
+        const int &x,
         const int &y );
-    void handleMouseWheelDecEvent( 
-        const int &x, 
+    void handleMouseWheelDecEvent(
+        const int &x,
         const int &y );
     void handleMouseLeaveEvent();
     void handleKeyDownEvent( const int &keyCode );
     void handleKeyUpEvent( const int &keyCode );
-    
+
 protected:
     // -- utility functions -----------------------------------------
     void calcSettingsGeomBased();
@@ -117,13 +117,13 @@ protected:
     void handlePrevDiagram( const int &dgrmIdx );
     void handlePlayDiagram( const int &dgrmIdx );
     void handleNextDiagram( const int &dgrmIdx );
-    
+
     // -- hit detection ---------------------------------------------
     void handleHits( const std::vector< int > &ids );
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
-    
+
     // -- utility drawing functions ---------------------------------
     void clear();
     void drawSlider( const bool &inSelectMode );
@@ -145,7 +145,7 @@ protected:
 
     void handleShowDiagram( const int &dgrmIdx );
     void handleDragDiagram( const int &dgrmIdx );
-    
+
     // -- static variables ------------------------------------------
     static ColorRGB colClr;
     static ColorRGB colTxt;
@@ -177,11 +177,11 @@ protected:
         DRAG_STATUS_ITMS,
         DRAG_STATUS_DGRM
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
-    
+
     static bool useShading;
 
     Position2D posSliderTopLft;
@@ -189,12 +189,12 @@ protected:
     double itvSlider;
     int    nodesItvSlider;
     double itvSliderPerNode;
-    
+
     Position2D posScaleTopLft;
     Position2D posScaleBotRgt;
     double minPixPerNode;      // min number of pixels per item
     double actPixPerNode;      // actual number of pixels per item
-    
+
     int    nodesWdwScale;
     double itvWdwPerNode;
     int    wdwStartIdx;
@@ -202,7 +202,7 @@ protected:
 
     std::vector< Position2D > posAxesTopLft;
     std::vector< Position2D > posAxesBotRgt;
-    
+
     std::vector< std::vector< Position2D> > posValues;
 
     // interaction
@@ -232,7 +232,7 @@ protected:
     wxTimer* timerAnim;
     static int itvAnim;
     std::set< int >::iterator animFrame;
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

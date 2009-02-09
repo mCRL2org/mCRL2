@@ -34,7 +34,7 @@ namespace tipi {
 
     /**
      * \brief Base class for messages M is a type for message characterisation
-     * 
+     *
      * \attention M should be an enumeration type for message identifiers with
      *   a value D that is used as the default message type identifier
      *   a value A that is used as any (the wildcard) message type
@@ -96,10 +96,10 @@ namespace tipi {
 
         /** \brief Returns the message type */
         inline message_type get_type() const;
- 
+
         /** \brief Returns the message originator information */
         inline end_point get_originator() const;
- 
+
         /** \brief Returns the content without formatting */
         inline std::string to_string() const;
 
@@ -115,7 +115,7 @@ namespace tipi {
         /** \brief Generates an XML text string for the message */
         inline void set_content(std::istream&);
     };
- 
+
     /**
      * \param o message originator identifier
      * \param t a message type identifier
@@ -157,7 +157,7 @@ namespace tipi {
     inline typename message< M, D, A >::end_point message< M, D, A >::get_originator() const {
       return (m_originator);
     }
- 
+
     template < class M, M D, M A >
     inline std::string message< M, D, A >::to_string() const {
       return (m_content);
@@ -174,9 +174,9 @@ namespace tipi {
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(std::istream& c) {
       std::ostringstream temporary;
- 
+
       temporary << c.rdbuf();
- 
+
       m_content = temporary.str();
     }
 

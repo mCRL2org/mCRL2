@@ -154,7 +154,7 @@ class Enumerator
 		 * \endcode
 		 **/
 		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions *old = NULL) = 0;
-		
+
 		/**
 		 * \brief Get rewriter used by this object.
 		 * \return Rewriter object used by this Enumerator object.

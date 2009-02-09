@@ -49,7 +49,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   }
 
   creator = SVCgetCreator(&f);
-  
+
   string svc_type = SVCgetType(&f);
   if ( type == lts_mcrl )
   {

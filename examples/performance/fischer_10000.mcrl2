@@ -1,7 +1,7 @@
 % This is an MCRL2 description of Fischer's mutual exclusion protocol
 % for two processes. The idea is that two processes communicate within
 % certain time bounds to obtain exclusive access to a mututal resource.
-% This protocol is particularly interesting, because it crucially 
+% This protocol is particularly interesting, because it crucially
 % relies on time, and is quite simple. This version has been made by
 % Yaroslav Usenko using a similar model in UPPAAL.
 
@@ -9,9 +9,9 @@ eqn n=10000;
 eqn k=2;
 
 sort Time=Real;
-map 
+map
   n:Pos;
-  k:Time; 
+  k:Time;
 
 act
   get,_get,__get:Nat;

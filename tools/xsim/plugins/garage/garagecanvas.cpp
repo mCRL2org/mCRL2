@@ -92,7 +92,7 @@ void GarageCanvas::SetDataStructs( int floor[3][20],
   }
   }
 
-  // Update lift state 
+  // Update lift state
   liftHeight = liftH;
   liftOccupied = liftO;
 
@@ -149,7 +149,7 @@ void GarageCanvas::Draw()
   else
     scaleFactor = 11*VisUtils::getColInterval();
 
-  glScalef( 
+  glScalef(
         2.0/scaleFactor,
         2.0/scaleFactor,
         2.0/scaleFactor );
@@ -223,7 +223,7 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
     glViewport(0, 0, width, height);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
- 
+
     //Force redraw because the paint event is not triggered in Windows
 //  Draw();
   }

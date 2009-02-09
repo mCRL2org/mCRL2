@@ -119,22 +119,22 @@ namespace mcrl2 {
         /path/to/demo-tool [OPTIONS]... [PATHS]
         Serves as demonstration of the features of the interface_description
         class.
-      
+
         Options:
           -r, --recursive          option without argument
           -t[SEC], --timeout=[SEC] option optional argument (default 2)
               --tool=FOO           option with mandatory argument
               --language=LANG      option with mandatory argument (default english)
-      
+
         Standard options:
           -q, --quiet              do not display warning messages
           -v, --verbose            display short intermediate messages
           -d, --debug              display detailed intermediate messages
           -h, --help               display help information
               --version            display version information
-      
+
         Report bugs at <http://www.mcrl2.org/issuetracker>.
-      
+
         See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
        \endverbatim
      * Printing version information.
@@ -152,7 +152,7 @@ namespace mcrl2 {
         This is free software.  You may redistribute copies of it under the
         terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.
         There is NO WARRANTY, to the extent permitted by law.
-      
+
         Written by Rincewind. \endverbatim
      **/
     class interface_description {
@@ -479,7 +479,7 @@ namespace mcrl2 {
            This is free software.  You may redistribute copies of it under the
            terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.
            There is NO WARRANTY, to the extent permitted by law.
-          
+
            Written by John Doe \endverbatim
          *
          * Where toolset version, revision and copyright year are constants
@@ -649,17 +649,17 @@ namespace mcrl2 {
      *  try {
      *    // parse command line
      *    command_line_parser parser(cli, "test -v --verbose -r --timeout --tool=foo bar1 bar2");
-     * 
+     *
      *    std::cerr << parser.options.count("recursive");        // prints: 1
      *    std::cerr << parser.options.count("verbose");          // prints: 2
      *    std::cerr << parser.options.count("tool");             // prints: 1
      *    std::cerr << parser.options.count("timeout");          // prints: 1
      *    std::cerr << parser.options.count("bar1");             // prints: 0
-     * 
+     *
      *    std::cerr << parser.option_argument("tool");           // prints: "foo"
      *    std::cerr << parser.option_argument_as< int >("tool"); // prints: 2
      *    std::cerr << parser.option_argument("recursive");      // prints: ""
-     * 
+     *
      *    std::cerr << parser.arguments.size();                  // prints: 2
      *    std::cerr << parser.arguments[0];                      // prints: "bar1"
      *    std::cerr << parser.arguments[1];                      // prints: "bar2"

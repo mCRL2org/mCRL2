@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/font_renderer.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 
@@ -58,7 +58,7 @@ void visualvisible::draw( void )
     // get attached object coordinate
     in_visibility_frame = m_object->get_coordinate();
   }
- 
+
   on_visibility_frame = move_to_border_rectangle( m_coord, m_width, m_height, in_visibility_frame );
 
   // draw visible line
@@ -77,7 +77,7 @@ void visualvisible::draw( void )
 //    draw_on_side = true;
     horizontal_alignment = al_left;
   }
-  else 
+  else
   {
 //    text_coordinate.m_x = on_visibility_frame.m_x + 3 * g_text_space;
     text_coordinate.m_x = on_visibility_frame.m_x;
@@ -124,7 +124,7 @@ bool visualvisible::is_inside( libgrape::coordinate &p_coord )
     // get attached object coordinate
     in_visibility_frame = m_object->get_coordinate();
   }
- 
+
   on_visibility_frame = move_to_border_rectangle( m_coord, m_width, m_height, in_visibility_frame );
 
   // test is inside line

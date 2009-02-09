@@ -38,7 +38,7 @@ class sim_partitioner
      * The state numbers of the transitions are the equivalence class
      * numbers which range from 0 upto (and excluding) \ref num_eq_classes().
      *
-     * \pre The simulation equivalence classes have been computed. 
+     * \pre The simulation equivalence classes have been computed.
      * \param[out] nt Used to store the number of transitions between the
      * simulation equivalence classes.
      * \param[out] size Used to store the length of the returned array.
@@ -47,7 +47,7 @@ class sim_partitioner
     mcrl2::lts::transition* get_transitions(uint& nt,uint& size) const;
 
     /** Gives the number of simulation equivalence classes of the LTS.
-     * \pre The simulation equivalence classes have been computed. 
+     * \pre The simulation equivalence classes have been computed.
      * \return The number of simulation equivalence classes of the LTS.
      */
     uint num_eq_classes() const;
@@ -62,7 +62,7 @@ class sim_partitioner
     uint get_eq_class(uint s) const;
 
     /** Returns whether one state is simulated by another state.
-     * \pre The simulation preorder has been computed. 
+     * \pre The simulation preorder has been computed.
      * \param[in] s A state number.
      * \param[in] t A state number.
      * \retval true if \e s is simulated by \e t;
@@ -71,7 +71,7 @@ class sim_partitioner
 
     /** Returns whether two states are in the same simulation
      * equivalence class.
-     * \pre The simulation equivalence classes have been computed. 
+     * \pre The simulation equivalence classes have been computed.
      * \param[in] s A state number.
      * \param[in] t A state number.
      * \retval true if \e s and \e t are in the same simulation

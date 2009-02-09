@@ -1,6 +1,6 @@
-// Author(s): Carst Tankink, based on font renderers by VitaminB100 and 
+// Author(s): Carst Tankink, based on font renderers by VitaminB100 and
 //            A. J. (Hannes) Pretorius
-// 
+//
 // Distributed unaer the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
@@ -50,10 +50,10 @@ namespace mcrl2
       /**
        * \brief A font renderer for use with OpenGL
        *
-       * The font renderer maintains the resources used for drawing text on an 
-       * OpenGL canvas. This is intended for wxGL implementations, but will 
+       * The font renderer maintains the resources used for drawing text on an
+       * OpenGL canvas. This is intended for wxGL implementations, but will
        * probably work on generic OpenGL versions.
-       * The renderer provides three functions: 
+       * The renderer provides three functions:
        *   - draw a string,
        *   - draw a string cropped to a specified bounding box,
        *   - draw the bounding box of a string
@@ -81,11 +81,11 @@ namespace mcrl2
           /// \pre There is an initialized canvas, text color is initialized and
           ///      any necessary rotation has been done.
           ///
-          /// \post The text is rendered at the specified location, with the 
+          /// \post The text is rendered at the specified location, with the
           ///       specified alignments and at the specified scale.
           void draw_text(
             const std::string s,
-            const double x, 
+            const double x,
             const double y,
             const double scale,
             const Alignment align_horizontal,
@@ -107,7 +107,7 @@ namespace mcrl2
           /// \post A bounding box for the given string is drawn.
           void draw_bounding_box(
             const std::string s,
-            const double x, 
+            const double x,
             const double y,
             const double scale,
             const Alignment align_horizontal,
@@ -130,7 +130,7 @@ namespace mcrl2
           /// \pre There is an initialized canvas, text color is initialized and
           ///      any necessary rotation has been done.
           ///
-          /// \post The text is rendered at the specified location, with the 
+          /// \post The text is rendered at the specified location, with the
           ///       specified alignments and at the specified scale. It is cropped
           ///       To fit within the bounding box defined by xLft, xRgt, yBot and
           ///       yTop.
@@ -160,15 +160,15 @@ namespace mcrl2
           /// \pre There is an initialized canvas, text color is initialized and
           ///      any necessary rotation has been done.
           ///
-          /// \post The text is rendered at the specified location, with the 
+          /// \post The text is rendered at the specified location, with the
           ///       specified alignments and at the specified scale. It is cropped
           ///       To fit within the bounding box defined by xLft, xRgt, yBot and
           ///       yTop.
           void draw_wrapped_text(
             const std::string s,
-            const double xLft, 
+            const double xLft,
             const double xRgt,
-            const double yTop, 
+            const double yTop,
             const double yBot,
             const double scale,
             const Alignment align_horizontal,

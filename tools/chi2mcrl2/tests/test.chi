@@ -6,6 +6,6 @@ model z()=
 proc Test( var z: bool, r, k: nat ) =
 |[ var a, b : bool = false,
    var    c,f : nat ,
-       d    : bool 
-:: skip ; delta ; skip ; delta 
+       d    : bool
+:: skip ; delta ; skip ; delta
 ]|

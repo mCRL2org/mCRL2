@@ -303,7 +303,7 @@ void GarageFrame::UpdateState( ATerm State )
       ATermList gs_hal_elts = gsGetDataExprArgs(gs_hal);
 
       Rewriter* rewriter = nextState->getRewriter();
-  
+
       //update floor state
       ATermAppl sOccState = MakeSortId("OccState");
       ATermAppl tFree = MakeOpId("free", sOccState);
@@ -319,18 +319,18 @@ void GarageFrame::UpdateState( ATerm State )
             } else if (ATisEqual(state, tOccupied)) {
               floorState[i-1][(j-1)*2+k] = 1;
             } else {
-              std::cerr 
+              std::cerr
                 << "error: floor state of position "
                 << PrintPart_CXX((ATerm) fp, ppDefault)
-                << " cannot be shown because the term " 
+                << " cannot be shown because the term "
                 << PrintPart_CXX((ATerm) state, ppDefault)
                 << " cannot be rewritten to normal form"
                 << std::endl;
-            } 
+            }
           }
         }
       }
-  
+
       //update shuttle state
       ATermAppl tLowered =
         MakeOpId("lowered", MakeSortId("ShuttleOrientation"));
@@ -370,7 +370,7 @@ void GarageFrame::UpdateState( ATerm State )
           }
         }
       }
-  
+
       //update lift state
       ATermAppl ls = ATAelementAt(gs_hal_elts, 2);
       ATermAppl lsSort = MakeSortId("LiftState");
@@ -400,7 +400,7 @@ void GarageFrame::UpdateState( ATerm State )
         floorState[0][11] = -1;
         floorState[0][12] = -1;
       }
-  
+
       // Update canvas
       canvas->SetDataStructs(floorState, shuttleState, liftHeight, liftOccupied);
     }

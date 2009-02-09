@@ -11,4 +11,4 @@ proc P(x:Real) = sum y:Real.(x<y)->step.P(y)
                + sum y:Real.(x<y && x<2)->urgent.P(y)
                + reset.P(0);
 
-init P(0); 
+init P(0);

@@ -40,11 +40,11 @@ template <typename Term>
 struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
 {
   const Term& term;
-  
+
   compare_term(const Term& t)
    : term(t)
   {}
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
@@ -103,11 +103,11 @@ struct data_variable_sort: public std::unary_function<data_variable, sort_expres
 struct sort_has_name
 {
   std::string m_name;
-    
+
   sort_has_name(std::string name)
     : m_name(name)
   {}
-  
+
   /// \brief Function call operator
   /// \param s A sort expression
   /// \return The function result
@@ -120,11 +120,11 @@ struct sort_has_name
 struct data_operation_has_name
 {
   std::string m_name;
-    
+
   data_operation_has_name(std::string name)
     : m_name(name)
   {}
-  
+
   /// \brief Function call operator
   /// \param c A data operation
   /// \return The function result

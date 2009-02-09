@@ -16,7 +16,7 @@
 #include "geometric.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 
 visualterminating_transition::visualterminating_transition( terminating_transition* p_terminating_transition )
@@ -110,7 +110,7 @@ bool visualterminating_transition::is_inside( libgrape::coordinate &p_coord )
   // test is inside line
   inside = inside || is_inside_line( fc, tc, p_coord );
 
-  // test is inside rectangle 
+  // test is inside rectangle
   inside = inside || is_inside_rectangle( tc, 0.1f, 0.1f, p_coord, false);
 
   inside = inside || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );

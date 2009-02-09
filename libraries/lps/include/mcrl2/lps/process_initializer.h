@@ -33,7 +33,7 @@ class process_initializer: public atermpp::aterm_appl
   protected:
     /// \brief The free variables of the initializer
     data::data_variable_list   m_free_variables;
-      
+
     /// \brief The assignments of the initializer
     data::data_assignment_list m_assignments;
 
@@ -95,7 +95,7 @@ class process_initializer: public atermpp::aterm_appl
     process_initializer substitute(Substitution f)
     {
       return process_initializer(f(atermpp::aterm(*this)));
-    }     
+    }
 
     /// \brief Checks if the process initializer is well typed
     /// \return Returns true if

@@ -112,7 +112,7 @@ bool Cluster::hasDescendants() const {
 }
 
 
-void Cluster::severDescendant( int i ) 
+void Cluster::severDescendant( int i )
 {
   severedDescendants[i].push_back(true);
   ++severedDescendantsC;
@@ -121,7 +121,7 @@ void Cluster::severDescendant( int i )
 
 void Cluster::healSeverance(int i)
 {
-  if (severedDescendants[i].size() > 0) 
+  if (severedDescendants[i].size() > 0)
   {
     severedDescendants[i].pop_back();
     --severedDescendantsC;
@@ -162,7 +162,7 @@ int Cluster::getRank() const {
   return rank;
 }
 
-int Cluster::getPositionInRank() const 
+int Cluster::getPositionInRank() const
 {
   return positionInRank;
 }
@@ -235,7 +235,7 @@ void Cluster::slotUndecided(unsigned int ring,unsigned int from,unsigned int to)
       undecidedStates[i]->setPositionRadius(radius);
       undecidedStates[i]->setPositionAngle(sp);
       occupySlot(ring,sp,undecidedStates[i]);
-      sp += diff; 
+      sp += diff;
     }
   }
   else {
@@ -278,7 +278,7 @@ void Cluster::slotUndecided(unsigned int ring,unsigned int from,unsigned int to)
         undecidedStates[i]->setPositionRadius(radius);
         undecidedStates[i]->setPositionAngle(sp);
         occupySlot(ring,sp,undecidedStates[i]);
-        sp += diff; 
+        sp += diff;
         if (sp >= 360.0f) {
           sp -= 360.0f;
         }
@@ -400,7 +400,7 @@ void Cluster::computeSizeAndPositions_FSM() {
   for (unsigned int i = 0; i < descendants.size(); ++i) {
     descendants[i]->computeSizeAndPositions_FSM();
   }
-   
+
   /* Compute the cluster radius r such that all states fit nicely into the
    * cluster. Suppose the cluster has N states and every state is visualized by
    * a circle with radius 0.1. Suppose we want the total area of all states
@@ -413,11 +413,11 @@ void Cluster::computeSizeAndPositions_FSM() {
   topRadius = states.size()/(2*PI);
   int numSlots;
 
-  if (descendants.size() == 0) { 
+  if (descendants.size() == 0) {
     baseRadius = topRadius;
     bc_radius = topRadius;
     bc_height = 1.0f;
-    // Assign as much slots as there are nodes, to provide the best  
+    // Assign as much slots as there are nodes, to provide the best
     // possible spacing
     // The position of the nodes is by the index as follows:
     // 0 -- getNumStates + 1: The rim slots.
@@ -440,9 +440,9 @@ void Cluster::computeSizeAndPositions_FSM() {
     // determine whether a unique smallest descendant exists
     Cluster* smallest = descendants[0];
     Cluster* nextSmallest = descendants[1];
-    bool uniqueSmallest = ((nextSmallest->getBCRadius()-smallest->getBCRadius()) / 
+    bool uniqueSmallest = ((nextSmallest->getBCRadius()-smallest->getBCRadius()) /
         smallest->getBCRadius()) > 0.01f;
-    
+
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[descendants.size()-1];
     Cluster* nextLargest = descendants[descendants.size()-2];
@@ -460,7 +460,7 @@ void Cluster::computeSizeAndPositions_FSM() {
       --y;
       bcr_center = largest->getBCRadius();
       bcr_rim = nextLargest->getBCRadius();
-    } 
+    }
     if (uniqueSmallest && (!uniqueLargest || !smallest->hasDescendants())) {
       // center the smallest descendant
       smallest->center();
@@ -479,7 +479,7 @@ void Cluster::computeSizeAndPositions_FSM() {
         bcr_center = smallest->getBCRadius();
       }
     }
-    
+
     // compute the radius of the base of the cylinder and the cluster's size
     float min_radius1 = 0.0f;
     if (y-x > 1) {
@@ -516,7 +516,7 @@ void Cluster::computeSizeAndPositions_FSM() {
     }
     else if (uniqueSmallest) {
       // There is a centered descendant, the smallest cluster.
-      numSlots = smallest->getTotalNumSlots() * 2;      
+      numSlots = smallest->getTotalNumSlots() * 2;
     }
     else {
       // There is no centered descendant. All clusters are placed on the rim.
@@ -549,7 +549,7 @@ void Cluster::computeSizeAndPositions() {
   for (unsigned int i = 0; i < descendants.size(); ++i) {
     descendants[i]->computeSizeAndPositions();
   }
-   
+
   /* Compute the cluster radius r such that all states fit nicely into the
    * cluster. Suppose the cluster has N states and every state is visualized by
    * a circle with radius 0.1. Suppose we want the total area of all states
@@ -562,11 +562,11 @@ void Cluster::computeSizeAndPositions() {
   topRadius = sqrt(states.size()*0.04);
   int numSlots;
 
-  if (descendants.size() == 0) { 
+  if (descendants.size() == 0) {
     baseRadius = topRadius;
     bc_radius = topRadius;
     bc_height = 1.0f;
-    // Assign as much slots as there are nodes, to provide the best  
+    // Assign as much slots as there are nodes, to provide the best
     // possible spacing
     // The position of the nodes is by the index as follows:
     // 0 -- getNumStates + 1: The rim slots.
@@ -589,10 +589,10 @@ void Cluster::computeSizeAndPositions() {
     // determine whether a unique smallest descendant exists
     Cluster* smallest = descendants[0];
     Cluster* nextSmallest = descendants[1];
-    
-    bool uniqueSmallest = ((nextSmallest->getBCVolume()-smallest->getBCVolume()) / 
+
+    bool uniqueSmallest = ((nextSmallest->getBCVolume()-smallest->getBCVolume()) /
         smallest->getBCVolume()) > 0.01f;
-    
+
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[descendants.size()-1];
     Cluster* nextLargest = descendants[descendants.size()-2];
@@ -603,7 +603,7 @@ void Cluster::computeSizeAndPositions() {
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
     int y = descendants.size();
-    
+
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
     if (uniqueLargest) {
@@ -620,7 +620,7 @@ void Cluster::computeSizeAndPositions() {
         bcr_center = smallest->getBCRadius();
       }
     }
-    
+
     // compute the radius of the base of the cylinder and the cluster's size
     float minRimRadius = 0.0f;
     if (y-x > 1) {
@@ -675,7 +675,7 @@ void Cluster::computeSizeAndPositions() {
     }
     else if (uniqueSmallest) {
       // There is a centered descendant, the smallest cluster.
-      numSlots = smallest->getTotalNumSlots() * 2;      
+      numSlots = smallest->getTotalNumSlots() * 2;
     }
     else {
       // There is no centered descendant. All clusters are placed on the rim.

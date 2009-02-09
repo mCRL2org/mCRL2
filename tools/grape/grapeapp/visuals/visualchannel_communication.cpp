@@ -13,7 +13,7 @@
 #include "geometric.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 
 visualchannel_communication::visualchannel_communication( channel_communication* p_channel_communication )

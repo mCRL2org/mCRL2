@@ -12,7 +12,7 @@
 /// Traces are sequences of state-action-time triples.
 /// The state is a vector of data values, the action is the outgoing
 /// action in this state, and the time is an absolute
-/// real number indicating the current time or NULL if the trace 
+/// real number indicating the current time or NULL if the trace
 /// is untimed.
 /// \author Muck van Weerdenburg
 
@@ -38,12 +38,12 @@ namespace trace {
 /// The tfMcrl2 format saves a trace as an mCRL2 term in ATerm internal format.
 /// This is a compact but unreadable format.
 /// The tfPlain format is an ascii representation of the trace, which is
-/// human readable but only contains the actions and no time or state information. 
+/// human readable but only contains the actions and no time or state information.
 /// tfUnknown is only used to read traces, when it is
 /// not known what the format is. In this case it is determined based
 /// on the format of the input file.
 
-enum TraceFormat 
+enum TraceFormat
   { tfMcrl2,  /**< Format is stored as an ATerm */
     tfPlain,  /**< Format is stored in plain text. In this format there are only actions */
     tfUnknown /**< This value indicates that the format is unknown */
@@ -55,7 +55,7 @@ enum TraceFormat
 /// action there can be a state. In the current version of the trace library an action, a state and
 /// a time tag are arbitrary expressions of sort AtermAppl. It is expected that this will change
 /// in the near future to match the data types used in the LPS library.
-/// 
+///
 /// An important property of a state is its current position. All operations on a state
 /// operate with respect to its current position. A trace can be traversed by increasing
 /// and decreasing the current position between 0 up to the length. If a new action is
@@ -64,7 +64,7 @@ enum TraceFormat
 ///
 /// States can be saved in two formats. A human readable ascii format containging only a
 /// sequence of untimed actions and a more compact ATerm format also containing time and
-/// state information. 
+/// state information.
 
 class Trace
 {
@@ -99,7 +99,7 @@ class Trace
 		~Trace();
 
 /// \brief Set the current position back to the beginning of the trace
-/// \details The trace itself remains unaltered. 
+/// \details The trace itself remains unaltered.
 
 		void resetPosition();
 
@@ -200,19 +200,19 @@ class Trace
 		void load(std::string const& filename, TraceFormat tf = tfUnknown);
 
 /// \brief Output the trace into the indicated stream.
-/// \details Output the trace into the indicated stream. 
-/// If a problem occurs, this routine dumps core. 
+/// \details Output the trace into the indicated stream.
+/// If a problem occurs, this routine dumps core.
 /// \param [in] os The stream to which the trace is written.
-/// \param [in] tf The format used to represent the trace in the stream. If 
+/// \param [in] tf The format used to represent the trace in the stream. If
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
 /// \exception mcrl2::runtime_error message in case of failure
 
 		void save(std::ostream &os, TraceFormat tf = tfMcrl2);
 
 /// \brief Output the trace into a file with the indicated name.
-/// \details Write the trace to a file with the indicated name. 
+/// \details Write the trace to a file with the indicated name.
 /// \param [in] filename The name of the file that is written.
-/// \param [in] tf The format used to represent the trace in the stream. If 
+/// \param [in] tf The format used to represent the trace in the stream. If
 /// the format is tfPlain only actions are written. Default: tfMcrl2.
 /// \exception mcrl2::runtime_error message in case of failure
 

@@ -85,19 +85,19 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     /* Attach resize event handler */
     Connect(id, wxEVT_SIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
     Connect(id, wxEVT_MAXIMIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
-	
+
     state_varnames = ATmakeList0();
     ATprotectList(&state_varnames);
     current_state = NULL;
     ATprotect(&current_state);
-   
+
     simulator = new StandardSimulatorGUI(this);
     simulator->Register(this);
 
     tracewin = new XSimTrace(this);
     simulator->Register(tracewin);
     //tracewin->Show(FALSE); // default, so not needed
-    
+
     wxConfig config(wxT("xsimrc"));
     if ( config.HasGroup(wxT("LoadLibrary")) )
     {
@@ -123,7 +123,7 @@ XSimMain::~XSimMain()
 {
         simulator->Unregister(tracewin);
         simulator->Unregister(this);
-	
+
 	delete tracewin;
 
 	ATunprotectList(&state_varnames);
@@ -154,7 +154,7 @@ void XSimMain::CreateMenu()
     redo->Enable(false);
     editmenu->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
     menu->Append( editmenu, wxT("&Edit") );
-    
+
     wxMenu *sim = new wxMenu;
     playiitem = sim->Append( ID_PLAYI, wxT("Play Trace from Initial State"), wxT(""));
     playcitem = sim->Append( ID_PLAYC, wxT("Play Trace from Current State"), wxT(""));
@@ -163,7 +163,7 @@ void XSimMain::CreateMenu()
     stopitem = sim->Append( ID_STOP, wxT("Stop	DEL"), wxT("") );
     stopitem->Enable(false);
     menu->Append( sim, wxT("&Automation") );
-    
+
     wxMenu *opts = new wxMenu;
     tau_prior = opts->Append( ID_TAU, wxT("Enable Tau Prioritisation"), wxT(""), wxITEM_CHECK );
     showdc = opts->Append( ID_SHOWDC, wxT("Show Don't Cares in State Changes"), wxT(""), wxITEM_CHECK );
@@ -176,7 +176,7 @@ void XSimMain::CreateMenu()
     views->Append( ID_MENU, wxT("&Graph"), wxT("") )->Enable(false);
     views->Append( ID_LOADVIEW, wxT("&Load Plugin..."), wxT("") );
     menu->Append( views, wxT("&Views") );
-    
+
     wxMenu *help = new wxMenu;
     help->Append(wxID_HELP, wxT("&Contents"), wxT("Show help contents"));
     help->AppendSeparator();
@@ -219,7 +219,7 @@ void XSimMain::CreateContent()
     split->SetMinimumPaneSize(27);
     split->SetSashGravity(1.0);
     mainsizer->Add(split, 1, wxEXPAND|wxALIGN_CENTER|wxALL, 5);
-    
+
     SetMinSize(wxSize(240,160));
 
     stateview->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
@@ -236,7 +236,7 @@ void XSimMain::CreateContent()
 
     stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
     transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
-    
+
     /* Obtain height information of stateview; needed for FitCurrentState() */
     stateview->InsertItem(0,wxT("tmp"));
     wxRect r;
@@ -256,7 +256,7 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
   }
 
   /* Set column width of stateview, if necessary */
-  if (stateview->GetColumnWidth(1) != s) { 
+  if (stateview->GetColumnWidth(1) != s) {
     stateview->SetColumnWidth(1, s);
   }
 
@@ -267,7 +267,7 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
   }
 
   /* Set column width of transview, if necessary */
-  if (transview->GetColumnWidth(1) != s) { 
+  if (transview->GetColumnWidth(1) != s) {
     transview->SetColumnWidth(1, s);
   }
 
@@ -329,7 +329,7 @@ void XSimMain::SetInteractiveness(bool interactive)
 void XSimMain::LoadFile(const wxString &filename)
 {
     FILE *f;
-    
+
     if ( (f = fopen(filename.fn_str(),"rb")) == NULL )
     {
 	    wxMessageDialog msg(this, wxT("Failed to open file."),
@@ -349,7 +349,7 @@ void XSimMain::LoadFile(const wxString &filename)
 	    return;
     }
 
-    SetTitle(base_title+wxT(" - ")+filename);    
+    SetTitle(base_title+wxT(" - ")+filename);
 
     ldtrcitem->Enable(true);
     svtrcitem->Enable(true);
@@ -362,7 +362,7 @@ void XSimMain::LoadDLL(const wxString &filename)
   string s(filename.fn_str());
   simulator->LoadView(s);
 }
- 
+
 
 void XSimMain::Registered(SimulatorInterface *Simulator)
 {
@@ -781,7 +781,7 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
 			{
 				wxString s;
 				int h;
-			
+
 				s = actions[j];
 				actions[j] = actions[j-1];
 				actions[j-1] = s;
@@ -805,7 +805,7 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
 		{
 			wxString s;
 			int h;
-		
+
 			s = actions[j];
 			actions[j] = actions[j-1];
 			actions[j-1] = s;
@@ -832,7 +832,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
 	wxArrayString actions;
 	wxArrayString statechanges;
 	wxArrayInt indices;
-	
+
 	NextState *nextstate = simulator->GetNextState();
 
 	wxArrayInt trace_next;

@@ -62,25 +62,25 @@ class Mediator {
     virtual void loadTrace(std::string const& path) = 0;
 
 
-    // Simulation start. 
+    // Simulation start.
     virtual void startSim() = 0;
 
     // Returns action label of transition with index i
     virtual std::string getActionLabel(const int i) const = 0;
-  
+
     // Returns number of parameters
     virtual int getNumberOfParams() const = 0;
-    
+
     // Returns the name of parameter with index i
     virtual std::string getParName(const int i) const = 0;
 
-    // Returns the value of the parameter with index i in the state with index 
+    // Returns the value of the parameter with index i in the state with index
     // j.
     virtual std::string getParValue(State* s, const int j) const = 0;
 
 
     virtual void generateBackTrace() = 0;
-    
+
 };
 
 #endif

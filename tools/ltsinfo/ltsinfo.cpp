@@ -61,7 +61,7 @@ class info_tool
     mcrl2::lts::lts_equivalence determinism_equivalence;
 
   public:
-    
+
     info_tool() :
                          intype(mcrl2::lts::lts_none),
                          determinism_equivalence(mcrl2::lts::lts_eq_isomorph) {
@@ -105,11 +105,11 @@ class info_tool
       clinterface.
         add_option("equivalence", make_mandatory_argument("NAME"),
           "use equivalence NAME for deterministic check:\n"
-          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_isomorph) + "' for "
                 + lts::name_of_equivalence(lts_eq_isomorph) + " (default),\n"
-          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
-          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for " 
+          "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
           "  'none' for not performing the check at all",
           'e').
@@ -121,8 +121,8 @@ class info_tool
       if (parser.continue_execution()) {
         if (parser.options.count("equivalence")) {
           determinism_equivalence = lts::parse_equivalence(parser.option_argument("equivalence"));
-          if (allowed_eqs().count(determinism_equivalence) == 0 ||
-              parser.option_argument("equivalence") == "none")
+          if (allowed_eqs().count(determinism_equivalence) == 0 &&
+              parser.option_argument("equivalence") != "none")
           {
             parser.error("option -e/--equivalence has illegal argument '" +
                 parser.option_argument("equivalence") + "'");

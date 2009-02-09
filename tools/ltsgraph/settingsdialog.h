@@ -20,7 +20,7 @@
 class SettingsDialog: public wxDialog {
   public:
     SettingsDialog(LTSGraph* app, wxWindow* parent);
-    
+
 
   private:
     LTSGraph* app;
@@ -29,7 +29,7 @@ class SettingsDialog: public wxDialog {
     void onTransLabels(wxCommandEvent& evt);
     void onStateLabels(wxCommandEvent& evt);
     void onColour(wxColourPickerEvent& evt);
-  
+
   DECLARE_EVENT_TABLE()
 };
 

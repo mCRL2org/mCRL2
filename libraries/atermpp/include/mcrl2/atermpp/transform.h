@@ -30,7 +30,7 @@ namespace atermpp
     else
       return l;
   }
-  
+
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_TRANSFORM_H

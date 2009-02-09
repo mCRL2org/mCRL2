@@ -32,7 +32,7 @@ using namespace mcrl2::core;
 
 struct tool_options_type {
   bool            convert_funcs;
-  bool            convert_bools; 
+  bool            convert_bools;
   std::string     infilename;
   std::string     outfilename;
 };
@@ -59,7 +59,7 @@ bool parse_command_line(int ac, char** av, tool_options_type& options) {
   if (parser.continue_execution()) {
     options.convert_bools = true;
     options.convert_funcs = options.convert_bools && parser.options.count("no-conv-map") == 0;
- 
+
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
     }
@@ -86,12 +86,12 @@ int main(int argc, char **argv)
     if (parse_command_line(argc, argv, options)) {
 
       ATermAppl mcrl_spec;
- 
+
       if (options.infilename.empty()) {
         gsVerboseMsg("reading mCRL LPS from stdin...\n");
- 
+
         mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
- 
+
         if (mcrl_spec == 0) {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
         }
@@ -101,17 +101,17 @@ int main(int argc, char **argv)
       }
       else {
         gsVerboseMsg("reading mCRL LPS from '%s'...\n", options.infilename.c_str());
- 
+
         FILE *in_stream = fopen(options.infilename.c_str(), "rb");
- 
+
         if (in_stream == 0) {
           throw mcrl2::runtime_error("could not open input file '" + options.infilename + "' for reading");
         }
- 
+
         mcrl_spec = (ATermAppl) ATreadFromFile(in_stream);
- 
+
         fclose(in_stream);
- 
+
         if (mcrl_spec == 0) {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + options.infilename + "'");
         }
@@ -119,29 +119,29 @@ int main(int argc, char **argv)
           throw mcrl2::runtime_error("'" + options.infilename + "' does not contain an mCRL LPS");
         }
       }
- 
+
       ATprotectAppl(&mcrl_spec);
       assert(is_mCRL_spec(mcrl_spec));
- 
+
       ATermAppl spec = translate(mcrl_spec,options.convert_bools,options.convert_funcs);
       ATprotectAppl(&spec);
- 
+
       if (options.outfilename.empty()) {
         gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
- 
+
         ATwriteToSAFFile((ATerm) spec, stdout);
       }
       else {
         gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", options.outfilename.c_str());
- 
+
         FILE *outstream = fopen(options.outfilename.c_str(), "wb");
- 
+
         if (outstream == NULL) {
           throw mcrl2::runtime_error("cannot open output file '" + options.outfilename + "'");
         }
- 
+
         ATwriteToSAFFile((ATerm) spec,outstream);
- 
+
         fclose(outstream);
       }
     }

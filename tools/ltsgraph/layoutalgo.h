@@ -31,8 +31,8 @@ class LayoutAlgorithm : public wxEvtHandler
   public:
     virtual ~LayoutAlgorithm() {};
 
-    // setupPane method. All algorithms define their own settings pane, and 
-    // manage the appropriate callback functions. 
+    // setupPane method. All algorithms define their own settings pane, and
+    // manage the appropriate callback functions.
     virtual void setupPane(wxPanel* pane) = 0;
     virtual void layoutGraph(Graph* graph) = 0;
     virtual void stop() = 0;

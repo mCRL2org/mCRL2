@@ -5,7 +5,7 @@
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
-# 
+#
 # Main build description containing custom rules to make project descriptions more compact.
 #
 #  Options:
@@ -13,13 +13,13 @@
 #   Build:
 #
 #    --enable-debug                 sets: debug-symbols=on runtime-debugging=on
-#   
+#
 #    --enable-profile               sets: profiling=on
 #
 #    --enable-optimisation          sets: optimization=speed inlining=full
 #
 #    --disable-squadt-support       disables squadt support in tools
-#   
+#
 #    --enable-experimental          activates building/installing of tools that are marked experimental
 #
 #    --enable-deprecated            activates building/installing of tools that are marked deprecated

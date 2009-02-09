@@ -83,25 +83,25 @@ static bool occurs_in_varL(atermpp::aterm_appl l, data::data_variable v)
 
 
 ///\brief returns a pbes expression which has been rewritten en where unnecessary quantifications have been removed. The result can optionally be translated to internal rewrite format.
-/// This function simplifies all data expressions in p by applying the rewriter to it. 
+/// This function simplifies all data expressions in p by applying the rewriter to it.
 /// Data expressions that are true or false are translated to the pbes expressions true and false.
 /// Quantified variables that do not occur in the body are removed.
 /// Conjunctions and disjunctions of which one of the arguments is true or false are simplified.
 /// If the boolean yield_internal_rewriter_format is set, the data expressions in the resulting
-/// pbes expressions are translated into the internal format belonging to the rewriter. The 
+/// pbes expressions are translated into the internal format belonging to the rewriter. The
 /// advantage of this is that the rewriter does not have to translate the data expressions
 /// to internal format the next time the rewriter is applied to it. This is for instance useful
 /// in the tool pbes2bool (or pbes2bes) where pbes expressions must iteratively be rewritten.
 
 inline pbes_expression pbes_expression_rewrite_and_simplify(
-                   pbes_expression p, 
+                   pbes_expression p,
                    Rewriter *rewriter,
                    const bool yield_internal_rewriter_format=false)
 {
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;
   pbes_expression result;
-  
+
   if (is_pbes_true(p))
   { // p is True
     result = p;
@@ -139,7 +139,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     if (is_pbes_true(l))
     { result = true_();
     }
-    else 
+    else
     { pbes_expression r = pbes_expression_rewrite_and_simplify(right(p),rewriter,yield_internal_rewriter_format);
       if (is_pbes_true(r))
       { result = true_();
@@ -186,7 +186,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
       { occurred_data_vars = push_front(occurred_data_vars, *i);
       }
     }
-    
+
     //If no data_vars remaining
     if (occurred_data_vars.empty())
       result = expr;
@@ -200,10 +200,10 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     core::identifier_string name = propvar.name();
     data::data_expression_list parameters;
     if (yield_internal_rewriter_format)
-    { 
+    {
       for( data::data_expression_list::iterator l=propvar.parameters().begin();
            l!=propvar.parameters().end(); l++)
-      { 
+      {
         parameters=push_front(parameters,
                               (data::data_expression)rewriter->rewriteInternal(
                                 rewriter->toRewriteFormat(*l)));
@@ -217,9 +217,9 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   }
   else
   { // p is a data::data_expression
-    
+
     if (yield_internal_rewriter_format)
-    { 
+    {
     data::data_expression d = (data::data_expression)rewriter->rewriteInternal(rewriter->toRewriteFormat(p));
       if (is_true_in_internal_rewrite_format(d,rewriter))
       { result = true_();
@@ -232,7 +232,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
       }
     }
     else
-    { 
+    {
       data::data_expression d = rewriter->rewrite(p);
       if (data::data_expr::is_true(d))
       { result = true_();
@@ -245,12 +245,12 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
       }
     }
   }
-  
+
   return result;
 }
 
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
-/// occurs in the pbes_specification. 
+/// occurs in the pbes_specification.
 
 template <typename Container>
 inline unsigned long get_rank(const propositional_variable_instantiation current_variable_instantiation,
@@ -296,12 +296,12 @@ inline bool get_fixpoint_symbol(const propositional_variable_instantiation curre
 /// \brief Gives the instantiated right hand side for a propositional_variable_instantiation
 
 template <typename Container>
-inline pbes_expression give_the_instantiated_rhs( 
-                   const propositional_variable_instantiation current_variable_instantiation, 
+inline pbes_expression give_the_instantiated_rhs(
+                   const propositional_variable_instantiation current_variable_instantiation,
                    pbes<Container> pbes_spec,
                    Rewriter *rewriter,
                    const bool use_internal_rewriter_format=false)
-{ 
+{
   Container eqsys = pbes_spec.equations();
 
   // Fill the pbes_equations table
@@ -319,24 +319,24 @@ inline pbes_expression give_the_instantiated_rhs(
   }
 
   data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-      
+
   for(data::data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-  { 
+  {
     assert(elist!=current_variable_instantiation.parameters().end());
 
     if (use_internal_rewriter_format)
     { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
     }
     else
-    { 
+    {
       rewriter->setSubstitution(*vlist,*elist);
     }
     elist++;
   }
   assert(elist==current_variable_instantiation.parameters().end());
   return  pbes_expression_substitute_and_rewrite(
-                                current_pbeq.formula(), 
+                                current_pbeq.formula(),
                                 pbes_spec.data(),
                                 rewriter,
                                 use_internal_rewriter_format);
@@ -347,8 +347,8 @@ inline pbes_expression give_the_instantiated_rhs(
 
 /**************************************************************************************************/
 
-// given a pbes expression of the form p1 && p2 && .... && pn, this will yield a 
-// set of the form { p1,p2, ..., pn}, assuming that pi does not have a && as main 
+// given a pbes expression of the form p1 && p2 && .... && pn, this will yield a
+// set of the form { p1,p2, ..., pn}, assuming that pi does not have a && as main
 // function symbol.
 
 static void distribute_and(const pbes_expression &expr,atermpp::set < pbes_expression> &conjunction_set)
@@ -375,7 +375,7 @@ static pbes_expression make_conjunction(const atermpp::set < pbes_expression> &c
     }
     else
     { t=pbes_expr::and_(*i,t);
-    } 
+    }
   }
   return t;
 }
@@ -400,14 +400,14 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 
   for(atermpp::set < pbes_expression>::const_iterator i=disjunction_set.begin();
           i!=disjunction_set.end() ; i++)
-  { 
+  {
     // std::cerr << "DISJUNCTION " << pp(*i) << "\n";
     if (pbes_expr::is_pbes_false(t))
     { t=*i;
     }
     else
     { t=pbes_expr::or_(*i,t);
-    } 
+    }
   }
   return t;
 }
@@ -415,20 +415,20 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 ///\brief Substitute in p, remove quantifiers and return the result after rewriting.
 /// Given a substitution, which is prepared within the rewriter, this function first
 /// applies this substitution. Then it will attempt to eliminate all quantifiers.
-/// I.e. if S is a constructorsort (which means that there exists at least one constructor 
+/// I.e. if S is a constructorsort (which means that there exists at least one constructor
 /// with S as target sort), then an expression of the form forall x:S.p(x) is replaced
 /// by forall x1..xn.p(f1(x1..xn) &&  forall x1..xm.p(f2(x1..xm)) && .... for all
-/// \brief Constructors fi with S as targetsort (this is done similarly for the exists). 
+/// \brief Constructors fi with S as targetsort (this is done similarly for the exists).
 /// if the constructors are constants (i.e. n=0, m=0, etc.), no new quantifications
 /// will be generated. And if the expressions are not constant, expressions such as
-/// p(f1(x1..xn)) are simplified, which can lead to the situation that certain 
+/// p(f1(x1..xn)) are simplified, which can lead to the situation that certain
 /// variables x1..xn do not occur anymore. In that case the quantors can be removed
 /// also. The function pbes_expression_substitute_and_rewrite will continue substituting
 /// \brief Constructors for quantified variables until there are no variables left, or
 /// until there are only quantifications over non constructor sorts. In the last case,
 /// the function will halt with an exit(1). For every 100 new variables being used
 /// in new quantifications, a message is printed.
-///   The data_specification is needed to determine the constructors of a certain 
+///   The data_specification is needed to determine the constructors of a certain
 /// sort. The rewriter is used to perform the rewriting steps. The rewriter can
 /// either work on internal rewriting format, in which case all data expressions in
 /// the pbes are already in internal rewriting format. In this case the data expressions
@@ -436,26 +436,26 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 /// a lot of internal compilation time.
 
 inline pbes_expression pbes_expression_substitute_and_rewrite(
-                   const pbes_expression &p, 
-                   const data::data_specification &data, 
+                   const pbes_expression &p,
+                   const data::data_specification &data,
                    Rewriter *rewriter,
                    const bool use_internal_rewrite_format)
-{ 
+{
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;
   pbes_expression result;
-  
+
   if (is_pbes_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p), 
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
                                data, rewriter,use_internal_rewrite_format);
     if (is_pbes_false(l))
     { result = false_();
     }
     else
-    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p), 
+    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p),
                  data, rewriter,use_internal_rewrite_format);
       //Options for left and right
       if (is_pbes_false(r))
@@ -473,16 +473,16 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_pbes_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
-    
+
     // std::cerr << "SUB&REWR OR: " << pp(p) << "\n";
-    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p), 
+    pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
                  data, rewriter,use_internal_rewrite_format);
     // std::cerr << "SUB&REWR OR LEFT: " << pp(left) << "\n";
     if (is_pbes_true(l))
     { result = true_();
     }
-    else 
-    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p), 
+    else
+    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p),
                  data, rewriter,use_internal_rewrite_format);
       // std::cerr << "SUB&REWR OR RIGHT: " << pp(right) << "\n";
       if (is_pbes_true(r))
@@ -507,21 +507,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     result = p;
   }
   else if (is_pbes_forall(p))
-  { 
+  {
 
     data::data_variable_list data_vars = var(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, rewriter,use_internal_rewrite_format);
 
     // If no data_vars
     if (data_vars.empty())
-    { 
+    {
       result = expr;
     }
     else
-    { /* Replace the quantified variables of constructor sorts by constructors. 
+    { /* Replace the quantified variables of constructor sorts by constructors.
          E.g. forall x:Nat.phi(x) is replaced by phi(0) && forall x':Nat.phi(successor(x')),
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
-         in de data-implementation of mCRL2).  Simplify the resulting expressions. */ 
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
       data::fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
@@ -534,7 +534,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
         for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
-        { 
+        {
           if (!is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
                 new_data_vars=push_front(new_data_vars,*i);
@@ -544,18 +544,18 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             atermpp::set <pbes_expression> new_conjunction_set;
             for(atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                          t!=conjunction_set.end() ; t++)
-            { 
+            {
               if (!occurs_in_varL(*t,*i))
               { new_conjunction_set.insert(*t);
               }
               else
-              { 
+              {
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
-                { 
+                {
                   data::sort_expression_list dsorts;
                   if (f->sort().is_arrow())
-                  { 
+                  {
                     data::sort_arrow sa=f->sort();
                     assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
@@ -564,7 +564,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     dsorts=sa.argument_sorts();
                   }
                   // else dsorts is empty.
-                    
+
                   // XXXXXXXXXXXXXX argument_sorts(), result_sort()  =source(f->sort());
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
@@ -587,10 +587,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
                   rewriter->clearSubstitution(*i);
                   if (pbes_expr::is_pbes_false(r)) /* the resulting expression is false, so we can terminate */
-                  { 
+                  {
                     return pbes_expr::false_();
                   }
-                  else 
+                  else
                   { new_conjunction_set.insert(r);
                   }
                 }
@@ -604,7 +604,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
 
       if (!new_data_vars.empty())
-      { 
+      {
         if (use_internal_rewrite_format)
         { std::cerr << "Cannot eliminate universal quantifiers of variables " << mcrl2::core::pp(new_data_vars) << std::endl;
         }
@@ -618,21 +618,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     }
   }
   else if (is_pbes_exists(p))
-  { 
+  {
     // std::cerr << "EXISTS_: " << pp(p) << "\n";
     data::data_variable_list data_vars = var(p);
     pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, rewriter,use_internal_rewrite_format);
     // std::cerr << "REWRITTEN EXPR " << pp(expr) << "\n";
     // If no data_vars
     if (data_vars.empty())
-    { 
+    {
       result = expr;
     }
     else
-    { /* Replace the quantified variables of constructor sorts by constructors. 
+    { /* Replace the quantified variables of constructor sorts by constructors.
          E.g. forall x:Nat.phi(x) is replaced by phi(0) || forall x':Nat.phi(successor(x')),
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
-         in de data-implementation of mCRL2).  Simplify the resulting expressions. */ 
+         in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
       data::fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
@@ -645,7 +645,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
         for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
-        { 
+        {
           if (!is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
                 new_data_vars=push_front(new_data_vars,*i);
@@ -655,18 +655,18 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             atermpp::set <pbes_expression> new_disjunction_set;
             for(atermpp::set <pbes_expression >::iterator t=disjunction_set.begin() ;
                          t!=disjunction_set.end() ; t++)
-            { 
+            {
               if (!occurs_in_varL(*t,*i))
               { new_disjunction_set.insert(*t);
               }
               else
-              { 
+              {
                 data::data_operation_list func=data.constructors(i->sort());
                 for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
-                { 
+                {
                   data::sort_expression_list dsorts;
                   if (f->sort().is_arrow())
-                  { 
+                  {
                     data::sort_arrow sa=f->sort();
                     assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
@@ -675,7 +675,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     dsorts=sa.argument_sorts();
                   }
                   // else dsorts is empty.
-                    
+
                   // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
                   data::data_variable_list function_arguments;
                   for( data::sort_expression_list::iterator s=dsorts.begin() ;
@@ -702,7 +702,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   { // std::cerr << "Return true\n";
                     return pbes_expr::true_();
                   }
-                  else 
+                  else
                   { new_disjunction_set.insert(r);
                   }
                 }
@@ -716,7 +716,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
 
       if (!new_data_vars.empty())
-      { 
+      {
         if (use_internal_rewrite_format)
         { std::cerr << "Cannot eliminate existential quantifiers of variables " << mcrl2::core::pp(new_data_vars) << " in " << mcrl2::core::pp(p) << std::endl;
         }
@@ -745,22 +745,22 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   }
   else
   { // p is a data::data_expression
-    if (use_internal_rewrite_format)  
+    if (use_internal_rewrite_format)
     {
       data::data_expression d = (data::data_expression)rewriter->rewriteInternal((atermpp::aterm)p);
-      if (is_true_in_internal_rewrite_format(d,rewriter))   
+      if (is_true_in_internal_rewrite_format(d,rewriter))
       { result = pbes_expr::true_();
       }
       else if (is_false_in_internal_rewrite_format(d,rewriter))
       { result = pbes_expr::false_();
       }
       else
-      { 
+      {
         result = d;
       }
     }
     else
-    { 
+    {
       data::data_expression d = rewriter->rewrite(p);
       // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
       // ATfprintf(stderr,"FORMAT: %t\n",(ATermAppl)(d));
@@ -771,12 +771,12 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       { result = pbes_expr::false_();
       }
       else
-      { 
+      {
         result = d;
       }
     }
   }
-  
+
   return result;
 }
 

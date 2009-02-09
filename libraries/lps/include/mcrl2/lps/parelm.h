@@ -47,8 +47,8 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
     {
       continue;
     }
-    atermpp::find_all_if(i->condition(), data::is_data_variable, std::inserter(result, result.end()));   
-    atermpp::find_all_if(i->actions(), data::is_data_variable, std::inserter(result, result.end()));   
+    atermpp::find_all_if(i->condition(), data::is_data_variable, std::inserter(result, result.end()));
+    atermpp::find_all_if(i->actions(), data::is_data_variable, std::inserter(result, result.end()));
     if (i->has_time())
     {
       atermpp::find_all_if(i->time(), data::is_data_variable, std::inserter(result, result.end()));
@@ -99,7 +99,7 @@ inline
 specification parelm(const specification& spec)
 {
   std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
-    
+
   // logging statements
   mcrl2::core::gsVerboseMsg("parelm removed %d process parameters: ", to_be_removed.size());
   for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
@@ -107,7 +107,7 @@ specification parelm(const specification& spec)
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }
   mcrl2::core::gsVerboseMsg("\n");
-    
+
   specification result = detail::remove_parameters(spec, to_be_removed);
   assert(result.is_well_typed());
   return result;
@@ -120,7 +120,7 @@ inline
 specification parelm2(const specification& spec)
 {
   std::vector<data::data_variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
-  
+
   // create a mapping m from process parameters to integers
   std::map<data::data_variable, int> m;
   int index = 0;
@@ -178,7 +178,7 @@ specification parelm2(const specification& spec)
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }
   mcrl2::core::gsVerboseMsg("\n");
-    
+
   specification result = detail::remove_parameters(spec, to_be_removed);
   assert(result.is_well_typed());
   return result;

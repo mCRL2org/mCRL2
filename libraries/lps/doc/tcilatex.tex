@@ -2,7 +2,7 @@
 % Copyright (C) 2002 Mackichan Software, Inc.
 
 \typeout{TCILATEX Macros for Scientific Word 5.0 <13 Feb 2003>.}
-\typeout{NOTICE:  This macro file is NOT proprietary and may be 
+\typeout{NOTICE:  This macro file is NOT proprietary and may be
 freely copied and distributed.}
 %
 \makeatletter
@@ -14,7 +14,7 @@ freely copied and distributed.}
 \ifx\pdfoutput\undefined
 \else
  \ifcase\pdfoutput
- \else 
+ \else
     \msipdfoutput=1
     \ifx\paperwidth\undefined
     \else
@@ -27,14 +27,14 @@ freely copied and distributed.}
         \pdfpagewidth\paperwidth
       \fi
     \fi
-  \fi  
+  \fi
 \fi
 
 %%%%%%%%%%%%%%%%%%%%%
 % FMTeXButton
-% This is used for putting TeXButtons in the 
+% This is used for putting TeXButtons in the
 % frontmatter of a document. Add a line like
-% \QTagDef{FMTeXButton}{101}{} to the filter 
+% \QTagDef{FMTeXButton}{101}{} to the filter
 % section of the cst being used. Also add a
 % new section containing:
 %     [f_101]
@@ -42,7 +42,7 @@ freely copied and distributed.}
 %     TAG_TYPE=FIELD
 %     TAG_LEADIN=TeX Button:
 %
-% It also works to put \defs in the preamble after 
+% It also works to put \defs in the preamble after
 % the \input tcilatex
 \def\FMTeXButton#1{#1}
 %
@@ -209,7 +209,7 @@ freely copied and distributed.}
 \def\addtoLaTeXparams#1{%
     \edef\LaTeXparams{\LaTeXparams #1}}%
 %
-% JCS -  added a switch BoxFrame that can 
+% JCS -  added a switch BoxFrame that can
 % be set by including X in the frame params.
 % If set a box is drawn around the frame.
 
@@ -340,11 +340,11 @@ freely copied and distributed.}
      \let\QCBOptA\empty
      \let\QCBOptB\empty
 	 \vbox\bgroup
-        \ifOverFrame 
+        \ifOverFrame
            #5\QCTOptA\par
         \fi
         \GRAPHIC{#4}{#3}{#1}{#2}{\z@}%
-        \ifUnderFrame 
+        \ifUnderFrame
            \break#5\QCBOptA
         \fi
 	 \egroup
@@ -427,7 +427,7 @@ freely copied and distributed.}
 %             i, d or f : in-line, display, or floating
 %             t,b,p,h   : LaTeX floating placement options
 %             x         : fit contents box to contents
-%             F or T    : Figure or Table. 
+%             F or T    : Figure or Table.
 %                         Later this can expand
 %                         to a more general float class.
 %
@@ -480,7 +480,7 @@ freely copied and distributed.}
  }%
 %
 % This macro added to let SW gobble a parameter that
-% should not be passed on and expanded. 
+% should not be passed on and expanded.
 
 \def\TEXUX#1{"texux"}
 
@@ -500,7 +500,7 @@ freely copied and distributed.}
 \def\unit#1{\mathord{\thinspace\rm #1}}%
 
 %
-% miscellaneous 
+% miscellaneous
 \long\def\QQQ#1#2{%
      \long\expandafter\def\csname#1\endcsname{#2}}%
 \@ifundefined{QTP}{\def\QTP#1{}}{}
@@ -533,7 +533,7 @@ freely copied and distributed.}
 \fi
 
 \@ifundefined{lambdabar}{
-      \def\lambdabar{\errmessage{You have used the lambdabar symbol. 
+      \def\lambdabar{\errmessage{You have used the lambdabar symbol.
                       This is available for typesetting only in RevTeX styles.}}
    }{}
 
@@ -554,9 +554,9 @@ freely copied and distributed.}
  \def\abstract{%
   \if@twocolumn
    \section*{Abstract (Not appropriate in this style!)}%
-   \else \small 
+   \else \small
    \begin{center}{\bf Abstract\vspace{-.5em}\vspace{\z@}}\end{center}%
-   \quotation 
+   \quotation
    \fi
   }%
  }{%
@@ -632,7 +632,7 @@ freely copied and distributed.}
 %
 \@ifundefined{tcol}{\def\tcol#1{{\baselineskip=6\p@ \vcenter{#1}} \Column}}{}%
 %
-\@ifundefined{dB}{\def\dB{\hbox{{}}}}{}%        %dummy entry in column 
+\@ifundefined{dB}{\def\dB{\hbox{{}}}}{}%        %dummy entry in column
 \@ifundefined{mB}{\def\mB#1{\hbox{$#1$}}}{}%   %column entry
 \@ifundefined{nB}{\def\nB#1{\hbox{#1}}}{}%     %column entry (not math)
 %
@@ -653,8 +653,8 @@ freely copied and distributed.}
 
 %
 % Greek bold macros
-% Redefine all of the math symbols 
-% which might be bolded	 - there are 
+% Redefine all of the math symbols
+% which might be bolded	 - there are
 % probably others to add to this list
 
 \def\alpha{{\Greekmath 010B}}%
@@ -700,9 +700,9 @@ freely copied and distributed.}
                       {\mbox{\boldmath$\scriptstyle\mathchar"#1#2#3#4$}}%
                       {\mbox{\boldmath$\scriptscriptstyle\mathchar"#1#2#3#4$}}%
         \else
-           \mathchar"#1#2#3#4% 
-        \fi 
-    \else 
+           \mathchar"#1#2#3#4%
+        \fi
+    \else
         \FindBoldGroup
         \ifnum\mathgroup=\theboldgroup % For 2e
            \mathchoice{\mbox{\boldmath$\displaystyle\mathchar"#1#2#3#4$}}%
@@ -710,8 +710,8 @@ freely copied and distributed.}
                       {\mbox{\boldmath$\scriptstyle\mathchar"#1#2#3#4$}}%
                       {\mbox{\boldmath$\scriptscriptstyle\mathchar"#1#2#3#4$}}%
         \else
-           \mathchar"#1#2#3#4% 
-        \fi     	    
+           \mathchar"#1#2#3#4%
+        \fi
 	  \fi}
 
 \newif\ifGreekBold  \GreekBoldfalse
@@ -733,7 +733,7 @@ freely copied and distributed.}
 
 \@ifundefined{mathletters}{%
   %\def\theequation{\arabic{equation}}
-  \newcounter{equationnumber}  
+  \newcounter{equationnumber}
   \def\mathletters{%
      \addtocounter{equation}{1}
      \edef\@currentlabel{\theequation}%
@@ -796,9 +796,9 @@ freely copied and distributed.}
 \def\QTATOPD#1#2#3#4{{\textstyle {#3 \atopwithdelims#1#2 #4}}}%
 \def\QDATOPD#1#2#3#4{{\displaystyle {#3 \atopwithdelims#1#2 #4}}}%
 \def\QABOVED#1#2#3#4#5{{#4 \abovewithdelims#1#2#3 #5}}%
-\def\QTABOVED#1#2#3#4#5{{\textstyle 
+\def\QTABOVED#1#2#3#4#5{{\textstyle
    {#4 \abovewithdelims#1#2#3 #5}}}%
-\def\QDABOVED#1#2#3#4#5{{\displaystyle 
+\def\QDABOVED#1#2#3#4#5{{\displaystyle
    {#4 \abovewithdelims#1#2#3 #5}}}%
 %
 % Macros for text size operators:
@@ -878,9 +878,9 @@ freely copied and distributed.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \typeout{TCILATEX defining AMS-like constructs in LaTeX 2.09 COMPATIBILITY MODE}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  Macros to define some AMS LaTeX constructs when 
+%  Macros to define some AMS LaTeX constructs when
 %  AMS LaTeX has not been loaded
-% 
+%
 % These macros are copied from the AMS-TeX package for doing
 % multiple integrals.
 %
@@ -1037,13 +1037,13 @@ freely copied and distributed.}
 %
 %
 % These are AMS environments that will be defined to
-% be verbatims if amstex has not actually been 
+% be verbatims if amstex has not actually been
 % loaded
 %
 %
 \begingroup \catcode `|=0 \catcode `[= 1
 \catcode`]=2 \catcode `\{=12 \catcode `\}=12
-\catcode`\\=12 
+\catcode`\\=12
 |gdef|@alignverbatim#1\end{align}[#1|end[align]]
 |gdef|@salignverbatim#1\end{align*}[#1|end[align*]]
 
@@ -1071,13 +1071,13 @@ freely copied and distributed.}
 
 
 |endgroup
-  
 
-  
+
+
 \def\align{\@verbatim \frenchspacing\@vobeyspaces \@alignverbatim
 You are using the "align" environment in a style in which it is not defined.}
 \let\endalign=\endtrivlist
- 
+
 \@namedef{align*}{\@verbatim\@salignverbatim
 You are using the "align*" environment in a style in which it is not defined.}
 \expandafter\let\csname endalign*\endcsname =\endtrivlist
@@ -1088,7 +1088,7 @@ You are using the "align*" environment in a style in which it is not defined.}
 \def\alignat{\@verbatim \frenchspacing\@vobeyspaces \@alignatverbatim
 You are using the "alignat" environment in a style in which it is not defined.}
 \let\endalignat=\endtrivlist
- 
+
 \@namedef{alignat*}{\@verbatim\@salignatverbatim
 You are using the "alignat*" environment in a style in which it is not defined.}
 \expandafter\let\csname endalignat*\endcsname =\endtrivlist
@@ -1099,7 +1099,7 @@ You are using the "alignat*" environment in a style in which it is not defined.}
 \def\xalignat{\@verbatim \frenchspacing\@vobeyspaces \@xalignatverbatim
 You are using the "xalignat" environment in a style in which it is not defined.}
 \let\endxalignat=\endtrivlist
- 
+
 \@namedef{xalignat*}{\@verbatim\@sxalignatverbatim
 You are using the "xalignat*" environment in a style in which it is not defined.}
 \expandafter\let\csname endxalignat*\endcsname =\endtrivlist
@@ -1110,7 +1110,7 @@ You are using the "xalignat*" environment in a style in which it is not defined.
 \def\gather{\@verbatim \frenchspacing\@vobeyspaces \@gatherverbatim
 You are using the "gather" environment in a style in which it is not defined.}
 \let\endgather=\endtrivlist
- 
+
 \@namedef{gather*}{\@verbatim\@sgatherverbatim
 You are using the "gather*" environment in a style in which it is not defined.}
 \expandafter\let\csname endgather*\endcsname =\endtrivlist
@@ -1119,7 +1119,7 @@ You are using the "gather*" environment in a style in which it is not defined.}
 \def\multiline{\@verbatim \frenchspacing\@vobeyspaces \@multilineverbatim
 You are using the "multiline" environment in a style in which it is not defined.}
 \let\endmultiline=\endtrivlist
- 
+
 \@namedef{multiline*}{\@verbatim\@smultilineverbatim
 You are using the "multiline*" environment in a style in which it is not defined.}
 \expandafter\let\csname endmultiline*\endcsname =\endtrivlist
@@ -1133,7 +1133,7 @@ You are using a type of "array" construct that is only allowed in AmS-LaTeX.}
 You are using a type of "tabular" construct that is only allowed in AmS-LaTeX.}
 \let\endtabulax=\endtrivlist
 
- 
+
 \@namedef{arrax*}{\@verbatim\@sarraxverbatim
 You are using a type of "array*" construct that is only allowed in AmS-LaTeX.}
 \expandafter\let\csname endarrax*\endcsname =\endtrivlist
@@ -1153,14 +1153,14 @@ You are using a type of "tabular*" construct that is only allowed in AmS-LaTeX.}
         $\hfil
            \displaywidth\linewidth\@taggnum\egroup \endtrivlist
         \global\tag@false
-        \global\@ignoretrue   
+        \global\@ignoretrue
       \else
         $\hfil
            \displaywidth\linewidth\@eqnnum\egroup \endtrivlist
         \global\tag@false
-        \global\@ignoretrue 
+        \global\@ignoretrue
       \fi
-     \else   
+     \else
       \iftag@
         \addtocounter{equation}{-1} % undo the increment made in the begin part
         \eqno \hbox{\@taggnum}
@@ -1171,10 +1171,10 @@ You are using a type of "tabular*" construct that is only allowed in AmS-LaTeX.}
         $$\global\@ignoretrue
       \fi
      \fi\fi
- } 
+ }
 
  \newif\iftag@ \tag@false
- 
+
  \def\TCItag{\@ifnextchar*{\@TCItagstar}{\@TCItag}}
  \def\@TCItag#1{%
      \global\tag@true
@@ -1199,8 +1199,8 @@ You are using a type of "tabular*" construct that is only allowed in AmS-LaTeX.}
 \def\tbinom#1#2{{\textstyle {#1 \choose #2}}}%
 \def\dbinom#1#2{{\displaystyle {#1 \choose #2}}}%
 
-% Do not add anything to the end of this file.  
-% The last section of the file is loaded only if 
+% Do not add anything to the end of this file.
+% The last section of the file is loaded only if
 % amstex has not been.
 \makeatother
 \endinput

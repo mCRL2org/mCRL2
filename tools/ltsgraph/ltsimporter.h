@@ -19,7 +19,7 @@ class LTSImporter: public Importer
 {
   public:
     Graph* importFile(std::string fn);
-  
+
 };
 
 #endif //LTS_IMPORTER_H

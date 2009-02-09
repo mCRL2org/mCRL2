@@ -6,7 +6,7 @@
  * an efficient binary exchange format. The purpose of the ATerm++ library is
  * to provide the user with a common C++ interface, and to make the ATerm
  * Library compatible with the C++ Standard Library.
- * 
+ *
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a

@@ -18,7 +18,7 @@
 #include "compoundreference.h"
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 
@@ -62,7 +62,7 @@ void visualchannel::draw( void )
 //    textx = x-g_text_space*2 - name.Len() * (g_text_space);
     textx = x - 0.5 * m_object->get_width();
     horizontal_align = al_left;
-  } 
+  }
   else
   {
     // set text right
@@ -77,7 +77,7 @@ void visualchannel::draw( void )
 //    texty = y-g_text_space*2;
     texty = y;
     vertical_align = al_bottom;
-  } 
+  }
   else
   {
     // set text up

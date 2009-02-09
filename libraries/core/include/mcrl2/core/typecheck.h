@@ -16,7 +16,7 @@
 
 namespace mcrl2 {
   namespace core {
- 
+
 /** \brief     Type check a parsed mCRL2 data specification.
  *  \param[in] data_spec An ATerm representation of an mCRL2 data
  *             specification that adheres to the initial internal ATerm

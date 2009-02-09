@@ -45,7 +45,7 @@ namespace transport {
           m_buffer[i] = 0;
         }
 
-        m_socket.async_receive(asio::buffer(m_buffer.get(), input_buffer_size), 0, 
+        m_socket.async_receive(asio::buffer(m_buffer.get(), input_buffer_size), 0,
                         boost::bind(&socket_transceiver::handle_receive, this, w, _1));
 
         /* Make sure the scheduler is running */
@@ -265,7 +265,7 @@ namespace transport {
 
         d.copy(buffer.get(), d.size(), 0);
 
-        boost::asio::async_write(m_socket, boost::asio::buffer(buffer.get(), d.size()), 
+        boost::asio::async_write(m_socket, boost::asio::buffer(buffer.get(), d.size()),
                boost::asio::transfer_all(),
                boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }
@@ -297,7 +297,7 @@ namespace transport {
 
         s.str().copy(buffer.get(), s.str().size(), 0);
 
-        async_write(m_socket, asio::buffer(buffer.get(), s.str().size()), 
+        async_write(m_socket, asio::buffer(buffer.get(), s.str().size()),
                boost::asio::transfer_all(),
                bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }

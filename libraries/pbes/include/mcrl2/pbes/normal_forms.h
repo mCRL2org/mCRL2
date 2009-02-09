@@ -36,7 +36,7 @@ static pbes_expression join
     return (pbes_expr::forall(var(right),join(left,arg(right),op)));
   if (is_exists(right))
     return (pbes_expr::exists(var(right),join(left,arg(right),op)));
- 
+
   return (op?pbes_expr::and_(left,right):pbes_expr::or_(left,right));
 }
 
@@ -61,7 +61,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expre
   pbes_expression visit_true
   (const pbes_expression& f)
   {
-  return pbes_expr::true_();   
+  return pbes_expr::true_();
   }
 
   pbes_expression visit_false
@@ -85,7 +85,7 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expre
     pbes_expression pright = visit(right); // prenex form right
     return (join(pleft,pright,true));
   }
-  
+
   pbes_expression visit_or
   (const pbes_expression& f, const pbes_expression& left, const pbes_expression& right)
   {
@@ -93,15 +93,15 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expre
     pbes_expression pleft = visit(left); // prenex form left
     pbes_expression pright = visit(right); // prenex form right
     return (join(pleft,pright,false));
-  }    
+  }
 
   pbes_expression visit_imp
   (const pbes_expression& f, const pbes_expression& left, const pbes_expression& right)
   {
     throw mcrl2::runtime_error(std::string("prenex error: illegal expression ") + f.to_string());
     return f;
-  }    
-  
+  }
+
   pbes_expression visit_forall
   (const pbes_expression& f, const data_variable_list& variables, const pbes_expression& expression)
   {
@@ -128,12 +128,12 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expre
 
 /// This function brings a pbes expression into PRENEX normal form,
 /// i.e. an expression with all quantifiers pulled to the beginning.
-/// It assumes as input a normalized pbes expression, 
+/// It assumes as input a normalized pbes expression,
 /// where no variable occurs both free and bounded,
 /// and no variable occurs bounded twice.
 /// \return The PRENEX normal form.
 inline
 pbes_expression pbes_expression_to_prenex(const pbes_expression& f)
-{  
+{
   return pbes_expression_prenex_builder().visit(f);
 }

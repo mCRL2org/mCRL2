@@ -39,14 +39,14 @@ void test_sequence()
   b.push_back(3);
   c.push_back(2);
   c.push_back(5);
-  
+
   std::vector<std::vector<int> > v;
   v.push_back(a);
   v.push_back(b);
   v.push_back(c);
-  
+
   int sum = 0;
-  
+
   // w will hold a sequence
   std::vector<int> w(v.size());
 
@@ -58,6 +58,6 @@ void test_sequence()
 int test_main(int, char*[])
 {
   test_sequence();
-  
+
   return 0;
 }

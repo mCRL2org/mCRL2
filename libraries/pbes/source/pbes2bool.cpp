@@ -10,7 +10,7 @@
 /// \brief Solver of parameterised boolean equation systems.
 /// \details This file contains the routines for the pbes2bool
 /// tool that can solve parameterised boolean equation systems
-/// by translating them to boolean equation systems and then 
+/// by translating them to boolean equation systems and then
 /// solving them with an adapted Gauss elimination procedure.
 
 // ======================================================================
@@ -71,7 +71,7 @@ using bes::bes_expression;
 
 //Function declarations used by main program
 //------------------------------------------
-static void calculate_bes(pbes<> pbes_spec, 
+static void calculate_bes(pbes<> pbes_spec,
                           t_tool_options tool_options,
                           bes::equations &bes_equations,
                           atermpp::indexed_set &variable_index,
@@ -89,13 +89,13 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
 //Post: pbes_spec is saved in cwi-format
 //Ret: -
 
-static void save_rhs_in_cwi_form(ostream &outputfile, 
+static void save_rhs_in_cwi_form(ostream &outputfile,
                                      bes_expression p,
                                      bes::equations &bes_equations);
-static void save_rhs_in_vasy_form(ostream &outputfile, 
+static void save_rhs_in_vasy_form(ostream &outputfile,
                                      bes_expression p,
                                      vector<unsigned long> &variable_index,
-                                     const unsigned long current_rank, 
+                                     const unsigned long current_rank,
                                      bes::equations &bes_equations);
 static bool is_pair(ATerm t);
 
@@ -103,8 +103,8 @@ static bool is_pair(ATerm t);
 
 static void print_tree_rec(const char c,
                            ATerm t,
-                           const bool opt_precompile_pbes, 
-                           Rewriter *rewriter, 
+                           const bool opt_precompile_pbes,
+                           Rewriter *rewriter,
                            ostream &f)
 {
   if (is_pair(t))
@@ -118,7 +118,7 @@ static void print_tree_rec(const char c,
     }
     else
     { data_expression t1(t);
-      f << c << pp(t1);   
+      f << c << pp(t1);
     }
   }
 }
@@ -149,7 +149,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
 
     data_expression_list tl=X.parameters();
     string s=X.name();
-    f << s; 
+    f << s;
     for(data_expression_list::iterator t=tl.begin();
           t!=tl.end(); t++)
     { f << (t==tl.begin()?"(":",");
@@ -157,7 +157,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
       { ATermAppl term=*t;
         f << pp(rewriter->fromRewriteFormat((ATerm)term));
       }
-      else 
+      else
       { f << pp(*t);
       }
     }
@@ -173,8 +173,8 @@ static void print_counter_example_rec(bes::variable_type current_var,
 
     for(std::deque < bes::counter_example>::iterator walker=bes_equations.counter_example_begin(current_var);
         walker!=bes_equations.counter_example_end(current_var) ; walker++)
-    { 
-      f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ; 
+    {
+      f << indent << (*walker).get_variable() << ": " << (*walker).print_reason() << "  " ;
       print_counter_example_rec((*walker).get_variable(),indent+"  ",
                             bes_equations,variable_index,already_printed,
                             opt_precompile_pbes,
@@ -199,9 +199,9 @@ static void print_counter_example(bes::equations &bes_equations,
                        opt_precompile_pbes,rewriter,opt_store_as_tree,cout);
   }
   if (f!=NULL)
-  { 
-    try 
-    { 
+  {
+    try
+    {
       ofstream f(filename.c_str());
       f << "Below the justification for this outcome is listed\n1: ";
       print_counter_example_rec(2,"  ",bes_equations,variable_index,already_printed,
@@ -209,7 +209,7 @@ static void print_counter_example(bes::equations &bes_equations,
       f.close();
     }
     catch (std::exception& e)
-    { cerr << "Fail to write counterexample to " << filename << 
+    { cerr << "Fail to write counterexample to " << filename <<
                "(" << e.what() << ")\n";
 
     }
@@ -217,7 +217,7 @@ static void print_counter_example(bes::equations &bes_equations,
 }
 
 template <typename Container>
-static void do_lazy_algorithm(pbes<Container> pbes_spec, 
+static void do_lazy_algorithm(pbes<Container> pbes_spec,
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
@@ -229,12 +229,12 @@ static bool solve_bes(const t_tool_options &,
 
 // Create a propositional variable instantiation with the checks needed in the naive algorithm
 
-void process(t_tool_options const& tool_options) 
+void process(t_tool_options const& tool_options)
 {
   //Load PBES
   pbes<> pbes_spec;
   pbes_spec.load(tool_options.infilename);
-  
+
   if (!pbes_spec.is_well_typed())
   { gsErrorMsg("The pbes is not well typed\n");
     exit(1);
@@ -268,7 +268,7 @@ void process(t_tool_options const& tool_options)
   if (tool_options.opt_use_hashtables)
   { bes::use_hashtables();
   }
-  atermpp::indexed_set variable_index(10000, 50); 
+  atermpp::indexed_set variable_index(10000, 50);
   bes::equations bes_equations;
 
   data_specification data = pbes_spec.data();
@@ -289,8 +289,8 @@ void process(t_tool_options const& tool_options)
   { //Save resulting bes if necessary.
     save_bes_in_vasy_format(tool_options.outfilename,bes_equations);
   }
-  else 
-  { 
+  else
+  {
     gsMessage("The solution for the initial variable of the pbes is %s\n", solve_bes(tool_options,bes_equations,variable_index) ? "true" : "false");
 
     if (tool_options.opt_construct_counter_example)
@@ -307,7 +307,7 @@ void process(t_tool_options const& tool_options)
 
 //function calculate_bes
 //-------------------
-void calculate_bes(pbes<> pbes_spec, 
+void calculate_bes(pbes<> pbes_spec,
                    t_tool_options tool_options,
                    bes::equations &bes_equations,
                    atermpp::indexed_set &variable_index,
@@ -317,12 +317,12 @@ void calculate_bes(pbes<> pbes_spec,
   {
     gsErrorMsg("The PBES is not well formed. Abort computation. \n");
     exit(1);
-  } 
+  }
   if (!pbes_spec.is_closed())
   {
     gsErrorMsg("The PBES contains free variables. Computation aborted.\n");
     exit(1);
-  } 
+  }
 
   do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
   //return new pbes
@@ -351,7 +351,7 @@ static bool is_pair(ATerm t)
 }
 
 static unsigned int largest_power_of_2_smaller_than(int i)
-{ unsigned int j=1; 
+{ unsigned int j=1;
   i=i>>1;
   while (i>0)
   { i=i>>1;
@@ -370,7 +370,7 @@ static void assign_variables_in_tree(
     assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
   }
   else
-  { 
+  {
     if (opt_precompile_pbes)
     { rewriter->setSubstitutionInternal(*var_iter,t);
     }
@@ -384,19 +384,19 @@ static void assign_variables_in_tree(
 
 // static ATermAppl store_as_tree(pbes_expression p)
 static ATermAppl store_as_tree(propositional_variable_instantiation p)
-/* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3 
+/* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3
  * arguments p is returned. Otherwise a term of the form B(pair(pair(...pair(x1,x2),...)))) is
  * returned, which is a balanced tree flushed to the right. For each input the resulting
  * tree is unique.
  */
-{ 
+{
   data_expression_list args=p.parameters();
 
   if ( args.size() ==0 )
   return p.name();
 
   unsigned int n=largest_power_of_2_smaller_than(args.size());
-  
+
   atermpp::vector<ATermAppl> tree_store(n);
 
   /* put the arguments in the intermediate tree_store. The last elements are stored as
@@ -419,7 +419,7 @@ static ATermAppl store_as_tree(propositional_variable_instantiation p)
   while (n>1)
   { n=n>>1; // n=n/2;
     for (unsigned int i=0; i<n; i++)
-    { 
+    {
       tree_store[i] = apply_pair_symbol(tree_store[2*i],tree_store[2*i+1]);
     }
   }
@@ -440,27 +440,27 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bes::variable_type current_variable,
                    const bool opt_store_as_tree,
                    const bool opt_precompile_pbes,
-                   Rewriter *rewriter) 
-{ 
+                   Rewriter *rewriter)
+{
   if (is_propositional_variable_instantiation(p))
-  { 
+  {
     pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
-    
+
     if (pr.second) /* p is added to the indexed set, so it is a new variable */
     { nr_of_generated_variables++;
       if (to_bdd)
       { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
       }
-      else 
+      else
       { return bes::variable(pr.first);
       }
     }
-    else 
+    else
     {
       if (strategy>lazy)
       { bes_expression b=bes_equations.get_rhs(pr.first);
         if (bes::is_true(b) )
-        { 
+        {
           if (construct_counter_example)
           { bes_equations.counter_example_queue(current_variable).
                    push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION_TRUE));
@@ -468,7 +468,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
           return b;
         }
         if (bes::is_false(b))
-        { 
+        {
           if (construct_counter_example)
           { bes_equations.counter_example_queue(current_variable).
                    push_front(bes::counter_example(pr.first,bes::FORWARD_SUBSTITUTION_FALSE));
@@ -479,7 +479,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
       if (to_bdd)
       { return bes::if_(bes::variable(pr.first),bes::true_(),bes::false_());
       }
-      else 
+      else
       { return bes::variable(pr.first);
       }
     }
@@ -513,7 +513,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     }
   }
   else if (pbes_expr::is_or(p))
-  { 
+  {
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
@@ -549,7 +549,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   else if (pbes_expr::is_false(p))
   { return bes::false_();
   }
-    
+
   if (opt_precompile_pbes)
   { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " <<
                      pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) << "\n";
@@ -566,11 +566,11 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
 //------------------------------
 
 // Global variables
-//  atermpp::indexed_set variable_index(10000, 50);     
+//  atermpp::indexed_set variable_index(10000, 50);
 //  bes::equations bes_equations;
 
 template <typename Container>
-static void do_lazy_algorithm(pbes<Container> pbes_spec, 
+static void do_lazy_algorithm(pbes<Container> pbes_spec,
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
@@ -578,17 +578,17 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 {
 
   // Verbose msg: doing naive algorithm
-  
+
   data_specification data = pbes_spec.data();
 
   // Variables in which the result is stored
   propositional_variable_instantiation new_initial_state;
-  
-  // atermpp::indexed_set variable_index(10000, 50); 
+
+  // atermpp::indexed_set variable_index(10000, 50);
   // In order to generate a counterexample, this must also be known outside
   // this procedure.
 
-  variable_index.put(bes::true_()); 
+  variable_index.put(bes::true_());
   variable_index.put(bes::false_()); /* Put first two dummy terms that
                                        gets index 0 and 1 in the indexed set, to
                                        take care that the first variable gets an index 2, to
@@ -636,9 +636,9 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   unsigned long rank=1;
 
   for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
-  { 
+  {
     pbes_equations.put(
-            eqi->variable().name(), 
+            eqi->variable().name(),
             pbes_equation(
                 eqi->symbol(),
                 eqi->variable(),
@@ -658,7 +658,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   #define RELEVANCE_DIVIDE_FACTOR 100
 
   gsVerboseMsg("Computing a BES from the PBES....\n");
-  
+
   // Set the first BES equation X1=X2
   bes_equations.add_equation(
                 1,
@@ -674,7 +674,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   while ((tool_options.opt_strategy>=on_the_fly)
              ?todo.size()>0
              :(nr_of_processed_variables < nr_of_generated_variables))
-  { 
+  {
     bes::variable_type variable_to_be_processed;
     if (tool_options.opt_strategy>=on_the_fly)
     { variable_to_be_processed=todo.front();
@@ -683,21 +683,21 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     else
     { variable_to_be_processed=nr_of_processed_variables+1;
     }
- 
-    if (bes_equations.is_relevant(variable_to_be_processed)) 
+
+    if (bes_equations.is_relevant(variable_to_be_processed))
            // If v is not relevant, it does not need to be investigated.
-    { 
+    {
 
       pbes_equation current_pbeq;
-      
+
       // Add the required substitutions
       if (tool_options.opt_store_as_tree)
-      {  // The current varable instantiation is stored as a tree, and this tree must be unfolded. 
+      {  // The current varable instantiation is stored as a tree, and this tree must be unfolded.
          ATerm t=variable_index.get(variable_to_be_processed);
          if (!is_pair(t))
-         { // Then t is the name of the current_variable_instantiation, and it has 
+         { // Then t is the name of the current_variable_instantiation, and it has
            // no arguments.
-      
+
            current_pbeq = pbes_equation(pbes_equations.get(t));
            assert(current_pbeq.variable().parameters().size()==0);
          }
@@ -714,34 +714,34 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
       }
       else // The current variable instantiation is a propositional_variable_instantiation
-      { 
+      {
         propositional_variable_instantiation current_variable_instantiation =
             propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
 
         current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
-        assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in 
+        assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in
                                                 // a right hand side, and not in the left hand side
-                                                // of an equation.      
-  
+                                                // of an equation.
+
         data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-      
+
         for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-        { 
+        {
           assert(elist!=current_variable_instantiation.parameters().end());
-          
+
           if (tool_options.opt_precompile_pbes)
           { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
           }
           else
-          { 
+          {
             rewriter->setSubstitution(*vlist,*elist);
           }
           elist++;
         }
         assert(elist==current_variable_instantiation.parameters().end());
       }
-      
+
       pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
       bes::bes_expression new_bes_expression=
@@ -763,14 +763,14 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
       { rewriter->clearSubstitution(*vlist);
       }
 
-  
+
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
       { // find a variable in the new_bes_expression from which `variable' to be
         // processed is reachable. If so, new_bes_expression can be set to
         // true or false.
 
         if (current_pbeq.symbol()==fixpoint_symbol::mu())
-        { 
+        {
           if (bes_equations.find_mu_loop(
                                new_bes_expression,
                                variable_to_be_processed,
@@ -782,8 +782,8 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
             }
           }
         }
-        else           
-        { 
+        else
+        {
           if (bes_equations.find_nu_loop(
                                new_bes_expression,
                                variable_to_be_processed,
@@ -798,7 +798,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
       }
 
       if ((tool_options.opt_strategy>=on_the_fly))
-      { 
+      {
         bes_equations.add_equation(
                 variable_to_be_processed,
                 current_pbeq.symbol(),
@@ -809,11 +809,11 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
         /* So now and then (after doing as many operations on the size of bes_equations,
            the relevances of variables must be reset, to avoid investigating irrelevant
            variables. There is an invariant in the system that all variables reachable
-           from the initial variable 1, are always relevant. Furthermore, relevant 
+           from the initial variable 1, are always relevant. Furthermore, relevant
            variables that need to be investigated are always in the todo list */
         relevance_counter++;
         if (relevance_counter>=relevance_counter_limit)
-        { relevance_counter_limit=bes_equations.nr_of_variables()/RELEVANCE_DIVIDE_FACTOR; 
+        { relevance_counter_limit=bes_equations.nr_of_variables()/RELEVANCE_DIVIDE_FACTOR;
           relevance_counter=0;
           bes_equations.refresh_relevances(todo);
         }
@@ -825,32 +825,32 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                 atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
                 new_bes_expression);
       }
-  
-      if (tool_options.opt_strategy>=on_the_fly) 
-      { 
+
+      if (tool_options.opt_strategy>=on_the_fly)
+      {
         if (bes::is_true(new_bes_expression)||bes::is_false(new_bes_expression))
-        { 
-          // new_bes_expression is true or false and opt_strategy is on the fly or higher. 
+        {
+          // new_bes_expression is true or false and opt_strategy is on the fly or higher.
           // This means we must optimize the bes by substituting true/false for this variable
           // everywhere. For this we use the occurrence set.
-  
+
           set <bes::variable_type> to_set_to_true_or_false;
           to_set_to_true_or_false.insert(variable_to_be_processed);
           for( ; !to_set_to_true_or_false.empty() ; )
           {
             bes::variable_type w=(*to_set_to_true_or_false.begin());
-            
+
             // Take the lowest element for substitution, to generate
             // short counterexample.
-            
+
             // gsVerboseMsg("------------------ %d\n",(unsigned long)w);
             to_set_to_true_or_false.erase(w);
-            for( set <bes::variable_type>::iterator 
+            for( set <bes::variable_type>::iterator
                       v=bes_equations.variable_occurrence_set_begin(w);
-                      v!=bes_equations.variable_occurrence_set_end(w); 
+                      v!=bes_equations.variable_occurrence_set_end(w);
                       v++)
             {
-              
+
               bes_expression b=bes_equations.get_rhs(*v);
               if (tool_options.opt_construct_counter_example)
               { b=substitute_true_false(b,w,bes_equations.get_rhs(w),
@@ -861,7 +861,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
               }
 
               if (bes::is_true(b)||bes::is_false(b))
-              { to_set_to_true_or_false.insert(*v); 
+              { to_set_to_true_or_false.insert(*v);
               }
               relevance_counter++;
               bes_equations.set_rhs(*v,b,w);
@@ -873,8 +873,8 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     }
     nr_of_processed_variables++;
     if (nr_of_processed_variables % 1000 == 0)
-    { 
-      gsVerboseMsg("Processed %d and generated %d boolean variables\n", 
+    {
+      gsVerboseMsg("Processed %d and generated %d boolean variables\n",
                                    nr_of_processed_variables,nr_of_generated_variables);
     }
   }
@@ -893,7 +893,7 @@ static bes_expression substitute_rank(
                 bes::variable_type current_variable=0)
 { /* substitute variables with rank larger and equal
      than current_rank with their approximations. */
-     
+
   if (bes::is_true(b)||bes::is_false(b)||bes::is_dummy(b))
   { return b;
   }
@@ -979,7 +979,7 @@ static bes_expression substitute_rank(
 
 
   else if (is_if(b))
-  { 
+  {
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)==current_rank)
     {
@@ -1014,13 +1014,13 @@ static bes_expression substitute_rank(
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
-      else 
+      else
       { result=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
       }
     }
   }
-  else 
-  { 
+  else
+  {
     assert(0);  // expect an if, variable, and, or, or a true or a false here.
   }
 
@@ -1042,13 +1042,13 @@ static bes_expression evaluate_bex(
                 const bool construct_counter_example,
                 const bes::variable_type current_variable)
 { /* substitute the approximation for variables in b, given
-     by approximation, for all those variables that have a 
+     by approximation, for all those variables that have a
      rank higher or equal to the variable rank; */
 
   if (bes::is_true(b)||bes::is_false(b))
   { return b;
   }
-  
+
   bes_expression result;
   if (use_hashtable)
   { result=hashtable.get(b);
@@ -1125,10 +1125,10 @@ static bes_expression evaluate_bex(
     }
   }
   else if (is_if(b))
-  { 
+  {
     bes::variable_type v=bes::get_variable(condition(b));
     if (bes_equations.get_rank(v)>=rank)
-    { 
+    {
       bes_expression b1=evaluate_bex(then_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       bes_expression b2=evaluate_bex(else_branch(b),approximation,rank,bes_equations,use_hashtable,hashtable,construct_counter_example,current_variable);
       result=BDDif(approximation[v],b1,b2);
@@ -1141,12 +1141,12 @@ static bes_expression evaluate_bex(
       if ((b1==then_branch(b)) && (b2==else_branch(b)))
       { result=b;
       }
-      else 
+      else
       { result=BDDif(bes::if_(condition(b),bes::true_(),bes::false_()),b1,b2);
       }
     }
   }
-  else 
+  else
   { assert(0); //expect an if, true or false, and, variable or or;
   }
 
@@ -1159,7 +1159,7 @@ static bes_expression evaluate_bex(
 bool solve_bes(const t_tool_options &tool_options,
                bes::equations &bes_equations,
                atermpp::indexed_set &variable_index)
-{ 
+{
   gsVerboseMsg("Solving the BES with %d equations.\n",bes_equations.nr_of_variables());
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
@@ -1167,7 +1167,7 @@ bool solve_bes(const t_tool_options &tool_options,
 
   /* Set the approximation to its initial value */
   for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
-  { 
+  {
     bes_expression b=bes_equations.get_rhs(v);
     if (b!=bes::dummy())
     { if (bes::is_true(bes_equations.get_rhs(v)))
@@ -1178,7 +1178,7 @@ bool solve_bes(const t_tool_options &tool_options,
       }
       else if (bes_equations.get_fixpoint_symbol(v)==fixpoint_symbol::mu())
       { approximation[v]=bes::false_();
-      } 
+      }
       else
       { approximation[v]=bes::true_();
       }
@@ -1189,7 +1189,7 @@ bool solve_bes(const t_tool_options &tool_options,
 
   for(unsigned long current_rank=bes_equations.max_rank;
       current_rank>0 ; current_rank--)
-  { 
+  {
     if (gsVerbose)
     { std::cerr << "Solve equations of rank " << current_rank << ".\n";
     }
@@ -1199,9 +1199,9 @@ bool solve_bes(const t_tool_options &tool_options,
     set <bes::variable_type> todo;
 
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
-    { 
+    {
       if (bes_equations.is_relevant(v) && (bes_equations.get_rank(v)==current_rank))
-      { 
+      {
         // std::cerr << "Evaluate variable" << v << "\n";
         bes_expression t=evaluate_bex(
                              bes_equations.get_rhs(v),
@@ -1212,11 +1212,11 @@ bool solve_bes(const t_tool_options &tool_options,
                              bex_hashtable,
                              false,
                              v);
-        
+
         if (toBDD(t)!=toBDD(approximation[v]))
         {
           if (tool_options.opt_use_hashtables)
-          { bex_hashtable.reset();  /* we change the approximation, so the 
+          { bex_hashtable.reset();  /* we change the approximation, so the
                                        hashtable becomes invalid */
           }
           if (tool_options.opt_construct_counter_example)
@@ -1241,17 +1241,17 @@ bool solve_bes(const t_tool_options &tool_options,
         }
       }
     }
-  
+
     for( ; todo.size()>0 ; )
     { set<bes::variable_type>::iterator w= todo.begin();
       bes::variable_type w_value=*w;
       todo.erase(w);
 
-      for(set <bes::variable_type>::iterator 
+      for(set <bes::variable_type>::iterator
          u=bes_equations.variable_occurrence_set_begin(w_value);
-         u!=bes_equations.variable_occurrence_set_end(w_value); 
+         u!=bes_equations.variable_occurrence_set_end(w_value);
          u++)
-      { 
+      {
         if (bes_equations.is_relevant(*u) && (bes_equations.get_rank(*u)==current_rank))
         { bes_expression t=evaluate_bex(
                               bes_equations.get_rhs(*u),
@@ -1262,11 +1262,11 @@ bool solve_bes(const t_tool_options &tool_options,
                               bex_hashtable,
                               false,
                               *u);
-        
+
           if (toBDD(t)!=toBDD(approximation[*u]))
-          { 
+          {
             if (tool_options.opt_use_hashtables)
-            { bex_hashtable.reset();  /* we change approximation, so the 
+            { bex_hashtable.reset();  /* we change approximation, so the
                                          hashtable becomes invalid */
             }
             if (tool_options.opt_construct_counter_example)
@@ -1296,17 +1296,17 @@ bool solve_bes(const t_tool_options &tool_options,
     /* substitute the stable solution for the current rank in all other
        equations. */
 
-    
+
     if (tool_options.opt_use_hashtables)
-    { bex_hashtable.reset();  
+    { bex_hashtable.reset();
     }
- 
+
     for(bes::variable_type v=bes_equations.nr_of_variables(); v>0; v--)
     { if (bes_equations.is_relevant(v))
-      { 
+      {
         // std::cerr << "Substitute values in lower rank" << v << "\n";
         if (bes_equations.get_rank(v)==current_rank)
-        { 
+        {
           if (tool_options.opt_construct_counter_example)
           { bes_equations.set_rhs(
                          v,
@@ -1319,11 +1319,11 @@ bool solve_bes(const t_tool_options &tool_options,
                                    bex_hashtable,
                                    true,v));
           }
-          else 
+          else
           { bes_equations.set_rhs(v,approximation[v]);
           }
         }
-        else 
+        else
         { bes_equations.set_rhs(
                          v,
                          substitute_rank(
@@ -1338,9 +1338,9 @@ bool solve_bes(const t_tool_options &tool_options,
       }
     }
     if (tool_options.opt_use_hashtables)
-    { bex_hashtable.reset();  
+    { bex_hashtable.reset();
     }
- 
+
   }
   assert(bes::is_true(approximation[1])||
          bes::is_false(approximation[1]));
@@ -1356,7 +1356,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
                                         const bes_expression b,
                                         const expression_sort s,
                                         bes::equations &bes_equations)
-{ 
+{
   if (bes::is_true(b))
   { return b;
   }
@@ -1364,7 +1364,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   { return b;
   }
   else if (bes::is_and(b))
-  { 
+  {
     if (s==or_form)
     { /* make a new equation B=b, and return B */
       bes::variable_type v=bes_equations.nr_of_variables()+1;
@@ -1382,7 +1382,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     }
   }
   else if (bes::is_or(b))
-  { 
+  {
     if (s==and_form)
     { /* make a new equation B=b, and return B */
       bes::variable_type v=bes_equations.nr_of_variables()+1;
@@ -1407,7 +1407,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   { //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
-    //Otherwise, the result is not monotonic, 
+    //Otherwise, the result is not monotonic,
     //which ought not to be possible.
     const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
@@ -1424,13 +1424,13 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
       { return translate_equation_for_vasy(i,and_(condition(b),y),s,bes_equations);
       }
     }
-    else 
+    else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
       exit(1);
     }
   }
   else
-  { 
+  {
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
     exit(1);
   }
@@ -1443,13 +1443,13 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
   gsVerboseMsg("Converting result to VASY-format...\n");
   // Use an indexed set to keep track of the variables and their vasy-representations
 
-  /* First translate the right hand sides of the equations such that they only 
+  /* First translate the right hand sides of the equations such that they only
      contain only conjunctions of disjunctions. Note that dynamically new
-     equations are added during the translation process in "translate_equation_for_vasy" 
+     equations are added during the translation process in "translate_equation_for_vasy"
      that must alos be translated. */
 
   for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    { 
+    {
         bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
     }
 
@@ -1460,7 +1460,7 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
   { unsigned long index=0;
     for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.get_rank(i)==r)
-      { 
+      {
         variable_index[i]=index;
         index++;
       }
@@ -1483,8 +1483,8 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
     for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
     { if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r))
       { if (first)
-        { ((outfilename=="")?cout:outputfile) << 
-             "block " << 
+        { ((outfilename=="")?cout:outputfile) <<
+             "block " <<
              ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "mu  B" : "nu B") <<
              r-1 <<
              " is " << endl;
@@ -1507,7 +1507,7 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
 
 //function save_rhs_in_vasy_form
 //---------------------------
-static void save_rhs_in_vasy_form(ostream &outputfile, 
+static void save_rhs_in_vasy_form(ostream &outputfile,
                                      bes_expression b,
                                      std::vector<unsigned long> &variable_index,
                                      const unsigned long current_rank,
@@ -1545,7 +1545,7 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
   { //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
-    //Otherwise, the result is not monotonic, 
+    //Otherwise, the result is not monotonic,
     //which ought not to be possible.
     const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
@@ -1561,13 +1561,13 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
     { // not is_true(y)
       save_rhs_in_vasy_form(outputfile,and_(condition(b),y),variable_index,current_rank,bes_equations);
     }
-    else 
+    else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
       exit(1);
     }
   }
   else
-  { 
+  {
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in VASY-format.\n");
     exit(1);
   }
@@ -1592,9 +1592,9 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
 
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    { 
+    {
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
-      { ((outfilename=="")?cout:outputfile) << 
+      { ((outfilename=="")?cout:outputfile) <<
               ((bes_equations.get_fixpoint_symbol(i)==fixpoint_symbol::mu()) ? "min X" : "max X") << i << "=";
         save_rhs_in_cwi_form(((outfilename=="")?cout:outputfile),bes_equations.get_rhs(i),bes_equations);
         ((outfilename=="")?cout:outputfile) << endl;
@@ -1608,7 +1608,7 @@ static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equati
 //function save_rhs_in_cwi
 //---------------------------
 static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equations &bes_equations)
-{ 
+{
   if (bes::is_true(b))
   { outputfile << "T";
   }
@@ -1642,7 +1642,7 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
   { //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
-    //Otherwise, the result is not monotonic, 
+    //Otherwise, the result is not monotonic,
     //which ought not to be possible.
     const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
@@ -1658,13 +1658,13 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
     { // not is_true(y)
       save_rhs_in_cwi_form(outputfile,and_(condition(b),y),bes_equations);
     }
-    else 
+    else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
       exit(1);
     }
   }
   else
-  { 
+  {
     gsErrorMsg("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
     exit(1);
   }

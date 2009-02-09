@@ -249,13 +249,13 @@ void test_formulas()
   formulas.push_back("[a(1)]false");
   formulas.push_back("!true");
   formulas.push_back("yaled@10");
-  
+
   for (std::vector<string>::iterator i = formulas.begin(); i != formulas.end(); ++i)
   {
     std::cout << "<formula>" << *i << std::flush;
-    pbes<> result1 = lps2pbes(SPEC, *i, false);   
+    pbes<> result1 = lps2pbes(SPEC, *i, false);
     std::cout << " <timed>" << std::flush;
-    pbes<> result2 = lps2pbes(SPEC, *i, true);   
+    pbes<> result2 = lps2pbes(SPEC, *i, true);
     std::cout << " <untimed>" << std::endl;
   }
 }

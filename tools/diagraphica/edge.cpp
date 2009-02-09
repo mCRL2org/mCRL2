@@ -18,7 +18,7 @@
 using namespace std;
 
 // --------------------
-Edge::Edge( 
+Edge::Edge(
     const int &idx,
     const string &lbl )
 // --------------------

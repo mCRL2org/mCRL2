@@ -50,17 +50,17 @@ class pbes_parelm_tool: public input_output_tool
         std::clog << "  input file:         " << m_input_filename << std::endl;
         std::clog << "  output file:        " << m_output_filename << std::endl;
       }
-    
+
       // load the pbes
       pbes_system::pbes<> p;
       p.load(m_input_filename);
 
       pbes_system::pbes_parelm_algorithm algorithm;
       algorithm.run(p);
-      
+
       // save the result
       p.save(m_output_filename);
-      
+
       return true;
     }
 };

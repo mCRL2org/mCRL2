@@ -37,14 +37,14 @@ const std::string case_3(
 
 
 static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
-{ 
+{
   ATermAppl v_process_equation = ATAgetArgument(s1, 2);
   ATermList v_summands = ATLgetArgument(v_process_equation, 2);
 
   for( ;  !ATisEmpty(v_summands) ; v_summands=ATgetNext(v_summands))
   { ATermAppl v_summand=ATAgetFirst(v_summands);
     ATermAppl v_multi_action_or_delta = ATAgetArgument(v_summand, 2);
-    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta)) 
+    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta))
     {
       ATermList v_actions=ATLgetArgument(v_multi_action_or_delta, 0);
       for( ; !ATisEmpty(v_actions) ; v_actions=ATgetNext(v_actions))
@@ -54,7 +54,7 @@ static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
         { return true;
         }
       }
-    } 
+    }
   }
   return false;
 }

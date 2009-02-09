@@ -2,20 +2,20 @@
 /* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -1388,7 +1388,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 49 "liblts_fsmparser.yy"
-    { 
+    {
       num_pars = 0;
       ignore_par.clear();
     ;}
@@ -1398,7 +1398,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 54 "liblts_fsmparser.yy"
-    { 
+    {
       fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
     ;}
     break;
@@ -1434,7 +1434,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 91 "liblts_fsmparser.yy"
-    { 
+    {
       if (!ignore_par[num_pars])
       {
         fsm_lexer_obj->typeValues = ATempty;
@@ -1447,7 +1447,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 99 "liblts_fsmparser.yy"
-    { 
+    {
       if (!ignore_par[num_pars])
       {
         fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
@@ -1504,11 +1504,11 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 145 "liblts_fsmparser.yy"
-    { 
+    {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues, 
-            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm), 
+        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
+            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)(yyvsp[(1) - (1)].aterm),
             (ATerm)fsm_lexer_obj->typeId ) );
       }
     ;}
@@ -1528,10 +1528,10 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 165 "liblts_fsmparser.yy"
     {
-      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector ); 
+      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
       unsigned int i = fsm_lexer_obj->fsm_lts->add_state(
           (ATerm) fsm_lexer_obj->stateVector );
-      if ( i == 0 ) 
+      if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
@@ -1543,12 +1543,12 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 182 "liblts_fsmparser.yy"
-    { 
+    {
       if (!ignore_par[par_index])
       {
         if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
         {
-          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector, 
+          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
               ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
                   par_index ), (yyvsp[(2) - (2)].number) ) );
         }

@@ -53,7 +53,7 @@ inline ATermAppl reconstruct_spec(ATermAppl spec) {
          detail::gsIsPBES(spec) || detail::gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
-   
+
   }
 }
 

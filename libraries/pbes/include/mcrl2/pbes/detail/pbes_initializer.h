@@ -24,7 +24,7 @@
 namespace mcrl2 {
 
 namespace pbes_system {
-  
+
 namespace detail {
 
 /// \brief The initial state of a pbes.

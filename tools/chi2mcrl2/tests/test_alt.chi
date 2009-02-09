@@ -5,6 +5,6 @@ model y()=
 
 
 proc Test( ) =
-|[ 
-( skip | skip ) ; skip  
+|[
+( skip | skip ) ; skip
 ]|

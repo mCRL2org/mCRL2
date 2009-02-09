@@ -31,10 +31,10 @@ namespace lts
       int *tags;
       unsigned int tags_size;
       unsigned int tags_next;
-      
+
       int *hashtable;
       unsigned int hashmask;
-      
+
       void check_tags();
       void check_buckets();
       int find_set(int child_l,int child_r);

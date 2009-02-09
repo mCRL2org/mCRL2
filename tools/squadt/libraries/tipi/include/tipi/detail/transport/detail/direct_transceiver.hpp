@@ -23,9 +23,9 @@ namespace transport {
     class direct_transceiver : public basic_transceiver {
       friend class transport::transporter;
       friend class transport::transporter_impl;
-  
+
       private:
- 
+
         /** The other side of the connection */
         direct_transceiver* peer;
 
@@ -45,7 +45,7 @@ namespace transport {
 
         /** Send a string input stream to the peer */
         inline void send(const std::string& data);
-  
+
         /** Send the contents of an input stream to the peer */
         inline void send(std::istream& data);
 
@@ -87,10 +87,10 @@ namespace transport {
      **/
     inline void direct_transceiver::send(const std::string& d) {
       std::istringstream input(d);
-  
+
       basic_transceiver::deliver(input);
     }
-  
+
     /**
      * @param s stream that contains the data to be sent
      **/

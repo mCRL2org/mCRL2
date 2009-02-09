@@ -456,7 +456,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] v the new default visibility 
+     * \param[in] v the new default visibility
      **/
     inline void manager::set_default_visibility(visibility const& v) {
       m_default_properties.m_visible = v;
@@ -548,7 +548,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e the element 
+     * \param[in] e the element
      * \param[in] b whether it should be enabled
      **/
     template < typename A >
@@ -563,7 +563,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e the element 
+     * \param[in] e the element
      **/
     template < typename A >
     inline void box< A >::disable(element* e) {
@@ -571,7 +571,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e the element 
+     * \param[in] e the element
      * \param[in] b whether it should be visible
      **/
     template < typename A >
@@ -586,7 +586,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] e the element 
+     * \param[in] e the element
      **/
     template < typename A >
     inline void box< A >::hide(element* e) {
@@ -618,7 +618,7 @@ namespace tipi {
     }
 
     /**
-     * \param[in] v the new default visibility 
+     * \param[in] v the new default visibility
      *
      * \return *this
      **/

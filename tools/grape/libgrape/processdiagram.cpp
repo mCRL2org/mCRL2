@@ -227,8 +227,8 @@ nonterminating_transition* process_diagram::add_nonterminating_transition( unsig
   {
     if ( p_beginstate )
     {
-      new_coord.m_x = p_beginstate->get_coordinate().m_x - p_beginstate->get_width();
-      new_coord.m_y = p_beginstate->get_coordinate().m_y - p_beginstate->get_height();
+      new_coord.m_x = p_beginstate->get_coordinate().m_x - 0.5*p_beginstate->get_width() - 0.2;
+      new_coord.m_y = p_beginstate->get_coordinate().m_y;
     }
   }
   else

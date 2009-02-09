@@ -1,14 +1,14 @@
 model blaat()=
-|[ blaak() || test(false, true) 
+|[ blaak() || test(false, true)
 ]|
 
 proc blaak()=
-|[ var a: bool 
+|[ var a: bool
 :: skip ;*( a := false )
 ]|
 
 proc test(var b,a:bool)=
-|[ 
-a *> ( a -> skip ; delta | skip ; skip ; a := false ) ; skip 
+|[
+a *> ( a -> skip ; delta | skip ; skip ; a := false ) ; skip
 ]|
 

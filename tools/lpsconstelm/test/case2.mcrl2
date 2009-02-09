@@ -1,5 +1,5 @@
 % Test Case 2 -- No Free Variables
-%  
+%
 % Process parameter i will not be removed.
 
 act action :Nat;

@@ -88,7 +88,7 @@ namespace tipi {
 
   /**
    * \brief Abstract container class for layout elements
-   * 
+   *
    * Elements are associated and managed by a display. The display can be used
    * to create them and when the display is destroyed, all associated elements
    * are destroyed as well.

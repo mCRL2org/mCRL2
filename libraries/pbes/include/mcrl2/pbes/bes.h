@@ -38,7 +38,7 @@
 //                    boolean variable
 //--------------------------------------------------------------------//
 namespace mcrl2 {
-  
+
 /// \brief The main namespace for boolean equation systems.
 namespace bes {
 
@@ -170,7 +170,7 @@ namespace bes {
 namespace mcrl2 {
 namespace core {
 
-  /// \brief Contains type information for boolean expressions 
+  /// \brief Contains type information for boolean expressions
   template <>
   struct term_traits<bes::boolean_expression>
   {
@@ -403,10 +403,10 @@ class boolean_equation: public atermpp::aterm_appl
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
-    
+
     /// \brief The predicate variable of the equation
     boolean_variable   m_variable;
-    
+
     /// \brief The formula of the equation
     boolean_expression m_formula;
 

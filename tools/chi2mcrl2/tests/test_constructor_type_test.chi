@@ -1,11 +1,11 @@
 model tst()=
-|[ chan b: [nat] 
-::dummy(b) 
+|[ chan b: [nat]
+::dummy(b)
 ]|
 
 proc dummy(chan f!: [nat])=
-|[  var a: (nat, nat, (nat,nat)), b: nat, c: [nat], d:{[nat]} 
+|[  var a: (nat, nat, (nat,nat)), b: nat, c: [nat], d:{[nat]}
 ::
- skip 
+ skip
 ]|
 

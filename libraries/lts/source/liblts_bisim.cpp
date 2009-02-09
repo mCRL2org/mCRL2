@@ -16,7 +16,7 @@
 using namespace mcrl2::core;
 using namespace std;
 
-int traceLevel = 0, optimal = 0, classes = 0; 
+int traceLevel = 0, optimal = 0, classes = 0;
 
 namespace mcrl2
 {
@@ -39,12 +39,12 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector
   }
 
   set_tau_actions(tau_actions);
-  int initState = ReadData(l); 
-  
+  int initState = ReadData(l);
+
   if ( branching )
   {
     SCC();
-    ReduceBranching();  
+    ReduceBranching();
   } else {
     Reduce();
   }
@@ -64,7 +64,7 @@ bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> const
   int init1, init2;
   set_tau_actions(tau_actions);
   ReadCompareData(l1, &init1, l2, &init2);
-  
+
   bool equal = false;
   if ( branching )
   {

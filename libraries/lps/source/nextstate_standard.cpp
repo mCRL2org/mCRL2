@@ -45,7 +45,7 @@ using namespace mcrl2::core::detail;
  * With an odd number of elements, our first goal is to pair just a few
  * elements to get a list with the length a power of 2. We do this in such
  * a way that it is as easy as possible to lookup an element.
- * 
+ *
  * The easiest way of looking up an element in a tree is probably when, for
  * a tree with n leafs, we know that numbers up to n/2 are on the left and
  * numbers above n/2 are on the right. This way we can just compare the
@@ -183,7 +183,7 @@ static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL)
 
 static bool statearg_match_list(ATermList arg, ATermList pat, ATermTable vars)
 {
-        assert(ATgetLength(arg) == ATgetLength(pat)); 
+        assert(ATgetLength(arg) == ATgetLength(pat));
         bool r = true;
 
         while (!ATisEmpty(arg) && r)
@@ -331,7 +331,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 			{
 				ATermList domains = gsGetSortExprDomains(funcsort);
 				ATermAppl t = ATAgetFirst(l);
-	
+
 				bool found = true;
 				for (; !ATisEmpty(domains); domains=ATgetNext(domains))
 				{
@@ -349,7 +349,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
                                         dummies = ATreverse(dummies);
 					t = gsMakeDataAppl(t,dummies);
 				}
-	
+
 				if ( found )
 				{
 					return t;
@@ -516,7 +516,7 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 
 	info.procvars = ATLgetArgument(ATAgetArgument(current_spec,2),1);
 	ATprotectList(&info.procvars);
-	
+
 	stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
 	for (int i=0; i<info.statelen; i++)
 	{
@@ -608,7 +608,7 @@ NextStateStandard::~NextStateStandard()
 	{
 		delete info.enum_obj;
 	}
-	
+
 	ATunprotectAFun(info.pairAFun);
 
 	ATunprotectList(&pars);
@@ -618,7 +618,7 @@ NextStateStandard::~NextStateStandard()
 	}
 
 	ATunprotectList(&info.procvars);
-	
+
 	ATunprotectAFun(smndAFun);
 	ATunprotectArray((ATerm *) info.summands);
 	free(info.summands);
@@ -940,7 +940,7 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
 		{
 			info.rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));
-		} 
+		}
 		return true;
 	} else {
 		*Transition = NULL;

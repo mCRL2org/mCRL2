@@ -40,7 +40,7 @@ namespace atermpp
       }
 
       /// Allow construction from an aterm. The aterm must be of the right type.
-      /// \param t A term.     
+      /// \param t A term.
       aterm_blob(aterm t)
         : aterm_base(t)
       {

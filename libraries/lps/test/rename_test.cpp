@@ -85,7 +85,7 @@ void test_lps_rename()
       BOOST_CHECK(std::find(forbidden_names.begin(), forbidden_names.end(), j->name()) == forbidden_names.end());
     }
   }
-  
+
   p = rename_process_parameters(p, forbidden_names, "_P");
   spec = rename_process_parameters(spec, forbidden_names, "_S");
 }

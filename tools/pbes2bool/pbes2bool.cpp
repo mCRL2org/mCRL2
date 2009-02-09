@@ -352,7 +352,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
   clinterface.add_rewriting_options();
 
   clinterface.
-    add_option("strategy", make_mandatory_argument("STRAT"), 
+    add_option("strategy", make_mandatory_argument("STRAT"),
       "use strategy STRAT (default '0');\n"
       " 0) Compute all boolean equations which can be reached"
       " from the initial state, without optimization"
@@ -419,20 +419,20 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
     tool_options.opt_strategy                  = lazy;
     tool_options.infilename                    = "";
     tool_options.outfilename                   = "";
-    
+
     if (parser.options.count("output")) { // Output format
       std::string format = parser.option_argument("output");
- 
+
       if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
         parser.error("unknown output format specified (got `" + format + "')");
       }
- 
+
       tool_options.opt_outputformat = format;
     }
-    
+
     if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
       int strategy = parser.option_argument_as< int >("strategy");
- 
+
       switch (strategy) {
         case 0:
          tool_options.opt_strategy = lazy;
@@ -450,7 +450,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
           parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
       }
     }
-    
+
     if (2 < parser.arguments.size()) {
       parser.error("too many file arguments");
     }
@@ -462,10 +462,10 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
         tool_options.outfilename = parser.arguments[1];
       }
     }
-    
+
     tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
   }
-  
+
   return parser.continue_execution();
 }
 

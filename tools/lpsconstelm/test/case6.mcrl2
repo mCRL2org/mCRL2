@@ -1,5 +1,5 @@
 % Test Case 6 -- No Free Variables
-%  
+%
 % Process parameter i is substituted by 0 and removed from the list of process
 % parameters.
 

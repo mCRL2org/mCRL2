@@ -1,18 +1,18 @@
-// Studying industrial systems by simulation enables the designer to study 
-// their dynamic behaviour and to determine characteristics of the system. 
-// Unfortunately, simulation also has some disadvantages. These can be 
+// Studying industrial systems by simulation enables the designer to study
+// their dynamic behaviour and to determine characteristics of the system.
+// Unfortunately, simulation also has some disadvantages. These can be
 // overcome by using formal methods. Formal methods allow a thorough analysis
 // of the possible behaviours of a system, parameterised system analysis and
 // a modular approach to the analysis of systems. We present a case study in
 // which a model of an industrial system is studied in a formal way. For this
-// purpose, the model is first specified and simulated using the CSP-based 
+// purpose, the model is first specified and simulated using the CSP-based
 // executable specification language χ. The model is translated into a model
 // in the process algebra μCRL. This enables us to give a correctness proof
 // of the parameterised model and to study the model in isolation.
 
 model STMC()=
-|[ chan st, tm: nat, 
-        mt, ts: [nat], 
+|[ chan st, tm: nat,
+        mt, ts: [nat],
         ct, cm: bool,
         //Dummy process
         es: nat,
@@ -27,25 +27,25 @@ model STMC()=
 ]|
 
 proc Din(chan es!: nat)=
-|[ *(es!1) 
+|[ *(es!1)
 ]|
 
 proc Dout(chan se?: [nat])=
 |[ var store : [nat]
-:: *(se?store) 
+:: *(se?store)
 ]|
 
 proc S(chan es?: nat, st!: nat, ts?: [nat], se!: [nat]) =
 |[ var x : nat,
        xs, y: [nat],
-       ys: [[nat]] 
+       ys: [[nat]]
 :: xs := []
  ; ys := []
  ; *( es?x; xs := xs ++ [x]
     | len(xs) > 0 -> st!hd(xs); xs := tl(xs)
     | ts?y; ys := ys ++ [y]
     | len(ys) > 0 -> se!hd(ys); ys := tl(ys)
-    ) 
+    )
 ]|
 
 proc T(chan st?: nat, tm!:nat, mt?: [nat], ts!:[nat], ct?:bool)=
@@ -53,8 +53,8 @@ proc T(chan st?: nat, tm!:nat, mt?: [nat], ts!:[nat], ct?:bool)=
      , xs: [nat]
      , z : bool
 :: xs := []
- ; z := true 
- ; *(  
+ ; z := true
+ ; *(
       ( z     -> st?x; xs := xs ++[x]; tm!hd(xs); xs := []
       | not z -> mt?xs; ts!xs; xs := []
       )
@@ -81,7 +81,7 @@ proc C(chan ct!, cm!: bool, var s: nat)=
 :: i := 0
  ; *(
       ct!(i + 1 /= s); cm!(i+1 /= s)
-    ; i := (i + 1) mod (s + 1) 
+    ; i := (i + 1) mod (s + 1)
     )
 ]|
 

@@ -1,7 +1,7 @@
 % Test Case 7
 %
-% The following LPS is generated:  
-% 
+% The following LPS is generated:
+%
 % act  act1,act2,act3: Nat;
 %
 % proc P(i,z,j: Nat) =

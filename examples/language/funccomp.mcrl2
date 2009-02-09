@@ -9,7 +9,7 @@ sort
 
 map
   comp: (B -> C) # (A -> B) -> (A -> C);
-  
+
 var
   f: B -> C;
   g: A -> B;

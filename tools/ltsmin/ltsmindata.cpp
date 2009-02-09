@@ -20,7 +20,7 @@ using namespace mcrl2::core::detail;
 /* Data definition */
 
 unsigned int Pi_pt = 0, n_partitions = 0;
-       
+
 SVCint nstate=0, nlabel=0, npar=0;
 ATbool *mark;
 SVCint *blockref;
@@ -33,7 +33,7 @@ BLOCKS blocks;
 SVCfile inFile[MAX_INFILES], outFile[1];
 SVCbool readIndex[MAX_INFILES];
 ATermTable *lab_src_tgt, *lab_tgt_src, graph, graph_i;
-ATerm *label_name, *par_name; 
+ATerm *label_name, *par_name;
 /* End data definition */
 
 static int n_transitions = 0, n_states = 0;
@@ -58,7 +58,7 @@ static void Info(SVCfile *inFile)
      fprintf(stderr, " initial state %ld\n", SVCgetInitialState(inFile));
      fprintf(stderr, " comments      %s\n", SVCgetComments(inFile));
      }
-     
+
 static ATerm *MakeArrayOfATerms(int n)
      {
      ATerm *result = (ATerm *) calloc(n, sizeof(ATerm));
@@ -67,7 +67,7 @@ static ATerm *MakeArrayOfATerms(int n)
      ATprotectArray(result, n);
      return result;
      }
-          
+
 static void AllocData(void)
      {
      int i;
@@ -81,45 +81,45 @@ static void AllocData(void)
      ATerror("Cannot allocate array with state numbers of size %d\n", nstate);
      if (!(lab = (ATermList*) calloc(nstate,  sizeof(ATermList))))
      ATerror("Cannot allocate array with [labels] of size %d\n", nstate);
-     ATprotectArray((ATerm*) lab, nstate); 
+     ATprotectArray((ATerm*) lab, nstate);
      if (!(Pi = (INTERVAL*) calloc(2*nstate, sizeof(INTERVAL))))
         ATerror("Indexed array Pi is not allocated (%d)\n",2*nstate);
      if (!(lab_src_tgt = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
-           ATerror("Array of tables is not allocated (%d)\n",nlabel); 
+           ATerror("Array of tables is not allocated (%d)\n",nlabel);
      if (!(lab_tgt_src = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
            ATerror("Array of tables is not allocated (%d)\n",nlabel);
      if (!(blok = (BLOK*) malloc(2*nstate * sizeof(BLOK))))
-        ATerror("BLOK is not allocated (%d)\n",nstate); 
+        ATerror("BLOK is not allocated (%d)\n",nstate);
      for (i=0;i<nlabel;i++) {
           if (!(lab_src_tgt[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
                ATerror("Not possible to create table (%d)",i);
           if (!(lab_tgt_src[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
                ATerror("Not possible to create table (%d)",i);
-          } 
+          }
      label_name = MakeArrayOfATerms(nlabel);
      for (i=0;i<nstate;i++)
-          { 
+          {
           lab[i] = ATempty;
           }
      if (classes) {
           if (!(par = (ATermList*) calloc(nstate,  sizeof(ATermList))))
           ATerror("Cannot allocate array with [parameters] of size %d\n", nstate);
           ATprotectArray((ATerm*) par, nstate);
-          par_name = MakeArrayOfATerms(npar); 
-          for (i=0;i<nstate;i++) { 
+          par_name = MakeArrayOfATerms(npar);
+          for (i=0;i<nstate;i++) {
               par[i] = ATempty;
               }
           }
-     blocks.pt = 0; 
-     /* StartSplitting(); */         
+     blocks.pt = 0;
+     /* StartSplitting(); */
      }
 
 void StartSplitting(void) {
      int i, nstate2 = 2* nstate;
-     Pi_pt = 0; 
-     n_partitions = 0;     
+     Pi_pt = 0;
+     n_partitions = 0;
      for (i=0;i<nstate;i++)
-          { 
+          {
           mark[i] = ATfalse;
           s[i] = i;
           blockref[i] = Pi_pt;
@@ -130,10 +130,10 @@ void StartSplitting(void) {
           }
      blok[Pi_pt].action = -1;
      blok[Pi_pt].parent = 0;
-     blok[Pi_pt].splitter = 0;     
+     blok[Pi_pt].splitter = 0;
      Pi_pt = Push(STABLE,0,nstate);
      n_partitions++;
-     } 
+     }
 /*
 --------------- Strongly Connected Components -------------------------
 */
@@ -145,13 +145,13 @@ static void ExtraNode(void) {
      ATermList states = ATempty;
      for (i=0;i<nstate;i++) states = ATinsert(states, (ATerm) ATmakeInt(i));
      ATtablePut(graph, (ATerm) ATmakeInt(nstate), (ATerm) ATreverse(states));
-} 
+}
 
 static void RemoveExtraNode(void) {
      /* Remove extra node which is connected to each point */
      ATtableRemove(graph, (ATerm) ATmakeInt(nstate));
-     dfsn--; 
-} 
+     dfsn--;
+}
 
 void DfsNumbering(ATerm t) {
      int d = ATgetInt((ATermInt) t);
@@ -171,7 +171,7 @@ void DfsNumbering(ATerm t) {
      dfsn2state[dfsn] = d;
      dfsn++;
      }
-} 
+}
 
 int TakeComponent(ATerm t) {
      static int s_pt = 0;
@@ -196,8 +196,8 @@ int TakeComponent(ATerm t) {
      s[s_pt] = d; s_pt++;
      blockref[d] = Pi_pt;
      return s_pt;
-     }    
-} 
+     }
+}
 
 static void MakeUnitPartition(void) {
      int i;
@@ -217,7 +217,7 @@ void SCC(void) {
      if (label_tau<0) {MakeUnitPartition(); return;}
      graph = lab_src_tgt[label_tau];
      graph_i = lab_tgt_src[label_tau];
-     ExtraNode(); 
+     ExtraNode();
      if (!(visited = (int*) calloc(nstate+1, sizeof(int))))
         ATerror("Visited is not allocated (%d)\n",nstate);
      for (i=0;i<=nstate;i++) visited[i] = -1;
@@ -226,7 +226,7 @@ void SCC(void) {
      DfsNumbering((ATerm) ATmakeInt(nstate));
      RemoveExtraNode();
      dfsn--;
-     while (dfsn>=0) { 
+     while (dfsn>=0) {
           Pi[Pi_pt].left = left;
           left = Pi[Pi_pt].right = TakeComponent(
                (ATerm) ATmakeInt(dfsn2state[dfsn]));
@@ -235,16 +235,16 @@ void SCC(void) {
           }
      /* for (i=0;i<Pi_pt;i++) ATwarning("(%d,%d)\n",Pi[i].left, Pi[i].right); */
      free(visited);
-     free(dfsn2state);                 
+     free(dfsn2state);
 }
 /*
 --------------- End Strongly Connected Components -------------------------
-*/     
-               
+*/
+
 static void UpdateTable(ATermTable db, int key, int val) {
      ATerm newkey = (ATerm) ATmakeInt(key);
-     ATermList newval = (ATermList) ATtableGet(db , newkey); 
-     if (!newval) 
+     ATermList newval = (ATermList) ATtableGet(db , newkey);
+     if (!newval)
           newval = ATmakeList1((ATerm) ATmakeInt(val));
      else
           newval = ATinsert(newval, (ATerm) ATmakeInt(val));
@@ -256,7 +256,7 @@ static void UpdateLabArray(int state, int label) {
      ATerm labno = (ATerm) ATmakeInt(label);
      if (!newval) newval = ATmakeList1(labno);
      else
-     if (ATindexOf(newval, labno,0)<0) 
+     if (ATindexOf(newval, labno,0)<0)
           newval = ATinsert(newval, labno);
      lab[state] = newval;
 }
@@ -266,7 +266,7 @@ static void UpdateParArray(int state, int parameter) {
      ATerm parno = (ATerm) ATmakeInt(parameter);
      if (!newval) newval = ATmakeList1(parno);
      else
-     if (ATindexOf(newval, parno,0)<0) 
+     if (ATindexOf(newval, parno,0)<0)
           newval = ATinsert(newval, parno);
      par[state] = newval;
 }
@@ -312,20 +312,20 @@ bool is_tau_mact(ATermAppl mact)
 	return true;
 }
 
-SVCstateIndex ReadData(void) 
+SVCstateIndex ReadData(void)
    {
    SVCstateIndex fromState, toState, initState;
    SVClabelIndex label;
    SVCparameterIndex parameter;
 //   ATerm term_tau = (ATerm) gsMakeMultAct(ATmakeList0());
-   if (traceLevel>0) Info(inFile); 
+   if (traceLevel>0) Info(inFile);
    nstate = SVCnumStates(inFile);
    nlabel = SVCnumLabels(inFile) + 1; // +1 for tau label
    if (classes) npar = SVCnumParameters(inFile);
    AllocData();
    label_tau = nlabel-1;
    label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
-   while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter)) 
+   while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter))
       {
       ATermAppl label_term = (ATermAppl) SVClabel2ATerm(inFile,label);
       if ( !gsIsMultAct(label_term) )
@@ -351,46 +351,46 @@ SVCstateIndex ReadData(void)
       }
       if (classes) {
           ATerm parname = par_name[parameter];
-          if (!parname) parname = par_name[parameter] = 
+          if (!parname) parname = par_name[parameter] =
                 SVCparameter2ATerm(inFile,parameter);
-      } 
+      }
       UpdateLabArray(toState, label);
       if (classes) UpdateParArray(fromState, parameter);
       UpdateTable(lab_src_tgt[label], fromState, toState);
       UpdateTable(lab_tgt_src[label], toState, fromState);
-      }   
-   initState =  SVCgetInitialState(inFile); 
+      }
+   initState =  SVCgetInitialState(inFile);
    if (classes == 0 && readIndex[0] && SVCclose(inFile)<0)
       {
       fprintf(stderr, "File trailer corrupt...\n");
       }
    return initState;
    }
-   
+
 static int Recode(int label) {
      int n = SVCnumLabels(inFile+1), m = SVCnumLabels(inFile), i;
      static int *newlabel = NULL, pt = 0;
      ATerm name = NULL;
-     if (!newlabel) { 
+     if (!newlabel) {
           if (!(newlabel = (int *) calloc(n, sizeof(int))))
                ATerror("No allocation of newlabel (%d)",n);
           for (i=0;i<n;i++) newlabel[i] = -1;
           pt = m;
-          } 
+          }
      if (label == -1) {free(newlabel);return -1;}
      if (newlabel[label]>=0) return newlabel[label];
      name = SVClabel2ATerm(inFile+1,label);
      if (ATisEqual(label_name[label] , name)) return label;
-     /* ATwarning("Collision %t <-> %t\n", label_name[label], name); */ 
+     /* ATwarning("Collision %t <-> %t\n", label_name[label], name); */
      for (i=0;i<m;i++) {
         if (ATisEqual(label_name[i],name)) break;
         }
      if (i< m) {newlabel[label]=i; return i;}
      /* ATwarning("New label\n"); */
      newlabel[label] = pt; return pt++;
-     } 
-   
-void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2) 
+     }
+
+void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2)
    {
    SVCstateIndex fromState, toState, offset = SVCnumStates(inFile);
    SVClabelIndex label;
@@ -398,8 +398,8 @@ void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2)
    ATerm term_tau = (ATerm) gsMakeMultAct(ATmakeList0());
    if (traceLevel>0) Info(inFile);
    nstate = SVCnumStates(inFile)+SVCnumStates(inFile+1);
-   nlabel = SVCnumLabels(inFile)+SVCnumLabels(inFile+1); 
-   AllocData(); 
+   nlabel = SVCnumLabels(inFile)+SVCnumLabels(inFile+1);
+   AllocData();
    while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter))
       {
       ATerm name = label_name[label];
@@ -409,22 +409,22 @@ void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2)
       UpdateTable(lab_src_tgt[label], fromState, toState);
       UpdateTable(lab_tgt_src[label], toState, fromState);
       }
-   *init1 =  SVCgetInitialState(inFile); 
-   if (readIndex[0]) 
+   *init1 =  SVCgetInitialState(inFile);
+   if (readIndex[0])
    if (SVCclose(inFile)<0)
        {
        fprintf(stderr, "File trailer corrupt...\n");
-       } 
+       }
    /* Second file */
-   if (traceLevel>0) Info(inFile+1);  
-   while (SVCgetNextTransition(inFile+1, &fromState, &label, &toState, &parameter)) 
+   if (traceLevel>0) Info(inFile+1);
+   while (SVCgetNextTransition(inFile+1, &fromState, &label, &toState, &parameter))
       {
       int label0 = label;
-      label = Recode(label0); 
+      label = Recode(label0);
       {
       ATerm name = label_name[label];
       if (!name) name = label_name[label] = SVClabel2ATerm(inFile+1,label0);
-      if (label_tau < 0 && ATisEqual(name, term_tau)) 
+      if (label_tau < 0 && ATisEqual(name, term_tau))
         label_tau =  label;
       UpdateLabArray(toState + offset, label);
       UpdateTable(lab_src_tgt[label], fromState +offset, toState + offset);
@@ -433,17 +433,17 @@ void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2)
       }
    Recode(-1);
    *init2 =  SVCgetInitialState(inFile+1) + offset;
-   if (readIndex[1]) 
+   if (readIndex[1])
    if (SVCclose(inFile+1)<0)
       {
       fprintf(stderr, "File trailer corrupt...\n");
-      } 
-   } 
-     
+      }
+   }
+
 static ATermList Union(ATermList t1s, ATermList t2s)
      {
      ATermList result = t2s;
-     /* ATwarning("Arguments union %t %t",t1s,t2s); */ 
+     /* ATwarning("Arguments union %t %t",t1s,t2s); */
      for (;!ATisEmpty(t1s);t1s=ATgetNext(t1s))
           {ATerm t1 = ATgetFirst(t1s);
           if (ATindexOf(t2s, t1,0)<0) result = ATinsert(result, t1);
@@ -463,7 +463,7 @@ static ATerm BlockCode(int b) {
           indeks = ATindexedSetCreate(INITSIZE, MAX_LOAD_PCT);
           }
     /*  ATwarning("ATindexedSetPut %d %d\n",indeks, b); */
-     d = ATindexedSetPut(indeks, (ATerm) ATmakeInt(b), &nnew);   
+     d = ATindexedSetPut(indeks, (ATerm) ATmakeInt(b), &nnew);
      return (ATerm) ATmakeInt(d);
 }
 
@@ -474,16 +474,16 @@ static ATermList  BlockNumbers(ATermList sources)
           {
           int source = ATgetInt((ATermInt) ATgetFirst(sources));
           ATerm block = BlockCode(blockref[source]);
-          if (ATindexOf(result, block,0)<0) result = ATinsert(result, block); 
+          if (ATindexOf(result, block,0)<0) result = ATinsert(result, block);
           }
      return result;
      }
-      
+
 void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right)
      {
      *left = Pi[b].left; *right = Pi[b].right;
      }
-      
+
 static void print_state(FILE *f,ATerm state)
 {
 	int arity = ATgetArity(ATgetAFun((ATermAppl) state));
@@ -510,25 +510,25 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
    "--------------------------- block %d --------------------------\n", (int) b);
    /* ATwarning("TransitionGoingTo b = %d newb = %d\n",b, newb); */
    for (i = left; i < right;i++) {
-        ATermList labels = lab[s[i]], pars = ATempty; 
+        ATermList labels = lab[s[i]], pars = ATempty;
         ATerm ss = (ATerm) ATmakeInt(s[i]);
         if (classes) {
             print_state(stdout,SVCstate2ATerm(inFile,s[i]));
-            gsfprintf(stdout, "\n"); 
+            gsfprintf(stdout, "\n");
             }
         for (;!ATisEmpty(labels);labels = ATgetNext(labels)) {
-             int label = ATgetInt((ATermInt) ATgetFirst(labels));            
+             int label = ATgetInt((ATermInt) ATgetFirst(labels));
              ATermList val = (ATermList) ATtableGet(lab_src_tgt[label], bb);
              ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], ss);
              ATermList newsources = BlockNumbers(sources);
-             if (val) 
+             if (val)
                     newsources = Union(val, newsources);
-             if (omitTauLoops && label_tau == label) 
+             if (omitTauLoops && label_tau == label)
                   newsources = ATremoveElement(newsources, bb);
              if (!val || !ATisEqual(val, newsources))
-                  ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources); 
+                  ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources);
              if (ATindexOf(newlabels, ATgetFirst(labels),0)<0)
-                  newlabels = ATinsert(newlabels, ATgetFirst(labels));                  
+                  newlabels = ATinsert(newlabels, ATgetFirst(labels));
              }
         if (classes && npar > 1) {
              pars = par[s[i]];
@@ -539,13 +539,13 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
                         par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
                   }
              ATfprintf(stdout, "\n");
-             }        
+             }
         }
-     newlab[newb] = newlabels;    
-}    
+     newlab[newb] = newlabels;
+}
 
 static void SwapClearTables(void) {
-     int i; 
+     int i;
      for (i=0;i<nlabel;i++) {
           ATermTable swap = lab_tgt_src[i];
           ATtableReset(swap);
@@ -553,8 +553,8 @@ static void SwapClearTables(void) {
           lab_src_tgt[i] = swap;
           }
      }
-       
-static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState, 
+
+static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
      ATermList blocks) {
      int i;
      ATermList *newlab = NULL;
@@ -576,12 +576,12 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
          {
          ATerm bb = (ATerm) ATmakeInt(i);
          ATermList labels = lab[i];
-         
+
          for (;!ATisEmpty(labels);labels=ATgetNext(labels))
            {int label = ATgetInt((ATermInt) ATgetFirst(labels));
            ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], bb);
            for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
-           ATermList tgts = (ATermList) 
+           ATermList tgts = (ATermList)
                 ATtableGet(lab_src_tgt[label],ATgetFirst(sources));
            if (!tgts)
                 ATtablePut(lab_src_tgt[label], ATgetFirst(sources),
@@ -594,7 +594,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
            }
            }
          }
-     result = ATgetInt((ATermInt) BlockCode(blockref[initState]));     
+     result = ATgetInt((ATermInt) BlockCode(blockref[initState]));
      nstate = n_states;
      /* Pi_pt = 0;
      n_partitions = 0; */
@@ -605,10 +605,10 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
           }
      return (SVCstateIndex) result;
      }
-     
+
 static int WriteTransitions(void) {
    int b, n_tau_transitions = 0;
-   SVCbool nnew; 
+   SVCbool nnew;
    for (b=0;b<nstate;b++) {
         ATerm bname = (ATerm) ATmakeInt(b);
         ATermList labels = lab[b];
@@ -616,33 +616,33 @@ static int WriteTransitions(void) {
         for (;!ATisEmpty(labels);labels = ATgetNext(labels)) {
              int label = ATgetInt((ATermInt) ATgetFirst(labels));
              ATerm action = label_name[label];
-             ATermList sources = 
+             ATermList sources =
              (ATermList) ATtableGet(lab_tgt_src[label], bname);
 	     if (!ATisEmpty(sources))
 	     {
              SVClabelIndex labelno = SVCnewLabel(outFile, action ,&nnew);
              for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
-                 SVCstateIndex fromState=SVCnewState(outFile, ATgetFirst(sources), 
+                 SVCstateIndex fromState=SVCnewState(outFile, ATgetFirst(sources),
                  &nnew);
                  SVCparameterIndex parameter=
                  SVCnewParameter(outFile, (ATerm)ATmakeList0(), &nnew);
                  SVCputTransition(outFile, fromState, labelno, toState, parameter);
                  n_transitions++;
                  if (label == label_tau) n_tau_transitions++;
-                 }    
+                 }
              }
              }
         }
    return n_tau_transitions;
    }
-   
-/*static void TestTransitions(void) { 
+
+/*static void TestTransitions(void) {
 int label;
 for (label=0;label<nlabel;label++) {
 ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
 }
 }*/
-  
+
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */
      {
@@ -666,22 +666,22 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool
      /* ATwarning("Block number of initial state: %d\n", result); */
      BlockCode(-1);
      return result;
-     }   
+     }
 }
-       
+
 int WriteData(SVCstateIndex initState, int omit_tauloops)
     {
     static char buf[1024];
     SVCbool nnew;
     int n_tau_transitions;
-    SVCstateIndex newState = SVCnewState(outFile, 
+    SVCstateIndex newState = SVCnewState(outFile,
     (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
-    SVCsetInitialState(outFile, newState); 
+    SVCsetInitialState(outFile, newState);
     SVCsetType(outFile, "mCRL2");
     SVCsetCreator(outFile, "ltsmin");
     n_tau_transitions = WriteTransitions();
     if (omit_tauloops == DELETE_TAULOOPS) {
-         sprintf(buf, 
+         sprintf(buf,
 "branching bisimulation equivalence classes with %d nonsilent tau transitions",
          n_tau_transitions);
     } else
@@ -690,17 +690,17 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
          {
          ATwarning("Number of states: %d\n",n_states);
          ATwarning("Number of transitions: %d\n",n_transitions);
-         if (label_tau>=0) 
+         if (label_tau>=0)
          ATwarning("Number of tau steps: %d\n",n_tau_transitions);
          } */
-    SVCsetComments(outFile, buf); 
+    SVCsetComments(outFile, buf);
     if (traceLevel) ATwarning("Info output file: \n");
-    if (traceLevel) Info(outFile); 
+    if (traceLevel) Info(outFile);
     if (SVCclose(outFile)<0)
        {
        fprintf(stderr, "File trailer corrupt...\n");
-       }         
-    return EXIT_OK;     
+       }
+    return EXIT_OK;
     }
 
 
@@ -755,7 +755,7 @@ int WriteDataAddParam(SVCfile *in, SVCstateIndex initState, int is_branching)
   SVCstateIndex init = SVCgetInitialState(in);
   ReturnEquivalenceClasses(initState,is_branching?ATtrue:ATfalse);
 
-  SVCsetInitialState(outFile, get_new_state(in,init)); 
+  SVCsetInitialState(outFile, get_new_state(in,init));
 
 //  fprintf(stderr,"%i: %i\n",init,blockref[init]);
 //  fprintf(stderr,"%i: %i\n",init,ATgetInt((ATermInt) BlockCode(init)));
@@ -765,8 +765,8 @@ int WriteDataAddParam(SVCfile *in, SVCstateIndex initState, int is_branching)
 //  	fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,blockref[from],lab,to,blockref[to]);
 //	gsfprintf(stderr,"%i(%i) = ",from,blockref[from]);print_state(stderr,SVCstate2ATerm(in,from));fprintf(stderr,"\n");
 //  	fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,ATgetInt((ATermInt) BlockCode(from)),lab,to,ATgetInt((ATermInt) BlockCode(to)));
-  	SVCstateIndex new_from = get_new_state(in,from); 
-  	SVCstateIndex new_to = get_new_state(in,to); 
+  	SVCstateIndex new_from = get_new_state(in,from);
+  	SVCstateIndex new_to = get_new_state(in,to);
 	SVClabelIndex new_lab = get_new_label(in,lab);
 	SVCputTransition(outFile,new_from,new_lab,new_to,new_param);
   }

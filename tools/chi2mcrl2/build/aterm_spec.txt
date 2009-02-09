@@ -6,18 +6,18 @@
 
 <ProcDef>		::= ProcDef(<String>, <ProcDecl>, <ProcBody>)
 
-<ProcDecl>		::= ProcDecl(<Decl>*) 
+<ProcDecl>		::= ProcDecl(<Decl>*)
 
 <Decl>			::= VarDecl(<VarID>+)
                   | ChanDecl(<TypedChannels>+)
- 
+
 <ProcBody>		::= ProcSpec(<VarSpec>*, <Statement>)
 
 <VarSpec>		::= VarSpec(<VarExpID>+)
 				  | ChanSpec(<ChanID>+)
 
-<VarExpID>		::= DataVarExprID( <VarID>, <Expr> ) 
-				  |	<VarID> 
+<VarExpID>		::= DataVarExprID( <VarID>, <Expr> )
+				  |	<VarID>
 
 <VarID>			::= DataVarID(<String>, <TypeExp>)
 
@@ -31,11 +31,11 @@
 <ChannelTypedID>::= ChannelTypedID(<ChannelID>,<TypeID>, <Expr>)
 
 <ChannelID>     ::= ChannelID(<VarID>, <ComType>)
-					
-<ComTyp>        ::= Nil 
+
+<ComTyp>        ::= Nil
                   | Send
                   | Recv
-			
+
 <Expr>			::= Expression(<String>, <TypeID> )
 				  | UnaryExpression( <String>, <TypeID>, <Expr> )
 				  | BinaryExpression( <String>, <TypeID>, <Expr>, <Expr> )
@@ -43,7 +43,7 @@
                   | SetLiteral( <Expr>*, <TypeID> )
                   | TupleLiteral( <Expr>*, <TypeID> )
 				  | BinaryListExpression( <String>, <TypeID>, <Expr>, <Expr> )
-                  | BinarySetExpression( <String>, <TypeID>, <Expr>, <Expr> ) 
+                  | BinarySetExpression( <String>, <TypeID>, <Expr>, <Expr> )
                   | Function(<String>, <TypeID>, <Expr>)
                   | Function2(<String>, <TypeID>, <Expr>, <Expr> )
                   | TupleDot(<Expr>, <TypeID>, <String> )
@@ -61,8 +61,8 @@
                   | Instantiation(<String>,<Expr>*)
                   | SendStat(OptGuard, <Expr>, <Expr>, <Expr>+)
                   | RecvStat(OptGuard, <Expr>, <Expr>, <Expr>+)
-					
-<OptGuard>		::= <Expr> 
+
+<OptGuard>		::= <Expr>
 				  |	Nil
 
 <OptChannel>	::= Nil

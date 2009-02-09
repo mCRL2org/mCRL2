@@ -44,7 +44,7 @@ public:
     static ColorRGB getColorBdl();
 
     static int getBlendType();
-    
+
     ColorRGB getColorSel();
     int getIdxClstSel();
 
@@ -55,12 +55,12 @@ public:
     static void setColorBdl( const ColorRGB &col );
 
     static void setBlendType( const int &type );
-    
+
     void setDiagram( Diagram *dgrm );
-    void initFrameCurr( 
+    void initFrameCurr(
         Cluster* frame,
         const std::vector< Attribute* > &attrs );
-    void updateFrameCurr( 
+    void updateFrameCurr(
         Cluster* frame,
         const Position2D &pos );
     void clearData();
@@ -69,25 +69,25 @@ public:
 
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
     void handleMouseLeaveEvent();
 
@@ -104,20 +104,20 @@ protected:
     void initFramesPrevNext();
     void initBundles();
     void sortFramesPrevNext();
-    
+
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
     void calcIntervals();
     void calcPositions();
     void calcPosFrames();
     void calcPosBundles();
-    
+
     void handleKeyUp();
     void handleKeyRgt();
     void handleKeyDwn();
     void handleKeyLft();
     void markFrameClusts();
-    
+
     void clearAttributes();
     void clearDiagram();
     void clearFrames();
@@ -125,17 +125,17 @@ protected:
 
     // -- hit detection ---------------------------------------------
     void handleHits( const std::vector< int > &ids );
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor( 
+    void calcColor(
         const int &iter,
         const int &numr,
         ColorRGB &col );
-    
+
     void drawFrameCurr( const bool &inSelectMode );
     void drawFramesPrev( const bool &inSelectMode );
     void drawFramesNext( const bool &inSelectMode );
@@ -145,12 +145,12 @@ protected:
     void drawBundlesNext( const bool &inSelectMode );
     void drawControls( const bool &inSelectMode );
     void animate();
-    
+
     // -- utility event handlers ------------------------------------
     void onTimer( wxTimerEvent &e );
-    
+
     // -- static variables ------------------------------------------
-    
+
     static ColorRGB colClr;
     static ColorRGB colTxt;
     static int      szeTxt;
@@ -177,7 +177,7 @@ protected:
         ID_CLEAR,
         ID_DIAGRAM_MORE
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
     std::vector< Attribute* > attributes; // association
@@ -186,11 +186,11 @@ protected:
     std::vector< Cluster* > framesPrev; // composition
     std::vector< Cluster* > framesNext; // composition
     std::vector< Bundle* >  bundles;    // composition
-    
+
     std::vector< Bundle* >  bundlesByLbl;
     std::vector< Bundle* >  bundlesPrevByLbl;
     std::vector< Bundle* >  bundlesNextByLbl;
-    
+
     static int itvLblPixVert;
     double scaleDgrmHori;
     double scaleDgrmVert;
@@ -207,7 +207,7 @@ protected:
     Position2D posFrameCurr;
     std::vector< Position2D > posFramesPrev;
     std::vector< Position2D > posFramesNext;
-    
+
     std::vector< Position2D > posBdlLblGridPrevTopLft;
     std::vector< Position2D > posBdlLblGridPrevBotRgt;
     std::vector< Position2D > posBdlLblGridNextTopLft;
@@ -217,17 +217,17 @@ protected:
     std::vector< std::vector< Position2D > > posBundlesPrevBotRgt;
     std::vector< std::vector< Position2D > > posBundlesNextTopLft;
     std::vector< std::vector< Position2D > > posBundlesNextBotRgt;
-    
+
     // animation
     static int itvTmrMS;
     static double pixPerMS;
     double timeTotalMS;
     double timeAlphaMS;
     int animPhase;
-    
+
     wxTimer* timerAnim;
-    bool animating;  
-    
+    bool animating;
+
     Cluster* keyFrameFr;
     Cluster* keyFrameTo;
     Position2D posKeyFrameFr;

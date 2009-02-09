@@ -3,7 +3,7 @@
  * The PBES library provides the facilities to handle <i>Parameterised Boolean
  * Equation Systems</i> (PBES). Using the library, a PBES can be read from/written
  * to file, and complex operations can be applied to them.
- * 
+ *
  * These pages contain the reference manual for this library.
  *
  * More information about this library can be found in the <a

@@ -184,7 +184,7 @@ bool XSim::DoInit()
   frame->simulator->use_dummies = dummies;
   frame->simulator->rewr_strat  = rewrite_strategy;
   frame->Show(true);
- 
+
   if (!lps_file_argument.empty()) {
     frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
   }

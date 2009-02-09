@@ -78,8 +78,8 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select objects in current diagram"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select objects in current diagram"), _T("Select objects in current diagram"));
-  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
-  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
+//  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
+//  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
   AddRadioTool(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, _T("Add Architecture reference"), g_icons[ _T("archref") ], wxNullBitmap, _T("Add Architecture reference"), _T("Add Architecture reference"));
   AddRadioTool(GRAPE_TOOL_ADD_PROCESS_REFERENCE, _T("Add Process reference"), g_icons[ _T("procref") ], wxNullBitmap, _T("Add Process reference"), _T("Add Process reference"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL, _T("Add Channel"), g_icons[ _T("channel") ], wxNullBitmap, _T("Add Channel"), _T("Add Channel"));
@@ -105,8 +105,8 @@ grape_proc_toolbar::grape_proc_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select items"), _T("Select items"));
-  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
-  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
+//  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
+//  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
   AddRadioTool(GRAPE_TOOL_ADD_STATE, _T("Add State"), g_icons[ _T("state") ], wxNullBitmap, _T("Add State"), _T("Add State"));
   AddRadioTool(GRAPE_TOOL_ADD_REFERENCE_STATE, _T("Add Process reference"), g_icons[ _T("procref") ], wxNullBitmap, _T("Add Process reference"), _T("Add Process reference"));
   AddRadioTool(GRAPE_TOOL_ADD_NONTERMINATING_TRANSITION, _T("Add Transition"), g_icons[ _T("transition") ], wxNullBitmap, _T("Add Transition"), _T("Add Transition"));

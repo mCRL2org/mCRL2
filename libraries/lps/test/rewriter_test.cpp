@@ -29,7 +29,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
 const std::string SPECIFICATION1 =
-"sort Natural;                                    \n" 
+"sort Natural;                                    \n"
 "                                                 \n"
 "cons _0: Natural;                                \n"
 "    S: Natural -> Natural;                       \n"
@@ -95,7 +95,7 @@ void test1()
   data_expression n8    = find_mapping(spec.data(), "_8");
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
-  
+
   // cout << mcrl2::core::pp(data_application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
   specification spec1=rewrite_lps(spec,r);

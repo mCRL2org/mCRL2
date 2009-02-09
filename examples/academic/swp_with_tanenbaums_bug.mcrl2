@@ -1,6 +1,6 @@
 % This file describes the third sliding window protocol in Computer Networks
 % by A.S. Tanenbaum, Prentice Hall, 1988. In earlier editions of this book
-% (up till the fourth edition) the most complex sliding window protocol 
+% (up till the fourth edition) the most complex sliding window protocol
 % (i.e. the protocol using selective repeat, section 4.2.3 (first edition),
 % 4.4.3 (second editions) and section 3.4.3 (fourth edition))
 % exhibits a nasty livelock. This livelock occurs when the acknowledgement
@@ -9,7 +9,7 @@
 % "no need for separate ack frame". If the protocol is used unidirectionally,
 % i.e., when no piggy backing can be used, no acknowledgements are sent from
 % this point, unless new data is transmitted and received. In the rare case
-% that the timer is switched off when all data in the sender has been 
+% that the timer is switched off when all data in the sender has been
 % received by the receiving entity, retransmitted data by the sender
 % is ignored. Therefore, no new data is received at the sender, and
 % the acknowledgement timer is not switched on again. The result is that
@@ -18,19 +18,19 @@
 %   The protocol has been described in PSF (Process Specification Formalism,
 % defined by S. Mauw and G.J. Veltink). This has been done by J.J. Brunekreef,
 % a formal specification of three sliding window protocols, technical report
-% P9102, programming research group, university of Amsterdam, 1991. This 
+% P9102, programming research group, university of Amsterdam, 1991. This
 % description (of >>750 lines) is translated to mCRL2 below (this file
 % unfortunately is also quite lengthy, appr. 200 lines). It is expected that
 % using functions, instead of lists, a more compact specification is possible,
 % but then the description would divert too much from the description of
 % Brunekreef.
-%   The livelock in Tanenbaum's protocol was detected in an attempt to 
+%   The livelock in Tanenbaum's protocol was detected in an attempt to
 % prove the correctness of this protocol by me in the summer of 1991. The error was
 % communicated to Tanenbaum, but he indicated not to be interested in it,
-% as he indicated: "For a decade this protocol has been implemented by several 
+% as he indicated: "For a decade this protocol has been implemented by several
 % groups of students. None of these students ever came to me indicating that
 % there is a problem with this protocol. And now you say that you found a
-% bug with formal techniques. Clearly this cannot be a serious problem". However, 
+% bug with formal techniques. Clearly this cannot be a serious problem". However,
 % others have apparently detected the bug in "more ordinary" ways, as, as said above,
 % from edition 4 of Computer Networks, the bug does not occur anymore.
 %   Below the bug occurs when the action "error" can occur. Actually, as the
@@ -46,8 +46,8 @@
 % of data, without being able to send data in the mean time. As such it
 % is my expectation that this external behaviour of the sliding window
 % protocol below can only be most compactly described by the processes below.
-% An acceptable external behaviour would consist of two independent queues. 
-% Minor changes in the sliding window protocol can already have this effect, 
+% An acceptable external behaviour would consist of two independent queues.
+% Minor changes in the sliding window protocol can already have this effect,
 % by decoupling delivery and acceptance of data.
 %
 % Jan Friso Groote, February 2007.
@@ -58,7 +58,7 @@
 sort CS=struct accept | deliver | error | lost;
 
 
-% Data packets 
+% Data packets
 
 sort DP = struct d1 | d2; % restricted to two data packets, for simulation.
 
@@ -72,7 +72,7 @@ eqn MaxBuf = 2;  % An arbitrary constant
     ChannelBufferSize=1;
 
 
-% The inWindow condition 
+% The inWindow condition
 
 map inWindow:Nat#Nat#Nat -> Bool;
     seq:Nat#Nat#Nat -> Bool;
@@ -94,7 +94,7 @@ map  in_table:Nat#Buffer->Bool;
      insert:DP#Nat#Buffer->Buffer;
 var  k,k':Nat;
      p,p':DP;
-     b:Buffer;    
+     b:Buffer;
 eqn  b==[] -> in_table(k,b) = false;
      in_table(k,item(p,k')|>b) = (k==k')||in_table(k,b);
      b==[] -> del(k,b) = [];
@@ -131,7 +131,7 @@ sort Fid = struct dat | ack | nak;
 sort Tis = struct start | stop;
      Act = struct act_;
 
- 
+
 % The description of a channel.
 
 act skip,lost;
@@ -140,7 +140,7 @@ act skip,lost;
 % This is a channel with limited capacity. If the channel is full,
 % the newly entered element replaces the last element that was entered into the channel.
 
-proc CH(cq:List(Frame),cs:CS) = 
+proc CH(cq:List(Frame),cs:CS) =
            sum fr:Frame.rc1(fr).((#cq<ChannelBufferSize) -> CH(fr|>cq,cs) <> CH(fr|>tail(cq),cs)) +
            (cs==accept && (#cq)!=0) -> (skip.CH(cq,deliver) + skip.CH(cq,lost) + skip.CH(cq,error))<>delta+
            (cs==deliver && #cq!=0) -> sc2(rhead(cq)).CH(rtail(cq),accept)<>delta+
@@ -159,10 +159,10 @@ act ri1,si2  : DP;
 
 proc IMP = IMP(0,0,0,[],[],false);
 
-     IMP(fts,fta,ftr:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
+     IMP(fts,fta,ftr:Nat,sbuf,rbuf:Buffer,nfs:Bool) =
           ((fta+MaxBuf) mod MaxSeq==fts) -> error2(fts).IMP(fts,fta,ftr,sbuf,rbuf,nfs)<>delta+
           error3(ftr).IMP(fts,fta,ftr,sbuf,rbuf,nfs)+
-          ((((fts+MaxBuf) mod MaxSeq)!=fta) -> 
+          ((((fts+MaxBuf) mod MaxSeq)!=fta) ->
              ( sum d:DP.ri1(d).
                       si3(dframe(dat,d,fts,(ftr-1) mod MaxSeq)).
                       si5(start,fts).
@@ -190,25 +190,25 @@ proc IMP = IMP(0,0,0,[],[],false);
                           si5(stop,act_).
                           IMP(fts,fta,ftr,sbuf,rbuf,true))+
 
-          sum tfs:Nat.ri6(tfs).  
+          sum tfs:Nat.ri6(tfs).
                       si3(dframe(dat,retr(tfs,sbuf),tfs,(ftr-1) mod MaxSeq)).
                       si5(start,tfs).
                       IMP(fts,fta,ftr,sbuf,rbuf,nfs) +
           ri6(act_).si3(naframe(ack,(ftr-1) mod MaxSeq)).IMP(fts,fta,ftr,sbuf,rbuf,nfs) ;
 
-    DEL(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
+    DEL(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) =
       in_table(ftr,rbuf) -> si2(retr(ftr,rbuf)).DEL(fts,fta,(ftr+1) mod MaxSeq,rac,sbuf,del(ftr,rbuf),false)
                          <> si5(start,act_).ACK(fts,fta,ftr,rac,sbuf,rbuf,nfs);
 
-    TORB(fts,fta,ftr,rfr,rac:Nat,e:DP,sbuf,rbuf:Buffer,nfs:Bool) = 
+    TORB(fts,fta,ftr,rfr,rac:Nat,e:DP,sbuf,rbuf:Buffer,nfs:Bool) =
       (inWindow(rfr,ftr,(ftr+MaxBuf) mod MaxSeq) && !in_table(rfr,rbuf))
           -> ACK(fts,fta,ftr,rac,sbuf,insert(e,rfr,rbuf),nfs)
           <> ACK(fts,fta,ftr,rac,sbuf,rbuf,nfs);
 
-    ACK(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) = 
+    ACK(fts,fta,ftr,rac:Nat,sbuf,rbuf:Buffer,nfs:Bool) =
        inWindow(rac,fta,fts) -> si5(stop,fta).ACK(fts,(fta+1) mod MaxSeq,ftr,rac,sbuf,rbuf,nfs)
                              <> IMP(fts,fta,ftr,sbuf,rbuf,nfs);
- 
+
 
 % The specification of a timer.
 
@@ -218,12 +218,12 @@ act  rt1 : Tis # Nat;
      st2 : Act;
 
 proc TIM = TIM([],false);
-     TIM(ttab:TTAB,atr:Bool) = 
+     TIM(ttab:TTAB,atr:Bool) =
            sum fn1:Nat.rt1(start,fn1).TIM(insert(fn1,ttab),false) +
-           rt1(start,act_).TIM(ttab,true) + 
+           rt1(start,act_).TIM(ttab,true) +
            rt1(stop,act_).TIM(ttab,false) +
            sum fn2:Nat.in_table(fn2,ttab) -> (rt1(stop,fn2) + st2(fn2)).TIM(del(fn2,ttab),atr)<>delta +
-           atr -> st2(act_).TIM(ttab,false) 
+           atr -> st2(act_).TIM(ttab,false)
                <> sum n:Nat.error1(n).TIM(ttab,atr);
 
 % Below all the components above are combined into one process.
@@ -250,7 +250,7 @@ proc IMPa=block({error3},rename({ri1->ra, si2->sb, si3->s1, ri4->r2, si5->s3, ri
      TIMa=block({error1},rename({rt1->r3, st2->s4},TIM));
      TIMb=rename({rt1->r7, st2->s8},TIM);
 
-     SWP3 = 
+     SWP3 =
       hide({c1,c2,c3,c4,c5,c6,c7,c8,skip,lost},
       allow({ra,rd,sb,sc,c1,c2,c3,c4,c5,c6,c7,c8,skip,lost,error},
       comm({ s1|r1 -> c1,

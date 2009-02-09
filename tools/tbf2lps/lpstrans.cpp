@@ -148,7 +148,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 	ATermList l = ATgetArguments(t);
 	ATermList m;
 	ATermAppl t2,r;
-	
+
 	t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
 
 	if ( ATisEmpty(l) )
@@ -170,7 +170,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 
                 r = gsMakeDataAppl(r,m);
 	}
-	
+
 	return r;
 }
 
@@ -502,10 +502,10 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	gsVerboseMsg("converting initial LPE state...\n");
 	init = gsMakeLinearProcessInit(ATmakeList0(),convert_init(spec,&ids));
-	
+
 	gsVerboseMsg("converting LPE...\n");
 	lps = convert_lps(spec,&ids);
-	
+
 	gsVerboseMsg("constructing action declarations...\n");
 	act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
@@ -563,7 +563,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
 
-	
+
 	ATunprotectList(&typelist);
 
 	return implement_data_lin_proc_spec(r);

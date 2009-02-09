@@ -91,11 +91,11 @@ Utils::RGB_Color blend_RGB(RGB_Color c1, RGB_Color c2, float factor)
                         static_cast<float>(c2.r * (1 - factor))
                       ),
                       static_cast<unsigned char> (
-                        static_cast<float>(c1.g * factor) + 
+                        static_cast<float>(c1.g * factor) +
                         static_cast<float>(c2.g * (1 - factor))
                       ),
                       static_cast<unsigned char> (
-                        static_cast<float>(c1.b * factor) + 
+                        static_cast<float>(c1.b * factor) +
                         static_cast<float>(c2.b * (1 - factor))
                       )};
 
@@ -114,11 +114,11 @@ float rad_to_deg(float rad) {
 Utils::HSV_Color RGB_to_HSV(RGB_Color c) {
   unsigned char MIN = (std::min)(c.r,(std::min)(c.g,c.b));
   unsigned char MAX = (std::max)(c.r,(std::max)(c.g,c.b));
-  
+
   HSV_Color result;
   if (MAX == MIN) {
     result.h = 0;
-  } 
+  }
   else if (MAX == c.r) {
     if (c.g >= c.b) {
       result.h = round_to_int(60.0 * double(c.g-c.b)/double(MAX-MIN));
@@ -266,7 +266,7 @@ Utils::RGB_Color Interpolater::getColor(int i) {
   }
   while (result.h < 0) {
     result.h += 360;
-  } 
+  }
   while (result.h >= 360) {
     result.h -= 360;
   }
@@ -279,7 +279,7 @@ wxColour RGB_to_wxC(RGB_Color c) {
   return wxColour(c.r,c.g,c.b);
 }
 
-Utils::RGB_Color wxC_to_RGB(wxColour c) { 
+Utils::RGB_Color wxC_to_RGB(wxColour c) {
   RGB_Color result = {c.Red(),c.Green(),c.Blue()};
   return result;
 }

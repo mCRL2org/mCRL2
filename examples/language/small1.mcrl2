@@ -4,8 +4,8 @@
 % of 'b' can be freely chosen. The state space of this example is infinite
 % and it is also infinitely branching.
 %
-% Note that this specification is much shorter and more readable 
-% than its muCRL counterpart, because of the availability of predefined 
+% Note that this specification is much shorter and more readable
+% than its muCRL counterpart, because of the availability of predefined
 % data types.
 
 act

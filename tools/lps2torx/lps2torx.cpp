@@ -41,7 +41,7 @@ using namespace mcrl2::data;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
-          
+
 void print_torx_action(ostream &os, ATermAppl mact)
 {
   if ( is_tau(mact) )
@@ -58,7 +58,7 @@ void print_torx_action(ostream &os, ATermAppl mact)
     }
   }
 }
-  
+
 typedef struct {
   int action;
   int state;
@@ -135,7 +135,7 @@ class torx_data
 
 struct lps2torx_tool {
   bool            usedummies;
-  bool            removeunused; 
+  bool            removeunused;
   RewriteStrategy strategy;
   int             stateformat;
   std::string     name_for_input;
@@ -215,16 +215,16 @@ struct lps2torx_tool {
     if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
       throw mcrl2::runtime_error(str_in + " does not contain an LPS");
     }
-  
+
     if ( removeunused )
     {
       gsVerboseMsg("removing unused parts of the data specification.\n");
       Spec = removeUnusedData(Spec);
     }
-  
+
     gsVerboseMsg("initialising...\n");
     torx_data td(10000);
-  
+
     NextState *nstate = createNextState(
       Spec,
       !usedummies,
@@ -236,28 +236,28 @@ struct lps2torx_tool {
       ),
       true
     );
-  
+
     ATerm initial_state = nstate->getInitialState();
-  
+
     ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,ATfalse));
     td.add_action_state(initial_state,dummy_action,initial_state);
-  
+
     gsVerboseMsg("generating state space...\n");
-  
+
     NextStateGenerator *nsgen = NULL;
     bool err = false;
     bool notdone = true;
     while ( notdone && !cin.eof() )
     {
       string s;
-  
+
       cin >> s;
       if ( s.size() != 1 )
       {
               cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
               continue;
       }
-  
+
       switch ( s[0] )
       {
         case 'r': // Reset
@@ -268,7 +268,7 @@ struct lps2torx_tool {
           {
           int index;
           ATerm state;
-          
+
           cin >> index;
           state = td.get_state( index );
           if ( state == NULL )
@@ -276,7 +276,7 @@ struct lps2torx_tool {
           	cout << "E0 value " << index << " not valid" << endl;
           	break;
           }
-      
+
           cout << "EB" << endl;
           nsgen = nstate->getNextStates(state,nsgen);
           ATermAppl Transition;
@@ -284,9 +284,9 @@ struct lps2torx_tool {
           while ( nsgen->next(&Transition,&NewState) )
           {
             index_pair p;
-      
+
             p = td.add_action_state(state,(ATerm) Transition,NewState);
-  
+
             // Ee event TAB visible TAB solved TAB label TAB preds TAB freevars TAB identical
             cout << "Ee " << p.action << "\t" << (is_tau(Transition)?0:1) << "\t1\t";
             print_torx_action(cout,Transition);
@@ -298,7 +298,7 @@ struct lps2torx_tool {
             cout << endl;
           }
           cout << "EE" << endl;
-  
+
           if ( nsgen->errorOccurred() )
           {
             err = true;
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 
   try {
     lps2torx_tool tool;
-   
+
     if (tool.parse_command_line(argc, argv)) {
       tool.process();
     }

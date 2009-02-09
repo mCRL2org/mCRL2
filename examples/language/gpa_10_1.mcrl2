@@ -5,7 +5,7 @@ act
   get_i, put_k, get_l, put_j: Nat;
   get, put: Nat;
 
-proc 
+proc
   Sqr_ik =
     sum n:Nat. get_i(n) | put_k(n*n) . Sqr_ik;
 

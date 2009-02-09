@@ -25,7 +25,7 @@ class ExporterLatex: public Exporter
   private:
     LTSGraph* owner;
     std::string tikz_code;
-    
+
     void drawBezier(Transition* tr);
     void drawSelfLoop(Transition* tr);
 };

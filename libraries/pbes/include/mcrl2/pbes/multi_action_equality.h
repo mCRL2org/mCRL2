@@ -189,7 +189,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
 
 } // namespace detail
     /// \endcond
-    
+
     /// \brief Returns a data expression that expresses under which conditions the
     /// multi actions a and b are equal. The multi actions may contain free variables.
     /// \param a A sequence of actions

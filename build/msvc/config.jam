@@ -1,4 +1,4 @@
-# 
+#
 # Copy to build/config.jam to build with MSVC
 #
 rule import_user_config {

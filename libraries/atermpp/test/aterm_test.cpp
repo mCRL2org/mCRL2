@@ -29,10 +29,10 @@ void test_aterm()
   BOOST_CHECK(a != b);
   aterm c = remove_annotation(b, label);
   BOOST_CHECK(a == c);
-  
+
   aterm d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);
-  
+
   aterm e = aterm();
   BOOST_CHECK(!e);
 }

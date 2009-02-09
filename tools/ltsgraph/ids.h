@@ -15,14 +15,14 @@
 
 namespace IDS
 {
-  enum { 
+  enum {
     myID_MENU_EXPORT = wxID_HIGHEST + 1,
     myID_IMPORT,
     myID_DISPLAY_STATE_LBL,
     myID_DISPLAY_TRANS_LBL,
     myID_DLG_INFO,
     myID_DLG_ALGO,
-    
+
     myID_NS_SLIDER,
     myID_ES_SLIDER,
     myID_NL_SLIDER,

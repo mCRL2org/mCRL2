@@ -60,7 +60,7 @@ void test_bisimulation()
   BOOST_CHECK(sb .is_well_typed());
   BOOST_CHECK(wb .is_well_typed());
   BOOST_CHECK(sbe.is_well_typed());
- 
+
 //  BOOST_CHECK(pbes2bool(bb ));
 //  BOOST_CHECK(pbes2bool(sb ));
 //  BOOST_CHECK(pbes2bool(wb ));
@@ -71,6 +71,6 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test_bisimulation();
-  
+
   return 0;
 }

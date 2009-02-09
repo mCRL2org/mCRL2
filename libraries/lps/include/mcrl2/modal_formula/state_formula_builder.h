@@ -44,7 +44,7 @@ struct state_formula_builder
 {
   virtual ~state_formula_builder()
   { }
-  
+
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
@@ -86,14 +86,14 @@ struct state_formula_builder
   virtual state_formula visit_or(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return state_formula();
-  }    
+  }
 
   /// \brief Visit imp node
   /// \return The result of visiting the node
   virtual state_formula visit_imp(const state_formula& /* e */, const state_formula& /* left */, const state_formula& /* right */)
   {
     return state_formula();
-  }    
+  }
 
   /// \brief Visit forall node
   /// \return The result of visiting the node

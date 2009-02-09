@@ -111,7 +111,7 @@ const char* option_newstate                 = "newstate";
 const char* option_binary                   = "binary";
 const char* option_statenames               = "statenames";
 const char* option_no_rewrite               = "no_rewrite";
-const char* option_no_freevars              = "no_freevars"; 
+const char* option_no_freevars              = "no_freevars";
 const char* option_no_sumelm                = "no_sumelm";
 const char* option_no_deltaelm              = "no_dataelm";
 const char* option_end_phase                = "end_phase";
@@ -172,7 +172,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < t_lin_method > method_selector(d);
 
   // Helper for end phase selection
-  mcrl2::utilities::squadt::radio_button_helper < t_phase >      phase_selector(d); 
+  mcrl2::utilities::squadt::radio_button_helper < t_phase >      phase_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
@@ -392,7 +392,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 #endif
 
 static bool parse_command_line(int argc, char *argv[], t_lin_options& options)
-{ 
+{
   interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
@@ -555,7 +555,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     result = parse_proc_spec(instream);
     instream.close();
   }
-  if (result == NULL) 
+  if (result == NULL)
   {
     gsErrorMsg("parsing failed\n");
     return NULL;
@@ -567,7 +567,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   //type check the result
   gsVerboseMsg("type checking...\n");
   result = type_check_proc_spec(result);
-  if (result == NULL) 
+  if (result == NULL)
   {
     gsErrorMsg("type checking failed\n");
     return NULL;
@@ -575,7 +575,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   if (lin_options.end_phase == phTypeCheck) {
     return result;
   }
-  //perform alphabet reductions 
+  //perform alphabet reductions
   if (!lin_options.noalpha) {
     gsVerboseMsg("performing alphabet reductions...\n");
     result = gsAlpha(result);
@@ -591,7 +591,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
   result = implement_data_proc_spec(result);
-  if (result == NULL) 
+  if (result == NULL)
   {
     gsErrorMsg("data implementation failed\n");
     return NULL;
@@ -603,12 +603,12 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   gsVerboseMsg("linearising processes using the %s method\n", lin_method_to_string(lin_options.lin_method));
 
   result = linearise_std(result, lin_options);
-  if (result == NULL) 
+  if (result == NULL)
   {
     gsErrorMsg("linearisation failed\n");
     return NULL;
   }
-  return result; 
+  return result;
 }
 
 inline char const* lin_method_to_string(t_lin_method lin_method)
@@ -618,7 +618,7 @@ inline char const* lin_method_to_string(t_lin_method lin_method)
   return (method[lin_method]);
 }
 
-// Main 
+// Main
 
 int main(int argc, char *argv[])
 {
@@ -632,7 +632,7 @@ int main(int argc, char *argv[])
 #endif
 
     t_lin_options lin_options;
-   
+
     if (parse_command_line(argc, argv, lin_options)) {
 
       //linearise infilename with options lin_options
@@ -670,7 +670,7 @@ int main(int argc, char *argv[])
           }
           PrintPart_CXX(outstream, (ATerm) result, lin_options.pretty?ppDefault:ppInternal);
           outstream.close();
-        }     
+        }
       }
     }
   }

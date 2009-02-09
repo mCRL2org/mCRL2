@@ -370,7 +370,7 @@ namespace tipi {
 
     /**
      * \brief Derived data type specifier for integer number ranges (finite using long int)
-     * 
+     *
      * The range is specified by a minimum and a maximum. The minimum, of
      * course, must be smaller than the maximum.
      **/

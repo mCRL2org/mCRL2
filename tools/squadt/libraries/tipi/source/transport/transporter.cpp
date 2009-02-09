@@ -143,17 +143,17 @@ namespace transport {
 
     if (t->owner.lock().get() != 0) {
       assert(t->owner.lock().get() == this);
-     
+
       for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
         if (i->get() == t) {
-          boost::shared_ptr< basic_transceiver > target(*i); 
-         
+          boost::shared_ptr< basic_transceiver > target(*i);
+
           connections.erase(i);
-         
+
           t->owner.reset();
 
           on_disconnect(target.get());
-     
+
           return target;
         }
       }
@@ -214,7 +214,7 @@ namespace transport {
       if ((*i).get() == &t) {
         (*i)->owner.reset();
         (*i)->disconnect(*i);
- 
+
         connections.erase(i);
 
         return true;
@@ -294,7 +294,7 @@ namespace transport {
 
   transporter::transporter(boost::shared_ptr < transporter_impl > const& c) : impl(c) {
   }
- 
+
   size_t transporter::number_of_listeners() const {
     return (impl->listeners.size());
   }
@@ -339,14 +339,14 @@ namespace transport {
   }
 
   /**
-   * \param[in] t the local endpoint to disconnect from 
+   * \param[in] t the local endpoint to disconnect from
    **/
   bool transporter::disconnect(basic_transceiver const& t) {
     return impl->disconnect(t);
   }
 
   /**
-   * \param[in] m the local transporter to disconnect from 
+   * \param[in] m the local transporter to disconnect from
    **/
   bool transporter::disconnect(transporter& m) {
     return impl->disconnect(m.impl.get());

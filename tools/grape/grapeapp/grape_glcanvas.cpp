@@ -166,14 +166,15 @@ void grape_glcanvas::draw_visual_objects()
     visual_object* vis_obj_ptr = m_visual_objects.Item( i );
     vis_obj_ptr->draw();
   }
-    
-  // draw terminating transition if we are dragging a transition
-  if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) && (m_mousedown))
+
+  if (m_mousedown)
   {
-    wxString label_text = _T("");
-    // draw transition
-    draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, label_text);
-  }        
+    // draw terminating transition if we are dragging
+    if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
+
+    // draw channel communication if we are dragging
+    if ((m_canvas_state == ADD_CHANNEL_COMMUNICATION) && (m_mousedown)) draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
+  }
 }
 
 void grape_glcanvas::paint_coordinate( coordinate translation_coordinate )
@@ -310,7 +311,7 @@ void grape_glcanvas::event_size(wxSizeEvent &p_event)
 
     glMatrixMode(GL_MODELVIEW);
   }
-  
+
   update_scrollbars();
   Refresh();
 }
@@ -454,7 +455,7 @@ void grape_glcanvas::event_scroll_pagedown(wxScrollWinEvent &p_event)
 void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 {
   if ( p_event.Dragging() )
-  { 
+  {
     coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() );
     m_mouse_coordinate = clicked_coord;
 
@@ -462,12 +463,9 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
     {
       if ( m_touched_visual_object )
       {
-        // update canvas if we are dragging a transition
-        if (m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)
-        {
-          draw();
-        }
-        
+        // update canvas if we are dragging a transition or channel communication
+        if (m_canvas_state == ADD_CHANNEL_COMMUNICATION || m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) draw();
+
         // select object
         object *obj_ptr = m_touched_visual_object->get_selectable_object();
         if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
@@ -476,7 +474,7 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
         }
 
         m_dragging = true;
-        
+
         m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
         // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
         m_touched_visual_object = get_visual_object( obj_ptr );
@@ -546,7 +544,7 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   {
     released_coordinate.m_y = -1 * ( m_max_size_y - g_cursor_margin );
   }
-      
+
   // Determine if we had touched an object upon mouse down
   if ( m_touched_visual_object && m_touched_visual_object_id >= 0 )
   {
@@ -575,7 +573,7 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   m_mousedown = false;
   m_dragging = false;
   m_touched_visual_object = 0;
-  
+
   // update canvas
   draw();
 }

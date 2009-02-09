@@ -46,7 +46,7 @@ void test_find()
 
   aterm_appl t = find_if(a, is_f());
   assert(t == make_term("f(y)"));
-  
+
   vector<aterm> v;
   find_all_if(a, is_f(), back_inserter(v));
   assert(v.front() == make_term("f(y)"));

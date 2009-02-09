@@ -25,7 +25,7 @@ PopupFrame::PopupFrame(
     wxPoint position,
     wxSize size )
     : Colleague( m ),
-      wxFrame( 
+      wxFrame(
         parent,
         id,
         wxString( title ),

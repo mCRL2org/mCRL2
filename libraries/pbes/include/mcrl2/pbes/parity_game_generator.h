@@ -166,7 +166,7 @@ namespace pbes_system {
             m_priorities[i->variable().name()] = ++priority;
           }
         }
-        // If it is a max-priority game, adjust the priorities        
+        // If it is a max-priority game, adjust the priorities
         if (!m_is_min_parity)
         {
           // Choose an even upperbound max_priority

@@ -27,7 +27,7 @@
 namespace mcrl2 {
 
 namespace lps {
-  
+
 namespace detail {
 
 /// \brief Adds a time parameter t to s if needed and returns the result. The time t
@@ -75,13 +75,13 @@ struct data_variable_replacer
 {
   const SrcList& src_;
   const DestList& dest_;
-  
+
   data_variable_replacer(const SrcList& src, const DestList& dest)
     : src_(src), dest_(dest)
   {
     assert(src_.size() == dest_.size());
   }
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result
@@ -121,13 +121,13 @@ struct data_variable_name_replacer
 {
   const SrcList& src_;
   const DestList& dest_;
-  
+
   data_variable_name_replacer(const SrcList& src, const DestList& dest)
     : src_(src), dest_(dest)
   {
     assert(src_.size() == dest_.size());
   }
-  
+
   /// \brief Function call operator
   /// \param t A term
   /// \return The function result

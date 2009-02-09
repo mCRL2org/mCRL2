@@ -9,8 +9,8 @@
 /// \file ./colleague.h
 
 // ------------------------------------------------------------------
-// This is the BASE CLASS from which all colleages inheret and 
-// provides acces to a single Mediator. This allows for the 
+// This is the BASE CLASS from which all colleages inheret and
+// provides acces to a single Mediator. This allows for the
 // implementation of a MEDIATOR design pattern where an instance of
 // Mediator serves as the mediator or controller.
 // ------------------------------------------------------------------
@@ -29,7 +29,7 @@ public:
     Colleague( Mediator* m );
     Colleague( const Colleague &colleague );
     ~Colleague();
-    
+
 protected:
     // -- data members ----------------------------------------------
     Mediator* mediator;     // association

@@ -27,15 +27,15 @@ using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 
 class lps_rewriter_tool : public rewriter_tool<input_output_tool>
-{ 
-  protected: 
+{
+  protected:
     typedef rewriter_tool<input_output_tool> super;
-    
+
     static Rewriter *rewr;
 
     bool m_benchmark;
     unsigned long m_bench_times;
-  
+
   //std::string     infilename;
   //std::string     outfilename;
   //RewriteStrategy strategy;
@@ -53,12 +53,12 @@ class lps_rewriter_tool : public rewriter_tool<input_output_tool>
 
       m_benchmark = (parser.options.count("benchmark")>0);
 
-      if (m_benchmark) 
+      if (m_benchmark)
       { m_bench_times = parser.option_argument_as< unsigned long >("benchmark");
       }
     }
 
-  public: 
+  public:
     lps_rewriter_tool()
       : super(
           TOOLNAME,
@@ -88,7 +88,7 @@ class lps_rewriter_tool : public rewriter_tool<input_output_tool>
       if (m_benchmark)
       { std::cerr << "rewriting LPS " << m_bench_times << " times...\n";
       }
-      for (unsigned long i=0; i < m_bench_times; i++) 
+      for (unsigned long i=0; i < m_bench_times; i++)
       { spec=rewrite_lps(spec,rewr);
       }
       spec.save(m_output_filename);
@@ -105,7 +105,7 @@ class lps_rewriter_tool : public rewriter_tool<input_output_tool>
 const char* lps_file_for_input    = "lps_in";
 const char* lps_file_for_output   = "lps_out";
 
-class squadt_interactor 
+class squadt_interactor
               : public mcrl2::utilities::squadt::mcrl2_tool_interface,
                 public lps_rewriter_tool
 {
@@ -141,7 +141,7 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
 }
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) 
+void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
 { // lpsrewr does not require interaction with squadt.
 }
 
@@ -180,14 +180,14 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   send_clear_display();
 } */
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const
 {
   bool result = true;
 
   return (result);
 }
 
-bool squadt_interactor::perform_task(tipi::configuration& c) 
+bool squadt_interactor::perform_task(tipi::configuration& c)
 {
   input_filename() = c.get_input(lps_file_for_input).location();
   output_filename() = c.get_output(lps_file_for_output).location();

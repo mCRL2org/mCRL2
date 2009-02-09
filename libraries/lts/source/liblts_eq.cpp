@@ -91,7 +91,7 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
       return false;
   }
 }
- 
+
 bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
 {
   switch ( eq )
@@ -125,7 +125,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
         // Determinise first LTS
         bisimulation_reduce(*this,false);
         this->determinise();
-        
+
         // Determinise second LTS
         bisimulation_reduce(l,false);
         l.determinise();
@@ -140,7 +140,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
         this->tau_star_reduce();
         bisimulation_reduce(*this,false);
         this->determinise();
-        
+
         // Eliminate silent steps and determinise second LTS
         bisimulation_reduce(l,true,false,&opts.reduce.tau_actions);
         l.tau_star_reduce();
@@ -156,7 +156,7 @@ bool lts::compare(lts &l, lts_equivalence eq, lts_eq_options const&opts)
       return false;
   }
 }
- 
+
 bool lts::compare(lts &l, lts_preorder pre, lts_eq_options const&opts)
 {
   switch ( pre )
@@ -205,7 +205,7 @@ bool lts::compare(lts &l, lts_preorder pre, lts_eq_options const&opts)
         // Eliminate silent steps of first LTS
         bisimulation_reduce(*this,true,false,&opts.reduce.tau_actions);
         this->tau_star_reduce();
-        
+
         // Eliminate silent steps of second LTS
         bisimulation_reduce(l,true,false,&opts.reduce.tau_actions);
         l.tau_star_reduce();
@@ -218,6 +218,6 @@ bool lts::compare(lts &l, lts_preorder pre, lts_eq_options const&opts)
       return false;
   }
 }
- 
+
 }
 }

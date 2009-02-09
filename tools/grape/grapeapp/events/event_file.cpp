@@ -345,7 +345,7 @@ grape_event_export_datatype_specification_text::~grape_event_export_datatype_spe
 bool grape_event_export_datatype_specification_text::Do( void )
 {
   // display save dialog
-  wxFileDialog save_dialog( m_main_frame, _T( "Export to text..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "All files ( *.* )|*.*" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT ); 
+  wxFileDialog save_dialog( m_main_frame, _T( "Export to text..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "All files ( *.* )|*.*" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
   int result = save_dialog.ShowModal();
   if ( result == wxID_OK )
   {

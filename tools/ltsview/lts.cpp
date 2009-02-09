@@ -182,7 +182,7 @@ LTS::LTS(Mediator* owner, LTS* parent, bool fromAbove)
 
     lastCluster = selectedCluster;
 
-    Cluster* child = NULL; 
+    Cluster* child = NULL;
     Cluster* parent = selectedCluster;
 
     do
@@ -221,7 +221,7 @@ LTS::~LTS()
     }
     states.clear();
     initialState = NULL;
-    
+
     for (r = 0; r < clustersInRank.size(); ++r)
     {
       for (i = 0; i < clustersInRank[r].size(); ++i)
@@ -324,7 +324,7 @@ mcrl2::lts::lts* LTS::getmCRL2LTS()
 bool LTS::readFromFile(std::string filename)
 {
   mcrl2_lts = new mcrl2::lts::lts();
-  
+
   // try to read the file
   if (!mcrl2_lts->read_from(filename,lts_none))
   {
@@ -375,10 +375,10 @@ State* LTS::selectStateByID(int id)
     // For fast deselection
     selectedCluster = NULL;
     selectedState = s;
-  
+
     // If we are simulating, see if this is a state we can select.
     if ((simulation != NULL) && (simulation->getStarted()))
-    { 
+    {
       vector< Transition* > posTrans = simulation->getPosTrans();
       for (size_t i = 0; i < posTrans.size(); ++i)
       {
@@ -447,7 +447,7 @@ void LTS::addCluster(Cluster* c)
   {
     clustersInRank.resize(rank + 1);
   }
-  
+
   if (clustersInRank[rank].size() <= pos)
   {
     clustersInRank[rank].resize(pos + 1);
@@ -462,14 +462,14 @@ void LTS::addCluster(Cluster* c)
     if (states.size() <= sid)
     {
       states.resize(sid + 1);
-    }  
-    
+    }
+
     states[sid] = s;
     s->setZoomLevel(zoomLevel);
   }
 }
 
-void LTS::addClusterAndBelow(Cluster* c) 
+void LTS::addClusterAndBelow(Cluster* c)
 {
   if (c != NULL)
   {
@@ -562,7 +562,7 @@ void LTS::clearRanksAndClusters()
   {
     delete *ci;
   }
-  
+
   vector< vector< Cluster* > > temp2;
   clustersInRank.swap(temp2);
 }
@@ -802,18 +802,18 @@ void LTS::clearStatePositions()
 void LTS::edgeLengthBottomUp(vector< State* > &undecided)
 {
   //Phase 1: Processes states bottom-up, keeping edges as short as possible.
-  //Pre:  clustersInRank is correctly sorted by rank. 
-  //Post: states are positioned bottom up, keeping edges as 
+  //Pre:  clustersInRank is correctly sorted by rank.
+  //Post: states are positioned bottom up, keeping edges as
   //      short as possible, if enough information is available.
   //Ret:  states that could not be placed in this phase, sorted bottom-up
   //
   // The details of this algorithm can be found in  Frank van Ham's master's
   // thesis, pp. 21-29
- 
+
   int s,t;
   State *succ, *currState;
   Cluster* currCluster;
-  // Iterate over the ranks in reverse order (bottom-up): 
+  // Iterate over the ranks in reverse order (bottom-up):
   // we create a *reverse* cluster iterator
   for (Cluster_iterator ci = getClusterIterator(true); !ci.is_end(); ++ci)
   {
@@ -822,7 +822,7 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
     for (s = 0; s < currCluster->getNumStates(); ++s)
     {
       currState = currCluster->getState(s);
-      // Compute the position of the state, based on number and position of 
+      // Compute the position of the state, based on number and position of
       // descendants of its cluster.
       if (currCluster->getNumStates() == 1)
       {
@@ -858,10 +858,10 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
             // We know the states in this cluster have a pseudo-correct position
             // (as determined in this pass), since we process the system bottom-up
 
-            // Get the subordinate states. These are all in one cluster, and we 
+            // Get the subordinate states. These are all in one cluster, and we
             // can calculate the position of the current state directly from them.
-            
-            // Variable that keeps track of whether or not the children are all 
+
+            // Variable that keeps track of whether or not the children are all
             // centered.
             bool allcentered = true;
             t = 0;
@@ -959,7 +959,7 @@ void LTS::edgeLengthBottomUp(vector< State* > &undecided)
                 }
               }
             }
-            
+
             unsigned int ring = round_to_int(vec_length(v) *
                 float(NUM_RINGS-1) / currCluster->getTopRadius());
             ring = min(ring,NUM_RINGS-1);
@@ -1006,7 +1006,7 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
   {
 
     // We know that this state is already centered after the previous pass
-    // 
+    //
     // Get the cluster belonging to this state
     currCluster = (*state_it)->getCluster();
 
@@ -1043,7 +1043,7 @@ void LTS::edgeLengthTopDown(vector< State* > &ss)
         if ((**state_it).getRank()-1 == pred->getRank()
             && !pred->isCentered())
         {
-          v = v + pred->getPositionRadius() * 
+          v = v + pred->getPositionRadius() *
             deg_to_vec(pred->getPositionAngle());
         }
       }
@@ -1206,7 +1206,7 @@ void LTS::loadTrace(std::string const& path)
     mediator->reportError(error);
     return;
   }
-    
+
     Simulation* sim = new Simulation();
     // Initialize simulation with initial state of the LTS;
     State* initState;
@@ -1224,7 +1224,7 @@ void LTS::loadTrace(std::string const& path)
 
     // Get the first state of the trace (as an ATermAppl)
     ATermAppl currState = tr.currentState();
-    // Now, currState ~ initState. 
+    // Now, currState ~ initState.
     //
     // In currState, free variables can occur, instantiate this with the values
     // of the initial state in the simulation.
@@ -1253,7 +1253,7 @@ void LTS::loadTrace(std::string const& path)
       int toChoose = -1;
 
       for(size_t i = 0; i < posTrans.size(); ++i)
-      { 
+      {
         if (action == mcrl2_lts->label_value_str(posTrans[i]->getLabel()))
         {
           ++possibilities;
@@ -1265,7 +1265,7 @@ void LTS::loadTrace(std::string const& path)
       {
         // More than one possibility, meaning that choosing on action name is
         // ambiguous. Solve disambiguation by looking at states
-        
+
         currState = tr.currentState();
 
 
@@ -1274,7 +1274,7 @@ void LTS::loadTrace(std::string const& path)
         // The value of this match should be the number of variables which have
         // the same value as in the LPS, minus the number of free variables (
         // which are undetectable).
-        int maxmatch = -1; 
+        int maxmatch = -1;
 
         for (size_t j = 0; j < posTrans.size(); ++j)
         {
@@ -1285,7 +1285,7 @@ void LTS::loadTrace(std::string const& path)
               ++i)
           {
 
-            std::string currVal = PrintPart_CXX(ATgetArgument(currState, i), 
+            std::string currVal = PrintPart_CXX(ATgetArgument(currState, i),
                                               ppDefault);
 
             std::map<std::string, std::string>::iterator it;
@@ -1294,7 +1294,7 @@ void LTS::loadTrace(std::string const& path)
             {
               ++match;
             }
-            
+
           }
 
           if (match > maxmatch)
@@ -1308,7 +1308,7 @@ void LTS::loadTrace(std::string const& path)
       {
         // Exactly one possibility, so skip
       }
-      else 
+      else
       {
         // This cannot occur, unless there was some mismatch between lps and lts
         std::string error = "Could not regenerate trace, does it belong to the loaded LTS?";
@@ -1316,7 +1316,7 @@ void LTS::loadTrace(std::string const& path)
         toChoose = -1;
         return;
       }
-      
+
       sim->chooseTrans(toChoose);
       sim->followTrans();
     }
@@ -1337,6 +1337,6 @@ void LTS::generateBackTrace()
     topLevel = topLevel->getPreviousLevel();
   }
   initState = topLevel->getInitialState();
-  
+
   simulation->traceBack(initState);
 }

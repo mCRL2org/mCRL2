@@ -39,7 +39,7 @@ data_variable bool_(std::string name)
 
 int test_main(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv) 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   data_variable n1 = nat("n1");
   data_variable n2 = nat("n2");
@@ -60,9 +60,9 @@ int test_main(int argc, char* argv[])
 std::cout << "<sexpr>" << sexpr << std::endl;
   data_variable q1(identifier_string("q1"), sexpr);
 
-  data_expression x = and_(equal_to(n1, n2), not_equal_to(n2, n3)); 
+  data_expression x = and_(equal_to(n1, n2), not_equal_to(n2, n3));
   data_expression y = or_(equal_to(p1, p2), and_(x, b2));
-  
+
   BOOST_CHECK( find_data_variable(x, n1));
   BOOST_CHECK( find_data_variable(x, n2));
   BOOST_CHECK( find_data_variable(x, n3));

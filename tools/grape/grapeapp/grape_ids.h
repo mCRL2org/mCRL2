@@ -82,15 +82,15 @@ namespace grape
 
       GRAPE_DATASPEC_TEXT,
 
-      // dialog events 
-      GRAPE_GRID_TEXT, 
+      // dialog events
+      GRAPE_GRID_TEXT,
       GRAPE_PARAMETER_GRID_TEXT,
       GRAPE_LOCALVAR_GRID_TEXT,
-      
+
       GRAPE_VAR_DECLS_GRID_TEXT,
       GRAPE_VAR_UPDATES_GRID_TEXT,
       GRAPE_MULTIACTION_GRID_TEXT,
-      
+
       GRAPE_TIMESTAMP_INPUT_TEXT,
       GRAPE_CONDITION_INPUT_TEXT
     };

@@ -62,7 +62,7 @@ void test_accessors()
   pbes_expression y = expressions[1];
   data_variable d(identifier_string("d"), sort_expr::nat());
   data_variable_list v = make_list(d);
-  pbes_expression z = d; 
+  pbes_expression z = d;
   propositional_variable_instantiation X(identifier_string("X"), make_list(d));
 
   atermpp::set<pbes_expression> q;
@@ -81,7 +81,7 @@ void test_accessors()
     atermpp::set<pbes_expression> q1;
 
     e = val(z);
-    
+
     a = not_(x);
     b = arg(a);
     BOOST_CHECK(x == b);
@@ -109,7 +109,7 @@ void test_accessors()
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
-   
+
     a = exists(v, x);
     w = var(a);
     b = arg(a);
@@ -118,7 +118,7 @@ void test_accessors()
 
     s = name(X);
     BOOST_CHECK(s == identifier_string("X"));
-    
+
     data_expression_list f = param(X);
     data_expression_list g = make_list(d);
     BOOST_CHECK(f == g);
@@ -126,7 +126,7 @@ void test_accessors()
     print(q);
 
     a = join_or(q.begin(), q.end());
-    q1 = split_or(a);    
+    q1 = split_or(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
@@ -136,7 +136,7 @@ void test_accessors()
     BOOST_CHECK(q == q1);
 
     print(q1);
-  } 
+  }
 
   {
     using namespace pbes_expr_optimized;
@@ -148,7 +148,7 @@ void test_accessors()
     atermpp::set<pbes_expression> q1;
 
     e = val(z);
-    
+
     a = not_(x);
     a = and_(x, y);
     a = or_(x, y);
@@ -161,7 +161,7 @@ void test_accessors()
     a = join_and(q.begin(), q.end());
     q1 = split_or(a);
     q1 = split_and(a);
-  } 
+  }
 }
 
 void test_pbes_expression_with_variables()
@@ -184,14 +184,14 @@ void test_pbes_expression_with_variables()
   std::set<data::data_variable> v = find_free_variables(y);
   y.variables() = data::data_variable_list(v.begin(), v.end());
   BOOST_CHECK(y.variables().size() == 2);
-  
+
   x = parse_pbes_expression("forall k:Nat.X(true, 2) && Y(n+1) && Y(k)", VARSPEC);
   pbes_expression_with_variables z(x);
   BOOST_CHECK(z.variables().size() == 0);
   v = find_free_variables(z);
   z.variables() = data::data_variable_list(v.begin(), v.end());
   BOOST_CHECK(z.variables().size() == 1);
-  
+
   pbes_expression_with_variables yz = tr::and_(y, z);
   BOOST_CHECK(yz.variables().size() == 2);
 }
@@ -210,12 +210,12 @@ void test_pbes_expression_with_propositional_variables()
 
   pbes_expression x = parse_pbes_expression("Y(1) && Y(m)", VARSPEC);
   std::set<data::data_variable> vx = find_free_variables(x);
-  std::set<propositional_variable_instantiation> px = find_all_propositional_variable_instantiations(x); 
+  std::set<propositional_variable_instantiation> px = find_all_propositional_variable_instantiations(x);
   pbes_expression_with_propositional_variables X(x, data::data_variable_list(vx.begin(), vx.end()), propositional_variable_instantiation_list(px.begin(), px.end()));
 
   pbes_expression y = parse_pbes_expression("Y(n) || Y(4)", VARSPEC);
   std::set<data::data_variable> vy = find_free_variables(y);
-  std::set<propositional_variable_instantiation> py = find_all_propositional_variable_instantiations(y); 
+  std::set<propositional_variable_instantiation> py = find_all_propositional_variable_instantiations(y);
   pbes_expression_with_propositional_variables Y(y, data::data_variable_list(vy.begin(), vy.end()), propositional_variable_instantiation_list(py.begin(), py.end()));
 
   typedef core::term_traits<pbes_expression_with_propositional_variables> tr;

@@ -4,7 +4,7 @@
 
 act a,b,t,tcomm:Nat;
 
-proc Cycler(i:Nat,n:Pos) = 
+proc Cycler(i:Nat,n:Pos) =
            t(i).a(i).
              (t((i+1) mod n).b(i)+
               b(i).t((i+1) mod n)).Cycler(i,n);
@@ -19,5 +19,5 @@ proc Cycler(i:Nat,n:Pos) =
                                      Cycler(3,5)||Cycler(4,5)));
      Scheduler6=allow({a,b,tcomm},comm({t|t->tcomm},Start||Cycler(0,6)||Cycler(1,6)||Cycler(2,6)||
                                      Cycler(3,6)||Cycler(4,6)||Cycler(5,6)));
-                
+
 init hide({tcomm},Scheduler2);

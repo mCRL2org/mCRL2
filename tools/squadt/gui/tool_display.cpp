@@ -635,7 +635,7 @@ namespace squadt {
      * \param[in] l the layout elements that have changed
      **/
     void tool_display::update(boost::weak_ptr< tipi::tool_display > w, std::vector < tipi::layout::element const* > l) {
-      boost::shared_ptr < tipi::tool_display > p(w.lock()); 
+      boost::shared_ptr < tipi::tool_display > p(w.lock());
 
       if (p) {
         BOOST_FOREACH(tipi::layout::element const* i, l) {

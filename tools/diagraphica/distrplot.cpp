@@ -68,7 +68,7 @@ void DistrPlot::clearValues()
     number.clear();
     attrIdx    = 0;
     maxNumber  = 0;
-    
+
     clearPositions();
 }
 
@@ -93,9 +93,9 @@ void DistrPlot::visualize( const bool &inSelectMode )
         genCharTex();
 
     // check if positions are ok
-    if ( geomChanged == true )        
+    if ( geomChanged == true )
         calcPositions();
-    
+
     // visualize
     if ( inSelectMode == true )
     {
@@ -106,13 +106,13 @@ void DistrPlot::visualize( const bool &inSelectMode )
             selectBuf,
             2.0,
             2.0 );
-        
+
         //setScalingTransf();
         drawPlot( inSelectMode );
-        
+
         finishSelectMode(
             hits,
-            selectBuf );        
+            selectBuf );
     }
     else
     {
@@ -135,19 +135,19 @@ void DistrPlot::drawAxes( const bool &inSelectMode )
     double xLft, xRgt;
     double yBot, yMid, yTop;
     double pix;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w+20*pix;
     xRgt =  0.5*w-10*pix;
     yTop =  0.5*h-10*pix;
     yBot = -0.5*h+20*pix;
     yMid =  0.5*( yTop+yBot );
-            
+
     // rendering mode
     if ( inSelectMode != true )
     {
@@ -156,7 +156,7 @@ void DistrPlot::drawAxes( const bool &inSelectMode )
         VisUtils::drawLine( xLft, xRgt, yTop, yTop );
         VisUtils::drawLine( xLft, xRgt, yMid, yMid );
         VisUtils::drawLine( xRgt, xRgt, yBot, yTop );
-        
+
         // x- & y-axis
         VisUtils::setColorMdGray();
         VisUtils::drawLine( xLft, xLft, yBot, yTop );
@@ -175,7 +175,7 @@ void DistrPlot::drawLabels( const bool &inSelectMode )
     double scaling;
     string xLabel;
     string min, max;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -185,7 +185,7 @@ void DistrPlot::drawLabels( const bool &inSelectMode )
 
     // color
     VisUtils::setColorBlack();
-    
+
     // y-axis labels
     x = -0.5*w+9*pix;
     y =  0;
@@ -203,7 +203,7 @@ void DistrPlot::drawLabels( const bool &inSelectMode )
         x = -0.5*w+13*pix;
         y =  0.5*h-10*pix;
         VisUtils::drawLabelVertBelow( texCharId, x, y, scaling, max );
-        
+
         min = "0";
         y = -0.5*h+20*pix;
         VisUtils::drawLabelVertAbove( texCharId, x, y, scaling, min );
@@ -220,7 +220,7 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
     double xLft, xRgt, yTop, yBot;
     double pix;
     ColorRGB col;
-    
+
     hCanv = canvas->getHeight();
     pix = canvas->getPixelSize();
     sizePositions = positions.size();
@@ -235,7 +235,7 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
             xLft = positions[i].x - 0.5*width;
             xRgt = positions[i].x + 0.5*width;
             yTop = positions[i].y;
-            
+
             glPushName( i );
             VisUtils::fillRect( xLft, xRgt, yTop, yBot );
             glPopName();
@@ -251,11 +251,11 @@ void DistrPlot::drawPlot( const bool &inSelectMode )
             xLft = positions[i].x - 0.5*width;
             xRgt = positions[i].x + 0.5*width;
             yTop = positions[i].y;
-            
+
             VisUtils::mapColorCoolGreen( col );
             col.a = 0.7;
             VisUtils::setColor( col );
-                
+
             if ( xRgt-xLft < pix )
                 VisUtils::drawLine( xLft, xLft, yTop, yBot );
             else
@@ -375,9 +375,9 @@ void DistrPlot::setScalingTransf()
     glLoadIdentity();
     double f = canvas->getScaleFactor();
     glScalef( f, f, f );
-    glTranslatef( 
-        canvas->getXTranslation(), 
-        canvas->getYTranslation(), 
+    glTranslatef(
+        canvas->getXTranslation(),
+        canvas->getYTranslation(),
         0.0 );
     glLoadIdentity();
 }
@@ -394,7 +394,7 @@ void DistrPlot::displTooltip( const size_t &posIdx )
         string value    = "";
         if ( posIdx < static_cast <size_t> (attr->getSizeCurValues()) )
             value = attr->getCurValue( posIdx )->getValue();
-        
+
         msgDgrm.clear();
 
         // x-axis label
@@ -407,10 +407,10 @@ void DistrPlot::displTooltip( const size_t &posIdx )
         // y-axis label
         msgDgrm.append( Utils::intToStr( number[posIdx] ) );
         msgDgrm.append( " nodes; " );
-        msgDgrm.append( Utils::dblToStr( 
+        msgDgrm.append( Utils::dblToStr(
             Utils::perc( number[posIdx], graph->getSizeNodes() ) ) );
         msgDgrm.append( "%" );
-        
+
         if ( diagram == NULL )
         {
             // show tooltip
@@ -422,7 +422,7 @@ void DistrPlot::displTooltip( const size_t &posIdx )
             double xM, yM;
             double xD, yD;
             canvas->getWorldCoords( xMouseCur, yMouseCur, xM, yM );
-            
+
             if ( xM < 0 )
                 xD = xM+1.0*scaleDgrm;
             else
@@ -452,7 +452,7 @@ void DistrPlot::calcPositions()
 {
     // update flag
     geomChanged = false;
-    
+
     // calc positions
     if ( number.size() > 0 )
     {
@@ -463,17 +463,17 @@ void DistrPlot::calcPositions()
         double fracX;
         double x, y;
         double ratio;
-    
+
         // get size of sides & 1 pixel
         canvas->getSize( w, h );
         pix = canvas->getPixelSize();
-    
+
         // calc size of bounding box
         xLft = -0.5*w+20*pix;
         xRgt =  0.5*w-10*pix;
         yTop =  0.5*h-10*pix;
         yBot = -0.5*h+20*pix;
-    
+
         // get number of values per axis
         numX = graph->getAttribute( attrIdx )->getSizeCurValues();
         numY = number.size();
@@ -481,28 +481,28 @@ void DistrPlot::calcPositions()
         // get intervals for x-axis
         if ( numX > 1 )
             fracX = ( 1.0 / (double)numX )*( xRgt-xLft );
-        else 
+        else
             fracX = 1.0;
-        
+
         // calc width
         if ( fracX < maxWthHintPx*pix )
             width = fracX;
         else
             width = maxWthHintPx*pix;
-        
+
         // calc positions
         positions.clear();
         for ( size_t i = 0; i < number.size(); ++i )
         {
             // calc ratio
             ratio = (double)number[i]/(double)maxNumber;
-            
+
             // center, top
             x = xLft + 0.5*fracX + i*fracX;
             y = yBot + ratio*( yTop-yBot );
             if ( y-yBot < pix*minHgtHintPx )
                 y += pix*minHgtHintPx;
-            
+
             Position2D pos;
             pos.x = x;
             pos.y = y;
@@ -528,15 +528,15 @@ void DistrPlot::clearPositions()
 
 
 // -------------------------
-void DistrPlot::processHits( 
-    GLint hits, 
+void DistrPlot::processHits(
+    GLint hits,
     GLuint buffer[] )
 // -------------------------
 {
     GLuint *ptr;
     int    number;
     int    name;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -573,6 +573,6 @@ void DistrPlot::processHits(
 
     ptr = NULL;
 }
-    
+
 
 // -- end -----------------------------------------------------------

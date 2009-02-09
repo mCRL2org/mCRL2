@@ -28,7 +28,7 @@ Node::Node( const int &idx )
 
 
 // ---------------------------
-Node::Node( 
+Node::Node(
     const int &idx,
     const vector< double > &tpl )
 // ---------------------------
@@ -52,7 +52,7 @@ Node::~Node()
 
 
 // ---------------------
-void Node::swapTupleVal( 
+void Node::swapTupleVal(
     const size_t &idx1,
     const size_t &idx2 )
 // ---------------------
@@ -70,7 +70,7 @@ void Node::swapTupleVal(
 
 
 // ---------------------
-void Node::moveTupleVal( 
+void Node::moveTupleVal(
     const size_t &idxFr,
     const size_t &idxTo )
 // ---------------------
@@ -112,7 +112,7 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
         try
         {
             vector< double > tupleNew;
-        
+
             // init new tuple
             {
             for ( size_t i = 0; i < idcsFrTo.size(); ++i )
@@ -141,12 +141,12 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
 
 
 // --------------------
-void Node::addTupleVal( 
+void Node::addTupleVal(
     const int &idx,
     const double &val )
 // --------------------
 {
-    tuple.insert( 
+    tuple.insert(
         tuple.begin() + idx,
         val );
 }

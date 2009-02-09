@@ -61,7 +61,7 @@ void test_case_2()
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)  
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
   }
@@ -90,7 +90,7 @@ void test_case_3()
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)  
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
     sumvar_count += i->summation_variables().size();
@@ -121,7 +121,7 @@ void test_case_4()
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)  
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(!i->has_time());
     sumvar_count += i->summation_variables().size();

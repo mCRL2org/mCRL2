@@ -76,19 +76,19 @@ public:
         const double &y );
     void handleDOFOpaClear(
         const int &idx );
-    void setLinkDOFAttr( 
-        const int &DOFIdx, 
+    void setLinkDOFAttr(
+        const int &DOFIdx,
         const int &attrIdx );
     void clearLinkDOFAttr( const int &DOFIdx );
     void clearLinkAttrDOF( const int &attrIdx );
-    
+
     // -- helper functions ------------------------------------------
     virtual void printMouseVariables();
-    
+
     // -- get functions ---------------------------------------------
     Diagram* getDiagram();
     int getEditMode();
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void reGenText();
@@ -97,25 +97,25 @@ public:
     void handleMouseLftDownEvent(
         const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
     void handleMouseLftDClickEvent(
         const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
     void handleKeyUpEvent( const int &keyCode, const int &specialKey );
     void handleKeyDownEvent( const int &keyCode, const int &specialKey );
-    
+
     void handleHits( const std::vector< int > &ids );
     void handleHitDiagramOnly();
     void handleHitShape( const int &shapeIdx );
-    void handleHitShapeHandle( 
+    void handleHitShapeHandle(
         const int &shapeIdx,
         const int &handleId );
 
@@ -147,7 +147,7 @@ public:
 
     // -- public utility functions ----------------------------------
     void deselectAll();
-    
+
     // -- public constants ------------------------------------------
     enum
     {
@@ -165,7 +165,7 @@ protected:
     // -- private utility functions ---------------------------------
     void displShapeEdtOptions( Shape *s );
     void displDOFInfo( Shape* s );
-    
+
     void handleDragCtr( Shape* s, double &xDrag, double &yDrag );
     void handleDragTopLft( Shape* s );
     void handleDragLft( Shape* s );
@@ -191,8 +191,8 @@ protected:
     void handleDragDOFAglEnd( Shape* s );
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
@@ -206,11 +206,11 @@ protected:
     double xDrgDist;
     double yDrgDist;
     double selectedX1, selectedX2, selectedY1, selectedY2;
-    
+
     Shape* clipBoardShape; // composition
     std::vector < Shape* > clipBoardList;
     double xPaste, yPaste;
-    
+
     // -- static variables ------------------------------------------
     static int szeTxt;
 };

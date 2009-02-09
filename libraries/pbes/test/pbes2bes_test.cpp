@@ -57,7 +57,7 @@ std::string test1 =
   "                                                                                  \n"
   "init X(true,0);                                                                   \n"
   ;
-  
+
 std::string test2 =
   "pbes                                                                              \n"
   "                                                                                  \n"
@@ -195,7 +195,7 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 }
 
 void test_pbes2bes()
-{ 
+{
   test_pbes(test1, true, false);
   test_pbes(test2, true, true);
   test_pbes(test3, true, false);

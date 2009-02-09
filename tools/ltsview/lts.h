@@ -77,7 +77,7 @@ class LTS
     int getNumRanks() const;
     int getNumStates() const;
     int getNumTransitions() const;
-    
+
     unsigned int getNumParameters() const;
     atermpp::set<ATerm> getParameterDomain(int parindex);
     std::string getParameterName(int parindex) ;
@@ -96,20 +96,20 @@ class LTS
     void rankStates(Utils::RankStyle rs);
 
     bool readFromFile(std::string filename);
-    
+
     int getZoomLevel() const;
     void setZoomLevel(const int level);
     // Zooms into the structure starting from the initial cluster/state
-    // and upto selectedCluster, if any. 
-    LTS* zoomIntoAbove(); 
+    // and upto selectedCluster, if any.
+    LTS* zoomIntoAbove();
     // Zooms into the structure starting from the selectedCluster, upto
-    // the end of the structure. 
+    // the end of the structure.
     LTS* zoomIntoBelow();
     // Zooms out to the previous level.
     LTS* zoomOut();
     // Returns the maximal rank of the structure, that is, the highest
     // rank a cluster would have in a non-zoomed in structure
-    int getMaxRanks() const; 
+    int getMaxRanks() const;
     void setLastCluster(Cluster* c);
     void setPreviousLevel(LTS* prev);
     LTS* getPreviousLevel() const;
@@ -155,7 +155,7 @@ class LTS
 
     // Methods for positioning states based on Frank van Ham's
     // heuristics
-    void edgeLengthBottomUp(std::vector< State* > &undecided); 
+    void edgeLengthBottomUp(std::vector< State* > &undecided);
     void edgeLengthTopDown(std::vector< State* > &ss);
 
     void resolveClusterSlots();

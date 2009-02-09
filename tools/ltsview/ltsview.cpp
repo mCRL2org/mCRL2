@@ -164,7 +164,7 @@ bool LTSView::DoInit()
   markManager = new MarkManager();
   glCanvas = mainFrame->getGLCanvas();
   glCanvas->setVisualizer(visualizer);
-  
+
   SetTopWindow(mainFrame);
   mainFrame->Show(true);
   glCanvas->initialize();
@@ -183,12 +183,12 @@ bool LTSView::DoInit()
 }
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
 
-  MCRL2_ATERM_INIT(0, lpCmdLine) 
+  MCRL2_ATERM_INIT(0, lpCmdLine)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
@@ -248,31 +248,31 @@ void LTSView::openFile(string fileName) {
     delete lts;
   }
   lts = newlts;
-  
+
   mainFrame->updateProgressDialog(17,"Ranking states");
   lts->rankStates(rankStyle);
-  
+
   mainFrame->updateProgressDialog(33,"Clustering states");
   lts->clusterStates(rankStyle);
 
   mainFrame->updateProgressDialog(50,"Setting cluster info");
   lts->computeClusterInfo();
-  
+
   mainFrame->updateProgressDialog(67,"Positioning clusters");
   lts->positionClusters(fsmStyle);
 
   markManager->setLTS(lts,true);
   visualizer->setLTS(lts,true);
-  
+
   mainFrame->updateProgressDialog(83,"Positioning states");
   lts->positionStates();
-  
+
   mainFrame->updateProgressDialog(100,"Done");
   visualizer->notifyMarkStyleChanged();
 
   glCanvas->enableDisplay();
   glCanvas->resetView();
-  
+
   mainFrame->loadTitle();
   mainFrame->setNumberInfo(lts->getNumStates(),
       lts->getNumTransitions(),lts->getNumClusters(),
@@ -282,7 +282,7 @@ void LTSView::openFile(string fileName) {
     mainFrame->addParameter(i,lts->getParameterName(i));
   }
   mainFrame->resetMarkRules();
-  
+
   vector< string > ls;
   lts->getActionLabels(ls);
 
@@ -305,14 +305,14 @@ void LTSView::setRankStyle(RankStyle rs) {
 
       mainFrame->updateProgressDialog(17,"Ranking states");
       lts->rankStates(rankStyle);
-      
+
       mainFrame->updateProgressDialog(33,"Clustering states");
       lts->clusterStates(rankStyle);
 
       mainFrame->updateProgressDialog(40,"Setting cluster info");
       lts->computeClusterInfo();
       markManager->markClusters();
-      
+
       mainFrame->updateProgressDialog(60,"Positioning clusters");
       lts->positionClusters(fsmStyle);
 
@@ -363,7 +363,7 @@ void LTSView::addMarkRule()
     {
       if (msrdlg->getParamIndex() != -1)
       {
-        
+
         int mr = markManager->createMarkRule(msrdlg->getParamIndex(),
             msrdlg->getNegated(),msrdlg->getColor(),
             msrdlg->getValues());
@@ -464,7 +464,7 @@ Utils::RGB_Color LTSView::getNewRuleColour()
 
   switch(colourCounter)
   {
-    case 0: 
+    case 0:
       { result.r = 228;
         result.g = 26;
         result.b = 28;
@@ -612,7 +612,7 @@ void LTSView::startSim() {
   Simulation* sim = lts->getSimulation();
 
   sim->start();
-  
+
   // Select/deselect initial state of simulation, to initialize state info pane.
   selectStateByID(sim->getCurrState()->getID());
 }
@@ -632,7 +632,7 @@ string LTSView::getActionLabel(const int i) const {
   {
     return lts->getLabel(i);
   }
-  else 
+  else
   {
     return "";
   }
@@ -643,7 +643,7 @@ string LTSView::getParName(const int i) const {
   {
     return lts->getParameterName(i);
   }
-  else 
+  else
   {
     return "";
   }
@@ -675,9 +675,9 @@ void LTSView::selectStateByID(const int id)
   }
 }
 
-void LTSView::selectCluster(const int rank, const int pos) 
+void LTSView::selectCluster(const int rank, const int pos)
 {
-  if (lts != NULL) 
+  if (lts != NULL)
   {
     Cluster* c = lts->selectCluster(rank, pos);
     mainFrame->setClusterStateNr(c->getNumStates());
@@ -739,7 +739,7 @@ void LTSView::zoomInAbove()
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
      lts->getNumTransitions(),lts->getNumClusters(),
-     lts->getNumRanks()); 
+     lts->getNumRanks());
   applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
@@ -764,12 +764,12 @@ void LTSView::zoomOut()
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
     lts->getNumTransitions(),lts->getNumClusters(),
-    lts->getNumRanks()); 
+    lts->getNumRanks());
   applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
 
-  if (oldLTS != lts) 
+  if (oldLTS != lts)
   {
     delete oldLTS;
   }
@@ -782,7 +782,7 @@ void LTSView::loadTrace(std::string const& path)
   mainFrame->setSim(lts->getSimulation());
 }
 
-void LTSView::reportError(std::string const& error) 
+void LTSView::reportError(std::string const& error)
 {
   mainFrame->reportError(error);
 }

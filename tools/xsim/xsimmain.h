@@ -73,7 +73,7 @@ public:
     virtual void Redo(unsigned int Count);
     virtual void TraceChanged(ATermList Trace, unsigned int From);
     virtual void TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index);
-    
+
 private:
     // WDR: method declarations for XSimMain
     void CreateMenu();
@@ -83,7 +83,7 @@ private:
     void Stopper_Exit();
     void StopAutomation();
     void SetInteractiveness(bool interactive);
-    
+
 private:
     // WDR: member variable declarations for XSimMain
     wxString base_title;
@@ -122,7 +122,7 @@ private:
     play_func_enum timer_func;
     int timer_interval;
     ATerm current_state;
-    
+
 private:
     // WDR: handler declarations for XSimMain
     void OnOpen( wxCommandEvent &event );
@@ -149,7 +149,7 @@ private:
     void stateOnListItemSelected( wxListEvent &event );
     void transOnListItemActivated( wxListEvent &event );
     void UpdateSizes( wxCommandEvent &event );
-    
+
 private:
     void SetCurrentState(ATerm state, bool showchange = false);
     void UpdateTransitions(ATermList nextstates);

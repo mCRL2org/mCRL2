@@ -115,7 +115,7 @@ const std::string BALANCE_PLAT_SPECIFICATION =
   "          );                                                                          \n"
   "                                                                                      \n"
   " init BalancingAct(C,0,0);                                                            \n"
-  ;  
+  ;
 
 const std::string NO_DEADLOCK = "[true*]<true>true";
 

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsbinary.cpp
-/// \brief 
+/// \brief
 
 #include "boost.hpp" // precompiled headers
 
@@ -189,7 +189,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
       }
       else
       {
-        data_assignment_list substitutions; 
+        data_assignment_list substitutions;
         // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
         aterm_list solution = aterm_list(sol);
 
@@ -218,7 +218,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
                                     summand_.time().substitute(assignment_list_substitution(substitutions)),
                                     summand_.assignments().substitute(assignment_list_substitution(substitutions))
                                     );
-        
+
         result = push_front(result, s);
         ++nr_summands;
       }
@@ -245,7 +245,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
 ///and returns the instantiated summand list
 lps::summand_list instantiate_summands(const lps::specification& specification,
                                      const lps::summand_list& sl,
-                                     EnumeratorStandard& enumerator, 
+                                     EnumeratorStandard& enumerator,
                                      const t_suminst_options& o)
 {
   lps::summand_list result;

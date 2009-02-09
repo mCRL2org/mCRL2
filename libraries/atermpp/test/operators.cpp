@@ -32,8 +32,8 @@ int test_main(int argc, char* argv[])
   aterm_appl a = make_term("f(x)");
   aterm_list l = make_term("[3]");
   ATerm T      = t;
-  ATermAppl A  = a; 
-  ATermList L  = l;  
+  ATermAppl A  = a;
+  ATermList L  = l;
 
   // assignment
   t = t;

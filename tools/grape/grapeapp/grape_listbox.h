@@ -27,7 +27,7 @@ namespace grape
       private:
 	grape_frame*	m_main_frame;	/**< A pointer to the main grape frame. */
         int		m_diagram_type;	/**< Identifier of the diagram_type. */
-        
+
         DECLARE_EVENT_TABLE();		/**< The event table of this listbox. */
 
       public:

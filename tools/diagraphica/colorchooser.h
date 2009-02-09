@@ -35,25 +35,25 @@ public:
     void setPoints(
         const std::vector< double > &hue,
         const std::vector< double > &y );
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-    
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-	void handleMouseMotionEvent( 
-        const int &x, 
+	void handleMouseMotionEvent(
+        const int &x,
         const int &y );
 
     // -- public constants ------------------------------------------
@@ -66,19 +66,19 @@ protected:
     void drawColorSpectrum();
     void drawPath( const bool &inSelectMode );
     void drawPoints( const bool &inSelectMode );
-    
+
     // -- utility event handlers ------------------------------------
     void handleHits( const std::vector< int > &ids );
     void handleDrag();
-   
+
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
-    
+
     // -- data members ----------------------------------------------
     bool active;
-    
+
     std::vector< double > positionsX;
     std::vector< double > positionsY;
     int dragIdx;

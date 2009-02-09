@@ -60,14 +60,14 @@ namespace grape
 
         /**
          * Test if coordinate is inside the object
-         * @param p_coord test coordinate 
+         * @param p_coord test coordinate
          * @return Returns whether the specified coordinate is inside the drawn object.
          */
         bool is_inside( libgrape::coordinate &p_coord );
 
         /**
          * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate 
+         * @param p_coord test coordinate
          * @return Returns whether the specified coordinate on the border of a drawn object.
          */
         grape_direction is_on_border( libgrape::coordinate &p_coord );
@@ -77,7 +77,7 @@ namespace grape
          * @param p_coord The to be tested coordinate.
          * @return Returns whether the specified coordinate is nearest to the head of the arrow (true) or nearest to the other end of the arrow (false).
          */
-        bool is_nearest_head( libgrape::coordinate &p_coord );        
+        bool is_nearest_head( libgrape::coordinate &p_coord );
     };
   } // namespace grapeapp
 } // namespace grape

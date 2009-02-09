@@ -191,14 +191,14 @@ bool parse_command_line(int ac, char** av, lts_generation_options& options) {
     }
     if (parser.options.count("strategy")) {
       options.expl_strat = str_to_expl_strat(parser.option_argument("strategy").c_str());
- 
+
       if ( options.expl_strat == es_none ) {
         parser.error("invalid exploration strategy '" + parser.option_argument("strategy") + "'");
       }
     }
     if (parser.options.count("out")) {
       options.outformat = lts::parse_format(parser.option_argument("out"));
- 
+
       if (options.outformat == lts_none) {
         parser.error("format '" + parser.option_argument("out") + "' is not recognised");
       }
@@ -230,7 +230,7 @@ bool parse_command_line(int ac, char** av, lts_generation_options& options) {
     if (!options.lts.empty()) {
       if ( options.outformat == lts_none ) {
         options.outformat = lts::guess_format(options.lts);
- 
+
         if ( options.outformat == lts_none ) {
           gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
           options.outformat = lts_mcrl2;
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-  // Start 
+  // Start
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
       return EXIT_SUCCESS;
@@ -255,16 +255,16 @@ int main(int argc, char **argv)
 #endif
 
     lts_generation_options lgopts;
-    
+
     if (parse_command_line(argc, argv, lgopts)) {
 
       if ( !initialise_lts_generation(&lgopts) )
       {
         return 1;
       }
-    
+
       generate_lts();
- 
+
       finalise_lts_generation();
     }
   }

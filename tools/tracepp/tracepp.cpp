@@ -157,7 +157,7 @@ void process(t_tool_options const& tool_options) {
       trace.load(in);
     }
     else {
-      throw mcrl2::runtime_error("could not open input file '" + 
+      throw mcrl2::runtime_error("could not open input file '" +
           tool_options.name_for_input + "' for reading");
     }
   }
@@ -182,8 +182,8 @@ void process(t_tool_options const& tool_options) {
     if (out.good()) {
       if (tool_options.format_for_output == otDot) {
         gsVerboseMsg("writing result in dot format...\n");
-     
-        trace2dot(out,trace, 
+
+        trace2dot(out,trace,
             tool_options.name_for_input.substr(tool_options.name_for_input.find_last_of('.')).c_str());
       }
       else {
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 
   try {
     t_tool_options options;
-    
+
     if (parse_command_line(argc, argv, options)) {
        process(options);
     }

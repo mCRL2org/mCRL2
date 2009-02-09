@@ -58,16 +58,16 @@ typedef struct
   {
   int action, parent, splitter;
   } BLOK;
- 
+
 typedef struct {
    int pt;
    int *b;
 } BLOCKS;
 /* List of candidate blocks for being splitted */
 
-extern BLOK *blok; 
-extern BLOCKS blocks;   
-extern unsigned int Pi_pt, n_partitions;  
+extern BLOK *blok;
+extern BLOCKS blocks;
+extern unsigned int Pi_pt, n_partitions;
 extern SVCint nstate, nlabel; /* number of states, number of labels */
 extern ATbool *mark;
 extern SVCint *blockref;
@@ -89,7 +89,7 @@ extern ATermTable *lab_src_tgt, *lab_tgt_src;
 #define isRemoved(p) ((p)->mode==REMOVED)
 #define Push(kind, lft, rgh) ((Pi[Pi_pt].mode=kind),(Pi[Pi_pt].left=lft), \
 (Pi[Pi_pt].right=rgh),Pi_pt+1)
-        
+
 int  parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int *classes);
 void doHelp(char *);
 void doVersion();
@@ -109,6 +109,6 @@ void StartSplitting(void);
 void Reduce(void);
 void ReduceBranching(void);
 void SCC(void);
-int Compare(SVCstateIndex init1,SVCstateIndex init2); 
+int Compare(SVCstateIndex init1,SVCstateIndex init2);
 int CompareBranching(SVCstateIndex init1,SVCstateIndex init2);
 SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool tauloops);

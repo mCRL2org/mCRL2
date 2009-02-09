@@ -22,7 +22,7 @@ const float preamble_width = 1.0f;
 const float preamble_height = 0.3f;
 
 namespace grape {
-	
+
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 
@@ -64,7 +64,7 @@ void visualpreamble::draw( void )
   coordinate p_middle_top = {preamble_x_coordinate, y+0.025f};
   coordinate p_middle_bottom = {preamble_x_coordinate, y+preamble_height-0.025f};
   draw_line( p_middle_top, p_middle_bottom, false);
- 
+
   // draw horizontal line
   coordinate p_top_left = {preamble_x_coordinate-preamble_width*0.5+0.025f, y+preamble_height-0.05f};
   coordinate p_top_right = {preamble_x_coordinate+preamble_width*0.5-0.025f, y+preamble_height-0.05f};

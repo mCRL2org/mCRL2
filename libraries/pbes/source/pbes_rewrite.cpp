@@ -37,7 +37,7 @@ using namespace mcrl2::core;
 pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification data, Rewriter *rewriter)
 {
 	pbes_expression result;
-	
+
 	if (is_true(p))
 	{ // p is True
 		result = p;
@@ -60,7 +60,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = l;
 		else if (l == r)
 			result = l;
-		else 
+		else
 			result = and_(l,r);
 	}
 	else if (is_or(p))
@@ -77,14 +77,14 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			result = l;
 		else if (l == r)
 			result = r;
-		else 
+		else
 			result = or_(l,r);
 	}
 	else if (is_forall(p))
 	{ // p = forall(data_expression_list, pbes_expression)
 		data_variable_list data_vars = var(p);
 		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
-		
+
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -101,7 +101,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			data_vars = occured_data_vars;
 			if (is_true(expr) || is_false(expr))
 				result = expr;
-			
+
 			//If the forall  has only finite data variables, make a conjunction out of it.
 			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
 			{
@@ -123,7 +123,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	{ // p = exists(data_expression_list, pbes_expression)
 		data_variable_list data_vars = var(p);
 		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
-		
+
 		//Remove data_vars which does not occur in expr
 		data_variable_list occured_data_vars;
 		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -131,7 +131,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			if (occurs_inL(expr, *i)) // The var occurs in expr
 				occured_data_vars = push_back(occured_data_vars, *i);
 		}
-		
+
 		//If no data_vars remaining
 		if (occured_data_vars.empty())
 			result = expr;
@@ -153,7 +153,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				gsErrorMsg("Aborting\n");
 				exit(1);
 			}
-			else 
+			else
 				result = exists(data_vars, expr);
 		}
 	}
@@ -174,7 +174,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		else
 			result = val(d);
 	}
-	
+
 	return result;
 }
 
@@ -209,7 +209,7 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 			{
 				result = true;
 			}
-		} 
+		}
 	}
 	return result;
 }
@@ -245,7 +245,7 @@ pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, 
 	{
 		result = push_front(result, *exp);
 	}
-	
+
 	return reverse(result);
 }
 
@@ -255,7 +255,7 @@ pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_spe
 	// Return a list with only one element False, if an element in the original list is false.
 	pbes_expression_list result;
 	bool is_pbes_false = false;
-	
+
 	pbes_expression_list::iterator it_enum = and_list.begin();
 	while ((it_enum != and_list.end()) && (!is_pbes_false))
 	{
@@ -280,7 +280,7 @@ pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_speci
 	// Return a list with only one element False, if an element in the original list is true.
 	pbes_expression_list result;
 	bool is_pbes_true = false;
-	
+
 	pbes_expression_list::iterator it_enum = or_list.begin();
 	while ((it_enum != or_list.end()) && (!is_pbes_true))
 	{

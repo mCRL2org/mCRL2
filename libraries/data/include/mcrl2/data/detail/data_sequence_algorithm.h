@@ -39,7 +39,7 @@ namespace detail {
     }
     return atermpp::term_list<Term>(result.begin(), result.end());
   }
-  
+
   /// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.
   /// \param x A sequence of data variables
   /// \param y A sequence of data variables
@@ -51,7 +51,7 @@ namespace detail {
     {
       return x;
     }
-  
+
     // We assume that in the majority of cases no variables are removed.
     // Therefore we only do the expensive ATerm list construction if it
     // is really needed.

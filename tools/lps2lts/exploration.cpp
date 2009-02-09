@@ -79,17 +79,17 @@ static unsigned long level;
 static unsigned long long num_found_same;
 static unsigned long long current_state;
 static unsigned long long initial_state;
- 
+
 static atermpp::vector<ATerm> backpointers;
 static unsigned long *bithashtable = NULL;
- 
+
 static bool trace_support = false;
 static unsigned long tracecnt;
- 
+
 static char *basefilename = NULL;
 
 static bool lg_error = false;
-  
+
 static void initialise_representation(bool confluence_reduction);
 static void cleanup_representation();
 
@@ -100,7 +100,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   lgopts = opts;
 
   lg_error = false;
- 
+
   ATermAppl Spec = (ATermAppl) load_aterm(lgopts->specification);
   if (!gsIsLinProcSpec(Spec)) {
     throw mcrl2::runtime_error(((lgopts->specification.empty())?"stdin":("'" + lgopts->specification + "'")) + " does not contain an LPS");
@@ -137,7 +137,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   } else {
     states = ATindexedSetCreate(lgopts->initial_table_size,50);
   }
-  
+
   assert( backpointers.empty() );
   if ( lgopts->trace || lgopts->save_error_trace )
   {
@@ -146,9 +146,9 @@ bool initialise_lts_generation(lts_generation_options *opts)
   } else {
     trace_support = false;
   }
- 
+
   nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
- 
+
   if ( lgopts->priority_action != "" )
   {
     gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
@@ -177,7 +177,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   return true;
 }
-  
+
 bool finalise_lts_generation()
 {
   if ( lg_error )
@@ -258,7 +258,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
   ATerm ns;
   ATermList tr = ATmakeList0();
   NextStateGenerator *nsgen = NULL;
-  
+
   if ( extra_state != NULL )
   {
     tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
@@ -287,7 +287,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
   }
 
   delete nsgen;
-  
+
   Trace trace;
   trace.setState(nstate->makeStateVector(s));
   for (; !ATisEmpty(tr); tr=ATgetNext(tr))
@@ -618,7 +618,7 @@ static unsigned long long calc_hash(ATerm state)
   calc_hash_init();
 
   calc_hash_aterm(state);
-  
+
   return calc_hash_finish() % lgopts->bithashsize;
 }
 
@@ -959,7 +959,7 @@ bool generate_lts()
           state = ATindexedSetGetElem(states,current_state);
         }
         bool deadlockstate = true;
-  
+
         nsgen = nstate->getNextStates(state,nsgen);
         ATermAppl Transition;
         ATerm NewState;
@@ -982,7 +982,7 @@ bool generate_lts()
             }
           }
         }
-        
+
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
@@ -993,7 +993,7 @@ bool generate_lts()
         {
           check_deadlocktrace(state);
         }
-  
+
         current_state++;
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
@@ -1127,7 +1127,7 @@ bool generate_lts()
           // inv
         }
         // inv
-        
+
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
@@ -1167,6 +1167,6 @@ bool generate_lts()
       gsErrorMsg("unknown exploration strategy\n");
     }
   }
-  
+
   return !lg_error;
 }

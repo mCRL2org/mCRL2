@@ -55,7 +55,7 @@ namespace detail {
   //   }
   //   return t;
   // }
-  
+
   /// \brief Applies the function f to all children of a.
   /// \param a A term
   /// \param f A function on terms
@@ -92,19 +92,19 @@ namespace detail {
   {
     typedef typename std::iterator_traits<Iterator>::value_type type;
   };
-  
+
   template <class Container>
   struct iterator_value<std::insert_iterator<Container> >
   {
     typedef typename Container::value_type type;
   };
-  
+
   template <class Container>
   struct iterator_value<std::back_insert_iterator<Container> >
   {
     typedef typename Container::value_type type;
   };
-  
+
   template <class Container>
   struct iterator_value<std::front_insert_iterator<Container> >
   {
@@ -146,7 +146,7 @@ namespace detail {
     }
     return op;
   }
-  
+
   /// \brief Implements the find_if algorithm
   /// If the term t is found, an exception of type found_term_exception is thrown
   /// \param t A term
@@ -182,7 +182,7 @@ namespace detail {
   void find_all_if_impl(aterm t, MatchPredicate op, OutputIterator& destBegin)
   {
     typedef typename iterator_value<OutputIterator>::type value_type;
-    
+
     if (t.type() == AT_LIST) {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
@@ -206,7 +206,7 @@ namespace detail {
   }
 
   //--- partial find --------------------------------------------------------//
-  
+
   /// \brief Implements the partial_find_if_impl algorithm
   /// \param t A term
   /// \param match A predicate function on terms
@@ -269,7 +269,7 @@ namespace detail {
       {
         partial_find_all_if_impl(*i, match, stop, destBegin);
       }
-    } 
+    }
   }
 
 //--- replace -------------------------------------------------------------//
@@ -281,11 +281,11 @@ namespace detail {
   struct replace_helper
   {
     ReplaceFunction m_replace;
-  
+
     replace_helper(ReplaceFunction replace)
       : m_replace(replace)
     {}
-  
+
     /// \brief Function call operator.
     /// \param t A term
     /// \return The function result
@@ -321,12 +321,12 @@ namespace detail {
   {
     aterm_appl m_src;
     aterm_appl m_dest;
-    
+
     default_replace(aterm_appl src, aterm_appl dest)
       : m_src(src),
         m_dest(dest)
     { }
-  
+
     /// \brief Function call operator
     /// \param t A term
     /// \return The function result
@@ -345,11 +345,11 @@ namespace detail {
   struct partial_replace_helpsr
   {
     ReplaceFunction m_replace;
-  
+
     partial_replace_helpsr(ReplaceFunction replace)
       : m_replace(replace)
     {}
-  
+
     /// \brief Function call operator
     /// \param t A term
     /// \return The function result
@@ -388,16 +388,16 @@ namespace detail {
 
   template <typename ReplaceFunction>
   aterm bottom_up_replace_impl(aterm t, ReplaceFunction bottom_up_replace);
- 
+
   template <typename ReplaceFunction>
   struct bottom_up_replace_helpsr
   {
     ReplaceFunction m_bottom_up_replace;
-  
+
     bottom_up_replace_helpsr(ReplaceFunction bottom_up_replace)
       : m_bottom_up_replace(bottom_up_replace)
     {}
-  
+
     /// \brief Function call operator
     /// \param t A term
     /// \return The function result
@@ -432,12 +432,12 @@ namespace detail {
   {
     aterm_appl m_src;
     aterm_appl m_dest;
-    
+
     default_bottom_up_replace(aterm_appl src, aterm_appl dest)
       : m_src(src),
         m_dest(dest)
     { }
-  
+
     /// \brief Function call operator
     /// \param t A term
     /// \return The function result

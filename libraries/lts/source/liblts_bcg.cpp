@@ -80,7 +80,7 @@ bool p_lts::read_from_bcg(string const& filename)
   unsigned int from,label,to;
   BCG_OT_ITERATE_PLN(bcg_graph,from,label,to)
   {
-   p_add_transition(from,label,to); 
+   p_add_transition(from,label,to);
   }
   BCG_OT_END_ITERATE;
 

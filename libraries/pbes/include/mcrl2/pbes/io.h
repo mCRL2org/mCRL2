@@ -93,7 +93,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
   // Use an indexed set to keep track of the variables and their cwi-representations
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
   atermpp::indexed_set *variables = new atermpp::indexed_set(2*eqsys.size(), 50);
-  
+
   // Fill the indexed set
   for (atermpp::vector<pbes_equation>::iterator eq = eqsys.begin(); eq != eqsys.end(); eq++)
   {
@@ -126,7 +126,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
   {
     std::ofstream outputfile;
     outputfile.open(outfilename.c_str(), std::ios::trunc);
-  
+
     for (std::vector< std::string >::iterator res = result.begin(); res != result.end(); res++)
     {
       if (outputfile.is_open())
@@ -167,7 +167,7 @@ void save_pbes(pbes<> pbes_spec, std::string outfilename, std::string outputform
   {
     core::gsVerboseMsg("The result is a BES.\n");
   }
-  
+
   if (outputformat == "internal")
   { // In internal format
     core::gsVerboseMsg("Saving result in internal format...\n");

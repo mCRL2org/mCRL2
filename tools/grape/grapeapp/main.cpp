@@ -73,10 +73,10 @@ bool grape_app::parse_command_line(int& argc, wxChar** argv) {
   interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
       NAME, AUTHOR, "[OPTION]... [INFILE]",
       "Graphical editing environment for mCRL2 process specifications. "
-      "If INFILE is supplied, it is loaded as a GraPE specification."); 
+      "If INFILE is supplied, it is loaded as a GraPE specification.");
 
   command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
- 
+
   if (parser.continue_execution()) {
     if (0 < parser.arguments.size()) {
       filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
@@ -90,17 +90,17 @@ bool grape_app::parse_command_line(int& argc, wxChar** argv) {
 }
 
 #ifdef __WINDOWS__
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
-                                  HINSTANCE hPrevInstance,                
-                                  wxCmdLineArgType lpCmdLine,             
-                                  int nCmdShow) {                                                                     
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
 
   MCRL2_ATERM_INIT(0, lpCmdLine);
   gsSetVerboseMsg();
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);  
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #endif
- 
+
 int main(int argc, char** argv)
 {
   init_mcrl2libs(argc, argv);

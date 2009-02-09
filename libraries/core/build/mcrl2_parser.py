@@ -89,7 +89,7 @@ class Function:
 
     def full_name(self):
         return self.name_
-       
+
     def name(self):
         if self.name_[0] == '<':
             return self.name_[1:-1]
@@ -124,7 +124,7 @@ class Function:
         for i in range(len(params)):
             t.append('(ATerm) %s' % (params[i]))
         return string.join(t, ', ')
-      
+
     def default_declaration(self):
         params = self.parameters()
         types  = self.types()
@@ -151,7 +151,7 @@ class Argument:
 
     def name(self):
         return self.expressions[0].name()
-    
+
     def check_name(self):
         return self.expressions[0].check_name()
 
@@ -167,17 +167,17 @@ class Argument:
 #---------------------------------------------------------------#
 #                          Mcrl2Actions
 #---------------------------------------------------------------#
-class Mcrl2Actions:      
+class Mcrl2Actions:
     def make_expression(self, terms):
         return terms
-    
+
     def make_term(self, name, arguments, phase):
         return Function(name, arguments, phase)
-    
+
     # repetitions can be either '\*', '\?', '\+' or ''
     def make_factor(self, expression, repetitions):
         return Argument(expression, repetitions)
-    
+
     def make_rule(self, lhs, rhs):
         return Rule(lhs, rhs)
 
@@ -191,14 +191,14 @@ class Mcrl2Actions:
 # digit      ::= [0-9]
 # letter     ::= [a-zA-Z]
 # reserved   ::= ":" | "=" | "|" | "*" | "+" | "?" | "(" | ")" | "[" | "]" | "-"
-# other      ::= "`" | "_" | "~" | "!" | "@" | "#" | "$" | "%" | "^" | "&" 
-#              | "\" | "{" | "}" | ";" | "," | "." | "/" | "<" | ">" 
+# other      ::= "`" | "_" | "~" | "!" | "@" | "#" | "$" | "%" | "^" | "&"
+#              | "\" | "{" | "}" | ";" | "," | "." | "/" | "<" | ">"
 # identifier ::= letter ( letter | digit )?
 # character  ::= digit | letter | special | other
 # string     ::= "'" ( character | '"' )+ "'"
 #              | '"' ( character | "'" )+ '"'
 # range      ::= "~"? "[" ( character | digit "-" digit | letter "-" letter )+ "]"
-# 
+#
 # syntax     ::= ( rule )*
 # rule       ::= identifier "::=" expression
 # expression ::= term ( "|" term )*
@@ -247,7 +247,7 @@ class EBNFParser(tpg.Parser):
             )*
                                           $ e = self.actions.make_expression(terms) $
             ;
-        
+
         term/t ->
                                           $ factors = []; p = None $
             identifier/name
@@ -262,10 +262,10 @@ class EBNFParser(tpg.Parser):
             )?
             (
               phase/p
-            )?           
+            )?
                                           $ t = self.actions.make_term(name, factors, p) $
             ;
-            
+
         factor/f ->
                                           $ r = '' $
             (

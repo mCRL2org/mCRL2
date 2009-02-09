@@ -11,7 +11,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "export_svg.h"  
+#include "export_svg.h"
 #include <boost/format.hpp>
 #include <wx/textfile.h>
 #include <iostream>
@@ -35,8 +35,8 @@ bool ExporterSVG::export_to(wxString filename)
   // SVG header
   svg_code  = "<?xml version = \"1.0\" standalone=\"no\"?>\n\n";
   svg_code += "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://w3c.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n\n";
-  
-  // For the size of the viewBox (canvas), we stick to the virtual size of 
+
+  // For the size of the viewBox (canvas), we stick to the virtual size of
   // the graph's model, which is 2000 by 2000. To make a more true-to-screen
   // representation, we multiply by the windows aspect ratio (width / height)
   double width = 2000 * aspect;
@@ -56,13 +56,13 @@ bool ExporterSVG::export_to(wxString filename)
   boost::format arrowHead2(" refX=\"%1%\" refY = \"%2%\" \n");
   arrowHead2%(radius * 2) % (radius / 2);
   svg_code += boost::str(arrowHead2);
-  
+
   svg_code += " markerUnits = \"strokeWidth\" orient = \"auto\" \n";
-  
+
   boost::format arrowHead3(" markerWidth = \"%1%\" markerHeight = \"%1%\">\n");
   arrowHead3%(radius * 4);
   svg_code += boost::str(arrowHead3);
-  
+
   boost::format arrowHead4(" <polyline points = \"0,0 %1%,%2% 0,%1% %3%,%2%\" fill = \"black\" />\n");
   arrowHead4%radius%(radius/2)%(radius/10);
   svg_code += boost::str(arrowHead4);
@@ -80,7 +80,7 @@ bool ExporterSVG::export_to(wxString filename)
       // Interpolate and draw the path
       drawBezier(tr);
     }
-    
+
     for(size_t j = 0; j < from->getNumberOfSelfLoops(); ++j)
     {
       Transition* tr = from->getSelfLoop(j);
@@ -89,7 +89,7 @@ bool ExporterSVG::export_to(wxString filename)
     }
   }
 
-  // Go through all the states again, to make sure that no transitions are seen 
+  // Go through all the states again, to make sure that no transitions are seen
   // on top of them (SVG uses the painter's algorithm to render)
   for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
@@ -113,7 +113,7 @@ bool ExporterSVG::export_to(wxString filename)
       stroke = "black";
       stroke_width = 1;
     }
-    
+
     wxColour c = from->getColour();
     int red = c.Red();
     int green = c.Green();
@@ -139,11 +139,11 @@ bool ExporterSVG::export_to(wxString filename)
     svg_code += "  " + labelstr.str() + "\n</text> \n\n";
   }
 
-  
+
 
   // End svg code
   svg_code += "</svg>\n";
- 
+
   // Create the file
 
   wxTextFile svgFile(filename);
@@ -180,7 +180,7 @@ bool ExporterSVG::export_to(wxString filename)
   {
     return false;
   }
-  
+
   return true;
 }
 
@@ -192,26 +192,26 @@ void ExporterSVG::drawBezier(Transition* tr)
 
   from = tr->getFrom();
   to = tr->getTo();
-  
+
   xFrom = (1000.0 + from->getX()) * aspect;
   yFrom = 1000.0 - from->getY();
 
   xTo = (1000.0 + to->getX()) * aspect;
   yTo = 1000.0 - to->getY();
-  
+
   tr->getControl(xVirtual, yVirtual);
-  
+
   xVirtual += 1000.0;
   xVirtual *= aspect;
 
   yVirtual = 1000.0 - yVirtual;
-  // For a justification of the xControl, yControl computations, see the 
+  // For a justification of the xControl, yControl computations, see the
   // drawTransition method in visualizer.cpp
   xControl = 2.0 * xVirtual - .5 * (xFrom + xTo);
   yControl = 2.0 * yVirtual - .5 * (yFrom + yTo);
-    
+
   svg_code += "<path d = \"";
-  
+
   boost::format p1("M%1%,%2% Q%3%,%4% %5%,%6%\"\n");
   p1 % xFrom    % yFrom
      % xControl % yControl
@@ -238,7 +238,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
 {
   // For a self-loop, t.to == t.from
   State* s = tr->getFrom();
-  
+
   double alpha = tr->getControlAlpha();
   double beta = .25 * M_PI;
   double dist = tr->getControlDist();
@@ -249,11 +249,11 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
 
   double xVirtual = xState + cos(alpha) * dist * 200.0f;
   double yVirtual = yState - sin(alpha) * dist * 200.0f;
-  
+
   double gamma = alpha + beta;
   double delta = alpha - beta;
 
-  double xFactor, yFactor; 
+  double xFactor, yFactor;
   double xControl1, yControl1;
   double xControl2, yControl2;
   double cosGamma = cos(gamma);
@@ -267,7 +267,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
-  
+
   if(fabs(sinGamma + sinDelta) <= 0.01)
   {
     float additive = tan(beta) * (xControl1 - xState);
@@ -297,7 +297,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   svg_code += boost::str(f);
   svg_code += " stroke = \"black\" stroke-width=\"1\" fill=\"none\"\n";
   svg_code += " marker-end=\"url(#Arrowhead)\"/>\n";
-  
+
   // Draw the transition's label
   std::string label = tr->getLabel();
 

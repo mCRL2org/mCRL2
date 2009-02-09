@@ -48,7 +48,7 @@ namespace detail {
       throw mcrl2::runtime_error("parse error");
     return result;
   }
-  
+
   /// \brief Type checks a specification
   /// \param spec A term
   /// \return A term in an undocumented format
@@ -60,7 +60,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error");
     return result;
   }
-  
+
   /// \brief Applies alpha reduction to a specification
   /// \param spec A term
   /// \return A term in an undocumented format
@@ -72,7 +72,7 @@ namespace detail {
       throw mcrl2::runtime_error("alpha reduction error");
     return result;
   }
-  
+
   /// \brief Applies data implementation to a specification
   /// \param spec A term
   /// \return A term in an undocumented format
@@ -84,7 +84,7 @@ namespace detail {
       throw mcrl2::runtime_error("data implementation error");
     return result;
   }
-  
+
   /// \brief Applies linearization to a specification
   /// \param spec A term
   /// \param options Options for the algorithm
@@ -123,7 +123,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error");
     return result;
   }
- 
+
   /// \brief Applies data implementation to a state formula
   /// \pre spec is a {lps specification, pbes specification, data specification}
   /// before data implementation
@@ -138,7 +138,7 @@ namespace detail {
       throw mcrl2::runtime_error("data implementation error");
     return result;
   }
-  
+
   /// \brief Converts a regular formula to a state formula
   /// \param formula A term
   /// \return The converted regular formula

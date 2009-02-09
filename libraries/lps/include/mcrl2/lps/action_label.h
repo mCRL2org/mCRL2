@@ -85,7 +85,7 @@ class action_label: public atermpp::aterm_appl
     action_label substitute(Substitution f)
     {
       return action_label(f(*this));
-    }     
+    }
 };
 
 /// \brief Read-only singly linked list of action labels

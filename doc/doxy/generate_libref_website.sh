@@ -71,14 +71,14 @@ INPUT_LIST="include source doc/Mainpage"
 # where [patlist] is a space-separated list of file name patterns that will be
 # matched against the absolute path of a file. See the manual on the Doxygen
 # website for more information on these patterns.
-# 
+#
 # IMPORTANT: Please use '+=' instead of '=' on the line mentioned above!
 # This is because the DOXYMASTER file already assigns some common exclude
 # patterns, like "*/.svn/*" and "*/detail/*", to the EXCLUDE_PATTERNS variable.
 # Using a '=' would assign a new list of patterns to this variable, thereby
 # overwriting the patterns assigned to it in the DOXYMASTER file. A '+=' would
 # merely append patterns to this list.
-# 
+#
 # For a list of all variables that can be set in your Doxyfile, please refer to
 # the online Doxygen manual. Note that the values of some variables should not
 # be overridden if they are part of mCRL2 policy. In case of uncertainty, please
@@ -172,16 +172,16 @@ function write_index {
   mcrl2_head_end();
   mcrl2_body_begin();
   mcrl2_main_begin();
-   
+
   mcrl2_portal_begin();
   mcrl2_libref_portlet(\"\");
   mcrl2_search_portlet();
   mcrl2_portal_end();
-   
+
   mcrl2_contents_begin();
 ?>
   $MAIN_TEXT
-<?php 
+<?php
   mcrl2_contents_end();
   mcrl2_main_end();
   mcrl2_body_end();
@@ -217,12 +217,12 @@ function write_doxyheader {
 } # End of function write_doxyheader
 
 function write_doxyfooter {
-  echo "<?php 
-   
+  echo "<?php
+
   mcrl2_pageinfo('$FOOTER_TEXT');
 
   mcrl2_main_end();
-  
+
   mcrl2_body_end();
   mcrl2_html_end();
 ?>" > $DOXYFOOTER
@@ -239,7 +239,7 @@ function print_help {
   echo
   echo "If -l is passed, the generated webpages are suitable for offline"
   echo "viewing. They contain normal HTML and use the default Doxygen"
-  echo "layout. Use of -l does generally not result in properly interlinked" 
+  echo "layout. Use of -l does generally not result in properly interlinked"
   echo "library websites."
   echo
   echo "If no OPTION is passed, then the websites for all known libraries are"
@@ -396,11 +396,11 @@ for L in $LIBRARY_LIST ; do
   IFS=$':'
   set -- $L
   IFS=$OLDIFS
-  
+
   determine_input $3
 
   DOXYCONFIG="
-    PROJECT_NAME = \"$1\" 
+    PROJECT_NAME = \"$1\"
     INPUT = $DOXYINPUT
     GENERATE_HTML = YES
     OUTPUT_DIRECTORY = $OUTPUT_DIR
@@ -430,7 +430,7 @@ for L in $LIBRARY_LIST ; do
   else
     ( cat $DOXYMASTER ; echo "$DOXYCONFIG" ) | doxygen -
   fi
-  
+
   if [ ! $OFFLINE ] ; then
     # Remove unused files that Doxygen generated.
     rm -f $OUTPUT_DIR/$2/{tab_[blr].gif,*.css,doxygen.png,installdox}

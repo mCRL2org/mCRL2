@@ -27,15 +27,15 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
 
   // create grid
   m_parameter_grid = new wxGrid( this, GRAPE_PARAMETER_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_parameter_grid->CreateGrid( p_preamble->get_parameter_declarations_list().GetCount()+1, 2 );  
+  m_parameter_grid->CreateGrid( p_preamble->get_parameter_declarations_list().GetCount()+1, 2 );
   for ( unsigned int i = 0; i < p_preamble->get_parameter_declarations_list().GetCount(); ++i )
-  {     
+  {
     //fill cells
     decl parameter_assignment = p_preamble->get_parameter_declarations_list().Item( i );
     m_parameter_grid->SetCellValue(i, 0, parameter_assignment.get_name());
-    m_parameter_grid->SetCellValue(i, 1, parameter_assignment.get_type());    
+    m_parameter_grid->SetCellValue(i, 1, parameter_assignment.get_type());
   }
-  
+
   m_parameter_grid->SetColSize( 0, 200 );
   m_parameter_grid->SetColSize( 1, 170 );
   m_parameter_grid->SetColLabelValue(0, _T("Name"));
@@ -43,23 +43,23 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   m_parameter_grid->SetRowLabelSize(30);
 
   vsizer->Add(m_parameter_grid, 1, wxEXPAND );
-  
+
 
   text = new wxStaticText( this, wxID_ANY, _T("Local variable declarations:") );
   vsizer->Add( text, 0, wxEXPAND );
 
   // create grid
   m_localvar_grid = new wxGrid( this, GRAPE_LOCALVAR_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_localvar_grid->CreateGrid( p_preamble->get_local_variable_declarations_list().GetCount()+1, 3 );  
+  m_localvar_grid->CreateGrid( p_preamble->get_local_variable_declarations_list().GetCount()+1, 3 );
   for ( unsigned int i = 0; i < p_preamble->get_local_variable_declarations_list().GetCount(); ++i )
-  {     
+  {
     //fill cells
     decl_init localvar_assignment = p_preamble->get_local_variable_declarations_list().Item( i );
     m_localvar_grid->SetCellValue(i, 0, localvar_assignment.get_name());
-    m_localvar_grid->SetCellValue(i, 1, localvar_assignment.get_type());  
-    m_localvar_grid->SetCellValue(i, 2, localvar_assignment.get_value());    
-  }  
-  
+    m_localvar_grid->SetCellValue(i, 1, localvar_assignment.get_type());
+    m_localvar_grid->SetCellValue(i, 2, localvar_assignment.get_value());
+  }
+
   m_localvar_grid->SetColSize( 0, 170 );
   m_localvar_grid->SetColSize( 1, 100 );
   m_localvar_grid->SetColSize( 2, 100 );
@@ -69,7 +69,7 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   m_localvar_grid->SetRowLabelSize(30);
   //p_preamble->get_local_variable_declarations()
   vsizer->Add(m_localvar_grid, 1, wxEXPAND );
-  
+
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
   vsizer->Add( sizer, 0, wxALIGN_RIGHT );
@@ -104,8 +104,8 @@ wxString grape_preamble_dialog::get_parameter_declarations() const
       result += m_parameter_grid->GetCellValue(i, 0) + _T( ":" ) + m_parameter_grid->GetCellValue(i, 1) + _T( ";" );
     }
   }
-  return result;  
-  
+  return result;
+
 }
 
 wxString grape_preamble_dialog::get_local_variable_declarations() const
@@ -118,8 +118,8 @@ wxString grape_preamble_dialog::get_local_variable_declarations() const
 	  result += m_localvar_grid->GetCellValue(i, 0) + _T( ":" ) + m_localvar_grid->GetCellValue(i, 1) + _T( "=" ) + m_localvar_grid->GetCellValue(i, 2) + _T( ";" );
     }
   }
-  return result;  
-  
+  return result;
+
 }
 
 void grape_preamble_dialog::check_text()
@@ -128,10 +128,10 @@ void grape_preamble_dialog::check_text()
   static grape::libgrape::preamble tmp_preamble;
   valid = tmp_preamble.set_parameter_declarations( get_parameter_declarations() );
   valid &= tmp_preamble.set_local_variable_declarations( get_local_variable_declarations() );
-	
+
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
-	
+
 void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
 {
   check_text();
@@ -142,7 +142,7 @@ void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
     rows_count = m_parameter_grid->GetNumberRows();
   }
 }
-  
+
 void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &p_event )
 {
   check_text();
@@ -153,8 +153,8 @@ void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &p_event )
     rows_count = m_localvar_grid->GetNumberRows();
   }
 }
-  
+
 BEGIN_EVENT_TABLE(grape_preamble_dialog, wxDialog)
   EVT_GRID_CMD_CELL_CHANGE(GRAPE_PARAMETER_GRID_TEXT, grape_preamble_dialog::event_change_parameter_text)
-  EVT_GRID_CMD_CELL_CHANGE(GRAPE_LOCALVAR_GRID_TEXT, grape_preamble_dialog::event_change_localvar_text)  
+  EVT_GRID_CMD_CELL_CHANGE(GRAPE_LOCALVAR_GRID_TEXT, grape_preamble_dialog::event_change_localvar_text)
 END_EVENT_TABLE()

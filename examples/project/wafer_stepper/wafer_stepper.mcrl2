@@ -19,8 +19,8 @@ eqn  IsFresh(wafer(s))       = is_fresh(s);
 sort WaferList = List (Wafer);
 map  InitWaferList: Nat -> WaferList;
 var  n : Nat;
-eqn  InitWaferList(0)     = []; 
-0 < n -> InitWaferList(n) = wafer(fresh) |> InitWaferList(max(n - 1,0)); 
+eqn  InitWaferList(0)     = [];
+0 < n -> InitWaferList(n) = wafer(fresh) |> InitWaferList(max(n - 1,0));
 
 sort LockID  = struct L0 | L1 | L2 | L3;
 
@@ -87,9 +87,9 @@ proc
 
      % Wafer stages
      C(occupiedC0:Bool,w0:Wafer,occupiedC1:Bool,w1:Wafer) =
-       (occupiedC0 && IsFresh(w0)) -> 
+       (occupiedC0 && IsFresh(w0)) ->
          Measure.C(occupiedC0,MakeMeasured(w0),occupiedC1,w1) +
-       (occupiedC1 && IsMeasured(w1)) -> 
+       (occupiedC1 && IsMeasured(w1)) ->
          Expose.C(occupiedC0,w0,occupiedC1,MakeExposed(w1)) +
        ((occupiedC0 && !occupiedC1 && IsMeasured(w0)) ||
         (occupiedC1 && if(occupiedC0,IsMeasured(w0),true) && IsExposed(w1))) ->

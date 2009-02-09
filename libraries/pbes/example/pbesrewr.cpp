@@ -45,23 +45,23 @@ class pbes_rewr_tool: public utilities::filter_tool_with_rewriter
         std::cout << "  input file:         " << m_input_filename << std::endl;
         std::cout << "  output file:        " << m_output_filename << std::endl;
       }
-    
+
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
-      
+
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());
-     
+
       // pbes rewriter
-      simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> pbesr(datar);    
-      
+      simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> pbesr(datar);
+
       // apply the rewriter
       pbesrewr(p, pbesr);
-      
+
       // save the result
       p.save(m_output_filename);
-      
+
       return true;
     }
 };

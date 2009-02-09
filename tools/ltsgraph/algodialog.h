@@ -16,11 +16,11 @@
 
 #include "ltsgraph.h"
 
-class AlgoDialog : public wxDialog 
+class AlgoDialog : public wxDialog
 {
   public:
     AlgoDialog(LTSGraph* owner, wxWindow* parent);
-  
+
   private:
     LTSGraph* app;
 

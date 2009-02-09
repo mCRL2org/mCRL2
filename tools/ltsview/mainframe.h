@@ -55,7 +55,7 @@ class MainFrame : public wxFrame {
     void onInfo(wxCommandEvent& event);
     void onMark(wxCommandEvent& event);
     void onSim(wxCommandEvent& event);
-    
+
     void onZoomInBelow(wxCommandEvent& event);
     void onZoomInAbove(wxCommandEvent& event);
     void onZoomOut(wxCommandEvent& event);
@@ -63,7 +63,7 @@ class MainFrame : public wxFrame {
     void onStartForceDirected(wxCommandEvent& event);
     void onStopForceDirected(wxCommandEvent& event);
     void onResetStatePositions(wxCommandEvent& event);
-  
+
     void setSim(Simulation* sim);
     void replaceMarkRule(wxString str,int index);
     void resetMarkRules();
@@ -83,9 +83,9 @@ class MainFrame : public wxFrame {
     void setClusterStateNr(int n);
     void resetParameters();
     void resetParameterValues();
-    
+
     void reportError(std::string const& error);
-   
+
 //    void  onIdle(wxIdleEvent &event);/* needed for computing the frame rate */
   private:
 //    double previousTime; /* needed for computing the frame rate (FPS) */

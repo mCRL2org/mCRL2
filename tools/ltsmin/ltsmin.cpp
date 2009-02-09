@@ -22,7 +22,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
+int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0;
 
 struct t_tool_options {
   std::string inputname;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
       if (options.task == CMD_BRANCH_REDUCE) {
         return doBranchReduce(options);
       }
- 
+
       return doReduce(options);
     }
   }
@@ -129,9 +129,9 @@ int main(int argc, char *argv[])
   return EXIT_SUCCESS;
 } /* main */
 
-int doReduce(t_tool_options const& options) 
+int doReduce(t_tool_options const& options)
   {
-  SVCstateIndex initState = ReadData(); 
+  SVCstateIndex initState = ReadData();
   Reduce();
   if ( add_state_parameter )
   {
@@ -142,16 +142,16 @@ int doReduce(t_tool_options const& options)
   } else {
     WriteData(initState,WITH_TAULOOPS);
   }
-  return 0; 
+  return 0;
   }
-  
-int doBranchReduce(t_tool_options const& options) 
+
+int doBranchReduce(t_tool_options const& options)
   {
   SVCstateIndex initState = ReadData();
   SCC();
 //  initState = ReturnEquivalenceClasses(initState, DELETE_TAULOOPS);
   /* ATwarning("Number of states after deletion of tau loops: %d\n", nstate); */
-  ReduceBranching();  
+  ReduceBranching();
   if ( add_state_parameter )
   {
     SVCbool b;
@@ -161,23 +161,23 @@ int doBranchReduce(t_tool_options const& options)
   } else {
     WriteData(initState, DELETE_TAULOOPS);
   }
-  return 0; 
-  } 
+  return 0;
+  }
    /* doCompare */
-int doCompare(void) 
+int doCompare(void)
   {
   SVCstateIndex init1, init2;
   ReadCompareData(&init1, &init2);
   if (Compare(init1, init2)) return EXIT_NOTOK;
   if (traceLevel) ATwarning("Transition systems are strongly bisimilar\n");
-  return EXIT_OK; 
+  return EXIT_OK;
   }
    /* doCompare */
-int doBranchCompare(void) 
+int doBranchCompare(void)
   {
   SVCstateIndex init1, init2;
   ReadCompareData(&init1, &init2);
   if (CompareBranching(init1, init2)) return EXIT_NOTOK;
   if (traceLevel) ATwarning("Transition systems are branching bisimilar\n");
-  return EXIT_OK; 
+  return EXIT_OK;
   } /* doCompare */

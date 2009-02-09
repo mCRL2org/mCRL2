@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     }
 
     pbes_system::pbes<> p;
-    p.load(infile);   
+    p.load(infile);
     run1(p);
     run2(p, outfile);
   }

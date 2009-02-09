@@ -28,7 +28,7 @@ grape_event_add_channel::grape_event_add_channel( grape_frame *p_main_frame, coo
 : grape_event_base( p_main_frame, true, _T( "add channel" ) )
 {
   m_chan = m_main_frame->get_new_id();
-  m_coord = p_coord; 
+  m_coord = p_coord;
   m_ref = p_ref->get_id();
   m_def_chan_width = DEFAULT_CHANNEL_WIDTH;
   m_def_chan_height = DEFAULT_CHANNEL_HEIGHT;
@@ -203,7 +203,7 @@ grape_event_change_channel::grape_event_change_channel( grape_frame *p_main_fram
   {
     // user cancelled
     m_pressed_ok = false;
-  }  
+  }
 }
 
 grape_event_change_channel::~grape_event_change_channel( void )
