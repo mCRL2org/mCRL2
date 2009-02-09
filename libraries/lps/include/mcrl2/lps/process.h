@@ -13,6 +13,7 @@
 #define MCRL2_LPS_PROCESS_H
 
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -78,6 +79,10 @@ namespace lps {
         assert(core::detail::check_term_ProcVarId(m_term));
       }
 
+      process_identifier(core::identifier_string name, data::sort_expression_list sorts)
+        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, sorts))
+      {}
+
       core::identifier_string name() const
       {
         using namespace atermpp;
@@ -103,6 +108,10 @@ namespace lps {
       {
         assert(core::detail::check_term_ProcEqn(m_term));
       }
+
+      process_equation(data::data_variable_list variables1, process_identifier name, data::data_variable_list variables2, process_expression expression)
+        : atermpp::aterm_appl(core::detail::gsMakeProcEqn(variables1, name, variables2, expression))
+      {}
 
       data::data_variable_list variables1() const
       {
@@ -145,6 +154,10 @@ namespace lps {
         assert(core::detail::check_term_ProcessInit(m_term));
       }
 
+      process_initialization(data::data_variable_list variables, process_expression expression)
+        : atermpp::aterm_appl(core::detail::gsMakeProcessInit(variables, expression))
+      {}
+
       data::data_variable_list variables() const
       {
         using namespace atermpp;
@@ -170,6 +183,10 @@ namespace lps {
       {
         assert(core::detail::check_term_ProcSpec(m_term));
       }
+
+      process_specification(data::data_specification data, action_list actions, process_equation_list equations, process_initialization init)
+        : atermpp::aterm_appl(core::detail::gsMakeProcSpec(data, core::detail::gsMakeActSpec(actions), core::detail::gsMakeProcEqnSpec(equations), init))
+      {}
 
       data::data_specification data() const
       {
@@ -219,6 +236,10 @@ namespace lps {
         assert(core::detail::check_term_RenameExpr(m_term));
       }
 
+      rename_expression(core::identifier_string source, core::identifier_string target)
+        : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
+      {}
+
       core::identifier_string source() const
       {
         using namespace atermpp;
@@ -247,6 +268,10 @@ namespace lps {
         assert(core::detail::check_term_MultActName(m_term));
       }
 
+      multi_action_name(core::identifier_string_list names)
+        : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
+      {}
+
       core::identifier_string_list names() const
       {
         using namespace atermpp;
@@ -268,6 +293,10 @@ namespace lps {
       {
         assert(core::detail::check_term_CommExpr(m_term));
       }
+
+      communication_expression(multi_action_name action_name, core::identifier_string name)
+        : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
+      {}
 
       multi_action_name action_name() const
       {
@@ -298,6 +327,10 @@ namespace lps {
         assert(core::detail::check_term_Process(m_term));
       }
 
+      process(const process_identifier pi, const data::data_expression_list& v)
+        : process_expression(core::detail::gsMakeProcess(pi, v))
+      {}
+
       process_identifier identifier() const
       {
         using namespace atermpp;
@@ -324,6 +357,10 @@ namespace lps {
         assert(core::detail::check_term_ProcessAssignment(m_term));
       }
 
+      process_assignment(const process_identifier& pi, const data::data_assignment_list& v)
+        : process_expression(core::detail::gsMakeProcessAssignment(pi, v))
+      {}
+
       process_identifier identifier() const
       {
         using namespace atermpp;
@@ -349,6 +386,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Delta(m_term));
       }
+
+      delta()
+        : process_expression(core::detail::gsMakeDelta())
+      {}
   };
 
   /// \brief Tau
@@ -363,6 +404,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Tau(m_term));
       }
+
+      tau()
+        : process_expression(core::detail::gsMakeTau())
+      {}
   };
 
   /// \brief Sum
@@ -377,6 +422,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Sum(m_term));
       }
+
+      sum(const data::data_variable_list& v, const process_expression& right)
+        : process_expression(core::detail::gsMakeSum(v, right))
+      {}
 
       data::data_variable_list variables() const
       {
@@ -404,6 +453,10 @@ namespace lps {
         assert(core::detail::check_term_Block(m_term));
       }
 
+      block(const core::identifier_string_list& s, const process_expression& right)
+        : process_expression(core::detail::gsMakeBlock(s, right))
+      {}
+
       core::identifier_string_list names() const
       {
         using namespace atermpp;
@@ -429,6 +482,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Hide(m_term));
       }
+
+      hide(const core::identifier_string_list& s, const process_expression& right)
+        : process_expression(core::detail::gsMakeHide(s, right))
+      {}
 
       core::identifier_string_list names() const
       {
@@ -456,6 +513,10 @@ namespace lps {
         assert(core::detail::check_term_Rename(m_term));
       }
 
+      rename(const rename_expression_list& r, const process_expression& right)
+        : process_expression(core::detail::gsMakeRename(r, right))
+      {}
+
       rename_expression_list rename_expressions() const
       {
         using namespace atermpp;
@@ -481,6 +542,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Comm(m_term));
       }
+
+      comm(const communication_expression_list& c, const process_expression& right)
+        : process_expression(core::detail::gsMakeComm(c, right))
+      {}
 
       communication_expression_list communication_expressions() const
       {
@@ -508,6 +573,10 @@ namespace lps {
         assert(core::detail::check_term_Allow(m_term));
       }
 
+      allow(const multi_action_name_list& s, const process_expression& right)
+        : process_expression(core::detail::gsMakeAllow(s, right))
+      {}
+
       multi_action_name_list names()
       {
         using namespace atermpp;
@@ -533,6 +602,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Sync(m_term));
       }
+
+      sync(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeSync(left, right))
+      {}
 
       process_expression left() const
       {
@@ -560,6 +633,10 @@ namespace lps {
         assert(core::detail::check_term_AtTime(m_term));
       }
 
+      at_time(const process_expression& left, const data::data_expression& d)
+        : process_expression(core::detail::gsMakeAtTime(left, d))
+      {}
+
       process_expression expression() const
       {
         using namespace atermpp;
@@ -585,6 +662,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Seq(m_term));
       }
+
+      seq(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeSeq(left, right))
+      {}
 
       process_expression left() const
       {
@@ -612,6 +693,10 @@ namespace lps {
         assert(core::detail::check_term_IfThen(m_term));
       }
 
+      if_then(const data::data_expression& d, const process_expression& right)
+        : process_expression(core::detail::gsMakeIfThen(d, right))
+      {}
+
       data::data_expression condition() const
       {
         using namespace atermpp;
@@ -637,6 +722,10 @@ namespace lps {
       {
         assert(core::detail::check_term_IfThenElse(m_term));
       }
+
+      if_then_else(const data::data_expression& d, const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeIfThenElse(d, left, right))
+      {}
 
       data::data_expression condition() const
       {
@@ -670,6 +759,10 @@ namespace lps {
         assert(core::detail::check_term_BInit(m_term));
       }
 
+      binit(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeBInit(left, right))
+      {}
+
       process_expression left() const
       {
         using namespace atermpp;
@@ -695,6 +788,10 @@ namespace lps {
       {
         assert(core::detail::check_term_Merge(m_term));
       }
+
+      merge(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeMerge(left, right))
+      {}
 
       process_expression left() const
       {
@@ -722,6 +819,10 @@ namespace lps {
         assert(core::detail::check_term_LMerge(m_term));
       }
 
+      lmerge(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeLMerge(left, right))
+      {}
+
       process_expression left() const
       {
         using namespace atermpp;
@@ -748,6 +849,10 @@ namespace lps {
         assert(core::detail::check_term_Choice(m_term));
       }
 
+      choice(const process_expression& left, const process_expression& right)
+        : process_expression(core::detail::gsMakeChoice(left, right))
+      {}
+
       process_expression left() const
       {
         using namespace atermpp;
@@ -766,6 +871,14 @@ namespace lps {
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_expression)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_identifier)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_equation)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_initialization)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_specification)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::rename_expression)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::multi_action_name)
+MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::communication_expression)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_assignment)
 MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::delta)

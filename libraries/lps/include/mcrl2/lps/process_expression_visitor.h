@@ -67,7 +67,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_assignment(const process_expression& x, const process_identifier pi, const data::data_assignment_list& v, Arg& /* a */)
+  virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::data_assignment_list& v, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -460,7 +460,7 @@ struct process_expression_visitor
       }
       leave_choice();
     }
-
+    
   }
 };
 
@@ -509,7 +509,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_assignment(const process_expression& x, const process_identifier pi, const data::data_assignment_list& v)
+  virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::data_assignment_list& v)
   {
     return continue_recursion;
   }
@@ -902,7 +902,7 @@ struct process_expression_visitor<void>
       }
       leave_choice();
     }
-
+    
   }
 };
 //--- end generated text ---//
