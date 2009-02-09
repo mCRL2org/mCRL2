@@ -1,5 +1,6 @@
-// Author(s): Carst Tankink, based on font renderers by VitaminB100 and
-//            A. J. (Hannes) Pretorius
+// Author(s): Carst Tankink, based on font renderers by Remco Blewanus,
+// Thorstin Crijns, Diana Koenraadt, Bas Luksenburg, Jonathan Nelisse,
+// Hans Poppelaars, Bram Schoenmakers and A. J. (Hannes) Pretorius
 //
 // Distributed unaer the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
