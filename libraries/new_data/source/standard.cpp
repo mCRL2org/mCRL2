@@ -260,8 +260,8 @@ namespace mcrl2 {
       result.push_back(if_(s));
       result.push_back(less(s));
       result.push_back(less_equal(s));
-      result.push_back(greater(s));
       result.push_back(greater_equal(s));
+      result.push_back(greater(s));
 
       return result;
     }
@@ -280,8 +280,8 @@ namespace mcrl2 {
       result.push_back(data_equation(make_vector(b, x), if_(b, x, x), x));
       result.push_back(data_equation(make_vector(x), less(x,x), sort_bool_::false_()));
       result.push_back(data_equation(make_vector(x), less_equal(x,x), sort_bool_::true_()));
-      result.push_back(data_equation(make_vector(x, y), greater(x,y), less(y,x)));
       result.push_back(data_equation(make_vector(x, y), greater_equal(x,y), less_equal(y,x)));
+      result.push_back(data_equation(make_vector(x, y), greater(x,y), less(y,x)));
 
       return result;
     }
