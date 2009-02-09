@@ -44,8 +44,12 @@ namespace mcrl2 {
 
         /// \internal
         data_equation(const atermpp::aterm_appl& a)
-          : atermpp::aterm_appl(a)
-        {}
+          : atermpp::aterm_appl(a), m_variables(
+	       atermpp::term_list_iterator< data_expression >(
+	          reinterpret_cast< ATermList >(static_cast< ATerm >(a(0)))),
+	       atermpp::term_list_iterator< data_expression >())
+        {
+	}
 
         /// \brief Constructor
         ///

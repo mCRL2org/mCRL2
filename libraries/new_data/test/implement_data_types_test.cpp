@@ -9,7 +9,9 @@
 /// \file implement_data_types.cpp
 /// \brief Regression test for new_data implementation.
 
+#include <algorithm>
 #include <iostream>
+#include <functional>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
@@ -3021,6 +3023,122 @@ void implement_standard_functions_test()
   BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
 }
 
+bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2) {
+  boost::iterator_range< variable_list::const_iterator > o1variables(o1.variables());
+  boost::iterator_range< variable_list::const_iterator > o2variables(o2.variables());
+
+  if (o1variables.size() == o2variables.size()) {
+    if (((o1.condition() == o2.condition()) &&
+         (o1.lhs() == o2.lhs()) && (o1.rhs() == o2.rhs()))) {
+      return true;
+    }
+    else {
+      // chack alpha equivalence
+      if (!o1variables.empty()) {
+        atermpp::term_list< atermpp::aterm_appl > s;
+
+        // Assumes that the equation variables are declared in the same order
+        while (!o1variables.empty() && !o2variables.empty()) {
+          if (o1variables.front() != o2variables.front()) {
+            if (o1variables.front().sort() != o2variables.front().sort()) {
+              return false;
+            }
+
+            s = atermpp::push_front(s, atermpp::aterm_appl(gsMakeSubst_Appl(o2variables.front(), o1variables.front())));
+          }
+
+          o1variables.advance_begin(1);
+          o2variables.advance_begin(1);
+        }
+
+        if (o1 == mcrl2::new_data::data_equation(gsSubstValues_Appl(s, o2, true))) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+// imposes a strict ordering on the operands (<)
+struct equation_smaller {
+
+  bool operator()(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2) const {
+
+    if (alpha_equivalent(o1, o2)) {
+      return false;
+    }
+
+    return ((o1.variables().size() < o2.variables().size()) ||
+     ((o1.variables().size() == o2.variables().size()) && ((o1.condition() < o2.condition()) ||
+     ((o1.condition() == o2.condition()) && ((o1.rhs() < o2.rhs()) ||
+     ((o1.rhs() == o2.rhs()) && o1.lhs() < o2.lhs()))))));
+  }
+};
+
+// compares equations of two lists disregarding duplicates, equation order and variable naming
+bool compare_modulo_order_and_alpha(
+  atermpp::term_list< mcrl2::new_data::data_equation > olde,
+  atermpp::term_list< mcrl2::new_data::data_equation > newe) {
+
+  std::set< mcrl2::new_data::data_equation, equation_smaller > oldset(olde.begin(), olde.end());
+  std::set< mcrl2::new_data::data_equation, equation_smaller > newset(newe.begin(), newe.end());
+
+  if (oldset != newset) {
+    std::vector< mcrl2::new_data::data_equation > olddiff;
+    std::vector< mcrl2::new_data::data_equation > newdiff;
+
+    std::set_difference(oldset.begin(), oldset.end(), newset.begin(), newset.end(),
+      std::back_insert_iterator< std::vector< mcrl2::new_data::data_equation > >(olddiff),
+      equation_smaller());
+
+    std::set_difference(newset.begin(), newset.end(), oldset.begin(), oldset.end(),
+      std::back_insert_iterator< std::vector< mcrl2::new_data::data_equation > >(newdiff),
+      equation_smaller());
+
+    std::string old_differences;
+
+    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = olddiff.begin(); i != olddiff.end(); ++i) {
+      std::vector< mcrl2::new_data::data_equation >::const_iterator j =
+         std::find_if(newdiff.begin(), newdiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
+
+      BOOST_CHECK(j != newdiff.end());
+
+      if (j == newdiff.end()) {
+        old_differences.append(mcrl2::core::pp(*i)).append(", ");
+      }
+    }
+
+    if (!old_differences.empty()) {
+      std::clog << "IN OLD BUT NOT NEW " << old_differences.substr(0, old_differences.size() - 2) << std::endl;
+    }
+
+    std::string new_differences;
+
+    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = newdiff.begin(); i != newdiff.end(); ++i) {
+      std::vector< mcrl2::new_data::data_equation >::const_iterator j =
+         std::find_if(olddiff.begin(), olddiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
+
+      BOOST_CHECK(j != olddiff.end());
+
+      if (j == olddiff.end()) {
+        new_differences.append(mcrl2::core::pp(*i)).append(", ");
+      }
+    }
+
+    if (!new_differences.empty()) {
+      std::clog << "IN OLD BUT NOT NEW " << new_differences.substr(0, new_differences.size() - 2) << std::endl;
+    }
+
+    return old_differences.empty() && new_differences.empty();
+  }
+
+  return true;
+}
+
 void implement_structured_sort_test()
 {
   t_data_decls data_decls_old;
@@ -3030,27 +3148,37 @@ void implement_structured_sort_test()
   // TODO: Clean up
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
+
   atermpp::vector< new_data::structured_sort_constructor_argument > arguments;
+
   arguments.push_back(new_data::structured_sort_constructor_argument("a0", basic_sort("A")));
   arguments.push_back(new_data::structured_sort_constructor_argument(basic_sort("B")));
   arguments.push_back(new_data::structured_sort_constructor_argument("n0", sort_nat::nat()));
+  arguments.push_back(new_data::structured_sort_constructor_argument("n1", sort_nat::nat()));
 
   atermpp::vector< new_data::structured_sort_constructor > constructors;
   // without arguments or recogniser
+  //  c0
   constructors.push_back(new_data::structured_sort_constructor("c0"));
   // without arguments, with recogniser
+  //  c1?is_one
   constructors.push_back(new_data::structured_sort_constructor("c1", std::string("is_one")));
   // with arguments, without recogniser
+  //  a(a0 : A)
   constructors.push_back(new_data::structured_sort_constructor("a",
      boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   // two arguments, with recogniser
+  //  b(B)?is_b
   constructors.push_back(new_data::structured_sort_constructor("b",
      boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+  //  c(n0 : Nat, n1 : Nat)?is_c
   constructors.push_back(new_data::structured_sort_constructor("c",
      boost::make_iterator_range(arguments.begin() + 1, arguments.end()), "is_c"));
 
   new_data::structured_sort ls(boost::make_iterator_range(constructors));
   old_impl_sort_struct(ls, &old_substs, &data_decls_old);
+  constructors.push_back(new_data::structured_sort_constructor("d",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_d"));
   impl_exprs_appl(ls, &new_substs, &data_decls_new);
 
   std::clog << "== STRUCTURED SORT COMPARISON ==" << std::endl;
@@ -3063,9 +3191,9 @@ void implement_structured_sort_test()
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
-  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
   std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
             << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
+  BOOST_CHECK(compare_modulo_order_and_alpha(data_decls_old.data_eqns, data_decls_new.data_eqns));
 }
 
 void implement_data_specification_test()
