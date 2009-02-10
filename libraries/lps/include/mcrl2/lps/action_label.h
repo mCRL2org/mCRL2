@@ -104,8 +104,4 @@ bool is_action_label(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::action_label)
-/// \endcond
-
 #endif // MCRL2_LPS_ACTION_LABEL_H

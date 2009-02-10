@@ -442,8 +442,4 @@ data_specification set_equations(data_specification s, data_equation_list equati
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_specification)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H

@@ -9,8 +9,6 @@
 /// \file aterm_traits_test.cpp
 /// \brief Test for aterm_traits.
 
-// #define MCRL2_NEW_ATERM_TRAITS
-
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -20,7 +18,6 @@
 class B : public atermpp::aterm_appl
 {
 };
-MCRL2_ATERM_TRAITS_SPECIALIZATION(B)
 
 template <typename Term>
 void test_protection_traits(Term& t)

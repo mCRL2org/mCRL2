@@ -27,10 +27,8 @@ namespace atermpp
     template <typename T>
     friend struct aterm_traits;
 
-#ifdef MCRL2_NEW_ATERM_TRAITS
     template <typename T>
     friend struct aterm_appl_traits;
-#endif
 
     protected:
       /// The wrapped ATerm.

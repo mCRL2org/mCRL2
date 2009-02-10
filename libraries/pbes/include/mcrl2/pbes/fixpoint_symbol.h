@@ -83,8 +83,4 @@ class fixpoint_symbol: public atermpp::aterm_appl
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::fixpoint_symbol)
-/// \endcond
-
 #endif // MCRL2_PBES_FIXPOINT_SYMBOL_H

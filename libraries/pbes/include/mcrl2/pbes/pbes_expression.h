@@ -593,10 +593,6 @@ namespace pbes_expr_optimized {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_expression)
-/// \endcond
-
 namespace mcrl2 {
 
 namespace core {

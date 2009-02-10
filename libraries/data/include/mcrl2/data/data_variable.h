@@ -114,8 +114,4 @@ class data_variable: public data_expression
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_variable)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_VARIABLE_H

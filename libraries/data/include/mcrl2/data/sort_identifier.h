@@ -85,8 +85,4 @@ bool is_sort_identifier(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::sort_identifier)
-/// \endcond
-
 #endif // MCRL2_DATA_SORT_ID_H

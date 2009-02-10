@@ -870,36 +870,6 @@ namespace lps {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_expression)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_identifier)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_equation)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_initialization)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_specification)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::rename_expression)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::multi_action_name)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::communication_expression)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_assignment)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::delta)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::tau)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::sum)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::block)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::hide)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::rename)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::comm)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::allow)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::sync)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::at_time)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::seq)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::if_then)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::if_then_else)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::binit)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::merge)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::lmerge)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::choice)
-/// \endcond
-
 namespace mcrl2 {
 
 namespace core {

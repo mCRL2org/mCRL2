@@ -336,8 +336,4 @@ specification repair_free_variables(const specification& spec)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::specification)
-/// \endcond
-
 #endif // MCRL2_LPS_SPECIFICATION_H

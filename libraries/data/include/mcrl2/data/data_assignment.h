@@ -232,8 +232,4 @@ struct assignment_list_substitution
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_assignment)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_ASSIGNMENT_H

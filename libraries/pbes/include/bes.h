@@ -1351,8 +1351,4 @@ namespace bes
 
 } // namespace bes.
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(bes::bes_expression)
-/// \endcond
-
 #endif

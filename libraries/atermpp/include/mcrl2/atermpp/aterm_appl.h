@@ -245,7 +245,6 @@ namespace atermpp
     static ATerm* ptr(term_appl<Term>& t)    { return &t.term(); }
   };
 
-#ifdef MCRL2_NEW_ATERM_TRAITS
   template <typename T>
   struct aterm_appl_traits
   {
@@ -279,7 +278,6 @@ namespace atermpp
   struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type > {
     typedef aterm_appl_traits< T > base_type;
   };
-#endif
   /// \endcond
 
   /// \brief Equality operator.

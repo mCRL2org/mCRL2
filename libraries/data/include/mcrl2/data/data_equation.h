@@ -164,8 +164,4 @@ namespace data {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_equation)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_EQUATION_H

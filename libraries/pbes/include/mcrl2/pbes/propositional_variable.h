@@ -194,9 +194,4 @@ bool is_propositional_variable_instantiation(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::propositional_variable)
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::propositional_variable_instantiation)
-/// \endcond
-
 #endif // MCRL2_PBES_PROPOSITIONAL_VARIABLE_H

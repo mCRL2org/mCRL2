@@ -282,8 +282,4 @@ namespace accessors
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::action_formula)
-/// \endcond
-
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

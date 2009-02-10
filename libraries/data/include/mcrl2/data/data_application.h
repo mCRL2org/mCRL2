@@ -90,8 +90,4 @@ bool is_data_application(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_application)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_APPLICATION_H

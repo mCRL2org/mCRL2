@@ -516,8 +516,4 @@ namespace state_frm
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::state_formula)
-/// \endcond
-
 #endif // MCRL2_MODAL_STATE_FORMULA_H

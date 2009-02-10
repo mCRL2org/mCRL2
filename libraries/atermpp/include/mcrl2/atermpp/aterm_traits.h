@@ -12,16 +12,13 @@
 #ifndef MCRL2_ATERMPP_ATERM_TRAITS_H
 #define MCRL2_ATERMPP_ATERM_TRAITS_H
 
-#ifdef MCRL2_NEW_ATERM_TRAITS
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
-#endif
 
 #include "aterm2.h"
 
 namespace atermpp {
 
-#ifdef MCRL2_NEW_ATERM_TRAITS
 class aterm;
 
 template < typename T >
@@ -65,40 +62,6 @@ struct select_traits_base {
 template <typename T>
 struct aterm_traits: public select_traits_base< T >::base_type
 {};
-#else // MCRL2_NEW_ATERM_TRAITS
-/// \brief Traits class for terms. It is used to specify how the term interacts
-/// with the garbage collector, and how it can be converted to an ATerm.
-template <typename T>
-struct aterm_traits
-{
-  /// The type of the aterm pointer (ATermAppl / ATermList ...)
-  typedef void* aterm_type;
-
-  /// \brief Protects the term t from garbage collection.
-  /// \param t A term
-  static void protect(T* t)       {}
-
-  /// \brief Unprotects the term t from garbage collection.
-  /// \param t A term
-  static void unprotect(T* t)     {}
-
-  /// \brief Marks t for garbage collection.
-  /// \param t A term
-  static void mark(T t)           {}
-
-  /// \brief Returns the ATerm that corresponds to the term t.
-  /// \param t A term
-  /// \return The ATerm that corresponds to the term t.
-  static T term(const T& t)
-  { return t; }
-
-  /// \brief Returns a pointer to the ATerm that corresponds to the term t.
-  /// \param t A term
-  /// \return A pointer to the  ATerm that corresponds to the term t.
-  static const T* ptr(const T& t)
-  { return &t; }
-};
-#endif // MCRL2_NEW_ATERM_TRAITS
 
 /// \cond INTERNAL_DOCS
 template <>
@@ -169,21 +132,5 @@ struct aterm_traits<ATermInt>
 /// \endcond
 
 } // namespace atermpp
-
-/// \brief Generates an aterm_traits specialization for a given type.
-/// \param type The type for which a specialization is generated.
-#define MCRL2_ATERM_TRAITS_SPECIALIZATION(type)       \
-namespace atermpp {                                   \
-template<>                                            \
-struct aterm_traits<type>                             \
-{                                                     \
-  typedef ATermAppl aterm_type;                       \
-  static void protect(type t)   { t.protect(); }      \
-  static void unprotect(type t) { t.unprotect(); }    \
-  static void mark(type t)      { t.mark(); }         \
-  static ATerm term(type t)     { return t.term(); }  \
-  static ATerm* ptr(type& t)    { return &t.term(); } \
-};                                                    \
-}
 
 #endif // MCRL2_ATERMPP_ATERM_TRAITS_H
