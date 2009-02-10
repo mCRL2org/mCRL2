@@ -132,7 +132,6 @@ class A: public data_expression
       : data_expression(term)
     {}
 };
-MCRL2_ATERM_TRAITS_SPECIALIZATION(A)
 
 void f(data_expression d)
 {
