@@ -24,18 +24,9 @@ namespace atermpp {
 #ifdef MCRL2_NEW_ATERM_TRAITS
 class aterm;
 
-template <typename T>
-class term_appl;
-
-template <typename T, typename C = typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type>
-struct aterm_appl_traits;
-
-/// \brief Traits class for terms. It is used to specify how the term interacts
-/// with the garbage collector, and how it can be converted to an ATerm.
-template <typename T>
-struct aterm_traits: public aterm_appl_traits<T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type>
+template < typename T >
+struct non_aterm_traits
 {
-/*
   /// The type of the aterm pointer (ATermAppl / ATermList ...)
   typedef void* aterm_type;
 
@@ -46,11 +37,11 @@ struct aterm_traits: public aterm_appl_traits<T, typename boost::enable_if<typen
   /// \brief Unprotects the term t from garbage collection.
   /// \param t A term
   static void unprotect(T* t)     {}
-*/
+
   /// \brief Marks t for garbage collection.
   /// \param t A term
   static void mark(T t)           {}
-/*
+
   /// \brief Returns the ATerm that corresponds to the term t.
   /// \param t A term
   /// \return The ATerm that corresponds to the term t.
@@ -62,40 +53,18 @@ struct aterm_traits: public aterm_appl_traits<T, typename boost::enable_if<typen
   /// \return A pointer to the  ATerm that corresponds to the term t.
   static const T* ptr(const T& t)
   { return &t; }
-*/
 };
 
-template <>
-struct aterm_traits<bool>
-{
-  static bool term(const bool& t)       { return t; }
-  static const bool* ptr(const bool& t) { return &t; }
-  static void mark(bool t)                 {}
+template < typename T, typename C = void >
+struct select_traits_base {
+  typedef non_aterm_traits< T > base_type;
 };
 
-template <>
-struct aterm_traits<int>
-{
-  static int term(const int& t)       { return t; }
-  static const int* ptr(const int& t) { return &t; }
-  static void mark(int t)                 {}
-};
-
-template <>
-struct aterm_traits<double>
-{
-  static double term(const double& t) { return t; }
-  static const double* ptr(const double& t) { return &t; }
-  static void mark(double t)                 {}
-};
-
-template <>
-struct aterm_traits<const char*>
-{
-  static const char* term(const char* const& t) { return t; }
-  static const char* const* ptr(const char* const& t) { return &t; }
-  static void mark(const char* t)                 {}
-};
+/// \brief Traits class for terms. It is used to specify how the term interacts
+/// with the garbage collector, and how it can be converted to an ATerm.
+template <typename T>
+struct aterm_traits: public select_traits_base< T >::base_type
+{};
 #else // MCRL2_NEW_ATERM_TRAITS
 /// \brief Traits class for terms. It is used to specify how the term interacts
 /// with the garbage collector, and how it can be converted to an ATerm.

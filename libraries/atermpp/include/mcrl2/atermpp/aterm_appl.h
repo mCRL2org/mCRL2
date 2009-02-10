@@ -247,7 +247,7 @@ namespace atermpp
 
 #ifdef MCRL2_NEW_ATERM_TRAITS
   template <typename T>
-  struct aterm_appl_traits<T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type>
+  struct aterm_appl_traits
   {
     /// \brief The type of the aterm pointer (ATermAppl / ATermList ...)
     typedef ATermAppl aterm_type;
@@ -273,6 +273,11 @@ namespace atermpp
     /// \param t A term
     /// \return A pointer to the  ATerm that corresponds to the term t.
     static ATerm* ptr(aterm_appl& t)    { return &t.term(); }
+  };
+
+  template < typename T >
+  struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type > {
+    typedef aterm_appl_traits< T > base_type;
   };
 #endif
   /// \endcond

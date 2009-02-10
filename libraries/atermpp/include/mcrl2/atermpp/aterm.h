@@ -28,7 +28,7 @@ namespace atermpp
     friend struct aterm_traits;
 
 #ifdef MCRL2_NEW_ATERM_TRAITS
-    template <typename T, typename C>
+    template <typename T>
     friend struct aterm_appl_traits;
 #endif
 
