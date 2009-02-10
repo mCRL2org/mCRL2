@@ -244,6 +244,37 @@ namespace atermpp
     static ATerm term(term_appl<Term> t)     { return t.term(); }
     static ATerm* ptr(term_appl<Term>& t)    { return &t.term(); }
   };
+
+#ifdef MCRL2_NEW_ATERM_TRAITS
+  template <typename T>
+  struct aterm_appl_traits<T, typename boost::enable_if<typename boost::is_base_of<term_appl<aterm>, T>::type>::type>
+  {
+    /// \brief The type of the aterm pointer (ATermAppl / ATermList ...)
+    typedef ATermAppl aterm_type;
+  
+    /// \brief Protects the term t from garbage collection.
+    /// \param t A term
+    static void protect(aterm_appl t)   { t.protect(); }     
+  
+    /// \brief Unprotects the term t from garbage collection.
+    /// \param t A term
+    static void unprotect(aterm_appl t) { t.unprotect(); }   
+  
+    /// \brief Marks t for garbage collection.
+    /// \param t A term
+    static void mark(aterm_appl t)      { t.mark(); }        
+  
+    /// \brief Returns the ATerm that corresponds to the term t.
+    /// \param t A term
+    /// \return The ATerm that corresponds to the term t.
+    static ATerm term(aterm_appl t)     { return t.term(); } 
+  
+    /// \brief Returns a pointer to the ATerm that corresponds to the term t.
+    /// \param t A term
+    /// \return A pointer to the  ATerm that corresponds to the term t.
+    static ATerm* ptr(aterm_appl& t)    { return &t.term(); }
+  };
+#endif
   /// \endcond
 
   /// \brief Equality operator.
