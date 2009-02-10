@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/data_reconstruct.h
+/// \file mcrl2/new_data/detail/data_reconstruct.h
 ///
 /// \brief Reconstruct data types from mCRL2 specification and expressions.
 
@@ -18,7 +18,8 @@
 #include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {
-  namespace core {
+  namespace new_data {
+    namespace detail {
 
 /// \brief     Reconstruct data types of an mCRL2 expression after data
 ///            implementation with respect to a type checked mCRL2
@@ -49,11 +50,14 @@ ATerm reconstruct_exprs(ATerm expr, const ATermAppl spec = NULL);
 ///            If something went wrong, an appropriate error
 ///            message is printed and NULL is returned.
 inline ATermAppl reconstruct_spec(ATermAppl spec) {
-  assert(detail::gsIsProcSpec(spec) || detail::gsIsLinProcSpec(spec) ||
-         detail::gsIsPBES(spec) || detail::gsIsDataSpec(spec));
+  assert(mcrl2::core::detail::gsIsProcSpec(spec) ||
+         mcrl2::core::detail::gsIsLinProcSpec(spec) ||
+         mcrl2::core::detail::gsIsPBES(spec) ||
+	 mcrl2::core::detail::gsIsDataSpec(spec));
   return (ATermAppl) reconstruct_exprs((ATerm) spec, spec);
 }
 
+    }
   }
 }
 

@@ -20,7 +20,7 @@
 #include <mcrl2/data/data_specification.h>
 #include <mcrl2/data/sort_identifier.h>
 #include <mcrl2/data/sort_expression.h>
-#include <mcrl2/core/data_reconstruct.h>
+#include <mcrl2/new_data/detail/data_reconstruct.h>
 
 using namespace atermpp;
 using namespace atermpp::detail;

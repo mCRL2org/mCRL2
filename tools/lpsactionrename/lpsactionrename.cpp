@@ -28,7 +28,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/core/data_reconstruct.h"
+#include "mcrl2/new_data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/core/messaging.h"

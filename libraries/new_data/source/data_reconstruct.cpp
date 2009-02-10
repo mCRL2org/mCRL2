@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file data_reconstruct.cpp
+/// \file mcrl2/new_data/data_reconstruct.cpp
 //
 //This file contains the implementation of data reconstruction. I.e.
 //it attempts to revert the data implementation.
@@ -17,7 +17,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
 
-#include "mcrl2/core/data_reconstruct.h"
+#include "mcrl2/new_data/detail/data_reconstruct.h"
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
@@ -33,7 +33,8 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::new_data::detail;
 
 namespace mcrl2 {
-  namespace core {
+  namespace new_data {
+    namespace detail {
 
 // declarations
 // ----------------------------------------------
@@ -2588,5 +2589,6 @@ bool is_function_operation(ATermAppl data_expr)
 
 }
 
-  }   //namespace core
+    }   //namespace detail
+  }   //namespace new_data
 }     //namespace mcrl2

@@ -2,8 +2,6 @@ project pbes
        : source-location ../source
        ;
 
-
-
 mcrl2-library pbes
        : pbes_rewrite.cpp
          pbes2bool.cpp
