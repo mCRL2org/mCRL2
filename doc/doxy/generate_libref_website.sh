@@ -45,6 +45,7 @@ LIBRARY_LIST="
 ATerm++:atermpp:libraries/atermpp
 Core:core:libraries/core
 Data:data:libraries/data
+NewData:new_data:libraries/new_data
 LPS:lps:libraries/lps
 LTS:lts:libraries/lts
 PBES:pbes:libraries/pbes
