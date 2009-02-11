@@ -404,8 +404,8 @@ bool grape_event_click::Do( void )
     }
   } // end switch
 
-  //if we added a object
-  if ((state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
+  //if we added an object
+  if ((state == ADD_NONTERMINATING_TRANSITION) || (state == ADD_TERMINATING_TRANSITION) || (state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
   {
     //deselect all objects
     grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
@@ -1174,8 +1174,8 @@ bool grape_event_drag::Do( void )
   } // end switch
   
   
-  //if we added a object
-  if ((state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
+  //if we added an object
+  if ((state == ADD_NONTERMINATING_TRANSITION) || (state == ADD_TERMINATING_TRANSITION) || (state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
   {
     //deselect all objects
     grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
