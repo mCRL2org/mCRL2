@@ -850,42 +850,12 @@ We provide an overview of the classes with a short description, we also describe
   {container\_sort}
   {This represents container sorts. These are sorts with a name and an element sort. An example of this is $\List(Nat)$, representing the List of natural numbers. In this, List is the name of the container, and Nat is the element sort.}
   {sort\_expression}
-  {\begin{itemize}
-    \item list\_sort
-    \item set\_sort
-    \item bag\_sort
-   \end{itemize}}
+  {}
   {\begin{description}
     \item[container\_name] Returns the name of the container. For example the container name of $\List(Nat)$ is $List$.
     \item[element\_sort] Returns the sort of the elements of the container. For example the element sort of $\List(Nat)$ is $Nat$.
-    \item[is\_list] Returns true iff the container name is $List$.
-    \item[is\_set] Returns true iff the container name is $Set$.
-    \item[is\_bag] Returns true iff the container name is $Bag$.
    \end{description}}
 
-
-\dataclass
-  {list\_sort}
-  {This represents list sorts. An example of this is $\List(Nat)$, representing the List of natural numbers. This is a container with a fixed container name of $List$.}
-  {container\_sort}
-  {}
-  {}
-
-
-\dataclass
-  {set\_sort}
-  {This represents set sorts. An example of this is Set(Nat), representing the set of natural numbers. This is a container with a fixed container name of $Set$.}
-  {container}
-  {}
-  {}
-
-
-\dataclass
-  {bag\_sort}
-  {This represents bag sorts. An example of this is Bag(Nat), representing the bag of natural numbers. This is a container with a fixed container name of $Bag$.}
-  {container}
-  {}
-  {}
 
 %  \item[sort\_visitor] is an abstract visitor class. This can be used by concrete visitors to implement operations on sorts. For an in-depth explanation of the visitor pattern see also \cite{gamma94dp}.
 
@@ -990,9 +960,6 @@ All these list types provide iterator interfaces.
   {}
   {\begin{description}
     \item[name] Returns the name of the function symbol.
-    \item[is\_unary] Returns whether this is a unary function.
-    \item[is\_binary] Returns whether this is a binary function.
-    \item[is\_ternary] Returns whether this is a ternary function.
     \item[arity] Returns the arity of this function.
    \end{description}}
 
@@ -1005,8 +972,6 @@ All these list types provide iterator interfaces.
     \item lambda
     \item forall
     \item exists
-    \item set\_comprehension
-    \item bag\_comprehension
    \end{itemize}}
   {\begin{description}
     \item[binding\_operator] Returns the binding operator of the abstraction.
@@ -1015,8 +980,6 @@ All these list types provide iterator interfaces.
     \item[is\_lambda] Returns \true iff the abstraction is a lambda abstraction.
     \item[is\_forall] Returns \true iff the abstraction is a universal quantification.
     \item[is\_exists] Returns \true iff the abstraction is an existential quantification.
-    \item[is\_set\_comprehension] Returns \true iff the abstraction is a set comprehension.
-    \item[is\_bag\_comprehension] Returns \true iff the abstraction is a bag comprehension.
    \end{description}}
 
 
@@ -1053,23 +1016,6 @@ All these list types provide iterator interfaces.
   {abstraction}
   {}
   {}
-
-
-\dataclass
-  {set\_comprehension}
-  {This denotes a set comprehension, e.g. $\{ x_0, \dots, x_n \mid t \}$.}
-  {abstraction}
-  {}
-  {}
-
-
-\dataclass
-  {bag\_comprehension}
-  {This denotes a bag comprehension, e.g. $\{ x_0 : m_0, \dots, x_n : m_0 \mid t \}$ (with $m_i$ the number of occurrences of $x_i$.}
-  {abstraction}
-  {}
-  {}
-
 
 \dataclass
   {where\_clause}
@@ -1130,23 +1076,23 @@ A data specification represents a signature $\Sigma$ with an associated set of e
   {\begin{description}
     \item[sorts] Returns all sorts in the specification, except the function sorts.
     \item[constructors] Returns all constructors declared in the specification.
-    \item[functions] Returns all functions declared in the specification.
+    \item[mappings] Returns all mappings declared in the specification.
     \item[equations] Returns all equations declared in the specification.
     \item[aliases(s)] Returns all aliases of sort $s$.
     \item[dependent\_sorts(constructor)] Returns all sorts on which a constructor depends. See also Section~\ref{sec:sort_finiteness}.
     \item[dependent\_sorts(sort)] Returns all sorts on which a sort depends. See also Section~\ref{sec:sort_finiteness}.
     \item[constructors(sort)] Returns all constructors of $sort$.
-    \item[functions(sort)] Returns all functions which have $sort$ as a result.
+    \item[mappings(sort)] Returns all mappings which have $sort$ as a result.
     \item[equations(d)] Returns all equations with $d$ as the head of one of its sides.
     \item[is\_certainly\_finite(s)] Returns true iff sort $s$ is definately finite.
     \item[default\_expression] Returns a valid data expression according to this data specification of the given sort s. If no valid expression can be found, an exception is thrown. It returns a minimal term. When selecting function symbols, constructor symbols have a preference over mappings. For each sort, the same term is returned.
     \item[add\_sort] Adds a sort to the specification.
     \item[add\_constructor] Adds a constructor to the specification.
-    \item[add\_function] Adds a function to the specification.
+    \item[add\_mapping] Adds a mapping to the specification.
     \item[add\_equation] Adds an equation to the specification.
     \item[add\_sorts(sl)] Adds all sorts in $sl$ to the specification.
     \item[add\_constructors(fl)] Adds all constructors in $fl$ to the specification.
-    \item[add\_functions(fl)] Adds all functions in $fl$ to the specification.
+    \item[add\_mappings(fl)] Adds all mappings in $fl$ to the specification.
     \item[add\_equations(el)] Adds all equations in $el$ to the specification.
    \end{description}}
 
