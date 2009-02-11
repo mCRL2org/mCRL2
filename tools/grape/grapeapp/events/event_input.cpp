@@ -70,11 +70,13 @@ bool grape_event_click::Do( void )
         {
           if ( !obj_ptr->get_selected() || !m_shift_pressed )
           {
+            // select object
             grape_event_select* event = new grape_event_select( m_main_frame, obj_ptr, m_shift_pressed );
             m_main_frame->get_event_handler()->Submit( event, false );
           }
           else
           {
+            // deselect object
             grape_event_deselect* event = new grape_event_deselect( m_main_frame, obj_ptr );
             m_main_frame->get_event_handler()->Submit( event, false );
           }
@@ -82,9 +84,9 @@ bool grape_event_click::Do( void )
       }
       else // no objects were touched, deselect everything
       {
+        // deselect all objects
         grape_event_deselect_all* event = new grape_event_deselect_all( m_main_frame );
         m_main_frame->get_event_handler()->Submit(event, false );
-        // deselect all objects
       }
       break;
     }
@@ -409,7 +411,6 @@ bool grape_event_click::Do( void )
     grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
     m_main_frame->get_event_handler()->Submit(event, false);
   }
-
   return true;
 }
 
@@ -458,7 +459,7 @@ grape_event_drag::~grape_event_drag( void )
 bool grape_event_drag::Do( void )
 {
   canvas_state state = m_main_frame->get_glcanvas()->get_canvas_state();
-
+  
   // only add objects when the mousebutton is up again.
   if ( m_mousedown && state != SELECT )
   {
@@ -1171,6 +1172,16 @@ bool grape_event_drag::Do( void )
       break;
     }
   } // end switch
+  
+  
+  //if we added a object
+  if ((state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_VISIBLE) || (state == ADD_BLOCKED) || (state == ADD_NONTERMINATING_TRANSITION))
+  {
+    //deselect all objects
+    grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
+    m_main_frame->get_event_handler()->Submit(event, false);
+  }
+  
   return true;
 }
 
