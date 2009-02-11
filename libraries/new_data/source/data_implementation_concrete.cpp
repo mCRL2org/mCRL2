@@ -829,7 +829,6 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   assert(gsIsSortStruct(sort_struct));
   assert(gsIsSortId(sort_id));
   assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
-  gsVerboseMsg("Implementing structured sort %T with name %T\n", sort_struct, sort_id);
 
   // declare fresh sort identifier for sort_struct 
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
