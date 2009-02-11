@@ -27,8 +27,6 @@
 #include "mcrl2/new_data/lambda.h"
 #include "mcrl2/new_data/forall.h"
 #include "mcrl2/new_data/exists.h"
-#include "mcrl2/new_data/set_comprehension.h"
-#include "mcrl2/new_data/bag_comprehension.h"
 #include "mcrl2/new_data/where_clause.h"
 #include "mcrl2/new_data/assignment.h"
 
@@ -266,66 +264,6 @@ void exists_test()
   BOOST_CHECK(I_.body() == I.body()) ;
 }
 
-void set_comprehension_test()
-{
-  basic_sort s("S");
-
-  variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
-  set_comprehension I(xl_range, x);
-  BOOST_CHECK(I.binding_operator() == "setcomprehension");
-  BOOST_CHECK(I.is_set_comprehension());
-  BOOST_CHECK(I.variables() == xl_range);
-  BOOST_CHECK(I.body() == x);
-  sort_expression s_(s);
-  sort_expression_list s_l(make_vector(s_));
-
-  // TODO Check sort
-
-  data_expression I_e(I);
-  set_comprehension I_e_(I_e);
-  BOOST_CHECK(I_e_ == I);
-  BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
-  BOOST_CHECK(I_e_.variables() == I.variables());
-  BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_("setcomprehension", xl_range, x);
-  BOOST_CHECK(I_ == I);
-  BOOST_CHECK(I_.binding_operator() == I.binding_operator());
-  BOOST_CHECK(I_.variables() == I.variables());
-  BOOST_CHECK(I_.body() == I.body()) ;
-}
-
-void bag_comprehension_test()
-{
-  basic_sort s("S");
-
-  variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
-  bag_comprehension I(xl_range, x);
-  BOOST_CHECK(I.binding_operator() == "bagcomprehension");
-  BOOST_CHECK(I.is_bag_comprehension());
-  BOOST_CHECK(I.variables() == xl_range);
-  BOOST_CHECK(I.body() == x);
-  sort_expression s_(s);
-  sort_expression_list s_l(make_vector(s_));
-
-  // TODO Check sort
-
-  data_expression I_e(I);
-  bag_comprehension I_e_(I_e);
-  BOOST_CHECK(I_e_ == I);
-  BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
-  BOOST_CHECK(I_e_.variables() == I.variables());
-  BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_("bagcomprehension", xl_range, x);
-  BOOST_CHECK(I_ == I);
-  BOOST_CHECK(I_.binding_operator() == I.binding_operator());
-  BOOST_CHECK(I_.variables() == I.variables());
-  BOOST_CHECK(I_.body() == I.body()) ;
-}
-
 void where_declaration_test()
 {
   basic_sort s("S");
@@ -369,8 +307,6 @@ int test_main(int argc, char** argv)
   lambda_test();
   forall_test();
   exists_test();
-  set_comprehension_test();
-  bag_comprehension_test();
   where_declaration_test();
   assignment_test();
 
