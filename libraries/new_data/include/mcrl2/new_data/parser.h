@@ -28,6 +28,7 @@
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/new_data/detail/data_implementation.h"
 
 namespace mcrl2 {
@@ -164,11 +165,10 @@ namespace detail {
   variable parse_variable(std::string var_decl, std::string data_spec = "")
   {
     std::istringstream in(var_decl + ";");
-    std::istringstream lps_stream(data_spec);
     atermpp::term_list< data_expression > v(core::parse_data_vars(in));
     assert(v.size() == 1);
     v = core::type_check_data_vars(v,
-           new_data::detail::parse_specification(lps_stream));
+           detail::data_specification_to_aterm_data_spec(parse_data_specification(data_spec)));
     variable_list w(v.begin(), v.end());
     return w.front();
   }

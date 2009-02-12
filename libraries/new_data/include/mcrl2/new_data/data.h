@@ -15,13 +15,11 @@
 
 #include "abstraction.h"
 #include "application.h"
-#include "bag_comprehension.h"
 #include "data_expression.h"
 #include "exists.h"
 #include "forall.h"
 #include "function_symbol.h"
 #include "lambda.h"
-#include "set_comprehension.h"
 #include "variable.h"
 #include "where_clause.h"
 
