@@ -117,7 +117,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = new_data::detail::implement_data_data_spec(spec);
+    ATermAppl result = new_data::detail::implement_data_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;

@@ -190,7 +190,7 @@ using namespace mcrl2::new_data::detail;
       ATermAppl raw_specification;
       if (infilename.empty()) {
         //use empty data specification
-        raw_specification = implement_data_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
+        raw_specification = implement_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
       } else {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
@@ -244,7 +244,7 @@ using namespace mcrl2::new_data::detail;
         throw mcrl2::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
       //implement data in the formula
-      f_formula = implement_data_data_expr(f_formula,v_reconstructed_spec);
+      f_formula = implement_data_expr(f_formula,v_reconstructed_spec);
       if(!f_formula){
         throw mcrl2::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }

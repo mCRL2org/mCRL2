@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief new_data assignment.
@@ -55,7 +55,7 @@ namespace mcrl2 {
         {
           return variable(atermpp::arg1(*this));
         }
-        
+
         /// \brief Returns the right hand side of the assignment
         inline
         data_expression rhs() const

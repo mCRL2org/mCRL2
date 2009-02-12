@@ -147,8 +147,8 @@ namespace mcrl2 {
         ///corresponding to that sort.
         atermpp::map<sort_expression, function_symbol_list> m_constructors;
 
-        ///\brief The functions of the specification.
-        function_symbol_list m_functions;
+        ///\brief The mappings of the specification.
+        function_symbol_list m_mappings;
 
         ///\brief The equations of the specification.
         data_equation_list m_equations;
@@ -159,8 +159,8 @@ namespace mcrl2 {
         ///\brief Table containing system defined constructors.
         atermpp::table m_sys_constructors;
 
-        ///\brief Table containing system defined functions.
-        atermpp::table m_sys_functions;
+        ///\brief Table containing system defined mappings.
+        atermpp::table m_sys_mappings;
 
         ///\brief Table containing system defined equations.
         atermpp::table m_sys_equations;
@@ -175,18 +175,18 @@ namespace mcrl2 {
       data_specification(const atermpp::aterm_appl& t)
         : m_sorts(detail::aterm_sort_spec_to_sort_expression_list(atermpp::arg1(t))),
           m_constructors(detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(t))),
-          m_functions(detail::aterm_map_spec_to_function_list(atermpp::arg3(t))),
+          m_mappings(detail::aterm_map_spec_to_function_list(atermpp::arg3(t))),
           m_equations(detail::aterm_data_eqn_spec_to_equation_list(atermpp::arg4(t)))
       {}
 
       ///\brief Constructor
       data_specification(const boost::iterator_range<sort_expression_list::const_iterator>& sorts,
                          const boost::iterator_range<atermpp::map<sort_expression, function_symbol_list>::const_iterator>& constructors,
-                         const boost::iterator_range<function_symbol_list::const_iterator>& functions,
+                         const boost::iterator_range<function_symbol_list::const_iterator>& mappings,
                          const boost::iterator_range<data_equation_list::const_iterator>& equations)
         : m_sorts(sorts.begin(), sorts.end()),
           m_constructors(constructors.begin(), constructors.end()),
-          m_functions(functions.begin(), functions.end()),
+          m_mappings(mappings.begin(), mappings.end()),
           m_equations(equations.begin(), equations.end())
       {}
 
@@ -244,26 +244,26 @@ namespace mcrl2 {
         }
       }
 
-      /// \brief Gets all functions in this specification
+      /// \brief Gets all mappings in this specification
       ///
-      /// \ret All functions in this specification, including recognisers and
+      /// \ret All mappings in this specification, including recognisers and
       /// projection functions from structured sorts.
       inline
-      boost::iterator_range<function_symbol_list::const_iterator> functions() const
+      boost::iterator_range<function_symbol_list::const_iterator> mappings() const
       {
-        return boost::make_iterator_range(m_functions);
+        return boost::make_iterator_range(m_mappings);
       }
 
-      /// \brief Gets all functions of a sort
+      /// \brief Gets all mappings of a sort
       ///
       /// \param[in] s A sort expression.
-      /// \ret All functions in this specification, for which s occurs as a
-      /// righthandside of the function's sort.
+      /// \ret All mappings in this specification, for which s occurs as a
+      /// righthandside of the mapping's sort.
       inline
-      function_symbol_list functions(const sort_expression& s) const
+      function_symbol_list mappings(const sort_expression& s) const
       {
         function_symbol_list result;
-        for (function_symbol_list::const_iterator i = m_functions.begin(); i != m_functions.end(); ++i)
+        for (function_symbol_list::const_iterator i = m_mappings.begin(); i != m_mappings.end(); ++i)
         {
           if(i->sort().is_function_sort())
           {
@@ -359,7 +359,7 @@ namespace mcrl2 {
       {
         function_symbol_list cs(constructors());
         assert(std::count(cs.begin(), cs.end(), f) == 0);
-        assert(std::find(m_functions.begin(), m_functions.end(), f) == m_functions.end());
+        assert(std::find(m_mappings.begin(), m_mappings.end(), f) == m_mappings.end());
         sort_expression s;
         if (f.sort().is_function_sort())
         {
@@ -385,12 +385,12 @@ namespace mcrl2 {
         m_sys_constructors.put(f,f);
       }
 
-      /// \brief Adds a function to this specification
+      /// \brief Adds a mapping to this specification
       ///
       /// \param[in] f A function symbol.
       /// \pre f does not yet occur in this specification.
       inline
-      void add_function(const function_symbol& f)
+      void add_mapping(const function_symbol& f)
       {
         sort_expression s;
         if (f.sort().is_function_sort())
@@ -407,21 +407,21 @@ namespace mcrl2 {
           function_symbol_list fl(m_constructors.find(s)->second);
           assert(std::count(fl.begin(), fl.end(), f) == 0);
         }
-        assert(std::count(m_functions.begin(), m_functions.end(), f) == 0);
+        assert(std::count(m_mappings.begin(), m_mappings.end(), f) == 0);
         m_constructors.find(s)->second.push_back(f);
       }
 
-      /// \brief Adds a function to this specification, and marks it as system
+      /// \brief Adds a mapping to this specification, and marks it as system
       ///        defined.
       ///
       /// \param[in] f A function symbol.
       /// \pre f does not yet occur in this specification.
       /// \post is_system_defined(f) == true
       inline
-      void add_system_defined_function(const function_symbol& f)
+      void add_system_defined_mapping(const function_symbol& f)
       {
-        add_function(f);
-        m_sys_functions.put(f,f);
+        add_mapping(f);
+        m_sys_mappings.put(f,f);
       }
 
       /// \brief Adds an equation to this specification
@@ -500,29 +500,29 @@ namespace mcrl2 {
         }
       }
 
-      /// \brief Adds functions to this specification
+      /// \brief Adds mappings to this specification
       ///
       /// \param[in] fl A range of function symbols.
       inline
-      void add_functions(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
+      void add_mappings(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
       {
         for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
-          add_function(*i);
+          add_mapping(*i);
         }
       }
 
-      /// \brief Adds functions to this specification, and marks them as system
+      /// \brief Adds mappings to this specification, and marks them as system
       ///        defined.
       ///
       /// \param[in] fl A range of function symbols.
       /// \post for all f in fl: is_system_defined(f)
       inline
-      void add_system_defined_functions(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
+      void add_system_defined_mappings(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
       {
         for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
-          add_system_defined_function(*i);
+          add_system_defined_mapping(*i);
         }
       }
 
@@ -554,7 +554,7 @@ namespace mcrl2 {
 
       /// \brief Removes sort from specification.
       ///
-      /// Note that this does not remove constructors, functions and equations
+      /// Note that this does not remove constructors, mappings and equations
       /// for a sort.
       /// \param[in] s A sort expression.
       /// \post s does not occur in this specification.
@@ -625,31 +625,31 @@ namespace mcrl2 {
         }
       }
 
-      /// \brief Removes function from specification.
+      /// \brief Removes mapping from specification.
       ///
-      /// Note that this does not remove equations containing the function.
+      /// Note that this does not remove equations in which the mapping occurs.
       /// \param[in] f A function.
       /// \post f does not occur as constructor.
       inline
-      void remove_function(const function_symbol& f)
+      void remove_mapping(const function_symbol& f)
       {
         if (is_system_defined(f))
         {
-          m_sys_functions.remove(f);
+          m_sys_mappings.remove(f);
         }
-        m_functions.erase(std::find(m_functions.begin(), m_functions.end(), f));
+        m_mappings.erase(std::find(m_mappings.begin(), m_mappings.end(), f));
       }
 
-      /// \brief Removes functions from specification.
+      /// \brief Removes mappings from specification.
       ///
       /// \param[in] fl A range of constructors.
-      /// \post for all f in fl: f not in functions()
+      /// \post for all f in fl: f not in mappings()
       inline
-      void remove_functions(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
+      void remove_mappings(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
       {
         for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
-          remove_function(*i);
+          remove_mapping(*i);
         }
       }
 
@@ -699,10 +699,10 @@ namespace mcrl2 {
       bool is_system_defined(const function_symbol& f)
       {
         return (m_sys_constructors.get(f) != atermpp::aterm() ||
-                m_sys_functions.get(f)    != atermpp::aterm());
+                m_sys_mappings.get(f)    != atermpp::aterm());
       }
 
-      /// \brief Checks wheter an equation is system defined.
+      /// \brief Checks whether an equation is system defined.
       ///
       /// \param[in] e An equation.
       /// \ret true iff e is system defined, false otherwise.
@@ -810,7 +810,7 @@ namespace mcrl2 {
     {
       return x.sorts() == y.sorts() &&
              x.constructors() == y.constructors() &&
-             x.functions() == y.functions() &&
+             x.mappings() == y.mappings() &&
              x.equations() == y.equations();
     }
 

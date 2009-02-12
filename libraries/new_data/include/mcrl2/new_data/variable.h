@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/application.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief new_data variable.
@@ -38,7 +38,17 @@ namespace mcrl2 {
 
         /// \brief Constructor.
         ///
-        /// \param[in] d A new_data expression.
+        /// \param[in] d A term expression.
+        /// \pre d is a variable.
+        variable(const atermpp::aterm_appl& d)
+          : data_expression(d)
+        {
+          assert(data_expression(d).is_variable());
+        }
+
+        /// \brief Constructor.
+        ///
+        /// \param[in] d A data expression.
         /// \pre d is a variable.
         variable(const data_expression& d)
           : data_expression(d)

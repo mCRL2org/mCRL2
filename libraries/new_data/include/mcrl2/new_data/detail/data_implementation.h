@@ -35,7 +35,7 @@ namespace mcrl2 {
  *             went wrong, an appropriate error message is printed and
  *             NULL is returned.
  **/
-inline ATermAppl implement_data_data_spec(ATermAppl spec)
+inline ATermAppl implement_data_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsDataSpec(spec));
   return implement_data_spec(spec);
@@ -143,7 +143,7 @@ inline ATermAppl implement_data_sort_expr(ATermAppl sort_expr, ATermAppl& spec)
  *             something went wrong, an appropriate error message is
  *             printed and NULL is returned.
 **/
-inline ATermAppl implement_data_data_expr(ATermAppl data_expr, ATermAppl& spec)
+inline ATermAppl implement_data_expr(ATermAppl data_expr, ATermAppl& spec)
 {
   assert(core::detail::gsIsDataExpr(data_expr));
   return impl_exprs_with_spec(data_expr, spec);

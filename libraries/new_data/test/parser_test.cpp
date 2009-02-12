@@ -28,7 +28,7 @@ void parser_test()
   new_data::data_specification spec(new_data::parse_data_specification(text));
   BOOST_CHECK(spec.sorts().size() == 1);
   BOOST_CHECK(spec.constructors().size() == 1);
-  BOOST_CHECK(spec.functions().size() == 1);
+  BOOST_CHECK(spec.mappings().size() == 1);
 }
 
 int test_main(int argc, char** argv)

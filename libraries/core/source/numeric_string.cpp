@@ -16,7 +16,7 @@
 #include "workarounds.h"
 
 namespace mcrl2 {
-  namespace utilities {
+  namespace core {
 
       //String representations of numbers
       //---------------------------------

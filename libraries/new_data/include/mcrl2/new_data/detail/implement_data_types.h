@@ -26,11 +26,11 @@ namespace mcrl2 {
 
       inline atermpp::aterm_appl implement_data_specification(const data_specification& spec)
       {
-        return implement_data_data_spec(data_specification_to_aterm_data_spec(spec));
+        return implement_data_spec(data_specification_to_aterm_data_spec(spec));
       }
 
     } // namespace detail
-    
+
   } // namespace new_data
 
 } // namespace mcrl2

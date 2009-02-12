@@ -188,7 +188,7 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 static void add_basis(ATermTable used_data)
 {
 	/* Add sorts/functions that should always be available */
-	data_specification data(implement_data_data_spec(gsMakeEmptyDataSpec()));
+	data_specification data(implement_data_spec(gsMakeEmptyDataSpec()));
 	for (sort_expression_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
 	{
 		add_used_sort(*i,used_data);

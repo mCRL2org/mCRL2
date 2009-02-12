@@ -77,7 +77,7 @@ void test_constructors()
   boost::iterator_range<function_symbol_list::const_iterator> fgl_range(boost::make_iterator_range(fgl));
   boost::iterator_range<function_symbol_list::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_list::const_iterator> fghl_range(boost::make_iterator_range(fghl));
-  
+
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -144,35 +144,35 @@ void test_functions()
   spec.add_sort(s);
   spec.add_sort(s0);
   data_specification spec1(spec);
-  spec.add_function(f);
-  spec.add_function(g);
-  spec.add_function(h);
-  spec1.add_functions(fghl);
+  spec.add_mapping(f);
+  spec.add_mapping(g);
+  spec.add_mapping(h);
+  spec1.add_mappings(fghl);
 
-  BOOST_CHECK(spec.functions().size() == 3);
-  BOOST_CHECK(std::find(spec.functions().begin(), spec.functions().end(), f) != spec.functions().end());
-  BOOST_CHECK(std::find(spec.functions().begin(), spec.functions().end(), g) != spec.functions().end());
-  BOOST_CHECK(std::find(spec.functions().begin(), spec.functions().end(), h) != spec.functions().end());
+  BOOST_CHECK(spec.mappings().size() == 3);
+  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), f) != spec.mappings().end());
+  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), g) != spec.mappings().end());
+  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), h) != spec.mappings().end());
 
   BOOST_CHECK(spec == spec1);
-  BOOST_CHECK(spec.functions(s).size() == 2);
-  BOOST_CHECK(std::find(spec.functions(s).begin(), spec.functions(s).end(), f) != spec.functions(s).end());
-  BOOST_CHECK(std::find(spec.functions(s).begin(), spec.functions(s).end(), g) != spec.functions(s).end());
-  BOOST_CHECK(std::find(spec.functions(s0).begin(), spec.functions(s0).end(), h) != spec.functions(s0).end());
-  BOOST_CHECK(spec.functions() == fghl_range);
-  BOOST_CHECK(spec1.functions(s) == fgl_range);
-  BOOST_CHECK(spec1.functions(s0) == hl_range);
-  BOOST_CHECK(spec1.functions() == fghl_range);
-  BOOST_CHECK(spec1.functions(s).size() == 2);
-  BOOST_CHECK(std::find(spec1.functions(s).begin(), spec1.functions(s).end(), f) != spec1.functions(s).end());
-  BOOST_CHECK(std::find(spec1.functions(s).begin(), spec1.functions(s).end(), g) != spec1.functions(s).end());
-  BOOST_CHECK(std::find(spec1.functions(s0).begin(), spec1.functions(s0).end(), h) != spec1.functions(s0).end());
+  BOOST_CHECK(spec.mappings(s).size() == 2);
+  BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), f) != spec.mappings(s).end());
+  BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), g) != spec.mappings(s).end());
+  BOOST_CHECK(std::find(spec.mappings(s0).begin(), spec.mappings(s0).end(), h) != spec.mappings(s0).end());
+  BOOST_CHECK(spec.mappings() == fghl_range);
+  BOOST_CHECK(spec1.mappings(s) == fgl_range);
+  BOOST_CHECK(spec1.mappings(s0) == hl_range);
+  BOOST_CHECK(spec1.mappings() == fghl_range);
+  BOOST_CHECK(spec1.mappings(s).size() == 2);
+  BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), f) != spec1.mappings(s).end());
+  BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
+  BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
 
   function_symbol i("i", s0);
-  spec.add_system_defined_function(i);
+  spec.add_system_defined_mapping(i);
   function_symbol_list il(make_vector(i));
   boost::iterator_range<function_symbol_list::const_iterator> il_range(il);
-  spec1.add_system_defined_functions(il_range);
+  spec1.add_system_defined_mappings(il_range);
   BOOST_CHECK(spec == spec1);
   BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
@@ -183,8 +183,8 @@ void test_functions()
   BOOST_CHECK(!spec1.is_system_defined(g));
   BOOST_CHECK(!spec1.is_system_defined(h));
 
-  spec.remove_functions(il_range);
-  spec1.remove_function(i);
+  spec.remove_mappings(il_range);
+  spec1.remove_mapping(i);
   BOOST_CHECK(spec == spec1);  
 }
 

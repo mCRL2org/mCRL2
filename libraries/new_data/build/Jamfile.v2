@@ -6,11 +6,15 @@ mcrl2-library new_data
        : source/data_implementation_concrete.cpp 
          source/data_reconstruct.cpp 
          source/standard.cpp
+         [ glob source/rewrite/*.cpp ]
+         [ glob source/prover/*.cpp ]
        : <library>/libraries//core
          <library>/libraries//atermpp
          <library>/libraries//utilities
-         <library>/site-config//cvc
          <include>../include
+         <library>/site-config//cvc
+         <library>/site-config//m               # for rewrite
+         <library>/site-config//dynamic_loading # for rewrite
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic
          <include>../include

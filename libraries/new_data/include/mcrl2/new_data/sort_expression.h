@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
 
 namespace mcrl2 {
   
@@ -105,6 +106,15 @@ namespace mcrl2 {
     /// \brief list of sorts
     ///
     typedef atermpp::vector<sort_expression> sort_expression_list;
+
+    /// \brief Returns true if the term t is a sort_expression
+    /// \param t A term
+    /// \return True if the term is a sort expression.
+    inline
+    bool is_sort_expression(atermpp::aterm_appl t)
+    {
+      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
+    }
 
   } // namespace new_data
 

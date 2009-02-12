@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/data_expression.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function symbol.

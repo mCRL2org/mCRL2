@@ -51,12 +51,12 @@ namespace mcrl2 {
       {
         return core::detail::gsMakeDataSpec(sort_expression_list_to_aterm_sort_spec(s.sorts()),
                                             constructor_list_to_aterm_cons_spec(s.constructors()),
-                                            function_list_to_aterm_map_spec(s.functions()),
+                                            function_list_to_aterm_map_spec(s.mappings()),
                                             data_equation_list_to_aterm_eqn_spec(s.equations()));
       }
 
     } // namespace detail
-    
+
   } // namespace new_data
 
 } // namespace mcrl2

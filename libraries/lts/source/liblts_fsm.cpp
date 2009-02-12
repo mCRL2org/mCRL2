@@ -109,7 +109,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
       gsVerboseMsg("error type checking state argument\n");
       return NULL;
     }
-    expr = implement_data_data_expr(expr,reconstructed_lps);
+    expr = implement_data_expr(expr,reconstructed_lps);
     if ( expr == NULL )
     {
       gsVerboseMsg("error implementing data of state argument\n");

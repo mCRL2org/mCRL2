@@ -443,7 +443,7 @@ data_expression pbes_to_data(pbes_expression e)
      aterm_appl x =
        gsMakeBinder(gsMakeForall(),var(e),pbes_to_data(arg(e)));
      return (gsMakeDataExprExists(x));
-     //implement_data_data_expr(x,spec);
+     //implement_data_expr(x,spec);
      // (if implement, then there is no way back anymore!)
    }
  else if (is_exists(e))

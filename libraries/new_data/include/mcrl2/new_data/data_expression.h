@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/struct.h" // for gsIsDataExpr
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/function_sort.h"
 
@@ -131,6 +132,14 @@ namespace mcrl2 {
     ///
     typedef atermpp::vector<data_expression> data_expression_list;
 
+    /// \brief Returns true if the term t is a data expression
+    /// \param t A term
+    /// \return True if the term is a data expression.
+    inline
+    bool is_data_expression(atermpp::aterm_appl t)
+    {
+      return core::detail::gsIsDataExpr(t);
+    }
   } // namespace new_data
 
 } // namespace mcrl2

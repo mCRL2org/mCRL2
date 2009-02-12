@@ -584,7 +584,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       }
 
       //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant, f_reconstructed_lps);
+      f_invariant = implement_data_expr(f_invariant, f_reconstructed_lps);
       if (!f_invariant) {
         throw mcrl2::runtime_error("Data implementation of the invariant formula failed.\n");
       }

@@ -261,7 +261,7 @@ static ATermAppl parse_term(string &term_string, data_specification &spec, ATerm
 
   gsDebugMsg("type checked: %T\n",term);
 
-  term = implement_data_data_expr(term,reconstructed_spec);
+  term = implement_data_expr(term,reconstructed_spec);
   if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
   {
     spec = data_specification(reconstructed_spec);
@@ -292,7 +292,7 @@ static data_specification load_specification(const string &infilename)
   ATermAppl raw_specification;
   if (infilename.empty()) {
     //use empty data specification
-    raw_specification = implement_data_data_spec(gsMakeEmptyDataSpec());
+    raw_specification = implement_data_spec(gsMakeEmptyDataSpec());
   } else {
     //load data specification from file infilename
     gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());

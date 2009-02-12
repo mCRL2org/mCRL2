@@ -1392,7 +1392,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
                 else
                 {
                   ATermAppl data_type_spec = datatype_spec;
-                  ATermAppl a_implemented_data_expr = implement_data_data_expr( a_type_checked_action_param_expr, data_type_spec );
+                  ATermAppl a_implemented_data_expr = implement_data_expr( a_type_checked_action_param_expr, data_type_spec );
                   if (a_implemented_data_expr == 0 )
                   {
                     // ERROR: action parameter is not valid

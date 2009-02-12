@@ -18,6 +18,7 @@
 #include <sstream>
 #include <fstream>
 #include "aterm2.h"
+#include "boost/algorithm/string.hpp"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/messaging.h"
@@ -43,7 +44,7 @@ namespace detail {
       throw mcrl2::runtime_error("parse error");
     return result;
   }
-  
+
   inline
   ATermAppl type_check_specification(ATermAppl spec)
   {
@@ -52,7 +53,7 @@ namespace detail {
       throw mcrl2::runtime_error("type check error");
     return result;
   }
-  
+
   inline
   ATermAppl alpha_reduce(ATermAppl spec)
   {
@@ -89,7 +90,7 @@ namespace detail {
     ATermAppl result = new_data::detail::parse_specification(lps_stream);
     result           = new_data::detail::type_check_specification(result);
     result           = new_data::detail::alpha_reduce(result);
-   
+
     return data_specification(atermpp::arg1(result));
   }
 
@@ -111,8 +112,84 @@ namespace detail {
     result           = new_data::detail::type_check_specification(result);
     result           = new_data::detail::alpha_reduce(result);
     result           = new_data::detail::deprecated_implement_data_specification(result);
-   
+
     return atermpp::arg1(result);
+  }
+
+  /// \brief Parses a single data expression.
+  /// \param text A string
+  /// \param var_decl A string
+  /// with their types.<br>
+  /// An example of this is:
+  /// \code
+  ///   m, n: Nat;
+  ///   b: Bool;
+  /// \endcode
+  /// \param data_spec A string
+  /// \return The parsed expression
+  inline
+  data_expression parse_data_expression(std::string text, std::string var_decl = "", std::string data_spec = "")
+  {
+    data_expression result;
+
+    // make an equation of the form 'x == x'
+    std::string s = "eqn (" + text + ") = (" + text + ");";
+    if (!boost::trim_copy(var_decl).empty())
+    {
+      s = "var\n" + var_decl + "\n" + s;
+    }
+    s = data_spec + (data_spec.empty() ? "" : "\n") + s;
+
+    try
+    {
+      data_specification data_spec(new_data::parse_data_specification(s));
+
+      // extract the left hand side of the equation 'x == x'
+      std::vector<data_equation> eqn(data_spec.equations().begin(), data_spec.equations().end());
+      result = eqn.back().lhs();
+    }
+    catch (std::runtime_error e)
+    {
+      std::cout << "<specification>" << s << std::endl;
+      std::cout << e.what() << std::endl;
+    }
+    return result;
+  }
+
+  /// \brief Parses a data variable.
+  /// \param var_decl A string
+  /// \param data_spec A string
+  /// \return The parsed variable
+  inline
+  variable parse_variable(std::string var_decl, std::string data_spec = "")
+  {
+    std::istringstream in(var_decl + ";");
+    std::istringstream lps_stream(data_spec);
+    atermpp::term_list< data_expression > v(core::parse_data_vars(in));
+    assert(v.size() == 1);
+    v = core::type_check_data_vars(v,
+           new_data::detail::parse_specification(lps_stream));
+    variable_list w(v.begin(), v.end());
+    return w.front();
+  }
+
+  /// \brief Creates a data specification that contains rewrite rules for the standard data types like
+  /// Pos, Nat and Int.
+  /// \return The created data specification
+  inline
+  data_specification default_data_specification()
+  {
+    // Add dummy variables for standard types, to make sure that
+    // rewrite rules are created for them.
+    return parse_data_specification(
+      "map dummy1:Pos;  \n"
+      "var dummy2:Bool; \n"
+      "    dummy3:Pos;  \n"
+      "    dummy4:Nat;  \n"
+      "    dummy5:Int;  \n"
+      "    dummy6:Real; \n"
+      "eqn dummy1 = 1;  \n"
+    );
   }
 
 } // namespace new_data

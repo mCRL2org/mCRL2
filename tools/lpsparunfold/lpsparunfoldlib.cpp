@@ -17,7 +17,7 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
 {
   m_data_specification = s;
   m_lps = lps;
-  for (sort_expression_list::const_iterator i =  s.sorts().begin(); 
+  for (sort_expression_list::const_iterator i =  s.sorts().begin();
                                             i != s.sorts().end();
                                             ++i){
     sortSet.insert(*i);
@@ -41,8 +41,8 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
   }
 
   {
-    //Error: s.functions( unfoldParameter ); -> 0 functions
-    boost::iterator_range<function_symbol_list::const_iterator> fsl= s.functions();
+    //Error: s.mappings( unfoldParameter ); -> 0 functions
+    boost::iterator_range<function_symbol_list::const_iterator> fsl= s.mappings();
     for (function_symbol_list::const_iterator i = fsl.begin();
                                               i != fsl.end();
                                               ++i){

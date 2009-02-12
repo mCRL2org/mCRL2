@@ -14,7 +14,7 @@
 #define MCRL2_NEW_DATA_DATA_H
 
 #include "abstraction.h"
-#include "application.h" 
+#include "application.h"
 #include "bag_comprehension.h"
 #include "data_expression.h"
 #include "exists.h"

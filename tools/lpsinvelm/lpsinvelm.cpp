@@ -301,7 +301,7 @@ using namespace mcrl2::new_data::detail;
       }
 
       //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant,f_reconstructed_spec);
+      f_invariant = implement_data_expr(f_invariant,f_reconstructed_spec);
       if(!f_invariant){
         gsErrorMsg("Data implementation of the invariant formula failed.\n");
         exit(1);

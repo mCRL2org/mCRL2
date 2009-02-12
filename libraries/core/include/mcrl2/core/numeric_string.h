@@ -13,7 +13,7 @@
 #define __NUMERIC_STRING_FUNCTIONS_H__
 
 namespace mcrl2 {
-  namespace utilities {
+  namespace core {
 
     //String representations of numbers
     //---------------------------------
