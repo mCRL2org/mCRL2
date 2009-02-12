@@ -207,6 +207,7 @@ namespace boost
     
 # ifndef BOOST_SYSTEM_NO_DEPRECATED
     //  deprecated synonyms
+    inline const error_category &  get_posix_category() { return get_generic_category(); }
     static const error_category &  posix_category = get_generic_category();
     static const error_category &  errno_ecat     = get_generic_category();
     static const error_category &  native_ecat    = get_system_category();
@@ -214,7 +215,7 @@ namespace boost
 
     //  class error_condition  -----------------------------------------------//
 
-    //  error_conditions are portable, error_codes are system or lib specific
+    //  error_conditions are portable, error_codes are system or library specific
 
     class error_condition
     {
@@ -383,8 +384,30 @@ namespace boost
     };
 
     //  predefined error_code object used as "throw on error" tag
+# ifndef BOOST_SYSTEM_NO_DEPRECATED
     BOOST_SYSTEM_DECL extern error_code throws;
+# endif
 
+    //  Moving from a "throws" object to a "throws" function without breaking
+    //  existing code is a bit of a problem. The workaround is to place the
+    //  "throws" function in namespace boost rather than namespace boost::system.
+
+  }  // namespace system
+
+  namespace detail { inline system::error_code * throws() { return 0; } }
+    //  Misuse of the error_code object is turned into a noisy failure by
+    //  poisoning the reference. This particular implementation doesn't
+    //  produce warnings or errors from popular compilers, is very efficient
+    //  (as determined by inspecting generated code), and does not suffer
+    //  from order of initialization problems. In practice, it also seems
+    //  cause user function error handling implementation errors to be detected
+    //  very early in the development cycle.
+
+  inline system::error_code & throws()
+    { return *detail::throws(); }
+
+  namespace system
+  {
     //  non-member functions  ------------------------------------------------//
 
     inline bool operator!=( const error_code & lhs,
