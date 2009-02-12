@@ -134,6 +134,7 @@ local boost-requirements =
                <include>$(BOOST_ROOT)
                <define>BOOST_ALL_NO_LIB=1 # no autolinking
                <define>BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS=1
+               <define>BOOST_MULTI_INDEX_DISABLE_SERIALIZATION=1
                <target-os>windows:<define>WIN32_LEAN_AND_MEAN=1
                <target-os>windows:<define>_WIN32_WINNT=0x0501 ;
 
