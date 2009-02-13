@@ -609,12 +609,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::structured_sort_constructor_argument);
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::structured_sort_constructor);
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::structured_sort);
-/// \endcond
-
-
 #endif // MCRL2_NEW_DATA_SORT_EXPRESSION_H
 

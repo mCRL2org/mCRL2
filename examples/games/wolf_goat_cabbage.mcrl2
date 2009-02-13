@@ -12,7 +12,7 @@
 %
 % This example shows the use of sets in mCRL2.
 %
-% Jan Friso Groote & Aad Mathijssen, Januari 2009
+% Jan Friso Groote & Aad Mathijssen, January 2009
 
 sort Item     = struct wolf | goat | cabbage;
      Position = struct left | right;

@@ -184,9 +184,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::application)
-/// \endcond
-
 #endif // MCRL2_NEW_DATA_APPLICATION_H
 

@@ -105,8 +105,4 @@ class pbes_initializer: public atermpp::aterm_appl
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::detail::pbes_initializer)
-/// \endcond
-
 #endif // MCRL2_PBES_DETAIL_PBES_INITIALIZER_H

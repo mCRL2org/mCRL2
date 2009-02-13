@@ -93,8 +93,4 @@ bool is_sort_arrow(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::sort_arrow)
-/// \endcond
-
 #endif // MCRL2_DATA_SORT_ARROW_H

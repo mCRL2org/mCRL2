@@ -113,10 +113,6 @@ namespace bes {
 } // namespace bes
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::bes::boolean_variable)
-/// \endcond
-
 //--------------------------------------------------------------------//
 //                    boolean expression
 //--------------------------------------------------------------------//
@@ -336,11 +332,6 @@ namespace core {
 } // namespace core
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::bes::boolean_expression)
-/// \endcond
-
-
 namespace mcrl2 {
 namespace bes {
 
@@ -480,10 +471,6 @@ typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
 } // namespace bes
 } // namespace mcrl2
-
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::bes::boolean_equation)
-/// \endcond
 
 //--------------------------------------------------------------------//
 //                    boolean equation system

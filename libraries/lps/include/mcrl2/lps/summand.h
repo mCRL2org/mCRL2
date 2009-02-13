@@ -391,8 +391,4 @@ typedef atermpp::term_list<summand> summand_list;
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::summand)
-/// \endcond
-
 #endif // MCRL2_LPS_SUMMAND_H

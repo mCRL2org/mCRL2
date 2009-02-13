@@ -1,4 +1,5 @@
-// Author(s): VitaminB100
+// Author(s): Remco Blewanus, Thorstin Crijns, Diana Koenraadt, Bas Luksenburg,
+// Jonathan Nelisse, Hans Poppelaars and Bram Schoenmakers
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at

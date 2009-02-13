@@ -73,9 +73,5 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::new_data::assignment)
-/// \endcond
-
 #endif // MCRL2_NEW_DATA_ASSIGNMENT_H
 

@@ -27,6 +27,9 @@ namespace atermpp
     template <typename T>
     friend struct aterm_traits;
 
+    template <typename T>
+    friend struct aterm_appl_traits;
+
     protected:
       /// The wrapped ATerm.
       ATerm m_term;

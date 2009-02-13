@@ -12,7 +12,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
-      #[ run parse_test.cpp ]
+      [ run process_test.cpp ]
       [ run action_rename_test.cpp ]
       [ run data_specification_test.cpp ]
       [ run linearization_test.cpp ]

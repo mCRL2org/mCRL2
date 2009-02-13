@@ -95,8 +95,4 @@ bool is_data_operation(atermpp::aterm_appl t)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::data::data_operation)
-/// \endcond
-
 #endif // MCRL2_DATA_DATA_OPERATION_H

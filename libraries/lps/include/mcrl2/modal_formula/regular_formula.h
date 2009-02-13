@@ -74,8 +74,4 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::modal::regular_formula)
-/// \endcond
-
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

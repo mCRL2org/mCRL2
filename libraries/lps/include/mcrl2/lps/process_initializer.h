@@ -123,8 +123,4 @@ class process_initializer: public atermpp::aterm_appl
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::process_initializer)
-/// \endcond
-
 #endif // MCRL2_LPS_PROCESS_INITIALIZER_H

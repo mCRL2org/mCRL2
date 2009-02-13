@@ -10,6 +10,7 @@ project libraries/aterm/test
 
 test-suite aterm
     :
+      [ run aterm_traits_test.cpp ]
       [ run make_match_test.cpp ]
       [ run aterm_list_test.cpp ]
       [ run aterm_test.cpp ]

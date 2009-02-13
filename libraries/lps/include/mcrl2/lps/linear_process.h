@@ -334,8 +334,4 @@ linear_process set_summands(linear_process l, summand_list summands)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::linear_process)
-/// \endcond
-
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

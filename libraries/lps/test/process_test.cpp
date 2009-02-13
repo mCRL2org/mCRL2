@@ -15,10 +15,23 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/process_expression_visitor.h"
+#include "mcrl2/lps/process_expression_builder.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::lps;
+
+void visit_process_expression(const process_expression& x)
+{
+  process_expression_visitor<> visitor;
+  visitor.visit(x);
+}
+
+void build_process_expression(const process_expression& x)
+{
+  process_expression_builder<> visitor;
+  visitor.visit(x);
+}
 
 void test_processes()
 {
@@ -33,7 +46,13 @@ void test_processes()
             << core::pp(spec.actions()) << std::endl
             << spec.equations() << std::endl
             << spec.init() << std::endl;
-  BOOST_CHECK(false);
+
+  for (process_equation_list::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
+  {
+    std::cout << "<equation>" << core::pp(*i) << std::endl;
+    visit_process_expression(i->expression());
+    build_process_expression(i->expression());
+  }
 }
 
 int test_main(int argc, char** argv )

@@ -123,8 +123,4 @@ bool equal_signatures(const action& a, const action& b)
 
 } // namespace mcrl2
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::lps::action)
-/// \endcond
-
 #endif // MCRL2_LPS_ACTION_H

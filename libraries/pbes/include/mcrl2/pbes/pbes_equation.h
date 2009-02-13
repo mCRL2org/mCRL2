@@ -184,8 +184,4 @@ struct term_list_iterator_traits<pbes_equation>
 } // namespace atermpp
 /// \endcond
 
-/// \cond INTERNAL_DOCS
-MCRL2_ATERM_TRAITS_SPECIALIZATION(mcrl2::pbes_system::pbes_equation)
-/// \endcond
-
 #endif // MCRL2_PBES_PBES_EQUATION_H
