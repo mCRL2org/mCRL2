@@ -156,6 +156,25 @@ namespace squadt {
         m_output_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
       }
 
+      // Helper class for wxEventHandling
+      class processor_details::wx_handler : public wxEvtHandler {
+        private:
+
+          processor_details&                                        m_window;
+          boost::shared_ptr< squadt::processor::object_descriptor > m_object;
+
+        public:
+
+          void on_main_type_change(wxCommandEvent& e) {
+            m_object->get_generator()->change_format(*m_object, build_system::storage_format(std::string(e.GetString().fn_str())));
+
+            m_window.show_outputs();
+          }
+
+          wx_handler(processor_details& w, boost::shared_ptr< squadt::processor::object_descriptor > const& object) : m_window(w), m_object(object) {
+          }
+      };
+
       void processor_details::build(boost::shared_ptr< squadt::processor::object_descriptor > const& object) {
         using namespace boost::filesystem;
 
@@ -183,25 +202,6 @@ namespace squadt {
           u->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Type: ")), 0, wxALIGN_CENTRE);
           u->AddSpacer(5);
           u->Add(m_type, 2, wxEXPAND|wxALIGN_CENTRE);
-
-          // Helper class for wxEventHandling
-          class wx_handler : public wxEvtHandler {
-            private:
-
-              processor_details&                                        m_window;
-              boost::shared_ptr< squadt::processor::object_descriptor > m_object;
-
-            public:
-
-              void on_main_type_change(wxCommandEvent& e) {
-                m_object->get_generator()->change_format(*m_object, build_system::storage_format(std::string(e.GetString().fn_str())));
-
-                m_window.show_outputs();
-              }
-
-              wx_handler(processor_details& w, boost::shared_ptr< squadt::processor::object_descriptor > const& object) : m_window(w), m_object(object) {
-              }
-          };
 
           wx_handler* handler = new wx_handler(*this, object);
 

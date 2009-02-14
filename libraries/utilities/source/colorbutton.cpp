@@ -26,20 +26,19 @@ namespace mcrl2 {
       void wxColorButton::OnMouseDown( wxMouseEvent& /*event*/ ) {
         wxColourData coldat;
         coldat.SetColour( GetBackgroundColour() );
-        wxColourDialog* coldlg = new wxColourDialog( appFrame, &coldat );
-        coldlg->CentreOnParent();
-        if ( coldlg->ShowModal() == wxID_OK )
+        wxColourDialog coldlg( appFrame, &coldat );
+        coldlg.CentreOnParent();
+        if ( coldlg.ShowModal() == wxID_OK )
         {
-          coldat = coldlg->GetColourData();
+          coldat = coldlg.GetColourData();
           SetBackgroundColour( coldat.GetColour() );
           ClearBackground();
 
           wxCommandEvent cmdEvent( wxEVT_COMMAND_BUTTON_CLICKED, GetId() );
           cmdEvent.SetEventObject( this );
-          GetParent()->ProcessEvent( cmdEvent );
+          ProcessEvent( cmdEvent );
         }
-        coldlg->Close();
-        coldlg->Destroy();
+        coldlg.Close();
       }
 
       BEGIN_EVENT_TABLE( wxColorButton, wxPanel )

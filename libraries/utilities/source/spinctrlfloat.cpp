@@ -91,7 +91,7 @@ namespace mcrl2 {
 
         wxCommandEvent NewEvent( wxEVT_COMMAND_SPINCTRL_UPDATED, GetId());
         NewEvent.SetEventObject( this );
-        GetParent()->ProcessEvent( NewEvent );
+        GetParent()->GetEventHandler()->ProcessEvent( NewEvent );
       }
 
       void wxSpinCtrlFloat::OnSpin( wxSpinEvent& event )
@@ -101,7 +101,7 @@ namespace mcrl2 {
 
         wxCommandEvent NewEvent( wxEVT_COMMAND_SPINCTRL_UPDATED, GetId());
         NewEvent.SetEventObject( this );
-        GetParent()->ProcessEvent( NewEvent );
+        GetParent()->GetEventHandler()->ProcessEvent( NewEvent );
       }
 
       double wxSpinCtrlFloat::GetValue()

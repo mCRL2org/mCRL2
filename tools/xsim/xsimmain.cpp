@@ -83,8 +83,8 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     CreateContent();
 
     /* Attach resize event handler */
-    Connect(id, wxEVT_SIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
-    Connect(id, wxEVT_MAXIMIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
+    Connect(id, wxEVT_SIZE, wxSizeEventHandler(XSimMain::OnResize), 0, this);
+    Connect(id, wxEVT_MAXIMIZE, wxMaximizeEventHandler(XSimMain::OnMaximize), 0, this);
 
     state_varnames = ATmakeList0();
     ATprotectList(&state_varnames);
@@ -246,10 +246,8 @@ void XSimMain::CreateContent()
     stateview->DeleteAllItems();
 }
 
-void XSimMain::UpdateSizes(wxCommandEvent& event) {
+void XSimMain::UpdateSizes() {
   int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
-
-  event.Skip();
 
   if (s <= 80) {
     s = wxLIST_AUTOSIZE;
@@ -281,6 +279,20 @@ void XSimMain::UpdateSizes(wxCommandEvent& event) {
   stateview->SetClientSize(0,0);
   stateview->SetClientSize(w,h);
 #endif
+}
+
+void XSimMain::OnMaximize(wxMaximizeEvent& event)
+{
+  event.Skip();
+
+  UpdateSizes();
+}
+
+void XSimMain::OnResize(wxSizeEvent& event)
+{
+  event.Skip();
+
+  UpdateSizes();
 }
 
 void XSimMain::SetInteractiveness(bool interactive)

@@ -67,7 +67,8 @@ class event_helper : public wxEvtHandler, public wxClientData {
     event_helper(S const& s, W& w) : tipi_element(const_cast < S& > (s)), wx_element(w) {
     }
 
-    void connect(wxEventType const& e) {
+    template < typename E >
+    void connect(E e) {
       wx_element.Connect(e, wxCommandEventHandler(event_helper::export_wx_changes), this, this);
     }
 
@@ -560,7 +561,7 @@ namespace squadt {
 
       size_event.SetEventObject(GetParent());
 
-      GetParent()->GetParent()->ProcessEvent(size_event);
+      GetParent()->GetParent()->GetEventHandler()->ProcessEvent(size_event);
       GetParent()->Layout();
       GetParent()->Refresh();
     }
