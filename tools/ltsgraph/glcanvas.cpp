@@ -50,7 +50,6 @@ GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
 
 GLCanvas::~GLCanvas()
 {
-  owner->getAlgorithm(0)->stop();
 }
 
 void GLCanvas::initialize()
@@ -240,7 +239,7 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
 {
   oldX = event.GetX();
   oldY = event.GetY();
-  pickObjects(oldX, oldY, event.CmdDown());
+  pickObjects(oldX, oldY, event);
   owner->dragObject();
   display();
 }
@@ -256,7 +255,7 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldX = event.GetX();
   oldY = event.GetY();
 
-  pickObjects(oldX, oldY, event.CmdDown());
+  pickObjects(oldX, oldY, event);
   owner->lockObject();
   display();
 }
@@ -295,7 +294,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 }
 
 
-void GLCanvas::pickObjects(int x, int y, bool ctrl)
+void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
@@ -357,13 +356,13 @@ void GLCanvas::pickObjects(int x, int y, bool ctrl)
 
     hits = glRenderMode(GL_RENDER);
 
-    processHits(hits, selectBuf, ctrl);
+    processHits(hits, selectBuf, e);
     reshape();
     display();
   }
 }
 
-void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
+void GLCanvas::processHits(const GLint hits, GLuint *buffer, wxMouseEvent const& e)
 {
   // This method selects the object clicked.
   //
@@ -415,11 +414,14 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool ctrl)
     }
     case IDS::STATE:
     {
-      if(!ctrl) {
+      if(!e.CmdDown()) {
         owner->selectState(selectedObject[1]);
       }
-      else {
+      if (e.Button(wxMOUSE_BTN_LEFT)) {
         owner->colourState(selectedObject[1]);
+      }
+      else {
+        owner->uncolourState(selectedObject[1]);
       }
       break;
     }

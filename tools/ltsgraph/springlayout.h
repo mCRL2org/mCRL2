@@ -21,6 +21,8 @@ class SpringLayout : public LayoutAlgorithm
     SpringLayout(LTSGraph* owner);
     void setupPane(wxPanel* pane);
     void stop();
+    void start();
+    void toggle();
 
 
 

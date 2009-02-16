@@ -65,6 +65,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     void deselect();
     void selectState(size_t state);
     void colourState(size_t state);
+    void uncolourState(size_t state);
     void selectTransition(size_t state, size_t trans);
     void selectSelfLoop(size_t state, size_t trans);
     void selectLabel(size_t state, size_t trans);
@@ -87,8 +88,6 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     std::string getFileName() const;
     int getRadius() const;
     double getAspectRatio() const;
-    std::string getVersion();
-    std::string getRevision();
 };
 
 
