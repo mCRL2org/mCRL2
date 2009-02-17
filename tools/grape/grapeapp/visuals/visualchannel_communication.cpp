@@ -43,9 +43,9 @@ void visualchannel_communication::draw( void )
     draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_object->get_selected());
   }
 
-  // draw bounding box; only drawn if the object is selected
-  // draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
-  // disabled because not useful for channel communication; cannot be resized anyway.
+  // draw control point
+  draw_filled_rectangle(m_object->get_coordinate(), static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  
 }
 
 bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
