@@ -65,6 +65,8 @@ namespace squadt {
 
         private:
 
+          class wx_handler;
+
           /** \brief Helper function that places the widgets */
           void build(boost::shared_ptr< squadt::processor::object_descriptor > const&);
 

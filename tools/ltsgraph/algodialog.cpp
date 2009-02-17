@@ -44,7 +44,6 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
     }
     sizer->Add(nb, 0, wxEXPAND|wxALL, 5);
   }
-
   else
   {
     LayoutAlgorithm* algo = app->getAlgorithm(0);
@@ -61,5 +60,4 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   SetSizer(sizer);
   Fit();
   Layout();
-
 }

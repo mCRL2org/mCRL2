@@ -34,9 +34,11 @@ SpringLayout::SpringLayout(LTSGraph* owner)
   app = owner;
   edgeStiffness = 3;
   nodeStrength = 100000;
-  naturalLength = 20;
+  naturalLength = 10;
   stopOpti = true;
   stopped = true;
+  optimizeBtn = 0;
+  stopBtn = 0;
 }
 
 void SpringLayout::setupPane(wxPanel* pane)
@@ -99,98 +101,59 @@ void SpringLayout::setupPane(wxPanel* pane)
 
 void SpringLayout::onStart(wxCommandEvent& /* event */)
 {
-  Graph* g = app->getGraph();
-  if (g) {
-    optimizeBtn->Enable(false);
-    stopBtn->Enable(true);
-    stopOpti = false;
-    stopped = false;
-
-    while(!stopOpti)
-    {
-      layoutGraph(g);
-
-      if(app)
-      {
-        app->display();
-      }
-
-      wxYield();
-    }
-
-    stopped = true;
-
-  }
+  start();
 }
 
 
 void SpringLayout::onStop(wxCommandEvent& /* event */)
 {
-  if(optimizeBtn)
-  {
-    optimizeBtn->Enable(true);
-  }
-  if(stopBtn)
-  {
-    stopBtn->Enable(false);
-  }
-  stopOpti = true;
+  stop();
 }
 
 void SpringLayout::layoutGraph(Graph* graph)
 {
   size_t nrStates = graph->getNumberOfStates();
-  std::vector<float> sumFX;
-  std::vector<float> sumFY;
+  std::vector<float> sumFX(nrStates, 0.0f);
+  std::vector<float> sumFY(nrStates, 0.0f);
 
   double windowWidth = 2000;
   double windowHeight = 2000;
 
   for(size_t i = 0; i < nrStates; ++i)
   {
-    sumFX.push_back(0.0f);
-    sumFY.push_back(0.0f);
-
     State* s1 = graph->getState(i);
 
     // Calculate forces
     double x1 = s1->getX();
     double y1 = s1->getY();
 
-    for (size_t j = 0; j < nrStates; ++j)
+    for (size_t j = i + 1; j < nrStates; ++j)
     {
-      if (i != j)
+      State* s2 = graph->getState(j);
+
+      double x2 = s2->getX();
+      double y2 = s2->getY();
+      double xDiff = x1 - x2;
+      double yDiff = y1 - y2;
+
+      // Euclidean distance
+      double distance = sqrt (xDiff * xDiff + yDiff * yDiff);
+
+      if (distance > 1)
       {
-        State* s2 = graph->getState(j);
+        double s = nodeStrength / (distance * distance * distance);
 
-        double x2 = s2->getX();
-        double y2 = s2->getY();
-        double xDiff = x1 - x2;
-        double yDiff = y1 - y2;
-
-        // Euclidean distance
-        double distance = sqrt (xDiff * xDiff + yDiff * yDiff);
-
-        if (distance > 1)
-        {
-          double s = nodeStrength / (distance * distance * distance);
-
-          sumFX[i] += s * xDiff;
-          sumFY[i] += s * yDiff;
-        }
-        else
-        {
-          if (i > j)
-          {
-            sumFX[i] += 5;
-            sumFY[i] += 5;
-          }
-          else
-          {
-            sumFX[i] += -5;
-            sumFX[i] += -5;
-          }
-        }
+        sumFX[i] += s * xDiff;
+        sumFY[i] += s * yDiff;
+        sumFX[j] -= s * xDiff;
+        sumFY[j] -= s * yDiff;
+      }
+      else
+      {
+        sumFX[j] += 5;
+        sumFY[j] += 5;
+        sumFX[i] += -5;
+        sumFX[i] += -5;
       }
     }
 
@@ -291,7 +254,51 @@ void SpringLayout::onTransLength(wxScrollEvent& evt)
   naturalLength = evt.GetPosition();
 }
 
+void SpringLayout::toggle()
+{
+  if (stopOpti) {
+    start();
+  }
+  else {
+    stop();
+  }
+}
+
+void SpringLayout::start()
+{
+  Graph* g = app->getGraph();
+  if (g) {
+    optimizeBtn->Enable(false);
+    stopBtn->Enable(true);
+    stopOpti = false;
+    stopped = false;
+
+    while(!stopOpti)
+    {
+      layoutGraph(g);
+
+      if(app)
+      {
+        app->display();
+      }
+
+      wxYield();
+    }
+
+    stopped = true;
+
+  }
+}
+
 void SpringLayout::stop()
 {
+  if(optimizeBtn)
+  {
+    optimizeBtn->Enable(true);
+  }
+  if(stopBtn)
+  {
+    stopBtn->Enable(false);
+  }
   stopOpti = true;
 }

@@ -36,6 +36,7 @@ class LayoutAlgorithm : public wxEvtHandler
     virtual void setupPane(wxPanel* pane) = 0;
     virtual void layoutGraph(Graph* graph) = 0;
     virtual void stop() = 0;
+    virtual void toggle() = 0;
 };
 
 

@@ -659,7 +659,8 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
   //add sort Pos, if needed
   if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
     impl_standard_functions_sort(gsMakeSortIdPos(), &data_decls);
-    impl_sort_pos(&data_decls);
+    ATermList new_equations = ATmakeList0();
+    impl_sort_pos(&data_decls, &new_equations);
   }
   //add generated declarations to spec
   insert_data_decls(data_decls, spec);

@@ -143,29 +143,29 @@ namespace mcrl2 {
             ::wxAboutBox(information);
           }
 
+          // Helper class for wxEventHandling
+          class wx_handler : public wxEvtHandler {
+
+              wx::tool< CRTP > const& m_wx_tool;
+
+            public:
+
+              void on_about(wxCommandEvent&) {
+                m_wx_tool.OnAbout();
+              }
+
+              void on_help(wxCommandEvent&) {
+                wxLaunchDefaultBrowser(wxString(
+                      std::string("http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/"
+                               + boost::to_lower_copy(m_wx_tool.m_tool_name)).c_str(), wxConvLocal));
+              }
+
+              wx_handler(wx::tool< CRTP > const& wx_tool) : m_wx_tool(wx_tool) {
+              }
+          };
+
           // Needed for successful termination
           inline int OnRun() {
-            // Helper class for wxEventHandling
-            class wx_handler : public wxEvtHandler {
-
-                wx::tool< CRTP > const& m_wx_tool;
-
-              public:
-
-                void on_about(wxCommandEvent&) {
-                  m_wx_tool.OnAbout();
-                }
-
-                void on_help(wxCommandEvent&) {
-                  wxLaunchDefaultBrowser(wxString(
-                        std::string("http://www.mcrl2.org/wiki/index.php/User_manual/"
-                                 + boost::to_lower_copy(m_wx_tool.m_tool_name)).c_str(), wxConvLocal));
-                }
-
-                wx_handler(wx::tool< CRTP > const& wx_tool) : m_wx_tool(wx_tool) {
-                }
-            };
-
             if (m_execute) {
               if (wxWindow* window = GetTopWindow()) {
  	        wx_handler* handler = new wx_handler(*this);
@@ -176,18 +176,16 @@ namespace mcrl2 {
                 window->PushEventHandler(handler);
                 window->PushEventHandler(original);
 
-                handler->Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(wx_handler::on_about), 0, handler);
-                handler->Connect(wxID_HELP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(wx_handler::on_help), 0, handler);
+                handler->Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED,
+                   wxCommandEventHandler(wx_handler::on_about), 0, handler);
+                handler->Connect(wxID_HELP, wxEVT_COMMAND_MENU_SELECTED,
+                   wxCommandEventHandler(wx_handler::on_help), 0, handler);
               }
 
               return wxApp::OnRun();
             }
 
             return EXIT_SUCCESS;
-          }
-
-          inline virtual int OnExit() {
-            return wxApp::OnExit();
           }
 
           inline bool OnInit() {
@@ -201,6 +199,12 @@ namespace mcrl2 {
             }
 
             return true;
+          }
+
+        protected:
+
+          inline virtual int OnExit() {
+            return wxApp::OnExit();
           }
 
         public:

@@ -16,8 +16,8 @@
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/process_expression_visitor.h"
 #include "mcrl2/lps/process_expression_builder.h"
+#include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
@@ -52,10 +52,11 @@ void test_processes()
     std::cout << "<equation>" << core::pp(*i) << std::endl;
     visit_process_expression(i->expression());
     build_process_expression(i->expression());
+    std::cerr << core::pp(*i) << " is " << (detail::linear_process_expression_visitor().is_linear(*i) ? "" : "not") << "linear" << std::endl;
   }
 }
 
-int test_main(int argc, char** argv )
+int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

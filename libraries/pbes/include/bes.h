@@ -14,6 +14,7 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+// #include "mcrl2/core/term_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -160,6 +161,10 @@ namespace bes
       {
         m_term = t;
         return *this;
+      }
+      
+      atermpp::aterm aterm() const
+      { return m_term;
       }
   };
 
@@ -976,7 +981,7 @@ namespace bes
                       bes_expression b,
                       const bool use_indexed_set,
                       atermpp::indexed_set &indexed_set)
-      {
+      { 
         assert(v>0);
         assert(variable_occurrences_are_stored);
 
@@ -988,7 +993,6 @@ namespace bes
         { if (!(indexed_set.put(b)).second)  // b is already in the set.
           return;
         }
-
         if (is_if(b))
         { assert(get_variable(condition(b))>0);
           // std::cerr << "ADD " << v << " TO SET " << get_variable(condition(b)) << std::endl;
@@ -1014,7 +1018,6 @@ namespace bes
           add_variables_to_occurrence_sets(v,rhs(b),use_indexed_set,indexed_set);
           return;
         }
-
         assert(0); // do not expect other term formats.
 
       }
@@ -1350,5 +1353,20 @@ namespace bes
 
 
 } // namespace bes.
+
+  namespace atermpp
+  {  
+    template<>
+    struct aterm_traits<bes::bes_expression>
+    {
+      typedef ATermAppl aterm_type;
+      static void protect(bes::bes_expression t)   { t.aterm().protect(); }   // protect the term against garbage collection
+      static void unprotect(bes::bes_expression t) { t.aterm().unprotect(); } // undo the protection against garbage collection
+      static void mark(bes::bes_expression t)      { t.aterm().mark(); }      // mark the term for not being garbage collected
+                                                                    // when it is inside a protected container
+      static ATerm term(bes::bes_expression t)     { return t.term(); }  // return the ATerm corresponding to t
+      static ATerm* ptr(bes::bes_expression& t)    { return &t.term(); } // return the address of the ATerm corresponding to t
+    };  
+  } // namespace atermpp
 
 #endif

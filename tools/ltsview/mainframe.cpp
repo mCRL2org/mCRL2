@@ -239,28 +239,26 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/) {
         mcrl2::lts::lts::lts_extensions_as_string(";") +
         "|All files (*.*)|*.*").c_str(),
         wxConvLocal);
-  wxFileDialog* dialog = new wxFileDialog(this,wxT("Open LTS"),
+  wxFileDialog dialog(this,wxT("Open LTS"),
       filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
-  dialog->CentreOnParent();
-  if (dialog->ShowModal() == wxID_OK) {
-    filename.Assign(dialog->GetPath());
+  dialog.CentreOnParent();
+  if (dialog.ShowModal() == wxID_OK) {
+    filename.Assign(dialog.GetPath());
     mediator->openFile(string(filename.GetFullPath().fn_str()));
   }
-  dialog->Destroy();
 }
 
 void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 {
   wxString filemask = wxT("Traces (*.trc)|*.trc|All files (*.*)|*.*");
-  wxFileDialog* dialog = new wxFileDialog(this, wxT("Open Trace"),
+  wxFileDialog dialog(this, wxT("Open Trace"),
     filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
-  dialog->CentreOnParent();
-  if (dialog->ShowModal() == wxID_OK)
+  dialog.CentreOnParent();
+  if (dialog.ShowModal() == wxID_OK)
   {
-    std::string path(dialog->GetPath().mb_str());
+    std::string path(dialog.GetPath().mb_str());
     mediator->loadTrace(path);
   }
-  dialog->Destroy();
 }
 
 void MainFrame::onSavePic(wxCommandEvent& /*event*/)

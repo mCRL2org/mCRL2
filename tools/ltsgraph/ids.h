@@ -22,6 +22,7 @@ namespace IDS
     myID_DISPLAY_TRANS_LBL,
     myID_DLG_INFO,
     myID_DLG_ALGO,
+    myID_TOGGLE_POSITIONING,
 
     myID_NS_SLIDER,
     myID_ES_SLIDER,

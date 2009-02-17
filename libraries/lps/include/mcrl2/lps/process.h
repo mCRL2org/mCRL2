@@ -102,6 +102,11 @@ namespace lps {
   {
     public:
       /// \brief Constructor.
+      process_equation()
+        : atermpp::aterm_appl(core::detail::constructProcEqn())
+      {}
+
+      /// \brief Constructor.
       /// \param term A term
       process_equation(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)

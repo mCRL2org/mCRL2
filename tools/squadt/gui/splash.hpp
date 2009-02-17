@@ -41,7 +41,7 @@ namespace squadt {
 
         private:
           /** \brief Method that paints the image */
-          inline void on_paint(wxPaintEvent& WXUNUSED(event));
+          inline void on_paint(wxPaintEvent&);
 
         public:
 

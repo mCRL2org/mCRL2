@@ -48,7 +48,12 @@
 #define cmID_DETAILS     (wxID_HIGHEST + 7)
 #define cmID_TOOLS       (wxID_HIGHEST + 8)
 
-#define wxEVT_DISPATCH   (-1)
+#if (wxMAJOR_VERSION <= 2) && (wxMINOR_VERSION <= 8)
+# define wxEVT_DISPATCH   (-1)
+#else
+wxDECLARE_EVENT(wxEVT_DISPATCH, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_DISPATCH, wxCommandEvent);
+#endif
 
 namespace squadt {
   namespace GUI {

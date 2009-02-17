@@ -223,14 +223,6 @@ Graph* LTSGraph::getGraph()
   return graph;
 }
 
-std::string LTSGraph::getVersion() {
-  return mcrl2::utilities::version_tag();
-}
-
-std::string LTSGraph::getRevision() {
-  return std::string(MCRL2_REVISION);
-}
-
 size_t LTSGraph::getNumberOfAlgorithms() const
 {
   return algorithms.size();
@@ -333,22 +325,23 @@ void LTSGraph::deselect()
   display();
 }
 
+void LTSGraph::uncolourState(size_t selectedObject) {
+  if(colouring) {
+    graph->colourState(selectedObject);
+  }
+}
+
 void LTSGraph::colourState(size_t selectedObject) {
-  colouring = !colouring;
-  selectState(selectedObject);
-  colouring = !colouring;
+  if(colouring) {
+    graph->colourState(selectedObject, brushColour);
+  }
 }
 
 void LTSGraph::selectState(size_t selectedObject)
 {
-  if(colouring) {
-    graph->colourState(selectedObject, brushColour);
-  }
-  else {
+  if(!colouring) {
     selectedState = graph->selectState(selectedObject);
   }
-
-
 }
 
 void LTSGraph::selectTransition(size_t state, size_t transition)

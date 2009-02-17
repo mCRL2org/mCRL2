@@ -36,6 +36,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(myID_IMPORT, MainFrame::onImport)
   EVT_MENU(myID_MENU_EXPORT, MainFrame::onExport)
   EVT_MENU(wxID_EXIT, MainFrame::onQuit)
+  EVT_CLOSE(MainFrame::onClose)
+  EVT_MENU(myID_TOGGLE_POSITIONING, MainFrame::onTogglePositioning)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
@@ -61,6 +63,9 @@ MainFrame::MainFrame(LTSGraph* owner)
 
   SetSize(800, 600);
   CentreOnScreen();
+
+  algoDlg->CentreOnParent();
+  infoDlg->CentreOnParent();
 }
 
 void MainFrame::setupMenuBar()
@@ -84,6 +89,9 @@ void MainFrame::setupMenuBar()
     myID_TOOL_SELECT,wxT("&Select\tS"),wxT("Select tool"));
   toolsMenu->AppendRadioItem(myID_COLOUR,
     wxT("&Colour\tC"),wxT("Colouring tool"));
+  toolsMenu->AppendSeparator();
+  toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("&Toggle optimisation... \tCTRL-T"),
+                    wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
@@ -138,6 +146,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
     wxString path = dialog.GetPath();
     std::string stPath(path.fn_str());
 
+    app->getAlgorithm(0)->stop();
     app->openFile(stPath);
   }
 }
@@ -160,6 +169,7 @@ void MainFrame::onImport(wxCommandEvent& /*event*/)
     wxString path = dialog.GetPath();
     std::string stPath(path.fn_str());
 
+    app->getAlgorithm(0)->stop();
     app->openFile(stPath);
   }
 }
@@ -261,14 +271,26 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   }
 }
 
-void MainFrame::onQuit(wxCommandEvent& /*event */)
+void MainFrame::onQuit(wxCommandEvent& e)
 {
   app->getAlgorithm(0)->stop();
-  Close(TRUE);
+  Close(true);
 }
+
+void MainFrame::onClose(wxCloseEvent& e)
+{
+  app->getAlgorithm(0)->stop();
+  Destroy();
+}
+
 GLCanvas* MainFrame::getGLCanvas()
 {
   return glCanvas;
+}
+
+void MainFrame::onTogglePositioning(wxCommandEvent&)
+{
+  app->getAlgorithm(0)->toggle();
 }
 
 void MainFrame::onInfo(wxCommandEvent& /* event */)

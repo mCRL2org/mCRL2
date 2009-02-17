@@ -67,8 +67,8 @@ class GLCanvas : public wxGLCanvas
 
     void getSize(double & width, double & height);
 
-    void pickObjects(int x, int y, bool ctrl);
-    void processHits(const GLint hits, GLuint * buffer, bool ctrl);
+    void pickObjects(int x, int y, wxMouseEvent const&);
+    void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
 
   DECLARE_EVENT_TABLE()
 };
