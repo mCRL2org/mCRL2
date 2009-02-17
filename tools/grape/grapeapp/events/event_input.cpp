@@ -574,15 +574,11 @@ bool grape_event_drag::Do( void )
                 if ((ntt_ptr->get_beginstate() != 0) && (ntt_ptr->get_endstate() != 0))
                 {
                   coordinate new_coordinate;
+                  // if it is a loop
                   if ( ntt_ptr->get_beginstate() == ntt_ptr->get_endstate() )
                   {
-                    // if it is a loop
-                    new_coordinate.m_x = ntt_ptr->get_beginstate()->get_coordinate().m_x - ntt_ptr->get_beginstate()->get_width() * 0.5 - 0.2;
+                    new_coordinate.m_x = ntt_ptr->get_beginstate()->get_coordinate().m_x - ntt_ptr->get_beginstate()->get_width() * 0.5 - 0.12;
                     new_coordinate.m_y = ntt_ptr->get_beginstate()->get_coordinate().m_y;
-
-                    // Find a decent coordinate to place the transition
-                    while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0) new_coordinate.m_x = new_coordinate.m_x - 0.1;
-
                   } else {
                     // if the begin and endstate are different
                     new_coordinate.m_x = (ntt_ptr->get_beginstate()->get_coordinate().m_x + ntt_ptr->get_endstate()->get_coordinate().m_x) * 0.5;

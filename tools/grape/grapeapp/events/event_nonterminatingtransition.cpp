@@ -52,13 +52,24 @@ bool grape_event_add_nonterminating_transition::Do( void )
 
   nonterminating_transition* ntt_ptr = dia_ptr->add_nonterminating_transition( m_ntt, beginstate, endstate );
 
-  //get transition coordinate
+  // Get transition coordinate
   coordinate new_coordinate = ntt_ptr->get_coordinate();
-
-  // Find a empty coordinate to place the transition
-  while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0) new_coordinate.m_x = new_coordinate.m_x - 0.1;
-
-  // update transition coordiante
+  
+  // Initially the coordinate is not placed outside the screen
+  bool placed_outside_screen = false;
+                    
+  // Find a decent coordinate to place the transition
+  while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0)
+  {
+    placed_outside_screen = placed_outside_screen or (new_coordinate.m_x < 0.1);
+    if (placed_outside_screen) {
+      new_coordinate.m_x = new_coordinate.m_x + 0.08;
+    } else {
+      new_coordinate.m_x = new_coordinate.m_x - 0.08;
+    }
+  }
+  
+  // Update transition coordiante
   ntt_ptr->set_coordinate(new_coordinate);
 
   finish_modification();
