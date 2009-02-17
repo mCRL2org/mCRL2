@@ -14,6 +14,7 @@
 #define MCRL2_NEW_DATA_DATAIMPL_H
 
 #include <aterm2.h>
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
 
@@ -38,7 +39,10 @@ namespace mcrl2 {
 inline ATermAppl implement_data_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsDataSpec(spec));
-  return implement_data_spec(spec);
+
+  ATermList substitution_context = ATmakeList0();
+
+  return implement_data_spec(spec, &substitution_context);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 process
@@ -57,7 +61,7 @@ inline ATermAppl implement_data_spec(ATermAppl spec)
 inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsProcSpec(spec));
-  return implement_data_spec(spec);
+  return implement_data_spec(reinterpret_cast< ATermAppl >(ATgetArgument(spec, 0)));
 }
 
 /** \brief     Implement data types of a type checked mCRL2 linear process
@@ -76,7 +80,7 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsLinProcSpec(spec));
-  return detail::implement_data_spec(spec);
+  return detail::implement_data_spec(spec); // TODO
 }
 
 /** \brief     Implement data types of a type checked mCRL2 parameterised
@@ -95,7 +99,7 @@ inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
 inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsPBES(spec));
-  return implement_data_spec(spec);
+  return implement_data_spec(spec); // TODO
 }
 
 /** \brief     Implement data types of a type checked mCRL2 sort

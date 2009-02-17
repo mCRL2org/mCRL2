@@ -1021,6 +1021,7 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
 
     // Construct lists of data declarations for system defined sorts
     t_data_decls data_decls_impl;
+    ATermList    new_equations = ATmakeList0();
     initialize_data_decls(&data_decls_impl);
 
   //  gsDebugMsg("Removing system defined sorts from data declarations\n");
@@ -1028,23 +1029,23 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
       impl_sort_bool    (&data_decls_impl);
     }
     if (sorts_table.get(gsMakeSortExprPos()) != NULL) {
-      impl_sort_pos     (&data_decls_impl);
+      impl_sort_pos     (&data_decls_impl, &new_equations);
     }
     if (sorts_table.get(gsMakeSortExprNat()) != NULL) {
       // Nat is included in the implementation of other sorts, as well as that it
       // includes the implementation of natpair, so needs to be
       // removed with the rest of these.
-      impl_sort_nat     (&data_decls_impl);
+      impl_sort_nat     (&data_decls_impl, &new_equations);
     }
     if (sorts_table.get(gsMakeSortExprInt()) != NULL) {
       // Int includes implementation of Nat, so it needs to be included in a
       // larger batch.
-      impl_sort_int     (&data_decls_impl);
+      impl_sort_int     (&data_decls_impl, &new_equations);
     }
     if (sorts_table.get(gsMakeSortExprReal()) != NULL) {
       // Real includes implementation of Int, so it needs to be included in a
       // larger batch.
-      impl_sort_real    (&data_decls_impl);
+      impl_sort_real    (&data_decls_impl, &new_equations);
     }
 
     while(!ATisEmpty(data_decls_impl.sorts)) {

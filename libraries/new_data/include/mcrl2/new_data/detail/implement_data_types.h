@@ -24,6 +24,11 @@ namespace mcrl2 {
 
     namespace detail {
 
+      inline atermpp::aterm_appl implement_data_specification(const data_specification& spec, ATermList* substitution_context)
+      {
+        return implement_data_spec(data_specification_to_aterm_data_spec(spec), substitution_context);
+      }
+
       inline atermpp::aterm_appl implement_data_specification(const data_specification& spec)
       {
         return implement_data_spec(data_specification_to_aterm_data_spec(spec));

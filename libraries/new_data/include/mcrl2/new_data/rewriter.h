@@ -38,10 +38,48 @@ namespace new_data {
 
     protected:
       /// \brief for data implementation/reconstruction
-      mutable ATermAppl m_specification; // cannot use atermpp::aterm_appl due to modifications
+      mutable ATermAppl                  m_specification; // cannot use atermpp::aterm_appl due to modifications
+
+      /// \brief for data implementation
+      mutable ATermList                  m_substitution_context;
 
       /// \brief The wrapped Rewriter.
       boost::shared_ptr<detail::Rewriter> m_rewriter;
+
+    protected:
+
+      ATermAppl implement(data_expression expression) {
+        ATermList new_data_equations = ATmakeList0();
+
+        core::detail::t_data_decls declarations = core::detail::get_data_decls(m_specification);
+
+        ATermAppl implemented = detail::impl_exprs_appl(expression,
+                        &m_substitution_context, &declarations, &new_data_equations);
+
+        if (new_data_equations != ATempty) {
+          atermpp::term_list< atermpp::aterm_appl > new_equations(new_data_equations);
+
+          for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = new_equations.begin();
+                                                                        i != new_equations.end(); ++i) {
+std::cerr << "Rule : " << mcrl2::core::pp(*i) << std::endl;
+            m_rewriter->addRewriteRule(*i);
+          }
+
+          m_specification = core::detail::add_data_decls(m_specification, declarations);
+        }
+std::cerr << "I " << atermpp::aterm_appl(implemented) << std::endl;
+        return implemented;
+      }
+
+      data_expression reconstruct(ATermAppl expression) const {
+std::cerr << "TR " << atermpp::aterm_appl(expression) << std::endl;
+        ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
+           detail::reconstruct_exprs(reinterpret_cast< ATerm >(
+           static_cast< ATermAppl >(expression)))));
+
+std::cerr << "R " << atermpp::aterm_appl(reconstructed) << std::endl;
+        return atermpp::aterm_appl(reconstructed);
+      }
 
     public:
       /// \brief The variable type of the rewriter.
@@ -77,6 +115,7 @@ namespace new_data {
       /// \param r A rewriter
       basic_rewriter(basic_rewriter const& r)
         : m_specification(r.m_specification),
+          m_substitution_context(r.m_substitution_context),
           m_rewriter(r.m_rewriter)
       { }
 
@@ -84,23 +123,25 @@ namespace new_data {
       /// \param d A data specification
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification d, strategy s = jitty)
-        : m_specification(detail::implement_data_specification(d)),
-          m_rewriter(detail::createRewriter(m_specification, static_cast<RewriteStrategy>(s)))
-      { }
+        : m_substitution_context(ATmakeList0())
+      {
+        m_specification = detail::implement_data_specification(d, &m_substitution_context);
+        m_rewriter.reset(detail::createRewriter(m_specification, static_cast<RewriteStrategy>(s)));
+      }
 
       /// \brief Adds an equation to the rewrite rules.
       /// \param eq The equation that is added.
       /// \return Returns true if the operation succeeded.
       bool add_rule(const data_equation& eq)
       {
-        return m_rewriter.get()->addRewriteRule(eq);
+        return m_rewriter->addRewriteRule(eq);
       }
 
       /// \brief Removes an equation from the rewrite rules.
       /// \param eq The equation that is removed.
       void remove_rule(const data_equation& eq)
       {
-        m_rewriter.get()->removeRewriteRule(eq);
+        m_rewriter->removeRewriteRule(eq);
       }
 
       /// \brief Returns a pointer to the Rewriter object that is used for the implementation.
@@ -135,11 +176,9 @@ namespace new_data {
       /// \brief Rewrites a data expression.
       /// \param d A data expression
       /// \return The normal form of d.
-      data_expression operator()(const data_expression& d) const
+      data_expression operator()(const data_expression& d)
       {
-        data_expression id(detail::implement_data_expr(static_cast< const ATermAppl >(d), m_specification));
-        return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(detail::reconstruct_exprs(reinterpret_cast< ATerm >(
-           m_rewriter->rewrite(id)), m_specification)));
+        return reconstruct(m_rewriter->rewrite(implement(d)));
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -148,11 +187,9 @@ namespace new_data {
       /// \param sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
-      data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
+      data_expression operator()(const data_expression& d, SubstitutionFunction sigma)
       {
-        detail::implement_data_expr(d, m_specification);
-        return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(detail::reconstruct_exprs(reinterpret_cast< ATerm >(
-           static_cast< ATermAppl >(this->operator()(replace_variables(d, sigma)))), m_specification)));
+        return reconstruct(m_rewriter->rewrite(implement(replace_variables(d, sigma))));
       }
   };
 

@@ -20,5 +20,6 @@ test-suite new_data
       [ run parser_test.cpp ]
       [ run implement_data_types_test.cpp ]
       [ run rewriter_test.cpp ]
+      [ run rewriting_test.cpp ]
       [ compile-headers ../include ]
     ;
