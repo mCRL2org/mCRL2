@@ -46,7 +46,11 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected_output) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected_output) << std::endl
-              << "R(input) " << core::pp(output) << std::endl;
+              << "R(input) " << core::pp(output) << std::endl
+              << " -- term representations -- " << std::endl
+              << "input    " << input << std::endl
+              << "expected " << expected_output << std::endl
+              << "R(input) " << output << std::endl;
   }
 }
 
@@ -228,19 +232,19 @@ void list_rewrite_test() {
   new_data::rewriter R(specification);
 
   sort_expression list_bool(list(bool_()));
-  data_expression empty(nil(list_bool));
-  data_expression head_true(cons_(list_bool, true_(), empty));
+  data_expression empty(nil(bool_()));
+  data_expression head_true(cons_(bool_(), true_(), empty));
 
-  data_rewrite_test(R, in(list_bool, true_(), head_true), true_());
-  data_rewrite_test(R, in(list_bool, false_(), head_true), false_());
-  data_rewrite_test(R, count(true_(), head_true), parse_data_expression("1"));
-  data_rewrite_test(R, in(list_bool, false_(), snoc(list_bool, true_(), head_true)), false_());
-  data_rewrite_test(R, concat(list_bool, head_true, head_true), cons_(list_bool, true_(), head_true));
-  data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("1")), true_());
-  data_rewrite_test(R, head(list_bool, head_true), true_());
-  data_rewrite_test(R, rhead(list_bool, head_true), true_());
-  data_rewrite_test(R, rtail(list_bool, head_true), empty);
-  data_rewrite_test(R, tail(list_bool, head_true), empty);
+  data_rewrite_test(R, in(bool_(), true_(), head_true), true_());
+  data_rewrite_test(R, in(bool_(), false_(), head_true), false_());
+  data_rewrite_test(R, count(bool_(), head_true), new_data::function_symbol("1", sort_nat::nat()));
+  data_rewrite_test(R, in(bool_(), false_(), snoc(bool_(), head_true, true_())), false_());
+  data_rewrite_test(R, concat(bool_(), head_true, head_true), cons_(bool_(), true_(), R(head_true)));
+  data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("0")), true_());
+  data_rewrite_test(R, head(bool_(), head_true), true_());
+  data_rewrite_test(R, rhead(bool_(), head_true), true_());
+  data_rewrite_test(R, rtail(bool_(), head_true), R(empty));
+  data_rewrite_test(R, tail(bool_(), head_true), R(empty));
 }
 
 int test_main(int argc, char** argv)

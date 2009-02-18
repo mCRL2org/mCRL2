@@ -51,7 +51,7 @@ static ATermList compute_sort_ref_substs(ATermAppl spec);
 //     sort_ref(n,e) is the first sort reference with e as a rhs, e := n is in
 //     the result; otherwise, n := e is in the result.
 
-static ATermAppl impl_sort_refs(ATermAppl spec);
+static ATermAppl impl_sort_refs(ATermAppl spec, ATermList* substitution_context);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation, with the exception that sort references may occur
 //Ret: spec in which all sort references are implemented, i.e.:
@@ -188,7 +188,7 @@ ATermAppl implement_data_spec(ATermAppl spec, ATermList* substitution_context)
   //implement numerical pattern matching
   spec = impl_numerical_pattern_matching(spec);
   //implement sort references
-  spec = impl_sort_refs(spec);
+  spec = impl_sort_refs(spec, substitution_context);
   //implement standard functions
   spec = impl_standard_functions_spec(spec);
   return spec;
@@ -250,8 +250,8 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
   lps_spec = impl_numerical_pattern_matching(lps_spec);
   ar_spec = impl_numerical_pattern_matching(ar_spec);
   //implement sort references
-  lps_spec = impl_sort_refs(lps_spec);
-  ar_spec = impl_sort_refs(ar_spec);
+  lps_spec = impl_sort_refs(lps_spec, &substs);
+  ar_spec = impl_sort_refs(ar_spec, &substs);
   //implement standard functions
   lps_spec = impl_standard_functions_spec(lps_spec);
   ar_spec = impl_standard_functions_spec(ar_spec);
@@ -299,7 +299,7 @@ ATermList compute_sort_ref_substs(ATermAppl spec)
   return substs;
 }
 
-ATermAppl impl_sort_refs(ATermAppl spec)
+ATermAppl impl_sort_refs(ATermAppl spec, ATermList* substitution_context)
 {
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsActionRenameSpec(spec) || gsIsDataSpec(spec));
   //get sort declarations
@@ -325,7 +325,7 @@ ATermAppl impl_sort_refs(ATermAppl spec)
     spec = ATsetArgument(spec, (ATerm) data_spec, 0);
   }
   //make list of substitutions from sort_refs, the list of sort references
-  ATermList substs = ATmakeList0();
+  //ATermList substs = ATmakeList0();
   while (!ATisEmpty(sort_refs))
   {
     ATermAppl sort_ref = ATAgetFirst(sort_refs);
@@ -341,13 +341,14 @@ ATermAppl impl_sort_refs(ATermAppl spec)
     } else {
       subst = gsMakeSubst_Appl(lhs, rhs);
     }
-    substs = ATinsert(substs, (ATerm) subst);
+    *substitution_context = gsAddSubstToSubsts(subst, *substitution_context);
+//    substs = ATinsert(substs, (ATerm) subst);
     //perform substitution on the remaining elements of sort_refs
     sort_refs = ATgetNext(sort_refs);    
     sort_refs = gsSubstValues_List(ATmakeList1((ATerm) subst), sort_refs, true);
   }
   //perform substitutions on spec
-  spec = gsSubstValues_Appl(substs, spec, true);
+  spec = gsSubstValues_Appl(*substitution_context, spec, true);
   return spec;
 }
 
@@ -488,7 +489,7 @@ ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec)
   //implement sort references
   //note that it is important that this is done AFTER computing the
   //substitutions for part
-  spec = impl_sort_refs(spec);
+  spec = impl_sort_refs(spec, &substs);
   //implement standard functions
   spec = impl_standard_functions_spec(spec);
   return part;

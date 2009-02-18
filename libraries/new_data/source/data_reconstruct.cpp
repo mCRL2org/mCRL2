@@ -824,7 +824,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       gsMakeDataExprEq(arg1, gsMakeDataExprC0()),
       arg0,
       gsMakeDataExprIf(gsMakeDataExprEq(arg1, arg0), gsMakeDataExprC0(), arg1));
-  } else if (is_list_enum_impl(Part)) {
+  } /*else if (is_list_enum_impl(Part)) {
     if(!gsIsDataExprEmptyList(Part)) {
       ATermList Elts = ATmakeList0();
       while (gsIsDataExprCons(Part)) {
@@ -837,7 +837,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       ATermAppl Sort = gsMakeSortExprList(gsGetSort(ATAgetFirst(Elts)));
       Part = gsMakeDataExprListEnum(Elts, Sort);
     }
-  }
+  }*/
   return Part;
 }
 

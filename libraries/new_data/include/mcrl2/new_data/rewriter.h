@@ -61,23 +61,19 @@ namespace new_data {
 
           for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = new_equations.begin();
                                                                         i != new_equations.end(); ++i) {
-std::cerr << "Rule : " << mcrl2::core::pp(*i) << std::endl;
             m_rewriter->addRewriteRule(*i);
           }
 
           m_specification = core::detail::add_data_decls(m_specification, declarations);
         }
-std::cerr << "I " << atermpp::aterm_appl(implemented) << std::endl;
         return implemented;
       }
 
       data_expression reconstruct(ATermAppl expression) const {
-std::cerr << "TR " << atermpp::aterm_appl(expression) << std::endl;
         ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
            detail::reconstruct_exprs(reinterpret_cast< ATerm >(
            static_cast< ATermAppl >(expression)))));
 
-std::cerr << "R " << atermpp::aterm_appl(reconstructed) << std::endl;
         return atermpp::aterm_appl(reconstructed);
       }
 
