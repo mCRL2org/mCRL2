@@ -102,7 +102,7 @@ namespace detail {
     std::stringstream formula_stream;
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
-    ATermAppl reconstructed_spec = mcrl2::core::reconstruct_spec(spec);
+    ATermAppl reconstructed_spec = new_data::detail::reconstruct_spec(spec);
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);

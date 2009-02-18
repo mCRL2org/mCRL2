@@ -114,7 +114,7 @@ namespace detail {
     result           = new_data::detail::alpha_reduce(result);
     result           = new_data::detail::deprecated_implement_data_specification(result);
 
-    return result;
+    return atermpp::arg1(result);
   }
 
   /// \brief Parses a single data expression.

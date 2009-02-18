@@ -1408,7 +1408,7 @@ void old_impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     ATermList new_equations = ATmakeList0();
 
-    impl_sort_nat(p_data_decls, &new_equations);
+    impl_sort_nat(p_data_decls, true, &new_equations);
   }
 }
 
@@ -2751,7 +2751,7 @@ void implement_nat_test()
   initialize_data_decls(&data_decls_new);
   old_impl_sort_nat(&data_decls_old, false);
   ATermList new_equations = ATmakeList0();
-  impl_sort_nat(&data_decls_new, &new_equations, false);
+  impl_sort_nat(&data_decls_new, false, &new_equations);
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -2789,7 +2789,7 @@ void implement_int_test()
   initialize_data_decls(&data_decls_new);
   old_impl_sort_int(&data_decls_old, false);
   ATermList new_equations = ATmakeList0();
-  impl_sort_int(&data_decls_new, &new_equations, false);
+  impl_sort_int(&data_decls_new, false, &new_equations);
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -2827,7 +2827,7 @@ void implement_real_test()
   initialize_data_decls(&data_decls_new);
   old_impl_sort_real(&data_decls_old, false);
   ATermList new_equations = ATmakeList0();
-  impl_sort_real(&data_decls_new, &new_equations, false);
+  impl_sort_real(&data_decls_new, false, &new_equations);
 
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
@@ -2854,7 +2854,7 @@ void implement_real_test()
   for(aterm_list::const_iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
   {
     std::clog << *i << std::endl;
-  }  
+  }
 }
 
 void implement_list_test()
@@ -3199,16 +3199,24 @@ void implement_structured_sort_test()
 
   std::clog << "== STRUCTURED SORT COMPARISON ==" << std::endl;
   BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.sorts) << std::endl
-            << "NEW " << mcrl2::core::pp(data_decls_new.sorts) << std::endl;
+  if (data_decls_old.sorts != data_decls_new.sorts) {
+    std::clog << "OLD " << mcrl2::core::pp(data_decls_old.sorts) << std::endl
+              << "NEW " << mcrl2::core::pp(data_decls_new.sorts) << std::endl;
+  }
   BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.cons_ops) << std::endl
-            << "NEW " << mcrl2::core::pp(data_decls_new.cons_ops) << std::endl;
+  if (data_decls_old.cons_ops != data_decls_new.cons_ops) {
+    std::clog << "OLD " << mcrl2::core::pp(data_decls_old.cons_ops) << std::endl
+              << "NEW " << mcrl2::core::pp(data_decls_new.cons_ops) << std::endl;
+  }
   BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
-            << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
-  std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
-            << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
+  if (data_decls_old.ops != data_decls_new.ops) {
+    std::clog << "OLD " << mcrl2::core::pp(data_decls_old.ops) << std::endl
+              << "NEW " << mcrl2::core::pp(data_decls_new.ops) << std::endl;
+  }
+  if (data_decls_old.ops != data_decls_new.ops) {
+    std::clog << "OLD " << mcrl2::core::pp(data_decls_old.data_eqns) << std::endl
+              << "NEW " << mcrl2::core::pp(data_decls_new.data_eqns) << std::endl;
+  }
   BOOST_CHECK(compare_modulo_order_and_alpha(data_decls_old.data_eqns, data_decls_new.data_eqns));
 }
 

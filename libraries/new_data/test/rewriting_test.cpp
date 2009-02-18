@@ -85,10 +85,10 @@ void pos_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p1(parse_data_expression("1"));
-  data_expression p2(parse_data_expression("2"));
-  data_expression p3(parse_data_expression("3"));
-  data_expression p4(parse_data_expression("4"));
+  data_expression p1(R(parse_data_expression("1")));
+  data_expression p2(R(parse_data_expression("2")));
+  data_expression p3(R(parse_data_expression("3")));
+  data_expression p4(R(parse_data_expression("4")));
 
   data_rewrite_test(R, sort_pos::plus(p1, p2), p3);
   data_rewrite_test(R, sort_pos::plus(p2, p1), p3);
@@ -116,11 +116,11 @@ void nat_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p0(parse_data_expression("0"));
-  data_expression p1(pos2nat(parse_data_expression("1")));
-  data_expression p2(pos2nat(parse_data_expression("2")));
-  data_expression p3(pos2nat(parse_data_expression("3")));
-  data_expression p4(pos2nat(parse_data_expression("4")));
+  data_expression p0(R(parse_data_expression("0")));
+  data_expression p1(R(pos2nat(parse_data_expression("1"))));
+  data_expression p2(R(pos2nat(parse_data_expression("2"))));
+  data_expression p3(R(pos2nat(parse_data_expression("3"))));
+  data_expression p4(R(pos2nat(parse_data_expression("4"))));
 
   data_rewrite_test(R, plus(p0, p2), p2);
   data_rewrite_test(R, plus(p2, p0), p2);
@@ -142,23 +142,23 @@ void nat_rewrite_test() {
   data_rewrite_test(R, (max)(p2, p0), p2);
   data_rewrite_test(R, (max)(p1, p2), p2);
 
-  data_rewrite_test(R, succ(p0), p1);
-  data_rewrite_test(R, succ(p1), p2);
+  data_rewrite_test(R, succ(p0), R(nat2pos(p1)));
+  data_rewrite_test(R, succ(p1), R(nat2pos(p2)));
 
-  data_rewrite_test(R, pred(p1), p0);
-  data_rewrite_test(R, pred(p2), p1);
+  data_rewrite_test(R, pred(nat2pos(p1)), p0);
+  data_rewrite_test(R, pred(nat2pos(p2)), p1);
 
   data_rewrite_test(R, abs(p1), p1);
 
-  data_rewrite_test(R, div(p1, p1), p1);
-  data_rewrite_test(R, div(p0, p2), p0);
-  data_rewrite_test(R, div(p2, p1), p2);
-  data_rewrite_test(R, div(p4, p2), p2);
+  data_rewrite_test(R, div(p1, parse_data_expression("1")), p1);
+  data_rewrite_test(R, div(p0, parse_data_expression("2")), p0);
+  data_rewrite_test(R, div(p2, parse_data_expression("1")), p2);
+  data_rewrite_test(R, div(p4, parse_data_expression("2")), p2);
 
-  data_rewrite_test(R, mod(p1, p1), p0);
-  data_rewrite_test(R, mod(p0, p2), p0);
-  data_rewrite_test(R, mod(p2, p1), p0);
-  data_rewrite_test(R, mod(p4, p3), p1);
+  data_rewrite_test(R, mod(p1, nat2pos(p1)), p0);
+  data_rewrite_test(R, mod(p0, nat2pos(p2)), p0);
+  data_rewrite_test(R, mod(p2, nat2pos(p1)), p0);
+  data_rewrite_test(R, mod(p4, nat2pos(p3)), p1);
 
   data_rewrite_test(R, exp(p2, p2), p4);
 }
@@ -172,11 +172,11 @@ void int_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p0(nat2int(parse_data_expression("0")));
-  data_expression p1(pos2int(parse_data_expression("1")));
-  data_expression p2(pos2int(parse_data_expression("2")));
-  data_expression p3(pos2int(parse_data_expression("3")));
-  data_expression p4(pos2int(parse_data_expression("4")));
+  data_expression p0(R(nat2int(parse_data_expression("0"))));
+  data_expression p1(R(pos2int(parse_data_expression("1"))));
+  data_expression p2(R(pos2int(parse_data_expression("2"))));
+  data_expression p3(R(pos2int(parse_data_expression("3"))));
+  data_expression p4(R(pos2int(parse_data_expression("4"))));
 
   data_rewrite_test(R, plus(p0, p2), p2);
   data_rewrite_test(R, plus(p2, p0), p2);
@@ -206,19 +206,19 @@ void int_rewrite_test() {
   data_rewrite_test(R, pred(p1), p0);
   data_rewrite_test(R, pred(p2), p1);
 
-  data_rewrite_test(R, abs(p1), p1);
+  data_rewrite_test(R, nat2int(abs(p1)), p1);
 
-  data_rewrite_test(R, div(p1, p1), p1);
-  data_rewrite_test(R, div(p0, p2), p0);
-  data_rewrite_test(R, div(p2, p1), p2);
-  data_rewrite_test(R, div(p4, p2), p2);
+  data_rewrite_test(R, div(p1, int2pos(p1)), p1);
+  data_rewrite_test(R, div(p0, int2pos(p2)), p0);
+  data_rewrite_test(R, div(p2, int2pos(p1)), p2);
+  data_rewrite_test(R, div(p4, int2pos(p2)), p2);
 
-  data_rewrite_test(R, mod(p1, p1), p0);
-  data_rewrite_test(R, mod(p0, p2), p0);
-  data_rewrite_test(R, mod(p2, p1), p0);
-  data_rewrite_test(R, mod(p4, p3), p1);
+  data_rewrite_test(R, mod(p1, int2pos(p1)), R(int2nat(p0)));
+  data_rewrite_test(R, mod(p0, int2pos(p2)), R(int2nat(p0)));
+  data_rewrite_test(R, mod(p2, int2pos(p1)), R(int2nat(p0)));
+  data_rewrite_test(R, mod(p4, int2pos(p3)), R(int2nat(p1)));
 
-  data_rewrite_test(R, exp(p2, p2), p4);
+  data_rewrite_test(R, exp(p2, int2nat(p2)), p4);
 }
 
 void list_rewrite_test() {
@@ -239,12 +239,21 @@ void list_rewrite_test() {
   data_rewrite_test(R, in(bool_(), false_(), head_true), false_());
   data_rewrite_test(R, count(bool_(), head_true), new_data::function_symbol("1", sort_nat::nat()));
   data_rewrite_test(R, in(bool_(), false_(), snoc(bool_(), head_true, true_())), false_());
-  data_rewrite_test(R, concat(bool_(), head_true, head_true), cons_(bool_(), true_(), R(head_true)));
+  data_rewrite_test(R, concat(bool_(), head_true, head_true), R(cons_(bool_(), true_(), head_true)));
   data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("0")), true_());
   data_rewrite_test(R, head(bool_(), head_true), true_());
   data_rewrite_test(R, rhead(bool_(), head_true), true_());
   data_rewrite_test(R, rtail(bool_(), head_true), R(empty));
   data_rewrite_test(R, tail(bool_(), head_true), R(empty));
+}
+
+void set_rewrite_test() {
+}
+
+void bag_rewrite_test() {
+}
+
+void structured_sort_rewrite_test() {
 }
 
 int test_main(int argc, char** argv)
@@ -255,11 +264,14 @@ int test_main(int argc, char** argv)
 //  std::string expr1("exists b: Bool, c: Bool. if(b, c, b)");
 //  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
 
-  list_rewrite_test();
   int_rewrite_test();
   bool_rewrite_test();
   pos_rewrite_test();
   nat_rewrite_test();
+  list_rewrite_test();
+  set_rewrite_test();
+  bag_rewrite_test();
+  structured_sort_rewrite_test();
 
   return 0;
 }

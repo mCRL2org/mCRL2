@@ -73,7 +73,7 @@ void test1()
   data_expression t = datar(greater(min(x,y), z));
 
   BOOST_CHECK(datar(plus(parse_data_expression("1"),
-    parse_data_expression("2"))) == parse_data_expression("3"));
+    parse_data_expression("2"))) == datar(parse_data_expression("3")));
 
   // copy a rewriter
   new_data::rewriter datar1 = datar;

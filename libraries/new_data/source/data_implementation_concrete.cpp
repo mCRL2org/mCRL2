@@ -509,7 +509,7 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     //part is a structured sort; replace by a new sort and add data
     //declarations for this sort
     ATermAppl sort_id = make_fresh_struct_sort_id((ATerm) p_data_decls->sorts);
-    impl_sort_struct(part, sort_id, p_substs, p_data_decls, new_data_equations);
+    impl_sort_struct(part, sort_id, p_substs, p_data_decls, true, new_data_equations);
     part = sort_id;
   } else if (gsIsSortExprList(part)) {
     //part is a list sort; replace by a new sort and add data declarations for
@@ -539,17 +539,17 @@ ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
     } else if (ATisEqual(part,gsMakeSortIdNat())) {
       //add implementation of sort Nat, if necessary
       if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-        impl_sort_nat(p_data_decls, new_data_equations);
+        impl_sort_nat(p_data_decls, true, new_data_equations);
       }
     } else if (ATisEqual(part, gsMakeSortIdInt())) {
       //add implementation of sort Int, if necessary
       if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-        impl_sort_int(p_data_decls, new_data_equations);
+        impl_sort_int(p_data_decls, true, new_data_equations);
       }
     } else if (ATisEqual(part, gsMakeSortIdReal())) {
       //add implementation of sort Int, if necessary
       if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
-        impl_sort_real(p_data_decls, new_data_equations);
+        impl_sort_real(p_data_decls, true, new_data_equations);
       }
     }
   } else if (gsIsDataAppl(part)) {
@@ -830,7 +830,7 @@ ATermList create_op_id_args(ATermAppl op_id,
 }
 
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
-  ATermList *p_substs, t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive)
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   assert(gsIsSortStruct(sort_struct));
   assert(gsIsSortId(sort_id));
@@ -878,7 +878,10 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   p_data_decls->ops = ATconcat(gsSubstValues_List(*p_substs, atermpp::term_list<function_symbol>(functions.begin(), functions.end()), true), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(gsSubstValues_List(*p_substs, new_data_eqns, true), p_data_decls->data_eqns);
   ATermList new_equations = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  *new_data_equations = ATconcat(new_equations, *new_data_equations);
+
+  if (new_data_equations) {
+    *new_data_equations = ATconcat(new_equations, *new_data_equations);
+  }
 }
 
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
@@ -1954,10 +1957,12 @@ void impl_sort_pos(t_data_decls *p_data_decls, ATermList* new_data_equations)
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
-  *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+  if (new_data_equations) {
+    *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+  }
 }
 
-void impl_sort_nat(t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive)
+void impl_sort_nat(t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   //Declare sort NatPair
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_nat::natpair()));
@@ -1969,7 +1974,10 @@ void impl_sort_nat(t_data_decls *p_data_decls, ATermList* new_data_equations, bo
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
-  *new_data_equations =  ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+
+  if (new_data_equations) {
+    *new_data_equations =  ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+  }
 
   //add implementation of sort Pos, if necessary
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
@@ -1977,7 +1985,7 @@ void impl_sort_nat(t_data_decls *p_data_decls, ATermList* new_data_equations, bo
   }
 }
 
-void impl_sort_int(t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive)
+void impl_sort_int(t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_int_::int_()));
   function_symbol_list constructors = sort_int_::int__generate_constructors_code();
@@ -1986,7 +1994,10 @@ void impl_sort_int(t_data_decls *p_data_decls, ATermList* new_data_equations, bo
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
-  *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+
+  if (new_data_equations) {
+    *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+  }
 
   //add implementation of sort Nat, if necessary
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
@@ -1994,7 +2005,7 @@ void impl_sort_int(t_data_decls *p_data_decls, ATermList* new_data_equations, bo
   }
 }
 
-void impl_sort_real(t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive)
+void impl_sort_real(t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_real_::real_()));
   function_symbol_list constructors = sort_real_::real__generate_constructors_code();
@@ -2003,7 +2014,10 @@ void impl_sort_real(t_data_decls *p_data_decls, ATermList* new_data_equations, b
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
-  *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+
+  if (new_data_equations) {
+    *new_data_equations = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), *new_data_equations);
+  }
 
   //add implementation of sort Int, if necessary
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {

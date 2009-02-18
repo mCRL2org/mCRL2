@@ -1,4 +1,4 @@
-project lpsrealelm ;
+project tools/lpsrealelm ;
 
 tool lpsrealelm
        : lpsrealelm.cpp

@@ -103,7 +103,7 @@ ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_
 ///       *p_data_decls and new induced substitutions are added *p_substs
 ///       if recursive, then the sorts of the projection functions are also implemented
 void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
-  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive = true);
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
 
 /// \pre sort_elt and sort_list are sort expressions.
 /// \return the list of data equations belonging to the list sort sort_list, with
@@ -199,17 +199,17 @@ void impl_sort_pos(core::detail::t_data_decls *p_data_decls, ATermList* new_data
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Nat is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_nat(core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive = true);
+void impl_sort_nat(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Int is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_int(core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive = true);
+void impl_sort_int(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
 
 /// \pre p_data_decls represents a pointer to new data declarations
 /// \post an implementation of sort Real is added to *p_data_decls
 ///       if recursive, then the sorts it depends on are also implemented
-void impl_sort_real(core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations, bool recursive = true);
+void impl_sort_real(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
 
 /// \pre sort is a sort expression that adheres to the internal syntax after
 ///     data implementation

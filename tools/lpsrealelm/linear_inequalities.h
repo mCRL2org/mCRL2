@@ -94,7 +94,7 @@ class linear_inequality
         else throw mcrl2::runtime_error("Expect constant multiplies expression: " + pp(e));
       }
       else if (is_data_variable(e))
-      { if (e.sort()=sort_expr::real())
+      { if (e.sort() == sort_expr::real())
         {
           if(m_lhs.find(e) == m_lhs.end())
           {

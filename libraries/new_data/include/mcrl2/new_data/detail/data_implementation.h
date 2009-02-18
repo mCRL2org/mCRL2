@@ -61,7 +61,10 @@ inline ATermAppl implement_data_spec(ATermAppl spec)
 inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsProcSpec(spec));
-  return implement_data_spec(reinterpret_cast< ATermAppl >(ATgetArgument(spec, 0)));
+
+  ATermList substitution_context = ATmakeList0();
+
+  return implement_data_spec(spec, &substitution_context);
 }
 
 /** \brief     Implement data types of a type checked mCRL2 linear process
@@ -80,7 +83,10 @@ inline ATermAppl implement_data_proc_spec(ATermAppl spec)
 inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsLinProcSpec(spec));
-  return detail::implement_data_spec(spec); // TODO
+
+  ATermList substitution_context = ATmakeList0();
+
+  return detail::implement_data_spec(spec, &substitution_context); // TODO
 }
 
 /** \brief     Implement data types of a type checked mCRL2 parameterised
@@ -99,7 +105,10 @@ inline ATermAppl implement_data_lin_proc_spec(ATermAppl spec)
 inline ATermAppl implement_data_pbes_spec(ATermAppl spec)
 {
   assert(core::detail::gsIsPBES(spec));
-  return implement_data_spec(spec); // TODO
+
+  ATermList substitution_context = ATmakeList0();
+
+  return implement_data_spec(spec, &substitution_context); // TODO
 }
 
 /** \brief     Implement data types of a type checked mCRL2 sort

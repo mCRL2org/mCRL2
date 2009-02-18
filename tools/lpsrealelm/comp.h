@@ -173,9 +173,10 @@ data_specification add_comp_sort(const data_specification& s)
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
   ATermList substitutions = ATmakeList0();
+  ATermList new_equations = ATmakeList0();
 
   // Implement Comp as structured sort, reusing data implementation
-  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls);
+  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls, true, &new_equations);
 
   // Add declarations in data_decls to the specification
   sort_expression_list sorts = ATconcat(s.sorts(), data_decls.sorts);

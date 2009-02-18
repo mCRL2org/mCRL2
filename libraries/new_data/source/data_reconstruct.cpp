@@ -1035,17 +1035,17 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
       // Nat is included in the implementation of other sorts, as well as that it
       // includes the implementation of natpair, so needs to be
       // removed with the rest of these.
-      impl_sort_nat     (&data_decls_impl, &new_equations);
+      impl_sort_nat     (&data_decls_impl, true, &new_equations);
     }
     if (sorts_table.get(gsMakeSortExprInt()) != NULL) {
       // Int includes implementation of Nat, so it needs to be included in a
       // larger batch.
-      impl_sort_int     (&data_decls_impl, &new_equations);
+      impl_sort_int     (&data_decls_impl, true, &new_equations);
     }
     if (sorts_table.get(gsMakeSortExprReal()) != NULL) {
       // Real includes implementation of Int, so it needs to be included in a
       // larger batch.
-      impl_sort_real    (&data_decls_impl, &new_equations);
+      impl_sort_real    (&data_decls_impl, true, &new_equations);
     }
 
     while(!ATisEmpty(data_decls_impl.sorts)) {
