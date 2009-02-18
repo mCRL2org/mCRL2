@@ -6358,8 +6358,19 @@ static ATermList sortMultiActionLabels(ATermList l)
   return result;
 }
 
+
+/// \brief determine whether the multiaction has the same labels as the allow action,
+//         in which case true is delivered. If multiaction is the action Terminate,
+//         then true is also returned.
+
 static int allowsingleaction(ATermList allowaction, ATermAppl multiaction)
 {
+
+  if (multiaction==terminationAction)
+  { // multiaction is equal to terminate. This action cannot be blocked.
+    return 1;
+  }
+  
   for (ATermList walker=ATLgetArgument(multiaction,0);
               walker!=ATempty ; walker=ATgetNext(walker) )
   {
