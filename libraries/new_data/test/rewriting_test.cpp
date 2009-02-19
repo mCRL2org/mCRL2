@@ -19,6 +19,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/int.h"
+#include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/list.h"
 #include "mcrl2/new_data/set.h"
 #include "mcrl2/new_data/bag.h"
@@ -224,6 +225,63 @@ void int_rewrite_test() {
 }
 
 void real_rewrite_test() {
+  using namespace mcrl2::new_data::sort_real_;
+
+  data_specification specification = parse_data_specification(
+    "sort A = Real;"
+  );
+
+  new_data::rewriter R(specification);
+
+  data_expression p0(R(nat2real(parse_data_expression("0"))));
+  data_expression p1(R(pos2real(parse_data_expression("1"))));
+  data_expression p2(R(pos2real(parse_data_expression("2"))));
+  data_expression p3(R(pos2real(parse_data_expression("3"))));
+  data_expression p4(R(pos2real(parse_data_expression("4"))));
+
+  data_rewrite_test(R, plus(p0, p2), p2);
+  data_rewrite_test(R, plus(p2, p0), p2);
+  data_rewrite_test(R, plus(p1, p2), p3);
+  data_rewrite_test(R, plus(p2, p1), p3);
+  data_rewrite_test(R, plus(negate(p4), p4), p0);
+  data_rewrite_test(R, minus(p4, p4), p0);
+
+  data_rewrite_test(R, times(p1, p1), p1);
+  data_rewrite_test(R, times(p0, p2), p0);
+  data_rewrite_test(R, times(p2, p0), p0);
+  data_rewrite_test(R, times(p1, p2), p2);
+
+  data_rewrite_test(R, (min)(p1, p1), p1);
+  data_rewrite_test(R, (min)(p0, p2), p0);
+  data_rewrite_test(R, (min)(p2, p0), p0);
+  data_rewrite_test(R, (min)(p1, p2), p1);
+
+  data_rewrite_test(R, (max)(p1, p1), p1);
+  data_rewrite_test(R, (max)(p0, p2), p2);
+  data_rewrite_test(R, (max)(p2, p0), p2);
+  data_rewrite_test(R, (max)(p1, p2), p2);
+
+  data_rewrite_test(R, succ(p0), p1);
+  data_rewrite_test(R, succ(p1), p2);
+
+  data_rewrite_test(R, pred(p1), p0);
+  data_rewrite_test(R, pred(p2), p1);
+
+  data_rewrite_test(R, abs(p1), p1);
+
+  data_rewrite_test(R, divides(p1, p1), p1);
+  data_rewrite_test(R, divides(p0, p2), p0);
+  data_rewrite_test(R, divides(p2, p1), p2);
+  data_rewrite_test(R, divides(p4, p2), p2);
+
+  data_rewrite_test(R, exp(p2, real2int(p2)), p4);
+
+  data_rewrite_test(R, floor(parse_data_expression("2.9")), p2);
+
+  data_rewrite_test(R, ceil(parse_data_expression("1.2")), p2);
+
+  data_rewrite_test(R, round(parse_data_expression("1.6")), p2);
+  data_rewrite_test(R, round(parse_data_expression("2.4")), p2);
 }
 
 void list_rewrite_test() {
