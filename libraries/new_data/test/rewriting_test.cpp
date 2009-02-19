@@ -20,6 +20,8 @@
 #include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/int.h"
 #include "mcrl2/new_data/list.h"
+#include "mcrl2/new_data/set.h"
+#include "mcrl2/new_data/bag.h"
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/parser.h"
@@ -221,6 +223,9 @@ void int_rewrite_test() {
   data_rewrite_test(R, exp(p2, int2nat(p2)), p4);
 }
 
+void real_rewrite_test() {
+}
+
 void list_rewrite_test() {
   using namespace mcrl2::new_data::sort_bool_;
   using namespace mcrl2::new_data::sort_list;
@@ -254,6 +259,74 @@ void bag_rewrite_test() {
 }
 
 void structured_sort_rewrite_test() {
+  using namespace sort_bool_;
+  using namespace sort_nat;
+
+  data_specification specification = parse_data_specification(
+    ""
+  );
+
+  atermpp::vector< structured_sort_constructor_argument > arguments;
+
+  arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
+  arguments.push_back(structured_sort_constructor_argument(bool_()));
+  arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
+  arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
+
+  atermpp::vector< structured_sort_constructor > constructors;
+  // without arguments or recogniser
+  //  c0
+  constructors.push_back(structured_sort_constructor("c0"));
+  // without arguments, with recogniser
+  //  c1?is_one
+  constructors.push_back(structured_sort_constructor("c1", std::string("is_one")));
+  // with arguments, without recogniser
+  //  a(a0 : A)
+  constructors.push_back(structured_sort_constructor("a",
+     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  // two arguments, with recogniser
+  //  b(B)?is_b
+  constructors.push_back(structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+  //  c(n0 : Nat, n1 : Nat)?is_c
+  constructors.push_back(structured_sort_constructor("c",
+     boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
+
+  new_data::structured_sort ls(boost::make_iterator_range(constructors));
+
+  specification.add_sort(ls);
+
+  new_data::rewriter R(specification);
+
+  data_expression c0(constructors[0].constructor_function(ls));
+  data_expression c1(constructors[1].constructor_function(ls));
+  data_expression a(application(constructors[2].constructor_function(ls), true_()));
+  data_expression b(application(constructors[3].constructor_function(ls), false_()));
+  data_expression n0(pos2nat(parse_data_expression("0")));
+  data_expression n1(pos2nat(parse_data_expression("1")));
+  data_expression c(application(constructors[4].constructor_function(ls), n0, n1));
+
+  // recogniser tests
+  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c0), false_());
+  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c0), false_());
+  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c0), false_());
+  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c1), true_());
+  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c1), false_());
+  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c1), false_());
+  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), a),  false_());
+  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), a),  false_());
+  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), a),  false_());
+  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), b),  false_());
+  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), b),  true_());
+  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), b),  false_());
+  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c),  false_());
+  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c),  false_());
+  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c),  true_());
+
+  // projection tests
+  data_rewrite_test(R, application(constructors[2].projection_functions(ls)[0], a),  true_());
+  data_rewrite_test(R, application(constructors[4].projection_functions(ls)[0], c),  R(n0));
+  data_rewrite_test(R, application(constructors[4].projection_functions(ls)[1], c),  R(n1));
 }
 
 int test_main(int argc, char** argv)
@@ -264,10 +337,11 @@ int test_main(int argc, char** argv)
 //  std::string expr1("exists b: Bool, c: Bool. if(b, c, b)");
 //  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
 
-  int_rewrite_test();
   bool_rewrite_test();
   pos_rewrite_test();
   nat_rewrite_test();
+  int_rewrite_test();
+  real_rewrite_test();
   list_rewrite_test();
   set_rewrite_test();
   bag_rewrite_test();

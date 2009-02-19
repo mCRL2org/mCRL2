@@ -3192,8 +3192,6 @@ void implement_structured_sort_test()
 
   new_data::structured_sort ls(boost::make_iterator_range(constructors));
   old_impl_sort_struct(ls, &old_substs, &data_decls_old);
-  constructors.push_back(new_data::structured_sort_constructor("d",
-     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_d"));
   ATermList equations = ATmakeList0();
   impl_exprs_appl(ls, &new_substs, &data_decls_new, &equations);
 
