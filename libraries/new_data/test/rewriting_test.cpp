@@ -276,12 +276,12 @@ void real_rewrite_test() {
 
   data_rewrite_test(R, exp(p2, real2int(p2)), p4);
 
-  data_rewrite_test(R, floor(parse_data_expression("2.9")), p2);
+  data_rewrite_test(R, floor(parse_data_expression("29/10")), p2);
 
-  data_rewrite_test(R, ceil(parse_data_expression("1.2")), p2);
+  data_rewrite_test(R, ceil(parse_data_expression("12/10")), p2);
 
-  data_rewrite_test(R, round(parse_data_expression("1.6")), p2);
-  data_rewrite_test(R, round(parse_data_expression("2.4")), p2);
+  data_rewrite_test(R, round(parse_data_expression("16/10")), p2);
+  data_rewrite_test(R, round(parse_data_expression("24/10")), p2);
 }
 
 void list_rewrite_test() {
@@ -311,9 +311,91 @@ void list_rewrite_test() {
 }
 
 void set_rewrite_test() {
+  using namespace mcrl2::new_data::sort_set;
+  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::new_data::sort_bool_;
+
+  data_specification specification = parse_data_specification(
+    "sort A = Set(Nat);"
+    "map  s, s1, s2 : Set(Nat);"
+    "eqn  s = {1, 2};"
+    "     s1 = {1};"
+    "     s2 = {2};"
+  );
+
+  new_data::rewriter R(specification);
+
+  sort_expression set_nat(sort_set::set(nat()));
+
+  data_expression p0(R(parse_data_expression("0")));
+  data_expression p1(R(pos2nat(parse_data_expression("1"))));
+  data_expression p2(R(pos2nat(parse_data_expression("2"))));
+
+  data_expression s(R(new_data::function_symbol("s", set_nat)));
+  data_expression s1(R(new_data::function_symbol("s1", set_nat)));
+  data_expression s2(R(new_data::function_symbol("s2", set_nat)));
+
+  data_rewrite_test(R, setin(nat(), p0, s), false_());
+  data_rewrite_test(R, setin(nat(), p1, s), true_());
+  data_rewrite_test(R, setin(nat(), p2, s), true_());
+
+  data_rewrite_test(R, setunion_(nat(), s, emptyset(nat())), s);
+  data_rewrite_test(R, setunion_(nat(), s1, s2), s);
+
+  data_rewrite_test(R, setintersection(nat(), s, emptyset(nat())), R(emptyset(nat())));
+  data_rewrite_test(R, setintersection(nat(), s, s1), s1);
+  data_rewrite_test(R, setintersection(nat(), s, s2), s2);
+
+  data_rewrite_test(R, setdifference(nat(), s, emptyset(nat())), s);
+  data_rewrite_test(R, setdifference(nat(), s, s1), s2);
+  data_rewrite_test(R, setdifference(nat(), s, s2), s1);
+
+  data_rewrite_test(R, setin(nat(), p0, setcomplement(nat(), s)), true_());
 }
 
 void bag_rewrite_test() {
+  using namespace mcrl2::new_data::sort_bag;
+  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::new_data::sort_bool_;
+
+  data_specification specification = parse_data_specification(
+    "sort A = Bag(Nat);"
+    "map  s, s1, s2 : Bag(Nat);"
+    "eqn  s = {1:1, 2:2};"
+    "     s1 = {1:1};"
+    "     s2 = {2:2};"
+  );
+
+  new_data::rewriter R(specification);
+
+  sort_expression bag_nat(sort_bag::bag(nat()));
+
+  data_expression p0(R(parse_data_expression("0")));
+  data_expression p1(R(pos2nat(parse_data_expression("1"))));
+  data_expression p2(R(pos2nat(parse_data_expression("2"))));
+
+  data_expression s(R(new_data::function_symbol("s", bag_nat)));
+  data_expression s1(R(new_data::function_symbol("s1", bag_nat)));
+  data_expression s2(R(new_data::function_symbol("s2", bag_nat)));
+
+  data_rewrite_test(R, bagin(nat(), p0, s), false_());
+  data_rewrite_test(R, bagin(nat(), p1, s), true_());
+  data_rewrite_test(R, bagin(nat(), p2, s), true_());
+
+  data_rewrite_test(R, count(nat(), p0, s), p0);
+  data_rewrite_test(R, count(nat(), p1, s), p1);
+  data_rewrite_test(R, count(nat(), p2, s), p2);
+
+  data_rewrite_test(R, bagunion_(nat(), s, emptybag(nat())), s);
+  data_rewrite_test(R, bagunion_(nat(), s1, s2), s);
+
+  data_rewrite_test(R, bagintersection(nat(), s, emptybag(nat())), R(emptybag(nat())));
+  data_rewrite_test(R, bagintersection(nat(), s, s1), s1);
+  data_rewrite_test(R, bagintersection(nat(), s, s2), s2);
+
+  data_rewrite_test(R, bagdifference(nat(), s, emptybag(nat())), s);
+  data_rewrite_test(R, bagdifference(nat(), s, s1), s2);
+  data_rewrite_test(R, bagdifference(nat(), s, s2), s1);
 }
 
 void structured_sort_rewrite_test() {
