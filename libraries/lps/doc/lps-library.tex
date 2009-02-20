@@ -8,7 +8,7 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Tuesday, February 17, 2009 15:15:11}
+%TCIDATA{LastRevised=Friday, February 20, 2009 16:28:24}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -130,8 +130,7 @@ g_{i}(d,e)$, and $t_{i}(d,e)$ that appear in the definition of $p$.\newpage
 \subsection{Processes}
 
 Process expressions in mCRL2 are expressions built according to the
-following syntax:
-
+following syntax:%
 \[
 \begin{array}{ccc}
 \text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
@@ -159,7 +158,8 @@ x\ ||\ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\
 x\ ||\_\ y & \text{lmerge(}x\text{,}y\text{)} & \text{LMerge} \\ 
 x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
 \end{array}%
-\]%
+\]
+
 where the types of the symbols are as follows:%
 \[
 \begin{array}{cl}
@@ -224,7 +224,54 @@ following grammar:
                               | process_assignment(<process identifier>, <data assignments>)                      
 \end{verbatim}
 
-\pagebreak
+\bigskip \pagebreak 
+
+\subsection{\protect\bigskip Linear processes}
+
+Linear process expressions in mCRL2 are expressions built according to the
+following syntax:
+
+\[
+\begin{array}{ccc}
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+b(e) & \text{action(}b\text{,}e\text{)} & \text{Action} \\ 
+\sum\limits_{v}c\rightarrow a\mbox{\aap ,}t\ P(g) & \text{summand(}v,c,a,t,g%
+\text{)} & \text{LinearProcessSummand} \\ 
+\sum\limits_{v}c\rightarrow a\mbox{\aap ,}t\ P(g) & \text{summand(}v,c,a,g%
+\text{)} & \text{LinearProcessSummand} \\ 
+\sum\limits_{v}c\rightarrow \delta \mbox{\aap ,}t & \text{summand(}v,c,t%
+\text{)} & \text{LinearProcessSummand} \\ 
+\sum\limits_{v}c\rightarrow \delta \mbox{\aap ,}t & \text{summand(}v,c\text{)%
+} & \text{LinearProcessSummand} \\ 
+P(d:=e) & \text{process\_initializer(}f,d:=e\text{)\QQfnmark{%
+Here $f$ is a superset of the free variables appearing in $e$.}} & \text{%
+LinearProcessInit} \\ 
+\sum\limits_{i\in I}s_{i} & \text{linear\_process(}f,v,s\text{)\QQfnmark{%
+Here $s=[s_{1},\cdots ,s_{n}]$ is a sequence of summands, $v$ is the
+sequence of process parameters of the corresponding process, and $f$ is a
+sequence of free variables appearing in $s$.}} & \text{LinearProcess}%
+\end{array}%
+\QQfntext{-1}{
+Here $f$ is a superset of the free variables appearing in $e$.}
+\QQfntext{1}{
+Here $s=[s_{1},\cdots ,s_{n}]$ is a sequence of summands, $v$ is the
+sequence of process parameters of the corresponding process, and $f$ is a
+sequence of free variables appearing in $s$.}
+\]%
+where the types of the symbols are as follows:%
+\[
+\begin{array}{cl}
+a & \text{an action} \\ 
+b & \text{a string (action name)} \\ 
+P & \text{a process identifier} \\ 
+e,f,g,v & \text{a sequence of data expressions} \\ 
+d & \text{a sequence of data variables} \\ 
+t & \text{a data expression of type real} \\ 
+s & \text{a sequence of summands} \\ 
+c & \text{ a data expression of type bool}%
+\end{array}%
+\]%
+\pagebreak 
 
 \subsection{Operations on linear processes}
 

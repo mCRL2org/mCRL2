@@ -91,11 +91,11 @@ class summand: public atermpp::aterm_appl
     /// \brief Constructor.
     /// Constructs an untimed summand.
     summand(data::data_variable_list   summation_variables,
-                data::data_expression      condition,
-                bool                 delta,
-                action_list          actions,
-                data::data_assignment_list assignments
-               )
+            data::data_expression      condition,
+            bool                       delta,
+            action_list                actions,
+            data::data_assignment_list assignments
+           )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
@@ -113,12 +113,12 @@ class summand: public atermpp::aterm_appl
     /// \brief Constructor.
     /// Constructs a timed summand.
     summand(data::data_variable_list   summation_variables,
-                data::data_expression      condition,
-                bool                 delta,
-                action_list          actions,
-                data::data_expression      time,
-                data::data_assignment_list assignments
-               )
+            data::data_expression      condition,
+            bool                       delta,
+            action_list                actions,
+            data::data_expression      time,
+            data::data_assignment_list assignments
+           )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
@@ -131,6 +131,82 @@ class summand: public atermpp::aterm_appl
         m_actions            (actions),
         m_time               (time),
         m_assignments        (assignments)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs a timed summand.
+    summand(data::data_variable_list   summation_variables,
+            data::data_expression      condition,
+            action_list                actions,
+            data::data_expression      time,
+            data::data_assignment_list assignments
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+               condition,
+               core::detail::gsMakeMultAct(actions),
+               time,
+               assignments)
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (false),
+        m_actions            (actions),
+        m_time               (time),
+        m_assignments        (assignments)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs a timed delta summand.
+    summand(data::data_variable_list   summation_variables,
+            data::data_expression      condition,
+            data::data_expression      time
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+               condition,
+               core::detail::gsMakeMultAct(action_list()),
+               time,
+               data::data_assignment_list())
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (true),
+        m_time               (time)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs an untimed summand.
+    summand(data::data_variable_list   summation_variables,
+            data::data_expression      condition,
+            action_list                actions,
+            data::data_assignment_list assignments
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+               condition,
+               core::detail::gsMakeMultAct(actions),
+               data::data_expression(),
+               assignments)
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (false),
+        m_actions            (actions),
+        m_assignments        (assignments)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs an untimed delta summand.
+    summand(data::data_variable_list   summation_variables,
+            data::data_expression      condition
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(summation_variables,
+               condition,
+               core::detail::gsMakeMultAct(action_list()),
+               data::data_expression(),
+               data::data_assignment_list())
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (true)
     {}
 
     /// \brief Returns the sequence of summation variables.
