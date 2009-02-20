@@ -456,6 +456,8 @@ rule load-configuration ( build-root-path configuration-file-name ) {
     libdir     = $(destdir)$(libdir) ;
     includedir = $(destdir)$(includedir) ;
     datadir    = $(destdir)$(datadir) ;
+    mandir     = $(destdir)$(mandir) ;
+    plugindir  = $(destdir)$(plugindir) ;
   }
 }
 
