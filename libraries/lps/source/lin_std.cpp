@@ -7570,11 +7570,21 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl condition,
                      ATermAppl timevariable,
                      ATermAppl actiontime,
-                     specificationbasictype *spec)
+                     specificationbasictype *spec,
+                     ATermList &existentially_quantified_variables)
 { /* Generate a condition of the form:
 
        exists sumvars. condition && timevariable<actiontime
+   
+     where the sumvars are added to the existentially quantified 
+     variables, and the resulting expression is
 
+       condition && timevariable<actiontime
+
+     The comments below refer to old code, where an explicit
+     existential quantor was generated.
+
+     OLD:
      Currently, the existential quantifier must use an equation,
      which represents a higher order function. The existential
      quantifier is namely of type exists:sorts1->Bool, where sorts1
@@ -7625,8 +7635,9 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   }
   used_sumvars = ATreverse(used_sumvars);
+  existentially_quantified_variables=ATconcat(used_sumvars,existentially_quantified_variables);
 
-  if(!ATisEmpty(used_sumvars))
+  /* if(!ATisEmpty(used_sumvars))
   { // Make a new data equation.
     if (!existsort(realsort)) {
       insert_numeric_sort_decls(realsort, spec);
@@ -7640,7 +7651,7 @@ static ATermAppl makesingleultimatedelaycondition(
     ATermAppl neweqn = gsMakeDataApplList(eqn, used_sumvars);
     insertequation(gsMakeDataEqn(ATconcat(variables, used_sumvars),gsMakeNil(),neweqn,result),spec);
     result=gsMakeDataExprExists(eqn);
-  }
+  } */
 
   return result;
 }
@@ -7649,8 +7660,10 @@ static ATermAppl getUltimateDelayCondition(
                  ATermList sumlist,
                  ATermList freevars,
                  ATermAppl timevariable,
-                 specificationbasictype *spec)
+                 specificationbasictype *spec,
+                 ATermList &existentially_quantified_variables)
 {
+  assert(existentially_quantified_variables==ATempty);
   if (!existsort(realsort)) {
     insert_numeric_sort_decls(realsort, spec);
   }
@@ -7693,7 +7706,8 @@ static ATermAppl getUltimateDelayCondition(
                      condition,
                      timevariable,
                      actiontime,
-                     spec);
+                     spec,
+                     existentially_quantified_variables);
     if (result==gsMakeDataExprFalse())
     { result=intermediate_result;
     }
@@ -7816,15 +7830,17 @@ static ATermList combine_summand_lists(
 
   ATermAppl timevar=getfreshvariable(
                        "timevar",realsort);
+  ATermList ultimate_delay_sumvars1=ATempty;
   ATermAppl ultimatedelaycondition=
              (add_delta?gsMakeDataExprTrue():
-                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
+                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
+                                                  timevar,spec,ultimate_delay_sumvars1));
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty);
                         walker1=ATgetNext(walker1))
   { ATermAppl summand1=ATAgetFirst(walker1);
 
-    ATermList sumvars1=linGetSumVars(summand1);
+    ATermList sumvars1=ATconcat(linGetSumVars(summand1),ultimate_delay_sumvars1);
     ATermAppl multiaction1=linGetMultiAction(summand1);
     ATermAppl actiontime1=linGetActionTime(summand1);
     ATermAppl condition1=linGetCondition(summand1);
@@ -7866,19 +7882,16 @@ static ATermList combine_summand_lists(
   }
   /* second we enumerate the summands of sumlist2 */
 
-  if (add_delta)
-  { ultimatedelaycondition=gsMakeDataExprTrue();
-  }
-  else
-  { ultimatedelaycondition=
-                   getUltimateDelayCondition(sumlist1,par1,timevar,spec);
-  }
+  ATermList ultimate_delay_sumvars2=ATempty;
+  ultimatedelaycondition=(add_delta?gsMakeDataExprTrue():
+               getUltimateDelayCondition(sumlist1,par1,
+                                     timevar,spec,ultimate_delay_sumvars2));
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
   {
     ATermAppl summand2=ATAgetFirst(walker2);
-    ATermList sumvars2=linGetSumVars(summand2);
+    ATermList sumvars2=ATconcat(linGetSumVars(summand2),ultimate_delay_sumvars2);
     ATermAppl multiaction2=linGetMultiAction(summand2);
     ATermAppl actiontime2=linGetActionTime(summand2);
     ATermAppl condition2=linGetCondition(summand2);
