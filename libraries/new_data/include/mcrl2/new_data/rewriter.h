@@ -56,7 +56,7 @@ namespace new_data {
         ATermAppl implemented = detail::impl_exprs_appl(expression,
                         &m_substitution_context, &declarations, &new_data_equations);
 
-        if (new_data_equations != ATempty) {
+        if (!ATisEmpty(new_data_equations)) {
           atermpp::term_list< atermpp::aterm_appl > new_equations(new_data_equations);
 
           for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = new_equations.begin();
@@ -66,6 +66,7 @@ namespace new_data {
 
           m_specification = core::detail::add_data_decls(m_specification, declarations);
         }
+
         return implemented;
       }
 

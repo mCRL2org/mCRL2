@@ -13,7 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/utility.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/new_data/data_equation.h"

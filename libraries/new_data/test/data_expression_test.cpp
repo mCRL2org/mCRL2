@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/utility.h"
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/function_sort.h"
 #include "mcrl2/new_data/data_expression.h"

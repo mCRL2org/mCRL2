@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -29,6 +29,7 @@
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
@@ -295,7 +296,7 @@ void list_rewrite_test() {
   new_data::rewriter R(specification);
 
   sort_expression list_bool(list(bool_()));
-  data_expression empty(nil(bool_()));
+  data_expression empty(R(nil(bool_())));
   data_expression head_true(cons_(bool_(), true_(), empty));
 
   data_rewrite_test(R, in(bool_(), true_(), head_true), true_());
@@ -306,8 +307,8 @@ void list_rewrite_test() {
   data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("0")), true_());
   data_rewrite_test(R, head(bool_(), head_true), true_());
   data_rewrite_test(R, rhead(bool_(), head_true), true_());
-  data_rewrite_test(R, rtail(bool_(), head_true), R(empty));
-  data_rewrite_test(R, tail(bool_(), head_true), R(empty));
+  data_rewrite_test(R, rtail(bool_(), head_true), empty);
+  data_rewrite_test(R, tail(bool_(), head_true), empty);
 }
 
 void set_rewrite_test() {
