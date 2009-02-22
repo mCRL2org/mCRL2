@@ -70,7 +70,8 @@ class summand_information
 {
 
   private:
-    mcrl2::lps::summand smd;
+    // the summand is put in an atermpp vector for protection. It only contains one element.
+    atermpp::vector < mcrl2::lps::summand > smd;
     atermpp::vector < mcrl2::data::data_expression > new_values_for_xi_variables;
     vector < linear_inequality > summand_real_conditions;
     atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
@@ -87,7 +88,7 @@ class summand_information
              vector < linear_inequality > src,
              atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
              ):
-      smd(s),
+      smd(1,s),
       new_values_for_xi_variables(),
       summand_real_conditions(src),
       summand_real_nextstate_map(srnm),
@@ -97,7 +98,7 @@ class summand_information
     }
 
     mcrl2::lps::summand get_summand() const
-    { return smd;
+    { return smd[0];
     }
 
     atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
