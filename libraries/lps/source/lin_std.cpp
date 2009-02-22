@@ -38,7 +38,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
 
@@ -9098,7 +9098,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //initialise local data structures
   initialize_data();
   if (mayrewrite) {
-    rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(spec,0)),
+    rewr = createRewriter(ATAgetArgument(spec,0),
                           lin_options.rewrite_strategy);
   }
   specificationbasictype *spec_int = create_spec(spec);

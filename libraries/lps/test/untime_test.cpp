@@ -17,7 +17,7 @@
 #include <mcrl2/lps/mcrl22lps.h>
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 /*
@@ -39,7 +39,12 @@ void test_case_1()
     BOOST_CHECK(!i->has_time());
   }
 
-  BOOST_CHECK(s0 == s1);
+  BOOST_CHECK(static_cast< ATermAppl >(s0) == static_cast< ATermAppl >(s1));
+
+  if (s0 != s1) {
+    std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
+              << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
+  }
 }
 
 /*

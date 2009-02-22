@@ -17,6 +17,7 @@
 #include "mcrl2/lps/process_expression_visitor.h"
 #include "mcrl2/lps/process_expression_builder.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
@@ -42,7 +43,7 @@ void test_processes()
     ;
 
   process_specification spec = parse_process_specification(SPECIFICATION);
-  std::cout << core::pp(spec.data()) << std::endl
+  std::cout << core::pp(new_data::detail::data_specification_to_aterm_data_spec(spec.data())) << std::endl
             << core::pp(spec.actions()) << std::endl
             << spec.equations() << std::endl
             << spec.init() << std::endl;

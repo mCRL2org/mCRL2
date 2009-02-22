@@ -37,7 +37,7 @@ void test_case_1()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {
@@ -73,7 +73,7 @@ void test_case_2()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {
@@ -109,7 +109,7 @@ void test_case_3()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {
@@ -144,7 +144,7 @@ void test_case_4()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {
@@ -180,7 +180,7 @@ void test_case_5()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {
@@ -219,7 +219,7 @@ void test_case_6()
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
-  for (data_variable_list::iterator i = s1.process().process_parameters().begin();
+  for (variable_list::iterator i = s1.process().process_parameters().begin();
        i != s1.process().process_parameters().end();
        ++i)
   {

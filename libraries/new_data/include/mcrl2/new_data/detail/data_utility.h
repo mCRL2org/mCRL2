@@ -9,8 +9,8 @@
 /// \file mcrl2/new_data/detail/data_utility.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
-#define MCRL2_DATA_DETAIL_DATA_UTILITY_H
+#ifndef MCRL2_NEW_DATA_DETAIL_DATA_UTILITY_H
+#define MCRL2_NEW_DATA_DETAIL_DATA_UTILITY_H
 
 #include <algorithm>
 #include <iterator>
@@ -18,10 +18,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/range/iterator_range.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/assignment.h"
 
 namespace mcrl2 {
@@ -75,10 +77,10 @@ namespace detail {
 /// \param variables A sequence of data variables
 /// \return True if the names of the given variables are unique.
 inline
-bool unique_names(variable_list variables)
+bool unique_names(variable_list const& variables)
 {
   std::set<core::identifier_string> variable_names;
-  for (variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     variable_names.insert(i->name());
   }
@@ -94,11 +96,11 @@ bool unique_names(variable_list variables)
 /// \param variables A sequence of data variables
 /// \return True if the left hand sides of assignments are contained in variables.
 inline
-bool check_assignment_variables(assignment_list assignments, variable_list variables)
+bool check_assignment_variables(assignment_list const& assignments, variable_list variables)
 {
   std::set<variable> v;
   std::copy(variables.begin(), variables.end(), std::inserter(v, v.begin()));
-  for (assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
+  for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
   {
     if (v.find(i->lhs()) == v.end())
       return false;
@@ -208,11 +210,27 @@ bool check_variable_sorts(const VariableContainer& variables, const std::set<sor
 /// \param names A set of strings
 /// \return True if names of the given variables are not contained in names.
 inline
-bool check_variable_names(variable_list variables, const std::set<core::identifier_string>& names)
+bool check_variable_names(variable_list const& variables, const std::set<core::identifier_string>& names)
 {
-  for (variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (names.find(i->name()) != names.end())
+      return false;
+  }
+  return true;
+}
+
+/// \brief Returns true if the domain sorts and range sort of the given functions are contained in sorts.
+/// \param range A sequence of data operations
+/// \param sorts A set of sort expressions
+/// \return True if the domain sorts and range sort of the given functions are contained in sorts.
+template < typename I >
+inline
+bool check_data_spec_sorts(boost::iterator_range< I > const& range, const std::set<sort_expression>& sorts)
+{
+  for (function_symbol_list::const_iterator i = range.begin(); i != range.end(); ++i)
+  {
+    if (!check_sort(i->sort(), sorts))
       return false;
   }
   return true;
@@ -223,24 +241,19 @@ bool check_variable_names(variable_list variables, const std::set<core::identifi
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
 inline
-bool check_data_spec_sorts(function_symbol_list functions, const std::set<sort_expression>& sorts)
+bool check_data_spec_sorts(function_symbol_list const& functions, const std::set<sort_expression>& sorts)
 {
-  for (function_symbol_list::iterator i = functions.begin(); i != functions.end(); ++i)
-  {
-    if (!check_sort(i->sort(), sorts))
-      return false;
-  }
-  return true;
+  return check_data_spec_sorts(boost::make_iterator_range(functions), sorts);
 }
 
 /// \brief Returns the names of the variables in t
 /// \param t A sequence of data variables
 /// \return The names of the variables in t
 inline
-std::vector<std::string> variable_strings(variable_list t)
+std::vector<std::string> variable_strings(variable_list const& t)
 {
   std::vector<std::string> result;
-  for (variable_list::iterator i = t.begin(); i != t.end(); ++i)
+  for (variable_list::const_iterator i = t.begin(); i != t.end(); ++i)
     result.push_back(i->name());
   return result;
 }

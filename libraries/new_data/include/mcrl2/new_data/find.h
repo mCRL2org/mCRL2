@@ -16,7 +16,7 @@
 #include <functional>
 #include <iterator>
 #include <functional>
-#include <boost/bind.hpp>
+#include "boost/bind.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/detail/data_functional.h"
@@ -24,7 +24,6 @@
 namespace mcrl2 {
 
 namespace new_data {
-
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param t A term
@@ -66,6 +65,64 @@ std::set<variable> find_all_variables(Term t)
   std::set<variable> result;
   atermpp::find_all_if(t, std::ptr_fun(&local::caster), std::inserter(result, result.end()));
   return result;
+}
+
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] begin start of a range of expressions
+/// \param[in] end of a range of expressions
+/// \param[in] d A data variable
+/// \return True if the term has a given variable as subterm.
+template <typename ForwardTraversalIterator >
+inline bool find_variable(ForwardTraversalIterator const& begin, ForwardTraversalIterator const& end, const variable& d)
+{
+  atermpp::aterm result;
+
+  for (ForwardTraversalIterator i = begin; result == atermpp::aterm() && i != end; ++i) {
+    result = atermpp::partial_find_if(*i, detail::compare_term<variable>(d), core::detail::gsIsDataVarId);
+  }
+
+  return result != atermpp::aterm();
+}
+
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] range a range of expressions
+/// \param[in] d A data variable
+/// \return True if the term has a given variable as subterm.
+template <typename ForwardTraversalIterator >
+inline bool find_variable(boost::iterator_range< ForwardTraversalIterator > const& range, const variable& d)
+{
+  return find_variable(range.begin(), range.end(), d);
+}
+
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] begin start of a range of expressions
+/// \param[in] end of a range of expressions
+/// \return All data variables that occur in the term t
+template <typename ForwardTraversalIterator >
+std::set<variable> find_all_variables(ForwardTraversalIterator const& begin, ForwardTraversalIterator const& end)
+{
+  struct local {
+    static bool caster(atermpp::aterm p) {
+      return data_expression(p).is_variable();
+    }
+  };
+
+  std::set<variable> result;
+
+  for (ForwardTraversalIterator i = begin; i != end; ++i) {
+    atermpp::find_all_if(*i, std::ptr_fun(&local::caster), std::inserter(result, result.end()));
+  }
+
+  return result;
+}
+
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] range a range of expressions
+/// \return All data variables that occur in the term t
+template <typename ForwardTraversalIterator >
+std::set<variable> find_all_variables(boost::iterator_range< ForwardTraversalIterator > const& range)
+{
+  return find_all_variables(range.begin(), range.end());
 }
 
 /// \brief Returns true if the term has a given sort identifier as subterm.

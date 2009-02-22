@@ -15,10 +15,10 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/find.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
@@ -27,14 +27,14 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+using namespace mcrl2::new_data::data_expr;
 using namespace mcrl2::lps;
 
 struct compare_variable
 {
   aterm d;
 
-  compare_variable(data_variable d_)
+  compare_variable(variable d_)
     : d(d_)
   {}
 
@@ -44,7 +44,7 @@ struct compare_variable
   }
 };
 
-bool occurs_in(data_expression d, data_variable v)
+bool occurs_in(data_expression d, variable v)
 {
   return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
@@ -65,9 +65,9 @@ int main(int argc, char* argv[])
   summand summand_ = *lps.summands().begin();
   data_expression d = summand_.condition();
   cout << "d = " << d << endl;
-  for (data_variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)
+  for (variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)
   {
-    data_variable v = *j;
+    variable v = *j;
     bool b = occurs_in(d, v);
     cout << "v = " << v << endl;
     cout << "occurs: " << b << endl;

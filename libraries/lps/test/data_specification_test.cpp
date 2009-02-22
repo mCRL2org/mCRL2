@@ -15,7 +15,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 const std::string SPECIFICATION =
@@ -32,8 +32,8 @@ int test_main(int argc, char** argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   data_specification data = spec.data();
-  BOOST_CHECK(data.is_finite(sort_expr::bool_()));
-  BOOST_CHECK(!data.is_finite(sort_expr::nat()));
+  BOOST_CHECK(data.is_certainly_finite(sort_bool_::bool_()));
+  BOOST_CHECK(!data.is_certainly_finite(sort_nat::nat()));
 
   return 0;
 }

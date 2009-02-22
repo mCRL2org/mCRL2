@@ -17,18 +17,17 @@
 #include <mcrl2/atermpp/table.h>
 
 //LPS Framework
-#include <mcrl2/data/data_operation.h>
+#include <mcrl2/new_data/function_symbol.h>
 #include <mcrl2/lps/linear_process.h>
 #include <mcrl2/lps/specification.h>
-#include <mcrl2/data/sort_utility.h>
-#include <mcrl2/data/find.h>
+#include <mcrl2/new_data/detail/sort_utility.h>
+#include <mcrl2/new_data/find.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/new_data/detail/data_functional.h"
 
 //Enumerator
-#include <mcrl2/data/detail/enum/standard.h>
-#include <mcrl2/lps/nextstate.h>
+#include <mcrl2/new_data/detail/enum/standard.h>
 
 #include <mcrl2/lps/suminst.h>
 
@@ -36,7 +35,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
@@ -48,11 +47,11 @@ namespace lps {
 // Helper functions
 /////
 
-///\return a list of all data_variables of sort s in vl
-data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
+///\return a list of all variables of sort s in vl
+variable_list get_occurrences(const variable_list& vl, const sort_expression& s)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (i->sort() == s)
     {
@@ -63,11 +62,11 @@ data_variable_list get_occurrences(const data_variable_list& vl, const sort_expr
   return result;
 }
 
-///\return the list of all data_variables in vl, which are unequal to v
-data_variable_list filter(const data_variable_list& vl, const data_variable& v)
+///\return the list of all variables in vl, which are unequal to v
+variable_list filter(const variable_list& vl, const variable& v)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (!(*i == v))
     {
@@ -78,12 +77,12 @@ data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 }
 
 ///\return the list of all date_variables in vl, that are not in rl
-data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
+variable_list filter(const variable_list& vl, const variable_list& rl)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (!find_data_variable(rl, *i))
+    if (!find_variable(rl, *i))
     {
       result = push_front(result, *i);
     }
@@ -109,10 +108,10 @@ sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_
 }
 
 ///\return a list of all variables of a sort that occurs in sl
-data_variable_list get_variables(const data_variable_list& vl, const sort_expression_list& sl)
+variable_list get_variables(const variable_list& vl, const sort_expression_list& sl)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (find_sort_expression(sl, i->sort()))
     {
@@ -137,7 +136,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
 
   gsVerboseMsg("initialization...");
 
-  data_variable_list variables; // The variables we need to consider in instantiating
+  variable_list variables; // The variables we need to consider in instantiating
   if (o.finite_only)
   {
     // Only consider finite variables
@@ -158,7 +157,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
   {
     // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
     // because we only need to calculate it once.
-    data_variable_list new_vars = filter(summand_.summation_variables(), variables);
+    variable_list new_vars = filter(summand_.summation_variables(), variables);
 
     ATermList vars = ATermList(variables);
 
@@ -189,15 +188,15 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
       }
       else
       {
-        data_assignment_list substitutions;
+        assignment_list substitutions;
         // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
         aterm_list solution = aterm_list(sol);
 
-        // Translate internal rewriter solution to lps data_assignment_list
+        // Translate internal rewriter solution to lps assignment_list
         for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
         {
           // lefthandside of substitution
-          data_variable var = data_variable(ATgetArgument(ATerm(*i), 0));
+          variable var = variable(ATgetArgument(ATerm(*i), 0));
 
           // righthandside of substitution in internal rewriter format
           ATerm arg = ATgetArgument(ATerm(*i),1);
@@ -206,7 +205,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
           data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
 
           // Substitution to be performed
-          data_assignment substitution = data_assignment(var, res);
+          assignment substitution = assignment(var, res);
           substitutions = push_front(substitutions, substitution);
         }
         gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());

@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/variable.h"
 
@@ -61,6 +62,20 @@ namespace mcrl2 {
         data_expression rhs() const
         {
           return atermpp::arg2(*this);
+        }
+
+        /// \brief Returns true if the sorts of the left and right hand side are equal.
+        /// \return True if the assignement is well typed.
+        bool is_well_typed() const
+        {
+          bool result = lhs().sort() == rhs().sort();
+          if (!result)
+          {
+            std::clog << "data_assignment::is_well_typed() failed: the left and right hand sides "
+               << mcrl2::core::pp(lhs()) << " and " << mcrl2::core::pp(rhs()) << " have different sorts." << std::endl;
+            return false;
+          }
+          return true;
         }
 
     }; // class assignment

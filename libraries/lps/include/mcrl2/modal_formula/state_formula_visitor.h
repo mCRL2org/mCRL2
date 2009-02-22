@@ -47,7 +47,7 @@ struct state_formula_visitor
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
-  virtual bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
+  virtual bool visit_data_expression(const state_formula& /* e */, const new_data::data_expression& d)
   {
     return true;
   }
@@ -96,14 +96,14 @@ struct state_formula_visitor
 
   /// \brief Visit forall node
   /// \return The result of visiting the node
-  virtual bool visit_forall(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual bool visit_forall(const state_formula& /* e */, const new_data::variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
 
   /// \brief Visit exists node
   /// \return The result of visiting the node
-  virtual bool visit_exists(const state_formula& /* e */, const data::data_variable_list& /* variables */, const state_formula& /* expression */)
+  virtual bool visit_exists(const state_formula& /* e */, const new_data::variable_list& /* variables */, const state_formula& /* expression */)
   {
     return true;
   }
@@ -131,7 +131,7 @@ struct state_formula_visitor
 
   /// \brief Visit yaled_timed node
   /// \return The result of visiting the node
-  virtual bool visit_yaled_timed(const state_formula& /* e */, const data::data_expression& /* d */)
+  virtual bool visit_yaled_timed(const state_formula& /* e */, const new_data::data_expression& /* d */)
   {
     return true;
   }
@@ -145,28 +145,28 @@ struct state_formula_visitor
 
   /// \brief Visit delay_timed node
   /// \return The result of visiting the node
-  virtual bool visit_delay_timed(const state_formula& /* e */, const data::data_expression& /* d */)
+  virtual bool visit_delay_timed(const state_formula& /* e */, const new_data::data_expression& /* d */)
   {
     return true;
   }
 
   /// \brief Visit var node
   /// \return The result of visiting the node
-  virtual bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& /* l */)
+  virtual bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const new_data::data_expression_list& /* l */)
   {
     return true;
   }
 
   /// \brief Visit mu node
   /// \return The result of visiting the node
-  virtual bool visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual bool visit_mu(const state_formula& /* e */, const core::identifier_string& /* n */, const new_data::assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
 
   /// \brief Visit nu node
   /// \return The result of visiting the node
-  virtual bool visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_assignment_list& /* a */, const state_formula& /* f */)
+  virtual bool visit_nu(const state_formula& /* e */, const core::identifier_string& /* n */, const new_data::assignment_list& /* a */, const state_formula& /* f */)
   {
     return true;
   }
@@ -296,7 +296,7 @@ struct state_formula_visitor
         visit(r);
       }
     } else if (is_forall(e)) {
-      data::data_variable_list qvars = var(e);
+      new_data::variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       bool result = visit_forall(e, qvars, qexpr);
       if (result)
@@ -304,7 +304,7 @@ struct state_formula_visitor
         visit(qexpr);
       }
     } else if (is_exists(e)) {
-      data::data_variable_list qvars = var(e);
+      new_data::variable_list qvars = var(e);
       state_formula qexpr = arg(e);
       bool result = visit_exists(e, qvars, qexpr);
       if (result)
@@ -330,20 +330,20 @@ struct state_formula_visitor
     } else if (is_yaled(e)) {
       visit_yaled(e);
     } else if(is_yaled_timed(e)) {
-      data::data_expression t = time(e);
+      new_data::data_expression t = time(e);
       visit_yaled_timed(e, t);
     } else if (is_delay(e)) {
       visit_delay(e);
     } else if(is_delay_timed(e)) {
-      data::data_expression t = time(e);
+      new_data::data_expression t = time(e);
       visit_delay_timed(e, t);
     } else if(is_var(e)) {
       core::identifier_string n = name(e);
-      data::data_expression_list l = param(e);
+      new_data::data_expression_list l = param(e);
       visit_var(e, n, l);
     } else if(is_mu(e)) {
       core::identifier_string n = name(e);
-      data::data_assignment_list a = ass(e);
+      new_data::assignment_list a = ass(e);
       state_formula f = arg(e);
       bool result = visit_mu(e, n, a, f);
       if (result)
@@ -352,7 +352,7 @@ struct state_formula_visitor
       }
     } else if(is_nu(e)) {
       core::identifier_string n = name(e);
-      data::data_assignment_list a = ass(e);
+      new_data::assignment_list a = ass(e);
       state_formula f = arg(e);
       bool result = visit_nu(e, n, a, f);
       if (result)

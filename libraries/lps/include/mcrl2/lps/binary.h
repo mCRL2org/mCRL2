@@ -13,7 +13,7 @@
 #define MCRL2_LPS_BINARY_H
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 
 namespace mcrl2 {
 

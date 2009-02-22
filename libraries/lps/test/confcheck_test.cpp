@@ -18,7 +18,7 @@
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 

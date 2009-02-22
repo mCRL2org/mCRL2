@@ -33,7 +33,10 @@
 #include "application.h"
 
 #include "data_equation.h"
+#include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/compatibility.h"
+#include "mcrl2/new_data/detail/data_utility.h"
+#include "mcrl2/new_data/utility.h"
 
 namespace mcrl2 {
 
@@ -801,6 +804,35 @@ namespace mcrl2 {
       {
         return data_expression();
         //TODO
+      }
+
+      /// \brief Returns true if
+      /// <ul>
+      /// <li>the domain and range sorts of constructors are contained in the list of sorts</li>
+      /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
+      /// </ul>
+      /// \return True if the data specification is well typed.
+      bool is_well_typed() const
+      {
+        std::set<sort_expression> sorts = detail::make_set(m_sorts);
+
+        // check 1)
+        if (!detail::check_data_spec_sorts(constructors(), sorts))
+        {
+          std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
+                    << pp(constructors()) << " are declared in " << pp(m_sorts) << std::endl;
+          return false;
+        }
+
+        // check 2)
+        if (!detail::check_data_spec_sorts(mappings(), sorts))
+        {
+          std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
+                    << pp(mappings()) << " are declared in " << pp(m_sorts) << std::endl;
+          return false;
+        }
+
+        return true;
       }
 
     }; // class data_specification

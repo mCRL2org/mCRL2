@@ -14,9 +14,9 @@
 
 #include <algorithm>
 #include <set>
-#include "mcrl2/data/data.h"
+#include "mcrl2/new_data/data.h"
 #include "mcrl2/lps/summand.h"
-#include "mcrl2/data/detail/free_variables.h"
+#include "mcrl2/new_data/detail/free_variables.h"
 #include "mcrl2/atermpp/algorithm.h"
 
 namespace mcrl2 {
@@ -31,9 +31,9 @@ namespace detail {
 /// to be bound_variables and will not be part of the result
 /// \param dest An output iterator to which the result is written
 template <typename OutputIterator>
-void collect_free_variables(const summand& s, const std::set<data::data_variable>& bound_variables, OutputIterator dest)
+void collect_free_variables(const summand& s, const std::set<new_data::variable>& bound_variables, OutputIterator dest)
 {
-  atermpp::for_each(s, mcrl2::data::detail::make_data_variable_collector(bound_variables.begin(),
+  atermpp::for_each(s, mcrl2::new_data::detail::make_variable_collector(bound_variables.begin(),
                                                             bound_variables.end(),
                                                             s.summation_variables().begin(),
                                                             s.summation_variables().end(),

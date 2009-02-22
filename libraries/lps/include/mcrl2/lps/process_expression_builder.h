@@ -44,24 +44,24 @@ struct process_expression_builder
   /// \brief Destructor.
   virtual ~process_expression_builder()
   { }
-              
+
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_action(const process_expression& x, const action_label& l, const new_data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit process node
   /// \return The result of visiting the node
-  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const new_data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::data_assignment_list& v, Arg& /* a */)
+  virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const new_data::assignment_list& v, Arg& /* a */)
   {
     return process_expression();
   }
@@ -82,7 +82,7 @@ struct process_expression_builder
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const process_expression& x, const data::data_variable_list& v, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
   }
@@ -131,7 +131,7 @@ struct process_expression_builder
               
   /// \brief Visit at_time node
   /// \return The result of visiting the node
-  virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
+  virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const new_data::data_expression& d, Arg& /* a */)
   {
     return process_expression();
   }
@@ -145,14 +145,14 @@ struct process_expression_builder
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_if_then(const process_expression& x, const new_data::data_expression& d, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_if_then_else(const process_expression& x, const new_data::data_expression& d, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
   }
@@ -202,7 +202,7 @@ struct process_expression_builder
     if (tr::is_action(x))
     {
       action_label l = action(x).label();
-      data::data_expression_list v = action(x).arguments();
+      new_data::data_expression_list v = action(x).arguments();
       result = visit_action(x, l, v, a);
       if (!is_finished(result))
       {
@@ -212,7 +212,7 @@ struct process_expression_builder
     else if (tr::is_process(x))
     {
       process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
+      new_data::data_expression_list v = process(x).expressions();
       result = visit_process(x, pi, v, a);
       if (!is_finished(result))
       {
@@ -222,7 +222,7 @@ struct process_expression_builder
     else if (tr::is_process_assignment(x))
     {
       process_identifier pi = process_assignment(x).identifier();
-      data::data_assignment_list v = process_assignment(x).assignments();
+      new_data::assignment_list v = process_assignment(x).assignments();
       result = visit_process_assignment(x, pi, v, a);
       if (!is_finished(result))
       {
@@ -247,7 +247,7 @@ struct process_expression_builder
     }
     else if (tr::is_sum(x))
     {
-      data::data_variable_list v = sum(x).variables();
+      new_data::variable_list v = sum(x).variables();
       process_expression right = sum(x).expression();
       result = visit_sum(x, v, right, a);
       if (!is_finished(result))
@@ -318,7 +318,7 @@ struct process_expression_builder
     else if (tr::is_at_time(x))
     {
       process_expression left = at_time(x).expression();
-      data::data_expression d = at_time(x).time();
+      new_data::data_expression d = at_time(x).time();
       result = visit_at_time(x, left, d, a);
       if (!is_finished(result))
       {
@@ -337,7 +337,7 @@ struct process_expression_builder
     }
     else if (tr::is_if_then(x))
     {
-      data::data_expression d = if_then(x).condition();
+      new_data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).left();
       result = visit_if_then(x, d, right, a);
       if (!is_finished(result))
@@ -347,7 +347,7 @@ struct process_expression_builder
     }
     else if (tr::is_if_then_else(x))
     {
-      data::data_expression d = if_then_else(x).condition();
+      new_data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).left();
       process_expression right = if_then_else(x).right();
       result = visit_if_then_else(x, d, left, right, a);
@@ -425,140 +425,140 @@ struct process_expression_builder<void>
   /// \brief Destructor.
   virtual ~process_expression_builder()
   { }
-              
+
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
+  virtual process_expression visit_action(const process_expression& x, const action_label& l, const new_data::data_expression_list& v)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit process node
   /// \return The result of visiting the node
-  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const new_data::data_expression_list& v)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::data_assignment_list& v)
+  virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const new_data::assignment_list& v)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit delta node
   /// \return The result of visiting the node
   virtual process_expression visit_delta(const process_expression& x)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit tau node
   /// \return The result of visiting the node
   virtual process_expression visit_tau(const process_expression& x)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const process_expression& x, const data::data_variable_list& v, const process_expression& right)
+  virtual process_expression visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit block node
   /// \return The result of visiting the node
   virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit hide node
   /// \return The result of visiting the node
   virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit rename node
   /// \return The result of visiting the node
   virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit comm node
   /// \return The result of visiting the node
   virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit allow node
   /// \return The result of visiting the node
   virtual process_expression visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit sync node
   /// \return The result of visiting the node
   virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit at_time node
   /// \return The result of visiting the node
-  virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+  virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const new_data::data_expression& d)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit seq node
   /// \return The result of visiting the node
   virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+  virtual process_expression visit_if_then(const process_expression& x, const new_data::data_expression& d, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_if_then_else(const process_expression& x, const new_data::data_expression& d, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit binit node
   /// \return The result of visiting the node
   virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit merge node
   /// \return The result of visiting the node
   virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
   virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-              
+
   /// \brief Visit choice node
   /// \return The result of visiting the node
   virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
@@ -581,7 +581,7 @@ struct process_expression_builder<void>
     if (tr::is_action(x))
     {
       action_label l = action(x).label();
-      data::data_expression_list v = action(x).arguments();
+      new_data::data_expression_list v = action(x).arguments();
       result = visit_action(x, l, v);
       if (!is_finished(result))
       {
@@ -591,7 +591,7 @@ struct process_expression_builder<void>
     else if (tr::is_process(x))
     {
       process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
+      new_data::data_expression_list v = process(x).expressions();
       result = visit_process(x, pi, v);
       if (!is_finished(result))
       {
@@ -601,7 +601,7 @@ struct process_expression_builder<void>
     else if (tr::is_process_assignment(x))
     {
       process_identifier pi = process_assignment(x).identifier();
-      data::data_assignment_list v = process_assignment(x).assignments();
+      new_data::assignment_list v = process_assignment(x).assignments();
       result = visit_process_assignment(x, pi, v);
       if (!is_finished(result))
       {
@@ -626,7 +626,7 @@ struct process_expression_builder<void>
     }
     else if (tr::is_sum(x))
     {
-      data::data_variable_list v = sum(x).variables();
+      new_data::variable_list v = sum(x).variables();
       process_expression right = sum(x).expression();
       result = visit_sum(x, v, right);
       if (!is_finished(result))
@@ -697,7 +697,7 @@ struct process_expression_builder<void>
     else if (tr::is_at_time(x))
     {
       process_expression left = at_time(x).expression();
-      data::data_expression d = at_time(x).time();
+      new_data::data_expression d = at_time(x).time();
       result = visit_at_time(x, left, d);
       if (!is_finished(result))
       {
@@ -716,7 +716,7 @@ struct process_expression_builder<void>
     }
     else if (tr::is_if_then(x))
     {
-      data::data_expression d = if_then(x).condition();
+      new_data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).left();
       result = visit_if_then(x, d, right);
       if (!is_finished(result))
@@ -726,7 +726,7 @@ struct process_expression_builder<void>
     }
     else if (tr::is_if_then_else(x))
     {
-      data::data_expression d = if_then_else(x).condition();
+      new_data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).left();
       process_expression right = if_then_else(x).right();
       result = visit_if_then_else(x, d, left, right);

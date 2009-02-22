@@ -13,7 +13,7 @@
 #define MCRL2_LPS_LIN_TYPES_H
 
 #include <string>
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/detail/rewrite.h"
 
 //Type definitions for all linearisers
 

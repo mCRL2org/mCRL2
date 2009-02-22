@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file sequence_algorithm.h
+/// \file mcrl2/new_data/detail/sequence_algorithm.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
-#define MCRL2_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#ifndef MCRL2_NEW_DATA_DETAIL_SEQUENCE_ALGORITHM_H
+#define MCRL2_NEW_DATA_DETAIL_SEQUENCE_ALGORITHM_H
 
 #include <algorithm>
 #include <iterator>
@@ -84,7 +84,7 @@ std::set<typename Container::value_type> make_set(const Container& c)
 
 } // namespace detail
 
-} // namespace data
+} // namespace new_data
 
 } // namespace mcrl2
 

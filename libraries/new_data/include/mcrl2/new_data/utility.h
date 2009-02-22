@@ -12,8 +12,15 @@
 #ifndef MCRL2_NEW_DATA_UTILITY_H
 #define MCRL2_NEW_DATA_UTILITY_H
 
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
 
+#include "boost/format.hpp"
 #include <boost/assert.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_integral.hpp>
@@ -27,6 +34,10 @@
 #include "mcrl2/new_data/int.h"
 #include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/list.h"
+#include "mcrl2/new_data/assignment.h"
+#include "mcrl2/new_data/detail/data_utility.h"
+#include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
@@ -35,7 +46,7 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail {
 
-      std::vector< char > string_to_vector_number(std::string const& s) {
+      inline std::vector< char > string_to_vector_number(std::string const& s) {
         std::vector< char > result;
 
         result.reserve(s.size());
@@ -51,7 +62,7 @@ namespace mcrl2 {
 
       /// Type T is an unsigned type
       template< typename T >
-      std::string as_decimal_string(T t) {
+      inline std::string as_decimal_string(T t) {
         if (t != 0) {
           std::string result;
 
@@ -70,7 +81,7 @@ namespace mcrl2 {
       /// \brief Divides a number in decimal notation represented by an array by two
       /// \param[in,out] s the number
       /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
-      void divide_by_two(std::vector< char >& n)
+      inline void divide_by_two(std::vector< char >& n)
       {
         BOOST_ASSERT(0 < n.size());
 
@@ -121,7 +132,7 @@ namespace mcrl2 {
 
     namespace sort_bool_{
       /// \brief Constructs expression of type Bool from an integral type
-      data_expression bool_(bool b) {
+      inline data_expression bool_(bool b) {
         return (b) ? sort_bool_::true_() : sort_bool_::false_();
       }
     }
@@ -138,7 +149,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Pos from a string
-      data_expression pos(std::string const& n) {
+      inline data_expression pos(std::string const& n) {
         using namespace mcrl2::core::detail;
 
         std::vector< char > number_as_vector(detail::string_to_vector_number(n));
@@ -173,7 +184,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Nat from a string
-      data_expression nat(std::string const& n) {
+      inline data_expression nat(std::string const& n) {
         if (n == "0") {
           return data_expression(core::detail::gsMakeDataExprC0());
         }
@@ -196,7 +207,7 @@ namespace mcrl2 {
 
       /// \brief Constructs expression of type Int from a string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
-      data_expression int_(std::string const& n) {
+      inline data_expression int_(std::string const& n) {
         if (n[0] == '-') {
           return data_expression(core::detail::gsMakeDataExprCNeg(sort_pos::pos(n.substr(1))));
         }
@@ -226,14 +237,15 @@ namespace mcrl2 {
 
       /// \brief Constructs expression of type Real from a string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
-      data_expression real_(std::string const& s) {
+      inline data_expression real_(std::string const& s) {
         return data_expression(core::detail::gsMakeDataExprCReal(sort_int_::int_(s), core::detail::gsMakeDataExprC1()));
       }
     }
 
     /// \brief Construct numeric expression from a string representing a number in decimal notation
     /// \pre n is of the form [0...9]+
-    data_expression number(sort_expression const& s, std::string const& n) {
+    inline data_expression number(sort_expression const& s, std::string const& n)
+    {
       if (s == sort_pos::pos()) {
         return sort_pos::pos(n);
       }
@@ -245,6 +257,155 @@ namespace mcrl2 {
       }
 
       return sort_real_::real_(n);
+    }
+
+    /// \brief Returns true if the term t is equal to nil
+    inline bool is_nil(atermpp::aterm_appl t)
+    {
+      return t == core::detail::gsMakeNil();
+    }
+
+    /// \brief Applies the assignment to t and returns the result.
+    /// \param t A term
+    /// \return The application of the assignment to the term.
+    inline data_expression substitute(assignment const& c, data_expression const& e)
+    {
+      return atermpp::replace(e, atermpp::aterm(c.lhs()), atermpp::aterm(c.rhs()));
+    }
+
+    template < typename SubstitutionFunction >
+    inline data_expression substitute(SubstitutionFunction& f, data_expression const& c)
+    {
+      return data_expression(f(c));
+    }
+
+    /// \brief Applies a substitution function to all elements of a container
+    template < typename Container, typename SubstitutionFunction, typename OutputIterator >
+    void substitute(SubstitutionFunction f, Container const& c, OutputIterator o)
+    {
+      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i, ++o)
+      {
+        *o = f(*i);
+      }
+    }
+
+    /// \brief Pretty prints the contents of a container
+    template < typename Container >
+    inline std::string pp(Container const& c)
+    {
+      std::string result;
+
+      if (c.begin() != c.end())
+      {
+        result.append(mcrl2::core::pp(*c.begin()));
+
+        for (typename Container::const_iterator i = ++(c.begin()); i != c.end(); ++i)
+        {
+          result.append(", ").append(mcrl2::core::pp(*i));
+        }
+      }
+
+      return result;
+    }
+
+    /// \brief Returns a copy of t, but with a common postfix added to each variable name,
+    /// and such that the new names do not appear in context.
+    /// \param t A sequence of data variables
+    /// \param context A set of strings
+    /// \param postfix_format A string
+    /// \return A sequence of variables with names that do not appear in \p context. The
+    /// string \p postfix_format is used to generate new names. It should contain one
+    /// occurrence of "%d", that will be replaced with an integer.
+    inline
+    variable_list fresh_variables(variable_list const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
+    {
+      std::vector<std::string> ids = detail::variable_strings(t);
+      std::string postfix;
+      for (int i = 0; ; i++)
+      {
+        postfix = str(boost::format(postfix_format) % i);
+        std::vector<std::string>::iterator j = ids.begin();
+        for ( ; j != ids.end(); j++)
+        {
+          if (context.find(*j + postfix) != context.end())
+            break;
+        }
+        if (j == ids.end()) // success!
+          break;
+      }
+      variable_list result;
+      for (variable_list::const_iterator k = t.begin(); k != t.end(); ++k)
+      {
+        core::identifier_string name(std::string(k->name()) + postfix);
+        result.push_back(variable(name, k->sort()));
+      }
+      return result;
+    }
+
+    /// \brief Returns an identifier that doesn't appear in the set <tt>context</tt>
+    /// \param context A set of strings
+    /// \param hint A string
+    /// \param id_creator A function that generates identifiers
+    /// \return An identifier that doesn't appear in the set <tt>context</tt>
+    template <typename IdentifierCreator>
+    inline core::identifier_string fresh_identifier(const std::set<core::identifier_string>& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+    {
+      int index = 0;
+      core::identifier_string s;
+      do
+      {
+        s = core::identifier_string(id_creator(hint, index++));
+      }
+      while(context.find(s) != context.end());
+      return s;
+    }
+
+    /// \brief Returns an identifier that doesn't appear in the term context
+    /// \param context A term
+    /// \param hint A string
+    /// \param id_creator A function that generates identifiers
+    /// \return An identifier that doesn't appear in the term context
+    template <typename Term, class IdentifierCreator>
+    core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+    {
+      return fresh_identifier(core::find_identifiers(context), hint, id_creator);
+    }
+
+    /// \brief Creates an identifier built from name and index.
+    struct default_identifier_creator
+    {
+      /// \brief Constructor.
+      /// \param name A string
+      /// \param index A positive number.
+      /// \return An identifier.
+      std::string operator()(const std::string& name, int index) const
+      {
+        if (index <= 0)
+          return name;
+        return str(boost::format(name + "%02d") % index++);
+      }
+    };
+
+    /// \brief Returns an identifier that doesn't appear in the term context
+    /// \param context A term
+    /// \param hint A string
+    /// \return An identifier that doesn't appear in the term context
+    template <typename Term>
+    core::identifier_string fresh_identifier(const Term& context, const std::string& hint)
+    {
+      return fresh_identifier(context, hint, default_identifier_creator());
+    }
+
+    /// \brief Returns a variable that doesn't appear in context
+    /// \param context A term
+    /// \param s A sort expression
+    /// \param hint A string
+    /// \return A variable that doesn't appear in context
+    template <typename Term>
+    variable fresh_variable(Term context, sort_expression s, std::string hint)
+    {
+      core::identifier_string id = fresh_identifier(context, hint);
+      return variable(id, s);
     }
 
   } // namespace new_data

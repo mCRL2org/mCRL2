@@ -9,8 +9,8 @@
 /// \file mcrl2/core/messaging.h
 /// \brief Controlling and printing of messages.
 
-#ifndef __MCRL2_MESSAGING_H__
-#define __MCRL2_MESSAGING_H__
+#ifndef __MCRL2_CORE_MESSAGING_H__
+#define __MCRL2_CORE_MESSAGING_H__
 
 #include <cstdarg>
 #include <cassert>

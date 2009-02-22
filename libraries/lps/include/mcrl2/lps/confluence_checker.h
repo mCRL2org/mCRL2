@@ -16,8 +16,8 @@
 #define CONFLUENCE_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/new_data/detail/bdd_prover.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/bdd2dot.h"
@@ -133,7 +133,7 @@ class Confluence_Checker {
     Invariant_Checker f_invariant_checker;
 
     /// \brief BDD based prover.
-    BDD_Prover f_bdd_prover;
+    mcrl2::new_data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
     BDD2Dot f_bdd2dot;
@@ -186,7 +186,7 @@ class Confluence_Checker {
       RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_no_marking = false,
       bool a_check_all = false,

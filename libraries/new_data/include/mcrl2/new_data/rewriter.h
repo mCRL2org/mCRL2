@@ -48,7 +48,8 @@ namespace new_data {
 
     protected:
 
-      ATermAppl implement(data_expression expression) {
+      ATermAppl implement(data_expression expression) const
+      {
         ATermList new_data_equations = ATmakeList0();
 
         core::detail::t_data_decls declarations = core::detail::get_data_decls(m_specification);
@@ -70,7 +71,8 @@ namespace new_data {
         return implemented;
       }
 
-      data_expression reconstruct(ATermAppl expression) const {
+      data_expression reconstruct(ATermAppl expression) const
+      {
         ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
            detail::reconstruct_exprs(reinterpret_cast< ATerm >(
            static_cast< ATermAppl >(expression)))));
@@ -173,7 +175,7 @@ namespace new_data {
       /// \brief Rewrites a data expression.
       /// \param d A data expression
       /// \return The normal form of d.
-      data_expression operator()(const data_expression& d)
+      data_expression operator()(const data_expression& d) const
       {
         return reconstruct(m_rewriter->rewrite(implement(d)));
       }
@@ -184,7 +186,7 @@ namespace new_data {
       /// \param sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
-      data_expression operator()(const data_expression& d, SubstitutionFunction sigma)
+      data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
       {
         return reconstruct(m_rewriter->rewrite(implement(replace_variables(d, sigma))));
       }

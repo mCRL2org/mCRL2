@@ -25,11 +25,10 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/sort_identifier.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/new_data/data_expression.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -103,10 +102,10 @@ namespace lps {
   {
     protected:
       /// \brief The data variables of the rule
-      data::data_variable_list m_variables;
+      new_data::variable_list m_variables;
 
       /// \brief The condition of the rule
-      data::data_expression    m_condition;
+      new_data::data_expression    m_condition;
 
       /// \brief The left hand side of the rule
       action                   m_lhs;
@@ -143,14 +142,14 @@ namespace lps {
 
       /// \brief Returns the variables of the rule.
       /// \return The variables of the rule.
-      data::data_variable_list variables() const
+      new_data::variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the condition of the rule.
       /// \return The condition of the rule.
-      data::data_expression condition() const
+      new_data::data_expression condition() const
       {
         return m_condition;
       }
@@ -179,7 +178,7 @@ namespace lps {
     protected:
 
       /// \brief The data specification of the action rename specification
-      data::data_specification m_data;
+      new_data::data_specification m_data;
 
       /// \brief The action labels of the action rename specification
       action_label_list        m_action_labels;
@@ -217,7 +216,7 @@ namespace lps {
       /// \param data A data specification
       /// \param action_labels A sequence of action labels
       /// \param rules A sequence of action rename rules
-      action_rename_specification(data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
+      action_rename_specification(new_data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
         :
           m_data(data),
           m_action_labels(action_labels),
@@ -269,7 +268,7 @@ namespace lps {
 
       /// \brief Returns the data action_rename_specification.
       /// \return The data action_rename_specification.
-      data::data_specification data() const
+      new_data::data_specification data() const
       { return m_data; }
 
       /// \brief Returns the sequence of action labels
@@ -346,30 +345,30 @@ namespace lps {
     void rename_renamerule_variables(data_expression& rcond, action& rleft, action& rright, IdentifierGenerator& generator)
     {
 
-      std::vector<data_variable> src;  // contains the variables that need to be renamed
-      std::vector<data_variable> dest; // contains the corresponding replacements
+      std::vector<variable> src;  // contains the variables that need to be renamed
+      std::vector<variable> dest; // contains the corresponding replacements
 
-      std::set<data_variable> new_vars;
-      std::set<data_variable> found_vars;
+      std::set<variable> new_vars;
+      std::set<variable> found_vars;
       for(data_expression_list::iterator rleft_argument_i = rleft.arguments().begin();
                                               rleft_argument_i != rleft.arguments().end();
                                             ++rleft_argument_i){
-        found_vars = find_all_data_variables(*rleft_argument_i);
+        found_vars = find_all_variables(*rleft_argument_i);
         new_vars.insert(found_vars.begin(), found_vars.end());
       }
 
-      for (std::set<data_variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i)
+      for (std::set<variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i)
       { mcrl2::core::identifier_string new_name = generator(i->name());
         if (new_name != i->name())
         {
           src.push_back(*i);
-          dest.push_back(data_variable(new_name, i->sort()));
+          dest.push_back(variable(new_name, i->sort()));
         }
       }
 
-      rcond = atermpp::partial_replace(rcond, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
-      rleft = atermpp::partial_replace(rleft, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
-      rright = atermpp::partial_replace(rright, mcrl2::lps::detail::make_data_variable_replacer(src, dest));
+      rcond = atermpp::partial_replace(rcond, mcrl2::lps::detail::make_variable_replacer(src, dest));
+      rleft = atermpp::partial_replace(rleft, mcrl2::lps::detail::make_variable_replacer(src, dest));
+      rright = atermpp::partial_replace(rright, mcrl2::lps::detail::make_variable_replacer(src, dest));
     }
 
   } // namespace detail
@@ -411,7 +410,7 @@ lps::specification action_rename(
             const lps::specification &lps_old_spec)
 {
   using namespace mcrl2::core;
-  using namespace mcrl2::data::data_expr;
+  using namespace mcrl2::new_data::data_expr;
   using namespace mcrl2::data;
   using namespace mcrl2::lps;
   using namespace std;
@@ -421,7 +420,7 @@ lps::specification action_rename(
   summand_list lps_summands = summand_list(); //for changes in lps_old_summands
   action_list lps_new_actions = action_list();;
 
-  data::postfix_identifier_generator generator("");
+  new_data::postfix_identifier_generator generator("");
   generator.add_to_context(lps_old_spec);
 
   bool to_tau=false;
@@ -465,8 +464,8 @@ lps::specification action_rename(
                        rule_old_argument_i = rule_old_action.arguments().begin();
                        rule_old_argument_i != rule_old_action.arguments().end();
                        rule_old_argument_i++)
-    { if ((!is_data_variable(*rule_old_argument_i)) &&
-          (!(find_all_data_variables(*rule_old_argument_i).empty())))
+    { if ((!is_variable(*rule_old_argument_i)) &&
+          (!(find_all_variables(*rule_old_argument_i).empty())))
       { std::cerr << "The arguments of the lhs " << pp(rule_old_action) <<
                           " are not variables or closed expressions\n";
         exit(1);
@@ -474,8 +473,8 @@ lps::specification action_rename(
     }
 
     // Check whether the variables in rhs are included in the lefthandside.
-    std::set < data_variable > variables_in_old_rule = find_all_data_variables(rule_old_action);
-    std::set < data_variable > variables_in_new_rule = find_all_data_variables(rule_new_action);
+    std::set < variable > variables_in_old_rule = find_all_variables(rule_old_action);
+    std::set < variable > variables_in_new_rule = find_all_variables(rule_new_action);
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
@@ -485,7 +484,7 @@ lps::specification action_rename(
     }
 
     // Check whether the variables in condition are included in the lefthandside.
-    std::set < data_variable > variables_in_condition = find_all_data_variables(rule_condition);
+    std::set < variable > variables_in_condition = find_all_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
     { std::cerr << "There are variables occurring in the condition " << pp(rule_condition) <<
@@ -497,7 +496,7 @@ lps::specification action_rename(
     // is empty at the end.
     for(data_expression_list::iterator i=rule_old_action.arguments().begin() ;
                      i!=rule_old_action.arguments().end() ; i++)
-    { if (is_data_variable(*i))
+    { if (is_variable(*i))
       { if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
         { std::cerr << "Variable " << pp(*i) << " occurs more than once in lhs " <<
                        pp(rule_old_action) << " of an action rename rule\n";
@@ -526,7 +525,7 @@ lps::specification action_rename(
          and one where it actually does. This means that for a multiaction
          with k summands 2^k new summands can result. */
 
-      atermpp::vector < data_variable_list >
+      atermpp::vector < variable_list >
                            lps_new_sum_vars(1,lps_old_summand.summation_variables());
       atermpp::vector < data_expression >
                          lps_new_condition(1,lps_old_summand.condition());
@@ -561,16 +560,16 @@ lps::specification action_rename(
                        rule_old_argument_i = renamed_rule_old_action.arguments().begin();
                        rule_old_argument_i != renamed_rule_old_action.arguments().end();
                        rule_old_argument_i++)
-          { if (is_data_variable(*rule_old_argument_i))
+          { if (is_variable(*rule_old_argument_i))
             {
-              new_equalities_condition=optimized::and_(new_equalities_condition,
+              new_equalities_condition=lazy::and_(new_equalities_condition,
                                data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
-            { assert((find_all_data_variables(*rule_old_argument_i).empty())); // the argument must be closed,
+            { assert((find_all_variables(*rule_old_argument_i).empty())); // the argument must be closed,
                                                                                // which is checked above.
               renamed_rule_condition=
-                        optimized::and_(renamed_rule_condition,
+                        lazy::and_(renamed_rule_condition,
                              data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             lps_old_argument_i++;
@@ -579,15 +578,15 @@ lps::specification action_rename(
           /* insert the new equality condition in all the newly generated summands */
           for (atermpp::vector < data_expression > :: iterator i=lps_new_condition.begin() ;
                        i!=lps_new_condition.end() ; i++ )
-          { *i=optimized::and_(*i,new_equalities_condition);
+          { *i=lazy::and_(*i,new_equalities_condition);
           }
 
           /* insert the new sum variables in all the newly generated summands */
-          std::set<data_variable> new_vars = find_all_data_variables(renamed_rule_old_action);
-          for(std::set<data_variable>::iterator sdvi = new_vars.begin();
+          std::set<variable> new_vars = find_all_variables(renamed_rule_old_action);
+          for(std::set<variable>::iterator sdvi = new_vars.begin();
                          sdvi != new_vars.end(); sdvi++)
           {
-            for ( atermpp::vector < data_variable_list > :: iterator i=lps_new_sum_vars.begin() ;
+            for ( atermpp::vector < variable_list > :: iterator i=lps_new_sum_vars.begin() ;
                         i!=lps_new_sum_vars.end() ; i++ )
             { *i = push_front(*i, *sdvi);
             }
@@ -661,12 +660,12 @@ lps::specification action_rename(
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition.begin() ;
                          i!=lps_new_condition.end() ; i++ )
-            { *i=optimized::and_(*i,renamed_rule_condition);
+            { *i=lazy::and_(*i,renamed_rule_condition);
             }
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition_temp.begin() ;
                          i!=lps_new_condition_temp.end() ; i++ )
-            { *i=optimized::and_(*i,not_(renamed_rule_condition));
+            { *i=lazy::and_(*i,not_(renamed_rule_condition));
             }
 
             lps_new_condition.insert(lps_new_condition.end(),
@@ -690,7 +689,7 @@ lps::specification action_rename(
       /* Add the summands to lps_new_summands */
 
       atermpp::vector < std::pair <bool, action_list > > :: iterator i_act=lps_new_actions.begin();
-      atermpp::vector < data_variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
+      atermpp::vector < variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
       for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
       {

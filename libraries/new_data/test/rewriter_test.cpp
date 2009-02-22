@@ -32,11 +32,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 using namespace mcrl2::new_data::detail;
 
-variable nat(std::string name)
-{
-  return variable(core::identifier_string(name) , sort_nat::nat());
-}
-
 new_data::rewriter make_data_rewriter(const data_specification& data_spec)
 {
   new_data::rewriter datar(data_spec);
@@ -67,9 +62,9 @@ void test1()
   ;
   data_specification data = parse_data_specification(DATA_SPEC1);
   rewriter datar(data);
-  variable x = nat("x");
-  variable y = nat("y");
-  variable z = nat("z");
+  variable x("x", sort_nat::nat());
+  variable y("y", sort_nat::nat());
+  variable z("z", sort_nat::nat());
   data_expression t = datar(greater(min(x,y), z));
 
   BOOST_CHECK(datar(plus(parse_data_expression("1"),

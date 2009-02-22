@@ -18,7 +18,7 @@
 #include "gc.h" // garbage collector of ATerm Library
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 // Parameter i should be removed
@@ -76,8 +76,8 @@ int test_main(int argc, char** argv)
 
   specification s0;
   specification s1;
-  data_variable_list v0;
-  data_variable_list v1;
+  variable_list v0;
+  variable_list v1;
 
   // case 1
  s0 = mcrl22lps(case_1);
@@ -92,7 +92,7 @@ int test_main(int argc, char** argv)
  s1 = parelm(s0);
  v0 = s0.process().process_parameters();
  v1 = s1.process().process_parameters();
- BOOST_CHECK((v1.size() == 1)); // && (v1.front() == data_variable("i:Nat")))
+ BOOST_CHECK((v1.size() == 1)); // && (v1.front() == variable("i:Nat")))
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
 
 //  // case 3
@@ -100,7 +100,7 @@ int test_main(int argc, char** argv)
  s1 = parelm(s0);
  v0 = s0.process().process_parameters();
  v1 = s1.process().process_parameters();
- BOOST_CHECK((v1.size() == 1)); // && v1.front() == data_variable("i:Nat"));
+ BOOST_CHECK((v1.size() == 1)); // && v1.front() == variable("i:Nat"));
  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
 
 //  // case 4

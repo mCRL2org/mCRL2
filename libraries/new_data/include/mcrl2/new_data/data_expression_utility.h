@@ -214,6 +214,87 @@ namespace mcrl2 {
         return f;
       }
     }
+
+    /** \brief A collection of utilities for lazy expression construction
+     * The basic idea is to keep expressions that result from application of
+     * any of the container operations by applying the usual rules of logic.
+     *
+     * For example and(true, x) as in `and' applied to `true' and `x' yields x.
+     **/
+    namespace lazy {
+      /// \brief Returns an expression equivalent to not p
+      /// \param p A data expression
+      /// \return The value <tt>!p</tt>
+      inline data_expression not_(data_expression const& p)
+      {
+        if (p == sort_bool_::true_()) {
+          return sort_bool_::false_();
+        }
+        else if (p == sort_bool_::false_()) {
+          return sort_bool_::true_();
+        }
+
+        return sort_bool_::not_(p);
+      }
+
+      /// \brief Returns an expression equivalent to p and q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value <tt>p && q</tt>
+      inline data_expression and_(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::true_()) || (q == sort_bool_::true_())) {
+          return sort_bool_::true_();
+        }
+        else if ((p == q) || (p == sort_bool_::false_())) {
+          return q;
+        }
+        else if (q == sort_bool_::false_()) {
+          return p;
+        }
+
+        return sort_bool_::or_(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p or q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The expression p = q
+      inline data_expression or_(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::false_()) || (q == sort_bool_::false_())) {
+          return sort_bool_::false_();
+        }
+        else if ((p == q) || (p == sort_bool_::true_())) {
+          return q;
+        }
+        else if (q == sort_bool_::true_()) {
+          return p;
+        }
+
+        return sort_bool_::and_(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p implies q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The expression p = q
+      inline data_expression implies(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::false_()) || (q == sort_bool_::true_()) || (p == q)) {
+          return sort_bool_::true_();
+        }
+        else if (p == sort_bool_::true_()) {
+          return q;
+        }
+        else if (q == sort_bool_::false_()) {
+          return p;
+        }
+
+        return sort_bool_::implies(p, q);
+      }
+    }
+
   } // namespace new_data
 
 } // namespace mcrl2

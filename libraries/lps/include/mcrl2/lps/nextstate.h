@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/nextstate.h
+/// \file mcrl2/new_data/nextstate.h
 
 #ifndef _LIBNEXTSTATE_H
 #define _LIBNEXTSTATE_H
