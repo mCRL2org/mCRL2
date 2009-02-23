@@ -512,8 +512,8 @@ namespace mcrl2 {
 
       s.imbue(std::locale(s.getloc(), new boost::gregorian::date_facet("%B %Y")));
 
-      s << ".\" " << "Manual page for " << m_name << " revision " << revision() << "." << std::endl
-        << ".\" " << "Generated from " << m_name << " --generate-man-page." << std::endl;
+      s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
+        << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
 
       s << ".TH " << boost::to_upper_copy(m_name) << " \"1\" \""
                   << boost::gregorian::day_clock::local_day() << "\" \""
