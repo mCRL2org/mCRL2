@@ -6,29 +6,92 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/multi_action_equality.h
-/// \brief Functions for determining equality of multi actions.
+/// \file mcrl2/lps/multi_action.h
+/// \brief Multi-action class.
 
-#ifndef MCRL2_PBES_MULTI_ACTION_EQUALITY_H
-#define MCRL2_PBES_MULTI_ACTION_EQUALITY_H
+#ifndef MCRL2_LPS_MULTI_ACTION_H
+#define MCRL2_LPS_MULTI_ACTION_H
 
-#include <algorithm>
-#include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/modal_formula/state_formula_rename.h"
-#include "mcrl2/modal_formula/free_variables.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/find.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/data/xyz_identifier_generator.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/action.h"
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace lps {
+
+  class multi_action
+  {
+    protected:
+      /// \brief The actions of the summand
+      action_list m_actions;
+
+      /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
+      /// the multi action has no time.
+      data::data_expression m_time;
+
+    public:
+      multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
+        : m_actions(actions), m_time(time)
+      {}
+
+      /// \brief Returns true if time is available.
+      /// \return True if time is available.
+      bool has_time() const
+      {
+        return m_time != data::data_expression();
+      }
+  
+      /// \brief Returns the sequence of actions.
+      /// \return The sequence of actions.
+      action_list actions() const
+      {
+        return m_actions;
+      }
+  
+      /// \brief Returns the time.
+      /// \return The time.
+      data::data_expression time() const
+      {
+        return m_time;
+      }
+
+      /// \brief Returns the name of the first action.
+      /// \return The name of the first action.
+      core::identifier_string name() const
+      {
+        return front(m_actions).label().name();
+      }
+
+      /// \brief Returns the arguments of the multi action.
+      /// \return The arguments of the multi action.
+      data::data_expression_list arguments() const
+      {
+        return front(m_actions).arguments();
+      }
+
+      /// \brief Applies a low level substitution function to this term and returns the result.
+      /// \param f A
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
+      /// \return The substitution result.
+      template <typename Substitution>
+      multi_action substitute(Substitution f)
+      {
+        return multi_action(m_actions.substitute(f), m_time.substitute(f));
+      }
+
+      /// \brief Stream operator. Writes a pretty printed representation of the multi-action to a stream
+      /// \param to An output stream
+      /// \return The output stream
+      std::ostream& operator<<(std::ostream& to) const
+      {
+        to << "MultiAction(" << actions();
+        if (has_time())
+          to << "," << time();
+        to << ")";
+        return to;
+      }
+  };
 
 /// \cond INTERNAL_DOCS
 namespace detail {
@@ -59,13 +122,13 @@ namespace detail {
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return True if the actions in a and b have the same names, and the same sorts.
-    inline bool equal_action_signatures(const std::vector<lps::action>& a, const std::vector<lps::action>& b)
+    inline bool equal_action_signatures(const std::vector<action>& a, const std::vector<action>& b)
     {
       if (a.size() != b.size())
       {
         return false;
       }
-      std::vector<lps::action>::const_iterator i, j;
+      std::vector<action>::const_iterator i, j;
       for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
       {
         if (i->label() != j->label())
@@ -81,7 +144,7 @@ namespace detail {
       /// \param a An action
       /// \param b An action
       /// \return The function result
-      bool operator()(const lps::action& a, const lps::action& b) const
+      bool operator()(const action& a, const action& b) const
       {
         return a.label() < b.label();
       }
@@ -94,7 +157,7 @@ namespace detail {
       /// \param a An action
       /// \param b An action
       /// \return The function result
-      bool operator()(const lps::action& a, const lps::action& b) const
+      bool operator()(const action& a, const action& b) const
       {
         return a.label() < b.label();
         if (a.label().name() != b.label().name())
@@ -108,12 +171,12 @@ namespace detail {
     /// \brief Used for building an expression for the comparison of data parameters.
     struct equal_data_parameters_builder
     {
-      const std::vector<lps::action>& a;
-      const std::vector<lps::action>& b;
+      const std::vector<action>& a;
+      const std::vector<action>& b;
       atermpp::set<data::data_expression>& result;
 
-      equal_data_parameters_builder(const std::vector<lps::action>& a_,
-                                    const std::vector<lps::action>& b_,
+      equal_data_parameters_builder(const std::vector<action>& a_,
+                                    const std::vector<action>& b_,
                                     atermpp::set<data::data_expression>& result_
                                    )
         : a(a_),
@@ -128,7 +191,7 @@ namespace detail {
         namespace d = data::data_expr;
 
         atermpp::vector<data::data_expression> v;
-        std::vector<lps::action>::const_iterator i, j;
+        std::vector<action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
           data::data_expression_list d1 = i->arguments();
@@ -151,12 +214,12 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     /// \brief Used for building an expression for the comparison of data parameters.
     struct not_equal_multi_actions_builder
     {
-      const std::vector<lps::action>& a;
-      const std::vector<lps::action>& b;
+      const std::vector<action>& a;
+      const std::vector<action>& b;
       atermpp::vector<data::data_expression>& result;
 
-      not_equal_multi_actions_builder(const std::vector<lps::action>& a_,
-                                      const std::vector<lps::action>& b_,
+      not_equal_multi_actions_builder(const std::vector<action>& a_,
+                                      const std::vector<action>& b_,
                                       atermpp::vector<data::data_expression>& result_
                                      )
         : a(a_),
@@ -171,7 +234,7 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
         namespace d = data::data_expr;
 
         atermpp::vector<data::data_expression> v;
-        std::vector<lps::action>::const_iterator i, j;
+        std::vector<action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
           data::data_expression_list d1 = i->arguments();
@@ -195,18 +258,18 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return Necessary conditions for the equality of a and b
-    inline data::data_expression equal_multi_actions(lps::action_list a, lps::action_list b)
+    inline data::data_expression equal_multi_actions(const multi_action& a, const multi_action& b)
     {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
 std::cerr << "\n<equal multi actions>" << std::endl;
-std::cerr << "a = " << pp(a) << std::endl;
-std::cerr << "b = " << pp(b) << std::endl;
+std::cerr << "a = " << pp(a.actions()) << std::endl;
+std::cerr << "b = " << pp(b.actions()) << std::endl;
 #endif
       using namespace data::data_expr::optimized;
 
       // make copies of a and b and sort them
-      std::vector<lps::action> va(a.begin(), a.end()); // protection not needed
-      std::vector<lps::action> vb(b.begin(), b.end()); // protection not needed
+      std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
+      std::vector<action> vb(b.actions().begin(), b.actions().end()); // protection not needed
       std::sort(va.begin(), va.end(), detail::compare_actions());
       std::sort(vb.begin(), vb.end(), detail::compare_actions());
 
@@ -214,14 +277,14 @@ std::cerr << "b = " << pp(b) << std::endl;
       {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
 std::cerr << "different action signatures detected!" << std::endl;
-std::cerr << "a = " << lps::action_list(va.begin(), va.end()) << std::endl;
-std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
+std::cerr << "a = " << action_list(va.begin(), va.end()) << std::endl;
+std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 #endif
         return data::data_expr::false_();
       }
 
       // compute the intervals of a with equal names
-      typedef std::vector<lps::action>::iterator action_iterator;
+      typedef std::vector<action>::iterator action_iterator;
       std::vector<std::pair<action_iterator, action_iterator> > intervals;
       action_iterator first = va.begin();
       while (first != va.end())
@@ -243,13 +306,13 @@ std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return Necessary conditions for the inequality of a and b
-    inline data::data_expression not_equal_multi_actions(lps::action_list a, lps::action_list b)
+    inline data::data_expression not_equal_multi_actions(const multi_action& a, const multi_action& b)
     {
       using namespace data::data_expr::optimized;
 
       // make copies of a and b and sort them
-      std::vector<lps::action> va(a.begin(), a.end());
-      std::vector<lps::action> vb(b.begin(), b.end());
+      std::vector<action> va(a.actions().begin(), a.actions().end());
+      std::vector<action> vb(b.actions().begin(), b.actions().end());
       std::sort(va.begin(), va.end(), detail::compare_actions());
       std::sort(vb.begin(), vb.end(), detail::compare_actions());
 
@@ -259,7 +322,7 @@ std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
       }
 
       // compute the intervals of a with equal names
-      typedef std::vector<lps::action>::iterator action_iterator;
+      typedef std::vector<action>::iterator action_iterator;
       std::vector<std::pair<action_iterator, action_iterator> > intervals;
       action_iterator first = va.begin();
       while (first != va.end())
@@ -275,8 +338,8 @@ std::cerr << "b = " << lps::action_list(vb.begin(), vb.end()) << std::endl;
       return result;
     }
 
-} // namespace pbes_system
+} // namespace lps
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_MULTI_ACTION_EQUALITY_H
+#endif // MCRL2_LPS_MULTI_ACTION_H

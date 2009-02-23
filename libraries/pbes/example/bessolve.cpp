@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
       case 0: q = do_lazy_algorithm(p, pbesr); break;
       case 1: q = do_finite_algorithm(p, pbesr); break;
     }
-    int result = bes_gauss_elimination(q);
+    int result = pbes_gauss_elimination(q);
     if (result == 0)
     {
       std::cout << "FALSE" << std::endl;

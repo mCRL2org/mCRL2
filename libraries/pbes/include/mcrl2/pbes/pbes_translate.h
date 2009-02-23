@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/pbes/multi_action_equality.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
@@ -101,86 +100,6 @@ namespace detail {
 class pbes_translate_algorithm
 {
   protected:
-
-    /// \brief multi-action with time
-    class timed_action
-    {
-      protected:
-        /// \brief The actions of the multi action
-        lps::action_list m_actions;
-
-        /// \brief The time of the multi action
-        data::data_expression m_time;
-
-      public:
-
-        /// \brief Constructor
-        /// \param actions A sequence of actions
-        /// \param time A data expression
-        timed_action(lps::action_list actions, data::data_expression time)
-          : m_actions(actions), m_time(time)
-        {}
-
-        /// \brief Returns true if time is available.
-        /// \return True if time is available.
-        bool has_time() const
-        {
-          return !data::data_expr::is_nil(m_time);
-        }
-
-        /// \brief Returns the sequence of actions. Returns an empty list if \p is_delta() holds.
-        /// \return The sequence of actions
-        lps::action_list actions() const
-        {
-          return m_actions;
-        }
-
-        /// \brief Returns the time of the multi-action
-        /// \return The time of the multi-action
-        data::data_expression time() const
-        {
-          return m_time;
-        }
-
-        /// \brief Returns the name of the first action.
-        /// \return The name of the first action.
-        core::identifier_string name() const
-        {
-          return front(m_actions).label().name();
-        }
-
-        /// \brief Returns the arguments of the multi action.
-        /// \return The arguments of the multi action.
-        data::data_expression_list arguments() const
-        {
-          return front(m_actions).arguments();
-        }
-
-        /// \brief Applies a low level substitution function to this term and returns the result.
-        /// \param f A
-        /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-        /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-        /// \deprecated
-        /// \return The substitution result.
-        template <typename Substitution>
-        timed_action substitute(Substitution f)
-        {
-          return timed_action(m_actions.substitute(f), m_time.substitute(f));
-        }
-
-        /// \brief Stream operator. Writes a pretty printed representation of the multi-action to a stream
-        /// \param to An output stream
-        /// \return The output stream
-        std::ostream& operator<<(std::ostream& to) const
-        {
-          to << "TimedAction(" << actions();
-          if (has_time())
-            to << "," << time();
-          to << ")";
-          return to;
-        }
-    };
-
     /// \brief The Par function of the translation
     /// \param x A
     /// \param l A sequence of data variables
@@ -308,7 +227,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \param a A timed multi-action
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(timed_action a, modal::action_formula b)
+    pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
@@ -321,8 +240,7 @@ std::cerr << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
       pbes_expression result;
 
       if (is_mult_act(b)) {
-        lps::action_list b_actions = mult_params(b);
-        result = equal_multi_actions(a.actions(), b_actions);
+        result = lps::equal_multi_actions(a, lps::multi_action(mult_params(b)));
       } else if (is_true(b)) {
         result = p::true_();
       } else if (is_false(b)) {
@@ -416,8 +334,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             if (i->is_delta())
               continue;
             data::data_expression ci(i->condition());
-            data::data_expression ti(i->time());
-            timed_action ai(i->actions(), ti);
+            lps::multi_action ai = i->multi_action();
             data::data_assignment_list gi = i->assignments();
             data::data_variable_list xp(lps.process_parameters());
             data::data_variable_list yi(i->summation_variables());
@@ -427,9 +344,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             context.insert(rhs_context.begin(), rhs_context.end());
             data::data_variable_list y = fresh_variables(yi, context);
             ci = ci.substitute(make_list_substitution(yi, y));
-            ti = ti.substitute(make_list_substitution(yi, y));
             ai = ai.substitute(make_list_substitution(yi, y));
             gi = gi.substitute(make_list_substitution(yi, y));
+            data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
@@ -450,8 +367,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             if (i->is_delta())
               continue;
             data::data_expression ci(i->condition());
-            data::data_expression ti(i->time());
-            timed_action ai(i->actions(), ti);
+            lps::multi_action ai = i->multi_action();
             data::data_assignment_list gi = i->assignments();
             data::data_variable_list xp(lps.process_parameters());
             data::data_variable_list yi(i->summation_variables());
@@ -461,9 +377,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             context.insert(rhs_context.begin(), rhs_context.end());
             data::data_variable_list y = fresh_variables(yi, context);
             ci = ci.substitute(make_list_substitution(yi, y));
-            ti = ti.substitute(make_list_substitution(yi, y));
             ai = ai.substitute(make_list_substitution(yi, y));
             gi = gi.substitute(make_list_substitution(yi, y));
+            data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
@@ -746,7 +662,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     /// \param a A sequence of actions
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(lps::action_list a, modal::action_formula b)
+    pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
@@ -758,8 +674,7 @@ std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
       pbes_expression result;
 
       if (is_mult_act(b)) {
-        lps::action_list b_actions = mult_params(b);
-        result = equal_multi_actions(a, b_actions);
+        result = lps::equal_multi_actions(a, lps::multi_action(mult_params(b)));
       } else if (is_true(b)) {
         result = p::true_();
       } else if (is_false(b)) {
@@ -779,7 +694,7 @@ std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
         modal::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a, b)));
+          data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b)));
           result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
@@ -789,7 +704,7 @@ std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
         modal::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
-          data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a, b)));
+          data::data_variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b)));
           result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
         }
         else
