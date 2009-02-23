@@ -128,7 +128,10 @@ lib opengl   : GLU
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
 alias opengl : : <target-os>darwin : : <framework>OpenGL ;
 
-use-project /boost : ../3rd-party/boost ;
+if ! $(BOOST_LIBRARY_PATH) {
+  use-project /boost : ../3rd-party/boost ;
+}
+#use-project /boost : ../3rd-party/boost ;
 
 local boost-requirements =
                <include>$(BOOST_ROOT)
