@@ -23,8 +23,8 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/detail/data_assignment_functional.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/deadlock.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 
@@ -152,7 +152,7 @@ class summand: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    /// Constructs a non-deadlock summand.
+    /// Constructs a multi action summand.
     summand(data::data_variable_list   summation_variables,
             data::data_expression      condition,
             const lps::multi_action&   a,
@@ -168,7 +168,7 @@ class summand: public atermpp::aterm_appl
         m_condition          (condition),
         m_delta              (false),
         m_actions            (a.actions()),
-        m_time               (a.time()),
+	m_time               (a.time()),
         m_assignments        (assignments)
     {}
 
@@ -187,7 +187,7 @@ class summand: public atermpp::aterm_appl
         m_summation_variables(summation_variables),
         m_condition          (condition),
         m_delta              (true),
-        m_time               (d.time())
+	m_time               (d.time())
     {}
 
     /// \brief Returns the sequence of summation variables.

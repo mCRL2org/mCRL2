@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/deadlock.h
-/// \brief Deadlock class.
+/// \brief add your file description here.
 
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
@@ -20,10 +20,11 @@ namespace lps {
   {
     protected:
       /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
-      /// the deadlock has no time.
+      /// the multi action has no time.
       data::data_expression m_time;
 
     public:
+      /// \brief Constructor
       deadlock(data::data_expression time = data::data_expression())
         : m_time(time)
       {}
@@ -37,9 +38,28 @@ namespace lps {
   
       /// \brief Returns the time.
       /// \return The time.
-      data::data_expression time() const
+      const data::data_expression& time() const
       {
         return m_time;
+      }
+
+      /// \brief Returns the time.
+      /// \return The time.
+      data::data_expression& time()
+      {
+        return m_time;
+      }
+
+      /// \brief Applies a low level substitution function to this term and returns the result.
+      /// \param f A
+      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// \deprecated
+      /// \return The substitution result.
+      template <typename Substitution>
+      deadlock substitute(Substitution f)
+      {
+        return deadlock(m_time.substitute(f));
       }
   };
 

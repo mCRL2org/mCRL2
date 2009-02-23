@@ -29,8 +29,14 @@ namespace lps {
       data::data_expression m_time;
 
     public:
+      /// \brief Constructor
       multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
         : m_actions(actions), m_time(time)
+      {}
+
+      /// \brief Constructor
+      multi_action(const action& l)
+        : m_actions(atermpp::push_front(action_list(), l))
       {}
 
       /// \brief Returns true if time is available.
@@ -49,7 +55,14 @@ namespace lps {
   
       /// \brief Returns the time.
       /// \return The time.
-      data::data_expression time() const
+      const data::data_expression& time() const
+      {
+        return m_time;
+      }
+
+      /// \brief Returns the time.
+      /// \return The time.
+      data::data_expression& time()
       {
         return m_time;
       }
@@ -90,6 +103,14 @@ namespace lps {
           to << "," << time();
         to << ")";
         return to;
+      }
+      
+      /// \brief Joins the actions of both multi actions.
+      /// \pre The time of both multi actions must be equal.
+      multi_action operator+(const multi_action& other) const
+      {
+        assert(m_time == other.m_time);
+	return multi_action(m_actions + other.m_actions, m_time);
       }
   };
 
