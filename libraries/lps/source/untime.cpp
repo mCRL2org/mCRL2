@@ -19,11 +19,16 @@
 //mCRL2 data
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/core/detail/struct.h" // Jeroen: dit is gedaan om de gsMake functies hieronder te gebruiken.
+                                      // Dit is oerlelijk, en zou moeten worden vervangen.
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
 #include "mcrl2/lps/untime.h"
+#include "mcrl2/atermpp/set_operations.h"
+#include "mcrl2/atermpp/map.h"
+
 
 // For Aterm library extension functions
 using namespace mcrl2::core;
@@ -37,7 +42,7 @@ namespace mcrl2 {
 namespace lps {
 
 ///\return specification, in which all delta summands have been removed, and replaced with a single true->delta
-lps::specification remove_deltas(const lps::specification& spec) {
+static lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;
   for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
@@ -63,6 +68,79 @@ lps::specification remove_deltas(const lps::specification& spec) {
   return result;
 }
 
+
+///\brief This function returns an expression containing invariants for variables relating to time.
+///\details For all parameters x relating to time, the expression 0<=x && x<=last_action_time is returned,
+///         provided that in the initial vector the variable x gets the value 0, and in each summand the
+///         new value for x is either x, or the value that is assigned to last action time, which is the time
+///         tag of the action in that summand.
+
+static mcrl2::data::data_expression calculate_time_invariant(
+                   const lps::specification& spec, 
+                   const mcrl2::data::data_variable &last_action_time) 
+{
+  const data::data_variable_list parameters=spec.process().process_parameters();
+  const data::data_expression_list initial_values =spec.initial_process().state();
+  const data::data_expression real_zero=mcrl2::core::detail::gsMakeDataExprCReal(
+                                                        mcrl2::core::detail::gsMakeDataExprCInt(
+                                                                mcrl2::core::detail::gsMakeDataExprC0()),
+                                                                       mcrl2::core::detail::gsMakeDataExprC1());
+
+  // The vector below contains exactly one boolean for each parameter. As long as the value
+  // for the elements in the vector is true, it is a candidate time variable.
+  std::vector <bool> time_variable_candidates(parameters.size(),true);
+  std::vector <bool>::iterator j=time_variable_candidates.begin() ;
+  if (core::gsVerbose)
+  { std::cerr << "For lpsuntime to function optimally, it is assumed that the input lps is rewritten to normal form\n";
+  }
+  for(data::data_expression_list::const_iterator k=initial_values.begin();
+              k!=initial_values.end() ; ++j, ++k)
+  { if (*k!=real_zero) 
+    { (*j)=false;
+    }
+  }
+  assert(j==time_variable_candidates.end());
+
+  for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  {
+    if (!(i->is_delta()))
+    { const data::data_expression_list summand_arguments=i->next_state(parameters);
+      std::vector <bool>::iterator j=time_variable_candidates.begin();
+      data::data_variable_list::const_iterator l=parameters.begin();
+      for( data::data_expression_list::const_iterator k=summand_arguments.begin() ;
+                  k!=summand_arguments.end(); ++j, ++k, l++)
+      { if ((*k!=real_zero)&&(*k!=*l)&&(*k!=i->time()))
+        { 
+          (*j)=false;
+        }
+      }
+      assert(j==time_variable_candidates.end());
+    }
+  }
+
+  mcrl2::data::data_expression time_invariant(true_());
+  j=time_variable_candidates.begin();
+  for( data::data_variable_list::const_iterator k=parameters.begin();
+              k!=parameters.end() ; ++j, ++k)
+  { if (*j) 
+    { 
+      data::data_variable kvar(*k);
+      data::data_variable lat(last_action_time);
+      time_invariant=optimized::and_(time_invariant,
+                         optimized::and_(mcrl2::data::data_expr::less_equal(real_zero,kvar),
+                                         mcrl2::data::data_expr::less_equal(kvar,lat)));
+    }
+  }
+  assert(j==time_variable_candidates.end());
+  if (core::gsVerbose)
+  { std::cerr << "Time invariant " << pp(time_invariant) << "\n";
+  }
+  return time_invariant;
+}
+
+
+
+
 ///Returns an LPS specification in which the timed arguments have been rewritten
 lps::specification untime(const lps::specification& spec) {
   lps::specification untime_specification; // Updated specification
@@ -71,7 +149,6 @@ lps::specification untime(const lps::specification& spec) {
   lps::summand_list untime_summand_list; // Updated summand list
   data::data_variable_list untime_process_parameters; // Updated process parameters
   data::data_variable last_action_time; // Extra parameter to display the last action time
-  data::data_assignment_list untime_initial_assignments; // Updated initial assignments
 
   gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
 
@@ -85,6 +162,8 @@ lps::specification untime(const lps::specification& spec) {
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
   last_action_time = fresh_variable(spec, mcrl2::data::sort_expr::real(), "last_action_time");
+  data::data_expression time_invariant=calculate_time_invariant(spec,last_action_time); 
+
   untime_process_parameters = push_back(lps.process_parameters(), last_action_time);
 
   // Transpose the original summand list, and see if there are summands with time
@@ -110,7 +189,13 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = i->summation_variables();
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = optimized::and_(i->condition(), data::data_expr::greater(i->time(),data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), 
+                           optimized::and_(data::data_expr::greater(i->time(),data_expression(last_action_time)),
+                                   data::data_expr::greater(data_expression(i->time()),
+                                                    mcrl2::core::detail::gsMakeDataExprCReal(
+                                                        mcrl2::core::detail::gsMakeDataExprCInt(
+                                                                mcrl2::core::detail::gsMakeDataExprC0()),
+                                                                       mcrl2::core::detail::gsMakeDataExprC1()))));
 
 	// Extend original assignments to include t.i(d,e.i)
 	untime_assignments = push_back(i->assignments(),data_assignment(last_action_time,i->time()));
@@ -124,7 +209,13 @@ lps::specification untime(const lps::specification& spec) {
 	untime_summation_variables = push_back(i->summation_variables(), time_var);
 
 	// Extend the original condition with an additional argument
-	untime_condition = optimized::and_(i->condition(), mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)));
+	untime_condition = optimized::and_(i->condition(), 
+                           optimized::and_(mcrl2::data::data_expr::greater(time_var, data_expression(last_action_time)),
+                                   data::data_expr::greater(data_expression(time_var),
+                                                    mcrl2::core::detail::gsMakeDataExprCReal(
+                                                        mcrl2::core::detail::gsMakeDataExprCInt(
+                                                                mcrl2::core::detail::gsMakeDataExprC0()),
+                                                                       mcrl2::core::detail::gsMakeDataExprC1()))));
 
 
 	// Extend original assignments to include t.i(d,e.i)
@@ -132,6 +223,9 @@ lps::specification untime(const lps::specification& spec) {
                                       data_assignment(last_action_time, time_var)
                                      );
       } // i->has_time()
+
+      // Add the condition last_action_time>=0, which holds, and which is generally a useful fact for further processing.
+      untime_condition = optimized::and_(untime_condition,time_invariant);
 
       // Create a new summand with the changed parameters
       untime_summand = lps::summand(untime_summation_variables,
@@ -166,7 +260,9 @@ lps::specification untime(const lps::specification& spec) {
   untime_lps = lps::linear_process(lps.free_variables(), untime_process_parameters, untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
-  untime_initial_assignments = push_back(spec.initial_process().assignments(), data_assignment(last_action_time, real(0)));
+
+  data::data_assignment_list untime_initial_assignments = 
+          push_back(spec.initial_process().assignments(), data_assignment(last_action_time, real(0)));
 
   // Create new specification, this equals original specification, except for the new LPS.
   untime_specification = lps::specification(spec.data(),
