@@ -73,6 +73,7 @@ namespace detail {
       throw mcrl2::runtime_error("new_data implementation error");
     return result;
   }
+
 } // namespace detail
 /// \endcond
 
@@ -162,7 +163,7 @@ namespace detail {
   /// \param data_spec A string
   /// \return The parsed variable
   inline
-  variable parse_variable(std::string var_decl, std::string data_spec = "")
+  variable parse_variable(std::string const& var_decl, std::string const& data_spec = "")
   {
     std::istringstream in(var_decl + ";");
     atermpp::term_list< data_expression > v(core::parse_data_vars(in));
@@ -172,6 +173,50 @@ namespace detail {
     variable_list w(v.begin(), v.end());
     return w.front();
   }
+
+  /// \cond INTERNAL_DOCS
+  namespace detail {
+    /// \brief Parses a data variable
+    /// For example: "X(d:D,e:E)".
+    /// \param s A string
+    /// \return The parsed data variable
+    inline
+    std::pair<std::string, data_expression_list> parse_variable(std::string const& s)
+    {
+      using boost::algorithm::split;
+      using boost::algorithm::is_any_of;
+
+      std::string name;
+      data_expression_list variables;
+
+      std::string::size_type idx = s.find('(');
+      if (idx == std::string::npos)
+      {
+        name = s;
+      }
+      else
+      {
+        name = s.substr(0, idx);
+        assert(*s.rbegin() == ')');
+        std::vector<std::string> v;
+        std::string w = s.substr(idx + 1, s.size() - idx - 2);
+        split(v, w, is_any_of(","));
+        // This doesn't compile in combination with 'using namespace std::rel_ops'
+        // for Visual C++ 8.0 (looks like a compiler bug)
+        // for (std::vector<std::string>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i)
+        // {
+        //   data_expression d = variable(*i);
+        //   variables = push_front(variables, d);
+        // }
+        for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+        {
+          variables.push_back(new_data::parse_variable(*i));
+        }
+      }
+      return std::make_pair(name, variables);
+    }
+  } // namespace detail
+  /// \endcond
 
   /// \brief Creates a data specification that contains rewrite rules for the standard data types like
   /// Pos, Nat and Int.

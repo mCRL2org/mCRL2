@@ -32,47 +32,6 @@ namespace new_data {
 
 namespace detail {
 
-/// \brief Parses a data variable
-/// For example: "X(d:D,e:E)".
-/// \param s A string
-/// \return The parsed data variable
-//inline
-//std::pair<std::string, data_expression_list> parse_variable(std::string s)
-//{
-//  using boost::algorithm::split;
-//  using boost::algorithm::is_any_of;
-//
-//  std::string name;
-//  data_expression_list variables;
-//
-//  std::string::size_type idx = s.find('(');
-//  if (idx == std::string::npos)
-//  {
-//    name = s;
-//  }
-//  else
-//  {
-//    name = s.substr(0, idx);
-//    assert(*s.rbegin() == ')');
-//    std::vector<std::string> v;
-//    std::string w = s.substr(idx + 1, s.size() - idx - 2);
-//    split(v, w, is_any_of(","));
-    // This doesn't compile in combination with 'using namespace std::rel_ops'
-    // for Visual C++ 8.0 (looks like a compiler bug)
-    // for (std::vector<std::string>::reverse_iterator i = v.rbegin(); i != v.rend(); ++i)
-    // {
-    //   data_expression d = variable(*i);
-    //   variables = push_front(variables, d);
-    // }
-//    for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
-//    {
-//      data_expression d = variable(*i);
-//      variables = variables.variables.push_back(d);
-//    }
-//  }
-//  return std::make_pair(name, variables);
-//}
-
 /// \brief Returns true if the names of the given variables are unique.
 /// \param variables A sequence of data variables
 /// \return True if the names of the given variables are unique.
