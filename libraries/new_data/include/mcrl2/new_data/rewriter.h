@@ -17,7 +17,7 @@
 #include <sstream>
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/new_data/expression_traits.h"
-//#include "mcrl2/new_data/data_expression_with_variables.h"
+#include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/new_data/detail/rewrite.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_reconstruct.h"
@@ -90,23 +90,23 @@ namespace new_data {
       /// \brief The strategy of the rewriter.
       enum strategy
       {
-        innermost                  = GS_REWR_INNER   ,  /** \brief Innermost */
+        innermost                  = detail::GS_REWR_INNER   ,  /** \brief Innermost */
 #ifdef MCRL2_INNERC_AVAILABLE
-        innermost_compiling        = GS_REWR_INNERC  ,  /** \brief Compiling innermost */
+        innermost_compiling        = detail::GS_REWR_INNERC  ,  /** \brief Compiling innermost */
 #endif
-        jitty                      = GS_REWR_JITTY   ,  /** \brief JITty */
+        jitty                      = detail::GS_REWR_JITTY   ,  /** \brief JITty */
 #ifdef MCRL2_JITTYC_AVAILABLE
-        jitty_compiling            = GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
+        jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
 #endif
-        innermost_prover           = GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
+        innermost_prover           = detail::GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
 #ifdef MCRL2_INNERC_AVAILABLE
-        innermost_compiling_prover = GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
+        innermost_compiling_prover = detail::GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-        jitty_prover               = GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
-        jitty_compiling_prover     = GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
+        jitty_prover               = detail::GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
+        jitty_compiling_prover     = detail::GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
 #else
-        jitty_prover               = GS_REWR_JITTY_P    /** \brief JITty + Prover */
+        jitty_prover               = detail::GS_REWR_JITTY_P    /** \brief JITty + Prover */
 #endif
       };
 
@@ -125,7 +125,7 @@ namespace new_data {
         : m_substitution_context(ATmakeList0())
       {
         m_specification = detail::implement_data_specification(d, &m_substitution_context);
-        m_rewriter.reset(detail::createRewriter(m_specification, static_cast<RewriteStrategy>(s)));
+        m_rewriter.reset(detail::createRewriter(m_specification, static_cast< detail::RewriteStrategy >(s)));
       }
 
       /// \brief Adds an equation to the rewrite rules.
@@ -193,49 +193,47 @@ namespace new_data {
   };
 
   /// \brief Rewriter that operates on data expressions.
-//  class rewriter_with_variables: public basic_rewriter<data_expression_with_variables>
-//  {
-//    public:
-//
-//      /// \brief Constructor.
-//      /// \param d A data specification
-//      /// \param s A rewriter strategy.
-//      rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
-//        : basic_rewriter<data_expression_with_variables>(d, s)
-//      { }
-//
-//      /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
-//      /// \param r A data rewriter
-//      rewriter_with_variables(rewriter const& r)
-//        : basic_rewriter<data_expression_with_variables>(r)
-//      {}
-//
-//      /// \brief Rewrites a data expression.
-//      /// \param d The term to be rewritten.
-//      /// \return The normal form of d.
-//      data_expression_with_variables operator()(const data_expression_with_variables& d) const
-//      {
-//        data_expression_with_variables di(detail::implement_data_expr(d, m_specification),d.variables());
-//        data_expression t = m_rewriter.get()->rewrite(di);
-//        std::set<variable> v = find_all_variables(t);
-//        return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
-//      }
-//
-//      /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-//      /// to data variables.
-//      /// \param d A term.
-//      /// \param sigma A substitution function
-//      /// \return The normal form of the term.
-//      template <typename SubstitutionFunction>
-//      data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
-//      {
-//        data_expression_with_variables di(detail::implement_data_expr(d, m_specification),d.variables());
-//        data_expression t = this->operator()(replace_variables(di, sigma));
-//        std::set<variable> v = find_all_variables(t);
-//        data_expression_with_variables result(t, variable_list(v.begin(), v.end()));
-//        return result;
-//      }
-//  };
+  class rewriter_with_variables: public basic_rewriter<data_expression_with_variables>
+  {
+    public:
+
+      /// \brief Constructor.
+      /// \param d A data specification
+      /// \param s A rewriter strategy.
+      rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
+        : basic_rewriter<data_expression_with_variables>(d, s)
+      { }
+
+      /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
+      /// \param r A data rewriter
+      rewriter_with_variables(basic_rewriter< data_expression_with_variables > const& r)
+        : basic_rewriter<data_expression_with_variables>(r)
+      {}
+
+      /// \brief Rewrites a data expression.
+      /// \param d The term to be rewritten.
+      /// \return The normal form of d.
+      data_expression_with_variables operator()(const data_expression_with_variables& d) const
+      {
+        data_expression t = reconstruct(m_rewriter.get()->rewrite(implement(d)));
+        std::set<variable> v = find_all_variables(t);
+        return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
+      }
+
+      /// \brief Rewrites the data expression d, and on the fly applies a substitution function
+      /// to data variables.
+      /// \param d A term.
+      /// \param sigma A substitution function
+      /// \return The normal form of the term.
+      template <typename SubstitutionFunction>
+      data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
+      {
+        data_expression t = this->operator()(replace_variables(d, sigma));
+        std::set<variable> v = find_all_variables(t);
+        data_expression_with_variables result(t, variable_list(v.begin(), v.end()));
+        return result;
+      }
+  };
 
   /// \brief Function object that turns a map of substitutions to variables into a substitution function.
   template <typename SubstitutionMap>

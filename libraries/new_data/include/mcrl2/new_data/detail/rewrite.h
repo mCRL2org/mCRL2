@@ -20,6 +20,10 @@
                                           rewriter is available */
 #endif
 
+namespace mcrl2 {
+  namespace new_data {
+    namespace detail {
+
 /** \brief Rewrite strategies. */
 typedef enum { GS_REWR_INNER     /** \brief Innermost */
 #ifdef MCRL2_INNERC_AVAILABLE
@@ -40,9 +44,6 @@ typedef enum { GS_REWR_INNER     /** \brief Innermost */
 	     , GS_REWR_INVALID   /** \brief Invalid strategy */
 	     } RewriteStrategy;
 
-namespace mcrl2 {
-  namespace new_data {
-    namespace detail {
 /**
  * \brief Rewriter interface class.
  *

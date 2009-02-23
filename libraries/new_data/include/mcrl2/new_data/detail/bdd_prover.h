@@ -155,6 +155,15 @@ class BDD_Prover: public Prover {
       bool a_apply_induction = false
     );
 
+    BDD_Prover(
+      mcrl2::new_data::data_specification const&,
+      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      int a_time_limit = 0,
+      bool a_path_eliminator = false,
+      SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_apply_induction = false
+    );
+
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.
     virtual ~BDD_Prover();
 

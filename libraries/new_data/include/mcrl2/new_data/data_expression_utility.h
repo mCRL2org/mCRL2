@@ -259,7 +259,7 @@ namespace mcrl2 {
       /// \brief Returns an expression equivalent to p or q
       /// \param p A data expression
       /// \param q A data expression
-      /// \return The expression p = q
+      /// \return The value p || q
       inline data_expression or_(data_expression const& p, data_expression const& q)
       {
         if ((p == sort_bool_::false_()) || (q == sort_bool_::false_())) {
@@ -278,7 +278,7 @@ namespace mcrl2 {
       /// \brief Returns an expression equivalent to p implies q
       /// \param p A data expression
       /// \param q A data expression
-      /// \return The expression p = q
+      /// \return The value p || q
       inline data_expression implies(data_expression const& p, data_expression const& q)
       {
         if ((p == sort_bool_::false_()) || (q == sort_bool_::true_()) || (p == q)) {
@@ -292,6 +292,32 @@ namespace mcrl2 {
         }
 
         return sort_bool_::implies(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p == q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value p == q
+      inline data_expression equal_to(data_expression const& p, data_expression const& q)
+      {
+        if (p == q) {
+          return sort_bool_::true_();
+        }
+
+        return new_data::equal_to(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p == q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value ! p == q
+      inline data_expression not_equal_to(data_expression const& p, data_expression const& q)
+      {
+        if (p == q) {
+          return sort_bool_::false_();
+        }
+
+        return new_data::not_equal_to(p, q);
       }
     }
 

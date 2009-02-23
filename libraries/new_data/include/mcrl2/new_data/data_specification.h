@@ -53,7 +53,7 @@ namespace mcrl2 {
       /// \pre f is a constructor.
       /// \ret All sorts on which f depends.
       inline
-      sort_expression_list dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited)
+      sort_expression_list dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited) const
       {
         if (f.sort().is_basic_sort())
         {
@@ -79,7 +79,7 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \ret All sorts on which s depends.
       inline
-      sort_expression_list dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited)
+      sort_expression_list dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited) const
       {
         if (visited.find(s) != visited.end())
         {
@@ -721,7 +721,7 @@ namespace mcrl2 {
       /// \ret true if s can be determined to be finite,
       ///      false otherwise.
       inline
-      bool is_certainly_finite(const sort_expression& s)
+      bool is_certainly_finite(const sort_expression& s) const
       {
         // Check for recursive occurrence.
         atermpp::set<sort_expression> visited;

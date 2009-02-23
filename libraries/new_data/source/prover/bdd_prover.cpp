@@ -19,6 +19,7 @@
 #include "mcrl2/new_data/detail/prover.h"
 #include "mcrl2/new_data/detail/prover/utilities.h"
 #include "mcrl2/new_data/detail/bdd_prover.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/new_data/detail/prover/induction.h"
 
 using namespace mcrl2::core;
@@ -303,6 +304,33 @@ namespace mcrl2 {
         f_bdd_simplifier = new BDD_Simplifier();
       }
     }
+
+    BDD_Prover::BDD_Prover(
+      mcrl2::new_data::data_specification const& data_spec, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+    ):
+      Prover(data_specification_to_aterm_data_spec(data_spec), a_rewrite_strategy, a_time_limit),
+      f_data_spec(data_specification_to_aterm_data_spec(data_spec)),
+      f_induction(data_specification_to_aterm_data_spec(data_spec))
+    {
+      f_reverse = true;
+      f_full = true;
+      f_apply_induction = a_apply_induction;
+      f_info->set_reverse(f_reverse);
+      f_info->set_full(f_full);
+      gsDebugMsg(
+        "Flags:\n"
+        "  Reverse: %s,\n"
+        "  Full: %s,\n",
+        bool_to_char_string(f_reverse),
+        bool_to_char_string(f_full)
+      );
+      if (a_path_eliminator) {
+        f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
+      } else {
+        f_bdd_simplifier = new BDD_Simplifier();
+      }
+    }
+
 
     // --------------------------------------------------------------------------------------------
 

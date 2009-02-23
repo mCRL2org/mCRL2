@@ -9097,9 +9097,11 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   add_delta = lin_options.add_delta;
   //initialise local data structures
   initialize_data();
+
+  new_data::rewriter rewriter(new_data::data_specification(ATAgetArgument(spec,0)), lin_options.rewrite_strategy);
+
   if (mayrewrite) {
-    rewr = createRewriter(ATAgetArgument(spec,0),
-                          lin_options.rewrite_strategy);
+    rewr = rewriter.get_rewriter();
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
@@ -9143,7 +9145,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //clean up
   uninitialize_data();
   uninitialize_symbols();
-  delete rewr;
+  rewr = 0;
 
   return result;
 }

@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren, Jeroen van der Wulp, Aad Mathijssen
+// Author(s): Jeroen Keiren, Jeroen van der Wulp, Wieger Wesselink, Aad Mathijssen
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //

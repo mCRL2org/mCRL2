@@ -69,7 +69,7 @@ namespace mcrl2 {
         function_symbol_list result;
         for(function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
-          if (function_sort(i->sort()).codomain() == s)
+          if (!i->is_function_sort() || function_sort(i->sort()).codomain() == s)
           {
             result.push_back(*i);
           }

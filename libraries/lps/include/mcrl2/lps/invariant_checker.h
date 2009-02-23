@@ -83,7 +83,7 @@ class Invariant_Checker {
     /// to 0, no time limit will be enforced
     Invariant_Checker(
       ATermAppl a_lps,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::new_data::detail::RewriteStrategy a_rewrite_strategy = mcrl2::new_data::detail::GS_REWR_JITTY,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,
