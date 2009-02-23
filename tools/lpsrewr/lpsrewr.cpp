@@ -63,6 +63,7 @@ class lps_rewriter_tool : public rewriter_tool<input_output_tool>
       : super(
           TOOLNAME,
           AUTHOR,
+          "rewrite data expressions in an LPS",
           "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
           "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is"
           "used."

@@ -141,7 +141,9 @@ struct lps2torx_tool {
   std::string     name_for_input;
 
   bool parse_command_line(int ac, char** av) {
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... INFILE\n",
+    interface_description clinterface(av[0], NAME, AUTHOR,
+      "provide TorX explorer interface to an LPS",
+      "[OPTION]... INFILE\n",
       "Provide a TorX explorer interface to the LPS in INFILE. "
       "\n\n"
       "The LPS can be explored using TorX as described in torx_explorer(5).");

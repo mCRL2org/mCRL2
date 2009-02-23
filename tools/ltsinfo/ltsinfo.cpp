@@ -92,7 +92,9 @@ class info_tool
       using namespace mcrl2::lts;
       using mcrl2::lts::lts;
 
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+      interface_description clinterface(argv[0], NAME, AUTHOR,
+        "display basic information about an LTS",
+        "[OPTION]... [INFILE]\n",
         "Print information about the labelled transition system (LTS) in INFILE. "
         "If INFILE is not supplied, stdin is used.\n"
         "\n"

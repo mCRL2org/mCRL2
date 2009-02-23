@@ -37,6 +37,9 @@ namespace tools {
       /// The name of the developer(s)
       std::string m_author;
 
+      /// One-line "what is" description of the tool
+      std::string m_what_is;
+
       /// The description of the tool
       std::string m_tool_description;
 
@@ -68,10 +71,12 @@ namespace tools {
       /// \brief Constructor.
       tool(const std::string& name,
                   const std::string& author,
+                  const std::string& what_is,
                   const std::string& tool_description
                  )
         : m_name            (name),
           m_author          (author),
+          m_what_is         (what_is),
           m_tool_description(tool_description)
       {
       }
@@ -91,7 +96,7 @@ namespace tools {
       int execute(int argc, char* argv[])
       {
         try {
-          interface_description clinterface(argv[0], m_name, m_author, synopsis(), m_tool_description);
+          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
           check_positional_options(parser);

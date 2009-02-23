@@ -42,7 +42,9 @@ struct t_tool_options
 
 bool parse_command_line(int ac, char **av, t_tool_options& tool_options)
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+    "parse a textual description of a PBES",
+    "[OPTION]... [INFILE [OUTFILE]]\n",
     "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
     "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
     "The textual description should adhere to the BNF syntax description at "

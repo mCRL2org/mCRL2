@@ -392,7 +392,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
 static bool parse_command_line(int argc, char *argv[], t_lin_options& options)
 {
-  interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(argv[0], NAME, AUTHOR,
+    "translate an mCRL2 specification to an LPS",
+    "[OPTION]... [INFILE [OUTFILE]]\n",
     "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
     "stdin is used.");

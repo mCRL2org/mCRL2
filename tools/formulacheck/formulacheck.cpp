@@ -9,7 +9,7 @@
 /// \file formcheck.cpp
 /// \brief Add your file description here.
 
-#define NAME "formcheck"
+#define NAME "formulacheck"
 #define AUTHOR "Luc Engelen"
 
 #include <string>
@@ -122,7 +122,9 @@ using namespace mcrl2::core;
     /// \param argv is an array of all arguments passed on the command line
 
     bool Form_Check::get_options(int argc, char* argv[]) {
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+      interface_description clinterface(argv[0], NAME, AUTHOR,
+        "check a boolean formula",
+        "[OPTION]... [INFILE]\n",
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
         "INFILE holds. If INFILE is not present, stdin is used.");
 

@@ -202,6 +202,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       : super(
           "pbes2bes",
           "Alexander van Dam, Wieger Wesselink",
+          "compute a BES out of a PBES",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
           "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
           "standard output is used."

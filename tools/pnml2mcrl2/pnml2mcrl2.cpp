@@ -2383,7 +2383,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   }
 
   bool parse_command_line(int ac, char** av, tool_options_type& tool_options) {
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+    interface_description clinterface(av[0], NAME, AUTHOR,
+      "convert a Petri net to an mCRL2 specification",
+      "[OPTION]... [INFILE [OUTFILE]]\n",
       "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
       "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
       "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard."

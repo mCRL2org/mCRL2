@@ -133,12 +133,14 @@ namespace tools {
       /// \brief Constructor.
       /// \param name The name of the tool
       /// \param author The author(s) of the tool
+      /// \param what_is One-line "what is" description of the tool
       /// \param tool_description The description of the tool
       pbes_rewriter_tool(const std::string& name,
                          const std::string& author,
+                         const std::string& what_is,
                          const std::string& tool_description
                         )
-        : Tool(name, author, tool_description)
+        : Tool(name, author, what_is, tool_description)
       {}
 
       /// \brief Returns the rewriter type

@@ -58,9 +58,10 @@ namespace tools {
       /// \brief Constructor.
       input_tool(const std::string& name,
                  const std::string& author,
+                 const std::string& what_is,
                  const std::string& tool_description
                 )
-        : tool(name, author, tool_description)
+        : tool(name, author, what_is, tool_description)
       {
       }
 

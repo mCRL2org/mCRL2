@@ -311,7 +311,9 @@ struct tool_options_type {
 };
 
 static bool parse_command_line(int ac, char** av, tool_options_type& options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+    "interpreter for the mCRL2 data language",
+    "[OPTION]... [INFILE]\n",
     "Evaluate mCRL2 data expressions via a text-based interface. "
     "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used."
     "\n\n"

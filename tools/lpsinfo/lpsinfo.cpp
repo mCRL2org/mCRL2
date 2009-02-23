@@ -122,7 +122,9 @@ class info_tool
   private:
 
     bool parse_command_line(int ac, char** av) {
-      interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+      interface_description clinterface(av[0], NAME, AUTHOR,
+                           "display basic information about an LPS",
+                           "[OPTION]... [INFILE]\n",
                            "Print basic information on the linear process specification (LPS) in INFILE.");
 
       command_line_parser parser(clinterface, ac, av);

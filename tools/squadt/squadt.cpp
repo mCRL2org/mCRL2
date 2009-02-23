@@ -83,7 +83,9 @@ bool SQuADt::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
   if (0 < argc) {
-    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()), NAME, AUTHOR, "[OPTION]... [PATH]\n",
+    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()), NAME, AUTHOR,
+        "interactive integration of software tools",
+        "[OPTION]... [PATH]\n",
         "Graphical environment that provides a uniform interface for using all kinds of "
         "other connected tools. If PATH is provided, it provides an existing project in "
         "PATH.");

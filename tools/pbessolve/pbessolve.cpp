@@ -160,7 +160,9 @@ int main(int argc, char** argv)
 //========================================
 bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+                          "solve a PBES",
+                          "[OPTION]... [INFILE]\n",
                           "Solve the PBES in INFILE, and write the result to stdout. If INFILE is not\n"
                           "present, stdin is used.");
 

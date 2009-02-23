@@ -37,7 +37,8 @@ class pbes_parelm_tool: public input_output_tool
       : input_output_tool(
           "pbesparelm",
           "Wieger Wesselink",
-          "Reads a file containing a pbes, and applies parameter elimination to it. If OUTFILE "
+          "remove unused parameters from a PBES",
+          "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."
         )
     {}

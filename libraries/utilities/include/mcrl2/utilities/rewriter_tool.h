@@ -51,9 +51,10 @@ namespace tools {
       /// \brief Constructor.
       rewriter_tool(const std::string& name,
                     const std::string& author,
+                    const std::string& what_is,
                     const std::string& tool_description
                    )
-        : Tool(name, author, tool_description),
+        : Tool(name, author, what_is, tool_description),
           m_rewrite_strategy(GS_REWR_JITTY)
       {}
 

@@ -435,7 +435,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     /// \param argv is an array of all arguments passed on the command line
 
     bool LPS_Conf_Check::get_options(int argc, char* argv[]) {
-      interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+      interface_description clinterface(argv[0], NAME, AUTHOR,
+        "mark confluent tau-summands of an LPS",
+        "[OPTION]... [INFILE [OUTFILE]]\n",
         "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
         "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
         "stdin is used. If OUTFILE is not present, stdout is used.");

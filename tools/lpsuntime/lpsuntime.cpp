@@ -108,7 +108,9 @@ int do_untime(const tool_options& options)
 }
 
 bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+                              "remove time from an LPS",
+                              "[OPTION]... [INFILE [OUTFILE]]\n",
                               "Remove time from the linear process specification (LPS) in INFILE and write the\n"
                               "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not\n"
                               "present, stdout is used.\n");

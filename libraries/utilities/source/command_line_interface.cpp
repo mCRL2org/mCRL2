@@ -332,10 +332,11 @@ namespace mcrl2 {
     }
 
     interface_description::interface_description(std::string const& path,
-          std::string const& name, std::string const& authors, std::string const& synopsis,
+          std::string const& name, std::string const& authors,
+          std::string const& what_is, std::string const& synopsis,
           std::string const& description, std::string const& known_issues) :
                           m_path(path), m_name(name), m_authors(authors),
-                          m_usage(synopsis), m_description(description),
+                          m_what_is(what_is), m_usage(synopsis), m_description(description),
                           m_known_issues(known_issues), m_options(get_standard_description().m_options),
                           m_short_to_long(get_standard_description().m_short_to_long) {
 
@@ -521,7 +522,7 @@ namespace mcrl2 {
         << "\" \"User Commands\"" << std::endl;
 
       s << ".SH NAME" << std::endl
-        << m_name << " - manual page for " << m_name << " mCRL2 toolset " << version_tag() << std::endl;
+        << m_name << " \\- " << m_what_is << std::endl;
 
       s << ".SH SYNOPSIS" << std::endl
         << ".B " << m_name << std::endl
