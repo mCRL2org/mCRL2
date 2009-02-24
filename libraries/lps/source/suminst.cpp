@@ -93,17 +93,16 @@ variable_list filter(const variable_list& vl, const variable_list& rl)
 
 ///\pre fl is a list of constructors
 ///\return a list of finite sorts in sl
-sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_expression_list& sl)
+sort_expression_list get_finite_sorts(const new_data::data_specification& d, const sort_expression_list& sl)
 {
   sort_expression_list result;
   for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    if (is_finite(fl, *i))
+    if (d.is_certainly_finite(fl, *i))
     {
-      result = push_front(result, *i);
+      result.push_back(*i);
     }
   }
-  reverse(result);
   return result;
 }
 
@@ -140,7 +139,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
   if (o.finite_only)
   {
     // Only consider finite variables
-    variables = get_variables(summand_.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
+    variables = get_variables(summand_.summation_variables(), get_finite_sorts(specification.data(), specification.data().sorts()));
   }
   else
   {

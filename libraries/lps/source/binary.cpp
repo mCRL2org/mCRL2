@@ -80,17 +80,16 @@ int powerof2_(int n)
 
 ///\pre cl is a list of constructors
 ///\return all sorts s in sl that are finite and not bool
-sort_expression_list get_finite_sorts_not_bool(const function_symbol_list& cl, const sort_expression_list& sl)
+sort_expression_list get_finite_sorts_not_bool(const new_data::data_specificaiton& d, const sort_expression_list& sl)
 {
   sort_expression_list result;
   for(sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    if (!is_bool(*i) && is_finite(cl, *i))
+    if (!is_bool(*i) && d.is_certainly_finite(*i))
     {
-      result = push_front(result, *i);
+      result.push_back(*i);
     }
   }
-  reverse(result);
   return result;
 }
 
@@ -188,7 +187,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
   for (variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     variable par = *i;
-    if (!is_bool(par) && is_finite(specification.data().constructors(), par.sort()))
+    if (!is_bool(par) && specification.data().is_certainly_finite(par.sort()))
     {
       //Get all constructors for par
       aterm_list pl;

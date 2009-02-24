@@ -212,12 +212,12 @@ class linear_process: public atermpp::aterm_appl
       {
         std::cerr << "linear_process::is_well_typed() failed: some of the free variables were not declared\n";
         std::cerr << "declared free variables: ";
-        for (std::set<new_data::variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
+        for (std::set<new_data::variable>::const_iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
         {
           std::cerr << mcrl2::core::pp(*i) << " ";
         }
         std::cerr << "\noccurring free variables: ";
-        for (std::set<new_data::variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
+        for (std::set<new_data::variable>::const_iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
         {
           std::cerr << mcrl2::core::pp(*i) << " ";
         }

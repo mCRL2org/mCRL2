@@ -69,7 +69,7 @@ namespace mcrl2 {
         function_symbol_list result;
         for(function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
-          if (!i->sort().is_function_sort() || function_sort(i->sort()).codomain() == s)
+          if ((!i->sort().is_function_sort() && i->sort() == s) || function_sort(i->sort()).codomain() == s)
           {
             result.push_back(*i);
           }
@@ -83,70 +83,6 @@ namespace mcrl2 {
         return !core::detail::gsIsSortId(atermpp::aterm_appl(f.argument(1)));
       }
 
-      inline bool is_finite(const function_symbol_list& fl, const sort_expression& s, mcrl2::new_data::sort_expression_list const& visited);
-
-      ///\return true if all sorts in sl are finite, false otherwise
-      ///Note that when a constructor sort is in visited we hold the sort as infinite because loops are created!
-      template < typename ForwardTraversalIterator >
-      inline bool is_finite(const function_symbol_list& fl, const boost::iterator_range< ForwardTraversalIterator >& sl,
-                            const mcrl2::new_data::sort_expression_list& visited = mcrl2::new_data::sort_expression_list())
-      {
-        bool result = true;
-
-        // A list of sorts is finite if all sorts in the list are finite
-        // If a sort is in "visited" that means that we have already seen the sort
-        // during our calculation. We now get loops of the sort D = d1(E), sort E=e1(D),
-        // this makes our sort infinite.
-        for (sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
-        {
-          if (!occurs_in(visited.begin(), visited.end(), *i))
-          {
-            result = result && is_finite(fl, *i, visited);
-          }
-          else
-          {
-            result = false;
-          }
-        }
-        return result;
-      }
-
-      inline bool is_finite(const function_symbol_list& fl, const sort_expression& s)
-      {
-         mcrl2::new_data::sort_expression_list visited;
-
-         return is_finite(fl, s, visited);
-      }
-
-      ///\pre fl is a list of constructors
-      ///\return sort s is finite
-      inline bool is_finite(const function_symbol_list& fl, const sort_expression& s, mcrl2::new_data::sort_expression_list const& visited)
-      {
-        bool result = true;
-        function_symbol_list cl = get_constructors(fl, s);
-
-        //If a sort has not got any constructors it is infinite
-        if (cl.empty())
-        {
-          result = false;
-        }
-
-        //Otherwise a sort is finite if all its constructors are finite;
-        //i.e. the constructors have no arguments, or their arguments are finite.
-        //In the recursive call pass s add s to the visited sorts, so that we know
-        //it may not occur in a constructor anymore.
-        for (function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
-        {
-          mcrl2::new_data::sort_expression_list local_visited(visited);
-
-          local_visited.push_back(s);
-
-          result = result && (!(has_arguments(*i)) || is_finite(fl, function_sort(i->sort()).domain(), local_visited));
-        }
-
-        return result;
-      }
-
       ///\pre s is a sort that occurs in data_specfication data
       ///\ret true iff there exists a constructor function with s as target sort
       inline bool is_constructorsort(const sort_expression &s,const data_specification &data)
@@ -154,7 +90,8 @@ namespace mcrl2 {
         // cl contains all constructors with target sort s.
 
         if (s.is_function_sort())
-        { return false;
+        {
+          return false;
         }
 
         assert(occurs_in(data.sorts(),s));
@@ -183,20 +120,6 @@ namespace mcrl2 {
           result.push_back(i->sort());
         }
         return result;
-      }
-
-      /// Undocumented function.
-      inline
-      bool check_finite(new_data::function_symbol_list fl, new_data::sort_expression s)
-      {
-        return is_finite(fl, s);
-      }
-
-      /// Undocumented function.
-      inline
-      bool check_finite_list(new_data::function_symbol_list fl, new_data::sort_expression_list s)
-      {
-        return is_finite(fl, boost::make_iterator_range(s));
       }
 
       /// Undocumented function.
@@ -230,14 +153,14 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::data_expression_list enumerate_constructors(new_data::function_symbol_list const& fl, new_data::sort_expression s)
+      new_data::data_expression_list enumerate_constructors(new_data::data_specification const& d, new_data::sort_expression s)
       {
         // All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
-        assert(is_finite(fl, s));
+        assert(d.is_certainly_finite(s));
         // The resulting new_data::data_expression_list.
         new_data::data_expression_list ces;
         // Get all constructors of sort s
-        new_data::function_symbol_list cl = get_constructors(fl,s);
+        new_data::function_symbol_list cl = d.constructors(s);
         // For each constructor of sort s...
         for (new_data::function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); i++)
         {
@@ -248,7 +171,7 @@ namespace mcrl2 {
                                         j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
                 {
                         // Put all values which the sort can have in a list
-                        argumentss.push_back(enumerate_constructors(fl,j.front()));
+                        argumentss.push_back(enumerate_constructors(d, j.front()));
                 }
                 // Create data_expression_list out of the values which a sort can have
                 new_data::data_expression_list temp = create_data_expression_list(*i, argumentss);
