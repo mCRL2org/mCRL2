@@ -100,11 +100,11 @@ void pos_rewrite_test() {
   data_rewrite_test(R, sort_pos::times(p1, p1), p1);
   data_rewrite_test(R, sort_pos::times(p1, p2), p2);
 
-  data_rewrite_test(R, (sort_pos::min)(p1, p1), p1);
-  data_rewrite_test(R, (sort_pos::min)(p1, p2), p1);
+  data_rewrite_test(R, (sort_pos::minimum)(p1, p1), p1);
+  data_rewrite_test(R, (sort_pos::minimum)(p1, p2), p1);
 
-  data_rewrite_test(R, (sort_pos::max)(p1, p1), p1);
-  data_rewrite_test(R, (sort_pos::max)(p1, p2), p2);
+  data_rewrite_test(R, (sort_pos::maximum)(p1, p1), p1);
+  data_rewrite_test(R, (sort_pos::maximum)(p1, p2), p2);
 
   data_rewrite_test(R, sort_pos::succ(p1), p2);
 
@@ -136,15 +136,15 @@ void nat_rewrite_test() {
   data_rewrite_test(R, times(p2, p0), p0);
   data_rewrite_test(R, times(p1, p2), p2);
 
-  data_rewrite_test(R, (min)(p1, p1), p1);
-  data_rewrite_test(R, (min)(p0, p2), p0);
-  data_rewrite_test(R, (min)(p2, p0), p0);
-  data_rewrite_test(R, (min)(p1, p2), p1);
+  data_rewrite_test(R, (minimum)(p1, p1), p1);
+  data_rewrite_test(R, (minimum)(p0, p2), p0);
+  data_rewrite_test(R, (minimum)(p2, p0), p0);
+  data_rewrite_test(R, (minimum)(p1, p2), p1);
 
-  data_rewrite_test(R, (max)(p1, p1), p1);
-  data_rewrite_test(R, (max)(p0, p2), p2);
-  data_rewrite_test(R, (max)(p2, p0), p2);
-  data_rewrite_test(R, (max)(p1, p2), p2);
+  data_rewrite_test(R, (maximum)(p1, p1), p1);
+  data_rewrite_test(R, (maximum)(p0, p2), p2);
+  data_rewrite_test(R, (maximum)(p2, p0), p2);
+  data_rewrite_test(R, (maximum)(p1, p2), p2);
 
   data_rewrite_test(R, succ(p0), R(nat2pos(p1)));
   data_rewrite_test(R, succ(p1), R(nat2pos(p2)));
@@ -194,15 +194,15 @@ void int_rewrite_test() {
   data_rewrite_test(R, times(p2, p0), p0);
   data_rewrite_test(R, times(p1, p2), p2);
 
-  data_rewrite_test(R, (min)(p1, p1), p1);
-  data_rewrite_test(R, (min)(p0, p2), p0);
-  data_rewrite_test(R, (min)(p2, p0), p0);
-  data_rewrite_test(R, (min)(p1, p2), p1);
+  data_rewrite_test(R, (minimum)(p1, p1), p1);
+  data_rewrite_test(R, (minimum)(p0, p2), p0);
+  data_rewrite_test(R, (minimum)(p2, p0), p0);
+  data_rewrite_test(R, (minimum)(p1, p2), p1);
 
-  data_rewrite_test(R, (max)(p1, p1), p1);
-  data_rewrite_test(R, (max)(p0, p2), p2);
-  data_rewrite_test(R, (max)(p2, p0), p2);
-  data_rewrite_test(R, (max)(p1, p2), p2);
+  data_rewrite_test(R, (maximum)(p1, p1), p1);
+  data_rewrite_test(R, (maximum)(p0, p2), p2);
+  data_rewrite_test(R, (maximum)(p2, p0), p2);
+  data_rewrite_test(R, (maximum)(p1, p2), p2);
 
   data_rewrite_test(R, succ(p0), p1);
   data_rewrite_test(R, succ(p1), p2);
@@ -252,15 +252,15 @@ void real_rewrite_test() {
   data_rewrite_test(R, times(p2, p0), p0);
   data_rewrite_test(R, times(p1, p2), p2);
 
-  data_rewrite_test(R, (min)(p1, p1), p1);
-  data_rewrite_test(R, (min)(p0, p2), p0);
-  data_rewrite_test(R, (min)(p2, p0), p0);
-  data_rewrite_test(R, (min)(p1, p2), p1);
+  data_rewrite_test(R, (minimum)(p1, p1), p1);
+  data_rewrite_test(R, (minimum)(p0, p2), p0);
+  data_rewrite_test(R, (minimum)(p2, p0), p0);
+  data_rewrite_test(R, (minimum)(p1, p2), p1);
 
-  data_rewrite_test(R, (max)(p1, p1), p1);
-  data_rewrite_test(R, (max)(p0, p2), p2);
-  data_rewrite_test(R, (max)(p2, p0), p2);
-  data_rewrite_test(R, (max)(p1, p2), p2);
+  data_rewrite_test(R, (maximum)(p1, p1), p1);
+  data_rewrite_test(R, (maximum)(p0, p2), p2);
+  data_rewrite_test(R, (maximum)(p2, p0), p2);
+  data_rewrite_test(R, (maximum)(p1, p2), p2);
 
   data_rewrite_test(R, succ(p0), p1);
   data_rewrite_test(R, succ(p1), p2);

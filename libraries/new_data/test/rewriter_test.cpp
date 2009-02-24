@@ -65,18 +65,18 @@ void test1()
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
-  data_expression t = datar(greater(min(x,y), z));
+  data_expression t = datar(greater(minimum(x,y), z));
 
   BOOST_CHECK(datar(plus(parse_data_expression("1"),
     parse_data_expression("2"))) == datar(parse_data_expression("3")));
 
   // copy a rewriter
   new_data::rewriter datar1 = datar;
-  t = datar1(greater(min(x,y), z));
+  t = datar1(greater(minimum(x,y), z));
 
   // rewriter as return value
   new_data::rewriter datar2 = make_data_rewriter(data);
-  t = datar2(greater(min(x,y), z));
+  t = datar2(greater(minimum(x,y), z));
 
   A a(datar);
   data_expression qa = a.r_(t);
