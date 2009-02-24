@@ -26,7 +26,7 @@
 #include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/detail/assignment_functional.h"
-#include "mcrl2/new_data/detail/assignment_list_substitution.h"
+#include "mcrl2/new_data/assignment_list_substitution.h"
 #include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/deadlock.h"

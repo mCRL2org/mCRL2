@@ -265,23 +265,39 @@ namespace mcrl2 {
       return t == core::detail::gsMakeNil();
     }
 
+    template < typename SubstitutionFunction >
+    inline data_expression substitute(SubstitutionFunction const& f, data_expression const& c)
+    {
+      return data_expression(f(c));
+    }
+
     /// \brief Applies the assignment to t and returns the result.
-    /// \param t A term
+    /// \param c an assignment to apply to the expression
+    /// \param e the expression on which to apply the assignment
     /// \return The application of the assignment to the term.
+    template < >
     inline data_expression substitute(assignment const& c, data_expression const& e)
     {
       return atermpp::replace(e, atermpp::aterm(c.lhs()), atermpp::aterm(c.rhs()));
     }
 
-    template < typename SubstitutionFunction >
-    inline data_expression substitute(SubstitutionFunction& f, data_expression const& c)
+    /// \brief Applies a substitution function to all elements of a container
+    /// \param[in] f substitution function
+    /// \param[in,out] c applies substitution function on elements of container
+    template < typename Container, typename SubstitutionFunction >
+    Container& substitute(SubstitutionFunction const& f, Container& c)
     {
-      return data_expression(f(c));
+      for (typename Container::iterator i = c.begin(); i != c.end(); ++i)
+      {
+        *i = f(*i);
+      }
+
+      return c;
     }
 
     /// \brief Applies a substitution function to all elements of a container
     template < typename Container, typename SubstitutionFunction, typename OutputIterator >
-    void substitute(SubstitutionFunction f, Container const& c, OutputIterator o)
+    void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
     {
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i, ++o)
       {
@@ -406,6 +422,19 @@ namespace mcrl2 {
     {
       core::identifier_string id = fresh_identifier(context, hint);
       return variable(id, s);
+    }
+
+    /// \brief Combines two variables lists
+    /// \param v1 a list of variables
+    /// \param v2 a list of variables
+    /// \return for all x : x in v1 or x in v2  implies x in result
+    template < typename Container >
+    inline variable_list merge(Container const& v1, Container const& v2) {
+      std::set< typename Container::value_type > variables(v1.begin(), v1.end());
+
+      variables.insert(v2.begin(), v2.end());
+
+      return Container(variables.begin(), variables.end());
     }
 
   } // namespace new_data

@@ -21,16 +21,6 @@ namespace mcrl2 {
 
 namespace new_data {
 
-  namespace detail {
-    inline variable_list merge(variable_list const& v1, variable_list const& v2) {
-      std::set< variable > variables(v1.begin(), v1.end());
-
-      variables.insert(v2.begin(), v2.end());
-
-      return variable_list(variables.begin(), variables.end());
-    }
-  }
-
   /// \brief Data expression with a sequence of variables attached to it
   /// The intended use case is to store the free variables of the expression.
   class data_expression_with_variables: public data_expression
@@ -146,7 +136,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return term_type(new_data::sort_bool_::and_(p, q), new_data::detail::merge(p.variables(), q.variables()));
+      return term_type(new_data::sort_bool_::and_(p, q), new_data::merge(p.variables(), q.variables()));
     }
 
     /// \brief Make a disjunction
@@ -156,7 +146,7 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return term_type(new_data::sort_bool_::or_(p, q), new_data::detail::merge(p.variables(), q.variables()));
+      return term_type(new_data::sort_bool_::or_(p, q), new_data::merge(p.variables(), q.variables()));
     }
 
     /// \brief Test for value true

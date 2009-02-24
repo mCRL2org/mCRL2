@@ -84,6 +84,24 @@ namespace mcrl2 {
     ///
     typedef atermpp::vector<assignment> assignment_list;
 
+    ///////////////////////////////////////////////////////////////////////////////
+    /// \brief Constructs an assignment_list by pairwise combining a variable and expression
+    /// \param lhs A sequence of data variables
+    /// \param rhs A sequence of data expressions
+    /// \return The corresponding assignment list.
+    inline assignment_list make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
+    {
+      assert(lhs.size() == rhs.size());
+      assignment_list result;
+      variable_list::const_iterator i = lhs.begin();
+      data_expression_list::const_iterator j = rhs.begin();
+      for ( ; i != lhs.end(); ++i, ++j)
+      {
+        result.push_back(assignment(*i, *j));
+      }
+      return result;
+    }
+
   } // namespace new_data
 
 } // namespace mcrl2
