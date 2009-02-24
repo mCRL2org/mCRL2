@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
   std::string infile;            // location of pbes
   std::string outfile;           // location of result
   bool compute_conditions;
+  bool remove_redundant_equations;
 
   try {
     //--- pbesconstelm options ---------
@@ -51,6 +52,7 @@ int main(int argc, char* argv[])
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
       ("compute-conditions,c", po::value<bool>(&compute_conditions)->default_value(false), "compute propagation conditions")
+      ("remove-equations,e", po::value<bool>(&remove_redundant_equations)->default_value(false), "remove redundant equations")
       ;
 
     //--- hidden options ---------
@@ -87,10 +89,11 @@ int main(int argc, char* argv[])
 
     if (mcrl2::core::gsVerbose)
     {
-      std::cout << "pbesconstelm parameters:" << std::endl;
-      std::cout << "  input file:         " << infile << std::endl;
-      std::cout << "  output file:        " << outfile << std::endl;
-      std::cout << "  compute conditions: " << std::boolalpha << compute_conditions << std::endl;
+      std::cerr << "pbesconstelm parameters:" << std::endl;
+      std::cerr << "  input file:         " << infile << std::endl;
+      std::cerr << "  output file:        " << outfile << std::endl;
+      std::cerr << "  compute conditions: " << std::boolalpha << compute_conditions << std::endl;
+      std::cerr << "  remove equations  : " << std::boolalpha << remove_redundant_equations << std::endl;
     }
 
     // load the pbes
@@ -111,7 +114,7 @@ int main(int argc, char* argv[])
     pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
     // run the algorithm
-    algorithm.run(p, name_generator, compute_conditions);
+    algorithm.run(p, compute_conditions, remove_redundant_equations);
 
     // save the result
     p.save(outfile);
