@@ -26,10 +26,12 @@
 #include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/detail/assignment_functional.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/detail/action_utility.h"
-#include "mcrl2/new_data/assignment_list_substitution.h"
+#include "mcrl2/new_data/detail/assignment_list_substitution.h"
 #include "mcrl2/new_data/detail/sequence_algorithm.h"
+#include "mcrl2/lps/action.h"
+#include "mcrl2/lps/deadlock.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
 
@@ -67,6 +69,20 @@ class summand: public atermpp::aterm_appl
     new_data::assignment_list m_assignments;
 
   public:
+    /// \brief Returns the multi-action of this summand.
+    /// \pre The summand is no deadlock summand.
+    lps::multi_action multi_action() const
+    {
+      return lps::multi_action(m_actions, m_time);
+    }
+
+    /// \brief Returns the deadlock of this summand.
+    /// \pre The summand is a deadlock summand.
+    lps::deadlock deadlock() const
+    {
+      return lps::deadlock(m_time);
+    }
+
     /// \brief Constructor.
     summand()
       : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessSummand())
@@ -99,12 +115,13 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// Constructs an untimed summand.
+    /// \deprecated
     summand(new_data::variable_list   summation_variables,
-                new_data::data_expression      condition,
-                bool                 delta,
-                action_list          actions,
-                new_data::assignment_list assignments
-               )
+            new_data::data_expression      condition,
+            bool                 delta,
+            action_list          actions,
+            new_data::assignment_list assignments
+           )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
                condition,
@@ -122,13 +139,14 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// Constructs a timed summand.
+    /// \deprecated
     summand(new_data::variable_list   summation_variables,
-                new_data::data_expression      condition,
-                bool                 delta,
-                action_list          actions,
-                new_data::data_expression      time,
-                new_data::assignment_list assignments
-               )
+            new_data::data_expression condition,
+            bool                      delta,
+            action_list               actions,
+            new_data::data_expression time,
+            new_data::assignment_list assignments
+           )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
                condition,
@@ -142,6 +160,47 @@ class summand: public atermpp::aterm_appl
         m_actions            (actions),
         m_time               (time),
         m_assignments        (assignments)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs a multi action summand.
+    summand(new_data::variable_list   summation_variables,
+            new_data::data_expression      condition,
+            const lps::multi_action&   a,
+            new_data::assignment_list assignments
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
+               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               condition,
+               core::detail::gsMakeMultAct(a.actions()),
+               a.time(),
+               atermpp::term_list< new_data::assignment >(assignments.begin(), assignments.end()))
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (false),
+        m_actions            (a.actions()),
+	m_time               (a.time()),
+        m_assignments        (assignments)
+    {}
+
+    /// \brief Constructor.
+    /// Constructs a deadlock summand.
+    summand(new_data::variable_list   summation_variables,
+            new_data::data_expression      condition,
+            const lps::deadlock&       d
+           )
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
+               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               condition,
+               core::detail::gsMakeMultAct(action_list()),
+               d.time(),
+               atermpp::term_list< new_data::assignment >())
+        ),
+        m_summation_variables(summation_variables),
+        m_condition          (condition),
+        m_delta              (true),
+	m_time               (d.time())
     {}
 
     /// \brief Returns the sequence of summation variables.
@@ -192,6 +251,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of actions. Returns an empty list if is_delta() holds.
     /// \return The sequence of actions. Returns an empty list if is_delta() holds.
+    /// \deprecated
     action_list actions() const
     {
       return m_actions;
@@ -199,6 +259,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the time.
     /// \return The time.
+    /// \deprecated
     new_data::data_expression time() const
     {
       return m_time;

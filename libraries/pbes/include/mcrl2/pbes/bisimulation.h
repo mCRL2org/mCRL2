@@ -23,12 +23,12 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_operators.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/multi_action_equality.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
@@ -229,9 +229,9 @@ public:
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return Necessary conditions for the equality of a and b
-    pbes_expression equals(action_list a, action_list b) const
+    pbes_expression equals(const multi_action& a, const multi_action& b) const
     {
-      return equal_multi_actions(a, b);
+      return lps::equal_multi_actions(a, b);
     }
 
     /// \brief Returns the fixpoint symbol mu.
@@ -360,9 +360,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
           }
           const data_expression&    cj = j->condition();
           const data_variable_list& e1 = j->summation_variables();
-          data_expression_list        gj = j->next_state(q.process_parameters());
-          const action_list         ai = i->actions();
-          const action_list         aj = j->actions();
+          data_expression_list      gj = j->next_state(q.process_parameters());
           pbes_expression expr = exists(e1, and_(cj, var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
@@ -375,9 +373,9 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         {
           const data_expression&    cj = j->condition();
           const data_variable_list& e1 = j->summation_variables();
-          data_expression_list        gj = j->next_state(q.process_parameters());
-          const action_list         ai = i->actions();
-          const action_list         aj = j->actions();
+          data_expression_list      gj = j->next_state(q.process_parameters());
+          multi_action              ai = i->multi_action();
+          multi_action              aj = j->multi_action();
           pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
@@ -502,9 +500,9 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       {
         const data_expression&    cj = j->condition();
         const data_variable_list& e1 = j->summation_variables();
-        data_expression_list        gj = j->next_state(q.process_parameters());
-        const action_list         ai = i->actions();
-        const action_list         aj = j->actions();
+        data_expression_list      gj = j->next_state(q.process_parameters());
+        multi_action              ai = i->multi_action();
+        multi_action              aj = j->multi_action();
         pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
         result.push_back(expr);
       }
@@ -581,8 +579,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       const data_variable_list& d1 = q.process_parameters();
-      data_expression_list        gi = i->next_state(p.process_parameters());
-      const action_list         ai = i->actions();
+      data_expression_list      gi = i->next_state(p.process_parameters());
+      multi_action              ai = i->actions();
       if (i->is_tau())
       {
         return close2(p, q, i, gi, make_data_expression_list(d1));
@@ -594,8 +592,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         {
           const data_expression&    cj = j->condition();
           const data_variable_list& e1 = j->summation_variables();
-          data_expression_list        gj = j->next_state(q.process_parameters());
-          const action_list         aj = j->actions();
+          data_expression_list      gj = j->next_state(q.process_parameters());
+          multi_action              aj = j->actions();
           pbes_expression expr = exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }

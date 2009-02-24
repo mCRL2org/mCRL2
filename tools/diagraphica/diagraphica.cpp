@@ -128,7 +128,9 @@ bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
   using namespace ::mcrl2::utilities;
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+      NAME, AUTHOR,
+      "interactive visual analysis of an LTS",
+      "[OPTION]... [INFILE]\n",
       "Multivariate state visualisation and simulation analysis for labelled "
       "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
       "DiaGraphica is started without opening an LTS.");

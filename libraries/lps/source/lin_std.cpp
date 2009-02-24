@@ -5362,6 +5362,42 @@ static ATermList addcondition(
                    transform_matching_list(matchinglist,spec));
 }
 
+/// \brief Join the variables in v1 with those in v2, but do not add duplicates.
+/// \details As it stands renamings has no function.
+
+static ATermList merge_var_simple(
+                    ATermList v1,
+                    ATermList v2,
+                    ATermList *renamings)
+{ 
+  v1=ATreverse(v1);
+  ATermList result=v2;
+  for( ; v1!=ATempty ; v1=ATgetNext(v1))
+  { ATermAppl var1=ATAgetFirst(v1);
+    bool found=false;
+    for( ATermList v2_iterator=v2 ; v2_iterator!=ATempty ; v2_iterator=ATgetNext(v2_iterator))
+    { ATermAppl var2=ATAgetFirst(v2_iterator);
+      if (var1==var2)
+      { // Check whether the names are the same, but the types differ
+        found=true;
+        break;
+      }
+      else
+      { if (ATgetArgument(var1,0)==ATgetArgument(var2,0))
+        { assert(0); // We need to deal with this later. This can
+                     // only occur when variables with the same string
+                     // and different types are used.
+        }
+      }
+    }
+    if (!found)
+    { result=ATinsertA(result,var1);
+    }
+  }
+  return result;
+}
+
+
 static ATermList merge_var(
                     ATermList v1,
                     ATermList v2,
@@ -6356,8 +6392,19 @@ static ATermList sortMultiActionLabels(ATermList l)
   return result;
 }
 
+
+/// \brief determine whether the multiaction has the same labels as the allow action,
+//         in which case true is delivered. If multiaction is the action Terminate,
+//         then true is also returned.
+
 static int allowsingleaction(ATermList allowaction, ATermAppl multiaction)
 {
+
+  if (multiaction==terminationAction)
+  { // multiaction is equal to terminate. This action cannot be blocked.
+    return 1;
+  }
+  
   for (ATermList walker=ATLgetArgument(multiaction,0);
               walker!=ATempty ; walker=ATgetNext(walker) )
   {
@@ -7557,11 +7604,21 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl condition,
                      ATermAppl timevariable,
                      ATermAppl actiontime,
-                     specificationbasictype *spec)
+                     specificationbasictype *spec,
+                     ATermList &used_sumvars)
 { /* Generate a condition of the form:
 
        exists sumvars. condition && timevariable<actiontime
+   
+     where the sumvars are added to the existentially quantified 
+     variables, and the resulting expression is
 
+       condition && timevariable<actiontime
+
+     The comments below refer to old code, where an explicit
+     existential quantor was generated.
+
+     OLD:
      Currently, the existential quantifier must use an equation,
      which represents a higher order function. The existential
      quantifier is namely of type exists:sorts1->Bool, where sorts1
@@ -7576,6 +7633,7 @@ static ATermAppl makesingleultimatedelaycondition(
      of the form timevariable < actiontime is omitted.
   */
 
+  assert(used_sumvars==ATempty);
   ATermAppl result;
   ATermList variables=ATempty;
   if (gsIsNil(actiontime) || check_real_variable_occurrence(sumvars,actiontime,condition))
@@ -7602,7 +7660,6 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   }
 
-  ATermList used_sumvars = ATmakeList0();
   for ( ; sumvars != ATempty ; sumvars=ATgetNext(sumvars))
   {
     ATermAppl sumvar=ATAgetFirst(sumvars);
@@ -7613,7 +7670,7 @@ static ATermAppl makesingleultimatedelaycondition(
   }
   used_sumvars = ATreverse(used_sumvars);
 
-  if(!ATisEmpty(used_sumvars))
+  /* if(!ATisEmpty(used_sumvars))
   { // Make a new data equation.
     if (!existsort(realsort)) {
       insert_numeric_sort_decls(realsort, spec);
@@ -7627,7 +7684,7 @@ static ATermAppl makesingleultimatedelaycondition(
     ATermAppl neweqn = gsMakeDataApplList(eqn, used_sumvars);
     insertequation(gsMakeDataEqn(ATconcat(variables, used_sumvars),gsMakeNil(),neweqn,result),spec);
     result=gsMakeDataExprExists(eqn);
-  }
+  } */
 
   return result;
 }
@@ -7636,8 +7693,10 @@ static ATermAppl getUltimateDelayCondition(
                  ATermList sumlist,
                  ATermList freevars,
                  ATermAppl timevariable,
-                 specificationbasictype *spec)
+                 specificationbasictype *spec,
+                 ATermList &existentially_quantified_variables)
 {
+  assert(existentially_quantified_variables==ATempty);
   if (!existsort(realsort)) {
     insert_numeric_sort_decls(realsort, spec);
   }
@@ -7673,6 +7732,7 @@ static ATermAppl getUltimateDelayCondition(
     ATermAppl actiontime=linGetActionTime(summand);
     ATermAppl condition=linGetCondition(summand);
 
+    ATermList new_existentially_quantified_variables=ATempty;
     ATermAppl intermediate_result=
            makesingleultimatedelaycondition(
                      sumvars,
@@ -7680,7 +7740,19 @@ static ATermAppl getUltimateDelayCondition(
                      condition,
                      timevariable,
                      actiontime,
-                     spec);
+                     spec,
+                     new_existentially_quantified_variables);
+    ATermList renamings=ATempty;
+    // ATermList conditionlist=ATempty;
+    // ATfprintf(stderr,"IN %t\n%t\n",existentially_quantified_variables,new_existentially_quantified_variables);
+    existentially_quantified_variables=merge_var_simple(
+                           existentially_quantified_variables,
+                           new_existentially_quantified_variables,
+                           &renamings);
+    // ATfprintf(stderr,"OUT %t\n\n",existentially_quantified_variables);
+    // ATfprintf(stderr,"LCOOC %t\n%t\n\n\n", existentially_quantified_variables,renamings);
+    assert(renamings==ATempty); // Currently nothing is done with the renamings, as they are
+                                // not generated by merge_var_simple as it stands.
     if (result==gsMakeDataExprFalse())
     { result=intermediate_result;
     }
@@ -7803,15 +7875,17 @@ static ATermList combine_summand_lists(
 
   ATermAppl timevar=getfreshvariable(
                        "timevar",realsort);
+  ATermList ultimate_delay_sumvars1=ATempty;
   ATermAppl ultimatedelaycondition=
              (add_delta?gsMakeDataExprTrue():
-                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
+                   getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
+                                                  timevar,spec,ultimate_delay_sumvars1));
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty);
                         walker1=ATgetNext(walker1))
   { ATermAppl summand1=ATAgetFirst(walker1);
 
-    ATermList sumvars1=linGetSumVars(summand1);
+    ATermList sumvars1=ATconcat(linGetSumVars(summand1),ultimate_delay_sumvars1);
     ATermAppl multiaction1=linGetMultiAction(summand1);
     ATermAppl actiontime1=linGetActionTime(summand1);
     ATermAppl condition1=linGetCondition(summand1);
@@ -7853,19 +7927,16 @@ static ATermList combine_summand_lists(
   }
   /* second we enumerate the summands of sumlist2 */
 
-  if (add_delta)
-  { ultimatedelaycondition=gsMakeDataExprTrue();
-  }
-  else
-  { ultimatedelaycondition=
-                   getUltimateDelayCondition(sumlist1,par1,timevar,spec);
-  }
+  ATermList ultimate_delay_sumvars2=ATempty;
+  ultimatedelaycondition=(add_delta?gsMakeDataExprTrue():
+               getUltimateDelayCondition(sumlist1,par1,
+                                     timevar,spec,ultimate_delay_sumvars2));
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
   {
     ATermAppl summand2=ATAgetFirst(walker2);
-    ATermList sumvars2=linGetSumVars(summand2);
+    ATermList sumvars2=ATconcat(linGetSumVars(summand2),ultimate_delay_sumvars2);
     ATermAppl multiaction2=linGetMultiAction(summand2);
     ATermAppl actiontime2=linGetActionTime(summand2);
     ATermAppl condition2=linGetCondition(summand2);

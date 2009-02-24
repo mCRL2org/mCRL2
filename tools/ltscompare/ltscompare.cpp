@@ -86,7 +86,9 @@ struct t_tool_options {
 };
 
 bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE1] INFILE2\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+    "compare two LTSs",
+    "[OPTION]... [INFILE1] INFILE2\n",
     "Determine whether or not the labelled transition systems (LTSs) in INFILE1 and INFILE2 are related by some equivalence or preorder. "
     "If INFILE1 is not supplied, stdin is used.\n"
     "\n"

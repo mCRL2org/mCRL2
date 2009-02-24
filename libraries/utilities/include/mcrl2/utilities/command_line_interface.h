@@ -90,9 +90,13 @@ namespace mcrl2 {
      * The following examples illustrate use of the interface description
      * class. Construction of an interface description object.
      * \code
-     *  interface_description interface("/path/to/demo-tool",
-     *          "demo-tool", "Rincewind", "[OPTIONS]... [PATHS]"
-     *          "Serves as demonstration of the features of the interface_description class.");
+     *  interface_description interface(
+     *    "/path/to/demo-tool",
+     *    "demo-tool",
+     *    "Rincewind",
+     *    "demonstrate the interface_description class",
+     *    "[OPTIONS]... [INFILE]",
+     *    "Demonstrate the features of the interface_description class using INFILE as input.");
      * \endcode
      *
      * Adding options to an interface description.
@@ -359,6 +363,9 @@ namespace mcrl2 {
         /// \brief Comma separated list of authors
         std::string       m_authors;
 
+        /// \brief One-line "what is" information (used only in man pages)
+        std::string       m_what_is;
+
         /// \brief Usage and description
         std::string       m_usage;
 
@@ -448,12 +455,14 @@ namespace mcrl2 {
          * \param[in] path path or name that identifies the executable
          * \param[in] name the name of the tool
          * \param[in] authors string with the names of the authors
+         * \param[in] what_is one-line description of the program (used only in man pages, must not refer to the synopsis)
          * \param[in] synopsis message that gives an abstract summary of tool usage
-         * \param[in] description message that explains tool usage and description
+         * \param[in] description message that explains tool usage and description (may refer to the synopsis)
          * \param[in] known_issues textual description of known issues with the tool
          **/
         interface_description(std::string const& path, std::string const& name, std::string const& authors,
-                     std::string const& synopsis, std::string const& description, std::string const& known_issues = "");
+                    std::string const& what_is, std::string const& synopsis, std::string const& description,
+                    std::string const& known_issues = "");
 
         /**
          * \brief Composes a copyright message
@@ -508,7 +517,7 @@ namespace mcrl2 {
          * More specifically it specifies one of the two template types:
          * \li interface_description::optional_argument< std::string >
          * representing a untyped optional option argument or,
-         * interface_description::mandatory_argument< std::string > representing a untyped
+         * \li interface_description::mandatory_argument< std::string > representing a untyped
          * mandatory option argument.
          *
          * The current implementation does not perform type checking of

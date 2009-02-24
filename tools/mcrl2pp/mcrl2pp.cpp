@@ -44,7 +44,9 @@ struct t_tool_options {
   t_pp_format  format;
 
   bool parse_command_line(int ac, char** av) {
-    interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+    interface_description clinterface(av[0], NAME, AUTHOR,
+      "pretty print an LPS",
+      "[OPTION]... [INFILE [OUTFILE]]\n",
       "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
       "is not present, stdout is used. If INFILE is not present, stdin is used.",
       "The LPS printed in the default format might not be a well-formed mCRL2 specification, "

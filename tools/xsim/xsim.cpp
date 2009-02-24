@@ -112,7 +112,9 @@ bool XSim::parse_command_line(int argc, wxChar** argv) {
   using namespace ::mcrl2::utilities;
 
   interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR, "[OPTION]... [INFILE]\n",
+    NAME, AUTHOR,
+    "graphical simulation of an LPS",
+    "[OPTION]... [INFILE]\n",
     "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
     "loaded into the simulator.");
 

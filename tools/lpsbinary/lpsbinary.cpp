@@ -201,7 +201,9 @@ int do_binary(const tool_options& options)
 
 ///Parses command line and sets settings from command line switches
 bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+                            "replace finite sort variables by vectors of boolean variables in an LPS",
+                            "[OPTION]... [INFILE [OUTFILE]]\n",
                             "Replace finite sort variables by vectors of boolean variables in the LPS in\n"
                             "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used.\n"
                             "If OUTFILE is not present, stdout is used\n");

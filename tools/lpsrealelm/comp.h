@@ -46,7 +46,7 @@ identifier_string smaller_name()
 inline
 identifier_string equal_name()
 {
-  return identifier_string("equation");
+  return identifier_string("equal");
 }
 
 /// \brief Name for the operator larger on sort Comp.

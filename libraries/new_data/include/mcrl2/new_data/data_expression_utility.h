@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/find.h"
+#include "mcrl2/core/detail/join.h"
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/function_sort.h"
@@ -318,6 +319,26 @@ namespace mcrl2 {
         }
 
         return new_data::not_equal_to(p, q);
+      }
+
+      /// \brief Returns or applied to the sequence of data expressions [first, last)
+      /// \param first Start of a sequence of data expressions
+      /// \param last End of a sequence of data expressions
+      /// \return Or applied to the sequence of data expressions [first, last)
+      template <typename FwdIt>
+      data_expression join_or(FwdIt first, FwdIt last)
+      {
+        return core::detail::join(first, last, lazy::or_, sort_bool_::false_());
+      }
+
+      /// \brief Returns and applied to the sequence of data expressions [first, last)
+      /// \param first Start of a sequence of data expressions
+      /// \param last End of a sequence of data expressions
+      /// \return And applied to the sequence of data expressions [first, last)
+      template <typename FwdIt>
+      data_expression join_and(FwdIt first, FwdIt last)
+      {
+        return core::detail::join(first, last, lazy::and_, sort_bool_::true_());
       }
     }
 

@@ -114,7 +114,9 @@ struct tool_options_type {
   bool parse_command_line(int argc, char** argv) {
     using namespace ::mcrl2::utilities;
 
-    interface_description clinterface(argv[0], NAME, AUTHOR, "[OPTION]... INFILE\n",
+    interface_description clinterface(argv[0], NAME, AUTHOR,
+      "command-line simulation of an LPS",
+      "[OPTION]... INFILE\n",
       "Simulate the LPS in INFILE via a text-based interface.");
 
     clinterface.add_rewriting_options();

@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#define NAME   "GraPE"
+#define NAME   "grape"
 #define AUTHOR "Remco Blewanus, Thorstin Crijns, Diana Koenraadt, Bas Luksenburg, Jonathan Nelisse, Hans Poppelaars and Bram Schoenmakers"
 
 /**
@@ -71,7 +71,9 @@ bool grape_app::parse_command_line(int& argc, wxChar** argv) {
   using namespace mcrl2::utilities;
 
   interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR, "[OPTION]... [INFILE]",
+      NAME, AUTHOR,
+      "graphical editing environment for mCRL2 process specifications",
+      "[OPTION]... [INFILE]",
       "Graphical editing environment for mCRL2 process specifications. "
       "If INFILE is supplied, it is loaded as a GraPE specification.");
 

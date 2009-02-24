@@ -32,6 +32,7 @@ class lps_parelm_tool : public mcrl2::utilities::tools::input_output_tool
     lps_parelm_tool() : input_output_tool (
              "lpsparelm",
              "Jeroen van der Wulp and Wieger Wesselink",
+             "remove unused parameters from an LPS",
              "Remove unused parameters from the linear process specification (LPS) in INFILE "
              "and write the result to OUTFILE. If INFILE is not present, stdin is used. If "
              "OUTFILE is not present, stdout is used.") {

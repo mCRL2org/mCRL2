@@ -345,7 +345,9 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 //---------------------------
 bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
 {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+      "determine whether a PBES is valid by translating it to a BES",
+      "[OPTION]... [INFILE [OUTFILE]]\n",
       "Solves PBES from INFILE, or writes an equivalent BES to OUTFILE. If INFILE is "
       "not present, stdin is used. If OUTFILE is not present, stdout is used.");
 

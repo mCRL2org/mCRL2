@@ -134,7 +134,9 @@ int do_realelm(const tool_options& options)
 
 ///Parses command line and sets settings from command line switches
 bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], TOOLNAME, AUTHORS, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], TOOLNAME, AUTHORS,
+                             "remove real numbers from an LPS",
+                             "[OPTION]... [INFILE [OUTFILE]]\n",
                              "Remove Real numbers from the linear process specification (LPS) in "
                              "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
                              "If OUTFILE is not present, stdout is used.");

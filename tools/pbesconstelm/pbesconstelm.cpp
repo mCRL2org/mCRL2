@@ -60,7 +60,8 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       : super(
           "pbesconstelm",
           "Wieger Wesselink",
-          "Reads a file containing a pbes, and applies constant parameter elimination to it. If OUTFILE "
+          "remove constant parameters from a PBES",
+          "Reads a file containing a PBES, and applies constant parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."
         )
     {}

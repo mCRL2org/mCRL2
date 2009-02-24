@@ -78,7 +78,9 @@ ATermAppl *parse_action_list(const char *s, int *len)
 }
 
 bool parse_command_line(int ac, char** av, lts_generation_options& options) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE [OUTFILE]]\n",
+  interface_description clinterface(av[0], NAME, AUTHOR,
+    "generate an LTS from an LPS",
+    "[OPTION]... [INFILE [OUTFILE]]\n",
     "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. "
     "If INFILE is not supplied, stdin is used. "
     "If OUTFILE is not supplied, the LTS is not stored.\n"
