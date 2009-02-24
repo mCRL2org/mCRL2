@@ -17,7 +17,7 @@
 #include "aterm2.h"
 #include "mcrl2/new_data/detail/rewrite.h"
 #include "mcrl2/new_data/detail/bdd_prover.h"
-#include "mcrl2/utilities/bdd2dot.h"
+#include "mcrl2/new_data/detail/prover/bdd2dot.h"
 
   /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.
   /// After initialization, the function Invariant_Checker::check_invariant can be called any number of times to check
