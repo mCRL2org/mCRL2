@@ -3735,7 +3735,8 @@ RewriteStrategy RewriterCompilingJitty::getStrategy()
 	return GS_REWR_JITTYC;
 }
 
-#endif
     }
   }
 }
+
+#endif
