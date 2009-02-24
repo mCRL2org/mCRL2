@@ -12,7 +12,7 @@
 #ifndef MCRL2_UTILITIES_REWRITER_TOOL_H
 #define MCRL2_UTILITIES_REWRITER_TOOL_H
 
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 
 namespace mcrl2 {
@@ -42,7 +42,7 @@ namespace tools {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-      	Tool::parse_options(parser);
+        Tool::parse_options(parser);
         m_rewrite_strategy = parser.option_argument_as<RewriteStrategy>("rewriter");
       }
 
@@ -60,17 +60,17 @@ namespace tools {
 
       /// \brief Returns the rewrite strategy
       /// \return The rewrite strategy
-      data::rewriter::strategy rewrite_strategy() const
+      new_data::rewriter::strategy rewrite_strategy() const
       {
-        return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
+        return static_cast<new_data::rewriter::strategy>(m_rewrite_strategy);
       }
 
       /// \brief Creates a data rewriter as specified on the command line.
       /// \param data_spec A data specification
       /// \return A data rewriter
-      data::rewriter create_rewriter(data::data_specification data_spec = data::default_data_specification())
+      new_data::rewriter create_rewriter(new_data::data_specification data_spec = new_data::default_data_specification())
       {
-        return data::rewriter(data_spec, rewrite_strategy());
+        return new_data::rewriter(data_spec, rewrite_strategy());
       }
   };
 

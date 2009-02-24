@@ -144,7 +144,7 @@ namespace mcrl2 {
       }
 
     } // namespace detail
-    
+
   } // namespace new_data
 
 } // namespace mcrl2
