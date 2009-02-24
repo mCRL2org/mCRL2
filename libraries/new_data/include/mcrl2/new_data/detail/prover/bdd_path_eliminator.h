@@ -16,8 +16,8 @@
 #include "mcrl2/new_data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/new_data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/new_data/detail/prover/smt_solver_cvc_fast.h"
-#include "mcrl2/utilities/bdd_manipulator.h"
-#include "mcrl2/utilities/bdd_info.h"
+#include "mcrl2/new_data/detail/prover/bdd_manipulator.h"
+#include "mcrl2/new_data/detail/prover/bdd_info.h"
 
 namespace mcrl2 {
   namespace new_data {

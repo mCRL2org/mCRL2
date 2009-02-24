@@ -9,7 +9,6 @@ mcrl2-library new_data
          [ glob source/rewrite/*.cpp ]
          [ glob source/prover/*.cpp ]
        : <library>/libraries//core
-         <library>/libraries//atermpp
          <use>/libraries//utilities
          <include>../include
          <library>/site-config//cvc
