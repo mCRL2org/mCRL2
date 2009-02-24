@@ -12,10 +12,10 @@ cons @c0 <"c0"> : Nat;
 
 map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     Nat2Pos <"nat2pos"> : Nat <"arg"> -> Pos;
-    max <"max">:Pos <"left"> #Nat <"right">->Pos;
-    max <"max">:Nat <"left"> #Pos <"right">->Pos;
-    max <"max">:Nat <"left"> #Nat <"right">->Nat;
-    min <"min">:Nat <"left"> #Nat <"right">->Nat;
+    max <"maximum">:Pos <"left"> #Nat <"right">->Pos;
+    max <"maximum">:Nat <"left"> #Pos <"right">->Pos;
+    max <"maximum">:Nat <"left"> #Nat <"right">->Nat;
+    min <"minimum">:Nat <"left"> #Nat <"right">->Nat;
     abs <"abs">:Nat <"number">->Nat;
     succ <"succ">:Nat <"number">->Pos;
     pred <"pred">:Pos <"number">->Nat;

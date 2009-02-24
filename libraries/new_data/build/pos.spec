@@ -5,8 +5,8 @@ sort Pos <"pos">;
 cons @c1 <"c1">:Pos;
      @cDub <"cdub">:Bool <"bit"> #Pos <"number"> ->Pos;
 
-map max <"max">:Pos <"left"> #Pos <"right">->Pos;
-    min <"min">:Pos <"left"> #Pos <"right">->Pos;
+map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
+    min <"minimum">:Pos <"left"> #Pos <"right">->Pos;
     abs <"abs">:Pos <"number">->Pos;
     succ <"succ">:Pos <"number">->Pos;
     + <"plus">:Pos <"left"> #Pos <"right">->Pos;
