@@ -14,6 +14,8 @@
 
 #include "event_property.h"
 
+#include "dialogs/channelcommunicationdialog.h"
+
 #include "event_channelcommunication.h"
 
 using namespace grape::grapeapp;
@@ -447,6 +449,58 @@ bool grape_event_detach_channel_communication::Undo(  void  )
     dia_ptr->attach_channel_communication_to_channel( comm_ptr, chan_ptr );
   }
 
+  finish_modification();
+  return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+grape_event_change_channel_communication::grape_event_change_channel_communication( grape_frame *p_main_frame, channel_communication* p_channel_communication )
+: grape_event_base( p_main_frame, true, _T( "change channel communication name" ) )
+{ 
+  m_channel_communication = p_channel_communication->get_id();  
+  
+  m_old_channel_communication = *p_channel_communication;
+  
+  grape_channel_communication_dlg dialog( m_old_channel_communication );
+
+  m_pressed_ok = dialog.show_modal( m_new_channel_communication );  
+}
+
+grape_event_change_channel_communication::~grape_event_change_channel_communication( void )
+{
+}
+
+bool grape_event_change_channel_communication::Do( void )
+{
+  if ( !m_pressed_ok )
+  {
+    // user cancelled, don't push it on the undo stack
+    return false;
+  }
+
+  channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
+  //channel_communication_ptr->set_name( m_new_channel_communication.get_name() );
+  channel_communication_ptr->set_channeltype( m_new_channel_communication.get_channeltype() );
+ 
+  finish_modification();
+  return true;
+}
+
+bool grape_event_change_channel_communication::Undo( void )
+{
+  channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
+  //channel_communication_ptr->set_name( m_old_channel_communication.get_name() );
+  channel_communication_ptr->set_channeltype( m_old_channel_communication.get_channeltype() );
+   
   finish_modification();
   return true;
 }

@@ -33,15 +33,17 @@ void channel::init()
   m_name = wxEmptyString;
   m_enabled_channel = false;
   m_channel_communication = 0;
+  m_channeltype = channel_visible;
 }
 
 channel::channel( const channel &p_channel )
 : connection( p_channel )
 {
-  m_name= p_channel.m_name;
+  m_name = p_channel.m_name;
   m_enabled_channel = p_channel.m_enabled_channel;
   m_has_channel = p_channel.m_has_channel;
   m_channel_communication = p_channel.m_channel_communication;
+  m_channeltype = p_channel.m_channeltype;
 }
 
 channel::~channel(void)
@@ -62,7 +64,8 @@ bool channel::operator==( const channel &p_channel )
   return m_name == p_channel.m_name &&
   m_enabled_channel == p_channel.m_enabled_channel &&
   &m_has_channel == &(p_channel.m_has_channel) &&
-  &m_channel_communication == &(p_channel.m_channel_communication);
+  &m_channel_communication == &(p_channel.m_channel_communication) &&
+  &m_channeltype == &(p_channel.m_channeltype);
 }
 
 wxString channel::get_name(void) const
@@ -113,6 +116,16 @@ bool channel::get_enabled( void ) const
 void channel::set_enabled( bool p_enabled )
 {
   m_enabled_channel = p_enabled;
+}
+       
+channeltype channel::get_channeltype( void ) const
+{
+  return m_channeltype;
+}
+
+void channel::set_channeltype( const channeltype &p_channeltype )
+{
+  m_channeltype = p_channeltype;
 }
 
 // WxWidgets dynamic array implementation.
