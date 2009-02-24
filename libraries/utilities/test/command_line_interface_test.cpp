@@ -44,7 +44,7 @@ inline void string_to_prover_type_test(std::string const& prover_type) {
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid) {
-  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Empty command line
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, ""));
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(border_invalid) {
 }
 
 BOOST_AUTO_TEST_CASE(parsing) {
-  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Valid option -h
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -v"));
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(conformance) {
-  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Valid options -v, --verbose
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -v"));
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(conformance) {
 }
 
 BOOST_AUTO_TEST_CASE(rewriting_options) {
-  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // testing rewriter strategy extraction
   string_to_strategy_test< true >("jitty");
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
 }
 
 BOOST_AUTO_TEST_CASE(prover_options) {
-  interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // testing smt prover type extraction
   string_to_prover_type_test< true >("ario");
@@ -190,7 +190,7 @@ inline std::string const& last_of(command_line_parser const& p, std::string cons
 }
 
 BOOST_AUTO_TEST_CASE(result_browsing) {
-  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "description");
+  interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // disable check for duplicate options
   test_interface.add_option("cli-testing-no-duplicate-option-checking", "");
