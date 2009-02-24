@@ -6,7 +6,7 @@
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/application.h"
 #include "mcrl2/new_data/data_equation.h"
-#include "mcrl2/new_data/detail/utility.h"
+#include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/standard.h"
 #include "mcrl2/new_data/bool.h"
 
@@ -99,16 +99,16 @@ namespace mcrl2 {
 
       // Function symbol max
       inline
-      function_symbol max()
+      function_symbol maximum()
       {
-        //static function_symbol max("max", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-        function_symbol max("max", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-        return max;
+        //static function_symbol maximum("max", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+        function_symbol maximum("max", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+        return maximum;
       }
 
       // Recogniser for max
       inline
-      bool is_max_function_symbol(const data_expression& e)
+      bool is_maximum_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
@@ -119,37 +119,37 @@ namespace mcrl2 {
 
       // Application of max
       inline
-      application max(const data_expression& arg0, const data_expression& arg1)
+      application maximum(const data_expression& arg0, const data_expression& arg1)
       {
         //assert(sort_pos::is_pos(arg0.sort()));
         //assert(sort_pos::is_pos(arg1.sort()));
         
-        return application(max(),arg0, arg1);
+        return application(maximum(),arg0, arg1);
       }
 
       // Recogniser for application of max
       inline
-      bool is_max_application(const data_expression& e)
+      bool is_maximum_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_max_function_symbol(static_cast<const application&>(e).head());
+          return is_maximum_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
 
       // Function symbol min
       inline
-      function_symbol min()
+      function_symbol minimum()
       {
-        //static function_symbol min("min", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-        function_symbol min("min", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
-        return min;
+        //static function_symbol minimum("min", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+        function_symbol minimum("min", function_sort(sort_pos::pos(), sort_pos::pos(), sort_pos::pos()));
+        return minimum;
       }
 
       // Recogniser for min
       inline
-      bool is_min_function_symbol(const data_expression& e)
+      bool is_minimum_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
@@ -160,21 +160,21 @@ namespace mcrl2 {
 
       // Application of min
       inline
-      application min(const data_expression& arg0, const data_expression& arg1)
+      application minimum(const data_expression& arg0, const data_expression& arg1)
       {
         //assert(sort_pos::is_pos(arg0.sort()));
         //assert(sort_pos::is_pos(arg1.sort()));
         
-        return application(min(),arg0, arg1);
+        return application(minimum(),arg0, arg1);
       }
 
       // Recogniser for application of min
       inline
-      bool is_min_application(const data_expression& e)
+      bool is_minimum_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_min_function_symbol(static_cast<const application&>(e).head());
+          return is_minimum_function_symbol(static_cast<const application&>(e).head());
         }
         return false;
       }
@@ -442,8 +442,8 @@ namespace mcrl2 {
       function_symbol_list pos_generate_functions_code()
       {
         function_symbol_list result;
-        result.push_back(max());
-        result.push_back(min());
+        result.push_back(maximum());
+        result.push_back(minimum());
         result.push_back(abs());
         result.push_back(succ());
         result.push_back(plus());
@@ -458,14 +458,14 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
+        //assert( || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         
-        if (is_max_application(e))
+        if (is_maximum_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
 
-        if (is_min_application(e))
+        if (is_minimum_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
@@ -588,14 +588,14 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        //assert( || is_max_application(e) || is_min_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
+        //assert( || is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         
-        if (is_max_application(e))
+        if (is_maximum_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
 
-        if (is_min_application(e))
+        if (is_minimum_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
@@ -642,8 +642,8 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less_equal(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("q", sort_pos::pos()))), less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less_equal(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::false_(), variable("q", sort_pos::pos()))), less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos()), variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), less_equal(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::cdub(variable("c", sort_bool_::bool_()), variable("q", sort_pos::pos()))), if_(sort_bool_::implies(variable("b", sort_bool_::bool_()), variable("c", sort_bool_::bool_())), less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::max(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::min(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::maximum(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
+        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::minimum(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::abs(variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
         result.push_back(data_equation(variable_list(), sort_pos::succ(sort_pos::c1()), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::succ(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos()))), sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))));
