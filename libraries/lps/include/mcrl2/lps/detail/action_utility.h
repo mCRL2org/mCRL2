@@ -65,7 +65,9 @@ bool check_action_label_sorts(action_label_list action_labels, const std::set<ne
 {
   for (action_label_list::iterator i = action_labels.begin(); i != action_labels.end(); ++i)
   {
-    for (new_data::sort_expression_list::const_iterator j = i->sorts().begin(); j != i->sorts().end(); ++j)
+    new_data::sort_expression_list i_sorts(i->sorts());
+
+    for (new_data::sort_expression_list::const_iterator j = i_sorts.begin(); j != i_sorts.end(); ++j)
     {
       if (!new_data::detail::check_sort(*j, sorts))
         return false;

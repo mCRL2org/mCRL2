@@ -12,13 +12,15 @@
 #ifndef MCRL2_NEW_DATA_ALIAS_H
 #define MCRL2_NEW_DATA_ALIAS_H
 
+#include "boost/range/iterator_range.hpp"
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/basic_sort.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief alias.
@@ -26,7 +28,7 @@ namespace mcrl2 {
     /// An alias introduces another name for a sort.
     class alias: public sort_expression
     {
-      public:    
+      public:
 
         /// \brief Constructor
         ///
@@ -44,19 +46,19 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] n The name of the alias that is created.
+        /// \param[in] b The name of the alias that is created.
         /// \param[in] s The sort for which an alias is created.
         /// \post n and s describe the same sort.
-        alias(const std::string& n, const sort_expression s)
-          : sort_expression(mcrl2::core::detail::gsMakeSortRef(mcrl2::core::identifier_string(n), s))
+        alias(const basic_sort& b, const sort_expression s)
+          : sort_expression(mcrl2::core::detail::gsMakeSortRef(atermpp::arg1(static_cast< ATermAppl >(b)), s))
         {}
 
         /// \brief Returns the name of this sort.
         ///
         inline
-        std::string name() const
+        basic_sort name() const
         {
-          return atermpp::aterm_string(atermpp::arg1(*this));
+          return basic_sort(std::string(atermpp::aterm_string(atermpp::arg1(*this))));
         }
 
         /// \brief Returns the sort to which the name refers.
@@ -66,11 +68,15 @@ namespace mcrl2 {
         {
           return atermpp::arg2(*this);
         }
-        
+
     }; // class alias
 
-    /// List of aliases
-    typedef atermpp::vector<alias> alias_list;
+    /// \brief list of aliases
+    typedef atermpp::vector< alias >                              alias_list;
+    /// \brief iterator range over list of aliases
+    typedef boost::iterator_range< alias_list::iterator >         alias_range;
+    /// \brief iterator range over constant list of aliases
+    typedef boost::iterator_range< alias_list::const_iterator >   alias_const_range;
 
   } // namespace new_data
 

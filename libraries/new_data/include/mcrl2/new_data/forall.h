@@ -51,7 +51,7 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the forall abstraction.
         /// \pre variables is not empty.
-        forall(const boost::iterator_range<variable_list::const_iterator>& variables,
+        forall(const variable_const_range& variables,
                const data_expression& body)
           : abstraction("forall", variables, body),
             m_variables(variables.begin(), variables.end())

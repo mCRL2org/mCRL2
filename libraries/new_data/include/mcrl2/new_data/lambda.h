@@ -22,7 +22,7 @@
 #include "mcrl2/new_data/application.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function symbol.
@@ -51,7 +51,7 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the lambda abstraction.
         /// \pre variables is not empty.
-        lambda(const boost::iterator_range<variable_list::const_iterator>& variables,
+        lambda(const variable_const_range& variables,
                const data_expression& body)
           : abstraction("lambda", variables, body),
             m_variables(variables.begin(), variables.end())

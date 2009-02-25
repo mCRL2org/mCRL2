@@ -24,7 +24,7 @@ void test_sorts()
 {
   basic_sort s("S");
   basic_sort s0("S0");
-  alias s1("S1", s);
+  alias s1(basic_sort("S1"), s);
  
   sort_expression_list sl;
   sl.push_back(s);

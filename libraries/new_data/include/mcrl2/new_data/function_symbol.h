@@ -12,6 +12,8 @@
 #ifndef MCRL2_NEW_DATA_FUNCTION_SYMBOL_H
 #define MCRL2_NEW_DATA_FUNCTION_SYMBOL_H
 
+#include "boost/range/iterator_range.hpp"
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -22,7 +24,7 @@
 #include "mcrl2/new_data/sort_expression.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function symbol.
@@ -96,8 +98,11 @@ namespace mcrl2 {
     }; // class function_symbol
 
     /// \brief list of function symbols
-    ///
-    typedef atermpp::vector<function_symbol> function_symbol_list;
+    typedef atermpp::vector< function_symbol >                            function_symbol_list;
+    /// \brief iterator range over list of function symbols
+    typedef boost::iterator_range< function_symbol_list::iterator >       function_symbol_range;
+    /// \brief iterator range over constant list of function symbols
+    typedef boost::iterator_range< function_symbol_list::const_iterator > function_symbol_const_range;
 
   } // namespace new_data
 

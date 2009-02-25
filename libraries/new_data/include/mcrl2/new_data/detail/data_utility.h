@@ -24,7 +24,10 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/new_data/container_sort.h"
 #include "mcrl2/new_data/assignment.h"
+#include "mcrl2/new_data/alias.h"
 
 namespace mcrl2 {
 
@@ -121,7 +124,7 @@ struct is_not_a_constant_operation
   }
 };
 
-/// \brief Returns true if the domain sorts and the range sort of the given sort s are contained in sorts.
+/// \brief Returns true if the domain sorts and the codomain sort of the given sort s are contained in sorts.
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
@@ -129,7 +132,37 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
 {
   std::set<sort_expression> s_sorts;
   atermpp::find_all_if(s, is_constant_sort(), std::inserter(s_sorts, s_sorts.begin()));
-  return std::includes(sorts.begin(), sorts.end(), s_sorts.begin(), s_sorts.end());
+  for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
+  {
+    if (sorts.find(*i) == sorts.end()) {
+      // sort *i is not well-typed, a standard sort or an alias 
+      if (!(i->is_standard()) && i->is_alias()) {
+        alias sort_alias(*i);
+
+        if (sorts.find(sort_alias.name()) == sorts.end()) {
+          // sort_alias.reference() is a basic, structured or container sort
+          sort_expression sort_reference(sort_alias.reference());
+
+          if (sorts.find(sort_reference) == sorts.end()) {
+            // sort_reference is structured or container sort
+            if (sort_reference.is_structured_sort()) {
+              assert(false);
+            }
+            else if (sort_reference.is_container_sort()) {
+              if (sorts.find(container_sort(sort_reference).element_sort()) == sorts.end()) {
+                return false;
+              }
+            }
+            else {
+              assert(false);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 /// \brief Returns true if the domain sorts and the range sort of the sorts in the sequence [first, last)

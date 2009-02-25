@@ -159,22 +159,21 @@ namespace mcrl2 {
         assert(d.is_certainly_finite(s));
         // The resulting new_data::data_expression_list.
         new_data::data_expression_list ces;
-        // Get all constructors of sort s
-        new_data::function_symbol_list cl = d.constructors(s);
         // For each constructor of sort s...
-        for (new_data::function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); i++)
+        for (boost::iterator_range< new_data::function_symbol_list::const_iterator > i(d.constructors(s));
+                         !i.empty(); i.advance_begin(1))
         {
                 // Vector for all enumerated constructors
                 std::vector< new_data::data_expression_list > argumentss;
                 // For each sort of the constructor...
                 for (boost::iterator_range< new_data::sort_expression_list::const_iterator >
-                                        j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+                                        j(function_sort(i.front().sort()).domain()); !j.empty(); j.advance_begin(1))
                 {
                         // Put all values which the sort can have in a list
                         argumentss.push_back(enumerate_constructors(d, j.front()));
                 }
                 // Create data_expression_list out of the values which a sort can have
-                new_data::data_expression_list temp = create_data_expression_list(*i, argumentss);
+                new_data::data_expression_list temp = create_data_expression_list(i.front(), argumentss);
                 //concatenate ces and temp
                 ces.insert(ces.end(), temp.begin(), temp.end());
         }

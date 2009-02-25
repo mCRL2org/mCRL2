@@ -89,7 +89,7 @@ void alias_test()
 {
   basic_sort s0("S0");
 
-  std::string s0_name("other_S");
+  basic_sort s0_name("other_S");
   alias s0_(s0_name, s0);
   BOOST_CHECK(!s0_.is_basic_sort());
   BOOST_CHECK(!s0_.is_function_sort());

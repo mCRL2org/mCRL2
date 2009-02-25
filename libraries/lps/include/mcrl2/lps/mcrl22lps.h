@@ -38,7 +38,6 @@ namespace lps {
     ATermAppl result = detail::parse_specification(spec_stream);
     result           = detail::type_check_specification(result);
     result           = detail::alpha_reduce(result);
-    result           = detail::implement_data_specification(result);
     return detail::linearise(result, options);
   }
 

@@ -12,6 +12,7 @@
 #ifndef MCRL2_NEW_DATA_DATA_EQUATION_H
 #define MCRL2_NEW_DATA_DATA_EQUATION_H
 
+#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -24,7 +25,7 @@
 #include "mcrl2/new_data/function_symbol.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief new_data data_equation.
@@ -126,8 +127,11 @@ namespace mcrl2 {
     }; // class data_equation
 
     /// \brief list of data_equations
-    ///
-    typedef atermpp::vector<data_equation> data_equation_list;
+    typedef atermpp::vector< data_equation >                              data_equation_list;
+    /// \brief iterator range over list of data equations
+    typedef boost::iterator_range< data_equation_list::iterator >       data_equation_range;
+    /// \brief iterator range over constant list of data equations
+    typedef boost::iterator_range< data_equation_list::const_iterator > data_equation_const_range;
 
   } // namespace new_data
 

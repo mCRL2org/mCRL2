@@ -283,7 +283,8 @@ std::set<new_data::variable> compute_free_variables(const linear_process& proces
 {
   std::set<new_data::variable> result;
   std::set<new_data::variable> process_parameters = mcrl2::new_data::detail::make_set(process.process_parameters());
-  for (summand_list::iterator i = process.summands().begin(); i != process.summands().end(); ++i)
+  summand_list summands(process.summands());
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     lps::detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
   }

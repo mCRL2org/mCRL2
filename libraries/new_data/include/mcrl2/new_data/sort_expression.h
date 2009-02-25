@@ -12,6 +12,8 @@
 #ifndef MCRL2_NEW_DATA_SORT_EXPRESSION_H
 #define MCRL2_NEW_DATA_SORT_EXPRESSION_H
 
+#include "boost/range/iterator_range.hpp"
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -21,7 +23,7 @@
 #include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief sort expression.
@@ -85,6 +87,17 @@ namespace mcrl2 {
           return core::detail::gsIsSortRef(*this);
         }
 
+        /// \brief Returns true iff the expression represents a standard sort.
+        inline
+        bool is_standard() const
+        {
+          using namespace core::detail;
+
+          return gsIsSortExprBool(*this) || gsIsSortExprReal(*this) ||
+                 gsIsSortExprInt(*this) || gsIsSortExprNat(*this) ||
+                 gsIsSortExprPos(*this);
+        }
+
         /// \brief Returns the target sort of this expression.
         /// \ret codomain if this is a function sort,
         ///      this sort otherwise
@@ -104,8 +117,11 @@ namespace mcrl2 {
     }; // class sort_expression
 
     /// \brief list of sorts
-    ///
-    typedef atermpp::vector<sort_expression> sort_expression_list;
+    typedef atermpp::vector< sort_expression >                            sort_expression_list;
+    /// \brief iterator range over list of sort expressions
+    typedef boost::iterator_range< sort_expression_list::iterator >       sort_expression_range;
+    /// \brief iterator range over constant list of sort expressions
+    typedef boost::iterator_range< sort_expression_list::const_iterator > sort_expression_const_range;
 
     /// \brief Returns true if the term t is a sort_expression
     /// \param t A term

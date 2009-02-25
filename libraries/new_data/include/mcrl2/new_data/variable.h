@@ -12,6 +12,8 @@
 #ifndef MCRL2_NEW_DATA_VARIABLE_H
 #define MCRL2_NEW_DATA_VARIABLE_H
 
+#include "boost/range/iterator_range.hpp"
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -101,8 +103,11 @@ namespace mcrl2 {
     }; // class variable
 
     /// \brief list of variables
-    ///
-    typedef atermpp::vector<variable> variable_list;
+    typedef atermpp::vector< variable >                            variable_list;
+    /// \brief iterator range over list of sort expressions
+    typedef boost::iterator_range< variable_list::iterator >       variable_range;
+    /// \brief iterator range over constant list of sort expressions
+    typedef boost::iterator_range< variable_list::const_iterator > variable_const_range;
 
   } // namespace new_data
 

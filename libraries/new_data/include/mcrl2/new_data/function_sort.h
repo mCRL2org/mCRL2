@@ -25,7 +25,7 @@
 #include "mcrl2/new_data/detail/utility.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function sort..
@@ -36,7 +36,7 @@ namespace mcrl2 {
 
         sort_expression_list m_domain; ///< The domain of the sort.
 
-      public:    
+      public:
 
         /// \brief Constructor
         ///
@@ -60,7 +60,7 @@ namespace mcrl2 {
         /// \param[in] domain The domain of the sort.
         /// \param[in] codomain The codomain of the sort.
         /// \pre domain is not empty.
-        function_sort(const boost::iterator_range<sort_expression_list::const_iterator>& domain,
+        function_sort(const sort_expression_const_range& domain,
                       const sort_expression& codomain)
           : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(domain.begin(), domain.end()), codomain)),
             m_domain (domain.begin(), domain.end())
@@ -135,7 +135,7 @@ namespace mcrl2 {
         /// \brief Returns the domain of the sort.
         ///
         inline
-        boost::iterator_range<sort_expression_list::const_iterator> domain() const
+        sort_expression_const_range domain() const
         {
           return boost::make_iterator_range(m_domain.begin(), m_domain.end());
         }

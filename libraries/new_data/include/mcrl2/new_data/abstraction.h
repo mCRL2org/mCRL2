@@ -22,7 +22,7 @@
 #include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function symbol.
@@ -126,7 +126,7 @@ namespace mcrl2 {
         ///      "setcomprehension" or "bagcomprehension".
         /// \pre variables is not empty.
         abstraction(const std::string& binding_operator,
-                    const boost::iterator_range<variable_list::const_iterator>& variables,
+                    const variable_const_range& variables,
                     const data_expression body)
           : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), atermpp::term_list<variable>(variables.begin(), variables.end()), body)),
             m_variables(variables.begin(), variables.end())
@@ -153,7 +153,7 @@ namespace mcrl2 {
 
         /// \brief Returns the variables of the abstraction
         inline
-        boost::iterator_range<variable_list::const_iterator> variables() const
+        variable_const_range variables() const
         {
           return boost::make_iterator_range(m_variables);
         }

@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief existential quantification.
@@ -51,7 +51,7 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the exists abstraction.
         /// \pre variables is not empty.
-        exists(const boost::iterator_range<variable_list::const_iterator>& variables,
+        exists(const variable_const_range& variables,
                const data_expression& body)
           : abstraction("exists", variables, body),
             m_variables(variables.begin(), variables.end())
