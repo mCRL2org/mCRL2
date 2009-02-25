@@ -1,51 +1,29 @@
-#include <stdlib.h>
+#include <set>
 #include "protaterm.h"
+
+using namespace std;
 
 IProtectedATerm::~IProtectedATerm()
 {
 }
 
-IProtectedATerm **p_aterms = NULL;
-int p_aterms_size = 0;
-int p_aterms_count = 0;
+typedef multiset<IProtectedATerm *> pa_container;
+static pa_container p_aterms;
 
 void AT_protectProtectedATerms()
 {
-  int i;
-  for (i=0; i<p_aterms_count; i++)
+  for (pa_container::iterator i=p_aterms.begin(); i!=p_aterms.end(); i++)
   {
-    p_aterms[i]->ATprotectTerms();
+    (*i)->ATprotectTerms();
   }
 }
 
 void ATprotectProtectedATerm(IProtectedATerm *i)
 {
-  if ( p_aterms_count == p_aterms_size )
-  {
-    if ( p_aterms_size == 0 )
-    {
-      p_aterms_size = 32;
-      ATaddProtectFunction(AT_protectProtectedATerms);
-    } else {
-      p_aterms_size = p_aterms_size * 2;
-    }
-
-    p_aterms = (IProtectedATerm **) realloc(p_aterms, p_aterms_size*sizeof(IProtectedATerm *));
-  }
-
-  p_aterms[p_aterms_count] = i;
-  p_aterms_count++;
+  p_aterms.insert(i);
 }
 
 void ATunprotectProtectedATerm(IProtectedATerm *i)
 {
-  int j;
-  for (j=0; j<p_aterms_count; j++)
-  {
-    if ( p_aterms[j] == i )
-    {
-      p_aterms_count--;
-      p_aterms[j] = p_aterms[p_aterms_count];
-    }
-  }
+  p_aterms.erase(p_aterms.find(i));
 }
