@@ -526,7 +526,7 @@ namespace mcrl2 {
       /// \param p A data expression
       /// \param q A data expression
       /// \return The value <tt>p && q</tt>
-      inline data_expression and_(data_expression const& p, data_expression const& q)
+      inline data_expression or_(data_expression const& p, data_expression const& q)
       {
         if ((p == sort_bool_::true_()) || (q == sort_bool_::true_())) {
           return sort_bool_::true_();
@@ -545,7 +545,7 @@ namespace mcrl2 {
       /// \param p A data expression
       /// \param q A data expression
       /// \return The value p || q
-      inline data_expression or_(data_expression const& p, data_expression const& q)
+      inline data_expression and_(data_expression const& p, data_expression const& q)
       {
         if ((p == sort_bool_::false_()) || (q == sort_bool_::false_())) {
           return sort_bool_::false_();
@@ -573,7 +573,7 @@ namespace mcrl2 {
           return q;
         }
         else if (q == sort_bool_::false_()) {
-          return p;
+          return sort_bool_::not_(p);
         }
 
         return sort_bool_::implies(p, q);

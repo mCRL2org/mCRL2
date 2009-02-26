@@ -176,7 +176,7 @@ void test_case_6()
   BOOST_CHECK(sumvar_count == 1);
   BOOST_CHECK(s0 == s1);
 
-  if (!(s0 == s1)) {
+  if (!(s0 == s1) || sumvar_count != 1) {
     std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
               << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
   }
@@ -291,7 +291,6 @@ void test_case_10()
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-std::clog << i->condition() << std::endl;
     BOOST_CHECK(i->condition() != sort_bool_::true_());
     if (!i->summation_variables().empty())
     {

@@ -179,7 +179,6 @@ namespace lps {
     };
 
     //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
-std::clog << "Summand " << mcrl2::core::pp(summand_) << std::endl;
     int num_removed = 0;
     lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
@@ -189,32 +188,16 @@ std::clog << "Summand " << mcrl2::core::pp(summand_) << std::endl;
     // This reduces the running time from O(|summand| * |summation variables|)
     // to O(|summand| + |summation variables|)
     atermpp::set<data_expression> occurring_vars;
-    partial_find_all_if(summand_.condition(), boost::bind(&local::is_variable, _1), is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-for (atermpp::set< data_expression >::const_iterator i = occurring_vars.begin(); i != occurring_vars.end(); ++i) {
-std::clog << *i << ", ";
-}
-std::clog << std::endl;
-    partial_find_all_if(summand_.actions(), boost::bind(&local::is_variable, _1), is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-for (atermpp::set< data_expression >::const_iterator i = occurring_vars.begin(); i != occurring_vars.end(); ++i) {
-std::clog << *i << ", ";
-}
-std::clog << std::endl;
-    partial_find_all_if(summand_.time(), boost::bind(&local::is_variable, _1), is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-for (atermpp::set< data_expression >::const_iterator i = occurring_vars.begin(); i != occurring_vars.end(); ++i) {
-std::clog << *i << ", ";
-}
-std::clog << std::endl;
+    partial_find_all_if(summand_.condition(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.actions(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.time(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
 
     assignment_list assignments(summand_.assignments());
 
     for (assignment_list::const_iterator i(assignments.begin()); i != assignments.end(); ++i)
     {
-      partial_find_all_if(*i, boost::bind(&local::is_variable, _1), is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+      partial_find_all_if(*i, boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
     }
-for (atermpp::set< data_expression >::const_iterator i = occurring_vars.begin(); i != occurring_vars.end(); ++i) {
-std::clog << *i << ", ";
-}
-std::clog << std::endl;
 
     variable_list summation_variables(summand_.summation_variables());
 
@@ -234,7 +217,6 @@ std::clog << std::endl;
 
     new_summand = set_summation_variables(summand_, new_summation_variables);
     gsVerboseMsg("Removed %d summation variables\n", num_removed);
-std::clog << "Removed " << num_removed << " summation variables\n" << std::endl;
 
     return new_summand;
   }
@@ -354,7 +336,7 @@ std::clog << "Removed " << num_removed << " summation variables\n" << std::endl;
     for (lps::summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
       gsVerboseMsg("Summand %d: ", ++index);
-std::clog << "Summand " << mcrl2::core::pp(*i) << std::endl;
+
       new_summand_list = push_front(new_summand_list, substitute_equalities(*i));
     }
     new_summand_list = reverse(new_summand_list);
