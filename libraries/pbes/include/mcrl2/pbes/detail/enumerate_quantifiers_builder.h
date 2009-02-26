@@ -339,7 +339,7 @@ namespace detail {
 
         atermpp::set<term_type> A;
         std::vector<atermpp::vector<data_term_type> > D;
-        std::set<variable_type> dependencies;
+        atermpp::set<variable_type> dependencies;
 
         // For an element (v, t, k) of todo, we have the invariant v == x[k].
         // The variable v is stored for efficiency reasons, it avoids the lookup x[k].
