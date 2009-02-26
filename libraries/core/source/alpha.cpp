@@ -886,7 +886,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
   else if ( gsIsAction(a) ){
     return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeDelta():a;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a) ){
     ATermList l = ATLtableGet(alphas,(ATerm) a);
     if(!l) l=gsaGetAlpha(a);
 
@@ -1006,7 +1006,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
   else if ( gsIsAction(a) ){
     return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)>=0)?gsMakeTau():a;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermList l = ATLtableGet(alphas,(ATerm) a);
     if(!l) l=gsaGetAlpha(a);
     l = filter_hide_list(l,I);
@@ -1092,7 +1092,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
       return gsMakeDelta();
     return gsApplyAlpha(a);
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermAppl pn=ATAgetArgument(a,0);
     ATbool full_alpha_know=ATtrue;
     ATermList l = ATLtableGet(alphas,(ATerm)pn);
@@ -1342,7 +1342,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return a;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermList l = ATLtableGet(alphas,(ATerm) a);
     if(!l) l=gsaGetAlpha(a);
 
@@ -1537,7 +1537,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     //check if the current call is already in the hash table.
     //if so, return the value
     ATermAppl p=a;
-    if(gsIsAction(a) || gsIsProcess(a)) p=ATAgetArgument(a,0);
+    if(gsIsAction(a) || gsIsProcess(a) || gsIsProcessAssignment(a)) p=ATAgetArgument(a,0);
     l=ATLtableGet(alphas,(ATerm) p);
     if(l) return l;
 
@@ -1562,7 +1562,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
     if(!l)
       l = ATmakeList1((ATerm)ATmakeList1((ATerm)a));
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     a=ATAgetArgument(a,0);
     l=ATLtableGet(alphas,(ATerm)a);
     if(!l){
@@ -1689,7 +1689,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
     if(!l)
       l = ATmakeList1((ATerm)ATmakeList1(ATgetArgument(a,0)));
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     // XXX
   }
   else if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)){
@@ -1741,7 +1741,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
     }
     ATtablePut(alphas,(ATerm)a,(ATerm)l); //for this full action
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermAppl pn=ATAgetArgument(a,0);
     ATermList l=ATLtableGet(alphas,(ATerm)pn); // for this particular process term
 
@@ -1826,7 +1826,7 @@ ATermList gsaGetDeps(ATermAppl a){
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return r;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermAppl pn=ATAgetArgument(a,0);
     r=ATmakeList1((ATerm)pn);
     ATermList dep=ATLtableGet(deps,(ATerm)pn);
@@ -1860,7 +1860,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return r;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a)){
     ATermAppl pn=ATAgetArgument(a,0);
     return ATAgetArgument(ATAtableGet(props,(ATerm)pn),0);
   }
@@ -1905,10 +1905,12 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return a;
   }
-  else if ( gsIsProcess(a) ){
+  else if ( gsIsProcess(a) || gsIsProcessAssignment(a) ){
     ATermAppl pn=ATAgetArgument(a,0);
     ATermList l=ATLtableGet(subs_npCRL,(ATerm)pn);
     if(!l) return a; //not an npCRL process call.
+
+    if ( gsIsProcessAssignment(a) ){ gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n\n",a); return NULL; }
 
     //determine the value of the parameter.
     ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
@@ -1921,7 +1923,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
 	k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
       }
     if(!k){
-      gsWarningMsg("cannot evaluate the parameter value in process term %T\n as a positive number\n\n",a);
+      gsErrorMsg("cannot evaluate the parameter value in process term %T\n as a positive number.\n\n",a);
       return NULL;
     }
 
