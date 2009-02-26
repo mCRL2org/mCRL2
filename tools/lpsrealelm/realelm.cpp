@@ -1100,37 +1100,6 @@ static bool are_data_variables_shared(
   return false;
 }
 
-// Determine whether the pair t,u belonging to the variable xi
-// already occurs in the list of conditions in the form t<u, t==u
-// or t>u. If so, return in new_condition_for_xi smaller(xi),
-// equal(xi) or larger(xi), respectively.
-/* static bool check_whether_condition_exist(
-                 const real_representing_variable &xi_variable,
-                 const vector < inequality > &conditions,
-                 data_expression &new_condition_for_xi)
-{ const data_expression t(xi_variable.get_lowerbound());
-  const data_expression u(xi_variable.get_upperbound());
-  data_expression original_xi_condition=gsMakeDataExprLT(t,u);
-  if (std::find(conditions.begin(),conditions.end(),original_xi_condition)!=conditions.end())
-  { new_condition_for_xi=is_smaller(xi_variable.get_variable());
-    return true;
-  }
-
-  original_xi_condition=gsMakeDataExprEq(t,u);
-  if (std::find(conditions.begin(),conditions.end(),original_xi_condition)!=conditions.end())
-  { new_condition_for_xi=is_equal(xi_variable.get_variable());
-    return true;
-  }
-
-  original_xi_condition=gsMakeDataExprGT(t,u);
-  if (std::find(conditions.begin(),conditions.end(),original_xi_condition)!=conditions.end())
-  { new_condition_for_xi=is_larger(xi_variable.get_variable());
-    return true;
-  }
-
-  return false;
-} */
-
 /// \brief Perform elimination of real variables on a specification in a maximum
 ///        number of iterations.
 /// \param s A specification

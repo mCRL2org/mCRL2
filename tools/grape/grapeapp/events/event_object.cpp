@@ -517,7 +517,12 @@ bool grape_event_properties::Do( void )
         m_main_frame->get_event_handler()->Submit( event, true );
         break;
       }
-      case CHANNEL_COMMUNICATION: break;
+      case CHANNEL_COMMUNICATION:
+      {
+        grape_event_change_channel_communication* event = new grape_event_change_channel_communication( m_main_frame, static_cast<channel_communication*> ( m_obj_ptr ) );
+        m_main_frame->get_event_handler()->Submit( event, true );
+        break;
+      }
       case PROCESS_REFERENCE:
       {
         process_reference *proc_ref = static_cast<process_reference*> ( m_obj_ptr );

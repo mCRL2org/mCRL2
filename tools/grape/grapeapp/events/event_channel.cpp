@@ -11,7 +11,7 @@
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
-#include "dialogs/textdialog.h"
+#include "dialogs/channeldialog.h"
 
 #include "event_channelcommunication.h"
 
@@ -192,18 +192,14 @@ bool grape_event_remove_channel::Undo( void )
 
 grape_event_change_channel::grape_event_change_channel( grape_frame *p_main_frame, channel* p_channel )
 : grape_event_base( p_main_frame, true, _T( "change channel name" ) )
-{
-  m_channel = p_channel->get_id();
-  m_old_text = p_channel->get_name();
+{ 
+  m_channel = p_channel->get_id();  
+  
+  m_old_channel = *p_channel;
+  
+  grape_channel_dlg dialog( m_old_channel );
 
-  grape_text_dlg dialog( _T("Change channel name"), _T("Give the new action for the channel."), m_old_text, false /* no multiline */ );
-
-  m_pressed_ok = true;
-  if ( !dialog.show_modal( m_new_text ) ) // Note Diana: show_modal returns an integer as far as I know, cannot be assigned to m_pressed_ok as boolean.
-  {
-    // user cancelled
-    m_pressed_ok = false;
-  }
+  m_pressed_ok = dialog.show_modal( m_new_channel );  
 }
 
 grape_event_change_channel::~grape_event_change_channel( void )
@@ -219,8 +215,9 @@ bool grape_event_change_channel::Do( void )
   }
 
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
-  channel_ptr->set_name( m_new_text );
-
+  channel_ptr->set_name( m_new_channel.get_name() );
+  channel_ptr->set_channeltype( m_new_channel.get_channeltype() );
+ 
   finish_modification();
   return true;
 }
@@ -228,8 +225,9 @@ bool grape_event_change_channel::Do( void )
 bool grape_event_change_channel::Undo( void )
 {
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
-  channel_ptr->set_name( m_old_text );
-
+  channel_ptr->set_name( m_old_channel.get_name() );
+  channel_ptr->set_channeltype( m_old_channel.get_channeltype() );
+   
   finish_modification();
   return true;
 }

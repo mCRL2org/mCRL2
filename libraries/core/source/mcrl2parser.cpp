@@ -4191,9 +4191,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1577 "mcrl2parser.yy"
     {
-      mcrl2yyerror("process assignments are not yet supported");
-      YYABORT
-      //XXX safe_assign($$, $1);
+      //mcrl2yyerror("process assignments are not yet supported");
+      // YYABORT
+      safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
@@ -6207,7 +6207,7 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 
   switch (yyn)
     {
-
+      
       default: break;
     }
 }

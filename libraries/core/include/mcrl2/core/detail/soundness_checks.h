@@ -156,6 +156,8 @@ template <typename Term> bool check_term_IfThen(Term t);
 template <typename Term> bool check_term_StateImp(Term t);
 template <typename Term> bool check_term_PBESExists(Term t);
 template <typename Term> bool check_term_PBESImp(Term t);
+template <typename Term> bool check_term_Binder(Term t);
+template <typename Term> bool check_term_SortRef(Term t);
 template <typename Term> bool check_term_ProcEqnSpec(Term t);
 template <typename Term> bool check_term_StateForall(Term t);
 template <typename Term> bool check_term_BooleanImp(Term t);
@@ -164,12 +166,14 @@ template <typename Term> bool check_term_StateNu(Term t);
 template <typename Term> bool check_term_DataSpec(Term t);
 template <typename Term> bool check_term_Tau(Term t);
 template <typename Term> bool check_term_StateYaledTimed(Term t);
+template <typename Term> bool check_term_SortCons(Term t);
 template <typename Term> bool check_term_DataEqnSpec(Term t);
 template <typename Term> bool check_term_LinearProcessSummand(Term t);
 template <typename Term> bool check_term_SortSpec(Term t);
 template <typename Term> bool check_term_ActionRenameRules(Term t);
 template <typename Term> bool check_term_BooleanEquation(Term t);
 template <typename Term> bool check_term_ConsSpec(Term t);
+template <typename Term> bool check_term_SortList(Term t);
 template <typename Term> bool check_term_Sum(Term t);
 template <typename Term> bool check_term_DataVarId(Term t);
 template <typename Term> bool check_term_ProcVarId(Term t);
@@ -205,16 +209,17 @@ template <typename Term> bool check_term_PBESFalse(Term t);
 template <typename Term> bool check_term_DataAppl(Term t);
 template <typename Term> bool check_term_StateDelayTimed(Term t);
 template <typename Term> bool check_term_Nu(Term t);
+template <typename Term> bool check_term_SortStruct(Term t);
 template <typename Term> bool check_term_AtTime(Term t);
 template <typename Term> bool check_term_ActOr(Term t);
 template <typename Term> bool check_term_Comm(Term t);
 template <typename Term> bool check_term_BooleanNot(Term t);
 template <typename Term> bool check_term_Delta(Term t);
 template <typename Term> bool check_term_StateAnd(Term t);
-template <typename Term> bool check_term_ActionRenameRule(Term t);
+template <typename Term> bool check_term_LMerge(Term t);
 template <typename Term> bool check_term_SetComp(Term t);
 template <typename Term> bool check_term_ActForall(Term t);
-template <typename Term> bool check_term_ActExists(Term t);
+template <typename Term> bool check_term_RenameExpr(Term t);
 template <typename Term> bool check_term_Merge(Term t);
 template <typename Term> bool check_term_ActSpec(Term t);
 template <typename Term> bool check_term_BooleanVariable(Term t);
@@ -229,7 +234,7 @@ template <typename Term> bool check_term_ActAnd(Term t);
 template <typename Term> bool check_term_ActionRenameSpec(Term t);
 template <typename Term> bool check_term_PBES(Term t);
 template <typename Term> bool check_term_StateVar(Term t);
-template <typename Term> bool check_term_LMerge(Term t);
+template <typename Term> bool check_term_ActionRenameRule(Term t);
 template <typename Term> bool check_term_LinearProcess(Term t);
 template <typename Term> bool check_term_ActAt(Term t);
 template <typename Term> bool check_term_DataEqn(Term t);
@@ -244,14 +249,17 @@ template <typename Term> bool check_term_Nil(Term t);
 template <typename Term> bool check_term_StateOr(Term t);
 template <typename Term> bool check_term_StructProj(Term t);
 template <typename Term> bool check_term_PBEqn(Term t);
+template <typename Term> bool check_term_Whr(Term t);
 template <typename Term> bool check_term_OpId(Term t);
+template <typename Term> bool check_term_SortSet(Term t);
 template <typename Term> bool check_term_ActFalse(Term t);
 template <typename Term> bool check_term_ActId(Term t);
 template <typename Term> bool check_term_PBESOr(Term t);
-template <typename Term> bool check_term_RenameExpr(Term t);
+template <typename Term> bool check_term_ActExists(Term t);
 template <typename Term> bool check_term_Allow(Term t);
 template <typename Term> bool check_term_PropVarDecl(Term t);
 template <typename Term> bool check_term_ActImp(Term t);
+template <typename Term> bool check_term_SortBag(Term t);
 template <typename Term> bool check_term_PBInit(Term t);
 template <typename Term> bool check_term_ActTrue(Term t);
 
@@ -260,6 +268,8 @@ bool check_rule_SortExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_rule_SortId(t)
+         || check_term_SortCons(t)
+         || check_term_SortStruct(t)
          || check_term_SortArrow(t);
 #else
   return true;
@@ -280,7 +290,9 @@ template <typename Term>
 bool check_rule_SortConsType(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    ;
+  return    check_term_SortList(t)
+         || check_term_SortSet(t)
+         || check_term_SortBag(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -323,7 +335,9 @@ bool check_rule_DataExpr(Term t)
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   return    check_rule_DataVarId(t)
          || check_rule_OpId(t)
-         || check_term_DataAppl(t);
+         || check_term_DataAppl(t)
+         || check_term_Binder(t)
+         || check_term_Whr(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -447,7 +461,8 @@ template <typename Term>
 bool check_rule_SortDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_SortId(t);
+  return    check_rule_SortId(t)
+         || check_term_SortRef(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -1339,6 +1354,77 @@ bool check_term_PBESImp(Term t)
   return true;
 }
 
+// Binder(BindingOperator, DataVarId+, DataExpr)
+template <typename Term>
+bool check_term_Binder(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsBinder(a))
+    return false;
+
+  // check the children
+  if (a.size() != 3)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_BindingOperator<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_BindingOperator" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_DataVarId<atermpp::aterm>, 1))
+    {
+      std::cerr << "check_rule_DataVarId" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_DataExpr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortRef(String, SortExpr)
+template <typename Term>
+bool check_term_SortRef(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortRef(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_String" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_SortExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // ProcEqnSpec(ProcEqn*)
 template <typename Term>
 bool check_term_ProcEqnSpec(Term t)
@@ -1591,6 +1677,39 @@ bool check_term_StateYaledTimed(Term t)
   return true;
 }
 
+// SortCons(SortConsType, SortExpr)
+template <typename Term>
+bool check_term_SortCons(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortCons(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_SortConsType<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_SortConsType" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(1), check_rule_SortExpr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_SortExpr" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // DataEqnSpec(DataEqn*)
 template <typename Term>
 bool check_term_DataEqnSpec(Term t)
@@ -1627,10 +1746,17 @@ bool check_term_LinearProcessSummand(Term t)
   // check the type of the term
   atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
+  {
+    std::cerr << "term type not AT_APPL" << std::endl;
     return false;
+  }
   atermpp::aterm_appl a(term);
   if (!gsIsLinearProcessSummand(a))
+  {
+    std::cerr << "term not a linear process summand" << std::endl;
+    std::cerr << "term: " << a << std::endl;
     return false;
+  }
 
   // check the children
   if (a.size() != 5)
@@ -1784,6 +1910,27 @@ bool check_term_ConsSpec(Term t)
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortList()
+template <typename Term>
+bool check_term_SortList(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortList(a))
+    return false;
+
+  // check the children
+  if (a.size() != 0)
+    return false;
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -2834,6 +2981,34 @@ bool check_term_Nu(Term t)
   return true;
 }
 
+// SortStruct(StructCons+)
+template <typename Term>
+bool check_term_SortStruct(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortStruct(a))
+    return false;
+
+  // check the children
+  if (a.size() != 1)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_list_argument(a(0), check_rule_StructCons<atermpp::aterm>, 1))
+    {
+      std::cerr << "check_rule_StructCons" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // AtTime(ProcExpr, DataExpr)
 template <typename Term>
 bool check_term_AtTime(Term t)
@@ -3015,9 +3190,9 @@ bool check_term_StateAnd(Term t)
   return true;
 }
 
-// ActionRenameRule(DataVarId*, DataExprOrNil, ParamIdOrAction, ActionRenameRuleRHS)
+// LMerge(ProcExpr, ProcExpr)
 template <typename Term>
-bool check_term_ActionRenameRule(Term t)
+bool check_term_LMerge(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -3025,31 +3200,21 @@ bool check_term_ActionRenameRule(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsActionRenameRule(a))
+  if (!gsIsLMerge(a))
     return false;
 
   // check the children
-  if (a.size() != 4)
+  if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
+  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
     {
-      std::cerr << "check_rule_DataVarId" << std::endl;
+      std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
     {
-      std::cerr << "check_rule_DataExprOrNil" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(2), check_rule_ParamIdOrAction<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_ParamIdOrAction" << std::endl;
-      return false;
-    }
-  if (!check_term_argument(a(3), check_rule_ActionRenameRuleRHS<atermpp::aterm>))
-    {
-      std::cerr << "check_rule_ActionRenameRuleRHS" << std::endl;
+      std::cerr << "check_rule_ProcExpr" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3112,9 +3277,9 @@ bool check_term_ActForall(Term t)
   return true;
 }
 
-// ActExists(DataVarId+, ActFrm)
+// RenameExpr(String, String)
 template <typename Term>
-bool check_term_ActExists(Term t)
+bool check_term_RenameExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -3122,21 +3287,21 @@ bool check_term_ActExists(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsActExists(a))
+  if (!gsIsRenameExpr(a))
     return false;
 
   // check the children
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
+  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
     {
-      std::cerr << "check_rule_DataVarId" << std::endl;
+      std::cerr << "check_rule_String" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_String<atermpp::aterm>))
     {
-      std::cerr << "check_rule_ActFrm" << std::endl;
+      std::cerr << "check_rule_String" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3595,9 +3760,9 @@ bool check_term_StateVar(Term t)
   return true;
 }
 
-// LMerge(ProcExpr, ProcExpr)
+// ActionRenameRule(DataVarId*, DataExprOrNil, ParamIdOrAction, ActionRenameRuleRHS)
 template <typename Term>
-bool check_term_LMerge(Term t)
+bool check_term_ActionRenameRule(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -3605,21 +3770,31 @@ bool check_term_LMerge(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsLMerge(a))
+  if (!gsIsActionRenameRule(a))
     return false;
 
   // check the children
-  if (a.size() != 2)
+  if (a.size() != 4)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_ProcExpr<atermpp::aterm>))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 0))
     {
-      std::cerr << "check_rule_ProcExpr" << std::endl;
+      std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
     {
-      std::cerr << "check_rule_ProcExpr" << std::endl;
+      std::cerr << "check_rule_DataExprOrNil" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(2), check_rule_ParamIdOrAction<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ParamIdOrAction" << std::endl;
+      return false;
+    }
+  if (!check_term_argument(a(3), check_rule_ActionRenameRuleRHS<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_ActionRenameRuleRHS" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4081,6 +4256,39 @@ bool check_term_PBEqn(Term t)
   return true;
 }
 
+// Whr(DataExpr, WhrDecl+)
+template <typename Term>
+bool check_term_Whr(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsWhr(a))
+    return false;
+
+  // check the children
+  if (a.size() != 2)
+    return false;
+#ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+  if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
+    {
+      std::cerr << "check_rule_DataExpr" << std::endl;
+      return false;
+    }
+  if (!check_list_argument(a(1), check_rule_WhrDecl<atermpp::aterm>, 1))
+    {
+      std::cerr << "check_rule_WhrDecl" << std::endl;
+      return false;
+    }
+#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
 // OpId(String, SortExpr)
 template <typename Term>
 bool check_term_OpId(Term t)
@@ -4109,6 +4317,27 @@ bool check_term_OpId(Term t)
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortSet()
+template <typename Term>
+bool check_term_SortSet(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortSet(a))
+    return false;
+
+  // check the children
+  if (a.size() != 0)
+    return false;
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;
@@ -4201,9 +4430,9 @@ bool check_term_PBESOr(Term t)
   return true;
 }
 
-// RenameExpr(String, String)
+// ActExists(DataVarId+, ActFrm)
 template <typename Term>
-bool check_term_RenameExpr(Term t)
+bool check_term_ActExists(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
   // check the type of the term
@@ -4211,21 +4440,21 @@ bool check_term_RenameExpr(Term t)
   if (term.type() != AT_APPL)
     return false;
   atermpp::aterm_appl a(term);
-  if (!gsIsRenameExpr(a))
+  if (!gsIsActExists(a))
     return false;
 
   // check the children
   if (a.size() != 2)
     return false;
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  if (!check_term_argument(a(0), check_rule_String<atermpp::aterm>))
+  if (!check_list_argument(a(0), check_rule_DataVarId<atermpp::aterm>, 1))
     {
-      std::cerr << "check_rule_String" << std::endl;
+      std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_String<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_ActFrm<atermpp::aterm>))
     {
-      std::cerr << "check_rule_String" << std::endl;
+      std::cerr << "check_rule_ActFrm" << std::endl;
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4328,6 +4557,27 @@ bool check_term_ActImp(Term t)
       return false;
     }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
+
+#endif // MCRL2_NO_SOUNDNESS_CHECKS
+  return true;
+}
+
+// SortBag()
+template <typename Term>
+bool check_term_SortBag(Term t)
+{
+#ifndef MCRL2_NO_SOUNDNESS_CHECKS
+  // check the type of the term
+  atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
+  if (term.type() != AT_APPL)
+    return false;
+  atermpp::aterm_appl a(term);
+  if (!gsIsSortBag(a))
+    return false;
+
+  // check the children
+  if (a.size() != 0)
+    return false;
 
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
   return true;

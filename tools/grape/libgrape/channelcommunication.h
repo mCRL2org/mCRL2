@@ -12,6 +12,7 @@
 #define LIBGRAPE_CHANNELCOMMUNICATION_H
 
 #include "communication.h"
+#include "channeltype.h"
 
 namespace grape
 {
@@ -29,6 +30,7 @@ namespace grape
       protected:
         /** The communications involved in this channel communication. Each communication is associated with exactly one channel. */
         arr_communication    m_communication;
+        channeltype          m_channeltype;     /**< type of channel communication. */
 
       public:
 
@@ -89,6 +91,19 @@ namespace grape
          * @return Returns a pointer to the array with communications
          */
         arr_communication*  get_communications( void );
+        
+        /**
+         * Channel communication type retrieval function
+         * @return The channel communication type
+         */
+        channeltype get_channeltype( void ) const;
+
+        /**
+         * Channel communication type assignment function
+         * Takes a new channeltype and assigns it to the channeltype of the channel.
+         * @param p_channeltype The new channeltype
+         */
+        void set_channeltype( const channeltype &p_channeltype );
     };
 
     /**

@@ -12,6 +12,7 @@
 #define LIBGRAPE_CHANNEL_H
 
 #include "connection.h"
+#include "channeltype.h"
 
 namespace grape
 {
@@ -41,6 +42,7 @@ namespace grape
       protected:
         wxString                    m_name;           /**< name of the channel. */
         bool                        m_enabled_channel; /**< flag used during simulation. */
+        channeltype                 m_channeltype;     /**< type of channel associated with this transition. */
 
         compound_reference          *m_has_channel;   /**< reference channel is connected to. */
         channel_communication       *m_channel_communication; /**< channel communication connected to this channel. */
@@ -142,6 +144,19 @@ namespace grape
          * @param p_enabled true if the channel has to be enabled and false otherwise.
          */
         void set_enabled( bool p_enabled );
+
+        /**
+         * Channel type retrieval function
+         * @return The channel type
+         */
+        channeltype get_channeltype( void ) const;
+
+        /**
+         * Channel type assignment function
+         * Takes a new channeltype and assigns it to the channeltype of the channel.
+         * @param p_channeltype The new channeltype
+         */
+        void set_channeltype( const channeltype &p_channeltype );
 
     };
 

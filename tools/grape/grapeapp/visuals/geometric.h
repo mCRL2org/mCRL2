@@ -23,6 +23,7 @@
 #include <wx/string.h>
 #include "nonterminatingtransition.h"
 #include "compoundstate.h"
+#include "channeltype.h"
 
 struct color
 {
@@ -35,6 +36,8 @@ struct color
 const color g_color_blue = {0.0f, 0.0f, 1.0f};
 const color g_color_black = {0.0f, 0.0f, 0.0f};
 const color g_color_white = {1.0f, 1.0f, 1.0f};
+const color g_color_red = {1.0f, 0.0f, 0.0f};
+const color g_color_gray = {0.5f, 0.5f, 0.5f};
 const color g_color_state = {(float)120/255, (float)255/255, (float)120/255};
 const color g_color_comment = {(float)255/255, (float)255/255, (float)110/255};
 const color g_color_terminating_transition = g_color_black;
@@ -43,7 +46,9 @@ const color g_color_architecture_diagram = {1.0f, 0.0f, 0.0f};
 const color g_color_process_diagram = {1.0f, 0.0f, 0.0f};
 const color g_color_architecture_reference = {(float)255/255, (float)160/255, (float)148/255};
 const color g_color_process_reference = {(float)120/255, (float)255/255, (float)120/255};
-const color g_color_channel = g_color_white;
+const color g_color_channel_visible = g_color_white;
+const color g_color_channel_blocked = g_color_red;
+const color g_color_channel_hidden = g_color_gray;
 const color g_color_channel_communication = g_color_black;
 const color g_color_designator = {0.0f, 0.0f, 1.0f};
 const color g_color_preamble = {(float)228/255, (float)182/255, (float)255/255};
@@ -335,8 +340,9 @@ namespace grape
      * @param p_center The center coordinate of the ellipse.
      * @param p_radius The radius of the circle.
      * @param p_selected A flag indicating whether the object is selected.
+     * @param p_channeltype Type of the channel.
      */
-    void draw_channel( const coordinate &p_center, float p_radius, bool p_selected );
+    void draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channeltype p_channeltype);
 
     /**
      * Filled rectangle draw function.

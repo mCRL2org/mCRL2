@@ -10,14 +10,14 @@
 
 #include <algorithm>
 #include <string>
+#include <cmath>
 
 #include "grape_glcanvas.h"
 #include "geometric.h"
 #include "mcrl2/utilities/font_renderer.h"
 #include "state.h"
 #include "referencestate.h"
-#include "workarounds.h" // for M_PI{_X}
-#include <cmath>
+#include "workarounds.h" 
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
@@ -815,14 +815,16 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 
-void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected )
+void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channeltype p_channeltype)
 {
   glPushMatrix();
 
   // perform necessary translation
   glTranslatef( p_center.m_x, p_center.m_y, 0.0f);
   // set the color for the fill of the ellipse
-  set_color(g_color_channel, p_selected);
+  if (p_channeltype == channel_visible) set_color(g_color_channel_visible, p_selected);
+  if (p_channeltype == channel_blocked) set_color(g_color_channel_blocked, p_selected);
+  if (p_channeltype == channel_hidden) set_color(g_color_channel_hidden, p_selected);
 
   // fill ellipse
   glBegin(GL_POLYGON);

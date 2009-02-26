@@ -45,7 +45,7 @@ void visualchannel::draw( void )
   wxString name = c->get_name();
 
   // draw channel
-  draw_channel( m_object->get_coordinate(), 0.5 * m_object->get_width(),  m_object->get_selected() );
+  draw_channel( m_object->get_coordinate(), 0.5 * m_object->get_width(), m_object->get_selected(), c->get_channeltype() );
 
   // draw channel name
   compound_reference* cref = c->get_reference();

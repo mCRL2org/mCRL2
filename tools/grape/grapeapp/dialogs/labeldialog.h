@@ -107,6 +107,9 @@ namespace grape
          */
         bool show_modal( label &p_label );
 
+        /**
+         * Update label preview.
+         */
         void update_preview();
     };
   }

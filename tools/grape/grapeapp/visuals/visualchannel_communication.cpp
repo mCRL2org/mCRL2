@@ -43,9 +43,9 @@ void visualchannel_communication::draw( void )
     draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_object->get_selected());
   }
 
-  // draw control point
-  draw_filled_rectangle(m_object->get_coordinate(), static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
-  
+  // draw channel
+  draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channeltype() );
+
 }
 
 bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )

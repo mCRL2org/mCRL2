@@ -27,12 +27,12 @@ namespace grape
     class grape_event_add_channel : public grape_event_base
     {
       private:
-        unsigned int                  m_chan; /**< Identifier of the to be created channel. */
+        unsigned int          m_chan; /**< Identifier of the to be created channel. */
         coordinate            m_coord; /**< The coordinate that was clicked. */
-        unsigned int                  m_ref; /**< Identifier of the compound reference that was clicked. */
+        unsigned int          m_ref; /**< Identifier of the compound reference that was clicked. */
         float                 m_def_chan_width;  /**< The default width of a channel. */
         float                 m_def_chan_height; /**< The default height of a channel. */
-        unsigned int                  m_in_diagram; /**< Identifier of the diagram in which the channel will be added. */
+        unsigned int          m_in_diagram; /**< Identifier of the diagram in which the channel will be added. */\
       public:
 
         /**
@@ -68,15 +68,15 @@ namespace grape
     class grape_event_remove_channel : public grape_event_base
     {
       private:
-        unsigned int                            m_chan; /**< Identifier of the to be deleted channel. */
+        unsigned int                    m_chan; /**< Identifier of the to be deleted channel. */
         bool                            m_normal;       /**< Boolean value to indicate whether the channel should do anything to the channel communications it is attached to; a normal remove */
         wxString                        m_name; /**< Name of the channel. */
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel. */
-        unsigned int                            m_ref; /**< Identifier of the compound reference that the channel belonged to. */
+        unsigned int                    m_ref; /**< Identifier of the compound reference that the channel belonged to. */
         float                           m_width;        /**< Backup of the width of the channel. */
         float                           m_height;       /**< Backup of the height of the channel. */
         wxArrayLong                     m_comments;     /**< Backup of the list of comments attached to the channel. */
-        unsigned int                            m_in_diagram; /**< Identifier of the diagram from which the channel was deleted. */
+        unsigned int                    m_in_diagram; /**< Identifier of the diagram from which the channel was deleted. */
 
         // Below implemented with arrays instead of pointers, to prevent annoying pointer crashes.
         arr_event_remove_visible     m_visible;  /**< Backup of the visible that was associated with the channel, if applicable. */
@@ -118,10 +118,10 @@ namespace grape
     class grape_event_change_channel : public grape_event_base
     {
       private:
-        unsigned int        m_channel; /**< A pointer to the channel of which the name is to be changed. */
-        wxString    m_old_text; /**< A string containing the previous name of the channel. */
-        wxString    m_new_text; /**< A string containing the new name of the channel. */
-        bool        m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */
+        unsigned int        m_channel; /**< A pointer to the channel of which the name is to be changed. */        
+        channel             m_old_channel; /**< Containing the previous channel of the transition. */
+        channel             m_new_channel; /**< Containing the new channel of the transition. */
+        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */
       public:
 
         /**

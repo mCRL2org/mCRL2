@@ -199,13 +199,53 @@ namespace grape
         bool Undo(  void  );
     };
 
+
+    /**
+     * \short Represents the event to change a channel communication name.
+     */
+    class grape_event_change_channel_communication : public grape_event_base
+    {
+      private:
+        unsigned int        m_channel_communication; /**< A pointer to the channel communication of which the name is to be changed. */        
+        channel_communication             m_old_channel_communication; /**< Containing the previous channel communication. */
+        channel_communication             m_new_channel_communication; /**< Containing the new channel communication. */
+        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */
+      public:
+
+        /**
+         * Initializes the event.
+         * @param p_main_frame Pointer to the main frame.
+         * @param p_channel The channel whose text is to be changed.
+         */
+        grape_event_change_channel_communication( grape_frame *p_main_frame, channel_communication* p_channel_communication );
+
+        /**
+         * Default destructor.
+         * Frees allocated memory.
+         */
+        ~grape_event_change_channel_communication( void );
+
+        /**
+         * Overloaded Do function.
+         * Performs the event.
+         */
+        bool Do( void );
+
+        /**
+         * Overloaded Undo function.
+         * Reverts the event.
+         */
+        bool Undo( void );
+    };
+
+
     /**
      * Array of remove channel events.
      */
     WX_DECLARE_OBJARRAY( grape_event_remove_channel_communication, arr_event_remove_channel_communication );
 
     /**
-     * Array of remove channel events.
+     * Array of detach channel events.
      */
     WX_DECLARE_OBJARRAY( grape_event_detach_channel_communication, arr_event_detach_channel_communication );
   }

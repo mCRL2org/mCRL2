@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPSREALELM_REALELM_H
 #define MCRL2_LPSREALELM_REALELM_H
 
+#include "protaterm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
@@ -22,17 +23,15 @@
 #include "linear_inequalities.h"
 
 
+
 mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5, RewriteStrategy = GS_REWR_JITTY);
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);
 
-// Terms that must be protected are put in the atermpp set below.
-static atermpp::set < data_expression > protective_set;
-static atermpp::set < data_expression_list > protective_list_set;
 void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
 
-class real_representing_variable
+class real_representing_variable 
 {
   private:
     mcrl2::data::data_variable variable;
@@ -43,12 +42,42 @@ class real_representing_variable
     real_representing_variable
           ( mcrl2::data::data_variable v,
             mcrl2::data::data_expression lb,
-            mcrl2::data::data_expression ub):
-            variable(v), lowerbound(lb), upperbound(ub)
+            mcrl2::data::data_expression ub)
     {
-      protective_set.insert(v);
-      protective_set.insert(lb);
-      protective_set.insert(ub);
+      variable.protect();
+      lowerbound.protect();
+      upperbound.protect();
+      variable=v;
+      lowerbound=lb;
+      upperbound=ub;
+    }
+
+
+/*  The code below gives rise to garbage collection problems. */
+    ~real_representing_variable()
+    { 
+      variable.unprotect();
+      lowerbound.unprotect();
+      upperbound.unprotect();
+    }
+
+    real_representing_variable & operator = (const real_representing_variable & other)
+    { 
+      variable=other.variable;
+      lowerbound=other.lowerbound;
+      upperbound=other.upperbound;
+      return *this;
+    } 
+
+    real_representing_variable(const real_representing_variable &other)
+    { 
+      variable.protect();
+      lowerbound.protect();
+      upperbound.protect();
+      variable=other.variable;
+      lowerbound=other.lowerbound;
+      upperbound=other.upperbound;
+
     }
 
     mcrl2::data::data_variable get_variable() const
@@ -70,8 +99,7 @@ class summand_information
 {
 
   private:
-    // the summand is put in an atermpp vector for protection. It only contains one element.
-    atermpp::vector < mcrl2::lps::summand > smd;
+    mcrl2::lps::summand smd;
     atermpp::vector < mcrl2::data::data_expression > new_values_for_xi_variables;
     vector < linear_inequality > summand_real_conditions;
     atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
@@ -88,17 +116,31 @@ class summand_information
              vector < linear_inequality > src,
              atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
              ):
-      smd(1,s),
+      smd(s),
       new_values_for_xi_variables(),
       summand_real_conditions(src),
       summand_real_nextstate_map(srnm),
       nextstate_context_combinations(1,vector < linear_inequality >()),
       nextstate_value_combinations(1,data_expression_list())
-    {
+    { smd.protect();
+    }
+
+    summand_information(const summand_information &s)
+    { smd.protect();
+      smd=s.smd;
+      new_values_for_xi_variables=s.new_values_for_xi_variables;
+      summand_real_conditions=s.summand_real_conditions;
+      summand_real_nextstate_map=s.summand_real_nextstate_map;
+      nextstate_context_combinations=s.nextstate_context_combinations;
+      nextstate_value_combinations=s.nextstate_value_combinations;
+    }
+
+    ~summand_information()
+    { smd.unprotect();
     }
 
     mcrl2::lps::summand get_summand() const
-    { return smd[0];
+    { return smd;
     }
 
     atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
