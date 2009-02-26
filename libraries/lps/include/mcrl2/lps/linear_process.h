@@ -286,7 +286,14 @@ std::set<new_data::variable> compute_free_variables(const linear_process& proces
   summand_list summands(process.summands());
   for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
-    lps::detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
+    std::set<new_data::variable> temporary;
+    lps::detail::collect_free_variables(*i, process_parameters, std::inserter(temporary, temporary.end()));
+
+    new_data::variable_list summation_variables(i->summation_variables());
+    std::sort(summation_variables.begin(), summation_variables.end());
+
+    std::set_difference(temporary.begin(), temporary.end(), summation_variables.begin(), summation_variables.end(),
+                                                std::inserter(result, result.end()));
   }
   return result;
 }

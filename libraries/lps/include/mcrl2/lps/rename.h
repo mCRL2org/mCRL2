@@ -47,9 +47,10 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
 
   std::vector<new_data::variable> src;  // contains the variables that need to be renamed
   std::vector<new_data::variable> dest; // contains the corresponding replacements
+  std::vector<new_data::variable> parameters(p.process_parameters());
   generator.add_identifiers(forbidden_names);
 
-  for (new_data::variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i)
+  for (new_data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())
@@ -178,12 +179,16 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
   );
   generator.add_identifiers(forbidden_names);
 
-  for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+  summand_list summands(p.summands());
+
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     std::vector<new_data::variable> src;  // contains the variables that need to be renamed
     std::vector<new_data::variable> dest; // contains the corresponding replacements
 
-    for (new_data::variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
+    new_data::variable_list summation_variables(i->summation_variables());
+
+    for (new_data::variable_list::const_iterator j = summation_variables.begin(); j != summation_variables.end(); ++j)
     {
       core::identifier_string new_name = generator(j->name());
       if (new_name != j->name())

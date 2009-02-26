@@ -80,7 +80,8 @@ void test_lps_rename()
 
   for (summand_list::iterator i = q.summands().begin(); i != q.summands().end(); ++i)
   {
-    for (variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
+    variable_list summation_variables(i->summation_variables());
+    for (variable_list::iterator j = summation_variables.begin(); j != summation_variables.end(); ++j)
     {
       BOOST_CHECK(std::find(forbidden_names.begin(), forbidden_names.end(), j->name()) == forbidden_names.end());
     }

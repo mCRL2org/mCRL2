@@ -330,14 +330,14 @@ class summand: public atermpp::aterm_appl
       }
 
       // check 2)
-      if (has_time() && !new_data::sort_real_::is_real_(m_time))
+      if (has_time() && !new_data::sort_real_::is_real_(m_time.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!new_data::sort_bool_::is_bool_(m_condition))
+      if (!new_data::sort_bool_::is_bool_(m_condition.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: condition " << mcrl2::core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
