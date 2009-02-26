@@ -199,7 +199,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE 
 #line 79 "mcrl2parser.yy"
 {
   ATerm term;
