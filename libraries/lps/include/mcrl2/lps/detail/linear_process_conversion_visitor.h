@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 
+#include <stdexcept>
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/process_expression_visitor.h"
@@ -47,9 +48,42 @@ namespace detail {
     /// \brief The traits class for process expressions.
     typedef core::term_traits<process_expression> tr;
 
-    /// \brief Exception that is thrown by linear_process_conversion_visitor.
+    /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
     {};
+
+    /// \brief Exception that is thrown to denote that a linear process is encountered
+    /// that can not be transformed into LPS format. For example P = a.
+    struct unsupported_linear_process
+    {};
+
+    void add_summand()
+    {
+      if (m_summand == summand())
+      {
+        if (m_multi_action != multi_action())
+        {
+          if (m_next_state == data::data_assignment_list())
+          {
+            throw unsupported_linear_process();
+          }
+          m_summand = summand(data::data_variable_list(), core::detail::gsMakeNil(), m_multi_action, m_next_state);
+        }
+        else if (m_deadlock != deadlock())
+        {
+          m_summand = summand(data::data_variable_list(), data::data_expr::true_(), m_deadlock);
+        }
+        else
+        {
+          return;
+        }
+      }
+      result.push_back(m_summand);
+      m_summand = summand();
+      m_deadlock = deadlock();
+      m_multi_action = multi_action();
+      m_next_state = data::data_assignment_list();
+    }
   
     summand add_summand_variables(const summand& s, const data::data_variable_list& v)
     {
@@ -167,23 +201,6 @@ namespace detail {
       return stop_recursion;
     }
 
-    /// \brief Visit if_then node
-    /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
-    {
-      if (tr::is_seq(right))
-      {
-        visit(right);
-        m_summand = summand(data::data_variable_list(), d, m_multi_action, m_next_state);
-      }
-      else
-      { // delta() or at_time(delta(), ...)
-        visit(right);
-        m_summand = summand(data::data_variable_list(), d, m_deadlock);
-      }
-      return stop_recursion;
-    }
-
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
     bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
@@ -223,12 +240,12 @@ namespace detail {
       visit(left);
       if (!tr::is_choice(left))
       {
-        result.push_back(m_summand);
+        add_summand();
       }
       visit(right);
       if (!tr::is_choice(right))
       {
-        result.push_back(m_summand);
+        add_summand();
       }
       return stop_recursion;
     }
@@ -236,9 +253,23 @@ namespace detail {
     /// \brief Returns true if the process equation e is linear.
     void convert(const process_equation& e)
     {
-      m_equation = e;
-      result.clear();
-      visit(m_equation.expression());
+      try
+      {
+        m_equation = e;
+        result.clear();
+        visit(m_equation.expression());
+        add_summand(); // needed if it is not a choice
+      }
+      catch(unsupported_linear_process)
+      {
+        result.clear();
+        std::cerr << "Unsupported linear expression encountered in linear_process_conversion_visitor" << std::endl;
+      }
+      catch(non_linear_process)
+      {
+        result.clear();
+        std::cerr << "Non-linear expression encountered in linear_process_conversion_visitor" << std::endl;
+      }
     }
   };
 

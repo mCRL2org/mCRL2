@@ -34,15 +34,21 @@ void build_process_expression(const process_expression& x)
   visitor.visit(x);
 }
 
-void test_processes()
-{
-  const std::string SPECIFICATION =
-    "act a;                  \n"
-    "proc X(i: Nat) = a.X(i);\n"
-    "init X(2);              \n"
-    ;
+const std::string SPEC1 =
+  "act a;                  \n"
+  "proc X = a;             \n"
+  "init X;                 \n"
+  ;
 
-  process_specification spec = parse_process_specification(SPECIFICATION);
+const std::string SPEC2 =
+  "act a;                  \n"
+  "proc X(i: Nat) = a.X(i);\n"
+  "init X(2);              \n"
+  ;
+
+void test_process(std::string text)
+{
+  process_specification spec = parse_process_specification(text);
   std::cout << core::pp(spec.data()) << std::endl
             << core::pp(spec.actions()) << std::endl
             << spec.equations() << std::endl
@@ -70,7 +76,8 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_processes();
+  test_process(SPEC1);
+  test_process(SPEC2);
 
   return 0;
 }

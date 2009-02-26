@@ -25,7 +25,7 @@ namespace lps {
 
     public:
       /// \brief Constructor
-      deadlock(data::data_expression time = data::data_expression())
+      deadlock(data::data_expression time = core::detail::gsMakeNil())
         : m_time(time)
       {}
 
@@ -60,6 +60,18 @@ namespace lps {
       deadlock substitute(Substitution f)
       {
         return deadlock(m_time.substitute(f));
+      }
+
+      /// \brief Comparison operator
+      bool operator==(const deadlock& other)
+      {
+        return m_time == other.m_time;
+      }
+
+      /// \brief Comparison operator
+      bool operator!=(const deadlock& other)
+      {
+        return !(*this == other);
       }
   };
 

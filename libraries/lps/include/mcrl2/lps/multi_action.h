@@ -30,13 +30,14 @@ namespace lps {
 
     public:
       /// \brief Constructor
-      multi_action(action_list actions = action_list(), data::data_expression time = data::data_expression())
+      multi_action(action_list actions = action_list(), data::data_expression time = core::detail::gsMakeNil())
         : m_actions(actions), m_time(time)
       {}
 
       /// \brief Constructor
       multi_action(const action& l)
-        : m_actions(atermpp::push_front(action_list(), l))
+        : m_actions(atermpp::push_front(action_list(), l)),
+          m_time(core::detail::gsMakeNil())
       {}
 
       /// \brief Returns true if time is available.
@@ -110,7 +111,19 @@ namespace lps {
       multi_action operator+(const multi_action& other) const
       {
         assert(m_time == other.m_time);
-	return multi_action(m_actions + other.m_actions, m_time);
+        return multi_action(m_actions + other.m_actions, m_time);
+      }
+      
+      /// \brief Comparison operator
+      bool operator==(const multi_action& other)
+      {
+        return m_actions == other.m_actions && m_time == other.m_time;
+      }
+
+      /// \brief Comparison operator
+      bool operator!=(const multi_action& other)
+      {
+        return !(*this == other);
       }
   };
 
