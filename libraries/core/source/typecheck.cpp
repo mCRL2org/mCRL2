@@ -2012,6 +2012,89 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   int n = ATgetArity(ATgetAFun(ProcTerm));
   if(n==0) return ProcTerm;
 
+  //Here the code for shord-hand assignments begins.
+  if(gsIsIdAssignment(ProcTerm)){
+    gsDebugMsg("typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
+    ATermAppl Name=ATAgetArgument(ProcTerm,0);
+    ATermList ParList=ATLtableGet(context.processes,(ATerm)Name);
+    if (!ParList) { gsErrorMsg("process %P not declared\n", Name); return NULL; }
+ 
+    // Put the assignments into a table 
+    ATermTable As=ATtableCreate(63,50);
+    for(ATermList l=ATLgetArgument(ProcTerm,1);!ATisEmpty(l);l=ATgetNext(l)){
+      ATermAppl a=ATAgetFirst(l);
+      ATtablePut(As,(ATerm)ATAgetArgument(a,0),(ATerm)ATAgetArgument(a,1));
+    }
+
+    {
+      // Now filter the ParList to contain only the processes with parameters in this process call with assignments
+      ATermList NewParList=ATmakeList0();
+      for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+        ATermList Par=ATLgetFirst(ParList);
+ 
+        // get the formal parameter names
+        ATermList FormalPars=ATLtableGet(body.proc_pars,(ATerm)gsMakeProcVarId(Name,Par));
+        // we only need the names of the parameters, not the types
+        ATermList FormalParNames=ATmakeList0();
+        for(;!ATisEmpty(FormalPars);FormalPars=ATgetNext(FormalPars)){
+           FormalParNames=ATinsert(FormalParNames,(ATerm)ATAgetArgument(ATAgetFirst(FormalPars),0));
+        }
+        
+        if(ATisEmpty(list_minus(ATtableKeys(As),FormalParNames))) NewParList=ATinsert(NewParList,(ATerm)Par);
+      }
+      ParList=ATreverse(NewParList);
+    }
+
+    if(ATisEmpty(ParList)) { ATtableDestroy(As); gsErrorMsg("no process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
+    if(!ATisEmpty(ATgetNext(ParList))) { ATtableDestroy(As); gsErrorMsg("ambiguous process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
+
+    // get the formal parameter names
+    ATermList ActualPars=ATmakeList0();
+    ATermList FormalPars=ATLtableGet(body.proc_pars,(ATerm)gsMakeProcVarId(Name,ATLgetFirst(ParList)));
+    {
+      // we only need the names of the parameters, not the types
+      for(ATermList l=FormalPars;!ATisEmpty(l);l=ATgetNext(l)){
+        ATermAppl FormalParName=ATAgetArgument(ATAgetFirst(l),0);
+        ATermAppl ActualPar=ATAtableGet(As,(ATerm)FormalParName);
+        if(!ActualPar) ActualPar=gsMakeId(FormalParName);
+        ActualPars=ATinsert(ActualPars,(ATerm)ActualPar);
+      }
+      ActualPars=ATreverse(ActualPars);
+    }
+   
+    gsDebugMsg("transformed into a process call without short-hand assignments %T\n\n", gsMakeParamId(Name,ActualPars));
+ 
+    ATermAppl TypeCheckedProcTerm=gstcRewrActProc(Vars, gsMakeParamId(Name,ActualPars));
+    if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("the previous type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
+    
+   gsDebugMsg("successfully typechecked it into %T\n\n", TypeCheckedProcTerm);    
+
+    //reverse the assignments
+    ATtableReset(As);
+    for(ATermList l=ATLgetArgument(TypeCheckedProcTerm,1),m=FormalPars;!ATisEmpty(l);l=ATgetNext(l),m=ATgetNext(m)){
+      ATermAppl act_par=ATAgetFirst(l);
+      ATermAppl form_par=ATAgetFirst(m);
+      if(ATisEqual(form_par,act_par)) continue; //parameter does not change
+      ATtablePut(As,(ATerm)ATAgetArgument(form_par,0),(ATerm)gsMakeDataVarIdInit(form_par,act_par));
+    }
+    
+    ATermList TypedAssignments=ATmakeList0();
+    for(ATermList l=ATLgetArgument(ProcTerm,1);!ATisEmpty(l);l=ATgetNext(l)){
+      ATermAppl a=ATAgetFirst(l);
+      a=ATAtableGet(As,(ATerm)ATAgetArgument(a,0));
+      if(!a) continue; 
+      TypedAssignments=ATinsert(TypedAssignments,(ATerm)a);
+    }
+    TypedAssignments=ATreverse(TypedAssignments);
+  
+    TypeCheckedProcTerm=gsMakeProcessAssignment(ATAgetArgument(TypeCheckedProcTerm,0),TypedAssignments);
+
+    gsDebugMsg("the resulting process call is %T\n\n", TypeCheckedProcTerm);
+ 
+    return TypeCheckedProcTerm;
+  }
+  //Here it ends.
+
   if(gsIsParamId(ProcTerm)){
     return gstcRewrActProc(Vars,ProcTerm);
   }
