@@ -11,7 +11,7 @@
 #include "boost.hpp" // precompiled headers
 
 #define NAME "mcrl2pp"
-#define AUTHOR "Yaroslav Usenko"
+#define AUTHOR "Aad Mathijsen and Yaroslav S. Usenko"
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,17 +45,17 @@ struct t_tool_options {
 
   bool parse_command_line(int ac, char** av) {
     interface_description clinterface(av[0], NAME, AUTHOR,
-      "pretty print an LPS",
+      "pretty print an mCRL2 specification, an LPS, or a PBES",
       "[OPTION]... [INFILE [OUTFILE]]\n",
-      "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
+      "Print an mCRL2 specification, an LPS, or a PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
       "is not present, stdout is used. If INFILE is not present, stdin is used.",
-      "The LPS printed in the default format might not be a well-formed mCRL2 specification, "
+      "The mCRL2 specification or the LPS printed in the default format might not be a well-formed mCRL2 specification, "
       "because the proc and init sections could be preceded by declarations of free variables "
       "denoted by var.");
 
     clinterface.
       add_option("format", make_mandatory_argument("FORMAT"),
-        "print the LPS in the specified FORMAT:\n"
+        "print the mCRL2 specification, the LPS, or the PBES in the specified FORMAT:\n"
         "  'internal' for a textual ATerm representation of the internal format,\n"
         "  'default' for an mCRL2 specification (default), or\n"
         "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, each data equation is put in a separate data equation section, and next states of process references are printed in assignment notation", 'f');
@@ -122,9 +122,18 @@ void print_specification_file_name(t_tool_options const& tool_options)
   std::string str_in  = (tool_options.specification_file_name.empty())?"stdin":("'" + tool_options.specification_file_name + "'");
   std::string str_out = (tool_options.output_file_name.empty())?"stdout":("'" + tool_options.output_file_name + "'");
   ATermAppl spec = (ATermAppl) mcrl2::core::detail::load_aterm(tool_options.specification_file_name);
-  if (!mcrl2::core::detail::gsIsLinProcSpec(spec)) {
-    throw mcrl2::runtime_error(str_in + " does not contain an LPS");
+  if (! (    mcrl2::core::detail::gsIsLinProcSpec(spec)
+          || mcrl2::core::detail::gsIsProcSpec(spec)
+          || mcrl2::core::detail::gsIsPBES(spec)
+          
+        )
+     ) {
+    throw mcrl2::runtime_error(str_in + " does not contain an mCRL2 specification, an LPS, or a PBES");
   }
+  std::string spec_type = "mCRL2 specification";
+  if(mcrl2::core::detail::gsIsLinProcSpec(spec)) spec_type = "LPS";
+  if(mcrl2::core::detail::gsIsPBES(spec)) spec_type = "PBES";
+
   //open output file for writing or set to stdout
   FILE *output_stream    = NULL;
   if (tool_options.output_file_name.empty()) {
@@ -143,8 +152,8 @@ void print_specification_file_name(t_tool_options const& tool_options)
   }
   assert(output_stream != NULL);
   //print spec to output_stream
-  gsVerboseMsg("printing LPS from %s to %s in the %s format\n",
-    str_in.c_str(), str_out.c_str(), pp_format_to_string(tool_options.format).c_str());
+  gsVerboseMsg("printing %s from %s to %s in the %s format\n",
+    spec_type.c_str(), str_in.c_str(), str_out.c_str(), pp_format_to_string(tool_options.format).c_str());
   //pretty print spec to output_stream
   PrintPart_C(output_stream, (ATerm) spec, tool_options.format);
   if (output_stream != stdout) {
