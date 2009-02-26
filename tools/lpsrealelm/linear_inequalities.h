@@ -51,14 +51,9 @@ class linear_inequality
     // void set_factor_for_a_variable(const data_variable x,const data_expression e);
 
   private:
-    // The right hand sides are put in a vector, via an index to protect the aterms.
     // The right hand sides should only contain expressions representing constant reals.
 
-    // Using static here means that there is one copy of m_empty_spots_in_rhss
-    // and m_rhss in the entire program, instead of per object (see Stroustrup).
-    // This seems wrong to me.
-
-    atermpp::vector < data_expression > m_rhs;
+    data_expression m_rhs;
     // The left hand side contains mappings from data variables of sort real, to
     // constants of sort real. If x is mapped to value r, it means that this inequality
     // contains r*x as a subexpression at the left hand side.
@@ -116,8 +111,28 @@ class linear_inequality
   public:
 
     /// \brief Constructor yielding an inconsistent inequality.
-    linear_inequality():m_rhs(1,real_zero()),m_lhs(),m_comparison(less)
-    {}
+    linear_inequality():m_lhs(),m_comparison(less)
+    { m_rhs.protect();
+      m_rhs=real_zero();
+    }
+
+    linear_inequality(const linear_inequality &l)
+    { m_rhs.protect();
+      m_rhs=l.m_rhs;
+      m_lhs=l.m_lhs;
+      m_comparison=l.m_comparison;
+    }
+
+    ~linear_inequality()
+    { m_rhs.unprotect();
+    }
+    
+    linear_inequality &operator=(const linear_inequality &l)
+    { m_rhs=l.m_rhs;
+      m_lhs=l.m_lhs;
+      m_comparison=l.m_comparison;
+      return *this;
+    }
 
     /// \brief Constructor that constructs a linear inequality out of a data expression.
     /// \details The data expression e is expected to have the form
@@ -127,8 +142,13 @@ class linear_inequality
     /// \param e Contains the expression to become a linear inequality.
 
     linear_inequality(const mcrl2::data::data_expression e,
-                      const rewriter &r):m_rhs(1,real_zero()),m_lhs(),m_comparison(less)
-    { bool negate(false);
+                      const rewriter &r):m_lhs(),m_comparison(less)
+    { 
+      m_rhs.protect();
+      m_rhs=real_zero();
+
+      
+      bool negate(false);
       if (is_equal_to(e))
       { m_comparison=equal;
       }
@@ -158,16 +178,14 @@ class linear_inequality
     linear_inequality(const data_expression lhs,
                       const data_expression rhs,
                       const comparison_t cmp,
-                      const rewriter &r):m_rhs(1,real_zero()),m_lhs(),m_comparison(cmp)
+                      const rewriter &r):m_lhs(),m_comparison(cmp)
     { // std::cerr << "lhs " << pp(lhs) << "  rhs " << pp(rhs) << "\n";
+      m_rhs.protect();
+      m_rhs=real_zero();
+
       parse_and_store_expression(lhs,r);
       parse_and_store_expression(rhs,r,true);
       // std::cerr << "Result-: " << string(*this) << "\n";
-    }
-
-
-    ~linear_inequality()
-    {
     }
 
     lhs_t::const_iterator lhs_begin() const
@@ -184,21 +202,21 @@ class linear_inequality
 
     data_expression rhs() const
     {
-      return m_rhs.front();
+      return m_rhs;
     }
 
     void swap(linear_inequality &l)
     {
-      m_rhs.swap(l.m_rhs);
+      m_rhs=l.m_rhs;
       m_lhs.swap(l.m_lhs);
       const comparison_t c(m_comparison);
       m_comparison=l.m_comparison;
-      l.m_comparison=c;
+      l.m_comparison=c; 
     }
 
     void set_rhs(const data_expression e)
     { assert(is_number(e));
-      m_rhs[0]=e;
+      m_rhs=e;
     }
 
     void set_factor_for_a_variable(const data_variable x,const data_expression e)
@@ -646,7 +664,6 @@ inline void remove_redundant_inequalities(
     return;
   }
 
-  // std::cerr << "redundant in " << pp_vector(inequalities) << "\n";
   resulting_inequalities=inequalities;
   for(unsigned int i=0; i<resulting_inequalities.size(); )
   { // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
@@ -654,30 +671,6 @@ inline void remove_redundant_inequalities(
     if (resulting_inequalities[i].comparison()==linear_inequality::equal)
     { // Do nothing, as removing redundant inequalities is expensive.
       i++;
-      /* resulting_inequalities[i].set_comparison(linear_inequality::less);
-      if (is_inconsistent(resulting_inequalities,r))
-      {
-        resulting_inequalities[i].invert(r);
-        resulting_inequalities[i].set_comparison(linear_inequality::less);
-        if (is_inconsistent(resulting_inequalities,r))
-        { // So, t<c and t>c is inconsistent. So, t==c is redundant.
-          if (i+1<resulting_inequalities.size())
-          { // Copy the last element to the current position.
-            resulting_inequalities[i].swap(resulting_inequalities.back());
-          }
-          resulting_inequalities.pop_back();
-        }
-        else
-        {
-          resulting_inequalities[i].invert(r);
-          resulting_inequalities[i].set_comparison(linear_inequality::equal);
-          ++i;
-        }
-      }
-      else
-      { resulting_inequalities[i].set_comparison(linear_inequality::equal);
-        ++i;
-      } */
     }
     else
     {
@@ -697,7 +690,6 @@ inline void remove_redundant_inequalities(
       }
     }
   }
-  // std::cerr << "redundant out " << pp_vector(resulting_inequalities) << "\n";
 }
 
 /// \brief Determine whether a list of data expressions is inconsistent
@@ -718,7 +710,7 @@ inline bool is_inconsistent(
   // If false is among the inequalities, [false] is the minimal result.
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
-  { if(i->is_false())
+  { if (i->is_false())
     { return true;
     }
   }
