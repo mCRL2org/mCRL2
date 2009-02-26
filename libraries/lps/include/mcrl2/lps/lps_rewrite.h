@@ -56,14 +56,14 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
 
   summand_list summands=lpe.summands();
   summand_list new_summands;
-  for (summand_list::iterator i=summands.begin();
+  for (summand_list::const_iterator i=summands.begin();
            i!=summands.end(); ++i)
   { // Rewrite the condition.
     new_data::data_expression new_condition=r(i->condition());
 
     // Rewrite the actions.
     action_list new_actions, actions=i->actions();
-    for (action_list::iterator j = actions.begin(); j != actions.end(); ++j)
+    for (action_list::const_iterator j = actions.begin(); j != actions.end(); ++j)
     {
       new_data::data_expression_list new_arguments, arguments=j->arguments();
       for (new_data::data_expression_list::iterator k=arguments.begin();
@@ -74,7 +74,7 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
 
       new_actions=push_front(new_actions,action(j->label(), new_arguments));
     }
-    new_summands=reverse(new_actions);
+    new_actions=reverse(new_actions);
 
     // Rewrite the assignments in the next state of the summand.
     new_data::assignment_list new_assignments, assignments=i->assignments();

@@ -17,6 +17,7 @@
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
@@ -87,7 +88,7 @@ bool occurs_in(data_expression d, variable v)
 inline
 bool is_variable(aterm t)
 {
-  return t.type() == AT_APPL && is_variable(aterm_appl(t));
+  return t.type() == AT_APPL && data_expression(t).is_variable();
 };
 
 /// Search for a data variable in the term t. Precondition: t must contain

@@ -747,6 +747,7 @@ namespace mcrl2 {
               }
             }
           }
+
           return !fl.empty();
         }
         else if (s.is_container_sort())
@@ -761,9 +762,9 @@ namespace mcrl2 {
         else if (s.is_function_sort())
         {
           function_sort fs(s);
-          for (sort_expression_list::const_iterator i = fs.domain().begin(); i != fs.domain().end(); ++i)
+          for (sort_expression_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
           {
-            if (!is_certainly_finite(*i))
+            if (!is_certainly_finite(i.front()))
             {
               return false;
             }

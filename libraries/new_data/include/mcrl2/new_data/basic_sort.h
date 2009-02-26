@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/sort_expression.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief basic sort.
@@ -29,7 +29,7 @@ namespace mcrl2 {
     /// A basic sort is sort with only a name.
     class basic_sort: public sort_expression
     {
-      public:    
+      public:
 
         /// \brief Constructor
         ///
@@ -61,7 +61,7 @@ namespace mcrl2 {
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }
-        
+
     }; // class sort_expression
 
     /// \brief list of basic sorts

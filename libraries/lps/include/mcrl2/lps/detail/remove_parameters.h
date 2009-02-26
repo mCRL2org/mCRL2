@@ -33,7 +33,7 @@ new_data::assignment_list remove_parameters(const new_data::assignment_list& l, 
 {
   std::vector<new_data::assignment> a(l.begin(), l.end());
   a.erase(std::remove_if(a.begin(), a.end(), new_data::detail::has_left_hand_side_in(to_be_removed)), a.end());
-  return new_data::assignment_list(a.begin(), a.end()); 
+  return new_data::assignment_list(a.begin(), a.end());
 }
 
 /// \brief Removes the parameters in to_be_removed from p.
@@ -43,7 +43,7 @@ new_data::assignment_list remove_parameters(const new_data::assignment_list& l, 
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<new_data::variable>& to_be_removed)
 {
-  atermpp::vector<new_data::variable> v(p.process_parameters().begin(), p.process_parameters().end());
+  new_data::variable_list  v(p.process_parameters());
   atermpp::vector<summand> s(p.summands().begin(), p.summands().end());
 
   for (std::set<new_data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
@@ -55,7 +55,7 @@ linear_process remove_parameters(const linear_process& p, const std::set<new_dat
   {
     *i = set_assignments(*i, remove_parameters(i->assignments(), to_be_removed));
   }
-  
+
   new_data::variable_list new_process_parameters(v.begin(), v.end());
   summand_list new_summands(s.begin(), s.end());
   linear_process result = set_process_parameters(p, new_process_parameters);

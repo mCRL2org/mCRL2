@@ -69,10 +69,14 @@ std::set<new_data::variable> transition_variables(Iterator first, Iterator last)
 inline
 std::set<new_data::variable> compute_insignificant_parameters(const linear_process& p)
 {
-  std::set<new_data::variable> process_parameters(p.process_parameters().begin(), p.process_parameters().end());
+  new_data::variable_list      process_parameter_list(p.process_parameters());
+
+  std::set<new_data::variable> process_parameters(process_parameter_list.begin(), process_parameter_list.end());
+
+  summand_list summands(p.summands());
 
   // significant variables may not be removed by parelm
-  std::set<new_data::variable> significant_variables = transition_variables(p.summands().begin(), p.summands().end());
+  std::set<new_data::variable> significant_variables = transition_variables(summands.begin(), summands.end());
 
   // recursively extend the set of significant variables
   std::set<new_data::variable> todo = significant_variables;
@@ -81,12 +85,13 @@ std::set<new_data::variable> compute_insignificant_parameters(const linear_proce
     new_data::variable x = *todo.begin();
     todo.erase(todo.begin());
 
-    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {
       if (!i->is_delta())
       {
-        new_data::assignment_list::iterator j = std::find_if(i->assignments().begin(), i->assignments().end(), new_data::detail::has_left_hand_side(x));
-        if (j != i->assignments().end())
+        new_data::assignment_list assignments(i->assignments());
+        new_data::assignment_list::iterator j = std::find_if(assignments.begin(), assignments.end(), new_data::detail::has_left_hand_side(x));
+        if (j != assignments.end())
         {
           std::set<new_data::variable> new_variables = new_data::detail::set_difference(new_data::find_all_variables(j->rhs()), significant_variables);
           todo.insert(new_variables.begin(), new_variables.end());
@@ -125,7 +130,7 @@ specification parelm(const specification& spec)
 inline
 specification parelm2(const specification& spec)
 {
-  std::vector<new_data::variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
+  new_data::variable_list process_parameters(spec.process().process_parameters());
 
   // create a mapping m from process parameters to integers
   std::map<new_data::variable, int> m;
@@ -135,8 +140,10 @@ specification parelm2(const specification& spec)
     m[*i] = index++;
   }
 
+  summand_list summands(spec.process().summands());
+
   // compute the initial set v of significant variables
-  std::set<new_data::variable> tvars = transition_variables(spec.process().summands().begin(), spec.process().summands().end());
+  std::set<new_data::variable> tvars = transition_variables(summands.begin(), summands.end());
   std::vector<int> v;
   for (std::set<new_data::variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
   {
@@ -147,11 +154,13 @@ specification parelm2(const specification& spec)
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
   typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
   graph G(process_parameters.size());
-  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     if (!i->is_delta())
     {
-      for (new_data::assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      new_data::assignment_list assignments(i->assignments());
+
+      for (new_data::assignment_list::iterator j = assignments.begin(); j != assignments.end(); ++j)
       {
         int j0 = m[j->lhs()];
         std::set<new_data::variable> vars = new_data::find_all_variables(j->rhs());
