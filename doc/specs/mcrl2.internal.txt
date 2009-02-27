@@ -51,6 +51,8 @@
 <SortConsType> ::= SortList                                              [- di]
                  | SortSet                                               [- di]
                  | SortBag                                               [- di]
+                 | SortFSet                                              [. di]
+                 | SortFBag                                              [. di]
 
 //constructor declaration of a structured sort
 <StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)

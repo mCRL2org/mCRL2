@@ -2183,6 +2183,50 @@ bool gsIsSortCons(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunSortCons();
 }
 
+// SortFBag
+inline
+AFun initAFunSortFBag(AFun& f)
+{
+  f = ATmakeAFun("SortFBag", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSortFBag()
+{
+  static AFun AFunSortFBag = initAFunSortFBag(AFunSortFBag);
+  return AFunSortFBag;
+}
+
+inline
+bool gsIsSortFBag(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSortFBag();
+}
+
+// SortFSet
+inline
+AFun initAFunSortFSet(AFun& f)
+{
+  f = ATmakeAFun("SortFSet", 0, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunSortFSet()
+{
+  static AFun AFunSortFSet = initAFunSortFSet(AFunSortFSet);
+  return AFunSortFSet;
+}
+
+inline
+bool gsIsSortFSet(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunSortFSet();
+}
+
 // SortId
 inline
 AFun initAFunSortId(AFun& f)
@@ -3455,6 +3499,18 @@ inline
 ATermAppl gsMakeSortCons(ATermAppl SortConsType_0, ATermAppl SortExpr_1)
 {
   return ATmakeAppl2(gsAFunSortCons(), (ATerm) SortConsType_0, (ATerm) SortExpr_1);
+}
+
+inline
+ATermAppl gsMakeSortFBag()
+{
+  return ATmakeAppl0(gsAFunSortFBag());
+}
+
+inline
+ATermAppl gsMakeSortFSet()
+{
+  return ATmakeAppl0(gsAFunSortFSet());
 }
 
 inline

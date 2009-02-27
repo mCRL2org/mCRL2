@@ -95,27 +95,30 @@ ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_lis
 void impl_sort_list(ATermAppl sort_expression_list, ATermAppl sort_id,
   ATermList *p_substs, t_data_decls *p_data_decls);
 
-/// \pre sort_elt and sort_fset are sort expressions
-/// \return the list of data equations belonging to the finite set sort_fset, with elements
-///     of sort sort_elt
-ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset);
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+/// \return the list of data equations belonging to the finite set FSet(sort_elt)
+///      represented by sort_fset_id
+ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id);
 
-/// \pre  sort_elt is a sort
-///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+/// \pre  sort_fset is a finite set sort
+///       sort_fset_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
 ///       p_substs is a pointer to a list of substitutions induced by the context
 ///       of sort_set
 ///       p_data_decls represents a pointer to new data declarations, induced by
 ///       the context of sort_set
-/// \post an implementation of a finite set of elements of sort sort_elt
-///       represented by sort sort_id is added to *p_data_decls and new
-///       induced substitutions are added *p_substs
-void impl_sort_fset(ATermAppl sort_elt, ATermAppl sort_id,
+/// \post an implementation of sort sort_fset represented by sort sort_fset_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_sfet_id,
   ATermList *p_substs, t_data_decls *p_data_decls);
 
-/// \pre sort_elt, sort_fset and sort_set are sort expressions
-/// \return the list of data equations belonging to the set sort_set, with elements
-///     of sort sort_elt and finite sets of sort sort_fset
-ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_set);
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_set_id is a sort identifier
+/// \return the list of data equations belonging to the set Set(sort_elt) represented
+///      by sort_set_id, making use of finite set sort FSet(sort_elt) represented by
+///      sort_fset_id
+ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_set_id);
 
 /// \pre  sort_set is a set sort
 ///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
@@ -131,35 +134,48 @@ void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
 /// \pre sort_elt, sort_fset, sort_fbag_elt and sort_fbag are sort expressions
 /// \return the list of data equations belonging to the finite bag sort_fbag, with elements
 ///     of sort sort_elt, finite sets of sort sort_fset, and finite bag elements of sort sort_fbag_elt
-ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_fbag_elt, ATermAppl sort_fbag);
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_fbag_elt is a sort expression
+///      sort_fbag_id is a sort identifier
+/// \return the list of data equations belonging to the finite bag FBag(sort_elt)
+///      represented by sort_fbag_id, making use of
+///      \li finite bag elements represented by sort_fbag_elt
+///      \li finite set sort FSet(sort_elt) represented by sort_fset_id
+ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_elt, ATermAppl sort_fbag_id);
 
-/// \pre  sort_elt is a sort expression
-///       sort_fset is a sort expression
-///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+/// \pre  sort_fbag is finite bag sort
+///       sort_fbag_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
 ///       p_substs is a pointer to a list of substitutions induced by the context
 ///       of sort_set
 ///       p_data_decls represents a pointer to new data declarations, induced by
 ///       the context of sort_set
-/// \post an implementation of a finite bag of elements of sort sort_elt
-///       with finite sets of sort sort_fset represented by sort sort_id is added to
+/// \post an implementation of sort sort_fbag represented by sort sort_fbag_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
-void impl_sort_fbag(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_id,
+void impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id,
   ATermList *p_substs, t_data_decls *p_data_decls);
 
-/// \pre sort_elt and sort_list are sort expressions
-/// \return the list of data equations belonging to the set sort_set, with elements
-///     of sort_elt
-ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_fbag, ATermAppl sort_set, ATermAppl sort_bag);
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_fbag_id is a sort identifier
+///      sort_set_id is a sort identifier
+///      sort_bag_id is a sort identifier
+/// \return the list of data equations belonging to the bag Bag(sort_elt) represented
+///      by sort_bag_id, making use of:
+///      \li set sort Set(sort_elt) represented by sort_set_id
+///      \li finite set sort FSet(sort_elt) represented by sort_fset_id
+///      \li finite bag sort FBag(sort_elt) represented by sort_fbag_id
+ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id, ATermAppl sort_set_id, ATermAppl sort_bag_id);
 
 /// \pre  sort_bag is a bag sort
-///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       sort_bag_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
 ///       p_substs is a pointer to a list of substitutions induced by the context
 ///       of sort_bag
 ///       p_data_decls represents a pointer to new data declarations, induced by
 ///       the context of sort_bag
-/// \post an implementation of sort_bag represented by sort sort_id is added to
+/// \post an implementation of sort_bag represented by sort sort_bag_id is added to
 ///       *p_data_decls and new induced substitutions are added *p_substs
-void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_id,
+void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_bag_id,
   ATermList *p_substs, t_data_decls *p_data_decls);
 
 /// \pre p_data_decls represents a pointer to new data declarations
