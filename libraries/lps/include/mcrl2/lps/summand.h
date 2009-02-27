@@ -180,7 +180,7 @@ class summand: public atermpp::aterm_appl
         m_condition          (condition),
         m_delta              (false),
         m_actions            (a.actions()),
-	m_time               (a.time()),
+  m_time               (a.time()),
         m_assignments        (assignments)
     {}
 
@@ -193,14 +193,14 @@ class summand: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
                condition,
-               core::detail::gsMakeMultAct(action_list()),
+               core::detail::gsMakeDelta(),
                d.time(),
                atermpp::term_list< new_data::assignment >())
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
         m_delta              (true),
-	m_time               (d.time())
+        m_time               (d.time())
     {}
 
     /// \brief Returns the sequence of summation variables.

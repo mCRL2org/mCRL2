@@ -98,7 +98,6 @@ void test1()
   // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(application(plus, n4, n5)) == r(application(plus, n2, n7)));
   specification spec1=rewrite_lps(spec,r);
-std::clog << mcrl2::core::pp(spec1) << std::endl;
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
   BOOST_CHECK(spec1.process().summands().size()==1);
   // test destructor

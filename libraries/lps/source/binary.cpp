@@ -316,8 +316,10 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
     // Make sure all elements get encoded.
     while (!elts.empty())
     {
+      int count(powerof2_(i-1));
+
       // Iterate over the elements that get the boolean value new_parameters.front() == false
-      for(int j = 0; j < powerof2_(i-1); ++j)
+      for(int j = 0; j < count; ++j)
       {
         if (!elts.empty())
         {
@@ -326,7 +328,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
       }
 
       // Iterate over the elements that get the boolean value new_parameters.front() == true
-      for(int j = 0; j < powerof2_(i-1); ++j)
+      for(int j = 0; j < count; ++j)
       {
         if (!elts.empty())
         {
