@@ -94,16 +94,10 @@ namespace lps {
         return multi_action(m_actions.substitute(f), m_time.substitute(f));
       }
 
-      /// \brief Stream operator. Writes a pretty printed representation of the multi-action to a stream
-      /// \param to An output stream
-      /// \return The output stream
-      std::ostream& operator<<(std::ostream& to) const
+      /// \brief Returns a string representation of the multi action
+      std::string to_string() const
       {
-        to << "MultiAction(" << actions();
-        if (has_time())
-          to << "," << time();
-        to << ")";
-        return to;
+        return core::pp(m_actions) + (has_time() ? (" @ " + core::pp(m_time)) : "");
       }
       
       /// \brief Joins the actions of both multi actions.

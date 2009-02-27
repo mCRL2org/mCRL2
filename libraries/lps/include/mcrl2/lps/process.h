@@ -189,8 +189,8 @@ namespace lps {
         assert(core::detail::check_term_ProcSpec(m_term));
       }
 
-      process_specification(data::data_specification data, action_list actions, process_equation_list equations, process_initialization init)
-        : atermpp::aterm_appl(core::detail::gsMakeProcSpec(data, core::detail::gsMakeActSpec(actions), core::detail::gsMakeProcEqnSpec(equations), init))
+      process_specification(data::data_specification data, action_label_list action_labels, process_equation_list equations, process_initialization init)
+        : atermpp::aterm_appl(core::detail::gsMakeProcSpec(data, core::detail::gsMakeActSpec(action_labels), core::detail::gsMakeProcEqnSpec(equations), init))
       {}
 
       data::data_specification data() const
@@ -199,7 +199,7 @@ namespace lps {
         return arg1(*this);
       }
 
-      action_list actions() const
+      action_label_list action_labels() const
       {
         using namespace atermpp;
         return list_arg1(arg2(*this));
@@ -225,6 +225,8 @@ namespace lps {
     spec_stream << spec;
     ATermAppl result = detail::parse_specification(spec_stream);
     result           = detail::type_check_specification(result);
+    result           = detail::alpha_reduce(result);
+    result           = detail::implement_data_specification(result);
     return atermpp::aterm_appl(result);
   }
 

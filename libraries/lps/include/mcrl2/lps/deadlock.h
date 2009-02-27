@@ -62,6 +62,12 @@ namespace lps {
         return deadlock(m_time.substitute(f));
       }
 
+      /// \brief Returns a string representation of the deadlock
+      std::string to_string() const
+      {
+        return std::string("delta") + (has_time() ? (" @ " + core::pp(m_time)) : "");
+      }
+
       /// \brief Comparison operator
       bool operator==(const deadlock& other)
       {
