@@ -4683,6 +4683,23 @@ static ATermList insert_summand(
      Note also that a terminated term is indicated by taking procargs
      equal to NULL. */
 
+  return ATinsertA(sumlist,
+                   gsMakeLinearProcessSummand(
+                         sumvars,
+                         condition,
+                         multiAction,
+                         actTime,
+                         procargs));
+
+/* The code below checks whether the new summand is very
+   similar to existing summands. This means the action, and
+   nextstate parameters must be equal modulo a renaming of
+   variables. If so, the summand is merged with such an existing
+   summand. As this code requires to go through all the summands
+   to add one single summand, it is extremely expensive.
+   Therefore, it is commented out. JFG 27/2/2009. 
+   
+ 
   ATermList newsumlist=ATempty;
 
   for(newsumlist=ATempty ;
@@ -4741,7 +4758,7 @@ static ATermList insert_summand(
   }
 
   /* There is no matching summand in sumlist. So, we add the summand
-     at the beginning */
+     at the beginning * /
 
   return ATinsertA(newsumlist,
                    gsMakeLinearProcessSummand(
@@ -4750,7 +4767,7 @@ static ATermList insert_summand(
                          multiAction,
                          actTime,
                          procargs));
-
+  */
 }
 
 static void add_summands(
