@@ -451,7 +451,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
                         gsFreshString2ATermAppl("x", (ATerm) context, true),
                         se_func_dom);
       ATermAppl body;
-      if (gsIsDataExprEmptyList(de_fset) || gsIsDataExprFSetEmpty(de_fset))
+      if (gsIsDataExprFSetEmpty(de_fset))
       {
         body = gsMakeDataAppl1(de_func, var);
       }
@@ -468,8 +468,8 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     ATermAppl se_set = gsGetSort(Part);
     bool elts_is_consistent = true;
     ATermList elts = ATmakeList0();
-    while (!(gsIsDataExprEmptyList(de_fset) || gsIsDataExprFSetEmpty(de_fset)) && elts_is_consistent) {
-      if (gsIsDataExprCons(de_fset) || gsIsDataExprFSetInsert(de_fset)) {
+    while (!gsIsDataExprFSetEmpty(de_fset) && elts_is_consistent) {
+      if (gsIsDataExprFSetCons(de_fset) || gsIsDataExprFSetInsert(de_fset)) {
         ATermList de_fset_args = ATLgetArgument(de_fset, 1);
         elts = ATinsert(elts, ATelementAt(de_fset_args, 0));
         de_fset = ATAelementAt(de_fset_args, 1);
@@ -532,7 +532,7 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
       } else {
         body = gsMakeDataAppl1(de_func, var);
       }
-      if (!gsIsDataExprEmptyList(de_fbag) && !gsIsDataExprFSetEmpty(de_fbag)) {
+      if (!gsIsDataExprFBagEmpty(de_fbag)) {
         body = gsMakeDataExprSwapZero(body, gsMakeDataExprCount(var, de_bag_fbag));
       }
       Part = gsMakeBinder(gsMakeBagComp(), ATmakeList1((ATerm)var), body);
@@ -544,26 +544,20 @@ ATermAppl reconstruct_data_expr(ATermAppl Part, ATermList* p_substs, const ATerm
     ATermAppl se_bag = gsGetSort(Part);
     bool elts_is_consistent = true;
     ATermList elts = ATmakeList0();
-    while (!(gsIsDataExprEmptyList(de_fbag) || gsIsDataExprFBagEmpty(de_fbag)) && elts_is_consistent) {
-      if (gsIsDataExprCons(de_fbag)) {
+    while (!gsIsDataExprFBagEmpty(de_fbag) && elts_is_consistent) {
+      if (gsIsDataExprFBagCons(de_fbag) || gsIsDataExprFBagInsert(de_fbag)) {
         ATermList de_fbag_args = ATLgetArgument(de_fbag, 1);
         ATermAppl de_bag_elt = ATAelementAt(de_fbag_args, 0);
-        if (gsIsDataExprBagElt(de_bag_elt)) {
-          ATermList de_bag_elt_args = ATLgetArgument(de_bag_elt, 1);
-          ATermAppl de_bag_elt_elt = ATAelementAt(de_bag_elt_args, 0);
-          elts = ATinsert(elts, (ATerm) de_bag_elt_elt);
-          ATermAppl de_bag_elt_count = ATAelementAt(de_bag_elt_args, 1);
-          elts = ATinsert(elts, (ATerm) gsMakeDataExprCNat(de_bag_elt_count));
-          de_fbag = ATAelementAt(de_fbag_args, 1);
-        } else {
-          elts_is_consistent = false;
-        }
+        elts = ATinsert(elts, (ATerm) de_bag_elt);
+        ATermAppl de_bag_count = ATAelementAt(de_fbag_args, 1);
+        elts = ATinsert(elts, (ATerm) gsMakeDataExprCNat(de_bag_count));
+        de_fbag = ATAelementAt(de_fbag_args, 2);
       } else if (gsIsDataExprFBagCInsert(de_fbag)) {
         ATermList de_fbag_args = ATLgetArgument(de_fbag, 1);
-        ATermAppl de_bag_elt_elt = ATAelementAt(de_fbag_args, 0);
-        elts = ATinsert(elts, (ATerm) de_bag_elt_elt);
-        ATermAppl de_bag_elt_count = ATAelementAt(de_fbag_args, 1);
-        elts = ATinsert(elts, (ATerm) de_bag_elt_count);
+        ATermAppl de_bag_elt = ATAelementAt(de_fbag_args, 0);
+        elts = ATinsert(elts, (ATerm) de_bag_elt);
+        ATermAppl de_bag_count = ATAelementAt(de_fbag_args, 1);
+        elts = ATinsert(elts, (ATerm) de_bag_count);
         de_fbag = ATAelementAt(de_fbag_args, 2);
       } else {
         elts_is_consistent = false;
@@ -1251,6 +1245,7 @@ bool is_set_operator(const ATermAppl data_expr)
          gsIsOpIdSet(data_expr) ||
          // Finite set operations
          gsIsOpIdFSetEmpty(data_expr) ||
+         gsIsOpIdFSetCons(data_expr) ||
          gsIsOpIdFSetInsert(data_expr) ||
          gsIsOpIdFSetCInsert(data_expr) ||
          gsIsOpIdFSetIn(data_expr) ||
@@ -1933,7 +1928,6 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
 //  gsDebugMsg("Collecting data equations\n");
  // for matching against list, set, bag equations
   ATermAppl elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt"));
-  ATermAppl fbag_elt_sort = gsMakeSortId(gsString2ATermAppl("sort_elt_fbag"));
   ATermAppl list_sort = gsMakeSortId(gsString2ATermAppl("sort_list"));
   ATermAppl set_sort = gsMakeSortId(gsString2ATermAppl("sort_set"));
   ATermAppl bag_sort = gsMakeSortId(gsString2ATermAppl("sort_bag"));
@@ -1941,7 +1935,6 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
   ATermAppl fbag_sort = gsMakeSortId(gsString2ATermAppl("sort_fbag"));
   ATerm dummy = (ATerm) gsString2ATermAppl("@dummy");
   elt_sort =  (ATermAppl) ATsetAnnotation((ATerm) elt_sort,  dummy, dummy);
-  fbag_elt_sort = (ATermAppl) ATsetAnnotation((ATerm) fbag_elt_sort, dummy, dummy);
   list_sort = (ATermAppl) ATsetAnnotation((ATerm) list_sort, dummy, dummy);
   set_sort =  (ATermAppl) ATsetAnnotation((ATerm) set_sort,  dummy, dummy);
   bag_sort =  (ATermAppl) ATsetAnnotation((ATerm) bag_sort,  dummy, dummy);
@@ -1951,7 +1944,7 @@ void collect_data_equations(const t_data_decls* p_data_decls, t_reconstruct_cont
                                 ATconcat(build_set_equations(elt_sort, fset_sort, set_sort),
                                 ATconcat(build_fset_equations(elt_sort, fset_sort),
                                 ATconcat(build_bag_equations(elt_sort, fset_sort, fbag_sort, set_sort, bag_sort),
-                                         build_fbag_equations(elt_sort, fset_sort, fbag_elt_sort, fbag_sort)))));
+                                         build_fbag_equations(elt_sort, fset_sort, fbag_sort)))));
   std::pair<long, bool> put_result;
 
   // Traverse data equations and:
@@ -2428,6 +2421,10 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
         if (element_sort != NULL) {
           if (gsIsListSortId(sort) || gsIsFSetSortId(sort) || gsIsFBagSortId(sort)) {
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
+          } else if (gsIsFSetSortId(sort)) { 
+            *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprFSet(element_sort)), *p_substs);
+          } else if (gsIsFBagSortId(sort)) {
+            *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprFBag(element_sort)), *p_substs);
           } else {
             assert(ATindexOf(p_data_decls->sorts, (ATerm) sort, 0) == -1); // Do not add duplicate sorts
             ATermAppl sort_name = ATAgetArgument(sort, 0);

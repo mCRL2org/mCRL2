@@ -131,18 +131,13 @@ ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermA
 void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
   ATermList *p_substs, t_data_decls *p_data_decls);
 
-/// \pre sort_elt, sort_fset, sort_fbag_elt and sort_fbag are sort expressions
-/// \return the list of data equations belonging to the finite bag sort_fbag, with elements
-///     of sort sort_elt, finite sets of sort sort_fset, and finite bag elements of sort sort_fbag_elt
 /// \pre sort_elt is a sort expression
 ///      sort_fset_id is a sort identifier
-///      sort_fbag_elt is a sort expression
 ///      sort_fbag_id is a sort identifier
 /// \return the list of data equations belonging to the finite bag FBag(sort_elt)
-///      represented by sort_fbag_id, making use of
-///      \li finite bag elements represented by sort_fbag_elt
-///      \li finite set sort FSet(sort_elt) represented by sort_fset_id
-ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_elt, ATermAppl sort_fbag_id);
+///      represented by sort_fbag_id, making use of finite set sort FSet(sort_elt)
+///      represented by sort_fset_id
+ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id);
 
 /// \pre  sort_fbag is finite bag sort
 ///       sort_fbag_id is a fresh sort identifier (not occurring in p_data_decls->sorts)

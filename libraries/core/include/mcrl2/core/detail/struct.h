@@ -495,8 +495,8 @@ ATermAppl gsMakeOpIdNameBag2Set();
 ATermAppl gsMakeOpIdNameSet2Bag();
 ///Creation of name for the system operation identifier "FSetEmpty"
 ATermAppl gsMakeOpIdNameFSetEmpty();
-/////Creation of name for the system operation identifier "FSetCons"
-//ATermAppl gsMakeOpIdNameFSetCons();
+///Creation of name for the system operation identifier "FSetCons"
+ATermAppl gsMakeOpIdNameFSetCons();
 ///Creation of name for the system operation identifier "FSetInsert"
 ATermAppl gsMakeOpIdNameFSetInsert();
 ///Creation of name for the system operation identifier "FSetCInsert"
@@ -511,8 +511,8 @@ ATermAppl gsMakeOpIdNameFSetUnion();
 ATermAppl gsMakeOpIdNameFSetInter();
 ///Creation of name for the system operation identifier "FBagEmpty"
 ATermAppl gsMakeOpIdNameFBagEmpty();
-/////Creation of name for the system operation identifier "FBagCons"
-//ATermAppl gsMakeOpIdNameFBagCons();
+///Creation of name for the system operation identifier "FBagCons"
+ATermAppl gsMakeOpIdNameFBagCons();
 ///Creation of name for the system operation identifier "FBagInsert"
 ATermAppl gsMakeOpIdNameFBagInsert();
 ///Creation of name for the system operation identifier "FBagCInsert"
@@ -569,8 +569,6 @@ ATermAppl gsMakeOpIdNameMonusFunc();
 ATermAppl gsMakeOpIdNameNat2BoolFunc();
 ///Creation of name for the system operation identifier "Bool2NatFunc"
 ATermAppl gsMakeOpIdNameBool2NatFunc();
-///Creation of name for the system operation identifier "BagElt"
-ATermAppl gsMakeOpIdNameBagElt();
 
 
 // Creation of operation identifiers for system defined operations.
@@ -997,8 +995,8 @@ ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
 ///\return Operation identifier for FSetEmpty
 ATermAppl gsMakeOpIdFSetEmpty(ATermAppl SortExprFSet);
 
-/////\return Operation identifier for FSetCons
-//ATermAppl gsMakeOpIdFSetCons(ATermAppl SortExprElt, ATermAppl SortExprFSet);
+///\return Operation identifier for FSetCons
+ATermAppl gsMakeOpIdFSetCons(ATermAppl SortExprElt, ATermAppl SortExprFSet);
 
 ///\return Operation identifier for FSetInsert
 ATermAppl gsMakeOpIdFSetInsert(ATermAppl SortExprElt, ATermAppl SortExprFSet);
@@ -1021,8 +1019,8 @@ ATermAppl gsMakeOpIdFSetInter(ATermAppl SortExprElt, ATermAppl SortExprFSet);
 ///\return Operation identifier for FBagEmpty
 ATermAppl gsMakeOpIdFBagEmpty(ATermAppl SortExprFBag);
 
-/////\return Operation identifier for FBagCons
-//ATermAppl gsMakeOpIdFBagCons(ATermAppl SortExprElt, ATermAppl SortExprFBag);
+///\return Operation identifier for FBagCons
+ATermAppl gsMakeOpIdFBagCons(ATermAppl SortExprElt, ATermAppl SortExprFBag);
 
 ///\return Operation identifier for FBagInsert
 ATermAppl gsMakeOpIdFBagInsert(ATermAppl SortExprElt, ATermAppl SortExprFBag);
@@ -1107,9 +1105,6 @@ ATermAppl gsMakeOpIdNat2BoolFunc(ATermAppl SortExprElt);
 
 ///\return Operation identifier for Bool2NatFunc
 ATermAppl gsMakeOpIdBool2NatFunc(ATermAppl SortExprElt);
-
-///\return Operation identifier for BagElt
-ATermAppl gsMakeOpIdBagElt(ATermAppl SortExprElt, ATermAppl SortExprFBagElt);
 
 
 // Creation of data expressions for system defined operations.
@@ -1583,10 +1578,10 @@ ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr);
 ///\return Data expression for FSetEmpty() of sort SortExprFSet
 ATermAppl gsMakeDataExprFSetEmpty(ATermAppl SortExprFSet);
 
-/////\pre DataExprElt is a data expression
-/////     DataExprFSet is a data expression
-/////\return Data expression for FSetCons(DataExprElt, DataExprFSet)
-//ATermAppl gsMakeDataExprFSetCons(ATermAppl DataExprElt, ATermAppl DataExprFSet);
+///\pre DataExprElt is a data expression
+///     DataExprFSet is a data expression
+///\return Data expression for FSetCons(DataExprElt, DataExprFSet)
+ATermAppl gsMakeDataExprFSetCons(ATermAppl DataExprElt, ATermAppl DataExprFSet);
 
 ///\pre DataExprElt is a data expression
 ///     DataExprFSet is a data expression
@@ -1623,11 +1618,11 @@ ATermAppl gsMakeDataExprFSetInter(ATermAppl DataExprFuncLHS, ATermAppl DataExprF
 ///\return Data expression for FBagEmpty() of sort SortExprFBag
 ATermAppl gsMakeDataExprFBagEmpty(ATermAppl SortExprFBag);
 
-/////\pre DataExprElt is a data expression
-/////     DataExprPos is a data expression of sort Pos
-/////     DataExprFBag is a data expression
-/////\return Data expression for FBagCons(DataExprElt, DataExprPos, DataExprFBag)
-//ATermAppl gsMakeDataExprFBagCons(ATermAppl DataExprElt, ATermAppl DataExprPos, ATermAppl DataExprFBag);
+///\pre DataExprElt is a data expression
+///     DataExprPos is a data expression of sort Pos
+///     DataExprFBag is a data expression
+///\return Data expression for FBagCons(DataExprElt, DataExprPos, DataExprFBag)
+ATermAppl gsMakeDataExprFBagCons(ATermAppl DataExprElt, ATermAppl DataExprPos, ATermAppl DataExprFBag);
 
 ///\pre DataExprElt is a data expression
 ///     DataExprPos is a data expression of sort Pos
@@ -1765,12 +1760,6 @@ ATermAppl gsMakeDataExprNat2BoolFunc(ATermAppl DataExprArg);
 ///\return Data expression for the Bool2Nat function over sort S,
 ///        which has sort (S -> Bool) -> (S -> Nat)
 ATermAppl gsMakeDataExprBool2NatFunc(ATermAppl DataExprArg);
-
-///\pre    DataExprElt is a data expression,
-///        DataExprPos is a data expression of sort Pos
-///        SortExprFBagElt is a sort expression
-///\return Data expression for BagElt(e, p) of sort SortExprFBagElt
-ATermAppl gsMakeDataExprBagElt(ATermAppl DataExprElt, ATermAppl DataExprPos, ATermAppl SortExprFBagElt);
 
 
 // Auxiliary functions concerning data expressions
@@ -2132,6 +2121,10 @@ bool gsIsOpIdSet2Bag(ATermAppl DataExpr);
 bool gsIsOpIdFSetEmpty(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
+///\return DataExpr is an fset cons function
+bool gsIsOpIdFSetCons(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
 ///\return DataExpr is an fset insert function
 bool gsIsOpIdFSetInsert(ATermAppl DataExpr);
 
@@ -2158,6 +2151,10 @@ bool gsIsOpIdFSetInter(ATermAppl DataExpr);
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a finite empty bag function
 bool gsIsOpIdFBagEmpty(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return DataExpr is a finite bag cons function
+bool gsIsOpIdFBagCons(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return DataExpr is a finite bag insert function
@@ -2216,11 +2213,7 @@ bool gsIsOpIdZeroFunc(ATermAppl DataExpr);
 bool gsIsOpIdOneFunc(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
-///\return DataExpr is a bag element
-bool gsIsOpIdBagElt(ATermAppl DataExpr);
-
-///\pre DataExpr is a data expression
-///\return DataExpr is a bag element
+///\return DataExpr is a swap_zero
 bool gsIsOpIdSwapZero(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
@@ -2491,10 +2484,6 @@ bool gsIsDataExprZeroFunc(ATermAppl DataExpr);
 bool gsIsDataExprOneFunc(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
-///\return the data expression is a bag element
-bool gsIsDataExprBagElt(ATermAppl DataExpr);
-
-///\pre DataExpr is a data expression
 ///\return the data expression is a swap_zero expression
 bool gsIsDataExprSwapZero(ATermAppl DataExpr);
 
@@ -2503,12 +2492,24 @@ bool gsIsDataExprSwapZero(ATermAppl DataExpr);
 bool gsIsDataExprFSetEmpty(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
+///\return the data expression is an fset cons 
+bool gsIsDataExprFSetCons(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
 ///\return the data expression is an fset insert
 bool gsIsDataExprFSetInsert(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return the data expression is an empty fbag
 bool gsIsDataExprFBagEmpty(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return the data expression is an fbag cons 
+bool gsIsDataExprFBagCons(ATermAppl DataExpr);
+
+///\pre DataExpr is a data expression
+///\return the data expression is an fbag insert
+bool gsIsDataExprFBagInsert(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
 ///\return the data expression is an fbag cinsert

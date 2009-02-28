@@ -166,9 +166,6 @@ static ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term);
 //     abstraction, where s is sort_expr and n is a name with prefix
 //     gsLambdaPrefix, that does not occur in term
 
-static ATermAppl make_struct_bag_elt(ATermAppl sort_elt);
-//Pre: sort_elt is a sort expression
-//Ret: the structured sort "struct bag_elt(sort_elt, Pos)"
 
 //implementation
 //--------------
@@ -1259,26 +1256,22 @@ ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id)
   ATermList dstfgl = ATmakeList5((ATerm) d, (ATerm) s, (ATerm) t, (ATerm) f, (ATerm) g);
   ATermList destfgl = ATmakeList6((ATerm) d, (ATerm) e, (ATerm) s, (ATerm) t, (ATerm) f, (ATerm) g);
 
-  ATermList new_data_eqns = ATmakeList(29,
-    //empty set (sort_fset_id)
-    (ATerm) gsMakeDataEqn(ATmakeList0(), gsMakeNil(),
-      gsMakeDataExprFSetEmpty(sort_fset_id),
-      gsMakeDataExprEmptyList(sort_fset_id)),
+  ATermList new_data_eqns = ATmakeList(28,
     //insert (sort_elt # sort_fset_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(dl, gsMakeNil(),
-      gsMakeDataExprFSetInsert(d, gsMakeDataExprEmptyList(sort_fset_id)),
-      gsMakeDataExprCons(d, gsMakeDataExprEmptyList(sort_fset_id))),
+      gsMakeDataExprFSetInsert(d, gsMakeDataExprFSetEmpty(sort_fset_id)),
+      gsMakeDataExprFSetCons(d, gsMakeDataExprFSetEmpty(sort_fset_id))),
     (ATerm) gsMakeDataEqn(dsl, gsMakeNil(),
-      gsMakeDataExprFSetInsert(d, gsMakeDataExprCons(d, s)),
-      gsMakeDataExprCons(d, s)),
+      gsMakeDataExprFSetInsert(d, gsMakeDataExprFSetCons(d, s)),
+      gsMakeDataExprFSetCons(d, s)),
     (ATerm) gsMakeDataEqn(desl,
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFSetInsert(d, gsMakeDataExprCons(e, s)),
-      gsMakeDataExprCons(d, gsMakeDataExprCons(e, s))),
+      gsMakeDataExprFSetInsert(d, gsMakeDataExprFSetCons(e, s)),
+      gsMakeDataExprFSetCons(d, gsMakeDataExprFSetCons(e, s))),
     (ATerm) gsMakeDataEqn(desl,
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFSetInsert(d, gsMakeDataExprCons(e, s)),
-      gsMakeDataExprCons(e, gsMakeDataExprFSetInsert(d, s))),
+      gsMakeDataExprFSetInsert(d, gsMakeDataExprFSetCons(e, s)),
+      gsMakeDataExprFSetCons(e, gsMakeDataExprFSetInsert(d, s))),
     //conditional insert (sort_elt # Bool # sort_fset_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(dsl, gsMakeNil(),
       gsMakeDataExprFSetCInsert(d, gsMakeDataExprFalse(), s),
@@ -1288,120 +1281,120 @@ ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id)
       gsMakeDataExprFSetInsert(d, s)),
     //element of a finite set (sort_elt # sort_fset_id -> Bool)
     (ATerm) gsMakeDataEqn(dl, gsMakeNil(),
-      gsMakeDataExprFSetIn(d, gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetIn(d, gsMakeDataExprFSetEmpty(sort_fset_id)),
       gsMakeDataExprFalse()),
     (ATerm) gsMakeDataEqn(dsl, gsMakeNil(),
-      gsMakeDataExprFSetIn(d, gsMakeDataExprCons(d, s)),
+      gsMakeDataExprFSetIn(d, gsMakeDataExprFSetCons(d, s)),
       gsMakeDataExprTrue()),
     (ATerm) gsMakeDataEqn(desl,
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFSetIn(d, gsMakeDataExprCons(e, s)),
+      gsMakeDataExprFSetIn(d, gsMakeDataExprFSetCons(e, s)),
       gsMakeDataExprFalse()),
     (ATerm) gsMakeDataEqn(desl,
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFSetIn(d, gsMakeDataExprCons(e, s)),
+      gsMakeDataExprFSetIn(d, gsMakeDataExprFSetCons(e, s)),
       gsMakeDataExprFSetIn(d, s)),
     //finite subset or equality ((sort_elt -> Bool) # sort_fset_id # sort_fset_id -> Bool)
     (ATerm) gsMakeDataEqn(fl, gsMakeNil(),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetEmpty(sort_fset_id)),
       gsMakeDataExprTrue()),
     (ATerm) gsMakeDataEqn(dsfl, gsMakeNil(),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprCons(d, s), gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetEmpty(sort_fset_id)),
       gsMakeDataExprAnd(
         gsMakeDataAppl1(f, d),
-        gsMakeDataExprFSetLTE(f, s, gsMakeDataExprEmptyList(sort_fset_id)))),
+        gsMakeDataExprFSetLTE(f, s, gsMakeDataExprFSetEmpty(sort_fset_id)))),
     (ATerm) gsMakeDataEqn(etfl, gsMakeNil(),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprAnd(
         gsMakeDataExprNot(gsMakeDataAppl1(f, e)),
-        gsMakeDataExprFSetLTE(f, gsMakeDataExprEmptyList(sort_fset_id), t))),
+        gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetEmpty(sort_fset_id), t))),
     (ATerm) gsMakeDataEqn(dstfl, gsMakeNil(),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprCons(d, s), gsMakeDataExprCons(d, t)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(d, t)),
       gsMakeDataExprFSetLTE(f, s, t)),
     (ATerm) gsMakeDataEqn(destfl,
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprAnd(
         gsMakeDataAppl1(f, d),
-        gsMakeDataExprFSetLTE(f, s, gsMakeDataExprCons(e, t)))),
+        gsMakeDataExprFSetLTE(f, s, gsMakeDataExprFSetCons(e, t)))),
     (ATerm) gsMakeDataEqn(destfl,
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFSetLTE(f, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprAnd(
         gsMakeDataExprNot(gsMakeDataAppl1(f, e)),
-        gsMakeDataExprFSetLTE(f, gsMakeDataExprCons(d, s), t))),
+        gsMakeDataExprFSetLTE(f, gsMakeDataExprFSetCons(d, s), t))),
     //finite set union ((sort_elt -> Bool) # (sort_elt -> Bool) # sort_fset_id # sort_fset_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(fgl, gsMakeNil(),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprEmptyList(sort_fset_id)),
-      gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetEmpty(sort_fset_id)),
+      gsMakeDataExprFSetEmpty(sort_fset_id)),
     (ATerm) gsMakeDataEqn(dsfgl, gsMakeNil(),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetEmpty(sort_fset_id)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataExprNot(gsMakeDataAppl1(g, d)),
-        gsMakeDataExprFSetUnion(f, g, s, gsMakeDataExprEmptyList(sort_fset_id)))),
+        gsMakeDataExprFSetUnion(f, g, s, gsMakeDataExprFSetEmpty(sort_fset_id)))),
     (ATerm) gsMakeDataEqn(etfgl, gsMakeNil(),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         e,
         gsMakeDataExprNot(gsMakeDataAppl1(f, e)),
-        gsMakeDataExprFSetUnion(f, g, gsMakeDataExprEmptyList(sort_fset_id), t))),
+        gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), t))),
     (ATerm) gsMakeDataEqn(dstfgl, gsMakeNil(),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(d, t)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(d, t)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataExprEq(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d)),
         gsMakeDataExprFSetUnion(f, g, s, t))),
     (ATerm) gsMakeDataEqn(destfgl,
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataExprNot(gsMakeDataAppl1(g, d)),
-        gsMakeDataExprFSetUnion(f, g, s, gsMakeDataExprCons(e, t)))),
+        gsMakeDataExprFSetUnion(f, g, s, gsMakeDataExprFSetCons(e, t)))),
     (ATerm) gsMakeDataEqn(destfgl,
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         e,
         gsMakeDataExprNot(gsMakeDataAppl1(f, e)),
-        gsMakeDataExprFSetUnion(f, g, gsMakeDataExprCons(d, s), t))),
+        gsMakeDataExprFSetUnion(f, g, gsMakeDataExprFSetCons(d, s), t))),
     //finite set intersection ((sort_elt -> Bool) # (sort_elt -> Bool) # sort_fset_id # sort_fset_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(fgl, gsMakeNil(),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprEmptyList(sort_fset_id)),
-      gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetEmpty(sort_fset_id)),
+      gsMakeDataExprFSetEmpty(sort_fset_id)),
     (ATerm) gsMakeDataEqn(dsfgl, gsMakeNil(),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetEmpty(sort_fset_id)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataAppl1(g, d),
-        gsMakeDataExprFSetInter(f, g, s, gsMakeDataExprEmptyList(sort_fset_id)))),
+        gsMakeDataExprFSetInter(f, g, s, gsMakeDataExprFSetEmpty(sort_fset_id)))),
     (ATerm) gsMakeDataEqn(etfgl, gsMakeNil(),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprEmptyList(sort_fset_id), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         e,
         gsMakeDataAppl1(f, e),
-        gsMakeDataExprFSetInter(f, g, gsMakeDataExprEmptyList(sort_fset_id), t))),
+        gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetEmpty(sort_fset_id), t))),
     (ATerm) gsMakeDataEqn(dstfgl, gsMakeNil(),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(d, t)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(d, t)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataExprEq(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d)),
         gsMakeDataExprFSetInter(f, g, s, t))),
     (ATerm) gsMakeDataEqn(destfgl,
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataAppl1(g, d),
-        gsMakeDataExprFSetInter(f, g, s, gsMakeDataExprCons(e, t)))),
+        gsMakeDataExprFSetInter(f, g, s, gsMakeDataExprFSetCons(e, t)))),
     (ATerm) gsMakeDataEqn(destfgl,
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFSetInter(f, g, gsMakeDataExprCons(d, s), gsMakeDataExprCons(e, t)),
+      gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), gsMakeDataExprFSetCons(e, t)),
       gsMakeDataExprFSetCInsert(
         e,
         gsMakeDataAppl1(f, e),
-        gsMakeDataExprFSetInter(f, g, gsMakeDataExprCons(d, s), t)))
+        gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), t)))
   );
 
   return new_data_eqns;
@@ -1422,12 +1415,24 @@ void impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_fset_id, ATermList *p_su
   ATermAppl subst = gsMakeSubst_Appl(sort_fset, sort_fset_id);
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
-  //implement finite sets of sort sort_elt as finite lists of sort sort_elt
-  impl_sort_list(gsMakeSortExprList(sort_elt), sort_fset_id, p_substs, p_data_decls);
+  //implement finite sets of sort sort_elt as the structured sort FSet(sort_elt),
+  //represented by sort_fset_id and defined by:
+  //
+  //  sort FSet(sort_elt) = struct fset_empty
+  //                             | fset_cons(sort_elt, FSet(sort_elt))
+  //                             ;
+  //
+  ATermAppl sort_struct = gsMakeSortStruct(ATmakeList2(
+    (ATerm) gsMakeStructCons(gsMakeOpIdNameFSetEmpty(), ATmakeList0(), gsMakeNil()),
+    (ATerm) gsMakeStructCons(gsMakeOpIdNameFSetCons(),  ATmakeList2(
+      (ATerm) gsMakeStructProj(gsMakeNil(), sort_elt),
+      (ATerm) gsMakeStructProj(gsMakeNil(), sort_fset_id)
+      ), gsMakeNil())
+  ));
+  impl_sort_struct(sort_struct, sort_fset_id, p_substs, p_data_decls);
 
   //declare operations for sort sort_fset_id
-  ATermList new_ops = ATmakeList(7,
-      (ATerm) gsMakeOpIdFSetEmpty(sort_fset_id),
+  ATermList new_ops = ATmakeList(6,
       (ATerm) gsMakeOpIdFSetInsert(sort_elt, sort_fset_id),
       (ATerm) gsMakeOpIdFSetCInsert(sort_elt, sort_fset_id),
       (ATerm) gsMakeOpIdFSetIn(sort_elt, sort_fset_id),
@@ -1675,7 +1680,7 @@ void impl_sort_set(ATermAppl sort_set, ATermAppl sort_set_id, ATermList *p_subst
   p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
 }
 
-ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_elt, ATermAppl sort_fbag_id)
+ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id)
 {
   //declare equations for sort sort_fbag_id
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), sort_fbag_id);
@@ -1688,30 +1693,22 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
   ATermAppl g = gsMakeDataVarId(gsString2ATermAppl("g"), gsMakeSortArrow1(sort_elt, gsMakeSortExprNat()));
   ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), sort_fset_id);
 
-  ATermList new_data_eqns = ATmakeList(40,
-    //gsMakeDataExprEmptyList(sort_fbag_id) bag (sort_fbag_id)
-    (ATerm) gsMakeDataEqn(ATmakeList0(), gsMakeNil(),
-      gsMakeDataExprFBagEmpty(sort_fbag_id),
-      gsMakeDataExprEmptyList(sort_fbag_id)),
+  ATermList new_data_eqns = ATmakeList(39,
     //insert (sort_elt # Pos # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) d, (ATerm) p), gsMakeNil(),
-      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprEmptyList(sort_fbag_id)),
-      gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), gsMakeDataExprEmptyList(sort_fbag_id))),
+      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprFBagEmpty(sort_fbag_id)),
+      gsMakeDataExprFBagCons(d, p, gsMakeDataExprFBagEmpty(sort_fbag_id))),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) d, (ATerm) p, (ATerm) q, (ATerm) b), gsMakeNil(),
-      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprCons(gsMakeDataExprBagElt(d, q, sort_fbag_elt), b)),
-      gsMakeDataExprCons(gsMakeDataExprBagElt(d, gsMakeDataExprAdd(p, q), sort_fbag_elt), b)),
+      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprFBagCons(d, q, b)),
+      gsMakeDataExprFBagCons(d, gsMakeDataExprAdd(p, q), b)),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) d, (ATerm) e, (ATerm)p, (ATerm) q, (ATerm) b),
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), b)),
-      gsMakeDataExprCons(
-        gsMakeDataExprBagElt(d, p, sort_fbag_elt),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), b))),
+      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprFBagCons(e, q, b)),
+      gsMakeDataExprFBagCons(d, p, gsMakeDataExprFBagCons(e, q, b))),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) e, (ATerm) d, (ATerm)p, (ATerm) q, (ATerm) b),
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), b)),
-      gsMakeDataExprCons(
-        gsMakeDataExprBagElt(e, q, sort_fbag_elt),
-        gsMakeDataExprFBagInsert(d, p, b))),
+      gsMakeDataExprFBagInsert(d, p, gsMakeDataExprFBagCons(e, q, b)),
+      gsMakeDataExprFBagCons(e, q, gsMakeDataExprFBagInsert(d, p, b))),
     //conditional insert (sort_elt # Nat # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) d, (ATerm) b), gsMakeNil(),
       gsMakeDataExprFBagCInsert(d, gsMakeDataExprC0(), b),
@@ -1721,18 +1718,18 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
       gsMakeDataExprFBagInsert(d, p, b)),
     //count of an element in a finite bag (sort_elt # sort_fbag_id -> Nat)
     (ATerm) gsMakeDataEqn(ATmakeList1((ATerm) d), gsMakeNil(),
-      gsMakeDataExprFBagCount(d, gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagCount(d, gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprC0()),
     (ATerm) gsMakeDataEqn(ATmakeList3((ATerm) d, (ATerm) p, (ATerm) b), gsMakeNil(),
-      gsMakeDataExprFBagCount(d, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b)),
+      gsMakeDataExprFBagCount(d, gsMakeDataExprFBagCons(d, p, b)),
       gsMakeDataExprCNat(p)),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) d, (ATerm) e, (ATerm) p, (ATerm) b),
       gsMakeDataExprLT(d, e),
-      gsMakeDataExprFBagCount(d, gsMakeDataExprCons(gsMakeDataExprBagElt(e, p, sort_fbag_elt), b)),
+      gsMakeDataExprFBagCount(d, gsMakeDataExprFBagCons(e, p, b)),
       gsMakeDataExprC0()),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) d, (ATerm) e, (ATerm) p, (ATerm) b),
       gsMakeDataExprLT(e, d),
-      gsMakeDataExprFBagCount(d, gsMakeDataExprCons(gsMakeDataExprBagElt(e, p, sort_fbag_elt), b)),
+      gsMakeDataExprFBagCount(d, gsMakeDataExprFBagCons(e, p, b)),
       gsMakeDataExprFBagCount(d, b)),
     //element test (sort_elt # sort_fbag_id -> Bool)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) d, (ATerm) b), gsMakeNil(),
@@ -1740,61 +1737,61 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
       gsMakeDataExprGT(gsMakeDataExprFBagCount(d, b), gsMakeDataExprC0())),
     //finite subbag or equality ((sort_elt -> Nat) # sort_fbag_id # sort_fbag_id -> Bool)
     (ATerm) gsMakeDataEqn(ATmakeList1((ATerm) f), gsMakeNil(),
-      gsMakeDataExprFBagLTE(f, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagLTE(f, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprTrue()),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) f, (ATerm) d, (ATerm) p, (ATerm) b) , gsMakeNil(),
-      gsMakeDataExprFBagLTE(f, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagLTE(f, gsMakeDataExprFBagCons(d, p, b), gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprAnd(
         gsMakeDataExprSwapZeroLTE(gsMakeDataAppl1(f, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagLTE(f, b, gsMakeDataExprEmptyList(sort_fbag_id)))),
+        gsMakeDataExprFBagLTE(f, b, gsMakeDataExprFBagEmpty(sort_fbag_id)))),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) f, (ATerm) e, (ATerm) q, (ATerm) c), gsMakeNil(),
-      gsMakeDataExprFBagLTE(f, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+      gsMakeDataExprFBagLTE(f, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprAnd(
         gsMakeDataExprSwapZeroLTE(gsMakeDataAppl1(f, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagLTE(f, gsMakeDataExprEmptyList(sort_fbag_id), c))),
+        gsMakeDataExprFBagLTE(f, gsMakeDataExprFBagEmpty(sort_fbag_id), c))),
     (ATerm) gsMakeDataEqn(ATmakeList6((ATerm) f, (ATerm) d, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c), gsMakeNil(),
       gsMakeDataExprFBagLTE(f,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(d, q, c)),
       gsMakeDataExprAnd(
         gsMakeDataExprSwapZeroLTE(gsMakeDataAppl1(f, d), gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
         gsMakeDataExprFBagLTE(f, b, c))),
     (ATerm) gsMakeDataEqn(ATmakeList(7, (ATerm) f, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(d, e),
       gsMakeDataExprFBagLTE(f,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprAnd(
         gsMakeDataExprSwapZeroLTE(gsMakeDataAppl1(f, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagLTE(f, b, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)))),
+        gsMakeDataExprFBagLTE(f, b, gsMakeDataExprFBagCons(e, q, c)))),
     (ATerm) gsMakeDataEqn(ATmakeList(7, (ATerm) f, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(e, d),
       gsMakeDataExprFBagLTE(f,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprAnd(
         gsMakeDataExprSwapZeroLTE(gsMakeDataAppl1(f, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagLTE(f, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), c))),
+        gsMakeDataExprFBagLTE(f, gsMakeDataExprFBagCons(d, p, b), c))),
     //finite bag join ((sort_elt -> Nat) # (sort_elt -> Nat) # sort_fbag_id # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) f, (ATerm) g), gsMakeNil(),
-      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprEmptyList(sort_fbag_id)),
-      gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagEmpty(sort_fbag_id)),
+      gsMakeDataExprFBagEmpty(sort_fbag_id)),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) b) , gsMakeNil(),
-      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprFBagCons(d, p, b), gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroAdd(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagJoin(f, g, b, gsMakeDataExprEmptyList(sort_fbag_id)))),
+        gsMakeDataExprFBagJoin(f, g, b, gsMakeDataExprFBagEmpty(sort_fbag_id)))),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) e, (ATerm) q, (ATerm) c), gsMakeNil(),
-      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+      gsMakeDataExprFBagJoin(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroAdd(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagJoin(f, g, gsMakeDataExprEmptyList(sort_fbag_id), c))),
+        gsMakeDataExprFBagJoin(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), c))),
     (ATerm) gsMakeDataEqn(ATmakeList(7, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c), gsMakeNil(),
       gsMakeDataExprFBagJoin(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(d, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroAdd(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
@@ -1802,41 +1799,41 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(d, e),
       gsMakeDataExprFBagJoin(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroAdd(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagJoin(f, g, b, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)))),
+        gsMakeDataExprFBagJoin(f, g, b, gsMakeDataExprFBagCons(e, q, c)))),
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(e, d),
       gsMakeDataExprFBagJoin(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroAdd(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagJoin(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), c))),
+        gsMakeDataExprFBagJoin(f, g, gsMakeDataExprFBagCons(d, p, b), c))),
     //finite bag intersection ((sort_elt -> Nat) # (sort_elt -> Nat) # sort_fbag_id # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) f, (ATerm) g), gsMakeNil(),
-      gsMakeDataExprFBagInter(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprEmptyList(sort_fbag_id)),
-      gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagInter(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagEmpty(sort_fbag_id)),
+      gsMakeDataExprFBagEmpty(sort_fbag_id)),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) b) , gsMakeNil(),
-      gsMakeDataExprFBagInter(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagInter(f, g, gsMakeDataExprFBagCons(d, p, b), gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMin(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagInter(f, g, b, gsMakeDataExprEmptyList(sort_fbag_id)))),
+        gsMakeDataExprFBagInter(f, g, b, gsMakeDataExprFBagEmpty(sort_fbag_id)))),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) e, (ATerm) q, (ATerm) c), gsMakeNil(),
-      gsMakeDataExprFBagInter(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+      gsMakeDataExprFBagInter(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroMin(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagInter(f, g, gsMakeDataExprEmptyList(sort_fbag_id), c))),
+        gsMakeDataExprFBagInter(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), c))),
     (ATerm) gsMakeDataEqn(ATmakeList(7, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c), gsMakeNil(),
       gsMakeDataExprFBagInter(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(d, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMin(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
@@ -1844,41 +1841,41 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(d, e),
       gsMakeDataExprFBagInter(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMin(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagInter(f, g, b, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)))),
+        gsMakeDataExprFBagInter(f, g, b, gsMakeDataExprFBagCons(e, q, c)))),
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(e, d),
       gsMakeDataExprFBagInter(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroMin(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagInter(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), c))),
+        gsMakeDataExprFBagInter(f, g, gsMakeDataExprFBagCons(d, p, b), c))),
     //finite bag intersection ((sort_elt -> Nat) # (sort_elt -> Nat) # sort_fbag_id # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) f, (ATerm) g), gsMakeNil(),
-      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprEmptyList(sort_fbag_id)),
-      gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagEmpty(sort_fbag_id)),
+      gsMakeDataExprFBagEmpty(sort_fbag_id)),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) b) , gsMakeNil(),
-      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprFBagCons(d, p, b), gsMakeDataExprFBagEmpty(sort_fbag_id)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMonus(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagDiff(f, g, b, gsMakeDataExprEmptyList(sort_fbag_id)))),
+        gsMakeDataExprFBagDiff(f, g, b, gsMakeDataExprFBagEmpty(sort_fbag_id)))),
     (ATerm) gsMakeDataEqn(ATmakeList5((ATerm) f, (ATerm) g, (ATerm) e, (ATerm) q, (ATerm) c), gsMakeNil(),
-      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprEmptyList(sort_fbag_id), gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+      gsMakeDataExprFBagDiff(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroMonus(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagDiff(f, g, gsMakeDataExprEmptyList(sort_fbag_id), c))),
+        gsMakeDataExprFBagDiff(f, g, gsMakeDataExprFBagEmpty(sort_fbag_id), c))),
     (ATerm) gsMakeDataEqn(ATmakeList(7, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c), gsMakeNil(),
       gsMakeDataExprFBagDiff(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(d, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMonus(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
@@ -1886,27 +1883,27 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(d, e),
       gsMakeDataExprFBagDiff(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprSwapZeroMonus(gsMakeDataAppl1(f, d), gsMakeDataAppl1(g, d), gsMakeDataExprCNat(p), gsMakeDataExprC0()),
-        gsMakeDataExprFBagDiff(f, g, b, gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)))),
+        gsMakeDataExprFBagDiff(f, g, b, gsMakeDataExprFBagCons(e, q, c)))),
     (ATerm) gsMakeDataEqn(ATmakeList(8, (ATerm) f, (ATerm) g, (ATerm) d, (ATerm) e, (ATerm) p, (ATerm) q, (ATerm) b, (ATerm) c),
       gsMakeDataExprLT(e, d),
       gsMakeDataExprFBagDiff(f, g,
-        gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b),
-        gsMakeDataExprCons(gsMakeDataExprBagElt(e, q, sort_fbag_elt), c)),
+        gsMakeDataExprFBagCons(d, p, b),
+        gsMakeDataExprFBagCons(e, q, c)),
       gsMakeDataExprFBagCInsert(
         e,
         gsMakeDataExprSwapZeroMonus(gsMakeDataAppl1(f, e), gsMakeDataAppl1(g, e), gsMakeDataExprC0(), gsMakeDataExprCNat(q)),
-        gsMakeDataExprFBagDiff(f, g, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), c))),
+        gsMakeDataExprFBagDiff(f, g, gsMakeDataExprFBagCons(d, p, b), c))),
     //convert finite bag to finite set (sort_fbag_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(ATmakeList1((ATerm) f), gsMakeNil(),
-      gsMakeDataExprFBag2FSet(f, gsMakeDataExprEmptyList(sort_fbag_id), sort_fset_id),
-      gsMakeDataExprEmptyList(sort_fset_id)),
+      gsMakeDataExprFBag2FSet(f, gsMakeDataExprFBagEmpty(sort_fbag_id), sort_fset_id),
+      gsMakeDataExprFSetEmpty(sort_fset_id)),
     (ATerm) gsMakeDataEqn(ATmakeList4((ATerm) f, (ATerm) d, (ATerm) p, (ATerm) b), gsMakeNil(),
-      gsMakeDataExprFBag2FSet(f, gsMakeDataExprCons(gsMakeDataExprBagElt(d, p, sort_fbag_elt), b), sort_fset_id),
+      gsMakeDataExprFBag2FSet(f, gsMakeDataExprFBagCons(d, p, b), sort_fset_id),
       gsMakeDataExprFSetCInsert(
         d,
         gsMakeDataExprEq(
@@ -1916,10 +1913,10 @@ ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATerm
       )),
     //convert finite set to finite bag (sort_fset_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList0(), gsMakeNil(),
-      gsMakeDataExprFSet2FBag(gsMakeDataExprEmptyList(sort_fset_id), sort_fbag_id),
-      gsMakeDataExprEmptyList(sort_fbag_id)),
+      gsMakeDataExprFSet2FBag(gsMakeDataExprFSetEmpty(sort_fset_id), sort_fbag_id),
+      gsMakeDataExprFBagEmpty(sort_fbag_id)),
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) d, (ATerm) s), gsMakeNil(),
-      gsMakeDataExprFSet2FBag(gsMakeDataExprCons(d, s), sort_fbag_id),
+      gsMakeDataExprFSet2FBag(gsMakeDataExprFSetCons(d, s), sort_fbag_id),
       gsMakeDataExprFBagCInsert(
         d,
         gsMakeDataExprCNat(gsMakeDataExprC1()),
@@ -1955,17 +1952,24 @@ void impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id, ATermList *p_su
     impl_sort_fset(sort_fset, sort_fset_id, p_substs, p_data_decls);
   }
 
-  //implement finite bags of sort sort_elt as finite lists of pairs bag_elt(e, p),
-  //where e is of sort sort_elt and p is of sort Pos
-  ATermAppl struct_fbag_elt = make_struct_bag_elt(sort_elt);
-  ////The name of struct_fbag_elt is irrelevant, so let the standard routines decide
-  //ATermAppl sort_fbag_elt = make_fresh_struct_sort_id((ATerm) p_data_decls->sorts);
-  //impl_sort_struct(struct_fbag_elt, sort_fbag_elt, p_substs, p_data_decls);
-  impl_sort_list(gsMakeSortExprList(struct_fbag_elt), sort_fbag_id, p_substs, p_data_decls);
+  //implement finite bags of sort sort_elt as the structured sort FBag(sort_elt),
+  //represented by sort_fbag_id and defined by:
+  //
+  //  sort FBag(sort_elt) = struct fbag_empty
+  //                             | fbag_cons(sort_elt, Pos, FBag(sort_elt))
+  //                             ;
+  ATermAppl sort_struct = gsMakeSortStruct(ATmakeList2(
+    (ATerm) gsMakeStructCons(gsMakeOpIdNameFBagEmpty(), ATmakeList0(), gsMakeNil()),
+    (ATerm) gsMakeStructCons(gsMakeOpIdNameFBagCons(),  ATmakeList3(
+      (ATerm) gsMakeStructProj(gsMakeNil(), sort_elt),
+      (ATerm) gsMakeStructProj(gsMakeNil(), gsMakeSortExprPos()),
+      (ATerm) gsMakeStructProj(gsMakeNil(), sort_fbag_id)
+      ), gsMakeNil())
+  ));
+  impl_sort_struct(sort_struct, sort_fbag_id, p_substs, p_data_decls);
 
   //declare operations for sort sort_fbag_id
-  ATermList new_ops = ATmakeList(11,
-      (ATerm) gsMakeOpIdFBagEmpty(sort_fbag_id),
+  ATermList new_ops = ATmakeList(10,
       (ATerm) gsMakeOpIdFBagInsert(sort_elt, sort_fbag_id),
       (ATerm) gsMakeOpIdFBagCInsert(sort_elt, sort_fbag_id),
       (ATerm) gsMakeOpIdFBagCount(sort_elt, sort_fbag_id),
@@ -1978,7 +1982,7 @@ void impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id, ATermList *p_su
       (ATerm) gsMakeOpIdFSet2FBag(sort_fset_id, sort_fbag_id)
   );
 
-  ATermList new_data_eqns = build_fbag_equations(sort_elt, sort_fset_id, struct_fbag_elt, sort_fbag_id);
+  ATermList new_data_eqns = build_fbag_equations(sort_elt, sort_fset_id, sort_fbag_id);
 
   //perform substitutions
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
@@ -3523,39 +3527,6 @@ ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
 {
   return gsMakeOpId(gsFreshString2ATermAppl(gsLambdaPrefix(), term, false),
     sort_expr);
-}
-
-//ATermAppl make_struct_fset(ATermAppl sort_elt, ATermAppl sort_fset)
-//{
-//  return gsMakeSortStruct(ATmakeList2(
-//    (ATerm) gsMakeStructCons(gsMakeOpIdNameFSetEmpty(), ATmakeList0(), gsMakeNil()),
-//    (ATerm) gsMakeStructCons(gsMakeOpIdNameFSetCons(), ATmakeList2(
-//      (ATerm) gsMakeStructProj(gsMakeNil(), sort_elt),
-//      (ATerm) gsMakeStructProj(gsMakeNil(), sort_fset)
-//    ), gsMakeNil())
-//  ));
-//}
-
-//ATermAppl make_struct_fbag(ATermAppl sort_elt, ATermAppl sort_fset)
-//{
-//  return gsMakeSortStruct(ATmakeList2(
-//    (ATerm) gsMakeStructCons(gsMakeOpIdNameFBagEmpty(), ATmakeList0(), gsMakeNil()),
-//    (ATerm) gsMakeStructCons(gsMakeOpIdNameFBagCons(), ATmakeList3(
-//      (ATerm) gsMakeStructProj(gsMakeNil(), sort_elt),
-//      (ATerm) gsMakeStructProj(gsMakeNil(), gsMakeSortExprPos()),
-//      (ATerm) gsMakeStructProj(gsMakeNil(), sort_fset)
-//    ), gsMakeNil())
-//  ));
-//}
-
-ATermAppl make_struct_bag_elt(ATermAppl sort_elt)
-{
-  return gsMakeSortStruct(ATmakeList1((ATerm)
-    gsMakeStructCons(gsMakeOpIdNameBagElt(), ATmakeList2(
-      (ATerm) gsMakeStructProj(gsMakeNil(), sort_elt),
-      (ATerm) gsMakeStructProj(gsMakeNil(), gsMakeSortExprPos())
-    ), gsMakeNil())
-  ));
 }
 
 void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
