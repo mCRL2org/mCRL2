@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/new_data/data.h"
 
 namespace mcrl2 {
 
@@ -35,16 +35,16 @@ struct sequence_substitution
 
   struct compare_assignment_lhs
   {
-    data_variable m_variable;
+    variable m_variable;
 
-    compare_assignment_lhs(const data_variable& variable)
+    compare_assignment_lhs(const variable& variable)
       : m_variable(variable)
     {}
 
     /// \brief Function call operator
     /// \param a A pair of data variables
     /// \return The function result
-    bool operator()(const std::pair<data_variable, data_variable>& a) const
+    bool operator()(const std::pair<variable, variable>& a) const
     {
       return m_variable == a.first;
     }
@@ -63,12 +63,12 @@ struct sequence_substitution
     /// \return The function result
     std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
     {
-      if (!is_data_variable(t))
+      if (!data_expression(t).is_variable())
       {
         return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
       }
 
-      data_variable v(t);
+      variable v(t);
       typename Container::const_iterator i = std::find_if(m_assignments.begin(), m_assignments.end(), compare_assignment_lhs(v));
       if (i != m_assignments.end())
       {

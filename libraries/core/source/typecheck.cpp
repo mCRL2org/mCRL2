@@ -2088,6 +2088,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       TypedAssignments=ATinsert(TypedAssignments,(ATerm)a);
     }
     TypedAssignments=ATreverse(TypedAssignments);
+
+    ATtableDestroy(As);
   
     TypeCheckedProcTerm=gsMakeProcessAssignment(ATAgetArgument(TypeCheckedProcTerm,0),TypedAssignments);
 

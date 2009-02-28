@@ -62,6 +62,18 @@ Term replace_variables(Term t, ReplaceFunction r)
   return atermpp::partial_replace(t, replace_variables_helper<ReplaceFunction>(r));
 }
 
+template <typename Term, typename ReplaceFunction>
+atermpp::vector< Term > replace_variables(atermpp::vector< Term > const& t, ReplaceFunction r)
+{
+  atermpp::vector< Term > result;
+
+  for (typename atermpp::vector< Term >::const_iterator i = t.begin(); i != t.end(); ++i) {
+    result.push_back(atermpp::partial_replace(*i, replace_variables_helper<ReplaceFunction>(r)));
+  }
+
+  return result;
+}
+
 /// \cond INTERNAL_DOCS
 template <typename VariableContainer, typename ExpressionContainer>
 struct variable_sequence_replace_helper

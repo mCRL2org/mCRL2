@@ -31,10 +31,10 @@ namespace mcrl2 {
 
   namespace new_data {
 
-    template < typename SubstitutionFunction >
-    inline data_expression substitute(SubstitutionFunction const& f, data_expression const& c)
+    template < typename Expression, typename SubstitutionFunction >
+    inline Expression substitute(SubstitutionFunction const& f, Expression const& c)
     {
-      return data_expression(f(c));
+      return static_cast< Expression >(f(static_cast< atermpp::aterm_appl const& >(c)));
     }
 
     /// \brief Applies the assignment to t and returns the result.
@@ -50,16 +50,33 @@ namespace mcrl2 {
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
     /// \param[in,out] c applies substitution function on elements of container
-    template < typename Container, typename SubstitutionFunction >
-    Container& substitute(SubstitutionFunction const& f, Container& c)
+    template < typename Expression, typename SubstitutionFunction >
+    atermpp::vector< Expression >& substitute(SubstitutionFunction const& f, atermpp::vector< Expression >& c)
     {
-      for (typename Container::iterator i = c.begin(); i != c.end(); ++i)
+      for (typename atermpp::vector< Expression >::iterator i = c.begin(); i != c.end(); ++i)
       {
-        *i = f(*i);
+        (*i) = substitute(f, *i);
       }
 
       return c;
     }
+
+    /// \brief Applies a substitution function to all elements of a container
+    /// \param[in] f substitution function
+    /// \param[in,out] c applies substitution function on elements of container
+    template < typename Expression, typename SubstitutionFunction >
+    atermpp::vector< Expression > substitute(SubstitutionFunction const& f, atermpp::vector< Expression > const& c)
+    {
+      atermpp::vector< Expression > result;
+
+      for (typename atermpp::vector< Expression >::const_iterator i = c.begin(); i != c.end(); ++i)
+      {
+        result.push_back(substitute(f, *i));
+      }
+
+      return result;
+    }
+
 
     /// \brief Applies a substitution function to all elements of a container
     template < typename Container, typename SubstitutionFunction, typename OutputIterator >

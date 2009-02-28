@@ -277,12 +277,12 @@ void real_rewrite_test() {
 
   data_rewrite_test(R, exp(p2, real2int(p2)), p4);
 
-  data_rewrite_test(R, floor(parse_data_expression("29/10")), p2);
+  data_rewrite_test(R, int2real(floor(parse_data_expression("29/10"))), p2);
 
-  data_rewrite_test(R, ceil(parse_data_expression("12/10")), p2);
+  data_rewrite_test(R, int2real(ceil(parse_data_expression("12/10"))), p2);
 
-  data_rewrite_test(R, round(parse_data_expression("16/10")), p2);
-  data_rewrite_test(R, round(parse_data_expression("24/10")), p2);
+  data_rewrite_test(R, int2real(round(parse_data_expression("16/10"))), p2);
+  data_rewrite_test(R, int2real(round(parse_data_expression("24/10"))), p2);
 }
 
 void list_rewrite_test() {

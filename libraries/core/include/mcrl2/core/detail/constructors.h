@@ -53,7 +53,7 @@ ATermAppl constructForall();
 ATermAppl constructCommExpr();
 ATermAppl constructStateNot();
 ATermAppl constructBooleanFalse();
-ATermAppl constructIfThen();
+ATermAppl constructSortFSet();
 ATermAppl constructStateImp();
 ATermAppl constructPBESExists();
 ATermAppl constructPBESImp();
@@ -129,7 +129,7 @@ ATermAppl constructSetComp();
 ATermAppl constructActForall();
 ATermAppl constructRenameExpr();
 ATermAppl constructMerge();
-ATermAppl constructActSpec();
+ATermAppl constructIfThen();
 ATermAppl constructBooleanVariable();
 ATermAppl constructAction();
 ATermAppl constructPBESAnd();
@@ -165,6 +165,7 @@ ATermAppl constructActId();
 ATermAppl constructSortUnknown();
 ATermAppl constructPBESOr();
 ATermAppl constructRegSeq();
+ATermAppl constructSortFBag();
 ATermAppl constructAllow();
 ATermAppl constructPropVarDecl();
 ATermAppl constructActImp();
@@ -172,6 +173,7 @@ ATermAppl constructSortBag();
 ATermAppl constructPBInit();
 ATermAppl constructActTrue();
 ATermAppl constructRegTransOrNil();
+ATermAppl constructActSpec();
 ATermAppl constructId();
 ATermAppl constructSortExpr();
 ATermAppl constructSortConsType();
@@ -337,19 +339,19 @@ ATermAppl constructBooleanFalse()
   return t;
 }
 
-// IfThen
+// SortFSet
 inline
-ATermAppl initConstructIfThen(ATermAppl& t)
+ATermAppl initConstructSortFSet(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunIfThen(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
+  t = ATmakeAppl0(gsAFunSortFSet());
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructIfThen()
+ATermAppl constructSortFSet()
 {
-  static ATermAppl t = initConstructIfThen(t);
+  static ATermAppl t = initConstructSortFSet(t);
   return t;
 }
 
@@ -1553,19 +1555,19 @@ ATermAppl constructMerge()
   return t;
 }
 
-// ActSpec
+// IfThen
 inline
-ATermAppl initConstructActSpec(ATermAppl& t)
+ATermAppl initConstructIfThen(ATermAppl& t)
 {
-  t = ATmakeAppl1(gsAFunActSpec(), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl2(gsAFunIfThen(), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructProcExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructActSpec()
+ATermAppl constructIfThen()
 {
-  static ATermAppl t = initConstructActSpec(t);
+  static ATermAppl t = initConstructIfThen(t);
   return t;
 }
 
@@ -2129,6 +2131,22 @@ ATermAppl constructRegSeq()
   return t;
 }
 
+// SortFBag
+inline
+ATermAppl initConstructSortFBag(ATermAppl& t)
+{
+  t = ATmakeAppl0(gsAFunSortFBag());
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructSortFBag()
+{
+  static ATermAppl t = initConstructSortFBag(t);
+  return t;
+}
+
 // Allow
 inline
 ATermAppl initConstructAllow(ATermAppl& t)
@@ -2238,6 +2256,22 @@ inline
 ATermAppl constructRegTransOrNil()
 {
   static ATermAppl t = initConstructRegTransOrNil(t);
+  return t;
+}
+
+// ActSpec
+inline
+ATermAppl initConstructActSpec(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunActSpec(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructActSpec()
+{
+  static ATermAppl t = initConstructActSpec(t);
   return t;
 }
 

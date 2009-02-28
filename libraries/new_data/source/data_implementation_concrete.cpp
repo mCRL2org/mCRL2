@@ -2001,7 +2001,7 @@ void impl_sort_int(t_data_decls *p_data_decls, bool recursive, ATermList* new_da
 
   //add implementation of sort Nat, if necessary
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-    impl_sort_nat(p_data_decls, new_data_equations);
+    impl_sort_nat(p_data_decls, recursive, new_data_equations);
   }
 }
 
@@ -2021,7 +2021,7 @@ void impl_sort_real(t_data_decls *p_data_decls, bool recursive, ATermList* new_d
 
   //add implementation of sort Int, if necessary
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-    impl_sort_int(p_data_decls, new_data_equations);
+    impl_sort_int(p_data_decls, recursive, new_data_equations);
   }
 }
 

@@ -92,7 +92,7 @@ namespace lps {
       template <typename Substitution>
       multi_action substitute(Substitution f)
       {
-        return multi_action(substitute(f, m_actions), substitute(f, m_time));
+        return multi_action(m_actions.substitute(f), new_data::substitute(f, m_time));
       }
 
       /// \brief Returns a string representation of the multi action
@@ -108,7 +108,7 @@ namespace lps {
         assert(m_time == other.m_time);
         return multi_action(m_actions + other.m_actions, m_time);
       }
-      
+
       /// \brief Comparison operator
       bool operator==(const multi_action& other)
       {

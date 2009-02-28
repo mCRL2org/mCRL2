@@ -1217,6 +1217,16 @@ ATermAppl gsMakeSortExprBag(ATermAppl SortExpr)
   return gsMakeSortCons(gsMakeSortBag(), SortExpr);
 }
 
+ATermAppl gsMakeSortExprFSet(ATermAppl SortExpr)
+{
+  return gsMakeSortCons(gsMakeSortFSet(), SortExpr);
+}
+
+ATermAppl gsMakeSortExprFBag(ATermAppl SortExpr)
+{
+  return gsMakeSortCons(gsMakeSortFBag(), SortExpr);
+}
+
 //Recognition functions for system defined sort expressions
 
 bool gsIsSortExprBool(ATermAppl SortExpr) {
@@ -1270,6 +1280,22 @@ bool gsIsSortExprBag(ATermAppl Term)
     return false;
   else
     return gsIsSortBag(ATAgetArgument(Term, 0));
+}
+
+bool gsIsSortExprFSet(ATermAppl Term)
+{
+  if (!gsIsSortCons(Term))
+    return false;
+  else
+    return gsIsSortFSet(ATAgetArgument(Term, 0));
+}
+
+bool gsIsSortExprFBag(ATermAppl Term)
+{
+  if (!gsIsSortCons(Term))
+    return false;
+  else
+    return gsIsSortFBag(ATAgetArgument(Term, 0));
 }
 
 const char* gsSortStructPrefix()

@@ -38,10 +38,10 @@ namespace new_data {
 
     protected:
       /// \brief for data implementation/reconstruction
-      mutable ATermAppl                  m_specification; // cannot use atermpp::aterm_appl due to modifications
+      mutable atermpp::aterm_appl         m_specification;
 
       /// \brief for data implementation
-      mutable ATermList                  m_substitution_context;
+      mutable atermpp::aterm_list         m_substitution_context;
 
       /// \brief The wrapped Rewriter.
       boost::shared_ptr<detail::Rewriter> m_rewriter;
@@ -50,12 +50,13 @@ namespace new_data {
 
       ATermAppl implement(data_expression expression) const
       {
-        ATermList new_data_equations = ATmakeList0();
+        ATermList substitution_context = m_substitution_context;
+        ATermList new_data_equations   = ATmakeList0();
 
         core::detail::t_data_decls declarations = core::detail::get_data_decls(m_specification);
 
         ATermAppl implemented = detail::impl_exprs_appl(expression,
-                        &m_substitution_context, &declarations, &new_data_equations);
+                        &substitution_context, &declarations, &new_data_equations);
 
         if (!ATisEmpty(new_data_equations)) {
           atermpp::term_list< atermpp::aterm_appl > new_equations(new_data_equations);
@@ -67,6 +68,8 @@ namespace new_data {
 
           m_specification = core::detail::add_data_decls(m_specification, declarations);
         }
+
+        m_substitution_context = substitution_context;
 
         return implemented;
       }
@@ -116,7 +119,9 @@ namespace new_data {
         : m_specification(r.m_specification),
           m_substitution_context(r.m_substitution_context),
           m_rewriter(r.m_rewriter)
-      { }
+      {
+        m_specification.protect();
+      }
 
       /// \brief Constructor.
       /// \param d A data specification
@@ -124,8 +129,12 @@ namespace new_data {
       basic_rewriter(data_specification d, strategy s = jitty)
         : m_substitution_context(ATmakeList0())
       {
-        m_specification = detail::implement_data_specification(d, &m_substitution_context);
+        ATermList substitution_context = m_substitution_context;
+        m_specification = detail::implement_data_specification(d, &substitution_context);
         m_rewriter.reset(detail::createRewriter(m_specification, static_cast< detail::RewriteStrategy >(s)));
+        m_substitution_context = substitution_context;
+        m_substitution_context.protect();
+        m_specification.protect();
       }
 
       /// \brief Adds an equation to the rewrite rules.
@@ -149,6 +158,10 @@ namespace new_data {
       detail::Rewriter* get_rewriter()
       {
         return m_rewriter.get();
+      }
+
+      ~basic_rewriter() {
+        m_specification.unprotect();
       }
   };
 

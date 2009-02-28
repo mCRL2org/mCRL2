@@ -104,6 +104,12 @@ ATermAppl gsMakeSortExprSet(ATermAppl SortExpr);
 ///\return Sort expression for `Bag of SortExpr'
 ATermAppl gsMakeSortExprBag(ATermAppl SortExpr);
 
+///\return Sort expression for `FSet of SortExpr'
+ATermAppl gsMakeSortExprFSet(ATermAppl SortExpr);
+
+///\return Sort expression for `FBag of SortExpr'
+ATermAppl gsMakeSortExprFBag(ATermAppl SortExpr);
+
 // Auxiliary functions concerning implemented sort expressions
 
 ///\return SortExpr is a sort expression for Bool
@@ -135,6 +141,12 @@ bool gsIsSortExprSet(ATermAppl SortExpr);
 
 ///\return SortExpr is a SortExprBag
 bool gsIsSortExprBag(ATermAppl SortExpr);
+
+///\return SortExpr is a SortExprFSet
+bool gsIsSortExprFSet(ATermAppl SortExpr);
+
+///\return SortExpr is a SortExprFBag
+bool gsIsSortExprFBag(ATermAppl SortExpr);
 
 ///\return Prefix for implemented structured sort
 const char* gsSortStructPrefix();

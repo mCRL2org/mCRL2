@@ -250,9 +250,107 @@ std::vector<std::string> variable_strings(variable_list const& t)
   return result;
 }
 
+/// \brief Returns the concatenation of the lists l and m
+/// \param l A sequence of data expressions
+/// \param m A sequence of data variables
+/// \return The concatenation of the lists l and m
+inline
+data_expression_list operator+(data_expression_list const& l, variable_list const& m)
+{
+  data_expression_list result(l.begin(), l.end());
+
+  result.insert(result.end(), m.begin(), m.end());
+
+  return result;
+}
+
+/// \brief Returns the concatenation of the lists l and m
+/// \param l A sequence of variables
+/// \param m A sequence of variables
+/// \return The concatenation of the lists l and m
+inline
+variable_list operator+(variable_list const& l, variable_list const& m)
+{
+  variable_list result(l.begin(), l.end());
+
+  result.insert(result.end(), m.begin(), m.end());
+
+  return result;
+}
+
+/// \brief Returns the concatenation of the lists l and m
+/// \param l A sequence of variables
+/// \param m A sequence of variables
+/// \return The concatenation of the lists l and m
+inline
+data_expression_list operator+(data_expression_list const& l, data_expression_list const& m)
+{
+  data_expression_list result(l.begin(), l.end());
+
+  result.insert(result.end(), m.begin(), m.end());
+
+  return result;
+}
+
+/// \brief Returns the concatenation of the lists l and m.
+/// \param l A sequence of data variables
+/// \param m A sequence of data expressions
+/// \return The concatenation of the lists l and m
+inline
+data_expression_list operator+(variable_list const& l, data_expression_list const& m)
+{ return m + l; }
+
+/// \brief Returns the concatenation of [v] and the list l.
+/// \param v A data variable
+/// \param l A sequence of data expressions
+/// \return The concatenation of [v] and the list l.
+inline
+variable_list operator+(variable_list const& l, variable v)
+{
+  variable_list result(l.begin(), l.end());
+
+  result.insert(result.end(), data_expression(v));
+
+  return result;
+}
+
+/// \brief Returns the concatenation of [v] and the list l.
+/// \param v A data variable
+/// \param l A sequence of data expressions
+/// \return The concatenation of [v] and the list l.
+inline
+data_expression_list operator+(data_expression_list const& l, variable v)
+{
+  data_expression_list result(l.begin(), l.end());
+
+  result.insert(result.end(), data_expression(v));
+
+  return result;
+}
+
+/// \brief Returns the concatenation of the list l and [v].
+/// \param l A sequence of data expressions
+/// \param v A data variable
+/// \return The concatenation of the list l and [v].
+inline
+data_expression_list operator+(variable v, data_expression_list const& l)
+{
+  return l + v;
+}
+
+/// \brief Returns the concatenation of the list l and [v].
+/// \param l A sequence of data expressions
+/// \param v A data variable
+/// \return The concatenation of the list l and [v].
+inline
+variable_list operator+(variable v, variable_list const& l)
+{
+  return l + v;
+}
+
 } // namespace detail
 
-} // namespace data
+} // namespace new_data
 
 } // namespace mcrl2
 

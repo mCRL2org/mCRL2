@@ -51,7 +51,7 @@ namespace mcrl2 {
       ///
       /// \param[in] f A function symbol.
       /// \pre f is a constructor.
-      /// \ret All sorts on which f depends.
+      /// \return All sorts on which f depends.
       inline
       sort_expression_list dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited) const
       {
@@ -77,7 +77,7 @@ namespace mcrl2 {
       /// \brief Determines the sorts on which a sort expression depends
       ///
       /// \param[in] s A sort expression.
-      /// \ret All sorts on which s depends.
+      /// \return All sorts on which s depends.
       inline
       sort_expression_list dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited) const
       {
@@ -195,7 +195,7 @@ namespace mcrl2 {
 
       /// \brief Gets the sort declarations
       ///
-      /// \ret The sort declarations of this specification.
+      /// \return The sort declarations of this specification.
       inline
       sort_expression_const_range sorts() const
       {
@@ -205,7 +205,7 @@ namespace mcrl2 {
       /// \brief Gets the aliases
       ///
       /// \param[in] s A sort expression
-      /// \ret The aliases of sort s
+      /// \return The aliases of sort s
       inline
       alias_const_range aliases(sort_expression& s) const
       {
@@ -215,7 +215,7 @@ namespace mcrl2 {
 
       /// \brief Gets all constructors
       ///
-      /// \ret All constructors in this specification, including those for
+      /// \return All constructors in this specification, including those for
       /// structured sorts.
 
       inline
@@ -233,7 +233,7 @@ namespace mcrl2 {
       /// \brief Gets all constructors of a sort.
       ///
       /// \param[in] s A sort expression.
-      /// \ret The constructors for sort s in this specification.
+      /// \return The constructors for sort s in this specification.
       inline
       function_symbol_const_range constructors(const sort_expression& s) const
       {
@@ -249,7 +249,7 @@ namespace mcrl2 {
 
       /// \brief Gets all mappings in this specification
       ///
-      /// \ret All mappings in this specification, including recognisers and
+      /// \return All mappings in this specification, including recognisers and
       /// projection functions from structured sorts.
       inline
       function_symbol_const_range mappings() const
@@ -260,7 +260,7 @@ namespace mcrl2 {
       /// \brief Gets all mappings of a sort
       ///
       /// \param[in] s A sort expression.
-      /// \ret All mappings in this specification, for which s occurs as a
+      /// \return All mappings in this specification, for which s occurs as a
       /// righthandside of the mapping's sort.
       inline
       function_symbol_list mappings(const sort_expression& s) const
@@ -288,7 +288,7 @@ namespace mcrl2 {
 
       /// \brief Gets all equations in this specification
       ///
-      /// \ret All equations in this specification, including those for
+      /// \return All equations in this specification, including those for
       ///  structured sorts.
       inline
       data_equation_const_range equations() const
@@ -300,7 +300,7 @@ namespace mcrl2 {
       /// on one of its sides.
       ///
       /// \param[in] d A new_data expression.
-      /// \ret All equations with d as head in one of its sides.
+      /// \return All equations with d as head in one of its sides.
       inline
       data_equation_list equations(const data_expression& d) const
       {
@@ -686,7 +686,7 @@ namespace mcrl2 {
       /// \brief Checks whether a sort is system defined.
       ///
       /// \param[in] s A sort expression.
-      /// \ret true iff s is system defined, false otherwise.
+      /// \return true iff s is system defined, false otherwise.
       inline
       bool is_system_defined(const sort_expression& s)
       {
@@ -696,7 +696,7 @@ namespace mcrl2 {
       /// \brief Checks whether a function symbol is system defined.
       ///
       /// \param[in[ f A function symbol.
-      /// \ret true iff f is system defined (either as constructor or as
+      /// \return true iff f is system defined (either as constructor or as
       ///      mapping), false otherwise.
       inline
       bool is_system_defined(const function_symbol& f)
@@ -708,7 +708,7 @@ namespace mcrl2 {
       /// \brief Checks whether an equation is system defined.
       ///
       /// \param[in] e An equation.
-      /// \ret true iff e is system defined, false otherwise.
+      /// \return true iff e is system defined, false otherwise.
       inline
       bool is_system_defined(const data_equation& e)
       {
@@ -718,7 +718,7 @@ namespace mcrl2 {
       /// \brief Checks whether a sort is certainly finite.
       ///
       /// \param[in] s A sort expression
-      /// \ret true if s can be determined to be finite,
+      /// \return true if s can be determined to be finite,
       ///      false otherwise.
       inline
       bool is_certainly_finite(const sort_expression& s) const
@@ -733,6 +733,10 @@ namespace mcrl2 {
 
         if (s.is_basic_sort())
         {
+          if (s.is_standard()) {
+            return sort_bool_::is_bool_(s);
+          }
+
           function_symbol_const_range fl(constructors(s));
 
           for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
@@ -796,10 +800,27 @@ namespace mcrl2 {
         }
       }
 
+      /// \brief Checks whether all sort expressions are certainly finite.
+      ///
+      /// \param[in] s A range of sort expressions
+      /// \return std::find_if(s.begin(), s.end(), std::bind1st(std::mem_fun(&data_specification::is_certainly_finite), this)) == s.end()
+      template < typename ForwardTraversalIterator >
+      inline
+      bool is_certainly_finite(const boost::iterator_range< ForwardTraversalIterator >& s) const
+      {
+        for (ForwardTraversalIterator i = s.begin(); i != s.end(); ++i) {
+          if (!is_certainly_finite(*i)) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
       /// \brief Returns a default expression for a sort.
       ///
       /// \param[in] s A sort expression.
-      /// \ret Default expression of sort s.
+      /// \return Default expression of sort s.
       inline
       data_expression default_expression(const sort_expression& s)
       {
