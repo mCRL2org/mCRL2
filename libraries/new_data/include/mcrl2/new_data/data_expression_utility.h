@@ -609,20 +609,20 @@ namespace mcrl2 {
       /// \param first Start of a sequence of data expressions
       /// \param last End of a sequence of data expressions
       /// \return Or applied to the sequence of data expressions [first, last)
-      template <typename FwdIt>
-      data_expression join_or(FwdIt first, FwdIt last)
+      template < typename ForwardTraversalIterator >
+      data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
-        return core::detail::join(first, last, lazy::or_, sort_bool_::false_());
+        return core::detail::join(first, last, lazy::or_, static_cast< sort_expression const& >(sort_bool_::false_()));
       }
 
       /// \brief Returns and applied to the sequence of data expressions [first, last)
       /// \param first Start of a sequence of data expressions
       /// \param last End of a sequence of data expressions
       /// \return And applied to the sequence of data expressions [first, last)
-      template <typename FwdIt>
-      data_expression join_and(FwdIt first, FwdIt last)
+      template < typename ForwardTraversalIterator >
+      data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
-        return core::detail::join(first, last, lazy::and_, sort_bool_::true_());
+        return core::detail::join(first, last, lazy::and_, static_cast< sort_expression const& >(sort_bool_::true_()));
       }
     }
 

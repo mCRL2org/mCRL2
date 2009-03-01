@@ -123,14 +123,14 @@ class linear_process: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    new_data::variable_list free_variables() const
+    new_data::variable_list const& free_variables() const
     {
       return m_free_variables;
     }
 
     /// \brief Returns the sequence of process parameters.
     /// \return The sequence of process parameters.
-    new_data::variable_list process_parameters() const
+    new_data::variable_list const& process_parameters() const
     {
       return m_process_parameters;
     }

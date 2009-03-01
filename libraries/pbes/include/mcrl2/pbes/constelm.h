@@ -490,7 +490,8 @@ namespace detail {
         std::vector<variable_type> constant_parameters() const
         {
           std::vector<variable_type> result;
-          for (typename variable_sequence_type::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i)
+          variable_sequence_type parameters(variable.parameters());
+          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i)
           {
             if (is_constant(*i))
             {
@@ -506,7 +507,8 @@ namespace detail {
         {
           std::vector<int> result;
           int index = 0;
-          for (typename variable_sequence_type::iterator i = variable.parameters().begin(); i != variable.parameters().end(); ++i, index++)
+          variable_sequence_type parameters(variable.parameters());
+          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
           {
             if (is_constant(*i))
             {
@@ -642,7 +644,8 @@ namespace detail {
           for (std::vector<int>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             // std::advance doesn't work for aterm lists :-(
-            typename variable_sequence_type::iterator k = v.variable.parameters().begin();
+            variable_sequence_type parameters(v.variable.parameters());
+            typename variable_sequence_type::iterator k = parameters.begin();
             for (int i = 0; i < *j; i++)
             {
               ++k;
@@ -843,7 +846,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
           std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
           for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
           {
-            for (typename std::vector<variable_type>::iterator j = i->second.begin(); j != i->second.end(); ++j)
+            for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
             {
               std::cerr << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
             }

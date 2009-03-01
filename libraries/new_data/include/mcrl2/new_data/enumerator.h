@@ -188,7 +188,8 @@ class data_enumerator
 
       // Compute the instantiations for each variable of e.
       std::vector<atermpp::vector<data_expression_with_variables> > enumerated_values;
-      for (variable_list::const_iterator i = e.variables().begin(); i != e.variables().end(); ++i)
+      variable_list variables(e.variables());
+      for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
         enumerated_values.push_back(enumerate(*i));
       }

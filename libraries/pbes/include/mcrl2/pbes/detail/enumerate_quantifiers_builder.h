@@ -372,7 +372,8 @@ namespace detail {
             bool is_constant = true;
 
             D[k].erase(std::find(D[k].begin(), D[k].end(), y));
-            for (typename variable_sequence_type::iterator i = y.variables().begin(); i != y.variables().end(); ++i)
+            variable_sequence_type variables(y.variables());
+            for (typename variable_sequence_type::iterator i = variables.begin(); i != variables.end(); ++i)
             {
               dependencies.erase(*i);
             }
@@ -406,7 +407,9 @@ namespace detail {
                 }
                 else
                 {
-                  for (typename variable_sequence_type::iterator j = i->variables().begin(); j != i->variables().end(); ++j)
+                  variable_sequence_type variables(i->variables());
+
+                  for (typename variable_sequence_type::iterator j = variables.begin(); j != variables.end(); ++j)
                   {
                     dependencies.erase(*j);
                   }

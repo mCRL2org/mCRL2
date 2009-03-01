@@ -200,8 +200,10 @@ class pbes_translate_algorithm
     atermpp::set<new_data::variable> free_variables(const lps::specification& spec) const
     {
       atermpp::set<new_data::variable> result;
-      result.insert(spec.process().free_variables().begin(), spec.process().free_variables().end());
-      result.insert(spec.initial_process().free_variables().begin(), spec.initial_process().free_variables().end());
+      new_data::variable_list free_variables(spec.process().free_variables());
+      result.insert(free_variables.begin(), free_variables.end());
+      new_data::variable_list initial_free_variables(spec.initial_process().free_variables());
+      result.insert(initial_free_variables.begin(), initial_free_variables.end());
       return result;
     }
 

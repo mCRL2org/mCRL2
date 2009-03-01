@@ -136,8 +136,8 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
   std::vector<new_data::variable> src;  // contains the variables that need to be renamed
   std::vector<new_data::variable> dest; // contains the corresponding replacements
   generator.add_identifiers(forbidden_names);
-
-  for (new_data::variable_list::iterator i = p.free_variables().begin(); i != p.free_variables().end(); ++i)
+  new_data::variable_list free_variables(p.free_variables());
+  for (new_data::variable_list::const_iterator i = free_variables.begin(); i != free_variables.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())

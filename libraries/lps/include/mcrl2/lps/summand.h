@@ -205,7 +205,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of summation variables.
     /// \return The sequence of summation variables.
-    new_data::variable_list summation_variables() const
+    new_data::variable_list const& summation_variables() const
     {
       return m_summation_variables;
     }
@@ -244,7 +244,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the condition expression.
     /// \return The condition expression.
-    new_data::data_expression condition() const
+    new_data::data_expression const& condition() const
     {
       return m_condition;
     }
@@ -260,14 +260,14 @@ class summand: public atermpp::aterm_appl
     /// \brief Returns the time.
     /// \return The time.
     /// \deprecated
-    new_data::data_expression time() const
+    new_data::data_expression const& time() const
     {
       return m_time;
     }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    new_data::assignment_list assignments() const
+    new_data::assignment_list const& assignments() const
     {
       return m_assignments;
     }
