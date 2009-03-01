@@ -15,8 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/detail/utility.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
 
 using namespace atermpp;

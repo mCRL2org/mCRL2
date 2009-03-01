@@ -254,7 +254,7 @@ namespace lps {
       //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
       //is always the same.
       if (!lhs(working_condition).is_variable() && rhs(working_condition).is_variable() &&
-          new_data::find_variable(boost::make_iterator_range(summand_.summation_variables()), rhs(working_condition)))
+          new_data::search_variable(summand_.summation_variables(), rhs(working_condition)))
       {
         working_condition = swap_equality(working_condition);
       }
@@ -265,8 +265,8 @@ namespace lps {
       //substitution in summation_variables is done in calling function.
       if (lhs(working_condition).is_variable())
       {
-        if (new_data::find_variable(boost::make_iterator_range(summand_.summation_variables()), variable(lhs(working_condition))) &&
-            !find_data_expression(rhs(working_condition), lhs(working_condition)))
+        if (new_data::search_variable(summand_.summation_variables(), variable(lhs(working_condition))) &&
+            !search_data_expression(rhs(working_condition), lhs(working_condition)))
         {
           if (substitutions.count(lhs(working_condition)) == 0)
           {
@@ -274,7 +274,7 @@ namespace lps {
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = sort_bool_::true_();
           } else if (rhs(working_condition).is_variable() &&
-                     new_data::find_variable(boost::make_iterator_range(summand_.summation_variables()), variable(rhs(working_condition)))) {
+                     new_data::search_variable(summand_.summation_variables(), variable(rhs(working_condition)))) {
             // check whether the converse is possible
             if (substitutions.count(rhs(working_condition)) == 0) {
               sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
@@ -282,7 +282,7 @@ namespace lps {
             }
           } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 &&
                        substitutions[lhs(working_condition)].is_variable() &&
-                       new_data::find_variable(boost::make_iterator_range(summand_.summation_variables()), variable(substitutions[lhs(working_condition)]))) {
+                       new_data::search_variable(summand_.summation_variables(), variable(substitutions[lhs(working_condition)]))) {
             sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
             result = sort_bool_::true_();

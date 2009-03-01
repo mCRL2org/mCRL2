@@ -122,7 +122,7 @@ void test_case_5()
   specification s0 = mcrl22lps(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
-  std::set<variable> parameters = mcrl2::new_data::find_all_variables(boost::make_iterator_range(s1.process().process_parameters()));
+  std::set<variable> parameters = mcrl2::new_data::find_all_variables(s1.process().process_parameters());
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());

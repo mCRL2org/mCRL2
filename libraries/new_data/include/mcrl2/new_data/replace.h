@@ -13,8 +13,10 @@
 #define MCRL2_DATA_REPLACE_H
 
 #include <utility>
+#include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -51,6 +53,49 @@ struct replace_variables_helper
 };
 /// \endcond
 
+/// \cond INTERNAL_DOCS
+namespace detail {
+
+  // The last argument of the functions below is used with boost::enable_if to
+  // activate the correct overload. This way the compiler generates the
+  // necessary code, which would otherwise need to be duplicated *at least*
+  // four times for frequently used containers (currently std::set,
+  // atermpp::set, std::vector, atermpp::vector). Adding overloads for a new
+  // container type only requires instantiation of is_container_impl for the
+  // appropriate type.
+
+  template <typename T, typename ReplaceFunction >
+  T partial_replace(T t, ReplaceFunction r, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+  {
+    return atermpp::partial_replace(t, r);
+  }
+
+  template <typename T, typename ReplaceFunction >
+  T partial_replace(T const& t, ReplaceFunction r, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    T result;
+
+    typename std::insert_iterator< T > j(result, result.end());
+
+    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+      *j = atermpp::partial_replace(*i, r);
+    }
+
+    return result;
+  }
+
+  template <typename T, typename ReplaceFunction >
+  T& partial_replace(T& t, ReplaceFunction r, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    for (typename T::iterator i = t.begin(); i != t.end(); ++i) {
+      *i = atermpp::partial_replace(*i, r);
+    }
+
+    return t;
+  }
+}
+/// \endcond
+
 /// \brief Recursively traverses the given term, and applies the replace function to
 /// each data variable that is encountered during the traversal.
 /// \param t A term
@@ -59,19 +104,7 @@ struct replace_variables_helper
 template <typename Term, typename ReplaceFunction>
 Term replace_variables(Term t, ReplaceFunction r)
 {
-  return atermpp::partial_replace(t, replace_variables_helper<ReplaceFunction>(r));
-}
-
-template <typename Term, typename ReplaceFunction>
-atermpp::vector< Term > replace_variables(atermpp::vector< Term > const& t, ReplaceFunction r)
-{
-  atermpp::vector< Term > result;
-
-  for (typename atermpp::vector< Term >::const_iterator i = t.begin(); i != t.end(); ++i) {
-    result.push_back(atermpp::partial_replace(*i, replace_variables_helper<ReplaceFunction>(r)));
-  }
-
-  return result;
+  return detail::partial_replace(t, replace_variables_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
@@ -202,10 +235,10 @@ struct replace_data_expressions_helper
 /// \param t A term
 /// \param r A replace function
 /// \return The replacement result
-template <typename Term, typename ReplaceFunction>
-Term replace_data_expressions(Term t, ReplaceFunction r)
+template <typename Container, typename ReplaceFunction >
+Container replace_data_expressions(Container const t, ReplaceFunction r)
 {
-  return atermpp::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
+  return detail::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS

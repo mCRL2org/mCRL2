@@ -6,7 +6,7 @@
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/application.h"
 #include "mcrl2/new_data/data_equation.h"
-#include "mcrl2/new_data/detail/utility.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/pos.h"

@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -17,174 +17,198 @@
 #include <iterator>
 #include <functional>
 #include "boost/bind.hpp"
+#include "boost/utility/enable_if.hpp"
+#include "boost/type_traits/remove_const.hpp"
+#include "boost/type_traits/remove_reference.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 
 namespace mcrl2 {
 
 namespace new_data {
 
+/// \cond INTERNAL_DOCS
+namespace detail {
+
+  // The last argument of the functions below is used with boost::enable_if to
+  // activate the correct overload. This way the compiler generates the
+  // necessary code, which would otherwise need to be duplicated *at least*
+  // four times for frequently used containers (currently std::set,
+  // atermpp::set, std::vector, atermpp::vector). Adding overloads for a new
+  // container type only requires instantiation of is_container_impl for the
+  // appropriate type.
+
+  template <typename T, typename MatchPredicate>
+  atermpp::aterm_appl find_if(T t, MatchPredicate match, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+  {
+    return atermpp::find_if(t, match);
+  }
+
+  template <typename T, typename MatchPredicate>
+  atermpp::aterm_appl find_if(T const& t, MatchPredicate match, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+      atermpp::aterm_appl result = atermpp::find_if(t, match);
+
+      if (result != atermpp::aterm_appl()) {
+        return result;
+      }
+    }
+
+    return atermpp::aterm_appl();
+  }
+
+  template <typename T, typename MatchPredicate, typename StopPredicate>
+  atermpp::aterm_appl partial_find_if(T t, MatchPredicate match, StopPredicate stop, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+  {
+    return atermpp::partial_find_if(t, match, stop);
+  }
+
+  template <typename T, typename MatchPredicate, typename StopPredicate>
+  atermpp::aterm_appl partial_find_if(T const& t, MatchPredicate match, StopPredicate stop, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+      atermpp::aterm_appl result = atermpp::partial_find_if(*i, match, stop);
+
+      if (result != atermpp::aterm_appl()) {
+        return result;
+      }
+    }
+
+    return atermpp::aterm_appl();
+  }
+
+  template <typename T, typename MatchPredicate, typename OutputIterator>
+  void find_all_if(T t, MatchPredicate match, OutputIterator destBegin, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+  {
+    atermpp::find_all_if(t, match, destBegin);
+  }
+
+  // container specialisation
+  template <typename T, typename MatchPredicate, typename OutputIterator>
+  void find_all_if(T const& t, MatchPredicate match, OutputIterator destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+      atermpp::find_all_if(*i, match, destBegin);
+    }
+  }
+
+  template <typename T, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+  void partial_find_all_if(T t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+  {
+    atermpp::partial_find_all_if(t, match, stop, destBegin);
+  }
+
+  // container specialisation
+  template <typename T, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
+  void partial_find_all_if(T const& t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  {
+    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+      atermpp::partial_find_all_if(*i, match, stop, destBegin);
+    }
+  }
+}
+/// \endcond
+
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param t A term
+/// \param[in] container a container with expressions
 /// \param d A data variable
 /// \return True if the term has a given variable as subterm.
-template <typename Term>
-bool find_variable(Term t, const variable& d)
+template <typename Container >
+bool search_variable(Container t, const variable& d)
 {
-  return atermpp::partial_find_if(t, detail::compare_term<variable>(d), core::detail::gsIsDataVarId) != atermpp::aterm();
+  return detail::partial_find_if(t, detail::compare_term<variable>(d), &detail::is_variable) != atermpp::aterm();
 }
 
 /// \brief Returns all data variables that occur in the term t
 /// This is implementation is more efficient, but there are problems with it...
-/// \param t A term
+/// \param t an expression
 /// \return All data variables that occur in the term t
-template <typename Term>
-std::set<variable> find_all_variables2(Term t)
+template <typename Container>
+std::set<variable> find_all_variables2(Container t)
 {
   std::set<variable> result;
-  atermpp::partial_find_all_if(t,
-                               std::mem_fun(&data_expression::is_variable),
-                               boost::bind(std::logical_or<bool>(), boost::bind(&data_expression::is_variable, _1), boost::bind(&data_expression::is_function_symbol, _1)),
-                               std::inserter(result, result.end())
+  detail::partial_find_all_if(t,
+                               boost::bind(&detail::is_variable, _1),
+                               boost::bind(std::logical_or<bool>(), boost::bind(&detail::is_variable, _1), boost::bind(&detail::is_function_symbol, _1)),
+                               detail::make_inserter(result)
                               );
   return result;
 }
 
-/// \brief Returns all data variables that occur in the term t
-/// \param t A term
-/// \return All data variables that occur in the term t
-template <typename Term>
-std::set<variable> find_all_variables(Term t)
-{
-  struct local {
-    static bool caster(atermpp::aterm p) {
-      return data_expression(p).is_variable();
-    }
-  };
-  std::set<variable> result;
-  atermpp::find_all_if(t, std::ptr_fun(&local::caster), std::inserter(result, result.end()));
-  return result;
-}
-
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] begin start of a range of expressions
-/// \param[in] end of a range of expressions
-/// \param[in] d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename ForwardTraversalIterator >
-inline bool find_variable(ForwardTraversalIterator const& begin, ForwardTraversalIterator const& end, const variable& d)
-{
-  atermpp::aterm result;
-
-  for (ForwardTraversalIterator i = begin; result == atermpp::aterm() && i != end; ++i) {
-    result = atermpp::partial_find_if(*i, detail::compare_term<variable>(d), core::detail::gsIsDataVarId);
-  }
-
-  return result != atermpp::aterm();
-}
-
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] range a range of expressions
-/// \param[in] d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename ForwardTraversalIterator >
-inline bool find_variable(boost::iterator_range< ForwardTraversalIterator > const& range, const variable& d)
-{
-  return find_variable(range.begin(), range.end(), d);
-}
-
 /// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] begin start of a range of expressions
-/// \param[in] end of a range of expressions
+/// \param[in] container a container with expressions
 /// \return All data variables that occur in the term t
-template <typename ForwardTraversalIterator >
-std::set<variable> find_all_variables(ForwardTraversalIterator const& begin, ForwardTraversalIterator const& end)
+template <typename Container >
+std::set<variable> find_all_variables(Container const& container)
 {
-  struct local {
-    static bool caster(atermpp::aterm p) {
-      return data_expression(p).is_variable();
-    }
-  };
-
   std::set<variable> result;
-
-  for (ForwardTraversalIterator i = begin; i != end; ++i) {
-    atermpp::find_all_if(*i, std::ptr_fun(&local::caster), std::inserter(result, result.end()));
-  }
-
+  detail::find_all_if(container, boost::bind(&detail::is_variable, _1), detail::make_inserter(result));
   return result;
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] range a range of expressions
-/// \return All data variables that occur in the term t
-template <typename ForwardTraversalIterator >
-std::set<variable> find_all_variables(boost::iterator_range< ForwardTraversalIterator > const& range)
-{
-  return find_all_variables(range.begin(), range.end());
 }
 
 /// \brief Returns true if the term has a given sort identifier as subterm.
-/// \param t A term
+/// \param t an expression
 /// \param s A sort identifier
 /// \return True if the term has a given sort identifier as subterm.
-template <typename Term>
-bool find_basic_sort(Term t, const basic_sort& s)
+template <typename Container>
+bool search_basic_sort(Container t, const basic_sort& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
+  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
-/// \param t A term
+/// \param t an expression
 /// \return All sort identifiers that occur in the term t
-template <typename Term>
-std::set<basic_sort> find_all_basic_sorts(Term t)
+template <typename Container >
+std::set<basic_sort> find_all_basic_sorts(Container t)
 {
   std::set<basic_sort> result;
-  atermpp::find_all_if(t, std::mem_fun(&sort_expression::is_basic_sort), std::inserter(result, result.end()));
+  detail::find_all_if(t, boost::bind(&detail::is_basic_sort, _1), detail::make_inserter(result));
   return result;
 }
 
 /// \brief Returns true if the term has a given sort expression as subterm.
-/// \param t A term
+/// \param t an expression
 /// \param s A sort expression
 /// \return True if the term has a given sort expression as subterm.
-template <typename Term>
-bool find_sort_expression(Term t, const sort_expression& s)
+template <typename Container>
+bool search_sort_expression(Container t, const sort_expression& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
+  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all sort expressions that occur in the term t
-/// \param t A term
+/// \param t an expression
 /// \return All sort expressions that occur in the term t
-template <typename Term>
-std::set<sort_expression> find_all_sort_expressions(Term t)
+template <typename Container>
+std::set<sort_expression> find_all_sort_expressions(Container t)
 {
   std::set<sort_expression> result;
-  atermpp::find_all_if(t, is_sort_expression, std::inserter(result, result.end()));
+  detail::find_all_if(t, is_sort_expression, detail::make_inserter(result));
   return result;
 }
 
 /// \brief Returns true if the term has a given data expression as subterm.
-/// \param t A term
+/// \param t an expression
 /// \param s A data expression
 /// \return True if the term has a given data expression as subterm.
-template <typename Term>
-bool find_data_expression(Term t, const data_expression& s)
+template <typename Container >
+bool search_data_expression(Container t, const data_expression& s)
 {
-  return atermpp::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
+  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all data expressions that occur in the term t
-/// \param t A term
+/// \param t an expression
 /// \return All data expressions that occur in the term t
-template <typename Term>
-std::set<data_expression> find_all_data_expressions(Term t)
+template <typename Container >
+std::set<data_expression> find_all_data_expressions(Container t)
 {
   std::set<data_expression> result;
-  atermpp::find_all_if(t, is_data_expression, std::inserter(result, result.end()));
+  detail::find_all_if(t, is_data_expression, detail::make_inserter(result));
   return result;
 }
 

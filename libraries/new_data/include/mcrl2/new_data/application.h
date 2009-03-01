@@ -16,7 +16,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/new_data/detail/utility.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/new_data/data_expression.h"
 

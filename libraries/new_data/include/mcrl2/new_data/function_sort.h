@@ -22,7 +22,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/detail/convert.h"
-#include "mcrl2/new_data/detail/utility.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 
 namespace mcrl2 {
 
