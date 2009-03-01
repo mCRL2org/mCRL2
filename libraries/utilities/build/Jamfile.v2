@@ -41,3 +41,5 @@ mcrl2-library utilities
       :
       : <include>../include
       ;
+
+alias exception : : : : <include>../include ;
