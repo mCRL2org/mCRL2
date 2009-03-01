@@ -300,10 +300,12 @@ static int strequal(char *s1,char *s2)
 }
 
 
+/* Function below was needed for insert_summand
+
 static int variablesequal(ATermList t1, ATermList t2,
                 ATermList *renamingvariablelist,
                 ATermList *renamingtermlist)
-{ /* return 1 iff t1 equals t2, modulo a renaming; */
+{ / * return 1 iff t1 equals t2, modulo a renaming; * /
   ATermAppl var1=NULL, var2=NULL;
 
   *renamingvariablelist=ATempty;
@@ -327,7 +329,7 @@ static int variablesequal(ATermList t1, ATermList t2,
   { return 1;
   }
   return 0;
-}
+} */
 
 static localstring *emptystringlist =NULL;
 
@@ -4637,6 +4639,8 @@ static ATermList dummyparameterlist(stacklisttype *stack, ATbool singlestate,spe
   /* return ATinsertA(stack->parameterlist,stack->stackvar); Erroneous, repaired 5/3 */
 }
 
+/*  Functions below were needed for insert summand.
+ 
 static int identicalActionIds_rec(ATermList ma1, ATermList ma2)
 {
   if (ma1==ATempty)
@@ -4666,7 +4670,7 @@ static int identicalActionIds(ATermAppl ma1, ATermAppl ma2)
   }
 
   return identicalActionIds_rec(ATLgetArgument(ma1,0),ATLgetArgument(ma2,0));
-}
+} */
 
 static ATermList insert_summand(
                     ATermList sumlist,
@@ -4757,7 +4761,7 @@ static ATermList insert_summand(
     newsumlist=ATinsertA(newsumlist,summand);
   }
 
-  /* There is no matching summand in sumlist. So, we add the summand
+  / * There is no matching summand in sumlist. So, we add the summand
      at the beginning * /
 
   return ATinsertA(newsumlist,
@@ -9048,6 +9052,7 @@ static void AddTerminationActionIfNecessary(
           ATAgetArgument(
             ATAgetFirst(ATLgetArgument(terminationAction,0)),
             0));
+      gsMessage("The action %P is added to signal termination of the linear process\n",terminationAction);
       return;
     }
   }
