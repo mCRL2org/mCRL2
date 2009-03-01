@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/detail/rewrite.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/find.h"

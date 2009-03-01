@@ -31,6 +31,7 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/data_common.h"
@@ -67,7 +68,7 @@ static bool allowFreeDataVariablesInProcesses;
 static bool nodeltaelimination;
 static bool add_delta;
 
-static Rewriter *rewr = NULL;
+static std::auto_ptr< mcrl2::new_data::rewriter > rewr;
 
 /* PREAMBLE */
 
@@ -660,7 +661,7 @@ static long insertmapping(
 
 static void insertequation(ATermAppl eqn, specificationbasictype *spec, bool add_to_spec)
 {
-  if (mayrewrite) rewr->addRewriteRule(eqn);
+  if (mayrewrite) rewr->add_rule(mcrl2::new_data::data_equation(eqn));
   if (add_to_spec) spec->eqns=ATinsertA(spec->eqns,eqn);
 }
 
@@ -949,7 +950,7 @@ static int upperpowerof2(int i)
 static ATermAppl RewriteTerm(ATermAppl t)
 {
   // gsfprintf(stderr,"Rewrite %P\n",t);
-  if (mayrewrite) t=rewr->rewrite(t);
+  if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::new_data::data_expression(t)));
   return t;
 }
 
@@ -9282,10 +9283,9 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //initialise local data structures
   initialize_data();
 
-  new_data::rewriter rewriter(new_data::data_specification(ATAgetArgument(spec,0)), lin_options.rewrite_strategy);
-mayrewrite = false;
   if (mayrewrite) {
-    rewr = rewriter.get_rewriter();
+    rewr.reset(new mcrl2::new_data::rewriter(
+                new_data::data_specification(ATAgetArgument(spec,0)), lin_options.rewrite_strategy));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
@@ -9329,7 +9329,7 @@ mayrewrite = false;
   //clean up
   uninitialize_data();
   uninitialize_symbols();
-  rewr = 0;
+  rewr.release();
 
   return result;
 }
@@ -9351,7 +9351,6 @@ void lin_std_initialize_global_variables()
   allowFreeDataVariablesInProcesses = false;
   nodeltaelimination = false;
   add_delta = false;
-  rewr = NULL;
   time_operators_used=0;
   seq_varnames=NULL;
   objectIndexTable=NULL;
