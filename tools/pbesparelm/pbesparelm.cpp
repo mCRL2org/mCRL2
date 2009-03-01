@@ -16,7 +16,6 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
 

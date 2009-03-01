@@ -27,7 +27,7 @@ namespace tools {
   {
     protected:
       /// The data rewriter strategy
-      RewriteStrategy m_rewrite_strategy;
+      mcrl2::new_data::rewriter::strategy m_rewrite_strategy;
 
       /// \brief Add options to an interface description. Also includes
       /// rewriter options.
@@ -43,7 +43,7 @@ namespace tools {
       void parse_options(const command_line_parser& parser)
       {
         Tool::parse_options(parser);
-        m_rewrite_strategy = parser.option_argument_as<RewriteStrategy>("rewriter");
+        m_rewrite_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
       }
 
     public:
@@ -55,7 +55,7 @@ namespace tools {
                     const std::string& tool_description
                    )
         : Tool(name, author, what_is, tool_description),
-          m_rewrite_strategy(GS_REWR_JITTY)
+          m_rewrite_strategy(mcrl2::new_data::rewriter::jitty)
       {}
 
       /// \brief Returns the rewrite strategy
