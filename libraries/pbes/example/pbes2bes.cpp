@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
     pbes<> p;
     p.load(infile);
-    pbes2bes_algorithm algorithm(p.data(), mcrl2::data::rewriter::jitty, print_equations, print_rewriter_output);
+    pbes2bes_algorithm algorithm(p.data(), mcrl2::new_data::rewriter::jitty, print_equations, print_rewriter_output);
     algorithm.run(p);
     p = algorithm.get_result();
     p.save(outfile);

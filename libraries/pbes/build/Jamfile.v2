@@ -4,12 +4,11 @@ project pbes
 
 mcrl2-library pbes
        : pbes_rewrite.cpp
-         pbes2bool.cpp
-         gauss.cpp
-         sort_instantiator.cpp
-         data_elimination.cpp
-       : <library>/libraries//data
-         <library>/libraries//lps
+#         pbes2bool.cpp
+#         gauss.cpp
+#         sort_instantiator.cpp
+#         data_elimination.cpp
+       : <library>/libraries//lps
          <include>../include
          <use>/site-config//boost
        :

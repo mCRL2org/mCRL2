@@ -46,7 +46,7 @@ namespace pbes_system {
 
       /// \brief Constructor.
       pbes_expression_with_propositional_variables(pbes_expression expression,
-                                                   data::data_variable_list variables,
+                                                   new_data::variable_list variables,
                                                    propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
         : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
       {}
@@ -82,9 +82,9 @@ template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_propositional_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)   { t.protect(); t.variables().protect(); t.propositional_variables().protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t) { t.unprotect(); t.variables().unprotect(); t.propositional_variables().unprotect(); }
-  static void mark(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)      { t.mark(); t.variables().mark(); t.propositional_variables().mark(); }
+  static void protect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)   { t.protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t) { t.unprotect();}
+  static void mark(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)      { t.mark();}
   static ATerm term(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)     { return t.term(); }
   static ATerm* ptr(mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)    { return &t.term(); }
 };
@@ -103,16 +103,16 @@ namespace core {
     typedef pbes_system::pbes_expression_with_propositional_variables term_type;
 
     /// \brief The data term type
-    typedef data::data_expression_with_variables data_term_type;
+    typedef new_data::data_expression_with_variables data_term_type;
 
     /// \brief The data term sequence type
-    typedef data::data_expression_list data_term_sequence_type;
+    typedef new_data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef data::data_variable variable_type;
+    typedef new_data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef data::data_variable_list variable_sequence_type;
+    typedef new_data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -151,7 +151,7 @@ namespace core {
     term_type and_(term_type p, term_type q)
     {
       return term_type(tr::and_(p, q),
-                       atermpp::term_list_union(p.variables(), q.variables()),
+                       mcrl2::detail::merge(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -164,7 +164,7 @@ namespace core {
     term_type or_(term_type p, term_type q)
     {
       return term_type(tr::or_(p, q),
-                       atermpp::term_list_union(p.variables(), q.variables()),
+                       mcrl2::detail::merge(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -177,7 +177,7 @@ namespace core {
     term_type imp(term_type p, term_type q)
     {
       return term_type(tr::imp(p, q),
-                       atermpp::term_list_union(p.variables(), q.variables()),
+                       mcrl2::detail::merge(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -190,7 +190,7 @@ namespace core {
     term_type forall(variable_sequence_type l, term_type p)
     {
       return term_type(tr::forall(l, p),
-                       atermpp::term_list_difference(p.variables(), l),
+                       mcrl2::detail::difference(p.variables(), l.begin(), l.end()),
                        p.propositional_variables()
                       );
     }
@@ -203,7 +203,7 @@ namespace core {
     term_type exists(variable_sequence_type l, term_type p)
     {
       return term_type(tr::exists(l, p),
-                       atermpp::term_list_difference(p.variables(), l),
+                       mcrl2::detail::difference(p.variables(), l.begin(), l.end()),
                        p.propositional_variables()
                       );
     }
@@ -351,7 +351,8 @@ namespace core {
     static inline
     term_type dataterm2term(data_term_type t)
     {
-      return term_type(t, t.variables());
+      new_data::variable_list variables(t.variables());
+      return term_type(t, atermpp::aterm_list(variables.begin(), variables.end()));
     }
 
     /// \brief Conversion from term to data term
@@ -374,7 +375,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + core::pp(t.variables()) + " " + core::pp(t.propositional_variables());
+      return core::pp(t) + " " + new_data::pp(t.variables()) + " " + new_data::pp(t.propositional_variables());
     }
   };
 

@@ -12,14 +12,48 @@
 #ifndef MCRL2_PBES_PBES_EXPRESSION_WITH_VARIABLES_H
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_VARIABLES_H
 
+#include <algorithm>
 #include <set>
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/detail/join.h"
-#include "mcrl2/data/data_expression_with_variables.h"
+#include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 
 namespace mcrl2 {
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  new_data::variable_list merge(new_data::variable_list const& v1, new_data::variable_list const& v2) {
+    std::set< new_data::variable > variables(v1.begin(), v1.end());
+
+    variables.insert(v2.begin(), v2.end());
+
+    return new_data::variable_list(variables.begin(), variables.end());
+  }
+
+  struct in_range : public std::unary_function< new_data::variable const&, bool > {
+    std::set< new_data::variable > m_variables;
+
+    bool operator()(new_data::variable const& v) const {
+      return m_variables.find(v) != m_variables.end();
+    }
+
+    template < typename ForwardTraversalIterator >
+    in_range(ForwardTraversalIterator b, ForwardTraversalIterator e) : m_variables(b, e) {
+    }
+  };
+
+  template < typename ForwardTraversalIterator >
+  new_data::variable_list difference(new_data::variable_list const& v, ForwardTraversalIterator const& b, ForwardTraversalIterator const& e) {
+    new_data::variable_list result;
+
+    std::remove_copy_if(v.begin(), v.end(), result.end(), in_range(b, e));
+
+    return result;
+  }
+}
+/// \endcond
 
 namespace pbes_system {
 
@@ -30,7 +64,7 @@ namespace pbes_system {
   {
     protected:
       /// \brief The sequence of variables.
-      data::data_variable_list m_variables;
+      new_data::variable_list m_variables;
 
     public:
       /// \brief Constructor.
@@ -52,20 +86,20 @@ namespace pbes_system {
       /// \brief Constructor.
       /// \param expression A PBES expression
       /// \param variables A sequence of data variables
-      pbes_expression_with_variables(pbes_expression expression, data::data_variable_list variables)
+      pbes_expression_with_variables(pbes_expression expression, new_data::variable_list variables)
         : pbes_expression(expression), m_variables(variables)
       {}
 
       /// \brief Returns the variables
       /// \return The variables
-      data::data_variable_list variables() const
+      new_data::variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the variables
       /// \return The variables
-      data::data_variable_list& variables()
+      new_data::variable_list& variables()
       {
         return m_variables;
       }
@@ -88,9 +122,9 @@ template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_expression_with_variables t)   { t.protect(); t.variables().protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes_expression_with_variables t) { t.unprotect(); t.variables().unprotect(); }
-  static void mark(mcrl2::pbes_system::pbes_expression_with_variables t)      { t.mark(); t.variables().mark(); }
+  static void protect(mcrl2::pbes_system::pbes_expression_with_variables t)   { t.protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes_expression_with_variables t) { t.unprotect(); }
+  static void mark(mcrl2::pbes_system::pbes_expression_with_variables t)      { t.mark(); }
   static ATerm term(mcrl2::pbes_system::pbes_expression_with_variables t)     { return t.term(); }
   static ATerm* ptr(mcrl2::pbes_system::pbes_expression_with_variables& t)    { return &t.term(); }
 };
@@ -109,16 +143,16 @@ namespace core {
     typedef pbes_system::pbes_expression_with_variables term_type;
 
     /// \brief The data term type
-    typedef data::data_expression_with_variables data_term_type;
+    typedef new_data::data_expression_with_variables data_term_type;
 
     /// \brief The data term sequence type
-    typedef data::data_expression_list data_term_sequence_type;
+    typedef new_data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef data::data_variable variable_type;
+    typedef new_data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef data::data_variable_list variable_sequence_type;
+    typedef new_data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -156,7 +190,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return term_type(tr::and_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
+      return term_type(tr::and_(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
     }
 
     /// \brief Make a disjunction
@@ -166,7 +200,7 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return term_type(tr::or_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
+      return term_type(tr::or_(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
     }
 
     /// \brief Make an implication
@@ -176,7 +210,7 @@ namespace core {
     static inline
     term_type imp(term_type p, term_type q)
     {
-      return term_type(tr::imp(p, q), atermpp::term_list_union(p.variables(), q.variables()));
+      return term_type(tr::imp(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
     }
 
     /// \brief Make a universal quantification
@@ -184,9 +218,9 @@ namespace core {
     /// \param p A term
     /// \return The value <tt>forall l.p</tt>
     static inline
-    term_type forall(variable_sequence_type l, term_type p)
+    term_type forall(variable_sequence_type const& l, term_type p)
     {
-      return term_type(tr::forall(l, p), atermpp::term_list_difference(p.variables(), l));
+      return term_type(tr::forall(l, p), mcrl2::detail::difference(p.variables(), l.begin(), l.end()));
     }
 
     /// \brief Make an existential quantification
@@ -194,9 +228,9 @@ namespace core {
     /// \param p A term
     /// \return The value <tt>exists l.p</tt>
     static inline
-    term_type exists(variable_sequence_type l, term_type p)
+    term_type exists(variable_sequence_type const& l, term_type p)
     {
-      return term_type(tr::exists(l, p), atermpp::term_list_difference(p.variables(), l));
+      return term_type(tr::exists(l, p), mcrl2::detail::difference(p.variables(), l.begin(), l.end()));
     }
 
     /// \brief Propositional variable instantiation
@@ -369,7 +403,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + core::pp(t.variables());
+      return core::pp(t) + " " + new_data::pp(t.variables());
     }
   };
 

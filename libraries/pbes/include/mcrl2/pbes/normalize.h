@@ -73,7 +73,7 @@ pbes_expression normalize(pbes_expression f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::data_expr::not_(f);
+      return new_data::sort_bool_::not_(f);
     } else if (is_pbes_true(f)) {
       return false_();
     } else if (is_pbes_false(f)) {
@@ -87,9 +87,9 @@ pbes_expression normalize(pbes_expression f)
     } else if (is_pbes_imp(f)) {
       return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_pbes_forall(f)) {
-      return exists(var(f), normalize(not_(arg(f))));
+      return pbes_expr::exists(var(f), normalize(not_(arg(f))));
     } else if (is_pbes_exists(f)) {
-      return forall(var(f), normalize(not_(arg(f))));
+      return pbes_expr::forall(var(f), normalize(not_(arg(f))));
     } else if (is_propositional_variable_instantiation(f)) {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     }
@@ -111,9 +111,9 @@ pbes_expression normalize(pbes_expression f)
     } else if (is_pbes_imp(f)) {
       return or_(normalize(not_(left(f))), normalize(right(f)));
     } else if (is_pbes_forall(f)) {
-      return forall(var(f), normalize(arg(f)));
+      return pbes_expr::forall(var(f), normalize(arg(f)));
     } else if (is_pbes_exists(f)) {
-      return exists(var(f), normalize(arg(f)));
+      return pbes_expr::exists(var(f), normalize(arg(f)));
     } else if (is_propositional_variable_instantiation(f)) {
       return f;
     }

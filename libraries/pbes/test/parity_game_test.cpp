@@ -20,6 +20,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
 
 using namespace mcrl2;
@@ -107,6 +108,81 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
   }
 }
 
+// This test fails on several platforms (in debug mode). It looks like
+// a garbage collection issue.
+void test_parity_game_generator()
+{
+  std::string spec_text =
+    "% This file describes the onebit sliding window protocol as documented     \n"
+    "% M.A. Bezem and J.F. Groote. A correctness proof of a one bit sliding     \n"
+    "% window protocol in muCRL. The Computer Journal, 37(4): 289-307, 1994.    \n"
+    "% This sliding window protocol is a bidirectional sliding window protocol  \n"
+    "% with piggy backing, where the window sizes at the receiving and          \n"
+    "% sending side have size 1. The behaviour of this sliding window protocol  \n"
+    "% is that of two bidirectional buffers sending data from channel ra to     \n"
+    "% sb, and from rc to sd. Both buffers have capacity 2.                     \n"
+    "%   The external behaviour of the onebit protocol is rather complex.       \n"
+    "% However, making only the behaviour visible at gates ra and sb reduced    \n"
+    "% modulo branching bisimulation clearly shows the behaviour of             \n"
+    "% a buffer of capacity 2.                                                  \n"
+    "%                                                                          \n"
+    "% Jan Friso Groote, translated from muCRL 30/12/2006                       \n"
+    "                                                                           \n"
+    "sort Bit = struct e0 | e1;                                                 \n"
+    "     D= struct d1;                                                         \n"
+    "     Frame=struct frame(dat:D,bit1:Bit,bit2:Bit);                          \n"
+    "     Status=struct read?eq_read | choice?eq_choice | del?eq_del;           \n"
+    "                                                                           \n"
+    "map inv:Bit-> Bit;                                                         \n"
+    "eqn  inv(e0)=e1;                                                           \n"
+    "     inv(e1)=e0;                                                           \n"
+    "                                                                           \n"
+    "act  r,w,rc,sd:D;                                                          \n"
+    "     rcl,scl,i_del,i_lost,ccl;                                             \n"
+    "     r1,s1,c1,s2,r2,c2,s4,r4,c4:Frame;                                     \n"
+    "                                                                           \n"
+    "proc S(ready:Bool,rec:Bool,sts:Bool,d:D,e:D,p:Bit,q:Bit)=                  \n"
+    "       ready -> sum d:D.r(d).S(false,rec,false,d,e,inv(p),q) +             \n"
+    "       !rec -> w(e).S(ready,true,sts,d,e,p,q) +                            \n"
+    "       rcl.S(ready,rec,false,d,e,p,q)+                                     \n"
+    "       sum f:D,b1:Bit,b2:Bit.                                              \n"
+    "           r4(frame(f,b1,b2)).                                             \n"
+    "              (rec && b1==inv(q)) -> S(b2==p,false,sts,d,f,p,inv(q))       \n"
+    "                                  <> S(b2==p,rec,sts,d,e,p,q) +            \n"
+    "       !sts -> s1(frame(d,p,q)).S(ready,rec,true,d,e,p,q) +                \n"
+    "       delta;                                                              \n"
+    "                                                                           \n"
+    "proc Tim= scl.Tim;                                                         \n"
+    "                                                                           \n"
+    "proc C(f:Frame,st:Status)=                                                 \n"
+    "       eq_read(st) -> sum f:Frame.r1(f).C(f,choice)<>delta+                \n"
+    "       eq_choice(st) -> (i_del.C(f,del)+i_lost.C(f,read))<>delta+          \n"
+    "       eq_del(st) -> s2(f).C(f,read)<>delta ;                              \n"
+    "                                                                           \n"
+    "init hide ({c4,c2,ccl,c1,i_del,i_lost},                                    \n"
+    "       allow({c1,ccl,c2,c4,i_del,i_lost,r,w,rc,sd},                        \n"
+    "         comm({r2|s2->c2,r4|s4->c4},                                       \n"
+    "           rename({w->sd},                                                 \n"
+    "             allow({c1,ccl,r,w,s2,r4,i_del,i_lost},                        \n"
+    "               comm({rcl|scl->ccl,r1|s1->c1},                              \n"
+    "                 S(true,true,true,d1,d1,e0,e0)||                           \n"
+    "                 Tim||                                                     \n"
+    "                 C(frame(d1,e0,e0),read))))||                              \n"
+    "           rename({r->rc,s2->s4,r4->r2},                                   \n"
+    "             allow({c1,ccl,r,w,s2,r4,i_del,i_lost},                        \n"
+    "               comm({rcl|scl->ccl,r1|s1->c1},                              \n"
+    "                 S(true,true,true,d1,d1,e0,e0)||                           \n"
+    "                 Tim||                                                     \n"
+    "                 C(frame(d1,e0,e0) ,read)))))));                           \n"
+    ;
+  
+  std::string formula_text = "nu X. <true>true && [true]X";
+  bool timed = false;
+  pbes_system::pbes<> p = pbes_system::lps2pbes(spec_text, formula_text, timed);
+  pbes_system::detail::parity_game_output pgg(p);
+  pgg.run();
+}
+
 void test_bes_examples()
 {
   test_bes(BES1, "parity_game_test_bes1.pg", false);
@@ -122,6 +198,8 @@ void test_bes_examples()
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+
+  // test_parity_game_generator();
   test_bes_examples();
 
   return 0;

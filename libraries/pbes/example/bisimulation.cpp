@@ -7,7 +7,7 @@
 #include "mcrl2/pbes/bisimulation.h"
 
 using namespace std;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;

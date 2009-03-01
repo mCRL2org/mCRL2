@@ -42,10 +42,10 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/replace.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/data_elimination.h"
 
@@ -65,7 +65,7 @@
 using namespace std;
 using atermpp::make_substitution;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system;
 using bes::bes_expression;
 
@@ -247,7 +247,7 @@ void process(t_tool_options const& tool_options)
   if (!pbes_spec.instantiate_free_variables())
   { std::cerr << "Fail to instantiate all free variables in the pbes.\n";
     std::cerr << "Remaining free variables are: ";
-    for(atermpp::set <data_variable>::iterator i=pbes_spec.free_variables().begin() ;
+    for(atermpp::set <variable>::iterator i=pbes_spec.free_variables().begin() ;
         i!=pbes_spec.free_variables().end() ; i++ )
     { std::cerr << pp(*i) << " ";
     }
@@ -362,7 +362,7 @@ static unsigned int largest_power_of_2_smaller_than(int i)
 
 static void assign_variables_in_tree(
                       ATerm t,
-                      data_variable_list::iterator &var_iter,
+                      variable_list::iterator &var_iter,
                       Rewriter *rewriter,
                       const bool opt_precompile_pbes)
 { if (is_pair(t))
@@ -707,7 +707,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
            // the right hand side of t are the parameters, in a tree structure.
 
            t=ATgetArgument(t,1);
-           data_variable_list::iterator iter=current_pbeq.variable().parameters().begin();
+           variable_list::iterator iter=current_pbeq.variable().parameters().begin();
            assign_variables_in_tree(t,iter,
                                     rewriter,tool_options.opt_precompile_pbes);
          }
@@ -725,7 +725,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
         data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
 
-        for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+        for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
         {
           assert(elist!=current_variable_instantiation.parameters().end());
@@ -758,7 +758,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                         tool_options.opt_precompile_pbes,
                         rewriter);
 
-      for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+      for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
       { rewriter->clearSubstitution(*vlist);
       }

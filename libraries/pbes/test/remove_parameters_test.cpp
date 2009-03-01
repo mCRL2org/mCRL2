@@ -10,51 +10,50 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/data.h"
+#include "mcrl2/new_data/data.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
 void test_propositional_variable()
 {
-  data_variable_list d = make_list(nat("n"), pos("p"), bool_("b"), bool_("c"));
+  variable_list d = make_vector(nat("n"), pos("p"), bool_("b"), bool_("c"));
   propositional_variable X = propvar("X", d);
   std::vector<int> v;
   v.push_back(1);
   v.push_back(3);
   propositional_variable X1 = remove_parameters(X, v);
-  data_variable_list d1 = make_list(nat("n"), bool_("b"));
+  variable_list d1 = make_vector(nat("n"), bool_("b"));
   BOOST_CHECK(X1 = propvar("X", d1));
 }
 
 void test_propositional_variable_instantiation()
 {
-  data_expression_list d = make_list(nat("n"), pos("p"), bool_("b"), bool_("c"));
+  data_expression_list d = make_vector< data_expression >(nat("n"), pos("p"), bool_("b"), bool_("c"));
   propositional_variable_instantiation X = propvarinst("X", d);
   std::vector<int> v;
   v.push_back(1);
   v.push_back(3);
   propositional_variable_instantiation X1 = remove_parameters(X, v);
-  data_expression_list d1 = make_list(nat("n"), bool_("b"));
+  data_expression_list d1 = make_vector< data_expression >(nat("n"), bool_("b"));
   BOOST_CHECK(X1 = propvarinst("X", d1));
 }
 
 void test_pbes_expression()
 {
-  using namespace data_expr;
-
-  data_variable_list d1 = atermpp::make_list(sort_expr::nat(), sort_expr::bool_());
-  data_variable_list d2 = atermpp::make_list(sort_expr::nat(), sort_expr::bool_(), sort_expr::nat());
+  variable_list d1 = make_vector(nat("m"), bool_("b"));
+  variable_list d2 = make_vector(nat("m"), bool_("b"), nat("p"));
   propositional_variable X1 = propvar("X1", d1);
   propositional_variable X2 = propvar("X2", d2);
 
-  data_expression_list e1 = make_list(plus(nat("m"), nat("n")), bool_("b"));
-  data_expression_list e2 = make_list(multiplies(nat("m"), nat("n")), bool_("b"), nat("p"));
+  data_expression_list e1 = make_vector< data_expression >(sort_nat::plus(nat("m"), nat("n")), bool_("b"));
+  data_expression_list e2 = make_vector< data_expression >(sort_nat::times(nat("m"), nat("n")), bool_("b"), nat("p"));
   propositional_variable_instantiation x1 = propvarinst("X1", e1);
   propositional_variable_instantiation x2 = propvarinst("X2", e2);
 
@@ -73,13 +72,13 @@ void test_pbes_expression()
 
   pbes_expression r;
   {
-    data_variable_list d1 = atermpp::make_list(sort_expr::nat());
-    data_variable_list d2 = atermpp::make_list(sort_expr::bool_());
+    variable_list d1 = make_vector(nat("m"));
+    variable_list d2 = make_vector(bool_("b"));
     propositional_variable X1 = propvar("X1", d1);
     propositional_variable X2 = propvar("X2", d2);
 
-    data_expression_list e1 = make_list(plus(nat("m"), nat("n")));
-    data_expression_list e2 = make_list(bool_("b"));
+    data_expression_list e1 = make_vector< data_expression >(sort_nat::plus(nat("m"), nat("n")));
+    data_expression_list e2 = make_vector< data_expression >(bool_("b"));
     propositional_variable_instantiation x1 = propvarinst("X1", e1);
     propositional_variable_instantiation x2 = propvarinst("X2", e2);
 

@@ -115,7 +115,7 @@ struct free_variable_visitor: public state_formula_visitor
   /// \return The result of visiting the node
   bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const new_data::data_expression_list& l)
   {
-    std::set<new_data::variable> variables = find_all_variables(boost::make_iterator_range(l));
+    std::set<new_data::variable> variables = find_all_variables(l);
     for (std::set<new_data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))

@@ -15,7 +15,6 @@
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/sequence.h"
 #include "mcrl2/data/data_expression_with_variables.h"

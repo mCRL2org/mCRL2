@@ -21,7 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/new_data/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -545,7 +545,7 @@ namespace detail {
           {
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
-              data_term_type e1 = datar(data::data_variable_map_replace(*i, e_constraints));
+              data_term_type e1 = datar(new_data::variable_map_replace(*i, e_constraints));
               if (core::term_traits<data_term_type>::is_constant(e1))
               {
                 constraints[*j] = e1;
@@ -568,7 +568,7 @@ namespace detail {
               {
                 continue;
               }
-              data_term_type ei = datar(data::data_variable_map_replace(*i, e_constraints));
+              data_term_type ei = datar(new_data::variable_map_replace(*i, e_constraints));
               if (ci != ei)
               {
                 ci = *j;
@@ -760,14 +760,14 @@ std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
 std::cerr << "  <target vertex before>" << v.to_string() << std::endl;
 #endif
 
-            term_type value = m_pbes_rewriter(data::data_variable_map_replace(e.condition, u.constraints));
+            term_type value = m_pbes_rewriter(new_data::variable_map_replace(e.condition, u.constraints));
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nEvaluated condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
+std::cerr << "\nEvaluated condition " << core::pp(new_data::variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
 #endif
             if (!tr::is_false(value) && !tr::is_true(value))
             {
 #ifdef MCRL2_PBES_CONSTELM_DEBUG
-std::cerr << "\nCould not evaluate condition " << core::pp(data::data_variable_map_replace(e.condition, u.constraints)) << " to true or false";
+std::cerr << "\nCould not evaluate condition " << core::pp(new_data::variable_map_replace(e.condition, u.constraints)) << " to true or false";
 #endif
             }
             if (!tr::is_false(value))
@@ -824,7 +824,7 @@ std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
             *i = pbes_equation(
               i->symbol(),
               i->variable(),
-              data::data_variable_map_replace(i->formula(), v.constraints)
+              new_data::variable_map_replace(i->formula(), v.constraints)
             );
           }
         }
