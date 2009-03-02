@@ -9,6 +9,8 @@
 /// \file mcrl2/pbes/pbes_expression.h
 /// \brief The class pbes_expression.
 
+#define MCRL2_SMART_ARGUMENT_SORTING
+
 #ifndef MCRL2_PBES_PBES_EXPRESSION_H
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
@@ -22,6 +24,7 @@
 #include "mcrl2/data/data_variable.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 
 namespace mcrl2 {
 
@@ -650,6 +653,28 @@ namespace core {
       return core::detail::gsMakePBESNot(p);
     }
 
+    static inline
+    bool is_sorted(term_type p, term_type q)
+    {
+      pbes_system::detail::compare_pbes_expression_visitor<term_type> pvisitor;
+      pvisitor.visit(p);
+      pbes_system::detail::compare_pbes_expression_visitor<term_type> qvisitor;
+      qvisitor.visit(q);
+      if (pvisitor.has_predicate_variables != qvisitor.has_predicate_variables)
+      {
+        return qvisitor.has_predicate_variables;
+      }
+      if (pvisitor.has_quantifiers != qvisitor.has_quantifiers)
+      {
+        return qvisitor.has_quantifiers;
+      }
+      if (pvisitor.result.size() != qvisitor.result.size())
+      {
+        return pvisitor.result.size() < qvisitor.result.size();
+      }
+      return p < q;
+    }
+
     /// \brief Make a conjunction
     /// \param p A term
     /// \param q A term
@@ -657,14 +682,12 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      if (p < q)
-      {
-        return core::detail::gsMakePBESAnd(p,q);
-      }
-      else
-      {
-        return core::detail::gsMakePBESAnd(q,p);
-      }
+#ifdef MCRL2_SMART_ARGUMENT_SORTING
+      bool sorted = is_sorted(p, q);
+#else
+      bool sorted = p < q;
+#endif
+      return sorted ? core::detail::gsMakePBESAnd(p,q) : core::detail::gsMakePBESAnd(q,p);
     }
 
     /// \brief Make a disjunction
@@ -674,14 +697,12 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      if (p < q)
-      {
-        return core::detail::gsMakePBESOr(p,q);
-      }
-      else
-      {
-        return core::detail::gsMakePBESOr(q,p);
-      }
+#ifdef MCRL2_SMART_ARGUMENT_SORTING
+      bool sorted = is_sorted(p, q);
+#else
+      bool sorted = p < q;
+#endif
+      return sorted ? core::detail::gsMakePBESOr(p,q) : core::detail::gsMakePBESOr(q,p);
     }
 
     /// \brief Make an implication
