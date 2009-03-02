@@ -32,9 +32,11 @@ namespace new_data {
 
   /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
   /// and data_expression_with_variables.
-  template <typename Term>
+  template < typename Expression >
   class basic_rewriter
   {
+    template < typename CompatibleExpression >
+    friend class basic_rewriter;
     friend class enumerator;
 
     protected:
@@ -49,6 +51,16 @@ namespace new_data {
 
     protected:
 
+      /// \brief Copy constructor for conversion between derived types
+      template < typename CompatibleExpression >
+      basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
+                       m_specification(other.m_specification),
+                       m_substitution_context(other.m_substitution_context),
+                       m_rewriter(other.m_rewriter)
+      {
+      }
+
+      /// \brief Performs data implementation before rewriting
       ATermAppl implement(data_expression expression) const
       {
         ATermList substitution_context = m_substitution_context;
@@ -75,6 +87,7 @@ namespace new_data {
         return implemented;
       }
 
+      /// \brief Performs data reconstruction after rewriting
       data_expression reconstruct(ATermAppl expression) const
       {
         ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
@@ -86,10 +99,10 @@ namespace new_data {
 
     public:
       /// \brief The variable type of the rewriter.
-      typedef typename core::term_traits<Term>::variable_type variable_type;
+      typedef typename core::term_traits< Expression >::variable_type variable_type;
 
       /// \brief The term type of the rewriter.
-      typedef Term term_type;
+      typedef Expression term_type;
 
       /// \brief The strategy of the rewriter.
       enum strategy
@@ -169,8 +182,6 @@ namespace new_data {
   /// \brief Rewriter that operates on data expressions.
   class rewriter: public basic_rewriter<data_expression>
   {
-//    friend class rewriter_with_variables;
-
     public:
       /// \brief Constructor.
       /// \param d A data specification
@@ -221,6 +232,12 @@ namespace new_data {
       /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
       /// \param r A data rewriter
       rewriter_with_variables(basic_rewriter< data_expression_with_variables > const& r)
+        : basic_rewriter<data_expression_with_variables>(r)
+      {}
+
+      /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
+      /// \param r A data rewriter
+      rewriter_with_variables(basic_rewriter< data_expression > const& r)
         : basic_rewriter<data_expression_with_variables>(r)
       {}
 

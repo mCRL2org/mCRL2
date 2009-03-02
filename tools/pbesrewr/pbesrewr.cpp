@@ -15,9 +15,9 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -51,10 +51,10 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
       if (core::gsVerbose)
       {
-        std::cerr << "pbesrewr parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
+        std::clog << "pbesrewr parameters:" << std::endl;
+        std::clog << "  input file:         " << m_input_filename << std::endl;
+        std::clog << "  output file:        " << m_output_filename << std::endl;
+        std::clog << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
 
       // load the pbes
@@ -62,38 +62,39 @@ class pbes_rewr_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       p.load(m_input_filename);
 
       // data rewriter
-      data::rewriter datar = create_rewriter(p.data());
+      new_data::rewriter datar = create_rewriter(p.data());
 
       // pbes rewriter
       switch (rewriter_type())
       {
         case simplify:
         {
-          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+          simplifying_rewriter<pbes_expression, new_data::rewriter> pbesr(datar);
           pbesrewr(p, pbesr);
           break;
         }
         case quantifier_all:
         {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
+          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
+          new_data::data_enumerator<> datae(p.data(), datar, generator);
+          new_data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
         case quantifier_finite:
         {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
+          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
+          new_data::data_enumerator<> datae(p.data(), datar, generator);
+          new_data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
         case prover:
+        default:
         { // Just ignore.
           assert(0);  // The PBES rewriter cannot be activated through
                       // the commandline or squadt. So, we cannot end up here.
@@ -185,7 +186,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace utilities;
 
   if (!c.option_exists(option_rewrite_strategy))
-  { c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);
+  { c.add_option(option_rewrite_strategy).set_argument_value< 0 >(mcrl2::new_data::rewriter::jitty);
   }
 
   if (!c.option_exists(option_pbes_rewrite_strategy))
@@ -198,7 +199,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
 
   // Helper for rewrite strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > rewrite_strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < mcrl2::new_data::rewriter::strategy > rewrite_strategy_selector(d);
 
   // Helper for pbes rewrite strategy selection, aka quantifier elimination
   mcrl2::utilities::squadt::radio_button_helper < pbes_rewriter_type > pbes_rewrite_strategy_selector(d);
@@ -207,15 +208,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
-                append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::innermost, "Inner")).
 #ifdef MCRL2_INNERC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::innermost_compiling, "Innerc")).
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")),
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty, "Jitty")).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty_compiling, "Jittyc")),
 #else
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")),
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty, "Jitty")),
 #endif
           margins(0,5,0,5)).
 
@@ -235,7 +236,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   if (c.option_exists(option_rewrite_strategy))
   { rewrite_strategy_selector.set_selection(
-        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+        c.get_option_argument< mcrl2::new_data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
 
   if (c.option_exists(option_pbes_rewrite_strategy))
@@ -279,7 +280,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace utilities;
   input_filename() = c.get_input(pbes_file_for_input).location();
   output_filename() = c.get_output(pbes_file_for_output).location();
-  m_rewrite_strategy = c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
+  m_rewrite_strategy = c.get_option_argument< mcrl2::new_data::rewriter::strategy >(option_rewrite_strategy, 0);
   m_pbes_rewriter_type = c.get_option_argument< pbes_rewriter_type >(option_pbes_rewrite_strategy, 0);
   bool result = run();
 
