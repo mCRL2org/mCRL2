@@ -43,6 +43,7 @@ void visualchannel::draw( void )
   float x = m_object->get_coordinate().m_x;
   float y = m_object->get_coordinate().m_y;
   wxString name = c->get_name();
+  wxString rename_to = c->get_rename_to();
 
   // draw channel
   draw_channel( m_object->get_coordinate(), 0.5 * m_object->get_width(), m_object->get_selected(), c->get_channeltype() );
@@ -58,35 +59,29 @@ void visualchannel::draw( void )
   float texty;
   if (ox > x)
   {
-    // set text left
-//    textx = x-g_text_space*2 - name.Len() * (g_text_space);
     textx = x - 0.5 * m_object->get_width();
     horizontal_align = al_left;
   }
   else
   {
-    // set text right
-//    textx = x+g_text_space;
     textx = x + 0.5 * m_object->get_width();
     horizontal_align = al_right;
   }
 
   if (oy > y)
   {
-    // set text down
-//    texty = y-g_text_space*2;
     texty = y;
     vertical_align = al_bottom;
   }
   else
   {
-    // set text up
-//    texty = y+g_text_space;
     texty = y + m_object->get_width();
     vertical_align = al_top;
   }
-  //draw text
-  grape_glcanvas::get_font_renderer()->draw_text( std::string(name.fn_str()), textx, texty, 0.0015f, horizontal_align, vertical_align);
+  //draw text 
+  wxString text = name;
+  if (rename_to != _T("")) text += _T(" -> ") + rename_to;   
+  grape_glcanvas::get_font_renderer()->draw_text(std::string(text.fn_str()), textx, texty, 0.0015f, horizontal_align, vertical_align);
 }
 
 bool visualchannel::is_inside( libgrape::coordinate &p_coord )

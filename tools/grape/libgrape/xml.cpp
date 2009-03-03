@@ -709,6 +709,10 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
         new wxXmlNode( xml_channel_communication_connected, wxXML_TEXT_NODE, _T( "value" ), text_connected );
 
       }
+      
+      write_rename_to( xml_channel_communication, c_comm_ptr->get_rename_to() );     
+      
+      write_channeltype( xml_channel_communication, c_comm_ptr->get_channeltype() );      
 
       /* Inherited */
       write_object_attributes( xml_channel_communication, c_comm_ptr );
@@ -753,7 +757,11 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
       new wxXmlNode( xml_channel_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
 
       write_name( xml_channel, channel_ptr->get_name() );
+      
+      write_rename_to( xml_channel, channel_ptr->get_rename_to() );      
 
+      write_channeltype( xml_channel, channel_ptr->get_channeltype() );      
+      
       /* Inherited */
       write_object_attributes( xml_channel, channel_ptr );
     }
@@ -953,6 +961,14 @@ void grape::libgrape::write_name( wxXmlNode *p_parent, const wxString &p_name )
   new wxXmlNode( xml_name, wxXML_TEXT_NODE, _T( "value" ), p_name );
 }
 
+void grape::libgrape::write_rename_to( wxXmlNode *p_parent, const wxString &p_rename_to )
+{
+  /* node <rename> */
+  wxXmlNode* xml_rename = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "rename" ) );
+
+  new wxXmlNode( xml_rename, wxXML_TEXT_NODE, _T( "value" ), p_rename_to );
+}
+
 void grape::libgrape::write_linetype( wxXmlNode *p_parent, linetype p_linetype )
 {
   wxXmlNode* xml_linetype = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "linetype" ) );
@@ -969,6 +985,24 @@ void grape::libgrape::write_linetype( wxXmlNode *p_parent, linetype p_linetype )
   }
 
   new wxXmlNode( xml_linetype, wxXML_TEXT_NODE, _T( "value" ), tt_linetype );
+}
+
+void grape::libgrape::write_channeltype( wxXmlNode *p_parent, channeltype p_channeltype )
+{
+  wxXmlNode* xml_channeltype = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "channeltype" ) );
+
+  wxString cc_channeltype = wxEmptyString;
+  switch( p_channeltype )
+  {
+      case channel_hidden:
+        cc_channeltype = _T( "hidden" ); break;
+      case channel_blocked:
+        cc_channeltype = _T( "blocked" ); break;
+      case channel_visible:
+        cc_channeltype = _T( "visible" ); break;
+  }
+
+  new wxXmlNode( xml_channeltype, wxXML_TEXT_NODE, _T( "value" ), cc_channeltype );
 }
 
 // WxWidgets dynamic array implementation.

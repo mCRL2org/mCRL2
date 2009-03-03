@@ -1771,6 +1771,8 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               float channel_height = 0.1f;
               float channel_width = 0.1f;
               wxString channel_name = _T( "" );
+              wxString channel_rename_to = _T( "" );
+              channeltype channel_channeltype = channel_visible;
               unsigned int channel_reference_id = 0;
 
               wxXmlNode* channel_information = channel_node->GetChildren();
@@ -1780,6 +1782,9 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                 if ( what_info == _T( "name" ) )
                 {
                   channel_name = channel_information->GetNodeContent();
+                } else if ( what_info == _T( "rename" ) )
+                { 
+                  channel_rename_to = channel_information->GetNodeContent();
                 }
                 else if ( what_info == _T( "id" ) )
                 {
@@ -1853,6 +1858,13 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                   identifier.ToLong( &dummy_id );
                   channel_reference_id = ( unsigned int ) dummy_id;
                 }
+                else if ( what_info == _T( "channeltype" ) )
+                {                
+                  wxString c_channeltype = channel_information->GetNodeContent();                  
+                  if (c_channeltype == _T("hidden" )) channel_channeltype = channel_hidden; 
+                  if (c_channeltype == _T("blocked" )) channel_channeltype = channel_blocked; 
+                  if (c_channeltype == _T("visible" )) channel_channeltype = channel_visible;
+                } 
                 else
                 {
                   /* invalid! NB: onchannelcommunication */
@@ -1872,6 +1884,12 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               channel* chan_ptr = p_arch_dia_ptr->add_channel( channel_identifier, channel_coordinate, channel_width, channel_height, ref_ptr );
               // set the channel name
               chan_ptr->set_name( channel_name );
+              
+              // set the channel rename
+              chan_ptr->set_rename_to( channel_rename_to );
+              
+              // set channel type              
+              chan_ptr->set_channeltype(channel_channeltype);
 
               // retrieve the next channel
               channel_node = channel_node->GetNext();
@@ -1918,6 +1936,8 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
             while ( communication_node )
             {
               unsigned int communication_identifier = 0;
+              wxString communication_rename_to = _T( "" );
+              channeltype communication_channeltype = channel_visible;
               coordinate communication_coordinate = { 0.0f, 0.0f };
               float communication_height = 0.1f;
               float communication_width = 0.1f;
@@ -1938,6 +1958,9 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                   {
                      g_max_id = dummy_id;
                   }
+                } else if ( what_info == _T( "rename" ) )
+                { 
+                  communication_rename_to = communication_information->GetNodeContent();
                 }
                 else if ( what_info == _T( "size" ) )
                 {
@@ -2015,7 +2038,13 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
 
                     connected_channel = connected_channel->GetNext();
                   }
-                }
+                } else if ( what_info == _T( "channeltype" ) )
+                {                
+                  wxString cc_channeltype = communication_information->GetNodeContent();                  
+                  if (cc_channeltype == _T("hidden" )) communication_channeltype = channel_hidden; 
+                  if (cc_channeltype == _T("blocked" )) communication_channeltype = channel_blocked; 
+                  if (cc_channeltype == _T("visible" )) communication_channeltype = channel_visible;
+                } 
                 else
                 {
                   /* invalid node name! */
@@ -2030,6 +2059,8 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                 channel_communication* comm_ptr = p_arch_dia_ptr->add_channel_communication( communication_identifier, communication_coordinate, channels.Item( 0 ), channels.Item( 1 ) );
                 comm_ptr->set_width( communication_width );
                 comm_ptr->set_height( communication_height );
+                comm_ptr->set_rename_to( communication_rename_to );
+                comm_ptr->set_channeltype( communication_channeltype );
                 for ( unsigned int i = 2; i < channels.GetCount(); ++i )
                 {
                   channel* chan_ptr = channels.Item( i );

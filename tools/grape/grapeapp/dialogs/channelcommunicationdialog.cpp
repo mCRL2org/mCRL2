@@ -24,9 +24,9 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename channel communication") );
   wnd_sizer->Add(text_rename, 0, wxALIGN_TOP, 0 );
   wnd_sizer->AddSpacer( 5 );
-
-  m_input = new wxTextCtrl(this, wxID_ANY, _T("empty") );            
-  wnd_sizer->Add(m_input, 0, wxEXPAND, 0);
+  
+  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel_communication.get_rename_to() );            
+  wnd_sizer->Add(m_rename_input, 0, wxEXPAND, 0);
   wnd_sizer->AddSpacer( 5 );
 
   wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("channel communication property") );
@@ -54,7 +54,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wnd_sizer->Fit(this);
   wnd_sizer->SetSizeHints(this);
 
-  m_input->SetFocus();
+  m_rename_input->SetFocus();
 }
 
 grape_channel_communication_dlg::grape_channel_communication_dlg()
@@ -69,7 +69,8 @@ grape_channel_communication_dlg::~grape_channel_communication_dlg()
 bool grape_channel_communication_dlg::show_modal( channel_communication &p_channel_communication )
 {
   if (ShowModal() != wxID_CANCEL)
-  {
+  {      
+    p_channel_communication.set_rename_to(m_rename_input->GetValue());     
     if (m_combobox->GetValue() == _T("hidden")) p_channel_communication.set_channeltype(channel_hidden);
     if (m_combobox->GetValue() == _T("blocked")) p_channel_communication.set_channeltype(channel_blocked);
     if (m_combobox->GetValue() == _T("visible")) p_channel_communication.set_channeltype(channel_visible);

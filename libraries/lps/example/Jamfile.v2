@@ -5,10 +5,11 @@ project libraries/lps/example
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
+       <define>MCRL2_REVISION=\"\\\"0\\\"\"
    ;
 
 exe lpsparelm       : lpsparelm.cpp : ;
-exe constelm        : constelm.cpp : ;
+exe lpsconstelm     : lpsconstelm.cpp : ;
 exe parelm          : parelm.cpp : ;
 exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp : ;
@@ -20,7 +21,7 @@ exe utility1        : utility1.cpp : ;
 install dist
    :
      lpsparelm
-     constelm
+     lpsconstelm
      parelm
      term_replace
      constructors

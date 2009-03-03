@@ -8,7 +8,6 @@ source_files = [ set.difference $(source_files) : [ glob ./squadt_proxy.cpp ] ] 
 
 tool squadt
       : [ sequence.insertion-sort $(source_files) ]
-        /site-config//boost_md5
         /libraries/tipi//controller
         /libraries/utilities//command_line_interfacing
         /libraries//ticpp

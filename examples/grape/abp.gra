@@ -946,8 +946,8 @@
                     <processreference>
                         <id>6</id>
                         <coord>
-                            <x>2.691667</x>
-                            <y>-1.325000</y>
+                            <x>2.741667</x>
+                            <y>-1.485000</y>
                         </coord>
                         <size>
                             <width>0.456667</width>
@@ -1017,6 +1017,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename>i</rename>
                         <name>i</name>
                         <onreference>7</onreference>
                         <onchannelcommunication/>
@@ -1031,6 +1033,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename>i</rename>
                         <name>i</name>
                         <onreference>5</onreference>
                         <onchannelcommunication/>
@@ -1045,6 +1049,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>r2</name>
                         <onreference>5</onreference>
                         <onchannelcommunication>21</onchannelcommunication>
@@ -1059,6 +1065,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>s3</name>
                         <onreference>5</onreference>
                         <onchannelcommunication>22</onchannelcommunication>
@@ -1066,13 +1074,15 @@
                     <channel>
                         <id>12</id>
                         <coord>
-                            <x>2.463333</x>
-                            <y>-1.150000</y>
+                            <x>2.513333</x>
+                            <y>-1.310000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>r3</name>
                         <onreference>6</onreference>
                         <onchannelcommunication>22</onchannelcommunication>
@@ -1080,13 +1090,15 @@
                     <channel>
                         <id>13</id>
                         <coord>
-                            <x>2.546667</x>
-                            <y>-1.530000</y>
+                            <x>2.596667</x>
+                            <y>-1.690000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>s5</name>
                         <onreference>6</onreference>
                         <onchannelcommunication>23</onchannelcommunication>
@@ -1094,13 +1106,15 @@
                     <channel>
                         <id>14</id>
                         <coord>
-                            <x>2.816667</x>
-                            <y>-1.120000</y>
+                            <x>2.866667</x>
+                            <y>-1.280000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename>s4</rename>
                         <name>s4</name>
                         <onreference>6</onreference>
                         <onchannelcommunication/>
@@ -1115,6 +1129,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>r5</name>
                         <onreference>7</onreference>
                         <onchannelcommunication>23</onchannelcommunication>
@@ -1129,6 +1145,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>s6</name>
                         <onreference>7</onreference>
                         <onchannelcommunication>24</onchannelcommunication>
@@ -1143,6 +1161,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>r6</name>
                         <onreference>8</onreference>
                         <onchannelcommunication>24</onchannelcommunication>
@@ -1157,6 +1177,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>hidden</channeltype>
+                        <rename></rename>
                         <name>s2</name>
                         <onreference>8</onreference>
                         <onchannelcommunication>21</onchannelcommunication>
@@ -1171,6 +1193,8 @@
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename>r1</rename>
                         <name>r1</name>
                         <onreference>8</onreference>
                         <onchannelcommunication/>
@@ -1187,6 +1211,8 @@
                             <width>0.250000</width>
                             <height>0.250000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename></rename>
                         <connectionlist>
                             <connectedtochannels>19</connectedtochannels>
                             <connectedtochannels>9</connectedtochannels>
@@ -1202,6 +1228,8 @@
                             <width>0.250000</width>
                             <height>0.250000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename></rename>
                         <connectionlist>
                             <connectedtochannels>10</connectedtochannels>
                             <connectedtochannels>12</connectedtochannels>
@@ -1217,6 +1245,8 @@
                             <width>0.250000</width>
                             <height>0.250000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename></rename>
                         <connectionlist>
                             <connectedtochannels>13</connectedtochannels>
                             <connectedtochannels>15</connectedtochannels>
@@ -1232,70 +1262,15 @@
                             <width>0.250000</width>
                             <height>0.250000</height>
                         </size>
+                        <channeltype>visible</channeltype>
+                        <rename></rename>
                         <connectionlist>
                             <connectedtochannels>17</connectedtochannels>
                             <connectedtochannels>18</connectedtochannels>
                         </connectionlist>
                     </channelcommunication>
                 </channelcommunicationlist>
-                <visiblelist>
-                    <visible>
-                        <id>39</id>
-                        <coord>
-                            <x>1.603000</x>
-                            <y>-1.783334</y>
-                        </coord>
-                        <size>
-                            <width>0.050000</width>
-                            <height>0.050000</height>
-                        </size>
-                        <name>i</name>
-                        <linetype>straight</linetype>
-                        <propertyof>35</propertyof>
-                    </visible>
-                    <visible>
-                        <id>38</id>
-                        <coord>
-                            <x>2.883000</x>
-                            <y>-1.340000</y>
-                        </coord>
-                        <size>
-                            <width>0.050000</width>
-                            <height>0.050000</height>
-                        </size>
-                        <name>s4</name>
-                        <linetype>straight</linetype>
-                        <propertyof>14</propertyof>
-                    </visible>
-                    <visible>
-                        <id>37</id>
-                        <coord>
-                            <x>1.959667</x>
-                            <y>-0.643333</y>
-                        </coord>
-                        <size>
-                            <width>0.050000</width>
-                            <height>0.050000</height>
-                        </size>
-                        <name>i</name>
-                        <linetype>straight</linetype>
-                        <propertyof>34</propertyof>
-                    </visible>
-                    <visible>
-                        <id>36</id>
-                        <coord>
-                            <x>0.623000</x>
-                            <y>-1.340000</y>
-                        </coord>
-                        <size>
-                            <width>0.050000</width>
-                            <height>0.050000</height>
-                        </size>
-                        <name>r1</name>
-                        <linetype>straight</linetype>
-                        <propertyof>20</propertyof>
-                    </visible>
-                </visiblelist>
+                <visiblelist/>
                 <blockedlist/>
                 <commentlist/>
             </objectlist>

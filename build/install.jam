@@ -337,7 +337,7 @@ rule platform-configuration ( properties * ) {
   local pch-path = $(build-root)/precompile ;
 
   if <regression-testing>no in $(properties) {
-    requirements = <dll-path>$(libdir) ; # dll-path required for rpath-linking
+    requirements = <dll-path>$(dllpath) ; # dll-path required for rpath-linking
   }
 
   if <toolset>gcc in $(properties) { # GCC
@@ -446,6 +446,8 @@ rule load-configuration ( build-root-path configuration-file-name ) {
     libdir    = [ get-option libdir : [ path.make $(install-prefix)/lib/mcrl2 ] ] ;
     plugindir = [ path.make $(prefix)/plugins ] ;
   }
+
+ dllpath = $(libdir) ;
 
   # Add prefix for packaging
   if [ get-option destdir : no ] != no {

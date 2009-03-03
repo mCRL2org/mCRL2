@@ -35,8 +35,9 @@ namespace lps {
 template <typename DataRewriter>
 std::map<new_data::variable, new_data::data_expression> compute_constant_parameters(const linear_process& p, new_data::data_expression_list init, DataRewriter& r)
 {
-  using namespace new_data::data_expr;
-  
+  using namespace new_data;
+  using namespace new_data::sort_bool_;
+
   std::map<new_data::variable, new_data::data_expression> replacements;
   new_data::variable_list::iterator i = p.process_parameters().begin();
   new_data::data_expression_list::iterator j = init.begin();
@@ -87,26 +88,16 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
 /// \return A map m that maps constant parameters to their constant value.
 std::map<new_data::variable, new_data::data_expression> compute_constant_parameters_subst(const linear_process& p, new_data::data_expression_list init, new_data::rewriter& r)
 {
-  using namespace new_data::data_expr;
-  namespace opt = new_data::data_expr::optimized;
-  
-  typedef std::map<new_data::variable, std::list<new_data::rewriter::substitution>::iterator> index_map;
+  using namespace new_data;
+  using namespace new_data::sort_bool_;
+  namespace opt = new_data::lazy;
 
   // create a mapping from process parameters to initial values
-  std::map<new_data::variable, new_data::data_expression> replacements;
+  new_data::rewriter_map<std::map<new_data::variable, new_data::data_expression> > replacements;
   new_data::data_expression_list::iterator j = init.begin();
-  for (new_data::variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
+  for (new_data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {
     replacements[*i] = *j;
-  }
-
-  // put the substitutions in a list, and make an index for it
-  std::list<new_data::rewriter::substitution> substitutions;
-  index_map index;
-  for (std::map<new_data::variable, new_data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
-  {
-    substitutions.push_back(new_data::rewriter::substitution(r, i->first, i->second));
-    index[i->first] = --substitutions.end();
   }
 
   bool has_changed;
@@ -115,25 +106,23 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      new_data::data_expression rc = r(i->condition(), substitutions);
+      new_data::data_expression rc = r(i->condition(), replacements);
 
       if (rc == false_())
       {
         continue;
       }
-      for (new_data::assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      for (new_data::assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
-        index_map::iterator k = index.find(j->lhs());
-        if (k != index.end())
+        std::map<new_data::variable, new_data::data_expression>::iterator k = replacements.find(j->lhs());
+        if (k != replacements.end())
         {
           new_data::data_expression d  = j->lhs();  // process parameter
           new_data::data_expression g  = j->rhs();  // assigned value
           new_data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
-          if (r(x, substitutions) == true_())
+          if (r(x, replacements) == true_())
           {
-            replacements.erase(d);
-            substitutions.erase(index[d]);
-            index.erase(k);
+            replacements.erase(k);
             has_changed = true;
           }
         }
@@ -170,7 +159,7 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
     std::cout << "Removing the constant process parameters: ";
     for (std::set<new_data::variable>::iterator i = constant_parameters.begin(); i != constant_parameters.end(); ++i)
     {
-      std::cout << pp(*i) << " ";
+      std::cout << new_data::pp(*i) << " ";
     }
     std::cout << std::endl;
   }

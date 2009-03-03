@@ -16,11 +16,15 @@ static pa_container initialise_p_aterms()
   ATaddProtectFunction(AT_protectProtectedATerms);
   return pa_container();
 }
-static pa_container p_aterms = initialise_p_aterms();
+static pa_container &p_aterms()
+{
+  static pa_container _p_aterms = initialise_p_aterms();
+  return _p_aterms;
+}
 
 static void AT_protectProtectedATerms()
 {
-  for (pa_container::iterator i=p_aterms.begin(); i!=p_aterms.end(); i++)
+  for (pa_container::iterator i=p_aterms().begin(); i!=p_aterms().end(); i++)
   {
     (*i)->ATprotectTerms();
   }
@@ -28,10 +32,10 @@ static void AT_protectProtectedATerms()
 
 void ATprotectProtectedATerm(IProtectedATerm *i)
 {
-  p_aterms.insert(i);
+  p_aterms().insert(i);
 }
 
 void ATunprotectProtectedATerm(IProtectedATerm *i)
 {
-  p_aterms.erase(p_aterms.find(i));
+  p_aterms().erase(p_aterms().find(i));
 }

@@ -488,7 +488,7 @@ bool grape_event_change_channel_communication::Do( void )
   }
 
   channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
-  //channel_communication_ptr->set_name( m_new_channel_communication.get_name() );
+  channel_communication_ptr->set_rename_to( m_new_channel_communication.get_rename_to() );
   channel_communication_ptr->set_channeltype( m_new_channel_communication.get_channeltype() );
  
   finish_modification();
@@ -498,7 +498,7 @@ bool grape_event_change_channel_communication::Do( void )
 bool grape_event_change_channel_communication::Undo( void )
 {
   channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
-  //channel_communication_ptr->set_name( m_old_channel_communication.get_name() );
+  channel_communication_ptr->set_rename_to( m_old_channel_communication.get_rename_to() );
   channel_communication_ptr->set_channeltype( m_old_channel_communication.get_channeltype() );
    
   finish_modification();

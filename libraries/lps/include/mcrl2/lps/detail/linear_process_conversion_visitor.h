@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 
 #include <stdexcept>
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/process_expression_visitor.h"

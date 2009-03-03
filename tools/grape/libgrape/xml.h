@@ -199,11 +199,26 @@ namespace grape
     void write_name( wxXmlNode *p_parent, const wxString &p_name );
 
     /**
+     * Writes an element tree representing a rename.
+     * @param p_parent The parent node of the element tree.
+     * @param p_rename_to The rename.
+     */
+    void write_rename_to( wxXmlNode *p_parent, const wxString &p_rename_to );
+
+    /**
      * Writes an element tree representing a line type.
      * @param p_parent The parent node of the element tree.
      * @param p_linetype The line type.
      */
     void write_linetype( wxXmlNode *p_parent, linetype p_linetype );
+
+    /**
+     * Writes an element tree representing a channel type.
+     * @param p_parent The parent node of the element tree.
+     * @param p_channeltype The channel type.
+     */
+    void write_channeltype( wxXmlNode *p_parent, channeltype p_channeltype );
+
   } // namespace libgrape
 } // namespace grape
 

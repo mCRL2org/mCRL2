@@ -40,6 +40,7 @@ channel::channel( const channel &p_channel )
 : connection( p_channel )
 {
   m_name = p_channel.m_name;
+  m_rename_to = p_channel.m_rename_to;
   m_enabled_channel = p_channel.m_enabled_channel;
   m_has_channel = p_channel.m_has_channel;
   m_channel_communication = p_channel.m_channel_communication;
@@ -62,6 +63,7 @@ channel::~channel(void)
 bool channel::operator==( const channel &p_channel )
 {
   return m_name == p_channel.m_name &&
+  m_rename_to == p_channel.m_rename_to &&
   m_enabled_channel == p_channel.m_enabled_channel &&
   &m_has_channel == &(p_channel.m_has_channel) &&
   &m_channel_communication == &(p_channel.m_channel_communication) &&
@@ -76,6 +78,16 @@ wxString channel::get_name(void) const
 void channel::set_name( const wxString &p_name)
 {
   m_name = p_name;
+}
+
+wxString channel::get_rename_to(void) const
+{
+  return m_rename_to;
+}
+
+void channel::set_rename_to( const wxString &p_rename_to)
+{
+  m_rename_to = p_rename_to;
 }
 
 void channel::attach_reference( compound_reference* p_reference )
