@@ -14,7 +14,8 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include <iosfwd>
+#include <iostream>
+#include <fstream>
 #include <ctime>
 #include <exception>
 
@@ -795,7 +796,7 @@ namespace squadt {
     return generator.lock();
   }
 
-  boost::md5::digest_type processor_impl::object_descriptor::get_checksum() const {
+  boost::uint32_t processor_impl::object_descriptor::get_checksum() const {
     return checksum;
   }
 
@@ -830,6 +831,42 @@ namespace squadt {
     return self_check(0);
   }
 
+  class crc_buf : public std::streambuf {
+  
+    private:
+  
+      boost::crc_32_type m_crc_computer;
+  
+    public:
+  
+     int overflow(int c) {
+       m_crc_computer.process_byte(c);
+  
+       return 1;
+     }
+  
+     std::streamsize xsputn(const char * s, std::streamsize n) {
+       m_crc_computer.process_bytes(s, n);
+  
+       pbump(n);
+  
+       return n;
+     }
+
+     boost::uint32_t checksum() const {
+       return m_crc_computer.checksum();
+     }
+  };
+
+  boost::uint32_t compute_checksum(boost::filesystem::path const& p) {
+    std::ifstream file(p.string().c_str());
+    std::ostream  out(new crc_buf());
+
+    out << file.rdbuf();
+
+    return static_cast< crc_buf const* >(out.rdbuf())->checksum();
+  }
+
   /**
    * \param[in] t objects older than this time stamp are considered obsolete
    * \return whether the object is up to date (according to time stamp and checksum)
@@ -848,13 +885,13 @@ namespace squadt {
           time_t stamp = last_write_time(l);
 
           if (stamp < t) {
-            return (processor_impl::try_change_status(*this, reproducible_out_of_date));
+            return processor_impl::try_change_status(*this, reproducible_out_of_date);
           }
           else if (timestamp < stamp) {
             /* Compare checksums and update recorded checksum */
-            boost::md5::digest_type old = checksum;
+            boost::uint32_t old = checksum;
 
-            checksum = boost::md5(l).digest();
+            checksum = compute_checksum(l);
 
             if (timestamp != 0 && old != checksum) {
               processor_impl::try_change_status(*this, reproducible_up_to_date);
@@ -871,7 +908,7 @@ namespace squadt {
       }
     }
 
-    return (false);
+    return false;
   }
   /// \endcond
 

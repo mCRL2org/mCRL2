@@ -1,6 +1,0 @@
-project boost/md5
-    : source-location ../src
-    ;
-
-obj boost_md5 : md5.cpp : <use>/site-config//boost <include>../../../boost/md5 <library>/site-config//boost_system <library>/site-config//boost_filesystem ;
-

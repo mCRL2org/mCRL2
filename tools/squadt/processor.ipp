@@ -16,6 +16,7 @@
 #include <functional>
 
 #include <boost/bind.hpp>
+#include <boost/crc.hpp>
 #include <boost/filesystem/convenience.hpp>
 
 #include "task_monitor.hpp"
@@ -23,7 +24,6 @@
 #include "project_manager.hpp"
 #include "executor.hpp"
 #include "tool_manager.ipp"
-#include "md5.hpp" // boost vault md5 library
 
 namespace squadt {
   /// \cond INTERNAL_DOCS
@@ -70,7 +70,7 @@ namespace squadt {
           boost::weak_ptr < project_manager > project;        ///< The manager of the project of which this object is part (generator->impl->manager)
           tipi::mime_type                     mime_type;      ///< The used storage format
           tipi::uri                           location;       ///< The location of the object
-          boost::md5::digest_type             checksum;       ///< The digest for the completed object
+          boost::uint32_t                     checksum;       ///< The digest for the completed object
           std::time_t                         timestamp;      ///< The last time the file was modified just before the last checksum was computed
 
         public:
@@ -91,7 +91,7 @@ namespace squadt {
           boost::filesystem::path get_location() const;
 
           /** \brief Returns the last recorded MD5 checksum of the file */
-          boost::md5::digest_type get_checksum() const;
+          boost::uint32_t get_checksum() const;
 
           /** \brief Returns the last recorded timestamp of the file */
           std::time_t get_timestamp() const;
