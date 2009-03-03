@@ -230,7 +230,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<sat>" << pp(a.actions()) << " " << pp(b) << std::flush;
+std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
 #endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
@@ -665,7 +665,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<sat>" << pp(a) << " " << pp(b) << std::flush;
+std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
 #endif
       using namespace modal::act_frm;
       using namespace modal::accessors;
