@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/process_expression_visitor.h"
 #include "mcrl2/lps/process_expression_builder.h"
@@ -102,26 +103,6 @@ const std::string ABS_SPEC_LINEARIZED =
   "init P(1, d2, true, 1, d2, false, 1, false, 1, d2, true);                                                                    \n"
   ;
 
-inline
-specification convert_linear_process_specification(const process_specification& pspec)
-{
-  detail::linear_process_conversion_visitor visitor;
-  specification result;
-  try
-  {
-    result = visitor.convert(pspec);
-  }
-  catch(detail::linear_process_conversion_visitor::unsupported_linear_process)
-  {
-    std::cerr << "Specification contains unsupported linear process expressions" << std::endl;
-  }
-  catch(detail::linear_process_conversion_visitor::non_linear_process)
-  {
-    std::cerr << "Specification contains non-linear process expressions" << std::endl;
-  }
-  return result;
-}
-
 void test_process(std::string text)
 {
   std::cout << "----------------------------------" << std::endl;
@@ -129,7 +110,7 @@ void test_process(std::string text)
   //std::cout << "LPS summands:\n" << core::pp(spec1.process().summands()) << std::endl;
 
   process_specification spec = parse_process_specification(text);
-  specification sp = convert_linear_process_specification(spec);
+  specification sp = parse_linear_process_specification(spec);
   std::cout << "<spec>" << core::pp(sp) << std::endl;
 
   //std::cout << core::pp(spec.data()) << std::endl
@@ -160,7 +141,6 @@ int test_main(int argc, char* argv[])
   test_process(SPEC1);
   test_process(SPEC2);
   test_process(ABS_SPEC_LINEARIZED);
-  BOOST_CHECK(false);
 
   return 0;
 }
