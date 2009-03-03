@@ -11,10 +11,13 @@
 #include "channelcommunication.h"
 #include "visualchannel_communication.h"
 #include "geometric.h"
+#include "grape_glcanvas.h"
+#include "mcrl2/utilities/font_renderer.h"
 
 namespace grape {
 
 using namespace grape::grapeapp;
+using namespace mcrl2::utilities::wx;
 
 visualchannel_communication::visualchannel_communication( channel_communication* p_channel_communication )
 {
@@ -43,8 +46,17 @@ void visualchannel_communication::draw( void )
     draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_object->get_selected());
   }
 
+  channel_communication *cc = static_cast<channel_communication *>(m_object);
+
+  float x = m_object->get_coordinate().m_x;
+  float y = m_object->get_coordinate().m_y;
+  wxString rename_to = cc->get_rename_to();
+
   // draw channel
   draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channeltype() );
+
+  //draw text 
+  if (rename_to != _T("")) grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.5 * m_object->get_width(), y, 0.0015f, al_right, al_top);
 
 }
 

@@ -31,6 +31,7 @@ namespace grape
         /** The communications involved in this channel communication. Each communication is associated with exactly one channel. */
         arr_communication    m_communication;
         channeltype          m_channeltype;     /**< type of channel communication. */
+        wxString             m_rename_to;       /**< rename of the channel communication. */
 
       public:
 
@@ -60,6 +61,20 @@ namespace grape
          */
         ~channel_communication( void );
 
+        /**
+         * Rename retrieval function.
+         * @return The rename to of the channel communication.
+         */
+        wxString get_rename_to(void) const;
+
+       /**
+         * Rename assignment function.
+         * Assigns the name to the rename of the channel communication.
+         * @pre The channel communication is selected.
+         * @param p_rename_to The new rename of the channel communication.
+         */
+        void set_rename_to( const wxString &p_rename_to );
+        
         /**
          * Channel addition function.
          * Adds a new channel to the channel communication.

@@ -216,6 +216,7 @@ bool grape_event_change_channel::Do( void )
 
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
   channel_ptr->set_name( m_new_channel.get_name() );
+  channel_ptr->set_rename_to( m_new_channel.get_rename_to() );
   channel_ptr->set_channeltype( m_new_channel.get_channeltype() );
  
   finish_modification();
@@ -226,6 +227,7 @@ bool grape_event_change_channel::Undo( void )
 {
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
   channel_ptr->set_name( m_old_channel.get_name() );
+  channel_ptr->set_rename_to( m_old_channel.get_rename_to() );
   channel_ptr->set_channeltype( m_old_channel.get_channeltype() );
    
   finish_modification();

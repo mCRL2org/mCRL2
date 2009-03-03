@@ -41,6 +41,8 @@ namespace grape
 
       protected:
         wxString                    m_name;           /**< name of the channel. */
+        wxString                    m_rename_to;      /**< rename of the channel. */
+        
         bool                        m_enabled_channel; /**< flag used during simulation. */
         channeltype                 m_channeltype;     /**< type of channel associated with this transition. */
 
@@ -90,11 +92,25 @@ namespace grape
 
        /**
          * Name assignment function.
-         * Assigns the name to the name of the channel.
+         * Assigns the name the rename of the channel.
          * @pre The channel is selected.
-         * @param p_name The new name of the channel.
+         * @param p_name The new rename of the channel.
          */
         void set_name( const wxString &p_name );
+        
+        /**
+         * Rename retrieval function.
+         * @return The rename to of the channel.
+         */
+        wxString get_rename_to(void) const;
+
+       /**
+         * Rename assignment function.
+         * Assigns the name to the rename of the channel.
+         * @pre The channel is selected.
+         * @param p_rename_to The new rename of the channel.
+         */
+        void set_rename_to( const wxString &p_rename_to );
 
        /**
          * Compound reference association function.

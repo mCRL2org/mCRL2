@@ -21,12 +21,20 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
 {  
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
+  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("channel name") );
+  wnd_sizer->Add(text_name, 0, wxALIGN_TOP, 0 );
+  wnd_sizer->AddSpacer( 5 );
+
+  m_name_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_name() );            
+  wnd_sizer->Add(m_name_input, 0, wxEXPAND, 0);
+  wnd_sizer->AddSpacer( 5 );
+  
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("channel rename") );
   wnd_sizer->Add(text_rename, 0, wxALIGN_TOP, 0 );
   wnd_sizer->AddSpacer( 5 );
 
-  m_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_name() );            
-  wnd_sizer->Add(m_input, 0, wxEXPAND, 0);
+  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_rename_to() );            
+  wnd_sizer->Add(m_rename_input, 0, wxEXPAND, 0);
   wnd_sizer->AddSpacer( 5 );
 
   wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("channel property") );
@@ -59,7 +67,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->Fit(this);
   wnd_sizer->SetSizeHints(this);
 
-  m_input->SetFocus();
+  m_name_input->SetFocus();
 }
 
 grape_channel_dlg::grape_channel_dlg()
@@ -75,7 +83,8 @@ bool grape_channel_dlg::show_modal( channel &p_channel )
 {
   if (ShowModal() != wxID_CANCEL)
   {
-    p_channel.set_name(m_input->GetValue());     
+    p_channel.set_name(m_name_input->GetValue());     
+    p_channel.set_rename_to(m_rename_input->GetValue());     
     if (m_combobox->GetValue() == _T("hidden")) p_channel.set_channeltype(channel_hidden);
     if (m_combobox->GetValue() == _T("blocked")) p_channel.set_channeltype(channel_blocked);
     if (m_combobox->GetValue() == _T("visible")) p_channel.set_channeltype(channel_visible);
