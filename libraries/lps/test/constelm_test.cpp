@@ -248,11 +248,9 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
 {
   specification s0;
   process_specification pspec = parse_process_specification(spec_text);
-  if (false && is_linear(pspec))
+  if (is_linear(pspec))
   {
     s0 = parse_linear_process_specification(spec_text);
-std::cout << "s0 = \n" << core::pp(s0) << std::endl;
-BOOST_CHECK(s0.is_well_typed());
   }
   else
   {

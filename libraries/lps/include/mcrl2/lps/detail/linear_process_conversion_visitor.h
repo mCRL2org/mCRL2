@@ -78,7 +78,7 @@ namespace detail {
       m_deadlock_changed = false;
       m_multi_action = multi_action();
       m_multi_action_changed = false;
-      m_condition = core::detail::gsMakeNil();
+      m_condition = data::data_expr::true_();
       m_next_state = data::data_assignment_list();
     }
 
