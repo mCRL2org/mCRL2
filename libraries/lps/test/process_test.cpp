@@ -110,7 +110,7 @@ void test_process(std::string text)
   //std::cout << "LPS summands:\n" << core::pp(spec1.process().summands()) << std::endl;
 
   process_specification spec = parse_process_specification(text);
-  specification sp = parse_linear_process_specification(spec);
+  specification sp = parse_linear_process_specification(text);
   std::cout << "<spec>" << core::pp(sp) << std::endl;
 
   //std::cout << core::pp(spec.data()) << std::endl

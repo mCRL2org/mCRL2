@@ -90,23 +90,12 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
   using namespace data::data_expr;
   namespace opt = data::data_expr::optimized;
   
-  typedef std::map<data::data_variable, std::list<data::rewriter::substitution>::iterator> index_map;
-
   // create a mapping from process parameters to initial values
-  std::map<data::data_variable, data::data_expression> replacements;
+  data::rewriter_map<std::map<data::data_variable, data::data_expression> > replacements;
   data::data_expression_list::iterator j = init.begin();
   for (data::data_variable_list::iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {
     replacements[*i] = *j;
-  }
-
-  // put the substitutions in a list, and make an index for it
-  std::list<data::rewriter::substitution> substitutions;
-  index_map index;
-  for (std::map<data::data_variable, data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
-  {
-    substitutions.push_back(data::rewriter::substitution(r, i->first, i->second));
-    index[i->first] = --substitutions.end();
   }
 
   bool has_changed;
@@ -115,7 +104,7 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      data::data_expression rc = r(i->condition(), substitutions);
+      data::data_expression rc = r(i->condition(), replacements);
 
       if (rc == false_())
       {
@@ -123,17 +112,15 @@ std::map<data::data_variable, data::data_expression> compute_constant_parameters
       }
       for (data::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
-        index_map::iterator k = index.find(j->lhs());
-        if (k != index.end())
+        std::map<data::data_variable, data::data_expression>::iterator k = replacements.find(j->lhs());
+        if (k != replacements.end())
         {
           data::data_expression d  = j->lhs();  // process parameter
           data::data_expression g  = j->rhs();  // assigned value
           data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
-          if (r(x, substitutions) == true_())
+          if (r(x, replacements) == true_())
           {
-            replacements.erase(d);
-            substitutions.erase(index[d]);
-            index.erase(k);
+            replacements.erase(k);
             has_changed = true;
           }
         }

@@ -26,11 +26,12 @@ namespace lps {
   /// contains a non-linear process expression.
   /// Throws detail::linear_process_conversion_visitor::unsupported_linear_process if
   /// the process contains an unsupported linear process expression.
+  /// \param text A string containing a linear mCRL2 specification
   /// \return The parsed specification
-  specification parse_linear_process_specification(const process_specification& pspec)
+  specification parse_linear_process_specification(const std::string& text)
   {
+    process_specification pspec = parse_process_specification(text);
     detail::linear_process_conversion_visitor visitor;
-    specification result;
     return visitor.convert(pspec);
   }
 
