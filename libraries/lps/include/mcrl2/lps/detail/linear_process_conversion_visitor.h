@@ -104,7 +104,7 @@ namespace detail {
         }
       }
       result.push_back(m_summand);
-//std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
+// std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
       clear_summand();
     }
   
@@ -122,7 +122,7 @@ namespace detail {
     {
       m_deadlock = deadlock();
       m_deadlock_changed = true;
-//std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
       return stop_recursion;
     }
 
@@ -132,7 +132,7 @@ namespace detail {
     {
       m_multi_action = multi_action();
       m_multi_action_changed = true;
-//std::cout << "adding multi action tau\n" << m_multi_action.to_string() << std::endl;
+// std::cout << "adding multi action tau\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
 
@@ -141,7 +141,7 @@ namespace detail {
     bool visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
     {
       m_multi_action = multi_action(x);
-//std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
 
@@ -151,7 +151,7 @@ namespace detail {
     {
       visit(right);
       m_sum_variables = m_sum_variables + v;
-//std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
+// std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
       return stop_recursion;
     }
 
@@ -204,7 +204,7 @@ namespace detail {
       visit(right);
       multi_action r = m_multi_action;
       m_multi_action = l + r;
-//std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
 
@@ -216,12 +216,12 @@ namespace detail {
       if (tr::is_delta(x))
       {
         m_deadlock.time() = d;
-//std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
+// std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
       }
       else
       {
         m_multi_action.time() = d;
-//std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
+// std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       }
       return stop_recursion;
     }
@@ -233,7 +233,7 @@ namespace detail {
       visit(left);
       process p = right;
       m_next_state = data::make_assignment_list(m_equation.variables2(), p.expressions());
-//std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
+// std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
     }
 
@@ -243,7 +243,7 @@ namespace detail {
     {
       visit(right);
       m_condition = d;
-//std::cout << "adding condition\n" << core::pp(m_condition) << std::endl;
+// std::cout << "adding condition\n" << core::pp(m_condition) << std::endl;
       return stop_recursion;
     }
 
