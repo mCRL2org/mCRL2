@@ -95,7 +95,7 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level=true);
 static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
 static ATbool gstcReadInSortStruct(ATermAppl);
 static ATbool gstcAddConstant(ATermAppl, const char*, bool high_level=true);
-static ATbool gstcAddFunction(ATermAppl, const char*, bool high_level=true);
+static ATbool gstcAddFunction(ATermAppl, const char*, bool high_level=true, bool allow_double_decls=false);
 
 static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunction(ATermAppl);
@@ -1694,7 +1694,7 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
 
 	ATermAppl ProjName=ATAgetArgument(Proj,0);
 	if(!gsIsNil(ProjName) &&
-	   !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection")) {return ATfalse;}
+	   !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection",true,true)) {return ATfalse;}
 	ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
       }
       if(!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATreverse(ConstructorType),SortExpr)),"constructor")) {return ATfalse;}
@@ -1732,7 +1732,7 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
   return Result;
 }
 
-static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
+static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level, bool allow_double_decls){
   assert(gsIsOpId(OpId));
   ATbool Result=ATtrue;
   ATermAppl Name = gsGetName(OpId);
@@ -1788,8 +1788,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
   // function name. We need to check if there is already such a type
   // in the list. If so -- error, otherwise -- add
   if (Types && gstcInTypesA(Sort, Types)){
-    gsErrorMsg("double declaration of %s %P\n", msg, Name);
-    return ATfalse;
+    if(!allow_double_decls){ gsErrorMsg("double declaration of %s %P\n", msg, Name); return ATfalse; }
   }
   else{
     if (!Types) Types=ATmakeList0();
