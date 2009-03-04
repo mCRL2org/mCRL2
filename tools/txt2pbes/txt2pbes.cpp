@@ -109,6 +109,7 @@ int main(int argc, char** argv)
       }
       //check if PBES is monotonic
       try {
+        gsVerboseMsg("checking monotonicity...\n");
         mcrl2::pbes_system::pbes<> p(result);
         //TODO replace by a more sophisticated check
         p.normalize();
@@ -117,6 +118,11 @@ int main(int argc, char** argv)
         throw mcrl2::runtime_error("PBES is not monotonic");
       }
       //store the result
+      if (tool_options.outfilename.empty()) {
+        gsVerboseMsg("saving result to stdout...\n");
+      } else {
+        gsVerboseMsg("saving result to '%s'...\n", tool_options.outfilename.c_str());
+      }
       mcrl2::pbes_system::pbes<> p(result);
       p.save(tool_options.outfilename);
     }
