@@ -23,9 +23,9 @@ using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
 // Example usage of the parity_game_generator class.
-void run1(const pbes<>& p)
+void run1(const pbes<>& p, bool min_parity_game)
 {
-  parity_game_generator pgg(p);
+  parity_game_generator pgg(p, min_parity_game);
   std::set<unsigned int> todo = pgg.get_initial_values();
   std::set<unsigned int> done;
   while (!todo.empty())
@@ -53,9 +53,9 @@ void run1(const pbes<>& p)
 
 // Create a parity game graph, and write it to outfile. The graph
 // is in pgsolver format, see http://www.tcs.ifi.lmu.de/~mlange/pgsolver/index.html.
-void run2(const pbes<>& p, std::string outfile)
+void run2(const pbes<>& p, bool min_parity_game, std::string outfile)
 {
-  pbes_system::detail::parity_game_output pgg(p);
+  pbes_system::detail::parity_game_output pgg(p, min_parity_game);
   pgg.run();
   std::string text = pgg.pgsolver_graph();
   std::ofstream to(outfile.c_str());
@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
     boost::program_options::options_description paritygame_options(
       "Usage: paritygame [OPTION]... INFILE OUTFILE\n"
       "\n"
-      "Reads a file containing a pbes, and generates a bes.\n"
+      "Reads a file containing a pbes, and generates a parity game.\n"
+      "By default a min-parity game is generated.\n"
       "\n"
       "Options"
     );
@@ -82,6 +83,7 @@ int main(int argc, char* argv[])
       ("help,h", "display this help")
       ("verbose,v", "display short intermediate messages")
       ("debug,d", "display detailed intermediate messages")
+      ("max-parity-game,m", "generate max-parity game instead of min-parity game")
       ;
 
     //--- hidden options ---------
@@ -125,8 +127,16 @@ int main(int argc, char* argv[])
 
     pbes_system::pbes<> p;
     p.load(infile);
-    run1(p);
-    run2(p, outfile);
+
+    if (var_map.count("max-parity-game"))
+    {
+      run2(p, false, outfile);
+    }
+    else
+    {
+      run1(p, true);
+      run2(p, true, outfile);
+    }
   }
   catch(std::exception& e) {
     std::cerr << "error: " << e.what() << "\n";

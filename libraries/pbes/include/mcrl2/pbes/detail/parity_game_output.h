@@ -126,8 +126,8 @@ namespace detail {
       }
 
     public:
-      parity_game_output(const pbes<>& p)
-        : parity_game_generator(p, true)
+      parity_game_output(const pbes<>& p, bool min_parity_game = true)
+        : parity_game_generator(p, true, min_parity_game)
       {}
 
       // Example:
