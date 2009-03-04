@@ -41,7 +41,7 @@ grape_event_add_visible::grape_event_add_visible( grape_frame *p_main_frame, coo
   connection_property* prop_ptr = p_conn->get_property();
   if ( prop_ptr != 0 )
   {
-    visible* vis_ptr = dynamic_cast<visible*> ( prop_ptr );
+    visible* vis_ptr = dynamic_cast<visible*> ( prop_ptr );   
     if ( vis_ptr )
     {
       m_removed_visible = new grape_event_remove_visible( m_main_frame, vis_ptr, dia_ptr );
@@ -86,8 +86,12 @@ bool grape_event_add_visible::Do( void )
 
   connection* conn = dynamic_cast<connection*> ( find_object( m_conn ) );
   assert( conn != 0 );
-  dia_ptr->add_visible( m_vis, m_coord, m_def_vis_width, m_def_vis_height, conn );
-
+  
+  // if posible the visible should copy the channel name
+  visible* vis_ptr = dia_ptr->add_visible( m_vis, m_coord, m_def_vis_width, m_def_vis_height, conn );
+  channel* chan_ptr = dynamic_cast<channel*> ( conn );
+  if ( chan_ptr ) vis_ptr->set_name(chan_ptr->get_name());
+ 
   finish_modification();
   return true;
 }
