@@ -13,7 +13,7 @@
 
 // #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-#define MCRL2_PARITY_GAME_DEBUG
+// #define MCRL2_PARITY_GAME_DEBUG
 // #define MCRL2_PARITY_GAME_CREATE_FILES
 
 #include <fstream>
@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
+#include "gc.h" // ATerm Library garbage collector
 
 using namespace mcrl2;
 
@@ -195,10 +196,90 @@ void test_bes_examples()
   test_bes(BES8, "parity_game_test_bes8.pg", true);
 }
 
+// Another test example from Maks Verver that triggers a garbage collection problem.
+void test_parity_game_generator2()
+{
+  using namespace pbes_system;
+
+  std::string ABP =
+    "% This file contains the alternating bit protocol, as described in W.J.    \n"
+    "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
+    "%                                                                          \n"
+    "% The only exception is that the domain D consists of two data elements to \n"
+    "% facilitate simulation.                                                   \n"
+    "                                                                           \n"
+    "sort                                                                       \n"
+    "  D     = struct d1 | d2;                                                  \n"
+    "  Error = struct e;                                                        \n"
+    "                                                                           \n"
+    "act                                                                        \n"
+    "  r1,s4: D;                                                                \n"
+    "  s2,r2,c2: D # Bool;                                                      \n"
+    "  s3,r3,c3: D # Bool;                                                      \n"
+    "  s3,r3,c3: Error;                                                         \n"
+    "  s5,r5,c5: Bool;                                                          \n"
+    "  s6,r6,c6: Bool;                                                          \n"
+    "  s6,r6,c6: Error;                                                         \n"
+    "  i;                                                                       \n"
+    "                                                                           \n"
+    "proc                                                                       \n"
+    "  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
+    "  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
+    "                                                                           \n"
+    "  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
+    "                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
+    "                                                                           \n"
+    "  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
+    "                                                                           \n"
+    "  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
+    "                                                                           \n"
+    "init                                                                       \n"
+    "  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
+    "    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
+    "        S(true) || K || L || R(true)                                       \n"
+    "    )                                                                      \n"
+    "  );                                                                       \n"
+    ;
+    
+  std::string NODEADLOCK = "[true*]<true>true";
+
+  pbes<> pbes = lps2pbes(ABP, NODEADLOCK, true);
+                                                                                
+  // Generate min-priority parity game
+  mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true);
+
+  // Build the edge list
+  typedef unsigned int verti;
+  verti num_vertices = 1 + *pgg.get_initial_values().rbegin();
+  for (verti v = 0; v < num_vertices; ++v)
+  {
+      std::set<unsigned> deps = pgg.get_dependencies(v);
+      for ( std::set<unsigned>::const_iterator it = deps.begin();
+            it != deps.end(); ++it )
+      {
+          verti w = (verti)*it;
+          if (w >= num_vertices) num_vertices = w + 1;
+          printf("%6d -> %6d\n", v, w);
+      }
+  }
+
+AT_collect();
+
+  // Find vertex properties
+  for (verti v = 0; v < num_vertices; ++v)
+  {
+      bool and_op = pgg.get_operation(v) ==
+                    mcrl2::pbes_system::parity_game_generator::PGAME_AND;
+      int priority = pgg.get_priority(v);
+      printf("%6d: player=%d priority=%d\n", v, and_op, priority);
+  }
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_parity_game_generator2();
   // test_parity_game_generator();
   test_bes_examples();
 

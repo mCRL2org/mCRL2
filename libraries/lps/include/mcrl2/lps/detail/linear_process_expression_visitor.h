@@ -231,6 +231,15 @@ namespace detail {
       {
         throw non_linear_process();
       }
+      if (!tr::is_process(right))
+      {
+        throw std::runtime_error("unexpected error in visit_seq");
+      }
+      process q = right;
+      if (q.identifier() != eqn.name())
+      {
+        throw non_linear_process();
+      }
       return continue_recursion;
     }
 
@@ -286,6 +295,24 @@ namespace detail {
         visit(e.expression());
       }
       catch(non_linear_process&)
+      {
+        return false;
+      }
+      return true;
+    }
+
+    /// \brief Returns true if the process specification is linear.
+    bool is_linear(const process_specification& p)
+    {
+      if (p.equations().size() != 1)
+      {
+        return false;
+      }
+      if (!is_linear(*p.equations().begin()))
+      {
+        return false;
+      }
+      if (!tr::is_process(p.init().expression()))
       {
         return false;
       }

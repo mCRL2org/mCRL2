@@ -75,14 +75,7 @@ const std::string removed_7 = "";
 inline
 bool is_linear(const process_specification& pspec)
 {
-  for (process_equation_list::iterator i = pspec.equations().begin(); i != pspec.equations().end(); ++i)
-  {
-    if (!lps::detail::linear_process_expression_visitor().is_linear(*i))
-    {
-      return false;
-    }
-  }
-  return true;
+  return lps::detail::linear_process_expression_visitor().is_linear(pspec);
 }
 
 void test_parelm(const std::string& spec_text, const std::string& expected_result)
@@ -92,8 +85,6 @@ void test_parelm(const std::string& spec_text, const std::string& expected_resul
   if (is_linear(pspec))
   {
     s0 = parse_linear_process_specification(spec_text);
-std::cout << "s0 = \n" << core::pp(s0) << std::endl;
-BOOST_CHECK(s0.is_well_typed());
   }
   else
   {
