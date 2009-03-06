@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_PARITY_GAME_GENERATOR_H
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_H
 
-// #define MCRL2_BROKEN_ATERM_LIBRARY
-
 #include <iomanip>
 #include <map>
 #include <set>
@@ -24,6 +22,20 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
+
+namespace atermpp {
+  /// \cond INTERNAL_DOCS
+  template<>
+  struct aterm_traits<std::pair<pbes_expression, unsigned int> >
+  {
+    typedef ATermAppl aterm_type;
+    static void protect(std::pair<pbes_expression, unsigned int> t)   { t.first.protect(); }
+    static void unprotect(std::pair<pbes_expression, unsigned int> t) { t.first.unprotect(); }
+    static void mark(std::pair<pbes_expression, unsigned int> t)      { t.first.mark(); }
+    // static ATerm term(std::pair<pbes_expression, unsigned int> t)     { return t.first.term(); }
+    // static ATerm* ptr(std::pair<pbes_expression, unsigned int>& t)    { return &t.first.term(); }
+  };
+} // namespace atermpp
 
 namespace mcrl2 {
 
@@ -73,16 +85,11 @@ namespace pbes_system {
       /// \brief Maps PBES closed expressions to corresponding BES variables.
       atermpp::map<pbes_expression, unsigned int> m_pbes_expression_index;
 
-#ifdef MCRL2_BROKEN_ATERM_LIBRARY
-      /// \brief Force the ATerm Library to protect these terms
-      atermpp::aterm_list m_protected_terms;
-#endif
-
       /// \brief Contains intermediate results of the BES that is being generated.
       /// m_bes[i] represents a BES equation corresponding to BES variable i.
       /// m_bes[i].first is the right hand side of the BES equation
       /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
-      std::vector<std::pair<pbes_expression, unsigned int> > m_bes;
+      atermpp::vector<std::pair<pbes_expression, unsigned int> > m_bes;
 
       /// \brief Determines what kind of BES equations are generated for true and false.
       bool m_true_false_dependencies;
@@ -105,11 +112,6 @@ namespace pbes_system {
         }
         else
         {
-#ifdef MCRL2_BROKEN_ATERM_LIBRARY
-  atermpp::aterm t1(atermpp::aterm_traits<pbes_expression>::term(t));
-  m_protected_terms = atermpp::push_front(m_protected_terms, t1);
-  // m_protected_terms = atermpp::push_front(m_protected_terms, t);
-#endif
           unsigned int p = m_pbes_expression_index.size();
           m_pbes_expression_index[t] = p;
           m_bes.push_back(std::make_pair(t, priority));
