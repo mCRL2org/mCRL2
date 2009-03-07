@@ -29,9 +29,6 @@ namespace mcrl2 {
     ///
     class lambda: public abstraction
     {
-      protected:
-       variable_list m_variables; ///< The list of variables that is abstracted.
-
       public:
 
         /// Constructor.
@@ -39,8 +36,7 @@ namespace mcrl2 {
         /// \param[in] d A new_data expression.
         /// \pre d is a lambda abstraction.
         lambda(const data_expression& d)
-          : abstraction(d),
-            m_variables(atermpp::term_list<data_expression>(atermpp::list_arg2(d)).begin(), atermpp::term_list<data_expression>(atermpp::list_arg2(d)).end())
+          : abstraction(d)
         {
           assert(d.is_abstraction());
           assert(static_cast<abstraction>(d).binding_operator() == "lambda");
@@ -51,10 +47,34 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the lambda abstraction.
         /// \pre variables is not empty.
-        lambda(const variable_const_range& variables,
+        lambda(const variable_list& variables,
                const data_expression& body)
-          : abstraction("lambda", variables, body),
-            m_variables(variables.begin(), variables.end())
+          : abstraction("lambda", variables, body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the lambda abstraction.
+        /// \pre variables is not empty.
+        lambda(const variable_vector& variables,
+               const data_expression& body)
+          : abstraction("lambda", make_variable_list(variables), body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the lambda abstraction.
+        /// \pre variables is not empty.
+        template < typename ForwardIteratorRange >
+        lambda(const boost::iterator_range< ForwardIteratorRange >& variables,
+               const data_expression& body)
+          : abstraction("lambda", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }
@@ -82,7 +102,7 @@ namespace mcrl2 {
 
     /// \brief list of lambdas
     ///
-    typedef atermpp::vector<lambda> lambda_list;
+    typedef atermpp::term_list<lambda> lambda_list;
 
   } // namespace new_data
 

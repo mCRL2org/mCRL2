@@ -428,9 +428,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Pos
       inline
-      function_symbol_list pos_generate_constructors_code()
+      function_symbol_vector pos_generate_constructors_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(c1());
         result.push_back(cdub());
 
@@ -439,9 +439,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Pos
       inline
-      function_symbol_list pos_generate_functions_code()
+      function_symbol_vector pos_generate_functions_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(maximum());
         result.push_back(minimum());
         result.push_back(abs());
@@ -621,9 +621,9 @@ namespace mcrl2 {
 
       // Give all system defined equations for Pos
       inline
-      data_equation_list pos_generate_equations_code()
+      data_equation_vector pos_generate_equations_code()
       {
-        data_equation_list result;
+        data_equation_vector result;
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), equal_to(sort_pos::c1(), sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos()))), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), equal_to(sort_pos::cdub(variable("b", sort_bool_::bool_()), variable("p", sort_pos::pos())), sort_pos::c1()), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), equal_to(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos())), sort_pos::cdub(sort_bool_::true_(), variable("q", sort_pos::pos()))), sort_bool_::false_()));
@@ -645,7 +645,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::maximum(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::minimum(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), if_(less_equal(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::abs(variable("p", sort_pos::pos())), variable("p", sort_pos::pos())));
-        result.push_back(data_equation(variable_list(), sort_pos::succ(sort_pos::c1()), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1())));
+        result.push_back(data_equation(variable_vector(), sort_pos::succ(sort_pos::c1()), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::succ(sort_pos::cdub(sort_bool_::false_(), variable("p", sort_pos::pos()))), sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_pos::succ(sort_pos::cdub(sort_bool_::true_(), variable("p", sort_pos::pos()))), sort_pos::cdub(sort_bool_::false_(), sort_pos::succ(variable("p", sort_pos::pos())))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::plus(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_pos::add_with_carry(sort_bool_::false_(), variable("p", sort_pos::pos()), variable("q", sort_pos::pos()))));

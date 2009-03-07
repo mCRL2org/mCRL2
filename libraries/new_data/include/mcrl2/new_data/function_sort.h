@@ -32,9 +32,13 @@ namespace mcrl2 {
     ///
     class function_sort: public sort_expression
     {
-      protected:
-
-        sort_expression_list m_domain; ///< The domain of the sort.
+      public:
+        // \brief iterator range over list of structured sort constructors
+        typedef detail::term_list_random_iterator< sort_expression > domain_iterator;
+        /// \brief iterator range over list of structured sort constructors
+        typedef boost::iterator_range< domain_iterator >             domain_range;
+        /// \brief iterator range over constant list of structured sort constructors
+        typedef boost::iterator_range< domain_iterator >             domain_const_range;
 
       public:
 
@@ -49,8 +53,7 @@ namespace mcrl2 {
         /// \param[in] s A sort expression.
         /// \pre s is a function sort. 
         function_sort(const sort_expression& s)
-          : sort_expression(s),
-            m_domain(atermpp::term_list<sort_expression>(atermpp::list_arg1(s)).begin(), atermpp::term_list<sort_expression>(atermpp::list_arg1(s)).end())
+          : sort_expression(s)
         {
           assert(s.is_function_sort());
         }
@@ -60,10 +63,34 @@ namespace mcrl2 {
         /// \param[in] domain The domain of the sort.
         /// \param[in] codomain The codomain of the sort.
         /// \pre domain is not empty.
-        function_sort(const sort_expression_const_range& domain,
+        template < typename ForwardTraversalIterator >
+        function_sort(const typename boost::iterator_range< ForwardTraversalIterator >& domain,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(domain.begin(), domain.end()), codomain)),
-            m_domain (domain.begin(), domain.end())
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(make_sort_expression_list(domain), codomain))
+        {
+          assert(!domain.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] domain The domain of the sort.
+        /// \param[in] codomain The codomain of the sort.
+        /// \pre domain is not empty.
+        function_sort(const sort_expression_vector& domain,
+                      const sort_expression& codomain)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(detail::convert< sort_expression_list >(domain), codomain))
+        {
+          assert(!domain.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] domain The domain of the sort.
+        /// \param[in] codomain The codomain of the sort.
+        /// \pre domain is not empty.
+        function_sort(const sort_expression_list& domain,
+                      const sort_expression& codomain)
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(domain, codomain))
         {
           assert(!domain.empty());
         }
@@ -75,8 +102,7 @@ namespace mcrl2 {
         /// \post \this represents dom1 -> codomain
         function_sort(const sort_expression& dom1,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1)), codomain)),
-            m_domain (make_vector(dom1))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1)), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 2
@@ -88,8 +114,7 @@ namespace mcrl2 {
         function_sort(const sort_expression& dom1,
                       const sort_expression& dom2,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2)), codomain)),
-            m_domain (make_vector(dom1, dom2))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2)), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 3
@@ -103,8 +128,7 @@ namespace mcrl2 {
                       const sort_expression& dom2,
                       const sort_expression& dom3,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3)), codomain)),
-            m_domain (make_vector(dom1, dom2, dom3))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3)), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 3
@@ -120,8 +144,7 @@ namespace mcrl2 {
                       const sort_expression& dom3,
                       const sort_expression& dom4,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3, dom4)), codomain)),
-            m_domain (make_vector(dom1, dom2, dom3, dom4))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3, dom4)), codomain))
         {}
 
         /// \overload
@@ -135,9 +158,9 @@ namespace mcrl2 {
         /// \brief Returns the domain of the sort.
         ///
         inline
-        sort_expression_const_range domain() const
+        domain_const_range domain() const
         {
-          return boost::make_iterator_range(m_domain.begin(), m_domain.end());
+          return boost::make_iterator_range(add_random_access< sort_expression >(atermpp::list_arg1(*this)));
         }
 
         /// \brief Returns the codomain of the sort.
@@ -151,8 +174,9 @@ namespace mcrl2 {
     }; // class function_sort
 
     /// \brief list of function sorts
-    ///
-    typedef atermpp::vector<function_sort> function_sort_list;
+    typedef atermpp::term_list<function_sort> function_sort_list;
+    /// \brief list of function sorts
+    typedef atermpp::vector<function_sort>    function_sort_vector;
 
   } // namespace new_data
 

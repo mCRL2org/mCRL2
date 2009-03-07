@@ -467,9 +467,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for List
       inline
-      function_symbol_list list_generate_constructors_code(const sort_expression& s)
+      function_symbol_vector list_generate_constructors_code(const sort_expression& s)
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(nil(s));
         result.push_back(cons_(s));
 
@@ -478,9 +478,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for List
       inline
-      function_symbol_list list_generate_functions_code(const sort_expression& s)
+      function_symbol_vector list_generate_functions_code(const sort_expression& s)
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(in(s));
         result.push_back(count(s));
         result.push_back(snoc(s));
@@ -671,15 +671,15 @@ namespace mcrl2 {
 
       // Give all system defined equations for List
       inline
-      data_equation_list list_generate_equations_code(const sort_expression& s)
+      data_equation_vector list_generate_equations_code(const sort_expression& s)
       {
-        data_equation_list result;
+        data_equation_vector result;
         result.push_back(data_equation(make_vector(variable("d", s), variable("s", sort_list::list(s))), equal_to(sort_list::nil(s), sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("d", s), variable("s", sort_list::list(s))), equal_to(sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_list::nil(s)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("t", sort_list::list(s)), variable("s", sort_list::list(s)), variable("d", s), variable("e", s)), equal_to(sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), sort_list::cons_(s, variable("e", s), variable("t", sort_list::list(s)))), sort_bool_::and_(equal_to(variable("d", s), variable("e", s)), equal_to(variable("s", sort_list::list(s)), variable("t", sort_list::list(s))))));
         result.push_back(data_equation(make_vector(variable("d", s)), sort_list::in(s, variable("d", s), sort_list::nil(s)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("d", s), variable("e", s), variable("s", sort_list::list(s))), sort_list::in(s, variable("d", s), sort_list::cons_(s, variable("e", s), variable("s", sort_list::list(s)))), sort_bool_::or_(equal_to(variable("d", s), variable("e", s)), sort_list::in(s, variable("d", s), variable("s", sort_list::list(s))))));
-        result.push_back(data_equation(variable_list(), sort_list::count(s, sort_list::nil(s)), sort_nat::c0()));
+        result.push_back(data_equation(variable_vector(), sort_list::count(s, sort_list::nil(s)), sort_nat::c0()));
         result.push_back(data_equation(make_vector(variable("d", s), variable("s", sort_list::list(s))), sort_list::count(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s)))), sort_nat::cnat(sort_nat::succ(sort_list::count(s, variable("s", sort_list::list(s)))))));
         result.push_back(data_equation(make_vector(variable("d", s)), sort_list::snoc(s, sort_list::nil(s), variable("d", s)), sort_list::cons_(s, variable("d", s), sort_list::nil(s))));
         result.push_back(data_equation(make_vector(variable("d", s), variable("e", s), variable("s", sort_list::list(s))), sort_list::snoc(s, sort_list::cons_(s, variable("d", s), variable("s", sort_list::list(s))), variable("e", s)), sort_list::cons_(s, variable("d", s), sort_list::snoc(s, variable("s", sort_list::list(s)), variable("e", s)))));

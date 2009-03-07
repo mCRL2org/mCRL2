@@ -72,9 +72,9 @@ namespace new_data {
                         &substitution_context, &declarations, &new_data_equations);
 
         if (!ATisEmpty(new_data_equations)) {
-          atermpp::term_list< atermpp::aterm_appl > new_equations(new_data_equations);
+          atermpp::term_list< new_data::data_equation > new_equations(new_data_equations);
 
-          for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = new_equations.begin();
+          for (atermpp::term_list< new_data::data_equation >::const_iterator i = new_equations.begin();
                                                                         i != new_equations.end(); ++i) {
             m_rewriter->addRewriteRule(*i);
           }
@@ -92,7 +92,7 @@ namespace new_data {
       {
         ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
            detail::reconstruct_exprs(reinterpret_cast< ATerm >(
-           static_cast< ATermAppl >(expression)))));
+           static_cast< ATermAppl >(expression)), m_specification)));
 
         return atermpp::aterm_appl(reconstructed);
       }
@@ -134,13 +134,14 @@ namespace new_data {
           m_substitution_context(r.m_substitution_context),
           m_rewriter(r.m_rewriter)
       {
+        m_substitution_context.protect();
         m_specification.protect();
       }
 
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      basic_rewriter(data_specification d, strategy s = jitty)
+      basic_rewriter(data_specification d = data_specification(), strategy s = jitty)
         : m_substitution_context(ATmakeList0())
       {
         ATermList substitution_context = m_substitution_context;
@@ -186,7 +187,7 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter(data_specification const& d = default_data_specification(), strategy s = jitty)
+      rewriter(data_specification const& d = data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression>(d, s)
       { }
 
@@ -225,7 +226,7 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter_with_variables(data_specification d = default_data_specification(), strategy s = jitty)
+      rewriter_with_variables(data_specification d = data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression_with_variables>(d, s)
       { }
 

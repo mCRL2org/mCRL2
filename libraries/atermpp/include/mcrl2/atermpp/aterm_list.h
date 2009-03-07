@@ -15,6 +15,8 @@
 #include <cassert>
 #include <limits>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_make_match.h"
 #include "mcrl2/atermpp/detail/aterm_conversion.h"
@@ -112,7 +114,8 @@ namespace atermpp {
 
       /// Construction from aterm_list.
       /// \param t A term containing a list.
-      term_list(const term_list<aterm>& t);
+      template <typename SpecificTerm>
+      term_list(const term_list<SpecificTerm>& t);
 
       /// Allow construction from an aterm. The aterm must be of the right type.
       /// \param t A term containing a list.
@@ -126,12 +129,29 @@ namespace atermpp {
       /// \param first The start of a range of elements.
       /// \param last The end of a range of elements.
       template <class Iter>
-      term_list(Iter first, Iter last)
+      term_list(Iter first, Iter last, typename boost::enable_if<
+                typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+                                        boost::bidirectional_traversal_tag >::type >::type* = 0)
         : aterm_base(ATmakeList0())
       {
         while (first != last)
           m_term = void2term(list2void(ATinsert(list(), aterm(*(--last)))));
       }
+
+      /// Creates an term_list with a copy of a range.
+      /// \param first The start of a range of elements.
+      /// \param last The end of a range of elements.
+      template <class Iter>
+      term_list(Iter first, Iter last, typename boost::disable_if<
+                typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
+                                        boost::bidirectional_traversal_tag >::type >::type* = 0)
+        : aterm_base(ATmakeList0())
+      {
+        while (first != last)
+          m_term = void2term(list2void(ATinsert(list(), aterm(*(first++)))));
+        m_term = void2term(list2void(ATreverse(list())));
+      }
+
 
       /// Assignment operator.
       /// \param t A term containing a list.
@@ -388,7 +408,8 @@ namespace atermpp {
 
   // implementation
   template <typename Term>
-  term_list<Term>::term_list(const term_list<aterm>& t)
+  template <typename SpecificTerm>
+  term_list<Term>::term_list(const term_list<SpecificTerm>& t)
     : aterm_base(t)
   {}
 

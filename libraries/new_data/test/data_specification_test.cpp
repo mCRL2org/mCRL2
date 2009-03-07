@@ -15,6 +15,7 @@
 
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/basic_sort.h"
+#include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/utility.h"
 
 using namespace mcrl2;
@@ -25,27 +26,26 @@ void test_sorts()
   basic_sort s("S");
   basic_sort s0("S0");
   alias s1(basic_sort("S1"), s);
- 
-  sort_expression_list sl;
-  sl.push_back(s);
-  sl.push_back(s0);
-  sl.push_back(s1);
-  boost::iterator_range<sort_expression_list::const_iterator> sl_range(boost::make_iterator_range(sl));
+
+  atermpp::set< sort_expression > sl;
+  sl.insert(s);
+  sl.insert(s0);
+  sl.insert(s1);
 
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
   spec.add_sort(s1);
   data_specification spec1;
-  spec1.add_sorts(sl_range);
+  spec1.add_sorts(boost::make_iterator_range(sl));
 
-  BOOST_CHECK(spec.sorts() == sl_range);
-  BOOST_CHECK(spec1.sorts() == sl_range);
+  BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
+  BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
   BOOST_CHECK(spec == spec1);
 
   basic_sort s2("S2");
-  sort_expression_list s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
-  boost::iterator_range<sort_expression_list::const_iterator> s2l_range(s2l);
+  sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
+  boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_system_defined_sort(s2);
   spec1.add_system_defined_sorts(s2l_range);
   BOOST_CHECK(spec == spec1);
@@ -71,12 +71,12 @@ void test_constructors()
   function_symbol f("f", s);
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
-  function_symbol_list fgl(make_vector(f,g));
-  function_symbol_list hl(make_vector(h));
-  function_symbol_list fghl(make_vector(f,g,h));
-  boost::iterator_range<function_symbol_list::const_iterator> fgl_range(boost::make_iterator_range(fgl));
-  boost::iterator_range<function_symbol_list::const_iterator> hl_range(boost::make_iterator_range(hl));
-  boost::iterator_range<function_symbol_list::const_iterator> fghl_range(boost::make_iterator_range(fghl));
+  function_symbol_vector fgl(make_vector(f,g));
+  function_symbol_vector hl(make_vector(h));
+  function_symbol_vector fghl(make_vector(f,g,h));
+  boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
+  boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
+  boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
   data_specification spec;
   spec.add_sort(s);
@@ -88,11 +88,12 @@ void test_constructors()
   spec.add_constructor(h);
   spec1.add_constructors(fghl_range);
 
+  function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl_range);
-  BOOST_CHECK(spec.constructors().size() == 3);
-  BOOST_CHECK(std::find(spec.constructors().begin(), spec.constructors().end(), f) != spec.constructors().end());
-  BOOST_CHECK(std::find(spec.constructors().begin(), spec.constructors().end(), g) != spec.constructors().end());
-  BOOST_CHECK(std::find(spec.constructors().begin(), spec.constructors().end(), h) != spec.constructors().end());
+  BOOST_CHECK(constructors.size() == 3);
+  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
+  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
+  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
   BOOST_CHECK(spec == spec1);
   BOOST_CHECK(spec.constructors() == spec1.constructors());
@@ -106,8 +107,8 @@ void test_constructors()
   BOOST_CHECK(spec == spec1);
 
   spec.add_system_defined_constructor(i);
-  function_symbol_list il(make_vector(i));
-  boost::iterator_range<function_symbol_list::const_iterator> il_range(il);
+  function_symbol_vector il(make_vector(i));
+  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   spec1.add_system_defined_constructors(il_range);
   BOOST_CHECK(spec == spec1);
   BOOST_CHECK(spec.is_system_defined(i));
@@ -133,12 +134,12 @@ void test_functions()
   function_symbol g("g", s0s);
   function_symbol h("h", s0);
 
-  function_symbol_list fgl(make_vector(f,g));
-  function_symbol_list hl(make_vector(h));
-  function_symbol_list fghl(make_vector(f,g,h));
-  boost::iterator_range<function_symbol_list::const_iterator> fgl_range(boost::make_iterator_range(fgl));
-  boost::iterator_range<function_symbol_list::const_iterator> hl_range(boost::make_iterator_range(hl));
-  boost::iterator_range<function_symbol_list::const_iterator> fghl_range(boost::make_iterator_range(fghl));
+  function_symbol_vector fgl(make_vector(f,g));
+  function_symbol_vector hl(make_vector(h));
+  function_symbol_vector fghl(make_vector(f,g,h));
+  boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
+  boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
+  boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
   data_specification spec;
   spec.add_sort(s);
@@ -147,12 +148,13 @@ void test_functions()
   spec.add_mapping(f);
   spec.add_mapping(g);
   spec.add_mapping(h);
-  spec1.add_mappings(fghl);
+  spec1.add_mappings(fghl_range);
 
-  BOOST_CHECK(spec.mappings().size() == 3);
-  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), f) != spec.mappings().end());
-  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), g) != spec.mappings().end());
-  BOOST_CHECK(std::find(spec.mappings().begin(), spec.mappings().end(), h) != spec.mappings().end());
+  function_symbol_vector mappings(boost::copy_range< function_symbol_vector >(spec.mappings()));
+  BOOST_CHECK(mappings.size() == 3);
+  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
+  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) != mappings.end());
+  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) != mappings.end());
 
   BOOST_CHECK(spec == spec1);
   BOOST_CHECK(spec.mappings(s).size() == 2);
@@ -170,8 +172,8 @@ void test_functions()
 
   function_symbol i("i", s0);
   spec.add_system_defined_mapping(i);
-  function_symbol_list il(make_vector(i));
-  boost::iterator_range<function_symbol_list::const_iterator> il_range(il);
+  function_symbol_vector il(make_vector(i));
+  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   spec1.add_system_defined_mappings(il_range);
   BOOST_CHECK(spec == spec1);
   BOOST_CHECK(spec.is_system_defined(i));
@@ -185,7 +187,7 @@ void test_functions()
 
   spec.remove_mappings(il_range);
   spec1.remove_mapping(i);
-  BOOST_CHECK(spec == spec1);  
+  BOOST_CHECK(spec == spec1);
 }
 
 void test_equations()
@@ -195,10 +197,10 @@ void test_equations()
   function_sort s0s(make_vector(reinterpret_cast<sort_expression&>(s0)), s);
   function_symbol f("f", s0s);
   variable x("x", s0);
-  data_expression_list xel(make_vector(reinterpret_cast<data_expression&>(x)));
+  data_expression_vector xel(make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
-  variable_list xl(make_vector(x));
-  boost::iterator_range<variable_list::const_iterator> x_range(xl);
+  variable_vector xl(make_vector(x));
+  boost::iterator_range<variable_vector::const_iterator> x_range(xl);
   data_equation fxx(x_range, x, fx, x);
 
   data_specification spec;
@@ -207,8 +209,8 @@ void test_equations()
   spec.add_sort(s0);
   spec1 = spec;
   spec.add_equation(fxx);
-  data_equation_list fxxl(make_vector(fxx));
-  boost::iterator_range<data_equation_list::const_iterator> fxxl_range(fxxl);
+  data_equation_vector fxxl(make_vector(fxx));
+  boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
   spec1.add_equations(fxxl_range);
 
   BOOST_CHECK(spec == spec1);
@@ -216,8 +218,8 @@ void test_equations()
   BOOST_CHECK(spec1.equations() == fxxl_range);
 
   data_equation fxf(x_range, x, fx, f);
-  data_equation_list fxfl(make_vector(fxf));
-  boost::iterator_range<data_equation_list::const_iterator> fxfl_range(fxfl);
+  data_equation_vector fxfl(make_vector(fxf));
+  boost::iterator_range<data_equation_vector::const_iterator> fxfl_range(fxfl);
   spec.add_system_defined_equation(fxf);
   spec1.add_system_defined_equations(fxfl_range);
 
@@ -227,9 +229,10 @@ void test_equations()
   BOOST_CHECK(spec1.is_system_defined(fxf));
   BOOST_CHECK(!spec1.is_system_defined(fxx));
 
-  BOOST_CHECK(spec.equations(f).size() == 2);
-  BOOST_CHECK(std::find(spec.equations(f).begin(), spec.equations(f).end(), fxf) != spec.equations(f).end());
-  BOOST_CHECK(std::find(spec.equations(f).begin(), spec.equations(f).end(), fxx) != spec.equations(f).end());
+  data_equation_vector result = find_equations(spec, f);
+  BOOST_CHECK(result.size() == 2);
+  BOOST_CHECK(std::find(result.begin(), result.end(), fxf) != result.end());
+  BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
   spec.remove_equations(fxfl_range);
   spec1.remove_equation(fxf);
   BOOST_CHECK(spec == spec1);

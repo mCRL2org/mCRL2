@@ -21,23 +21,28 @@
 #include <vector>
 
 #include "boost/format.hpp"
+#include "boost/iterator/transform_iterator.hpp"
 
 #include "mcrl2/new_data/assignment.h"
-#include "mcrl2/new_data/detail/data_utility.h"
-#include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
   namespace new_data {
 
+    /// \brief Applies a function to an expression
+    /// \param f a function to apply to the expression
+    /// \param e the expression on which to apply the assignment
+    /// \return The application of the assignment to the term.
     template < typename Expression, typename SubstitutionFunction >
-    inline Expression substitute(SubstitutionFunction const& f, Expression const& c)
+    inline Expression substitute(SubstitutionFunction const& f, Expression const& e)
     {
-      return static_cast< Expression >(f(static_cast< atermpp::aterm_appl const& >(c)));
+      return static_cast< Expression >(f(static_cast< atermpp::aterm_appl const& >(e)));
     }
 
-    /// \brief Applies the assignment to t and returns the result.
+    /// \brief Applies a function to an expression
     /// \param c an assignment to apply to the expression
     /// \param e the expression on which to apply the assignment
     /// \return The application of the assignment to the term.
@@ -116,9 +121,10 @@ namespace mcrl2 {
     /// string \p postfix_format is used to generate new names. It should contain one
     /// occurrence of "%d", that will be replaced with an integer.
     inline
-    variable_list fresh_variables(variable_list const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
+    variable_vector fresh_variables(variable_list const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
     {
-      std::vector<std::string> ids = detail::variable_strings(t);
+      std::vector<std::string> ids(boost::make_transform_iterator(t.begin(), detail::variable_name()),
+                                   boost::make_transform_iterator(t.end(), detail::variable_name()));
       std::string postfix;
       for (int i = 0; ; i++)
       {
@@ -132,7 +138,7 @@ namespace mcrl2 {
         if (j == ids.end()) // success!
           break;
       }
-      variable_list result;
+      variable_vector result;
       for (variable_list::const_iterator k = t.begin(); k != t.end(); ++k)
       {
         core::identifier_string name(std::string(k->name()) + postfix);

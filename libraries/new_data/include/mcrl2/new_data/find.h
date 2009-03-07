@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/find.h
+/// \file mcrl2/new_data/find.h
 /// \brief Search functions of the data library.
 
-#ifndef MCRL2_DATA_FIND_H
-#define MCRL2_DATA_FIND_H
+#ifndef MCRL2_NEW_DATA_FIND_H
+#define MCRL2_NEW_DATA_FIND_H
 
 #include <set>
 #include <functional>
@@ -21,7 +21,10 @@
 #include "boost/type_traits/remove_const.hpp"
 #include "boost/type_traits/remove_reference.hpp"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/assignment.h"
+#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/new_data/variable.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 
@@ -212,7 +215,78 @@ std::set<data_expression> find_all_data_expressions(Container t)
   return result;
 }
 
-} // namespace data
+/// \brief Finds a mapping in a data specification.
+/// \param data A data specification
+/// \param s A string
+/// \return The found mapping
+inline
+function_symbol find_mapping(data_specification const& data, std::string const& s)
+{
+  data_specification::mappings_const_range r(data.mappings());
+
+  data_specification::mappings_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
+  return (i == r.end()) ? function_symbol() : *i;
+}
+
+/// \brief Finds a constructor in a data specification.
+/// \param data A data specification
+/// \param s A string
+/// \return The found constructor
+inline
+function_symbol find_constructor(data_specification data, std::string s)
+{
+  data_specification::constructors_const_range r(data.constructors());
+  data_specification::constructors_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
+  return (i == r.end()) ? function_symbol() : *i;
+}
+
+/// \brief Finds a sort in a data specification.
+/// \param data A data specification
+/// \param s A string
+/// \return The found sort
+inline
+sort_expression find_sort(data_specification const& data, std::string const& s)
+{
+  data_specification::sorts_const_range r(data.sorts());
+  data_specification::sorts_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
+  return (i == r.end()) ? sort_expression() : *i;
+}
+
+/// \brief Gets all equations with a data expression as head
+/// on one of its sides.
+///
+/// \param[in] d A new_data expression.
+/// \return All equations with d as head in one of its sides.
+inline
+data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
+{
+  data_equation_vector result;
+  data_specification::equations_const_range equations(specification.equations());
+  for (data_specification::equations_const_range::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  {
+    if (i->lhs() == d || i->rhs() == d)
+    {
+      result.push_back(*i);
+    }
+    else if(i->lhs().is_application())
+    {
+      if(static_cast<application>(i->lhs()).head() == d)
+      {
+        result.push_back(*i);
+      }
+    }
+    else if (i->rhs().is_application())
+    {
+      if(static_cast<application>(i->rhs()).head() == d)
+      {
+        result.push_back(*i);
+      }
+    }
+  }
+  return result;
+}
+
+} // namespace new_data
 
 } // namespace mcrl2
 

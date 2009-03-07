@@ -388,18 +388,18 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Bag
       inline
-      function_symbol_list bag_generate_constructors_code()
+      function_symbol_vector bag_generate_constructors_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
 
         return result;
       }
 
       // Give all system defined constructors for Bag
       inline
-      function_symbol_list bag_generate_functions_code(const sort_expression& s)
+      function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(bag_comprehension(s));
         result.push_back(emptybag(s));
         result.push_back(count(s));
@@ -510,11 +510,11 @@ namespace mcrl2 {
 
       // Give all system defined equations for Bag
       inline
-      data_equation_list bag_generate_equations_code(const sort_expression& s)
+      data_equation_vector bag_generate_equations_code(const sort_expression& s)
       {
-        data_equation_list result;
+        data_equation_vector result;
         result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), equal_to(sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), equal_to(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat())))));
-        result.push_back(data_equation(variable_list(), sort_bag::emptybag(s), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::c0()))));
+        result.push_back(data_equation(variable_vector(), sort_bag::emptybag(s), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::c0()))));
         result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("d", s)), sort_bag::count(s, variable("d", s), sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat())))), variable("f", function_sort(s, sort_nat::nat()))(variable("d", s))));
         result.push_back(data_equation(make_vector(variable("d", s), variable("s", sort_bag::bag(s))), sort_bag::bagin(s, variable("d", s), variable("s", sort_bag::bag(s))), greater(sort_bag::count(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_nat::c0())));
         result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), less_equal(sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), forall(make_vector(variable("x", s)),less_equal(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))))));

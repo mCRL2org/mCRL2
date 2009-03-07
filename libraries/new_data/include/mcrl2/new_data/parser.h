@@ -27,6 +27,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
+#include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/new_data/detail/data_implementation.h"
@@ -170,8 +171,7 @@ namespace detail {
     assert(v.size() == 1);
     v = core::type_check_data_vars(v,
            detail::data_specification_to_aterm_data_spec(parse_data_specification(data_spec)));
-    variable_list w(v.begin(), v.end());
-    return w.front();
+    return atermpp::front(v);
   }
 
   /// \cond INTERNAL_DOCS
@@ -187,7 +187,7 @@ namespace detail {
       using boost::algorithm::is_any_of;
 
       std::string name;
-      data_expression_list variables;
+      data_expression_vector variables;
 
       std::string::size_type idx = s.find('(');
       if (idx == std::string::npos)
@@ -213,29 +213,10 @@ namespace detail {
           variables.push_back(new_data::parse_variable(*i));
         }
       }
-      return std::make_pair(name, variables);
+      return std::make_pair(name, make_variable_list(variables));
     }
   } // namespace detail
   /// \endcond
-
-  /// \brief Creates a data specification that contains rewrite rules for the standard data types like
-  /// Pos, Nat and Int.
-  /// \return The created data specification
-  inline
-  data_specification default_data_specification()
-  {
-    // Add dummy variables for standard types, to make sure that
-    // rewrite rules are created for them.
-    return parse_data_specification(
-      "map dummy1:Pos;  \n"
-      "var dummy2:Bool; \n"
-      "    dummy3:Pos;  \n"
-      "    dummy4:Nat;  \n"
-      "    dummy5:Int;  \n"
-      "    dummy6:Real; \n"
-      "eqn dummy1 = 1;  \n"
-    );
-  }
 
 } // namespace new_data
 

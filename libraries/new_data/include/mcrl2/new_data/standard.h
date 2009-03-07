@@ -94,10 +94,10 @@ namespace mcrl2 {
     bool is_greater_equal_application(const data_expression& e);
 
     // Give all standard system defined functions for sort s
-    function_symbol_list standard_generate_functions_code(const sort_expression& s);
+    function_symbol_vector standard_generate_functions_code(const sort_expression& s);
 
     // Give all standard system defined equations for sort s
-    data_equation_list standard_generate_equations_code(const sort_expression& s);
+    data_equation_vector standard_generate_equations_code(const sort_expression& s);
 
   } // namespace new_data
 } // namespace mcrl2

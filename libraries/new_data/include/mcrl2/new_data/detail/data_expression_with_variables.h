@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/abstraction.h"
 #include "mcrl2/new_data/expression_traits.h"
 
 namespace mcrl2 {
@@ -46,6 +47,13 @@ namespace new_data {
       /// \param term A term
       data_expression_with_variables(ATermAppl term)
         : data_expression(term)
+      {}
+
+      /// \brief Constructor.
+      /// \param expression A data expression
+      /// \param variables A sequence of data variables
+      data_expression_with_variables(data_expression expression, variable_vector const& variables)
+        : data_expression(expression), m_variables(variables.begin(), variables.end())
       {}
 
       /// \brief Constructor.
@@ -211,7 +219,7 @@ namespace core {
     static inline
     term_type variable2term(variable_type v)
     {
-      return term_type(v, new_data::variable_list(1, v));
+      return term_type(v, atermpp::push_front(new_data::variable_list(), v));
     }
 
     /// \brief Test if a term is a variable

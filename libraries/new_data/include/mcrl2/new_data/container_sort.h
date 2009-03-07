@@ -21,7 +21,7 @@
 #include "mcrl2/new_data/sort_expression.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief container sort.
@@ -83,8 +83,8 @@ namespace mcrl2 {
           }
         }
 
-      public:    
- 
+      public:
+
         /// \brief Constructor
         ///
         container_sort()
@@ -163,7 +163,7 @@ namespace mcrl2 {
 
     /// \brief list of function sorts
     ///
-    typedef atermpp::vector<container_sort> container_sort_list;
+    typedef atermpp::term_list<container_sort> container_sort_list;
 
   } // namespace new_data
 

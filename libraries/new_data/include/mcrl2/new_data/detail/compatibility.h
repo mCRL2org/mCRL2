@@ -33,12 +33,12 @@ namespace mcrl2 {
       /// \ret A list of sort expressions in the new new_data format, containing
       ///      exactly one equivalent for each sort in sort_spec.
       inline
-      sort_expression_list aterm_sort_spec_to_sort_expression_list(const atermpp::aterm_appl& sort_spec)
+      atermpp::set< sort_expression > aterm_sort_spec_to_sort_expression_set(const atermpp::aterm_appl& sort_spec)
       {
         assert(core::detail::gsIsSortSpec(sort_spec));
 
         atermpp::term_list<atermpp::aterm_appl> sl = list_arg1(sort_spec);
-        return sort_expression_list(sl.begin(), sl.end());
+        return atermpp::set< sort_expression >(sl.begin(), sl.end());
       }
 
       /// \brief Convert a constructor specification in the old new_data format
@@ -49,28 +49,19 @@ namespace mcrl2 {
       /// \ret A mapping of sort expressions to the corresponding constructor
       ///      declarations in the new new_data format.
       inline
-      atermpp::map<sort_expression, function_symbol_list> aterm_cons_spec_to_constructor_map(const atermpp::aterm_appl& cons_spec)
+      atermpp::multimap<sort_expression, function_symbol> aterm_cons_spec_to_constructor_map(const atermpp::aterm_appl& cons_spec)
       {
         assert(core::detail::gsIsConsSpec(cons_spec));
 
-        atermpp::map<sort_expression, function_symbol_list> m;
-        atermpp::term_list<atermpp::aterm_appl> cl = atermpp::list_arg1(cons_spec);
+        atermpp::multimap<sort_expression, function_symbol> constructors;
 
-        for(atermpp::term_list<atermpp::aterm_appl>::iterator i = cl.begin(); i != cl.end(); ++i)
+        for(atermpp::term_list_iterator<function_symbol> i(atermpp::list_arg1(cons_spec));
+                                          i != atermpp::term_list_iterator<function_symbol>(); ++i)
         {
-          sort_expression s = function_symbol(*i).sort().target_sort();
-          atermpp::map<sort_expression, function_symbol_list>::iterator m_i = m.find(s);
-          if(m_i == m.end())
-          {
-            m[s] = make_vector(function_symbol(*i));
-          }
-          else
-          {
-            m_i->second.push_back(function_symbol(*i));
-          }
+           constructors.insert(std::make_pair(i->sort().target_sort(), *i));
         }
 
-        return m;
+        return constructors;
       }
 
       /// \brief Convert a map specification in the old new_data format before new_data
@@ -80,12 +71,12 @@ namespace mcrl2 {
       /// \ret A list of function declaration in the new new_data format, containing
       ///      exactly one equivalent for each function in map_spec.
       inline
-      function_symbol_list aterm_map_spec_to_function_list(const atermpp::aterm_appl& map_spec)
+      atermpp::set< function_symbol > aterm_map_spec_to_function_set(const atermpp::aterm_appl& map_spec)
       {
         assert(core::detail::gsIsMapSpec(map_spec));
 
         atermpp::term_list<atermpp::aterm_appl> fl = atermpp::list_arg1(map_spec);
-        return function_symbol_list(fl.begin(), fl.end());
+        return atermpp::set< function_symbol >(fl.begin(), fl.end());
       }
 
       /// \brief Convert an equation specification in the old new_data format before new_data
@@ -95,20 +86,21 @@ namespace mcrl2 {
       /// \ret A list of new_data equations in the new new_data format, containing
       ///      exactly one equivalent for each equation in eqn_spec.
       inline
-      data_equation_list aterm_data_eqn_spec_to_equation_list(const atermpp::aterm_appl& eqn_spec)
+      atermpp::set< data_equation > aterm_data_eqn_spec_to_equation_set(const atermpp::aterm_appl& eqn_spec)
       {
         assert(core::detail::gsIsDataEqnSpec(eqn_spec));
 
         atermpp::term_list<atermpp::aterm_appl> el = atermpp::list_arg1(eqn_spec);
-        return data_equation_list(el.begin(), el.end());
+        return atermpp::set< data_equation >(el.begin(), el.end());
       }
 
       /// \brief Convert a list of sort expressions in the new new_data format to a sort
       ///        specification in the old new_data format before new_data implementation.
       /// \param sl A list of sort expressions.
       /// \ret The sort specification in the old new_data format equivalent to sl.
+      template < typename ForwardTraversalIterator >
       inline
-      atermpp::aterm_appl sort_expression_list_to_aterm_sort_spec(const boost::iterator_range<sort_expression_list::const_iterator>& sl)
+      atermpp::aterm_appl sort_expression_list_to_aterm_sort_spec(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
         return core::detail::gsMakeSortSpec(atermpp::aterm_list(sl.begin(), sl.end()));
       }
@@ -117,8 +109,9 @@ namespace mcrl2 {
       ///        specification in the old new_data format before new_data implementation.
       /// \param cl A list of function symbols.
       /// \ret The constructor specification in the old new_data format equivalent to cl.
+      template < typename ForwardTraversalIterator >
       inline
-      atermpp::aterm_appl constructor_list_to_aterm_cons_spec(const boost::iterator_range<function_symbol_list::const_iterator>& cl)
+      atermpp::aterm_appl constructor_list_to_aterm_cons_spec(const boost::iterator_range< ForwardTraversalIterator >& cl)
       {
         return core::detail::gsMakeConsSpec(atermpp::aterm_list(cl.begin(), cl.end()));
       }
@@ -127,8 +120,9 @@ namespace mcrl2 {
       ///        specification in the old new_data format before new_data implementation.
       /// \param fl A list of function symbols.
       /// \ret The map specification in the old new_data format equivalent to fl.
+      template < typename ForwardTraversalIterator >
       inline
-      atermpp::aterm_appl function_list_to_aterm_map_spec(const boost::iterator_range<function_symbol_list::const_iterator>& fl)
+      atermpp::aterm_appl function_list_to_aterm_map_spec(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         return core::detail::gsMakeMapSpec(atermpp::aterm_list(fl.begin(), fl.end()));
       }
@@ -137,8 +131,9 @@ namespace mcrl2 {
       ///        specification in the old new_data format before new_data implementation.
       /// \param el A list of new_data equations.
       /// \ret The equation specification in the old new_data format equivalent to el.
+      template < typename ForwardTraversalIterator >
       inline
-      atermpp::aterm_appl data_equation_list_to_aterm_eqn_spec(const boost::iterator_range<data_equation_list::const_iterator>& el)
+      atermpp::aterm_appl data_equation_list_to_aterm_eqn_spec(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
         return core::detail::gsMakeDataEqnSpec(atermpp::aterm_list(el.begin(), el.end()));
       }

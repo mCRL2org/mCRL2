@@ -123,8 +123,7 @@ class data_enumerator
       {
         return i->second;
       }
-      boost::iterator_range< function_symbol_list::const_iterator > d = m_data->constructors(s);
-      m_constructors[s] = std::vector<function_symbol>(d.begin(), d.end());
+      m_constructors[s] = boost::copy_range< std::vector< function_symbol > >(m_data->constructors(s));
       return m_constructors[s];
     }
 
@@ -164,8 +163,7 @@ class data_enumerator
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
         std::vector<variable> variables;
-        for (boost::iterator_range< sort_expression_list::const_iterator >
-             j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+        for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
         {
           variables.push_back(variable((*m_generator)(), j.front()));
         }

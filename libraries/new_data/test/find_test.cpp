@@ -56,7 +56,7 @@ int test_main(int argc, char* argv[])
   variable p3 = pos("p3");
   variable p4 = pos("p4");
 
-  sort_expression_list domain = make_vector< sort_expression >(sort_pos::pos(), sort_bool_::bool_());
+  sort_expression_vector domain = make_vector< sort_expression >(sort_pos::pos(), sort_bool_::bool_());
   sort_expression sexpr = function_sort(domain, sort_nat::nat());
 std::cout << "<sexpr>" << sexpr << std::endl;
   variable q1(identifier_string("q1"), sexpr);

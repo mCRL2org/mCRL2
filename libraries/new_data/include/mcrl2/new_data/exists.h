@@ -28,9 +28,6 @@ namespace mcrl2 {
     ///
     class exists: public abstraction
     {
-      protected:
-        variable_list m_variables; ///< The variables that are abstracted.
-
       public:
 
         /// Constructor.
@@ -39,8 +36,7 @@ namespace mcrl2 {
         /// \pre d has the internal structure of an abstraction.
         /// \pre d is an existential quantification.
         exists(const data_expression& d)
-          : abstraction(d),
-            m_variables(atermpp::term_list<data_expression>(atermpp::list_arg2(d)).begin(), atermpp::term_list<data_expression>(atermpp::list_arg2(d)).end())
+          : abstraction(d)
         {
           assert(d.is_abstraction());
           assert(static_cast<abstraction>(d).binding_operator() == "exists");
@@ -51,10 +47,34 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the exists abstraction.
         /// \pre variables is not empty.
-        exists(const variable_const_range& variables,
+        exists(const variable_list& variables,
                const data_expression& body)
-          : abstraction("exists", variables, body),
-            m_variables(variables.begin(), variables.end())
+          : abstraction("exists", variables, body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the exists abstraction.
+        /// \pre variables is not empty.
+        exists(const variable_vector& variables,
+               const data_expression& body)
+          : abstraction("exists", make_variable_list(variables), body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the exists abstraction.
+        /// \pre variables is not empty.
+        template < typename ForwardTraversalIterator >
+        exists(const boost::iterator_range< ForwardTraversalIterator >& variables,
+               const data_expression& body)
+          : abstraction("exists", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }
@@ -72,8 +92,7 @@ namespace mcrl2 {
     }; // class exists
 
     /// \brief list of exists
-    ///
-    typedef atermpp::vector<exists> exists_list;
+    typedef atermpp::term_list<exists> exists_list;
 
   } // namespace new_data
 

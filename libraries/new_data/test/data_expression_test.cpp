@@ -89,11 +89,11 @@ void function_symbol_test()
   basic_sort s0("S0");
   basic_sort s1("S1");
   basic_sort s("S");
-  
-  sort_expression_list s01;
+
+  sort_expression_vector s01;
   s01.push_back(s0);
   s01.push_back(s1);
-  boost::iterator_range<sort_expression_list::iterator> s01_range = boost::make_iterator_range(s01);
+  boost::iterator_range<sort_expression_vector::iterator> s01_range = boost::make_iterator_range(s01);
   function_sort fs(s01_range, s);
 
 
@@ -126,7 +126,7 @@ void application_test()
   basic_sort s0("S0");
   basic_sort s1("S1");
   basic_sort s("S");
-  sort_expression_list s01;
+  sort_expression_vector s01;
   s01.push_back(sort_expression(s0));
   s01.push_back(sort_expression(s1));
   function_sort s01s(boost::make_iterator_range(s01), s);
@@ -134,8 +134,8 @@ void application_test()
   function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
-  data_expression_list xy = make_vector(x,y);
-  boost::iterator_range<data_expression_list::const_iterator> xy_range(boost::make_iterator_range(xy.begin(), xy.end()));
+  data_expression_vector xy = make_vector(x,y);
+  boost::iterator_range<data_expression_vector::const_iterator> xy_range(boost::make_iterator_range(xy.begin(), xy.end()));
   application fxy(f, xy_range);
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
@@ -157,8 +157,8 @@ void abstraction_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  variable_vector xl = make_vector(x);
+  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
   abstraction I("lambda", xl_range, x);
   BOOST_CHECK(I.binding_operator() == "lambda");
   BOOST_CHECK(I.variables() == xl_range);
@@ -177,17 +177,17 @@ void lambda_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  variable_vector xl = make_vector(x);
+  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
   lambda I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == "lambda");
   BOOST_CHECK(I.is_lambda());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_list s_l(make_vector(s_));
+  sort_expression_vector s_l(make_vector(s_));
   BOOST_CHECK(!s_l.empty());
-  boost::iterator_range<sort_expression_list::const_iterator> s_l_range(s_l);
+  boost::iterator_range<sort_expression_vector::const_iterator> s_l_range(s_l);
   function_sort fs(s_l_range, s);
   BOOST_CHECK(I.sort() == fs);
 
@@ -209,15 +209,15 @@ void forall_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  variable_vector xl = make_vector(x);
+  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
   forall I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == "forall");
   BOOST_CHECK(I.is_forall());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_list s_l(make_vector(s_));
+  sort_expression_vector s_l(make_vector(s_));
 
   // TODO Check sort
 
@@ -239,15 +239,15 @@ void exists_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl = make_vector(x);
-  boost::iterator_range<variable_list::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  variable_vector xl = make_vector(x);
+  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
   exists I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == "exists");
   BOOST_CHECK(I.is_exists());
   BOOST_CHECK(I.variables() == xl_range);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
-  sort_expression_list s_l(make_vector(s_));
+  sort_expression_vector s_l(make_vector(s_));
 
   // TODO Check sort
 
@@ -271,8 +271,8 @@ void where_declaration_test()
   variable y("y", s);
   
   assignment xy(x,y);
-  assignment_list xyl(make_vector(xy));
-  boost::iterator_range<assignment_list::const_iterator> xy_range(xyl);
+  assignment_vector xyl(make_vector(xy));
+  boost::iterator_range<assignment_vector::const_iterator> xy_range(xyl);
   where_clause wxy(x, xy_range);
   BOOST_CHECK(wxy.body() == x);
   BOOST_CHECK(wxy.declarations() == xy_range);

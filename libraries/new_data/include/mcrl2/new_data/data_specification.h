@@ -15,6 +15,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boost/iterator/transform_iterator.hpp>
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
@@ -33,8 +35,8 @@
 #include "application.h"
 
 #include "data_equation.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/compatibility.h"
+#include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/data_utility.h"
 #include "mcrl2/new_data/utility.h"
 
@@ -45,6 +47,52 @@ namespace mcrl2 {
     /// \brief new_data specification.
     class data_specification
     {
+      protected:
+
+        /// \brief map from sort expression to constructors
+        typedef atermpp::multimap< sort_expression, function_symbol > constructors_map;
+
+        struct constructor_projection : public std::unary_function< constructors_map::value_type const&, function_symbol const& >
+        {
+          function_symbol& operator()(constructors_map::value_type& v) const {
+            return v.second;
+          }
+          function_symbol const& operator()(constructors_map::value_type const& v) const {
+            return v.second;
+          }
+        };
+
+      public:
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< atermpp::set< sort_expression >::iterator >       sorts_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator > sorts_const_range;
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< atermpp::set< variable >::iterator >              variable_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< atermpp::set< variable >::const_iterator >        variable_const_range;
+
+        /// \brief iterator over constructors
+        typedef boost::transform_iterator< constructor_projection, constructors_map::iterator > constructors_iterator;
+        /// \brief const iterator over constructors
+        typedef boost::transform_iterator< constructor_projection, constructors_map::const_iterator > constructors_const_iterator;
+        /// \brief iterator range over constructors
+        typedef boost::iterator_range< constructors_iterator >                              constructors_range;
+        /// \brief const iterator range over constructors
+        typedef boost::iterator_range< constructors_const_iterator >                        constructors_const_range;
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< atermpp::set< function_symbol >::iterator >       mappings_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< atermpp::set< function_symbol >::const_iterator > mappings_const_range;
+
+        /// \brief iterator range over list of data equations
+        typedef boost::iterator_range< atermpp::set< data_equation >::iterator >         equations_range;
+        /// \brief iterator range over constant list of data equations
+        typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >   equations_const_range;
+
       private:
 
       /// \brief Determines the sorts on which a constructor depends
@@ -53,21 +101,21 @@ namespace mcrl2 {
       /// \pre f is a constructor.
       /// \return All sorts on which f depends.
       inline
-      sort_expression_list dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited) const
+      sort_expression_vector dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited) const
       {
         if (f.sort().is_basic_sort())
         {
-          return sort_expression_list();
+          return sort_expression_vector();
         }
         else
         {
-          sort_expression_list result;
+          sort_expression_vector result;
           function_sort f_sort(f.sort());
-          for (sort_expression_list::const_iterator i = f_sort.domain().begin(); i != f_sort.domain().end(); ++i)
+          for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
           {
-            result.push_back(*i);
-            visited.insert(*i);
-            sort_expression_list l(dependent_sorts(*i, visited));
+            result.push_back(i.front());
+            visited.insert(i.front());
+            sort_expression_vector l(dependent_sorts(i.front(), visited));
             result.insert(result.end(), l.begin(), l.end());
           }
           return result;
@@ -79,21 +127,21 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return All sorts on which s depends.
       inline
-      sort_expression_list dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited) const
+      sort_expression_vector dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited) const
       {
         if (visited.find(s) != visited.end())
         {
-          return sort_expression_list();
+          return sort_expression_vector();
         }
         visited.insert(s);
 
         if (s.is_basic_sort())
         {
-          sort_expression_list result;
-          boost::iterator_range< function_symbol_list::const_iterator > cl(constructors(s));
-          for (function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
+          sort_expression_vector result;
+
+          for (constructors_const_range i = constructors(s); !i.empty(); i.advance_begin(1))
           {
-            sort_expression_list l(dependent_sorts(*i, visited));
+            sort_expression_vector l(dependent_sorts(i.front(), visited));
             result.insert(result.end(), l.begin(), l.end());
           }
 
@@ -105,30 +153,29 @@ namespace mcrl2 {
         }
         else if (s.is_function_sort())
         {
-          sort_expression_list result;
+          sort_expression_vector result;
           function_sort fs(s);
 
-          for (sort_expression_list::const_iterator i = fs.domain().begin(); i != fs.domain().end(); ++i)
+          for (function_sort::domain_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
           {
-            sort_expression_list l(dependent_sorts(*i, visited));
+            sort_expression_vector l(dependent_sorts(i.front(), visited));
             result.insert(result.end(), l.begin(), l.end());
           }
 
-          sort_expression_list l(dependent_sorts(fs.codomain(), visited));
+          sort_expression_vector l(dependent_sorts(fs.codomain(), visited));
           result.insert(result.end(), l.begin(), l.end());
           return result;
         }
         else if (s.is_structured_sort())
         {
-          sort_expression_list result;
-          boost::iterator_range<structured_sort_constructor_list::const_iterator> scl(static_cast<structured_sort>(s).struct_constructors());
+          sort_expression_vector result;
+          structured_sort::constructor_const_range scl(static_cast<structured_sort>(s).struct_constructors());
 
-          for (structured_sort_constructor_list::const_iterator i = scl.begin(); i != scl.end(); ++i)
+          for (structured_sort::constructor_const_range::const_iterator i = scl.begin(); i != scl.end(); ++i)
           {
-            boost::iterator_range<structured_sort_constructor_argument_list::const_iterator> scal(i->arguments());
-            for (structured_sort_constructor_argument_list::const_iterator j = scal.begin(); j != scal.end(); ++j)
+            for (structured_sort_constructor::arguments_const_range j(i->arguments()); !j.empty(); j.advance_begin(1))
             {
-              sort_expression_list sl(dependent_sorts(j->sort(), visited));
+              sort_expression_vector sl(dependent_sorts(j.front().sort(), visited));
               result.insert(result.end(), sl.begin(), sl.end());
             }
           }
@@ -144,17 +191,17 @@ namespace mcrl2 {
       protected:
 
         ///\brief The basic sorts and structured sorts in the specification.
-        sort_expression_list m_sorts;
+        atermpp::set< sort_expression > m_sorts;
 
         ///\brief A mapping of sort expressions to the constructors
         ///corresponding to that sort.
-        atermpp::map<sort_expression, function_symbol_list> m_constructors;
+        atermpp::multimap< sort_expression, function_symbol > m_constructors;
 
         ///\brief The mappings of the specification.
-        function_symbol_list m_mappings;
+        atermpp::set< function_symbol > m_mappings;
 
         ///\brief The equations of the specification.
-        data_equation_list m_equations;
+        atermpp::set< data_equation >   m_equations;
 
         ///\brief Table containing system defined sorts.
         atermpp::table m_sys_sorts;
@@ -176,28 +223,46 @@ namespace mcrl2 {
 
       ///\internal
       data_specification(const atermpp::aterm_appl& t)
-        : m_sorts(detail::aterm_sort_spec_to_sort_expression_list(atermpp::arg1(t))),
+        : m_sorts(detail::aterm_sort_spec_to_sort_expression_set(atermpp::arg1(t))),
           m_constructors(detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(t))),
-          m_mappings(detail::aterm_map_spec_to_function_list(atermpp::arg3(t))),
-          m_equations(detail::aterm_data_eqn_spec_to_equation_list(atermpp::arg4(t)))
+          m_mappings(detail::aterm_map_spec_to_function_set(atermpp::arg3(t))),
+          m_equations(detail::aterm_data_eqn_spec_to_equation_set(atermpp::arg4(t)))
       {}
 
       ///\brief Constructor
-      data_specification(const boost::iterator_range<sort_expression_list::const_iterator>& sorts,
-                         const boost::iterator_range<atermpp::map<sort_expression, function_symbol_list>::const_iterator>& constructors,
-                         const boost::iterator_range<function_symbol_list::const_iterator>& mappings,
-                         const boost::iterator_range<data_equation_list::const_iterator>& equations)
+      data_specification(const atermpp::set< sort_expression >& sorts,
+                         const atermpp::multimap<sort_expression, function_symbol >& constructors,
+                         const atermpp::set< function_symbol >& mappings,
+                         const atermpp::set< data_equation >& equations)
         : m_sorts(sorts.begin(), sorts.end()),
           m_constructors(constructors.begin(), constructors.end()),
           m_mappings(mappings.begin(), mappings.end()),
           m_equations(equations.begin(), equations.end())
       {}
 
+      ///\brief Constructor
+      template < typename SortsIterator, typename ConstructorsIterator,
+                 typename MappingsIterator, typename EquationsIterator >
+      data_specification(const boost::iterator_range< SortsIterator >& sorts,
+                         const boost::iterator_range< ConstructorsIterator >& constructors,
+                         const boost::iterator_range< MappingsIterator >& mappings,
+                         const boost::iterator_range< EquationsIterator >& equations)
+        : m_sorts(sorts.begin(), sorts.end()),
+          m_mappings(mappings.begin(), mappings.end()),
+          m_equations(equations.begin(), equations.end())
+      {
+        for(ConstructorsIterator i = constructors.begin();
+                                          i != atermpp::term_list_iterator<function_symbol>(); ++i)
+        {
+          constructors.insert(constructors_map::value_type(i->sort().target_sort(), *i));
+        }
+      }
+
       /// \brief Gets the sort declarations
       ///
       /// \return The sort declarations of this specification.
       inline
-      sort_expression_const_range sorts() const
+      sorts_const_range sorts() const
       {
         return boost::make_iterator_range(m_sorts.begin(), m_sorts.end());
       }
@@ -219,15 +284,9 @@ namespace mcrl2 {
       /// structured sorts.
 
       inline
-      function_symbol_list constructors() const
+      constructors_const_range constructors() const
       {
-        function_symbol_list result;
-        for (atermpp::map<sort_expression, function_symbol_list>::const_iterator i = m_constructors.begin(); i != m_constructors.end(); ++i)
-        {
-          result.insert(result.end(), i->second.begin(), i->second.end());
-        }
-        result.ATprotectTerms();
-        return result;
+        return boost::iterator_range< constructors_const_iterator >(m_constructors);
       }
 
       /// \brief Gets all constructors of a sort.
@@ -235,16 +294,9 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
       inline
-      function_symbol_const_range constructors(const sort_expression& s) const
+      constructors_const_range constructors(const sort_expression& s) const
       {
-        if (m_constructors.find(s) == m_constructors.end())
-        {
-          return boost::make_iterator_range(function_symbol_list());
-        }
-        else
-        {
-          return boost::make_iterator_range(m_constructors.find(s)->second);
-        }
+        return boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s));
       }
 
       /// \brief Gets all mappings in this specification
@@ -252,7 +304,7 @@ namespace mcrl2 {
       /// \return All mappings in this specification, including recognisers and
       /// projection functions from structured sorts.
       inline
-      function_symbol_const_range mappings() const
+      mappings_const_range mappings() const
       {
         return boost::make_iterator_range(m_mappings);
       }
@@ -263,10 +315,10 @@ namespace mcrl2 {
       /// \return All mappings in this specification, for which s occurs as a
       /// righthandside of the mapping's sort.
       inline
-      function_symbol_list mappings(const sort_expression& s) const
+      function_symbol_vector mappings(const sort_expression& s) const
       {
-        function_symbol_list result;
-        for (function_symbol_list::const_iterator i = m_mappings.begin(); i != m_mappings.end(); ++i)
+        function_symbol_vector result;
+        for (atermpp::set< function_symbol >::const_iterator i = m_mappings.begin(); i != m_mappings.end(); ++i)
         {
           if(i->sort().is_function_sort())
           {
@@ -291,42 +343,9 @@ namespace mcrl2 {
       /// \return All equations in this specification, including those for
       ///  structured sorts.
       inline
-      data_equation_const_range equations() const
+      equations_const_range equations() const
       {
         return boost::make_iterator_range(m_equations);
-      }
-
-      /// \brief Gets all equations with a new_data expression as head
-      /// on one of its sides.
-      ///
-      /// \param[in] d A new_data expression.
-      /// \return All equations with d as head in one of its sides.
-      inline
-      data_equation_list equations(const data_expression& d) const
-      {
-        data_equation_list result;
-        for (data_equation_list::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
-        {
-          if (i->lhs() == d || i->rhs() == d)
-          {
-            result.push_back(*i);
-          }
-          else if(i->lhs().is_application())
-          {
-            if(static_cast<application>(i->lhs()).head() == d)
-            {
-              result.push_back(*i);
-            }
-          }
-          else if (i->rhs().is_application())
-          {
-            if(static_cast<application>(i->rhs()).head() == d)
-            {
-              result.push_back(*i);
-            }
-          }
-        }
-        return result;
       }
 
       /// \brief Adds a sort to this specification
@@ -337,7 +356,7 @@ namespace mcrl2 {
       void add_sort(const sort_expression& s)
       {
         assert(std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end());
-        m_sorts.push_back(s);
+        m_sorts.insert(s);
       }
 
       /// \brief Adds a sort to this specification, and marks it as system
@@ -360,7 +379,7 @@ namespace mcrl2 {
       inline
       void add_constructor(const function_symbol& f)
       {
-        function_symbol_list cs(constructors());
+        constructors_const_range cs(constructors());
         assert(std::count(cs.begin(), cs.end(), f) == 0);
         assert(std::find(m_mappings.begin(), m_mappings.end(), f) == m_mappings.end());
         sort_expression s;
@@ -372,7 +391,7 @@ namespace mcrl2 {
         {
           s = f.sort();
         }
-        m_constructors[s].push_back(f);
+        m_constructors.insert(std::make_pair(s, f));
       }
 
       /// \brief Adds a constructor to this specification, and marks it as
@@ -391,7 +410,6 @@ namespace mcrl2 {
       /// \brief Adds a mapping to this specification
       ///
       /// \param[in] f A function symbol.
-      /// \pre f does not yet occur in this specification.
       inline
       void add_mapping(const function_symbol& f)
       {
@@ -404,14 +422,13 @@ namespace mcrl2 {
         {
           s = f.sort();
         }
-
         if (m_constructors.find(s) != m_constructors.end())
         {
           function_symbol_list fl(m_constructors.find(s)->second);
           assert(std::count(fl.begin(), fl.end(), f) == 0);
         }
-        assert(std::count(m_mappings.begin(), m_mappings.end(), f) == 0);
-        m_constructors.find(s)->second.push_back(f);
+
+        m_mappings.insert(f);
       }
 
       /// \brief Adds a mapping to this specification, and marks it as system
@@ -435,7 +452,7 @@ namespace mcrl2 {
       void add_equation(const data_equation& e)
       {
         assert(std::count(m_equations.begin(), m_equations.end(), e) == 0);
-        m_equations.push_back(e);
+        m_equations.insert(e);
       }
 
       /// \brief Adds an equation to this specification, and marks it as system
@@ -454,10 +471,11 @@ namespace mcrl2 {
       /// \brief Adds sorts to this specification
       ///
       /// \param[in] sl A range of sort expressions.
+      template < typename ForwardTraversalIterator >
       inline
-      void add_sorts(const sort_expression_const_range& sl)
+      void add_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
-        for (sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
+        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
         {
           add_sort(*i);
         }
@@ -468,10 +486,11 @@ namespace mcrl2 {
       ///
       /// \param[in] sl A range of sort expressions.
       /// \post for all s in sl: is_system_defined(s)
+      template < typename ForwardTraversalIterator >
       inline
-      void add_system_defined_sorts(const sort_expression_const_range& sl)
+      void add_system_defined_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
-        for (sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
+        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
         {
           add_system_defined_sort(*i);
         }
@@ -480,10 +499,11 @@ namespace mcrl2 {
       /// \brief Adds constructors to this specification
       ///
       /// \param[in] fl A range of function symbols.
+      template < typename ForwardTraversalIterator >
       inline
-      void add_constructors(const function_symbol_const_range& fl)
+      void add_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
-        for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_constructor(*i);
         }
@@ -494,10 +514,11 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of function symbols.
       /// \post for all f in fl: is_system_defined(f)
+      template < typename ForwardTraversalIterator >
       inline
-      void add_system_defined_constructors(const function_symbol_const_range& fl)
+      void add_system_defined_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
-        for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_system_defined_constructor(*i);
         }
@@ -506,10 +527,11 @@ namespace mcrl2 {
       /// \brief Adds mappings to this specification
       ///
       /// \param[in] fl A range of function symbols.
+      template < typename ForwardTraversalIterator >
       inline
-      void add_mappings(const function_symbol_const_range& fl)
+      void add_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
-        for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_mapping(*i);
         }
@@ -520,10 +542,11 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of function symbols.
       /// \post for all f in fl: is_system_defined(f)
+      template < typename ForwardTraversalIterator >
       inline
-      void add_system_defined_mappings(const function_symbol_const_range& fl)
+      void add_system_defined_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
-        for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_system_defined_mapping(*i);
         }
@@ -532,10 +555,11 @@ namespace mcrl2 {
       /// \brief Adds equations to this specification
       ///
       /// \param[in] el A range of equations.
+      template < typename ForwardTraversalIterator >
       inline
-      void add_equations(const data_equation_const_range& el)
+      void add_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
-        for (data_equation_list::const_iterator i = el.begin(); i != el.end(); ++i)
+        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
         {
           add_equation(*i);
         }
@@ -546,10 +570,11 @@ namespace mcrl2 {
       ///
       /// \param[in] el A range of equations.
       /// \post for all e in el: is_system_defined(e)
+      template < typename ForwardTraversalIterator >
       inline
-      void add_system_defined_equations(const data_equation_const_range& el)
+      void add_system_defined_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
-        for (data_equation_list::const_iterator i = el.begin(); i != el.end(); ++i)
+        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
         {
           add_system_defined_equation(*i);
         }
@@ -576,10 +601,11 @@ namespace mcrl2 {
       ///
       /// \param[in] sl A range of sorts.
       /// \post for all s in sl: s no in sorts()
+      template < typename ForwardTraversalIterator >
       inline
-      void remove_sorts(const sort_expression_const_range& sl)
+      void remove_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
-        for (sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
+        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
         {
           remove_sort(*i);
         }
@@ -594,35 +620,33 @@ namespace mcrl2 {
       inline
       void remove_constructor(const function_symbol& f)
       {
-        function_symbol_list cs(constructors());
+        constructors_const_range cs(constructors());
         assert(std::count(cs.begin(), cs.end(), f) != 0);
         if (is_system_defined(f))
         {
           m_sys_constructors.remove(f);
         }
 
-        sort_expression s;
-        if (f.sort().is_function_sort())
-        {
-          s = static_cast<function_sort>(f.sort()).codomain();
-        }
-        else
-        {
-          s = f.sort();
-        }
+        sort_expression s = (f.sort().is_function_sort()) ?
+           static_cast<function_sort>(f.sort()).codomain() : f.sort();
 
-        atermpp::map<sort_expression, function_symbol_list>::iterator i = m_constructors.find(s);
-        i->second.erase(std::find(i->second.begin(), i->second.end(), f));
+        constructors_map::iterator i =
+                std::find(m_constructors.begin(), m_constructors.end(), constructors_map::value_type(s, f));
+
+        if (i != m_constructors.end()) {
+          m_constructors.erase(i);
+        }
       }
 
       /// \brief Removes constructors from specification.
       ///
       /// \param[in] cl A range of constructors.
       /// \post for all c in cl: c not in constructors()
+      template < typename ForwardTraversalIterator >
       inline
-      void remove_constructors(const function_symbol_const_range& cl)
+      void remove_constructors(const boost::iterator_range< ForwardTraversalIterator >& cl)
       {
-        for (function_symbol_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
+        for (ForwardTraversalIterator i = cl.begin(); i != cl.end(); ++i)
         {
           remove_constructor(*i);
         }
@@ -647,10 +671,11 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of constructors.
       /// \post for all f in fl: f not in mappings()
+      template < typename ForwardTraversalIterator >
       inline
-      void remove_mappings(const function_symbol_const_range& fl)
+      void remove_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
-        for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
         {
           remove_mapping(*i);
         }
@@ -674,10 +699,11 @@ namespace mcrl2 {
       ///
       /// \param[in] el A range of equations.
       /// \post for all e in el: e not in equations()
+      template < typename ForwardTraversalIterator >
       inline
-      void remove_equations(const data_equation_const_range& el)
+      void remove_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
-        for (data_equation_list::const_iterator i = el.begin(); i != el.end(); ++i)
+        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
         {
           remove_equation(*i);
         }
@@ -725,7 +751,7 @@ namespace mcrl2 {
       {
         // Check for recursive occurrence.
         atermpp::set<sort_expression> visited;
-        sort_expression_list dsl(dependent_sorts(s, visited));
+        sort_expression_vector dsl(dependent_sorts(s, visited));
         if (std::find(dsl.begin(), dsl.end(), s) != dsl.end())
         {
           return false;
@@ -737,13 +763,13 @@ namespace mcrl2 {
             return sort_bool_::is_bool_(s);
           }
 
-          function_symbol_const_range fl(constructors(s));
+          constructors_const_range fl(constructors(s));
 
-          for (function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
+          for (constructors_const_range::const_iterator i = fl.begin(); i != fl.end(); ++i)
           {
             atermpp::set<sort_expression> visited;
-            sort_expression_list sl(dependent_sorts(*i, visited));
-            for (sort_expression_list::const_iterator j = sl.begin(); j != sl.end(); ++j)
+            sort_expression_vector sl(dependent_sorts(*i, visited));
+            for (sort_expression_vector::const_iterator j = sl.begin(); j != sl.end(); ++j)
             {
               if (!is_certainly_finite(*j))
               {
@@ -766,7 +792,7 @@ namespace mcrl2 {
         else if (s.is_function_sort())
         {
           function_sort fs(s);
-          for (sort_expression_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
+          for (function_sort::domain_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
           {
             if (!is_certainly_finite(i.front()))
             {
@@ -784,8 +810,8 @@ namespace mcrl2 {
         else if (s.is_structured_sort())
         {
           atermpp::set<sort_expression> visited;
-          boost::iterator_range<sort_expression_list::const_iterator> sl(dependent_sorts(s, visited));
-          for (sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
+          sort_expression_vector sl(dependent_sorts(s, visited));
+          for (sort_expression_vector::const_iterator i = sl.begin(); i != sl.end(); ++i)
           {
             if (!is_certainly_finite(*i))
             {
@@ -836,10 +862,8 @@ namespace mcrl2 {
       /// \return True if the data specification is well typed.
       bool is_well_typed() const
       {
-        std::set<sort_expression> sorts = detail::make_set(m_sorts);
-
         // check 1)
-        if (!detail::check_data_spec_sorts(constructors(), sorts))
+        if (!detail::check_data_spec_sorts(constructors(), m_sorts))
         {
           std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
                     << pp(constructors()) << " are declared in " << pp(m_sorts) << std::endl;
@@ -847,7 +871,7 @@ namespace mcrl2 {
         }
 
         // check 2)
-        if (!detail::check_data_spec_sorts(mappings(), sorts))
+        if (!detail::check_data_spec_sorts(mappings(), m_sorts))
         {
           std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
                     << pp(mappings()) << " are declared in " << pp(m_sorts) << std::endl;

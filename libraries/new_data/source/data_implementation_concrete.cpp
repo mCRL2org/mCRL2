@@ -341,7 +341,7 @@ ATermAppl impl_sort_refs(ATermAppl spec, ATermList* substitution_context)
     *substitution_context = gsAddSubstToSubsts(subst, *substitution_context);
 //    substs = ATinsert(substs, (ATerm) subst);
     //perform substitution on the remaining elements of sort_refs
-    sort_refs = ATgetNext(sort_refs);    
+    sort_refs = ATgetNext(sort_refs);
     sort_refs = gsSubstValues_List(ATmakeList1((ATerm) subst), sort_refs, true);
   }
   //perform substitutions on spec
@@ -855,30 +855,30 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   ATermAppl subst = gsMakeSubst_Appl(sort_struct, sort_id);
   *p_substs = gsAddSubstToSubsts(subst, *p_substs);
 
-  function_symbol_list constructors = element_sort.constructor_functions(sort_expression(sort_id));
-  function_symbol_list functions;
-  function_symbol_list projection_functions = element_sort.projection_functions(sort_expression(sort_id));
-  function_symbol_list recogniser_functions = element_sort.recogniser_functions(sort_expression(sort_id));
+  function_symbol_vector constructors = element_sort.constructor_functions(sort_expression(sort_id));
+  function_symbol_vector functions;
+  function_symbol_vector projection_functions = element_sort.projection_functions(sort_expression(sort_id));
+  function_symbol_vector recogniser_functions = element_sort.recogniser_functions(sort_expression(sort_id));
 
   // implement argument sorts 
-  for (function_symbol_list::const_iterator i = projection_functions.begin();
+  for (function_symbol_vector::const_iterator i = projection_functions.begin();
                                         recursive && i != projection_functions.end(); ++i) {
     impl_exprs_appl(function_sort(i->sort()).codomain(), p_substs, p_data_decls, new_data_equations);
   }
 
   std::copy(projection_functions.begin(), projection_functions.end(),
-                                std::back_insert_iterator< function_symbol_list >(functions));
+                                std::back_insert_iterator< function_symbol_vector >(functions));
   std::copy(recogniser_functions.begin(), recogniser_functions.end(),
-                                std::back_insert_iterator< function_symbol_list >(functions));
+                                std::back_insert_iterator< function_symbol_vector >(functions));
 
-  data_equation_list   equations            = element_sort.constructor_equations(sort_expression(sort_id));
-  data_equation_list   projection_equations = element_sort.projection_equations(sort_expression(sort_id));
-  data_equation_list   recogniser_equations = element_sort.recogniser_equations(sort_expression(sort_id));
+  data_equation_vector   equations            = element_sort.constructor_equations(sort_expression(sort_id));
+  data_equation_vector   projection_equations = element_sort.projection_equations(sort_expression(sort_id));
+  data_equation_vector   recogniser_equations = element_sort.recogniser_equations(sort_expression(sort_id));
 
   std::copy(projection_equations.begin(), projection_equations.end(),
-                                std::back_insert_iterator< data_equation_list >(equations));
+                                std::back_insert_iterator< data_equation_vector >(equations));
   std::copy(recogniser_equations.begin(), recogniser_equations.end(),
-                                std::back_insert_iterator< data_equation_list >(equations));
+                                std::back_insert_iterator< data_equation_vector >(equations));
 
   ATermList new_data_eqns = atermpp::term_list<data_equation>(equations.begin(), equations.end());
   new_data_eqns = impl_exprs_list(new_data_eqns, p_substs, p_data_decls, new_data_equations);
@@ -895,7 +895,7 @@ void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
 
 ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
 {
-  data_equation_list equations = sort_list::list_generate_equations_code(sort_expression(sort_elt));
+  data_equation_vector equations = sort_list::list_generate_equations_code(sort_expression(sort_elt));
   // Workaround to keep data reconstruction happy
   // Apply substitution sort_list::list(sort_elt) := sort_list
   ATerm subst1 = (ATerm)gsMakeSubst_Appl(aterm_appl(sort_list::list(sort_expression(sort_elt))), sort_list);
@@ -915,9 +915,9 @@ void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
   ATermAppl sort_elt = ATAgetArgument(sort_list, 1);
   sort_expression element_sort(sort_elt);
 
-  function_symbol_list constructors = sort_list::list_generate_constructors_code(element_sort);
-  function_symbol_list functions = sort_list::list_generate_functions_code(element_sort);
-  data_equation_list equations = sort_list::list_generate_equations_code(element_sort);
+  function_symbol_vector constructors = sort_list::list_generate_constructors_code(element_sort);
+  function_symbol_vector functions = sort_list::list_generate_functions_code(element_sort);
+  data_equation_vector equations = sort_list::list_generate_equations_code(element_sort);
 
   //declare sort sort_id as representative of sort sort_list
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) sort_id);
@@ -1994,9 +1994,9 @@ void impl_sort_bool(t_data_decls *p_data_decls)
 {
   //Declare sort Bool
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_bool_::bool_()));
-  function_symbol_list constructors = sort_bool_::bool__generate_constructors_code();
-  function_symbol_list functions = sort_bool_::bool__generate_functions_code();
-  data_equation_list equations = sort_bool_::bool__generate_equations_code();
+  function_symbol_vector constructors = sort_bool_::bool__generate_constructors_code();
+  function_symbol_vector functions = sort_bool_::bool__generate_functions_code();
+  data_equation_vector equations = sort_bool_::bool__generate_equations_code();
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
@@ -2006,9 +2006,9 @@ void impl_sort_pos(t_data_decls *p_data_decls, ATermList* new_data_equations)
 {
   //Declare sort Pos
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_pos::pos()));
-  function_symbol_list constructors = sort_pos::pos_generate_constructors_code();
-  function_symbol_list functions = sort_pos::pos_generate_functions_code();
-  data_equation_list equations = sort_pos::pos_generate_equations_code();
+  function_symbol_vector constructors = sort_pos::pos_generate_constructors_code();
+  function_symbol_vector functions = sort_pos::pos_generate_functions_code();
+  data_equation_vector equations = sort_pos::pos_generate_equations_code();
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
@@ -2023,9 +2023,9 @@ void impl_sort_nat(t_data_decls *p_data_decls, bool recursive, ATermList* new_da
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_nat::natpair()));
   //Declare sort Nat
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_nat::nat()));
-  function_symbol_list constructors = sort_nat::nat_generate_constructors_code();
-  function_symbol_list functions = sort_nat::nat_generate_functions_code();
-  data_equation_list equations = sort_nat::nat_generate_equations_code();
+  function_symbol_vector constructors = sort_nat::nat_generate_constructors_code();
+  function_symbol_vector functions = sort_nat::nat_generate_functions_code();
+  data_equation_vector equations = sort_nat::nat_generate_equations_code();
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
@@ -2043,9 +2043,9 @@ void impl_sort_nat(t_data_decls *p_data_decls, bool recursive, ATermList* new_da
 void impl_sort_int(t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_int_::int_()));
-  function_symbol_list constructors = sort_int_::int__generate_constructors_code();
-  function_symbol_list functions = sort_int_::int__generate_functions_code();
-  data_equation_list equations = sort_int_::int__generate_equations_code();
+  function_symbol_vector constructors = sort_int_::int__generate_constructors_code();
+  function_symbol_vector functions = sort_int_::int__generate_functions_code();
+  data_equation_vector equations = sort_int_::int__generate_equations_code();
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
@@ -2063,9 +2063,9 @@ void impl_sort_int(t_data_decls *p_data_decls, bool recursive, ATermList* new_da
 void impl_sort_real(t_data_decls *p_data_decls, bool recursive, ATermList* new_data_equations)
 {
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, static_cast<const aterm&>(sort_real_::real_()));
-  function_symbol_list constructors = sort_real_::real__generate_constructors_code();
-  function_symbol_list functions = sort_real_::real__generate_functions_code();
-  data_equation_list equations = sort_real_::real__generate_equations_code();
+  function_symbol_vector constructors = sort_real_::real__generate_constructors_code();
+  function_symbol_vector functions = sort_real_::real__generate_functions_code();
+  data_equation_vector equations = sort_real_::real__generate_equations_code();
   p_data_decls->cons_ops = ATconcat(atermpp::term_list<function_symbol>(constructors.begin(), constructors.end()), p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(atermpp::term_list<function_symbol>(functions.begin(), functions.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(atermpp::term_list<data_equation>(equations.begin(), equations.end()), p_data_decls->data_eqns);
@@ -2084,8 +2084,8 @@ void impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls)
 {
   assert(gsIsSortExpr(sort));
   //Declare operations for sort
-  function_symbol_list ops = standard_generate_functions_code(sort_expression(sort));
-  data_equation_list eqns = standard_generate_equations_code(sort_expression(sort));
+  function_symbol_vector ops = standard_generate_functions_code(sort_expression(sort));
+  data_equation_vector eqns = standard_generate_equations_code(sort_expression(sort));
 
   p_data_decls->ops = ATconcat(aterm_list(ops.begin(), ops.end()), p_data_decls->ops);
   p_data_decls->data_eqns = ATconcat(aterm_list(eqns.begin(), eqns.end()), p_data_decls->data_eqns);
@@ -2094,7 +2094,7 @@ ATermAppl make_fresh_struct_sort_id(ATerm term)
 {
   return gsMakeSortId(gsFreshString2ATermAppl(gsSortStructPrefix(), term, false));
 }
- 
+
 ATermAppl make_fresh_list_sort_id(ATerm term)
 {
   return gsMakeSortId(gsFreshString2ATermAppl(gsSortListPrefix(), term, false));

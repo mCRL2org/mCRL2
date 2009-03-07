@@ -20,6 +20,7 @@
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/data_expression_utility.h"
 #include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/utility.h"
 
 namespace mcrl2 {
 
@@ -29,8 +30,12 @@ namespace mcrl2 {
     ///
     class abstraction: public data_expression
     {
+      public:
+
+        /// \brief Iterator range over bound variables
+        typedef boost::iterator_range< variable_list::const_iterator > variable_const_range;
+
       protected:
-        variable_list m_variables;
 
         /// \brief Transforms a string to an internally used binding operator.
         ///
@@ -109,8 +114,7 @@ namespace mcrl2 {
 
         /// Constructor.
         abstraction(const data_expression& d)
-          : data_expression(d),
-            m_variables(atermpp::term_list<data_expression>(atermpp::list_arg2(d)).begin(), atermpp::term_list<data_expression>(atermpp::list_arg2(d)).end())
+          : data_expression(d)
         {
           assert(d.is_abstraction());
         }
@@ -126,10 +130,28 @@ namespace mcrl2 {
         ///      "setcomprehension" or "bagcomprehension".
         /// \pre variables is not empty.
         abstraction(const std::string& binding_operator,
-                    const variable_const_range& variables,
-                    const data_expression body)
-          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), atermpp::term_list<variable>(variables.begin(), variables.end()), body)),
-            m_variables(variables.begin(), variables.end())
+                    const variable_list& variables,
+                    const data_expression& body)
+          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), variables, body))
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] binding_operator The binding operator of the abstraction.
+        ///              This may be one of "lambda", "forall",
+        ///              "exists", "setcomprehension", "bagcomprehension".
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the abstraction.
+        /// \pre binding_operator is one of "lambda", "forall", "exists",
+        ///      "setcomprehension" or "bagcomprehension".
+        /// \pre variables is not empty.
+        template < typename ForwardTraversalIterator >
+        abstraction(const std::string& binding_operator,
+                    const boost::iterator_range< ForwardTraversalIterator >& variables,
+                    const data_expression& body)
+          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), make_variable_list(variables), body))
         {
           assert(!variables.empty());
         }
@@ -155,7 +177,7 @@ namespace mcrl2 {
         inline
         variable_const_range variables() const
         {
-          return boost::make_iterator_range(m_variables);
+          return boost::make_iterator_range(atermpp::term_list< variable >(atermpp::list_arg2(*this)));
         }
 
         /// \brief Returns the body of the abstraction
@@ -203,8 +225,10 @@ namespace mcrl2 {
     }; // class abstraction
 
     /// \brief list of abstractions
-    ///
-    typedef atermpp::vector<abstraction> abstraction_list;
+    typedef atermpp::term_list<abstraction> abstraction_list;
+
+    /// \brief vector of abstractions
+    typedef atermpp::vector<abstraction>    abstraction_vector;
 
   } // namespace new_data
 

@@ -95,7 +95,7 @@ void test2()
   rewriter r;
   data_expression d1 = parse_data_expression("2+7");
   data_expression d2 = parse_data_expression("4+5");
-  assert(r(d1) == r(d2));
+  BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
   rewriter_map<atermpp::map<variable, data_expression> > sigma;
@@ -110,43 +110,43 @@ void test2()
 
 void test3()
 {
-//  typedef atermpp::map<variable, data_expression_with_variables> substitution_map;
+  typedef atermpp::map<variable, data_expression_with_variables> substitution_map;
 
-//  data_specification data_spec = parse_data_specification(
-//    "map dummy1:Pos;  \n"
-//    "var dummy2:Bool; \n"
-//    "    dummy3:Pos;  \n"
-//    "    dummy4:Nat;  \n"
-//    "    dummy5:Int;  \n"
-//    "    dummy6:Real; \n"
-//    "eqn dummy1 = 1;  \n"
-//  );
-//  rewriter_with_variables r(data_spec);
-//  data_expression x = parse_data_expression("b == b", "b: Bool;\n");
-//  std::set<variable> v = find_all_variables(x);
-//  BOOST_CHECK(v.size() == 1);
+  data_specification data_spec = parse_data_specification(
+    "map dummy1:Pos;  \n"
+    "var dummy2:Bool; \n"
+    "    dummy3:Pos;  \n"
+    "    dummy4:Nat;  \n"
+    "    dummy5:Int;  \n"
+    "    dummy6:Real; \n"
+    "eqn dummy1 = 1;  \n"
+  );
+  rewriter_with_variables r(data_spec);
+  data_expression x = parse_data_expression("b == b", "b: Bool;\n");
+  std::set<variable> v = find_all_variables(x);
+  BOOST_CHECK(v.size() == 1);
 
-//  data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
-//  data_expression_with_variables z = r(y);
-//  std::cout << "y = " << pp(y) << " " << pp(y.variables()) << std::endl;
-//  BOOST_CHECK(z.variables().empty());
+  data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
+  data_expression_with_variables z = r(y);
+  std::cout << "y = " << core::pp(y) << " " << new_data::pp(y.variables()) << std::endl;
+  BOOST_CHECK(z.variables().empty());
 
-//  std::string var_decl = "m, n: Pos;\n";
-//  rewriter_map<substitution_map> sigma;
-//  variable m = parse_variable("m:Pos");
-//  variable n = parse_variable("n:Pos");
-//  sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
-//  sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
+  std::string var_decl = "m, n: Pos;\n";
+  rewriter_map<substitution_map> sigma;
+  variable m(variable("m", sort_pos::pos()));
+  variable n(variable("n", sort_pos::pos()));
+  sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
+  sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
-//  data_expression_with_variables sigma_m = sigma(m);
+  data_expression_with_variables sigma_m = sigma(m);
 
-//  data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
-//  data_expression_with_variables d2(parse_data_expression("7"));
-//  BOOST_CHECK(r(d1, sigma) == r(d2));
+  data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
+  data_expression_with_variables d2(parse_data_expression("7"));
+  BOOST_CHECK(r(d1, sigma) == r(d2));
 
-//  BOOST_CHECK(d1.variables().size() == 0);
-//  data_expression_with_variables rd1 = r(d1);
-//  BOOST_CHECK(rd1.variables().size() == 2);
+  BOOST_CHECK(d1.variables().size() == 0);
+  data_expression_with_variables rd1 = r(d1);
+  BOOST_CHECK(rd1.variables().size() == 2);
 }
 
 /// Parse a string of the form "b: Bool := true, n: Nat := 0", and add them
@@ -189,11 +189,11 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
 
 void test4()
 {
-	data_specification data_spec = default_data_specification();
-	new_data::rewriter R(data_spec);
+  data_specification data_spec;
+  new_data::rewriter R(data_spec);
 
-	std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
-	std::string expr2 = "true";
+  std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
+  std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
   test_expressions(R, expr1, expr2, core::pp(new_data::detail::implement_data_specification(data_spec)), sigma);
 }

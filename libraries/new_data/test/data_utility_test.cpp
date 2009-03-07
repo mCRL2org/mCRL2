@@ -61,11 +61,11 @@ int test_main(int argc, char** argv)
   x = generator(f);
   BOOST_CHECK(x == variable("f00", basic_sort("F")));
 
-  variable_list w = make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
+  variable_vector w = make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
-  variable_list w1 = fresh_variables(w, context);
+  variable_vector w1 = fresh_variables(make_variable_list(w), context);
   std::cout << "w1 = " << mcrl2::new_data::pp(w1) << std::endl;
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d_01", basic_sort("D"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e_01", basic_sort("E"))) != w1.end());

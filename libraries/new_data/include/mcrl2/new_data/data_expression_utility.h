@@ -18,6 +18,7 @@
 
 #include "boost/format.hpp"
 #include "boost/assert.hpp"
+#include "boost/iterator/transform_iterator.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
@@ -46,6 +47,27 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
+
+      /// \brief Extracts the sort out of objects of type data expression (or derived type)
+      template < typename Expression >
+      struct sort_of : public std::unary_function< Expression const&, sort_expression > {
+        sort_expression operator()(Expression const& d) const {
+          return d.sort();
+        }
+      };
+
+      /// \brief Applies a function to the objects of type data expression (or derived type)
+      template < typename Expression >
+      struct apply : public std::unary_function< Expression const&, Expression > {
+        function_symbol const& m_function;
+
+        Expression operator()(Expression const& d) const {
+          return m_function(d);
+        }
+
+        apply(function_symbol const& f) : m_function(f) {
+        }
+      };
 
       inline std::vector< char > string_to_vector_number(std::string const& s) {
         std::vector< char > result;
@@ -89,7 +111,7 @@ namespace mcrl2 {
         std::vector< char >           result(number.size(), 0);
         std::vector< char >::iterator j(result.begin());
 
-        if (1 < number[0]) {
+        if (2 <= number[0]) {
           *(j++) = number[0] / 2;
         }
 
@@ -113,7 +135,7 @@ namespace mcrl2 {
         std::vector< char >           result(number.size() + 2, 0);
         std::vector< char >::iterator j(result.begin());
 
-        if (5 < number[0]) {
+        if (5 <= number[0]) {
           *(j++) = number[0] / 5;
         }
 
@@ -221,9 +243,9 @@ namespace mcrl2 {
 
       /// \brief Constructs expression of type pos from an integral type
       template < typename T >
-      inline typename boost::enable_if< typename boost::is_integral< T >::type,
-        typename boost::enable_if< typename boost::is_unsigned< T >::type, data_expression >::type >::type
+      inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       nat(T t) {
+        assert(0 <= t);
         return data_expression(core::detail::gsMakeDataExprNat(const_cast< char* >(detail::as_decimal_string(t).c_str())));
       }
 
@@ -315,42 +337,20 @@ namespace mcrl2 {
       return t == core::detail::gsMakeNil();
     }
 
-    template <typename Term>
-    atermpp::vector<Term> term_vector_difference(atermpp::vector<Term> v, atermpp::vector<Term> w)
+    /// \brief Iterator adapter for traversing the sorts of an underlying sequence of data expressions
+    template < typename ForwardTraversalIterator >
+    struct sort_of_iterator : public boost::transform_iterator<
+      detail::sort_of< typename ForwardTraversalIterator::value_type >, ForwardTraversalIterator >
     {
-      if (w.empty())
-      {
-        return v;
-      }
-      if (v.empty())
-      {
-        return w;
-      }
-      std::set<Term> result;
-      result.insert(v.begin(), v.end());
-      for (typename atermpp::vector<Term>::iterator i = w.begin(); i != w.end(); ++i)
-      {
-        result.erase(*i);
-      }
-      return atermpp::vector<Term>(result.begin(), result.end());
-    }
+      /// \brief Constructor from iterator
+      sort_of_iterator(ForwardTraversalIterator const& i) :
+        boost::transform_iterator< detail::sort_of< typename ForwardTraversalIterator::value_type >, ForwardTraversalIterator >(i)
+      {}
 
-    /// \brief Returns the sorts of the new_data expressions in the input
-    /// \param[in] l A range of new_data expressions
-    /// \ret The sorts of the new_data expressions in l.
-    template <typename T>
-    sort_expression_list sorts_of_data_expressions(const boost::iterator_range<T>& l)
-    {
-      sort_expression_list result;
-
-      for(T i = l.begin(); i != l.end(); ++i)
-      {
-        std::cerr << i->sort() << std::endl;
-        result.push_back(i->sort());
-      }
-
-      return result;
-    }
+      /// \brief Constructor for past-the-end iterator
+      sort_of_iterator()
+      {}
+    };
 
     /// Fresh variable generator that generates new_data variables with
     /// names that do not appear in the given context.
@@ -461,22 +461,21 @@ namespace mcrl2 {
     /// \brief Returns the application of f to a sufficient number of variables,
     ///        taking variables from context if possible, otherwise extending
     ///        the context.
-    inline data_expression apply_function_symbol_to_variables(const function_symbol& f, variable_list& context, variable_list& used_context)
+    inline data_expression apply_function_symbol_to_variables(const function_symbol& f, variable_vector& context, variable_vector& used_context)
     {
       if(f.sort().is_function_sort())
       {
         fresh_variable_generator generator(context, sort_bool_::bool_(), "x");
-        variable_list tmp_context = context; // Use vars only once
+        variable_vector tmp_context = context; // Use vars only once
         function_sort f_sort = static_cast<const function_sort&>(f.sort());
-        variable_list arguments;
-        sort_expression_list f_domain(f_sort.domain().begin(), f_sort.domain().end());
-        for(sort_expression_list::const_iterator i = f_domain.begin(); i != f_domain.end(); ++i)
+        variable_vector arguments;
+        for(function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
         {
           variable v;
-          generator.set_sort(*i);
-          for(variable_list::iterator j = tmp_context.begin(); j != tmp_context.end() && v == variable(); ++j)
+          generator.set_sort(i.front());
+          for(variable_vector::iterator j = tmp_context.begin(); j != tmp_context.end() && v == variable(); ++j)
           {
-            if(j->sort() == *i)
+            if(j->sort() == i.front())
             {
               v = *j;
               tmp_context.erase(j);

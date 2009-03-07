@@ -1057,9 +1057,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Int
       inline
-      function_symbol_list int__generate_constructors_code()
+      function_symbol_vector int__generate_constructors_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(cint());
         result.push_back(cneg());
 
@@ -1068,9 +1068,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Int
       inline
-      function_symbol_list int__generate_functions_code()
+      function_symbol_vector int__generate_functions_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(nat2int());
         result.push_back(int2nat());
         result.push_back(pos2int());
@@ -1313,9 +1313,9 @@ namespace mcrl2 {
 
       // Give all system defined equations for Int
       inline
-      data_equation_list int__generate_equations_code()
+      data_equation_vector int__generate_equations_code()
       {
-        data_equation_list result;
+        data_equation_vector result;
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), equal_to(sort_int_::cint(variable("m", sort_nat::nat())), sort_int_::cint(variable("n", sort_nat::nat()))), equal_to(variable("m", sort_nat::nat()), variable("n", sort_nat::nat()))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), equal_to(sort_int_::cint(variable("n", sort_nat::nat())), sort_int_::cneg(variable("p", sort_pos::pos()))), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), equal_to(sort_int_::cneg(variable("p", sort_pos::pos())), sort_int_::cint(variable("n", sort_nat::nat()))), sort_bool_::false_()));
@@ -1328,7 +1328,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), less_equal(sort_int_::cint(variable("n", sort_nat::nat())), sort_int_::cneg(variable("p", sort_pos::pos()))), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("p", sort_pos::pos())), less_equal(sort_int_::cneg(variable("p", sort_pos::pos())), sort_int_::cint(variable("n", sort_nat::nat()))), sort_bool_::true_()));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less_equal(sort_int_::cneg(variable("p", sort_pos::pos())), sort_int_::cneg(variable("q", sort_pos::pos()))), less_equal(variable("q", sort_pos::pos()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(variable_list(), sort_int_::nat2int(), sort_int_::cint()));
+        result.push_back(data_equation(variable_vector(), sort_int_::nat2int(), sort_int_::cint()));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::int2nat(sort_int_::cint(variable("n", sort_nat::nat()))), variable("n", sort_nat::nat())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::pos2int(variable("p", sort_pos::pos())), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::int2pos(sort_int_::cint(variable("n", sort_nat::nat()))), sort_nat::nat2pos(variable("n", sort_nat::nat()))));
@@ -1345,13 +1345,13 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::abs(sort_int_::cint(variable("n", sort_nat::nat()))), variable("n", sort_nat::nat())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::abs(sort_int_::cneg(variable("p", sort_pos::pos()))), sort_nat::cnat(variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::negate(variable("p", sort_pos::pos())), sort_int_::cneg(variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(variable_list(), sort_int_::negate(sort_nat::c0()), sort_int_::cint(sort_nat::c0())));
+        result.push_back(data_equation(variable_vector(), sort_int_::negate(sort_nat::c0()), sort_int_::cint(sort_nat::c0())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::negate(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cneg(variable("p", sort_pos::pos()))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::negate(sort_int_::cint(variable("n", sort_nat::nat()))), sort_int_::negate(variable("n", sort_nat::nat()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::negate(sort_int_::cneg(variable("p", sort_pos::pos()))), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::succ(sort_int_::cint(variable("n", sort_nat::nat()))), sort_int_::cint(sort_nat::cnat(sort_int_::succ(variable("n", sort_nat::nat()))))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::succ(sort_int_::cneg(variable("p", sort_pos::pos()))), sort_int_::negate(sort_int_::pred(variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(variable_list(), sort_int_::pred(sort_nat::c0()), sort_int_::cneg(sort_pos::c1())));
+        result.push_back(data_equation(variable_vector(), sort_int_::pred(sort_nat::c0()), sort_int_::cneg(sort_pos::c1())));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::pred(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cint(sort_int_::pred(variable("p", sort_pos::pos())))));
         result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_int_::pred(sort_int_::cint(variable("n", sort_nat::nat()))), sort_int_::pred(variable("n", sort_nat::nat()))));
         result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_int_::pred(sort_int_::cneg(variable("p", sort_pos::pos()))), sort_int_::cneg(sort_int_::succ(variable("p", sort_pos::pos())))));

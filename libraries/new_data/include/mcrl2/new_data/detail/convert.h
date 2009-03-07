@@ -15,41 +15,50 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 
 namespace mcrl2 {
 
   namespace new_data {
 
+    /// \cond INTERNAL_DOCS
     namespace detail {
-
-      template <typename Term>
-      atermpp::vector<Term> term_list_to_vector(const atermpp::term_list<Term>& l)
+      template < typename Container, typename ForwardTraversalIterator >
+      inline Container convert(boost::iterator_range< ForwardTraversalIterator > const& r)
       {
-        atermpp::vector<Term> v;
-
-        for (typename atermpp::term_list<Term>::const_iterator i = l.begin(); i != l.end(); ++i)
-        {
-          v.push_back(*i);
-        }
-
-        return v;
+        return Container(r.begin(), r.end());
       }
 
-      template <typename Term>
-      atermpp::term_list<Term> vector_to_term_list(const atermpp::vector<Term>& v)
+      // Copy to term list from term_list_iterator range
+//      template < typename TargetExpression, typename SourceExpression >
+//      inline typename atermpp::term_list< TargetExpression >
+//      convert(boost::iterator_range< typename atermpp::term_list_iterator< SourceExpression > > const& r)
+//      {
+//        return atermpp::term_list< TargetExpression >(static_cast< ATermList >(r.begin()));
+//      }
+
+      // Copy to term list from term_list_iterator range
+      template < typename TargetExpression, typename SourceExpression >
+      inline typename atermpp::term_list< TargetExpression >
+      convert(typename atermpp::vector< SourceExpression > const& r)
       {
-        atermpp::term_list<Term> l;
-
-        for (typename atermpp::vector<Term>::const_reverse_iterator i = v.rbegin(); i != v.rend(); ++i)
-        {
-          l = push_front(l, *i);
-        }
-
-        return l;
+        return atermpp::term_list< TargetExpression >(r.begin(), r.end());
       }
 
+      // Copy to term list from term_list_random_iterator range
+      template < typename TargetExpression, typename SourceExpression >
+      inline typename atermpp::term_list< TargetExpression >
+      convert(boost::iterator_range< typename detail::term_list_random_iterator< SourceExpression > > const& r)
+      {
+        if (r.end().list().empty()) {
+          return atermpp::term_list< TargetExpression >(r.begin().list());
+        }
+
+        return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+      }
     } // namespace detail
-    
+    /// \endcond
+
   } // namespace new_data
 
 } // namespace mcrl2

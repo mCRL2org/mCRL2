@@ -69,7 +69,7 @@ void list_construction_test() {
   using namespace mcrl2::new_data::sort_list;
   using namespace mcrl2::new_data::sort_bool_;
 
-  data_expression_list expressions;
+  data_expression_vector expressions;
 
   expressions.push_back(true_());
   expressions.push_back(false_());

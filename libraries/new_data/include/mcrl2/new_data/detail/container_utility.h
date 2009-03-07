@@ -15,11 +15,14 @@
 #include <set>
 #include <vector>
 
+#include "boost/assert.hpp"
 #include "boost/utility/enable_if.hpp"
+#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list_iterator.h"
 
 namespace mcrl2 {
 
@@ -27,6 +30,109 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
+
+      /**
+       * \brief Container adapter to use random access iterators for a term_list object
+       * \note Necessary for range construction with term_list_random_iterator
+       **/
+      template < typename Expression >
+      class random_access_list;
+
+      /// \brief Iterator for term_list.
+      template <typename Expression>
+      class term_list_random_iterator: public boost::iterator_facade<
+              term_list_random_iterator<Expression>, // Derived
+              const Expression,                      // Value
+              boost::random_access_traversal_tag,    // CategoryOrTraversal
+              const Expression                       // Reference
+          >
+      {
+       public:
+
+          /// \brief For efficient conversion of iterator ranges
+          atermpp::term_list< Expression > list() const
+          {
+            return m_list;
+          }
+
+       private:
+          friend class boost::iterator_core_access;
+
+          template < typename TermList >
+          friend class random_access_list;
+
+          /// \brief Constructor for a sequence with elements of l
+          /// \param l A sequence of terms
+          /// \param p A sequence of terms or the empty list
+          /// The empty list specifies that the object is past-the-end iterator
+          /// \note decrement will not work properly with objects constructed with default l
+          term_list_random_iterator(ATermList l = ATempty, ATermList p = ATempty)
+            : m_start(l), m_list(p)
+          {}
+
+          /// \brief Equality operator
+          /// \param other An iterator
+          /// \return True if the iterators are equal
+          bool equal(term_list_random_iterator const& other) const
+          {
+            return this->m_list == other.m_list;
+          }
+
+          /// \brief Dereference operator
+          /// \return The value that the iterator references
+          const Expression dereference() const
+          {
+          assert(!ATisEmpty(m_list));
+            return Expression(typename atermpp::term_list_iterator_traits<Expression>::value_type(ATgetFirst(m_list)));
+          }
+
+          /// \brief Increments the iterator (linear)
+          void decrement()
+          {
+            for (ATermList l = m_start; l != ATempty; l = ATgetNext(l)) {
+              if (ATgetNext(l) == m_list) {
+                m_list = l;
+
+                break;
+              }
+            }
+          }
+
+          /// \brief Increments the iterator
+          void increment()
+          { m_list = ATgetNext(m_list); }
+
+          /// \brief Advance by n
+          void advance(size_t n) {
+            for (; n != 0; --n) {
+              increment();
+            }
+          }
+
+          /// \brief Measure distance to other iterator
+          ptrdiff_t distance_to(term_list_random_iterator const& other) const {
+            ptrdiff_t count = 0;
+
+            for (ATermList l = m_list; !ATisEmpty(l); l = ATgetNext(l), ++count) {
+              if (l == other.m_list) {
+                return count;
+              }
+            }
+
+            count = 0;
+
+            for (ATermList l = other.m_list; !ATisEmpty(l); l = ATgetNext(l), --count) {
+              if (l == m_list) {
+                break;
+              }
+            }
+
+            return count;
+          }
+
+          ATermList m_start;
+          ATermList m_list;
+      };
 
       // Condition for recognising types that represent containers
       template < typename T >
@@ -109,12 +215,79 @@ namespace mcrl2 {
 
       // factory method
       template < typename Container >
-      conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >
+      inline conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >
       make_inserter(Container& c, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
         return conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >(std::inserter(c, c.end()));
       }
+
+      template < typename Container >
+      struct range_factory {
+        template < typename Iterator >
+        static typename boost::iterator_range< Iterator > make_range(Container const& c) {
+          return typename boost::iterator_range< Iterator >(Iterator(c.begin()), Iterator(c.end()));
+        }
+      };
+
+      template < >
+      struct range_factory< ATermList > {
+        template < typename Iterator >
+        static boost::iterator_range< Iterator > make_range(ATermList c) {
+          return typename boost::iterator_range< Iterator >(Iterator(atermpp::aterm_list(c)), Iterator());
+        }
+      };
+
+      template < typename Expression >
+      class random_access_list {
+
+        atermpp::aterm_list m_list;
+
+        public:
+          typedef Expression                              value_type;
+          typedef term_list_random_iterator< Expression > iterator;
+          typedef term_list_random_iterator< Expression > const_iterator;
+
+          template < typename SourceExpression >
+          random_access_list(atermpp::term_list< SourceExpression > const& list) : m_list(list) {
+          }
+
+          random_access_list(ATermList list) : m_list(atermpp::aterm_list(list)) {
+          }
+
+          term_list_random_iterator< Expression > begin() const {
+            return term_list_random_iterator< Expression >(m_list, m_list);
+          }
+
+          term_list_random_iterator< Expression > end() const {
+            return term_list_random_iterator< Expression >(m_list);
+          }
+      };
     } // namespace detail
 
+    /**
+     * \brief Container adapter to use random access iterators for a term_list object
+     * \note Necessary for range construction with term_list_random_iterator
+     **/
+    template < typename SourceExpression, typename TargetExpression >
+    detail::random_access_list< TargetExpression > add_random_access(atermpp::term_list< SourceExpression > const& list) {
+      return detail::random_access_list< TargetExpression >(list);
+    }
+
+    /**
+     * \brief Container adapter to use random access iterators for a term_list object
+     * \note Necessary for range construction with term_list_random_iterator
+     **/
+    template < typename Expression >
+    detail::random_access_list< Expression > add_random_access(ATermList list) {
+      return detail::random_access_list< Expression >(list);
+    }
+
+    /// \brief Convenience function for creating iterator ranges for ATermList or other containers
+    /// \seealso boost::make_iterator_range
+    template < typename Iterator, typename Container >
+    typename boost::iterator_range< Iterator >
+    make_iterator_range(Container const& c) {
+      return detail::range_factory< Container >::template make_range< Iterator >(c);
+    }
 
     /// \brief Constructs a vector with element type T of one argument.
     ///

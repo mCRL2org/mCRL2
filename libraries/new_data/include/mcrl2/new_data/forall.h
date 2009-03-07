@@ -21,16 +21,13 @@
 #include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief universal quantification.
     ///
     class forall: public abstraction
     {
-      protected:
-        variable_list m_variables; ///< The list of variables that is abstracted from.
-
       public:
 
         /// Constructor.
@@ -39,8 +36,7 @@ namespace mcrl2 {
         /// \pre d has the interal structure of an abstraction.
         /// \pre d is a universal quantification.
         forall(const data_expression& d)
-          : abstraction(d),
-            m_variables(atermpp::term_list<data_expression>(atermpp::list_arg2(d)).begin(), atermpp::term_list<data_expression>(atermpp::list_arg2(d)).end())
+          : abstraction(d)
         {
           assert(d.is_abstraction());
           assert(static_cast<abstraction>(d).binding_operator() == "forall");
@@ -51,10 +47,34 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the forall abstraction.
         /// \pre variables is not empty.
-        forall(const variable_const_range& variables,
+        forall(const variable_list& variables,
                const data_expression& body)
-          : abstraction("forall", variables, body),
-            m_variables(variables.begin(), variables.end())
+          : abstraction("forall", variables, body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the forall abstraction.
+        /// \pre variables is not empty.
+        forall(const variable_vector& variables,
+               const data_expression& body)
+          : abstraction("forall", make_variable_list(variables), body)
+        {
+          assert(!variables.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the forall abstraction.
+        /// \pre variables is not empty.
+        template < typename ForwardTraversalIterator >
+        forall(const boost::iterator_range< ForwardTraversalIterator >& variables,
+               const data_expression& body)
+          : abstraction("forall", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }
@@ -73,7 +93,7 @@ namespace mcrl2 {
 
     /// \brief list of foralls
     ///
-    typedef atermpp::vector<forall> forall_list;
+    typedef atermpp::term_list<forall> forall_list;
 
   } // namespace new_data
 

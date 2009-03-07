@@ -252,9 +252,9 @@ namespace mcrl2 {
     }
 
     // Give all system defined constructors for s
-    function_symbol_list standard_generate_functions_code(const sort_expression& s)
+    function_symbol_vector standard_generate_functions_code(const sort_expression& s)
     {
-      function_symbol_list result;
+      function_symbol_vector result;
       result.push_back(equal_to(s));
       result.push_back(not_equal_to(s));
       result.push_back(if_(s));
@@ -267,9 +267,9 @@ namespace mcrl2 {
     }
 
     // Give all system defined equations for s
-    data_equation_list standard_generate_equations_code(const sort_expression& s)
+    data_equation_vector standard_generate_equations_code(const sort_expression& s)
     {
-      data_equation_list result;
+      data_equation_vector result;
       variable b("b", sort_bool_::bool_());
       variable x("x", s);
       variable y("y", s);

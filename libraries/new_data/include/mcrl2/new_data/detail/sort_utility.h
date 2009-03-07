@@ -64,9 +64,9 @@ namespace mcrl2 {
       }
 
       ///\return the list of all functions f of sort s in fl
-      inline function_symbol_list get_constructors(const function_symbol_list& fl, const sort_expression& s)
+      inline function_symbol_vector get_constructors(const function_symbol_list& fl, const sort_expression& s)
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         for(function_symbol_list::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           if ((!i->sort().is_function_sort() && i->sort() == s) || function_sort(i->sort()).codomain() == s)
@@ -100,9 +100,9 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::sort_expression_list get_sorts(new_data::variable_list v)
+      new_data::sort_expression_vector get_sorts(new_data::variable_list v)
       {
-        new_data::sort_expression_list result;
+        new_data::sort_expression_vector result;
         for (new_data::variable_list::iterator i = v.begin(); i != v.end(); i++)
         {
           result.push_back(i->sort());
@@ -112,9 +112,9 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::sort_expression_list get_sorts(new_data::data_expression_list v)
+      new_data::sort_expression_vector get_sorts(new_data::data_expression_list v)
       {
-        new_data::sort_expression_list result;
+        new_data::sort_expression_vector result;
         for (new_data::data_expression_list::iterator i = v.begin(); i != v.end(); i++)
         {
           result.push_back(i->sort());
@@ -124,20 +124,20 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::data_expression_list create_data_expression_list(new_data::function_symbol f, std::vector< new_data::data_expression_list > const& dess)
+      new_data::data_expression_vector create_data_expression_vector(new_data::function_symbol f, std::vector< new_data::data_expression_vector > const& dess)
       {
         // Result list
-        new_data::data_expression_list result;
+        new_data::data_expression_vector result;
         // At first put function f in result
         result.push_back(new_data::data_expression(f));
-        for (std::vector< new_data::data_expression_list >::const_iterator i = dess.begin(); i != dess.end(); i++)
+        for (std::vector< new_data::data_expression_vector >::const_iterator i = dess.begin(); i != dess.end(); i++)
         {
                 //*i is a list of constructor expressions that should be applied to the elements of result
-                new_data::data_expression_list tmp;
-                for (new_data::data_expression_list::const_iterator k = i->begin(); k != i->end(); k++)
+                new_data::data_expression_vector tmp;
+                for (new_data::data_expression_vector::const_iterator k = i->begin(); k != i->end(); k++)
                 //*k is a constructor expression that should be applied to the elements of result
                 {
-                        for (new_data::data_expression_list::iterator j = result.begin(); j != result.end(); j++)
+                        for (new_data::data_expression_vector::iterator j = result.begin(); j != result.end(); j++)
                         {
                                 // *j is a data expression
                                 //  apply *j to *k
@@ -153,27 +153,25 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::data_expression_list enumerate_constructors(new_data::data_specification const& d, new_data::sort_expression s)
+      new_data::data_expression_vector enumerate_constructors(new_data::data_specification const& d, new_data::sort_expression s)
       {
         // All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
         assert(d.is_certainly_finite(s));
         // The resulting new_data::data_expression_list.
-        new_data::data_expression_list ces;
+        new_data::data_expression_vector ces;
         // For each constructor of sort s...
-        for (boost::iterator_range< new_data::function_symbol_list::const_iterator > i(d.constructors(s));
-                         !i.empty(); i.advance_begin(1))
+        for (data_specification::constructors_const_range i(d.constructors(s)); !i.empty(); i.advance_begin(1))
         {
                 // Vector for all enumerated constructors
-                std::vector< new_data::data_expression_list > argumentss;
+                std::vector< new_data::data_expression_vector > argumentss;
                 // For each sort of the constructor...
-                for (boost::iterator_range< new_data::sort_expression_list::const_iterator >
-                                        j(function_sort(i.front().sort()).domain()); !j.empty(); j.advance_begin(1))
+                for (function_sort::domain_const_range j(function_sort(i.front().sort()).domain()); !j.empty(); j.advance_begin(1))
                 {
-                        // Put all values which the sort can have in a list
-                        argumentss.push_back(enumerate_constructors(d, j.front()));
+                  // Put all values which the sort can have in a list
+                  argumentss.push_back(enumerate_constructors(d, j.front()));
                 }
                 // Create data_expression_list out of the values which a sort can have
-                new_data::data_expression_list temp = create_data_expression_list(i.front(), argumentss);
+                new_data::data_expression_vector temp = create_data_expression_vector(i.front(), argumentss);
                 //concatenate ces and temp
                 ces.insert(ces.end(), temp.begin(), temp.end());
         }

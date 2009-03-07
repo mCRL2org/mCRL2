@@ -81,18 +81,20 @@ namespace mcrl2 {
     }; // class assignment
 
     /// \brief list of assignments
-    ///
-    typedef atermpp::vector<assignment> assignment_list;
+    typedef atermpp::term_list<assignment> assignment_list;
+    /// \brief vector of assignments
+    typedef atermpp::vector<assignment>    assignment_vector;
+
 
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Constructs an assignment_list by pairwise combining a variable and expression
     /// \param lhs A sequence of data variables
     /// \param rhs A sequence of data expressions
     /// \return The corresponding assignment list.
-    inline assignment_list make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
+    inline assignment_vector make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
     {
       assert(lhs.size() == rhs.size());
-      assignment_list result;
+      assignment_vector result;
       variable_list::const_iterator i = lhs.begin();
       data_expression_list::const_iterator j = rhs.begin();
       for ( ; i != lhs.end(); ++i, ++j)
@@ -100,6 +102,26 @@ namespace mcrl2 {
         result.push_back(assignment(*i, *j));
       }
       return result;
+    }
+
+    /// \brief Converts an iterator range to data_expression_list
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename ForwardTraversalIterator >
+    inline assignment_list make_assignment_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< assignment_list >(r);
+    }
+
+    /// \brief Converts a vector to a variable_list 
+    template < typename Expression >
+    inline assignment_list make_assignment_list(atermpp::vector< Expression >const& r) {
+      return detail::convert< assignment_list >(r);
+    }
+
+    /// \brief Converts an iterator range to variable_list
+    template < typename ForwardTraversalIterator >
+    inline assignment_vector make_assignment_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< assignment_vector >(r);
     }
 
   } // namespace new_data

@@ -98,11 +98,10 @@ namespace mcrl2 {
     }; // class function_symbol
 
     /// \brief list of function symbols
-    typedef atermpp::vector< function_symbol >                            function_symbol_list;
-    /// \brief iterator range over list of function symbols
-    typedef boost::iterator_range< function_symbol_list::iterator >       function_symbol_range;
-    /// \brief iterator range over constant list of function symbols
-    typedef boost::iterator_range< function_symbol_list::const_iterator > function_symbol_const_range;
+    typedef atermpp::term_list< function_symbol > function_symbol_list;
+
+    /// \brief vector of function symbols
+    typedef atermpp::vector< function_symbol >    function_symbol_vector;
 
   } // namespace new_data
 

@@ -351,7 +351,7 @@ def generate_variables_code(sorts, variable_declarations, variables):
     for var in variables:
       variable_code = add_to_comma_sep_string(variable_code, generate_variable_code(sorts, variable_declarations, var))
     if variable_code == '':
-      variable_code = "variable_list()"
+      variable_code = "variable_vector()"
     else:
       variable_code = "make_vector(%s)" % variable_code
     return variable_code
@@ -642,9 +642,9 @@ def generate_functions_code(sorts, functions, function_type):
       argument = add_to_comma_sep_string(argument, "const sort_expression& %s" % p.lower())
     code = '''      // Give all system defined constructors for %s
       inline
-      function_symbol_list %s_generate_%s_code(%s)
+      function_symbol_vector %s_generate_%s_code(%s)
       {
-        function_symbol_list result;
+        function_symbol_vector result;
 ''' % (sortstring, sortlabel, function_type, argument)
     for f in functions:
       code += generate_function_code(sorts, functions, f)
@@ -674,9 +674,9 @@ def generate_equations_code(sorts, functions, variable_declarations, equations):
       sortlabel = sort[2].label
     code = '''      // Give all system defined equations for %s
       inline
-      data_equation_list %s_generate_equations_code(%s)
+      data_equation_vector %s_generate_equations_code(%s)
       {
-        data_equation_list result;
+        data_equation_vector result;
 ''' % (sortstring, sortlabel, argument)
     for equation in equations:
         code += "        result.push_back(%s);\n" % (generate_equation_code(sorts, functions, variable_declarations, equation))

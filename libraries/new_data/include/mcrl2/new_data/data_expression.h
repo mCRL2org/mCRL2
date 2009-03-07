@@ -23,7 +23,7 @@
 #include "mcrl2/new_data/function_sort.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief new_data expression.
@@ -70,7 +70,7 @@ namespace mcrl2 {
           else if (is_abstraction())
           {
             atermpp::term_list<data_expression> v_variables = atermpp::list_arg2(*this);
-            sort_expression_list s;
+            sort_expression_vector s;
             for(atermpp::term_list<data_expression>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
             {
               s.push_back(i->sort());
@@ -130,7 +130,11 @@ namespace mcrl2 {
 
     /// \brief list of new_data expressions
     ///
-    typedef atermpp::vector<data_expression> data_expression_list;
+    typedef atermpp::term_list<data_expression> data_expression_list;
+
+    /// \brief vector of new_data expressions
+    ///
+    typedef atermpp::vector<data_expression> data_expression_vector;
 
     /// \brief Returns true if the term t is a data expression
     /// \param t A term
@@ -140,6 +144,27 @@ namespace mcrl2 {
     {
       return core::detail::gsIsDataExpr(t);
     }
+
+    /// \brief Converts an iterator range to data_expression_list
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename ForwardTraversalIterator >
+    inline data_expression_list make_data_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< data_expression_list >(r);
+    }
+
+    /// \brief Converts an iterator range to data_expression_list
+    template < typename ForwardTraversalIterator >
+    inline data_expression_vector  make_data_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< data_expression_vector >(r);
+    }
+
+    /// \brief Converts a vector to a data_expression_list
+    template < typename Expression >
+    inline data_expression_list  make_data_expression_list(atermpp::vector< Expression >const& r) {
+      return detail::convert< data_expression_list >(r);
+    }
+
   } // namespace new_data
 
 } // namespace mcrl2

@@ -28,8 +28,11 @@ namespace mcrl2 {
     ///
     class application: public data_expression
     {
-      protected:
-        data_expression_list m_arguments; ///< The list of arguments of the application.
+
+      public:
+
+        /// \brief Iterator over arguments
+        typedef detail::term_list_random_iterator< data_expression > argument_iterator;
 
       public:
 
@@ -44,8 +47,7 @@ namespace mcrl2 {
         /// \param[in] d A new_data expression.
         /// \pre d has the internal structure of an application.
         application(const data_expression& d)
-          : data_expression(d),
-            m_arguments(atermpp::term_list<data_expression>(atermpp::list_arg2(d)).begin(), atermpp::term_list<data_expression>(atermpp::list_arg2(d)).end())
+          : data_expression(d)
         {
           assert(d.is_application());
         }
@@ -56,10 +58,9 @@ namespace mcrl2 {
         /// \param[in] arguments The new_data expressions that head is applied to.
         /// \pre head.sort() is a function sort.
         /// \pre arguments is not empty.
-        application(const data_expression& head, 
+        application(const data_expression& head,
                     const data_expression_list& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end()))),
-            m_arguments(arguments.begin(), arguments.end())
+          : data_expression(core::detail::gsMakeDataAppl(head, arguments))
         {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());
@@ -71,11 +72,24 @@ namespace mcrl2 {
         /// \param[in] arguments The new_data expressions that head is applied to.
         /// \pre head.sort() is a function sort.
         /// \pre arguments is not empty.
-        template <typename Iter>
-        application(const data_expression& head, 
-                    const boost::iterator_range<Iter>& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end()))),
-            m_arguments(arguments.begin(), arguments.end())
+        application(const data_expression& head,
+                    const data_expression_vector& arguments)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end())))
+        {
+          assert(head.sort().is_function_sort());
+          assert(!arguments.empty());
+        }
+
+        /// \brief Constructor.
+        ///
+        /// \param[in] head The new_data expression that is applied.
+        /// \param[in] arguments The new_data expressions that head is applied to.
+        /// \pre head.sort() is a function sort.
+        /// \pre arguments is not empty.
+        template <typename ForwardIterator >
+        application(const data_expression& head,
+                    const typename boost::iterator_range< ForwardIterator >& arguments)
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end())))
         {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());
@@ -88,8 +102,7 @@ namespace mcrl2 {
         /// \post \this represents head(arg1)
         application(const data_expression& head,
                     const data_expression& arg1)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1)))),
-            m_arguments(make_vector(arg1))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1))))
         { }
 
         /// \brief Convenience constructor for application with two arguments
@@ -101,8 +114,7 @@ namespace mcrl2 {
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2)))),
-            m_arguments(make_vector(arg1, arg2))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2))))
         { }
 
         /// \brief Convenience constructor for application with three arguments
@@ -116,8 +128,7 @@ namespace mcrl2 {
                     const data_expression& arg1,
                     const data_expression& arg2,
                     const data_expression& arg3)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3)))),
-            m_arguments(make_vector(arg1, arg2, arg3))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3))))
         { }
 
         /// \brief Convenience constructor for application with three arguments
@@ -133,8 +144,7 @@ namespace mcrl2 {
                     const data_expression& arg2,
                     const data_expression& arg3,
                     const data_expression& arg4)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3, arg4)))),
-            m_arguments(make_vector(arg1, arg2, arg3, arg4))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3, arg4))))
         { }
 
         /// \brief Returns the application of this application to an argument.
@@ -165,19 +175,19 @@ namespace mcrl2 {
 
         /// \brief Returns the arguments of the application
         inline
-        boost::iterator_range<data_expression_list::const_iterator> arguments() const
+        boost::iterator_range< argument_iterator > arguments() const
         {
-          return boost::make_iterator_range(m_arguments);
+          return boost::make_iterator_range(add_random_access< data_expression >(atermpp::list_arg2(appl())));
         }
 
         /// \brief Returns the first argument of the application
         /// \pre head() is a binary operator
-        /// \ret arguments()
+        /// \return arguments()
         inline
         data_expression left() const
         {
-          assert(m_arguments.size() == 2);
-          return m_arguments[0];
+          assert(arguments().size() == 2);
+          return arguments()[0];
         }
 
         /// \brief Returns the second argument of the application
@@ -185,15 +195,17 @@ namespace mcrl2 {
         inline
         data_expression right() const
         {
-          assert(m_arguments.size() == 2);
-          return m_arguments[1];
+          assert(arguments().size() == 2);
+          return arguments()[1];
         }
 
     }; // class application
 
     /// \brief list of applications
-    ///
-    typedef atermpp::vector<application> application_list;
+    typedef atermpp::term_list<application> application_list;
+
+    /// \brief vector of applications
+    typedef atermpp::vector<application> application_vector;
 
   } // namespace new_data
 

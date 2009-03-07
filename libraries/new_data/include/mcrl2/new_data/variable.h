@@ -103,11 +103,29 @@ namespace mcrl2 {
     }; // class variable
 
     /// \brief list of variables
-    typedef atermpp::vector< variable >                            variable_list;
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< variable_list::iterator >       variable_range;
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< variable_list::const_iterator > variable_const_range;
+    typedef atermpp::term_list< variable >                         variable_list;
+    /// \brief list of variables
+    typedef atermpp::vector< variable >                            variable_vector;
+
+    /// \brief Converts an iterator range to data_expression_list
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename ForwardTraversalIterator >
+    inline variable_list make_variable_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< variable_list >(r);
+    }
+
+    /// \brief Converts a vector to a variable_list 
+    template < typename Expression >
+    inline variable_list make_variable_list(atermpp::vector< Expression >const& r) {
+      return detail::convert< variable_list >(r);
+    }
+
+    /// \brief Converts an iterator range to variable_list
+    template < typename ForwardTraversalIterator >
+    inline variable_vector make_variable_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< variable_vector >(r);
+    }
 
   } // namespace new_data
 

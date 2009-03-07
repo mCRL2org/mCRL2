@@ -35,10 +35,10 @@ namespace mcrl2 {
       {
         assert(core::detail::gsIsDataSpec(data_spec));
 
-        return data_specification(aterm_sort_spec_to_sort_expression_list(atermpp::arg1(data_spec)),
+        return data_specification(aterm_sort_spec_to_sort_expression_set(atermpp::arg1(data_spec)),
                                   aterm_cons_spec_to_constructor_map(atermpp::arg2(data_spec)),
-                                  aterm_map_spec_to_function_list(atermpp::arg3(data_spec)),
-                                  aterm_data_eqn_spec_to_equation_list(atermpp::arg4(data_spec)));
+                                  aterm_map_spec_to_function_set(atermpp::arg3(data_spec)),
+                                  aterm_data_eqn_spec_to_equation_set(atermpp::arg4(data_spec)));
       }
 
       /// \brief Convert a new_data specification in the new new_data format to a new_data

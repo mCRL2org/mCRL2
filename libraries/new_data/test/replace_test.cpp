@@ -115,15 +115,15 @@ void test_assignment_list()
   variable e2("e2", basic_sort("D"));
   variable e3("e3", basic_sort("D"));
 
-  assignment_list l;
+  assignment_vector l;
   l.push_back(assignment(d1, e1));
   l.push_back(assignment(e1, e2));
   l.push_back(assignment(e2, e3));
 
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
-  data_expression t1 = partial_replace(t, assignment_list_replacer(l));
-  data_expression t2 = substitute(assignment_list_substitution(l), t);
+  data_expression t1 = partial_replace(t, assignment_list_replacer(assignment_list(l.begin(), l.end())));
+  data_expression t2 = substitute(assignment_list_substitution(assignment_list(l.begin(), l.end())), t);
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
@@ -138,7 +138,7 @@ void test_variable_replace()
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));
   variable d3("d3", basic_sort("D"));
-  variable_list variables;
+  variable_vector variables;
   variables.push_back(d1);
   variables.push_back(d2);
   variables.push_back(d3);
@@ -149,7 +149,7 @@ void test_variable_replace()
   data_expression e1 = x;
   data_expression e2 = z;
   data_expression e3 = y;
-  data_expression_list replacements;
+  data_expression_vector replacements;
   replacements.push_back(e1);
   replacements.push_back(e2);
   replacements.push_back(e3);
@@ -180,10 +180,10 @@ void test_data_expression_replace()
   // 4:Real
   data_expression x(sort_real_::real_(4));
   // [y]
-  data_expression_list el;
+  data_expression_vector el;
   el.push_back(e);
   // [4]
-  data_expression_list xl;
+  data_expression_vector xl;
   xl.push_back(x);
 
   // y := 4
@@ -196,7 +196,7 @@ void test_data_expression_replace()
   BOOST_CHECK(e_ == x);
 
   std::cerr << mcrl2::new_data::pp(xl) << std::endl;
-  data_expression_list xl_ = data_expression_map_replace(el, replacements);
+  data_expression_vector xl_ = data_expression_map_replace(el, replacements);
   std::cerr << mcrl2::new_data::pp(xl_) << std::endl;
   BOOST_CHECK(xl_ == xl);
 

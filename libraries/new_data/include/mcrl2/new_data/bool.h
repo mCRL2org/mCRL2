@@ -240,9 +240,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Bool
       inline
-      function_symbol_list bool__generate_constructors_code()
+      function_symbol_vector bool__generate_constructors_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(true_());
         result.push_back(false_());
 
@@ -251,9 +251,9 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Bool
       inline
-      function_symbol_list bool__generate_functions_code()
+      function_symbol_vector bool__generate_functions_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(not_());
         result.push_back(and_());
         result.push_back(or_());
@@ -329,11 +329,11 @@ namespace mcrl2 {
 
       // Give all system defined equations for Bool
       inline
-      data_equation_list bool__generate_equations_code()
+      data_equation_vector bool__generate_equations_code()
       {
-        data_equation_list result;
-        result.push_back(data_equation(variable_list(), sort_bool_::not_(sort_bool_::true_()), sort_bool_::false_()));
-        result.push_back(data_equation(variable_list(), sort_bool_::not_(sort_bool_::false_()), sort_bool_::true_()));
+        data_equation_vector result;
+        result.push_back(data_equation(variable_vector(), sort_bool_::not_(sort_bool_::true_()), sort_bool_::false_()));
+        result.push_back(data_equation(variable_vector(), sort_bool_::not_(sort_bool_::false_()), sort_bool_::true_()));
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::not_(sort_bool_::not_(variable("b", sort_bool_::bool_()))), variable("b", sort_bool_::bool_())));
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::true_()), variable("b", sort_bool_::bool_())));
         result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::false_()));

@@ -23,6 +23,7 @@
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -32,8 +33,13 @@ namespace mcrl2 {
     ///
     class data_equation: public atermpp::aterm_appl
     {
-      protected:
-        variable_list m_variables; ///< Free variables of the new_data equation
+      public:
+
+        /// \brief iterator range over a list of variables
+        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const;
+
+        /// \brief iterator range over a constant list of variables
+        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
 
       public:
 
@@ -45,12 +51,8 @@ namespace mcrl2 {
 
         /// \internal
         data_equation(const atermpp::aterm_appl& a)
-          : atermpp::aterm_appl(a), m_variables(
-	       atermpp::term_list_iterator< data_expression >(
-	          reinterpret_cast< ATermList >(static_cast< ATerm >(a(0)))),
-	       atermpp::term_list_iterator< data_expression >())
-        {
-	}
+          : atermpp::aterm_appl(a)
+        { }
 
         /// \brief Constructor
         ///
@@ -58,14 +60,34 @@ namespace mcrl2 {
         /// \param[in] condition The condition of the data_equation.
         /// \param[in] lhs The left hand side of the data_equation.
         /// \param[in] rhs The right hand side of the data_equation.
-        data_equation(const boost::iterator_range<variable_list::const_iterator>& variables,
+        data_equation(const variable_list& variables,
                       const data_expression& condition,
                       const data_expression& lhs,
                       const data_expression& rhs)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-              atermpp::term_list<variable>(variables.begin(), variables.end()),
-              condition, lhs, rhs)),
-            m_variables(variables.begin(), variables.end())
+                  variables, condition, lhs, rhs))
+        {}
+
+        /// \brief Constructor
+        /// \overload for variable list as vector
+        data_equation(const variable_vector& variables,
+                      const data_expression& condition,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                  make_variable_list(variables), condition, lhs, rhs))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \overload for variable list as iterator range
+        template < typename ForwardTraversalIterator >
+        data_equation(const typename boost::iterator_range< ForwardTraversalIterator >& variables,
+                      const data_expression& condition,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                  make_variable_list(variables), condition, lhs, rhs))
         {}
 
         /// \brief Constructor
@@ -74,14 +96,54 @@ namespace mcrl2 {
         /// \param[in] lhs The left hand side of the data_equation.
         /// \param[in] rhs The right hand side of the data_equation.
         /// \post this is the new_data equation representing the input, with
-        //        condition true
-        data_equation(const boost::iterator_range<variable_list::const_iterator>& variables,
+        ///       condition true
+        template < typename ForwardTraversalIterator >
+        data_equation(const typename boost::iterator_range< ForwardTraversalIterator >& variables,
                       const data_expression& lhs,
                       const data_expression& rhs)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-              atermpp::term_list<variable>(variables.begin(), variables.end()),
-              core::detail::gsMakeNil(), lhs, rhs)),
-            m_variables(variables.begin(), variables.end())
+                  variable_list(variables.begin(), variables.end()), core::detail::gsMakeNil(), lhs, rhs))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] variables The free variables of the data_equation.
+        /// \param[in] lhs The left hand side of the data_equation.
+        /// \param[in] rhs The right hand side of the data_equation.
+        /// \post this is the new_data equation representing the input, with
+        ///       condition true
+        data_equation(const variable_list& variables,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                  variables, core::detail::gsMakeNil(), lhs, rhs))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] variables The free variables of the data_equation.
+        /// \param[in] lhs The left hand side of the data_equation.
+        /// \param[in] rhs The right hand side of the data_equation.
+        /// \post this is the new_data equation representing the input, with
+        ///       condition true
+        data_equation(const variable_vector& variables,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                  variable_list(variables.begin(), variables.end()), core::detail::gsMakeNil(), lhs, rhs))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] lhs The left hand side of the new_data equation.
+        /// \param[in] rhs The right hand side of the new_data equation.
+        /// \post this is the new_data equations representing the input, without
+        ///       variables, and condition true
+        data_equation(const data_expression& condition,
+                      const data_expression& lhs,
+                      const data_expression& rhs)
+          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
+                  variable_list(), condition, lhs, rhs))
         {}
 
         /// \brief Constructor
@@ -93,14 +155,14 @@ namespace mcrl2 {
         data_equation(const data_expression& lhs,
                       const data_expression& rhs)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-              atermpp::term_list<variable>(), core::detail::gsMakeNil(), lhs, rhs))
+                  variable_list(), core::detail::gsMakeNil(), lhs, rhs))
         {}
 
         /// \brief Returns the variables of the new_data equation.
         inline
-        boost::iterator_range<variable_list::const_iterator> variables() const
+        variables_const_range variables() const
         {
-          return boost::make_iterator_range(m_variables);
+          return boost::make_iterator_range(add_random_access< variable >(atermpp::list_arg1(appl())));
         }
 
         /// \brief Returns the condition of the new_data equation.
@@ -127,11 +189,10 @@ namespace mcrl2 {
     }; // class data_equation
 
     /// \brief list of data_equations
-    typedef atermpp::vector< data_equation >                              data_equation_list;
-    /// \brief iterator range over list of data equations
-    typedef boost::iterator_range< data_equation_list::iterator >       data_equation_range;
-    /// \brief iterator range over constant list of data equations
-    typedef boost::iterator_range< data_equation_list::const_iterator > data_equation_const_range;
+    typedef atermpp::term_list< data_equation >    data_equation_list;
+
+    /// \brief list of data_equations
+    typedef atermpp::vector< data_equation >       data_equation_vector;
 
   } // namespace new_data
 

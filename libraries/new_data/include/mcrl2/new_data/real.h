@@ -1311,18 +1311,18 @@ namespace mcrl2 {
 
       // Give all system defined constructors for Real
       inline
-      function_symbol_list real__generate_constructors_code()
+      function_symbol_vector real__generate_constructors_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
 
         return result;
       }
 
       // Give all system defined constructors for Real
       inline
-      function_symbol_list real__generate_functions_code()
+      function_symbol_vector real__generate_functions_code()
       {
-        function_symbol_list result;
+        function_symbol_vector result;
         result.push_back(creal());
         result.push_back(pos2real());
         result.push_back(nat2real());
@@ -1606,9 +1606,9 @@ namespace mcrl2 {
 
       // Give all system defined equations for Real
       inline
-      data_equation_list real__generate_equations_code()
+      data_equation_vector real__generate_equations_code()
       {
-        data_equation_list result;
+        data_equation_vector result;
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), equal_to(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), equal_to(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
         result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), less(variable("r", sort_real_::real_()), variable("r", sort_real_::real_())), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), less(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));

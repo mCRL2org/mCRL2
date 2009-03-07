@@ -14,7 +14,7 @@
 
 #include <set>
 #include <vector>
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
 
@@ -34,10 +34,10 @@ namespace detail {
     {
       if (to_be_removed.find(*i) == to_be_removed.end())
       {
-        result.push_back(*i);
+        result = push_front(result, *i);
       }
     }
-    return result;
+    return reverse(result);
   }
 
   /// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.

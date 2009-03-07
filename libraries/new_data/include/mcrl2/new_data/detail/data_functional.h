@@ -21,9 +21,9 @@
 #include <vector>
 
 #include "boost/format.hpp"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/basic_sort.h"
+#include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
@@ -116,7 +116,7 @@ struct sort_has_name
 {
   std::string m_name;
 
-  sort_has_name(std::string name)
+  sort_has_name(std::string const& name)
     : m_name(name)
   {}
 
@@ -133,7 +133,7 @@ struct function_symbol_has_name
 {
   std::string m_name;
 
-  function_symbol_has_name(std::string name)
+  function_symbol_has_name(std::string const& name)
     : m_name(name)
   {}
 
@@ -146,58 +146,9 @@ struct function_symbol_has_name
   }
 };
 
-/// \brief Finds a mapping in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found mapping
-inline
-function_symbol find_mapping(data_specification data, std::string s)
-{
-  boost::iterator_range< function_symbol_list::const_iterator > r(data.mappings());
-
-  function_symbol_list::const_iterator i = std::find_if(r.begin(), r.end(), function_symbol_has_name(s));
-  if (i == data.mappings().end())
-  {
-    return function_symbol();
-  }
-  return *i;
-}
-
-/// \brief Finds a constructor in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found constructor
-inline
-function_symbol find_constructor(data_specification data, std::string s)
-{
-  function_symbol_list::const_iterator i = std::find_if(data.constructors().begin(), data.constructors().end(), function_symbol_has_name(s));
-  if (i == data.constructors().end())
-  {
-    return function_symbol();
-  }
-  return *i;
-}
-
-/// \brief Finds a sort in a data specification.
-/// \param data A data specification
-/// \param s A string
-/// \return The found sort
-inline
-sort_expression find_sort(data_specification data, std::string s)
-{
-  boost::iterator_range< sort_expression_list::const_iterator > r(data.sorts());
-
-  sort_expression_list::const_iterator i = std::find_if(r.begin(), r.end(), sort_has_name(s));
-  if (i == data.sorts().end())
-  {
-    return sort_expression();
-  }
-  return *i;
-}
-
 } // namespace detail
 
-} // namespace data
+} // namespace new_data
 
 } // namespace mcrl2
 

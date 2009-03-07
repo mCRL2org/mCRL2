@@ -128,7 +128,7 @@ struct is_not_a_constant_operation
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
-inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
+inline bool check_sort(sort_expression s, const atermpp::set<sort_expression>& sorts)
 {
   std::set<sort_expression> s_sorts;
   atermpp::find_all_if(s, is_constant_sort(), std::inserter(s_sorts, s_sorts.begin()));
@@ -172,7 +172,7 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
 /// \param sorts A set of sort expressions
 /// \return True if the sequence of sorts is contained in <tt>sorts</tt>
 template <typename Iterator>
-bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>& sorts)
+bool check_sorts(Iterator first, Iterator last, const atermpp::set<sort_expression>& sorts)
 {
   for (Iterator i = first; i != last; ++i)
   {
@@ -187,7 +187,7 @@ bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>&
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and the range sort of the given variables are contained in sorts.
 template <typename VariableContainer>
-bool check_variable_sorts(const VariableContainer& variables, const std::set<sort_expression>& sorts)
+bool check_variable_sorts(const VariableContainer& variables, const atermpp::set<sort_expression>& sorts)
 {
   for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
@@ -216,11 +216,11 @@ bool check_variable_names(variable_list const& variables, const std::set<core::i
 /// \param range A sequence of data operations
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
-template < typename I >
+template < typename ForwardTraversalIterator >
 inline
-bool check_data_spec_sorts(boost::iterator_range< I > const& range, const std::set<sort_expression>& sorts)
+bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > const& range, const atermpp::set<sort_expression>& sorts)
 {
-  for (function_symbol_list::const_iterator i = range.begin(); i != range.end(); ++i)
+  for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
       return false;
@@ -233,9 +233,45 @@ bool check_data_spec_sorts(boost::iterator_range< I > const& range, const std::s
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
 inline
-bool check_data_spec_sorts(function_symbol_list const& functions, const std::set<sort_expression>& sorts)
+bool check_data_spec_sorts(function_symbol_list const& functions, const atermpp::set<sort_expression>& sorts)
 {
   return check_data_spec_sorts(boost::make_iterator_range(functions), sorts);
+}
+
+/// \brief Returns the concatenation of the lists l and m
+/// \param l A sequence of data expressions
+/// \param m A sequence of data variables
+/// \return The concatenation of the lists l and m
+inline
+data_expression_list operator+(data_expression_list l, variable_list m)
+{ return data_expression_list(ATconcat(l, m)); }
+
+/// \brief Returns the concatenation of the lists l and m.
+/// \param l A sequence of data variables
+/// \param m A sequence of data expressions
+/// \return The concatenation of the lists l and m
+inline
+data_expression_list operator+(variable_list l, data_expression_list m)
+{ return data_expression_list(ATconcat(l, m)); }
+
+/// \brief Returns the concatenation of [v] and the list l.
+/// \param v A data variable
+/// \param l A sequence of data expressions
+/// \return The concatenation of [v] and the list l.
+inline
+data_expression_list operator+(variable v, data_expression_list l)
+{
+  return data_expression(atermpp::aterm_appl(v)) + l;
+}
+
+/// \brief Returns the concatenation of the list l and [v].
+/// \param l A sequence of data expressions
+/// \param v A data variable
+/// \return The concatenation of the list l and [v].
+inline
+data_expression_list operator+(data_expression_list l, variable v)
+{
+  return l + data_expression(atermpp::aterm_appl(v));
 }
 
 /// \brief Returns the names of the variables in t
@@ -255,9 +291,9 @@ std::vector<std::string> variable_strings(variable_list const& t)
 /// \param m A sequence of data variables
 /// \return The concatenation of the lists l and m
 inline
-data_expression_list operator+(data_expression_list const& l, variable_list const& m)
+data_expression_vector operator+(data_expression_vector const& l, variable_vector const& m)
 {
-  data_expression_list result(l.begin(), l.end());
+  data_expression_vector result(l.begin(), l.end());
 
   result.insert(result.end(), m.begin(), m.end());
 
@@ -269,9 +305,9 @@ data_expression_list operator+(data_expression_list const& l, variable_list cons
 /// \param m A sequence of variables
 /// \return The concatenation of the lists l and m
 inline
-variable_list operator+(variable_list const& l, variable_list const& m)
+variable_vector operator+(variable_vector const& l, variable_vector const& m)
 {
-  variable_list result(l.begin(), l.end());
+  variable_vector result(l.begin(), l.end());
 
   result.insert(result.end(), m.begin(), m.end());
 
@@ -283,9 +319,9 @@ variable_list operator+(variable_list const& l, variable_list const& m)
 /// \param m A sequence of variables
 /// \return The concatenation of the lists l and m
 inline
-data_expression_list operator+(data_expression_list const& l, data_expression_list const& m)
+data_expression_vector operator+(data_expression_vector const& l, data_expression_vector const& m)
 {
-  data_expression_list result(l.begin(), l.end());
+  data_expression_vector result(l.begin(), l.end());
 
   result.insert(result.end(), m.begin(), m.end());
 
@@ -297,7 +333,7 @@ data_expression_list operator+(data_expression_list const& l, data_expression_li
 /// \param m A sequence of data expressions
 /// \return The concatenation of the lists l and m
 inline
-data_expression_list operator+(variable_list const& l, data_expression_list const& m)
+data_expression_vector operator+(variable_vector const& l, data_expression_vector const& m)
 { return m + l; }
 
 /// \brief Returns the concatenation of [v] and the list l.
@@ -305,9 +341,9 @@ data_expression_list operator+(variable_list const& l, data_expression_list cons
 /// \param l A sequence of data expressions
 /// \return The concatenation of [v] and the list l.
 inline
-variable_list operator+(variable_list const& l, variable v)
+variable_vector operator+(variable_vector const& l, variable v)
 {
-  variable_list result(l.begin(), l.end());
+  variable_vector result(l.begin(), l.end());
 
   result.insert(result.end(), data_expression(v));
 
@@ -319,9 +355,9 @@ variable_list operator+(variable_list const& l, variable v)
 /// \param l A sequence of data expressions
 /// \return The concatenation of [v] and the list l.
 inline
-data_expression_list operator+(data_expression_list const& l, variable v)
+data_expression_vector operator+(data_expression_vector const& l, variable v)
 {
-  data_expression_list result(l.begin(), l.end());
+  data_expression_vector result(l.begin(), l.end());
 
   result.insert(result.end(), data_expression(v));
 
@@ -333,7 +369,7 @@ data_expression_list operator+(data_expression_list const& l, variable v)
 /// \param v A data variable
 /// \return The concatenation of the list l and [v].
 inline
-data_expression_list operator+(variable v, data_expression_list const& l)
+data_expression_vector operator+(variable v, data_expression_vector const& l)
 {
   return l + v;
 }
@@ -343,7 +379,7 @@ data_expression_list operator+(variable v, data_expression_list const& l)
 /// \param v A data variable
 /// \return The concatenation of the list l and [v].
 inline
-variable_list operator+(variable v, variable_list const& l)
+variable_vector operator+(variable v, variable_vector const& l)
 {
   return l + v;
 }

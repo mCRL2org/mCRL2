@@ -22,15 +22,20 @@
 #include "mcrl2/new_data/assignment.h"
 
 namespace mcrl2 {
-  
+
   namespace new_data {
 
     /// \brief function symbol.
     ///
     class where_clause: public data_expression
     {
-      protected:
-        assignment_list m_declarations; ///< The list of declarations of the where clause.
+      public:
+
+        /// \brief Iterator range over list of declarations
+        typedef boost::iterator_range< atermpp::term_list< assignment >::iterator >       declarations_range;
+
+        /// \brief Iterator range over constant list of declarations
+        typedef boost::iterator_range< atermpp::term_list< assignment >::const_iterator > declarations_const_range;
 
       public:
 
@@ -45,8 +50,7 @@ namespace mcrl2 {
         /// \param[in] d A new_data expression
         /// \pre d has the internal structure of a where clause.
         where_clause(const data_expression& d)
-          : data_expression(d),
-            m_declarations(atermpp::term_list<assignment>(atermpp::list_arg2(d)).begin(), atermpp::term_list<assignment>(atermpp::list_arg2(d)).end())
+          : data_expression(d)
         {
           assert(core::detail::gsIsWhr(d));
         }
@@ -56,10 +60,34 @@ namespace mcrl2 {
         /// \param[in] body The body of the where_clause.
         /// \param[in] declarations The variable declarations of the where
         ///            clause.
+        template < typename ForwardTraversalIterator >
         where_clause(const data_expression& body,
-                     const boost::iterator_range<assignment_list::const_iterator>& declarations)
-          : data_expression(core::detail::gsMakeWhr(body, atermpp::term_list<assignment>(declarations.begin(), declarations.end()))),
-            m_declarations(declarations.begin(), declarations.end())
+                     const boost::iterator_range< ForwardTraversalIterator >& declarations)
+          : data_expression(core::detail::gsMakeWhr(body, atermpp::term_list<assignment>(declarations.begin(), declarations.end())))
+        {
+          assert(!declarations.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] body The body of the where_clause.
+        /// \param[in] declarations The variable declarations of the where
+        ///            clause.
+        where_clause(const data_expression& body,
+                     const assignment_vector& declarations)
+          : data_expression(core::detail::gsMakeWhr(body, atermpp::term_list<assignment>(declarations.begin(), declarations.end())))
+        {
+          assert(!declarations.empty());
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] body The body of the where_clause.
+        /// \param[in] declarations The variable declarations of the where
+        ///            clause.
+        where_clause(const data_expression& body,
+                     const assignment_list& declarations)
+          : data_expression(core::detail::gsMakeWhr(body, declarations))
         {
           assert(!declarations.empty());
         }
@@ -76,9 +104,9 @@ namespace mcrl2 {
 
         /// \brief Returns the declarations of the where_clause
         inline
-        boost::iterator_range<assignment_list::const_iterator> declarations() const
+        declarations_const_range declarations() const
         {
-          return boost::make_iterator_range(m_declarations);
+          return boost::make_iterator_range(atermpp::term_list<assignment>(atermpp::list_arg2(*this)));
         }
 
         /// \brief Returns the body of the where_clause
@@ -92,7 +120,7 @@ namespace mcrl2 {
 
     /// \brief list of where_clauses
     ///
-    typedef atermpp::vector<where_clause> where_clause_list;
+    typedef atermpp::vector<where_clause> where_clause_vector;
 
   } // namespace new_data
 

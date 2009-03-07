@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/new_data/detail/convert.h"
 #include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
 
 namespace mcrl2 {
@@ -117,11 +118,29 @@ namespace mcrl2 {
     }; // class sort_expression
 
     /// \brief list of sorts
-    typedef atermpp::vector< sort_expression >                            sort_expression_list;
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< sort_expression_list::iterator >       sort_expression_range;
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< sort_expression_list::const_iterator > sort_expression_const_range;
+    typedef atermpp::term_list< sort_expression >  sort_expression_list;
+    /// \brief vector of sorts
+    typedef atermpp::vector< sort_expression >     sort_expression_vector;
+
+    /// \brief Converts an iterator range to sort_expression_list
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename ForwardTraversalIterator >
+    inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< sort_expression_list >(r);
+    }
+
+    /// \brief Converts an iterator range to sort_expression_list
+    template < typename ForwardTraversalIterator >
+    inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
+      return detail::convert< sort_expression_vector >(r);
+    }
+
+    /// \brief Converts a vector to a sort_expression_list
+    template < typename Expression >
+    inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
+      return detail::convert< sort_expression_list >(r);
+    }
 
     /// \brief Returns true if the term t is a sort_expression
     /// \param t A term

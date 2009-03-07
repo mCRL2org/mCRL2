@@ -15,6 +15,7 @@
 #include <string>
 #include <iterator>
 #include <boost/range/iterator_range.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -35,6 +36,8 @@
 namespace mcrl2 {
 
   namespace new_data {
+
+    class structured_sort;
 
     /// \brief Argument of a structured sort constructor.
     ///
@@ -105,11 +108,9 @@ namespace mcrl2 {
     }; // class structured_sort_constructor_argument
 
     /// \brief List of structured_sort_constructor_argument
-    typedef atermpp::vector< structured_sort_constructor_argument >                            structured_sort_constructor_argument_list;
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< structured_sort_constructor_argument_list::iterator >       structured_sort_constructor_argument_range;
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< structured_sort_constructor_argument_list::const_iterator > structured_sort_constructor_argument_const_range;
+    typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
+    /// \brief Vector of structured_sort_constructor_argument
+    typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
 
     /// \brief A structured sort constructor.
     ///
@@ -117,8 +118,31 @@ namespace mcrl2 {
     /// non-empty list of arguments and and optional recogniser name.
     class structured_sort_constructor: public atermpp::aterm_appl
     {
-      protected:
-        structured_sort_constructor_argument_list m_arguments; ///< The arguments of the constructor
+      private:
+
+        struct get_argument_sort : public
+          std::unary_function< structured_sort_constructor_argument const&, sort_expression > {
+
+          sort_expression operator()(structured_sort_constructor_argument const& s) const {
+            return s.sort();
+          }
+        };
+
+      public:
+
+        /// \brief iterator range over list of structured sort constructors
+        typedef detail::term_list_random_iterator< structured_sort_constructor_argument > arguments_iterator;
+        /// \brief iterator range over list of structured sort constructors
+        typedef boost::iterator_range< arguments_iterator >                               arguments_range;
+        /// \brief iterator range over constant list of structured sort constructors
+        typedef boost::iterator_range< arguments_iterator >                               arguments_const_range;
+
+        /// \brief iterator range over list of structured sort constructors
+        typedef boost::transform_iterator< get_argument_sort, arguments_iterator >        argument_sorts_iterator;
+        /// \brief iterator range over list of structured sort constructors
+        typedef boost::iterator_range< argument_sorts_iterator >                          argument_sorts_range;
+        /// \brief iterator range over constant list of structured sort constructors
+        typedef boost::iterator_range< argument_sorts_iterator >                          argument_sorts_const_range;
 
       public:
 
@@ -143,9 +167,7 @@ namespace mcrl2 {
         ///
         /// \param[in] c is a structured sort constructor.
         structured_sort_constructor(const structured_sort_constructor& c)
-          : atermpp::aterm_appl(c),
-            m_arguments(atermpp::term_list<structured_sort_constructor_argument>(atermpp::list_arg2(c)).begin(),
-                        atermpp::term_list<structured_sort_constructor_argument>(atermpp::list_arg2(c)).end())
+          : atermpp::aterm_appl(c)
         {}
 
         /// \brief Constructor
@@ -155,13 +177,13 @@ namespace mcrl2 {
         /// \param[in] recogniser The name of the recogniser.
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
+        template < typename ForwardTraversalIterator >
         structured_sort_constructor(const std::string& name,
-                                    const structured_sort_constructor_argument_const_range& arguments,
+                                    const typename boost::iterator_range< ForwardTraversalIterator >& arguments,
                                     const std::string& recogniser)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                                               atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
-                                                               atermpp::aterm_string(recogniser))),
-            m_arguments        (arguments.begin(), arguments.end())
+                                  detail::convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
+                                  atermpp::aterm_string(recogniser)))
         {
           assert(!name.empty());
           assert(!recogniser.empty());
@@ -175,8 +197,8 @@ namespace mcrl2 {
         /// \pre recogniser is not empty.
         structured_sort_constructor(const std::string& name, const std::string& recogniser = "")
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                       atermpp::term_list<structured_sort_constructor_argument>(),
-                                       (recogniser.empty()) ? core::detail::gsMakeNil()
+                                  atermpp::term_list<structured_sort_constructor_argument>(),
+                                  (recogniser.empty()) ? core::detail::gsMakeNil()
                                                : static_cast< ATermAppl >(atermpp::aterm_string(recogniser))))
         {
           assert(!name.empty());
@@ -187,12 +209,12 @@ namespace mcrl2 {
         /// \param[in] name The name of the constructor.
         /// \param[in] arguments The arguments of the constructor.
         /// \pre name is not empty.
+        template < typename ForwardTraversalIterator >
         structured_sort_constructor(const std::string& name,
-                                    const structured_sort_constructor_argument_const_range& arguments)
+                                    const typename boost::iterator_range< ForwardTraversalIterator >& arguments)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                   atermpp::term_list<structured_sort_constructor_argument>(arguments.begin(), arguments.end()),
-                   core::detail::gsMakeNil())),
-            m_arguments        (arguments.begin(), arguments.end())
+                   detail::convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
+                   core::detail::gsMakeNil()))
         {
           assert(!name.empty());
         }
@@ -208,22 +230,17 @@ namespace mcrl2 {
         /// \brief Returns the arguments of the constructor.
         ///
         inline
-        structured_sort_constructor_argument_const_range arguments() const
+        arguments_const_range arguments() const
         {
-          return boost::make_iterator_range(m_arguments);
+          return boost::make_iterator_range(add_random_access< structured_sort_constructor_argument >(atermpp::list_arg2(appl())));
         }
 
         /// \brief Returns the sorts of the arguments.
         ///
         inline
-        sort_expression_list argument_sorts() const
+        argument_sorts_const_range argument_sorts() const
         {
-          sort_expression_list result;
-          for(structured_sort_constructor_argument_list::const_iterator i = m_arguments.begin(); i != m_arguments.end(); ++i)
-          {
-            result.push_back(i->sort());
-          }
-          return result;
+          return new_data::make_iterator_range< argument_sorts_iterator >(arguments());
         }
 
         /// \brief Returns the constructor function for this constructor,
@@ -232,7 +249,7 @@ namespace mcrl2 {
         inline
         function_symbol constructor_function(const sort_expression& s) const
         {
-          sort_expression_list arguments(argument_sorts());
+          argument_sorts_const_range arguments(argument_sorts());
 
           return function_symbol(name(), (arguments.empty()) ? s : function_sort(arguments, s));
         }
@@ -241,13 +258,13 @@ namespace mcrl2 {
         /// \param s The sort as which the structured sort this constructor corresponds
         ///          to is treated internally.
         inline
-        function_symbol_list projection_functions(const sort_expression& s) const
+        function_symbol_vector projection_functions(const sort_expression& s) const
         {
-          function_symbol_list result;
-          for(structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+          function_symbol_vector result;
+          for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
           {
-            if (!i->name().empty()) {
-              result.push_back(function_symbol(i->name(), function_sort(s, i->sort())));
+            if (!i.front().name().empty()) {
+              result.push_back(function_symbol(i.front().name(), function_sort(s, i.front().sort())));
             }
           }
           return result;
@@ -284,11 +301,10 @@ namespace mcrl2 {
     }; // class structured_sort_constructor
 
     /// \brief List of structured_sort_constructor.
-    typedef atermpp::vector< structured_sort_constructor >                            structured_sort_constructor_list;
-    /// \brief iterator range over list of structured sort constructors
-    typedef boost::iterator_range< structured_sort_constructor_list::iterator >       structured_sort_constructor_range;
-    /// \brief iterator range over constant list of structured sort constructors
-    typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > structured_sort_constructor_const_range;
+    typedef atermpp::term_list< structured_sort_constructor > structured_sort_constructor_list;
+
+    /// \brief List of structured_sort_constructor.
+    typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
     /// \brief structured sort.
     ///
@@ -302,8 +318,35 @@ namespace mcrl2 {
     /// * is_ci are the recognisers.
     class structured_sort: public sort_expression
     {
-      protected:
-        structured_sort_constructor_list m_struct_constructors; ///< The list of constructors of the structured sort.
+
+      private:
+
+        static bool has_recogniser(structured_sort_constructor const& s)
+        {
+          return !s.recogniser().empty();
+        }
+
+      public:
+
+        /// \brief iterator range over list of constructor declarations
+        typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructor_range;
+        /// \brief iterator range over constant list of constructor declarations
+        typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructor_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   constructor_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             constructor_function_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   projection_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             projection_function_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   recogniser_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             recogniser_function_const_range;
 
       public:
 
@@ -317,9 +360,7 @@ namespace mcrl2 {
         /// \param[in] s A sort expression.
         /// \pre s is a structured sort.
         structured_sort(const sort_expression& s)
-          : sort_expression(s),
-            m_struct_constructors(atermpp::term_list<structured_sort_constructor>(atermpp::list_arg1(s)).begin(),
-                                  atermpp::term_list<structured_sort_constructor>(atermpp::list_arg1(s)).end())
+          : sort_expression(s)
         {
           assert(s.is_structured_sort());
         }
@@ -328,9 +369,29 @@ namespace mcrl2 {
         ///
         /// \param[in] struct_constructors The list of constructors.
         /// \post struct_constructors is empty.
-        structured_sort(const structured_sort_constructor_const_range& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end()))),
-            m_struct_constructors(struct_constructors.begin(), struct_constructors.end())
+        structured_sort(const structured_sort_constructor_list& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(struct_constructors))
+        {
+          assert(!struct_constructors.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        structured_sort(const structured_sort_constructor_vector& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
+        {
+          assert(!struct_constructors.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        template < typename ForwardTraversalIterator >
+        structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
         {
           assert(!struct_constructors.empty());
         }
@@ -338,9 +399,9 @@ namespace mcrl2 {
         /// \brief Returns the struct constructors of this sort
         ///
         inline
-        structured_sort_constructor_const_range struct_constructors() const
+        constructor_const_range struct_constructors() const
         {
-          return boost::make_iterator_range(m_struct_constructors);
+          return boost::make_iterator_range(structured_sort_constructor_list(atermpp::arg1(*this)));
         }
 
 
@@ -349,12 +410,12 @@ namespace mcrl2 {
         /// \param s The sort expression as which this sort is treated
         //         internally
         inline
-        function_symbol_list constructor_functions(const sort_expression& s) const
+        function_symbol_vector constructor_functions(const sort_expression& s) const
         {
-          function_symbol_list result;
-          for(structured_sort_constructor_list::const_iterator i = m_struct_constructors.begin(); i != m_struct_constructors.end(); ++i)
+          function_symbol_vector result;
+          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
-            result.push_back(i->constructor_function(s));
+            result.push_back(i.front().constructor_function(s));
           }
           return result;
         }
@@ -364,14 +425,14 @@ namespace mcrl2 {
         /// \param s The sort expression as which this sort is treated
         //         internally
         inline
-        function_symbol_list projection_functions(const sort_expression& s) const
+        function_symbol_vector projection_functions(const sort_expression& s) const
         {
-          function_symbol_list result;
-          for(structured_sort_constructor_list::const_iterator i = m_struct_constructors.begin(); i != m_struct_constructors.end(); ++i)
+          function_symbol_vector result;
+          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
-            function_symbol_list projections(i->projection_functions(s));
+            function_symbol_vector projections(i.front().projection_functions(s));
 
-            for(function_symbol_list::const_iterator j = projections.begin(); j != projections.end(); ++j)
+            for(function_symbol_vector::const_iterator j = projections.begin(); j != projections.end(); ++j)
             {
               result.push_back(*j);
             }
@@ -384,13 +445,13 @@ namespace mcrl2 {
         /// \param s The sort expression as which this sort is treated
         //         internally
         inline
-        function_symbol_list recogniser_functions(const sort_expression& s) const
+        function_symbol_vector recogniser_functions(const sort_expression& s) const
         {
-          function_symbol_list result;
-          for(structured_sort_constructor_list::const_iterator i = m_struct_constructors.begin(); i != m_struct_constructors.end(); ++i)
+          function_symbol_vector result;
+          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
-            if (!i->recogniser().empty()) {
-              result.push_back(i->recogniser_function(s));
+            if (!i.front().recogniser().empty()) {
+              result.push_back(i.front().recogniser_function(s));
             }
           }
           return result;
@@ -401,15 +462,15 @@ namespace mcrl2 {
         /// \param s The sort expression as which this sort is treated
         //         internally
         inline
-        data_equation_list constructor_equations(const sort_expression& s) const
+        data_equation_vector constructor_equations(const sort_expression& s) const
         {
-          data_equation_list result;
+          data_equation_vector result;
 
-          structured_sort_constructor_const_range cl(struct_constructors());
+          structured_sort_constructor_vector cl(boost::copy_range< structured_sort_constructor_vector >(struct_constructors()));
 
-          for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
+          for (structured_sort_constructor_vector::const_iterator i = cl.begin(); i != cl.end(); ++i)
           {
-            for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
+            for (structured_sort_constructor_vector::const_iterator j = cl.begin(); j != cl.end(); ++j)
             {
               data_expression right_equal         = (i == j) ? sort_bool_::true_() : sort_bool_::false_();
               data_expression right_smaller       = (i < j)  ? sort_bool_::true_() : sort_bool_::false_();
@@ -431,7 +492,7 @@ namespace mcrl2 {
                 number_postfix_generator generator("v");
 
                 // Create variables for equation
-                variable_list variables;
+                variable_vector variables;
 
                 if (i->argument_sorts().empty())
                 {
@@ -439,14 +500,13 @@ namespace mcrl2 {
                 }
                 else
                 {
-                  for (structured_sort_constructor_argument_const_range k(i->arguments()); k.begin() != k.end(); k.advance_begin(1))
+                  for (structured_sort_constructor::arguments_const_range k(i->arguments()); k.begin() != k.end(); k.advance_begin(1))
                   {
                     variables.push_back(variable(generator(), k.front().sort()));
                   }
 
                   // create first operand of ==, < or <=
-                  operand_left = application(i->constructor_function(s),
-                                                                        boost::make_iterator_range(variables));
+                  operand_left = application(i->constructor_function(s), boost::make_iterator_range(variables));
                 }
 
                 if (j->argument_sorts().empty())
@@ -455,7 +515,7 @@ namespace mcrl2 {
                 }
                 else
                 {
-                  for (structured_sort_constructor_argument_const_range k(j->arguments()); k.begin() != k.end(); k.advance_begin(1))
+                  for (structured_sort_constructor::arguments_const_range k(j->arguments()); k.begin() != k.end(); k.advance_begin(1))
                   {
                     variables.push_back(variable(generator(), k.front().sort()));
                   }
@@ -467,8 +527,8 @@ namespace mcrl2 {
 
                 if (i == j)
                 { // constructors are the same
-                  variable_list::const_reverse_iterator k(variables.rbegin() + i->arguments().size());
-                  variable_list::const_reverse_iterator l(variables.rbegin());
+                  variable_vector::const_reverse_iterator k(variables.rbegin() + i->arguments().size());
+                  variable_vector::const_reverse_iterator l(variables.rbegin());
 
                   right_equal         = equal_to(*k, *l);
                   right_smaller       = less(*k, *l);
@@ -511,22 +571,22 @@ namespace mcrl2 {
         }
 
         inline
-        data_equation_list projection_equations(const sort_expression& s) const
+        data_equation_vector projection_equations(const sort_expression& s) const
         {
-          data_equation_list result;
+          data_equation_vector result;
 
-          for (structured_sort_constructor_const_range i(struct_constructors());
+          for (constructor_const_range i(struct_constructors());
                                          i.begin() != i.end(); i.advance_begin(1))
           {
             if (!i.front().argument_sorts().empty())
             {
-              typedef structured_sort_constructor_argument_const_range argument_range;
+              typedef structured_sort_constructor::arguments_const_range argument_range;
 
-              argument_range arguments(i.front().arguments());
+              structured_sort_constructor::arguments_const_range arguments(i.front().arguments());
 
               number_postfix_generator generator("v");
 
-              variable_list variables;
+              variable_vector variables;
 
               // Create variables for equation
               for (argument_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
@@ -550,13 +610,15 @@ namespace mcrl2 {
         }
 
         inline
-        data_equation_list recogniser_equations(const sort_expression& s) const
+        data_equation_vector recogniser_equations(const sort_expression& s) const
         {
-          data_equation_list result;
+          data_equation_vector result;
 
-          for(structured_sort_constructor_list::const_iterator i = m_struct_constructors.begin(); i != m_struct_constructors.end(); ++i)
+          constructor_const_range cl(struct_constructors());
+
+          for (constructor_const_range::iterator i = cl.begin(); i != cl.end(); ++i)
           {
-            for(structured_sort_constructor_list::const_iterator j = m_struct_constructors.begin(); j != m_struct_constructors.end(); ++j)
+            for (constructor_const_range::iterator j = cl.begin(); j != cl.end(); ++j)
             {
               if(!j->recogniser().empty())
               {
@@ -569,14 +631,14 @@ namespace mcrl2 {
                 }
                 else
                 {
-                  typedef structured_sort_constructor_argument_const_range argument_range;
+                  typedef structured_sort_constructor::arguments_const_range argument_range;
 
                   number_postfix_generator generator("v");
 
                   argument_range arguments(i->arguments());
 
                   // Create variables for equation
-                  variable_list variables;
+                  variable_vector variables;
 
                   for (argument_range::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
                   {
@@ -596,11 +658,9 @@ namespace mcrl2 {
     }; // class structured_sort
 
     /// \brief list of structured sorts
-    typedef atermpp::vector< structured_sort >                            structured_sort_list;
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< structured_sort_list::iterator >       structured_sort_range;
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< structured_sort_list::const_iterator > structured_sort_const_range;
+    typedef atermpp::term_list< structured_sort > structured_sort_list;
+    /// \brief vector of structured sorts
+    typedef atermpp::vector< structured_sort >    structured_sort_vector;
 
   } // namespace new_data
 
