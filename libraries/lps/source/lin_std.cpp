@@ -1308,7 +1308,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsChoice(body))
   { if (status==multiAction)
-    { gsErrorMsg("choice operator occurs in a multi-action in %P.\n", body);
+    { gsErrorMsg("Choice operator occurs in a multi-action in %P.\n", body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
@@ -1322,7 +1322,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsSeq(body))
   { if (status==multiAction)
-    { gsErrorMsg("sequential operator occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("Sequential operator occurs in a multi-action in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
@@ -1336,7 +1336,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsMerge(body))
   { if (status!=mCRL)
-    { gsErrorMsg("parallel operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Parallel operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),mCRL);
@@ -1345,13 +1345,13 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsLMerge(body))
-  { gsErrorMsg("cannot linearize because the specification contains a leftmerge.\n");
+  { gsErrorMsg("Cannot linearize because the specification contains a leftmerge.\n");
     exit(1);
   }
 
   if (gsIsIfThen(body))
   { if (status==multiAction)
-    { gsErrorMsg("if-then occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("If-then occurs in a multi-action in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1365,7 +1365,7 @@ static processstatustype determine_process_statusterm(
   if (gsIsIfThenElse(body))
   {
     if (status==multiAction)
-    { gsErrorMsg("if-then-else occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("If-then-else occurs in a multi-action in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1382,7 +1382,7 @@ static processstatustype determine_process_statusterm(
        that this variable name will be reused later on */
     insertvariables(ATLgetArgument(body,0),ATfalse);
     if (status==multiAction)
-    { gsErrorMsg("sum operator occurs within a multi-action in %P.\n",body);
+    { gsErrorMsg("Sum operator occurs within a multi-action in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1395,7 +1395,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsComm(body))
   { if (status!=mCRL)
-    { gsErrorMsg("communication operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Communication operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s2=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1403,14 +1403,14 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsBInit(body))
-  { gsErrorMsg("cannot linearize a specification with the bounded initialization operator.\n");
+  { gsErrorMsg("Cannot linearize a specification with the bounded initialization operator.\n");
     exit(1);
   }
 
   if (gsIsAtTime(body))
   { timeIsBeingUsed = true;
     if (status==multiAction)
-    { gsErrorMsg("time operator occurs in a multi-action in %P.\n",body);
+    { gsErrorMsg("Time operator occurs in a multi-action in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
@@ -1427,7 +1427,7 @@ static processstatustype determine_process_statusterm(
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1!=multiAction)||(s2!=multiAction))
     {
-      gsErrorMsg("other objects than multi-actions occur in the scope of a synch operator in %P.\n",body);
+      gsErrorMsg("Other objects than multi-actions occur in the scope of a synch operator in %P.\n",body);
       exit(1);
     }
     return multiAction;
@@ -1443,6 +1443,12 @@ static processstatustype determine_process_statusterm(
     return status;
   }
 
+  if (gsIsProcessAssignment(body))
+  { 
+    determine_process_status_rec(ATAgetArgument(body,0),status);
+    return status;
+  }
+
   if (gsIsDelta(body))
   { return pCRL;
   }
@@ -1453,7 +1459,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsHide(body))
   { if (status!=mCRL)
-    { gsErrorMsg("hide operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Hide operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1462,7 +1468,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsRename(body))
   { if (status!=mCRL)
-    { gsErrorMsg("rename operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Rename operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1471,7 +1477,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsAllow(body))
   { if (status!=mCRL)
-    { gsErrorMsg("allow operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Allow operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1480,14 +1486,14 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsBlock(body))
   { if (status!=mCRL)
-    { gsErrorMsg("block operator occurs in the scope of pCRL operators in %P.\n",body);
+    { gsErrorMsg("Block operator occurs in the scope of pCRL operators in %P.\n",body);
       exit(1);
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
   }
 
-  gsErrorMsg("process has unexpected format (2) %P\n",body);
+  gsErrorMsg("Process has unexpected format (2) %P\n",body);
   exit(1);
   return error;
 }
@@ -1583,7 +1589,8 @@ static void collectPcrlProcesses_term(ATermAppl body, ATermIndexedSet visited)
     return;
   }
 
-  if (gsIsProcess(body))
+  if ((gsIsProcess(body))||
+      (gsIsProcessAssignment(body)))
   { collectPcrlProcesses_rec(ATAgetArgument(body,0),visited);
     return;
   }
@@ -2265,6 +2272,34 @@ static ATermAppl substitute_pCRLproc(
   return NULL;
 }
 
+
+// The function below transforms a ProcessAssignment to a Process, provided
+// that the process is defined in objectnames.
+
+static ATermAppl transform_process_assignment_to_process(ATermAppl procId)
+{ assert(gsIsProcessAssignment(procId));
+
+  long n=objectIndex(ATAgetArgument(procId,0));
+  // gsfprintf(stderr,"BBBB %T    %T\n", objectdata[n].objectname,
+  //                                     objectdata[n].parameters);
+  ATermList variables=ATempty;
+  ATermList terms=ATempty;
+
+  ATermList assignments=ATLgetArgument(procId,1);
+
+  // Transform the assignments into a list of variables and substitutable terms;
+  for(ATermList i=assignments; i!=ATempty; i=ATgetNext(i))
+  { ATermAppl assignment=ATAgetFirst(i);
+    variables=ATinsertA(variables,ATAgetArgument(assignment,0));
+    terms=ATinsertA(terms,ATAgetArgument(assignment,1));
+  }
+
+  ATermAppl result=gsMakeProcess(ATAgetArgument(procId,0),
+                       substitute_datalist(terms,variables,objectdata[n].parameters));
+  // gsfprintf(stderr,"procId: %T\nResult %T\n\n",procId,result);
+  return result;
+}
+
 /********************************************************************/
 /*                                                                  */
 /*   BELOW THE PROCEDURES ARE GIVEN TO TRANSFORM PROCESSES TO       */
@@ -2821,6 +2856,11 @@ static ATermAppl bodytovarheadGNF(
   if (gsIsProcess(body))
   { return body;
   }
+
+  if (gsIsProcessAssignment(body))
+  { return transform_process_assignment_to_process(body);
+  }
+
 
   if (gsIsTau(body))
   { if (v==first)
@@ -8599,6 +8639,14 @@ static bool containstimebody(
     return objectdata[objectIndex(ATAgetArgument(t,0))].containstime;
   }
 
+  if (gsIsProcessAssignment(t))
+  { t=transform_process_assignment_to_process(t);
+    if (allowrecursion)
+    { return (containstime_rec(ATAgetArgument(t,0),stable,visited,contains_if_then,print_info));
+    }
+    return objectdata[objectIndex(ATAgetArgument(t,0))].containstime;
+  }
+
   if (gsIsHide(t))
   { return (containstimebody(ATAgetArgument(t,1),stable,visited,allowrecursion,contains_if_then,print_info));
   }
@@ -8673,7 +8721,7 @@ static bool containstimebody(
     return r1||r2;
   }
 
-  gsErrorMsg("unexpected process format in containstime%T\n",t);
+  gsErrorMsg("unexpected process format in containstime %T\n",t);
   exit(1);
   return 0;
 }
@@ -8756,6 +8804,14 @@ static int canterminatebody(
     return objectdata[objectIndex(ATAgetArgument(t,0))].canterminate;
   }
 
+  if (gsIsProcessAssignment(t))
+  { t=transform_process_assignment_to_process(t);
+    if (allowrecursion)
+    { return (canterminate_rec(ATAgetArgument(t,0),stable,visited));
+    }
+    return objectdata[objectIndex(ATAgetArgument(t,0))].canterminate;
+  } 
+
   if (gsIsHide(t))
   { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
@@ -8829,7 +8885,7 @@ static int canterminatebody(
     return r1&&r2;
   }
 
-  gsErrorMsg("unexpected process format in canterminate%T\n",t);
+  gsErrorMsg("unexpected process format in canterminate %T\n",t);
   exit(1);
   return 0;
 }
@@ -8933,6 +8989,8 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
   return procId;
 }
 
+
+
 static ATermAppl split_body(
                     ATermAppl t,
                     ATermTable visited,
@@ -8941,7 +8999,9 @@ static ATermAppl split_body(
      by a process identifier. E.g. (a+b)||c is replaced by X||c and
      a new process equation X=a+b is added. Furthermore, if the replaced
      process can terminate a termination action is put behind it.
-     In the example X=(a+b).terminate.delta@0. */
+     In the example X=(a+b).terminate.delta@0. 
+
+     Besides this each ProcessAssignment is transformed into a Process. */
 
   ATermAppl result=NULL;
 
@@ -8956,6 +9016,13 @@ static ATermAppl split_body(
     else
     if (gsIsProcess(t))
     { result=gsMakeProcess(
+                   split_process(ATAgetArgument(t,0),visited),
+                   ATLgetArgument(t,1));
+    }
+    else
+    if (gsIsProcessAssignment(t))
+    { t=transform_process_assignment_to_process(t);
+      result=gsMakeProcess(
                    split_process(ATAgetArgument(t,0),visited),
                    ATLgetArgument(t,1));
     }
