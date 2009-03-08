@@ -48,15 +48,14 @@ class action: public atermpp::aterm_appl
       assert(core::detail::check_rule_Action(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
-      m_arguments.assign(atermpp::term_list_iterator< new_data::data_expression >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                         atermpp::term_list_iterator< new_data::data_expression >());
+      m_arguments = *i;
     }
 
     /// \brief Constructor.
     /// \param label An action label
     /// \param arguments A sequence of data expressions
     action(const action_label& label, const new_data::data_expression_list& arguments)
-     : atermpp::aterm_appl(core::detail::gsMakeAction(label, atermpp::term_list< new_data::data_expression >(arguments.begin(), arguments.end()))),
+     : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
        m_label(label),
        m_arguments(arguments)
     {}

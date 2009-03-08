@@ -150,7 +150,7 @@ namespace detail {
     bool visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right)
     {
       visit(right);
-      m_sum_variables.insert(m_sum_variables.end(), v.begin(), v.end());
+      m_sum_variables = m_sum_variables + v;
 // std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
       return stop_recursion;
     }

@@ -128,7 +128,7 @@ struct is_not_a_constant_operation
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
-inline bool check_sort(sort_expression s, const atermpp::set<sort_expression>& sorts)
+inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
 {
   std::set<sort_expression> s_sorts;
   atermpp::find_all_if(s, is_constant_sort(), std::inserter(s_sorts, s_sorts.begin()));
@@ -187,7 +187,7 @@ bool check_sorts(Iterator first, Iterator last, const atermpp::set<sort_expressi
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and the range sort of the given variables are contained in sorts.
 template <typename VariableContainer>
-bool check_variable_sorts(const VariableContainer& variables, const atermpp::set<sort_expression>& sorts)
+bool check_variable_sorts(const VariableContainer& variables, const std::set<sort_expression>& sorts)
 {
   for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {

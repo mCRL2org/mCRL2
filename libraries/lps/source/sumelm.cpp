@@ -90,10 +90,10 @@ namespace lps {
   /// the specified map of replacements.
   ///
   static inline
-  assignment_list sumelm_assignment_list_replace(const assignment_list& t,
+  assignment_vector sumelm_assignment_list_replace(const assignment_list& t,
                          const std::map<data_expression, data_expression>& replacements)
   {
-    assignment_list result;
+    assignment_vector result;
 
     for (assignment_list::const_iterator i = t.begin(); i != t.end(); ++i)
     {
@@ -151,9 +151,9 @@ namespace lps {
 
   ///Apply substitution to the righthand sides of the assignments in dl
   static inline
-  assignment_list substitute_rhs(const assignment_list& dl, const assignment& substitution)
+  assignment_vector substitute_rhs(const assignment_list& dl, const assignment& substitution)
   {
-    assignment_list result;
+    assignment_vector result;
 
     for(assignment_list::const_iterator i = dl.begin(); i != dl.end(); ++i)
     {
@@ -182,7 +182,7 @@ namespace lps {
     int num_removed = 0;
     lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
-    variable_list new_summation_variables;
+    variable_vector new_summation_variables;
 
     // Construct a set with all variables occurring in the summand.
     // This reduces the running time from O(|summand| * |summation variables|)
@@ -199,9 +199,9 @@ namespace lps {
       partial_find_all_if(*i, boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
     }
 
-    variable_list summation_variables(summand_.summation_variables());
+    variable_vector summation_variables(new_data::make_variable_vector(summand_.summation_variables()));
 
-    for (variable_list::const_iterator i = summation_variables.begin();
+    for (variable_vector::const_iterator i = summation_variables.begin();
                                        i != summation_variables.end(); ++i)
     {
       //Check whether variable occurs in other terms of summand
@@ -215,7 +215,7 @@ namespace lps {
       //else remove the variable, i.e. do not add it to the new list (skip)
     }
 
-    new_summand = set_summation_variables(summand_, new_summation_variables);
+    new_summand = set_summation_variables(summand_, new_data::make_variable_list(new_summation_variables));
     gsVerboseMsg("Removed %d summation variables\n", num_removed);
 
     return new_summand;
@@ -313,7 +313,7 @@ namespace lps {
                               new_summand.is_delta(),
                               sumelm_replace(new_summand.actions(), substitutions),
                               sumelm_replace(new_summand.time(), substitutions),
-                              sumelm_assignment_list_replace(new_summand.assignments(), substitutions));
+                              new_data::make_assignment_list(sumelm_assignment_list_replace(new_summand.assignments(), substitutions)));
     //Take the summand with substitution, and remove the summation variables that are now not needed
     new_summand = remove_unused_variables(new_summand);
     return new_summand;

@@ -96,9 +96,7 @@ class summand: public atermpp::aterm_appl
       assert(core::detail::check_rule_LinearProcessSummand(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
 
-      m_summation_variables.assign(atermpp::term_list_iterator< new_data::variable >(
-                                        reinterpret_cast< ATermList >(static_cast< ATerm >(*i++))),
-                                   atermpp::term_list_iterator< new_data::variable >());
+      m_summation_variables = *i++;
       m_condition           = new_data::data_expression(*i++);
       atermpp::aterm_appl x          = *i++;
       m_delta = core::detail::gsIsDelta(x);
@@ -108,9 +106,7 @@ class summand: public atermpp::aterm_appl
         m_actions = action_list(x.argument(0));
       }
       m_time                = new_data::data_expression(*i++);
-      m_assignments.assign(atermpp::term_list_iterator< new_data::assignment >(
-                                        reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                                   atermpp::term_list_iterator< new_data::assignment >());
+      m_assignments = *i;
     }
 
     /// \brief Constructor.
@@ -123,11 +119,11 @@ class summand: public atermpp::aterm_appl
             new_data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                core::detail::gsMakeNil(),
-               atermpp::term_list< new_data::assignment >(assignments.begin(), assignments.end()))
+               assignments)
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
@@ -148,11 +144,11 @@ class summand: public atermpp::aterm_appl
             new_data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               summation_variables,
                condition,
                (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
                time,
-               atermpp::term_list< new_data::assignment >(assignments.begin(), assignments.end()))
+               assignments)
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
@@ -170,11 +166,11 @@ class summand: public atermpp::aterm_appl
             new_data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               summation_variables,
                condition,
                core::detail::gsMakeMultAct(a.actions()),
                a.time(),
-               atermpp::term_list< new_data::assignment >(assignments.begin(), assignments.end()))
+               assignments)
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
@@ -191,7 +187,7 @@ class summand: public atermpp::aterm_appl
             const lps::deadlock&       d
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               atermpp::term_list< new_data::variable >(summation_variables.begin(), summation_variables.end()),
+               summation_variables,
                condition,
                core::detail::gsMakeDelta(),
                d.time(),
@@ -281,12 +277,12 @@ class summand: public atermpp::aterm_appl
     /// \return A symbolic representation of the next states
     new_data::data_expression_list next_state(const new_data::variable_list& process_parameters) const
     {
-      new_data::data_expression_list result;
+      new_data::data_expression_vector result;
 
       substitute(new_data::assignment_list_substitution(assignments()),
-                        process_parameters, std::back_insert_iterator< new_data::data_expression_list >(result));
+                        process_parameters, std::inserter(result, result.end()));
 
-      return result;
+      return new_data::make_data_expression_list(result);
     }
 
     /// \brief Applies a low level substitution function to this term and returns the result.

@@ -127,6 +127,12 @@ namespace mcrl2 {
       return detail::convert< variable_vector >(r);
     }
 
+    /// \brief Converts an iterator range to variable_list
+    template < typename Expression >
+    inline variable_vector make_variable_vector(atermpp::term_list< Expression > const& r) {
+      return detail::convert< variable_vector >(boost::make_iterator_range(r));
+    }
+
   } // namespace new_data
 
 } // namespace mcrl2

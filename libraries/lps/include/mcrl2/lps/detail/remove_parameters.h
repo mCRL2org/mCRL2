@@ -43,8 +43,8 @@ new_data::assignment_list remove_parameters(const new_data::assignment_list& l, 
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<new_data::variable>& to_be_removed)
 {
-  new_data::variable_list  v(p.process_parameters());
-  atermpp::vector<summand> s(p.summands().begin(), p.summands().end());
+  new_data::variable_vector v(new_data::make_variable_vector(p.process_parameters()));
+  atermpp::vector<summand>  s(p.summands().begin(), p.summands().end());
 
   for (std::set<new_data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {

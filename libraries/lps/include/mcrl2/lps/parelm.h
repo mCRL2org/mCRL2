@@ -130,12 +130,12 @@ specification parelm(const specification& spec)
 inline
 specification parelm2(const specification& spec)
 {
-  new_data::variable_list process_parameters(spec.process().process_parameters());
+  new_data::variable_vector process_parameters(new_data::make_variable_vector(spec.process().process_parameters()));
 
   // create a mapping m from process parameters to integers
   std::map<new_data::variable, int> m;
   int index = 0;
-  for (std::vector<new_data::variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  for (new_data::variable_vector::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     m[*i] = index++;
   }

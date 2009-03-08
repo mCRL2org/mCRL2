@@ -48,8 +48,8 @@ class process_initializer: public atermpp::aterm_appl
                         new_data::assignment_list assignments
                        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(
-         atermpp::term_list< new_data::variable >(free_variables.begin(), free_variables.end()),
-         atermpp::term_list< new_data::assignment >(assignments.begin(), assignments.end()))),
+         free_variables,
+         assignments)),
        m_free_variables(free_variables),
        m_assignments(assignments)
     {
@@ -62,10 +62,8 @@ class process_initializer: public atermpp::aterm_appl
     {
       assert(core::detail::check_term_LinearProcessInit(m_term));
       atermpp::aterm_appl::iterator i   = t.begin();
-      m_free_variables.assign(atermpp::term_list_iterator< new_data::variable >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i++))),
-                     atermpp::term_list_iterator< new_data::variable >());
-      m_assignments.assign(atermpp::term_list_iterator< new_data::assignment >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                     atermpp::term_list_iterator< new_data::assignment >());
+      m_free_variables = *i++;
+      m_assignments = *i;
     }
 
     /// \brief Returns the sequence of free variables.

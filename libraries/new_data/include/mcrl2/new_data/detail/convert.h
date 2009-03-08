@@ -56,8 +56,20 @@ namespace mcrl2 {
 
         return atermpp::term_list< TargetExpression >(r.begin(), r.end());
       }
+
+      template < typename Container, typename TermList >
+      inline Container convert(ATermList const& l)
+      {
+        return Container(atermpp::term_list< typename Container::value_type >(l), atermpp::term_list< typename Container::value_type >());
+      }
     } // namespace detail
     /// \endcond
+
+    /// \brief Convert container with expressions to a new container with expressions
+    template < typename TargetContainer, typename SourceContainer >
+    TargetContainer convert(SourceContainer const& c) {
+      return detail::convert< TargetContainer >(c);
+    }
 
   } // namespace new_data
 

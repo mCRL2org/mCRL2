@@ -47,10 +47,10 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
 
   std::vector<new_data::variable> src;  // contains the variables that need to be renamed
   std::vector<new_data::variable> dest; // contains the corresponding replacements
-  std::vector<new_data::variable> parameters(p.process_parameters());
+  std::vector<new_data::variable> parameters(new_data::make_variable_vector(p.process_parameters()));
   generator.add_identifiers(forbidden_names);
 
-  for (new_data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
+  for (new_data::variable_vector::const_iterator i = parameters.begin(); i != parameters.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())

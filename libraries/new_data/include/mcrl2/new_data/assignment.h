@@ -91,7 +91,7 @@ namespace mcrl2 {
     /// \param lhs A sequence of data variables
     /// \param rhs A sequence of data expressions
     /// \return The corresponding assignment list.
-    inline assignment_vector make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
+    inline assignment_vector make_assignment_vector(variable_list const& lhs, data_expression_list const& rhs)
     {
       assert(lhs.size() == rhs.size());
       assignment_vector result;
@@ -102,6 +102,16 @@ namespace mcrl2 {
         result.push_back(assignment(*i, *j));
       }
       return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    /// \brief Constructs an assignment_list by pairwise combining a variable and expression
+    /// \param lhs A sequence of data variables
+    /// \param rhs A sequence of data expressions
+    /// \return The corresponding assignment list.
+    inline assignment_list make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
+    {
+      return convert< assignment_list >(make_assignment_vector(lhs, rhs));
     }
 
     /// \brief Converts an iterator range to data_expression_list
@@ -122,6 +132,12 @@ namespace mcrl2 {
     template < typename ForwardTraversalIterator >
     inline assignment_vector make_assignment_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
       return detail::convert< assignment_vector >(r);
+    }
+
+    /// \brief Converts an iterator range to variable_list
+    template < typename Expression >
+    inline assignment_vector make_assignment_vector(atermpp::term_list< Expression > const& r) {
+      return detail::convert< assignment_vector >(boost::make_iterator_range(r));
     }
 
   } // namespace new_data

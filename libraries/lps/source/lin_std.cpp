@@ -5151,13 +5151,11 @@ static enumeratedtype *create_enumeratedtype
       //add declaration of standard functions
       insertsort(gsMakeSortRef(ATAgetArgument(sort_id, 0), sort_struct), spec, true);
 
-      // Temporary construction
-      new_data::function_symbol_list constructors(new_data::structured_sort(new_data::sort_expression(sort_struct)).
-                                        constructor_functions(new_data::sort_expression(sort_id)));
-
       //store new declarations in return value w
       w->sortId = sort_id;
-      w->elementnames = atermpp::term_list< new_data::function_symbol >(constructors.begin(), constructors.end());
+      w->elementnames = new_data::convert< new_data::function_symbol_list >(
+                new_data::structured_sort(new_data::sort_expression(sort_struct)).
+                                        constructor_functions(new_data::sort_expression(sort_id)));
     }
 
     w->functions=ATempty;

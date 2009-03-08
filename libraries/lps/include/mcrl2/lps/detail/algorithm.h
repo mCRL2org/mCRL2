@@ -50,7 +50,7 @@ struct make_timed_lps_summand
       new_data::variable v = m_generator();
       summand_ = set_time(summand_, new_data::data_expression(v));
       new_data::variable_list V(summand_.summation_variables());
-      V.push_back(v);
+      V = push_front(V, v);
       summand_ = set_summation_variables(summand_, V);
     }
     return summand_;

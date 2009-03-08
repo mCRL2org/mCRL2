@@ -81,8 +81,8 @@ class linear_process: public atermpp::aterm_appl
         summand_list       summands
        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcess(
-            atermpp::term_list< new_data::variable >(free_variables.begin(), free_variables.end()),
-            atermpp::term_list< new_data::variable >(process_parameters.begin(), process_parameters.end()),
+            free_variables,
+            process_parameters,
             summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
@@ -98,13 +98,9 @@ class linear_process: public atermpp::aterm_appl
 
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_free_variables.assign(
-        atermpp::term_list_iterator< new_data::variable >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i++))),
-        atermpp::term_list_iterator< new_data::variable >());
-      m_process_parameters.assign(
-        atermpp::term_list_iterator< new_data::variable >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i++))),
-        atermpp::term_list_iterator< new_data::variable >());
-      m_summands           = summand_list(*i);
+      m_free_variables = *i++;
+      m_process_parameters = *i++;
+      m_summands           = *i;
     }
 
     /// \brief Returns the sequence of LPS summands.
@@ -289,7 +285,7 @@ std::set<new_data::variable> compute_free_variables(const linear_process& proces
     std::set<new_data::variable> temporary;
     lps::detail::collect_free_variables(*i, process_parameters, std::inserter(temporary, temporary.end()));
 
-    new_data::variable_list summation_variables(i->summation_variables());
+    new_data::variable_vector summation_variables(new_data::make_variable_vector(i->summation_variables()));
     std::sort(summation_variables.begin(), summation_variables.end());
 
     std::set_difference(temporary.begin(), temporary.end(), summation_variables.begin(), summation_variables.end(),

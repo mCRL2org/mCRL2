@@ -49,16 +49,14 @@ class action_label: public atermpp::aterm_appl
       assert(core::detail::check_rule_ActId(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
       m_name  = *i++;
-
-      m_sorts.assign(atermpp::term_list_iterator< new_data::sort_expression >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                     atermpp::term_list_iterator< new_data::sort_expression >());
+      m_sorts = *i;
     }
 
     /// \brief Constructor.
     /// \param name A
     /// \param sorts A sequence of sort expressions
     action_label(const core::identifier_string& name, const new_data::sort_expression_list &sorts)
-     : atermpp::aterm_appl(core::detail::gsMakeActId(name, atermpp::term_list< new_data::sort_expression >(sorts.begin(), sorts.end()))),
+     : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}

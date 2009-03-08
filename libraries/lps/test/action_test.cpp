@@ -33,18 +33,18 @@ int test_main(int argc, char** argv )
   sort_expression X(basic_sort("X"));
   sort_expression Y(basic_sort("Y"));
 
-  action_label aX(identifier_string("a"),  make_vector(X));
-  action_label aY(identifier_string("a"),  make_vector(Y));
-  action_label aXY(identifier_string("a"), make_vector(X, Y));
-  action_label bX(identifier_string("b"),  make_vector(X));
+  action_label aX(identifier_string("a"),  make_list(X));
+  action_label aY(identifier_string("a"),  make_list(Y));
+  action_label aXY(identifier_string("a"), make_list(X, Y));
+  action_label bX(identifier_string("b"),  make_list(X));
 
   data_expression x_X = variable("x", X);
   data_expression y_X = variable("y", X);
   data_expression y_Y = variable("y", Y);
 
-  action a1(aX, make_vector(x_X));
-  action a2(aX, make_vector(y_X));
-  action a3(bX, make_vector(x_X));
+  action a1(aX, make_list(x_X));
+  action a2(aX, make_list(y_X));
+  action a3(bX, make_list(x_X));
 
   BOOST_CHECK(equal_signatures(a1, a1));
   BOOST_CHECK(equal_signatures(a1, a2));

@@ -145,7 +145,7 @@ lps::specification untime(const lps::specification& spec) {
   lps::linear_process lps = spec.process(); // Original lps
   lps::linear_process untime_lps; // Updated lps
   lps::summand_list untime_summand_list; // Updated summand list
-  new_data::variable_list untime_process_parameters; // Updated process parameters
+  new_data::variable_vector untime_process_parameters; // Updated process parameters
   new_data::variable last_action_time; // Extra parameter to display the last action time
 
   gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
@@ -161,7 +161,7 @@ lps::specification untime(const lps::specification& spec) {
   // last_action_time is used later on in the code
   last_action_time = fresh_variable(spec, mcrl2::new_data::sort_real_::real_(), "last_action_time");
   new_data::data_expression time_invariant=calculate_time_invariant(spec,last_action_time); 
-  untime_process_parameters = lps.process_parameters();
+  untime_process_parameters = new_data::make_variable_vector(lps.process_parameters());
   untime_process_parameters.push_back(last_action_time);
 
   // Transpose the original summand list, and see if there are summands with time
@@ -173,9 +173,9 @@ lps::specification untime(const lps::specification& spec) {
     gsVerboseMsg("Untiming summand %d\n", j);
 
     // Declarations within scope of for-loop
-    new_data::variable_list untime_summation_variables; //Updated set of summation variables
+    new_data::variable_vector untime_summation_variables; //Updated set of summation variables
     new_data::data_expression untime_condition; //Updated condition
-    new_data::assignment_list untime_assignments; //Updated assignments (or next state)
+    new_data::assignment_vector untime_assignments; //Updated assignments (or next state)
     lps::summand untime_summand; //Updated summand
 
     // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
@@ -184,7 +184,7 @@ lps::specification untime(const lps::specification& spec) {
       if (i->has_time())
       {
 	// The summand is already timed, therefor there is no need to add an extra summation variable for time
-	untime_summation_variables = i->summation_variables();
+	untime_summation_variables = new_data::make_variable_vector(i->summation_variables());
 
 	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
 	untime_condition = lazy::and_(i->condition(),
@@ -192,7 +192,7 @@ lps::specification untime(const lps::specification& spec) {
                                    new_data::greater(data_expression(i->time()), new_data::sort_real_::real_(0))));
 
 	// Extend original assignments to include t.i(d,e.i)
-	untime_assignments = i->assignments();
+	untime_assignments = new_data::make_assignment_vector(i->assignments());
         untime_assignments.push_back(assignment(last_action_time,i->time()));
       }
       else
@@ -201,7 +201,7 @@ lps::specification untime(const lps::specification& spec) {
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
 	mcrl2::new_data::variable time_var = fresh_variable(spec, new_data::sort_real_::real_(), "time_var");
-	untime_summation_variables = i->summation_variables();
+	untime_summation_variables = new_data::make_variable_vector(i->summation_variables());
         untime_summation_variables.push_back(time_var);
 
 	// Extend the original condition with an additional argument
@@ -211,7 +211,7 @@ lps::specification untime(const lps::specification& spec) {
 
 
 	// Extend original assignments to include t.i(d,e.i)
-	untime_assignments = i->assignments();
+	untime_assignments = new_data::make_assignment_vector(i->assignments());
         untime_assignments.push_back(assignment(last_action_time, time_var));
       } // i->has_time()
 
@@ -219,11 +219,11 @@ lps::specification untime(const lps::specification& spec) {
       untime_condition = lazy::and_(untime_condition,time_invariant);
 
       // Create a new summand with the changed parameters
-      untime_summand = lps::summand(untime_summation_variables,
+      untime_summand = lps::summand(new_data::make_variable_list(untime_summation_variables),
 					  untime_condition,
 					  i->is_delta(),
 					  i->actions(),
-					  untime_assignments
+					  new_data::make_assignment_list(untime_assignments)
 					  );
 
       // Add the new summand to the list
@@ -248,11 +248,11 @@ lps::specification untime(const lps::specification& spec) {
   untime_summand_list = atermpp::reverse(untime_summand_list);
 
   // Create new LPS, this equals lps, except for the new summand list and the additional process parameter.
-  untime_lps = lps::linear_process(lps.free_variables(), untime_process_parameters, untime_summand_list);
+  untime_lps = lps::linear_process(lps.free_variables(), new_data::make_variable_list(untime_process_parameters), untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
   new_data::assignment_list untime_initial_assignments = spec.initial_process().assignments();
-  untime_initial_assignments.push_back(assignment(last_action_time, sort_real_::real_(0)));
+  untime_initial_assignments = push_back(untime_initial_assignments,assignment(last_action_time, sort_real_::real_(0)));
 
   // Create new specification, this equals original specification, except for the new LPS.
   untime_specification = lps::specification(spec.data(),
