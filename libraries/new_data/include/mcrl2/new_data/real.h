@@ -13,14 +13,15 @@
 #include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/int.h"
 
-
 namespace mcrl2 {
 
   namespace new_data {
 
+    /// \brief Namespace for system defined sort real_
     namespace sort_real_ {
 
-      // Sort expression Real
+      /// \brief Constructor for sort expression Real
+      /// \ret Sort expression Real
       inline
       basic_sort real_()
       {
@@ -28,7 +29,9 @@ namespace mcrl2 {
         return real_;
       }
 
-      // Recogniser for sort expression Real
+      /// \brief Recogniser for sort expression Real
+      /// \param e A sort expression
+      /// \ret true iff e == real_()
       inline
       bool is_real_(const sort_expression& e)
       {
@@ -39,16 +42,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol @cReal
+      /// \brief Give all system defined constructors for real_
+      /// \ret All system defined constructors for real_
+      inline
+      function_symbol_vector real__generate_constructors_code()
+      {
+        function_symbol_vector result;
+
+        return result;
+      }
+      /// \brief Constructor for function symbol @cReal
+      /// \ret Function symbol creal
       inline
       function_symbol creal()
       {
-        //static function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), sort_real_::real_()));
-        function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), sort_real_::real_()));
+        //static function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_()));
+        function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_()));
         return creal;
       }
 
-      // Recogniser for @cReal
+      /// \brief Recogniser for function @cReal
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching @cReal
       inline
       bool is_creal_function_symbol(const data_expression& e)
       {
@@ -59,17 +74,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of @cReal
+      ///\brief Application of function symbol @cReal
+      ///\ret Application of @cReal to a number of arguments
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_int_::is_int_(arg0.sort()));
-        //assert(sort_pos::is_pos(arg1.sort()));
-        
         return application(creal(),arg0, arg1);
       }
 
-      // Recogniser for application of @cReal
+      ///\brief Recogniser for application of @cReal
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol creal to a
+      ///     number of arguments
       inline
       bool is_creal_application(const data_expression& e)
       {
@@ -80,16 +96,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Pos2Real
+      /// \brief Constructor for function symbol Pos2Real
+      /// \ret Function symbol pos2real
       inline
       function_symbol pos2real()
       {
-        //static function_symbol pos2real("Pos2Real", function_sort(sort_pos::pos(), sort_real_::real_()));
-        function_symbol pos2real("Pos2Real", function_sort(sort_pos::pos(), sort_real_::real_()));
+        //static function_symbol pos2real("Pos2Real", function_sort(sort_pos::pos(), real_()));
+        function_symbol pos2real("Pos2Real", function_sort(sort_pos::pos(), real_()));
         return pos2real;
       }
 
-      // Recogniser for Pos2Real
+      /// \brief Recogniser for function Pos2Real
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Pos2Real
       inline
       bool is_pos2real_function_symbol(const data_expression& e)
       {
@@ -100,16 +119,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Pos2Real
+      ///\brief Application of function symbol Pos2Real
+      ///\ret Application of Pos2Real to a number of arguments
       inline
       application pos2real(const data_expression& arg0)
       {
-        //assert(sort_pos::is_pos(arg0.sort()));
-        
         return application(pos2real(),arg0);
       }
 
-      // Recogniser for application of Pos2Real
+      ///\brief Recogniser for application of Pos2Real
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol pos2real to a
+      ///     number of arguments
       inline
       bool is_pos2real_application(const data_expression& e)
       {
@@ -120,16 +141,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Nat2Real
+      /// \brief Constructor for function symbol Nat2Real
+      /// \ret Function symbol nat2real
       inline
       function_symbol nat2real()
       {
-        //static function_symbol nat2real("Nat2Real", function_sort(sort_nat::nat(), sort_real_::real_()));
-        function_symbol nat2real("Nat2Real", function_sort(sort_nat::nat(), sort_real_::real_()));
+        //static function_symbol nat2real("Nat2Real", function_sort(sort_nat::nat(), real_()));
+        function_symbol nat2real("Nat2Real", function_sort(sort_nat::nat(), real_()));
         return nat2real;
       }
 
-      // Recogniser for Nat2Real
+      /// \brief Recogniser for function Nat2Real
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Nat2Real
       inline
       bool is_nat2real_function_symbol(const data_expression& e)
       {
@@ -140,16 +164,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Nat2Real
+      ///\brief Application of function symbol Nat2Real
+      ///\ret Application of Nat2Real to a number of arguments
       inline
       application nat2real(const data_expression& arg0)
       {
-        //assert(sort_nat::is_nat(arg0.sort()));
-        
         return application(nat2real(),arg0);
       }
 
-      // Recogniser for application of Nat2Real
+      ///\brief Recogniser for application of Nat2Real
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol nat2real to a
+      ///     number of arguments
       inline
       bool is_nat2real_application(const data_expression& e)
       {
@@ -160,16 +186,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Int2Real
+      /// \brief Constructor for function symbol Int2Real
+      /// \ret Function symbol int2real
       inline
       function_symbol int2real()
       {
-        //static function_symbol int2real("Int2Real", function_sort(sort_int_::int_(), sort_real_::real_()));
-        function_symbol int2real("Int2Real", function_sort(sort_int_::int_(), sort_real_::real_()));
+        //static function_symbol int2real("Int2Real", function_sort(sort_int_::int_(), real_()));
+        function_symbol int2real("Int2Real", function_sort(sort_int_::int_(), real_()));
         return int2real;
       }
 
-      // Recogniser for Int2Real
+      /// \brief Recogniser for function Int2Real
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Int2Real
       inline
       bool is_int2real_function_symbol(const data_expression& e)
       {
@@ -180,16 +209,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Int2Real
+      ///\brief Application of function symbol Int2Real
+      ///\ret Application of Int2Real to a number of arguments
       inline
       application int2real(const data_expression& arg0)
       {
-        //assert(sort_int_::is_int_(arg0.sort()));
-        
         return application(int2real(),arg0);
       }
 
-      // Recogniser for application of Int2Real
+      ///\brief Recogniser for application of Int2Real
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol int2real to a
+      ///     number of arguments
       inline
       bool is_int2real_application(const data_expression& e)
       {
@@ -200,16 +231,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Real2Pos
+      /// \brief Constructor for function symbol Real2Pos
+      /// \ret Function symbol real2pos
       inline
       function_symbol real2pos()
       {
-        //static function_symbol real2pos("Real2Pos", function_sort(sort_real_::real_(), sort_pos::pos()));
-        function_symbol real2pos("Real2Pos", function_sort(sort_real_::real_(), sort_pos::pos()));
+        //static function_symbol real2pos("Real2Pos", function_sort(real_(), sort_pos::pos()));
+        function_symbol real2pos("Real2Pos", function_sort(real_(), sort_pos::pos()));
         return real2pos;
       }
 
-      // Recogniser for Real2Pos
+      /// \brief Recogniser for function Real2Pos
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Real2Pos
       inline
       bool is_real2pos_function_symbol(const data_expression& e)
       {
@@ -220,16 +254,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Real2Pos
+      ///\brief Application of function symbol Real2Pos
+      ///\ret Application of Real2Pos to a number of arguments
       inline
       application real2pos(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(real2pos(),arg0);
       }
 
-      // Recogniser for application of Real2Pos
+      ///\brief Recogniser for application of Real2Pos
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol real2pos to a
+      ///     number of arguments
       inline
       bool is_real2pos_application(const data_expression& e)
       {
@@ -240,16 +276,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Real2Nat
+      /// \brief Constructor for function symbol Real2Nat
+      /// \ret Function symbol real2nat
       inline
       function_symbol real2nat()
       {
-        //static function_symbol real2nat("Real2Nat", function_sort(sort_real_::real_(), sort_nat::nat()));
-        function_symbol real2nat("Real2Nat", function_sort(sort_real_::real_(), sort_nat::nat()));
+        //static function_symbol real2nat("Real2Nat", function_sort(real_(), sort_nat::nat()));
+        function_symbol real2nat("Real2Nat", function_sort(real_(), sort_nat::nat()));
         return real2nat;
       }
 
-      // Recogniser for Real2Nat
+      /// \brief Recogniser for function Real2Nat
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Real2Nat
       inline
       bool is_real2nat_function_symbol(const data_expression& e)
       {
@@ -260,16 +299,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Real2Nat
+      ///\brief Application of function symbol Real2Nat
+      ///\ret Application of Real2Nat to a number of arguments
       inline
       application real2nat(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(real2nat(),arg0);
       }
 
-      // Recogniser for application of Real2Nat
+      ///\brief Recogniser for application of Real2Nat
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol real2nat to a
+      ///     number of arguments
       inline
       bool is_real2nat_application(const data_expression& e)
       {
@@ -280,16 +321,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Real2Int
+      /// \brief Constructor for function symbol Real2Int
+      /// \ret Function symbol real2int
       inline
       function_symbol real2int()
       {
-        //static function_symbol real2int("Real2Int", function_sort(sort_real_::real_(), sort_int_::int_()));
-        function_symbol real2int("Real2Int", function_sort(sort_real_::real_(), sort_int_::int_()));
+        //static function_symbol real2int("Real2Int", function_sort(real_(), sort_int_::int_()));
+        function_symbol real2int("Real2Int", function_sort(real_(), sort_int_::int_()));
         return real2int;
       }
 
-      // Recogniser for Real2Int
+      /// \brief Recogniser for function Real2Int
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Real2Int
       inline
       bool is_real2int_function_symbol(const data_expression& e)
       {
@@ -300,16 +344,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Real2Int
+      ///\brief Application of function symbol Real2Int
+      ///\ret Application of Real2Int to a number of arguments
       inline
       application real2int(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(real2int(),arg0);
       }
 
-      // Recogniser for application of Real2Int
+      ///\brief Recogniser for application of Real2Int
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol real2int to a
+      ///     number of arguments
       inline
       bool is_real2int_application(const data_expression& e)
       {
@@ -320,31 +366,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol min
+      ///\brief Constructor for function symbol min
+      ///\ret Function symbol minimum
       inline
       function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        if (s0 == real_() && s1 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
         {
-          target_sort = sort_pos::pos();
+          target_sort = sort_int_::int_();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_pos::pos();
         }
         else
         {
@@ -356,7 +399,9 @@ namespace mcrl2 {
         return minimum;
       }
 
-      // Recogniser for min
+      /// \brief Recogniser for function min
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching min
       inline
       bool is_minimum_function_symbol(const data_expression& e)
       {
@@ -367,15 +412,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of min
+      ///\brief Application of function symbol min
+      ///\ret Application of min to a number of arguments
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(minimum(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of min
+      ///\brief Recogniser for application of min
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol minimum to a
+      ///     number of arguments
       inline
       bool is_minimum_application(const data_expression& e)
       {
@@ -386,61 +434,52 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol max
+      ///\brief Constructor for function symbol max
+      ///\ret Function symbol maximum
       inline
       function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_pos::pos() && s1 == sort_int_::int_())||
-               //(s0 == sort_int_::int_() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_int_::int_())||
-               //(s0 == sort_int_::int_() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        if (s0 == real_() && s1 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        else if (s0 == sort_pos::pos() && s1 == sort_int_::int_())
         {
           target_sort = sort_pos::pos();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        else if (s0 == sort_int_::int_() && s1 == sort_pos::pos())
         {
           target_sort = sort_pos::pos();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_nat::nat() && s1 == sort_int_::int_())
         {
           target_sort = sort_nat::nat();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_int_::int_())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_int_::int_() && s1 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_nat::nat() && s1 == sort_int_::int_())
+        else if (s0 == sort_int_::int_() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
-        else if(s0 == sort_int_::int_() && s1 == sort_nat::nat())
-        {
-          target_sort = sort_nat::nat();
-        }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
         {
           target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
         }
         else
         {
@@ -452,7 +491,9 @@ namespace mcrl2 {
         return maximum;
       }
 
-      // Recogniser for max
+      /// \brief Recogniser for function max
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching max
       inline
       bool is_maximum_function_symbol(const data_expression& e)
       {
@@ -463,15 +504,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of max
+      ///\brief Application of function symbol max
+      ///\ret Application of max to a number of arguments
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(maximum(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of max
+      ///\brief Recogniser for application of max
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol maximum to a
+      ///     number of arguments
       inline
       bool is_maximum_application(const data_expression& e)
       {
@@ -482,31 +526,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol abs
+      ///\brief Constructor for function symbol abs
+      ///\ret Function symbol abs
       inline
       function_symbol abs(const sort_expression& s0)
       {
-        //assert(//(s0 == sort_real_::real_())||
-               //(s0 == sort_pos::pos())||
-               //(s0 == sort_nat::nat())||
-               //(s0 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_())
+        if (s0 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos())
+        else if (s0 == sort_int_::int_())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if (s0 == sort_nat::nat())
+        {
+          target_sort = sort_nat::nat();
+        }
+        else if (s0 == sort_pos::pos())
         {
           target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_nat::nat())
-        {
-          target_sort = sort_nat::nat();
-        }
-        else if(s0 == sort_int_::int_())
-        {
-          target_sort = sort_nat::nat();
         }
         else
         {
@@ -518,7 +559,9 @@ namespace mcrl2 {
         return abs;
       }
 
-      // Recogniser for abs
+      /// \brief Recogniser for function abs
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching abs
       inline
       bool is_abs_function_symbol(const data_expression& e)
       {
@@ -529,15 +572,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of abs
+      ///\brief Application of function symbol abs
+      ///\ret Application of abs to a number of arguments
       inline
       application abs(const data_expression& arg0)
       {
-        
         return application(abs(arg0.sort()),arg0);
       }
 
-      // Recogniser for application of abs
+      ///\brief Recogniser for application of abs
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol abs to a
+      ///     number of arguments
       inline
       bool is_abs_application(const data_expression& e)
       {
@@ -548,29 +594,26 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol -
+      ///\brief Constructor for function symbol -
+      ///\ret Function symbol negate
       inline
       function_symbol negate(const sort_expression& s0)
       {
-        //assert(//(s0 == sort_real_::real_())||
-               //(s0 == sort_pos::pos())||
-               //(s0 == sort_nat::nat())||
-               //(s0 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_())
+        if (s0 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos())
-        {
-          target_sort = sort_int_::int_();
-        }
-        else if(s0 == sort_nat::nat())
+        else if (s0 == sort_pos::pos())
         {
           target_sort = sort_int_::int_();
         }
-        else if(s0 == sort_int_::int_())
+        else if (s0 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_int_::int_())
         {
           target_sort = sort_int_::int_();
         }
@@ -584,7 +627,9 @@ namespace mcrl2 {
         return negate;
       }
 
-      // Recogniser for -
+      /// \brief Recogniser for function -
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching -
       inline
       bool is_negate_function_symbol(const data_expression& e)
       {
@@ -595,15 +640,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of -
+      ///\brief Application of function symbol -
+      ///\ret Application of - to a number of arguments
       inline
       application negate(const data_expression& arg0)
       {
-        
         return application(negate(arg0.sort()),arg0);
       }
 
-      // Recogniser for application of -
+      ///\brief Recogniser for application of -
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol negate to a
+      ///     number of arguments
       inline
       bool is_negate_application(const data_expression& e)
       {
@@ -614,31 +662,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol succ
+      ///\brief Constructor for function symbol succ
+      ///\ret Function symbol succ
       inline
       function_symbol succ(const sort_expression& s0)
       {
-        //assert(//(s0 == sort_real_::real_())||
-               //(s0 == sort_pos::pos())||
-               //(s0 == sort_nat::nat())||
-               //(s0 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_())
+        if (s0 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_nat::nat())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_int_::int_())
+        else if (s0 == sort_int_::int_())
         {
           target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_nat::nat())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if (s0 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
         }
         else
         {
@@ -650,7 +695,9 @@ namespace mcrl2 {
         return succ;
       }
 
-      // Recogniser for succ
+      /// \brief Recogniser for function succ
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching succ
       inline
       bool is_succ_function_symbol(const data_expression& e)
       {
@@ -661,15 +708,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of succ
+      ///\brief Application of function symbol succ
+      ///\ret Application of succ to a number of arguments
       inline
       application succ(const data_expression& arg0)
       {
-        
         return application(succ(arg0.sort()),arg0);
       }
 
-      // Recogniser for application of succ
+      ///\brief Recogniser for application of succ
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol succ to a
+      ///     number of arguments
       inline
       bool is_succ_application(const data_expression& e)
       {
@@ -680,31 +730,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol pred
+      ///\brief Constructor for function symbol pred
+      ///\ret Function symbol pred
       inline
       function_symbol pred(const sort_expression& s0)
       {
-        //assert(//(s0 == sort_real_::real_())||
-               //(s0 == sort_pos::pos())||
-               //(s0 == sort_nat::nat())||
-               //(s0 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_())
+        if (s0 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos())
+        else if (s0 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_int_::int_())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_pos::pos())
         {
           target_sort = sort_nat::nat();
-        }
-        else if(s0 == sort_nat::nat())
-        {
-          target_sort = sort_int_::int_();
-        }
-        else if(s0 == sort_int_::int_())
-        {
-          target_sort = sort_int_::int_();
         }
         else
         {
@@ -716,7 +763,9 @@ namespace mcrl2 {
         return pred;
       }
 
-      // Recogniser for pred
+      /// \brief Recogniser for function pred
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching pred
       inline
       bool is_pred_function_symbol(const data_expression& e)
       {
@@ -727,15 +776,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of pred
+      ///\brief Application of function symbol pred
+      ///\ret Application of pred to a number of arguments
       inline
       application pred(const data_expression& arg0)
       {
-        
         return application(pred(arg0.sort()),arg0);
       }
 
-      // Recogniser for application of pred
+      ///\brief Recogniser for application of pred
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol pred to a
+      ///     number of arguments
       inline
       bool is_pred_application(const data_expression& e)
       {
@@ -746,41 +798,36 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol +
+      ///\brief Constructor for function symbol +
+      ///\ret Function symbol plus
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               //(s0 == sort_nat::nat() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        if (s0 == real_() && s1 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
         {
-          target_sort = sort_pos::pos();
+          target_sort = sort_int_::int_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
-        {
-          target_sort = sort_pos::pos();
-        }
-        else if(s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
           target_sort = sort_pos::pos();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_nat::nat() && s1 == sort_pos::pos())
+        {
+          target_sort = sort_pos::pos();
+        }
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_pos::pos();
         }
         else
         {
@@ -792,7 +839,9 @@ namespace mcrl2 {
         return plus;
       }
 
-      // Recogniser for +
+      /// \brief Recogniser for function +
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching +
       inline
       bool is_plus_function_symbol(const data_expression& e)
       {
@@ -803,15 +852,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of +
+      ///\brief Application of function symbol +
+      ///\ret Application of + to a number of arguments
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of +
+      ///\brief Recogniser for application of +
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol plus to a
+      ///     number of arguments
       inline
       bool is_plus_application(const data_expression& e)
       {
@@ -822,29 +874,26 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol -
+      ///\brief Constructor for function symbol -
+      ///\ret Function symbol minus
       inline
       function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        if (s0 == real_() && s1 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
-        {
-          target_sort = sort_int_::int_();
-        }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
           target_sort = sort_int_::int_();
         }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
         {
           target_sort = sort_int_::int_();
         }
@@ -858,7 +907,9 @@ namespace mcrl2 {
         return minus;
       }
 
-      // Recogniser for -
+      /// \brief Recogniser for function -
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching -
       inline
       bool is_minus_function_symbol(const data_expression& e)
       {
@@ -869,15 +920,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of -
+      ///\brief Application of function symbol -
+      ///\ret Application of - to a number of arguments
       inline
       application minus(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of -
+      ///\brief Recogniser for application of -
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol minus to a
+      ///     number of arguments
       inline
       bool is_minus_application(const data_expression& e)
       {
@@ -888,31 +942,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol *
+      ///\brief Constructor for function symbol *
+      ///\ret Function symbol times
       inline
       function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_real_::real_())||
-               //(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_real_::real_())
+        if (s0 == real_() && s1 == real_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_pos::pos())
+        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
         {
-          target_sort = sort_pos::pos();
+          target_sort = sort_int_::int_();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
-        else if(s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_pos::pos();
         }
         else
         {
@@ -924,7 +975,9 @@ namespace mcrl2 {
         return times;
       }
 
-      // Recogniser for *
+      /// \brief Recogniser for function *
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching *
       inline
       bool is_times_function_symbol(const data_expression& e)
       {
@@ -935,15 +988,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of *
+      ///\brief Application of function symbol *
+      ///\ret Application of * to a number of arguments
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of *
+      ///\brief Recogniser for application of *
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol times to a
+      ///     number of arguments
       inline
       bool is_times_application(const data_expression& e)
       {
@@ -954,31 +1010,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol exp
+      ///\brief Constructor for function symbol exp
+      ///\ret Function symbol exp
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_real_::real_() && s1 == sort_int_::int_())||
-               //(s0 == sort_pos::pos() && s1 == sort_nat::nat())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_nat::nat()));
-
+        
         sort_expression target_sort;
-        if(s0 == sort_real_::real_() && s1 == sort_int_::int_())
+        if (s0 == real_() && s1 == sort_int_::int_())
         {
-          target_sort = sort_real_::real_();
+          target_sort = real_();
         }
-        else if(s0 == sort_pos::pos() && s1 == sort_nat::nat())
+        else if (s0 == sort_int_::int_() && s1 == sort_nat::nat())
+        {
+          target_sort = sort_int_::int_();
+        }
+        else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
           target_sort = sort_pos::pos();
         }
-        else if(s0 == sort_nat::nat() && s1 == sort_nat::nat())
+        else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
-        }
-        else if(s0 == sort_int_::int_() && s1 == sort_nat::nat())
-        {
-          target_sort = sort_int_::int_();
         }
         else
         {
@@ -990,7 +1043,9 @@ namespace mcrl2 {
         return exp;
       }
 
-      // Recogniser for exp
+      /// \brief Recogniser for function exp
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching exp
       inline
       bool is_exp_function_symbol(const data_expression& e)
       {
@@ -1001,15 +1056,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of exp
+      ///\brief Application of function symbol exp
+      ///\ret Application of exp to a number of arguments
       inline
       application exp(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(exp(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of exp
+      ///\brief Recogniser for application of exp
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol exp to a
+      ///     number of arguments
       inline
       bool is_exp_application(const data_expression& e)
       {
@@ -1020,22 +1078,22 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol /
+      ///\brief Constructor for function symbol /
+      ///\ret Function symbol divides
       inline
       function_symbol divides(const sort_expression& s0, const sort_expression& s1)
       {
-        //assert(//(s0 == sort_pos::pos() && s1 == sort_pos::pos())||
-               //(s0 == sort_nat::nat() && s1 == sort_nat::nat())||
-               //(s0 == sort_int_::int_() && s1 == sort_int_::int_())||
-               //(s0 == sort_real_::real_() && s1 == sort_real_::real_()));
+        
+        sort_expression target_sort(real_());
 
-        sort_expression target_sort(sort_real_::real_());
         //static function_symbol divides("/", function_sort(s0, s1, target_sort));
         function_symbol divides("/", function_sort(s0, s1, target_sort));
         return divides;
       }
 
-      // Recogniser for /
+      /// \brief Recogniser for function /
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching /
       inline
       bool is_divides_function_symbol(const data_expression& e)
       {
@@ -1046,15 +1104,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of /
+      ///\brief Application of function symbol /
+      ///\ret Application of / to a number of arguments
       inline
       application divides(const data_expression& arg0, const data_expression& arg1)
       {
-        
         return application(divides(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      // Recogniser for application of /
+      ///\brief Recogniser for application of /
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol divides to a
+      ///     number of arguments
       inline
       bool is_divides_application(const data_expression& e)
       {
@@ -1065,16 +1126,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol floor
+      /// \brief Constructor for function symbol floor
+      /// \ret Function symbol floor
       inline
       function_symbol floor()
       {
-        //static function_symbol floor("floor", function_sort(sort_real_::real_(), sort_int_::int_()));
-        function_symbol floor("floor", function_sort(sort_real_::real_(), sort_int_::int_()));
+        //static function_symbol floor("floor", function_sort(real_(), sort_int_::int_()));
+        function_symbol floor("floor", function_sort(real_(), sort_int_::int_()));
         return floor;
       }
 
-      // Recogniser for floor
+      /// \brief Recogniser for function floor
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching floor
       inline
       bool is_floor_function_symbol(const data_expression& e)
       {
@@ -1085,16 +1149,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of floor
+      ///\brief Application of function symbol floor
+      ///\ret Application of floor to a number of arguments
       inline
       application floor(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(floor(),arg0);
       }
 
-      // Recogniser for application of floor
+      ///\brief Recogniser for application of floor
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol floor to a
+      ///     number of arguments
       inline
       bool is_floor_application(const data_expression& e)
       {
@@ -1105,16 +1171,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol ceil
+      /// \brief Constructor for function symbol ceil
+      /// \ret Function symbol ceil
       inline
       function_symbol ceil()
       {
-        //static function_symbol ceil("ceil", function_sort(sort_real_::real_(), sort_int_::int_()));
-        function_symbol ceil("ceil", function_sort(sort_real_::real_(), sort_int_::int_()));
+        //static function_symbol ceil("ceil", function_sort(real_(), sort_int_::int_()));
+        function_symbol ceil("ceil", function_sort(real_(), sort_int_::int_()));
         return ceil;
       }
 
-      // Recogniser for ceil
+      /// \brief Recogniser for function ceil
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching ceil
       inline
       bool is_ceil_function_symbol(const data_expression& e)
       {
@@ -1125,16 +1194,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of ceil
+      ///\brief Application of function symbol ceil
+      ///\ret Application of ceil to a number of arguments
       inline
       application ceil(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(ceil(),arg0);
       }
 
-      // Recogniser for application of ceil
+      ///\brief Recogniser for application of ceil
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol ceil to a
+      ///     number of arguments
       inline
       bool is_ceil_application(const data_expression& e)
       {
@@ -1145,16 +1216,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol round
+      /// \brief Constructor for function symbol round
+      /// \ret Function symbol round
       inline
       function_symbol round()
       {
-        //static function_symbol round("round", function_sort(sort_real_::real_(), sort_int_::int_()));
-        function_symbol round("round", function_sort(sort_real_::real_(), sort_int_::int_()));
+        //static function_symbol round("round", function_sort(real_(), sort_int_::int_()));
+        function_symbol round("round", function_sort(real_(), sort_int_::int_()));
         return round;
       }
 
-      // Recogniser for round
+      /// \brief Recogniser for function round
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching round
       inline
       bool is_round_function_symbol(const data_expression& e)
       {
@@ -1165,16 +1239,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of round
+      ///\brief Application of function symbol round
+      ///\ret Application of round to a number of arguments
       inline
       application round(const data_expression& arg0)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        
         return application(round(),arg0);
       }
 
-      // Recogniser for application of round
+      ///\brief Recogniser for application of round
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol round to a
+      ///     number of arguments
       inline
       bool is_round_application(const data_expression& e)
       {
@@ -1185,16 +1261,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol @redfrac
+      /// \brief Constructor for function symbol @redfrac
+      /// \ret Function symbol redfrac
       inline
       function_symbol redfrac()
       {
-        //static function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), sort_real_::real_()));
-        function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), sort_real_::real_()));
+        //static function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_()));
+        function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_()));
         return redfrac;
       }
 
-      // Recogniser for @redfrac
+      /// \brief Recogniser for function @redfrac
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching @redfrac
       inline
       bool is_redfrac_function_symbol(const data_expression& e)
       {
@@ -1205,17 +1284,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of @redfrac
+      ///\brief Application of function symbol @redfrac
+      ///\ret Application of @redfrac to a number of arguments
       inline
       application redfrac(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_int_::is_int_(arg0.sort()));
-        //assert(sort_int_::is_int_(arg1.sort()));
-        
         return application(redfrac(),arg0, arg1);
       }
 
-      // Recogniser for application of @redfrac
+      ///\brief Recogniser for application of @redfrac
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol redfrac to a
+      ///     number of arguments
       inline
       bool is_redfrac_application(const data_expression& e)
       {
@@ -1226,16 +1306,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol @redfracwhr
+      /// \brief Constructor for function symbol @redfracwhr
+      /// \ret Function symbol redfracwhr
       inline
       function_symbol redfracwhr()
       {
-        //static function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), sort_real_::real_()));
-        function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), sort_real_::real_()));
+        //static function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_()));
+        function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_()));
         return redfracwhr;
       }
 
-      // Recogniser for @redfracwhr
+      /// \brief Recogniser for function @redfracwhr
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching @redfracwhr
       inline
       bool is_redfracwhr_function_symbol(const data_expression& e)
       {
@@ -1246,18 +1329,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of @redfracwhr
+      ///\brief Application of function symbol @redfracwhr
+      ///\ret Application of @redfracwhr to a number of arguments
       inline
       application redfracwhr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
-        //assert(sort_pos::is_pos(arg0.sort()));
-        //assert(sort_int_::is_int_(arg1.sort()));
-        //assert(sort_nat::is_nat(arg2.sort()));
-        
         return application(redfracwhr(),arg0, arg1, arg2);
       }
 
-      // Recogniser for application of @redfracwhr
+      ///\brief Recogniser for application of @redfracwhr
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol redfracwhr to a
+      ///     number of arguments
       inline
       bool is_redfracwhr_application(const data_expression& e)
       {
@@ -1268,16 +1351,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol @redfrachlp
+      /// \brief Constructor for function symbol @redfrachlp
+      /// \ret Function symbol redfrachlp
       inline
       function_symbol redfrachlp()
       {
-        //static function_symbol redfrachlp("@redfrachlp", function_sort(sort_real_::real_(), sort_int_::int_(), sort_real_::real_()));
-        function_symbol redfrachlp("@redfrachlp", function_sort(sort_real_::real_(), sort_int_::int_(), sort_real_::real_()));
+        //static function_symbol redfrachlp("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_()));
+        function_symbol redfrachlp("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_()));
         return redfrachlp;
       }
 
-      // Recogniser for @redfrachlp
+      /// \brief Recogniser for function @redfrachlp
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching @redfrachlp
       inline
       bool is_redfrachlp_function_symbol(const data_expression& e)
       {
@@ -1288,17 +1374,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of @redfrachlp
+      ///\brief Application of function symbol @redfrachlp
+      ///\ret Application of @redfrachlp to a number of arguments
       inline
       application redfrachlp(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_real_::is_real_(arg0.sort()));
-        //assert(sort_int_::is_int_(arg1.sort()));
-        
         return application(redfrachlp(),arg0, arg1);
       }
 
-      // Recogniser for application of @redfrachlp
+      ///\brief Recogniser for application of @redfrachlp
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol redfrachlp to a
+      ///     number of arguments
       inline
       bool is_redfrachlp_application(const data_expression& e)
       {
@@ -1309,16 +1396,8 @@ namespace mcrl2 {
         return false;
       }
 
-      // Give all system defined constructors for Real
-      inline
-      function_symbol_vector real__generate_constructors_code()
-      {
-        function_symbol_vector result;
-
-        return result;
-      }
-
-      // Give all system defined constructors for Real
+      /// \brief Give all system defined mappings for real_
+      /// \ret All system defined mappings for real_
       inline
       function_symbol_vector real__generate_functions_code()
       {
@@ -1330,325 +1409,316 @@ namespace mcrl2 {
         result.push_back(real2pos());
         result.push_back(real2nat());
         result.push_back(real2int());
-        result.push_back(minimum(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(maximum(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(abs(sort_real_::real_()));
-        result.push_back(negate(sort_real_::real_()));
-        result.push_back(succ(sort_real_::real_()));
-        result.push_back(pred(sort_real_::real_()));
-        result.push_back(plus(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(minus(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(times(sort_real_::real_(), sort_real_::real_()));
-        result.push_back(exp(sort_real_::real_(), sort_int_::int_()));
+        result.push_back(minimum(real_(), real_()));
+        result.push_back(maximum(real_(), real_()));
+        result.push_back(abs(real_()));
+        result.push_back(negate(real_()));
+        result.push_back(succ(real_()));
+        result.push_back(pred(real_()));
+        result.push_back(plus(real_(), real_()));
+        result.push_back(minus(real_(), real_()));
+        result.push_back(times(real_(), real_()));
+        result.push_back(exp(real_(), sort_int_::int_()));
         result.push_back(divides(sort_pos::pos(), sort_pos::pos()));
         result.push_back(divides(sort_nat::nat(), sort_nat::nat()));
         result.push_back(divides(sort_int_::int_(), sort_int_::int_()));
-        result.push_back(divides(sort_real_::real_(), sort_real_::real_()));
+        result.push_back(divides(real_(), real_()));
         result.push_back(floor());
         result.push_back(ceil());
         result.push_back(round());
         result.push_back(redfrac());
         result.push_back(redfracwhr());
         result.push_back(redfrachlp());
-
         return result;
       }
-
-      // Function for projecting out right
+      ///\brief Function for projecting out argument
+      ///        right from an application
+      /// \param e A data expression
+      /// \pre right is defined for e
+      /// \ret The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
-        
         if (is_minimum_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_maximum_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_plus_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_minus_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_times_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_exp_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_divides_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_redfrachlp_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg3
+      ///\brief Function for projecting out argument
+      ///        arg3 from an application
+      /// \param e A data expression
+      /// \pre arg3 is defined for e
+      /// \ret The argument of e that corresponds to arg3
       inline
       data_expression arg3(const data_expression& e)
       {
-        //assert( || is_redfracwhr_application(e));
-        
         if (is_redfracwhr_application(e))
         {
           return static_cast<const application&>(e).arguments()[2];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg1
+      ///\brief Function for projecting out argument
+      ///        arg1 from an application
+      /// \param e A data expression
+      /// \pre arg1 is defined for e
+      /// \ret The argument of e that corresponds to arg1
       inline
       data_expression arg1(const data_expression& e)
       {
-        //assert( || is_redfracwhr_application(e));
-        
         if (is_redfracwhr_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg2
+      ///\brief Function for projecting out argument
+      ///        arg2 from an application
+      /// \param e A data expression
+      /// \pre arg2 is defined for e
+      /// \ret The argument of e that corresponds to arg2
       inline
       data_expression arg2(const data_expression& e)
       {
-        //assert( || is_redfracwhr_application(e));
-        
         if (is_redfracwhr_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out denominator
+      ///\brief Function for projecting out argument
+      ///        denominator from an application
+      /// \param e A data expression
+      /// \pre denominator is defined for e
+      /// \ret The argument of e that corresponds to denominator
       inline
       data_expression denominator(const data_expression& e)
       {
-        //assert( || is_creal_application(e));
-        
         if (is_creal_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out numerator
+      ///\brief Function for projecting out argument
+      ///        numerator from an application
+      /// \param e A data expression
+      /// \pre numerator is defined for e
+      /// \ret The argument of e that corresponds to numerator
       inline
       data_expression numerator(const data_expression& e)
       {
-        //assert( || is_creal_application(e));
-        
         if (is_creal_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg
+      ///\brief Function for projecting out argument
+      ///        arg from an application
+      /// \param e A data expression
+      /// \pre arg is defined for e
+      /// \ret The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
-        //assert( || is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e) || is_floor_application(e) || is_ceil_application(e) || is_round_application(e));
-        
         if (is_pos2real_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_nat2real_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_int2real_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_real2pos_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_real2nat_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_real2int_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_abs_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_negate_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_succ_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_pred_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_floor_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_ceil_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_round_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out left
+      ///\brief Function for projecting out argument
+      ///        left from an application
+      /// \param e A data expression
+      /// \pre left is defined for e
+      /// \ret The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
-        //assert( || is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
-        
         if (is_minimum_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_maximum_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_plus_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_minus_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_times_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_exp_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_divides_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_redfrachlp_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Give all system defined equations for Real
+      /// \brief Give all system defined equations for real_
+      /// \ret All system defined equations for sort real_
       inline
       data_equation_vector real__generate_equations_code()
       {
-        data_equation_vector result;
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), equal_to(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), equal_to(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), less(variable("r", sort_real_::real_()), variable("r", sort_real_::real_())), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), less(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), less_equal(variable("r", sort_real_::real_()), variable("r", sort_real_::real_())), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), less_equal(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), less_equal(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::int2real(variable("x", sort_int_::int_())), sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat())), sort_real_::nat2real(variable("n", sort_nat::nat())), sort_real_::creal(sort_int_::cint(variable("n", sort_nat::nat())), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos())), sort_real_::pos2real(variable("p", sort_pos::pos())), sort_real_::creal(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2int(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), variable("x", sort_int_::int_())));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2nat(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), sort_int_::int2nat(variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_())), sort_real_::real2pos(sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())), sort_int_::int2pos(variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::minimum(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("r", sort_real_::real_()), variable("s", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), sort_real_::maximum(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), variable("s", sort_real_::real_())), variable("s", sort_real_::real_()), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::abs(variable("r", sort_real_::real_())), if_(less(variable("r", sort_real_::real_()), sort_real_::creal(sort_int_::cint(sort_nat::c0()), sort_pos::c1())), sort_real_::negate(variable("r", sort_real_::real_())), variable("r", sort_real_::real_()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::negate(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::negate(variable("x", sort_int_::int_())), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::succ(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::plus(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::pred(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_real_::creal(sort_real_::minus(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::plus(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::plus(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::minus(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::minus(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::times(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::times(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_int_::cint(sort_nat::cnat(sort_real_::times(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), not_equal_to(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::divides(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::creal(variable("y", sort_int_::int_()), variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_real_::times(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), sort_real_::times(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::divides(variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("m", sort_nat::nat())), not_equal_to(variable("m", sort_nat::nat()), sort_nat::c0()), sort_real_::divides(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_real_::redfrac(sort_int_::cint(variable("m", sort_nat::nat())), sort_int_::cint(variable("n", sort_nat::nat())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), not_equal_to(variable("y", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::divides(variable("x", sort_int_::int_()), variable("y", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("n", sort_nat::nat()), variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_int_::cint(variable("n", sort_nat::nat()))), sort_real_::redfrac(sort_real_::exp(variable("x", sort_int_::int_()), variable("n", sort_nat::nat())), sort_int_::cint(sort_nat::cnat(sort_real_::exp(variable("p", sort_pos::pos()), variable("n", sort_nat::nat())))))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), not_equal_to(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::c0())), sort_real_::exp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_int_::cneg(variable("q", sort_pos::pos()))), sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(sort_real_::exp(variable("p", sort_pos::pos()), sort_nat::cnat(variable("q", sort_pos::pos()))))), sort_real_::exp(variable("x", sort_int_::int_()), sort_nat::cnat(variable("q", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::floor(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))), sort_int_::div(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::ceil(variable("r", sort_real_::real_())), sort_real_::negate(sort_real_::floor(sort_real_::negate(variable("r", sort_real_::real_()))))));
-        result.push_back(data_equation(make_vector(variable("r", sort_real_::real_())), sort_real_::round(variable("r", sort_real_::real_())), sort_real_::floor(sort_real_::plus(variable("r", sort_real_::real_()), sort_real_::creal(sort_int_::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), sort_int_::cneg(variable("p", sort_pos::pos()))), sort_real_::redfrac(sort_real_::negate(variable("x", sort_int_::int_())), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))))));
-        result.push_back(data_equation(make_vector(variable("p", sort_pos::pos()), variable("x", sort_int_::int_())), sort_real_::redfrac(variable("x", sort_int_::int_()), sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos())))), sort_real_::redfracwhr(variable("p", sort_pos::pos()), sort_int_::div(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_int_::mod(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::redfracwhr(variable("p", sort_pos::pos()), variable("x", sort_int_::int_()), sort_nat::c0()), sort_real_::creal(variable("x", sort_int_::int_()), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("p", sort_pos::pos()), variable("q", sort_pos::pos())), sort_real_::redfracwhr(variable("p", sort_pos::pos()), variable("x", sort_int_::int_()), sort_nat::cnat(variable("q", sort_pos::pos()))), sort_real_::redfrachlp(sort_real_::redfrac(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_int_::cint(sort_nat::cnat(variable("q", sort_pos::pos())))), variable("x", sort_int_::int_()))));
-        result.push_back(data_equation(make_vector(variable("x", sort_int_::int_()), variable("y", sort_int_::int_()), variable("p", sort_pos::pos())), sort_real_::redfrachlp(sort_real_::creal(variable("x", sort_int_::int_()), variable("p", sort_pos::pos())), variable("y", sort_int_::int_())), sort_real_::creal(sort_real_::plus(sort_int_::cint(sort_nat::cnat(variable("p", sort_pos::pos()))), sort_real_::times(variable("y", sort_int_::int_()), variable("x", sort_int_::int_()))), sort_int_::int2pos(variable("x", sort_int_::int_())))));
+        variable vm("m",sort_nat::nat());
+        variable vn("n",sort_nat::nat());
+        variable vp("p",sort_pos::pos());
+        variable vq("q",sort_pos::pos());
+        variable vx("x",sort_int_::int_());
+        variable vy("y",sort_int_::int_());
+        variable vr("r",real_());
+        variable vs("s",real_());
 
+        data_equation_vector result;
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vx, vp, vy, vq), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vr), greater(vr, vr), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), greater(creal(vx, vp), creal(vy, vq)), greater(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int_::cint(vn), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int_::cint(sort_nat::cnat(vp)), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
+        result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int_::int2nat(vx)));
+        result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int_::int2pos(vx)));
+        result.push_back(data_equation(make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
+        result.push_back(data_equation(make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
+        result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int_::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
+        result.push_back(data_equation(make_vector(vx, vp), negate(creal(vx, vp)), creal(negate(vx), vp)));
+        result.push_back(data_equation(make_vector(vx, vp), succ(creal(vx, vp)), creal(plus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(make_vector(vx, vp), pred(creal(vx, vp)), creal(minus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(make_vector(vx, vp, vy, vq), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vp, vy, vq), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int_::cint(vm), sort_int_::cint(vn))));
+        result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
+        result.push_back(data_equation(make_vector(vx, vp, vn), exp(creal(vx, vp), sort_int_::cint(vn)), redfrac(exp(vx, vn), sort_int_::cint(sort_nat::cnat(exp(vp, vn))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq), not_equal_to(vx, sort_int_::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int_::cneg(vq)), redfrac(sort_int_::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vx, vp), floor(creal(vx, vp)), sort_int_::div(vx, vp)));
+        result.push_back(data_equation(make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
+        result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int_::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(make_vector(vx, vp), redfrac(vx, sort_int_::cneg(vp)), redfrac(negate(vx), sort_int_::cint(sort_nat::cnat(vp)))));
+        result.push_back(data_equation(make_vector(vx, vp), redfrac(vx, sort_int_::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int_::div(vx, vp), sort_int_::mod(vx, vp))));
+        result.push_back(data_equation(make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vp, vx, vq), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq))), vx)));
+        result.push_back(data_equation(make_vector(vx, vp, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int_::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int_::int2pos(vx))));
         return result;
       }
 
-    } // namespace real_
+    } // namespace sort_real_
+
   } // namespace new_data
+
 } // namespace mcrl2
 
 #endif // MCRL2_NEW_DATA_REAL__H

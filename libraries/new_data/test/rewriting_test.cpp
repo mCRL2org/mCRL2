@@ -312,7 +312,7 @@ void list_rewrite_test() {
 }
 
 void set_rewrite_test() {
-  using namespace mcrl2::new_data::sort_set;
+  using namespace mcrl2::new_data::sort_set_;
   using namespace mcrl2::new_data::sort_nat;
   using namespace mcrl2::new_data::sort_bool_;
 
@@ -326,7 +326,7 @@ void set_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  sort_expression set_nat(sort_set::set(nat()));
+  sort_expression set_nat(sort_set_::set_(nat()));
 
   data_expression p0(R(parse_data_expression("0")));
   data_expression p1(R(pos2nat(parse_data_expression("1"))));

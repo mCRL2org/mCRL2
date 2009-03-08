@@ -43,7 +43,7 @@ namespace mcrl2 {
           {
             return core::detail::gsMakeSortList();
           }
-          else if (s == "set")
+          else if (s == "set_")
           {
             return core::detail::gsMakeSortSet();
           }
@@ -71,7 +71,7 @@ namespace mcrl2 {
           }
           else if (core::detail::gsIsSortSet(s))
           {
-            return "set";
+            return "set_";
           }
           else if (core::detail::gsIsSortBag(s))
           {

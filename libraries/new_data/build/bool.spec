@@ -5,14 +5,12 @@ sort Bool <"bool_">;
 cons true <"true_"> : Bool;
      false <"false_"> : Bool;
 
-map  
-    ! <"not_"> : Bool <"arg"> -> Bool;
+map ! <"not_"> : Bool <"arg"> -> Bool;
     && <"and_"> : Bool <"left"> # Bool <"right"> -> Bool;
     || <"or_"> : Bool <"left"> # Bool <"right"> -> Bool;
     => <"implies"> : Bool <"left"> # Bool <"right"> -> Bool;
 
 var b:Bool;
-    c:Bool;
 eqn !(true) = false;
     !(false) = true;
     !(!(b)) = b;

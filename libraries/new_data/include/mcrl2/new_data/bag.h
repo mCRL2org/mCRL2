@@ -8,21 +8,23 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/lambda.h"
+#include "mcrl2/new_data/forall.h"
+#include "mcrl2/new_data/container_sort.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/set.h"
-#include "mcrl2/new_data/container_sort.h"
-#include "mcrl2/new_data/lambda.h"
-#include "mcrl2/new_data/forall.h"
-
 
 namespace mcrl2 {
 
   namespace new_data {
 
+    /// \brief Namespace for system defined sort bag
     namespace sort_bag {
 
-      // Sort expression Bag(s)
+      /// \brief Constructor for sort expression Bag(s)
+      /// \param s A sort expression
+      /// \ret Sort expression bag(s)
       inline
       container_sort bag(const sort_expression& s)
       {
@@ -31,7 +33,10 @@ namespace mcrl2 {
         return bag;
       }
 
-      // Recogniser for sort expression Bag(s)
+      /// \brief Recogniser for sort expression Bag(s)
+      /// \param e A sort expression
+      /// \ret true iff e is a container sort of which the name matches
+      ///      bag
       inline
       bool is_bag(const sort_expression& e)
       {
@@ -42,16 +47,28 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol @bag
+      /// \brief Give all system defined constructors for bag
+      /// \ret All system defined constructors for bag
+      inline
+      function_symbol_vector bag_generate_constructors_code()
+      {
+        function_symbol_vector result;
+
+        return result;
+      }
+      /// \brief Constructor for function symbol @bag
+      /// \ret Function symbol bag_comprehension
       inline
       function_symbol bag_comprehension(const sort_expression& s)
       {
-        //static function_symbol bag_comprehension("@bag", function_sort(function_sort(s, sort_nat::nat()), sort_bag::bag(s)));
-        function_symbol bag_comprehension("@bag", function_sort(function_sort(s, sort_nat::nat()), sort_bag::bag(s)));
+        //static function_symbol bag_comprehension("@bag", function_sort(function_sort(s, sort_nat::nat()), bag(s)));
+        function_symbol bag_comprehension("@bag", function_sort(function_sort(s, sort_nat::nat()), bag(s)));
         return bag_comprehension;
       }
 
-      // Recogniser for @bag
+      /// \brief Recogniser for function @bag
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching @bag
       inline
       bool is_bag_comprehension_function_symbol(const data_expression& e)
       {
@@ -62,15 +79,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of @bag
+      ///\brief Application of function symbol @bag
+      ///\ret Application of @bag to a number of arguments
       inline
       application bag_comprehension(const sort_expression& s, const data_expression& arg0)
       {
-        
         return application(bag_comprehension(s),arg0);
       }
 
-      // Recogniser for application of @bag
+      ///\brief Recogniser for application of @bag
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bag_comprehension to a
+      ///     number of arguments
       inline
       bool is_bag_comprehension_application(const data_expression& e)
       {
@@ -81,16 +101,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol {}
+      /// \brief Constructor for function symbol {}
+      /// \ret Function symbol emptybag
       inline
       function_symbol emptybag(const sort_expression& s)
       {
-        //static function_symbol emptybag("{}", sort_bag::bag(s));
-        function_symbol emptybag("{}", sort_bag::bag(s));
+        //static function_symbol emptybag("{}", bag(s));
+        function_symbol emptybag("{}", bag(s));
         return emptybag;
       }
 
-      // Recogniser for {}
+      /// \brief Recogniser for function {}
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching {}
       inline
       bool is_emptybag_function_symbol(const data_expression& e)
       {
@@ -101,16 +124,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol count
+      /// \brief Constructor for function symbol count
+      /// \ret Function symbol count
       inline
       function_symbol count(const sort_expression& s)
       {
-        //static function_symbol count("count", function_sort(s, sort_bag::bag(s), sort_nat::nat()));
-        function_symbol count("count", function_sort(s, sort_bag::bag(s), sort_nat::nat()));
+        //static function_symbol count("count", function_sort(s, bag(s), sort_nat::nat()));
+        function_symbol count("count", function_sort(s, bag(s), sort_nat::nat()));
         return count;
       }
 
-      // Recogniser for count
+      /// \brief Recogniser for function count
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching count
       inline
       bool is_count_function_symbol(const data_expression& e)
       {
@@ -121,17 +147,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of count
+      ///\brief Application of function symbol count
+      ///\ret Application of count to a number of arguments
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(arg0.sort() == s);
-        //assert(sort_bag::is_bag(arg1.sort()));
-        
         return application(count(s),arg0, arg1);
       }
 
-      // Recogniser for application of count
+      ///\brief Recogniser for application of count
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol count to a
+      ///     number of arguments
       inline
       bool is_count_application(const data_expression& e)
       {
@@ -142,16 +169,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol in
+      /// \brief Constructor for function symbol in
+      /// \ret Function symbol bagin
       inline
       function_symbol bagin(const sort_expression& s)
       {
-        //static function_symbol bagin("in", function_sort(s, sort_bag::bag(s), sort_bool_::bool_()));
-        function_symbol bagin("in", function_sort(s, sort_bag::bag(s), sort_bool_::bool_()));
+        //static function_symbol bagin("in", function_sort(s, bag(s), sort_bool_::bool_()));
+        function_symbol bagin("in", function_sort(s, bag(s), sort_bool_::bool_()));
         return bagin;
       }
 
-      // Recogniser for in
+      /// \brief Recogniser for function in
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching in
       inline
       bool is_bagin_function_symbol(const data_expression& e)
       {
@@ -162,17 +192,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of in
+      ///\brief Application of function symbol in
+      ///\ret Application of in to a number of arguments
       inline
       application bagin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(arg0.sort() == s);
-        //assert(sort_bag::is_bag(arg1.sort()));
-        
         return application(bagin(s),arg0, arg1);
       }
 
-      // Recogniser for application of in
+      ///\brief Recogniser for application of in
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bagin to a
+      ///     number of arguments
       inline
       bool is_bagin_application(const data_expression& e)
       {
@@ -183,16 +214,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol +
+      /// \brief Constructor for function symbol +
+      /// \ret Function symbol bagunion_
       inline
       function_symbol bagunion_(const sort_expression& s)
       {
-        //static function_symbol bagunion_("+", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
-        function_symbol bagunion_("+", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
+        //static function_symbol bagunion_("+", function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagunion_("+", function_sort(bag(s), bag(s), bag(s)));
         return bagunion_;
       }
 
-      // Recogniser for +
+      /// \brief Recogniser for function +
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching +
       inline
       bool is_bagunion__function_symbol(const data_expression& e)
       {
@@ -203,17 +237,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of +
+      ///\brief Application of function symbol +
+      ///\ret Application of + to a number of arguments
       inline
       application bagunion_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bag::is_bag(arg0.sort()));
-        //assert(sort_bag::is_bag(arg1.sort()));
-        
         return application(bagunion_(s),arg0, arg1);
       }
 
-      // Recogniser for application of +
+      ///\brief Recogniser for application of +
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bagunion_ to a
+      ///     number of arguments
       inline
       bool is_bagunion__application(const data_expression& e)
       {
@@ -224,16 +259,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol -
+      /// \brief Constructor for function symbol -
+      /// \ret Function symbol bagdifference
       inline
       function_symbol bagdifference(const sort_expression& s)
       {
-        //static function_symbol bagdifference("-", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
-        function_symbol bagdifference("-", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
+        //static function_symbol bagdifference("-", function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagdifference("-", function_sort(bag(s), bag(s), bag(s)));
         return bagdifference;
       }
 
-      // Recogniser for -
+      /// \brief Recogniser for function -
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching -
       inline
       bool is_bagdifference_function_symbol(const data_expression& e)
       {
@@ -244,17 +282,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of -
+      ///\brief Application of function symbol -
+      ///\ret Application of - to a number of arguments
       inline
       application bagdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bag::is_bag(arg0.sort()));
-        //assert(sort_bag::is_bag(arg1.sort()));
-        
         return application(bagdifference(s),arg0, arg1);
       }
 
-      // Recogniser for application of -
+      ///\brief Recogniser for application of -
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bagdifference to a
+      ///     number of arguments
       inline
       bool is_bagdifference_application(const data_expression& e)
       {
@@ -265,16 +304,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol *
+      /// \brief Constructor for function symbol *
+      /// \ret Function symbol bagintersection
       inline
       function_symbol bagintersection(const sort_expression& s)
       {
-        //static function_symbol bagintersection("*", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
-        function_symbol bagintersection("*", function_sort(sort_bag::bag(s), sort_bag::bag(s), sort_bag::bag(s)));
+        //static function_symbol bagintersection("*", function_sort(bag(s), bag(s), bag(s)));
+        function_symbol bagintersection("*", function_sort(bag(s), bag(s), bag(s)));
         return bagintersection;
       }
 
-      // Recogniser for *
+      /// \brief Recogniser for function *
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching *
       inline
       bool is_bagintersection_function_symbol(const data_expression& e)
       {
@@ -285,17 +327,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of *
+      ///\brief Application of function symbol *
+      ///\ret Application of * to a number of arguments
       inline
       application bagintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bag::is_bag(arg0.sort()));
-        //assert(sort_bag::is_bag(arg1.sort()));
-        
         return application(bagintersection(s),arg0, arg1);
       }
 
-      // Recogniser for application of *
+      ///\brief Recogniser for application of *
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bagintersection to a
+      ///     number of arguments
       inline
       bool is_bagintersection_application(const data_expression& e)
       {
@@ -306,16 +349,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Bag2Set
+      /// \brief Constructor for function symbol Bag2Set
+      /// \ret Function symbol bag2set
       inline
       function_symbol bag2set(const sort_expression& s)
       {
-        //static function_symbol bag2set("Bag2Set", function_sort(sort_bag::bag(s), sort_set::set(s)));
-        function_symbol bag2set("Bag2Set", function_sort(sort_bag::bag(s), sort_set::set(s)));
+        //static function_symbol bag2set("Bag2Set", function_sort(bag(s), sort_set_::set_(s)));
+        function_symbol bag2set("Bag2Set", function_sort(bag(s), sort_set_::set_(s)));
         return bag2set;
       }
 
-      // Recogniser for Bag2Set
+      /// \brief Recogniser for function Bag2Set
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Bag2Set
       inline
       bool is_bag2set_function_symbol(const data_expression& e)
       {
@@ -326,16 +372,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Bag2Set
+      ///\brief Application of function symbol Bag2Set
+      ///\ret Application of Bag2Set to a number of arguments
       inline
       application bag2set(const sort_expression& s, const data_expression& arg0)
       {
-        //assert(sort_bag::is_bag(arg0.sort()));
-        
         return application(bag2set(s),arg0);
       }
 
-      // Recogniser for application of Bag2Set
+      ///\brief Recogniser for application of Bag2Set
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol bag2set to a
+      ///     number of arguments
       inline
       bool is_bag2set_application(const data_expression& e)
       {
@@ -346,16 +394,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol Set2Bag
+      /// \brief Constructor for function symbol Set2Bag
+      /// \ret Function symbol set2bag
       inline
       function_symbol set2bag(const sort_expression& s)
       {
-        //static function_symbol set2bag("Set2Bag", function_sort(sort_set::set(s), sort_bag::bag(s)));
-        function_symbol set2bag("Set2Bag", function_sort(sort_set::set(s), sort_bag::bag(s)));
+        //static function_symbol set2bag("Set2Bag", function_sort(sort_set_::set_(s), bag(s)));
+        function_symbol set2bag("Set2Bag", function_sort(sort_set_::set_(s), bag(s)));
         return set2bag;
       }
 
-      // Recogniser for Set2Bag
+      /// \brief Recogniser for function Set2Bag
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching Set2Bag
       inline
       bool is_set2bag_function_symbol(const data_expression& e)
       {
@@ -366,16 +417,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of Set2Bag
+      ///\brief Application of function symbol Set2Bag
+      ///\ret Application of Set2Bag to a number of arguments
       inline
       application set2bag(const sort_expression& s, const data_expression& arg0)
       {
-        //assert(sort_set::is_set(arg0.sort()));
-        
         return application(set2bag(s),arg0);
       }
 
-      // Recogniser for application of Set2Bag
+      ///\brief Recogniser for application of Set2Bag
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol set2bag to a
+      ///     number of arguments
       inline
       bool is_set2bag_application(const data_expression& e)
       {
@@ -386,16 +439,8 @@ namespace mcrl2 {
         return false;
       }
 
-      // Give all system defined constructors for Bag
-      inline
-      function_symbol_vector bag_generate_constructors_code()
-      {
-        function_symbol_vector result;
-
-        return result;
-      }
-
-      // Give all system defined constructors for Bag
+      /// \brief Give all system defined mappings for bag
+      /// \ret All system defined mappings for bag
       inline
       function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
@@ -409,127 +454,132 @@ namespace mcrl2 {
         result.push_back(bagintersection(s));
         result.push_back(bag2set(s));
         result.push_back(set2bag(s));
-
         return result;
       }
-
-      // Function for projecting out right
-      inline
-      data_expression right(const data_expression& e)
-      {
-        //assert( || is_count_application(e) || is_bagin_application(e) || is_bagunion__application(e) || is_bagdifference_application(e) || is_bagintersection_application(e));
-        
-        if (is_count_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_bagin_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_bagunion__application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_bagdifference_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        if (is_bagintersection_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[1];
-        }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
-      }
-
-      // Function for projecting out left
+      ///\brief Function for projecting out argument
+      ///        left from an application
+      /// \param e A data expression
+      /// \pre left is defined for e
+      /// \ret The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
-        //assert( || is_count_application(e) || is_bagin_application(e) || is_bagunion__application(e) || is_bagdifference_application(e) || is_bagintersection_application(e));
-        
         if (is_count_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_bagin_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_bagunion__application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_bagdifference_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_bagintersection_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg
+      ///\brief Function for projecting out argument
+      ///        right from an application
+      /// \param e A data expression
+      /// \pre right is defined for e
+      /// \ret The argument of e that corresponds to right
+      inline
+      data_expression right(const data_expression& e)
+      {
+        if (is_count_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+        if (is_bagin_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+        if (is_bagunion__application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+        if (is_bagdifference_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+        if (is_bagintersection_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[1];
+        }
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
+      }
+
+      ///\brief Function for projecting out argument
+      ///        arg from an application
+      /// \param e A data expression
+      /// \pre arg is defined for e
+      /// \ret The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
-        //assert( || is_bag_comprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e));
-        
         if (is_bag_comprehension_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_bag2set_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
         if (is_set2bag_application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Give all system defined equations for Bag
+      /// \brief Give all system defined equations for bag
+      /// \param s A sort expression
+      /// \ret All system defined equations for sort bag
       inline
       data_equation_vector bag_generate_equations_code(const sort_expression& s)
       {
-        data_equation_vector result;
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), equal_to(sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), equal_to(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat())))));
-        result.push_back(data_equation(variable_vector(), sort_bag::emptybag(s), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::c0()))));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("d", s)), sort_bag::count(s, variable("d", s), sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat())))), variable("f", function_sort(s, sort_nat::nat()))(variable("d", s))));
-        result.push_back(data_equation(make_vector(variable("d", s), variable("s", sort_bag::bag(s))), sort_bag::bagin(s, variable("d", s), variable("s", sort_bag::bag(s))), greater(sort_bag::count(s, variable("d", s), variable("s", sort_bag::bag(s))), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), less_equal(sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), forall(make_vector(variable("x", s)),less_equal(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s))))));
-        result.push_back(data_equation(make_vector(variable("t", sort_bag::bag(s)), variable("s", sort_bag::bag(s))), less(variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))), sort_bool_::and_(less_equal(variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))), not_equal_to(variable("s", sort_bag::bag(s)), variable("t", sort_bag::bag(s))))));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), sort_bag::bagunion_(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_bag::bagunion_(s, variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), sort_bag::bagdifference(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("y", s)),(lambda(make_vector(variable("m", sort_nat::nat())),lambda(make_vector(variable("n", sort_nat::nat())),if_(greater(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_nat::gtesubt(variable("m", sort_nat::nat()), variable("n", sort_nat::nat())), sort_nat::c0())))(variable("f", function_sort(s, sort_nat::nat()))(variable("y", s))))(variable("g", function_sort(s, sort_nat::nat()))(variable("y", s)))))));
-        result.push_back(data_equation(make_vector(variable("f", function_sort(s, sort_nat::nat())), variable("g", function_sort(s, sort_nat::nat()))), sort_bag::bagintersection(s, sort_bag::bag_comprehension(s, variable("f", function_sort(s, sort_nat::nat()))), sort_bag::bag_comprehension(s, variable("g", function_sort(s, sort_nat::nat())))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),sort_nat::minimum(variable("f", function_sort(s, sort_nat::nat()))(variable("x", s)), variable("g", function_sort(s, sort_nat::nat()))(variable("x", s)))))));
-        result.push_back(data_equation(make_vector(variable("s", sort_bag::bag(s))), sort_bag::bag2set(s, variable("s", sort_bag::bag(s))), sort_set::set_comprehension(s, lambda(make_vector(variable("x", s)),sort_bag::bagin(s, variable("x", s), variable("s", sort_bag::bag(s)))))));
-        result.push_back(data_equation(make_vector(variable("u", sort_set::set(s))), sort_bag::set2bag(s, variable("u", sort_set::set(s))), sort_bag::bag_comprehension(s, lambda(make_vector(variable("x", s)),if_(sort_set::setin(s, variable("x", s), variable("u", sort_set::set(s))), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
+        variable vd("d",s);
+        variable vf("f",function_sort(s, sort_nat::nat()));
+        variable vg("g",function_sort(s, sort_nat::nat()));
+        variable vs("s",bag(s));
+        variable vt("t",bag(s));
+        variable vu("u",sort_set_::set_(s));
+        variable vx("x",s);
+        variable vy("y",s);
+        variable vm("m",sort_nat::nat());
+        variable vn("n",sort_nat::nat());
 
+        data_equation_vector result;
+        result.push_back(data_equation(make_vector(vf, vg), equal_to(bag_comprehension(s, vf), bag_comprehension(s, vg)), equal_to(vf, vg)));
+        result.push_back(data_equation(variable_list(), emptybag(s), bag_comprehension(s, lambda(make_vector(vx), sort_nat::c0()))));
+        result.push_back(data_equation(make_vector(vd, vf), count(s, vd, bag_comprehension(s, vf)), vf(vd)));
+        result.push_back(data_equation(make_vector(vd, vs), bagin(s, vd, vs), less_equal(count(s, vd, vs), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(vf, vg, vx), greater(bag_comprehension(s, vf), bag_comprehension(s, vg)), forall(make_vector(vx), greater(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(greater(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vf, vg, vx), bagunion_(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), bagunion_(s, vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vf, vg, vn, vm, vy), bagdifference(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vy), lambda(make_vector(vm), lambda(make_vector(vn), if_(less_equal(vm, vn), sort_nat::gtesubt(vm, vn), sort_nat::c0())))(vf(vy))(vg(vy))))));
+        result.push_back(data_equation(make_vector(vf, vg, vx), bagintersection(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), sort_nat::minimum(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vs, vx), bag2set(s, vs), sort_set_::set_comprehension(s, lambda(make_vector(vx), bagin(s, vx, vs)))));
+        result.push_back(data_equation(make_vector(vu, vx), set2bag(s, vu), bag_comprehension(s, lambda(make_vector(vx), if_(bagin(s, vx, vu), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
         return result;
       }
 
-    } // namespace bag
+    } // namespace sort_bag
+
   } // namespace new_data
+
 } // namespace mcrl2
 
 #endif // MCRL2_NEW_DATA_BAG_H

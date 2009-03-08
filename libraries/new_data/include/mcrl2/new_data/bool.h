@@ -9,14 +9,15 @@
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
 
-
 namespace mcrl2 {
 
   namespace new_data {
 
+    /// \brief Namespace for system defined sort bool_
     namespace sort_bool_ {
 
-      // Sort expression Bool
+      /// \brief Constructor for sort expression Bool
+      /// \ret Sort expression Bool
       inline
       basic_sort bool_()
       {
@@ -24,7 +25,9 @@ namespace mcrl2 {
         return bool_;
       }
 
-      // Recogniser for sort expression Bool
+      /// \brief Recogniser for sort expression Bool
+      /// \param e A sort expression
+      /// \ret true iff e == bool_()
       inline
       bool is_bool_(const sort_expression& e)
       {
@@ -35,16 +38,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol true
+      /// \brief Constructor for function symbol true
+      /// \ret Function symbol true_
       inline
       function_symbol true_()
       {
-        //static function_symbol true_("true", sort_bool_::bool_());
-        function_symbol true_("true", sort_bool_::bool_());
+        //static function_symbol true_("true", bool_());
+        function_symbol true_("true", bool_());
         return true_;
       }
 
-      // Recogniser for true
+      /// \brief Recogniser for function true
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching true
       inline
       bool is_true__function_symbol(const data_expression& e)
       {
@@ -55,16 +61,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol false
+      /// \brief Constructor for function symbol false
+      /// \ret Function symbol false_
       inline
       function_symbol false_()
       {
-        //static function_symbol false_("false", sort_bool_::bool_());
-        function_symbol false_("false", sort_bool_::bool_());
+        //static function_symbol false_("false", bool_());
+        function_symbol false_("false", bool_());
         return false_;
       }
 
-      // Recogniser for false
+      /// \brief Recogniser for function false
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching false
       inline
       bool is_false__function_symbol(const data_expression& e)
       {
@@ -75,16 +84,30 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol !
+      /// \brief Give all system defined constructors for bool_
+      /// \ret All system defined constructors for bool_
+      inline
+      function_symbol_vector bool__generate_constructors_code()
+      {
+        function_symbol_vector result;
+        result.push_back(true_());
+        result.push_back(false_());
+
+        return result;
+      }
+      /// \brief Constructor for function symbol !
+      /// \ret Function symbol not_
       inline
       function_symbol not_()
       {
-        //static function_symbol not_("!", function_sort(sort_bool_::bool_(), sort_bool_::bool_()));
-        function_symbol not_("!", function_sort(sort_bool_::bool_(), sort_bool_::bool_()));
+        //static function_symbol not_("!", function_sort(bool_(), bool_()));
+        function_symbol not_("!", function_sort(bool_(), bool_()));
         return not_;
       }
 
-      // Recogniser for !
+      /// \brief Recogniser for function !
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching !
       inline
       bool is_not__function_symbol(const data_expression& e)
       {
@@ -95,16 +118,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of !
+      ///\brief Application of function symbol !
+      ///\ret Application of ! to a number of arguments
       inline
       application not_(const data_expression& arg0)
       {
-        //assert(sort_bool_::is_bool_(arg0.sort()));
-        
         return application(not_(),arg0);
       }
 
-      // Recogniser for application of !
+      ///\brief Recogniser for application of !
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol not_ to a
+      ///     number of arguments
       inline
       bool is_not__application(const data_expression& e)
       {
@@ -115,16 +140,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol &&
+      /// \brief Constructor for function symbol &&
+      /// \ret Function symbol and_
       inline
       function_symbol and_()
       {
-        //static function_symbol and_("&&", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
-        function_symbol and_("&&", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
+        //static function_symbol and_("&&", function_sort(bool_(), bool_(), bool_()));
+        function_symbol and_("&&", function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
 
-      // Recogniser for &&
+      /// \brief Recogniser for function &&
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching &&
       inline
       bool is_and__function_symbol(const data_expression& e)
       {
@@ -135,17 +163,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of &&
+      ///\brief Application of function symbol &&
+      ///\ret Application of && to a number of arguments
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bool_::is_bool_(arg0.sort()));
-        //assert(sort_bool_::is_bool_(arg1.sort()));
-        
         return application(and_(),arg0, arg1);
       }
 
-      // Recogniser for application of &&
+      ///\brief Recogniser for application of &&
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol and_ to a
+      ///     number of arguments
       inline
       bool is_and__application(const data_expression& e)
       {
@@ -156,16 +185,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol ||
+      /// \brief Constructor for function symbol ||
+      /// \ret Function symbol or_
       inline
       function_symbol or_()
       {
-        //static function_symbol or_("||", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
-        function_symbol or_("||", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
+        //static function_symbol or_("||", function_sort(bool_(), bool_(), bool_()));
+        function_symbol or_("||", function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
 
-      // Recogniser for ||
+      /// \brief Recogniser for function ||
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching ||
       inline
       bool is_or__function_symbol(const data_expression& e)
       {
@@ -176,17 +208,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of ||
+      ///\brief Application of function symbol ||
+      ///\ret Application of || to a number of arguments
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bool_::is_bool_(arg0.sort()));
-        //assert(sort_bool_::is_bool_(arg1.sort()));
-        
         return application(or_(),arg0, arg1);
       }
 
-      // Recogniser for application of ||
+      ///\brief Recogniser for application of ||
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol or_ to a
+      ///     number of arguments
       inline
       bool is_or__application(const data_expression& e)
       {
@@ -197,16 +230,19 @@ namespace mcrl2 {
         return false;
       }
 
-      // Function symbol =>
+      /// \brief Constructor for function symbol =>
+      /// \ret Function symbol implies
       inline
       function_symbol implies()
       {
-        //static function_symbol implies("=>", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
-        function_symbol implies("=>", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_bool_::bool_()));
+        //static function_symbol implies("=>", function_sort(bool_(), bool_(), bool_()));
+        function_symbol implies("=>", function_sort(bool_(), bool_(), bool_()));
         return implies;
       }
 
-      // Recogniser for =>
+      /// \brief Recogniser for function =>
+      /// \param e A data expression
+      /// \ret true iff e is the function symbol matching =>
       inline
       bool is_implies_function_symbol(const data_expression& e)
       {
@@ -217,17 +253,18 @@ namespace mcrl2 {
         return false;
       }
 
-      // Application of =>
+      ///\brief Application of function symbol =>
+      ///\ret Application of => to a number of arguments
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
-        //assert(sort_bool_::is_bool_(arg0.sort()));
-        //assert(sort_bool_::is_bool_(arg1.sort()));
-        
         return application(implies(),arg0, arg1);
       }
 
-      // Recogniser for application of =>
+      ///\brief Recogniser for application of =>
+      ///\param e A data expression
+      ///\ret true iff e is an application of function symbol implies to a
+      ///     number of arguments
       inline
       bool is_implies_application(const data_expression& e)
       {
@@ -238,18 +275,8 @@ namespace mcrl2 {
         return false;
       }
 
-      // Give all system defined constructors for Bool
-      inline
-      function_symbol_vector bool__generate_constructors_code()
-      {
-        function_symbol_vector result;
-        result.push_back(true_());
-        result.push_back(false_());
-
-        return result;
-      }
-
-      // Give all system defined constructors for Bool
+      /// \brief Give all system defined mappings for bool_
+      /// \ret All system defined mappings for bool_
       inline
       function_symbol_vector bool__generate_functions_code()
       {
@@ -258,105 +285,106 @@ namespace mcrl2 {
         result.push_back(and_());
         result.push_back(or_());
         result.push_back(implies());
-
         return result;
       }
+      ///\brief Function for projecting out argument
+      ///        left from an application
+      /// \param e A data expression
+      /// \pre left is defined for e
+      /// \ret The argument of e that corresponds to left
+      inline
+      data_expression left(const data_expression& e)
+      {
+        if (is_and__application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+        if (is_or__application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+        if (is_implies_application(e))
+        {
+          return static_cast<const application&>(e).arguments()[0];
+        }
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
+      }
 
-      // Function for projecting out right
+      ///\brief Function for projecting out argument
+      ///        right from an application
+      /// \param e A data expression
+      /// \pre right is defined for e
+      /// \ret The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
-        //assert( || is_and__application(e) || is_or__application(e) || is_implies_application(e));
-        
         if (is_and__application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_or__application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
         if (is_implies_application(e))
         {
           return static_cast<const application&>(e).arguments()[1];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out arg
+      ///\brief Function for projecting out argument
+      ///        arg from an application
+      /// \param e A data expression
+      /// \pre arg is defined for e
+      /// \ret The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
-        //assert( || is_not__application(e));
-        
         if (is_not__application(e))
         {
           return static_cast<const application&>(e).arguments()[0];
         }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
+        // This should never be reached, otherwise something is very wrong.
+        assert(false);
       }
 
-      // Function for projecting out left
-      inline
-      data_expression left(const data_expression& e)
-      {
-        //assert( || is_and__application(e) || is_or__application(e) || is_implies_application(e));
-        
-        if (is_and__application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_or__application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        if (is_implies_application(e))
-        {
-          return static_cast<const application&>(e).arguments()[0];
-        }
-
-        // This should never be reached, otherwise something is severely wrong.
-        assert(false); 
-      }
-
-      // Give all system defined equations for Bool
+      /// \brief Give all system defined equations for bool_
+      /// \ret All system defined equations for sort bool_
       inline
       data_equation_vector bool__generate_equations_code()
       {
-        data_equation_vector result;
-        result.push_back(data_equation(variable_vector(), sort_bool_::not_(sort_bool_::true_()), sort_bool_::false_()));
-        result.push_back(data_equation(variable_vector(), sort_bool_::not_(sort_bool_::false_()), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::not_(sort_bool_::not_(variable("b", sort_bool_::bool_()))), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::true_()), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::and_(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::or_(variable("b", sort_bool_::bool_()), sort_bool_::true_()), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::or_(variable("b", sort_bool_::bool_()), sort_bool_::false_()), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::or_(sort_bool_::true_(), variable("b", sort_bool_::bool_())), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::or_(sort_bool_::false_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::implies(variable("b", sort_bool_::bool_()), sort_bool_::true_()), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::implies(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::implies(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), sort_bool_::implies(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), equal_to(sort_bool_::true_(), variable("b", sort_bool_::bool_())), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), equal_to(sort_bool_::false_(), variable("b", sort_bool_::bool_())), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), equal_to(variable("b", sort_bool_::bool_()), sort_bool_::true_()), variable("b", sort_bool_::bool_())));
-        result.push_back(data_equation(make_vector(variable("b", sort_bool_::bool_())), equal_to(variable("b", sort_bool_::bool_()), sort_bool_::false_()), sort_bool_::not_(variable("b", sort_bool_::bool_()))));
+        variable vb("b",bool_());
 
+        data_equation_vector result;
+        result.push_back(data_equation(variable_list(), not_(true_()), false_()));
+        result.push_back(data_equation(variable_list(), not_(false_()), true_()));
+        result.push_back(data_equation(make_vector(vb), not_(not_(vb)), vb));
+        result.push_back(data_equation(make_vector(vb), and_(vb, true_()), vb));
+        result.push_back(data_equation(make_vector(vb), and_(vb, false_()), false_()));
+        result.push_back(data_equation(make_vector(vb), and_(true_(), vb), vb));
+        result.push_back(data_equation(make_vector(vb), and_(false_(), vb), false_()));
+        result.push_back(data_equation(make_vector(vb), or_(vb, true_()), true_()));
+        result.push_back(data_equation(make_vector(vb), or_(vb, false_()), vb));
+        result.push_back(data_equation(make_vector(vb), or_(true_(), vb), true_()));
+        result.push_back(data_equation(make_vector(vb), or_(false_(), vb), vb));
+        result.push_back(data_equation(make_vector(vb), implies(vb, true_()), true_()));
+        result.push_back(data_equation(make_vector(vb), implies(vb, false_()), not_(vb)));
+        result.push_back(data_equation(make_vector(vb), implies(true_(), vb), vb));
+        result.push_back(data_equation(make_vector(vb), implies(false_(), vb), true_()));
+        result.push_back(data_equation(make_vector(vb), equal_to(true_(), vb), vb));
+        result.push_back(data_equation(make_vector(vb), equal_to(false_(), vb), not_(vb)));
+        result.push_back(data_equation(make_vector(vb), equal_to(vb, true_()), vb));
+        result.push_back(data_equation(make_vector(vb), equal_to(vb, false_()), not_(vb)));
         return result;
       }
 
-    } // namespace bool_
+    } // namespace sort_bool_
+
   } // namespace new_data
+
 } // namespace mcrl2
 
 #endif // MCRL2_NEW_DATA_BOOL__H

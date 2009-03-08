@@ -2865,7 +2865,7 @@ void compare(t_data_decls const& old_, t_data_decls const& new_) {
     std::clog << "OLD " << mcrl2::core::pp(old_.ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.ops) << std::endl;
   }
-  if (old_.ops != new_.ops) {
+  if (old_.data_eqns != new_.data_eqns) {
     std::clog << "OLD " << mcrl2::core::pp(old_.data_eqns) << std::endl
               << "NEW " << mcrl2::core::pp(new_.data_eqns) << std::endl;
   }
@@ -2992,7 +2992,7 @@ void implement_set_test()
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
   basic_sort s("S");
-  container_sort ss(new_data::sort_set::set(s));
+  container_sort ss(new_data::sort_set_::set_(s));
   ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortSetPrefix(), atermpp::aterm(ss), false));
   ATermList equations = ATmakeList0();
   old_impl_sort_set(ss, sort_id, &old_substs, &data_decls_old);

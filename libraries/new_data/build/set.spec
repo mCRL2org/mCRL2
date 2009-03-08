@@ -1,6 +1,6 @@
 #include bool.spec
 
-sort Set(S) <"set">;
+sort Set(S) <"set_">;
 
 map @set <"set_comprehension"> : (S -> Bool) <"arg"> -> Set(S);
     {} <"emptyset"> : Set(S);
