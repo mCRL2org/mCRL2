@@ -81,6 +81,37 @@ void test_multiple_linearization_calls()
   spec = mcrl22lps(case_8);
 }
 
+const std::string assignment_case_1
+( "act a;"
+  "proc X(v:Nat)=a.X(v=3)+Y(v2=1);"
+  "Y(v1:Nat, v2:Nat)=a.X(v=3)+a.X(5);"
+  "init X(3);"
+);
+
+const std::string assignment_case_2
+("act a;"
+ "proc X(v:Nat)=a.Y(w=true);"
+ "Y(w:Bool)=a.X(v=0);"
+ "init X(v=3);"
+);
+
+const std::string assignment_case_3
+("act a;"
+ "b:Nat;"
+ "proc X(v:Nat,w:List(Bool))=a.X(w=[])+"
+ "                         (v>0) ->b(v).X(v=max(v,0));"
+ "init X(v=3,w=[]);"
+
+);
+
+
+void test_process_assignments()
+{ specification spec;
+  spec=mcrl22lps(assignment_case_1);
+  spec=mcrl22lps(assignment_case_2);
+  spec=mcrl22lps(assignment_case_3);
+}
+
 void test_struct()
 {
   std::string text =
@@ -382,6 +413,7 @@ int test_main(int argc, char** argv )
 
   test_struct();
   test_multiple_linearization_calls();
+  test_process_assignments();
   test_large_specification();
 
   return 0;
