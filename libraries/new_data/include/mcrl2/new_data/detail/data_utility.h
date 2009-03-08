@@ -172,7 +172,7 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
 /// \param sorts A set of sort expressions
 /// \return True if the sequence of sorts is contained in <tt>sorts</tt>
 template <typename Iterator>
-bool check_sorts(Iterator first, Iterator last, const atermpp::set<sort_expression>& sorts)
+bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>& sorts)
 {
   for (Iterator i = first; i != last; ++i)
   {

@@ -52,7 +52,12 @@ namespace mcrl2 {
           /// \brief For efficient conversion of iterator ranges
           atermpp::term_list< Expression > list() const
           {
-            return m_list;
+            return m_start;
+          }
+
+          /// \brief Conversion to term_list_iterator
+          operator atermpp::term_list_iterator< Expression >() {
+            return atermpp::term_list_iterator< Expression >(m_list);
           }
 
        private:

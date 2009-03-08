@@ -112,25 +112,25 @@ namespace mcrl2 {
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
     inline variable_list make_variable_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< variable_list >(r);
+      return convert< variable_list >(r);
     }
 
     /// \brief Converts a vector to a variable_list 
     template < typename Expression >
     inline variable_list make_variable_list(atermpp::vector< Expression >const& r) {
-      return detail::convert< variable_list >(r);
+      return convert< variable_list >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
     template < typename ForwardTraversalIterator >
     inline variable_vector make_variable_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< variable_vector >(r);
+      return convert< variable_vector >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
     template < typename Expression >
     inline variable_vector make_variable_vector(atermpp::term_list< Expression > const& r) {
-      return detail::convert< variable_vector >(boost::make_iterator_range(r));
+      return convert< variable_vector >(boost::make_iterator_range(r));
     }
 
   } // namespace new_data

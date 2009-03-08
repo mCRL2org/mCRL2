@@ -78,7 +78,7 @@ namespace mcrl2 {
         /// \pre domain is not empty.
         function_sort(const sort_expression_vector& domain,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(detail::convert< sort_expression_list >(domain), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(convert< sort_expression_list >(domain), codomain))
         {
           assert(!domain.empty());
         }

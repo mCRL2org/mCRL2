@@ -176,7 +176,7 @@ class summand: public atermpp::aterm_appl
         m_condition          (condition),
         m_delta              (false),
         m_actions            (a.actions()),
-  m_time               (a.time()),
+        m_time               (a.time()),
         m_assignments        (assignments)
     {}
 
@@ -201,7 +201,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of summation variables.
     /// \return The sequence of summation variables.
-    new_data::variable_list const& summation_variables() const
+    new_data::variable_list summation_variables() const
     {
       return m_summation_variables;
     }

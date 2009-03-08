@@ -91,7 +91,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		for (variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
 			if (occurs_inL(expr, *i)) // The var occurs in expr
-				occured_data_vars.push_back(*i);
+				occured_data_vars = push_front(occured_data_vars, *i);
 		}
 
 		// If no data_vars
@@ -130,7 +130,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		for (variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
 			if (occurs_inL(expr, *i)) // The var occurs in expr
-				occured_data_vars.push_back(*i);
+				occured_data_vars = push_front(occured_data_vars, *i);
 		}
 
 		//If no data_vars remaining
@@ -234,8 +234,8 @@ pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_
 		atermpp::set< pbes_expression > intermediate;
 		for (atermpp::set< pbes_expression >::iterator exp = set_result.begin(); exp != set_result.end(); exp++)
 		{
-			data_expression_list enumerations = enumerate_constructors(data, vars->sort());
-			for (data_expression_list::iterator enums = enumerations.begin(); enums != enumerations.end(); enums++)
+			data_expression_vector enumerations = enumerate_constructors(data, vars->sort());
+			for (data_expression_vector::iterator enums = enumerations.begin(); enums != enumerations.end(); enums++)
 			{
 				pbes_expression toAdd = *exp;
 				toAdd = toAdd.substitute(make_substitution(*vars, *enums));

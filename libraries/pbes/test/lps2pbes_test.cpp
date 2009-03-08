@@ -18,7 +18,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/detail/container_utility.h" // make_vector
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
@@ -287,17 +286,17 @@ void test_equal_multi_actions()
   data_expression d2 = nat("d2");
   data_expression d3 = nat("d3");
   data_expression d4 = nat("d4");
-  action_list a1  = make_list(act("a", make_vector(d1)));
-  action_list a2  = make_list(act("a", make_vector(d2)));
-  action_list b1  = make_list(act("b", make_vector(d1)));
-  action_list b2  = make_list(act("b", make_vector(d2)));
-  action_list a11 = make_list(act("a", make_vector(d1)), act("a", make_vector(d1)));
-  action_list a12 = make_list(act("a", make_vector(d1)), act("a", make_vector(d2)));
-  action_list a21 = make_list(act("a", make_vector(d2)), act("a", make_vector(d1)));
-  action_list a22 = make_list(act("a", make_vector(d2)), act("a", make_vector(d2)));
-  action_list a34 = make_list(act("a", make_vector(d3)), act("a", make_vector(d4)));
-  action_list a12b1 = make_list(act("a", make_vector(d1)), act("a", make_vector(d2)), act("b", make_vector(d1)));
-  action_list a34b2 = make_list(act("a", make_vector(d3)), act("a", make_vector(d4)), act("b", make_vector(d2)));
+  action_list a1  = make_list(act("a", make_list(d1)));
+  action_list a2  = make_list(act("a", make_list(d2)));
+  action_list b1  = make_list(act("b", make_list(d1)));
+  action_list b2  = make_list(act("b", make_list(d2)));
+  action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
+  action_list a12 = make_list(act("a", make_list(d1)), act("a", make_list(d2)));
+  action_list a21 = make_list(act("a", make_list(d2)), act("a", make_list(d1)));
+  action_list a22 = make_list(act("a", make_list(d2)), act("a", make_list(d2)));
+  action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
+  action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
+  action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
 
   test_multi_actions( a1,  a1, d::sort_bool_::true_());
   test_multi_actions( a1,  a2, d::equal_to(d1, d2));

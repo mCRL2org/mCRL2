@@ -101,9 +101,9 @@ new_data::variable_list mu_variables(modal::state_formula f)
   new_data::variable_list result;
   for(new_data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result.push_back(i->lhs());
+    result = atermpp::push_front(result, i->lhs());
   }
-  return result;
+  return atermpp::reverse(result);
 }
 
 /// \brief Returns the data expressions corresponding to ass(f)
@@ -117,9 +117,9 @@ new_data::data_expression_list mu_expressions(modal::state_formula f)
   new_data::data_expression_list result;
   for(new_data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
-    result.push_back(i->rhs());
+    result = atermpp::push_front(result, i->rhs());
   }
-  return result;
+  return atermpp::reverse(result);
 }
 
 } // namespace detail

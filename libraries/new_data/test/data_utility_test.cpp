@@ -65,7 +65,7 @@ int test_main(int argc, char** argv)
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
-  variable_vector w1 = fresh_variables(make_variable_list(w), context);
+  variable_vector w1 = fresh_variables(w, context);
   std::cout << "w1 = " << mcrl2::new_data::pp(w1) << std::endl;
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d_01", basic_sort("D"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e_01", basic_sort("E"))) != w1.end());

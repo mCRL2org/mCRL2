@@ -50,11 +50,8 @@ class propositional_variable: public atermpp::aterm_appl
     {
       std::pair<std::string, new_data::data_expression_list> p = new_data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      for (new_data::data_expression_list::const_iterator i = p.second.begin(); i != p.second.end(); ++i) {
-        m_parameters.push_back(new_data::variable(*i));
-      }
-      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name,
-                atermpp::term_list< new_data::variable >(m_parameters.begin(), m_parameters.end())));
+      m_parameters = new_data::make_variable_list(boost::make_iterator_range(p.second));
+      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
     /// \brief Constructor.
@@ -65,15 +62,14 @@ class propositional_variable: public atermpp::aterm_appl
       assert(core::detail::check_rule_PropVarDecl(m_term));
       iterator i = t.begin();
       m_name = *i++;
-      m_parameters.insert(m_parameters.end(), atermpp::term_list_iterator< new_data::data_expression >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                          atermpp::term_list_iterator< new_data::data_expression >());
+      m_parameters = *i;
     }
 
     /// \brief Constructor.
     /// \param name A
     /// \param parameters A sequence of data variables
     propositional_variable(core::identifier_string name, new_data::variable_list parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, atermpp::term_list< new_data::variable >(parameters.begin(), parameters.end()))),
+      : atermpp::aterm_appl(core::detail::gsMakePropVarDecl(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {
@@ -129,9 +125,8 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {
       std::pair<std::string, new_data::data_expression_list> p = new_data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      m_parameters.insert(m_parameters.end(), p.second.begin(), p.second.end());
-      m_term = reinterpret_cast< ATerm >(core::detail::gsMakePropVarInst(m_name,
-                atermpp::term_list< new_data::variable >(m_parameters.begin(), m_parameters.end())));
+      m_parameters = new_data::make_variable_list(boost::make_iterator_range(p.second));
+      m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
     }
 
     /// \brief Constructor.
@@ -142,16 +137,14 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
       assert(core::detail::check_rule_PropVarInst(m_term));
       iterator i = t.begin();
       m_name = *i++;
-      m_parameters.insert(m_parameters.end(),
-                          atermpp::term_list_iterator< new_data::data_expression >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i))),
-                          atermpp::term_list_iterator< new_data::data_expression >());
+      m_parameters = *i;
     }
 
     /// \brief Constructor.
     /// \param name A
     /// \param parameters A sequence of data expressions
     propositional_variable_instantiation(core::identifier_string name, new_data::data_expression_list const& parameters)
-      : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, atermpp::term_list< new_data::data_expression >(parameters.begin(), parameters.end()))),
+      : atermpp::aterm_appl(core::detail::gsMakePropVarInst(name, parameters)),
         m_name(name),
         m_parameters(parameters)
     {

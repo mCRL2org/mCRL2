@@ -351,8 +351,7 @@ namespace core {
     static inline
     term_type dataterm2term(data_term_type t)
     {
-      new_data::variable_list variables(t.variables());
-      return term_type(t, atermpp::aterm_list(variables.begin(), variables.end()));
+      return term_type(t, t.variables());
     }
 
     /// \brief Conversion from term to data term

@@ -127,19 +127,19 @@ namespace mcrl2 {
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
     inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< sort_expression_list >(r);
+      return convert< sort_expression_list >(r);
     }
 
     /// \brief Converts an iterator range to sort_expression_list
     template < typename ForwardTraversalIterator >
     inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< sort_expression_vector >(r);
+      return convert< sort_expression_vector >(r);
     }
 
     /// \brief Converts a vector to a sort_expression_list
     template < typename Expression >
     inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
-      return detail::convert< sort_expression_list >(r);
+      return convert< sort_expression_list >(r);
     }
 
     /// \brief Returns true if the term t is a sort_expression

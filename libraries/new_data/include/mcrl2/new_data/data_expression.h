@@ -150,19 +150,19 @@ namespace mcrl2 {
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
     inline data_expression_list make_data_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< data_expression_list >(r);
+      return convert< data_expression_list >(r);
     }
 
     /// \brief Converts an iterator range to data_expression_list
     template < typename ForwardTraversalIterator >
     inline data_expression_vector  make_data_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return detail::convert< data_expression_vector >(r);
+      return convert< data_expression_vector >(r);
     }
 
     /// \brief Converts a vector to a data_expression_list
     template < typename Expression >
     inline data_expression_list  make_data_expression_list(atermpp::vector< Expression >const& r) {
-      return detail::convert< data_expression_list >(r);
+      return convert< data_expression_list >(r);
     }
 
   } // namespace new_data

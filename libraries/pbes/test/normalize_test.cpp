@@ -94,8 +94,7 @@ void test_normalize1()
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
-  new_data::variable_list ab;
-  ab.push_back(new_data::variable("s", new_data::basic_sort("S")));
+  new_data::variable_list ab = make_list(new_data::variable("s", new_data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
   y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
   z = normalize(y);

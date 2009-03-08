@@ -162,7 +162,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (occurs_in_varL(expr, *i)) // The var occurs in expr
       {
-        occurred_data_vars.push_back(*i);
+        occurred_data_vars = push_front(occurred_data_vars, *i);
       }
     }
 
@@ -184,7 +184,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     {
       if (occurs_in_varL(expr, *i)) // The var occurs in expr
       {
-         occurred_data_vars.push_back(*i);
+         occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
       }
     }
 
@@ -206,9 +206,10 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
       for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
-        parameters.push_back(new_data::data_expression(rewriter->rewriteInternal(
+        parameters = atermpp::push_front(parameters, new_data::data_expression(rewriter->rewriteInternal(
                                 rewriter->toRewriteFormat(*l))));
       }
+      parameters = atermpp::reverse(parameters);
     }
     else
     {
@@ -540,7 +541,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         {
           if (!new_data::detail::is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
-             new_data_vars.push_back(*i);
+             new_data_vars = atermpp::push_front(new_data_vars, *i);
           }
           else
           {
@@ -553,7 +554,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (boost::iterator_range< new_data::function_symbol_list::const_iterator > f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
+                for (new_data::data_specification::constructors_const_range f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
                 {
                   boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
                   if (f.front().sort().is_function_sort())
@@ -581,8 +582,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       { std::cerr << "Vars: " << mcrl2::new_data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars.push_back(new_variable);
-                    function_arguments.push_back(new_variable);
+                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
+                    function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(f.front(),
                      atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
@@ -654,7 +655,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
         {
           if (!new_data::detail::is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
-             new_data_vars.push_back(*i);
+             new_data_vars = atermpp::push_front(new_data_vars, *i);
           }
           else
           {
@@ -667,7 +668,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (boost::iterator_range< new_data::function_symbol_list::const_iterator > f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
+                for (new_data::data_specification::constructors_const_range f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
                 {
                   boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
                   if (f.front().sort().is_function_sort())
@@ -695,8 +696,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       { std::cerr << "Vars: " << mcrl2::new_data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars.push_back(new_variable);
-                    function_arguments.push_back(new_variable);
+                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
+                    function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
                   pbes_expression d(core::detail::gsMakeDataApplList(f.front(),atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
                   rewriter->setSubstitution(*i,d);

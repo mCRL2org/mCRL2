@@ -182,7 +182,7 @@ namespace mcrl2 {
                                     const typename boost::iterator_range< ForwardTraversalIterator >& arguments,
                                     const std::string& recogniser)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                  detail::convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
+                                  convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
                                   atermpp::aterm_string(recogniser)))
         {
           assert(!name.empty());
@@ -213,7 +213,7 @@ namespace mcrl2 {
         structured_sort_constructor(const std::string& name,
                                     const typename boost::iterator_range< ForwardTraversalIterator >& arguments)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                   detail::convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
+                   convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
                    core::detail::gsMakeNil()))
         {
           assert(!name.empty());

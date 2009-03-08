@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -23,52 +23,93 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      template < typename Container, typename ForwardTraversalIterator >
-      inline Container convert(boost::iterator_range< ForwardTraversalIterator > const& r)
-      {
-        return Container(r.begin(), r.end());
-      }
-
-      // Copy to term list from term_list_iterator range
-//      template < typename TargetExpression, typename SourceExpression >
-//      inline typename atermpp::term_list< TargetExpression >
-//      convert(boost::iterator_range< typename atermpp::term_list_iterator< SourceExpression > > const& r)
-//      {
-//        return atermpp::term_list< TargetExpression >(static_cast< ATermList >(r.begin()));
-//      }
-
-      // Copy to term list from term_list_iterator range
-      template < typename TargetExpression, typename SourceExpression >
-      inline typename atermpp::term_list< TargetExpression >
-      convert(typename atermpp::vector< SourceExpression > const& r)
-      {
-        return atermpp::term_list< TargetExpression >(r.begin(), r.end());
-      }
-
-      // Copy to term list from term_list_random_iterator range
-      template < typename TargetExpression, typename SourceExpression >
-      inline typename atermpp::term_list< TargetExpression >
-      convert(boost::iterator_range< typename detail::term_list_random_iterator< SourceExpression > > const& r)
-      {
-        if (r.end().list().empty()) {
-          return atermpp::term_list< TargetExpression >(r.begin().list());
+      template < typename TargetContainer >
+      struct converter {
+        template < typename ForwardTraversalIterator >
+        static TargetContainer convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
+          return TargetContainer(r.begin(), r.end());
         }
 
-        return atermpp::term_list< TargetExpression >(r.begin(), r.end());
-      }
+        template < typename Container >
+        static TargetContainer convert(Container l,
+          typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0) {
 
-      template < typename Container, typename TermList >
-      inline Container convert(ATermList const& l)
-      {
-        return Container(atermpp::term_list< typename Container::value_type >(l), atermpp::term_list< typename Container::value_type >());
-      }
+          return TargetContainer(l.begin(), l.end());
+        }
+
+        template < typename ForwardTraversalIterator >
+        static TargetContainer convert(ATermList l) {
+          return Container(atermpp::term_list< typename TargetContainer::value_type >(l),
+                           atermpp::term_list< typename TargetContainer::value_type >());
+        }
+      };
+
+      // Copy to term list
+      template < typename TargetExpression >
+      struct converter< atermpp::term_list< TargetExpression > > {
+        template < typename ForwardTraversalIterator >
+        struct selector {
+          static atermpp::term_list< TargetExpression >
+          convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
+            return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+          }
+        };
+
+        template < typename ForwardTraversalIterator >
+        static atermpp::term_list< TargetExpression > convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
+          return selector< ForwardTraversalIterator >::convert(r);
+        }
+
+        template < typename Container >
+        static atermpp::term_list< TargetExpression > convert(Container l,
+          typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0) {
+
+          return atermpp::term_list< TargetExpression >(l.begin(), l.end());
+        }
+
+        template < typename ForwardTraversalIterator >
+        static atermpp::term_list< TargetExpression > convert(ATermList l) {
+          return atermpp::term_list< TargetExpression >(l);
+        }
+      };
+
+      // Copy to term list from term_list_iterator range
+      template < typename TargetExpression >
+      template < typename SourceExpression >
+      struct converter< atermpp::term_list< TargetExpression > >::selector< atermpp::term_list_iterator< SourceExpression > > {
+        template < typename ForwardTraversalIterator >
+        static atermpp::term_list< TargetExpression >
+        convert(typename boost::iterator_range< ForwardTraversalIterator > const& r) {
+          if (ATisEmpty(r.end().list())) {
+            return atermpp::term_list< TargetExpression >(r.begin().list());
+          }
+
+          return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+        }
+      };
+
+      // Copy to term list from term_list_iterator range
+      template < typename TargetExpression >
+      template < typename SourceExpression >
+      struct converter< atermpp::term_list< TargetExpression > >::selector< detail::term_list_random_iterator< SourceExpression > > {
+        template < typename ForwardTraversalIterator >
+        static atermpp::term_list< TargetExpression >
+        convert(typename boost::iterator_range< ForwardTraversalIterator > const& r) {
+          if (r.end().list().empty()) {
+            return atermpp::term_list< TargetExpression >(r.begin().list());
+          }
+
+          return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+        }
+      };
+
     } // namespace detail
     /// \endcond
 
     /// \brief Convert container with expressions to a new container with expressions
     template < typename TargetContainer, typename SourceContainer >
     TargetContainer convert(SourceContainer const& c) {
-      return detail::convert< TargetContainer >(c);
+      return detail::converter< TargetContainer >::convert(c);
     }
 
   } // namespace new_data

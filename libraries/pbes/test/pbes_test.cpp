@@ -260,8 +260,8 @@ void test_quantifier_rename_builder()
 
   pbes_expression p1 =
   and_(
-    pbes_expr::forall(make_vector(nN), pbes_expr::exists(make_vector(nN), f)),
-    pbes_expr::forall(make_vector(mN), pbes_expr::exists(make_vector(mN, nN), g))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), f)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
   );
   pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
   std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
@@ -269,10 +269,10 @@ void test_quantifier_rename_builder()
 
   pbes_expression p2 =
   and_(
-    pbes_expr::forall(make_vector(nN), pbes_expr::exists(make_vector(nN), p1)),
-    pbes_expr::forall(make_vector(mN), pbes_expr::exists(make_vector(mN, nN), q1))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), p1)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
   );
-  pbes_expression q2 = rename_quantifier_variables(p2, make_vector(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
+  pbes_expression q2 = rename_quantifier_variables(p2, make_list(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
   std::cout << "p2 = " << mcrl2::core::pp(p2) << std::endl;
   std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
 

@@ -48,8 +48,7 @@ class pbes_initializer: public atermpp::aterm_appl
     pbes_initializer(new_data::variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
-     : atermpp::aterm_appl(core::detail::gsMakePBInit(
-               atermpp::term_list< new_data::variable >(free_variables.begin(), free_variables.end()), variable)),
+     : atermpp::aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
        m_free_variables(free_variables),
        m_variable(variable)
     {
@@ -62,9 +61,7 @@ class pbes_initializer: public atermpp::aterm_appl
     {
       assert(core::detail::check_term_PBInit(m_term));
       atermpp::aterm_appl::iterator i   = t.begin();
-      m_free_variables.insert(m_free_variables.end(),
-        atermpp::term_list_iterator< new_data::variable >(reinterpret_cast< ATermList >(static_cast< ATerm >(*i++))),
-        atermpp::term_list_iterator< new_data::variable >());
+      m_free_variables = *i++;
       m_variable = propositional_variable_instantiation(*i);
     }
 

@@ -31,12 +31,12 @@ namespace detail {
   /// \param to_be_removed A sequence of integers
   /// \return The removal result
   template <typename Term>
-  atermpp::vector<Term> remove_elements(atermpp::vector<Term> l, const std::vector<int>& to_be_removed)
+  atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<int>& to_be_removed)
   {
     int index = 0;
     atermpp::vector<Term> result;
     std::vector<int>::const_iterator j = to_be_removed.begin();
-    for (typename atermpp::vector<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
+    for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
     {
       if (j != to_be_removed.end() && index == *j)
       {
@@ -47,7 +47,7 @@ namespace detail {
         result.push_back(*i);
       }
     }
-    return result;
+    return new_data::convert< atermpp::term_list< Term > >(result);
   }
 
 } // namespace detail

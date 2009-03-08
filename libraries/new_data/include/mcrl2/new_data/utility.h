@@ -70,6 +70,17 @@ namespace mcrl2 {
     /// \param[in] f substitution function
     /// \param[in,out] c applies substitution function on elements of container
     template < typename Expression, typename SubstitutionFunction >
+    atermpp::term_list< Expression > substitute(SubstitutionFunction const& f, atermpp::term_list< Expression > c)
+    {
+      atermpp::vector< Expression > result;
+
+      return convert< atermpp::term_list< Expression > >(substitute(f, result));
+    }
+
+    /// \brief Applies a substitution function to all elements of a container
+    /// \param[in] f substitution function
+    /// \param[in,out] c applies substitution function on elements of container
+    template < typename Expression, typename SubstitutionFunction >
     atermpp::vector< Expression > substitute(SubstitutionFunction const& f, atermpp::vector< Expression > const& c)
     {
       atermpp::vector< Expression > result;
@@ -120,8 +131,9 @@ namespace mcrl2 {
     /// \return A sequence of variables with names that do not appear in \p context. The
     /// string \p postfix_format is used to generate new names. It should contain one
     /// occurrence of "%d", that will be replaced with an integer.
+    template < typename Container >
     inline
-    variable_vector fresh_variables(variable_list const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
+    Container fresh_variables(boost::iterator_range< typename Container::const_iterator > const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d")
     {
       std::vector<std::string> ids(boost::make_transform_iterator(t.begin(), detail::variable_name()),
                                    boost::make_transform_iterator(t.end(), detail::variable_name()));
@@ -139,12 +151,26 @@ namespace mcrl2 {
           break;
       }
       variable_vector result;
-      for (variable_list::const_iterator k = t.begin(); k != t.end(); ++k)
+      for (typename Container::const_iterator k = t.begin(); k != t.end(); ++k)
       {
         core::identifier_string name(std::string(k->name()) + postfix);
         result.push_back(variable(name, k->sort()));
       }
-      return result;
+      return new_data::convert< Container >(result);
+    }
+
+    /// \brief Returns a copy of t, but with a common postfix added to each variable name,
+    /// \overload
+    inline
+    variable_list fresh_variables(variable_list const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d") {
+      return fresh_variables< variable_list >(boost::make_iterator_range(t), context, postfix_format);
+    }
+
+    /// \brief Returns a copy of t, but with a common postfix added to each variable name,
+    /// \overload
+    inline
+    variable_vector fresh_variables(variable_vector const& t, const std::set<std::string>& context, std::string postfix_format = "_%02d") {
+      return fresh_variables< variable_vector >(boost::make_iterator_range(t), context, postfix_format);
     }
 
     /// \brief Returns an identifier that doesn't appear in the set <tt>context</tt>

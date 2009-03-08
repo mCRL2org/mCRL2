@@ -46,11 +46,11 @@ namespace detail {
 
   template < typename ForwardTraversalIterator >
   new_data::variable_list difference(new_data::variable_list const& v, ForwardTraversalIterator const& b, ForwardTraversalIterator const& e) {
-    new_data::variable_list result;
+    new_data::variable_vector result;
 
     std::remove_copy_if(v.begin(), v.end(), result.end(), in_range(b, e));
 
-    return result;
+    return new_data::convert< new_data::variable_list >(result);
   }
 }
 /// \endcond

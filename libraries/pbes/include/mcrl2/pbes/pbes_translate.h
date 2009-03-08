@@ -349,11 +349,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = new_data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             new_data::variable_list y = fresh_variables(yi, context);
-            atermpp::list_substitution< atermpp::aterm_list, atermpp::aterm_list > list_substitution =
-                make_list_substitution(atermpp::aterm_list(yi.begin(), yi.end()), atermpp::aterm_list(y.begin(), y.end()));
-            ci = substitute(list_substitution, ci);
-            ai = ai.substitute(list_substitution);
-            gi = substitute(list_substitution, gi);
+            ci = substitute(make_list_substitution(yi, y), ci);
+            ai = ai.substitute(make_list_substitution(yi, y));
+            gi = substitute(make_list_substitution(yi, y), gi);
             new_data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -384,9 +382,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = new_data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             new_data::variable_list y = fresh_variables(yi, context);
-            substitute(make_list_substitution(atermpp::aterm_list(yi.begin(), yi.end()), atermpp::aterm_list(y.begin(), y.end())), ci);
+            ci = substitute(make_list_substitution(yi, y), ci);
             ai = ai.substitute(make_list_substitution(yi, y));
-            substitute(make_list_substitution(atermpp::aterm_list(yi.begin(), yi.end()), atermpp::aterm_list(y.begin(), y.end())), gi);
+            gi = substitute(make_list_substitution(yi, y), gi);
             new_data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -650,7 +648,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
 
       // add sort real to data_spec (if needed)
       new_data::data_specification          data_spec = spec.data();
-      new_data::sort_expression_const_range sorts(spec.data().sorts());
+      new_data::data_specification::sorts_const_range sorts(spec.data().sorts());
       if (std::find(sorts.begin(), sorts.end(), new_data::sort_real_::real_()) == sorts.end())
       {
         data_spec.add_sort(new_data::sort_real_::real_());
@@ -792,11 +790,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = new_data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             new_data::variable_list y = fresh_variables(yi, context);
-            atermpp::list_substitution< atermpp::aterm_list, atermpp::aterm_list > list_substitution =
-                make_list_substitution(atermpp::aterm_list(yi.begin(), yi.end()), atermpp::aterm_list(y.begin(), y.end()));
-            ci = substitute(list_substitution, ci);
-            ai = ai.substitute(list_substitution);
-            substitute(list_substitution, gi);
+            ci = substitute(make_list_substitution(yi, y), ci);
+            ai = ai.substitute(make_list_substitution(yi, y));
+            gi = substitute(make_list_substitution(yi, y), gi);
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(new_data::assignment_list_substitution(gi));
@@ -823,11 +819,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = new_data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             new_data::variable_list y = fresh_variables(yi, context);
-            atermpp::list_substitution< atermpp::aterm_list, atermpp::aterm_list > list_substitution =
-                make_list_substitution(atermpp::aterm_list(yi.begin(), yi.end()), atermpp::aterm_list(y.begin(), y.end()));
-            substitute(list_substitution, ci);
-            ai = ai.substitute(list_substitution);
-            substitute(list_substitution, gi);
+            ci = substitute(make_list_substitution(yi, y), ci);
+            ai = ai.substitute(make_list_substitution(yi, y));
+            gi = substitute(make_list_substitution(yi, y), gi);
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(new_data::assignment_list_substitution(gi));
