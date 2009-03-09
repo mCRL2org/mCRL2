@@ -42,6 +42,7 @@ namespace detail {
   /// \param data A data specification
   /// \param finite_variables A sequence of data variables
   /// \param infinite_variables A sequence of data variables
+  inline
   void split_finite_variables(data::data_variable_list variables, const data::data_specification& data, data::data_variable_list& finite_variables, data::data_variable_list& infinite_variables)
   {
     std::vector<data::data_variable> finite;
