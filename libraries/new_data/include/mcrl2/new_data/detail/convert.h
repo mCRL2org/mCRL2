@@ -37,7 +37,7 @@ namespace mcrl2 {
       template < typename TargetExpression, typename SourceExpression >
       struct converter< atermpp::term_list< TargetExpression >,
                         atermpp::term_list< SourceExpression >,
-	                typename TargetExpression, typename SourceExpression > {
+	                TargetExpression, SourceExpression > {
 
         static atermpp::term_list< TargetExpression >
 	convert(atermpp::term_list< SourceExpression > const& r) {
@@ -52,7 +52,7 @@ namespace mcrl2 {
       template < typename TargetExpression, typename SourceExpression >
       struct converter< atermpp::term_list< TargetExpression >,
                         boost::iterator_range< atermpp::term_list_iterator< SourceExpression > >,
-	                typename TargetExpression, typename SourceExpression > {
+	                TargetExpression, SourceExpression > {
 
         static atermpp::term_list< TargetExpression >
 	convert(boost::iterator_range< atermpp::term_list_iterator< SourceExpression > > const& r) {
@@ -68,7 +68,7 @@ namespace mcrl2 {
       template < typename TargetExpression, typename SourceExpression >
       struct converter< atermpp::term_list< TargetExpression >,
                         boost::iterator_range< detail::term_list_random_iterator< SourceExpression > >,
-	                typename TargetExpression, typename SourceExpression > {
+	                TargetExpression, SourceExpression > {
 
         static atermpp::term_list< TargetExpression >
 	convert(boost::iterator_range< detail::term_list_random_iterator< SourceExpression > > const& r) {
@@ -92,7 +92,7 @@ namespace mcrl2 {
 
     /// \brief Convert container with expressions to a new container with expressions
     template < typename TargetContainer, typename SourceContainer >
-    TargetContainer convert(ATermList c) {
+    TargetContainer convert(ATermList l) {
       return convert< TargetContainer >(atermpp::aterm_list(l));
     }
 

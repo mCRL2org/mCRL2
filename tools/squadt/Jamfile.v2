@@ -9,7 +9,6 @@ source_files = [ set.difference $(source_files) : [ glob ./squadt_proxy.cpp ] ] 
 tool squadt
       : [ sequence.insertion-sort $(source_files) ]
         /libraries/tipi//controller
-        /libraries/utilities//command_line_interfacing
         /libraries//ticpp
       : <define>USING_WX
         <include>.
