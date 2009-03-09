@@ -455,8 +455,8 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vf, vg), equal_to(set_comprehension(s, vf), set_comprehension(s, vg)), equal_to(vf, vg)));
         result.push_back(data_equation(variable_list(), emptyset(s), set_comprehension(s, lambda(make_vector(vx), sort_bool_::false_()))));
         result.push_back(data_equation(make_vector(vd, vf), setin(s, vd, set_comprehension(s, vf)), vf(vd)));
-        result.push_back(data_equation(make_vector(vf, vg, vx), greater(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
-        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(greater(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vf, vg, vx), less_equal(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
         result.push_back(data_equation(make_vector(vf, vg, vx), setunion_(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::or_(vf(vx), vg(vx))))));
         result.push_back(data_equation(make_vector(vs, vt), setdifference(s, vs, vt), setintersection(s, vs, setcomplement(s, vt))));
         result.push_back(data_equation(make_vector(vf, vg, vx), setintersection(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::and_(vf(vx), vg(vx))))));

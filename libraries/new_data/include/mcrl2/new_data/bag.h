@@ -565,11 +565,11 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vf, vg), equal_to(bag_comprehension(s, vf), bag_comprehension(s, vg)), equal_to(vf, vg)));
         result.push_back(data_equation(variable_list(), emptybag(s), bag_comprehension(s, lambda(make_vector(vx), sort_nat::c0()))));
         result.push_back(data_equation(make_vector(vd, vf), count(s, vd, bag_comprehension(s, vf)), vf(vd)));
-        result.push_back(data_equation(make_vector(vd, vs), bagin(s, vd, vs), less_equal(count(s, vd, vs), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(vf, vg, vx), greater(bag_comprehension(s, vf), bag_comprehension(s, vg)), forall(make_vector(vx), greater(vf(vx), vg(vx)))));
-        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(greater(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vd, vs), bagin(s, vd, vs), greater(count(s, vd, vs), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(vf, vg, vx), less_equal(bag_comprehension(s, vf), bag_comprehension(s, vg)), forall(make_vector(vx), less_equal(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
         result.push_back(data_equation(make_vector(vf, vg, vx), bagunion_(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), bagunion_(s, vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vf, vg, vn, vm, vy), bagdifference(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vy), lambda(make_vector(vm), lambda(make_vector(vn), if_(less_equal(vm, vn), sort_nat::gtesubt(vm, vn), sort_nat::c0())))(vf(vy))(vg(vy))))));
+        result.push_back(data_equation(make_vector(vf, vg, vy, vm, vn), bagdifference(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vy), lambda(make_vector(vm), lambda(make_vector(vn), if_(greater(vm, vn), sort_nat::gtesubt(vm, vn), sort_nat::c0())))(vf(vy))(vg(vy))))));
         result.push_back(data_equation(make_vector(vf, vg, vx), bagintersection(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), sort_nat::minimum(vf(vx), vg(vx))))));
         result.push_back(data_equation(make_vector(vs, vx), bag2set(s, vs), sort_set_::set_comprehension(s, lambda(make_vector(vx), bagin(s, vx, vs)))));
         result.push_back(data_equation(make_vector(vu, vx), set2bag(s, vu), bag_comprehension(s, lambda(make_vector(vx), if_(bagin(s, vx, vu), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));

@@ -1680,9 +1680,9 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(make_vector(vx, vp, vq, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vx, vp, vy, vq), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), greater(vr, vr), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vx, vp, vq, vy), greater(creal(vx, vp), creal(vy, vq)), greater(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vx, vp, vy, vq), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
         result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int_::cint(vn), sort_pos::c1())));
         result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int_::cint(sort_nat::cnat(vp)), sort_pos::c1())));
@@ -1695,7 +1695,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vx, vp), negate(creal(vx, vp)), creal(negate(vx), vp)));
         result.push_back(data_equation(make_vector(vx, vp), succ(creal(vx, vp)), creal(plus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
         result.push_back(data_equation(make_vector(vx, vp), pred(creal(vx, vp)), creal(minus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vx, vp, vy, vq), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(make_vector(vx, vp, vq, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(make_vector(vx, vp, vq, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
         result.push_back(data_equation(make_vector(vx, vp, vy, vq), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));

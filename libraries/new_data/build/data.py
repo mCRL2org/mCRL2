@@ -173,9 +173,9 @@ class function_declaration_list():
     elif function.id.to_string() == "<":
       return function_declaration(function.id, sort_expression(), label(identifier("less")))
     elif function.id.to_string() == ">":
-      return function_declaration(function.id, sort_expression(), label(identifier("less_equal")))
-    elif function.id.to_string() == "<=":
       return function_declaration(function.id, sort_expression(), label(identifier("greater")))
+    elif function.id.to_string() == "<=":
+      return function_declaration(function.id, sort_expression(), label(identifier("less_equal")))
     elif function.id.to_string() == ">=":
       return function_declaration(function.id, sort_expression(), label(identifier("greater_equal")))
     else:
@@ -483,11 +483,7 @@ class function_declaration_list():
     # and let it do the code generation
     multi_function_declarations = multi_function_declaration_list([])
     for e in self.elements:
-      print e.to_string()
-      print e.namespace
-      print self.namespace
       if (e.namespace == self.namespace):
-        print "ADDING"
         multi_function_declarations.push_back_function_declaration(e)
 
     code = multi_function_declarations.code(sort_spec)
