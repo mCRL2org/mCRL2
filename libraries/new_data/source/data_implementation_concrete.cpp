@@ -939,7 +939,7 @@ void impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
 
   //add implementation of sort Nat, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-    impl_sort_nat(p_data_decls, new_data_equations);
+    impl_sort_nat(p_data_decls, true, new_data_equations);
   }
 }
 
@@ -1139,7 +1139,7 @@ void impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_fset_id, ATermList *p_su
       (ATerm) gsMakeStructProj(gsMakeNil(), sort_fset_id)
       ), gsMakeNil())
   ));
-  impl_sort_struct(sort_struct, sort_fset_id, p_substs, p_data_decls, new_data_equations);
+  impl_sort_struct(sort_struct, sort_fset_id, p_substs, p_data_decls, true, new_data_equations);
 
   //declare operations for sort sort_fset_id
   ATermList new_ops = ATmakeList(6,
@@ -1678,7 +1678,7 @@ void impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id, ATermList *p_su
       (ATerm) gsMakeStructProj(gsMakeNil(), sort_fbag_id)
       ), gsMakeNil())
   ));
-  impl_sort_struct(sort_struct, sort_fbag_id, p_substs, p_data_decls);
+  impl_sort_struct(sort_struct, sort_fbag_id, p_substs, p_data_decls, true, new_data_equations);
 
   //declare operations for sort sort_fbag_id
   ATermList new_ops = ATmakeList(10,

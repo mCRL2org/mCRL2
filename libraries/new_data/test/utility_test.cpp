@@ -76,9 +76,7 @@ void list_construction_test() {
   expressions.push_back(true_());
   expressions.push_back(false_());
 
-  data_specification specification = parse_data_specification("");
-
-  mcrl2::new_data::rewriter R(specification);
+  mcrl2::new_data::rewriter R(data_specification(), rewriter::innermost);
 
   representation_check(R, sort_list::list(bool_(), expressions.begin(), expressions.end()),
                        R(snoc(bool_(), snoc(bool_(), snoc(bool_(), snoc(bool_(), nil(bool_()),

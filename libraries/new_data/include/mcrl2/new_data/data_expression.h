@@ -55,17 +55,19 @@ namespace mcrl2 {
         inline
         sort_expression sort() const
         {
+          sort_expression result;
+
           // This implementation is currently done in this class, because there
           // is no elegant solution of distributing the implementation of the
           // derived classes (as we need to support requesting the sort of a
           // data_expression we do need to provide an implementation here).
           if (is_variable())
           {
-            return atermpp::arg2(*this);
+            result = atermpp::arg2(*this);
           }
           else if (is_function_symbol())
           {
-            return atermpp::arg2(*this);
+            result = atermpp::arg2(*this);
           }
           else if (is_abstraction())
           {
@@ -75,20 +77,23 @@ namespace mcrl2 {
             {
               s.push_back(i->sort());
             }
-            return function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
+            result = function_sort(boost::make_iterator_range(s), data_expression(atermpp::arg3(*this)).sort());
           }
           else if (is_application())
           {
             sort_expression s(data_expression(atermpp::arg1(*this)).sort());
             assert(s.is_function_sort());
-            return atermpp::arg2(s);
+            result = atermpp::arg2(s);
           }
           else if (is_where_clause())
           {
-            return data_expression(atermpp::arg1(*this)).sort();
+            result = data_expression(atermpp::arg1(*this)).sort();
+          }
+          else {
+            assert(false);
           }
 
-          assert(false);
+          return result;
         }
 
         /// \brief Returns true iff the expression is variable

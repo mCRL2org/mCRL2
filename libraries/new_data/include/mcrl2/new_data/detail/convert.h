@@ -7,8 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/new_data/detail/convert.h
-/// \brief Conversion utilities for converting between the old aterm format
-///        and the new c++ implementation.
+/// \brief Conversion utilities for converting between the containers with
+///    expressions and term lists that contain expressions
 
 #ifndef MCRL2_NEW_DATA_DETAIL_CONVERT_H
 #define MCRL2_NEW_DATA_DETAIL_CONVERT_H
@@ -23,63 +23,24 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      template < typename TargetContainer >
+      template < typename TargetContainer, typename SourceContainer,
+                 typename TargetExpression = typename TargetContainer::value_type,
+                 typename SourceExpression = typename SourceContainer::value_type >
       struct converter {
-        template < typename ForwardTraversalIterator >
-        static TargetContainer convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
-          return TargetContainer(r.begin(), r.end());
-        }
-
         template < typename Container >
-        static TargetContainer convert(Container l,
-          typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0) {
-
+        static TargetContainer convert(Container const& l) {
           return TargetContainer(l.begin(), l.end());
         }
-
-        template < typename ForwardTraversalIterator >
-        static TargetContainer convert(ATermList l) {
-          return Container(atermpp::term_list< typename TargetContainer::value_type >(l),
-                           atermpp::term_list< typename TargetContainer::value_type >());
-        }
       };
 
-      // Copy to term list
-      template < typename TargetExpression >
-      struct converter< atermpp::term_list< TargetExpression > > {
-        template < typename ForwardTraversalIterator >
-        struct selector {
-          static atermpp::term_list< TargetExpression >
-          convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
-            return atermpp::term_list< TargetExpression >(r.begin(), r.end());
-          }
-        };
+      // Copy to from term list to term list
+      template < typename TargetExpression, typename SourceExpression >
+      struct converter< atermpp::term_list< TargetExpression >,
+                        atermpp::term_list< SourceExpression >,
+	                typename TargetExpression, typename SourceExpression > {
 
-        template < typename ForwardTraversalIterator >
-        static atermpp::term_list< TargetExpression > convert(boost::iterator_range< ForwardTraversalIterator > const& r) {
-          return selector< ForwardTraversalIterator >::convert(r);
-        }
-
-        template < typename Container >
-        static atermpp::term_list< TargetExpression > convert(Container l,
-          typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0) {
-
-          return atermpp::term_list< TargetExpression >(l.begin(), l.end());
-        }
-
-        template < typename ForwardTraversalIterator >
-        static atermpp::term_list< TargetExpression > convert(ATermList l) {
-          return atermpp::term_list< TargetExpression >(l);
-        }
-      };
-
-      // Copy to term list from term_list_iterator range
-      template < typename TargetExpression >
-      template < typename SourceExpression >
-      struct converter< atermpp::term_list< TargetExpression > >::selector< atermpp::term_list_iterator< SourceExpression > > {
-        template < typename ForwardTraversalIterator >
         static atermpp::term_list< TargetExpression >
-        convert(typename boost::iterator_range< ForwardTraversalIterator > const& r) {
+	convert(atermpp::term_list< SourceExpression > const& r) {
           if (ATisEmpty(r.end().list())) {
             return atermpp::term_list< TargetExpression >(r.begin().list());
           }
@@ -88,14 +49,31 @@ namespace mcrl2 {
         }
       };
 
-      // Copy to term list from term_list_iterator range
-      template < typename TargetExpression >
-      template < typename SourceExpression >
-      struct converter< atermpp::term_list< TargetExpression > >::selector< detail::term_list_random_iterator< SourceExpression > > {
-        template < typename ForwardTraversalIterator >
+      template < typename TargetExpression, typename SourceExpression >
+      struct converter< atermpp::term_list< TargetExpression >,
+                        boost::iterator_range< atermpp::term_list_iterator< SourceExpression > >,
+	                typename TargetExpression, typename SourceExpression > {
+
         static atermpp::term_list< TargetExpression >
-        convert(typename boost::iterator_range< ForwardTraversalIterator > const& r) {
-          if (r.end().list().empty()) {
+	convert(boost::iterator_range< atermpp::term_list_iterator< SourceExpression > > const& r) {
+
+          if (ATisEmpty(r.end().list())) {
+            return atermpp::term_list< TargetExpression >(r.begin().list());
+          }
+
+          return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+        }
+      };
+
+      template < typename TargetExpression, typename SourceExpression >
+      struct converter< atermpp::term_list< TargetExpression >,
+                        boost::iterator_range< detail::term_list_random_iterator< SourceExpression > >,
+	                typename TargetExpression, typename SourceExpression > {
+
+        static atermpp::term_list< TargetExpression >
+	convert(boost::iterator_range< detail::term_list_random_iterator< SourceExpression > > const& r) {
+
+          if (ATisEmpty(r.end().list())) {
             return atermpp::term_list< TargetExpression >(r.begin().list());
           }
 
@@ -109,7 +87,13 @@ namespace mcrl2 {
     /// \brief Convert container with expressions to a new container with expressions
     template < typename TargetContainer, typename SourceContainer >
     TargetContainer convert(SourceContainer const& c) {
-      return detail::converter< TargetContainer >::convert(c);
+      return detail::converter< TargetContainer, SourceContainer >::convert(c);
+    }
+
+    /// \brief Convert container with expressions to a new container with expressions
+    template < typename TargetContainer, typename SourceContainer >
+    TargetContainer convert(ATermList c) {
+      return convert< TargetContainer >(atermpp::aterm_list(l));
     }
 
   } // namespace new_data

@@ -45,30 +45,34 @@ namespace mcrl2 {
         /// \ret The internally used binding operator which is equivalent to o.
         inline atermpp::aterm_appl string_to_binding_operator(const std::string& s) const
         {
+          atermpp::aterm_appl result;
+
           if (s == "lambda")
           {
-            return core::detail::gsMakeLambda();
+            result = core::detail::gsMakeLambda();
           }
           else if (s == "forall")
           {
-            return core::detail::gsMakeForall();
+            result = core::detail::gsMakeForall();
           }
           else if (s == "exists")
           {
-            return core::detail::gsMakeExists();
+            result = core::detail::gsMakeExists();
           }
           else if (s == "setcomprehension")
           {
-            return core::detail::gsMakeSetComp();
+            result = core::detail::gsMakeSetComp();
           }
           else if (s == "bagcomprehension")
           {
-            return core::detail::gsMakeBagComp();
+            result = core::detail::gsMakeBagComp();
           }
           else
           {
             assert(false);
           }
+
+          return result;
         }
 
         /// \brief Transforms an internally used binding operator to a string.
@@ -78,30 +82,34 @@ namespace mcrl2 {
         inline
         std::string binding_operator_to_string(const atermpp::aterm_appl& o) const
         {
+          std::string result;
+
           if (core::detail::gsIsLambda(o))
           {
-            return "lambda";
+            result = "lambda";
           }
           else if (core::detail::gsIsForall(o))
           {
-            return "forall";
+            result = "forall";
           }
           else if (core::detail::gsIsExists(o))
           {
-            return "exists";
+            result = "exists";
           }
           else if (core::detail::gsIsSetComp(o))
           {
-            return "setcomprehension";
+            result = "setcomprehension";
           }
           else if (core::detail::gsIsBagComp(o))
           {
-            return "bagcomprehension";
+            result = "bagcomprehension";
           }
           else
           {
             assert(false);
           }
+
+          return result;
         }
 
       public:

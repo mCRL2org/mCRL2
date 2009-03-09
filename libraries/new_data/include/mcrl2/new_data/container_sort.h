@@ -39,23 +39,27 @@ namespace mcrl2 {
         inline
         atermpp::aterm_appl string_to_sort_cons_type(const std::string& s) const
         {
+          atermpp::aterm_appl result;
+
           if (s == "list")
           {
-            return core::detail::gsMakeSortList();
+            result = core::detail::gsMakeSortList();
           }
           else if (s == "set_")
           {
-            return core::detail::gsMakeSortSet();
+            result = core::detail::gsMakeSortSet();
           }
           else if (s == "bag")
           {
-            return core::detail::gsMakeSortBag();
+            result = core::detail::gsMakeSortBag();
           }
           else
           {
             std::cerr << "Incorrect sort_cons_type: " << s << std::endl;
             assert(false);
           }
+
+          return result;
         }
 
         /// \brief Converts an internally used type to a string.
@@ -65,22 +69,26 @@ namespace mcrl2 {
         inline
         std::string sort_cons_type_to_string(const atermpp::aterm_appl& s) const
         {
+          std::string result;
+
           if (core::detail::gsIsSortList(s))
           {
-            return "list";
+            result = "list";
           }
           else if (core::detail::gsIsSortSet(s))
           {
-            return "set_";
+            result = "set_";
           }
           else if (core::detail::gsIsSortBag(s))
           {
-            return "bag";
+            result = "bag";
           }
           else
           {
             assert(false);
           }
+
+          return result;
         }
 
       public:
