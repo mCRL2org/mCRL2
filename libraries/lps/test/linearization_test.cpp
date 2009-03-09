@@ -82,9 +82,9 @@ void test_multiple_linearization_calls()
 }
 
 const std::string assignment_case_1
-( "act a;"
-  "proc X(v:Nat)=a.X(v=3)+Y(v2=1);"
-  "Y(v1:Nat, v2:Nat)=a.X(v=3)+a.X(5);"
+( "act a,b,c;"
+  "proc X(v:Nat)=a.X(v=3)+Y(1,2);"
+  "Y(v1:Nat, v2:Nat)=a.Y(v1=3)+b.X(5)+c.Y(v2=7);"
   "init X(3);"
 );
 
