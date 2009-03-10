@@ -30,7 +30,7 @@ namespace mcrl2 {
       ///        implementation to a list of sort expressions in the new new_data format.
       /// \param sort_spec A sort specification in the old new_data format before
       ///                 new_data implementation.
-      /// \ret A list of sort expressions in the new new_data format, containing
+      /// \return A list of sort expressions in the new new_data format, containing
       ///      exactly one equivalent for each sort in sort_spec.
       inline
       atermpp::set< sort_expression > aterm_sort_spec_to_sort_expression_set(const atermpp::aterm_appl& sort_spec)
@@ -46,7 +46,7 @@ namespace mcrl2 {
       ///        constructor declarations in the new new_data format.
       /// \param cons_spec A constructor specification in the old new_data format
       ///        before new_data implementation.
-      /// \ret A mapping of sort expressions to the corresponding constructor
+      /// \return A mapping of sort expressions to the corresponding constructor
       ///      declarations in the new new_data format.
       inline
       atermpp::multimap<sort_expression, function_symbol> aterm_cons_spec_to_constructor_map(const atermpp::aterm_appl& cons_spec)
@@ -68,7 +68,7 @@ namespace mcrl2 {
       ///        implementation to a list of function symbols in the new new_data format.
       /// \param map_spec A map specification in the old new_data format before
       ///                 new_data implementation.
-      /// \ret A list of function declaration in the new new_data format, containing
+      /// \return A list of function declaration in the new new_data format, containing
       ///      exactly one equivalent for each function in map_spec.
       inline
       atermpp::set< function_symbol > aterm_map_spec_to_function_set(const atermpp::aterm_appl& map_spec)
@@ -83,7 +83,7 @@ namespace mcrl2 {
       ///        implementation to a list of new_data equations in the new new_data format.
       /// \param eqn_spec An equation specification in the old new_data format before
       ///                 new_data implementation.
-      /// \ret A list of new_data equations in the new new_data format, containing
+      /// \return A list of new_data equations in the new new_data format, containing
       ///      exactly one equivalent for each equation in eqn_spec.
       inline
       atermpp::set< data_equation > aterm_data_eqn_spec_to_equation_set(const atermpp::aterm_appl& eqn_spec)
@@ -97,7 +97,7 @@ namespace mcrl2 {
       /// \brief Convert a list of sort expressions in the new new_data format to a sort
       ///        specification in the old new_data format before new_data implementation.
       /// \param sl A list of sort expressions.
-      /// \ret The sort specification in the old new_data format equivalent to sl.
+      /// \return The sort specification in the old new_data format equivalent to sl.
       template < typename ForwardTraversalIterator >
       inline
       atermpp::aterm_appl sort_expression_list_to_aterm_sort_spec(const boost::iterator_range< ForwardTraversalIterator >& sl)
@@ -108,7 +108,7 @@ namespace mcrl2 {
       /// \brief Convert a list of function symbols in the new new_data format to a constructor
       ///        specification in the old new_data format before new_data implementation.
       /// \param cl A list of function symbols.
-      /// \ret The constructor specification in the old new_data format equivalent to cl.
+      /// \return The constructor specification in the old new_data format equivalent to cl.
       template < typename ForwardTraversalIterator >
       inline
       atermpp::aterm_appl constructor_list_to_aterm_cons_spec(const boost::iterator_range< ForwardTraversalIterator >& cl)
@@ -119,7 +119,7 @@ namespace mcrl2 {
       /// \brief Convert a list of function symbols in the new new_data format to a map
       ///        specification in the old new_data format before new_data implementation.
       /// \param fl A list of function symbols.
-      /// \ret The map specification in the old new_data format equivalent to fl.
+      /// \return The map specification in the old new_data format equivalent to fl.
       template < typename ForwardTraversalIterator >
       inline
       atermpp::aterm_appl function_list_to_aterm_map_spec(const boost::iterator_range< ForwardTraversalIterator >& fl)
@@ -130,7 +130,7 @@ namespace mcrl2 {
       /// \brief Convert a list of new_data equations in the new new_data format to an equation
       ///        specification in the old new_data format before new_data implementation.
       /// \param el A list of new_data equations.
-      /// \ret The equation specification in the old new_data format equivalent to el.
+      /// \return The equation specification in the old new_data format equivalent to el.
       template < typename ForwardTraversalIterator >
       inline
       atermpp::aterm_appl data_equation_list_to_aterm_eqn_spec(const boost::iterator_range< ForwardTraversalIterator >& el)

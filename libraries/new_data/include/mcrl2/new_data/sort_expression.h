@@ -100,7 +100,7 @@ namespace mcrl2 {
         }
 
         /// \brief Returns the target sort of this expression.
-        /// \ret codomain if this is a function sort,
+        /// \return codomain if this is a function sort,
         ///      this sort otherwise
         inline
         sort_expression target_sort() const

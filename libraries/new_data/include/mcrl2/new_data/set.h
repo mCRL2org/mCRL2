@@ -22,7 +22,7 @@ namespace mcrl2 {
 
       /// \brief Constructor for sort expression Set(s)
       /// \param s A sort expression
-      /// \ret Sort expression set_(s)
+      /// \return Sort expression set_(s)
       inline
       container_sort set_(const sort_expression& s)
       {
@@ -33,7 +33,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for sort expression Set(s)
       /// \param e A sort expression
-      /// \ret true iff e is a container sort of which the name matches
+      /// \return true iff e is a container sort of which the name matches
       ///      set_
       inline
       bool is_set_(const sort_expression& e)
@@ -46,7 +46,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined constructors for set_
-      /// \ret All system defined constructors for set_
+      /// \return All system defined constructors for set_
       inline
       function_symbol_vector set__generate_constructors_code()
       {
@@ -54,8 +54,8 @@ namespace mcrl2 {
 
         return result;
       }
-      /// \brief Constructor for function symbol @set
-      /// \ret Function symbol set_comprehension
+      /// \brief Constructor for function symbol \@set
+      /// \return Function symbol set_comprehension
       inline
       function_symbol set_comprehension(const sort_expression& s)
       {
@@ -64,9 +64,9 @@ namespace mcrl2 {
         return set_comprehension;
       }
 
-      /// \brief Recogniser for function @set
+      /// \brief Recogniser for function \@set
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @set
+      /// \return true iff e is the function symbol matching \@set
       inline
       bool is_set_comprehension_function_symbol(const data_expression& e)
       {
@@ -77,17 +77,17 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @set
-      ///\ret Application of @set to a number of arguments
+      ///\brief Application of function symbol \@set
+      ///\return Application of \@set to a number of arguments
       inline
       application set_comprehension(const sort_expression& s, const data_expression& arg0)
       {
         return application(set_comprehension(s),arg0);
       }
 
-      ///\brief Recogniser for application of @set
+      ///\brief Recogniser for application of \@set
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol set_comprehension to a
+      ///\return true iff e is an application of function symbol set_comprehension to a
       ///     number of arguments
       inline
       bool is_set_comprehension_application(const data_expression& e)
@@ -100,7 +100,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol {}
-      /// \ret Function symbol emptyset
+      /// \return Function symbol emptyset
       inline
       function_symbol emptyset(const sort_expression& s)
       {
@@ -111,7 +111,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function {}
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching {}
+      /// \return true iff e is the function symbol matching {}
       inline
       bool is_emptyset_function_symbol(const data_expression& e)
       {
@@ -123,7 +123,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol in
-      /// \ret Function symbol setin
+      /// \return Function symbol setin
       inline
       function_symbol setin(const sort_expression& s)
       {
@@ -134,7 +134,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function in
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching in
+      /// \return true iff e is the function symbol matching in
       inline
       bool is_setin_function_symbol(const data_expression& e)
       {
@@ -146,7 +146,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol in
-      ///\ret Application of in to a number of arguments
+      ///\return Application of in to a number of arguments
       inline
       application setin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -155,7 +155,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of in
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol setin to a
+      ///\return true iff e is an application of function symbol setin to a
       ///     number of arguments
       inline
       bool is_setin_application(const data_expression& e)
@@ -168,7 +168,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol +
-      /// \ret Function symbol setunion_
+      /// \return Function symbol setunion_
       inline
       function_symbol setunion_(const sort_expression& s)
       {
@@ -179,7 +179,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function +
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching +
+      /// \return true iff e is the function symbol matching +
       inline
       bool is_setunion__function_symbol(const data_expression& e)
       {
@@ -191,7 +191,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol +
-      ///\ret Application of + to a number of arguments
+      ///\return Application of + to a number of arguments
       inline
       application setunion_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -200,7 +200,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of +
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol setunion_ to a
+      ///\return true iff e is an application of function symbol setunion_ to a
       ///     number of arguments
       inline
       bool is_setunion__application(const data_expression& e)
@@ -213,7 +213,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol -
-      /// \ret Function symbol setdifference
+      /// \return Function symbol setdifference
       inline
       function_symbol setdifference(const sort_expression& s)
       {
@@ -224,7 +224,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function -
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching -
+      /// \return true iff e is the function symbol matching -
       inline
       bool is_setdifference_function_symbol(const data_expression& e)
       {
@@ -236,7 +236,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol -
-      ///\ret Application of - to a number of arguments
+      ///\return Application of - to a number of arguments
       inline
       application setdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -245,7 +245,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of -
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol setdifference to a
+      ///\return true iff e is an application of function symbol setdifference to a
       ///     number of arguments
       inline
       bool is_setdifference_application(const data_expression& e)
@@ -258,7 +258,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol *
-      /// \ret Function symbol setintersection
+      /// \return Function symbol setintersection
       inline
       function_symbol setintersection(const sort_expression& s)
       {
@@ -269,7 +269,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function *
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching *
+      /// \return true iff e is the function symbol matching *
       inline
       bool is_setintersection_function_symbol(const data_expression& e)
       {
@@ -281,7 +281,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol *
-      ///\ret Application of * to a number of arguments
+      ///\return Application of * to a number of arguments
       inline
       application setintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -290,7 +290,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of *
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol setintersection to a
+      ///\return true iff e is an application of function symbol setintersection to a
       ///     number of arguments
       inline
       bool is_setintersection_application(const data_expression& e)
@@ -303,7 +303,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol !
-      /// \ret Function symbol setcomplement
+      /// \return Function symbol setcomplement
       inline
       function_symbol setcomplement(const sort_expression& s)
       {
@@ -314,7 +314,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function !
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching !
+      /// \return true iff e is the function symbol matching !
       inline
       bool is_setcomplement_function_symbol(const data_expression& e)
       {
@@ -326,7 +326,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol !
-      ///\ret Application of ! to a number of arguments
+      ///\return Application of ! to a number of arguments
       inline
       application setcomplement(const sort_expression& s, const data_expression& arg0)
       {
@@ -335,7 +335,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of !
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol setcomplement to a
+      ///\return true iff e is an application of function symbol setcomplement to a
       ///     number of arguments
       inline
       bool is_setcomplement_application(const data_expression& e)
@@ -348,7 +348,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for set_
-      /// \ret All system defined mappings for set_
+      /// \return All system defined mappings for set_
       inline
       function_symbol_vector set__generate_functions_code(const sort_expression& s)
       {
@@ -366,7 +366,7 @@ namespace mcrl2 {
       ///        left from an application
       /// \param e A data expression
       /// \pre left is defined for e
-      /// \ret The argument of e that corresponds to left
+      /// \return The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
@@ -394,7 +394,7 @@ namespace mcrl2 {
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
-      /// \ret The argument of e that corresponds to right
+      /// \return The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
@@ -422,7 +422,7 @@ namespace mcrl2 {
       ///        arg from an application
       /// \param e A data expression
       /// \pre arg is defined for e
-      /// \ret The argument of e that corresponds to arg
+      /// \return The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
@@ -440,7 +440,7 @@ namespace mcrl2 {
 
       /// \brief Give all system defined equations for set_
       /// \param s A sort expression
-      /// \ret All system defined equations for sort set_
+      /// \return All system defined equations for sort set_
       inline
       data_equation_vector set__generate_equations_code(const sort_expression& s)
       {
@@ -452,15 +452,15 @@ namespace mcrl2 {
         variable vx("x",s);
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vf, vg), equal_to(set_comprehension(s, vf), set_comprehension(s, vg)), equal_to(vf, vg)));
+        result.push_back(data_equation(make_vector(vg, vf), equal_to(set_comprehension(s, vf), set_comprehension(s, vg)), equal_to(vf, vg)));
         result.push_back(data_equation(variable_list(), emptyset(s), set_comprehension(s, lambda(make_vector(vx), sort_bool_::false_()))));
-        result.push_back(data_equation(make_vector(vd, vf), setin(s, vd, set_comprehension(s, vf)), vf(vd)));
-        result.push_back(data_equation(make_vector(vf, vg, vx), less_equal(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
-        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), setunion_(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::or_(vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vs, vt), setdifference(s, vs, vt), setintersection(s, vs, setcomplement(s, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), setintersection(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::and_(vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vf, vx), setcomplement(s, set_comprehension(s, vf)), set_comprehension(s, lambda(make_vector(vx), setcomplement(s, vf(vx))))));
+        result.push_back(data_equation(make_vector(vf, vd), setin(s, vd, set_comprehension(s, vf)), vf(vd)));
+        result.push_back(data_equation(make_vector(vx, vg, vf), less_equal(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vt, vs), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vg, vx, vf), setunion_(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::or_(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vt, vs), setdifference(s, vs, vt), setintersection(s, vs, setcomplement(s, vt))));
+        result.push_back(data_equation(make_vector(vx, vg, vf), setintersection(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::and_(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vx, vf), setcomplement(s, set_comprehension(s, vf)), set_comprehension(s, lambda(make_vector(vx), setcomplement(s, vf(vx))))));
         return result;
       }
 

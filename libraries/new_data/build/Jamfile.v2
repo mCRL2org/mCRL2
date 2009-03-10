@@ -6,8 +6,8 @@ mcrl2-library new_data
        : source/data_implementation_concrete.cpp 
          source/data_reconstruct.cpp 
          source/standard.cpp
-         [ glob source/rewrite/*.cpp ]
-         [ glob source/prover/*.cpp ]
+         [ glob source/detail/rewrite/*.cpp ]
+         [ glob source/detail/prover/*.cpp ]
        : <library>/libraries//core
          <use>/libraries/utilities//exception
          <include>../include

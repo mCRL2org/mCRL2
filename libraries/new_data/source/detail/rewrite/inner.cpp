@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewr_inner.cpp
+/// \file inner.cpp
 
 #include "boost.hpp" // precompiled headers
 

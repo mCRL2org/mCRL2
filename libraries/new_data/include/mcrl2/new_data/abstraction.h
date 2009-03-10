@@ -42,7 +42,7 @@ namespace mcrl2 {
         /// \param[in] s String denoting a binding operator.
         /// \pre binding_operator is one of "lambda", "forall", "exists",
         ///      "setcomprehension" or "bagcomprehension".
-        /// \ret The internally used binding operator which is equivalent to o.
+        /// \return The internally used binding operator which is equivalent to o.
         inline atermpp::aterm_appl string_to_binding_operator(const std::string& s) const
         {
           atermpp::aterm_appl result;
@@ -78,7 +78,7 @@ namespace mcrl2 {
         /// \brief Transforms an internally used binding operator to a string.
         ///
         /// \param[in] o The internally used binding operator.
-        /// \ret The string equivalent to o.
+        /// \return The string equivalent to o.
         inline
         std::string binding_operator_to_string(const atermpp::aterm_appl& o) const
         {

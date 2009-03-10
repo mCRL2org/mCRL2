@@ -18,7 +18,7 @@ namespace mcrl2 {
     namespace sort_pos {
 
       /// \brief Constructor for sort expression Pos
-      /// \ret Sort expression Pos
+      /// \return Sort expression Pos
       inline
       basic_sort pos()
       {
@@ -28,7 +28,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for sort expression Pos
       /// \param e A sort expression
-      /// \ret true iff e == pos()
+      /// \return true iff e == pos()
       inline
       bool is_pos(const sort_expression& e)
       {
@@ -40,7 +40,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol @c1
-      /// \ret Function symbol c1
+      /// \return Function symbol c1
       inline
       function_symbol c1()
       {
@@ -51,7 +51,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function @c1
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @c1
+      /// \return true iff e is the function symbol matching @c1
       inline
       bool is_c1_function_symbol(const data_expression& e)
       {
@@ -63,7 +63,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol @cDub
-      /// \ret Function symbol cdub
+      /// \return Function symbol cdub
       inline
       function_symbol cdub()
       {
@@ -74,7 +74,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function @cDub
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @cDub
+      /// \return true iff e is the function symbol matching @cDub
       inline
       bool is_cdub_function_symbol(const data_expression& e)
       {
@@ -86,7 +86,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol @cDub
-      ///\ret Application of @cDub to a number of arguments
+      ///\return Application of @cDub to a number of arguments
       inline
       application cdub(const data_expression& arg0, const data_expression& arg1)
       {
@@ -95,7 +95,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of @cDub
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol cdub to a
+      ///\return true iff e is an application of function symbol cdub to a
       ///     number of arguments
       inline
       bool is_cdub_application(const data_expression& e)
@@ -108,7 +108,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined constructors for pos
-      /// \ret All system defined constructors for pos
+      /// \return All system defined constructors for pos
       inline
       function_symbol_vector pos_generate_constructors_code()
       {
@@ -119,7 +119,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol max
-      /// \ret Function symbol maximum
+      /// \return Function symbol maximum
       inline
       function_symbol maximum()
       {
@@ -130,7 +130,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function max
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching max
+      /// \return true iff e is the function symbol matching max
       inline
       bool is_maximum_function_symbol(const data_expression& e)
       {
@@ -142,7 +142,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol max
-      ///\ret Application of max to a number of arguments
+      ///\return Application of max to a number of arguments
       inline
       application maximum(const data_expression& arg0, const data_expression& arg1)
       {
@@ -151,7 +151,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of max
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol maximum to a
+      ///\return true iff e is an application of function symbol maximum to a
       ///     number of arguments
       inline
       bool is_maximum_application(const data_expression& e)
@@ -164,7 +164,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol min
-      /// \ret Function symbol minimum
+      /// \return Function symbol minimum
       inline
       function_symbol minimum()
       {
@@ -175,7 +175,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function min
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching min
+      /// \return true iff e is the function symbol matching min
       inline
       bool is_minimum_function_symbol(const data_expression& e)
       {
@@ -187,7 +187,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol min
-      ///\ret Application of min to a number of arguments
+      ///\return Application of min to a number of arguments
       inline
       application minimum(const data_expression& arg0, const data_expression& arg1)
       {
@@ -196,7 +196,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of min
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol minimum to a
+      ///\return true iff e is an application of function symbol minimum to a
       ///     number of arguments
       inline
       bool is_minimum_application(const data_expression& e)
@@ -209,7 +209,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol abs
-      /// \ret Function symbol abs
+      /// \return Function symbol abs
       inline
       function_symbol abs()
       {
@@ -220,7 +220,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function abs
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching abs
+      /// \return true iff e is the function symbol matching abs
       inline
       bool is_abs_function_symbol(const data_expression& e)
       {
@@ -232,7 +232,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol abs
-      ///\ret Application of abs to a number of arguments
+      ///\return Application of abs to a number of arguments
       inline
       application abs(const data_expression& arg0)
       {
@@ -241,7 +241,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of abs
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol abs to a
+      ///\return true iff e is an application of function symbol abs to a
       ///     number of arguments
       inline
       bool is_abs_application(const data_expression& e)
@@ -254,7 +254,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol succ
-      /// \ret Function symbol succ
+      /// \return Function symbol succ
       inline
       function_symbol succ()
       {
@@ -265,7 +265,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function succ
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching succ
+      /// \return true iff e is the function symbol matching succ
       inline
       bool is_succ_function_symbol(const data_expression& e)
       {
@@ -277,7 +277,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol succ
-      ///\ret Application of succ to a number of arguments
+      ///\return Application of succ to a number of arguments
       inline
       application succ(const data_expression& arg0)
       {
@@ -286,7 +286,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of succ
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol succ to a
+      ///\return true iff e is an application of function symbol succ to a
       ///     number of arguments
       inline
       bool is_succ_application(const data_expression& e)
@@ -299,7 +299,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol +
-      /// \ret Function symbol plus
+      /// \return Function symbol plus
       inline
       function_symbol plus()
       {
@@ -310,7 +310,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function +
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching +
+      /// \return true iff e is the function symbol matching +
       inline
       bool is_plus_function_symbol(const data_expression& e)
       {
@@ -322,7 +322,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol +
-      ///\ret Application of + to a number of arguments
+      ///\return Application of + to a number of arguments
       inline
       application plus(const data_expression& arg0, const data_expression& arg1)
       {
@@ -331,7 +331,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of +
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol plus to a
+      ///\return true iff e is an application of function symbol plus to a
       ///     number of arguments
       inline
       bool is_plus_application(const data_expression& e)
@@ -344,7 +344,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol @addc
-      /// \ret Function symbol add_with_carry
+      /// \return Function symbol add_with_carry
       inline
       function_symbol add_with_carry()
       {
@@ -355,7 +355,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function @addc
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @addc
+      /// \return true iff e is the function symbol matching @addc
       inline
       bool is_add_with_carry_function_symbol(const data_expression& e)
       {
@@ -367,7 +367,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol @addc
-      ///\ret Application of @addc to a number of arguments
+      ///\return Application of @addc to a number of arguments
       inline
       application add_with_carry(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
@@ -376,7 +376,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of @addc
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol add_with_carry to a
+      ///\return true iff e is an application of function symbol add_with_carry to a
       ///     number of arguments
       inline
       bool is_add_with_carry_application(const data_expression& e)
@@ -389,7 +389,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol *
-      /// \ret Function symbol times
+      /// \return Function symbol times
       inline
       function_symbol times()
       {
@@ -400,7 +400,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function *
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching *
+      /// \return true iff e is the function symbol matching *
       inline
       bool is_times_function_symbol(const data_expression& e)
       {
@@ -412,7 +412,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol *
-      ///\ret Application of * to a number of arguments
+      ///\return Application of * to a number of arguments
       inline
       application times(const data_expression& arg0, const data_expression& arg1)
       {
@@ -421,7 +421,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of *
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol times to a
+      ///\return true iff e is an application of function symbol times to a
       ///     number of arguments
       inline
       bool is_times_application(const data_expression& e)
@@ -434,7 +434,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol @multir
-      /// \ret Function symbol multir
+      /// \return Function symbol multir
       inline
       function_symbol multir()
       {
@@ -445,7 +445,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function @multir
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @multir
+      /// \return true iff e is the function symbol matching @multir
       inline
       bool is_multir_function_symbol(const data_expression& e)
       {
@@ -457,7 +457,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol @multir
-      ///\ret Application of @multir to a number of arguments
+      ///\return Application of @multir to a number of arguments
       inline
       application multir(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
@@ -466,7 +466,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of @multir
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol multir to a
+      ///\return true iff e is an application of function symbol multir to a
       ///     number of arguments
       inline
       bool is_multir_application(const data_expression& e)
@@ -479,7 +479,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for pos
-      /// \ret All system defined mappings for pos
+      /// \return All system defined mappings for pos
       inline
       function_symbol_vector pos_generate_functions_code()
       {
@@ -498,7 +498,7 @@ namespace mcrl2 {
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
-      /// \ret The argument of e that corresponds to right
+      /// \return The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
@@ -530,7 +530,7 @@ namespace mcrl2 {
       ///        arg1 from an application
       /// \param e A data expression
       /// \pre arg1 is defined for e
-      /// \ret The argument of e that corresponds to arg1
+      /// \return The argument of e that corresponds to arg1
       inline
       data_expression arg1(const data_expression& e)
       {
@@ -546,7 +546,7 @@ namespace mcrl2 {
       ///        arg2 from an application
       /// \param e A data expression
       /// \pre arg2 is defined for e
-      /// \ret The argument of e that corresponds to arg2
+      /// \return The argument of e that corresponds to arg2
       inline
       data_expression arg2(const data_expression& e)
       {
@@ -562,7 +562,7 @@ namespace mcrl2 {
       ///        arg3 from an application
       /// \param e A data expression
       /// \pre arg3 is defined for e
-      /// \ret The argument of e that corresponds to arg3
+      /// \return The argument of e that corresponds to arg3
       inline
       data_expression arg3(const data_expression& e)
       {
@@ -578,7 +578,7 @@ namespace mcrl2 {
       ///        number from an application
       /// \param e A data expression
       /// \pre number is defined for e
-      /// \ret The argument of e that corresponds to number
+      /// \return The argument of e that corresponds to number
       inline
       data_expression number(const data_expression& e)
       {
@@ -602,7 +602,7 @@ namespace mcrl2 {
       ///        bit from an application
       /// \param e A data expression
       /// \pre bit is defined for e
-      /// \ret The argument of e that corresponds to bit
+      /// \return The argument of e that corresponds to bit
       inline
       data_expression bit(const data_expression& e)
       {
@@ -626,7 +626,7 @@ namespace mcrl2 {
       ///        left from an application
       /// \param e A data expression
       /// \pre left is defined for e
-      /// \ret The argument of e that corresponds to left
+      /// \return The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
@@ -655,7 +655,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined equations for pos
-      /// \ret All system defined equations for sort pos
+      /// \return All system defined equations for sort pos
       inline
       data_equation_vector pos_generate_equations_code()
       {
@@ -666,45 +666,45 @@ namespace mcrl2 {
         variable vr("r",pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vp, vb), equal_to(c1(), cdub(vb, vp)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(vb, vp), equal_to(cdub(vb, vp), c1()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vq, vp), equal_to(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vq, vp), equal_to(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(vb, vp, vq), equal_to(cdub(vb, vp), cdub(vb, vq)), equal_to(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vc, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool_::and_(equal_to(vb, vc), equal_to(vp, vq))));
+        result.push_back(data_equation(make_vector(vq, vc, vb, vp), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool_::and_(equal_to(vb, vc), equal_to(vp, vq))));
         result.push_back(data_equation(make_vector(vp), less(vp, c1()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vp, vq), less(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), less_equal(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq, vc), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vb), less(c1(), cdub(vb, vp)), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vq, vp, vb), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vp), less(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vp, vb), less(cdub(vb, vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vc, vb, vp), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
         result.push_back(data_equation(make_vector(vp), less_equal(c1(), vp), sort_bool_::true_()));
         result.push_back(data_equation(make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vb, vp, vq), less_equal(cdub(vb, vp), cdub(vb, vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vq, vp), less_equal(cdub(vb, vp), cdub(vb, vq)), less_equal(vp, vq)));
         result.push_back(data_equation(make_vector(vp, vb, vq), less_equal(cdub(sort_bool_::false_(), vp), cdub(vb, vq)), less_equal(vp, vq)));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vc, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
-        result.push_back(data_equation(make_vector(vp, vq), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vp), less_equal(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vp, vb, vc), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
+        result.push_back(data_equation(make_vector(vq, vp), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
+        result.push_back(data_equation(make_vector(vq, vp), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
         result.push_back(data_equation(make_vector(vp), abs(vp), vp));
         result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool_::false_(), c1())));
         result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool_::false_(), vp)), cdub(sort_bool_::true_(), vp)));
         result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool_::true_(), vp)), cdub(sort_bool_::false_(), succ(vp))));
-        result.push_back(data_equation(make_vector(vp, vq), plus(vp, vq), add_with_carry(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vq, vp), plus(vp, vq), add_with_carry(sort_bool_::false_(), vp, vq)));
         result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::false_(), c1(), vp), succ(vp)));
         result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::true_(), c1(), vp), succ(succ(vp))));
         result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::false_(), vp, c1()), succ(vp)));
         result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::true_(), vp, c1()), succ(succ(vp))));
-        result.push_back(data_equation(make_vector(vb, vc, vq, vp), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
-        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(make_vector(vc, vq, vb, vp), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vb, vq), add_with_carry(vb, cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vq, vp), add_with_carry(vb, cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), times(vp, vq), multir(sort_bool_::false_(), c1(), vp, vq)));
         result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), times(vp, vq), multir(sort_bool_::false_(), c1(), vq, vp)));
-        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool_::false_(), vp, c1(), vq), vq));
-        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool_::true_(), vp, c1(), vq), add_with_carry(sort_bool_::false_(), vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq, vr), multir(vb, vp, cdub(sort_bool_::false_(), vq), vr), multir(vb, vp, vq, cdub(sort_bool_::false_(), vr))));
+        result.push_back(data_equation(make_vector(vq, vp), multir(sort_bool_::false_(), vp, c1(), vq), vq));
+        result.push_back(data_equation(make_vector(vq, vp), multir(sort_bool_::true_(), vp, c1(), vq), add_with_carry(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vb, vr, vq), multir(vb, vp, cdub(sort_bool_::false_(), vq), vr), multir(vb, vp, vq, cdub(sort_bool_::false_(), vr))));
         result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool_::false_(), vp, cdub(sort_bool_::true_(), vq), vr), multir(sort_bool_::true_(), vr, vq, cdub(sort_bool_::false_(), vr))));
-        result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool_::true_(), vp, cdub(sort_bool_::true_(), vq), vr), multir(sort_bool_::true_(), add_with_carry(sort_bool_::false_(), vp, vr), vq, cdub(sort_bool_::false_(), vr))));
+        result.push_back(data_equation(make_vector(vq, vr, vp), multir(sort_bool_::true_(), vp, cdub(sort_bool_::true_(), vq), vr), multir(sort_bool_::true_(), add_with_carry(sort_bool_::false_(), vp, vr), vq, cdub(sort_bool_::false_(), vr))));
         return result;
       }
 

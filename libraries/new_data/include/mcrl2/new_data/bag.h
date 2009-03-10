@@ -24,7 +24,7 @@ namespace mcrl2 {
 
       /// \brief Constructor for sort expression Bag(s)
       /// \param s A sort expression
-      /// \ret Sort expression bag(s)
+      /// \return Sort expression bag(s)
       inline
       container_sort bag(const sort_expression& s)
       {
@@ -35,7 +35,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for sort expression Bag(s)
       /// \param e A sort expression
-      /// \ret true iff e is a container sort of which the name matches
+      /// \return true iff e is a container sort of which the name matches
       ///      bag
       inline
       bool is_bag(const sort_expression& e)
@@ -48,7 +48,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined constructors for bag
-      /// \ret All system defined constructors for bag
+      /// \return All system defined constructors for bag
       inline
       function_symbol_vector bag_generate_constructors_code()
       {
@@ -57,7 +57,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol @bag
-      /// \ret Function symbol bag_comprehension
+      /// \return Function symbol bag_comprehension
       inline
       function_symbol bag_comprehension(const sort_expression& s)
       {
@@ -68,7 +68,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function @bag
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching @bag
+      /// \return true iff e is the function symbol matching @bag
       inline
       bool is_bag_comprehension_function_symbol(const data_expression& e)
       {
@@ -80,7 +80,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol @bag
-      ///\ret Application of @bag to a number of arguments
+      ///\return Application of @bag to a number of arguments
       inline
       application bag_comprehension(const sort_expression& s, const data_expression& arg0)
       {
@@ -89,7 +89,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of @bag
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bag_comprehension to a
+      ///\return true iff e is an application of function symbol bag_comprehension to a
       ///     number of arguments
       inline
       bool is_bag_comprehension_application(const data_expression& e)
@@ -102,7 +102,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol {}
-      /// \ret Function symbol emptybag
+      /// \return Function symbol emptybag
       inline
       function_symbol emptybag(const sort_expression& s)
       {
@@ -113,7 +113,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function {}
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching {}
+      /// \return true iff e is the function symbol matching {}
       inline
       bool is_emptybag_function_symbol(const data_expression& e)
       {
@@ -125,7 +125,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol count
-      /// \ret Function symbol count
+      /// \return Function symbol count
       inline
       function_symbol count(const sort_expression& s)
       {
@@ -136,7 +136,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function count
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching count
+      /// \return true iff e is the function symbol matching count
       inline
       bool is_count_function_symbol(const data_expression& e)
       {
@@ -148,7 +148,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol count
-      ///\ret Application of count to a number of arguments
+      ///\return Application of count to a number of arguments
       inline
       application count(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -157,7 +157,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of count
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol count to a
+      ///\return true iff e is an application of function symbol count to a
       ///     number of arguments
       inline
       bool is_count_application(const data_expression& e)
@@ -170,7 +170,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol in
-      /// \ret Function symbol bagin
+      /// \return Function symbol bagin
       inline
       function_symbol bagin(const sort_expression& s)
       {
@@ -181,7 +181,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function in
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching in
+      /// \return true iff e is the function symbol matching in
       inline
       bool is_bagin_function_symbol(const data_expression& e)
       {
@@ -193,7 +193,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol in
-      ///\ret Application of in to a number of arguments
+      ///\return Application of in to a number of arguments
       inline
       application bagin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -202,7 +202,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of in
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bagin to a
+      ///\return true iff e is an application of function symbol bagin to a
       ///     number of arguments
       inline
       bool is_bagin_application(const data_expression& e)
@@ -215,7 +215,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol +
-      /// \ret Function symbol bagunion_
+      /// \return Function symbol bagunion_
       inline
       function_symbol bagunion_(const sort_expression& s)
       {
@@ -226,7 +226,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function +
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching +
+      /// \return true iff e is the function symbol matching +
       inline
       bool is_bagunion__function_symbol(const data_expression& e)
       {
@@ -238,7 +238,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol +
-      ///\ret Application of + to a number of arguments
+      ///\return Application of + to a number of arguments
       inline
       application bagunion_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -247,7 +247,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of +
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bagunion_ to a
+      ///\return true iff e is an application of function symbol bagunion_ to a
       ///     number of arguments
       inline
       bool is_bagunion__application(const data_expression& e)
@@ -260,7 +260,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol -
-      /// \ret Function symbol bagdifference
+      /// \return Function symbol bagdifference
       inline
       function_symbol bagdifference(const sort_expression& s)
       {
@@ -271,7 +271,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function -
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching -
+      /// \return true iff e is the function symbol matching -
       inline
       bool is_bagdifference_function_symbol(const data_expression& e)
       {
@@ -283,7 +283,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol -
-      ///\ret Application of - to a number of arguments
+      ///\return Application of - to a number of arguments
       inline
       application bagdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -292,7 +292,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of -
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bagdifference to a
+      ///\return true iff e is an application of function symbol bagdifference to a
       ///     number of arguments
       inline
       bool is_bagdifference_application(const data_expression& e)
@@ -305,7 +305,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol *
-      /// \ret Function symbol bagintersection
+      /// \return Function symbol bagintersection
       inline
       function_symbol bagintersection(const sort_expression& s)
       {
@@ -316,7 +316,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function *
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching *
+      /// \return true iff e is the function symbol matching *
       inline
       bool is_bagintersection_function_symbol(const data_expression& e)
       {
@@ -328,7 +328,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol *
-      ///\ret Application of * to a number of arguments
+      ///\return Application of * to a number of arguments
       inline
       application bagintersection(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
@@ -337,7 +337,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of *
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bagintersection to a
+      ///\return true iff e is an application of function symbol bagintersection to a
       ///     number of arguments
       inline
       bool is_bagintersection_application(const data_expression& e)
@@ -350,7 +350,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Bag2Set
-      /// \ret Function symbol bag2set
+      /// \return Function symbol bag2set
       inline
       function_symbol bag2set(const sort_expression& s)
       {
@@ -361,7 +361,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function Bag2Set
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching Bag2Set
+      /// \return true iff e is the function symbol matching Bag2Set
       inline
       bool is_bag2set_function_symbol(const data_expression& e)
       {
@@ -373,7 +373,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol Bag2Set
-      ///\ret Application of Bag2Set to a number of arguments
+      ///\return Application of Bag2Set to a number of arguments
       inline
       application bag2set(const sort_expression& s, const data_expression& arg0)
       {
@@ -382,7 +382,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of Bag2Set
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol bag2set to a
+      ///\return true iff e is an application of function symbol bag2set to a
       ///     number of arguments
       inline
       bool is_bag2set_application(const data_expression& e)
@@ -395,7 +395,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Set2Bag
-      /// \ret Function symbol set2bag
+      /// \return Function symbol set2bag
       inline
       function_symbol set2bag(const sort_expression& s)
       {
@@ -406,7 +406,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function Set2Bag
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching Set2Bag
+      /// \return true iff e is the function symbol matching Set2Bag
       inline
       bool is_set2bag_function_symbol(const data_expression& e)
       {
@@ -418,7 +418,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol Set2Bag
-      ///\ret Application of Set2Bag to a number of arguments
+      ///\return Application of Set2Bag to a number of arguments
       inline
       application set2bag(const sort_expression& s, const data_expression& arg0)
       {
@@ -427,7 +427,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of Set2Bag
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol set2bag to a
+      ///\return true iff e is an application of function symbol set2bag to a
       ///     number of arguments
       inline
       bool is_set2bag_application(const data_expression& e)
@@ -440,7 +440,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for bag
-      /// \ret All system defined mappings for bag
+      /// \return All system defined mappings for bag
       inline
       function_symbol_vector bag_generate_functions_code(const sort_expression& s)
       {
@@ -460,7 +460,7 @@ namespace mcrl2 {
       ///        left from an application
       /// \param e A data expression
       /// \pre left is defined for e
-      /// \ret The argument of e that corresponds to left
+      /// \return The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
@@ -492,7 +492,7 @@ namespace mcrl2 {
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
-      /// \ret The argument of e that corresponds to right
+      /// \return The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
@@ -524,7 +524,7 @@ namespace mcrl2 {
       ///        arg from an application
       /// \param e A data expression
       /// \pre arg is defined for e
-      /// \ret The argument of e that corresponds to arg
+      /// \return The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
@@ -546,7 +546,7 @@ namespace mcrl2 {
 
       /// \brief Give all system defined equations for bag
       /// \param s A sort expression
-      /// \ret All system defined equations for sort bag
+      /// \return All system defined equations for sort bag
       inline
       data_equation_vector bag_generate_equations_code(const sort_expression& s)
       {
@@ -562,17 +562,17 @@ namespace mcrl2 {
         variable vn("n",sort_nat::nat());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vf, vg), equal_to(bag_comprehension(s, vf), bag_comprehension(s, vg)), equal_to(vf, vg)));
+        result.push_back(data_equation(make_vector(vg, vf), equal_to(bag_comprehension(s, vf), bag_comprehension(s, vg)), equal_to(vf, vg)));
         result.push_back(data_equation(variable_list(), emptybag(s), bag_comprehension(s, lambda(make_vector(vx), sort_nat::c0()))));
-        result.push_back(data_equation(make_vector(vd, vf), count(s, vd, bag_comprehension(s, vf)), vf(vd)));
-        result.push_back(data_equation(make_vector(vd, vs), bagin(s, vd, vs), greater(count(s, vd, vs), sort_nat::c0())));
-        result.push_back(data_equation(make_vector(vf, vg, vx), less_equal(bag_comprehension(s, vf), bag_comprehension(s, vg)), forall(make_vector(vx), less_equal(vf(vx), vg(vx)))));
-        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), bagunion_(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), bagunion_(s, vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vf, vg, vy, vm, vn), bagdifference(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vy), lambda(make_vector(vm), lambda(make_vector(vn), if_(greater(vm, vn), sort_nat::gtesubt(vm, vn), sort_nat::c0())))(vf(vy))(vg(vy))))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), bagintersection(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), sort_nat::minimum(vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vs, vx), bag2set(s, vs), sort_set_::set_comprehension(s, lambda(make_vector(vx), bagin(s, vx, vs)))));
-        result.push_back(data_equation(make_vector(vu, vx), set2bag(s, vu), bag_comprehension(s, lambda(make_vector(vx), if_(bagin(s, vx, vu), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
+        result.push_back(data_equation(make_vector(vf, vd), count(s, vd, bag_comprehension(s, vf)), vf(vd)));
+        result.push_back(data_equation(make_vector(vs, vd), bagin(s, vd, vs), greater(count(s, vd, vs), sort_nat::c0())));
+        result.push_back(data_equation(make_vector(vg, vf, vx), less_equal(bag_comprehension(s, vf), bag_comprehension(s, vg)), forall(make_vector(vx), less_equal(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vt, vs), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vg, vf, vx), bagunion_(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), bagunion_(s, vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vy, vg, vm, vf, vn), bagdifference(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vy), lambda(make_vector(vm), lambda(make_vector(vn), if_(greater(vm, vn), sort_nat::gtesubt(vm, vn), sort_nat::c0())))(vf(vy))(vg(vy))))));
+        result.push_back(data_equation(make_vector(vg, vf, vx), bagintersection(s, bag_comprehension(s, vf), bag_comprehension(s, vg)), bag_comprehension(s, lambda(make_vector(vx), sort_nat::minimum(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vx, vs), bag2set(s, vs), sort_set_::set_comprehension(s, lambda(make_vector(vx), bagin(s, vx, vs)))));
+        result.push_back(data_equation(make_vector(vx, vu), set2bag(s, vu), bag_comprehension(s, lambda(make_vector(vx), if_(bagin(s, vx, vu), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())))));
         return result;
       }
 

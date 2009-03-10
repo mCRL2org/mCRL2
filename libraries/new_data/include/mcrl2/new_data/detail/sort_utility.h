@@ -84,7 +84,7 @@ namespace mcrl2 {
       }
 
       ///\pre s is a sort that occurs in data_specfication data
-      ///\ret true iff there exists a constructor function with s as target sort
+      ///\return true iff there exists a constructor function with s as target sort
       inline bool is_constructorsort(const sort_expression &s,const data_specification &data)
       { // This function is added by Jan Friso Groote on 8/7/2007.
         // cl contains all constructors with target sort s.

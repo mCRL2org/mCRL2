@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/term_traits.h
+/// \file mcrl2/new_data/expression_traits.h
 /// \brief Contains term traits for data_expression.
 
 #ifndef MCRL2_DATA_TERM_TRAITS_H

@@ -17,7 +17,7 @@ namespace mcrl2 {
     namespace sort_bool_ {
 
       /// \brief Constructor for sort expression Bool
-      /// \ret Sort expression Bool
+      /// \return Sort expression Bool
       inline
       basic_sort bool_()
       {
@@ -27,7 +27,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for sort expression Bool
       /// \param e A sort expression
-      /// \ret true iff e == bool_()
+      /// \return true iff e == bool_()
       inline
       bool is_bool_(const sort_expression& e)
       {
@@ -39,7 +39,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol true
-      /// \ret Function symbol true_
+      /// \return Function symbol true_
       inline
       function_symbol true_()
       {
@@ -50,7 +50,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function true
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching true
+      /// \return true iff e is the function symbol matching true
       inline
       bool is_true__function_symbol(const data_expression& e)
       {
@@ -62,7 +62,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol false
-      /// \ret Function symbol false_
+      /// \return Function symbol false_
       inline
       function_symbol false_()
       {
@@ -73,7 +73,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function false
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching false
+      /// \return true iff e is the function symbol matching false
       inline
       bool is_false__function_symbol(const data_expression& e)
       {
@@ -85,7 +85,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined constructors for bool_
-      /// \ret All system defined constructors for bool_
+      /// \return All system defined constructors for bool_
       inline
       function_symbol_vector bool__generate_constructors_code()
       {
@@ -96,7 +96,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol !
-      /// \ret Function symbol not_
+      /// \return Function symbol not_
       inline
       function_symbol not_()
       {
@@ -107,7 +107,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function !
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching !
+      /// \return true iff e is the function symbol matching !
       inline
       bool is_not__function_symbol(const data_expression& e)
       {
@@ -119,7 +119,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol !
-      ///\ret Application of ! to a number of arguments
+      ///\return Application of ! to a number of arguments
       inline
       application not_(const data_expression& arg0)
       {
@@ -128,7 +128,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of !
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol not_ to a
+      ///\return true iff e is an application of function symbol not_ to a
       ///     number of arguments
       inline
       bool is_not__application(const data_expression& e)
@@ -141,7 +141,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol &&
-      /// \ret Function symbol and_
+      /// \return Function symbol and_
       inline
       function_symbol and_()
       {
@@ -152,7 +152,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function &&
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching &&
+      /// \return true iff e is the function symbol matching &&
       inline
       bool is_and__function_symbol(const data_expression& e)
       {
@@ -164,7 +164,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol &&
-      ///\ret Application of && to a number of arguments
+      ///\return Application of && to a number of arguments
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
@@ -173,7 +173,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of &&
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol and_ to a
+      ///\return true iff e is an application of function symbol and_ to a
       ///     number of arguments
       inline
       bool is_and__application(const data_expression& e)
@@ -186,7 +186,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ||
-      /// \ret Function symbol or_
+      /// \return Function symbol or_
       inline
       function_symbol or_()
       {
@@ -197,7 +197,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function ||
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching ||
+      /// \return true iff e is the function symbol matching ||
       inline
       bool is_or__function_symbol(const data_expression& e)
       {
@@ -209,7 +209,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol ||
-      ///\ret Application of || to a number of arguments
+      ///\return Application of || to a number of arguments
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
@@ -218,7 +218,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of ||
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol or_ to a
+      ///\return true iff e is an application of function symbol or_ to a
       ///     number of arguments
       inline
       bool is_or__application(const data_expression& e)
@@ -231,7 +231,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol =>
-      /// \ret Function symbol implies
+      /// \return Function symbol implies
       inline
       function_symbol implies()
       {
@@ -242,7 +242,7 @@ namespace mcrl2 {
 
       /// \brief Recogniser for function =>
       /// \param e A data expression
-      /// \ret true iff e is the function symbol matching =>
+      /// \return true iff e is the function symbol matching =>
       inline
       bool is_implies_function_symbol(const data_expression& e)
       {
@@ -254,7 +254,7 @@ namespace mcrl2 {
       }
 
       ///\brief Application of function symbol =>
-      ///\ret Application of => to a number of arguments
+      ///\return Application of => to a number of arguments
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
@@ -263,7 +263,7 @@ namespace mcrl2 {
 
       ///\brief Recogniser for application of =>
       ///\param e A data expression
-      ///\ret true iff e is an application of function symbol implies to a
+      ///\return true iff e is an application of function symbol implies to a
       ///     number of arguments
       inline
       bool is_implies_application(const data_expression& e)
@@ -276,7 +276,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for bool_
-      /// \ret All system defined mappings for bool_
+      /// \return All system defined mappings for bool_
       inline
       function_symbol_vector bool__generate_functions_code()
       {
@@ -291,7 +291,7 @@ namespace mcrl2 {
       ///        left from an application
       /// \param e A data expression
       /// \pre left is defined for e
-      /// \ret The argument of e that corresponds to left
+      /// \return The argument of e that corresponds to left
       inline
       data_expression left(const data_expression& e)
       {
@@ -315,7 +315,7 @@ namespace mcrl2 {
       ///        right from an application
       /// \param e A data expression
       /// \pre right is defined for e
-      /// \ret The argument of e that corresponds to right
+      /// \return The argument of e that corresponds to right
       inline
       data_expression right(const data_expression& e)
       {
@@ -339,7 +339,7 @@ namespace mcrl2 {
       ///        arg from an application
       /// \param e A data expression
       /// \pre arg is defined for e
-      /// \ret The argument of e that corresponds to arg
+      /// \return The argument of e that corresponds to arg
       inline
       data_expression arg(const data_expression& e)
       {
@@ -352,7 +352,7 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined equations for bool_
-      /// \ret All system defined equations for sort bool_
+      /// \return All system defined equations for sort bool_
       inline
       data_equation_vector bool__generate_equations_code()
       {

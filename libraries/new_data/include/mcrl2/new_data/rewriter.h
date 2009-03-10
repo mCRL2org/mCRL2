@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewriter.h
+/// \file mcrl2/new_data/rewriter.h
 /// \brief The class rewriter.
 
 #ifndef MCRL2_DATA_REWRITER_H

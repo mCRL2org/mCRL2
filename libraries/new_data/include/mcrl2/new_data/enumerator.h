@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/enumerator.h
+/// \file mcrl2/new_data/enumerator.h
 /// \brief The class enumerator.
 
 #ifndef MCRL2_NEW_DATA_ENUMERATOR_H

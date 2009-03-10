@@ -49,7 +49,7 @@ class variable_declaration():
 
   def sort_parameters(self):
     return self.sort_expression.sort_parameters()
-    
+
   def to_string(self):
     return "%s : %s" % (self.id.to_string(), self.sort_expression.to_string())
 
@@ -229,7 +229,7 @@ class function_declaration_list():
       case_code += "      ///        %s from an application\n" % (p)
       case_code += "      /// \\param e A data expression\n"
       case_code += "      /// \\pre %s is defined for e\n" % (p)
-      case_code += "      /// \\ret The argument of e that corresponds to %s\n" % (p)
+      case_code += "      /// \\return The argument of e that corresponds to %s\n" % (p)
       case_code += "      inline\n"
       case_code += "      data_expression %s(const data_expression& e)\n" % (p)
       case_code += "      {\n"
@@ -265,7 +265,7 @@ class function_declaration_list():
       # Constructor for function symbol
       # TODO, generate full documentation for the parameters of the function
       FUNCTION_CONSTRUCTOR = '''      /// \\brief Constructor for function symbol %(fullname)s
-      /// \\ret Function symbol %(name)s
+      /// \\return Function symbol %(name)s
       inline
       function_symbol %(name)s(%(sortparams)s)
       {
@@ -279,7 +279,7 @@ class function_declaration_list():
       # with a sort expression
       # TODO, generate full documentation for the parameters of the function
       POLYMORPHIC_FUNCTION_CONSTRUCTOR = '''      ///\\brief Constructor for function symbol %(fullname)s
-      ///\\ret Function symbol %(name)s
+      ///\\return Function symbol %(name)s
       inline
       function_symbol %(name)s(%(sortparams)s%(comma)s%(domainparams)s)
       {
@@ -293,7 +293,7 @@ class function_declaration_list():
       # Recogniser for function symbol
       FUNCTION_RECOGNISER = '''      /// \\brief Recogniser for function %(fullname)s
       /// \\param e A data expression
-      /// \\ret true iff e is the function symbol matching %(fullname)s
+      /// \\return true iff e is the function symbol matching %(fullname)s
       inline
       bool is_%(name)s_function_symbol(const data_expression& e)
       {
@@ -308,7 +308,7 @@ class function_declaration_list():
       # TODO: Properly document parameters
       # Application of function to arguments
       FUNCTION_APPLICATION='''      ///\\brief Application of function symbol %(fullname)s
-      ///\\ret Application of %(fullname)s to a number of arguments
+      ///\\return Application of %(fullname)s to a number of arguments
       inline
       application %(name)s(%(formsortparams)s%(comma)s%(formparams)s)
       {
@@ -319,7 +319,7 @@ class function_declaration_list():
       # Recogniser for function application
       FUNCTION_APPLICATION_RECOGNISER='''      ///\\brief Recogniser for application of %(fullname)s
       ///\\param e A data expression
-      ///\\ret true iff e is an application of function symbol %(name)s to a
+      ///\\return true iff e is an application of function symbol %(name)s to a
       ///     number of arguments
       inline
       bool is_%(name)s_application(const data_expression& e)
@@ -634,7 +634,7 @@ class equation_declaration_list():
     code  = "      /// \\brief Give all system defined equations for %s\n" % (self.namespace)
     for s in sort_parameters:
       code += "      /// \\param %s A sort expression\n" % (s.code(sort_spec))      
-    code += "      /// \\ret All system defined equations for sort %s\n" % (self.namespace)
+    code += "      /// \\return All system defined equations for sort %s\n" % (self.namespace)
     code += "      inline\n"
     code += "      data_equation_vector %s_generate_equations_code(%s)\n" % (self.namespace, string.join(formal_parameters_code, ", "))
     code += "      {\n"
@@ -1280,7 +1280,7 @@ class sort_declaration():
 
   # Constructor and recogniser for sort expression
   SORT_EXPRESSION_CONSTRUCTORS = '''      /// \\brief Constructor for sort expression %(fullname)s
-      /// \\ret Sort expression %(fullname)s
+      /// \\return Sort expression %(fullname)s
       inline
       basic_sort %(name)s()
       {
@@ -1290,7 +1290,7 @@ class sort_declaration():
 
       /// \\brief Recogniser for sort expression %(fullname)s
       /// \\param e A sort expression
-      /// \\ret true iff e == %(name)s()
+      /// \\return true iff e == %(name)s()
       inline
       bool is_%(name)s(const sort_expression& e)
       {
@@ -1305,7 +1305,7 @@ class sort_declaration():
   # Constructor and recogniser for parameterised sort expression, e.g. List(S)
   SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      /// \\brief Constructor for sort expression %(container)s(%(param)s)
       /// \\param %(param)s A sort expression
-      /// \\ret Sort expression %(label)s(%(param)s)
+      /// \\return Sort expression %(label)s(%(param)s)
       inline
       container_sort %(label)s(const sort_expression& %(param)s)
       {
@@ -1316,7 +1316,7 @@ class sort_declaration():
 
       /// \\brief Recogniser for sort expression %(container)s(%(param)s)
       /// \\param e A sort expression
-      /// \\ret true iff e is a container sort of which the name matches
+      /// \\return true iff e is a container sort of which the name matches
       ///      %(label)s
       inline
       bool is_%(label)s(const sort_expression& e)
@@ -1458,7 +1458,7 @@ class mapping_specification():
     code += self.declarations.code(sort_spec)
     code += "      /// \\brief Give all system defined mappings for %s\n" % (self.namespace)
 #    code += "      /// \\param %s A sort expression\n"
-    code += "      /// \\ret All system defined mappings for %s\n" % (self.namespace)
+    code += "      /// \\return All system defined mappings for %s\n" % (self.namespace)
     code += "      inline\n"
     code += "      function_symbol_vector %s_generate_functions_code(%s)\n" % (self.namespace, sort_parameters)
     code += "      {\n"
@@ -1497,7 +1497,7 @@ class constructor_specification():
     code  = self.declarations.code(sort_spec)
     code += "      /// \\brief Give all system defined constructors for %s\n" % (self.namespace)
 #    code += "      /// \\param %s A sort expression\n"
-    code += "      /// \\ret All system defined constructors for %s\n" % (self.namespace)
+    code += "      /// \\return All system defined constructors for %s\n" % (self.namespace)
     code += "      inline\n"
     code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (self.namespace,sort_parameters)
     code += "      {\n"

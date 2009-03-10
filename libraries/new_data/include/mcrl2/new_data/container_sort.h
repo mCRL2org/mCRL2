@@ -33,9 +33,9 @@ namespace mcrl2 {
 
         /// \brief Converts a string to an internally used type.
         ///
-        /// \param[in] The string to be converted. May only be any of "List",
+        /// \param[in] s The string to be converted. May only be any of "List",
         ///            "Set" or "Bag".
-        /// \ret The internally used type corresponding to s.
+        /// \return The internally used type corresponding to s.
         inline
         atermpp::aterm_appl string_to_sort_cons_type(const std::string& s) const
         {
@@ -64,8 +64,8 @@ namespace mcrl2 {
 
         /// \brief Converts an internally used type to a string.
         ///
-        /// \param[in] The internally used type to be converted.
-        /// \ret The string corresponding to s.
+        /// \param[in] s The internally used type to be converted.
+        /// \return The string corresponding to s.
         inline
         std::string sort_cons_type_to_string(const atermpp::aterm_appl& s) const
         {

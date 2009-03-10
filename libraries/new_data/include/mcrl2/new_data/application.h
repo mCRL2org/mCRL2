@@ -99,7 +99,7 @@ namespace mcrl2 {
         ///
         /// \param[in] head The new_data expression that is applied
         /// \param[in] arg1 The argument head is applied to
-        /// \post \this represents head(arg1)
+        /// \post *this represents head(arg1)
         application(const data_expression& head,
                     const data_expression& arg1)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1))))
@@ -110,7 +110,7 @@ namespace mcrl2 {
         /// \param[in] head The new_data expression that is applied
         /// \param[in] arg1 The first argument head is applied to
         /// \param[in] arg2 The second argument head is applied to
-        /// \post \this represents head(arg1, arg2)
+        /// \post *this represents head(arg1, arg2)
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2)
@@ -123,7 +123,7 @@ namespace mcrl2 {
         /// \param[in] arg1 The first argument head is applied to
         /// \param[in] arg2 The second argument head is applied to
         /// \param[in] arg3 The third argument head is applied to
-        /// \post \this represents head(arg1, arg2, arg3)
+        /// \post *this represents head(arg1, arg2, arg3)
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2,
@@ -138,7 +138,7 @@ namespace mcrl2 {
         /// \param[in] arg2 The second argument head is applied to
         /// \param[in] arg3 The third argument head is applied to
         /// \param[in] arg4 The fourth argument head is applied to
-        /// \post \this represents head(arg1, arg2, arg3, arg4)
+        /// \post *this represents head(arg1, arg2, arg3, arg4)
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2,

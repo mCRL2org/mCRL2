@@ -28,7 +28,7 @@ namespace mcrl2 {
       ///        implementation to a new_data specification in the new new_data format.
       /// \param data_spec A new_data specification in the old new_data format before
       ///                  new_data implementation.
-      /// \ret The new_data specification in the new new_data format equivalent to
+      /// \return The new_data specification in the new new_data format equivalent to
       ///      data_spec.
       inline
       data_specification aterm_data_spec_to_data_specification(const atermpp::aterm_appl& data_spec)
@@ -45,7 +45,7 @@ namespace mcrl2 {
       ///        specification in the old new_data format before new_data
       ///        implementation.
       /// \param s A new_data specification in the new new_data format.
-      /// \ret The new_data specification in the old new_data format equivalent to s.
+      /// \return The new_data specification in the old new_data format equivalent to s.
       inline
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
       {

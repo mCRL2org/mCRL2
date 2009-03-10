@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/data_reconstruct.cpp
+/// \file data_reconstruct.cpp
 //
 //This file contains the implementation of data reconstruction. I.e.
 //it attempts to revert the data implementation.
