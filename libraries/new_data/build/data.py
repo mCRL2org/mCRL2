@@ -25,6 +25,12 @@ def difference_by_string(s,t):
 def is_standard_function(s):
   return s == "equal_to" or s == "not_equal_to" or s == "if_" or s == "less" or s == "less_equal" or s == "greater" or s == "greater_equal"
 
+def target_sort(sort_expr):
+  if isinstance(sort_expr, sort_arrow):
+    return sort_expr.codomain
+  else:
+    return sort_expr
+
 class identifier():
   def __init__(self, string):
     self.string = string
@@ -202,10 +208,11 @@ class function_declaration_list():
       s += "%s\n" % (e.to_string())
     return s
 
-  def generator_code(self, sort_spec):
+  def generator_code(self, sort_spec, is_constructor_declaration = False):
     code = ""
     for e in self.elements:
-      code += e.generator_code(sort_spec, self)
+      if not is_constructor_declaration or not sort_spec.is_alias(target_sort(e.sort_expression)):
+        code += e.generator_code(sort_spec, self)
     return code
 
   def projection_code(self, sort_spec):
@@ -244,7 +251,7 @@ class function_declaration_list():
       code += "%s\n" % (case_code)
     return code
 
-  def code(self, sort_spec):
+  def code(self, sort_spec, is_constructor_declaration = False):
     assert(isinstance(sort_spec, sort_specification))
     # First we merge function declarations with the same function symbol/label,
     # hence we get function symbols with multiple sorts. Then for each of these
@@ -640,6 +647,7 @@ class equation_declaration_list():
     code += "      {\n"
     code += "%s\n" % (variable_spec.code(sort_spec))
     code += "        data_equation_vector result;\n"
+    code += "%s" % (sort_spec.structured_sort_equation_code())
     for e in self.elements:
       code += "        %s\n" % (e.code(sort_spec, function_spec, variable_spec))
     code += "        return result;\n"
@@ -731,7 +739,7 @@ class data_variable(data_expression):
     self.id = id
 
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    return variable_spec.find_variable(self).sort_expression.sort_parameters()    
+    return variable_spec.find_variable(self).sort_expression.sort_parameters()
 
   def determinise_variable_or_function_symbol(self, function_spec, variable_spec):
     return self
@@ -1171,12 +1179,28 @@ class structured_sort_declaration():
   def __init__(self, id, l, arguments = None):
     assert(isinstance(id, identifier))
     assert(isinstance(l, label))
-    assert(arguments == None or isinstance(arguments, sort_expression_list))
+    assert(arguments == None or isinstance(arguments, domain))
     self.id = id
     self.label = l
     self.arguments = arguments
     self.namespace = ""
     self.original_namespace = ""
+
+  def merge_structured_sort(self, function_spec, sort_expr):
+    if self.arguments == None:
+      s = sort_expr
+    else:
+      s = sort_arrow(self.arguments, sort_expr)
+    f = function_declaration(self.id, s, self.label)
+    # f.set_namespace should not be used here, as this function may be
+    # introduced in an included specification, and hence we need to preserve
+    # original_namespace
+    f.original_namespace = self.original_namespace
+    f.namespace = self.namespace
+    constructor_spec = function_spec.constructor_specification
+    constructor_spec.declarations.push_back(f)
+    function_spec.constructor_specification = constructor_spec
+    return function_spec
 
   def set_namespace(self, string):
     self.namespace = string
@@ -1189,8 +1213,17 @@ class structured_sort_declaration():
     else:
       return "%s(%s)" % (id.to_string(), arguments.to_string())
 
-  def code(self):
-    code = "" #TODO
+  def struct_constructor_arguments(self, sort_spec):
+    if self.arguments == None:
+      return "structured_constructor_argument_vector()"
+    else:
+      code = []
+      for a in self.arguments.elements:
+        code += ["structured_sort_constructor_argument(\"%s\", %s)" % (a[1].to_string(), a[0].code(sort_spec))]
+      return "make_vector(%s)" % (string.join(code, ", "))
+
+  def code(self, sort_spec):
+    return "structured_sort_constructor(\"%s\", %s)" % (self.label.to_string(), self.struct_constructor_arguments(sort_spec))
 
 class structured_sort_declaration_list():
   def __init__(self, elements):
@@ -1198,6 +1231,11 @@ class structured_sort_declaration_list():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
+
+  def merge_structured_sort(self, function_spec, sort_expr):
+    for e in self.elements:
+      function_spec = e.merge_structured_sort(function_spec, sort_expr)
+    return function_spec
 
   def push_back(self, element):
     assert(isinstance(element, structured_sort_declaration))
@@ -1218,10 +1256,10 @@ class structured_sort_declaration_list():
       s += e.to_string()
     return s
 
-  def code(self):
+  def code(self, sort_spec):
     code = ""
     for e in self.elements:
-      code += "%s\n" % (e.code())
+      code += "          constructors.push_back(%s);\n" % (e.code(sort_spec))
     return code
 
 class structured_sort_specification():
@@ -1231,18 +1269,20 @@ class structured_sort_specification():
     self.namespace = ""
     self.original_namespace = ""
 
+  def merge_structured_sort(self, function_spec, sort_expr):
+    return self.elements.merge_structured_sort(function_spec, sort_expr)
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
       self.original_namespace = string
-    for e in self.elements:
-      e.set_namespace(string)
+    self.elements.set_namespace(string)
 
   def to_string(self):
     return "struct %s" % (elements.to_string())
 
-  def code(self):
-    code = self.elements.code()
+  def code(self, sort_spec):
+    return self.elements.code(sort_spec)
 
 class sort_declaration():
   def __init__(self, sort_expr, l, alias = None):
@@ -1255,10 +1295,17 @@ class sort_declaration():
     self.namespace = ""
     self.original_namespace = ""
 
+  def merge_structured_sort(self, function_spec):
+    if self.alias <> None:
+      function_spec = self.alias.merge_structured_sort(function_spec, self.sort_expression)
+    return function_spec
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
       self.original_namespace = string
+    if self.alias <> None:
+      self.alias.set_namespace(string)
 
   def name(self):
     return self.sort_expression
@@ -1277,6 +1324,26 @@ class sort_declaration():
       return "%s()" % (self.label.to_string())
     else:
       return "sort_%s::%s()" % (self.namespace, self.label.to_string())
+
+  def structured_sort_constructor_code(self):
+    if self.alias == None:
+      return ""
+    else:
+      param = ""
+      if isinstance(self.sort_expression, sort_container):
+        param = self.sort_expression.element_sort.to_string().lower()
+      sort = "%s(%s)" % (self.label.to_string(), param)
+      return "        result = result + detail::%s_struct(%s).constructor_functions(%s);\n" % (self.label.to_string(), param, sort)
+
+  def structured_sort_equation_code(self):
+    if self.alias == None:
+      return ""
+    else:
+      param = ""
+      if isinstance(self.sort_expression, sort_container):
+        param = self.sort_expression.element_sort.to_string().lower()
+      sort = "%s(%s)" % (self.label.to_string(), param)
+      return "        result = result + detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label.to_string(), param, sort)
 
   # Constructor and recogniser for sort expression
   SORT_EXPRESSION_CONSTRUCTORS = '''      /// \\brief Constructor for sort expression %(fullname)s
@@ -1329,24 +1396,37 @@ class sort_declaration():
       }
 '''
 
-  def code(self):
-    if self.alias == None:
-      if isinstance(self.sort_expression, sort_identifier):
-        code = self.SORT_EXPRESSION_CONSTRUCTORS % {
-          'fullname' : self.sort_expression.to_string(),
-          'name'     : self.label.to_string(),
-        }
-      else:
-        assert(isinstance(self.sort_expression, sort_container))
-        code = self.SORT_EXPRESSION_CONSTRUCTORS_PARAM % {
-          'container' : self.sort_expression.container.to_string(),
-          'param'     : self.sort_expression.element_sort.to_string().lower(),
-          'label'     : self.label.to_string(),
-        }
+  def code(self, sort_spec):
+    if isinstance(self.sort_expression, sort_identifier):
+      code = self.SORT_EXPRESSION_CONSTRUCTORS % {
+        'fullname' : self.sort_expression.to_string(),
+        'name'     : self.label.to_string(),
+      }
     else:
-      print "Error: Function not implemented"
-      assert(False)
-      code = "" #TODO
+      assert(isinstance(self.sort_expression, sort_container))
+      code = self.SORT_EXPRESSION_CONSTRUCTORS_PARAM % {
+        'container' : self.sort_expression.container.to_string(),
+        'param'     : self.sort_expression.element_sort.to_string().lower(),
+        'label'     : self.label.to_string(),
+      }
+
+    if self.alias <> None:
+      code += "\n"
+      code += "      namespace detail {\n\n"
+      code += "        /// \\brief Declaration for sort %s as structured sort\n" % (self.label.to_string())
+      if isinstance(self.sort_expression, sort_container):
+        param = self.sort_expression.element_sort.to_string().lower()
+        code += "        /// \\param %s A sort expression\n" % (param)
+      else:
+        param = ""
+      code += "        /// \\ret The structured sort representing %s\n" % (self.label.to_string())
+      code += "        structured_sort %s_struct(%s)\n" % (self.label.to_string(), param)
+      code += "        {\n"
+      code += "          structured_sort_constructor_vector constructors;\n"
+      code += "%s" % (self.alias.code(sort_spec))
+      code += "          structured_sort(constructors);\n"
+      code += "        }\n\n"
+      code += "      } // namespace detail\n"
     return code
 
 class sort_declaration_list():
@@ -1356,9 +1436,18 @@ class sort_declaration_list():
     self.namespace = ""
     self.original_namespace = ""
 
+  def merge_structured_sorts(self, function_spec):
+    for e in self.elements:
+      function_spec = e.merge_structured_sort(function_spec)
+    return function_spec
+
   def push_back(self, element):
     assert(isinstance(element, sort_declaration))
     self.elements += [element]
+
+  def is_alias(self, sort_expr):
+    assert(isinstance(sort_expr, sort_expression))
+    return any(map(lambda x: x.sort_expression == sort_expr and x.alias <> None, self.elements))
 
   def set_namespace(self, string):
     self.namespace = string
@@ -1379,11 +1468,25 @@ class sort_declaration_list():
       s += "%s\n" % (e.to_string())
     return s
 
-  def code(self):
+  def structured_sort_constructor_code(self):
     code = ""
     for e in self.elements:
       if e.namespace == self.namespace:
-        code += "%s\n" % (e.code())
+        code += "%s" % (e.structured_sort_constructor_code())
+    return code
+
+  def structured_sort_equation_code(self):
+    code = ""
+    for e in self.elements:
+      if e.namespace == self.namespace:
+        code += "%s" % (e.structured_sort_equation_code())
+    return code
+
+  def code(self, sort_spec):
+    code = ""
+    for e in self.elements:
+      if e.namespace == self.namespace:
+        code += "%s\n" % (e.code(sort_spec))
     return code
 
 class equation_specification():
@@ -1502,7 +1605,8 @@ class constructor_specification():
     code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (self.namespace,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
-    code += "%s\n" % (self.declarations.generator_code(sort_spec))
+    code += "%s" % (sort_spec.structured_sort_constructor_code())
+    code += "%s\n" % (self.declarations.generator_code(sort_spec, True))
     code += "        return result;\n"
     code += "      }\n"
     return code
@@ -1558,6 +1662,13 @@ class sort_specification():
     self.namespace = ""
     self.original_namespace = ""
 
+  def is_alias(self, sort_expr):
+    assert(isinstance(sort_expr, sort_expression))
+    return self.declarations.is_alias(sort_expr)
+
+  def merge_structured_sorts(self, function_spec):
+    return self.declarations.merge_structured_sorts(function_spec)
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
@@ -1586,8 +1697,14 @@ class sort_specification():
   def to_string(self):
     return "sort %s" % (self.declarations.to_string())
 
+  def structured_sort_constructor_code(self):
+    return self.declarations.structured_sort_constructor_code()
+
+  def structured_sort_equation_code(self):
+    return self.declarations.structured_sort_equation_code()
+
   def code(self):
-    return self.declarations.code()
+    return self.declarations.code(self)
 
 class specification():
   def __init__(self, sort_spec, function_spec, variable_spec, equation_spec):
@@ -1645,6 +1762,8 @@ class specification():
     return s
 
   def code(self):
+    # Add structured sorts to constructor declarations
+    self.function_specification = self.sort_specification.merge_structured_sorts(self.function_specification)
     code  = "#ifndef MCRL2_NEW_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_NEW_DATA_%s_H\n\n" % (self.namespace.upper())
     code += "#include \"mcrl2/new_data/basic_sort.h\"\n"
