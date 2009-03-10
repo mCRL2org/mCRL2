@@ -1,8 +1,5 @@
 project atermpp
        : source-location ..
-       : requirements
-          <include>../include
-       : usage-requirements
        ;
 
 mcrl2-library atermpp

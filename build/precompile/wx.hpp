@@ -1,5 +1,5 @@
 #ifdef BOOST_BUILD_PCH_ENABLED
-#include <boost/foreach.hpp>
+#include "boost.hpp"
 #include <wx/wx.h>
 #include <wx/app.h>
 #include <wx/listctrl.h>

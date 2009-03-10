@@ -13,8 +13,6 @@
 /// data terms in it are rewritten, including those in the rewrite
 /// rules. This is not always desirable.
 
-#include "boost.hpp" // precompiled headers
-
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
