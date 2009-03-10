@@ -15,13 +15,6 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-using namespace mcrl2::core;
-using namespace mcrl2::new_data;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::pbes_expr;
-using namespace mcrl2::pbes_system::accessors;
-
-
 //auxiliary function that composes two prenex forms into a new prenex form
 static pbes_expression join
 (pbes_expression left, pbes_expression right, bool op)

@@ -13,6 +13,12 @@
 #ifndef MCRL2_NEW_DATA_DATA_H
 #define MCRL2_NEW_DATA_DATA_H
 
+namespace mcrl2 {
+  /// \brief Namespace for all new_data library functionality
+  namespace new_data {
+  }
+}
+
 #include "abstraction.h"
 #include "application.h"
 #include "data_expression.h"
