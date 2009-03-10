@@ -653,7 +653,7 @@ static void normalize_specification(
         remove_redundant_inequalities(new_inequalities,inequalities,r);
 
         if ((inequalities.size()>0) && (inequalities.front().is_false()))
-        { std::cerr << "INCONSISTENT \n";
+        { //  std::cerr << "INCONSISTENT \n";
         }
         else
         { 
@@ -1281,6 +1281,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
       std::vector < linear_inequality > real_condition2;
       remove_redundant_inequalities(real_condition1,real_condition2,r);
       
+      bool all_conditions_found=true;
       // std::cerr << "Nextstate cond: " << pp_vector(real_condition2) << "\n";
       for(std::vector <linear_inequality>::const_iterator j=real_condition2.begin();
                  j!=real_condition2.end(); ++j)
@@ -1320,7 +1321,9 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           }
         }
         // std::cerr << "FOUND " << pp(new_condition) << "\n";
-        assert(found);
+        if (!found)
+        { all_conditions_found=false;
+        }
       }
 
       // original condition of the summand && zeta[x := g(x)]
@@ -1377,7 +1380,8 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
           atermpp::vector < data_expression > new_inequalities; */
 
 
-          if (!new_inequalities.empty())
+          if (!all_conditions_found)
+          // if (!new_inequalities.empty())
           { // add a may transition.
             summand s = generate_summand(*i,
                                          new_condition,
