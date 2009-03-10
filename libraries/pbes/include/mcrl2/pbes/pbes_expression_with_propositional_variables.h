@@ -82,9 +82,9 @@ template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_propositional_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)   { t.protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t) { t.unprotect();}
-  static void mark(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)      { t.mark();}
+  static void protect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)   { t.protect(); t.variables().protect(); t.propositional_variables().protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes_expression_with_propositional_variables t) { t.unprotect(); t.variables().unprotect(); t.propositional_variables().unprotect(); }
+  static void mark(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)      { t.mark(); t.variables().mark(); t.propositional_variables().mark(); }
   static ATerm term(mcrl2::pbes_system::pbes_expression_with_propositional_variables t)     { return t.term(); }
   static ATerm* ptr(mcrl2::pbes_system::pbes_expression_with_propositional_variables& t)    { return &t.term(); }
 };
@@ -151,7 +151,7 @@ namespace core {
     term_type and_(term_type p, term_type q)
     {
       return term_type(tr::and_(p, q),
-                       mcrl2::detail::merge(p.variables(), q.variables()),
+                       atermpp::term_list_union(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -164,7 +164,7 @@ namespace core {
     term_type or_(term_type p, term_type q)
     {
       return term_type(tr::or_(p, q),
-                       mcrl2::detail::merge(p.variables(), q.variables()),
+                       atermpp::term_list_union(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -177,7 +177,7 @@ namespace core {
     term_type imp(term_type p, term_type q)
     {
       return term_type(tr::imp(p, q),
-                       mcrl2::detail::merge(p.variables(), q.variables()),
+                       atermpp::term_list_union(p.variables(), q.variables()),
                        atermpp::term_list_union(p.propositional_variables(), q.propositional_variables())
                       );
     }
@@ -190,7 +190,7 @@ namespace core {
     term_type forall(variable_sequence_type l, term_type p)
     {
       return term_type(tr::forall(l, p),
-                       mcrl2::detail::difference(p.variables(), l.begin(), l.end()),
+                       atermpp::term_list_difference(p.variables(), l),
                        p.propositional_variables()
                       );
     }
@@ -203,7 +203,7 @@ namespace core {
     term_type exists(variable_sequence_type l, term_type p)
     {
       return term_type(tr::exists(l, p),
-                       mcrl2::detail::difference(p.variables(), l.begin(), l.end()),
+                       atermpp::term_list_difference(p.variables(), l),
                        p.propositional_variables()
                       );
     }

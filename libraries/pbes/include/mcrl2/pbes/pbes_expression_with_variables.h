@@ -22,39 +22,6 @@
 
 namespace mcrl2 {
 
-/// \cond INTERNAL_DOCS
-namespace detail {
-  new_data::variable_list merge(new_data::variable_list const& v1, new_data::variable_list const& v2) {
-    std::set< new_data::variable > variables(v1.begin(), v1.end());
-
-    variables.insert(v2.begin(), v2.end());
-
-    return new_data::variable_list(variables.begin(), variables.end());
-  }
-
-  struct in_range : public std::unary_function< new_data::variable const&, bool > {
-    std::set< new_data::variable > m_variables;
-
-    bool operator()(new_data::variable const& v) const {
-      return m_variables.find(v) != m_variables.end();
-    }
-
-    template < typename ForwardTraversalIterator >
-    in_range(ForwardTraversalIterator b, ForwardTraversalIterator e) : m_variables(b, e) {
-    }
-  };
-
-  template < typename ForwardTraversalIterator >
-  new_data::variable_list difference(new_data::variable_list const& v, ForwardTraversalIterator const& b, ForwardTraversalIterator const& e) {
-    new_data::variable_vector result;
-
-    std::remove_copy_if(v.begin(), v.end(), result.end(), in_range(b, e));
-
-    return new_data::convert< new_data::variable_list >(result);
-  }
-}
-/// \endcond
-
 namespace pbes_system {
 
   /// \brief A pbes expression that stores a list of variables. The
@@ -122,9 +89,9 @@ template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_expression_with_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_expression_with_variables t)   { t.protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes_expression_with_variables t) { t.unprotect(); }
-  static void mark(mcrl2::pbes_system::pbes_expression_with_variables t)      { t.mark(); }
+  static void protect(mcrl2::pbes_system::pbes_expression_with_variables t)   { t.protect(); t.variables().protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes_expression_with_variables t) { t.unprotect(); t.variables().unprotect(); }
+  static void mark(mcrl2::pbes_system::pbes_expression_with_variables t)      { t.mark(); t.variables().mark(); }
   static ATerm term(mcrl2::pbes_system::pbes_expression_with_variables t)     { return t.term(); }
   static ATerm* ptr(mcrl2::pbes_system::pbes_expression_with_variables& t)    { return &t.term(); }
 };
@@ -190,7 +157,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return term_type(tr::and_(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
+      return term_type(tr::and_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
 
     /// \brief Make a disjunction
@@ -200,7 +167,7 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return term_type(tr::or_(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
+      return term_type(tr::or_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
 
     /// \brief Make an implication
@@ -210,7 +177,7 @@ namespace core {
     static inline
     term_type imp(term_type p, term_type q)
     {
-      return term_type(tr::imp(p, q), mcrl2::new_data::merge(p.variables(), q.variables()));
+      return term_type(tr::imp(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
 
     /// \brief Make a universal quantification
@@ -220,7 +187,7 @@ namespace core {
     static inline
     term_type forall(variable_sequence_type const& l, term_type p)
     {
-      return term_type(tr::forall(l, p), mcrl2::detail::difference(p.variables(), l.begin(), l.end()));
+      return term_type(tr::forall(l, p), atermpp::term_list_difference(p.variables(), l));
     }
 
     /// \brief Make an existential quantification
@@ -230,7 +197,7 @@ namespace core {
     static inline
     term_type exists(variable_sequence_type const& l, term_type p)
     {
-      return term_type(tr::exists(l, p), mcrl2::detail::difference(p.variables(), l.begin(), l.end()));
+      return term_type(tr::exists(l, p), atermpp::term_list_difference(p.variables(), l));
     }
 
     /// \brief Propositional variable instantiation

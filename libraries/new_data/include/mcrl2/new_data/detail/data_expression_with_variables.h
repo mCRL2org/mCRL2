@@ -95,9 +95,9 @@ template<>
 struct aterm_traits<mcrl2::new_data::data_expression_with_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::new_data::data_expression_with_variables t)   { t.protect(); }
-  static void unprotect(mcrl2::new_data::data_expression_with_variables t) { t.unprotect(); }
-  static void mark(mcrl2::new_data::data_expression_with_variables t)      { t.mark(); }
+  static void protect(mcrl2::new_data::data_expression_with_variables t)   { t.protect(); t.variables().protect(); }
+  static void unprotect(mcrl2::new_data::data_expression_with_variables t) { t.unprotect(); t.variables().unprotect(); }
+  static void mark(mcrl2::new_data::data_expression_with_variables t)      { t.mark(); t.variables().mark(); }
   static ATerm term(mcrl2::new_data::data_expression_with_variables t)     { return t.term(); }
   static ATerm* ptr(mcrl2::new_data::data_expression_with_variables& t)    { return &t.term(); }
 };

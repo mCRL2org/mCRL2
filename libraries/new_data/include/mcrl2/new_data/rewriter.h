@@ -247,7 +247,7 @@ namespace new_data {
       /// \return The normal form of d.
       data_expression_with_variables operator()(const data_expression_with_variables& d) const
       {
-        data_expression t = reconstruct(m_rewriter.get()->rewrite(implement(d)));
+        data_expression t = reconstruct(m_rewriter->rewrite(implement(d)));
         std::set<variable> v = find_all_variables(t);
         return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
       }
