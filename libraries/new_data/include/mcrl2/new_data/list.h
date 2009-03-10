@@ -20,18 +20,18 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort list
     namespace sort_list {
 
-      /// \brief Constructor for sort expression List(S)
+      /// \brief Constructor for sort expression List(s)
       /// \param s A sort expression
       /// \return Sort expression list(s)
       inline
       container_sort list(const sort_expression& s)
       {
-        //static container_sort list("List", s);
-        container_sort list("List", s);
+        //static container_sort list("list", s);
+        container_sort list("list", s);
         return list;
       }
 
-      /// \brief Recogniser for sort expression List(S)
+      /// \brief Recogniser for sort expression List(s)
       /// \param e A sort expression
       /// \return true iff e is a container sort of which the name matches
       ///      list
@@ -99,7 +99,7 @@ namespace mcrl2 {
         return application(cons_(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of cons_
+      ///\brief Recogniser for application of |>
       ///\param e A data expression
       ///\return true iff e is an application of function symbol cons_ to a
       ///     number of arguments
@@ -114,7 +114,6 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined constructors for list
-      /// \param s A sort expression
       /// \return All system defined constructors for list
       inline
       function_symbol_vector list_generate_constructors_code(const sort_expression& s)
@@ -201,7 +200,7 @@ namespace mcrl2 {
         return application(count(s),arg0);
       }
 
-      ///\brief Recogniser for application of count
+      ///\brief Recogniser for application of #
       ///\param e A data expression
       ///\return true iff e is an application of function symbol count to a
       ///     number of arguments
@@ -246,7 +245,7 @@ namespace mcrl2 {
         return application(snoc(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of snoc
+      ///\brief Recogniser for application of <|
       ///\param e A data expression
       ///\return true iff e is an application of function symbol snoc to a
       ///     number of arguments
@@ -291,7 +290,7 @@ namespace mcrl2 {
         return application(concat(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of concat
+      ///\brief Recogniser for application of ++
       ///\param e A data expression
       ///\return true iff e is an application of function symbol concat to a
       ///     number of arguments
@@ -336,7 +335,7 @@ namespace mcrl2 {
         return application(element_at(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of element_at
+      ///\brief Recogniser for application of .
       ///\param e A data expression
       ///\return true iff e is an application of function symbol element_at to a
       ///     number of arguments
@@ -531,7 +530,6 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for list
-      /// \param s A sort expression
       /// \return All system defined mappings for list
       inline
       function_symbol_vector list_generate_functions_code(const sort_expression& s)
@@ -741,26 +739,26 @@ namespace mcrl2 {
         variable vp("p",sort_pos::pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vd, vs), equal_to(nil(s), cons_(s, vd, vs)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vs, vd), equal_to(nil(s), cons_(s, vd, vs)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(vd, vs), equal_to(cons_(s, vd, vs), nil(s)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool_::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vs, ve, vt, vd), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool_::and_(equal_to(vd, ve), equal_to(vs, vt))));
         result.push_back(data_equation(make_vector(vd), in(s, vd, nil(s)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool_::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(make_vector(vs, ve, vd), in(s, vd, cons_(s, ve, vs)), sort_bool_::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(variable_list(), count(s, nil(s)), sort_nat::c0()));
-        result.push_back(data_equation(make_vector(vd, vs), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
+        result.push_back(data_equation(make_vector(vs, vd), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
         result.push_back(data_equation(make_vector(vd), snoc(s, nil(s), vd), cons_(s, vd, nil(s))));
-        result.push_back(data_equation(make_vector(vd, ve, vs), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
+        result.push_back(data_equation(make_vector(vd, vs, ve), snoc(s, cons_(s, vd, vs), ve), cons_(s, vd, snoc(s, vs, ve))));
         result.push_back(data_equation(make_vector(vs), concat(s, nil(s), vs), vs));
-        result.push_back(data_equation(make_vector(vd, vs, vt), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
+        result.push_back(data_equation(make_vector(vs, vd, vt), concat(s, cons_(s, vd, vs), vt), cons_(s, vd, concat(s, vs, vt))));
         result.push_back(data_equation(make_vector(vs), concat(s, vs, nil(s)), vs));
         result.push_back(data_equation(make_vector(vd, vs), element_at(s, cons_(s, vd, vs), sort_nat::c0()), vd));
-        result.push_back(data_equation(make_vector(vd, vp, vs), element_at(s, cons_(s, vd, vs), sort_nat::cnat(vp)), element_at(s, vs, sort_nat::pred(vp))));
-        result.push_back(data_equation(make_vector(vd, vs), head(s, cons_(s, vd, vs)), vd));
-        result.push_back(data_equation(make_vector(vd, vs), tail(s, cons_(s, vd, vs)), vs));
+        result.push_back(data_equation(make_vector(vd, vs, vp), element_at(s, cons_(s, vd, vs), sort_nat::cnat(vp)), element_at(s, vs, sort_nat::pred(vp))));
+        result.push_back(data_equation(make_vector(vs, vd), head(s, cons_(s, vd, vs)), vd));
+        result.push_back(data_equation(make_vector(vs, vd), tail(s, cons_(s, vd, vs)), vs));
         result.push_back(data_equation(make_vector(vd), rhead(s, cons_(s, vd, nil(s))), vd));
-        result.push_back(data_equation(make_vector(vd, ve, vs), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
+        result.push_back(data_equation(make_vector(ve, vd, vs), rhead(s, cons_(s, vd, cons_(s, ve, vs))), rhead(s, cons_(s, ve, vs))));
         result.push_back(data_equation(make_vector(vd), rtail(s, cons_(s, vd, nil(s))), nil(s)));
-        result.push_back(data_equation(make_vector(vd, ve, vs), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
+        result.push_back(data_equation(make_vector(ve, vs, vd), rtail(s, cons_(s, vd, cons_(s, ve, vs))), cons_(s, vd, rtail(s, cons_(s, ve, vs)))));
         return result;
       }
 

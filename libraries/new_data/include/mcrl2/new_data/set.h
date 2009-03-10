@@ -20,18 +20,18 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort set_
     namespace sort_set_ {
 
-      /// \brief Constructor for sort expression Set(S)
+      /// \brief Constructor for sort expression Set(s)
       /// \param s A sort expression
       /// \return Sort expression set_(s)
       inline
       container_sort set_(const sort_expression& s)
       {
-        //static container_sort set_("Set", s);
-        container_sort set_("Set", s);
+        //static container_sort set_("set_", s);
+        container_sort set_("set_", s);
         return set_;
       }
 
-      /// \brief Recogniser for sort expression Set(S)
+      /// \brief Recogniser for sort expression Set(s)
       /// \param e A sort expression
       /// \return true iff e is a container sort of which the name matches
       ///      set_
@@ -85,7 +85,7 @@ namespace mcrl2 {
         return application(set_comprehension(s),arg0);
       }
 
-      ///\brief Recogniser for application of set_comprehension
+      ///\brief Recogniser for application of \@set
       ///\param e A data expression
       ///\return true iff e is an application of function symbol set_comprehension to a
       ///     number of arguments
@@ -153,7 +153,7 @@ namespace mcrl2 {
         return application(setin(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of setin
+      ///\brief Recogniser for application of in
       ///\param e A data expression
       ///\return true iff e is an application of function symbol setin to a
       ///     number of arguments
@@ -198,7 +198,7 @@ namespace mcrl2 {
         return application(setunion_(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of setunion_
+      ///\brief Recogniser for application of +
       ///\param e A data expression
       ///\return true iff e is an application of function symbol setunion_ to a
       ///     number of arguments
@@ -243,7 +243,7 @@ namespace mcrl2 {
         return application(setdifference(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of setdifference
+      ///\brief Recogniser for application of -
       ///\param e A data expression
       ///\return true iff e is an application of function symbol setdifference to a
       ///     number of arguments
@@ -288,7 +288,7 @@ namespace mcrl2 {
         return application(setintersection(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of setintersection
+      ///\brief Recogniser for application of *
       ///\param e A data expression
       ///\return true iff e is an application of function symbol setintersection to a
       ///     number of arguments
@@ -333,7 +333,7 @@ namespace mcrl2 {
         return application(setcomplement(s),arg0);
       }
 
-      ///\brief Recogniser for application of setcomplement
+      ///\brief Recogniser for application of !
       ///\param e A data expression
       ///\return true iff e is an application of function symbol setcomplement to a
       ///     number of arguments
@@ -348,7 +348,6 @@ namespace mcrl2 {
       }
 
       /// \brief Give all system defined mappings for set_
-      /// \param s A sort expression
       /// \return All system defined mappings for set_
       inline
       function_symbol_vector set__generate_functions_code(const sort_expression& s)
@@ -453,15 +452,15 @@ namespace mcrl2 {
         variable vx("x",s);
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vf, vg), equal_to(set_comprehension(s, vf), set_comprehension(s, vg)), equal_to(vf, vg)));
+        result.push_back(data_equation(make_vector(vg, vf), equal_to(set_comprehension(s, vf), set_comprehension(s, vg)), equal_to(vf, vg)));
         result.push_back(data_equation(variable_list(), emptyset(s), set_comprehension(s, lambda(make_vector(vx), sort_bool_::false_()))));
-        result.push_back(data_equation(make_vector(vd, vf), setin(s, vd, set_comprehension(s, vf)), vf(vd)));
-        result.push_back(data_equation(make_vector(vf, vg, vx), less_equal(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
-        result.push_back(data_equation(make_vector(vs, vt), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), setunion_(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::or_(vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vs, vt), setdifference(s, vs, vt), setintersection(s, vs, setcomplement(s, vt))));
-        result.push_back(data_equation(make_vector(vf, vg, vx), setintersection(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::and_(vf(vx), vg(vx))))));
-        result.push_back(data_equation(make_vector(vf, vx), setcomplement(s, set_comprehension(s, vf)), set_comprehension(s, lambda(make_vector(vx), setcomplement(s, vf(vx))))));
+        result.push_back(data_equation(make_vector(vf, vd), setin(s, vd, set_comprehension(s, vf)), vf(vd)));
+        result.push_back(data_equation(make_vector(vx, vg, vf), less_equal(set_comprehension(s, vf), set_comprehension(s, vg)), forall(make_vector(vx), sort_bool_::implies(vf(vx), vg(vx)))));
+        result.push_back(data_equation(make_vector(vt, vs), less(vs, vt), sort_bool_::and_(less_equal(vs, vt), not_equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vg, vx, vf), setunion_(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::or_(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vt, vs), setdifference(s, vs, vt), setintersection(s, vs, setcomplement(s, vt))));
+        result.push_back(data_equation(make_vector(vx, vg, vf), setintersection(s, set_comprehension(s, vf), set_comprehension(s, vg)), set_comprehension(s, lambda(make_vector(vx), sort_bool_::and_(vf(vx), vg(vx))))));
+        result.push_back(data_equation(make_vector(vx, vf), setcomplement(s, set_comprehension(s, vf)), set_comprehension(s, lambda(make_vector(vx), setcomplement(s, vf(vx))))));
         return result;
       }
 

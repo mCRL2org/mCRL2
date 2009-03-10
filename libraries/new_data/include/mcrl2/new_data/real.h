@@ -20,8 +20,8 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort real_
     namespace sort_real_ {
 
-       /// \brief Constructor for sort expression Real
-       /// \return Sort expression Real
+      /// \brief Constructor for sort expression Real
+      /// \return Sort expression Real
       inline
       basic_sort real_()
       {
@@ -51,7 +51,7 @@ namespace mcrl2 {
 
         return result;
       }
-      /// \brief Constructor for function symbol \@cReal
+      /// \brief Constructor for function symbol @cReal
       /// \return Function symbol creal
       inline
       function_symbol creal()
@@ -61,9 +61,9 @@ namespace mcrl2 {
         return creal;
       }
 
-      /// \brief Recogniser for function \@cReal
+      /// \brief Recogniser for function @cReal
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@cReal
+      /// \return true iff e is the function symbol matching @cReal
       inline
       bool is_creal_function_symbol(const data_expression& e)
       {
@@ -74,15 +74,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@cReal
-      ///\return Application of \@cReal to a number of arguments
+      ///\brief Application of function symbol @cReal
+      ///\return Application of @cReal to a number of arguments
       inline
       application creal(const data_expression& arg0, const data_expression& arg1)
       {
         return application(creal(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of creal
+      ///\brief Recogniser for application of @cReal
       ///\param e A data expression
       ///\return true iff e is an application of function symbol creal to a
       ///     number of arguments
@@ -127,7 +127,7 @@ namespace mcrl2 {
         return application(pos2real(),arg0);
       }
 
-      ///\brief Recogniser for application of pos2real
+      ///\brief Recogniser for application of Pos2Real
       ///\param e A data expression
       ///\return true iff e is an application of function symbol pos2real to a
       ///     number of arguments
@@ -172,7 +172,7 @@ namespace mcrl2 {
         return application(nat2real(),arg0);
       }
 
-      ///\brief Recogniser for application of nat2real
+      ///\brief Recogniser for application of Nat2Real
       ///\param e A data expression
       ///\return true iff e is an application of function symbol nat2real to a
       ///     number of arguments
@@ -217,7 +217,7 @@ namespace mcrl2 {
         return application(int2real(),arg0);
       }
 
-      ///\brief Recogniser for application of int2real
+      ///\brief Recogniser for application of Int2Real
       ///\param e A data expression
       ///\return true iff e is an application of function symbol int2real to a
       ///     number of arguments
@@ -262,7 +262,7 @@ namespace mcrl2 {
         return application(real2pos(),arg0);
       }
 
-      ///\brief Recogniser for application of real2pos
+      ///\brief Recogniser for application of Real2Pos
       ///\param e A data expression
       ///\return true iff e is an application of function symbol real2pos to a
       ///     number of arguments
@@ -307,7 +307,7 @@ namespace mcrl2 {
         return application(real2nat(),arg0);
       }
 
-      ///\brief Recogniser for application of real2nat
+      ///\brief Recogniser for application of Real2Nat
       ///\param e A data expression
       ///\return true iff e is an application of function symbol real2nat to a
       ///     number of arguments
@@ -352,7 +352,7 @@ namespace mcrl2 {
         return application(real2int(),arg0);
       }
 
-      ///\brief Recogniser for application of real2int
+      ///\brief Recogniser for application of Real2Int
       ///\param e A data expression
       ///\return true iff e is an application of function symbol real2int to a
       ///     number of arguments
@@ -371,6 +371,7 @@ namespace mcrl2 {
       inline
       function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == real_())
         {
@@ -419,7 +420,7 @@ namespace mcrl2 {
         return application(minimum(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of minimum
+      ///\brief Recogniser for application of min
       ///\param e A data expression
       ///\return true iff e is an application of function symbol minimum to a
       ///     number of arguments
@@ -438,6 +439,7 @@ namespace mcrl2 {
       inline
       function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == real_())
         {
@@ -510,7 +512,7 @@ namespace mcrl2 {
         return application(maximum(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of maximum
+      ///\brief Recogniser for application of max
       ///\param e A data expression
       ///\return true iff e is an application of function symbol maximum to a
       ///     number of arguments
@@ -529,6 +531,7 @@ namespace mcrl2 {
       inline
       function_symbol abs(const sort_expression& s0)
       {
+        
         sort_expression target_sort;
         if (s0 == real_())
         {
@@ -596,6 +599,7 @@ namespace mcrl2 {
       inline
       function_symbol negate(const sort_expression& s0)
       {
+        
         sort_expression target_sort;
         if (s0 == real_())
         {
@@ -644,7 +648,7 @@ namespace mcrl2 {
         return application(negate(arg0.sort()),arg0);
       }
 
-      ///\brief Recogniser for application of negate
+      ///\brief Recogniser for application of -
       ///\param e A data expression
       ///\return true iff e is an application of function symbol negate to a
       ///     number of arguments
@@ -663,6 +667,7 @@ namespace mcrl2 {
       inline
       function_symbol succ(const sort_expression& s0)
       {
+        
         sort_expression target_sort;
         if (s0 == real_())
         {
@@ -730,6 +735,7 @@ namespace mcrl2 {
       inline
       function_symbol pred(const sort_expression& s0)
       {
+        
         sort_expression target_sort;
         if (s0 == real_())
         {
@@ -797,6 +803,7 @@ namespace mcrl2 {
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == real_())
         {
@@ -853,7 +860,7 @@ namespace mcrl2 {
         return application(plus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of plus
+      ///\brief Recogniser for application of +
       ///\param e A data expression
       ///\return true iff e is an application of function symbol plus to a
       ///     number of arguments
@@ -872,6 +879,7 @@ namespace mcrl2 {
       inline
       function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == real_())
         {
@@ -920,7 +928,7 @@ namespace mcrl2 {
         return application(minus(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of minus
+      ///\brief Recogniser for application of -
       ///\param e A data expression
       ///\return true iff e is an application of function symbol minus to a
       ///     number of arguments
@@ -939,6 +947,7 @@ namespace mcrl2 {
       inline
       function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == real_())
         {
@@ -987,7 +996,7 @@ namespace mcrl2 {
         return application(times(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of times
+      ///\brief Recogniser for application of *
       ///\param e A data expression
       ///\return true iff e is an application of function symbol times to a
       ///     number of arguments
@@ -1006,6 +1015,7 @@ namespace mcrl2 {
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort;
         if (s0 == real_() && s1 == sort_int_::int_())
         {
@@ -1073,6 +1083,7 @@ namespace mcrl2 {
       inline
       function_symbol divides(const sort_expression& s0, const sort_expression& s1)
       {
+        
         sort_expression target_sort(real_());
 
         //static function_symbol divides("/", function_sort(s0, s1, target_sort));
@@ -1101,7 +1112,7 @@ namespace mcrl2 {
         return application(divides(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of divides
+      ///\brief Recogniser for application of /
       ///\param e A data expression
       ///\return true iff e is an application of function symbol divides to a
       ///     number of arguments
@@ -1250,7 +1261,7 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol \@redfrac
+      /// \brief Constructor for function symbol @redfrac
       /// \return Function symbol redfrac
       inline
       function_symbol redfrac()
@@ -1260,9 +1271,9 @@ namespace mcrl2 {
         return redfrac;
       }
 
-      /// \brief Recogniser for function \@redfrac
+      /// \brief Recogniser for function @redfrac
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfrac
+      /// \return true iff e is the function symbol matching @redfrac
       inline
       bool is_redfrac_function_symbol(const data_expression& e)
       {
@@ -1273,15 +1284,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@redfrac
-      ///\return Application of \@redfrac to a number of arguments
+      ///\brief Application of function symbol @redfrac
+      ///\return Application of @redfrac to a number of arguments
       inline
       application redfrac(const data_expression& arg0, const data_expression& arg1)
       {
         return application(redfrac(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of redfrac
+      ///\brief Recogniser for application of @redfrac
       ///\param e A data expression
       ///\return true iff e is an application of function symbol redfrac to a
       ///     number of arguments
@@ -1295,7 +1306,7 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol \@redfracwhr
+      /// \brief Constructor for function symbol @redfracwhr
       /// \return Function symbol redfracwhr
       inline
       function_symbol redfracwhr()
@@ -1305,9 +1316,9 @@ namespace mcrl2 {
         return redfracwhr;
       }
 
-      /// \brief Recogniser for function \@redfracwhr
+      /// \brief Recogniser for function @redfracwhr
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfracwhr
+      /// \return true iff e is the function symbol matching @redfracwhr
       inline
       bool is_redfracwhr_function_symbol(const data_expression& e)
       {
@@ -1318,15 +1329,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@redfracwhr
-      ///\return Application of \@redfracwhr to a number of arguments
+      ///\brief Application of function symbol @redfracwhr
+      ///\return Application of @redfracwhr to a number of arguments
       inline
       application redfracwhr(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(redfracwhr(),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of redfracwhr
+      ///\brief Recogniser for application of @redfracwhr
       ///\param e A data expression
       ///\return true iff e is an application of function symbol redfracwhr to a
       ///     number of arguments
@@ -1340,7 +1351,7 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol \@redfrachlp
+      /// \brief Constructor for function symbol @redfrachlp
       /// \return Function symbol redfrachlp
       inline
       function_symbol redfrachlp()
@@ -1350,9 +1361,9 @@ namespace mcrl2 {
         return redfrachlp;
       }
 
-      /// \brief Recogniser for function \@redfrachlp
+      /// \brief Recogniser for function @redfrachlp
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@redfrachlp
+      /// \return true iff e is the function symbol matching @redfrachlp
       inline
       bool is_redfrachlp_function_symbol(const data_expression& e)
       {
@@ -1363,15 +1374,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@redfrachlp
-      ///\return Application of \@redfrachlp to a number of arguments
+      ///\brief Application of function symbol @redfrachlp
+      ///\return Application of @redfrachlp to a number of arguments
       inline
       application redfrachlp(const data_expression& arg0, const data_expression& arg1)
       {
         return application(redfrachlp(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of redfrachlp
+      ///\brief Recogniser for application of @redfrachlp
       ///\param e A data expression
       ///\return true iff e is an application of function symbol redfrachlp to a
       ///     number of arguments
@@ -1667,40 +1678,40 @@ namespace mcrl2 {
         variable vs("s",real_());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vq, vp, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vq, vp, vy, vx), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vx, vp, vq, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
         result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int_::cint(vn), sort_pos::c1())));
         result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int_::cint(sort_nat::cnat(vp)), sort_pos::c1())));
         result.push_back(data_equation(make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
         result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int_::int2nat(vx)));
         result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int_::int2pos(vx)));
-        result.push_back(data_equation(make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
-        result.push_back(data_equation(make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
+        result.push_back(data_equation(make_vector(vs, vr), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
+        result.push_back(data_equation(make_vector(vs, vr), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
         result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int_::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
         result.push_back(data_equation(make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
         result.push_back(data_equation(make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
         result.push_back(data_equation(make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vq, vp, vy, vx), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vy, vq, vx, vp), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vp, vy, vq), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vx, vq, vp, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vq, vp), divides(vp, vq), redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq)))));
         result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int_::cint(vm), sort_int_::cint(vn))));
         result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
-        result.push_back(data_equation(make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int_::cint(vn)), redfrac(exp(vx, vn), sort_int_::cint(sort_nat::cnat(exp(vp, vn))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx), not_equal_to(vx, sort_int_::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int_::cneg(vq)), redfrac(sort_int_::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vx, vp, vn), exp(creal(vx, vp), sort_int_::cint(vn)), redfrac(exp(vx, vn), sort_int_::cint(sort_nat::cnat(exp(vp, vn))))));
+        result.push_back(data_equation(make_vector(vp, vx, vq), not_equal_to(vx, sort_int_::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int_::cneg(vq)), redfrac(sort_int_::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
         result.push_back(data_equation(make_vector(vp, vx), floor(creal(vx, vp)), sort_int_::div(vx, vp)));
         result.push_back(data_equation(make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
         result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int_::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
         result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int_::cneg(vp)), redfrac(negate(vx), sort_int_::cint(sort_nat::cnat(vp)))));
         result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int_::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int_::div(vx, vp), sort_int_::mod(vx, vp))));
         result.push_back(data_equation(make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq))), vx)));
-        result.push_back(data_equation(make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int_::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int_::int2pos(vx))));
+        result.push_back(data_equation(make_vector(vp, vx, vq), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq))), vx)));
+        result.push_back(data_equation(make_vector(vy, vp, vx), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int_::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int_::int2pos(vx))));
         return result;
       }
 

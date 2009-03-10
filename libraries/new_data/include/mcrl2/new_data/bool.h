@@ -16,8 +16,8 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort bool_
     namespace sort_bool_ {
 
-       /// \brief Constructor for sort expression Bool
-       /// \return Sort expression Bool
+      /// \brief Constructor for sort expression Bool
+      /// \return Sort expression Bool
       inline
       basic_sort bool_()
       {
@@ -126,7 +126,7 @@ namespace mcrl2 {
         return application(not_(),arg0);
       }
 
-      ///\brief Recogniser for application of not_
+      ///\brief Recogniser for application of !
       ///\param e A data expression
       ///\return true iff e is an application of function symbol not_ to a
       ///     number of arguments
@@ -171,7 +171,7 @@ namespace mcrl2 {
         return application(and_(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of and_
+      ///\brief Recogniser for application of &&
       ///\param e A data expression
       ///\return true iff e is an application of function symbol and_ to a
       ///     number of arguments
@@ -216,7 +216,7 @@ namespace mcrl2 {
         return application(or_(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of or_
+      ///\brief Recogniser for application of ||
       ///\param e A data expression
       ///\return true iff e is an application of function symbol or_ to a
       ///     number of arguments
@@ -261,7 +261,7 @@ namespace mcrl2 {
         return application(implies(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of implies
+      ///\brief Recogniser for application of =>
       ///\param e A data expression
       ///\return true iff e is an application of function symbol implies to a
       ///     number of arguments
