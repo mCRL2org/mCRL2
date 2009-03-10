@@ -499,7 +499,8 @@ class pbes
     /// \brief Applies normalization to the equations of the pbes.
     void normalize()
     {
-      std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
+      Container& eqns = equations();
+      std::transform(eqns.begin(), eqns.end(), eqns.begin(), normalize_pbes_equation());
     }
 
     /// \brief Returns true if the pbes is normalized.
