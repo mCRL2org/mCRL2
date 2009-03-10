@@ -27,6 +27,9 @@ class RewriterJitty: public Rewriter
 		ATermAppl fromRewriteFormat(ATerm Term);
 		ATerm rewriteInternal(ATerm Term);
 
+		bool addRewriteRule(ATermAppl Rule);
+		bool removeRewriteRule(ATermAppl Rule);
+
 	private:
 		unsigned int num_opids;
 		unsigned int max_vars;
@@ -35,7 +38,8 @@ class RewriterJitty: public Rewriter
 
 		ATermTable term2int;
 		ATermAppl *int2term;
-		ATermList *jitty_eqns;
+		ATermTable jitty_eqns;
+		ATermList *jitty_strat;
 
 		ATermAppl rewrite_aux(ATermAppl Term);
 
