@@ -5,6 +5,13 @@
 import string
 import copy
 
+# Escape an initial @ sign is present. Needed for doxygen code extraction
+def escape(s):
+  if s[0] == "@":
+    return "\\%s" % (s)
+  else:
+    return s
+
 def union_by_string(s,t):
   result = set()
   for e in s:
@@ -233,10 +240,10 @@ class function_declaration_list():
       
       # Generate code for projection function
       case_code  = "      ///\\brief Function for projecting out argument\n"
-      case_code += "      ///        %s from an application\n" % (p)
+      case_code += "      ///        %s from an application\n" % (escape(p))
       case_code += "      /// \\param e A data expression\n"
-      case_code += "      /// \\pre %s is defined for e\n" % (p)
-      case_code += "      /// \\return The argument of e that corresponds to %s\n" % (p)
+      case_code += "      /// \\pre %s is defined for e\n" % (escape(p))
+      case_code += "      /// \\return The argument of e that corresponds to %s\n" % (escape(p))
       case_code += "      inline\n"
       case_code += "      data_expression %s(const data_expression& e)\n" % (p)
       case_code += "      {\n"
@@ -269,75 +276,76 @@ class function_declaration_list():
       def to_string(self):
         return "%s : { %s }" % (self.id.to_string(), self.sort_expression_list.to_string())
 
-      # Constructor for function symbol
-      # TODO, generate full documentation for the parameters of the function
-      FUNCTION_CONSTRUCTOR = '''      /// \\brief Constructor for function symbol %(fullname)s
-      /// \\return Function symbol %(name)s
-      inline
-      function_symbol %(name)s(%(sortparams)s)
-      {
-        //static function_symbol %(name)s("%(fullname)s", %(sort)s);
-        function_symbol %(name)s("%(fullname)s", %(sort)s);
-        return %(name)s;
-      }
-'''
+      def function_constructor(self, fullname, name, sortparams, sort):
+        code  = ""
+        code += "      /// \\brief Constructor for function symbol %s\n" % (escape(fullname))
+        code += "      /// \\return Function symbol %s\n" % (escape(name))
+        code += "      inline\n"
+        code += "      function_symbol %s(%s)\n" % (name, sortparams)
+        code += "      {\n"
+        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        return %s;\n" % (name)
+        code += "      }\n"
+        return code
 
-      # Constructor for function symbol, allowing for polymorphism by parameterisation
-      # with a sort expression
-      # TODO, generate full documentation for the parameters of the function
-      POLYMORPHIC_FUNCTION_CONSTRUCTOR = '''      ///\\brief Constructor for function symbol %(fullname)s
-      ///\\return Function symbol %(name)s
-      inline
-      function_symbol %(name)s(%(sortparams)s%(comma)s%(domainparams)s)
-      {
-        %(asserts)s
-        %(targetsort)s
-        //static function_symbol %(name)s("%(fullname)s", %(sort)s);
-        function_symbol %(name)s("%(fullname)s", %(sort)s);
-        return %(name)s;
-      }
-'''
-      # Recogniser for function symbol
-      FUNCTION_RECOGNISER = '''      /// \\brief Recogniser for function %(fullname)s
-      /// \\param e A data expression
-      /// \\return true iff e is the function symbol matching %(fullname)s
-      inline
-      bool is_%(name)s_function_symbol(const data_expression& e)
-      {
-        if (e.is_function_symbol())
-        {
-          return static_cast<const function_symbol&>(e).name() == "%(fullname)s";
-        }
-        return false;
-      }
-'''
+      def polymorphic_function_constructor(self, fullname, name, sortparams, comma, domainparams, targetsort, sort):
+        code  = ""
+        code += "      ///\\brief Constructor for function symbol %s\n" % (escape(fullname))
+        code += "      ///\\return Function symbol %s\n" % (escape(name))
+        code += "      inline\n"
+        code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
+        code += "      {\n"
+        code += "        %s\n" % (targetsort)
+        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        return %s;\n" % (name)
+        code += "      }\n"
+        return code 
 
-      # TODO: Properly document parameters
-      # Application of function to arguments
-      FUNCTION_APPLICATION='''      ///\\brief Application of function symbol %(fullname)s
-      ///\\return Application of %(fullname)s to a number of arguments
-      inline
-      application %(name)s(%(formsortparams)s%(comma)s%(formparams)s)
-      {
-        return application(%(name)s(%(actsortparams)s),%(actparams)s);
-      }
-'''
+      def function_recogniser(self, fullname, name):
+        code  = ""
+        code += "      /// \\brief Recogniser for function %s\n" % (escape(fullname))
+        code += "      /// \\param e A data expression\n"
+        code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
+        code += "      inline\n"
+        code += "      bool is_%s_function_symbol(const data_expression& e)\n" % (name)
+        code += "      {\n"
+        code += "        if (e.is_function_symbol())\n"
+        code += "        {\n"
+        code += "          return static_cast<const function_symbol&>(e).name() == \"%s\";\n" % (fullname)
+        code += "        }\n"
+        code += "        return false;\n"
+        code += "      }\n"
+        return code
 
-      # Recogniser for function application
-      FUNCTION_APPLICATION_RECOGNISER='''      ///\\brief Recogniser for application of %(fullname)s
-      ///\\param e A data expression
-      ///\\return true iff e is an application of function symbol %(name)s to a
-      ///     number of arguments
-      inline
-      bool is_%(name)s_application(const data_expression& e)
-      {
-        if (e.is_application())
-        {
-          return is_%(name)s_function_symbol(static_cast<const application&>(e).head());
-        }
-        return false;
-      }
-'''
+      def function_application(self, fullname, name, formsortparams, comma, formparams, actsortparams, actparams):
+        code  = ""
+        code += "      ///\\brief Application of function symbol %s\n" % (escape(fullname))
+        code += "      ///\\return Application of %s to a number of arguments\n" % (escape(fullname))
+        code += "      inline\n"
+        code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
+        code += "      {\n"
+        code += "        return application(%s(%s),%s);\n" % (name, actsortparams, actparams)
+        code += "      }\n"
+        return code
+
+      def function_application_recogniser(self, fullname, name):
+        code  = ""
+        code += "      ///\\brief Recogniser for application of %s\n" % (escape(name))
+        code += "      ///\\param e A data expression\n"
+        code += "      ///\\return true iff e is an application of function symbol %s to a\n" % (escape(name))
+        code += "      ///     number of arguments\n"
+        code += "      inline\n"
+        code += "      bool is_%s_application(const data_expression& e)\n" % (name)
+        code += "      {\n"
+        code += "        if (e.is_application())\n"
+        code += "        {\n"
+        code += "          return is_%s_function_symbol(static_cast<const application&>(e).head());\n" % (name)
+        code += "        }\n"
+        code += "        return false;\n"
+        code += "      }\n"
+        return code
 
       def function_application_code(self, sort, polymorphic = False):
         code = ""
@@ -353,20 +361,9 @@ class function_declaration_list():
           if self.sort_expression_list.actual_parameters_code() <> "":
             act_sort_params = [self.sort_expression_list.actual_parameters_code()] + act_sort_params
 
-          code += self.FUNCTION_APPLICATION % {
-            'formsortparams': self.sort_expression_list.formal_parameters_code(),
-            'comma'     : comma,
-            'actsortparams':  string.join(act_sort_params, ", "),
-            'fullname'  : self.id.to_string(),
-            'name'      : self.label.to_string(),
-            'formparams': sort.domain.formal_parameters_code(),
-            'actparams' : sort.domain.actual_parameters_code(),
-          }
+          code += self.function_application(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), comma, sort.domain.formal_parameters_code(), string.join(act_sort_params, ", "), sort.domain.actual_parameters_code())
           code += "\n"
-          code += self.FUNCTION_APPLICATION_RECOGNISER % {
-            'fullname'  : self.id.to_string(),
-            'name'      : self.label.to_string()
-          }
+          code += self.function_application_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
         return code
 
@@ -379,17 +376,9 @@ class function_declaration_list():
         code = ""
         if len(self.sort_expression_list.elements) == 1:
           sort = self.sort_expression_list.elements[0] # as len is 1
-          code += self.FUNCTION_CONSTRUCTOR % {
-            'sortparams' : self.sort_expression_list.formal_parameters_code(),
-            'fullname'   : self.id.to_string(),
-            'name'       : self.label.to_string(),
-            'sort'       : sort.code(sort_spec)
-          }
+          code += self.function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), sort.code(sort_spec))
           code += "\n"
-          code += self.FUNCTION_RECOGNISER % {
-            'fullname'   : self.id.to_string(),
-            'name'       : self.label.to_string()
-          }
+          code += self.function_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
           code += self.function_application_code(sort)
         else:
@@ -433,22 +422,9 @@ class function_declaration_list():
           comma = ""
           if self.sort_expression_list.formal_parameters_code() <> "":
             comma = ", "
-          code += self.POLYMORPHIC_FUNCTION_CONSTRUCTOR % {
-            'fullname'   : self.id.to_string(),
-            'name'       : self.label.to_string(),
-            'sortparams' : self.sort_expression_list.formal_parameters_code(),
-            'comma'      : comma,
-            'domainparams' : string.join(domain_param_code, ", "),
-            'asserts'    : "", # Find a nice set of assertions here
-            'targetsort' : target_sort,
-            'sort'       : new_sort.code(sort_spec)
-          }
+          code += self.polymorphic_function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), comma, string.join(domain_param_code, ", "), target_sort, new_sort.code(sort_spec))
           code += "\n"
-          
-          code += self.FUNCTION_RECOGNISER % {
-          'fullname'  : self.id.to_string(),
-          'name'      : self.label.to_string()
-          }
+          code += self.function_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
           code += self.function_application_code(self.sort_expression_list.elements[0], True)
 
@@ -567,7 +543,7 @@ class equation_declaration():
       if len(variables_code) == 0:
         variables_string = "variable_list()"
       else:
-        variables_string = "make_vector(%s)" % (string.join(variables_code, ", "))
+        variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
 
       code = "data_equation(%s, %s, %s)" % (variables_string, self.lhs.code(sort_spec, function_spec, variable_spec), self.rhs.code(sort_spec, function_spec, variable_spec))
 
@@ -579,7 +555,7 @@ class equation_declaration():
       if len(variables_code) == 0:
         variables_string = "variable_list()"
       else:
-        variables_string = "make_vector(%s)" % (string.join(variables_code, ", "))
+        variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
 
       code = "data_equation(%s, %s, %s, %s)" % (variables_string, self.condition.code(sort_spec, function_spec, variable_spec), self.lhs.code(sort_spec, function_spec, variable_spec), self.rhs.code(sort_spec, function_spec, variable_spec))
 
@@ -638,10 +614,10 @@ class equation_declaration_list():
     formal_parameters_code = []
     for s in sort_parameters:
       formal_parameters_code += [s.formal_parameter_code()]
-    code  = "      /// \\brief Give all system defined equations for %s\n" % (self.namespace)
+    code  = "      /// \\brief Give all system defined equations for %s\n" % (escape(self.namespace))
     for s in sort_parameters:
-      code += "      /// \\param %s A sort expression\n" % (s.code(sort_spec))      
-    code += "      /// \\return All system defined equations for sort %s\n" % (self.namespace)
+      code += "      /// \\param %s A sort expression\n" % (escape(s.code(sort_spec)))      
+    code += "      /// \\return All system defined equations for sort %s\n" % (escape(self.namespace))
     code += "      inline\n"
     code += "      data_equation_vector %s_generate_equations_code(%s)\n" % (self.namespace, string.join(formal_parameters_code, ", "))
     code += "      {\n"
@@ -1345,81 +1321,76 @@ class sort_declaration():
       sort = "%s(%s)" % (self.label.to_string(), param)
       return "        result = result + detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label.to_string(), param, sort)
 
-  # Constructor and recogniser for sort expression
-  SORT_EXPRESSION_CONSTRUCTORS = '''      /// \\brief Constructor for sort expression %(fullname)s
-      /// \\return Sort expression %(fullname)s
-      inline
-      basic_sort %(name)s()
-      {
-        static basic_sort %(name)s("%(fullname)s");
-        return %(name)s;
-      }
+  def sort_expression_constructors(self, id, label):
+    code = ""
+    code += "      /// \\brief Constructor for sort expression %s\n" % (escape(id.to_string()))
+    code += "      /// \\return Sort expression %s\n" % (escape(id.to_string()))
+    code += "      inline\n"
+    code += "      basic_sort %s()\n" % (label.to_string())
+    code += "      {\n"
+    code += "        static basic_sort %s(\"%s\");\n" % (label.to_string(), id.to_string())
+    code += "        return %s;\n" % (label.to_string())
+    code += "      }\n\n"
 
-      /// \\brief Recogniser for sort expression %(fullname)s
-      /// \\param e A sort expression
-      /// \\return true iff e == %(name)s()
-      inline
-      bool is_%(name)s(const sort_expression& e)
-      {
-        if (e.is_basic_sort())
-        {
-          return static_cast<const basic_sort&>(e) == %(name)s();
-        }
-        return false;
-      }
-'''
+    code += "      /// \\brief Recogniser for sort expression %s\n" % (escape(id.to_string()))
+    code += "      /// \\param e A sort expression\n"
+    code += "      /// \\return true iff e == %s()\n" % (escape(label.to_string()))
+    code += "      inline\n"
+    code += "      bool is_%s(const sort_expression& e)\n" % (label.to_string())
+    code += "      {\n"
+    code += "        if (e.is_basic_sort())\n"
+    code += "        {\n"
+    code += "          return static_cast<const basic_sort&>(e) == %s();\n" % (label.to_string())
+    code += "        }\n"
+    code += "        return false;\n"
+    code += "      }\n"
+    return code
 
-  # Constructor and recogniser for parameterised sort expression, e.g. List(S)
-  SORT_EXPRESSION_CONSTRUCTORS_PARAM = '''      /// \\brief Constructor for sort expression %(container)s(%(param)s)
-      /// \\param %(param)s A sort expression
-      /// \\return Sort expression %(label)s(%(param)s)
-      inline
-      container_sort %(label)s(const sort_expression& %(param)s)
-      {
-        //static container_sort %(label)s("%(label)s", %(param)s);
-        container_sort %(label)s("%(label)s", %(param)s);
-        return %(label)s;
-      }
+  def sort_expression_constructors_container_sort(self, id, label, parameter):
+    code = ""
+    code += "      /// \\brief Constructor for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
+    code += "      /// \\param %s A sort expression\n" % (escape(parameter.to_string().lower()))
+    code += "      /// \\return Sort expression %s(%s)\n" % (escape(label.to_string()), escape(parameter.to_string().lower()))
+    code += "      inline\n"
+    code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
+    code += "      {\n"
+    code += "        //static container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
+    code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
+    code += "        return %s;\n" % (label.to_string())
+    code += "      }\n\n"
 
-      /// \\brief Recogniser for sort expression %(container)s(%(param)s)
-      /// \\param e A sort expression
-      /// \\return true iff e is a container sort of which the name matches
-      ///      %(label)s
-      inline
-      bool is_%(label)s(const sort_expression& e)
-      {
-        if (e.is_container_sort())
-        {
-          return static_cast<const container_sort&>(e).container_name() == "%(label)s";
-        }
-        return false;
-      }
-'''
+    code += "      /// \\brief Recogniser for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
+    code += "      /// \\param e A sort expression\n"
+    code += "      /// \\return true iff e is a container sort of which the name matches\n"
+    code += "      ///      %s\n" % (escape(label.to_string()))
+    code += "      inline\n"
+    code += "      bool is_%s(const sort_expression& e)\n" % (label.to_string())
+    code += "      {\n"
+    code += "        if (e.is_container_sort())\n"
+    code += "        {\n"
+    code += "          return static_cast<const container_sort&>(e).container_name() == \"%s\";\n" % (label.to_string())
+    code += "        }\n"
+    code += "        return false;\n"
+    code += "      }\n"
+    return code
 
   def code(self, sort_spec):
     if isinstance(self.sort_expression, sort_identifier):
-      code = self.SORT_EXPRESSION_CONSTRUCTORS % {
-        'fullname' : self.sort_expression.to_string(),
-        'name'     : self.label.to_string(),
-      }
+      code = self.sort_expression_constructors(self.sort_expression, self.label)
     else:
       assert(isinstance(self.sort_expression, sort_container))
-      code = self.SORT_EXPRESSION_CONSTRUCTORS_PARAM % {
-        'container' : self.sort_expression.container.to_string(),
-        'param'     : self.sort_expression.element_sort.to_string().lower(),
-        'label'     : self.label.to_string(),
-      }
+      code = self.sort_expression_constructors_container_sort(self.sort_expression.container, self.label, self.sort_expression.element_sort)
 
     if self.alias <> None:
       code += "\n"
       code += "      namespace detail {\n\n"
-      code += "        /// \\brief Declaration for sort %s as structured sort\n" % (self.label.to_string())
+      code += "        /// \\brief Declaration for sort %s as structured sort\n" % (escape(self.label.to_string()))
       if isinstance(self.sort_expression, sort_container):
         param = self.sort_expression.element_sort.to_string().lower()
-        code += "        /// \\param %s A sort expression\n" % (param)
+        code += "        /// \\param %s A sort expression\n" % (escape(param))
       else:
         param = ""
-      code += "        /// \\ret The structured sort representing %s\n" % (self.label.to_string())
+      code += "        /// \\ret The structured sort representing %s\n" % (escape(self.label.to_string()))
       code += "        structured_sort %s_struct(%s)\n" % (self.label.to_string(), param)
       code += "        {\n"
       code += "          structured_sort_constructor_vector constructors;\n"
@@ -1559,9 +1530,10 @@ class mapping_specification():
     assert(self.namespace == sort_spec.namespace)
     code = ""
     code += self.declarations.code(sort_spec)
-    code += "      /// \\brief Give all system defined mappings for %s\n" % (self.namespace)
-#    code += "      /// \\param %s A sort expression\n"
-    code += "      /// \\return All system defined mappings for %s\n" % (self.namespace)
+    code += "      /// \\brief Give all system defined mappings for %s\n" % (escape(self.namespace))
+    for s in self.declarations.sort_parameters():
+      code += "      /// \\param %s A sort expression\n" % (escape(s.to_string().lower()))
+    code += "      /// \\return All system defined mappings for %s\n" % (escape(self.namespace))
     code += "      inline\n"
     code += "      function_symbol_vector %s_generate_functions_code(%s)\n" % (self.namespace, sort_parameters)
     code += "      {\n"
@@ -1598,9 +1570,10 @@ class constructor_specification():
     sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters()), ", ")
     assert(self.namespace == sort_spec.namespace)
     code  = self.declarations.code(sort_spec)
-    code += "      /// \\brief Give all system defined constructors for %s\n" % (self.namespace)
-#    code += "      /// \\param %s A sort expression\n"
-    code += "      /// \\return All system defined constructors for %s\n" % (self.namespace)
+    code += "      /// \\brief Give all system defined constructors for %s\n" % (escape(self.namespace))
+    for s in self.declarations.sort_parameters():
+      code += "      /// \\param %s A sort expression\n" % (escape(s.to_string().lower()))
+    code += "      /// \\return All system defined constructors for %s\n" % (escape(self.namespace))
     code += "      inline\n"
     code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (self.namespace,sort_parameters)
     code += "      {\n"
@@ -1786,7 +1759,7 @@ class specification():
     code += "\n"
     code += "namespace mcrl2 {\n\n"
     code += "  namespace new_data {\n\n"
-    code += "    /// \\brief Namespace for system defined sort %s\n" % (self.namespace)
+    code += "    /// \\brief Namespace for system defined sort %s\n" % (escape(self.namespace))
     code += "    namespace sort_%s {\n\n" % (self.namespace)
     code += self.sort_specification.code()
     code += self.function_specification.code(self.sort_specification)
