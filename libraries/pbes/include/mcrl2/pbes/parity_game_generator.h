@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <map>
 #include <set>
+#include <utility>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
@@ -26,14 +27,14 @@
 namespace atermpp {
   /// \cond INTERNAL_DOCS
   template<>
-  struct aterm_traits<std::pair<pbes_expression, unsigned int> >
+  struct aterm_traits<std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> >
   {
     typedef ATermAppl aterm_type;
-    static void protect(std::pair<pbes_expression, unsigned int> t)   { t.first.protect(); }
-    static void unprotect(std::pair<pbes_expression, unsigned int> t) { t.first.unprotect(); }
-    static void mark(std::pair<pbes_expression, unsigned int> t)      { t.first.mark(); }
-    // static ATerm term(std::pair<pbes_expression, unsigned int> t)     { return t.first.term(); }
-    // static ATerm* ptr(std::pair<pbes_expression, unsigned int>& t)    { return &t.first.term(); }
+    static void protect(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)   { t.first.protect(); }
+    static void unprotect(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t) { t.first.unprotect(); }
+    static void mark(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)      { t.first.mark(); }
+    // static ATerm term(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int> t)     { return t.first.term(); }
+    // static ATerm* ptr(std::pair<mcrl2::pbes_system::pbes_expression, unsigned int>& t)    { return &t.first.term(); }
   };
 } // namespace atermpp
 
