@@ -529,12 +529,13 @@ namespace mcrl2 {
                 { // constructors are the same
                   variable_vector::const_reverse_iterator k(variables.rbegin() + i->arguments().size());
                   variable_vector::const_reverse_iterator l(variables.rbegin());
+                  variable_vector::const_reverse_iterator end(variables.rend());
 
                   right_equal         = equal_to(*k, *l);
                   right_smaller       = less(*k, *l);
                   right_smaller_equal = less_equal(*k, *l);
 
-                  for (++l, ++k; k != variables.rend(); ++l, ++k)
+                  for (++l, ++k; k != end; ++l, ++k)
                   {
                     // Constructors have one or more arguments:
                     // - rhs for c(x0,...,xn) == c(y0,..,yn):

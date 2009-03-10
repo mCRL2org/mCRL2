@@ -13,9 +13,9 @@
 
 #include <memory>
 #include <vector>
-#include <aterm2.h>
-#include <mcrl2/data/enum.h>
-#include <mcrl2/data/rewrite.h>
+#include "aterm2.h"
+#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/rewriter.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -217,7 +217,7 @@ class NextState
 		 * \brief Get rewriter used by this object.
 		 * \return Rewriter object used by this NextState object.
 		 **/
-		virtual Rewriter *getRewriter() = 0;
+		virtual mcrl2::new_data::rewriter& getRewriter() = 0;
 };
 
 /**
@@ -259,7 +259,7 @@ NextState *createNextState(
 		ATermAppl spec,
 		bool allow_free_vars = true,
 		int state_format = GS_STATE_VECTOR,
-		RewriteStrategy rewrite_strategy = GS_REWR_JITTY,
+		mcrl2::new_data::rewriter::strategy rewrite_strategy = mcrl2::new_data::rewriter::jitty,
 		EnumerateStrategy enumerator_strategy = ENUM_STANDARD,
 		NextStateStrategy strategy = nsStandard
 		);
