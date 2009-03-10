@@ -5,15 +5,13 @@ rule mcrl2-library-components ( ) {
   return aterm atermpp svc core new_data utilities lps lts trace pbes ;
 }
 
-for library in [ mcrl2-library-components ] gl2ps ticpp tr {
-  if $(library) in [ mcrl2-library-components ] {
-    alias $(library) :
-         : <link>shared:<source>/libraries//mcrl2/<link>shared
-           <link>static:<source>/libraries/$(library)//$(library)/<link>static ;
-  }
-  else {
-    alias $(library) : /libraries/$(library)//$(library) ;
-  }
+for library in [ mcrl2-library-components ] {
+  alias $(library) :
+       : <link>shared:<source>/libraries//mcrl2/<link>shared
+         <link>static:<source>/libraries/$(library)//$(library)/<link>static ;
+}
+for library in gl2ps ticpp tr {
+  alias $(library) : /libraries/$(library)//$(library) ;
 }
 
 # Target for a library that is part of the collective mcrl2 library when link=shared

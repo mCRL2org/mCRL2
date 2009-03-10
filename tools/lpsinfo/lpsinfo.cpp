@@ -183,7 +183,7 @@ class info_tool
             cout << endl;
           }
           cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
-          cout << "Number of declared sorts          : " << lps_specification.data().sorts().size() << endl;
+          cout << "Number of declared sorts          : " << boost::distance(lps_specification.data().sorts()) << endl;
         }
 
         return EXIT_SUCCESS;
@@ -252,7 +252,7 @@ class info_tool
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.action_labels().size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_used_actions(lps).size()))).
                 append(d.create< label >().set_text(boost::lexical_cast< std::string > (used_multiactions(lps).size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
+                append(d.create< label >().set_text(boost::lexical_cast< std::string > (boost::distance(lps_specification.data().sorts())))));
 
       send_display_layout(d.manager(m));
 

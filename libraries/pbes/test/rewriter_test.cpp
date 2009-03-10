@@ -149,7 +149,7 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
 void test_simplifying_rewriter()
 {
   std::cout << "<test_simplifying_rewriter>" << std::endl;
-  new_data::rewriter datar(new_data::data_specification(), new_data::rewriter::innermost);
+  new_data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> R(datar);
 
   test_expressions(R, "val(n >= 0) || Y(n)"                                             , "val(true)");
@@ -199,10 +199,10 @@ void test_enumerate_quantifiers_rewriter()
   std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
 
   new_data::data_specification data_spec = new_data::data_specification();
-  new_data::rewriter datar(data_spec, new_data::rewriter::innermost);
+  new_data::rewriter datar(data_spec);
   new_data::number_postfix_generator generator("UNIQUE_PREFIX");
   new_data::data_enumerator<new_data::number_postfix_generator> datae(data_spec, datar, generator);
-  new_data::rewriter_with_variables datarv(data_spec, new_data::rewriter_with_variables::innermost);
+  new_data::rewriter_with_variables datarv(data_spec);
 
   new_data::variable   v = new_data::parse_data_expression("n", "n: Pos;\n");
   new_data::data_expression d = new_data::parse_data_expression("n < 10", "n: Pos;\n");
@@ -252,10 +252,10 @@ void test_enumerate_quantifiers_rewriter_finite()
   std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
 
   new_data::data_specification data_spec = new_data::data_specification();
-  new_data::rewriter datar(data_spec, new_data::rewriter::innermost);
+  new_data::rewriter datar(data_spec);
   new_data::number_postfix_generator generator("UNIQUE_PREFIX");
   new_data::data_enumerator<new_data::number_postfix_generator> datae(data_spec, datar, generator);
-  new_data::rewriter_with_variables datarv(data_spec, new_data::rewriter_with_variables::innermost);
+  new_data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > R(datarv, datae, false);
 
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> S(datar);
@@ -287,7 +287,7 @@ void test_substitutions1()
 {
   std::cout << "<test_substitutions1>" << std::endl;
 
-  new_data::rewriter  datar(new_data::data_specification(), new_data::rewriter::innermost);
+  new_data::rewriter  datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> r(datar);
 
   new_data::rewriter_map<atermpp::map<new_data::variable, pbes_system::pbes_expression> > sigma;
@@ -311,9 +311,9 @@ void test_substitutions2()
   std::cout << "<test_substitutions2>" << std::endl;
   new_data::data_specification data_spec = new_data::data_specification();
   new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-  new_data::rewriter datar(data_spec, new_data::rewriter::innermost);
+  new_data::rewriter datar(data_spec);
   new_data::data_enumerator<new_data::number_postfix_generator> datae(data_spec, datar, generator);
-  new_data::rewriter_with_variables datarv(data_spec, new_data::rewriter_with_variables::innermost);
+  new_data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > R(datarv, datae);
 
   std::string var_decl;
@@ -406,7 +406,7 @@ void test_substitutions3()
   ;
   new_data::data_specification data_spec = new_data::parse_data_specification(DATA_SPEC);
   new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-  new_data::rewriter datar(data_spec, new_data::rewriter::innermost);
+  new_data::rewriter datar(data_spec);
   new_data::data_enumerator<new_data::number_postfix_generator> datae(data_spec, datar, generator);
   new_data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > r(datarv, datae);

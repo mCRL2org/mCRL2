@@ -1,10 +1,7 @@
 project libraries/utilities
        : source-location ..
        : requirements
-          <use>/site-config//boost
           <include>../include
-       : usage-requirements
-          <use>/site-config//boost
        ;
 
 alias spinctrlfloat : spinctrlfloat.o ;
@@ -40,6 +37,7 @@ mcrl2-library utilities
       : <use>/site-config//boost
       :
       : <include>../include
+        <use>/site-config//boost
       ;
 
 alias exception : : : : <include>../include ;

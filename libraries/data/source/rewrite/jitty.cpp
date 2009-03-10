@@ -409,12 +409,11 @@ static ATermList create_strategy(ATermList rules)
 RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 {
 	ATermList l,n;
-	ATermTable tmp_eqns;
 	ATermInt i;
 
 	initialise_common();
 
-	tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
+	jitty_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,50);
 
 	num_opids = 0;
@@ -427,7 +426,7 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		// XXX only adds the last rule where lhs is an opid; this might go "wrong" if this rule is removed later
-		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
+		ATtablePut(jitty_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
 	}
 
 	l = dataappl_eqns;*/
@@ -445,7 +444,7 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 
 		ATermAppl u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
 
-		if ( (n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL )
+		if ( (n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0))) == NULL )
 		{
 			n = ATmakeList0();
 		}
@@ -454,15 +453,15 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 			max_vars = ATgetLength(ATLgetArgument(ATAgetFirst(l),0));
 		}
 		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) u,(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
-		ATtablePut(tmp_eqns,ATgetArgument(u,0),(ATerm) n);
+		ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
 	}
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	memset(int2term,0,num_opids*sizeof(ATermAppl));
 	ATprotectArray((ATerm *) int2term,num_opids);
-	jitty_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
-	memset(jitty_eqns,0,num_opids*sizeof(ATermList));
-	ATprotectArray((ATerm *) jitty_eqns,num_opids);
+	jitty_strat = (ATermList *) malloc(num_opids*sizeof(ATermList));
+	memset(jitty_strat,0,num_opids*sizeof(ATermList));
+	ATprotectArray((ATerm *) jitty_strat,num_opids);
 
 
 	l = ATtableKeys(term2int);
@@ -472,28 +471,86 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 
 		i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 		int2term[ATgetInt(i)] = ATAgetFirst(l);
-		if ( (n = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) == NULL )
+		if ( (n = (ATermList) ATtableGet(jitty_eqns,(ATerm) i)) == NULL )
 		{
-			jitty_eqns[ATgetInt(i)] = NULL;
+			jitty_strat[ATgetInt(i)] = NULL;
 		} else {
 //gsfprintf(stderr,"%T\n",ATAgetFirst(l));
-			jitty_eqns[ATgetInt(i)] = create_strategy(ATreverse(n));
+			jitty_strat[ATgetInt(i)] = create_strategy(ATreverse(n));
 		}
 	}
-
-	ATtableDestroy(tmp_eqns);
 }
 
 RewriterJitty::~RewriterJitty()
 {
-	ATunprotectArray((ATerm *) jitty_eqns);
-	free(jitty_eqns);
+	ATunprotectArray((ATerm *) jitty_strat);
+	free(jitty_strat);
 	ATunprotectArray((ATerm *) int2term);
 	free(int2term);
 	ATunprotectAppl(&jitty_true);
+	ATtableDestroy(jitty_eqns);
 	ATtableDestroy(term2int);
 
 	finalise_common();
+}
+
+bool RewriterJitty::addRewriteRule(ATermAppl Rule)
+{
+	try
+	{
+		CheckRewriteRule(Rule);
+	} catch ( std::runtime_error &e ) {
+		gsWarningMsg("%s\n",e.what());
+		return false;
+	}
+
+	ATermAppl u = (ATermAppl) toRewriteFormat(ATAgetArgument(Rule,2));
+	ATermList n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0));
+	if ( n == NULL )
+	{
+		n = ATmakeList0();
+	}
+	if ( ATgetLength(ATLgetArgument(Rule,0)) > max_vars)
+	{
+		max_vars = ATgetLength(ATLgetArgument(Rule,0));
+	}
+	n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(Rule,0),toRewriteFormat(ATAgetArgument(Rule,1)),(ATerm) u,toRewriteFormat(ATAgetArgument(Rule,3))));
+	ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
+
+	jitty_strat[ATgetInt((ATermInt) ATgetArgument(u,0))] = create_strategy(n);
+
+	return true;
+}
+
+bool RewriterJitty::removeRewriteRule(ATermAppl Rule)
+{
+	ATermAppl u = (ATermAppl) toRewriteFormat(ATAgetArgument(Rule,2));
+	ATermList n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0));
+	if ( n == NULL )
+	{
+		return true;
+	}
+	ATermList e = ATmakeList4(ATgetArgument(Rule,0),toRewriteFormat(ATAgetArgument(Rule,1)),(ATerm) u,(ATerm) toRewriteFormat(ATAgetArgument(Rule,3)));
+
+        ATermList l = n;
+	for (n = ATmakeList0(); !ATisEmpty(l); l=ATgetNext(l))
+	{
+		if ( !ATisEqual(e,ATgetFirst(l)) )
+		{
+			ATinsert(n,ATgetFirst(l));
+		}
+	}
+	ATermInt i = (ATermInt) ATgetArgument(u,0);
+	if ( ATisEmpty(n) )
+	{
+		ATtableRemove(jitty_eqns,(ATerm) i);
+		jitty_strat[ATgetInt(i)] = NULL;
+	} else {
+		ATtablePut(jitty_eqns,(ATerm) i,(ATerm) n);
+		jitty_strat[ATgetInt(i)] = create_strategy(n);
+	}
+
+	return true;
 }
 
 static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
@@ -683,7 +740,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 			}
 		}
 
-		if ( ATisInt(op) && ((strat = jitty_eqns[ATgetInt((ATermInt) op)]) != NULL) )
+		if ( ATisInt(op) && ((strat = jitty_strat[ATgetInt((ATermInt) op)]) != NULL) )
 		{
 //gsfprintf(stderr,"strat: %T\n\n",strat);
 			for (; !ATisEmpty(strat); strat=ATgetNext(strat))
@@ -858,10 +915,10 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 		for (unsigned int k = old_opids; k < num_opids; k++) int2term[k] = NULL;
 		ATprotectArray((ATerm *) int2term,num_opids);
-		ATunprotectArray((ATerm *) jitty_eqns);
-		jitty_eqns = (ATermList *) realloc(jitty_eqns,num_opids*sizeof(ATermList));
-		for (unsigned int k = old_opids; k < num_opids; k++) jitty_eqns[k] = NULL;
-		ATprotectArray((ATerm *) jitty_eqns,num_opids);
+		ATunprotectArray((ATerm *) jitty_strat);
+		jitty_strat = (ATermList *) realloc(jitty_strat,num_opids*sizeof(ATermList));
+		for (unsigned int k = old_opids; k < num_opids; k++) jitty_strat[k] = NULL;
+		ATprotectArray((ATerm *) jitty_strat,num_opids);
 		l = ATtableKeys(term2int);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
@@ -869,7 +926,7 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 			if ( ((unsigned int) ATgetInt(i)) >= old_opids )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
-				jitty_eqns[ATgetInt(i)] = NULL;
+				jitty_strat[ATgetInt(i)] = NULL;
 			}
 		}
 	}

@@ -92,7 +92,7 @@ void test2()
 {
   using namespace mcrl2::new_data::sort_nat;
 
-  rewriter r(data_specification(), rewriter::innermost);
+  rewriter r;
   data_expression d1 = parse_data_expression("2+7");
   data_expression d2 = parse_data_expression("4+5");
   BOOST_CHECK(r(d1) == r(d2));

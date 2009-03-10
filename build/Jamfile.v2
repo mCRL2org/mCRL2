@@ -145,13 +145,24 @@ cpp-pch boost.pch
             : precompile/boost.hpp
             : <include>./precompile
               $(boost-requirements)
-              <use>/boost//filesystem
-              <use>/boost//thread
+              <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
+              <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
+              <link>shared:<define>BOOST_THREAD_USE_DLL=1
+              <link>static:<define>BOOST_SYSTEM_STATIC_LINK=1
+              <link>static:<define>BOOST_FILESYSTEM_STATIC_LINK=1
+              <link>static:<define>BOOST_THREAD_USE_LIB=1
+              <define>BOOST_THREAD_POSIX
               $(boost-requirements)
             :
             : $(boost-requirements)
-              <use>/boost//filesystem # for preprocessor symbols
-              <use>/boost//thread     # for preprocessor symbols
+              <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
+              <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
+              <link>shared:<define>BOOST_THREAD_USE_DLL=1
+              <link>static:<define>BOOST_SYSTEM_STATIC_LINK=1
+              <link>static:<define>BOOST_FILESYSTEM_STATIC_LINK=1
+              <link>static:<define>BOOST_THREAD_USE_LIB=1
+              <define>BOOST_THREAD_POSIX
+              <library>boost_system
             ;
 
 alias boost : : : :
@@ -160,7 +171,7 @@ alias boost : : : :
               <toolset>msvc:<cxxflags>/FIboost.hpp
               <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
 
-local rule boost-library ( name link ? : requirements * : use-local-boost ? : use-system-boost ? ) {
+local rule boost-library ( name link ? : requirements * : usage-requirements * : use-local-boost ? ) {
   rule find-target ( target ) {
     if $(link) {
       return $(target)/$(link) ;
@@ -172,7 +183,7 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
 
   if $(use-local-boost) {
     alias boost_$(name) : [ find-target ../3rd-party/boost/libs/$(name)/build//boost_$(name) ]
-                        : $(requirements) <threading>multi : : $(requirements) <use>boost ;
+                        : $(requirements) <threading>multi : : $(requirements) $(usage-requirements) ;
   }
   else if $(BOOST_INCLUDE_PATH) {
     lib boost_$(name)
@@ -181,19 +192,19 @@ local rule boost-library ( name link ? : requirements * : use-local-boost ? : us
              <name>"boost_$(name)-mt"
              <search>"$(BOOST_LIBRARY_PATH)"
            :
-           : <use>boost
+           : $(usage-requirements)
            ;
   }
   else {
-    alias boost_$(name) : [ find-target /boost//$(name) ] : $(requirements) <threading>multi : : <use>boost ;
+    alias boost_$(name) : [ find-target /boost//$(name) ] : $(requirements) <threading>multi : : $(usage-requirements) ;
   }
 }
 
-boost-library filesystem ;
-boost-library program_options ;
-boost-library thread ;
-boost-library signals <link>static ;
-boost-library test : <toolset>msvc:<asynch-exceptions>on ;
+boost-library filesystem : <use>boost ;
+boost-library program_options : <use>boost ;
+boost-library thread : <use>boost ;
+boost-library signals <link>static : <use>boost ;
+boost-library test : <toolset>msvc:<asynch-exceptions>on : <use>boost ;
 boost-library system : ;
 
 if $(DL) {
@@ -274,18 +285,28 @@ if $(WX_CPPFLAGS) {
            : precompile/wx.hpp
            : <include>./precompile
              $(wx-requirements)
-             <use>boost
+             <link>shared:<use>boost.pch/<link>shared
+             <link>static:<use>boost.pch/<link>static
            :
            : <toolset>msvc:<cxxflags>/FIwx.hpp
              <target-os>windows,<include>intel:<cxxflags>/FIwx.hpp
+             <link>shared:<use>boost.pch/<link>shared
+             <link>static:<use>boost.pch/<link>static
+             <define>BOOST_THREAD_POSIX
            ;
 
   libraries-from-string wx_base
           : $(WX_BASE_LDFLAGS)
-          : : : <pch>on:<source>wx.pch $(wx-requirements) ;
+          :
+          :
+          : $(wx-requirements)
+          ;
 
   libraries-from-string wx_gl
           : $(WX_GL_LDFLAGS)
-          : : : <library>opengl <pch>on:<source>wx.pch $(wx-requirements) ;
+          :
+          :
+          : $(wx-requirements)
+          ;
 }
 

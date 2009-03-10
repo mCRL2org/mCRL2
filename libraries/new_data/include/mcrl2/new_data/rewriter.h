@@ -76,9 +76,7 @@ namespace new_data {
 
           for (atermpp::term_list< new_data::data_equation >::const_iterator i = new_equations.begin();
                                                                         i != new_equations.end(); ++i) {
-            if (!m_rewriter->addRewriteRule(*i)) {
-              throw mcrl2::runtime_error("Could not add rewrite rule!");
-            }
+            m_rewriter->addRewriteRule(*i);
           }
 
           m_specification = core::detail::add_data_decls(m_specification, declarations);

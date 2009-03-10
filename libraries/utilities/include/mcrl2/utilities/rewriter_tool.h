@@ -68,7 +68,7 @@ namespace tools {
       /// \brief Creates a data rewriter as specified on the command line.
       /// \param data_spec A data specification
       /// \return A data rewriter
-      new_data::rewriter create_rewriter(new_data::data_specification data_spec = new_data::default_data_specification())
+      new_data::rewriter create_rewriter(new_data::data_specification data_spec = new_data::data_specification())
       {
         return new_data::rewriter(data_spec, rewrite_strategy());
       }
