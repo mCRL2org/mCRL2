@@ -43,7 +43,6 @@ namespace mcrl2 {
       inline
       function_symbol true_()
       {
-        //static function_symbol true_("true", bool_());
         function_symbol true_("true", bool_());
         return true_;
       }
@@ -66,7 +65,6 @@ namespace mcrl2 {
       inline
       function_symbol false_()
       {
-        //static function_symbol false_("false", bool_());
         function_symbol false_("false", bool_());
         return false_;
       }
@@ -100,7 +98,6 @@ namespace mcrl2 {
       inline
       function_symbol not_()
       {
-        //static function_symbol not_("!", function_sort(bool_(), bool_()));
         function_symbol not_("!", function_sort(bool_(), bool_()));
         return not_;
       }
@@ -145,7 +142,6 @@ namespace mcrl2 {
       inline
       function_symbol and_()
       {
-        //static function_symbol and_("&&", function_sort(bool_(), bool_(), bool_()));
         function_symbol and_("&&", function_sort(bool_(), bool_(), bool_()));
         return and_;
       }
@@ -190,7 +186,6 @@ namespace mcrl2 {
       inline
       function_symbol or_()
       {
-        //static function_symbol or_("||", function_sort(bool_(), bool_(), bool_()));
         function_symbol or_("||", function_sort(bool_(), bool_(), bool_()));
         return or_;
       }
@@ -235,7 +230,6 @@ namespace mcrl2 {
       inline
       function_symbol implies()
       {
-        //static function_symbol implies("=>", function_sort(bool_(), bool_(), bool_()));
         function_symbol implies("=>", function_sort(bool_(), bool_(), bool_()));
         return implies;
       }

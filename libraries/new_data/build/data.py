@@ -283,7 +283,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      function_symbol %s(%s)\n" % (name, sortparams)
         code += "      {\n"
-        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+#        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
@@ -297,7 +297,7 @@ class function_declaration_list():
         code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
         code += "      {\n"
         code += "        %s\n" % (targetsort)
-        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+#        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
@@ -332,7 +332,7 @@ class function_declaration_list():
 
       def function_application_recogniser(self, fullname, name):
         code  = ""
-        code += "      ///\\brief Recogniser for application of %s\n" % (escape(name))
+        code += "      ///\\brief Recogniser for application of %s\n" % (escape(fullname))
         code += "      ///\\param e A data expression\n"
         code += "      ///\\return true iff e is an application of function symbol %s to a\n" % (escape(name))
         code += "      ///     number of arguments\n"
@@ -1354,12 +1354,12 @@ class sort_declaration():
     code += "      inline\n"
     code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
     code += "      {\n"
-    code += "        //static container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
-    code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
+#    code += "        //static container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
+    code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
-    code += "      /// \\brief Recogniser for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
+    code += "      /// \\brief Recogniser for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string().lower()))
     code += "      /// \\param e A sort expression\n"
     code += "      /// \\return true iff e is a container sort of which the name matches\n"
     code += "      ///      %s\n" % (escape(label.to_string()))

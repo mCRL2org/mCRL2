@@ -40,8 +40,8 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for sort expression @NatPair
-      /// \return Sort expression @NatPair
+      /// \brief Constructor for sort expression \@NatPair
+      /// \return Sort expression \@NatPair
       inline
       basic_sort natpair()
       {
@@ -49,7 +49,7 @@ namespace mcrl2 {
         return natpair;
       }
 
-      /// \brief Recogniser for sort expression @NatPair
+      /// \brief Recogniser for sort expression \@NatPair
       /// \param e A sort expression
       /// \return true iff e == natpair()
       inline
@@ -62,19 +62,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @c0
+      /// \brief Constructor for function symbol \@c0
       /// \return Function symbol c0
       inline
       function_symbol c0()
       {
-        //static function_symbol c0("@c0", nat());
         function_symbol c0("@c0", nat());
         return c0;
       }
 
-      /// \brief Recogniser for function @c0
+      /// \brief Recogniser for function \@c0
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @c0
+      /// \return true iff e is the function symbol matching \@c0
       inline
       bool is_c0_function_symbol(const data_expression& e)
       {
@@ -85,19 +84,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @cNat
+      /// \brief Constructor for function symbol \@cNat
       /// \return Function symbol cnat
       inline
       function_symbol cnat()
       {
-        //static function_symbol cnat("@cNat", function_sort(sort_pos::pos(), nat()));
         function_symbol cnat("@cNat", function_sort(sort_pos::pos(), nat()));
         return cnat;
       }
 
-      /// \brief Recogniser for function @cNat
+      /// \brief Recogniser for function \@cNat
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @cNat
+      /// \return true iff e is the function symbol matching \@cNat
       inline
       bool is_cnat_function_symbol(const data_expression& e)
       {
@@ -108,15 +106,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @cNat
-      ///\return Application of @cNat to a number of arguments
+      ///\brief Application of function symbol \@cNat
+      ///\return Application of \@cNat to a number of arguments
       inline
       application cnat(const data_expression& arg0)
       {
         return application(cnat(),arg0);
       }
 
-      ///\brief Recogniser for application of @cNat
+      ///\brief Recogniser for application of \@cNat
       ///\param e A data expression
       ///\return true iff e is an application of function symbol cnat to a
       ///     number of arguments
@@ -130,19 +128,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @cPair
+      /// \brief Constructor for function symbol \@cPair
       /// \return Function symbol cpair
       inline
       function_symbol cpair()
       {
-        //static function_symbol cpair("@cPair", function_sort(nat(), nat(), natpair()));
         function_symbol cpair("@cPair", function_sort(nat(), nat(), natpair()));
         return cpair;
       }
 
-      /// \brief Recogniser for function @cPair
+      /// \brief Recogniser for function \@cPair
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @cPair
+      /// \return true iff e is the function symbol matching \@cPair
       inline
       bool is_cpair_function_symbol(const data_expression& e)
       {
@@ -153,15 +150,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @cPair
-      ///\return Application of @cPair to a number of arguments
+      ///\brief Application of function symbol \@cPair
+      ///\return Application of \@cPair to a number of arguments
       inline
       application cpair(const data_expression& arg0, const data_expression& arg1)
       {
         return application(cpair(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @cPair
+      ///\brief Recogniser for application of \@cPair
       ///\param e A data expression
       ///\return true iff e is an application of function symbol cpair to a
       ///     number of arguments
@@ -192,7 +189,6 @@ namespace mcrl2 {
       inline
       function_symbol pos2nat()
       {
-        //static function_symbol pos2nat("Pos2Nat", function_sort(sort_pos::pos(), nat()));
         function_symbol pos2nat("Pos2Nat", function_sort(sort_pos::pos(), nat()));
         return pos2nat;
       }
@@ -237,7 +233,6 @@ namespace mcrl2 {
       inline
       function_symbol nat2pos()
       {
-        //static function_symbol nat2pos("Nat2Pos", function_sort(nat(), sort_pos::pos()));
         function_symbol nat2pos("Nat2Pos", function_sort(nat(), sort_pos::pos()));
         return nat2pos;
       }
@@ -282,7 +277,6 @@ namespace mcrl2 {
       inline
       function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
@@ -305,7 +299,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol maximum("max", function_sort(s0, s1, target_sort));
         function_symbol maximum("max", function_sort(s0, s1, target_sort));
         return maximum;
       }
@@ -350,7 +343,6 @@ namespace mcrl2 {
       inline
       function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort;
         if (s0 == nat() && s1 == nat())
         {
@@ -365,7 +357,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol minimum("min", function_sort(s0, s1, target_sort));
         function_symbol minimum("min", function_sort(s0, s1, target_sort));
         return minimum;
       }
@@ -410,7 +401,6 @@ namespace mcrl2 {
       inline
       function_symbol abs(const sort_expression& s0)
       {
-        
         sort_expression target_sort;
         if (s0 == nat())
         {
@@ -425,7 +415,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol abs("abs", function_sort(s0, target_sort));
         function_symbol abs("abs", function_sort(s0, target_sort));
         return abs;
       }
@@ -470,10 +459,8 @@ namespace mcrl2 {
       inline
       function_symbol succ(const sort_expression& s0)
       {
-        
         sort_expression target_sort(sort_pos::pos());
 
-        //static function_symbol succ("succ", function_sort(s0, target_sort));
         function_symbol succ("succ", function_sort(s0, target_sort));
         return succ;
       }
@@ -518,7 +505,6 @@ namespace mcrl2 {
       inline
       function_symbol pred()
       {
-        //static function_symbol pred("pred", function_sort(sort_pos::pos(), nat()));
         function_symbol pred("pred", function_sort(sort_pos::pos(), nat()));
         return pred;
       }
@@ -558,19 +544,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @dub
+      /// \brief Constructor for function symbol \@dub
       /// \return Function symbol dub
       inline
       function_symbol dub()
       {
-        //static function_symbol dub("@dub", function_sort(sort_bool_::bool_(), nat(), nat()));
         function_symbol dub("@dub", function_sort(sort_bool_::bool_(), nat(), nat()));
         return dub;
       }
 
-      /// \brief Recogniser for function @dub
+      /// \brief Recogniser for function \@dub
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @dub
+      /// \return true iff e is the function symbol matching \@dub
       inline
       bool is_dub_function_symbol(const data_expression& e)
       {
@@ -581,15 +566,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @dub
-      ///\return Application of @dub to a number of arguments
+      ///\brief Application of function symbol \@dub
+      ///\return Application of \@dub to a number of arguments
       inline
       application dub(const data_expression& arg0, const data_expression& arg1)
       {
         return application(dub(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @dub
+      ///\brief Recogniser for application of \@dub
       ///\param e A data expression
       ///\return true iff e is an application of function symbol dub to a
       ///     number of arguments
@@ -608,7 +593,6 @@ namespace mcrl2 {
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
@@ -631,7 +615,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol plus("+", function_sort(s0, s1, target_sort));
         function_symbol plus("+", function_sort(s0, s1, target_sort));
         return plus;
       }
@@ -671,22 +654,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Constructor for function symbol @gtesubt
+      ///\brief Constructor for function symbol \@gtesubt
       ///\return Function symbol gtesubt
       inline
       function_symbol gtesubt(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort(nat());
 
-        //static function_symbol gtesubt("@gtesubt", function_sort(s0, s1, target_sort));
         function_symbol gtesubt("@gtesubt", function_sort(s0, s1, target_sort));
         return gtesubt;
       }
 
-      /// \brief Recogniser for function @gtesubt
+      /// \brief Recogniser for function \@gtesubt
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @gtesubt
+      /// \return true iff e is the function symbol matching \@gtesubt
       inline
       bool is_gtesubt_function_symbol(const data_expression& e)
       {
@@ -697,15 +678,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @gtesubt
-      ///\return Application of @gtesubt to a number of arguments
+      ///\brief Application of function symbol \@gtesubt
+      ///\return Application of \@gtesubt to a number of arguments
       inline
       application gtesubt(const data_expression& arg0, const data_expression& arg1)
       {
         return application(gtesubt(arg0.sort(), arg1.sort()),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @gtesubt
+      ///\brief Recogniser for application of \@gtesubt
       ///\param e A data expression
       ///\return true iff e is an application of function symbol gtesubt to a
       ///     number of arguments
@@ -719,19 +700,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @gtesubtb
+      /// \brief Constructor for function symbol \@gtesubtb
       /// \return Function symbol gtesubtb
       inline
       function_symbol gtesubtb()
       {
-        //static function_symbol gtesubtb("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
         function_symbol gtesubtb("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), nat()));
         return gtesubtb;
       }
 
-      /// \brief Recogniser for function @gtesubtb
+      /// \brief Recogniser for function \@gtesubtb
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @gtesubtb
+      /// \return true iff e is the function symbol matching \@gtesubtb
       inline
       bool is_gtesubtb_function_symbol(const data_expression& e)
       {
@@ -742,15 +722,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @gtesubtb
-      ///\return Application of @gtesubtb to a number of arguments
+      ///\brief Application of function symbol \@gtesubtb
+      ///\return Application of \@gtesubtb to a number of arguments
       inline
       application gtesubtb(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(gtesubtb(),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of @gtesubtb
+      ///\brief Recogniser for application of \@gtesubtb
       ///\param e A data expression
       ///\return true iff e is an application of function symbol gtesubtb to a
       ///     number of arguments
@@ -769,7 +749,6 @@ namespace mcrl2 {
       inline
       function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort;
         if (s0 == nat() && s1 == nat())
         {
@@ -784,7 +763,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol times("*", function_sort(s0, s1, target_sort));
         function_symbol times("*", function_sort(s0, s1, target_sort));
         return times;
       }
@@ -829,10 +807,8 @@ namespace mcrl2 {
       inline
       function_symbol div(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort(nat());
 
-        //static function_symbol div("div", function_sort(s0, s1, target_sort));
         function_symbol div("div", function_sort(s0, s1, target_sort));
         return div;
       }
@@ -877,10 +853,8 @@ namespace mcrl2 {
       inline
       function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort(nat());
 
-        //static function_symbol mod("mod", function_sort(s0, s1, target_sort));
         function_symbol mod("mod", function_sort(s0, s1, target_sort));
         return mod;
       }
@@ -925,7 +899,6 @@ namespace mcrl2 {
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
-        
         sort_expression target_sort;
         if (s0 == sort_pos::pos() && s1 == nat())
         {
@@ -940,7 +913,6 @@ namespace mcrl2 {
           assert(false);
         }
 
-        //static function_symbol exp("exp", function_sort(s0, s1, target_sort));
         function_symbol exp("exp", function_sort(s0, s1, target_sort));
         return exp;
       }
@@ -980,19 +952,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @even
+      /// \brief Constructor for function symbol \@even
       /// \return Function symbol even
       inline
       function_symbol even()
       {
-        //static function_symbol even("@even", function_sort(nat(), sort_bool_::bool_()));
         function_symbol even("@even", function_sort(nat(), sort_bool_::bool_()));
         return even;
       }
 
-      /// \brief Recogniser for function @even
+      /// \brief Recogniser for function \@even
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @even
+      /// \return true iff e is the function symbol matching \@even
       inline
       bool is_even_function_symbol(const data_expression& e)
       {
@@ -1003,15 +974,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @even
-      ///\return Application of @even to a number of arguments
+      ///\brief Application of function symbol \@even
+      ///\return Application of \@even to a number of arguments
       inline
       application even(const data_expression& arg0)
       {
         return application(even(),arg0);
       }
 
-      ///\brief Recogniser for application of @even
+      ///\brief Recogniser for application of \@even
       ///\param e A data expression
       ///\return true iff e is an application of function symbol even to a
       ///     number of arguments
@@ -1025,19 +996,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @monus
+      /// \brief Constructor for function symbol \@monus
       /// \return Function symbol monus
       inline
       function_symbol monus()
       {
-        //static function_symbol monus("@monus", function_sort(nat(), nat(), nat()));
         function_symbol monus("@monus", function_sort(nat(), nat(), nat()));
         return monus;
       }
 
-      /// \brief Recogniser for function @monus
+      /// \brief Recogniser for function \@monus
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @monus
+      /// \return true iff e is the function symbol matching \@monus
       inline
       bool is_monus_function_symbol(const data_expression& e)
       {
@@ -1048,15 +1018,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @monus
-      ///\return Application of @monus to a number of arguments
+      ///\brief Application of function symbol \@monus
+      ///\return Application of \@monus to a number of arguments
       inline
       application monus(const data_expression& arg0, const data_expression& arg1)
       {
         return application(monus(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @monus
+      ///\brief Recogniser for application of \@monus
       ///\param e A data expression
       ///\return true iff e is an application of function symbol monus to a
       ///     number of arguments
@@ -1070,19 +1040,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @swap_zero
+      /// \brief Constructor for function symbol \@swap_zero
       /// \return Function symbol swap_zero
       inline
       function_symbol swap_zero()
       {
-        //static function_symbol swap_zero("@swap_zero", function_sort(nat(), nat(), nat()));
         function_symbol swap_zero("@swap_zero", function_sort(nat(), nat(), nat()));
         return swap_zero;
       }
 
-      /// \brief Recogniser for function @swap_zero
+      /// \brief Recogniser for function \@swap_zero
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @swap_zero
+      /// \return true iff e is the function symbol matching \@swap_zero
       inline
       bool is_swap_zero_function_symbol(const data_expression& e)
       {
@@ -1093,15 +1062,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @swap_zero
-      ///\return Application of @swap_zero to a number of arguments
+      ///\brief Application of function symbol \@swap_zero
+      ///\return Application of \@swap_zero to a number of arguments
       inline
       application swap_zero(const data_expression& arg0, const data_expression& arg1)
       {
         return application(swap_zero(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @swap_zero
+      ///\brief Recogniser for application of \@swap_zero
       ///\param e A data expression
       ///\return true iff e is an application of function symbol swap_zero to a
       ///     number of arguments
@@ -1115,19 +1084,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @swap_zero_add
+      /// \brief Constructor for function symbol \@swap_zero_add
       /// \return Function symbol swap_zero_add
       inline
       function_symbol swap_zero_add()
       {
-        //static function_symbol swap_zero_add("@swap_zero_add", function_sort(nat(), nat(), nat(), nat(), nat()));
         function_symbol swap_zero_add("@swap_zero_add", function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_add;
       }
 
-      /// \brief Recogniser for function @swap_zero_add
+      /// \brief Recogniser for function \@swap_zero_add
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @swap_zero_add
+      /// \return true iff e is the function symbol matching \@swap_zero_add
       inline
       bool is_swap_zero_add_function_symbol(const data_expression& e)
       {
@@ -1138,15 +1106,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @swap_zero_add
-      ///\return Application of @swap_zero_add to a number of arguments
+      ///\brief Application of function symbol \@swap_zero_add
+      ///\return Application of \@swap_zero_add to a number of arguments
       inline
       application swap_zero_add(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(swap_zero_add(),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of @swap_zero_add
+      ///\brief Recogniser for application of \@swap_zero_add
       ///\param e A data expression
       ///\return true iff e is an application of function symbol swap_zero_add to a
       ///     number of arguments
@@ -1160,19 +1128,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @swap_zero_min
+      /// \brief Constructor for function symbol \@swap_zero_min
       /// \return Function symbol swap_zero_min
       inline
       function_symbol swap_zero_min()
       {
-        //static function_symbol swap_zero_min("@swap_zero_min", function_sort(nat(), nat(), nat(), nat(), nat()));
         function_symbol swap_zero_min("@swap_zero_min", function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_min;
       }
 
-      /// \brief Recogniser for function @swap_zero_min
+      /// \brief Recogniser for function \@swap_zero_min
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @swap_zero_min
+      /// \return true iff e is the function symbol matching \@swap_zero_min
       inline
       bool is_swap_zero_min_function_symbol(const data_expression& e)
       {
@@ -1183,15 +1150,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @swap_zero_min
-      ///\return Application of @swap_zero_min to a number of arguments
+      ///\brief Application of function symbol \@swap_zero_min
+      ///\return Application of \@swap_zero_min to a number of arguments
       inline
       application swap_zero_min(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(swap_zero_min(),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of @swap_zero_min
+      ///\brief Recogniser for application of \@swap_zero_min
       ///\param e A data expression
       ///\return true iff e is an application of function symbol swap_zero_min to a
       ///     number of arguments
@@ -1205,19 +1172,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @swap_zero_monus
+      /// \brief Constructor for function symbol \@swap_zero_monus
       /// \return Function symbol swap_zero_monus
       inline
       function_symbol swap_zero_monus()
       {
-        //static function_symbol swap_zero_monus("@swap_zero_monus", function_sort(nat(), nat(), nat(), nat(), nat()));
         function_symbol swap_zero_monus("@swap_zero_monus", function_sort(nat(), nat(), nat(), nat(), nat()));
         return swap_zero_monus;
       }
 
-      /// \brief Recogniser for function @swap_zero_monus
+      /// \brief Recogniser for function \@swap_zero_monus
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @swap_zero_monus
+      /// \return true iff e is the function symbol matching \@swap_zero_monus
       inline
       bool is_swap_zero_monus_function_symbol(const data_expression& e)
       {
@@ -1228,15 +1194,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @swap_zero_monus
-      ///\return Application of @swap_zero_monus to a number of arguments
+      ///\brief Application of function symbol \@swap_zero_monus
+      ///\return Application of \@swap_zero_monus to a number of arguments
       inline
       application swap_zero_monus(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(swap_zero_monus(),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of @swap_zero_monus
+      ///\brief Recogniser for application of \@swap_zero_monus
       ///\param e A data expression
       ///\return true iff e is an application of function symbol swap_zero_monus to a
       ///     number of arguments
@@ -1250,19 +1216,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @swap_zero_lte
+      /// \brief Constructor for function symbol \@swap_zero_lte
       /// \return Function symbol swap_zero_lte
       inline
       function_symbol swap_zero_lte()
       {
-        //static function_symbol swap_zero_lte("@swap_zero_lte", function_sort(nat(), nat(), nat(), sort_bool_::bool_()));
         function_symbol swap_zero_lte("@swap_zero_lte", function_sort(nat(), nat(), nat(), sort_bool_::bool_()));
         return swap_zero_lte;
       }
 
-      /// \brief Recogniser for function @swap_zero_lte
+      /// \brief Recogniser for function \@swap_zero_lte
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @swap_zero_lte
+      /// \return true iff e is the function symbol matching \@swap_zero_lte
       inline
       bool is_swap_zero_lte_function_symbol(const data_expression& e)
       {
@@ -1273,15 +1238,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @swap_zero_lte
-      ///\return Application of @swap_zero_lte to a number of arguments
+      ///\brief Application of function symbol \@swap_zero_lte
+      ///\return Application of \@swap_zero_lte to a number of arguments
       inline
       application swap_zero_lte(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(swap_zero_lte(),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of @swap_zero_lte
+      ///\brief Recogniser for application of \@swap_zero_lte
       ///\param e A data expression
       ///\return true iff e is an application of function symbol swap_zero_lte to a
       ///     number of arguments
@@ -1295,19 +1260,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @first
+      /// \brief Constructor for function symbol \@first
       /// \return Function symbol first
       inline
       function_symbol first()
       {
-        //static function_symbol first("@first", function_sort(natpair(), nat()));
         function_symbol first("@first", function_sort(natpair(), nat()));
         return first;
       }
 
-      /// \brief Recogniser for function @first
+      /// \brief Recogniser for function \@first
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @first
+      /// \return true iff e is the function symbol matching \@first
       inline
       bool is_first_function_symbol(const data_expression& e)
       {
@@ -1318,15 +1282,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @first
-      ///\return Application of @first to a number of arguments
+      ///\brief Application of function symbol \@first
+      ///\return Application of \@first to a number of arguments
       inline
       application first(const data_expression& arg0)
       {
         return application(first(),arg0);
       }
 
-      ///\brief Recogniser for application of @first
+      ///\brief Recogniser for application of \@first
       ///\param e A data expression
       ///\return true iff e is an application of function symbol first to a
       ///     number of arguments
@@ -1340,19 +1304,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @last
+      /// \brief Constructor for function symbol \@last
       /// \return Function symbol last
       inline
       function_symbol last()
       {
-        //static function_symbol last("@last", function_sort(natpair(), nat()));
         function_symbol last("@last", function_sort(natpair(), nat()));
         return last;
       }
 
-      /// \brief Recogniser for function @last
+      /// \brief Recogniser for function \@last
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @last
+      /// \return true iff e is the function symbol matching \@last
       inline
       bool is_last_function_symbol(const data_expression& e)
       {
@@ -1363,15 +1326,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @last
-      ///\return Application of @last to a number of arguments
+      ///\brief Application of function symbol \@last
+      ///\return Application of \@last to a number of arguments
       inline
       application last(const data_expression& arg0)
       {
         return application(last(),arg0);
       }
 
-      ///\brief Recogniser for application of @last
+      ///\brief Recogniser for application of \@last
       ///\param e A data expression
       ///\return true iff e is an application of function symbol last to a
       ///     number of arguments
@@ -1385,19 +1348,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @divmod
+      /// \brief Constructor for function symbol \@divmod
       /// \return Function symbol divmod
       inline
       function_symbol divmod()
       {
-        //static function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
         function_symbol divmod("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), natpair()));
         return divmod;
       }
 
-      /// \brief Recogniser for function @divmod
+      /// \brief Recogniser for function \@divmod
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @divmod
+      /// \return true iff e is the function symbol matching \@divmod
       inline
       bool is_divmod_function_symbol(const data_expression& e)
       {
@@ -1408,15 +1370,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @divmod
-      ///\return Application of @divmod to a number of arguments
+      ///\brief Application of function symbol \@divmod
+      ///\return Application of \@divmod to a number of arguments
       inline
       application divmod(const data_expression& arg0, const data_expression& arg1)
       {
         return application(divmod(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of @divmod
+      ///\brief Recogniser for application of \@divmod
       ///\param e A data expression
       ///\return true iff e is an application of function symbol divmod to a
       ///     number of arguments
@@ -1430,19 +1392,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @gdivmod
+      /// \brief Constructor for function symbol \@gdivmod
       /// \return Function symbol gdivmod
       inline
       function_symbol gdivmod()
       {
-        //static function_symbol gdivmod("@gdivmod", function_sort(natpair(), sort_bool_::bool_(), sort_pos::pos(), natpair()));
         function_symbol gdivmod("@gdivmod", function_sort(natpair(), sort_bool_::bool_(), sort_pos::pos(), natpair()));
         return gdivmod;
       }
 
-      /// \brief Recogniser for function @gdivmod
+      /// \brief Recogniser for function \@gdivmod
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @gdivmod
+      /// \return true iff e is the function symbol matching \@gdivmod
       inline
       bool is_gdivmod_function_symbol(const data_expression& e)
       {
@@ -1453,15 +1414,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @gdivmod
-      ///\return Application of @gdivmod to a number of arguments
+      ///\brief Application of function symbol \@gdivmod
+      ///\return Application of \@gdivmod to a number of arguments
       inline
       application gdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(gdivmod(),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of @gdivmod
+      ///\brief Recogniser for application of \@gdivmod
       ///\param e A data expression
       ///\return true iff e is an application of function symbol gdivmod to a
       ///     number of arguments
@@ -1475,19 +1436,18 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Constructor for function symbol @ggdivmod
+      /// \brief Constructor for function symbol \@ggdivmod
       /// \return Function symbol ggdivmod
       inline
       function_symbol ggdivmod()
       {
-        //static function_symbol ggdivmod("@ggdivmod", function_sort(nat(), nat(), sort_pos::pos(), natpair()));
         function_symbol ggdivmod("@ggdivmod", function_sort(nat(), nat(), sort_pos::pos(), natpair()));
         return ggdivmod;
       }
 
-      /// \brief Recogniser for function @ggdivmod
+      /// \brief Recogniser for function \@ggdivmod
       /// \param e A data expression
-      /// \return true iff e is the function symbol matching @ggdivmod
+      /// \return true iff e is the function symbol matching \@ggdivmod
       inline
       bool is_ggdivmod_function_symbol(const data_expression& e)
       {
@@ -1498,15 +1458,15 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol @ggdivmod
-      ///\return Application of @ggdivmod to a number of arguments
+      ///\brief Application of function symbol \@ggdivmod
+      ///\return Application of \@ggdivmod to a number of arguments
       inline
       application ggdivmod(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(ggdivmod(),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of @ggdivmod
+      ///\brief Recogniser for application of \@ggdivmod
       ///\param e A data expression
       ///\return true iff e is an application of function symbol ggdivmod to a
       ///     number of arguments
@@ -1960,21 +1920,21 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(make_vector(vp), equal_to(c0(), cnat(vp)), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(vp), equal_to(cnat(vp), c0()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vq, vp), equal_to(cnat(vp), cnat(vq)), equal_to(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), equal_to(cnat(vp), cnat(vq)), equal_to(vp, vq)));
         result.push_back(data_equation(make_vector(vn), less(vn, c0()), sort_bool_::false_()));
         result.push_back(data_equation(make_vector(vp), less(c0(), cnat(vp)), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vq, vp), less(cnat(vp), cnat(vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), less(cnat(vp), cnat(vq)), less(vp, vq)));
         result.push_back(data_equation(make_vector(vn), less_equal(c0(), vn), sort_bool_::true_()));
         result.push_back(data_equation(make_vector(vp), less_equal(cnat(vp), c0()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vq, vp), less_equal(cnat(vp), cnat(vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), less_equal(cnat(vp), cnat(vq)), less_equal(vp, vq)));
         result.push_back(data_equation(variable_list(), pos2nat(), cnat()));
         result.push_back(data_equation(make_vector(vp), nat2pos(cnat(vp)), vp));
         result.push_back(data_equation(make_vector(vp), maximum(vp, c0()), vp));
-        result.push_back(data_equation(make_vector(vq, vp), maximum(vp, cnat(vq)), if_(less_equal(vp, vq), vq, vp)));
+        result.push_back(data_equation(make_vector(vp, vq), maximum(vp, cnat(vq)), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(make_vector(vp), maximum(c0(), vp), vp));
-        result.push_back(data_equation(make_vector(vq, vp), maximum(cnat(vp), vq), if_(less_equal(vp, vq), vq, vp)));
-        result.push_back(data_equation(make_vector(vn, vm), maximum(vm, vn), if_(less_equal(vm, vn), vn, vm)));
-        result.push_back(data_equation(make_vector(vn, vm), minimum(vm, vn), if_(less_equal(vm, vn), vm, vn)));
+        result.push_back(data_equation(make_vector(vp, vq), maximum(cnat(vp), vq), if_(less_equal(vp, vq), vq, vp)));
+        result.push_back(data_equation(make_vector(vm, vn), maximum(vm, vn), if_(less_equal(vm, vn), vn, vm)));
+        result.push_back(data_equation(make_vector(vm, vn), minimum(vm, vn), if_(less_equal(vm, vn), vm, vn)));
         result.push_back(data_equation(make_vector(vn), abs(vn), vn));
         result.push_back(data_equation(variable_list(), succ(c0()), sort_pos::c1()));
         result.push_back(data_equation(make_vector(vp), succ(cnat(vp)), succ(vp)));
@@ -1984,91 +1944,91 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vp), pred(sort_pos::cdub(sort_bool_::false_(), vp)), dub(sort_bool_::true_(), pred(vp))));
         result.push_back(data_equation(variable_list(), dub(sort_bool_::false_(), c0()), c0()));
         result.push_back(data_equation(variable_list(), dub(sort_bool_::true_(), c0()), cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vb), dub(vb, cnat(vp)), cnat(sort_pos::cdub(vb, vp))));
+        result.push_back(data_equation(make_vector(vb, vp), dub(vb, cnat(vp)), cnat(sort_pos::cdub(vb, vp))));
         result.push_back(data_equation(make_vector(vp), plus(vp, c0()), vp));
-        result.push_back(data_equation(make_vector(vq, vp), plus(vp, cnat(vq)), sort_pos::add_with_carry(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), plus(vp, cnat(vq)), sort_pos::add_with_carry(sort_bool_::false_(), vp, vq)));
         result.push_back(data_equation(make_vector(vp), plus(c0(), vp), vp));
-        result.push_back(data_equation(make_vector(vq, vp), plus(cnat(vp), vq), sort_pos::add_with_carry(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), plus(cnat(vp), vq), sort_pos::add_with_carry(sort_bool_::false_(), vp, vq)));
         result.push_back(data_equation(make_vector(vn), plus(c0(), vn), vn));
         result.push_back(data_equation(make_vector(vn), plus(vn, c0()), vn));
-        result.push_back(data_equation(make_vector(vq, vp), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool_::false_(), vp, vq))));
-        result.push_back(data_equation(make_vector(vq, vp), gtesubt(vp, vq), gtesubtb(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), plus(cnat(vp), cnat(vq)), cnat(sort_pos::add_with_carry(sort_bool_::false_(), vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vq), gtesubt(vp, vq), gtesubtb(sort_bool_::false_(), vp, vq)));
         result.push_back(data_equation(make_vector(vn), gtesubt(vn, c0()), vn));
-        result.push_back(data_equation(make_vector(vq, vp), gtesubt(cnat(vp), cnat(vq)), gtesubtb(sort_bool_::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), gtesubt(cnat(vp), cnat(vq)), gtesubtb(sort_bool_::false_(), vp, vq)));
         result.push_back(data_equation(make_vector(vp), gtesubtb(sort_bool_::false_(), vp, sort_pos::c1()), pred(vp)));
         result.push_back(data_equation(make_vector(vp), gtesubtb(sort_bool_::true_(), vp, sort_pos::c1()), pred(nat2pos(pred(vp)))));
-        result.push_back(data_equation(make_vector(vp, vc, vq, vb), gtesubtb(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gtesubtb(vb, vp, vq))));
-        result.push_back(data_equation(make_vector(vb, vq, vp), gtesubtb(vb, sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), dub(sort_bool_::not_(vb), gtesubtb(sort_bool_::true_(), vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vc, vp, vq), gtesubtb(vb, sort_pos::cdub(vc, vp), sort_pos::cdub(vc, vq)), dub(vb, gtesubtb(vb, vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vp, vq), gtesubtb(vb, sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), dub(sort_bool_::not_(vb), gtesubtb(sort_bool_::true_(), vp, vq))));
         result.push_back(data_equation(make_vector(vb, vp, vq), gtesubtb(vb, sort_pos::cdub(sort_bool_::true_(), vp), sort_pos::cdub(sort_bool_::false_(), vq)), dub(sort_bool_::not_(vb), gtesubtb(sort_bool_::false_(), vp, vq))));
         result.push_back(data_equation(make_vector(vn), times(c0(), vn), c0()));
         result.push_back(data_equation(make_vector(vn), times(vn, c0()), c0()));
-        result.push_back(data_equation(make_vector(vq, vp), times(cnat(vp), cnat(vq)), cnat(times(vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vq), times(cnat(vp), cnat(vq)), cnat(times(vp, vq))));
         result.push_back(data_equation(make_vector(vp), exp(vp, c0()), sort_pos::c1()));
         result.push_back(data_equation(make_vector(vp), exp(vp, cnat(sort_pos::c1())), vp));
-        result.push_back(data_equation(make_vector(vq, vp), exp(vp, cnat(sort_pos::cdub(sort_bool_::false_(), vq))), exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, vp), cnat(vq))));
-        result.push_back(data_equation(make_vector(vq, vp), exp(vp, cnat(sort_pos::cdub(sort_bool_::true_(), vq))), sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, vp), cnat(vq)))));
+        result.push_back(data_equation(make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool_::false_(), vq))), exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, vp), cnat(vq))));
+        result.push_back(data_equation(make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool_::true_(), vq))), sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, exp(sort_pos::multir(sort_bool_::false_(), sort_pos::c1(), vp, vp), cnat(vq)))));
         result.push_back(data_equation(make_vector(vn), exp(vn, c0()), cnat(sort_pos::c1())));
         result.push_back(data_equation(make_vector(vp), exp(c0(), cnat(vp)), c0()));
         result.push_back(data_equation(make_vector(vn, vp), exp(cnat(vp), vn), cnat(exp(vp, vn))));
         result.push_back(data_equation(variable_list(), even(c0()), sort_bool_::true_()));
         result.push_back(data_equation(variable_list(), even(cnat(sort_pos::c1())), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vb), even(cnat(sort_pos::cdub(vb, vp))), sort_bool_::not_(vb)));
+        result.push_back(data_equation(make_vector(vb, vp), even(cnat(sort_pos::cdub(vb, vp))), sort_bool_::not_(vb)));
         result.push_back(data_equation(make_vector(vp), div(vp, sort_pos::c1()), cnat(vp)));
-        result.push_back(data_equation(make_vector(vp, vb), div(sort_pos::c1(), sort_pos::cdub(vb, vp)), c0()));
-        result.push_back(data_equation(make_vector(vq, vp, vb), div(sort_pos::cdub(vb, vp), sort_pos::cdub(sort_bool_::false_(), vq)), div(vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vp), div(sort_pos::c1(), sort_pos::cdub(vb, vp)), c0()));
+        result.push_back(data_equation(make_vector(vb, vp, vq), div(sort_pos::cdub(vb, vp), sort_pos::cdub(sort_bool_::false_(), vq)), div(vp, vq)));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), div(sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), c0()));
         result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), div(sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), first(gdivmod(divmod(vp, sort_pos::cdub(sort_bool_::true_(), vq)), sort_bool_::false_(), sort_pos::cdub(sort_bool_::true_(), vq)))));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), div(sort_pos::cdub(sort_bool_::true_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), if_(equal_to(vp, vq), cnat(sort_pos::c1()), c0())));
         result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), div(sort_pos::cdub(sort_bool_::true_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), first(gdivmod(divmod(vp, sort_pos::cdub(sort_bool_::true_(), vq)), sort_bool_::true_(), sort_pos::cdub(sort_bool_::true_(), vq)))));
         result.push_back(data_equation(make_vector(vp), div(c0(), vp), c0()));
-        result.push_back(data_equation(make_vector(vq, vp), div(cnat(vp), vq), div(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), div(cnat(vp), vq), div(vp, vq)));
         result.push_back(data_equation(make_vector(vp), mod(vp, sort_pos::c1()), c0()));
-        result.push_back(data_equation(make_vector(vp, vb), mod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cnat(sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vq, vb), mod(sort_pos::cdub(vb, vp), sort_pos::cdub(sort_bool_::false_(), vq)), dub(vb, mod(vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vp), mod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cnat(sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vb, vp, vq), mod(sort_pos::cdub(vb, vp), sort_pos::cdub(sort_bool_::false_(), vq)), dub(vb, mod(vp, vq))));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), mod(sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), cnat(sort_pos::cdub(sort_bool_::false_(), vp))));
         result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), mod(sort_pos::cdub(sort_bool_::false_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), last(gdivmod(divmod(vp, sort_pos::cdub(sort_bool_::true_(), vq)), sort_bool_::false_(), sort_pos::cdub(sort_bool_::true_(), vq)))));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), mod(sort_pos::cdub(sort_bool_::true_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), if_(equal_to(vp, vq), c0(), cnat(sort_pos::cdub(sort_bool_::true_(), vp)))));
         result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), mod(sort_pos::cdub(sort_bool_::true_(), vp), sort_pos::cdub(sort_bool_::true_(), vq)), last(gdivmod(divmod(vp, sort_pos::cdub(sort_bool_::true_(), vq)), sort_bool_::true_(), sort_pos::cdub(sort_bool_::true_(), vq)))));
         result.push_back(data_equation(make_vector(vp), mod(c0(), vp), c0()));
-        result.push_back(data_equation(make_vector(vq, vp), mod(cnat(vp), vq), mod(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), mod(cnat(vp), vq), mod(vp, vq)));
         result.push_back(data_equation(make_vector(vm, vn), less_equal(vm, vn), monus(vm, vn), c0()));
         result.push_back(data_equation(make_vector(vm, vn), less(vn, vm), monus(vm, vn), gtesubt(vm, vn)));
         result.push_back(data_equation(make_vector(vm), swap_zero(vm, c0()), vm));
         result.push_back(data_equation(make_vector(vn), swap_zero(c0(), vn), vn));
         result.push_back(data_equation(make_vector(vp), swap_zero(cnat(vp), cnat(vp)), c0()));
         result.push_back(data_equation(make_vector(vp, vq), not_equal_to(vp, vq), swap_zero(cnat(vp), cnat(vq)), cnat(vq)));
-        result.push_back(data_equation(make_vector(vn, vm), swap_zero_add(c0(), c0(), vm, vn), plus(vm, vn)));
-        result.push_back(data_equation(make_vector(vp, vm), swap_zero_add(cnat(vp), c0(), vm, c0()), vm));
-        result.push_back(data_equation(make_vector(vq, vm, vp), swap_zero_add(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), plus(swap_zero(cnat(vp), vm), cnat(vq)))));
+        result.push_back(data_equation(make_vector(vm, vn), swap_zero_add(c0(), c0(), vm, vn), plus(vm, vn)));
+        result.push_back(data_equation(make_vector(vm, vp), swap_zero_add(cnat(vp), c0(), vm, c0()), vm));
+        result.push_back(data_equation(make_vector(vm, vp, vq), swap_zero_add(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), plus(swap_zero(cnat(vp), vm), cnat(vq)))));
         result.push_back(data_equation(make_vector(vn, vp), swap_zero_add(c0(), cnat(vp), c0(), vn), vn));
         result.push_back(data_equation(make_vector(vn, vp, vq), swap_zero_add(c0(), cnat(vp), cnat(vq), vn), swap_zero(cnat(vp), plus(cnat(vq), swap_zero(cnat(vp), vn)))));
-        result.push_back(data_equation(make_vector(vq, vp, vm, vn), swap_zero_add(cnat(vp), cnat(vq), vm, vn), swap_zero(plus(cnat(vp), cnat(vq)), plus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
-        result.push_back(data_equation(make_vector(vn, vm), swap_zero_min(c0(), c0(), vm, vn), minimum(vm, vn)));
-        result.push_back(data_equation(make_vector(vp, vm), swap_zero_min(cnat(vp), c0(), vm, c0()), c0()));
-        result.push_back(data_equation(make_vector(vp, vm, vq), swap_zero_min(cnat(vp), c0(), vm, cnat(vq)), minimum(swap_zero(cnat(vp), vm), cnat(vq))));
+        result.push_back(data_equation(make_vector(vm, vn, vp, vq), swap_zero_add(cnat(vp), cnat(vq), vm, vn), swap_zero(plus(cnat(vp), cnat(vq)), plus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
+        result.push_back(data_equation(make_vector(vm, vn), swap_zero_min(c0(), c0(), vm, vn), minimum(vm, vn)));
+        result.push_back(data_equation(make_vector(vm, vp), swap_zero_min(cnat(vp), c0(), vm, c0()), c0()));
+        result.push_back(data_equation(make_vector(vm, vp, vq), swap_zero_min(cnat(vp), c0(), vm, cnat(vq)), minimum(swap_zero(cnat(vp), vm), cnat(vq))));
         result.push_back(data_equation(make_vector(vn, vp), swap_zero_min(c0(), cnat(vp), c0(), vn), c0()));
-        result.push_back(data_equation(make_vector(vp, vq, vn), swap_zero_min(c0(), cnat(vp), cnat(vq), vn), minimum(cnat(vq), swap_zero(cnat(vp), vn))));
-        result.push_back(data_equation(make_vector(vq, vp, vn, vm), swap_zero_min(cnat(vp), cnat(vq), vm, vn), swap_zero(minimum(cnat(vp), cnat(vq)), minimum(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
-        result.push_back(data_equation(make_vector(vn, vm), swap_zero_monus(c0(), c0(), vm, vn), monus(vm, vn)));
-        result.push_back(data_equation(make_vector(vp, vm), swap_zero_monus(cnat(vp), c0(), vm, c0()), vm));
-        result.push_back(data_equation(make_vector(vp, vm, vq), swap_zero_monus(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), monus(swap_zero(cnat(vp), vm), cnat(vq)))));
+        result.push_back(data_equation(make_vector(vn, vp, vq), swap_zero_min(c0(), cnat(vp), cnat(vq), vn), minimum(cnat(vq), swap_zero(cnat(vp), vn))));
+        result.push_back(data_equation(make_vector(vm, vn, vp, vq), swap_zero_min(cnat(vp), cnat(vq), vm, vn), swap_zero(minimum(cnat(vp), cnat(vq)), minimum(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
+        result.push_back(data_equation(make_vector(vm, vn), swap_zero_monus(c0(), c0(), vm, vn), monus(vm, vn)));
+        result.push_back(data_equation(make_vector(vm, vp), swap_zero_monus(cnat(vp), c0(), vm, c0()), vm));
+        result.push_back(data_equation(make_vector(vm, vp, vq), swap_zero_monus(cnat(vp), c0(), vm, cnat(vq)), swap_zero(cnat(vp), monus(swap_zero(cnat(vp), vm), cnat(vq)))));
         result.push_back(data_equation(make_vector(vn, vp), swap_zero_monus(c0(), cnat(vp), c0(), vn), c0()));
         result.push_back(data_equation(make_vector(vn, vp, vq), swap_zero_monus(c0(), cnat(vp), cnat(vq), vn), monus(cnat(vq), swap_zero(cnat(vp), vn))));
-        result.push_back(data_equation(make_vector(vq, vm, vp, vn), swap_zero_monus(cnat(vp), cnat(vq), vm, vn), swap_zero(monus(cnat(vp), cnat(vq)), monus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
-        result.push_back(data_equation(make_vector(vn, vm), swap_zero_lte(c0(), vm, vn), less_equal(vm, vn)));
-        result.push_back(data_equation(make_vector(vp, vn, vm), swap_zero_lte(cnat(vp), vm, vn), less_equal(swap_zero(cnat(vp), vm), swap_zero(cnat(vp), vn))));
-        result.push_back(data_equation(make_vector(vu, vm, vv, vn), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool_::and_(equal_to(vm, vu), equal_to(vn, vv))));
-        result.push_back(data_equation(make_vector(vm, vu, vv, vn), less(cpair(vm, vn), cpair(vu, vv)), sort_bool_::or_(less(vm, vu), sort_bool_::and_(equal_to(vm, vu), less(vn, vv)))));
-        result.push_back(data_equation(make_vector(vv, vn, vm, vu), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool_::or_(less(vm, vu), sort_bool_::and_(equal_to(vm, vu), less_equal(vn, vv)))));
-        result.push_back(data_equation(make_vector(vn, vm), first(cpair(vm, vn)), vm));
-        result.push_back(data_equation(make_vector(vn, vm), last(cpair(vm, vn)), vn));
+        result.push_back(data_equation(make_vector(vm, vn, vp, vq), swap_zero_monus(cnat(vp), cnat(vq), vm, vn), swap_zero(monus(cnat(vp), cnat(vq)), monus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
+        result.push_back(data_equation(make_vector(vm, vn), swap_zero_lte(c0(), vm, vn), less_equal(vm, vn)));
+        result.push_back(data_equation(make_vector(vm, vn, vp), swap_zero_lte(cnat(vp), vm, vn), less_equal(swap_zero(cnat(vp), vm), swap_zero(cnat(vp), vn))));
+        result.push_back(data_equation(make_vector(vm, vn, vu, vv), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool_::and_(equal_to(vm, vu), equal_to(vn, vv))));
+        result.push_back(data_equation(make_vector(vm, vn, vu, vv), less(cpair(vm, vn), cpair(vu, vv)), sort_bool_::or_(less(vm, vu), sort_bool_::and_(equal_to(vm, vu), less(vn, vv)))));
+        result.push_back(data_equation(make_vector(vm, vn, vu, vv), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool_::or_(less(vm, vu), sort_bool_::and_(equal_to(vm, vu), less_equal(vn, vv)))));
+        result.push_back(data_equation(make_vector(vm, vn), first(cpair(vm, vn)), vm));
+        result.push_back(data_equation(make_vector(vm, vn), last(cpair(vm, vn)), vn));
         result.push_back(data_equation(variable_list(), divmod(sort_pos::c1(), sort_pos::c1()), cpair(cnat(sort_pos::c1()), c0())));
-        result.push_back(data_equation(make_vector(vp, vb), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), cnat(sort_pos::c1()))));
+        result.push_back(data_equation(make_vector(vb, vp), divmod(sort_pos::c1(), sort_pos::cdub(vb, vp)), cpair(c0(), cnat(sort_pos::c1()))));
         result.push_back(data_equation(make_vector(vb, vp, vq), divmod(sort_pos::cdub(vb, vp), vq), gdivmod(divmod(vp, vq), vb, vq)));
-        result.push_back(data_equation(make_vector(vn, vm, vb, vp), gdivmod(cpair(vm, vn), vb, vp), ggdivmod(dub(vb, vn), vm, vp)));
-        result.push_back(data_equation(make_vector(vp, vn), ggdivmod(c0(), vn, vp), cpair(dub(sort_bool_::false_(), vn), c0())));
-        result.push_back(data_equation(make_vector(vp, vq, vn), less(vp, vq), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool_::false_(), vn), cnat(vp))));
-        result.push_back(data_equation(make_vector(vq, vn, vp), less_equal(vq, vp), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool_::true_(), vn), gtesubtb(sort_bool_::false_(), vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vm, vn, vp), gdivmod(cpair(vm, vn), vb, vp), ggdivmod(dub(vb, vn), vm, vp)));
+        result.push_back(data_equation(make_vector(vn, vp), ggdivmod(c0(), vn, vp), cpair(dub(sort_bool_::false_(), vn), c0())));
+        result.push_back(data_equation(make_vector(vn, vp, vq), less(vp, vq), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool_::false_(), vn), cnat(vp))));
+        result.push_back(data_equation(make_vector(vn, vp, vq), less_equal(vq, vp), ggdivmod(cnat(vp), vn, vq), cpair(dub(sort_bool_::true_(), vn), gtesubtb(sort_bool_::false_(), vp, vq))));
         return result;
       }
 
