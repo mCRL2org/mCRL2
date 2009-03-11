@@ -2408,18 +2408,22 @@ void compute_sort_decls(t_data_decls* p_data_decls, t_reconstruct_context* p_ctx
 
     if(p_ctx->num_sort_constructors[sort] != 0) {
       if(p_ctx->num_sort_constructors[sort] == 2 &&
-         (ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)) {
-        // sort is a list sort
+         ((ATindexOf(constructors, (ATerm) gsMakeOpIdEmptyList(sort), 0) != -1)||
+          (ATindexOf(constructors, (ATerm) gsMakeOpIdFBagEmpty(sort), 0) != -1)||
+          (ATindexOf(constructors, (ATerm) gsMakeOpIdFSetEmpty(sort), 0) != -1))) {
+        // sort is a list, fset or fbag sort
         ATermAppl element_sort = NULL;
-        while (!ATisEmpty(constructors)) {
+        while (!ATisEmpty(constructors) && element_sort == NULL) {
           ATermAppl constructor = ATAgetFirst(constructors);
-          if (gsIsOpIdCons(constructor)) {
+          if (gsIsOpIdCons(constructor) ||
+              gsIsOpIdFSetCons(constructor) ||
+              gsIsOpIdFBagCons(constructor)) {
             element_sort = ATAgetFirst(ATLgetArgument(gsGetSort(constructor), 0));
           }
           constructors = ATgetNext(constructors);
         }
         if (element_sort != NULL) {
-          if (gsIsListSortId(sort) || gsIsFSetSortId(sort) || gsIsFBagSortId(sort)) {
+          if (gsIsListSortId(sort)) {
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprList(element_sort)), *p_substs);
           } else if (gsIsFSetSortId(sort)) { 
             *p_substs = gsAddSubstToSubsts(gsMakeSubst_Appl(sort, gsMakeSortExprFSet(element_sort)), *p_substs);
