@@ -151,10 +151,6 @@ void test_simplifying_rewriter()
   std::cout << "<test_simplifying_rewriter>" << std::endl;
   new_data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> R(datar);
-  new_data::data_expression x = new_data::parse_data_expression("n >= 0", "n:Nat;");
-  new_data::data_expression y = datar(x);
-  std::cerr << "x = " << core::pp(x) << " " << x << std::endl;
-  std::cerr << "y = " << core::pp(y) << " " << y << std::endl;
 
   test_expressions(R, "val(n >= 0) || Y(n)"                                             , "val(true)");
   test_expressions(R, "false"                                                           , "val(false)");

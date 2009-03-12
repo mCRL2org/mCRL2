@@ -165,6 +165,13 @@ void nat_rewrite_test() {
   data_rewrite_test(R, mod(p4, nat2pos(p3)), p1);
 
   data_rewrite_test(R, exp(p2, p2), p4);
+
+  // Added a few additional checks (Wieger)
+  new_data::rewriter datar;
+  new_data::data_expression x = new_data::parse_data_expression("n >= 0", "n:Nat;");
+  BOOST_CHECK(datar(x) == sort_bool_::true_());
+  variable n("n", sort_nat::nat());
+  data_rewrite_test(R, greater_equal(n, p0), sort_bool_::true_());
 }
 
 void int_rewrite_test() {
