@@ -12,7 +12,9 @@ namespace mcrl2 {
   namespace new_data {
     namespace concepts {
 
-      BOOST_concept(Substitution,(S)) : boost::DefaultConstructible< S > {
+      BOOST_concept(Substitution,(S)) :
+           boost::DefaultConstructible< S >,
+           boost::UnaryFunction< S, typename S::expression_type, typename S::expression_type > {
 
         typedef typename S::variable_type   variable_type;
         typedef typename S::expression_type expression_type;
@@ -25,14 +27,8 @@ namespace mcrl2 {
         BOOST_CONCEPT_USAGE(Substitution) {
           BOOST_ASSERT((boost::is_convertible< variable_type, expression_type >::value));
 
-          variable_type const& vv(static_cast< variable_type const& >(s(v)));
-
+          s(e) == e;
           s(v) == v;
-
-          expression_type const& ee(static_cast< expression_type const& >(s(v)));
-
-          static_cast< void >(vv);
-          static_cast< void >(ee);
         }
       };
 
@@ -48,6 +44,7 @@ namespace mcrl2 {
 
         BOOST_CONCEPT_USAGE(MutableSubstitution) {
           s[v] = e;
+          s[v] = v;
         }
       };
 

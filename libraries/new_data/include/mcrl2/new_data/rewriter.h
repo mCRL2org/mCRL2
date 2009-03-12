@@ -72,12 +72,31 @@ namespace new_data {
                         &substitution_context, &declarations, &new_data_equations);
 
         if (!ATisEmpty(new_data_equations)) {
+          using namespace atermpp;
+
           atermpp::term_list< new_data::data_equation > new_equations(new_data_equations);
 
-          for (atermpp::term_list< new_data::data_equation >::const_iterator i = new_equations.begin();
-                                                                        i != new_equations.end(); ++i) {
-            if (!m_rewriter->addRewriteRule(*i)) {
-               throw mcrl2::runtime_error("Could not add rewrite rule!"); 
+          std::set< sort_expression > known_sorts(
+                atermpp::term_list_iterator< sort_expression >(atermpp::list_arg1(atermpp::arg1(m_specification))),
+                atermpp::term_list_iterator< sort_expression >());
+
+          // add equations for standard functions for new sorts
+          for (atermpp::term_list_iterator< sort_expression > i(declarations.sorts);
+                           i != atermpp::term_list_iterator< sort_expression >(); ++i) {
+
+             if (known_sorts.find(*i) == known_sorts.end()) {
+               data_equation_vector equations(standard_generate_equations_code(*i));
+
+               new_equations = atermpp::term_list< data_equation >
+                                        (equations.begin(), equations.end()) + new_equations;
+             }
+          }
+
+          // add rewrite rules
+          for (atermpp::term_list< new_data::data_equation >::const_iterator r = new_equations.begin();
+                                                                        r != new_equations.end(); ++r) {
+            if (!m_rewriter->addRewriteRule(*r)) {
+               throw mcrl2::runtime_error("Could not add rewrite rule!");
             }
           }
 
