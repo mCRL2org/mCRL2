@@ -261,11 +261,6 @@ void test_data_reconstruct_bool_function()
   sort_expression bb = arrow(make_list(b), b);
   data_operation cbb(c_name, bb);
 
-  std::cerr << rec_data << std::endl;
-  std::cerr << c_name << std::endl;
-  std::cerr << bb << std::endl;
-  std::cerr << cbb << std::endl;
-
   BOOST_CHECK(find_term(rec_data(2), c_name));
   BOOST_CHECK(find_term(rec_data(2), b));
   BOOST_CHECK(find_term(rec_data(2), bb));
@@ -294,11 +289,6 @@ void test_data_reconstruct_bool_function_one_eq()
   data_operation cbb(c_name, bb);
   data_expression t = true_();
   data_application ct(cbb, make_list(t));
-
-  std::cerr << rec_data << std::endl;
-  std::cerr << c_name << std::endl;
-  std::cerr << bb << std::endl;
-  std::cerr << cbb << std::endl;
 
   BOOST_CHECK(find_term(rec_data(2), c_name));
   BOOST_CHECK(find_term(rec_data(2), b));
@@ -395,6 +385,75 @@ void test_data_reconstruct_set_alias()
   BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
 }
 
+// Test case for issue #516
+void test_data_reconstruct_list_func()
+{
+  std::string text =
+  "map f: List(Bool -> Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "Reconstructed data specification " << rec_data << std::endl;
+
+  sort_expression b = sort_expr::bool_();
+  sort_expression bb = sort_arrow(make_list(b), b);
+  aterm_appl list_bb = gsMakeSortExprList(bb);
+
+  BOOST_CHECK(find_term(rec_data(2), list_bb));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+// Test case for issue #516
+void test_data_reconstruct_bag_func()
+{
+  std::string text =
+  "map f: Bag(Bool -> Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "Reconstructed data specification " << rec_data << std::endl;
+
+  sort_expression b = sort_expr::bool_();
+  sort_expression bb = sort_arrow(make_list(b), b);
+  aterm_appl bag_bb = gsMakeSortExprBag(bb);
+
+  BOOST_CHECK(find_term(rec_data(2), bag_bb));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
+// Test case for issue #516
+void test_data_reconstruct_set_func()
+{
+  std::string text =
+  "map f: Set(Bool -> Bool);\n"
+  ;
+
+  data_specification data = parse_data_specification(text);
+  aterm_appl rec_data = reconstruct_spec(data);
+
+  std::clog << "Reconstructed data specification " << rec_data << std::endl;
+
+  sort_expression b = sort_expr::bool_();
+  sort_expression bb = sort_arrow(make_list(b), b);
+  aterm_appl set_bb = gsMakeSortExprSet(bb);
+
+  BOOST_CHECK(find_term(rec_data(2), set_bb));
+
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(0))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(1))(0)).empty());
+  BOOST_CHECK(aterm_list(aterm_appl(rec_data(3))(0)).empty());
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -410,6 +469,9 @@ int test_main(int argc, char** argv)
   test_data_reconstruct_set();
   test_data_reconstruct_bag_alias();
   test_data_reconstruct_set_alias();
+  test_data_reconstruct_list_func();
+  test_data_reconstruct_bag_func();
+  test_data_reconstruct_set_func();
 
   return 0;
 }
