@@ -76,7 +76,9 @@ namespace new_data {
 
           for (atermpp::term_list< new_data::data_equation >::const_iterator i = new_equations.begin();
                                                                         i != new_equations.end(); ++i) {
-            m_rewriter->addRewriteRule(*i);
+            if (!m_rewriter->addRewriteRule(*i)) {
+               throw mcrl2::runtime_error("Could not add rewrite rule!"); 
+            }
           }
 
           m_specification = core::detail::add_data_decls(m_specification, declarations);
@@ -167,12 +169,12 @@ namespace new_data {
         m_rewriter->removeRewriteRule(eq);
       }
 
-      /// \brief Returns a pointer to the Rewriter object that is used for the implementation.
-      /// \return A pointer to the wrapped Rewriter object.
+      /// \brief Returns a reference to the Rewriter object that is used for the implementation.
+      /// \return A reference to the wrapped Rewriter object.
       /// \deprecated
-      detail::Rewriter* get_rewriter()
+      detail::Rewriter& get_rewriter()
       {
-        return m_rewriter.get();
+        return *m_rewriter;
       }
 
       ~basic_rewriter() {

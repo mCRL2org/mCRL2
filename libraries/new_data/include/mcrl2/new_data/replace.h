@@ -43,7 +43,7 @@ struct replace_variables_helper
   {
     if (data_expression(t).is_variable())
     {
-      return std::pair<atermpp::aterm_appl, bool>(r_(t), false); // do not continue the recursion
+      return std::pair<atermpp::aterm_appl, bool>(r_(static_cast< variable >(t)), false); // do not continue the recursion
     }
     else
     {

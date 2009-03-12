@@ -8,6 +8,7 @@ mcrl2-library new_data
          source/standard.cpp
          [ glob source/detail/rewrite/*.cpp ]
          [ glob source/detail/prover/*.cpp ]
+         [ glob source/detail/enumerate/*.cpp ]
        : <library>/libraries//core
          <use>/libraries/utilities//exception
          <include>../include

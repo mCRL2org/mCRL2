@@ -47,6 +47,17 @@ namespace mcrl2 {
         /// \param[in] variables A nonempty list of binding variables.
         /// \param[in] body The body of the lambda abstraction.
         /// \pre variables is not empty.
+        lambda(const variable& variable,
+               const data_expression& body)
+          : abstraction("lambda", make_list(variable), body)
+        {
+        }
+
+        /// Constructor.
+        ///
+        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] body The body of the lambda abstraction.
+        /// \pre variables is not empty.
         lambda(const variable_list& variables,
                const data_expression& body)
           : abstraction("lambda", variables, body)

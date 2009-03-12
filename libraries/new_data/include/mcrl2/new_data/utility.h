@@ -36,6 +36,7 @@ namespace mcrl2 {
     /// \param f a function to apply to the expression
     /// \param e the expression on which to apply the assignment
     /// \return The application of the assignment to the term.
+    /// \deprecated
     template < typename Expression, typename SubstitutionFunction >
     inline Expression substitute(SubstitutionFunction const& f, Expression const& e)
     {

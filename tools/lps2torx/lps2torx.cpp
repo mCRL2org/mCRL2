@@ -26,8 +26,8 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/enum.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -37,7 +37,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
@@ -134,11 +134,11 @@ class torx_data
 };
 
 struct lps2torx_tool {
-  bool            usedummies;
-  bool            removeunused;
-  RewriteStrategy strategy;
-  int             stateformat;
-  std::string     name_for_input;
+  bool               usedummies;
+  bool               removeunused;
+  rewriter::strategy strategy;
+  int                stateformat;
+  std::string        name_for_input;
 
   bool parse_command_line(int ac, char** av) {
     interface_description clinterface(av[0], NAME, AUTHOR,
@@ -166,7 +166,7 @@ struct lps2torx_tool {
     if (parser.continue_execution()) {
       usedummies   = true;
       removeunused = parser.options.count("unused-data") == 0;
-      strategy     = parser.option_argument_as< RewriteStrategy >("rewriter");
+      strategy     = parser.option_argument_as< rewriter::strategy >("rewriter");
       stateformat  = GS_STATE_VECTOR;
 
       if (parser.options.count("dummy")) {

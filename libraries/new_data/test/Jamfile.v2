@@ -28,5 +28,7 @@ test-suite new_data
       [ run rewriting_test.cpp ]
       [ run utility_test.cpp ]
       [ run enumerator_test.cpp ]
+      [ run classic_enumerator_test.cpp ]
+      [ run substitution_test.cpp ]
       [ compile-headers ../include ]
     ;
