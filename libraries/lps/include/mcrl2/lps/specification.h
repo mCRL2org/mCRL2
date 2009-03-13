@@ -127,10 +127,13 @@ class specification: public atermpp::aterm_appl
       }
       //store the term locally
       init_term(atermpp::aterm_appl(t));
-      if (!is_well_typed())
-      {
-        throw mcrl2::runtime_error("specification is not well typed (specification::load())");
-      }
+      // The well typedness check is only done in debug mode, since for large
+      // LPSs it takes too much time                                        
+      assert(is_well_typed());                                               
+      //if (!is_well_typed())
+      //{
+      //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
+      //}
     }
 
     /// \brief Writes the specification to file.
@@ -143,10 +146,13 @@ class specification: public atermpp::aterm_appl
     /// much more compact than the ascii representation.
     void save(const std::string& filename, bool binary = true)
     {
-      if (!is_well_typed())
-      {
-        throw mcrl2::runtime_error("specification is not well typed (specification::save())");
-      }
+      // The well typedness check is only done in debug mode, since for large
+      // LPSs it takes too much time                                        
+      assert(is_well_typed());                                               
+      //if (!is_well_typed())
+      //{
+      //  throw mcrl2::runtime_error("specification is not well typed (specification::save())");
+      //}
       core::detail::save_aterm(m_term, filename, binary);
     }
 
