@@ -512,6 +512,26 @@ bool is_inconsistent(
               const std::vector < linear_inequality > &inequalities,
               const rewriter& r);
 
+
+// Count the occurrences of variables that occur in inequalities.
+static void count_occurrences(
+                 const std::vector < linear_inequality > &inequalities,
+                 map < data_variable, unsigned int> &nr_positive_occurrences,
+                 map < data_variable, unsigned int> &nr_negative_occurrences)
+{ 
+  for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
+           i!=inequalities.end(); ++i)
+  { for(linear_inequality::lhs_t::const_iterator j=i->lhs_begin(); j!=i->lhs_end(); ++j)
+    { if (is_positive(j->second))
+      { nr_positive_occurrences[j->first]=nr_positive_occurrences[j->first]+1;
+      }
+      else
+      { nr_negative_occurrences[j->first]=nr_negative_occurrences[j->first]+1;
+      }
+    }
+  }
+}
+
 /// \brief Eliminate variables from inequalities using Gauss elimination and
 ///        Fourier-Motzkin elimination.
 /// \details Deliver a set of inequalities equivalent to exists variables.inequalities.
@@ -560,6 +580,40 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // occurrences of each variable, and create a new system.
   for(atermpp::vector < data_variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
+    map < data_variable, unsigned int> nr_positive_occurrences;
+    map < data_variable, unsigned int> nr_negative_occurrences;
+    count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences);
+
+    bool found=false;
+    unsigned int best_choice=0;
+    data_variable best_variable;
+    for(atermpp::vector < data_variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
+    { const unsigned int p=nr_positive_occurrences[*k];
+      const unsigned int n=nr_negative_occurrences[*k];
+      if ((p!=0) || (n!=0))
+      { if (found)
+        { if (n*p<best_choice)
+          { best_choice=n*p;
+            best_variable=*k;
+          }
+        }
+        else
+        { // found is false
+          best_choice=n*p;
+          best_variable=*k;
+          found=true;
+        }
+      }
+      if (found && (best_choice==0))
+      { // Stop searching, we cannot find a better candidate.
+        break;
+      }
+    }
+    
+    if (!found) 
+    { // There are no variables anymore that can be removed from inequalities
+      break;
+    }
     vector < linear_inequality > new_inequalities;
     // The vectors below contain references for efficiency.
     // It is important that "inequalities" is not touched while using the arrays below.
@@ -568,13 +622,13 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 
     for(std::vector < linear_inequality >::iterator j = inequalities.begin();
                     j != inequalities.end(); ++j)
-    { linear_inequality::lhs_t::const_iterator factor_it=(j->lhs()).find(*i);
-      if (factor_it==j->lhs_end()) // variable *i does not occur in inequality *j.
+    { linear_inequality::lhs_t::const_iterator factor_it=(j->lhs()).find(best_variable);
+      if (factor_it==j->lhs_end()) // variable best_variable does not occur in inequality *j.
       { new_inequalities.push_back(*j);
       }
       else
       { data_expression f=factor_it->second;
-        j->lhs().erase(*i);
+        j->lhs().erase(best_variable);
         j->divide(f,r);
         if (is_positive(f))
         { inequalities_with_positive_variable.push_back(&(*j));

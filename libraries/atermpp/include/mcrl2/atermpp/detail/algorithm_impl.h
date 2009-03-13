@@ -184,7 +184,8 @@ namespace detail {
     typedef typename iterator_value<OutputIterator>::type value_type;
 
     if (t.type() == AT_LIST) {
-      for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
+      aterm_list l(t);
+      for (aterm_list::iterator i = l.begin(); i != l.end(); ++i)
       {
         find_all_if_impl(*i, op, destBegin);
       }

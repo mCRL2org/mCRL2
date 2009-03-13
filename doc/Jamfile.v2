@@ -8,18 +8,29 @@ import boostbook : boostbook ;
 
 boostbook doc
     :
-    src/boost.xml
+    src/mcrl2.xml
     :
     ## Build the various generated docs (Doxygen and QuickBook)...
 
+    <dependency>../libraries/data/doc//data_manual
+    <dependency>../libraries/lps/doc//lps_manual
     <dependency>../libraries/pbes/doc//pbes_manual
+    <dependency>../libraries/utilities/doc//utilities_manual
 
     ## Add path references to the QuickBook generated docs...
 
+    <implicit-dependency>../libraries/data/doc//data_manual
+    <implicit-dependency>../libraries/lps/doc//lps_manual
     <implicit-dependency>../libraries/pbes/doc//pbes_manual
+    <implicit-dependency>../libraries/utilities/doc//utilities_manual
 
+    <xsl:param>nav.layout=none
     <xsl:param>boost.libraries=../../libs/libraries.htm
-
+    <xsl:param>boost.image.src=images/mcrl2.png
+    <xsl:param>boost.image.alt=mCRL2
+    <xsl:param>boost.image.w=294
+    <xsl:param>boost.image.h=70
+ 
     <dependency>css
     <dependency>images
     <dependency>callouts

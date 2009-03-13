@@ -359,10 +359,14 @@ class pbes
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain a PBES");
       }
       init_term(atermpp::aterm_appl(t));
-      if (!is_well_typed())
-      {
-        throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
-      }
+
+      // The well typedness check is only done in debug mode, since for large
+      // PBESs it takes too much time
+      assert(is_well_typed());
+      //if (!is_well_typed())
+      //{
+      //  throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
+      //}
     }
 
     /// \brief Returns true if the PBES is a BES (boolean equation system).
@@ -421,10 +425,13 @@ class pbes
     /// \param binary If true the file is saved in binary format
     void save(const std::string& filename, bool binary = true) const
     {
-      if (!is_well_typed())
-      {
-        throw mcrl2::runtime_error("PBES is not well typed (pbes::save())");
-      }
+      // The well typedness check is only done in debug mode, since for large
+      // PBESs it takes too much time
+      assert(is_well_typed());
+      //if (!is_well_typed())
+      //{
+      //  throw mcrl2::runtime_error("PBES is not well typed (pbes::save())");
+      //}
       atermpp::aterm t = ATermAppl(*this);
       core::detail::save_aterm(t, filename, binary);
     }
@@ -504,7 +511,8 @@ class pbes
     /// \brief Applies normalization to the equations of the pbes.
     void normalize()
     {
-      std::transform(equations().begin(), equations().end(), equations().begin(), normalize_pbes_equation());
+      Container& eqns = equations();
+      std::transform(eqns.begin(), eqns.end(), eqns.begin(), normalize_pbes_equation());
     }
 
     /// \brief Returns true if the pbes is normalized.
