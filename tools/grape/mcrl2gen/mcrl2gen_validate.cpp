@@ -30,19 +30,18 @@
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 #include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/sort_identifier.h"
+#include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/basic_sort.h"
 
 // mCRL2 utility libraries
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/sort_info.h"
+//#include "mcrl2/utilities/sort_info.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data;
 using namespace mcrl2::new_data::detail;
 using namespace mcrl2;
 using namespace std;
@@ -1402,7 +1401,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
                     return label;
                   }
                   data_expression data_expr = data_expression( a_implemented_data_expr );
-                  sort_identifier sort_expr = data_expr.sort();
+                  basic_sort sort_expr = data_expr.sort();
                   string sort_expr_string = string(sort_expr.name());
                   action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
                 }
