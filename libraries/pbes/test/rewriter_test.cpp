@@ -467,5 +467,9 @@ int test_main(int argc, char* argv[])
   test_substitutions3();
   test_pfnf_rewriter();
 
+#if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
+  BOOST_CHECK(false);
+#endif
+
   return 0;
 }
