@@ -28,7 +28,8 @@ using utilities::tools::input_output_tool;
 class pbes_parelm_tool: public input_output_tool
 {
   protected:
-    void add_options(interface_description& desc)
+    void add_options(interface_description& desc) /*< One can add command line
+                     options by overriding the virtual function `add_options`. >*/
     {
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
     }
@@ -60,6 +61,7 @@ class pbes_parelm_tool: public input_output_tool
       p.load(input_filename()); /*< The functions `input_filename()` and `output_filename()`
                                     return the corresponding values that the user has entered
                                     on the command line. >*/
+
       // apply the algorithm
       pbes_system::pbes_parelm_algorithm algorithm;
       algorithm.run(p);
@@ -75,6 +77,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   pbes_parelm_tool tool;
-  return tool.execute(argc, argv);
+  return tool.execute(argc, argv); /*< The function `execute` first parses the command line
+                                       arguments, and then calls the function `run`. >*/
 }
 //]
