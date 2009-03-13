@@ -155,6 +155,17 @@ void test3()
   data_expression_with_variables x(c, make_vector(n));
 }
 
+void test4()
+{
+  data_specification data_spec;
+  rewriter datar;
+  number_postfix_generator generator("x_");
+  data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
+  variable y = parse_data_expression("n", "n: Nat;\n"); 
+  atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
+  BOOST_CHECK(z.size() > 0);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -162,6 +173,7 @@ int test_main(int argc, char* argv[])
   test_data_enumerator();
   test2();
   test3();
+  test4();
 
   return 0;
 }
