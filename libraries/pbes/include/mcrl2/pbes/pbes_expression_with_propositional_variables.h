@@ -374,7 +374,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + new_data::pp(t.variables()) + " " + new_data::pp(t.propositional_variables());
+      return core::pp(t) + " [" + new_data::pp(t.variables()) + "] [" + new_data::pp(t.propositional_variables()) + "]";
     }
   };
 

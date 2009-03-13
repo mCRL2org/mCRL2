@@ -517,7 +517,7 @@ struct pbes_expression_builder<Term, void>
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
   pbes_expression_builder_decrease_indent();
-  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
