@@ -947,7 +947,7 @@ ATermAppl RewriterJitty::rewrite(ATermAppl Term)
         /*gsVerboseMsg("Rewriting term: %T\n\n", Term);
         gsVerboseMsg("toRewriteFormat(Term): %T\n\n", toRewriteFormat(Term));
         gsVerboseMsg("fromInner(toRewriteFormat(Term)): %T\n\n\n", fromInner((ATermAppl) toRewriteFormat(Term)));*/
-	return fromInner(rewrite_aux((ATermAppl) toRewriteFormat(Term)));
+	return fromInner((ATermAppl) rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterJitty::rewriteInternal(ATerm Term)
@@ -963,6 +963,7 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 				jitty_strat[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(jitty_eqns,(ATerm) i));
 			}
 		}
+		need_rebuild = false;
 	}
 	return (ATerm) rewrite_aux((ATermAppl) Term);
 }
