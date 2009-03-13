@@ -24,6 +24,39 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+// use a static variable to store the indentation depth
+/// \cond INTERNAL_DOCS
+  template <class T> // note, T is only a dummy
+  struct pbes_expression_builder_indentation
+  {
+    static unsigned int depth;
+  };
+  
+  template <class T>
+  unsigned int pbes_expression_builder_indentation<T>::depth = 0;
+    
+  inline
+  std::string pbes_expression_builder_indent()
+  {
+    return std::string(pbes_expression_builder_indentation<int>::depth, ' ');
+  }
+
+  inline
+  void pbes_expression_builder_increase_indent()
+  {
+    pbes_expression_builder_indentation<int>::depth += 2;
+  }
+
+  inline
+  void pbes_expression_builder_decrease_indent()
+  {
+    pbes_expression_builder_indentation<int>::depth -= 2;
+  }
+/// \endcond
+#endif // MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+
 /// \brief Visitor class for visiting the nodes of a pbes expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns term_type(), the recursion is continued
@@ -165,7 +198,8 @@ struct pbes_expression_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << std::endl;
+  std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
+  pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -251,7 +285,8 @@ std::cerr << "<visit>" << tr::pp(e) << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  pbes_expression_builder_decrease_indent();
+  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -394,7 +429,8 @@ struct pbes_expression_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
+  std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
+  pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -480,7 +516,8 @@ std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+  pbes_expression_builder_decrease_indent();
+  std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;
