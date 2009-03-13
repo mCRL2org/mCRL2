@@ -418,6 +418,7 @@ RewriterJitty::RewriterJitty(mcrl2::data::data_specification DataSpec)
 
 	num_opids = 0;
 	max_vars = 0;
+        need_rebuild = false;
 
 	jitty_true = toInner(gsMakeDataExprTrue(),true);
 	ATprotectAppl(&jitty_true);
@@ -517,7 +518,8 @@ bool RewriterJitty::addRewriteRule(ATermAppl Rule)
 	n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(Rule,0),toRewriteFormat(ATAgetArgument(Rule,1)),(ATerm) u,toRewriteFormat(ATAgetArgument(Rule,3))));
 	ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
 
-	jitty_strat[ATgetInt((ATermInt) ATgetArgument(u,0))] = create_strategy(n);
+	jitty_strat[ATgetInt((ATermInt) ATgetArgument(u,0))] = NULL; //create_strategy(n);
+	need_rebuild = true;
 
 	return true;
 }
@@ -547,7 +549,8 @@ bool RewriterJitty::removeRewriteRule(ATermAppl Rule)
 		jitty_strat[ATgetInt(i)] = NULL;
 	} else {
 		ATtablePut(jitty_eqns,(ATerm) i,(ATerm) n);
-		jitty_strat[ATgetInt(i)] = create_strategy(n);
+		jitty_strat[ATgetInt(i)] = NULL;//create_strategy(n);
+		need_rebuild = true;
 	}
 
 	return true;
@@ -949,6 +952,18 @@ ATermAppl RewriterJitty::rewrite(ATermAppl Term)
 
 ATerm RewriterJitty::rewriteInternal(ATerm Term)
 {
+	if ( need_rebuild )
+	{
+		ATermList opids = ATtableKeys(jitty_eqns);
+		for (; !ATisEmpty(opids); opids=ATgetNext(opids))
+		{
+			ATermInt i = (ATermInt) ATgetFirst(opids);
+			if ( jitty_strat[ATgetInt(i)] == NULL )
+			{
+				jitty_strat[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(jitty_eqns,(ATerm) i));
+			}
+		}
+	}
 	return (ATerm) rewrite_aux((ATermAppl) Term);
 }
 
