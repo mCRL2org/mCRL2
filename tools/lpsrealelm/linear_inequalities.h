@@ -38,6 +38,9 @@ bool is_positive(const data_expression e);
 bool is_zero(const data_expression e);
 // End of functions that ought to be defined elsewhere.
 
+inline data_expression rewrite_with_memory(
+                      const data_expression t,const rewriter &r);
+
 // prototype
 class linear_inequality;
 inline std::string string(const linear_inequality& l);
@@ -93,18 +96,21 @@ class linear_inequality
         {
           if(m_lhs.find(e) == m_lhs.end())
           {
-            set_factor_for_a_variable(e,(negate?r(data_expr::negate(factor)):r(factor)));
+            set_factor_for_a_variable(e,(negate?rewrite_with_memory(data_expr::negate(factor),r)
+                                               :rewrite_with_memory(factor,r)));
           }
           else
           {
-            set_factor_for_a_variable(e,(negate?r(minus(m_lhs[e],factor)):r(plus(m_lhs[e],factor))));
+            set_factor_for_a_variable(e,(negate?rewrite_with_memory(minus(m_lhs[e],factor),r)
+                                               :rewrite_with_memory(plus(m_lhs[e],factor),r)));
           }
         }
         else
            throw mcrl2::runtime_error("Encountered a variable in a real expression which is not of sort real: " + pp(e));
       }
-      else if (is_number(r(e)))
-      { set_rhs(negate?r(plus(rhs(),e)): r(minus(rhs(),e)));
+      else if (is_number(rewrite_with_memory(e,r)))
+      { set_rhs(negate?rewrite_with_memory(plus(rhs(),e),r)
+                      :rewrite_with_memory(minus(rhs(),e),r));
       }
       else throw mcrl2::runtime_error("Expect linear expression over reals: " + pp(e));
     }
@@ -259,16 +265,20 @@ class linear_inequality
         ((m_comparison==equal)?is_zero(rhs()):is_positive(rhs())));
     }
 
+
+
     /// \brief Subtract the given equality, multiplied by f1/f2.
     ///
     void subtract(const linear_inequality &e,
                   const rewriter &r)
-    {
+    { 
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
-      { set_factor_for_a_variable(i->first,r(minus(get_factor_for_a_variable(i->first),i->second)));
+      { 
+        set_factor_for_a_variable(i->first,
+             rewrite_with_memory(minus(get_factor_for_a_variable(i->first),i->second),r));
       }
-      set_rhs(r(minus(rhs(),e.rhs())));
+      set_rhs(rewrite_with_memory(minus(rhs(),e.rhs()),r));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -278,12 +288,15 @@ class linear_inequality
                   const data_expression f1,
                   const data_expression f2,
                   const rewriter &r)
-    { data_expression f=r(mcrl2::data::divide(f1,f2));
+    { data_expression f=rewrite_with_memory(mcrl2::data::divide(f1,f2),r);
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
-      { set_factor_for_a_variable(i->first,r(minus(get_factor_for_a_variable(i->first),multiply(f,i->second))));
+      { set_factor_for_a_variable(
+                  i->first,
+                  rewrite_with_memory(
+                     minus(get_factor_for_a_variable(i->first),multiply(f,i->second)),r));
       }
-      set_rhs(r(minus(rhs(),multiply(f,e.rhs()))));
+      set_rhs(rewrite_with_memory(minus(rhs(),multiply(f,e.rhs())),r));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -302,7 +315,7 @@ class linear_inequality
 
       for(lhs_t::const_iterator i=lhs_begin(); i!=lhs_end(); ++i)
       { data_variable v=i->first;
-        data_expression e=multiply(r(mcrl2::data::divide(i->second,factor)),
+        data_expression e=multiply(rewrite_with_memory(mcrl2::data::divide(i->second,factor),r),
                                            data_expression(v));
         if (i==lhs_begin())
         { lhs_expression=e;
@@ -312,7 +325,7 @@ class linear_inequality
         }
       }
 
-      rhs_expression=r(mcrl2::data::divide(rhs(),factor));
+      rhs_expression=rewrite_with_memory(mcrl2::data::divide(rhs(),factor),r);
     }
 
     void divide(const data_expression e, const rewriter &r)
@@ -321,9 +334,9 @@ class linear_inequality
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
       { // m_lhs.find(i->first) == i
-        m_lhs[i->first]=r(mcrl2::data::divide(m_lhs[i->first],e));
+        m_lhs[i->first]=rewrite_with_memory(mcrl2::data::divide(m_lhs[i->first],e),r);
       }
-      set_rhs(r(mcrl2::data::divide(rhs(),e)));
+      set_rhs(rewrite_with_memory(mcrl2::data::divide(rhs(),e),r));
     }
 
     void invert(const rewriter &r)
@@ -331,9 +344,9 @@ class linear_inequality
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
       {
-        m_lhs[i->first]=r(negate(m_lhs[i->first]));
+        m_lhs[i->first]=rewrite_with_memory(negate(m_lhs[i->first]),r);
       }
-      set_rhs(r(negate(rhs())));
+      set_rhs(rewrite_with_memory(negate(rhs()),r));
       if (comparison()==less)
       { set_comparison(less_eq);
       }
@@ -954,6 +967,27 @@ atermpp::vector < data_variable > gauss_elimination(
   //                       (ATermList)eliminated_variables, (ATermList)inequalities);
 
   return remaining_variables;
+}
+
+// The introduction of the function rewrite_with_memory using a 
+// hash table here is a temporary trick, to boost 
+// performance, which is slow due to translations necessary from and to
+// rewrite format. 
+
+inline data_expression rewrite_with_memory(
+                      const data_expression t,const rewriter &r)
+{
+  static atermpp::map < data_expression, data_expression > rewrite_hash_table;
+  atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
+  if (i==rewrite_hash_table.end())
+  { 
+    data_expression t1=r(t);
+    // std::cerr << "Term " << pp(t) << "Result " << pp(t1) << "\n";
+    rewrite_hash_table[t]=t1;
+    return t1;
+  }
+  // std::cerr << "Term " << pp(t) << "FROM HASH " << pp(i->second) << "\n";
+  return i->second;
 }
 
 
