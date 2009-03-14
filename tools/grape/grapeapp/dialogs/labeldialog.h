@@ -32,23 +32,13 @@ namespace grape
     class grape_label_dialog : public wxDialog
     {
       private:
-        wxGrid         *m_var_decls_grid;   /**< Grid shown in the dialog, used for variable declarations.*/
+        wxTextCtrl     *m_var_decls_input;   /**< Input shown in the dialog, used for variable declarations.*/
         wxTextCtrl     *m_condition_input;  /**< Input shown in the dialog, used for condition.*/
         wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
-
-        wxGrid         *m_multiaction_grid; /**< Grid shown in the dialog, used for a multi action.*/
-        wxGrid         *m_timestamp_grid;   /**< Grid shown in the dialog, used for time.*/
-        wxGrid         *m_var_updates_grid; /**< Grid shown in the dialog, used for variable updates.*/
+        wxTextCtrl     *m_multiaction_input; /**< Input shown in the dialog, used for a multi action.*/
+        wxTextCtrl     *m_var_updates_input;  /**< Input shown in the dialog, used for variable. updates*/
 
         wxStaticText   *m_preview_text;     /**< Preview text.*/
-
-        wxNotebook     *m_notebook;         /**< Notebook shown in the dialog, used for all the grids.*/
-
-        wxNotebookPage *m_var_decls_page;   /**< Notebook variable declaration page used in the dialog.*/
-        wxNotebookPage *m_condition_page;   /**< Notebook condition page used in the dialog.*/
-        wxNotebookPage *m_multiaction_page; /**< Notebook multiaction page used in the dialog.*/
-        wxNotebookPage *m_timestamp_page;   /**< Notebook timestamp page used in the dialog.*/
-        wxNotebookPage *m_var_updates_page; /**< Notebook variable update page used in the dialog.*/
 
         label          *m_label;            /**< label for temporarily storage.*/
         /** Default constructor. */
@@ -70,21 +60,21 @@ namespace grape
          * Appending grid rows.
          * @param p_event The generated event.
          */
-        void event_change_var_decls_text( wxGridEvent &p_event );
+        void event_change_var_decls_text( wxCommandEvent &p_event );
 
         /**
          * Change var update grid event handler.
          * Appending grid rows.
          * @param p_event The generated event.
          */
-        void event_change_var_updates_text( wxGridEvent &p_event );
+        void event_change_var_updates_text( wxCommandEvent &p_event );
 
         /**
          * Change multi action grid event handler.
          * Appending grid rows.
          * @param p_event The generated event.
          */
-        void event_change_multiaction_text( wxGridEvent &p_event );
+        void event_change_multiaction_text( wxCommandEvent &p_event );
 
         /**
          * Change condition grid event handler.

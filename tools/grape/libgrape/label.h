@@ -85,7 +85,7 @@ namespace grape
          * @return the text of the declarations of the label
          */
         wxString get_declarations_text( void ) const;
-
+        
         /**
          * Label timestamp retrieval function
          * @return the timestamp of the label
@@ -116,6 +116,11 @@ namespace grape
          */
         void set_declarations( const list_of_decl &p_declarations );
         /**
+         * Label declarations assignment function
+         * @param p_declarations String of variable declarations 
+         */
+        void set_declarations_text( wxString p_declarations );
+        /**
          * Label condition assignment function
          * @param p_condition The condition text
          */
@@ -123,6 +128,11 @@ namespace grape
         /**
          * Label actions assignment function
          * @param p_actions The list of actions
+         */
+        void set_actions_text( const wxString &p_actions );
+        /**
+         * Label actions assignment function
+         * @param p_actions string containing actions
          */
         void set_actions( const list_of_action &p_actions );
         /**
@@ -135,6 +145,11 @@ namespace grape
          * @param p_variable_updates The list of variable updates
          */
         void set_variable_updates( const list_of_varupdate &p_variable_updates );
+        /**
+         * Label variable updates assignment function
+         * @param p_variable_updates the text of the variable updates
+         */
+        void set_variable_updates_text(wxString p_variable_updates );
     };
 
     /**

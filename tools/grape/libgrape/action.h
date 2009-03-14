@@ -75,6 +75,12 @@ namespace grape
 
         /**
          * Parameter assignment function.
+         * @param p_parameters String containing the parameters of the action.
+         */
+        void set_parameters_text( wxString p_parameters );
+        
+        /**
+         * Parameter assignment function.
          * @param p_parameters The new parameters of the action.
          */
         void set_parameters( list_of_dataexpression &p_parameters);
