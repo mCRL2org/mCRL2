@@ -72,6 +72,25 @@ const std::string case_7(
 );
 const std::string removed_7 = "";
 
+// Example given by Jan Friso. Parameter xi08 is erroneously found.
+const std::string case_8 =
+  "sort Comp = struct smaller?is_smaller | equal?is_equal | larger?is_larger;                                           \n"
+  "                                                                                                                     \n"
+  "map  k: Real;                                                                                                        \n"
+  "                                                                                                                     \n"
+  "eqn  k  =  2;                                                                                                        \n"
+  "                                                                                                                     \n"
+  "act  get,_get,__get,set,_set,__set: Nat;                                                                             \n"
+  "     cs_in,cs_out: Pos;                                                                                              \n"
+  "                                                                                                                     \n"
+  "proc P(s32_P_init1,s31_P_init1: Pos, id_ID: Nat, xi,xi00,xi01,xi02,xi03,xi04,xi05,xi06,xi07,xi08: Comp) =            \n"
+  "    ((((!is_smaller(xi08) && !is_smaller(xi04)) && !is_smaller(xi03)) && !is_smaller(xi02)) && !is_smaller(xi00)) -> \n"
+  "         delta;                                                                                                      \n"
+  "                                                                                                                     \n"
+  " init P(1, 1, 0, equal, equal, equal, larger, equal, larger, equal, equal, equal, equal);                            \n"
+  ;
+const std::string removed_8 = "";
+
 inline
 bool is_linear(const process_specification& pspec)
 {
@@ -137,6 +156,7 @@ int test_main(int argc, char* argv[])
   test_parelm(case_5, removed_5);
   test_parelm(case_6, removed_6);
   test_parelm(case_7, removed_7);
+  test_parelm(case_8, removed_8);
 
   return 0;
 }
