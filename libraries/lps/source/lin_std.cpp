@@ -130,6 +130,8 @@ static ATermAppl fresh_name(const std::string &name);
 static void insertequation(ATermAppl eqn, specificationbasictype *spec);
 static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
 static ATermAppl RewriteTerm(ATermAppl t);
+static ATermAppl transform_process_assignment_to_process(ATermAppl procId);
+
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)
 { return ATinsert(l,(ATerm)a);
@@ -2239,6 +2241,12 @@ static ATermAppl substitute_pCRLproc(
   if (gsIsProcess(p))
   { return gsMakeProcess(ATAgetArgument(p,0),
                 substitute_datalist(terms,vars,ATLgetArgument(p,1)));
+  }
+
+  if (gsIsProcessAssignment(p))
+  { ATermAppl q=transform_process_assignment_to_process(p);
+    return gsMakeProcess(ATAgetArgument(q,0),
+                substitute_datalist(terms,vars,ATLgetArgument(q,1)));
   }
 
   if (gsIsAction(p))
