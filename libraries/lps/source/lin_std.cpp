@@ -9260,7 +9260,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //initialise local data structures
   initialize_data();
   if (mayrewrite) {
-    rewr = createRewriter(mcrl2::data::data_specification(ATAgetArgument(spec,0)),
+    rewr = createRewriter(mcrl2::data::data_specification(),
                           lin_options.rewrite_strategy);
   }
   specificationbasictype *spec_int = create_spec(spec);
