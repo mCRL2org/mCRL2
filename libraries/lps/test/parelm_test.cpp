@@ -89,7 +89,7 @@ const std::string case_8 =
   "                                                                                                                     \n"
   " init P(1, 1, 0, equal, equal, equal, larger, equal, larger, equal, equal, equal, equal);                            \n"
   ;
-const std::string removed_8 = "";
+const std::string removed_8 = "id_ID s31_P_init1 s32_P_init1 xi xi01 xi05 xi06 xi07";
 
 inline
 bool is_linear(const process_specification& pspec)

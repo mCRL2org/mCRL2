@@ -43,10 +43,10 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
   std::set<data::data_variable> result;
   for (Iterator i = first; i != last; ++i)
   {
-    if (i->is_delta())
-    {
-      continue;
-    }
+    //if (i->is_delta())
+    //{
+    //  continue;
+    //}
     atermpp::find_all_if(i->condition(), data::is_data_variable, std::inserter(result, result.end()));
     atermpp::find_all_if(i->actions(), data::is_data_variable, std::inserter(result, result.end()));
     if (i->has_time())
@@ -60,7 +60,7 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
 /// \brief Returns a set of insignificant process parameters that may be eliminated from p.
 /// \param p A linear process
 /// \return A set of insignificant process parameters
-inline
+inline                                                              
 std::set<data::data_variable> compute_insignificant_parameters(const linear_process& p)
 {
   std::set<data::data_variable> process_parameters(p.process_parameters().begin(), p.process_parameters().end());
@@ -68,12 +68,25 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
   // significant variables may not be removed by parelm
   std::set<data::data_variable> significant_variables = transition_variables(p.summands().begin(), p.summands().end());
 
+#ifdef MCRL2_LPS_PARELM_DEBUG
+  std::clog << "<todo list>";
+  for (std::set<data::data_variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
+  {
+    std::clog << core::pp(*i) << " ";
+  }
+  std::clog << std::endl;
+#endif
+
   // recursively extend the set of significant variables
   std::set<data::data_variable> todo = significant_variables;
   while (!todo.empty())
   {
     data::data_variable x = *todo.begin();
     todo.erase(todo.begin());
+
+#ifdef MCRL2_LPS_PARELM_DEBUG
+    std::clog << "<handling todo element>" << core::pp(x) << std::endl;
+#endif
 
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
