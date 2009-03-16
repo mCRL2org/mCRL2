@@ -13,7 +13,7 @@ test-suite new_data
     :
       [ run sort_expression_test.cpp ]
       [ run data_expression_test.cpp ]
-      [ run data_reconstruct_expr_test.cpp ]
+      #[ run data_reconstruct_expr_test.cpp ]
       [ run data_reconstruct_spec_test.cpp ]
       [ run data_equation_test.cpp ]
       [ run data_specification_test.cpp ]

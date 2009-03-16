@@ -253,7 +253,7 @@ int test_main(int argc, char** argv) {
 
   empty_test();
 
-//  list_test< void >(512);
+//  list_test< classic_enumerator< > >(512);
 //  tree_test< void >(1096);
 //  mutually_recursive_test< void >(1096);
 

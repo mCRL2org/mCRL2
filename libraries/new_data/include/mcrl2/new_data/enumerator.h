@@ -123,7 +123,8 @@ class data_enumerator
       {
         return i->second;
       }
-      m_constructors[s] = boost::copy_range< std::vector< function_symbol > >(m_data->constructors(s));
+      function_symbol_vector r(m_data->constructors(s));
+      m_constructors[s].assign(r.begin(), r.end());
       return m_constructors[s];
     }
 
@@ -162,14 +163,22 @@ class data_enumerator
 
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
-        std::vector<variable> variables;
-        for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
-        {
-          variables.push_back(variable((*m_generator)(), j.front()));
+        if (i->sort().is_function_sort()) {
+          std::vector<variable> variables;
+
+          for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+          {
+            variables.push_back(variable((*m_generator)(), j.front()));
+          }
+
+          variable_list w(convert< variable_list >(variables));
+
+          result.push_back(data_expression_with_variables((*m_rewriter)(application(*i,
+                convert< data_expression_list >(w))), w));
         }
-        variable_list        w(variables.begin(), variables.end());
-        data_expression_list w1(variables.begin(), variables.end());
-        result.push_back(data_expression_with_variables((*m_rewriter)(application(*i, w1)), w));
+        else {
+          result.push_back(data_expression_with_variables((*m_rewriter)(*i), variable_list()));
+        }
       }
 
       return result;

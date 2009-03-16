@@ -15,7 +15,8 @@
 #include <iostream>
 #include <algorithm>
 
-#include <boost/iterator/transform_iterator.hpp>
+#include "boost/iterator/transform_iterator.hpp"
+#include "boost/iterator/iterator_adaptor.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
@@ -62,36 +63,72 @@ namespace mcrl2 {
           }
         };
 
+        /// \brief iterates the aliases of a range of sort expressions
+        template < typename ForwardTraversalIterator >
+        class aliases_iterator : public
+                boost::iterator_adaptor< aliases_iterator< ForwardTraversalIterator >,
+                                ForwardTraversalIterator, alias, boost::use_default, alias >
+        {
+          friend class boost::iterator_core_access;
+
+          private:
+
+            sort_expression m_sort;
+
+            void increment()
+            {
+              while (++(this->base_reference()) != ForwardTraversalIterator()) {
+                if (this->base_reference()->is_alias() && (alias(*this->base_reference()).reference() == m_sort)) {
+                  break;
+                }
+              }
+            }
+
+          public:
+
+            aliases_iterator()
+            { }
+
+            explicit aliases_iterator(ForwardTraversalIterator const& i, sort_expression const& s) :
+                                  aliases_iterator::iterator_adaptor_(i), m_sort(s)
+            { }
+        };
+
       public:
 
         /// \brief iterator range over list of sort expressions
-        typedef boost::iterator_range< atermpp::set< sort_expression >::iterator >       sorts_range;
+        typedef boost::iterator_range< atermpp::set< sort_expression >::iterator >                    sorts_range;
         /// \brief iterator range over constant list of sort expressions
-        typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator > sorts_const_range;
+        typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator >              sorts_const_range;
 
         /// \brief iterator range over list of sort expressions
-        typedef boost::iterator_range< atermpp::set< variable >::iterator >              variable_range;
+        typedef boost::iterator_range< atermpp::set< variable >::iterator >                           variable_range;
         /// \brief iterator range over constant list of sort expressions
-        typedef boost::iterator_range< atermpp::set< variable >::const_iterator >        variable_const_range;
+        typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
+
+        /// \brief iterator range over list of sort expressions
+        typedef boost::iterator_range< aliases_iterator< sorts_range::iterator > >                    aliases_range;
+        /// \brief iterator range over constant list of sort expressions
+        typedef boost::iterator_range< aliases_iterator< sorts_const_range::iterator > >              aliases_const_range;
 
         /// \brief iterator over constructors
-        typedef boost::transform_iterator< constructor_projection, constructors_map::iterator > constructors_iterator;
+        typedef boost::transform_iterator< constructor_projection, constructors_map::iterator >       constructors_iterator;
         /// \brief const iterator over constructors
         typedef boost::transform_iterator< constructor_projection, constructors_map::const_iterator > constructors_const_iterator;
         /// \brief iterator range over constructors
-        typedef boost::iterator_range< constructors_iterator >                              constructors_range;
+        typedef boost::iterator_range< constructors_iterator >                                        constructors_range;
         /// \brief const iterator range over constructors
-        typedef boost::iterator_range< constructors_const_iterator >                        constructors_const_range;
+        typedef boost::iterator_range< constructors_const_iterator >                                  constructors_const_range;
 
         /// \brief iterator range over list of sort expressions
-        typedef boost::iterator_range< atermpp::set< function_symbol >::iterator >       mappings_range;
+        typedef boost::iterator_range< atermpp::set< function_symbol >::iterator >                    mappings_range;
         /// \brief iterator range over constant list of sort expressions
-        typedef boost::iterator_range< atermpp::set< function_symbol >::const_iterator > mappings_const_range;
+        typedef boost::iterator_range< atermpp::set< function_symbol >::const_iterator >              mappings_const_range;
 
         /// \brief iterator range over list of data equations
-        typedef boost::iterator_range< atermpp::set< data_equation >::iterator >         equations_range;
+        typedef boost::iterator_range< atermpp::set< data_equation >::iterator >                      equations_range;
         /// \brief iterator range over constant list of data equations
-        typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >   equations_const_range;
+        typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >                equations_const_range;
 
       private:
 
@@ -139,9 +176,11 @@ namespace mcrl2 {
         {
           sort_expression_vector result;
 
-          for (constructors_const_range i = constructors(s); !i.empty(); i.advance_begin(1))
+          function_symbol_vector constructors_s(constructors(s));
+
+          for (function_symbol_vector::const_iterator i = constructors_s.begin(); i != constructors_s.end(); ++i)
           {
-            sort_expression_vector l(dependent_sorts(i.front(), visited));
+            sort_expression_vector l(dependent_sorts(*i, visited));
             result.insert(result.end(), l.begin(), l.end());
           }
 
@@ -264,7 +303,7 @@ namespace mcrl2 {
       inline
       sorts_const_range sorts() const
       {
-        return boost::make_iterator_range(m_sorts.begin(), m_sorts.end());
+        return boost::make_iterator_range(m_sorts);
       }
 
       /// \brief Gets the aliases
@@ -272,17 +311,15 @@ namespace mcrl2 {
       /// \param[in] s A sort expression
       /// \return The aliases of sort s
       inline
-      alias_const_range aliases(sort_expression& s) const
+      aliases_const_range aliases(sort_expression const& s) const
       {
-        //TODO
-        return boost::make_iterator_range(alias_list());
+        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), s), aliases_const_range::iterator());
       }
 
       /// \brief Gets all constructors
       ///
       /// \return All constructors in this specification, including those for
       /// structured sorts.
-
       inline
       constructors_const_range constructors() const
       {
@@ -294,9 +331,38 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
       inline
-      constructors_const_range constructors(const sort_expression& s) const
+      function_symbol_vector constructors(const sort_expression& s) const
       {
-        return boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s));
+        function_symbol_vector result = boost::copy_range< function_symbol_vector >(
+                 boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s)));
+
+        if (s.is_standard() && m_sorts.find(s) == m_sorts.end()) {
+          function_symbol_vector specification_result;
+          function_symbol_vector standard_result;
+
+          if (s == sort_pos::pos()) {
+            standard_result = sort_pos::pos_generate_constructors_code();
+          }
+          else if (s == sort_nat::nat()) {
+            standard_result = sort_nat::nat_generate_constructors_code();
+          }
+          else if (s == sort_int_::int_()) {
+            standard_result = sort_int_::int__generate_constructors_code();
+          }
+          else if (s == sort_real_::real_()) {
+            standard_result = sort_real_::real__generate_constructors_code();
+          }
+
+          specification_result.swap(result);
+
+          std::sort(standard_result.begin(), standard_result.end());
+          std::sort(specification_result.begin(), specification_result.end());
+          std::set_union(standard_result.begin(), standard_result.end(),
+            specification_result.begin(), specification_result.end(), std::inserter(result, result.end()));
+
+        }
+
+        return result;
       }
 
       /// \brief Gets all mappings in this specification
@@ -313,7 +379,7 @@ namespace mcrl2 {
       ///
       /// \param[in] s A sort expression.
       /// \return All mappings in this specification, for which s occurs as a
-      /// righthandside of the mapping's sort.
+      /// right-hand side of the mapping's sort.
       inline
       function_symbol_vector mappings(const sort_expression& s) const
       {
@@ -327,14 +393,37 @@ namespace mcrl2 {
               result.push_back(*i);
             }
           }
-          else
+          else if(i->sort() == s)
           {
-            if(i->sort() == s)
-            {
-              result.push_back(*i);
-            }
+            result.push_back(*i);
           }
         }
+        if (s.is_standard() && m_sorts.find(s) == m_sorts.end())
+        {
+          std::set< function_symbol > specification_result(result.begin(), result.end());
+          function_symbol_vector standard_result;
+
+          result.clear();
+
+          if (s == sort_pos::pos()) {
+            standard_result = sort_pos::pos_generate_functions_code();
+          }
+          else if (s == sort_nat::nat()) {
+            standard_result = sort_nat::nat_generate_functions_code();
+          }
+          else if (s == sort_int_::int_()) {
+            standard_result = sort_int_::int__generate_functions_code();
+          }
+          else if (s == sort_real_::real_()) {
+            standard_result = sort_real_::real__generate_functions_code();
+          }
+
+          std::sort(standard_result.begin(), standard_result.end());
+
+          std::set_union(standard_result.begin(), standard_result.end(),
+            specification_result.begin(), specification_result.end(), std::inserter(result, result.end()));
+        }
+
         return result;
       }
 
@@ -763,9 +852,9 @@ namespace mcrl2 {
             return sort_bool_::is_bool_(s);
           }
 
-          constructors_const_range fl(constructors(s));
+          function_symbol_vector fl(constructors(s));
 
-          for (constructors_const_range::const_iterator i = fl.begin(); i != fl.end(); ++i)
+          for (function_symbol_vector::const_iterator i = fl.begin(); i != fl.end(); ++i)
           {
             atermpp::set<sort_expression> visited;
             sort_expression_vector sl(dependent_sorts(*i, visited));

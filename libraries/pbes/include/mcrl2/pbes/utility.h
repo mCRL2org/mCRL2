@@ -554,12 +554,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (new_data::data_specification::constructors_const_range f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
+                new_data::function_symbol_vector constructors(data.constructors(i->sort()));
+
+                for (new_data::function_symbol_vector::const_iterator f(constructors.begin()); f == constructors.end(); ++f)
                 {
                   boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
-                  if (f.front().sort().is_function_sort())
+                  if (f->sort().is_function_sort())
                   {
-                    new_data::function_sort sa=f.front().sort();
+                    new_data::function_sort sa=f->sort();
                     assert(!sa.codomain().is_function_sort()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
                                                            // This code must be replaced by enumerator code,
@@ -585,7 +587,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(f.front(),
+                  pbes_expression d(core::detail::gsMakeDataApplList(*f,
                      atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
                   rewriter.setSubstitution(*i,d);
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
@@ -668,12 +670,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (new_data::data_specification::constructors_const_range f(data.constructors(i->sort())); !f.empty(); f.advance_begin(1))
+                new_data::function_symbol_vector constructors(data.constructors(i->sort()));
+
+                for (new_data::function_symbol_vector::const_iterator f(constructors.begin()); f == constructors.end(); ++f)
                 {
                   boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
-                  if (f.front().sort().is_function_sort())
+                  if (f->sort().is_function_sort())
                   {
-                    new_data::function_sort sa=f.front().sort();
+                    new_data::function_sort sa=f->sort();
                     assert(!sa.codomain().is_function_sort()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
                                                            // This code must be replaced by enumerator code,
@@ -699,7 +703,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(f.front(),atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
+                  pbes_expression d(core::detail::gsMakeDataApplList(*f,atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
                   rewriter.setSubstitution(*i,d);
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));

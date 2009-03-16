@@ -63,6 +63,30 @@ void test_sorts()
   BOOST_CHECK(spec == spec1);
 }
 
+void test_aliases()
+{
+  basic_sort s("S");
+  basic_sort t("T");
+  alias      s1(basic_sort("S1"), s);
+  alias      s2(basic_sort("S2"), s);
+
+  data_specification spec;
+
+  atermpp::set< sort_expression > sorts;
+  sorts.insert(s);
+  sorts.insert(t);
+  spec.add_sorts(boost::make_iterator_range(sorts));
+
+  atermpp::set< sort_expression > aliases;
+  aliases.insert(s1);
+  aliases.insert(s2);
+  spec.add_sorts(boost::make_iterator_range(aliases));
+
+  BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
+  BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
+  BOOST_CHECK(spec.aliases(s) == boost::make_iterator_range(aliases));
+}
+
 void test_constructors()
 {
   basic_sort s("S");

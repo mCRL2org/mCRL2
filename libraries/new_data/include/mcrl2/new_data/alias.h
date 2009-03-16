@@ -72,11 +72,10 @@ namespace mcrl2 {
     }; // class alias
 
     /// \brief list of aliases
-    typedef atermpp::vector< alias >                              alias_list;
-    /// \brief iterator range over list of aliases
-    typedef boost::iterator_range< alias_list::iterator >         alias_range;
-    /// \brief iterator range over constant list of aliases
-    typedef boost::iterator_range< alias_list::const_iterator >   alias_const_range;
+    typedef atermpp::term_list< alias >    alias_list;
+
+    /// \brief vector of aliases
+    typedef atermpp::vector < alias >      alias_vector;
 
   } // namespace new_data
 

@@ -61,9 +61,7 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
 void bool_rewrite_test() {
   using namespace mcrl2::new_data::sort_bool_;
 
-  data_specification specification = parse_data_specification(
-    ""
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -83,9 +81,7 @@ void bool_rewrite_test() {
 void pos_rewrite_test() {
   using namespace mcrl2::new_data::sort_pos;
 
-  data_specification specification = parse_data_specification(
-    "sort A = Pos;"
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -114,9 +110,7 @@ void pos_rewrite_test() {
 void nat_rewrite_test() {
   using namespace mcrl2::new_data::sort_nat;
 
-  data_specification specification = parse_data_specification(
-    "sort A = Nat;"
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -177,9 +171,7 @@ void nat_rewrite_test() {
 void int_rewrite_test() {
   using namespace mcrl2::new_data::sort_int_;
 
-  data_specification specification = parse_data_specification(
-    "sort A = Int;"
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -235,9 +227,7 @@ void int_rewrite_test() {
 void real_rewrite_test() {
   using namespace mcrl2::new_data::sort_real_;
 
-  data_specification specification = parse_data_specification(
-    "sort A = Real;"
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -296,9 +286,7 @@ void list_rewrite_test() {
   using namespace mcrl2::new_data::sort_bool_;
   using namespace mcrl2::new_data::sort_list;
 
-  data_specification specification = parse_data_specification(
-    "sort A = List(Bool);"
-  );
+  data_specification specification;
 
   new_data::rewriter R(specification);
 
@@ -410,9 +398,7 @@ void structured_sort_rewrite_test() {
   using namespace sort_bool_;
   using namespace sort_nat;
 
-  data_specification specification = parse_data_specification(
-    ""
-  );
+  data_specification specification;
 
   atermpp::vector< structured_sort_constructor_argument > arguments;
 

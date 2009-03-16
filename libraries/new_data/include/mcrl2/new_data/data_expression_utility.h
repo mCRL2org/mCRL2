@@ -500,6 +500,7 @@ namespace mcrl2 {
     }
 
     /** \brief A collection of utilities for lazy expression construction
+     *
      * The basic idea is to keep expressions that result from application of
      * any of the container operations by applying the usual rules of logic.
      *
