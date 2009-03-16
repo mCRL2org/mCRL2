@@ -146,28 +146,31 @@ using namespace mcrl2::lts;
     while(si.more())
     {
       line.clear();
-      for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
+      if(l.has_state_parameters ())
       {
-        if  (i != 0)
+        for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
         {
-          line.append(" ");
-        }
-
-        int c = 0;
-        atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
-        for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
-        {
-          if (*z == l.get_state_parameter_value( *si, i ))
+          if  (i != 0)
           {
-            line.append(to_string(c));
+            line.append(" ");
           }
-          ++c;
+
+          int c = 0;
+          atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
+          for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+          {
+            if (*z == l.get_state_parameter_value( *si, i ))
+            {
+              line.append(to_string(c));
+            }
+            ++c;
+          }
         }
       }
   //    cout << line << endl;
-                        parseStates(
-                            line,
-                            graph );
+      parseStates(
+         line,
+         graph );
       ++si;
     }
 
