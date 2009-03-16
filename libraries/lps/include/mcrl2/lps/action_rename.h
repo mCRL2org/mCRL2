@@ -29,6 +29,7 @@
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -222,9 +223,9 @@ namespace lps {
           m_action_labels(action_labels),
           m_rules(rules)
       {
-        m_term = reinterpret_cast<ATerm>(
+          m_term = reinterpret_cast<ATerm>(
           core::detail::gsMakeActionRenameSpec(
-            data,
+            new_data::detail::data_specification_to_aterm_data_spec(data),
             core::detail::gsMakeActSpec(action_labels),
             core::detail::gsMakeActionRenameRules(rules)
           )
@@ -333,7 +334,7 @@ namespace lps {
       return result;
     }
 
-    using namespace mcrl2::data;
+    using namespace mcrl2::new_data;
     using namespace mcrl2::lps;
 
     /// \brief Renames variables
@@ -410,8 +411,7 @@ lps::specification action_rename(
             const lps::specification &lps_old_spec)
 {
   using namespace mcrl2::core;
-  using namespace mcrl2::new_data::data_expr;
-  using namespace mcrl2::data;
+  using namespace mcrl2::new_data;
   using namespace mcrl2::lps;
   using namespace std;
 
@@ -464,9 +464,9 @@ lps::specification action_rename(
                        rule_old_argument_i = rule_old_action.arguments().begin();
                        rule_old_argument_i != rule_old_action.arguments().end();
                        rule_old_argument_i++)
-    { if ((!is_variable(*rule_old_argument_i)) &&
+    { if ((!rule_old_argument_i->is_variable()) &&
           (!(find_all_variables(*rule_old_argument_i).empty())))
-      { std::cerr << "The arguments of the lhs " << pp(rule_old_action) <<
+      { std::cerr << "The arguments of the lhs " << core::pp(rule_old_action) <<
                           " are not variables or closed expressions\n";
         exit(1);
       }
@@ -478,8 +478,8 @@ lps::specification action_rename(
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
-    { std::cerr << "There are variables occurring in rhs " << pp(rule_new_action) <<
-                   " of a rename rule not occurring in lhs " << pp(rule_old_action) << "\n";
+    { std::cerr << "There are variables occurring in rhs " << core::pp(rule_new_action) <<
+                   " of a rename rule not occurring in lhs " << core::pp(rule_old_action) << "\n";
       exit(1);
     }
 
@@ -487,8 +487,8 @@ lps::specification action_rename(
     std::set < variable > variables_in_condition = find_all_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
-    { std::cerr << "There are variables occurring in the condition " << pp(rule_condition) <<
-                   " of a rename rule not occurring in lhs " << pp(rule_old_action) << "\n";
+    { std::cerr << "There are variables occurring in the condition " << core::pp(rule_condition) <<
+                   " of a rename rule not occurring in lhs " << core::pp(rule_old_action) << "\n";
       exit(1);
     }
 
@@ -496,10 +496,10 @@ lps::specification action_rename(
     // is empty at the end.
     for(data_expression_list::iterator i=rule_old_action.arguments().begin() ;
                      i!=rule_old_action.arguments().end() ; i++)
-    { if (is_variable(*i))
+    { if (i->is_variable())
       { if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
-        { std::cerr << "Variable " << pp(*i) << " occurs more than once in lhs " <<
-                       pp(rule_old_action) << " of an action rename rule\n";
+        { std::cerr << "Variable " << core::pp(*i) << " occurs more than once in lhs " <<
+                       core::pp(rule_old_action) << " of an action rename rule\n";
           exit(1);
         }
         else
@@ -549,28 +549,28 @@ lps::specification action_rename(
           detail::rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
           if (is_nil(renamed_rule_condition))
-          { renamed_rule_condition=true_();
+          { renamed_rule_condition=sort_bool_::true_();
           }
 
           //go through the arguments of the action
           data_expression_list::iterator
                     lps_old_argument_i = lps_old_action.arguments().begin();
-          data_expression new_equalities_condition=true_();
+          data_expression new_equalities_condition=sort_bool_::true_();
           for(data_expression_list::iterator
                        rule_old_argument_i = renamed_rule_old_action.arguments().begin();
                        rule_old_argument_i != renamed_rule_old_action.arguments().end();
                        rule_old_argument_i++)
-          { if (is_variable(*rule_old_argument_i))
+          { if (rule_old_argument_i->is_variable())
             {
               new_equalities_condition=lazy::and_(new_equalities_condition,
-                               data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                               new_data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
             { assert((find_all_variables(*rule_old_argument_i).empty())); // the argument must be closed,
                                                                                // which is checked above.
               renamed_rule_condition=
                         lazy::and_(renamed_rule_condition,
-                             data_expr::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                             new_data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             lps_old_argument_i++;
           }
@@ -592,7 +592,7 @@ lps::specification action_rename(
             }
           }
 
-          if (is_true(renamed_rule_condition))
+          if (renamed_rule_condition==sort_bool_::true_())
           {
             if (to_delta)
             { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
@@ -610,7 +610,7 @@ lps::specification action_rename(
               }
             }
           }
-          else if (is_false(renamed_rule_condition))
+          else if (renamed_rule_condition==sort_bool_::false_())
           {
             for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
@@ -665,7 +665,7 @@ lps::specification action_rename(
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition_temp.begin() ;
                          i!=lps_new_condition_temp.end() ; i++ )
-            { *i=lazy::and_(*i,not_(renamed_rule_condition));
+            { *i=lazy::and_(*i,sort_bool_::not_(renamed_rule_condition));
             }
 
             lps_new_condition.insert(lps_new_condition.end(),
