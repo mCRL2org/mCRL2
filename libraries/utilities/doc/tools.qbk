@@ -1,7 +1,7 @@
 [library Utilities Library
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2008 Technische Universiteit Eindhoven]
+    [copyright 2008-2009 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
         The mCRL2 library contains data structures and algorithms
@@ -19,48 +19,55 @@
 
 [/  Links   ]
 [def __mcrl2__                 [@http://mcrl2.org mCRL2]]
+[def __cli_library__                   [@http://www.mcrl2.org/mcrl2/wiki/index.php/CLI_sublibrary Command Line Interface Library]]
 
 [section: Tool classes]
-The tools of the mCRL2 toolset share a lot of functionality. To avoid
-duplication of code, a number of tool classes exists. They handle
-many details of the creation of such a tool for a developer. The table
-below gives an overview of the available tool classes, and the command
-line options that they handle.
-
+To simplify the creation of a tool, a number of tool classes is available in the
+Utilities Library. They all inherit from the class `tool`, and they can be found
+in the namespace `utilities::tools`. The main purpose of the tool classes is to
+standardize the behavior of tools. Tool classes use the __cli_library__ for
+handling command line arguments. The table below gives an overview of the
+available tool classes, and the command line options that they handle.
+                           
 [table Tool classes and their supported command line arguments
     [[tool class] [command line arguments]]
-    [ [=command_line_tool=][ handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=]]
-    [ [=input_tool=][ in addition handles a positional input file argument]]
-    [ [=input_output_tool=][ in addition handles a positional output file argument]]
-    [ [=rewriter_tool=] [in addition handles =--rewriter=]]
-    [ [=pbes_rewriter_tool=] [in addition handles =--pbes-rewriter=]]
+    [ [=class tool=][ handles =--quiet=, =--verbose=, =--debug=, =--help= and =--version=]]
+    [ [=class input_tool=][ in addition handles a positional input file argument]]
+    [ [=class input_output_tool=][ in addition handles a positional output file argument]]
+    [ [=template <typename Tool> class rewriter_tool=] [extends a tool with a =--rewriter= option]]
+    [ [=template <typename Tool> class pbes_rewriter_tool=] [extends a tool with =--rewriter= and =--pbes-rewriter= options]]
 ]
-
-The class =rewriter_tool= makes all strategies of the data rewriter
-available to the user. The class =pbes_rewriter_tool= makes a selection
-of the pbes rewriters available to the user. One can change this selection
-by overriding the method =available_rewriters=.
-
-[note It is questionable whether an option =--pbes-rewriter= should
-exist, but it reflects the current situation of the toolset]
-
-The tool classes are part of the utilities library, and are located in the
-namespace =mcrl2::utilities=.
-
+                                                                                 
+The class =rewriter_tool= makes strategies of the data rewriter
+available to the user. The class =pbes_rewriter_tool= makes pbes rewriters
+available to the user.
+                                                           
 [h3 Example]
-Below a simple example for the lpsparelm tool is given. A class
-=lps_parelm_tool= is defined that derives from the most suitable tool
-class (=input_output_tool= in this case). The tool is executed
+Below an example is given for the pbesparelm tool. Since this is a tool that
+takes a file as input and also writes output to a file, it derives from the
+class =input_output_tool=.
+
+[import ../../../tools/pbesparelm/pbesparelm.cpp]
+[pbes_parelm_tool]
+
 using the =execute= member function, that accepts the command line
 arguments specified by the user.
 
-  class lps_parelm_tool : public input_output_tool {};
+In the constructor a few settings are provided.
+This is enough to create a tool with the follow help message:
+[pre
+Usage: pbesparelm [OPTION\]... [INFILE [OUTFILE\]\]
+Reads a file containing a PBES, and applies parameter elimination to it. If 
+OUTFILE is not present, standard output is used. If INFILE is not present,     
+standard input is used.
+]
 
-  int main(int argc, char* argv[])
-  {
-    lps_parelm_tool tool;
-    return tool.execute(argc, argv);
-  }
+[h3 Tool properties]
+[table Tool properties
+    [[property] [meaning]]
+    [ [ synopsis ][ Summary of command-line syntax ]]
+    [ [ what is  ][ don't know ]]
+]
 
 [h3 Creating a new tool]
 To create a new tool, the following needs to be done:
@@ -107,6 +114,10 @@ methods =parse_options= and =add_options=:
       }
     ...
   };
+
+One can change this selection
+by overriding the method =available_rewriters=.
+
 
 [h3 Creating a squadt user interface for a tool]
 The preferred way to add a squadt user interface to a tool is to define a

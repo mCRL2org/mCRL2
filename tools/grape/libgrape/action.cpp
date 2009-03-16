@@ -58,6 +58,7 @@ wxString action::get_name( void )
 void action::set_name( const wxString &p_name )
 {
   m_name = p_name;
+  m_name.Trim(true); m_name.Trim(false);
 }
 
 list_of_dataexpression action::get_parameters( void )
@@ -70,6 +71,26 @@ void action::set_parameters( list_of_dataexpression &p_parameters)
   m_parameters = p_parameters;
 }
 
+void action::set_parameters_text( wxString p_parameters )
+{   
+  int index;
+  
+  // loop until we parsed all parameters
+  m_parameters.Clear();
+  while (!p_parameters.IsEmpty())
+  {
+    index = p_parameters.First(_T(","));
+    if (index == -1) index = p_parameters.Len();
+              
+    dataexpression dataexpression;
+    wxString sub_text = p_parameters.SubString(0, index-1);
+    sub_text.Trim(true);
+    dataexpression.set_expression(sub_text);
+    m_parameters.Add(dataexpression);        
+        
+    p_parameters = p_parameters.SubString(index+1, p_parameters.Len());
+  }
+}
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>

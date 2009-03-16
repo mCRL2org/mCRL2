@@ -733,6 +733,11 @@ static void add_postponed_inequalities_to_context(
                 identifier_generator& variable_generator)
 { assert(inequalities_to_add.size() % 2==0);
   for(atermpp::vector < data_expression > ::const_iterator i=inequalities_to_add.begin();
+             i!=inequalities_to_add.end(); i++)
+  { // std::cerr << "XXXX " << pp(*i) << "\n";
+  }
+
+  for(atermpp::vector < data_expression > ::const_iterator i=inequalities_to_add.begin();
                         i!=inequalities_to_add.end(); i=i+2)
   {
     data_variable xi(variable_generator("xi"), sort_identifier("Comp"));
@@ -879,7 +884,8 @@ summand generate_summand(const summand_information &summand_info,
                          action_label_list &a,
                          identifier_generator& variable_generator,
                          const bool is_may_summand=false)
-{ static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
+{ // std::cerr << "SUMMNAD " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
+  static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
                                          // Used to recall which may actions labels have been
                                          // introduced, in order to re-use them.
@@ -959,7 +965,7 @@ data_assignment_list determine_process_initialization(
                           context_type& context,
                           rewriter& r)
 {
-  data_assignment_list init = get_nonreal_assignments(initialization);
+  data_assignment_list init = reverse(get_nonreal_assignments(initialization));
   data_assignment_list real_assignments = get_real_assignments(initialization);
   atermpp::map<data_expression, data_expression> replacements;
   for(data_assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
@@ -1210,6 +1216,7 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                         condition1,
                         r);
         condition.clear();
+        // Line below is the bottleneck in the second iteration for the railwaycrossing example.
         remove_redundant_inequalities(condition1,condition,r);
         // std::cerr << "CONDITION OUT" << pp_vector(condition) << "\n" ;
 

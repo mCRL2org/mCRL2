@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -97,11 +97,25 @@ const std::string assignment_case_2
 
 const std::string assignment_case_3
 ("act a;"
- "b:Nat;"
+ "    b:Nat;"
  "proc X(v:Nat,w:List(Bool))=a.X(w=[])+"
  "                         (v>0) ->b(v).X(v=max(v,0));"
  "init X(v=3,w=[]);"
 
+);
+
+const std::string assignment_case_4
+("act a;"
+ "proc X(v:Pos,w:Nat)=sum w:Pos.a.X(v=w)+"  
+ "                    sum u:Pos.a.X(v=u);"
+ "init X(3,4);"
+
+);
+
+const std::string assignment_case_5
+("act a;"
+ "proc X(v:Pos)=sum v:Pos.a@4.X();"   
+ "init X(3);"
 );
 
 
@@ -110,6 +124,8 @@ void test_process_assignments()
   spec=mcrl22lps(assignment_case_1);
   spec=mcrl22lps(assignment_case_2);
   spec=mcrl22lps(assignment_case_3);
+  spec=mcrl22lps(assignment_case_4);
+  spec=mcrl22lps(assignment_case_5);
 }
 
 void test_struct()

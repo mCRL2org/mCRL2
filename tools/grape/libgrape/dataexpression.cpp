@@ -30,6 +30,7 @@ dataexpression::~dataexpression( void )
 void dataexpression::set_expression( const wxString &p_expression )
 {
   m_expression = p_expression;
+  m_expression.Trim(true); m_expression.Trim(false);
 }
 
 wxString dataexpression::get_expression( void ) const

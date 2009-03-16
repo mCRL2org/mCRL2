@@ -37,6 +37,7 @@ class RewriterJitty: public Rewriter
 	private:
 		unsigned int num_opids;
 		unsigned int max_vars;
+		bool need_rebuild;
 
 		ATermAppl jitty_true;
 

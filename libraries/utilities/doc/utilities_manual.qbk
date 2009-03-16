@@ -3,7 +3,7 @@
     [authors [Wesselink, Wieger]]
     [copyright 2005-2009 Technische Universiteit Eindhoven]
     [category string-text]
-    [id pbes]
+    [id utilities]
     [dirname pbes]
 ]
 

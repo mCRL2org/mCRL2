@@ -49,10 +49,10 @@ std::set<new_data::variable> transition_variables(Iterator first, Iterator last)
   std::set<new_data::variable> result;
   for (Iterator i = first; i != last; ++i)
   {
-    if (i->is_delta())
-    {
-      continue;
-    }
+    //if (i->is_delta())
+    //{
+    //  continue;
+    //}
     atermpp::find_all_if(i->condition(), local::is_variable, std::inserter(result, result.end()));
     atermpp::find_all_if(i->actions(), local::is_variable, std::inserter(result, result.end()));
     if (i->has_time())
@@ -66,7 +66,7 @@ std::set<new_data::variable> transition_variables(Iterator first, Iterator last)
 /// \brief Returns a set of insignificant process parameters that may be eliminated from p.
 /// \param p A linear process
 /// \return A set of insignificant process parameters
-inline
+inline                                                              
 std::set<new_data::variable> compute_insignificant_parameters(const linear_process& p)
 {
   new_data::variable_list      process_parameter_list(p.process_parameters());
@@ -78,12 +78,25 @@ std::set<new_data::variable> compute_insignificant_parameters(const linear_proce
   // significant variables may not be removed by parelm
   std::set<new_data::variable> significant_variables = transition_variables(summands.begin(), summands.end());
 
+#ifdef MCRL2_LPS_PARELM_DEBUG
+  std::clog << "<todo list>";
+  for (std::set<data::data_variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
+  {
+    std::clog << core::pp(*i) << " ";
+  }
+  std::clog << std::endl;
+#endif
+
   // recursively extend the set of significant variables
   std::set<new_data::variable> todo = significant_variables;
   while (!todo.empty())
   {
     new_data::variable x = *todo.begin();
     todo.erase(todo.begin());
+
+#ifdef MCRL2_LPS_PARELM_DEBUG
+    std::clog << "<handling todo element>" << core::pp(x) << std::endl;
+#endif
 
     for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {

@@ -26,8 +26,6 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -230,13 +228,9 @@ struct lps2torx_tool {
     NextState *nstate = createNextState(
       Spec,
       !usedummies,
-      stateformat,
-      createEnumerator(
-        data_specification(ATAgetArgument(Spec,0)),
-        createRewriter(data_specification(ATAgetArgument(Spec,0)),strategy),
-        true
-      ),
-      true
+      strategy,
+      ENUM_STANDARD,
+      stateformat
     );
 
     ATerm initial_state = nstate->getInitialState();

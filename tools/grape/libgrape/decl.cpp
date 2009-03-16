@@ -57,6 +57,7 @@ wxString decl::get_name( void ) const
 void decl::set_name( const wxString &p_name )
 {
   m_name = p_name;
+  m_name.Trim(true); m_name.Trim(false);
 }
 
 wxString decl::get_type( void ) const

@@ -131,6 +131,8 @@ static ATermAppl fresh_name(const std::string &name);
 static void insertequation(ATermAppl eqn, specificationbasictype *spec, bool add_to_spec = false);
 static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
 static ATermAppl RewriteTerm(ATermAppl t);
+static ATermAppl transform_process_assignment_to_process(ATermAppl procId);
+
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)
 { return ATinsert(l,(ATerm)a);
@@ -2341,6 +2343,12 @@ static ATermAppl substitute_pCRLproc(
   if (gsIsProcess(p))
   { return gsMakeProcess(ATAgetArgument(p,0),
                 substitute_datalist(terms,vars,ATLgetArgument(p,1)));
+  }
+
+  if (gsIsProcessAssignment(p))
+  { ATermAppl q=transform_process_assignment_to_process(p);
+    return gsMakeProcess(ATAgetArgument(q,0),
+                substitute_datalist(terms,vars,ATLgetArgument(q,1)));
   }
 
   if (gsIsAction(p))
@@ -9350,7 +9358,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
 
   if (mayrewrite) {
     rewr.reset(new mcrl2::new_data::rewriter(
-                new_data::data_specification(ATAgetArgument(spec,0)), lin_options.rewrite_strategy));
+                new_data::data_specification(), lin_options.rewrite_strategy));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
