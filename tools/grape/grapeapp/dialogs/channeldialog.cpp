@@ -17,7 +17,7 @@
 using namespace grape::grapeapp;
 
 grape_channel_dlg::grape_channel_dlg( channel &p_channel )
-: wxDialog( 0, wxID_ANY, _T("Edit channel") )
+: wxDialog( 0, wxID_ANY, wxT("Edit channel"), wxDefaultPosition, wxDefaultSize )
 {  
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 

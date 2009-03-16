@@ -17,7 +17,7 @@
 using namespace grape::grapeapp;
 
 grape_channel_communication_dlg::grape_channel_communication_dlg( channel_communication &p_channel_communication )
-: wxDialog( 0, wxID_ANY, _T("Edit channel communication") )
+: wxDialog( 0, wxID_ANY, _T("Edit channel communication"), wxDefaultPosition, wxDefaultSize )
 {  
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
