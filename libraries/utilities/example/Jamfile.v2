@@ -1,0 +1,17 @@
+project libraries/utilities/example
+   : requirements
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
+       <source>/libraries/utilities//command_line_interfacing
+       <source>/libraries//data
+       <define>MCRL2_REVISION=\"\\\"0\\\"\"
+   ;
+
+include $(TOP)/build/testing/header_test.jam ;
+
+exe tool_declaration : tool_declaration.cpp : ;
+
+install dist
+   :
+     tool_declaration
+   ;

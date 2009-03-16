@@ -33,11 +33,13 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 
+//[pbes_constelm_tool
 class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
+  //<-
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
-
+  //->
     bool m_compute_conditions;
     bool m_remove_redundant_equations;
 
@@ -55,12 +57,13 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
+  //<-
   public:
     pbes_constelm_tool()
       : super(
           "pbesconstelm",
           "Wieger Wesselink",
-          "remove constant parameters from a PBES",
+          "Remove constant parameters from a PBES",
           "Reads a file containing a PBES, and applies constant parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."
         )
@@ -117,7 +120,9 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 
       return true;
     }
+  //->
 };
+//]
 
 int main(int argc, char* argv[])
 {

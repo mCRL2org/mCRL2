@@ -10,9 +10,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-// #define MCRL2_PBES_CONSTELM_DEBUG
-// #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/input_output_tool.h"
@@ -27,19 +24,14 @@ using utilities::tools::input_output_tool;
 //[pbes_parelm_tool
 class pbes_parelm_tool: public input_output_tool
 {
-  protected:
-    void add_options(interface_description& desc) /*< One can add command line
-                     options by overriding the virtual function `add_options`. >*/
-    {
-      desc.add_option("compute-conditions", "compute propagation conditions", 'c');
-    }
-
   public:
-    pbes_parelm_tool()
+    pbes_parelm_tool() /*< In the constructor a number of settings must be provided,
+                           like the author and a description of the tool. These are
+			   used for generating a help message. >*/
       : input_output_tool(
           "pbesparelm",
           "Wieger Wesselink",
-          "remove unused parameters from a PBES",
+          "Remove unused parameters from a PBES",
           "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."
         )
