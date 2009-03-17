@@ -15,7 +15,7 @@ test-suite lps
       #[ run pp_test.cpp ]
       [ run constelm_test.cpp ]
       [ run process_test.cpp ]
-#      [ run action_rename_test.cpp ]
+      [ run action_rename_test.cpp ]
       [ run data_specification_test.cpp ]
       [ run linearization_test.cpp ]
       [ run rewriter_test.cpp ]

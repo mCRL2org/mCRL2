@@ -15,7 +15,7 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/data_elimination.h>
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 
 namespace mcrl2
 {
