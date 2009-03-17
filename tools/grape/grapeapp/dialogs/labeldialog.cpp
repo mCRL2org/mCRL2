@@ -27,35 +27,40 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Variable declarations:   id:N,...") );
   vsizer->Add( text );
   // create variable declarations text
-  m_var_decls_input = new wxTextCtrl(this, GRAPE_VAR_DECLS_INPUT_TEXT, m_label->get_declarations_text(), wxDefaultPosition, wxSize(570, 20) );
+  m_var_decls_input = new wxTextCtrl(this, GRAPE_VAR_DECLS_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 20) );
+  m_var_decls_input->ChangeValue( m_label->get_declarations_text() );
   vsizer->Add( m_var_decls_input );
  
   // create condition text
   text = new wxStaticText( this, wxID_ANY, _T("Condition:") );
   vsizer->Add( text );
   // create condition input
-  m_condition_input = new wxTextCtrl(this, GRAPE_CONDITION_INPUT_TEXT, m_label->get_condition(), wxDefaultPosition, wxSize(570, 20) );
+  m_condition_input = new wxTextCtrl(this, GRAPE_CONDITION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 20) );
+  m_condition_input->ChangeValue( m_label->get_condition() );
   vsizer->Add( m_condition_input );
   
   // create multiaction text
   text = new wxStaticText( this, wxID_ANY, _T("Multiaction:   act(par1,...)|...") );
   vsizer->Add( text );
   // create multiaction grid
-  m_multiaction_input = new wxTextCtrl(this, GRAPE_MULTIACTION_INPUT_TEXT, m_label->get_actions_text(), wxDefaultPosition, wxSize(570, 20) );
+  m_multiaction_input = new wxTextCtrl(this, GRAPE_MULTIACTION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 20) );
+  m_multiaction_input->ChangeValue( m_label->get_actions_text() );
   vsizer->Add( m_multiaction_input );
  
   // create timestamp text
   text = new wxStaticText( this, wxID_ANY, _T("Timestamp:") );
   vsizer->Add( text );
   // create timestamp grid
-  m_timestamp_input = new wxTextCtrl(this, GRAPE_TIMESTAMP_INPUT_TEXT, m_label->get_timestamp(), wxDefaultPosition, wxSize(570, 20) );
+  m_timestamp_input = new wxTextCtrl(this, GRAPE_TIMESTAMP_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 20) );
+  m_timestamp_input->ChangeValue( m_label->get_timestamp() );
   vsizer->Add( m_timestamp_input );
     
   // create variable updates text
   text = new wxStaticText( this, wxID_ANY, _T("Variable updates:   var:=expr,...") );
   vsizer->Add( text );  
   // create variable updates input
-  m_var_updates_input = new wxTextCtrl(this, GRAPE_VAR_UPDATES_INPUT_TEXT, m_label->get_variable_updates_text(), wxDefaultPosition, wxSize(570, 20) );
+  m_var_updates_input = new wxTextCtrl(this, GRAPE_VAR_UPDATES_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 20) );
+  m_var_updates_input->ChangeValue( m_label->get_variable_updates_text() );
   vsizer->Add( m_var_updates_input );
 
   // add preview
