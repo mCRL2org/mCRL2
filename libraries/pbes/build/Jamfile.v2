@@ -7,7 +7,7 @@ mcrl2-library pbes
          pbes2bool.cpp
 #         gauss.cpp
 #         sort_instantiator.cpp
-#         data_elimination.cpp
+         data_elimination.cpp
        : <library>/libraries//lps
          <include>../include
          <use>/site-config//boost

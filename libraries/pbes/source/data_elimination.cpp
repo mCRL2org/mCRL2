@@ -48,7 +48,7 @@ static void add_used(pbes_expression expr, data_elimination &elim)
 		add_used(right(expr),elim);
 	} else if ( is_forall(expr) || is_exists(expr) )
 	{
-		add_used(make_data_expression_list(var(expr)),elim);
+		add_used(var(expr),elim);
 		add_used(arg(expr),elim);
 	} else if ( is_propositional_variable_instantiation(expr) )
 	{
