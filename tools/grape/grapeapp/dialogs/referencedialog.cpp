@@ -14,33 +14,33 @@
 
 #include "grape_ids.h"
 #include "referencedialog.h"
+#include "../events/event_base.h"
+#include "../grape_frame.h"
 
 using namespace grape::grapeapp;
 
-grape_reference_dialog::grape_reference_dialog( process_reference *p_ref, grape_specification *p_spec )
+grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, process_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+// process reference
 {
+  m_main_frame = p_main_frame;
   list_of_varupdate varupdate_list = p_ref->get_parameter_updates();
   init_for_processes( p_ref->get_relationship_refers_to(), varupdate_list, p_spec );
 }
 
-grape_reference_dialog::grape_reference_dialog( reference_state *p_ref, grape_specification *p_spec )
+grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, reference_state *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
-// description != bug
+// reference state
 {
+  m_main_frame = p_main_frame;
   init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_parameter_updates(), p_spec );
 }
 
-// The following exception is to make grape compile on Apple platforms, where wxWidgets do
-// not contain the iostreams package. This should be removed in due time (JFG: 16/6/2008).
-#ifdef __APPLE__
-grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
+grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, architecture_reference *p_ref, grape_specification *p_spec )
 : wxDialog( 0, wxID_ANY, _T("Edit architecture reference") , wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
-#else
-grape_reference_dialog::grape_reference_dialog( architecture_reference *p_ref, grape_specification *p_spec )
-: wxDialog( 0, wxID_ANY, _T("Edit architecture reference"), wxDefaultPosition )
-#endif
+// architecture reference
 {
+  m_main_frame = p_main_frame;
   wxPanel *panel = new wxPanel( this );
 
   wxGridSizer *grid = new wxFlexGridSizer( 2, 3, 0 );
@@ -99,7 +99,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
       selected = pos;
     }
   }
-  m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
+  m_combo = new wxComboBox( panel, GRAPE_COMBO_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND );
   m_combo->SetSelection( selected );
 
@@ -110,10 +110,10 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( p_list_of_varupdate.GetCount()+1, 2 );
+  m_grid->CreateGrid( p_list_of_varupdate.GetCount(), 2 );
   for ( unsigned int i = 0; i < p_list_of_varupdate.GetCount(); ++i )
   {
-    //fill cells
+    // fill cells
     varupdate parameter_assignment = p_list_of_varupdate.Item( i );
     m_grid->SetCellValue(i, 0, parameter_assignment.get_lhs());
     m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());
@@ -214,24 +214,42 @@ void grape_reference_dialog::check_text()
 void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
 {
   check_text();
-  int rows_count = m_grid->GetNumberRows();
+}
 
-  while ( (m_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_grid->GetCellValue(rows_count-1, 1) != _T(""))) {
-    m_grid->AppendRows();
-    rows_count = m_grid->GetNumberRows();
+void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
+{
+  unsigned int start_index = 0;
+  process_diagram *diagram_ptr = static_cast<process_diagram*>(find_a_diagram( m_main_frame, get_diagram_id() ) );
+  list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
+  
+  // fill grid with parameters
+  while ( m_grid->GetNumberRows() < parameter_declarations.GetCount()) m_grid->AppendRows();
+  if (diagram_ptr != 0)
+  {  
+    for ( unsigned int i = 0; i < parameter_declarations.GetCount(); ++i )
+    {
+      m_grid->SetCellValue(i, 0, parameter_declarations.Item( i ).get_name());
+      m_grid->SetCellValue(i, 1, _T(""));
+    }
+    start_index = parameter_declarations.GetCount();
   }
-
-/* FIX: DeleteRows doesn't work properly
-  while ( (rows_count > 10) && (m_grid->GetCellValue(rows_count-1, 0) = _T("")) && (m_grid->GetCellValue(rows_count-1, 1) = _T(""))) {
-  int result = wxMessageBox( m_grid->GetCellValue(rows_count-1, 0), _T("Question"), wxICON_QUESTION | wxYES_NO, this );
-    m_grid->DeleteRows(rows_count-1);
-    rows_count = m_grid->GetNumberRows();
+ 
+  // fill grid with empty values
+  for ( unsigned int i = start_index; i < m_grid->GetNumberRows(); ++i )
+  {
+    m_grid->SetCellValue(i, 0, _T(""));
+    m_grid->SetCellValue(i, 1, _T(""));
   }
-*/
+  
+  // remove empty rows
+  while ( (m_grid->GetNumberRows() > 0) && (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 0).IsEmpty()) &&  (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 1).IsEmpty()) ) m_grid->DeleteRows(m_grid->GetNumberRows()-1);
+  
+  check_text();
 }
 
 
 BEGIN_EVENT_TABLE(grape_reference_dialog, wxDialog)
+  EVT_COMBOBOX(GRAPE_COMBO_TEXT, grape_reference_dialog::event_change_combobox)
   EVT_GRID_CMD_CELL_CHANGE(GRAPE_GRID_TEXT, grape_reference_dialog::event_change_text)
 END_EVENT_TABLE()
 

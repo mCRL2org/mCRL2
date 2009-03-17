@@ -171,7 +171,7 @@ grape_event_change_archref::grape_event_change_archref( grape_frame *p_main_fram
     m_old_arch_id = -1;
   }
 
-  grape_reference_dialog dialog( p_arch_ref, m_main_frame->get_grape_specification() );
+  grape_reference_dialog dialog( p_main_frame, p_arch_ref, m_main_frame->get_grape_specification() );
   m_ok_pressed = dialog.show_modal();
   if ( m_ok_pressed )
   {

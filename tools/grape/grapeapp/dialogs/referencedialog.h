@@ -30,13 +30,16 @@ WX_DECLARE_STRING_HASH_MAP( int, diagramhash );
 namespace grape
 {
   namespace grapeapp
-  {
+  {    
+    class grape_frame;
+    
     /**
      * \short A class showing a dialog with a combobox and text edit.
      */
     class grape_reference_dialog : protected wxDialog
     {
       private:
+        grape_frame   *m_main_frame;          /**< Pointer to the main frame. */
         wxComboBox    *m_combo; /**< Combobox with all diagrams. */
         diagramhash   m_name2diagramid; /**< Maps the combobox positions to references. */
         wxGrid        *m_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
@@ -66,24 +69,27 @@ namespace grape
 
         /**
          * Constructor.
+         * @param p_main_frame pointer to the main frame
          * @param p_ref The process reference to edit.
          * @param p_spec The specification containing the diagrams the reference @p p_ref could point to.
          */
-        grape_reference_dialog( process_reference *p_ref, grape_specification *p_spec );
+        grape_reference_dialog( grape_frame *p_main_frame, process_reference *p_ref, grape_specification *p_spec );
 
         /**
          * Constructor.
+         * @param p_main_frame pointer to the main frame
          * @param p_ref The reference state to edit.
          * @param p_spec The specification containing the diagrams the reference @p p_ref could point to.
          */
-        grape_reference_dialog( reference_state *p_ref , grape_specification *p_spec );
+        grape_reference_dialog( grape_frame *p_main_frame, reference_state *p_ref , grape_specification *p_spec );
 
         /**
          * Constructor.
+         * @param p_main_frame pointer to the main frame
          * @param p_ref The architecture reference to edit.
          * @param p_spec The specification containing the diagrams the reference @p p_ref could point to.
          */
-        grape_reference_dialog( architecture_reference *p_ref , grape_specification *p_spec );
+        grape_reference_dialog( grape_frame *p_main_frame, architecture_reference *p_ref , grape_specification *p_spec );
 
         /**
          * Default destructor.
@@ -116,7 +122,13 @@ namespace grape
 	     * Appending grid rows.
 	     * @param p_event The generated event.
     	 */
-        void event_change_text( wxGridEvent &p_event );
+       void event_change_text( wxGridEvent &p_event );
+        
+	    /**
+	     * Change combobox event handler.
+	     * @param p_event The generated event.
+    	 */
+       void event_change_combobox( wxCommandEvent &p_event );
     };
   }
 }

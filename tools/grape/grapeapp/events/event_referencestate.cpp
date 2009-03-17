@@ -253,7 +253,7 @@ grape_event_change_refstate::grape_event_change_refstate( grape_frame *p_main_fr
   }
   m_old_text = p_ref_state->get_text();
 
-  grape_reference_dialog dialog( p_ref_state, m_main_frame->get_grape_specification() );
+  grape_reference_dialog dialog( p_main_frame, p_ref_state, m_main_frame->get_grape_specification() );
 
   m_ok_pressed = dialog.show_modal();
   if ( m_ok_pressed )

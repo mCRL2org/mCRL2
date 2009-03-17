@@ -3,7 +3,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt )
-//
+//p_main_frame
 /// \file event_processreference.cpp
 //
 // Defines GraPE events for process references.
@@ -21,7 +21,6 @@ const float DEFAULT_PROCESS_REFERENCE_WIDTH = 0.3f;
 const float DEFAULT_PROCESS_REFERENCE_HEIGHT = 0.3f;
 
 using namespace grape::grapeapp;
-
 
 grape_event_add_process_reference::grape_event_add_process_reference( grape_frame *p_main_frame, coordinate &p_coord )
 : grape_event_base( p_main_frame, true, _T( "add process reference" ) )
@@ -195,7 +194,7 @@ grape_event_change_procref::grape_event_change_procref( grape_frame *p_main_fram
     m_old_proc_id = -1;
   }
 
-  grape_reference_dialog dialog( p_proc_ref, m_main_frame->get_grape_specification() );
+  grape_reference_dialog dialog( p_main_frame, p_proc_ref, m_main_frame->get_grape_specification() );
 
   m_ok_pressed = dialog.show_modal();
   if ( m_ok_pressed )

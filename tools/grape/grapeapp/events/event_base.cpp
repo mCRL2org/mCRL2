@@ -21,6 +21,69 @@
 
 using namespace grape::grapeapp;
 
+       
+diagram* grape::grapeapp::find_a_diagram( grape_frame *m_main_frame, wxString p_dia_name, grape_diagram_type p_dia_type )
+{
+  diagram* result = 0;
+  grape_specification* spec = m_main_frame->get_grape_specification();
+  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
+  {
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
+    {
+      process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
+      if ( proc_dia_ptr->get_name() == p_dia_name )
+      {
+        result = proc_dia_ptr;
+        break; // break from the for-loop; we've found something
+      }
+    }
+  }
+  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
+  {
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    {
+      architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
+      if ( arch_dia_ptr->get_name() == p_dia_name )
+      {
+        result = arch_dia_ptr;
+        break; // break from the for-loop; we've found something
+      }
+    }
+  }
+  return result;
+}
+
+diagram* grape::grapeapp::find_a_diagram( grape_frame *m_main_frame, unsigned int p_dia_id, grape_diagram_type p_dia_type )
+{
+  diagram* result = 0;
+  grape_specification* spec = m_main_frame->get_grape_specification();
+  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
+  {
+    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
+    {
+      process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
+      if ( proc_dia_ptr->get_id() == p_dia_id )
+      {
+        result = proc_dia_ptr;
+        break; // break from the for-loop; we've found something
+      }
+    }
+  }
+  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
+  {
+    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
+    {
+      architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
+      if ( arch_dia_ptr->get_id() == p_dia_id )
+      {
+        result = arch_dia_ptr;
+        break; // break from the for-loop; we've found something
+      }
+    }
+  }
+  return result;
+}
+
 grape_event_base::grape_event_base( grape_frame *p_main_frame, bool p_can_undo, const wxString &p_name ) : wxCommand( p_can_undo, p_name )
 {
   // store pointer to main frame
@@ -65,68 +128,16 @@ object* grape_event_base::find_object( unsigned int p_obj_id, object_type p_obj_
   return result;
 }
 
-diagram* grape_event_base::find_diagram( wxString p_dia_name, grape_diagram_type p_dia_type )
+diagram* grape_event_base::find_diagram( wxString p_name, grape_diagram_type p_dia_type )
 {
-  diagram* result = 0;
-  grape_specification* spec = m_main_frame->get_grape_specification();
-  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
-  {
-    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
-    {
-      process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
-      if ( proc_dia_ptr->get_name() == p_dia_name )
-      {
-        result = proc_dia_ptr;
-        break; // break from the for-loop; we've found something
-      }
-    }
-  }
-  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
-  {
-    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
-    {
-      architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
-      if ( arch_dia_ptr->get_name() == p_dia_name )
-      {
-        result = arch_dia_ptr;
-        break; // break from the for-loop; we've found something
-      }
-    }
-  }
-  return result;
+  return find_a_diagram( m_main_frame, p_name, p_dia_type );
 }
-
+        
 diagram* grape_event_base::find_diagram( unsigned int p_dia_id, grape_diagram_type p_dia_type )
 {
-  diagram* result = 0;
-  grape_specification* spec = m_main_frame->get_grape_specification();
-  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_PROCESS_DIAGRAM ) )
-  {
-    for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
-    {
-      process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
-      if ( proc_dia_ptr->get_id() == p_dia_id )
-      {
-        result = proc_dia_ptr;
-        break; // break from the for-loop; we've found something
-      }
-    }
-  }
-  if ( ( p_dia_type == GRAPE_NO_DIAGRAM ) || ( p_dia_type == GRAPE_ARCHITECTURE_DIAGRAM ) )
-  {
-    for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
-    {
-      architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
-      if ( arch_dia_ptr->get_id() == p_dia_id )
-      {
-        result = arch_dia_ptr;
-        break; // break from the for-loop; we've found something
-      }
-    }
-  }
-  return result;
+   return find_a_diagram( m_main_frame, p_dia_id, p_dia_type );
 }
-
+ 
 bool grape_event_base::close_specification()
 {
   // access the main frame through m_main_frame->
