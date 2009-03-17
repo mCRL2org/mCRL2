@@ -55,6 +55,7 @@ Visualizer::Visualizer(Mediator* owner,Settings* ss) {
   settings->subscribe(InterpolateColor2,this);
   settings->subscribe(LongInterpolation,this);
   settings->subscribe(MarkedColor,this);
+  settings->subscribe(Quality,this);
 
   visObjectFactory = new VisObjectFactory();
   primitiveFactory = new PrimitiveFactory(settings);
@@ -117,6 +118,7 @@ void Visualizer::notify(SettingID s) {
       break;
     case BranchRotation:
     case ClusterHeight:
+    case Quality:
       update_matrices = true;
       update_abs = true;
       break;
@@ -227,46 +229,65 @@ void Visualizer::traverseTree(bool co) {
 }
 
 void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
-  if (!root->hasDescendants()) {
+  if (!root->hasDescendants())
+  {
     float r = root->getTopRadius();
     glPushMatrix();
     glScalef(r,r,r);
     vector<int> ids;
     ids.push_back(root->getRank());
     ids.push_back(root->getPositionInRank());
-    if (create_objects) {
+    if (create_objects)
+    {
       root->setVisObject(visObjectFactory->makeObject(
             primitiveFactory->makeSphere(),ids));
-    } else {
+    }
+    else
+    {
       visObjectFactory->updateObjectMatrix(root->getVisObject());
     }
     glPopMatrix();
-  } else {
+  }
+  else
+  {
     int drot = rot + settings->getInt(BranchRotation);
-    if (drot >= 360) {
+    if (drot >= 360)
+    {
       drot -= 360;
     }
-    if (create_objects) {
+    if (create_objects)
+    {
       root->clearBranchVisObjects();
     }
 
     glTranslatef(0.0f,0.0f,settings->getFloat(ClusterHeight));
-    for (int i = 0; i < root->getNumDescendants(); ++i) {
+    for (int i = 0; i < root->getNumDescendants(); ++i)
+    {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL) {
-        if (desc->isCentered()) {
-          if (root->getNumDescendants() > 1) {
+      if (desc != NULL)
+      {
+        if (desc->isCentered())
+        {
+          if (root->getNumDescendants() > 1)
+          {
             traverseTreeC(desc,false,drot);
-          } else {
+          }
+          else
+          {
             traverseTreeC(desc,false,rot);
           }
-        } else {
+        }
+        else
+        { 
+          float delta = distance_circle_to_poly(
+              deg_to_rad(desc->getPosition()+rot),
+              root->getBaseRadius());
           glRotatef(-desc->getPosition()-rot,0.0f,0.0f,1.0f);
-          glTranslatef(root->getBaseRadius(),0.0f,0.0f);
+          glTranslatef(root->getBaseRadius() - delta,0.0f,0.0f);
           glRotatef(settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
           traverseTreeC(desc,true,drot);
           glRotatef(-settings->getInt(BranchTilt),0.0f,1.0f,0.0f);
-          glTranslatef(-root->getBaseRadius(),0.0f,0.0f);
+          glTranslatef(-root->getBaseRadius() + delta,0.0f,0.0f);
           glRotatef(desc->getPosition()+rot,0.0f,0.0f,1.0f);
         }
       }
@@ -286,17 +307,22 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
 
-      if (create_objects) {
+      if (create_objects)
+      {
         root->setVisObject(visObjectFactory->makeObject(
               primitiveFactory->makeTruncatedCone(r,topClosed,
                 root->getNumDescendants() > 1 || root->hasSeveredDescendants()),
               ids));
-      } else {
+      }
+      else
+      {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
       glPopName();
-    } else {
+    }
+    else
+    {
       glScalef(root->getTopRadius(),root->getTopRadius(),
           settings->getFloat(ClusterHeight));
 
@@ -304,12 +330,15 @@ void Visualizer::traverseTreeC(Cluster *root,bool topClosed,int rot) {
       ids.push_back(root->getRank());
       ids.push_back(root->getPositionInRank());
 
-      if (create_objects) {
+      if (create_objects)
+      {
         root->setVisObject(visObjectFactory->makeObject(
               primitiveFactory->makeTruncatedCone(r,
                 root->getNumDescendants() > 1 || root->hasSeveredDescendants(),
                 topClosed), ids));
-      } else {
+      }
+      else
+      {
         visObjectFactory->updateObjectMatrix(root->getVisObject());
       }
       glPopName();
@@ -474,6 +503,14 @@ void Visualizer::traverseTreeT(Cluster *root, bool topClosed, int rot) {
       glPopMatrix();
     }
   }
+}
+
+float Visualizer::distance_circle_to_poly(float angle,float radius)
+{
+  float alpha = 2.0f * PI / settings->getInt(Quality);
+  float beta = int(angle / alpha) * alpha - angle;
+  return radius * abs(sin(alpha) * (cos(beta) - 1.0f) + sin(beta) *
+      (cos(alpha) - 1.0f)) / sqrt(2.0f - 2.0f * cos(alpha)) ;
 }
 
 float Visualizer::compute_cone_scale_x(float phi,float r,float x) {
