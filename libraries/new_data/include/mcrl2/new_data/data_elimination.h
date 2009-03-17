@@ -34,33 +34,33 @@ namespace new_data {
 
     public:
       /// \brief Default constructor.
-      data_elimination();
+      data_elimination()
+      { }
 
       /// \brief Destructor.
-      ~data_elimination();
-
+      ~data_elimination()
+      { }
 
       /// \brief       Ensure that data elimination does not remove sort s.
       /// \param[in] s An mCRL2 data sort expression.
-      void keep_sort(sort_expression s) {
-      }
+      void keep_sort(sort_expression s)
+      { }
 
       /// \brief        Ensure that data elimination does not remove mapping op.
       /// \param[in] op An mCRL2 data operation.
-      void keep_function(function_symbol op) {
-      }
+      void keep_function(function_symbol op)
+      { }
 
       /// \brief Ensure that data elimination does not remove the standard data
       ///        sorts (such as Bool and Pos) and mappings.
-      void keep_standard_data() {
-      }
+      void keep_standard_data()
+      { }
 
       /// \brief          Ensure that data elimination does not remove the sorts
       ///                 and mappings used in expr.
       /// \param[in] expr An mCRL2 data expression.
-      void keep_data_from_expr(data_expression expr) {
-      }
-
+      void keep_data_from_expr(data_expression expr)
+      { }
 
       /// \brief          Apply data elimination to spec
       /// \param[in] spec An mCRL2 data specification.
@@ -69,7 +69,8 @@ namespace new_data {
       ///                 keep (via the keep_* methods) and those that are used
       ///                 (directly or indirectly) in the specification of
       ///                 theses sorts and mappings.
-      data_specification apply(data_specification spec) {
+      data_specification apply(data_specification spec)
+      {
         std::clog << "Data elimination is not yet implemented!" << std::endl;
 
         return spec;
