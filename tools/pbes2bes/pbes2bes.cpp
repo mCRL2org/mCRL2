@@ -348,7 +348,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
         return EXIT_SUCCESS;
       }
-      return super::execute(argc, argv);
+      return pbes2bes_tool::execute(argc, argv);
     }
 };
 //<-
