@@ -13,11 +13,12 @@
 #include <wx/textctrl.h>
 
 #include "parameterdialog.h"
+#include "grape_ids.h"
 
 using namespace grape::grapeapp;
 
 grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declarations)
-: wxDialog( 0, wxID_ANY, _T("Set parameter initialisation"), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T("Set parameter initialisation"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 {
   wxPanel *panel = new wxPanel(this);
 
@@ -27,33 +28,26 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
   wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Parameter:" ) );
   grid->Add( text, 0 );
-
-  // choices
-  wxArrayString choices;
-  m_init.Empty();
-  for(unsigned int i=0; i<p_parameter_declarations.GetCount(); ++i)
-  {
-    decl_init t_param;
-    wxString param_name = p_parameter_declarations[i].get_name();
-    t_param.set_name(param_name);
-    m_init.Add(t_param);
-    choices.Add(param_name);
-  }
-
-  m_combo = new wxComboBox(panel, GRAPE_PARAMETER_DIALOG_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT | wxCB_READONLY);
-  grid->Add(m_combo, 1, wxEXPAND, 0);
-  m_combo->SetSelection(0);
-  m_combo_current = 0;
-
   vsizer->Add(grid);
 
-  text = new wxStaticText( panel, wxID_ANY, _T("Parameter initialisation:") );
-  vsizer->Add( text, 0 );
+  // create grid
+  m_grid = new wxGrid( panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
+  m_grid->CreateGrid( p_parameter_declarations.GetCount(), 2 );
+  for ( unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i )
+  {
+    // fill cells
+    m_grid->SetCellValue(i, 0, p_parameter_declarations[i].get_name());
+    m_grid->SetCellValue(i, 1, _T(""));
+  }
 
-  // create text control
-  m_input = new wxTextCtrl( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(400, 300), wxTE_MULTILINE );
-  vsizer->Add(m_input, 1, wxEXPAND );
+  m_grid->SetColSize( 0, 170 );
+  m_grid->SetColSize( 1, 100 );
+  m_grid->SetColLabelValue(0, _T("Name"));
+  m_grid->SetColLabelValue(1, _T("Value"));
+  m_grid->SetRowLabelSize(30);
 
+  vsizer->Add(m_grid, 1, wxEXPAND );
+ 
   panel->SetSizer( vsizer );
 
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
@@ -72,8 +66,9 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   wnd_sizer->Fit(this);
   wnd_sizer->SetSizeHints(this);
 
-  m_input->SetFocus();
-
+  m_grid->SetFocus();
+  
+  check_parameters();
 }
 
 grape_parameter_dialog::grape_parameter_dialog()
@@ -96,26 +91,36 @@ list_of_decl_init grape_parameter_dialog::get_initialisations() const
   return m_init;
 }
 
-void grape_parameter_dialog::event_combo(wxCommandEvent &WXUNUSED(p_event))
+void grape_parameter_dialog::check_parameters()
 {
-  // save initialisation
-  wxString param_init = m_input->GetValue();
-  m_init[m_combo_current].set_value(param_init);
-  m_combo_current = m_combo->GetCurrentSelection();
-  m_input->SetValue(m_init[m_combo_current].get_value());
+  bool valid = true;
+  
+  for ( unsigned int i = 0; i < m_grid->GetNumberRows(); ++i )
+  {
+    valid = valid && ( !m_grid->GetCellValue(i, 1).IsEmpty() );
+  }
+    
+  FindWindow(GetAffirmativeId())->Enable(valid);
 }
+
+void grape_parameter_dialog::event_change_text( wxGridEvent &p_event )
+{
+  check_parameters();
+}
+
 
 void grape_parameter_dialog::event_ok(wxCommandEvent &WXUNUSED(p_event))
 {
   // save initialisation
-  if(m_init.GetCount() > 0)
+  for ( unsigned int i = 0; i < m_grid->GetNumberRows(); ++i )
   {
-    m_init[m_combo_current].set_value(m_input->GetValue());
+    m_init[i].set_value(m_grid->GetCellValue(i, 1));
   }
+  
   EndModal(wxID_OK);
 }
 
 BEGIN_EVENT_TABLE(grape_parameter_dialog, wxDialog)
-  EVT_COMBOBOX(GRAPE_PARAMETER_DIALOG_COMBO, grape_parameter_dialog::event_combo)
   EVT_BUTTON(wxID_OK, grape_parameter_dialog::event_ok)
+  EVT_GRID_CMD_CELL_CHANGE(GRAPE_GRID_PARAM, grape_parameter_dialog::event_change_text)
 END_EVENT_TABLE()

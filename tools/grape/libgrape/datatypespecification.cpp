@@ -31,7 +31,7 @@ datatype_specification::~datatype_specification( void )
 
 wxString datatype_specification::get_declarations ( void ) const
 {
-  return m_dataexpressions;
+  return m_dataexpressions;  
 }
 
 void datatype_specification::set_declarations( const wxString &p_declarations )

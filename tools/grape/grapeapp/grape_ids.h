@@ -94,7 +94,9 @@ namespace grape
       
       GRAPE_CHANNEL_NAME_INPUT_TEXT,
       
-      GRAPE_COMBO_TEXT
+      GRAPE_COMBO_TEXT,
+      
+      GRAPE_GRID_PARAM
     };
 
   }

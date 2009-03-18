@@ -813,91 +813,74 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 {
   // clear logpanel and catch cout
   m_main_frame->get_logpanel()->Clear();
-  //m_main_frame->get_logpanel()->enable_catch_cout();
+  
+  // convert specification to XML
+  wxString empty_filename = wxEmptyString;
+  grape_specification *export_spec = m_main_frame->get_grape_specification();
+  wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
+  convert_spaces(export_doc);
 
-  // display save dialog
-  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), _T(""), _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-  int result = save_dialog.ShowModal();
-  if(result == wxID_OK)
+  // determine current diagram and ask for a parameter initialisation in case it is a process diagram
+  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  wxString diagram_id;
+  diagram_id.Printf(_T("%d"), export_diagram->get_id());
+  architecture_diagram *arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
+    
+  // export process diagram
+  list_of_decl_init param_init;
+  process_diagram *proc_diag = dynamic_cast<process_diagram*>(export_diagram);
+  if(proc_diag != 0)
   {
-    // get filename
-    wxFileName filename( save_dialog.GetPath() );
-    if ( filename.GetExt().Lower() != _T("mcrl2") )
-    {
-      wxString fullname = filename.GetFullName();
-      filename.SetName( fullname );
-      filename.SetExt( _T("mcrl2") );
-      if ( filename.FileExists() )
-      {
-        wxString s = _T("The file ");
-        s += filename.GetFullPath();
-        s += _T(" already exists, do you wish to overwrite this file?" );
-        int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
-        if ( result == wxNO )
-        {
-          return false;
-        }
-      }
-    }
+    // get parameter initialisation
+    param_init.Empty();
+    preamble *export_preamble = proc_diag->get_preamble();
 
-    // convert specification to XML
-    wxString empty_filename = wxEmptyString;
-    grape_specification *export_spec = m_main_frame->get_grape_specification();
-    wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
-    convert_spaces(export_doc);
-
-    // determine current diagram and ask for a parameter initialisation in case it is a process diagram
-    diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
-    wxString export_name = filename.GetFullPath();
-    wxString diagram_id;
-    diagram_id.Printf(_T("%d"), export_diagram->get_id());
-    architecture_diagram *arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
-    if(arch_diag != 0)
+    list_of_decl params = export_preamble->get_parameter_declarations_list();
+    if(params.GetCount() > 0)
     {
-      // export architecture diagram
-      if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true))
-      {
-        //m_main_frame->get_logpanel()->disable_catch_cout();
-        return false;
-      }
-    }
-    else
-    {
-      // export process diagram
-      process_diagram *proc_diag = dynamic_cast<process_diagram*>(export_diagram);
-      if(proc_diag != 0)
-      {
-        // get parameter initialisation
-        list_of_decl_init param_init;
-        param_init.Empty();
-        preamble *export_preamble = proc_diag->get_preamble();
-//        if(export_preamble->check_parameter_declarations_syntax())
-//        {
-        list_of_decl params = export_preamble->get_parameter_declarations_list();
-        if(params.GetCount() > 0)
-        {
-          grape_parameter_dialog *dialog = new grape_parameter_dialog(params);
-          dialog->show_modal();
-          param_init = dialog->get_initialisations();
-          delete dialog;
-        }
-//        }
-//        else
-//        {
-//          std::cerr << "mCRL2 conversion failed: the syntax of the parameter declaration in the preamble of the exported diagram is invalid." << std::endl;
-//          //m_main_frame->get_logpanel()->disable_catch_cout();
-//          return false;
-//        }
-        if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true))
-        {
-          //m_main_frame->get_logpanel()->disable_catch_cout();
-          return false;
-        }
-      }
+      grape_parameter_dialog *dialog = new grape_parameter_dialog(params);
+      if (!dialog->show_modal()) return false;
+      param_init = dialog->get_initialisations();
+      delete dialog;
     }
   }
 
-  //m_main_frame->get_logpanel()->disable_catch_cout();
+  // display save dialog
+  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), _T(""), _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (save_dialog.ShowModal() == wxID_CANCEL ) return false;
+  
+  // get filename
+  wxFileName filename( save_dialog.GetPath() );
+  if ( filename.GetExt().Lower() != _T("mcrl2") )
+  {
+    wxString fullname = filename.GetFullName();
+    filename.SetName( fullname );
+    filename.SetExt( _T("mcrl2") );
+    if ( filename.FileExists() )
+    {
+      wxString s = _T("The file ");
+      s += filename.GetFullPath();
+      s += _T(" already exists, do you wish to overwrite this file?" );
+      int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
+      if ( result == wxNO ) return false;
+    }    
+  }
+      
+  wxString export_name = filename.GetFullPath(); 
+  if(arch_diag != 0)
+  {
+    // export architecture diagram
+    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true)) return false;
+  }
+  else
+  {
+    if(proc_diag != 0)
+    {
+      // export process diagram
+      if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true)) return false;
+    }
+  }
+
   return true;
 }
 
