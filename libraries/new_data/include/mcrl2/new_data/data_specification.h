@@ -972,6 +972,18 @@ namespace mcrl2 {
 
     }; // class data_specification
 
+    /// \brief Pretty prints a data specification
+    /// \param[in] specification a data specification
+    template < typename Container >
+    inline std::string pp(data_specification const& specification)
+    {
+      return core::pp(core::detail::gsMakeDataSpec(
+        detail::sort_expression_list_to_aterm_sort_spec(specification.sorts()),
+               detail::constructor_list_to_aterm_cons_spec(specification.constructors()),
+               detail::function_list_to_aterm_map_spec(specification.mappings()),
+               detail::data_equation_list_to_aterm_eqn_spec(specification.equations())));
+    }
+
     inline
     bool operator==(const data_specification& x, const data_specification& y)
     {

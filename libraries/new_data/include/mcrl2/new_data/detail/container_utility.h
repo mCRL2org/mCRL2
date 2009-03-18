@@ -165,6 +165,11 @@ namespace mcrl2 {
         typedef boost::true_type type;
       };
 
+      template < typename T >
+      struct is_container_impl< boost::iterator_range< T > > {
+        typedef boost::true_type type;
+      };
+
       // type condition for use with boost::enable_if
       template < typename T >
       struct is_container : public is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >

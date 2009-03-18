@@ -21,12 +21,13 @@
 #include <vector>
 
 #include "boost/format.hpp"
-#include "boost/iterator/transform_iterator.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "mcrl2/new_data/assignment.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/find.h"
 
 namespace mcrl2 {
 
@@ -106,8 +107,9 @@ namespace mcrl2 {
     }
 
     /// \brief Pretty prints the contents of a container
+    /// \param[in] c a container with data or sort expressions
     template < typename Container >
-    inline std::string pp(Container const& c)
+    inline std::string pp(Container const& c, typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0)
     {
       std::string result;
 
@@ -122,6 +124,14 @@ namespace mcrl2 {
       }
 
       return result;
+    }
+
+    /// \brief Pretty prints a data and sort expressions
+    /// \param[in] specification a data specification
+    template < typename Container >
+    inline std::string pp(Container const& c, typename boost::disable_if< typename detail::is_container< Container >::type >::type* = 0)
+    {
+      return core::pp(c);
     }
 
     /// \brief Returns a copy of t, but with a common postfix added to each variable name,
@@ -143,7 +153,7 @@ namespace mcrl2 {
       {
         postfix = str(boost::format(postfix_format) % i);
         std::vector<std::string>::iterator j = ids.begin();
-        for ( ; j != ids.end(); j++)
+        for ( ; j != ids.end(); ++j)
         {
           if (context.find(*j + postfix) != context.end())
             break;
