@@ -11,9 +11,6 @@
 #ifndef GRAPE_EVENT_CHANCOMM_H
 #define GRAPE_EVENT_CHANCOMM_H
 
-#include "event_blocked.h"
-#include "event_visible.h"
-
 #include "event_base.h"
 
 namespace grape
@@ -22,6 +19,11 @@ namespace grape
   {
     class grape_event_detach_channel_communication;
     class grape_event_detach_property;
+
+    /**
+     * Array of detach channel events.
+     */
+    WX_DECLARE_OBJARRAY( grape_event_detach_channel_communication, arr_event_detach_channel_communication );
 
     /**
      * \short Represents the add channel communication event.
@@ -34,12 +36,6 @@ namespace grape
         unsigned int                  m_chan_1; /**< Identifier of the first clicked channel. */
         unsigned int                  m_chan_2; /**< Identifier of the second clicked channel. */
         unsigned int                  m_in_diagram; /**< Identifier of the diagram the channel communication is added to. */
-        grape_event_remove_visible *m_removed_visible_channel_1; /**< Detach event for the property the connection already had, if applicable. */
-        grape_event_remove_blocked *m_removed_blocked_channel_1; /**< Detach event for the property the connection already had, if applicable. */
-        grape_event_remove_visible *m_removed_visible_channel_2; /**< Detach event for the property the connection already had, if applicable. */
-        grape_event_remove_blocked *m_removed_blocked_channel_2; /**< Detach event for the property the connection already had, if applicable. */
-        grape_event_detach_channel_communication *m_detached_comm_1; /**< Detach event for the channel communication the channel was in, if applicable. */
-        grape_event_detach_channel_communication *m_detached_comm_2; /**< Detach event for the channel communication the channel was in, if applicable. */
       public:
 
         /**
@@ -84,9 +80,7 @@ namespace grape
         wxArrayLong                     m_comments;     /**< Identifiers of the list of comments attached to the channel communication. */
         unsigned int                            m_in_diagram;  /**< Identifier of the diagram from which the channel was deleted. */
         wxArrayLong                     m_channels;     /**< Identifiers of the channels the channel communication was attached to. */
-        // Below implemented with arrays instead of pointers, to prevent annoying pointer crashes.
-        arr_event_remove_visible     m_visible;  /**< Backup of the visible that was associated with the channel, if applicable. */
-        arr_event_remove_blocked     m_blocked;  /**< Backup of the blocked that was associated with the channel, if applicable. */
+        channel_communication_type      m_channel_communication_type;   /**< Backup of the channel communication type. */
       public:
 
         /**
@@ -126,9 +120,6 @@ namespace grape
         unsigned int      m_channel_communication; /**< The channel communication to which a channel is added. */
         unsigned int      m_channel; /**< The channel that is added to the channel communication. */
         unsigned int      m_diagram; /**< Identifier of the diagram in which the change was made. */
-        grape_event_remove_visible *m_remove_channel_visible; /**< The visible of the channel that is removed, if applicable. */
-        grape_event_remove_blocked *m_remove_channel_blocked; /**< The visible of the channel that is removed, if applicable. */
-        grape_event_detach_channel_communication *m_detach_channel_communication; /**< The channel communication of the channel that is detached, if applicable */
       public:
 
         /**
@@ -244,10 +235,6 @@ namespace grape
      */
     WX_DECLARE_OBJARRAY( grape_event_remove_channel_communication, arr_event_remove_channel_communication );
 
-    /**
-     * Array of detach channel events.
-     */
-    WX_DECLARE_OBJARRAY( grape_event_detach_channel_communication, arr_event_detach_channel_communication );
   }
 }
 #endif // GRAPE_EVENT_CHANCOMM_H

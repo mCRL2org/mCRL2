@@ -23,7 +23,8 @@
 #include <wx/string.h>
 #include "nonterminatingtransition.h"
 #include "compoundstate.h"
-#include "channeltype.h"
+#include "channel.h"
+#include "channelcommunication.h"
 
 struct color
 {
@@ -340,9 +341,18 @@ namespace grape
      * @param p_center The center coordinate of the ellipse.
      * @param p_radius The radius of the circle.
      * @param p_selected A flag indicating whether the object is selected.
-     * @param p_channeltype Type of the channel.
+     * @param p_channel_type Type of the channel.
      */
-    void draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channeltype p_channeltype);
+    void draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channel_type p_channel_type);
+
+    /**
+     * Channel communication (circle) draw function.
+     * @param p_center The center coordinate of the ellipse.
+     * @param p_radius The radius of the circle.
+     * @param p_selected A flag indicating whether the object is selected.
+     * @param p_channel_communication_type Type of the channel communication.
+     */
+    void draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channel_communication_type p_channel_communication_type);
 
     /**
      * Filled rectangle draw function.

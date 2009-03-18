@@ -304,8 +304,6 @@ grape_event_remove_diagram::grape_event_remove_diagram(grape_frame *p_main_frame
   m_channel_communications.Empty();
   m_architecture_references.Empty();
   m_process_references.Empty();
-  m_blockeds.Empty();
-  m_visibles.Empty();
 
   // retrieve the current diagram.
   assert( p_dia_ptr != 0 );
@@ -352,48 +350,6 @@ grape_event_remove_diagram::grape_event_remove_diagram(grape_frame *p_main_frame
         grape_event_remove_channel_communication* event = new
           grape_event_remove_channel_communication( m_main_frame, comm_ptr, arch_dia_ptr, p_normal );
         m_channel_communications.Add( event );
-      }
-    }
-    for ( unsigned int i = 0; i < arch_dia_ptr->count_blocked(); ++i )
-    {
-      blocked* block_ptr = arch_dia_ptr->get_blocked( i );
-      if ( p_normal )
-      {
-        // Only create remove events for blocked that are not connected to a channel.
-        if ( block_ptr->get_attached_connection() == 0 )
-        {
-          grape_event_remove_blocked* event = new
-            grape_event_remove_blocked( m_main_frame, block_ptr, arch_dia_ptr );
-          m_blockeds.Add( event );
-        }
-      }
-      else
-      {
-        // create remove for all
-        grape_event_remove_blocked* event = new
-          grape_event_remove_blocked( m_main_frame, block_ptr, arch_dia_ptr );
-        m_blockeds.Add( event );
-      }
-    }
-    for ( unsigned int i = 0; i < arch_dia_ptr->count_visible(); ++i )
-    {
-      // Only create remove events for visible that are not connected to a channel.
-      visible* vis_ptr = arch_dia_ptr->get_visible( i );
-      if ( p_normal )
-      {
-        // Only create remove events for visible that are not connected to a channel.
-        if ( vis_ptr->get_attached_connection() == 0 )
-        {
-          grape_event_remove_visible* event = new
-            grape_event_remove_visible( m_main_frame, vis_ptr, arch_dia_ptr );
-          m_visibles.Add( event );
-        }
-      }
-      else
-      {
-        grape_event_remove_visible* event = new
-          grape_event_remove_visible( m_main_frame, vis_ptr, arch_dia_ptr );
-        m_visibles.Add( event );
       }
     }
   }
@@ -458,8 +414,6 @@ grape_event_remove_diagram::~grape_event_remove_diagram( void )
   m_channels.Clear();
   m_architecture_references.Clear();
   m_process_references.Clear();
-  m_blockeds.Clear();
-  m_visibles.Clear();
 }
 
 bool grape_event_remove_diagram::Do( void )
@@ -468,16 +422,6 @@ bool grape_event_remove_diagram::Do( void )
   if ( m_type == GRAPE_ARCHITECTURE_DIAGRAM )
   {
     architecture_diagram* del_arch_dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram, m_type ) );
-    for ( unsigned int i = 0; i < m_blockeds.GetCount(); ++i )
-    {
-      grape_event_remove_blocked event = m_blockeds.Item( i );
-      event.Do();
-    }
-    for ( unsigned int i = 0; i < m_visibles.GetCount(); ++i )
-    {
-      grape_event_remove_visible event = m_visibles.Item( i );
-      event.Do();
-    }
     for ( unsigned int i = 0; i < m_channel_communications.GetCount(); ++i )
     {
       grape_event_remove_channel_communication event = m_channel_communications.Item( i );
@@ -511,28 +455,18 @@ bool grape_event_remove_diagram::Do( void )
     // update architecture listbox
     grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
     int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name() );
-    if ( pos != wxNOT_FOUND )
+    arch_listbox->Delete( pos );
+    if ( pos > 0 )
     {
-      arch_listbox->Delete( pos );
-      if ( pos > 0 )
+      arch_listbox->Select( pos - 1 );
+    }
+    else
+    {
+      // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
+      if (!m_main_frame->get_process_diagram_listbox()->IsEmpty())
       {
-        arch_listbox->Select( pos - 1 );
-      }
-      else
-      {
-	if (!arch_listbox->IsEmpty())
-        {
-          arch_listbox->Select( 0 );
-        }
-        else
-        {
-          // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
-          if (!m_main_frame->get_process_diagram_listbox()->IsEmpty())
-          {
-          	m_main_frame->get_process_diagram_listbox()->Select( 0 );
-      	  }
-        }
-      }
+      	m_main_frame->get_process_diagram_listbox()->Select( 0 );
+  	  }
     }
 
     // update grape mode
@@ -592,23 +526,16 @@ bool grape_event_remove_diagram::Do( void )
     grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
     int pos = proc_listbox->FindString( proc_dia_ptr->get_name() );
     proc_listbox->Delete( pos );
-    if ( pos != 0 )
+    if ( pos > 0 )
     {
       proc_listbox->Select( pos - 1 );
     }
     else
     {
-      if (!proc_listbox->IsEmpty())
+      // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
+      if (!m_main_frame->get_architecture_diagram_listbox()->IsEmpty())
       {
-         proc_listbox->Select( 0 );
-      }
-      else
-      {
-        // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
-        if (!m_main_frame->get_architecture_diagram_listbox()->IsEmpty())
-        {
-	      m_main_frame->get_architecture_diagram_listbox()->Select( 0 );
-        }
+        m_main_frame->get_architecture_diagram_listbox()->Select( 0 );
       }
     }
 
@@ -661,16 +588,6 @@ bool grape_event_remove_diagram::Undo( void )
     for ( unsigned int i = 0; i < m_channel_communications.GetCount(); ++i )
     {
       grape_event_remove_channel_communication event = m_channel_communications.Item( i );
-      event.Undo();
-    }
-    for ( unsigned int i = 0; i < m_visibles.GetCount(); ++i )
-    {
-      grape_event_remove_visible event = m_visibles.Item( i );
-      event.Undo();
-    }
-    for ( unsigned int i = 0; i < m_blockeds.GetCount(); ++i )
-    {
-      grape_event_remove_blocked event = m_blockeds.Item( i );
       event.Undo();
     }
     // check whether any architecturereferences exist that should point to the diagram.
@@ -1075,8 +992,6 @@ grape_event_delete_selected_objects::grape_event_delete_selected_objects( grape_
   m_tt.Empty();
   m_init.Empty();
   m_channel.Empty();
-  m_visible.Empty();
-  m_blocked.Empty();
   m_c_comm.Empty();
   m_proc_ref.Empty();
   m_arch_ref.Empty();
@@ -1127,20 +1042,6 @@ grape_event_delete_selected_objects::grape_event_delete_selected_objects( grape_
           grape_event_remove_architecture_reference* event = new grape_event_remove_architecture_reference
                                     ( m_main_frame, static_cast<architecture_reference*> ( obj_ptr ), arch_dia );
           m_arch_ref.Add( event );
-          break;
-        }
-        case VISIBLE:
-        {
-          grape_event_remove_visible* event = new grape_event_remove_visible( m_main_frame,
-                                                  static_cast<visible*> ( obj_ptr ), arch_dia );
-          m_visible.Add( event );
-          break;
-        }
-        case BLOCKED:
-        {
-          grape_event_remove_blocked* event = new grape_event_remove_blocked( m_main_frame,
-                                                  static_cast<blocked*> ( obj_ptr ), arch_dia );
-          m_blocked.Add( event );
           break;
         }
         case INITIAL_DESIGNATOR:break;
@@ -1208,8 +1109,6 @@ grape_event_delete_selected_objects::grape_event_delete_selected_objects( grape_
         case CHANNEL_COMMUNICATION: break;
         case PROCESS_REFERENCE: break;
         case ARCHITECTURE_REFERENCE: break;
-        case VISIBLE: break;
-        case BLOCKED:break;
         case NONE:break;
         default: /* assert( false ); */ break;
       }
@@ -1226,8 +1125,6 @@ grape_event_delete_selected_objects::~grape_event_delete_selected_objects( void 
   m_tt.Clear();
   m_init.Clear();
   m_channel.Clear();
-  m_visible.Clear();
-  m_blocked.Clear();
   m_c_comm.Clear();
   m_proc_ref.Clear();
   m_arch_ref.Clear();
@@ -1267,19 +1164,7 @@ bool grape_event_delete_selected_objects::Do( void )
     grape_event_remove_reference_state event = m_ref_state.Item( i );
     event.Do();
   }
-
-  // Perform property deletions first.
-  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
-  {
-    grape_event_remove_visible event = m_visible.Item( i );
-    event.Do();
-  }
-  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
-  {
-    grape_event_remove_blocked event = m_blocked.Item( i );
-    event.Do();
-  }
-  // Then channel communications
+  // Perform remove of channel communications
   for ( unsigned int i = 0; i < m_c_comm.GetCount(); ++i )
   {
     grape_event_remove_channel_communication event = m_c_comm.Item( i );
@@ -1364,17 +1249,6 @@ bool grape_event_delete_selected_objects::Undo( void )
   for ( unsigned int i = 0; i < m_c_comm.GetCount(); ++i )
   {
     grape_event_remove_channel_communication event = m_c_comm.Item( i );
-    event.Undo();
-  }
-  // And lastly the properties.
-  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
-  {
-    grape_event_remove_visible event = m_visible.Item( i );
-    event.Undo();
-  }
-  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
-  {
-    grape_event_remove_blocked event = m_blocked.Item( i );
     event.Undo();
   }
 

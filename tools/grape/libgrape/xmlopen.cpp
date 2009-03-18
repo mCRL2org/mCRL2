@@ -1427,8 +1427,8 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
       result = result && open_architecture_references( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_channels( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_channel_communications( p_spec, arch_dia_node, new_architecture_diagram );
-      result = result && open_visibles( p_spec, arch_dia_node, new_architecture_diagram );
-      result = result && open_blockeds( p_spec, arch_dia_node, new_architecture_diagram );
+//      result = result && open_visibles( p_spec, arch_dia_node, new_architecture_diagram );
+//      result = result && open_blockeds( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_comments( p_spec, arch_dia_node, new_architecture_diagram );
     }
     else
@@ -1770,9 +1770,11 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               coordinate channel_coordinate = { 0.0f, 0.0f };
               float channel_height = 0.1f;
               float channel_width = 0.1f;
+//              arr_channel_communication_ptr channel_communications;
+//              channel_communications.Empty();
               wxString channel_name = _T( "" );
               wxString channel_rename_to = _T( "" );
-              channeltype channel_channeltype = channel_visible;
+              channel_type channel_channel_type = VISIBLE_CHANNEL;
               unsigned int channel_reference_id = 0;
 
               wxXmlNode* channel_information = channel_node->GetChildren();
@@ -1858,12 +1860,36 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                   identifier.ToLong( &dummy_id );
                   channel_reference_id = ( unsigned int ) dummy_id;
                 }
+/*                else if ( what_info == _T( "connectionlist" ) )
+                {
+                  wxXmlNode* connected_channel_communication = channel_information->GetChildren();
+                  while ( connected_channel_communication )
+                  {
+                    if ( connected_channel_communication->GetName() == _T( "connectedtochannelcommunication" ) )
+                    {
+                      wxString identifier = connected_channel_communication->GetNodeContent();
+                      long dummy_id;
+                      identifier.ToLong( &dummy_id );
+                      unsigned int channel_communication_identifier = ( unsigned int ) dummy_id;
+                      channel_communication* chan_comm_ptr = dynamic_cast<channel_communication*> ( architecture_diagram::find_object( p_arch_dia_ptr, channel_communication_identifier ) );
+                      channel_communications.Add( chan_comm_ptr );
+                    }
+                    else
+                    {
+                      /* invalid node name! */
+/*                      return false;
+                    }
+
+                    connected_channel_communication = connected_channel_communication->GetNext();
+                  }
+                } 
+*/
                 else if ( what_info == _T( "channeltype" ) )
                 {                
-                  wxString c_channeltype = channel_information->GetNodeContent();                  
-                  if (c_channeltype == _T("hidden" )) channel_channeltype = channel_hidden; 
-                  if (c_channeltype == _T("blocked" )) channel_channeltype = channel_blocked; 
-                  if (c_channeltype == _T("visible" )) channel_channeltype = channel_visible;
+                  wxString c_channel_type = channel_information->GetNodeContent();                  
+                  if (c_channel_type == _T("visible" )) channel_channel_type = VISIBLE_CHANNEL;
+                  if (c_channel_type == _T("hidden" )) channel_channel_type = HIDDEN_CHANNEL; 
+                  if (c_channel_type == _T("blocked" )) channel_channel_type = BLOCKED_CHANNEL; 
                 } 
                 else
                 {
@@ -1889,8 +1915,16 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               chan_ptr->set_rename_to( channel_rename_to );
               
               // set channel type              
-              chan_ptr->set_channeltype(channel_channeltype);
+              chan_ptr->set_channel_type(channel_channel_type);
 
+              // set channel communications
+/*              for ( unsigned int i = 0; i < channel_communications.GetCount(); ++i )
+              {
+                channel_communication* chan_comm_ptr = channel_communications.Item( i );
+                chan_ptr->attach_channel_communication(chan_comm_ptr);
+                p_arch_dia_ptr->attach_channel_communication_to_channel( comm_ptr,  chan_ptr );
+              }
+*/
               // retrieve the next channel
               channel_node = channel_node->GetNext();
             }
@@ -1937,7 +1971,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
             {
               unsigned int communication_identifier = 0;
               wxString communication_rename_to = _T( "" );
-              channeltype communication_channeltype = channel_visible;
+              channel_communication_type communication_channel_type = VISIBLE_CHANNEL_COMMUNICATION;
               coordinate communication_coordinate = { 0.0f, 0.0f };
               float communication_height = 0.1f;
               float communication_width = 0.1f;
@@ -2021,7 +2055,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                   wxXmlNode* connected_channel = communication_information->GetChildren();
                   while ( connected_channel )
                   {
-                    if ( connected_channel->GetName() == _T( "connectedtochannels" ) )
+                    if ( connected_channel->GetName() == _T( "connectedtochannel" ) )
                     {
                       wxString identifier = connected_channel->GetNodeContent();
                       long dummy_id;
@@ -2038,12 +2072,13 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
 
                     connected_channel = connected_channel->GetNext();
                   }
-                } else if ( what_info == _T( "channeltype" ) )
+                } 
+                else if ( what_info == _T( "channelcommunicationtype" ) )
                 {                
-                  wxString cc_channeltype = communication_information->GetNodeContent();                  
-                  if (cc_channeltype == _T("hidden" )) communication_channeltype = channel_hidden; 
-                  if (cc_channeltype == _T("blocked" )) communication_channeltype = channel_blocked; 
-                  if (cc_channeltype == _T("visible" )) communication_channeltype = channel_visible;
+                  wxString cc_channel_type = communication_information->GetNodeContent();                  
+                  if (cc_channel_type == _T("visible" )) communication_channel_type = VISIBLE_CHANNEL_COMMUNICATION;
+                  if (cc_channel_type == _T("hidden" )) communication_channel_type = HIDDEN_CHANNEL_COMMUNICATION; 
+                  if (cc_channel_type == _T("blocked" )) communication_channel_type = BLOCKED_CHANNEL_COMMUNICATION; 
                 } 
                 else
                 {
@@ -2060,11 +2095,12 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                 comm_ptr->set_width( communication_width );
                 comm_ptr->set_height( communication_height );
                 comm_ptr->set_rename_to( communication_rename_to );
-                comm_ptr->set_channeltype( communication_channeltype );
+                comm_ptr->set_channel_communication_type( communication_channel_type );
                 for ( unsigned int i = 2; i < channels.GetCount(); ++i )
                 {
                   channel* chan_ptr = channels.Item( i );
                   p_arch_dia_ptr->attach_channel_communication_to_channel( comm_ptr,  chan_ptr );
+                  chan_ptr->attach_channel_communication( comm_ptr );
                 }
               }
               else
@@ -2212,6 +2248,7 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
                 // find the next piece of information about the state
                 visible_information = visible_information->GetNext();
               }
+/*
               connection* conn_ptr = dynamic_cast<connection*> ( architecture_diagram::find_object( p_arch_dia_ptr, visible_connection_id ) );
 
               // create the visible
@@ -2221,6 +2258,7 @@ bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_a
 
               // retrieve the next visible
               visible_node = visible_node->GetNext();
+*/
             }
             // break from the while loop; there can only be one statelist
             break;
@@ -2352,6 +2390,7 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
                 // find the next piece of information about the state
                 blocked_information = blocked_information->GetNext();
               }
+/*
               connection* conn_ptr = dynamic_cast<connection*> ( architecture_diagram::find_object( p_arch_dia_ptr, blocked_connection_id ) );
 
               // create the blocked
@@ -2359,6 +2398,7 @@ bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_a
 
               // retrieve the next blocked
               blocked_node = blocked_node->GetNext();
+*/
             }
             // break from the while loop; there can only be one statelist
             break;

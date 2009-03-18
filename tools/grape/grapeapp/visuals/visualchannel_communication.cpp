@@ -53,7 +53,7 @@ void visualchannel_communication::draw( void )
   wxString rename_to = cc->get_rename_to();
 
   // draw channel
-  draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channeltype() );
+  draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channel_communication_type() );
 
   //draw text 
   if (rename_to != _T("")) grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.5 * m_object->get_width(), y, 0.0015f, al_right, al_top);

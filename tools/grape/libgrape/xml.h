@@ -215,9 +215,16 @@ namespace grape
     /**
      * Writes an element tree representing a channel type.
      * @param p_parent The parent node of the element tree.
-     * @param p_channeltype The channel type.
+     * @param p_channel_type The channel type.
      */
-    void write_channeltype( wxXmlNode *p_parent, channeltype p_channeltype );
+    void write_channel_type( wxXmlNode *p_parent, channel_type p_channel_type );
+
+    /**
+     * Writes an element tree representing a channel communication type.
+     * @param p_parent The parent node of the element tree.
+     * @param p_channel_communication_type The channel communication type.
+     */
+    void write_channel_communication_type( wxXmlNode *p_parent, channel_communication_type p_channel_communication_type );
 
   } // namespace libgrape
 } // namespace grape

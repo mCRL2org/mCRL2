@@ -16,11 +16,9 @@
 #include "architecturereference.h"
 #include "mcrl2/utilities/font_renderer.h"
 #include "visuals/visualobject.h"
-#include "visuals/visualblocked.h"
 #include "visuals/visualchannel_communication.h"
 #include "visuals/visualcomment.h"
 #include "visuals/visualpreamble.h"
-#include "visuals/visualvisible.h"
 #include "visuals/visualterminating_transition.h"
 #include "visuals/visualnonterminating_transition.h"
 #include "visuals/visualstate.h"
@@ -29,7 +27,6 @@
 #include "visuals/visualprocess_reference.h"
 #include "visuals/visualarchitecture_reference.h"
 #include "visuals/visualchannel.h"
-#include "visuals/visualvisibilityframe.h"
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities;
@@ -66,11 +63,6 @@ grape_glcanvas::grape_glcanvas(wxWindow *p_parent, int *p_args, grape_frame* p_m
   m_dragging = false;
   m_mousedown = false;
   m_diagram = 0;
-
-  m_visibility_frame_height = m_max_size_y - 0.5 * g_frame_border_space;
-  m_visibility_frame_width = m_max_size_x - 2 * g_frame_border_space;
-  m_visibility_frame_coordinate.m_x = m_min_size_x + g_frame_border_space + 0.5 * m_visibility_frame_width;
-  m_visibility_frame_coordinate.m_y = -1 * ( m_min_size_y + 0.1f + 0.5 * m_visibility_frame_height );
 }
 
 void grape_glcanvas::update_scrollbars(void)
@@ -152,11 +144,6 @@ void grape_glcanvas::reset()
   m_dragging = false;
   m_mousedown = false;
   m_diagram = 0;
-
-  m_visibility_frame_height = m_max_size_y - 0.5 * g_frame_border_space;
-  m_visibility_frame_width = m_max_size_x - 2 * g_frame_border_space;
-  m_visibility_frame_coordinate.m_x = m_min_size_x + g_frame_border_space + 0.5 * m_visibility_frame_width;
-  m_visibility_frame_coordinate.m_y = -1 * ( m_min_size_y + 0.1f + 0.5 * m_visibility_frame_height );
 }
 void grape_glcanvas::draw_visual_objects()
 {
@@ -685,32 +672,12 @@ void grape_glcanvas::reload_visual_objects( void )
     architecture_diagram* arch_dia = dynamic_cast<architecture_diagram*> ( m_diagram );
     if ( arch_dia != 0 )
     {
-      // add the visibility frame.
-      visualvisibility_frame* new_frame = new visualvisibility_frame( m_visibility_frame_coordinate, m_visibility_frame_width, m_visibility_frame_height);
-      add_visual_object( new_frame );
-
       // add visuals comment
       for ( unsigned int i = 0; i < arch_dia->count_comment(); ++i )
       {
         comment* comm_ptr = arch_dia->get_comment( i );
         visualcomment* visual_comm = new visualcomment( comm_ptr );
         add_visual_object( visual_comm );
-      }
-
-      // add visuals blocked
-      for ( unsigned int i = 0; i < arch_dia->count_blocked(); ++i )
-      {
-        blocked* block_ptr = arch_dia->get_blocked( i );
-        visualblocked* visual_block = new visualblocked( block_ptr );
-        add_visual_object( visual_block );
-      }
-      // add visuals visible
-      for ( unsigned int i = 0; i < arch_dia->count_visible(); ++i )
-      {
-        // pass the coordinate, width and height of the visibility frame to the visibles.
-        visible* vis_ptr = arch_dia->get_visible( i );
-        visualvisible* visual_vis = new visualvisible( vis_ptr, m_visibility_frame_coordinate, m_visibility_frame_width, m_visibility_frame_height );
-        add_visual_object( visual_vis );
       }
 
       // Draw a reference and its own channels immediately thereafter so that no other objects can be placed between them.
@@ -828,11 +795,6 @@ wxImage grape_glcanvas::get_image( void )
   glReadPixels(0, 0, canvas_size.x, canvas_size.y, GL_RGB, GL_UNSIGNED_BYTE, canvas_image.GetData() );
   canvas_image = canvas_image.Mirror( false );
   return canvas_image;
-}
-
-bool grape_glcanvas::is_inside_visibility_frame( coordinate &p_coord )
-{
-  return is_inside_rectangle( m_visibility_frame_coordinate, m_visibility_frame_width, m_visibility_frame_height, p_coord );
 }
 
 font_renderer* grape_glcanvas::get_font_renderer( void )

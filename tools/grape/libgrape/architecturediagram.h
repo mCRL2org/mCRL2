@@ -12,9 +12,8 @@
 #define LIBGRAPE_ARCHITECTUREDIAGRAM_H
 
 #include "diagram.h"
-#include "blocked.h"
-#include "visible.h"
 #include "channelcommunication.h"
+#include "channel.h"
 #include "architecturereference.h"
 
 namespace grape
@@ -25,18 +24,14 @@ namespace grape
     /**
      * \short Represents an architecture diagram.
      * A description of the architecture of the "modelled system". An
-     * Architecture Diagram has a Visibility Frame, that determines
-     * what behavior of the diagram is externally visible. An Archi-
-     * tecture Diagram contains a number of Process References and
-     * Architecture References and the Channels they share.
+     * An Architecture Diagram contains a number of Process References
+     * and Architecture References and the Channels they share.
      *
      * @see diagram
      */
     class architecture_diagram : public diagram
     {
       protected:
-        arr_blocked                 m_blocked;                /**< blocked connection properties in this architecture diagram. */
-        arr_visible                 m_visibles;               /**< visible connection properties in this architecture diagram. */
         arr_channel_communication   m_channel_communications;  /**< channel communications in this architecture diagram. */
         arr_channel                 m_channels;               /**< channels in this architecture diagram. */
         arr_architecture_reference  m_architecture_references; /**< architecture references in this architecture diagram. */
@@ -233,100 +228,6 @@ namespace grape
         void detach_channel_from_channel_communication( channel* p_chan );
 
         /**
-         * Connection property addition function.
-         * Deselects all objects in the diagram and creates a new connection property.
-         * @param p_id The id of the connection property.
-         * @param p_coord The coordinate at which the connection property should be created.
-         * @param p_def_width The default width of a connection property.
-         * @param p_def_height The default height of a connection property.
-         * @param p_conn The connection to attach this property to.
-         * @return Returns a pointer to the newly created blocked.
-         */
-        blocked* add_blocked( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
-
-        /**
-         * Connection property removal function.
-         * Removes the connection property.
-         * @param p_blocked The connection property.
-         */
-        void remove_blocked( blocked* p_blocked );
-
-        /**
-         * Blocked count function.
-         * @return Returns the number of blocked in the architecture diagram.
-         */
-        unsigned int count_blocked( void );
-
-        /**
-         * Blocked retrieval function.
-         * @param p_i The index of the to be retrieved blocked.
-         * @return Returns a pointer to the blocked at index p_i in the list of blocked
-         */
-        blocked* get_blocked( int p_i );
-
-        /**
-         * To be used exclusively during XML-conversion.
-         * @return A pointer to list of blockeds
-         */
-        arr_blocked* get_blocked_list( void );
-
-        /**
-         * Connection property addition function.
-         * Deselects all objects in the diagram and creates a new connection property.
-         * @param p_id The id of the connection property.
-         * @param p_coord The coordinate at which the connection property should be created.
-         * @param p_def_width The default width of a connection property.
-         * @param p_def_height The default height of a connection property.
-         * @param p_conn The connection to attach the property to.
-         * @return Returns a pointer to the newly created visible.
-         */
-        visible* add_visible( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn );
-
-        /**
-         * Connection property removal function.
-         * Removes the connection property.
-         * @param p_visible The connection property.
-         */
-        void remove_visible( visible* p_visible );
-
-        /**
-         * Visible count function.
-         * @return Returns the number of visible in the architecture diagram.
-         */
-        unsigned int count_visible( void );
-
-        /**
-         * Visible retrieval function.
-         * @param p_i The index of the to be retrieved visible.
-         * @return Returns a pointer to the visible at index p_i in the list of visible
-         */
-        visible* get_visible( int p_i );
-
-        /**
-         * To be used exclusively during XML-conversion.
-         * @return A pointer to list of visibles
-         */
-        arr_visible* get_visible_list( void );
-
-        /**
-         * Connection property attachment function.
-         * Attaches the specified connection property to the specified connection.
-         * Detaches existing properties from the connection.
-         * Detaches existing channel communications from the connection, if the connection is a channel.
-         * @pre The property and connection are both in this diagram.
-         * @param p_prop The connection property.
-         * @param p_connection The connection.
-         */
-        void attach_property_to_connection( connection_property* p_prop, connection* p_connection );
-
-        /**
-         * Connection property detachment function.
-         * Detaches the specified connection property from its connection.
-         * @param p_prop The connection property.
-         */
-        void detach_property_from_connection( connection_property* p_prop );
-
-        /**
          * Object selection function.
          * Selects all objects in the diagram.
          */
@@ -346,12 +247,6 @@ namespace grape
          * @return Returns the object that has the specified id.
         */
         static object* find_object( architecture_diagram* p_arch_dia, unsigned int p_id, object_type p_type = ANY );
-      private:
-        /**
-         * Connection property removal function.
-         * Performs a dynamic cast on the specified pointer and removes the object from the corresponding list, which is either the list of visibles or the list of blocked.
-         */
-        void delete_property( connection_property* p_prop );
     };
 
     /**

@@ -15,8 +15,6 @@
 #include "state.h"
 #include "referencestate.h"
 #include "architecturereference.h"
-#include "visible.h"
-#include "blocked.h"
 #include "channelcommunication.h"
 
 namespace grape

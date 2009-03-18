@@ -11,8 +11,7 @@
 #ifndef LIBGRAPE_CHANNEL_H
 #define LIBGRAPE_CHANNEL_H
 
-#include "connection.h"
-#include "channeltype.h"
+#include "object.h"
 
 namespace grape
 {
@@ -21,8 +20,24 @@ namespace grape
 
     // forward declaration
     class compound_reference;
-    class communication;
     class channel_communication;
+
+//    WX_DECLARE_ARRAY_PTR(channel_communication*, arr_channel_communication_ptr);
+    /**
+     * Array of ChannelCommunication.
+     */
+    WX_DEFINE_ARRAY_PTR( channel_communication*, arr_channel_communication_ptr );
+
+    /**
+     * \short Channel type enumeration.
+     * An enumeration that includes all possible channel types ({VISIBLE, HIDDEN, BLOCKED}).
+     */
+    enum channel_type
+    {
+      VISIBLE_CHANNEL = 0, 
+      HIDDEN_CHANNEL, 
+      BLOCKED_CHANNEL
+    };
 
     /**
      * \short Represents a channel.
@@ -33,21 +48,21 @@ namespace grape
      * @see process_reference
      * @see architecture_reference
      */
-    class channel : public connection
+    class channel : public object
     {
       private:
         /** Initialization function. */
         void init();
 
       protected:
-        wxString                    m_name;           /**< name of the channel. */
-        wxString                    m_rename_to;      /**< rename of the channel. */
+        wxString                      m_name;                   /**< name of the channel. */
+        wxString                      m_rename_to;              /**< rename of the channel. */
         
-        bool                        m_enabled_channel; /**< flag used during simulation. */
-        channeltype                 m_channeltype;     /**< type of channel associated with this transition. */
+        bool                          m_enabled_channel;        /**< flag used during simulation. */
+        channel_type                  m_channel_type;           /**< type of channel associated with this transition. */
 
-        compound_reference          *m_has_channel;   /**< reference channel is connected to. */
-        channel_communication       *m_channel_communication; /**< channel communication connected to this channel. */
+        compound_reference            *m_has_channel;           /**< reference channel is connected to. */
+        arr_channel_communication_ptr m_channel_communication; /**< channel communications connected to this channel. */
 
       public:
 
@@ -141,13 +156,13 @@ namespace grape
          * Channel communication dissociation function.
          * Dissociates the channel from its channel communcation.
          */
-        void detach_channel_communication( void );
+        void detach_channel_communication( channel_communication* p_comm );
 
         /**
          * Channel communication retrieval function.
          * @return Returns a pointer to the channel communication the channel is associated with.
          */
-        channel_communication* get_channel_communication( void );
+        arr_channel_communication_ptr* get_channel_communications( void );
 
         /**
          * Enabled retrieval function.
@@ -165,14 +180,14 @@ namespace grape
          * Channel type retrieval function
          * @return The channel type
          */
-        channeltype get_channeltype( void ) const;
+        channel_type get_channel_type( void ) const;
 
         /**
          * Channel type assignment function
          * Takes a new channeltype and assigns it to the channeltype of the channel.
          * @param p_channeltype The new channeltype
          */
-        void set_channeltype( const channeltype &p_channeltype );
+        void set_channel_type( const channel_type &p_channel_type );
 
     };
 

@@ -48,7 +48,7 @@ namespace grape
      */
     struct channel_id
     {
-      wxString m_channel;           /**< The name of the channel. */
+      action   m_channel;           /**< The action of the channel. */
       wxString m_channel_id;        /**< The identifier of the channel. */
       wxString m_architecture_channel; /**< Name used for channels on architecture references (with correct id). */
     };
@@ -101,7 +101,8 @@ namespace grape
     struct renamed
     {
       wxString m_old_name;          /**< The old name of this object. */
-      wxString m_new_name;          /**< The new name of this object. */
+      //wxString m_new_name;          /**< The new name of this object. */
+      action m_new;
     };
 
     /**
@@ -376,11 +377,12 @@ namespace grape
      * @param p_doc_root The XML GraPE specification containing the list of architecture references.
      * @param p_architecture_diagram The XML architecture diagram containing the list of architecture references.
      * @param p_reference_list The XML list of architecture references.
+     * @param datatype_spec The datatype specification
      * @return True if the list of architecture references is valid, false otherwise.
      * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of architecture references, p_architecture_diagram is a valid pointer to the XML architecture diagram containing the list of architecture references and p_reference_list is a valid pointer to an XML list of architecture references.
      * @post The validity of the list of architecture references is returned and error messages are produced if necessary.
      */
-    bool validate_architecture_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list);
+    bool validate_architecture_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list, ATermAppl &datatype_spec);
 
     /**
      * Architecture diagram acyclicy checking function.
@@ -409,12 +411,40 @@ namespace grape
     /**
      * Architecture diagram visibles inference function.
      * Infers all visibles of an architecture diagram.
+     * @param p_doc_root The XML GraPE specification containing the list of architecture diagram visibles.
      * @param p_architecture_diagram The XML architecture diagram to infer the visibles of.
+     * @param datatype_spec The datatype specification.
      * @return An array of strings containing the names of the visibles.
      * @pre p_architecture_diagram is a valid XML architecture diagram.
-     * @post An array of strings containing the names of the inferred visibles.
+     * @post A list of actions containing the names and types of the inferred visibles.
      */
-    list_of_action infer_architecture_visibles(wxXmlNode *p_architecture_diagram);
+    list_of_action infer_architecture_visibles(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, ATermAppl &datatype_spec);
+
+    /**
+     * Architecture diagram visible channels inference function.
+     * Infers all visible channels of a diagram.
+     * @param p_doc_root The XML GraPE specification containing the list of diagrams.
+     * @param p_diagram_name The name of the diagram to infer the visibles of.
+     * @param p_objects The XML list of objects containing visibles, process references and channels.
+     * @param datatype_spec The datatype specification.
+     * @return An array of strings containing the names of the visible channels.
+     * @pre p_diagram_name is a valid architecture diagram name.
+     * @post A list of actions containing the names and types of the inferred visible channels.
+     */
+    list_of_action infer_architecture_visible_channels(wxXmlNode *p_doc_root, wxString &p_diagram_name, wxXmlNode *p_objects, ATermAppl &datatype_spec);
+
+    /**
+     * Architecture diagram visible channel communications inference function.
+     * Infers all visible channel communications of a diagram.
+     * @param p_doc_root The XML GraPE specification containing the list of diagrams.
+     * @param p_diagram_name The name of the diagram to infer the visible channel communications of.
+     * @param p_objects The XML list of objects containing visibles, process references, channels and channel communications.
+     * @param datatype_spec The datatype specification.
+     * @return An array of strings containing the names of the visible channel communications.
+     * @pre p_diagram_name is a valid architecture diagram name.
+     * @post A list of actions containing the names and types of the inferred visible channel communications.
+     */
+    list_of_action infer_architecture_visible_channel_communications(wxXmlNode *p_doc_root, wxString &p_diagram_name, wxXmlNode *p_objects, ATermAppl &datatype_spec);
 
     /**
      * Process diagram actions inference function.
@@ -446,12 +476,13 @@ namespace grape
      * Parameter initialisation parsing function.
      * Parses the parameter initialisation as it occurs inside a process reference or reference state.
      * @param p_parameter_initialisation The string containing the parameter initialisation.
+     * @param p_preamble_parameter_decls The list of parameters belonging to the referenced process.
      * @param datatype_spec The datatype specification.
      * @return An array of declarations and initialisations extracted from the parameter initialisation string.
      * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
      * @post An array of declarations and initialisations extracted from the parameter initialisation string is returned.
      */
-    bool parse_reference_parameters(wxXmlNode *p_process_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec);
+    bool parse_reference_parameters(wxXmlNode *p_process_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, list_of_decl &p_preamble_parameter_decls, ATermAppl &datatype_spec);
 
     /**
      * Diagram name validation function.

@@ -89,10 +89,6 @@ void grape_frame::event_tool_selected(wxCommandEvent& p_event)
       newstate = ADD_CHANNEL; break;
     case GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION:
       newstate = ADD_CHANNEL_COMMUNICATION; break;
-    case GRAPE_TOOL_ADD_VISIBLE:
-      newstate = ADD_VISIBLE; break;
-    case GRAPE_TOOL_ADD_BLOCKED:
-      newstate = ADD_BLOCKED; break;
     default: newstate = IDLE; break;
   }
 

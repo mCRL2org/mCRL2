@@ -62,18 +62,22 @@ bool grape_event_add_architecture_diagram::Undo( void )
   architecture_diagram* dummy_ptr = 0;
   spec->check_references( del_arch_ptr->get_name(), dummy_ptr );
 
-  // update process listbox
+  // update architecture listbox
   grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
   int pos = arch_listbox->FindString( del_arch_ptr->get_name() );
   arch_listbox->Delete( pos );
-  if ( pos != 0 )
+  if ( pos > 0 )
   {
     arch_listbox->Select( pos - 1 );
   }
   else
   {
     // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
-    m_main_frame->get_process_diagram_listbox()->Select( 0 );
+    grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
+    if ( !proc_listbox->IsEmpty() )
+    {
+      proc_listbox->Select( 0 );
+    }
   }
 
   // update grape mode

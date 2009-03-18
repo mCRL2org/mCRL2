@@ -61,7 +61,7 @@ bool grape_event_add_nonterminating_transition::Do( void )
   // Find a decent coordinate to place the transition
   while ( m_main_frame->get_glcanvas()->get_selectable_visual_object( new_coordinate ) != 0)
   {
-    placed_outside_screen = placed_outside_screen or (new_coordinate.m_x < 0.1);
+    placed_outside_screen = placed_outside_screen || (new_coordinate.m_x < 0.1);
     if (placed_outside_screen) {
       new_coordinate.m_x = new_coordinate.m_x + 0.08;
     } else {

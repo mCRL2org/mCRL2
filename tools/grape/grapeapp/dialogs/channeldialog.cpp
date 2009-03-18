@@ -42,18 +42,9 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->AddSpacer( 5 );
   
   // select the correct property of the channel
-  int index=0;  
-  if (p_channel.get_channel_communication() == 0)
-  {  
-    if (p_channel.get_channeltype() == channel_hidden) index = 0;
-    if (p_channel.get_channeltype() == channel_blocked) index = 1;
-    if (p_channel.get_channeltype() == channel_visible) index = 2;
-    wxString combobox_list[3] = {_T("hidden"), _T("blocked"), _T("visible")};
-    m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 3, combobox_list, wxCB_READONLY);
-  } else {
-    wxString combobox_list[1] = {_T("hidden")};
-    m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 0, combobox_list, wxCB_READONLY);
-  }
+  int index = p_channel.get_channel_type();
+  wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
+  m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 3, combobox_list, wxCB_READONLY);
   wnd_sizer->Add(m_combobox, 0, wxEXPAND, 0);
   wnd_sizer->AddSpacer( 5 );
 
@@ -85,12 +76,12 @@ bool grape_channel_dlg::show_modal( channel &p_channel )
   {
     p_channel.set_name(m_name_input->GetValue());     
     p_channel.set_rename_to(m_rename_input->GetValue());     
-    if (m_combobox->GetValue() == _T("hidden")) p_channel.set_channeltype(channel_hidden);
-    if (m_combobox->GetValue() == _T("blocked")) p_channel.set_channeltype(channel_blocked);
-    if (m_combobox->GetValue() == _T("visible")) p_channel.set_channeltype(channel_visible);
+    if (m_combobox->GetValue() == _T("visible")) p_channel.set_channel_type(VISIBLE_CHANNEL);
+    if (m_combobox->GetValue() == _T("hidden")) p_channel.set_channel_type(HIDDEN_CHANNEL);
+    if (m_combobox->GetValue() == _T("blocked")) p_channel.set_channel_type(BLOCKED_CHANNEL);
   
     return true;
-  } else {
-    return false;
   }
+  
+  return false;
 }

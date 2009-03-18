@@ -14,9 +14,7 @@
 #include "dialogs/channeldialog.h"
 
 #include "event_channelcommunication.h"
-
 #include "event_channel.h"
-#include "event_property.h"
 
 // Channel size. 0.05 was too large, 0.025 too small
 const float DEFAULT_CHANNEL_WIDTH = 0.037f;
@@ -86,37 +84,21 @@ grape_event_remove_channel::grape_event_remove_channel( grape_frame *p_main_fram
     m_comments.Add( comm_ptr->get_id() );
   }
   m_in_diagram = p_dia_ptr->get_id();
-  m_visible.Empty();
-  m_blocked.Empty();
+  m_channel_type = p_chan->get_channel_type();
   m_channel_communication.Empty();
 
   if ( m_normal )
   {
-    // Create remove event for associated property, if applicable
-    connection_property* prop = p_chan->get_property();
-    if ( prop != 0 )
+    // Create detach event for associated channel communications, if applicable.
+    arr_channel_communication_ptr* chan_comm_ptr = p_chan->get_channel_communications();
+    for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
     {
-      visible* vis_ptr = dynamic_cast<visible*> ( prop );
-      if ( vis_ptr != 0 ) // cast succesful
+      channel_communication* comm = chan_comm_ptr->Item( j );
+      if ( comm != 0 )
       {
-        grape_event_remove_visible* event = new grape_event_remove_visible( m_main_frame, vis_ptr, static_cast<architecture_diagram*> ( p_dia_ptr ) );
-        m_visible.Add( event );
+        grape_event_detach_channel_communication* event =new grape_event_detach_channel_communication( m_main_frame, comm, p_chan );
+        m_channel_communication.Add( event );
       }
-      else
-      {
-        blocked* block_ptr = dynamic_cast<blocked*> ( prop );
-        assert( block_ptr != 0 );
-        grape_event_remove_blocked* event = new grape_event_remove_blocked( m_main_frame, block_ptr, static_cast<architecture_diagram*> ( p_dia_ptr ) );
-        m_blocked.Add( event );
-      }
-    }
-
-    // Create detach event for associated channel communication, if applicable.
-    channel_communication* comm = p_chan->get_channel_communication();
-    if ( comm != 0 )
-    {
-      grape_event_detach_channel_communication* event =new grape_event_detach_channel_communication( m_main_frame, comm, p_chan );
-      m_channel_communication.Add( event );
     }
   }
 }
@@ -124,24 +106,12 @@ grape_event_remove_channel::grape_event_remove_channel( grape_frame *p_main_fram
 grape_event_remove_channel::~grape_event_remove_channel( void )
 {
   m_comments.Clear();
-  m_visible.Clear();
-  m_blocked.Clear();
   m_channel_communication.Clear();
 }
 
 bool grape_event_remove_channel::Do( void )
 {
-  // Perform remove event Do for visible and blocked.
-  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
-  {
-    grape_event_remove_visible event = m_visible.Item( i );
-    event.Do();
-  }
-  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
-  {
-    grape_event_remove_blocked event = m_blocked.Item( i );
-    event.Do();
-  }
+  // Perform remove event Do for channel communications.
   for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
   {
     grape_event_detach_channel_communication event = m_channel_communication.Item( i );
@@ -167,18 +137,9 @@ bool grape_event_remove_channel::Undo( void )
   assert( ref != 0 );
   channel* new_chan = dia_ptr->add_channel( m_chan, m_coordinate, m_width, m_height, ref );
   new_chan->set_name( m_name );
+  new_chan->set_channel_type( m_channel_type );
 
-  // Perform remove event Undo for visible and blocked.
-  for ( unsigned int i = 0; i < m_visible.GetCount(); ++i )
-  {
-    grape_event_remove_visible event = m_visible.Item( i );
-    event.Undo();
-  }
-  for ( unsigned int i = 0; i < m_blocked.GetCount(); ++i )
-  {
-    grape_event_remove_blocked event = m_blocked.Item( i );
-    event.Undo();
-  }
+  // Perform remove event Undo for channel communications.
   for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
   {
     grape_event_detach_channel_communication event = m_channel_communication.Item( i );
@@ -191,7 +152,7 @@ bool grape_event_remove_channel::Undo( void )
 
 
 grape_event_change_channel::grape_event_change_channel( grape_frame *p_main_frame, channel* p_channel )
-: grape_event_base( p_main_frame, true, _T( "change channel name" ) )
+: grape_event_base( p_main_frame, true, _T( "change channel properties" ) )
 { 
   m_channel = p_channel->get_id();  
   
@@ -217,7 +178,7 @@ bool grape_event_change_channel::Do( void )
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
   channel_ptr->set_name( m_new_channel.get_name() );
   channel_ptr->set_rename_to( m_new_channel.get_rename_to() );
-  channel_ptr->set_channeltype( m_new_channel.get_channeltype() );
+  channel_ptr->set_channel_type( m_new_channel.get_channel_type() );
  
   finish_modification();
   return true;
@@ -228,7 +189,7 @@ bool grape_event_change_channel::Undo( void )
   channel* channel_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL ) );
   channel_ptr->set_name( m_old_channel.get_name() );
   channel_ptr->set_rename_to( m_old_channel.get_rename_to() );
-  channel_ptr->set_channeltype( m_old_channel.get_channeltype() );
+  channel_ptr->set_channel_type( m_old_channel.get_channel_type() );
    
   finish_modification();
   return true;
@@ -236,40 +197,46 @@ bool grape_event_change_channel::Undo( void )
 
 
 grape_event_detach_channel::grape_event_detach_channel( grape_frame *p_main_frame, channel* p_channel )
-: grape_event_base( p_main_frame, false, _T( "detach channel" ) )
+: grape_event_base( p_main_frame, true, _T( "detach channel from channel communication" ) )
 {
   m_channel = p_channel;
+
+  arr_channel_communication_ptr* comms = m_channel->get_channel_communications();
+  for ( unsigned int i = 0; i < comms->GetCount(); ++i )
+  {
+    channel_communication* comm_ptr = comms->Item( i );
+    if ( comm_ptr != 0 )
+    {
+      grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, m_channel );
+      m_channel_communication.Add( event );
+    }
+  }
 }
 
 grape_event_detach_channel::~grape_event_detach_channel( void )
 {
+  m_channel_communication.Clear();
 }
 
 bool grape_event_detach_channel::Do( void )
 {
-  connection_property* prop_ptr = m_channel->get_property();
-  if ( prop_ptr )
+  // Perform remove event Do for channel communications.
+  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
   {
-    grape_event_detach_property* event = new grape_event_detach_property( m_main_frame, prop_ptr );
-    m_main_frame->get_event_handler()->Submit( event, true );
-    return true;
-  }
-  else
-  {
-    channel_communication* comm_ptr = m_channel->get_channel_communication();
-    if ( comm_ptr )
-    {
-      grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, m_channel );
-      m_main_frame->get_event_handler()->Submit( event, true );
-      return true;
-    }
+    grape_event_detach_channel_communication event = m_channel_communication.Item( i );
+    event.Do();
   }
   return true;
 }
 
 bool grape_event_detach_channel::Undo( void )
 {
-  // cannot be undone
+  // Perform remove event Undo for channel communications.
+  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
+  {
+    grape_event_detach_channel_communication event = m_channel_communication.Item( i );
+    event.Undo();
+  }
   return true;
 }
 

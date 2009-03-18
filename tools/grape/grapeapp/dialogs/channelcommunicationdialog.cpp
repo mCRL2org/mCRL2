@@ -34,11 +34,8 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wnd_sizer->AddSpacer( 5 );
   
   // select the correct property of the channel communication
-  int index=0;  
-  if (p_channel_communication.get_channeltype() == channel_hidden) index = 0;
-  if (p_channel_communication.get_channeltype() == channel_blocked) index = 1;
-  if (p_channel_communication.get_channeltype() == channel_visible) index = 2;
-  wxString combobox_list[3] = {_T("hidden"), _T("blocked"), _T("visible")};
+  int index = p_channel_communication.get_channel_communication_type();
+  wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
   m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 3, combobox_list, wxCB_READONLY);
   
   wnd_sizer->Add(m_combobox, 0, wxEXPAND, 0);
@@ -71,12 +68,12 @@ bool grape_channel_communication_dlg::show_modal( channel_communication &p_chann
   if (ShowModal() != wxID_CANCEL)
   {      
     p_channel_communication.set_rename_to(m_rename_input->GetValue());     
-    if (m_combobox->GetValue() == _T("hidden")) p_channel_communication.set_channeltype(channel_hidden);
-    if (m_combobox->GetValue() == _T("blocked")) p_channel_communication.set_channeltype(channel_blocked);
-    if (m_combobox->GetValue() == _T("visible")) p_channel_communication.set_channeltype(channel_visible);
+    if (m_combobox->GetValue() == _T("visible")) p_channel_communication.set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
+    if (m_combobox->GetValue() == _T("hidden")) p_channel_communication.set_channel_communication_type(HIDDEN_CHANNEL_COMMUNICATION);
+    if (m_combobox->GetValue() == _T("blocked")) p_channel_communication.set_channel_communication_type(BLOCKED_CHANNEL_COMMUNICATION);
   
     return true;
-  } else {
-    return false;
   }
+
+  return false;
 }

@@ -50,6 +50,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
 
   // choices
   int selected = wxNOT_FOUND;
+  wxString selected_name = wxEmptyString;
   unsigned int count = p_spec->count_architecture_diagram();
   wxArrayString choices;
   for ( unsigned int i = 0; i < count; ++i )
@@ -61,11 +62,19 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
          p_ref->get_relationship_refers_to()->get_id() == diagram->get_id() )
     {
       selected = pos;
+      selected_name = p_ref->get_relationship_refers_to()->get_name();
     }
   }
   m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND, 0 );
-  m_combo->SetSelection( selected );
+  if (selected == wxNOT_FOUND)
+  {
+    m_combo->SetSelection( selected );
+  }
+  else
+  {
+    m_combo->SetStringSelection( selected_name );
+  }
 
   panel->SetSizer( grid );
 
@@ -87,6 +96,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   // choices
   int selected = wxNOT_FOUND;
+  wxString selected_name = wxEmptyString;
   unsigned int count = p_spec->count_process_diagram();
   wxArrayString choices;
   for ( unsigned int i = 0; i < count; ++i )
@@ -97,11 +107,19 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
     if ( p_diagram && p_diagram->get_id() == diagram->get_id() )
     {
       selected = pos;
+      selected_name = p_diagram->get_name();
     }
   }
   m_combo = new wxComboBox( panel, GRAPE_COMBO_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND );
-  m_combo->SetSelection( selected );
+  if (selected == wxNOT_FOUND)
+  {
+    m_combo->SetSelection( selected );
+  }
+  else
+  {
+    m_combo->SetStringSelection( selected_name );
+  }
 
   vsizer->Add( grid );
 
@@ -218,15 +236,16 @@ void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
 
 void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
 {
-  unsigned int start_index = 0;
+  int start_index = 0;
   process_diagram *diagram_ptr = static_cast<process_diagram*>(find_a_diagram( m_main_frame, get_diagram_id() ) );
   list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
   
   // fill grid with parameters
-  while ( m_grid->GetNumberRows() < parameter_declarations.GetCount()) m_grid->AppendRows();
+  int param_count = parameter_declarations.GetCount();
+  while ( m_grid->GetNumberRows() < param_count) m_grid->AppendRows();
   if (diagram_ptr != 0)
   {  
-    for ( unsigned int i = 0; i < parameter_declarations.GetCount(); ++i )
+    for ( int i = 0; i < param_count; ++i )
     {
       m_grid->SetCellValue(i, 0, parameter_declarations.Item( i ).get_name());
       m_grid->SetCellValue(i, 1, _T(""));
@@ -235,7 +254,7 @@ void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
   }
  
   // fill grid with empty values
-  for ( unsigned int i = start_index; i < m_grid->GetNumberRows(); ++i )
+  for ( int i = start_index; i < m_grid->GetNumberRows(); ++i )
   {
     m_grid->SetCellValue(i, 0, _T(""));
     m_grid->SetCellValue(i, 1, _T(""));

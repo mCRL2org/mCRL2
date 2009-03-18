@@ -17,7 +17,6 @@
 
 #include "event_architecturereference.h"
 #include "event_architecturediagram.h"
-#include "event_blocked.h"
 #include "event_channel.h"
 #include "event_channelcommunication.h"
 #include "event_comment.h"
@@ -26,7 +25,6 @@
 #include "event_terminatingtransition.h"
 #include "event_nonterminatingtransition.h"
 #include "event_state.h"
-#include "event_visible.h"
 
 namespace grape
 {
@@ -169,8 +167,6 @@ namespace grape
         arr_event_remove_channel    m_channels; /**< Backup of the list of channels belonging to the diagram. */
         arr_event_remove_arch_ref   m_architecture_references;  /**< Backup of the list of architecture references belonging to the diagram. */
         arr_event_remove_proc_ref   m_process_references; /**< Backup of the list of process references belonging to the diagram. */
-        arr_event_remove_blocked    m_blockeds; /**< Backup of the list of blocked properties belonging to the diagram. */
-        arr_event_remove_visible    m_visibles; /**< Backup of the list of visible properties belonging to the diagram. */
       public:
 
         /**
@@ -349,8 +345,6 @@ namespace grape
         arr_event_remove_tt                     m_tt;   /**< The remove events for this type of object. */
         arr_event_remove_init                   m_init;   /**< The remove events for this type of object. */
         arr_event_remove_channel                m_channel;   /**< The remove events for this type of object. */
-        arr_event_remove_visible                m_visible;   /**< The remove events for this type of object. */
-        arr_event_remove_blocked                m_blocked;   /**< The remove events for this type of object. */
         arr_event_remove_channel_communication  m_c_comm;   /**< The remove events for this type of object. */
         arr_event_remove_proc_ref               m_proc_ref;   /**< The remove events for this type of object. */
         arr_event_remove_arch_ref               m_arch_ref;   /**< The remove events for this type of object. */

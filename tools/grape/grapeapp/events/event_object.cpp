@@ -24,7 +24,6 @@
 #include "event_nonterminatingtransition.h"
 #include "event_processdiagram.h"
 #include "event_processreference.h"
-#include "event_property.h"
 #include "event_referencestate.h"
 #include "event_select.h"
 #include "event_state.h"
@@ -193,17 +192,6 @@ bool grape_event_move::Do( void )
       }
       break;
     }
-    case VISIBLE:
-    {
-      // Determine if the visible is attached to a channel. If so, it cannot be moved.
-      visible* vis_ptr = static_cast<visible*> ( obj_ptr );
-      connection* conn_ptr = vis_ptr->get_attached_connection();
-      if ( conn_ptr == 0 )
-      {
-        vis_ptr->set_coordinate( m_new_coord );
-      }
-      break;
-    }
     default: obj_ptr->set_coordinate( m_new_coord ); break;
   }
 
@@ -330,17 +318,6 @@ bool grape_event_move::Undo( void )
       ntt_ptr->set_coordinate( m_old_coord );
       break;
     }
-    case VISIBLE:
-    {
-      // Determine if the visible is attached to a channel. If so, it cannot be moved.
-      visible* vis_ptr = static_cast<visible*> ( obj_ptr );
-      connection* conn_ptr = vis_ptr->get_attached_connection();
-      if ( conn_ptr == 0 )
-      {
-        vis_ptr->set_coordinate( m_old_coord );
-      }
-      break;
-    }
     default: obj_ptr->set_coordinate( m_old_coord ); break;
   }
 
@@ -365,8 +342,8 @@ bool grape_event_resize::Do( void )
 {
   object* obj_ptr = find_object( m_obj_id, m_obj_type );
 
-  // Do not resize if it's a channel or a blocked.
-  if ( obj_ptr->get_type() != CHANNEL && obj_ptr->get_type() != BLOCKED )
+  // Do not resize if it's a channel.
+  if ( obj_ptr->get_type() != CHANNEL )
   {
     obj_ptr->set_coordinate( m_new_geo.m_coord );
     obj_ptr->set_width( m_new_geo.m_width );
@@ -403,8 +380,8 @@ bool grape_event_resize::Undo( void )
 {
   object* obj_ptr = find_object( m_obj_id, m_obj_type );
 
-  // Do not resize if it's a channel or a blocked.
-  if ( obj_ptr->get_type() != CHANNEL && obj_ptr->get_type() != BLOCKED )
+  // Do not resize if it's a channel.
+  if ( obj_ptr->get_type() != CHANNEL )
   {
     obj_ptr->set_coordinate( m_old_geo.m_coord );
     obj_ptr->set_width( m_old_geo.m_width );
@@ -537,13 +514,6 @@ bool grape_event_properties::Do( void )
         m_main_frame->get_event_handler()->Submit( event, true );
         break;
       }
-      case VISIBLE:
-      {
-        grape_event_change_visible* event = new grape_event_change_visible( m_main_frame, static_cast<visible*> ( m_obj_ptr ) );
-        m_main_frame->get_event_handler()->Submit( event, true );
-        break;
-      }
-      case BLOCKED: break;
       default: break;
     }
   }

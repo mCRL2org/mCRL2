@@ -16,8 +16,6 @@ using namespace grape::libgrape;
 architecture_diagram::architecture_diagram(void)
 : diagram()
 {
-  m_blocked.Empty();
-  m_visibles.Empty();
   m_channel_communications.Empty();
   m_channels.Empty();
   m_architecture_references.Empty();
@@ -27,8 +25,6 @@ architecture_diagram::architecture_diagram(void)
 architecture_diagram::architecture_diagram( const architecture_diagram &p_arch_diagram )
 : diagram( p_arch_diagram )
 {
-  m_blocked = p_arch_diagram.m_blocked;
-  m_visibles = p_arch_diagram.m_visibles;
   m_channel_communications = p_arch_diagram.m_channel_communications;
   m_channels = p_arch_diagram.m_channels;
   m_architecture_references = p_arch_diagram.m_architecture_references;
@@ -37,8 +33,6 @@ architecture_diagram::architecture_diagram( const architecture_diagram &p_arch_d
 
 architecture_diagram::~architecture_diagram(void)
 {
-  m_blocked.Clear();
-  m_visibles.Clear();
   m_channel_communications.Clear();
   m_channels.Clear();
   m_architecture_references.Clear();
@@ -73,29 +67,29 @@ void architecture_diagram::remove_architecture_reference( architecture_reference
   {
     channel* channel_ptr = p_arch_ref->get_channel( i );
 
-    // Remove all properties of the channel
-    connection_property* property_ptr = channel_ptr->get_property();
-    delete_property( property_ptr );
-
     // Disconnect the channel from channel communications.
-    channel_communication* c_comm_ptr = channel_ptr->get_channel_communication();
-    if ( c_comm_ptr != 0 )
+    arr_channel_communication_ptr* chan_comm_ptr = channel_ptr->get_channel_communications();
+    for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
     {
-      channel_ptr->detach_channel_communication();
-      c_comm_ptr->detach_channel( channel_ptr );
-
-      // If the channel communication consists of less than two channels, remove it.
-      int count = c_comm_ptr->count_channel();
-      if ( count < 2 )
+      channel_communication* c_comm_ptr = chan_comm_ptr->Item( j );
+      if ( c_comm_ptr != 0 )
       {
-        int n = m_channel_communications.Index( *c_comm_ptr );
-        if ( n != wxNOT_FOUND )
+        channel_ptr->detach_channel_communication( c_comm_ptr );
+        c_comm_ptr->detach_channel( channel_ptr );
+
+        // If the channel communication consists of less than two channels, remove it.
+        int count = c_comm_ptr->count_channel();
+        if ( count < 2 )
         {
-          m_channel_communications.Detach( n );
-        }
-        delete c_comm_ptr;
+          int n = m_channel_communications.Index( *c_comm_ptr );
+          if ( n != wxNOT_FOUND )
+          {
+            m_channel_communications.Detach( n );
+            delete c_comm_ptr;
+          }
+        } // end if
       } // end if
-    } // end if
+    } // end for
 
     // Remove the channel
     int m = m_channels.Index( *channel_ptr );
@@ -158,29 +152,29 @@ void architecture_diagram::remove_process_reference( process_reference* p_proc_r
   {
     channel* channel_ptr = p_proc_ref->get_channel( i );
 
-    // Remove all properties of the channel
-    connection_property* property_ptr = channel_ptr->get_property();
-    delete_property( property_ptr );
-
     // Disconnect the channel from channel communications.
-    channel_communication* c_comm_ptr = channel_ptr->get_channel_communication();
-
-    if ( c_comm_ptr != 0 )
+    arr_channel_communication_ptr* chan_comm_ptr = channel_ptr->get_channel_communications();
+    for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
     {
-      channel_ptr->detach_channel_communication();
-      c_comm_ptr->detach_channel( channel_ptr );
+      channel_communication* c_comm_ptr = chan_comm_ptr->Item( j );
 
-      // If the channel communication consists of less than two channels, remove it.
-      if ( c_comm_ptr->count_channel() < 2 )
+      if ( c_comm_ptr != 0 )
       {
-        int n = m_channel_communications.Index( *c_comm_ptr );
-        if ( n != wxNOT_FOUND )
+        channel_ptr->detach_channel_communication( c_comm_ptr);
+        c_comm_ptr->detach_channel( channel_ptr );
+
+        // If the channel communication consists of less than two channels, remove it.
+        if ( c_comm_ptr->count_channel() < 2 )
         {
-          m_channel_communications.Detach( n );
-        }
-        delete c_comm_ptr;
+          int n = m_channel_communications.Index( *c_comm_ptr );
+          if ( n != wxNOT_FOUND )
+          {
+            m_channel_communications.Detach( n );
+          }
+          delete c_comm_ptr;
+        } // end if
       } // end if
-    } // end if
+    } // end for
 
     // Remove the channel
     int k = m_channels.Index( *channel_ptr );
@@ -244,16 +238,15 @@ void architecture_diagram::remove_channel( channel* p_channel )
 {
   deselect_object( p_channel );
 
-    // Remove all properties of the channel
-    connection_property* property_ptr = p_channel->get_property();
-    delete_property( property_ptr );
-
-    // Disconnect the channel from channel communications.
-    channel_communication* c_comm_ptr = p_channel->get_channel_communication();
+  // Disconnect the channel from channel communications.
+  arr_channel_communication_ptr* chan_comm_ptr = p_channel->get_channel_communications();
+  for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
+  {
+    channel_communication* c_comm_ptr = chan_comm_ptr->Item( j );
 
     if ( c_comm_ptr != 0 )
     {
-      p_channel->detach_channel_communication();
+      p_channel->detach_channel_communication( c_comm_ptr );
       c_comm_ptr->detach_channel( p_channel );
 
       // If the channel communication consists of less than two channels, remove it.
@@ -261,18 +254,22 @@ void architecture_diagram::remove_channel( channel* p_channel )
       if ( count < 2 )
       {
         int n = m_channel_communications.Index( *c_comm_ptr );
-        m_channel_communications.Detach( n );
-        delete c_comm_ptr;
+        if (n != wxNOT_FOUND)
+        {
+          m_channel_communications.Detach( n );
+          delete c_comm_ptr;
+        }
       } // end if
     } // end if
+  }
 
-    // Remove the channel (relationships are properly removed in the destructor of channel)
-    int n = m_channels.Index( *p_channel );
-    if ( n != wxNOT_FOUND )
-    {
-      channel* del_channel = m_channels.Detach( n );
-      delete del_channel;
-    }
+  // Remove the channel (relationships are properly removed in the destructor of channel)
+  int n = m_channels.Index( *p_channel );
+  if ( n != wxNOT_FOUND )
+  {
+    channel* del_channel = m_channels.Detach( n );
+    delete del_channel;
+  }
 }
 
 unsigned int architecture_diagram::count_channel( void )
@@ -313,39 +310,6 @@ void architecture_diagram::remove_channel_communication( channel_communication* 
 {
   deselect_object( p_c_comm );
 
-  // Remove the property of the channel communication, if it exists.
-  connection_property* property_ptr = p_c_comm->get_property();
-
-  if ( property_ptr )
-  {
-    // Try blocked
-    blocked* del_blocked = dynamic_cast<blocked*> ( property_ptr );
-    if ( del_blocked ) // Cast succesful
-    {
-      int m = m_blocked.Index( *del_blocked );
-      if ( m != wxNOT_FOUND )
-      {
-        m_blocked.Detach( m );
-        delete del_blocked;
-      } // end if
-    }
-    else // Cast failed
-    {
-      // Try visible
-      visible* del_visible = dynamic_cast<visible*> ( property_ptr );
-      if ( del_visible != 0 ) // Cast succesful
-      {
-        int m = m_visibles.Index( *del_visible );
-        if ( m != wxNOT_FOUND )
-        {
-          m_visibles.Detach( m );
-          delete del_visible;
-        } // end if
-      } // end if del_visible
-    } // end if del_blocked
-  } // end if property_ptr
-
-
   // Remove the channel communication
   int n = m_channel_communications.Index( *p_c_comm );
   if ( n != wxNOT_FOUND )
@@ -373,21 +337,6 @@ arr_channel_communication* architecture_diagram::get_channel_communication_list(
 
 void architecture_diagram::attach_channel_communication_to_channel( channel_communication* p_c_comm, channel* p_chan)
 {
-  // if the channel already has a property, detach it first
-  connection_property* property_ptr = p_chan->get_property();
-  if ( property_ptr != 0 )
-  {
-    p_chan->detach_property();
-    property_ptr->detach();
-  }
-  // if the channel is already in a channel communication, detach it first
-  channel_communication* comm_ptr = p_chan->get_channel_communication();
-  if ( comm_ptr != 0 )
-  {
-    comm_ptr->detach_channel( p_chan );
-    p_chan->detach_channel_communication();
-  }
-
   // Establish relationships
   p_c_comm->attach_channel( p_chan );
   p_chan->attach_channel_communication( p_c_comm );
@@ -396,159 +345,15 @@ void architecture_diagram::attach_channel_communication_to_channel( channel_comm
 void architecture_diagram::detach_channel_from_channel_communication( channel* p_chan )
 {
   // Remove relationships
-  channel_communication* p_c_comm = p_chan->get_channel_communication();
-  if ( p_c_comm != 0 )
+  arr_channel_communication_ptr* chan_comm_ptr = p_chan->get_channel_communications();
+  for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
   {
-    p_c_comm->detach_channel( p_chan );
-    p_chan->detach_channel_communication();
-  }
-}
-
-blocked* architecture_diagram::add_blocked( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
-{
-  // deselect all objects
-  deselect_all_objects();
-
-  // Create new blocked
-  blocked* new_blocked = new blocked;
-  new_blocked->set_id( p_id );
-  new_blocked->set_coordinate( p_coord );
-  new_blocked->set_width( p_def_width );
-  new_blocked->set_height( p_def_height );
-  new_blocked->set_diagram( this );
-  select_object( new_blocked );
-
-  // Establish relationships
-  new_blocked->attach( p_conn );
-  if ( p_conn != 0 )
-  {
-    p_conn->attach_property( new_blocked );
-  }
-  m_blocked.Add( new_blocked );
-  return new_blocked;
-}
-
-void architecture_diagram::remove_blocked( blocked* p_blocked )
-{
-  deselect_object( p_blocked );
-
-  int n = m_blocked.Index( *p_blocked );
-  if ( n != wxNOT_FOUND )
-  {
-    blocked*  del_blocked = m_blocked.Detach( n );
-    delete del_blocked;
-  }
-}
-
-unsigned int architecture_diagram::count_blocked( void )
-{
-  return m_blocked.GetCount();
-}
-
-blocked* architecture_diagram::get_blocked( int p_i )
-{
-  return &( m_blocked.Item( p_i ) );
-}
-
-arr_blocked* architecture_diagram::get_blocked_list( void )
-{
-  return &m_blocked;
-}
-
-visible* architecture_diagram::add_visible( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height, connection* p_conn )
-{
-  // deselect all objects
-  deselect_all_objects();
-
-  // Create new visible
-  visible* new_visible = new visible;
-  new_visible->set_id( p_id );
-  new_visible->set_coordinate( p_coord );
-  new_visible->set_width( p_def_width );
-  new_visible->set_height( p_def_height );
-  new_visible->set_diagram( this );
-  wxString name;
-  name.Printf( _T("Visible%d" ), p_id );
-  new_visible->set_name( name );
-  select_object( new_visible );
-
-  // Establish relationships
-  new_visible->attach( p_conn );
-  if ( p_conn != 0 )
-  {
-    p_conn->attach_property( new_visible );
-  }
-  m_visibles.Add( new_visible );
-  return new_visible;
-}
-
-void architecture_diagram::remove_visible( visible* p_visible )
-{
-  deselect_object( p_visible );
-
-  int n = m_visibles.Index( *p_visible );
-  if ( n != wxNOT_FOUND )
-  {
-    visible* del_visible = m_visibles.Detach( n );
-    delete del_visible;
-  }
-}
-
-unsigned int architecture_diagram::count_visible( void )
-{
-  return m_visibles.GetCount();
-}
-
-visible* architecture_diagram::get_visible( int p_i )
-{
-  return &( m_visibles.Item( p_i ) );
-}
-
-arr_visible* architecture_diagram::get_visible_list( void )
-{
-  return &m_visibles;
-}
-
-void architecture_diagram::attach_property_to_connection( connection_property* p_prop, connection* p_connection )
-{
-  // if the property is already connected, detach it first
-  connection* connection_ptr = p_prop->get_attached_connection();
-  if ( connection_ptr != 0 )
-  {
-    p_prop->detach();
-    connection_ptr->detach_property();
-  }
-  // if the connection already has a property, detach it first
-  connection_property* property_ptr = p_connection->get_property();
-  if ( property_ptr != 0 )
-  {
-    p_connection->detach_property();
-    property_ptr->detach();
-  }
-  // if the connection is a channel and is in a channel communication, detach it first
-  // Try channel
-  channel* channel_ptr = dynamic_cast<channel*> ( p_connection );
-  if ( channel_ptr != 0 ) // Cast succesful
-  {
-    channel_communication* comm_ptr = channel_ptr->get_channel_communication();
-    if ( comm_ptr != 0 )
+    channel_communication* p_c_comm = chan_comm_ptr->Item( j );
+    if ( p_c_comm != 0 )
     {
-      comm_ptr->detach_channel( channel_ptr );
-      channel_ptr->detach_channel_communication();
+      p_c_comm->detach_channel( p_chan );
+      p_chan->detach_channel_communication( p_c_comm );
     }
-  }
-
-  p_prop->attach( p_connection );
-  p_connection->attach_property( p_prop );
-}
-
-void architecture_diagram::detach_property_from_connection( connection_property* p_prop )
-{
-  connection* p_connection = p_prop->get_attached_connection();
-  if ( p_connection != 0 )
-  {
-    p_connection->detach_property();
-    p_prop->detach();
   }
 }
 
@@ -560,18 +365,6 @@ void architecture_diagram::select_all_objects( void )
   {
     comment* comment_ptr = &( m_comments.Item( i ) );
     plus_select_object( comment_ptr );
-  }
-  count = m_blocked.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    blocked* block_ptr = &( m_blocked.Item( i ) );
-    plus_select_object( block_ptr );
-  }
-  count = m_visibles.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    visible* vis_ptr = &( m_visibles.Item( i ) );
-    plus_select_object( vis_ptr );
   }
   count = m_channel_communications.GetCount();
   for ( int i = 0; i < count; ++i )
@@ -607,18 +400,6 @@ void architecture_diagram::deselect_all_objects( void )
     comment* comment_ptr = &( m_comments.Item( i ) );
     deselect_object( comment_ptr );
   }
-  count = m_blocked.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    blocked* block_ptr = &( m_blocked.Item( i ) );
-    deselect_object( block_ptr );
-  }
-  count = m_visibles.GetCount();
-  for ( int i = 0; i < count; ++i )
-  {
-    visible* vis_ptr = &( m_visibles.Item( i ) );
-    deselect_object( vis_ptr );
-  }
   count = m_channel_communications.GetCount();
   for ( int i = 0; i < count; ++i )
   {
@@ -643,39 +424,6 @@ void architecture_diagram::deselect_all_objects( void )
     process_reference* proc_ref_ptr = &( m_process_references.Item( i ) );
     deselect_object( proc_ref_ptr );
   }
-}
-
-// public
-void architecture_diagram::delete_property( connection_property* p_prop )
-{
-  if ( p_prop != 0 )
-  {
-    // Try blocked
-    blocked* del_blocked = dynamic_cast<blocked*> ( p_prop );
-    if ( del_blocked != 0 ) // Cast succesful
-    {
-      int m = m_blocked.Index( *del_blocked );
-      if ( m != wxNOT_FOUND )
-      {
-        m_blocked.Detach( m );
-        delete del_blocked;
-      } // end if
-    }
-    else // Cast failed
-    {
-      // Try visible
-      visible* del_visible = dynamic_cast<visible*> ( p_prop );
-      if ( del_visible != 0 ) // Cast succesful
-      {
-        int m = m_visibles.Index( *del_visible );
-        if ( m != wxNOT_FOUND )
-        {
-          m_visibles.Detach( m );
-          delete del_visible;
-        } // end if
-      } // end if del_visible
-    } // end if del_blocked
-  } // end if p_prop
 }
 
 object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, unsigned int p_id, object_type p_type )
@@ -730,25 +478,6 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uns
     }
   }
 
-  b = p_type == ANY || p_type == VISIBLE;
-  for ( unsigned int i = 0; b && i < p_arch_dia->count_visible(); ++i )
-  {
-    visible* vis_ptr = p_arch_dia->get_visible( i );
-    if ( vis_ptr->get_id() == p_id )
-    {
-      return vis_ptr;
-    }
-  }
-
-  b = p_type == ANY || p_type == BLOCKED;
-  for ( unsigned int i = 0; b && i < p_arch_dia->count_blocked(); ++i )
-  {
-    blocked* block_ptr = p_arch_dia->get_blocked( i );
-    if ( block_ptr->get_id() == p_id )
-    {
-      return block_ptr;
-    }
-  }
   return 0;
 }
 

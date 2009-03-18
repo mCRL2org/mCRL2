@@ -345,7 +345,7 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
 
   // toolbar + tools menu
   EVT_TOOL(GRAPE_TOOL_SELECT, grape_frame::event_tool_selected)
-  EVT_TOOL(GRAPE_TOOL_ATTACH, grape_frame::event_tool_selected)
+//  EVT_TOOL(GRAPE_TOOL_ATTACH, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_DETACH, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_REFERENCE_STATE, grape_frame::event_tool_selected)
@@ -356,8 +356,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_TOOL(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_CHANNEL, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, grape_frame::event_tool_selected)
-  EVT_TOOL(GRAPE_TOOL_ADD_VISIBLE, grape_frame::event_tool_selected)
-  EVT_TOOL(GRAPE_TOOL_ADD_BLOCKED, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_COMMENT, grape_frame::event_tool_selected)
   EVT_TOOL_ENTER(wxID_ANY, grape_frame::update_statusbar )
 
@@ -651,10 +649,6 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
             status_text = _T("Click on a reference to add a channel"); break;
           case ADD_CHANNEL_COMMUNICATION:
             status_text = _T("Drag from a channel to another channel to add a channel communication"); break;
-          case ADD_VISIBLE:
-            status_text = _T("Click on a channel or channel communication to make it visible"); break;
-          case ADD_BLOCKED:
-            status_text = _T("Click on a channel or channel communication to make it blocked"); break;
           case IDLE:
           default: status_text = wxEmptyString; break;
         }

@@ -95,18 +95,6 @@ void grape_specification::remove_architecture_diagram( architecture_diagram* p_a
       comment* del_comment = p_arch_dia->get_comment( i );
       p_arch_dia->remove_comment( del_comment );
     }
-    // remove all blocked from the architecture diagram
-    for ( unsigned int i = 0; i < p_arch_dia->count_blocked(); ++i )
-    {
-      blocked* del_blocked = p_arch_dia->get_blocked( i );
-      p_arch_dia->remove_blocked( del_blocked );
-    }
-    // remove all visibles from the architecture diagram
-    for ( unsigned int i = 0; i < p_arch_dia->count_visible(); ++i )
-    {
-      visible* del_visible = p_arch_dia->get_visible( i );
-      p_arch_dia->remove_visible( del_visible );
-    }
     // remove all channel communications from the architecture diagram
     for ( unsigned int i = 0; i < p_arch_dia->count_channel_communication(); ++i )
     {

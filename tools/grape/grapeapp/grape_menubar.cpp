@@ -172,9 +172,9 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetBitmap( g_icons[ _T("toolselect") ] );
   m_menu_tools->Append( item );
 
-  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ATTACH, _T("Attach objects"), _T("Attach objects to eachother") );
-  item->SetBitmap( g_icons[ _T("attach") ] );
-  m_menu_tools->Append( item );
+//  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ATTACH, _T("Attach objects"), _T("Attach objects to eachother") );
+//  item->SetBitmap( g_icons[ _T("attach") ] );
+//  m_menu_tools->Append( item );
 
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_DETACH, _T("Detach objects"), _T("Detach objects from eachother") );
   item->SetBitmap( g_icons[ _T("detach") ] );
@@ -196,14 +196,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, _T("Add Channel communication"), _T("Add Channel communication") );
   item->SetBitmap( g_icons[ _T("chancomm") ] );
-  m_menu_tools->Append( item );
-
-  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ADD_BLOCKED, _T("Add Blocked property"), _T("Add Blocked property") );
-  item->SetBitmap( g_icons[ _T("blocked") ] );
-  m_menu_tools->Append( item );
-
-  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ADD_VISIBLE, _T("Add Visible property"), _T("Add Visible property") );
-  item->SetBitmap( g_icons[ _T("visible") ] );
   m_menu_tools->Append( item );
 
   m_menu_tools->AppendSeparator();
@@ -301,8 +293,9 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );
-  Enable(GRAPE_TOOL_ATTACH, in_diagram );
-  Enable(GRAPE_TOOL_DETACH, in_diagram );
+//  Enable(GRAPE_TOOL_ATTACH, in_diagram );
+//  Enable(GRAPE_TOOL_DETACH, in_diagram );
+  Enable(GRAPE_TOOL_DETACH, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_COMMENT, in_diagram );
 
   Enable(GRAPE_MENU_RENAME_DIAGRAM, in_diagram );
@@ -316,8 +309,6 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_TOOL_ADD_PROCESS_REFERENCE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_CHANNEL, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
-  Enable(GRAPE_TOOL_ADD_BLOCKED, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
-  Enable(GRAPE_TOOL_ADD_VISIBLE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
 
   // process diagram specific items
   Enable(GRAPE_TOOL_ADD_STATE, (p_mode & GRAPE_MENUMODE_PROC) != 0 );

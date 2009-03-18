@@ -13,33 +13,31 @@
 using namespace grape::libgrape;
 
 channel_communication::channel_communication( void )
-: connection( CHANNEL_COMMUNICATION )
+: object( CHANNEL_COMMUNICATION )
 {
   m_communication.Empty();
-  set_channeltype(channel_visible);
+  set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
 }
 
 channel_communication::channel_communication( channel* p_channel_1, channel* p_channel_2 )
-: connection( CHANNEL_COMMUNICATION )
+: object( CHANNEL_COMMUNICATION )
 {
   m_communication.Empty();
-  set_channeltype(channel_visible);
+  set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
   
   communication* comm_1 = new communication( p_channel_1 );
   communication* comm_2 = new communication( p_channel_2 );
   m_communication.Add( comm_1 );
   m_communication.Add( comm_2 );
-  p_channel_1->set_channeltype(channel_hidden);
-  p_channel_2->set_channeltype(channel_hidden);
 }
 
 
 channel_communication::channel_communication( const channel_communication &p_channel_comm )
-: connection( p_channel_comm )
+: object( p_channel_comm )
 {
   m_communication = p_channel_comm.m_communication;
   m_rename_to = p_channel_comm.m_rename_to;
-  set_channeltype(p_channel_comm.get_channeltype());
+  set_channel_communication_type(p_channel_comm.get_channel_communication_type());
 }
 
 channel_communication::~channel_communication( void )
@@ -49,7 +47,7 @@ channel_communication::~channel_communication( void )
   {
     communication &comm = m_communication.Item ( i );
     channel* channel_ptr = comm.get_channel();
-    channel_ptr->detach_channel_communication();
+    channel_ptr->detach_channel_communication(this);
   }
 
   m_communication.Clear();
@@ -69,7 +67,6 @@ void channel_communication::attach_channel( channel* p_channel )
 {
   communication* comm = new communication( p_channel );
   m_communication.Add( comm );
-  p_channel->set_channeltype(channel_hidden);
 }
 
 void channel_communication::detach_channel( channel* p_channel )
@@ -104,14 +101,14 @@ arr_communication* channel_communication::get_communications( void )
   return &m_communication;
 }
 
-channeltype channel_communication::get_channeltype( void ) const
+channel_communication_type channel_communication::get_channel_communication_type( void ) const
 {
-  return m_channeltype;
+  return m_channel_communication_type;
 }
 
-void channel_communication::set_channeltype( const channeltype &p_channeltype )
+void channel_communication::set_channel_communication_type( const channel_communication_type &p_channel_communication_type )
 {
-  m_channeltype = p_channeltype;
+  m_channel_communication_type = p_channel_communication_type;
 }
 
 // WxWidgets dynamic array implementation.
