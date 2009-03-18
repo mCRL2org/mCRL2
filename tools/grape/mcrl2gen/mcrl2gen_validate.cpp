@@ -2760,7 +2760,8 @@ bool grape::mcrl2gen::parse_reference_parameters(wxXmlNode *p_reference, wxStrin
             // get type
             list_of_decl variable_decls;  // must be empty
             list_of_decl_init preamble_variable_decls; // must be empty
-            wxString parameter_assignment_type = infer_type(parameter_assignment.get_lhs(), p_preamble_parameter_decls, preamble_variable_decls, variable_decls);
+            wxString lhs_string = parameter_assignment.get_lhs();
+            wxString parameter_assignment_type = infer_type(lhs_string, p_preamble_parameter_decls, preamble_variable_decls, variable_decls);
             if ( parameter_assignment_type.IsEmpty() )
             {
               // type check whithout predefined type

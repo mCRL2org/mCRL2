@@ -66,7 +66,7 @@ list_of_dataexpression action::get_parameters( void )
   return m_parameters;
 }
 
-void action::set_parameters( list_of_dataexpression &p_parameters)
+void action::set_parameters( list_of_dataexpression p_parameters)
 {
   m_parameters = p_parameters;
 }
