@@ -39,66 +39,81 @@ using namespace Utils;
 std::string lts_file_argument;
 std::string parse_error;
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-//SQuADT protocol interface
-#undef check // macro that conflicts with Boost code included below (seems OS X 10.4 specific)
+#ifdef ENABLE_SQUADT_CONNECTIVITY // SQuADT protocol interface
+#undef check /* macro that conflicts with Boost code included below
+              * (seems OS X 10.4 specific) */
 #include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
-using namespace mcrl2::utilities::squadt;
-using namespace mcrl2::lts;
-const char* lts_file_for_input  = "lts_in";
+  using namespace mcrl2::utilities::squadt;
+  using namespace mcrl2::lts;
+  const char* lts_file_for_input = "lts_in";
 
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
+  class squadt_interactor:
+    public mcrl2::utilities::squadt::mcrl2_wx_tool_interface
+  {
+    public:
+      // Configures tool capabilities.
+      void set_capabilities(tipi::tool::capabilities& c) const
+      {
+        std::set< mcrl2::lts::lts_type > const& input_formats(
+            mcrl2::lts::lts::supported_lts_formats());
 
-  public:
-
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
-
-      for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
-        c.add_input_configuration(lts_file_for_input, tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
-      }
-    }
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&) {
-    }
-
-    bool check_configuration(tipi::configuration const& c) const {
-      if (c.input_exists(lts_file_for_input)) {
-        /* The input object is present, verify whether the specified format is supported */
-        if (lts::parse_format(c.get_input(lts_file_for_input).type().sub_type().c_str()) == lts_none) {
-          send_error("Invalid configuration: unsupported type `" +
-              c.get_input(lts_file_for_input).type().sub_type() + "' for main input");
-        }
-        else {
-          return true;
+        for (std::set< mcrl2::lts::lts_type >::const_iterator 
+            i = input_formats.begin(); i != input_formats.end(); ++i)
+        {
+          c.add_input_configuration(lts_file_for_input, 
+              tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)),
+              tipi::tool::category::visualisation);
         }
       }
 
-      return false;
-    }
+      // Queries the user via SQuADt if needed to obtain configuration
+      // information
+      void user_interactive_configuration(tipi::configuration&)
+      { }
 
-    bool perform_task(tipi::configuration& c) {
-      lts_file_argument = c.get_input(lts_file_for_input).location();
+      bool check_configuration(tipi::configuration const& c) const
+      {
+        if (c.input_exists(lts_file_for_input))
+        {
+          /* The input object is present, verify whether the specified
+           * format is supported */
+          if (lts::parse_format(
+                c.get_input(lts_file_for_input).type().sub_type().c_str())
+              == lts_none)
+          {
+            send_error(
+                "Invalid configuration: unsupported type `" +
+                c.get_input(lts_file_for_input).type().sub_type() +
+                "' for main input");
+          }
+          else
+          {
+            return true;
+          }
+        }
+        return false;
+      }
 
-      return mcrl2_wx_tool_interface::perform_task(c);
-    }
-};
+      bool perform_task(tipi::configuration& c)
+      {
+        lts_file_argument = c.get_input(lts_file_for_input).location();
+        return mcrl2_wx_tool_interface::perform_task(c);
+      }
+  };
 #endif // ENABLE_SQUADT_CONNECTIVITY
 
-bool LTSView::parse_command_line(int argc, wxChar** argv) {
-
+bool LTSView::parse_command_line(int argc, wxChar** argv)
+{
   using namespace mcrl2::utilities;
-
   interface_description clinterface(
-        std::string(wxString(argv[0], wxConvLocal).fn_str()),
-        NAME, AUTHOR,
-    "3D interactive visualisation of an LTS",
+    std::string(wxString(argv[0], wxConvLocal).fn_str()),
+    NAME,
+    AUTHOR,
+    "3D interactive visualization of a labelled transition system",
     "[OPTION]... [INFILE]\n",
-    "Start the LTSView application and open INFILE. If INFILE is not "
-    "supplied then LTSView is started without opening an LTS.\n"
+    "Start the LTSView application. If INFILE is supplied then the "
+    "LTS in INFILE is loaded into the application.\n"
     "\n"
     "The input format is determined by the contents of INFILE. If that fails, "
     "an attempt is made to force the input format based on the file extension. "
@@ -136,23 +151,25 @@ IMPLEMENT_APP_NO_MAIN(LTSView)
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
-std::vector< std::string > developers() {
+std::vector< std::string > developers()
+{
   static char const* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
-
   return std::vector< std::string >(&developer_names[0], &developer_names[2]);
 }
 
-LTSView::LTSView() : mcrl2::utilities::wx::tool< LTSView >("LTSView",
-      "Tool for interactive visualisation of state transition systems.\n"
-      "\n"
-      "LTSView is based on visualisation techniques by Frank van Ham and Jack van Wijk.\n"
-      "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
-      "\"Visualization of State Transition Graphs\". "
-      "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-      "\n"
-      "The default colour scheme for state marking was obtained through http://www.colorbrewer.org",
-      developers()) {
-}
+LTSView::LTSView() :
+  mcrl2::utilities::wx::tool< LTSView >(
+    "LTSView",
+    "Tool for interactive visualization of state transition systems.\n"
+    "\n"
+    "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
+    "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
+    "\"Visualization of State Transition Graphs\". "
+    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+    "\n"
+    "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
+    developers())
+{ }
 
 bool LTSView::DoInit()
 {
@@ -184,39 +201,43 @@ bool LTSView::DoInit()
   return true;
 }
 
+
 #ifdef __WINDOWS__
+
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                                  HINSTANCE hPrevInstance,
-                                  wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {
-
+    HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow)
+{
   MCRL2_ATERM_INIT(0, lpCmdLine)
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
+  if (interactor< squadt_interactor >::free_activation(hInstance,
+        hPrevInstance, lpCmdLine, nCmdShow))
+  {
     return EXIT_SUCCESS;
   }
 #endif
-
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
-#else
-int main(int argc, char **argv) {
 
+#else // not __WINDOWS__
+
+int main(int argc, char **argv)
+{
   MCRL2_ATERM_INIT(argc, argv)
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
+  if (interactor< squadt_interactor >::free_activation(argc, argv))
+  {
     return EXIT_SUCCESS;
   }
 #endif
-
   return wxEntry(argc, argv);
 }
-#endif
 
-int LTSView::OnExit() {
-  if (lts != 0) {
+#endif // __WINDOWS__
+
+int LTSView::OnExit()
+{
+  if (lts != 0)
+  {
     delete lts;
     delete settings;
     delete visualizer;
@@ -225,12 +246,14 @@ int LTSView::OnExit() {
   return 0;
 }
 
-std::string LTSView::getVersionString() {
-  return mcrl2::utilities::interface_description("", NAME, AUTHOR, "", "", "").
-                                                        version_information();
+std::string LTSView::getVersionString()
+{
+  return mcrl2::utilities::interface_description("", NAME, AUTHOR, "",
+      "", "").version_information();
 }
 
-void LTSView::openFile(string fileName) {
+void LTSView::openFile(string fileName)
+{
   glCanvas->disableDisplay();
 
   mainFrame->createProgressDialog("Opening file","Loading file");
@@ -297,10 +320,13 @@ void LTSView::openFile(string fileName) {
   mainFrame->setMarkedTransitionsInfo(0);
 }
 
-void LTSView::setRankStyle(RankStyle rs) {
-  if (rankStyle != rs) {
+void LTSView::setRankStyle(RankStyle rs)
+{
+  if (rankStyle != rs)
+  {
     rankStyle = rs;
-    if (lts != NULL) {
+    if (lts != NULL)
+    {
       glCanvas->disableDisplay();
 
       mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
@@ -335,17 +361,22 @@ void LTSView::setRankStyle(RankStyle rs) {
   }
 }
 
-void LTSView::setVisStyle(VisStyle vs) {
-  if (visualizer->getVisStyle() != vs) {
+void LTSView::setVisStyle(VisStyle vs)
+{
+  if (visualizer->getVisStyle() != vs)
+  {
     visualizer->setVisStyle(vs);
     glCanvas->display();
   }
 }
 
-void LTSView::setFSMStyle(bool b) {
-  if (b != fsmStyle) {
+void LTSView::setFSMStyle(bool b)
+{
+  if (b != fsmStyle)
+  {
     fsmStyle = b;
-    if (lts != NULL) {
+    if (lts != NULL)
+    {
       glCanvas->disableDisplay();
       lts->positionClusters(fsmStyle);
       visualizer->setLTS(lts,true);
@@ -433,27 +464,33 @@ void LTSView::editMarkRule(int mr)
   }
 }
 
-Utils::MarkStyle LTSView::getMarkStyle() {
+Utils::MarkStyle LTSView::getMarkStyle()
+{
   return markManager->getMarkStyle();
 }
 
-Utils::MatchStyle LTSView::getMatchStyle() {
+Utils::MatchStyle LTSView::getMatchStyle()
+{
   return markManager->getMatchStyle();
 }
 
-bool LTSView::isMarked(State* s) {
+bool LTSView::isMarked(State* s)
+{
   return markManager->isMarked(s);
 }
 
-bool LTSView::isMarked(Cluster* c) {
+bool LTSView::isMarked(Cluster* c)
+{
   return markManager->isMarked(c);
 }
 
-bool LTSView::isMarked(Transition* t) {
+bool LTSView::isMarked(Transition* t)
+{
   return markManager->isMarked(t);
 }
 
-Utils::RGB_Color LTSView::getMarkRuleColor(int mr) {
+Utils::RGB_Color LTSView::getMarkRuleColor(int mr)
+{
   return markManager->getMarkRuleColor(mr);
 }
 
@@ -529,12 +566,17 @@ Utils::RGB_Color LTSView::getNewRuleColour()
   return result;
 }
 
-void LTSView::activateMarkRule(int mr,bool activate) {
-  if (lts != NULL) {
+void LTSView::activateMarkRule(int mr,bool activate)
+{
+  if (lts != NULL)
+  {
     markManager->setMarkRuleActivated(mr,activate);
-    if (markManager->getMarkStyle() != MARK_STATES) {
+    if (markManager->getMarkStyle() != MARK_STATES)
+    {
       setMarkStyle(MARK_STATES);
-    } else {
+    }
+    else
+    {
       applyMarkStyle();
     }
   }
@@ -602,15 +644,18 @@ void LTSView::applyMarkStyle()
   glCanvas->display();
 }
 
-void LTSView::notifyRenderingStarted() {
+void LTSView::notifyRenderingStarted()
+{
   mainFrame->startRendering();
 }
 
-void LTSView::notifyRenderingFinished() {
+void LTSView::notifyRenderingFinished()
+{
   mainFrame->stopRendering();
 }
 
-void LTSView::startSim() {
+void LTSView::startSim()
+{
   Simulation* sim = lts->getSimulation();
 
   sim->start();
@@ -619,7 +664,8 @@ void LTSView::startSim() {
   selectStateByID(sim->getCurrState()->getID());
 }
 
-int LTSView::getNumberOfParams() const {
+int LTSView::getNumberOfParams() const
+{
   if (lts != NULL)
   {
     return lts->getNumParameters();
@@ -629,7 +675,8 @@ int LTSView::getNumberOfParams() const {
     return 0;
   }
 }
-string LTSView::getActionLabel(const int i) const {
+string LTSView::getActionLabel(const int i) const
+{
   if (lts != NULL)
   {
     return lts->getLabel(i);
@@ -640,7 +687,8 @@ string LTSView::getActionLabel(const int i) const {
   }
 }
 
-string LTSView::getParName(const int i) const {
+string LTSView::getParName(const int i) const
+{
   if (lts != NULL)
   {
     return lts->getParameterName(i);
@@ -651,7 +699,8 @@ string LTSView::getParName(const int i) const {
   }
 }
 
-string LTSView::getParValue(State *s, const int j) const {
+string LTSView::getParValue(State *s, const int j) const
+{
   if (lts != NULL)
   {
     return lts->getStateParameterValueStr(s,j);
@@ -697,7 +746,8 @@ void LTSView::selectCluster(const int rank, const int pos)
   }
 }
 
-void LTSView::deselect() {
+void LTSView::deselect()
+{
   if (lts != NULL)
   {
     lts->deselect();
@@ -706,10 +756,12 @@ void LTSView::deselect() {
   }
 }
 
-int LTSView::getNumberOfObjects() {
+int LTSView::getNumberOfObjects()
+{
   int result = 0;
 
-  if (lts != NULL) {
+  if (lts != NULL)
+  {
     result += lts->getNumClusters();
     result += lts->getNumStates();
   }
