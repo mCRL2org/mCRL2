@@ -18,7 +18,7 @@
 using namespace grape::grapeapp;
 
 grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
-: wxDialog( 0, wxID_ANY, _T( "Edit preamble" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T( "Edit preamble" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 {
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
 

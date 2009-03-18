@@ -20,7 +20,7 @@
 using namespace grape::grapeapp;
 
 grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, process_reference *p_ref, grape_specification *p_spec )
-: wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 // process reference
 {
   m_main_frame = p_main_frame;
@@ -29,7 +29,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, proce
 }
 
 grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, reference_state *p_ref, grape_specification *p_spec )
-: wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T( "Edit process reference" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 // reference state
 {
   m_main_frame = p_main_frame;
@@ -37,7 +37,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, refer
 }
 
 grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, architecture_reference *p_ref, grape_specification *p_spec )
-: wxDialog( 0, wxID_ANY, _T("Edit architecture reference") , wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T("Edit architecture reference") , wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 // architecture reference
 {
   m_main_frame = p_main_frame;
