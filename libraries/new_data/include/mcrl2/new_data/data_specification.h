@@ -143,9 +143,6 @@ namespace mcrl2 {
         friend data_specification& remove_all_system_defined(data_specification&);
         friend data_specification  remove_all_system_defined(data_specification const&);
 
-        ///\brief Adds the system defined sorts in a sequence
-        void import_system_defined_sort(sort_expression const&);
-
         ///\brief Adds system defined sorts when necessary to make the specification complete
         void make_system_defined_complete();
 
@@ -708,6 +705,9 @@ namespace mcrl2 {
 
         return true;
       }
+
+      ///\brief Adds the system defined sorts in a sequence
+      void import_system_defined_sort(sort_expression const&);
 
       /// \brief Returns a default expression for a sort.
       ///

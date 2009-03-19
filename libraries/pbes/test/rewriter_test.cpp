@@ -199,6 +199,7 @@ void test_enumerate_quantifiers_rewriter()
   std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
 
   new_data::data_specification data_spec = new_data::data_specification();
+  data_spec.import_system_defined_sort(new_data::sort_nat::nat());
   new_data::rewriter datar(data_spec);
   new_data::number_postfix_generator generator("UNIQUE_PREFIX");
   new_data::data_enumerator<new_data::number_postfix_generator> datae(data_spec, datar, generator);
