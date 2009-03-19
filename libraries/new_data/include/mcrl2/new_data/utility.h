@@ -209,6 +209,31 @@ namespace mcrl2 {
       return s;
     }
 
+    /// \brief Returns an identifier that doesn't appear in the set <tt>context</tt>
+    /// \param context A sequence of sort expressions
+    /// \param hint A string
+    /// \param id_creator A function that generates identifiers
+    /// \return An identifier that doesn't appear in the set <tt>context</tt>
+    template <typename ForwardTraversalIterator, typename IdentifierCreator>
+    inline core::identifier_string fresh_identifier(const boost::iterator_range< ForwardTraversalIterator >& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+    {
+      std::set<core::identifier_string> s;
+
+      for (std::set<sort_expression>::const_iterator i = context.begin(); i != context.end(); ++i)
+      {
+        if (i->is_alias())
+        {
+          s.insert(alias(*i).name().name());
+        }
+        else if (i->is_basic_sort())
+        {
+          s.insert(basic_sort(*i).name());
+        }
+      }
+
+      return fresh_identifier(s, hint, id_creator);
+    }
+
     /// \brief Returns an identifier that doesn't appear in the term context
     /// \param context A term
     /// \param hint A string

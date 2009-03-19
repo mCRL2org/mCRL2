@@ -74,11 +74,12 @@ namespace mcrl2 {
 
           private:
 
-            sort_expression m_sort;
+            ForwardTraversalIterator m_end;
+            sort_expression          m_sort;
 
             void increment()
             {
-              while (++(this->base_reference()) != ForwardTraversalIterator()) {
+              while (++(this->base_reference()) != m_end) {
                 if (this->base_reference()->is_alias() && (alias(*this->base_reference()).reference() == m_sort)) {
                   break;
                 }
@@ -87,12 +88,18 @@ namespace mcrl2 {
 
           public:
 
-            aliases_iterator()
+            aliases_iterator(ForwardTraversalIterator const& end) : aliases_iterator::iterator_adaptor_(end)
             { }
 
-            explicit aliases_iterator(ForwardTraversalIterator const& i, sort_expression const& s) :
-                                  aliases_iterator::iterator_adaptor_(i), m_sort(s)
-            { }
+            explicit aliases_iterator(ForwardTraversalIterator const& begin,
+                      ForwardTraversalIterator const& end, sort_expression const& s) :
+                                  aliases_iterator::iterator_adaptor_(begin), m_end(end), m_sort(s)
+            {
+              if (!this->base_reference()->is_alias())
+              {
+                increment();
+              }
+            }
         };
 
       public:
@@ -243,7 +250,7 @@ namespace mcrl2 {
       inline
       aliases_const_range aliases(sort_expression const& s) const
       {
-        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), s), aliases_const_range::iterator());
+        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), m_sorts.end(), s), aliases_const_range::iterator(m_sorts.end()));
       }
 
       /// \brief Gets all constructors
