@@ -130,7 +130,6 @@ namespace mcrl2 {
             }
             else if (s.is_alias())
             {
-std::clog << "DEP " << pp(alias(s)) << std::endl;
               add_generic_and_check(alias(s).reference());
             }
             else
@@ -192,7 +191,6 @@ std::clog << "DEP " << pp(alias(s)) << std::endl;
     {
       assert(sort.is_standard());
 
-std::clog << "ADDING " << pp(sort) << std::endl;
       // add sorts, constructors, mappings and equations
       if (sort == sort_real_::real_())
       {
@@ -269,7 +267,6 @@ std::clog << "ADDING " << pp(sort) << std::endl;
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
         if (i->is_standard() && (m_sorts.find(*i) == m_sorts.end())) {
-std::clog << "FOUND " << pp(*i) << std::endl;
           import_system_defined_sort(*i);
         }
       }
