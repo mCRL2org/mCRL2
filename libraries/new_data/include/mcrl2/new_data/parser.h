@@ -170,7 +170,7 @@ namespace detail {
     atermpp::term_list< data_expression > v(core::parse_data_vars(in));
     assert(v.size() == 1);
     v = core::type_check_data_vars(v,
-           detail::data_specification_to_aterm_data_spec(parse_data_specification(data_spec)));
+           detail::data_specification_to_aterm_data_spec(remove_all_system_defined(parse_data_specification(data_spec))));
     return atermpp::front(v);
   }
 
