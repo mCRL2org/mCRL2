@@ -8,6 +8,7 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/container_sort.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/pos.h"
@@ -30,7 +31,7 @@ namespace mcrl2 {
         return list;
       }
 
-      /// \brief Recogniser for sort expression List(S)
+      /// \brief Recogniser for sort expression List(s)
       /// \param e A sort expression
       /// \return true iff e is a container sort of which the name matches
       ///      list
@@ -752,6 +753,17 @@ namespace mcrl2 {
         return result;
       }
 
+      /// \brief Add sort, constructors, mappings and equations for list
+      /// \param specification A specification
+      /// \param the sort of elements stored by the container
+      inline
+      void add_list_to_specification(data_specification& specification, sort_expression const& element)
+      {
+         specification.add_system_defined_sort(list(element));
+         specification.add_system_defined_constructors(boost::make_iterator_range(list_generate_constructors_code(element)));
+         specification.add_system_defined_mappings(boost::make_iterator_range(list_generate_functions_code(element)));
+         specification.add_system_defined_equations(boost::make_iterator_range(list_generate_equations_code(element)));
+      }
     } // namespace sort_list
 
   } // namespace new_data

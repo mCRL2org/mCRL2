@@ -14,6 +14,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/standard.h"
 
 using namespace mcrl2;
 
@@ -25,7 +26,8 @@ void parser_test()
     "map f:S -> List(S);\n"
   );
 
-  new_data::data_specification spec(new_data::parse_data_specification(text));
+  new_data::data_specification spec(new_data::remove_all_system_defined(new_data::parse_data_specification(text)));
+
   BOOST_CHECK(boost::copy_range< new_data::sort_expression_vector >(spec.sorts()).size() == 1);
   BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.constructors()).size() == 1);
   BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.mappings()).size() == 1);

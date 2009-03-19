@@ -277,7 +277,7 @@ namespace mcrl2 {
      * \brief Container adapter to use random access iterators for a term_list object
      * \note Necessary for range construction with term_list_random_iterator
      **/
-    template < typename SourceExpression, typename TargetExpression >
+    template < typename TargetExpression, typename SourceExpression >
     detail::random_access_list< TargetExpression > add_random_access(atermpp::term_list< SourceExpression > const& list) {
       return detail::random_access_list< TargetExpression >(list);
     }

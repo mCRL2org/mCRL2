@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/function_sort.h"
 

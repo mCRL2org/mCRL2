@@ -5,6 +5,7 @@ project new_data
 mcrl2-library new_data
        : source/data_implementation_concrete.cpp 
          source/data_reconstruct.cpp 
+         source/data_specification.cpp 
          source/standard.cpp
          [ glob source/detail/rewrite/*.cpp ]
          [ glob source/detail/prover/*.cpp ]

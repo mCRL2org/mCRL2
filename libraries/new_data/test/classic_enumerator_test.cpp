@@ -193,8 +193,8 @@ void list_test(const size_t count) {
 
   std::set< variable > variables;
 
-  variables.insert(parse_variable("x : list_of_booleans", boolean_list_specification));
-  variables.insert(parse_variable("y : Nat", boolean_list_specification));
+  variables.insert(variable("x", basic_sort("list_of_booleans")));
+  variables.insert(variable("y", basic_sort("Nat")));
 
   enumerate< EnumeratorType >(parse_data_specification(boolean_list_specification),
         variables, parse_data_expression("y == size(x) && 0 < y && y < 2",

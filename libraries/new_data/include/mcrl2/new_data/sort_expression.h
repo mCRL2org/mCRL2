@@ -96,7 +96,7 @@ namespace mcrl2 {
 
           return gsIsSortExprBool(*this) || gsIsSortExprReal(*this) ||
                  gsIsSortExprInt(*this) || gsIsSortExprNat(*this) ||
-                 gsIsSortExprPos(*this);
+                 gsIsSortExprPos(*this) || is_container_sort() || is_structured_sort();
         }
 
         /// \brief Returns the target sort of this expression.

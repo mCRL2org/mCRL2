@@ -8,6 +8,7 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/pos.h"
 #include "mcrl2/new_data/nat.h"
@@ -1680,6 +1681,16 @@ namespace mcrl2 {
         return result;
       }
 
+      /// \brief Add sort, constructors, mappings and equations for real_
+      /// \param specification A specification
+      inline
+      void add_real__to_specification(data_specification& specification)
+      {
+         specification.add_system_defined_sort(real_());
+         specification.add_system_defined_constructors(boost::make_iterator_range(real__generate_constructors_code()));
+         specification.add_system_defined_mappings(boost::make_iterator_range(real__generate_functions_code()));
+         specification.add_system_defined_equations(boost::make_iterator_range(real__generate_equations_code()));
+      }
     } // namespace sort_real_
 
   } // namespace new_data

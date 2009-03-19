@@ -16,6 +16,10 @@
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/set.h"
+#include "mcrl2/new_data/bag.h"
+#include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/utility.h"
 
 using namespace mcrl2;
@@ -102,7 +106,7 @@ void test_constructors()
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
-  data_specification spec;
+  data_specification spec(remove_all_system_defined(data_specification()));
   spec.add_sort(s);
   spec.add_sort(s0);
   data_specification spec1(spec);
@@ -165,7 +169,7 @@ void test_functions()
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
-  data_specification spec;
+  data_specification spec(remove_all_system_defined(data_specification()));
   spec.add_sort(s);
   spec.add_sort(s0);
   data_specification spec1(spec);
@@ -227,7 +231,7 @@ void test_equations()
   boost::iterator_range<variable_vector::const_iterator> x_range(xl);
   data_equation fxx(x_range, x, fx, x);
 
-  data_specification spec;
+  data_specification spec(remove_all_system_defined(data_specification()));
   data_specification spec1;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -266,11 +270,11 @@ void test_is_certainly_finite()
 {
   basic_sort s("S");
   basic_sort s0("S0");
-  function_sort s0s0(make_vector(reinterpret_cast<sort_expression&>(s0)), s0);
+  function_sort s0s0(make_vector(static_cast<sort_expression&>(s0)), s0);
   function_symbol f("f", s);
   function_symbol g("g", s0s0);
   variable x("x", s0);
-  application gx(g, boost::make_iterator_range(make_vector(reinterpret_cast<data_expression&>(x))));
+  application gx(g, boost::make_iterator_range(make_vector(static_cast<data_expression&>(x))));
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -278,7 +282,53 @@ void test_is_certainly_finite()
   spec.add_constructor(g);
   BOOST_CHECK(spec.is_certainly_finite(s));
   BOOST_CHECK(!spec.is_certainly_finite(s0));
-  // TODO extend with tests for other kinds of sort
+
+  basic_sort s1("S1");
+  basic_sort s2("S2");
+  spec.add_constructor(function_symbol("h", function_sort(s1, s2)));
+  spec.add_constructor(function_symbol("i", function_sort(s2, s1)));
+
+  BOOST_CHECK(spec.is_certainly_finite(alias(basic_sort("a"), s)));
+  BOOST_CHECK(!spec.is_certainly_finite(alias(basic_sort("a0"), s0)));
+  BOOST_CHECK(!spec.is_certainly_finite(alias(basic_sort("a1"), s1)));
+
+  using namespace sort_list;
+
+  BOOST_CHECK(!spec.is_certainly_finite(list(s)));
+  BOOST_CHECK(!spec.is_certainly_finite(list(s0)));
+
+  using namespace sort_set_;
+
+  BOOST_CHECK(!spec.is_certainly_finite(set_(s)));
+  BOOST_CHECK(!spec.is_certainly_finite(set_(s0)));
+
+  using namespace sort_bag;
+
+  BOOST_CHECK(!spec.is_certainly_finite(bag(s)));
+  BOOST_CHECK(!spec.is_certainly_finite(bag(s0)));
+  BOOST_CHECK(spec.is_certainly_finite(function_sort(s,s)));
+  BOOST_CHECK(!spec.is_certainly_finite(function_sort(s,s0)));
+  BOOST_CHECK(!spec.is_certainly_finite(function_sort(s0,s)));
+
+  // structured sort
+  atermpp::vector< new_data::structured_sort_constructor_argument > arguments;
+
+  arguments.push_back(new_data::structured_sort_constructor_argument(s));
+  arguments.push_back(new_data::structured_sort_constructor_argument(s0));
+  arguments.push_back(new_data::structured_sort_constructor_argument(s1));
+
+  atermpp::vector< new_data::structured_sort_constructor > constructors;
+  constructors.push_back(new_data::structured_sort_constructor("a",
+     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(new_data::structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
+  constructors.push_back(new_data::structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
+
+  BOOST_CHECK(spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
+  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
+  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
+  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
 }
 
 int test_main(int argc, char** argv)

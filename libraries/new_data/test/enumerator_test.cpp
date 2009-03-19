@@ -157,11 +157,11 @@ void test3()
 
 void test4()
 {
-  data_specification data_spec;
+  data_specification data_spec(parse_data_specification("sort N = Nat;")); // import Nat
   rewriter datar;
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
-  variable y = parse_data_expression("n", "n: Nat;\n"); 
+  variable y = parse_data_expression("n", "n: Nat;\n");
   atermpp::vector<data_expression_with_variables> z = datae.enumerate(y);
   BOOST_CHECK(z.size() > 0);
 }

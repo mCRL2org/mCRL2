@@ -24,7 +24,6 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/container_sort.h"
 #include "mcrl2/new_data/assignment.h"
 #include "mcrl2/new_data/alias.h"

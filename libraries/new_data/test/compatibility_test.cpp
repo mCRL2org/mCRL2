@@ -16,6 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/standard.h"
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
@@ -41,7 +42,7 @@ void compatibility_test()
 
   aterm_appl spec_old_format = atermpp::arg1(lps_spec);
   new_data::data_specification spec_new_format(spec_old_format);
-  aterm_appl spec_old_format1 = new_data::detail::data_specification_to_aterm_data_spec(spec_new_format);
+  aterm_appl spec_old_format1 = new_data::detail::data_specification_to_aterm_data_spec(remove_all_system_defined(spec_new_format));
 
   BOOST_CHECK(spec_old_format == spec_old_format1);
 }

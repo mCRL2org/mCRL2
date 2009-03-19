@@ -128,8 +128,15 @@ namespace mcrl2 {
 
     /// \brief Pretty prints a data and sort expressions
     /// \param[in] specification a data specification
-    template < typename Container >
-    inline std::string pp(Container const& c, typename boost::disable_if< typename detail::is_container< Container >::type >::type* = 0)
+    inline std::string pp(atermpp::aterm_appl const& c)
+    {
+      return core::pp(c);
+    }
+
+    /// \brief Pretty prints a data and sort expressions
+    /// \param[in] specification a data specification
+    template < typename Expression >
+    inline std::string pp(atermpp::term_list< Expression > const& c)
     {
       return core::pp(c);
     }

@@ -237,7 +237,7 @@ class function_declaration_list():
         if not (id.to_string(), label.to_string(), idx) in unique_case_arguments_string:
           unique_case_arguments += [(id, label, idx)]
           unique_case_arguments_string += [(id.to_string(), label.to_string(), idx)]
-      
+
       # Generate code for projection function
       case_code  = "      ///\\brief Function for projecting out argument\n"
       case_code += "      ///        %s from an application\n" % (escape(p))
@@ -387,7 +387,7 @@ class function_declaration_list():
           # That is, we have parameters for all domain elements
           # bases on those, we compute the corresponding target sort
           new_domain_sorts = [sort_identifier(identifier("s%s" % i)) for i in range(len(self.sort_expression_list.elements[0].domain.elements))]
-          
+
           first_codomain = self.sort_expression_list.elements[0].codomain
           if all(map(lambda x: x.codomain.to_string() == first_codomain.to_string(), self.sort_expression_list.elements)):
             target_sort = "sort_expression target_sort(%s);\n" % (first_codomain.code(sort_spec))
@@ -482,7 +482,7 @@ class equation_declaration():
     self.lhs = lhs
     self.rhs = rhs
     self.condition = condition
-  
+
   def set_namespace(self, string):
     self.namespace = string
     if self.original_namespace == "":
@@ -616,7 +616,7 @@ class equation_declaration_list():
       formal_parameters_code += [s.formal_parameter_code()]
     code  = "      /// \\brief Give all system defined equations for %s\n" % (escape(self.namespace))
     for s in sort_parameters:
-      code += "      /// \\param %s A sort expression\n" % (escape(s.code(sort_spec)))      
+      code += "      /// \\param %s A sort expression\n" % (escape(s.code(sort_spec)))
     code += "      /// \\return All system defined equations for sort %s\n" % (escape(self.namespace))
     code += "      inline\n"
     code += "      data_equation_vector %s_generate_equations_code(%s)\n" % (self.namespace, string.join(formal_parameters_code, ", "))
@@ -649,7 +649,7 @@ class data_application(data_expression):
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
     result = self.head.sort_parameters(sort_spec, function_spec, variable_spec)
     result = union_by_string(result, self.arguments.sort_parameters(sort_spec, function_spec, variable_spec))
-    return result   
+    return result
 
   def determinise_variable_or_function_symbol(self, function_spec, variable_spec):
     return data_application(self.head.determinise_variable_or_function_symbol(function_spec, variable_spec), self.arguments.determinise_variable_or_function_symbol(function_spec, variable_spec))
@@ -1017,7 +1017,7 @@ class sort_identifier(sort_expression):
 
   def actual_parameter_code(self):
     return "%s" % (self.name.to_string().lower())
-    
+
   def code(self, sort_spec):
     assert(isinstance(sort_spec, sort_specification))
     if (sort_spec.has_sort(self)):
@@ -1067,7 +1067,7 @@ class domain(sort_expression):
       parameters += ["const data_expression& arg%s" % (index)]
       index += 1
     return string.join(parameters, ", ")
-    
+
   def actual_parameters_code(self):
     index = 0
     parameters = []
@@ -1522,8 +1522,8 @@ class mapping_specification():
     return "map %s" % (self.declarations.to_string())
 
   def merge_specification(self, spec):
-    self.declarations.merge_declarations(spec.declarations)    
-  
+    self.declarations.merge_declarations(spec.declarations)
+
   def code(self, sort_spec):
     assert(isinstance(sort_spec, sort_specification))
     sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters()), ", ")
@@ -1563,7 +1563,7 @@ class constructor_specification():
     return "cons %s" % (self.declarations.to_string())
 
   def merge_specification(self, spec):
-    self.declarations.merge_declarations(spec.declarations)    
+    self.declarations.merge_declarations(spec.declarations)
 
   def code(self, sort_spec):
     assert(isinstance(sort_spec, sort_specification))
@@ -1660,7 +1660,7 @@ class sort_specification():
     for d in self.declarations.elements:
       if d.sort_expression.to_string() == sort.to_string():
         return d
- 
+
   def defines_container(self):
     return self.declarations.defines_container()
 
@@ -1746,6 +1746,7 @@ class specification():
     code += "#include \"mcrl2/new_data/data_equation.h\"\n"
     code += "#include \"mcrl2/new_data/detail/container_utility.h\"\n"
     code += "#include \"mcrl2/new_data/standard.h\"\n"
+    code += "#include \"mcrl2/new_data/data_specification.h\"\n"
     if self.has_lambda():
       code += "#include \"mcrl2/new_data/lambda.h\"\n"
     if self.has_forall():
@@ -1765,6 +1766,29 @@ class specification():
     code += self.function_specification.code(self.sort_specification)
     code += self.equation_specification.code(self.sort_specification, self.function_specification, self.variable_specification)
     code += "\n"
+    if self.defines_container():
+      code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
+      code += "      /// \\param specification A specification\n"
+      code += "      /// \\param the sort of elements stored by the container\n"
+      code += "      inline\n"
+      code += "      void add_%s_to_specification(data_specification& specification, sort_expression const& element)\n" % (self.namespace)
+      code += "      {\n"
+      code += "         specification.add_system_defined_sort(%s(element));\n" % (escape(self.namespace))
+      code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code(element)));\n" % (self.namespace)
+      code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code(element)));\n" % (self.namespace)
+      code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code(element)));\n" % (self.namespace)
+      code += "      }\n"
+    else:
+      code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
+      code += "      /// \\param specification A specification\n"
+      code += "      inline\n"
+      code += "      void add_%s_to_specification(data_specification& specification)\n" % (self.namespace)
+      code += "      {\n"
+      code += "         specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
+      code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code()));\n" % (self.namespace)
+      code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code()));\n" % (self.namespace)
+      code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code()));\n" % (self.namespace)
+      code += "      }\n"
     code += "    } // namespace sort_%s\n\n" % (self.namespace)
     code += "  } // namespace new_data\n\n"
     code += "} // namespace mcrl2\n\n"

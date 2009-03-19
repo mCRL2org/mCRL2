@@ -95,7 +95,8 @@ namespace detail {
     ATermAppl result = linearise_std(spec, options);
     if (result == NULL)
       throw mcrl2::runtime_error("linearisation error");
-    return atermpp::aterm_appl(result);
+
+    return set_data_specification(specification(atermpp::aterm_appl(result)), specification(atermpp::aterm_appl(result)).data());
   }
 
   /// \brief Reads a state formula from an input stream

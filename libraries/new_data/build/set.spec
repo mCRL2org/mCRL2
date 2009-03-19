@@ -15,7 +15,7 @@ var d : S;
     t : Set(S);
     f : S->Bool;
     g : S->Bool;
-eqn ==(@set(f),@set(g)) = ==(f,g); 
+eqn ==(@set(f),@set(g)) = ==(f,g);
     {} = @set(lambda(x:S, false));
     in(d,@set(f)) = f(d);
     <=(@set(f),@set(g)) = forall(x:S, =>(f(x),g(x)));

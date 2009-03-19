@@ -23,6 +23,7 @@
 #include "mcrl2/core/detail/struct.h"
 
 #include "mcrl2/new_data/basic_sort.h"
+#include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/list.h"
 #include "mcrl2/new_data/set.h"
 #include "mcrl2/new_data/bag.h"
@@ -2865,11 +2866,11 @@ void compare(t_data_decls const& old_, t_data_decls const& new_) {
     std::clog << "OLD " << mcrl2::core::pp(old_.ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.ops) << std::endl;
   }
-  if (old_.data_eqns != new_.data_eqns) {
+  BOOST_CHECK(compare_modulo_order_and_alpha(old_.data_eqns, new_.data_eqns));
+  if (!compare_modulo_order_and_alpha(old_.data_eqns, new_.data_eqns)) {
     std::clog << "OLD " << mcrl2::core::pp(old_.data_eqns) << std::endl
               << "NEW " << mcrl2::core::pp(new_.data_eqns) << std::endl;
   }
-  BOOST_CHECK(compare_modulo_order_and_alpha(old_.data_eqns, new_.data_eqns));
 }
 
 
@@ -2896,10 +2897,6 @@ void implement_pos_test()
   ATermList new_equations = ATmakeList0();
   impl_sort_pos(&data_decls_new, &new_equations);
 
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-
   std::clog << "== POS COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
 }
@@ -2913,10 +2910,6 @@ void implement_nat_test()
   old_impl_sort_nat(&data_decls_old, false);
   ATermList new_equations = ATmakeList0();
   impl_sort_nat(&data_decls_new, false, &new_equations);
-
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
 
   std::clog << "== NAT COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
@@ -2932,10 +2925,6 @@ void implement_int_test()
   ATermList new_equations = ATmakeList0();
   impl_sort_int(&data_decls_new, false, &new_equations);
 
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-
   std::clog << "== INT COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
 }
@@ -2949,10 +2938,6 @@ void implement_real_test()
   old_impl_sort_real(&data_decls_old, false);
   ATermList new_equations = ATmakeList0();
   impl_sort_real(&data_decls_new, false, &new_equations);
-
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
 
   std::clog << "== REAL COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
@@ -2974,10 +2959,6 @@ void implement_list_test()
   ATermList equations = ATmakeList0();
   impl_sort_list(ls, sort_id, &new_substs, &data_decls_new, &equations);
 
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-
   std::clog << "== LIST COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
 }
@@ -2998,11 +2979,6 @@ void implement_set_test()
   old_impl_sort_set(ss, sort_id, &old_substs, &data_decls_old);
   impl_sort_set(ss, sort_id, &new_substs, &data_decls_new, &equations);
 
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
-
   std::clog << "== SET COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
 }
@@ -3022,11 +2998,6 @@ void implement_bag_test()
   old_impl_sort_bag(bs, sort_id, &old_substs, &data_decls_old);
   ATermList equations = ATmakeList0();
   impl_sort_bag(bs, sort_id, &new_substs, &data_decls_new, &equations);
-
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
 
   std::clog << "== BAG COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
@@ -3132,7 +3103,7 @@ void implement_data_specification_test()
     "map f:S -> List(S);\n"
   );
 
-  new_data::data_specification spec(new_data::parse_data_specification(text));
+  new_data::data_specification spec(remove_all_system_defined(new_data::parse_data_specification(text)));
   atermpp::aterm_appl old_impl_spec = new_data::parse_data_specification_and_implement(text);
   atermpp::aterm_appl impl_spec = new_data::detail::implement_data_specification(spec);
 

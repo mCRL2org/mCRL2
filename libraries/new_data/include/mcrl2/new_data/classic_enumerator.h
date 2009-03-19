@@ -28,6 +28,8 @@
 namespace mcrl2 {
   namespace new_data {
 
+    /** \brief Selection predicates for data expressions for use with enumerator components
+     **/
     namespace selectors {
       /** \brief Configuration component for expression selection
        *

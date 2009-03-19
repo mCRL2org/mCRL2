@@ -102,11 +102,12 @@ namespace detail {
     std::stringstream formula_stream;
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
-    ATermAppl reconstructed_spec = new_data::detail::reconstruct_spec(spec);
+    lps::specification copy_spec(set_data_specification(spec, remove_all_system_defined(spec.data())));
+    ATermAppl reconstructed_spec = new_data::detail::reconstruct_spec(copy_spec);
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
-    spec = lps::specification(reconstructed_spec);
+    spec = lps::specification(copy_spec);
     return f;
   }
 

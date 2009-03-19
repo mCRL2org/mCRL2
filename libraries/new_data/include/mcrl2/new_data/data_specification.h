@@ -12,9 +12,6 @@
 #ifndef MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 #define MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 
-#include <iostream>
-#include <algorithm>
-
 #include "boost/iterator/transform_iterator.hpp"
 #include "boost/iterator/iterator_adaptor.hpp"
 
@@ -22,13 +19,13 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/print.h"
 
 // sorts
 #include "sort_expression.h"
 #include "alias.h"
 #include "container_sort.h"
 #include "function_sort.h"
-#include "structured_sort.h"
 
 // new_data expressions
 #include "data_expression.h"
@@ -37,15 +34,19 @@
 
 #include "data_equation.h"
 #include "mcrl2/new_data/detail/compatibility.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
-#include "mcrl2/new_data/detail/data_utility.h"
-#include "mcrl2/new_data/utility.h"
 
 namespace mcrl2 {
 
   namespace new_data {
 
+    class data_specification;
+
+//    data_specification& remove_all_system_defined(data_specification& specification);
+//    data_specification  remove_all_system_defined(data_specification const& specification);
+
     /// \brief new_data specification.
+    ///
+    /// \invariant The specification is complete with respect to standard sorts
     class data_specification
     {
       protected:
@@ -132,100 +133,21 @@ namespace mcrl2 {
 
       private:
 
-      /// \brief Determines the sorts on which a constructor depends
-      ///
-      /// \param[in] f A function symbol.
-      /// \pre f is a constructor.
-      /// \return All sorts on which f depends.
-      inline
-      sort_expression_vector dependent_sorts(const function_symbol& f, atermpp::set<sort_expression>& visited) const
-      {
-        if (f.sort().is_basic_sort())
-        {
-          return sort_expression_vector();
-        }
-        else
-        {
-          sort_expression_vector result;
-          function_sort f_sort(f.sort());
-          for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
-          {
-            result.push_back(i.front());
-            visited.insert(i.front());
-            sort_expression_vector l(dependent_sorts(i.front(), visited));
-            result.insert(result.end(), l.begin(), l.end());
-          }
-          return result;
-        }
-      }
+        friend data_specification& remove_all_system_defined(data_specification&);
+        friend data_specification  remove_all_system_defined(data_specification const&);
 
-      /// \brief Determines the sorts on which a sort expression depends
-      ///
-      /// \param[in] s A sort expression.
-      /// \return All sorts on which s depends.
-      inline
-      sort_expression_vector dependent_sorts(const sort_expression& s, atermpp::set<sort_expression>& visited) const
-      {
-        if (visited.find(s) != visited.end())
-        {
-          return sort_expression_vector();
-        }
-        visited.insert(s);
+        ///\brief Adds the system defined sorts in a sequence
+        void import_system_defined_sort(sort_expression const&);
 
-        if (s.is_basic_sort())
-        {
-          sort_expression_vector result;
+        ///\brief Adds system defined sorts when necessary to make the specification complete
+        void make_system_defined_complete();
 
-          function_symbol_vector constructors_s(constructors(s));
+        ///\brief Adds system defined sorts when necessary to make the specification complete
+        /// \param[in] s a sort that is added to a specification that is system-defined complete 
+        void make_system_defined_complete(sort_expression const&);
 
-          for (function_symbol_vector::const_iterator i = constructors_s.begin(); i != constructors_s.end(); ++i)
-          {
-            sort_expression_vector l(dependent_sorts(*i, visited));
-            result.insert(result.end(), l.begin(), l.end());
-          }
-
-          return result;
-        }
-        else if (s.is_container_sort())
-        {
-          return dependent_sorts(static_cast<container_sort>(s).element_sort(), visited);
-        }
-        else if (s.is_function_sort())
-        {
-          sort_expression_vector result;
-          function_sort fs(s);
-
-          for (function_sort::domain_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
-          {
-            sort_expression_vector l(dependent_sorts(i.front(), visited));
-            result.insert(result.end(), l.begin(), l.end());
-          }
-
-          sort_expression_vector l(dependent_sorts(fs.codomain(), visited));
-          result.insert(result.end(), l.begin(), l.end());
-          return result;
-        }
-        else if (s.is_structured_sort())
-        {
-          sort_expression_vector result;
-          structured_sort::constructor_const_range scl(static_cast<structured_sort>(s).struct_constructors());
-
-          for (structured_sort::constructor_const_range::const_iterator i = scl.begin(); i != scl.end(); ++i)
-          {
-            for (structured_sort_constructor::arguments_const_range j(i->arguments()); !j.empty(); j.advance_begin(1))
-            {
-              sort_expression_vector sl(dependent_sorts(j.front().sort(), visited));
-              result.insert(result.end(), sl.begin(), sl.end());
-            }
-          }
-
-          return result;
-        }
-        else
-        {
-          assert(false);
-        }
-      }
+        ///\brief Removes system defined sorts including constructors, mappings and equations
+        void purge_system_defined();
 
       protected:
 
@@ -243,22 +165,24 @@ namespace mcrl2 {
         atermpp::set< data_equation >   m_equations;
 
         ///\brief Table containing system defined sorts.
-        atermpp::table m_sys_sorts;
+        mutable atermpp::table m_sys_sorts;
 
         ///\brief Table containing system defined constructors.
-        atermpp::table m_sys_constructors;
+        mutable atermpp::table m_sys_constructors;
 
         ///\brief Table containing system defined mappings.
-        atermpp::table m_sys_mappings;
+        mutable atermpp::table m_sys_mappings;
 
         ///\brief Table containing system defined equations.
-        atermpp::table m_sys_equations;
+        mutable atermpp::table m_sys_equations;
 
       public:
 
       ///\brief Default constructor
       data_specification()
-      {}
+      {
+        make_system_defined_complete();
+      }
 
       ///\internal
       data_specification(const atermpp::aterm_appl& t)
@@ -266,7 +190,9 @@ namespace mcrl2 {
           m_constructors(detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(t))),
           m_mappings(detail::aterm_map_spec_to_function_set(atermpp::arg3(t))),
           m_equations(detail::aterm_data_eqn_spec_to_equation_set(atermpp::arg4(t)))
-      {}
+      {
+        make_system_defined_complete();
+      }
 
       ///\brief Constructor
       data_specification(const atermpp::set< sort_expression >& sorts,
@@ -277,7 +203,9 @@ namespace mcrl2 {
           m_constructors(constructors.begin(), constructors.end()),
           m_mappings(mappings.begin(), mappings.end()),
           m_equations(equations.begin(), equations.end())
-      {}
+      {
+        make_system_defined_complete();
+      }
 
       ///\brief Constructor
       template < typename SortsIterator, typename ConstructorsIterator,
@@ -295,6 +223,8 @@ namespace mcrl2 {
         {
           constructors.insert(constructors_map::value_type(i->sort().target_sort(), *i));
         }
+
+        make_system_defined_complete();
       }
 
       /// \brief Gets the sort declarations
@@ -330,37 +260,10 @@ namespace mcrl2 {
       ///
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
-      inline
       function_symbol_vector constructors(const sort_expression& s) const
       {
         function_symbol_vector result = boost::copy_range< function_symbol_vector >(
                  boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s)));
-
-        if (s.is_standard() && m_sorts.find(s) == m_sorts.end()) {
-          function_symbol_vector specification_result;
-          function_symbol_vector standard_result;
-
-          if (s == sort_pos::pos()) {
-            standard_result = sort_pos::pos_generate_constructors_code();
-          }
-          else if (s == sort_nat::nat()) {
-            standard_result = sort_nat::nat_generate_constructors_code();
-          }
-          else if (s == sort_int_::int_()) {
-            standard_result = sort_int_::int__generate_constructors_code();
-          }
-          else if (s == sort_real_::real_()) {
-            standard_result = sort_real_::real__generate_constructors_code();
-          }
-
-          specification_result.swap(result);
-
-          std::sort(standard_result.begin(), standard_result.end());
-          std::sort(specification_result.begin(), specification_result.end());
-          std::set_union(standard_result.begin(), standard_result.end(),
-            specification_result.begin(), specification_result.end(), std::inserter(result, result.end()));
-
-        }
 
         return result;
       }
@@ -380,48 +283,15 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return All mappings in this specification, for which s occurs as a
       /// right-hand side of the mapping's sort.
-      inline
       function_symbol_vector mappings(const sort_expression& s) const
       {
         function_symbol_vector result;
         for (atermpp::set< function_symbol >::const_iterator i = m_mappings.begin(); i != m_mappings.end(); ++i)
         {
-          if(i->sort().is_function_sort())
-          {
-            if(static_cast<function_sort>(i->sort()).codomain() == s) //TODO check.
-            {
-              result.push_back(*i);
-            }
-          }
-          else if(i->sort() == s)
-          {
+          if(i->sort().target_sort() == s)
+          { //TODO check.
             result.push_back(*i);
           }
-        }
-        if (s.is_standard() && m_sorts.find(s) == m_sorts.end())
-        {
-          std::set< function_symbol > specification_result(result.begin(), result.end());
-          function_symbol_vector standard_result;
-
-          result.clear();
-
-          if (s == sort_pos::pos()) {
-            standard_result = sort_pos::pos_generate_functions_code();
-          }
-          else if (s == sort_nat::nat()) {
-            standard_result = sort_nat::nat_generate_functions_code();
-          }
-          else if (s == sort_int_::int_()) {
-            standard_result = sort_int_::int__generate_functions_code();
-          }
-          else if (s == sort_real_::real_()) {
-            standard_result = sort_real_::real__generate_functions_code();
-          }
-
-          std::sort(standard_result.begin(), standard_result.end());
-
-          std::set_union(standard_result.begin(), standard_result.end(),
-            specification_result.begin(), specification_result.end(), std::inserter(result, result.end()));
         }
 
         return result;
@@ -446,6 +316,7 @@ namespace mcrl2 {
       {
         assert(std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end());
         m_sorts.insert(s);
+        make_system_defined_complete(s);
       }
 
       /// \brief Adds a sort to this specification, and marks it as system
@@ -471,16 +342,8 @@ namespace mcrl2 {
         constructors_const_range cs(constructors());
         assert(std::count(cs.begin(), cs.end(), f) == 0);
         assert(std::find(m_mappings.begin(), m_mappings.end(), f) == m_mappings.end());
-        sort_expression s;
-        if (f.sort().is_function_sort())
-        {
-          s = static_cast<function_sort>(f.sort()).codomain();
-        }
-        else
-        {
-          s = f.sort();
-        }
-        m_constructors.insert(std::make_pair(s, f));
+        m_constructors.insert(std::make_pair(f.sort().target_sort(), f));
+        make_system_defined_complete(f.sort().target_sort());
       }
 
       /// \brief Adds a constructor to this specification, and marks it as
@@ -502,22 +365,8 @@ namespace mcrl2 {
       inline
       void add_mapping(const function_symbol& f)
       {
-        sort_expression s;
-        if (f.sort().is_function_sort())
-        {
-          s = static_cast<function_sort>(f.sort()).codomain();
-        }
-        else
-        {
-          s = f.sort();
-        }
-        if (m_constructors.find(s) != m_constructors.end())
-        {
-          function_symbol_list fl(m_constructors.find(s)->second);
-          assert(std::count(fl.begin(), fl.end(), f) == 0);
-        }
-
         m_mappings.insert(f);
+        make_system_defined_complete(f.sort());
       }
 
       /// \brief Adds a mapping to this specification, and marks it as system
@@ -803,7 +652,7 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return true iff s is system defined, false otherwise.
       inline
-      bool is_system_defined(const sort_expression& s)
+      bool is_system_defined(const sort_expression& s) const
       {
         return m_sys_sorts.get(s) != atermpp::aterm();
       }
@@ -814,7 +663,7 @@ namespace mcrl2 {
       /// \return true iff f is system defined (either as constructor or as
       ///      mapping), false otherwise.
       inline
-      bool is_system_defined(const function_symbol& f)
+      bool is_system_defined(const function_symbol& f) const
       {
         return (m_sys_constructors.get(f) != atermpp::aterm() ||
                 m_sys_mappings.get(f)    != atermpp::aterm());
@@ -825,7 +674,7 @@ namespace mcrl2 {
       /// \param[in] e An equation.
       /// \return true iff e is system defined, false otherwise.
       inline
-      bool is_system_defined(const data_equation& e)
+      bool is_system_defined(const data_equation& e) const
       {
         return m_sys_equations.get(e) != atermpp::aterm();
       }
@@ -835,90 +684,11 @@ namespace mcrl2 {
       /// \param[in] s A sort expression
       /// \return true if s can be determined to be finite,
       ///      false otherwise.
-      inline
-      bool is_certainly_finite(const sort_expression& s) const
-      {
-        // Check for recursive occurrence.
-        atermpp::set<sort_expression> visited;
-        sort_expression_vector dsl(dependent_sorts(s, visited));
-        if (std::find(dsl.begin(), dsl.end(), s) != dsl.end())
-        {
-          return false;
-        }
-
-        if (s.is_basic_sort())
-        {
-          if (s.is_standard()) {
-            return sort_bool_::is_bool_(s);
-          }
-
-          function_symbol_vector fl(constructors(s));
-
-          for (function_symbol_vector::const_iterator i = fl.begin(); i != fl.end(); ++i)
-          {
-            atermpp::set<sort_expression> visited;
-            sort_expression_vector sl(dependent_sorts(*i, visited));
-            for (sort_expression_vector::const_iterator j = sl.begin(); j != sl.end(); ++j)
-            {
-              if (!is_certainly_finite(*j))
-              {
-                return false;
-              }
-            }
-          }
-
-          return !fl.empty();
-        }
-        else if (s.is_container_sort())
-        {
-          container_sort cs(s);
-          if(cs.is_set_sort())
-          {
-            return is_certainly_finite(cs.element_sort());
-          }
-          return false;
-        }
-        else if (s.is_function_sort())
-        {
-          function_sort fs(s);
-          for (function_sort::domain_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
-          {
-            if (!is_certainly_finite(i.front()))
-            {
-              return false;
-            }
-          }
-
-          if (fs.codomain() == s)
-          {
-            return false;
-          }
-
-          return is_certainly_finite(fs.codomain());
-        }
-        else if (s.is_structured_sort())
-        {
-          atermpp::set<sort_expression> visited;
-          sort_expression_vector sl(dependent_sorts(s, visited));
-          for (sort_expression_vector::const_iterator i = sl.begin(); i != sl.end(); ++i)
-          {
-            if (!is_certainly_finite(*i))
-            {
-              return false;
-            }
-          }
-          return true;
-        }
-        else
-        {
-          assert(false);
-        }
-      }
+      bool is_certainly_finite(const sort_expression& s) const;
 
       /// \brief Checks whether all sort expressions are certainly finite.
       ///
       /// \param[in] s A range of sort expressions
-      /// \return std::find_if(s.begin(), s.end(), std::bind1st(std::mem_fun(&data_specification::is_certainly_finite), this)) == s.end()
       template < typename ForwardTraversalIterator >
       inline
       bool is_certainly_finite(const boost::iterator_range< ForwardTraversalIterator >& s) const
@@ -949,32 +719,12 @@ namespace mcrl2 {
       /// <li>the domain and range sorts of mappings are contained in the list of sorts</li>
       /// </ul>
       /// \return True if the data specification is well typed.
-      bool is_well_typed() const
-      {
-        // check 1)
-        if (!detail::check_data_spec_sorts(constructors(), m_sorts))
-        {
-          std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
-                    << pp(constructors()) << " are declared in " << pp(m_sorts) << std::endl;
-          return false;
-        }
-
-        // check 2)
-        if (!detail::check_data_spec_sorts(mappings(), m_sorts))
-        {
-          std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
-                    << pp(mappings()) << " are declared in " << pp(m_sorts) << std::endl;
-          return false;
-        }
-
-        return true;
-      }
+      bool is_well_typed() const;
 
     }; // class data_specification
 
     /// \brief Pretty prints a data specification
     /// \param[in] specification a data specification
-    template < typename Container >
     inline std::string pp(data_specification const& specification)
     {
       return core::pp(core::detail::gsMakeDataSpec(
@@ -982,6 +732,28 @@ namespace mcrl2 {
                detail::constructor_list_to_aterm_cons_spec(specification.constructors()),
                detail::function_list_to_aterm_map_spec(specification.mappings()),
                detail::data_equation_list_to_aterm_eqn_spec(specification.equations())));
+    }
+
+    /// \brief Removes all system defined sorts, constructors, mappings and equations
+    /// \warning this makes a data specification incomplete with respect to system defined
+    /// sorts, constructors, mappings and equations
+    inline data_specification& remove_all_system_defined(data_specification& specification)
+    {
+      specification.purge_system_defined();
+
+      return specification;
+    }
+
+    /// \brief Removes all system defined sorts, constructors, mappings and equations
+    /// \warning this makes a data specification incomplete with respect to system defined
+    /// sorts, constructors, mappings and equations
+    inline data_specification remove_all_system_defined(data_specification const& specification)
+    {
+      data_specification new_specification(specification);
+
+      new_specification.purge_system_defined();
+
+      return new_specification;
     }
 
     inline

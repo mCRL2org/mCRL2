@@ -8,6 +8,7 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/lambda.h"
 #include "mcrl2/new_data/forall.h"
 #include "mcrl2/new_data/container_sort.h"
@@ -32,7 +33,7 @@ namespace mcrl2 {
         return bag;
       }
 
-      /// \brief Recogniser for sort expression Bag(S)
+      /// \brief Recogniser for sort expression Bag(s)
       /// \param e A sort expression
       /// \return true iff e is a container sort of which the name matches
       ///      bag
@@ -567,6 +568,17 @@ namespace mcrl2 {
         return result;
       }
 
+      /// \brief Add sort, constructors, mappings and equations for bag
+      /// \param specification A specification
+      /// \param the sort of elements stored by the container
+      inline
+      void add_bag_to_specification(data_specification& specification, sort_expression const& element)
+      {
+         specification.add_system_defined_sort(bag(element));
+         specification.add_system_defined_constructors(boost::make_iterator_range(bag_generate_constructors_code()));
+         specification.add_system_defined_mappings(boost::make_iterator_range(bag_generate_functions_code(element)));
+         specification.add_system_defined_equations(boost::make_iterator_range(bag_generate_equations_code(element)));
+      }
     } // namespace sort_bag
 
   } // namespace new_data

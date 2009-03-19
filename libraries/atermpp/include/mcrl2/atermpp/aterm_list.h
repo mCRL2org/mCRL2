@@ -223,7 +223,7 @@ namespace atermpp {
       /// \brief Applies a low level substitution function to this term and returns the result.
       /// \param f A
       /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+      /// This function is applied to all <tt>aterm</tt> nodes appearing in this term.
       /// \deprecated
       /// \return The substitution result.
       template <typename Substitution>

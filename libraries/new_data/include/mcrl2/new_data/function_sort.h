@@ -160,7 +160,7 @@ namespace mcrl2 {
         inline
         domain_const_range domain() const
         {
-          return boost::make_iterator_range(add_random_access< sort_expression >(atermpp::list_arg1(*this)));
+          return domain_const_range(add_random_access< sort_expression >(atermpp::list_arg1(*this)));
         }
 
         /// \brief Returns the codomain of the sort.

@@ -8,6 +8,7 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/pos.h"
 
@@ -2032,6 +2033,16 @@ namespace mcrl2 {
         return result;
       }
 
+      /// \brief Add sort, constructors, mappings and equations for nat
+      /// \param specification A specification
+      inline
+      void add_nat_to_specification(data_specification& specification)
+      {
+         specification.add_system_defined_sort(nat());
+         specification.add_system_defined_constructors(boost::make_iterator_range(nat_generate_constructors_code()));
+         specification.add_system_defined_mappings(boost::make_iterator_range(nat_generate_functions_code()));
+         specification.add_system_defined_equations(boost::make_iterator_range(nat_generate_equations_code()));
+      }
     } // namespace sort_nat
 
   } // namespace new_data

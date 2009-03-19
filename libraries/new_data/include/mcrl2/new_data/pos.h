@@ -8,6 +8,7 @@
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/bool.h"
 
 namespace mcrl2 {
@@ -698,6 +699,16 @@ namespace mcrl2 {
         return result;
       }
 
+      /// \brief Add sort, constructors, mappings and equations for pos
+      /// \param specification A specification
+      inline
+      void add_pos_to_specification(data_specification& specification)
+      {
+         specification.add_system_defined_sort(pos());
+         specification.add_system_defined_constructors(boost::make_iterator_range(pos_generate_constructors_code()));
+         specification.add_system_defined_mappings(boost::make_iterator_range(pos_generate_functions_code()));
+         specification.add_system_defined_equations(boost::make_iterator_range(pos_generate_equations_code()));
+      }
     } // namespace sort_pos
 
   } // namespace new_data
