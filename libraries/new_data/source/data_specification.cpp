@@ -202,6 +202,7 @@ namespace mcrl2 {
       }
       else if (sort == sort_nat::nat())
       {
+        add_sort(sort_nat::natpair());
         sort_nat::add_nat_to_specification(*this);
       }
       else if (sort == sort_pos::pos())

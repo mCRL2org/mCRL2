@@ -253,9 +253,9 @@ int test_main(int argc, char** argv) {
 
   empty_test();
 
-//  list_test< classic_enumerator< > >(512);
-//  tree_test< void >(1096);
-//  mutually_recursive_test< void >(1096);
+  list_test< classic_enumerator< > >(512);
+  tree_test< classic_enumerator< > >(1096);
+  mutually_recursive_test< classic_enumerator< > >(1096);
 
   return EXIT_SUCCESS;
 }
