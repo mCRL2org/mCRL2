@@ -13,6 +13,7 @@ test-suite aterm
       [ run aterm_traits_test.cpp ]
       [ run make_match_test.cpp ]
       [ run aterm_list_test.cpp ]
+      [ run aterm_balanced_tree_test.cpp ]
       [ run aterm_test.cpp ]
       [ run function_test.cpp ]
       [ run make_term.cpp ]
