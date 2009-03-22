@@ -67,6 +67,7 @@ using atermpp::make_substitution;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::pbes_system::pbes_expr;
 using bes::bes_expression;
 
 //Function declarations used by main program
@@ -84,8 +85,12 @@ pbes<> load_pbes(t_tool_options tool_options);
 //Post: tool_options.infilename contains a PBES ("" indicates stdin)
 //Ret: The pbes loaded from infile
 
-static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equations);
-static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equations);
+static void save_bes_in_pbes_format(
+                          const string &outfilename,
+                          bes::equations &bes_equations, 
+                          const pbes<> &p);
+static void save_bes_in_cwi_format(const string &outfilename,bes::equations &bes_equations);
+static void save_bes_in_vasy_format(const string &outfilename,bes::equations bes_equations);
 //Post: pbes_spec is saved in cwi-format
 //Ret: -
 
@@ -288,6 +293,10 @@ void process(t_tool_options const& tool_options)
   else if (tool_options.opt_outputformat == "vasy")
   { //Save resulting bes if necessary.
     save_bes_in_vasy_format(tool_options.outfilename,bes_equations);
+  }
+  else if (tool_options.opt_outputformat == "binary")
+  { //Save resulting bes if necessary.
+    save_bes_in_pbes_format(tool_options.outfilename,bes_equations,pbes_spec);
   }
   else
   {
@@ -1438,7 +1447,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
 }
 
 
-static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equations)
+static void save_bes_in_vasy_format(const string &outfilename,bes::equations bes_equations)
 {
   gsVerboseMsg("Converting result to VASY-format...\n");
   // Use an indexed set to keep track of the variables and their vasy-representations
@@ -1446,12 +1455,12 @@ static void save_bes_in_vasy_format(string outfilename,bes::equations &bes_equat
   /* First translate the right hand sides of the equations such that they only
      contain only conjunctions of disjunctions. Note that dynamically new
      equations are added during the translation process in "translate_equation_for_vasy"
-     that must alos be translated. */
+     that must also be translated. */
 
   for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    {
-        bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
-    }
+  {
+    bes_equations.set_rhs(i,translate_equation_for_vasy(i,bes_equations.get_rhs(i),both,bes_equations));
+  }
 
   /* Second give a consecutive index to each variable of a particular rank */
 
@@ -1576,7 +1585,7 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
 
 //function save_bes_in_cwi_format
 //--------------------------------
-static void save_bes_in_cwi_format(string outfilename,bes::equations &bes_equations)
+static void save_bes_in_cwi_format(const string &outfilename,bes::equations &bes_equations)
 {
   gsVerboseMsg("Converting result to CWI-format...\n");
   // Use an indexed set to keep track of the variables and their cwi-representations
@@ -1659,7 +1668,8 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
       save_rhs_in_cwi_form(outputfile,and_(condition(b),y),bes_equations);
     }
     else
-    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
+    { ATfprintf(stderr,"WHAT: %t\n",(ATerm)b);
+      gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
       exit(1);
     }
   }
@@ -1670,3 +1680,93 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
   }
   return;
 }
+
+static pbes_expression generate_rhs_as_formula(bes_expression b);
+
+//function save_bes_in_pbes_format
+//--------------------------------
+static void save_bes_in_pbes_format(
+                   const string &outfilename,
+                   bes::equations &bes_equations,
+                   const pbes<> &p)
+{
+  gsVerboseMsg("Converting result to PBES-format...\n");
+  // Use an indexed set to keep track of the variables and their pbes-representations
+
+  atermpp::vector < pbes_equation > eqns;
+  for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
+  { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
+    { 
+      if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
+      {  pbes_expression pbe=generate_rhs_as_formula(bes_equations.get_rhs(i));
+         stringstream variable_name;
+         variable_name << "X" << i;
+         eqns.push_back(
+               pbes_equation(
+                  bes_equations.get_fixpoint_symbol(i),
+                  propositional_variable(variable_name.str()),
+                  generate_rhs_as_formula(bes_equations.get_rhs(i))));
+      }
+    }
+  }
+
+  pbes<> p1(p.data(),eqns,atermpp::set<data_variable>(),propositional_variable_instantiation("X1"));
+  p1.save(outfilename);
+}
+
+//function save_rhs_in_pbes
+//---------------------------
+static pbes_expression generate_rhs_as_formula(bes_expression b)
+{ 
+  if (bes::is_true(b))
+  { return true_();
+  }
+  else if (bes::is_false(b))
+  { return false_();
+  }
+  else if (bes::is_and(b))
+  { return and_(generate_rhs_as_formula(lhs(b)),
+                generate_rhs_as_formula(rhs(b)));
+  }
+  else if (bes::is_or(b))
+  { return or_(generate_rhs_as_formula(lhs(b)),
+               generate_rhs_as_formula(rhs(b)));
+  }
+  else if (bes::is_variable(b))
+  { stringstream converter;
+    converter << "X" << get_variable(b);
+    return   propositional_variable_instantiation(converter.str());
+  }
+  else if (bes::is_if(b))
+  { //BESIF(x,y,z) => (x & y) | (!x&z)
+    //If y is true, this reduces to (x | z)
+    //If z is false, this reduces to (x & y)
+    //Otherwise, the result is not monotonic,
+    //which ought not to be possible.
+    const bes_expression y=then_branch(b);
+    const bes_expression z=else_branch(b);
+    if (is_true(y))
+    { if (is_false(z))
+      { generate_rhs_as_formula(condition(b));
+      }
+      else
+      { generate_rhs_as_formula(or_(condition(b),z));
+      }
+    }
+    else if (is_false(z))
+    { // not is_true(y)
+      generate_rhs_as_formula(and_(condition(b),y));
+    }
+    else
+    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in PBES-format.\n");
+      exit(1);
+    }
+  }
+  else
+  {
+    gsErrorMsg("The generated equation system is not a BES. It cannot be saved in CWI-format.\n");
+    exit(1);
+  }
+  return true_();
+}
+
