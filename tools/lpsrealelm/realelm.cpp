@@ -762,11 +762,11 @@ static void add_postponed_inequalities_to_context(
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
                 atermpp::vector < data_expression > &inequalities_to_add,
-                const  vector < linear_inequality > l,
+                vector < linear_inequality > &l,
                 context_type& context,
                 const rewriter& r)
 { assert(inequalities_to_add.size() % 2==0);
-  for(vector < linear_inequality > ::const_iterator i = l.begin(); i != l.end(); ++i)
+  for(vector < linear_inequality > ::iterator i = l.begin(); i != l.end(); )
   {
     data_expression left;
     data_expression right;
@@ -777,6 +777,7 @@ static void add_inequalities_to_context_postponed(
       for(context_type::const_iterator c=context.begin() ; c!=context.end() && pair_is_new; ++c)
       { if ((c->get_lowerbound()==left) && (c->get_upperbound()==right))
         { pair_is_new=false;
+          ++i;
         }
       }
       if (pair_is_new)
@@ -784,14 +785,25 @@ static void add_inequalities_to_context_postponed(
                    j!=inequalities_to_add.end() && pair_is_new ; j=j+2)
         { if ((*j==left) && (*(j+1)==right))
           { pair_is_new=false;
+            ++i;
           }
         }
-        if(pair_is_new)
-        {
-          inequalities_to_add.push_back(left);
-          inequalities_to_add.push_back(right);
+        if (pair_is_new)
+        { if (is_a_redundant_inequality(l,i,r))
+          { i->swap(l.back());
+            l.pop_back();
+          }
+          else
+          { 
+            inequalities_to_add.push_back(left);
+            inequalities_to_add.push_back(right);
+            ++i;
+          }
         }
       }
+    }
+    else
+    { ++i;
     }
   }
 }
@@ -997,153 +1009,6 @@ data_assignment_list determine_process_initialization(
 }
 
 
-/* static void generate_xi_conditions_rec(
-              const context_type::const_reverse_iterator context_begin,
-              const context_type::const_reverse_iterator context_end,
-              vector < linear_inequality > &condition_list,
-              const data_expression_list comp_value_list,
-              vector < data_expression_list > &resulting_comp_values,
-              const rewriter &r)
-{ if (context_begin==context_end)
-  { // TODO: filter the comp value list to only contain
-    // those conditions on xi variables that match with
-    // conditions in the condition list.
-
-    // OLD CODE: resulting_conditions.push_back(condition_list);
-    // std::cerr << "Generate " << pp(comp_value_list) << "   " << pp_vector(condition_list) << "\n";
-    resulting_comp_values.push_back(comp_value_list);
-    return;
-  }
-
-  unsigned int old_size=condition_list.size();
-  condition_list.push_back(linear_inequality(
-                                    context_begin->get_lowerbound(),
-                                    context_begin->get_upperbound(),
-                                    linear_inequality::equal,
-                                    r));
-  // std::cerr << "condition list " << pp_vector(condition_list) << "\n";
-
-  vector < linear_inequality > new_condition_list;
-  remove_redundant_inequalities(condition_list,new_condition_list,r);
-  // std::cerr << "new condition list " << pp_vector(new_condition_list) << "\n";
-  data_expression_list new_comp_value_list=
-                                push_front(comp_value_list,
-                                    data_expression(is_equal(context_begin->get_variable())));
-
-  // if (!is_inconsistent(new_condition_list,r))
-  if (new_condition_list.empty() || !new_condition_list.front().is_false())
-  { generate_xi_conditions_rec(context_begin+1,
-                                      context_end,
-                                      new_condition_list,
-                                      new_comp_value_list,
-                                      resulting_comp_values,
-                                      r);
-  }
-  condition_list[old_size]=linear_inequality(
-                                    context_begin->get_lowerbound(),
-                                    context_begin->get_upperbound(),
-                                    linear_inequality::less,
-                                    r);
-  new_condition_list.clear();
-  remove_redundant_inequalities(condition_list,new_condition_list,r);
-
-  new_comp_value_list= push_front(comp_value_list,
-                                 data_expression(is_smaller(context_begin->get_variable())));
-
-  // if (!is_inconsistent(new_condition_list,r))
-  if (new_condition_list.empty() || !new_condition_list.front().is_false())
-  { generate_xi_conditions_rec(context_begin+1,
-                                      context_end,
-                                      new_condition_list,
-                                      new_comp_value_list,
-                                      resulting_comp_values,
-                                      r);
-  }
-
-  condition_list[old_size]=linear_inequality(
-                                    context_begin->get_upperbound(),
-                                    context_begin->get_lowerbound(),
-                                    linear_inequality::less,
-                                    r);
-  new_condition_list.clear();
-  remove_redundant_inequalities(condition_list,new_condition_list,r);
-
-  new_comp_value_list=push_front(comp_value_list,
-                                 data_expression(is_larger(context_begin->get_variable())));
-
-  // if (!is_inconsistent(new_condition_list,r))
-  if (new_condition_list.empty() || !new_condition_list.front().is_false())
-  { generate_xi_conditions_rec(context_begin+1,
-                                      context_end,
-                                      new_condition_list,
-                                      new_comp_value_list,
-                                      resulting_comp_values,
-                                      r);
-  }
-  condition_list.pop_back();
-} 
-
-/// \brief generate all combinations of contexts that are not inconsistent with each other
-///
-/// \param context The context variables from which the combinations must be generated.
-/// \param resulting_comp_values A vector with lists of values for the zeta/xi variables.
-///                              Depending on the parameter value_no_condition each list
-///                              contains values smaller, equal or greater corresponding to
-///                              the corresponding list in the result, or it contains
-///                              conditions is_smaller(xi), is_equal(xi) and is_greater(xi).
-/// \ret A vector containing consistent lists of conditions corresponding to context.
-static atermpp::vector < data_expression_list >
-       generate_xi_conditions(
-                   const context_type &context,
-                   const vector < linear_inequality > &context_conditions,
-                   const rewriter &r)
-{ atermpp::vector < data_expression_list > resulting_comp_values;
-  vector < linear_inequality > new_context_conditions;
-  remove_redundant_inequalities(context_conditions,new_context_conditions,r);
-  // std::cerr << "context conditions " << pp_vector(context_conditions) << std::endl;
-  // std::cerr << "new context conditions " << pp_vector(new_context_conditions) << std::endl;
-//  linear_inequality front = new_constext_conditions.front();
-  // if (!is_inconsistent(new_context_conditions,r))
-  if (new_context_conditions.empty() || !new_context_conditions.front().is_false())
-  { generate_xi_conditions_rec(
-                   context.rbegin(),
-                   context.rend(),
-                   new_context_conditions,
-                   data_expression_list(),
-                   resulting_comp_values,
-                   r);
-  }
-  return resulting_comp_values;
-} */
-
-// Check whether variables in the first two arguments coincide with those in the last two
-/* static bool are_data_variables_shared(
-                 const data_expression d1,
-                 const data_expression d2,
-                 const vector < linear_inequality > &l)
-{
-  std::set < data_variable> s1=find_all_data_variables(d1);
-  std::set < data_variable> s2=find_all_data_variables(d2);
-
-  // Check whether the variables in d1 and d2 occur in e.
-  atermpp::set < data_variable> s3;
-  for(vector < linear_inequality >::const_iterator i=l.begin();
-               i!=l.end(); ++i)
-  { i->add_variables(s3);
-  }
-
-  for(std::set < data_variable>::iterator i=s3.begin();
-              i!=s3.end(); i++)
-  { if ((s1.count(*i)>0) || (s2.count(*i)>0))
-    { // found
-      return true;
-    }
-  }
-
-  // So, the variables in d1 and d2 do not occur in e and l.
-  return false;
-} */
-
 /// \brief Perform elimination of real variables on a specification in a maximum
 ///        number of iterations.
 /// \param s A specification
@@ -1192,10 +1057,10 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
                         ++ nextstate_combination) // ,++ nextstate_value)
       {
         // zeta[x := g(x)]
-        vector < linear_inequality > zeta_condition=*nextstate_combination;
+        // vector < linear_inequality > zeta_condition=*nextstate_combination;
 
         // original condition of the summand && zeta[x := g(x)]
-        vector < linear_inequality >  condition = *nextstate_combination;
+        // vector < linear_inequality >  condition = *nextstate_combination;
         // condition.insert(condition.end(),
         //                 i->get_summand_real_conditions_begin(),
         //                 i->get_summand_real_conditions_end());
@@ -1210,14 +1075,15 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // std::cerr << "SUMVARS " << pp(sumvars) << "\n" ;
         // std::cerr << "CONDITION IN" << pp_vector(condition) << "\n" ;
         
-        fourier_motzkin(condition, 
+        fourier_motzkin(*nextstate_combination,
                         sumvars.begin(),
                         sumvars.end(),
                         condition1,
                         r);
-        condition.clear();
+        // condition.clear();
         // Line below is the bottleneck in the second iteration for the railwaycrossing example.
-        remove_redundant_inequalities(condition1,condition,r);
+        // vector < linear_inequality >  condition2; 
+        // remove_redundant_inequalities(condition1,condition2,r);
         // std::cerr << "CONDITION OUT" << pp_vector(condition) << "\n" ;
 
         // First check which of these inequalities are equivalent to concrete values of xi variables.
@@ -1225,10 +1091,11 @@ specification realelm(specification s, int max_iterations, RewriteStrategy strat
         // context combinations to be considered for the xi variables.
 
 
-        if (condition.empty() || !condition.front().is_false())
+        // if (condition.empty() || !condition.front().is_false())
+        if (!is_inconsistent(condition1,r))
         {
           // condition contains the inequalities over the process parameters
-          add_inequalities_to_context_postponed(new_inequalities,condition, context, r);
+          add_inequalities_to_context_postponed(new_inequalities,condition1, context, r);
         }
       }
     }

@@ -705,6 +705,65 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 
 
 
+/// \brief Indicate whether an inequality from a set of inequalities is redundant.
+/// \details Return whether the inequality referred to by i is inconsistent.
+///          It is expected that i refers to an equality in the vector inequalities.
+///          The vector inequalities might be changed within the procedure, but
+///          will be restored to its original value when this function terminates.
+/// \param inequalities A list of inequalities
+/// \param resulting_inequalities A list of inequalities to which the result is stored.
+///                               Initially this list must be empty.
+/// \param r A rewriter
+/// \ret An indication whether the inequality referred to by i is inconsistent
+///      in the context of inequalities.
+inline bool is_a_redundant_inequality(
+              const std::vector < linear_inequality > &inequalities,
+              const std::vector < linear_inequality > :: iterator i, 
+              const rewriter &r)
+{
+#ifndef NDEBUG
+  // Check that i points to some position in inequalities.
+  bool found=false;
+  for(std::vector < linear_inequality >:: const_iterator j=inequalities.begin() ;
+           j!=inequalities.end() ; ++j)
+  { if (j==i)
+    { found=true;
+      break;
+    }
+  }
+  assert(found);
+#endif
+  // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
+  // If yes, the i-th inequality is redundant.
+  if (i->comparison()==linear_inequality::equal)
+  { // An inequality t==u is only redundant for equalities if
+    // t<u and t>u are both inconsistent
+    i->set_comparison(linear_inequality::less);
+    if (is_inconsistent(inequalities,r))
+    { i->invert(r);
+      if (is_inconsistent(inequalities,r))
+      { i->set_comparison(linear_inequality::equal);
+        return true;
+      }
+    }
+    i->set_comparison(linear_inequality::equal);
+    return false;
+  }
+  else
+  { // an inequality t<u, t<=u, t>u and t>=u is redundant in equalities
+    // if its inversion is inconsistent.
+    i->invert(r);
+    if (is_inconsistent(inequalities,r))
+    { i->invert(r);
+      return true;
+    }
+    else
+    { i->invert(r);
+      return false;
+    }
+  }
+}
+
 /// \brief Remove every redundant inequality from a set of inequalities.
 /// \details If inequalities is inconsistent, [false] is returned. Otherwise
 ///          a list of inequalities is returned, from which no inequality can
@@ -741,8 +800,11 @@ inline void remove_redundant_inequalities(
     }
     else
     {
-      resulting_inequalities[i].invert(r);
-      if (is_inconsistent(resulting_inequalities,r))
+      // resulting_inequalities[i].invert(r);
+      // if (is_inconsistent(resulting_inequalities,r))
+      if (is_a_redundant_inequality(resulting_inequalities,
+                                    resulting_inequalities.begin()+i,
+                                    r))
       {
         if (i+1<resulting_inequalities.size())
         { // Copy the last element to the current position.
@@ -752,7 +814,6 @@ inline void remove_redundant_inequalities(
       }
       else
       {
-        resulting_inequalities[i].invert(r);
         ++i;
       }
     }

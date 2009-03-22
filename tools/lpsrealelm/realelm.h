@@ -107,6 +107,11 @@ class summand_information
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     vector < vector < linear_inequality > > nextstate_context_combinations;
+    // vector < vector < linear_inequality > > residual_inequalities; // These are inequalities equal to 
+                                                                   // xi conditions which are used in the current
+                                                                   // summand to be generated, but not added
+                                                                   // to the context combinations. Adding them
+                                                                   // is only necessary, if variables overlap.
     atermpp::vector < data_expression_list > nextstate_value_combinations;
     // context_type local_context;
 
@@ -125,8 +130,13 @@ class summand_information
       new_values_for_xi_variables(),
       summand_real_conditions(src),
       summand_real_nextstate_map(srnm),
+      // Remove the variables in src that do not occur in nextstate via
+      // fourier motzkin, because they are not needed for further calculations.
+      // vector < linear_inequality >() reduced_src;
+      // fourier_motzkin(src,vars.begin(),vars().end(),reduced_src);
+      // nextstate_context_combinations(1,reduced_src),
       nextstate_context_combinations(1,src),
-      // nextstate_context_combinations(1,vector < linear_inequality >()),
+      // residual_inequalities(1,vector < linear_inequality >()),
       nextstate_value_combinations(1,data_expression_list())
     { smd.protect();
       real_summation_variables.protect();
@@ -145,6 +155,7 @@ class summand_information
       summand_real_conditions=s.summand_real_conditions;
       summand_real_nextstate_map=s.summand_real_nextstate_map;
       nextstate_context_combinations=s.nextstate_context_combinations;
+      // residual_inequalities=s.residual_inequalities;
       nextstate_value_combinations=s.nextstate_value_combinations;
     }
 
@@ -196,6 +207,14 @@ class summand_information
     vector < vector < linear_inequality > > :: const_iterator nextstate_context_combinations_end() const
     { return nextstate_context_combinations.end();
     }
+
+    /* vector < vector < linear_inequality > > :: const_iterator residual_inequalities_begin() const
+    { return residual_inequalities.begin();
+    }
+
+    vector < vector < linear_inequality > > :: const_iterator residual_inequalities_end() const
+    { return residual_inequalities.end();
+    } */
 
     atermpp::vector < data_expression_list > :: const_iterator nextstate_value_combinations_begin() const
     { return nextstate_value_combinations.begin();
@@ -327,74 +346,95 @@ class summand_information
 
         vector < vector < linear_inequality > > new_nextstate_context_combinations;
         atermpp::vector < data_expression_list > new_nextstate_value_combinations;
+        // atermpp::vector < vector < linear_inequality > > new_residual_inequalities; 
+        // atermpp::vector < vector < linear_inequality > > ::const_iterator k=residual_inequalities.begin();
         atermpp::vector < data_expression_list >::const_iterator j=nextstate_value_combinations.begin();
         for(vector < vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
-                    i!=nextstate_context_combinations.end(); ++i,++j)
-        { vector < linear_inequality > vec_lin_eq;
-          vec_lin_eq.swap(*i);
-          unsigned int old_size=vec_lin_eq.size();
-          vector < linear_inequality > new_condition_list;
-          vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
-          remove_redundant_inequalities(
-                    vec_lin_eq,
-                    new_condition_list,
-                    r);
-          // std::cerr << "New conditions list 1 " << pp_vector(new_condition_list) << "\n";
-          // if (!is_inconsistent(new_condition_list,r))
-          if (new_condition_list.empty() || !new_condition_list.front().is_false())
-          { new_nextstate_context_combinations.push_back(new_condition_list);
-            if (new_values_for_xi_variables.back()==data_expression())
-            { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
-            }
-            else 
-            { new_nextstate_value_combinations.push_back(*j);
-            }
-          // std::cerr << "New values list 1 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
+                    i!=nextstate_context_combinations.end(); ++i,++j/* ,++k*/)
+        { if (new_values_for_xi_variables.back()!=data_expression()) // i.e. it is a xi variable.
+          { 
+            //vector < linear_inequality > k_aux= *k;
+            //k_aux.push_back(linear_inequality(t,u,linear_inequality::equal,r)); // Niet goed, niet altijd juiste xi variabele.
+            // new_residual_inequalities.push_back(k_aux);
+            new_nextstate_value_combinations.push_back(*j); // This can be done more efficiently,
+            new_nextstate_context_combinations.push_back(*i); // by not copying the arrays step by step.
           }
-
-          vec_lin_eq[old_size]=linear_inequality(t,u,linear_inequality::less,r);
-          new_condition_list.clear();
-          remove_redundant_inequalities(
-                    vec_lin_eq,
-                    new_condition_list,
-                    r);
-          // std::cerr << "New conditions list 2 " << pp_vector(new_condition_list) << "\n";
-          // if (!is_inconsistent(new_condition_list,r))
-          if (new_condition_list.empty() || !new_condition_list.front().is_false())
-          { new_nextstate_context_combinations.push_back(new_condition_list);
-            if (new_values_for_xi_variables.back()==data_expression())
-            { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
+          else 
+          { 
+            // Three times is intensional.
+            // new_residual_inequalities.push_back(*k);
+            // new_residual_inequalities.push_back(*k);
+            // new_residual_inequalities.push_back(*k);
+            vector < linear_inequality > vec_lin_eq;
+            vec_lin_eq.swap(*i);
+            unsigned int old_size=vec_lin_eq.size();
+            // vector < linear_inequality > new_condition_list;
+            vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
+            /* remove_redundant_inequalities(
+                      vec_lin_eq,
+                      new_condition_list,
+                      r); */
+            // std::cerr << "New conditions list 1 " << pp_vector(new_condition_list) << "\n";
+            if (!is_inconsistent(vec_lin_eq,r))
+            // if (new_condition_list.empty() || !new_condition_list.front().is_false())
+            { // new_nextstate_context_combinations.push_back(new_condition_list);
+              new_nextstate_context_combinations.push_back(vec_lin_eq);
+              if (new_values_for_xi_variables.back()==data_expression())
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
+              }
+              else 
+              { new_nextstate_value_combinations.push_back(*j);
+              }
+            // std::cerr << "New values list 1 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
             }
-            else 
-            { new_nextstate_value_combinations.push_back(*j);
+  
+            vec_lin_eq[old_size]=linear_inequality(t,u,linear_inequality::less,r);
+            /* new_condition_list.clear();
+            remove_redundant_inequalities(
+                      vec_lin_eq,
+                      new_condition_list,
+                      r); */
+            // std::cerr << "New conditions list 2 " << pp_vector(new_condition_list) << "\n";
+            if (!is_inconsistent(vec_lin_eq,r))
+            // if (new_condition_list.empty() || !new_condition_list.front().is_false())
+            { // new_nextstate_context_combinations.push_back(new_condition_list);
+              new_nextstate_context_combinations.push_back(vec_lin_eq);
+              if (new_values_for_xi_variables.back()==data_expression())
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
+              }
+              else 
+              { new_nextstate_value_combinations.push_back(*j);
+              }
+            // std::cerr << "New values list 2 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
             }
-          // std::cerr << "New values list 2 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
+  
+            // std::cerr << "HUH " << pp(u) << " < " << pp(t) << "\n";
+            vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
+            // new_condition_list.clear();
+            /* std::cerr << "Before remove redunda " << pp_vector(vec_lin_eq) << "\n";
+            remove_redundant_inequalities(
+                      vec_lin_eq,
+                      new_condition_list,
+                      r); */
+            // std::cerr << "New conditions list 3 " << pp_vector(new_condition_list) << "\n";
+            // if (!is_inconsistent(new_condition_list,r))
+            // if (new_condition_list.empty() || !new_condition_list.front().is_false())
+            if (!is_inconsistent(vec_lin_eq,r))
+            { // new_nextstate_context_combinations.push_back(new_condition_list);
+              new_nextstate_context_combinations.push_back(vec_lin_eq);
+              if (new_values_for_xi_variables.back()==data_expression())
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(larger())));
+              }
+              else 
+              { new_nextstate_value_combinations.push_back(*j);
+              }
+            // std::cerr << "New values list 3 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
+            }
           }
-
-          // std::cerr << "HUH " << pp(u) << " < " << pp(t) << "\n";
-          vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
-          new_condition_list.clear();
-          // std::cerr << "Before remove redunda " << pp_vector(vec_lin_eq) << "\n";
-          remove_redundant_inequalities(
-                    vec_lin_eq,
-                    new_condition_list,
-                    r);
-          // std::cerr << "New conditions list 3 " << pp_vector(new_condition_list) << "\n";
-          // if (!is_inconsistent(new_condition_list,r))
-          if (new_condition_list.empty() || !new_condition_list.front().is_false())
-          { new_nextstate_context_combinations.push_back(new_condition_list);
-            if (new_values_for_xi_variables.back()==data_expression())
-            { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(larger())));
-            }
-            else 
-            { new_nextstate_value_combinations.push_back(*j);
-            }
-          // std::cerr << "New values list 3 " << pp(reverse(new_nextstate_value_combinations.back())) << "\n";
-          }
-
         }
         nextstate_value_combinations.swap(new_nextstate_value_combinations);
         nextstate_context_combinations.swap(new_nextstate_context_combinations);
+        // residual_inequalities.swap(new_residual_inequalities);
       }
     }
 };
