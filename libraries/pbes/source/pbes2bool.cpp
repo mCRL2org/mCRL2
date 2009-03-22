@@ -294,7 +294,7 @@ void process(t_tool_options const& tool_options)
   { //Save resulting bes if necessary.
     save_bes_in_vasy_format(tool_options.outfilename,bes_equations);
   }
-  else if (tool_options.opt_outputformat == "binary")
+  else if (tool_options.opt_outputformat == "pbes")
   { //Save resulting bes if necessary.
     save_bes_in_pbes_format(tool_options.outfilename,bes_equations,pbes_spec);
   }
