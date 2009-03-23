@@ -172,15 +172,15 @@ void test4()
 // that satisfy n < 3, with n:Nat.
 void test5()
 {
-	data_specification data_spec;
+  data_specification data_spec;
   data_spec.import_system_defined_sort(sort_nat::nat());
   rewriter datar(data_spec);
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
   atermpp::deque<data_expression_with_variables> v;
-  variable n = parse_data_expression("n", "n: Nat;\n");
+  variable n("n", sort_nat::nat());
   v.push_front(data_expression_with_variables(n, make_list(n)));
-  data_expression_with_variables three = sort_nat::pos2nat(parse_data_expression("3"));
+  data_expression_with_variables three = sort_nat::nat(3);
 
   while (!v.empty())
   {

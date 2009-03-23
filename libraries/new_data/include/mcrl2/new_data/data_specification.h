@@ -22,17 +22,18 @@
 #include "mcrl2/core/print.h"
 
 // sorts
-#include "sort_expression.h"
-#include "alias.h"
-#include "container_sort.h"
-#include "function_sort.h"
+#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/alias.h"
+#include "mcrl2/new_data/container_sort.h"
+#include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/new_data/standard.h"
 
 // new_data expressions
-#include "data_expression.h"
-#include "function_symbol.h"
-#include "application.h"
+#include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/application.h"
 
-#include "data_equation.h"
+#include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/detail/compatibility.h"
 
 namespace mcrl2 {
@@ -40,9 +41,6 @@ namespace mcrl2 {
   namespace new_data {
 
     class data_specification;
-
-//    data_specification& remove_all_system_defined(data_specification& specification);
-//    data_specification  remove_all_system_defined(data_specification const& specification);
 
     /// \brief new_data specification.
     ///
@@ -320,6 +318,8 @@ namespace mcrl2 {
       {
         assert(std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end());
         m_sorts.insert(s);
+        add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
+        add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
         make_system_defined_complete(s);
       }
 

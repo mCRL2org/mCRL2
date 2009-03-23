@@ -64,7 +64,7 @@ namespace mcrl2 {
     application not_equal_to(const data_expression& arg0, const data_expression& arg1)
     {
       assert(arg0.sort() == arg1.sort());
-      
+
       return application(not_equal_to(arg0.sort()),arg0, arg1);
     }
 
@@ -100,7 +100,7 @@ namespace mcrl2 {
     {
       assert(sort_bool_::is_bool_(arg0.sort()));
       assert(arg1.sort() == arg2.sort());
-      
+
       return application(if_(arg1.sort()), arg0, arg1, arg2);
     }
 
@@ -223,7 +223,7 @@ namespace mcrl2 {
       function_symbol greater_equal(">=", function_sort(s, s, sort_bool_::bool_()));
       return greater_equal;
     }
-    
+
     // Recogniser for >=
     bool is_greater_equal_function_symbol(const data_expression& e)
     {

@@ -169,14 +169,16 @@ void test_functions()
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
-  data_specification spec(remove_all_system_defined(data_specification()));
+  data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
-  data_specification spec1(spec);
+  data_specification spec1(remove_all_system_defined(spec));
   spec.add_mapping(f);
   spec.add_mapping(g);
   spec.add_mapping(h);
   spec1.add_mappings(fghl_range);
+
+  remove_all_system_defined(spec);
 
   function_symbol_vector mappings(boost::copy_range< function_symbol_vector >(spec.mappings()));
   BOOST_CHECK(mappings.size() == 3);
@@ -242,8 +244,8 @@ void test_equations()
   spec1.add_equations(fxxl_range);
 
   BOOST_CHECK(spec == spec1);
-  BOOST_CHECK(spec.equations() == fxxl_range);
-  BOOST_CHECK(spec1.equations() == fxxl_range);
+  BOOST_CHECK(remove_all_system_defined(spec).equations() == fxxl_range);
+  BOOST_CHECK(remove_all_system_defined(spec1).equations() == fxxl_range);
 
   data_equation fxf(x_range, x, fx, f);
   data_equation_vector fxfl(make_vector(fxf));

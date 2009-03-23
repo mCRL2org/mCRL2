@@ -13,7 +13,6 @@ namespace mcrl2 {
     namespace concepts {
 
       BOOST_concept(Substitution,(S)) :
-           boost::DefaultConstructible< S >,
            boost::UnaryFunction< S, typename S::expression_type, typename S::expression_type > {
 
         typedef typename S::variable_type   variable_type;
@@ -32,7 +31,9 @@ namespace mcrl2 {
         }
       };
 
-      BOOST_concept(MutableSubstitution,(S)) : Substitution< S > {
+      BOOST_concept(MutableSubstitution,(S)) :
+           boost::DefaultConstructible< S >,
+           Substitution< S > {
 
         typedef typename S::variable_type   variable_type;
         typedef typename S::expression_type expression_type;
