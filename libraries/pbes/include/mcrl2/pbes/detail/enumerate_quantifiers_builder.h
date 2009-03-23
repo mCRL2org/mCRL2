@@ -146,8 +146,8 @@ namespace detail {
       template <typename SubstitutionFunction>
       struct sequence_assign
       {
-        typedef typename SubstitutionFunction::variable_type variable_type;
-        typedef typename SubstitutionFunction::term_type     term_type;
+        typedef typename SubstitutionFunction::variable_type   variable_type;
+        typedef typename SubstitutionFunction::expression_type term_type;
 
         SubstitutionFunction& sigma_;
 

@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/variable.h"
 
@@ -27,7 +29,7 @@ namespace mcrl2 {
 
     /// \brief new_data assignment.
     ///
-    class assignment: public atermpp::aterm_appl
+    class assignment: public atermpp::aterm_appl, public core::substitution_function<variable, data_expression>
     {
       public:
 
@@ -76,6 +78,15 @@ namespace mcrl2 {
             return false;
           }
           return true;
+        }
+
+        /// \brief Applies the substitution to a term
+        /// \param x A term
+        /// \return The value <tt>x[lhs() := rhs()]</tt>.
+        template <typename Term>
+        data_expression operator()(const Term& x) const
+        {
+          return atermpp::replace(t, lhs(), rhs());
         }
 
     }; // class assignment

@@ -12,6 +12,11 @@
 #ifndef MCRL2_NEWDATA_DATA_ASSIGNMENT_H
 #define MCRL2_NEWDATA_DATA_ASSIGNMENT_H
 
+#include <utility>
+#include "mcrl2/core/substitution_function.h"
+#include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/data_expression.h"
+
 namespace mcrl2 {
 
 namespace new_data {
@@ -21,7 +26,7 @@ namespace new_data {
 /// \brief Sequence of data assignments.
 // A linear search is done in the list of assignments.
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
-struct assignment_list_substitution
+struct assignment_list_substitution: public core::substitution_function<variable, data_expression>
 {
   /// \brief An assignment list.
   const assignment_list& m_assignments;

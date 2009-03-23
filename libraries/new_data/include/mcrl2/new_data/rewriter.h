@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
+#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/new_data/expression_traits.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/new_data/detail/rewrite.h"
@@ -290,15 +291,9 @@ namespace new_data {
 
   /// \brief Function object that turns a map of substitutions to variables into a substitution function.
   template <typename SubstitutionMap>
-  class rewriter_map: public SubstitutionMap
+  class rewriter_map: public SubstitutionMap, public core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>
   {
     public:
-      /// \brief The mapped type.
-      typedef typename SubstitutionMap::mapped_type term_type;
-
-      /// \brief The key type.
-      typedef typename SubstitutionMap::key_type variable_type;
-
       /// \brief Constructor.
       rewriter_map()
       {}
@@ -320,10 +315,10 @@ namespace new_data {
       /// \brief Function application.
       /// \param v A variable
       /// \return The corresponding value.
-      term_type operator()(const variable_type& v) const
+      expression_type operator()(const variable_type& v) const
       {
         typename SubstitutionMap::const_iterator i = this->find(v);
-        return i == this->end() ? core::term_traits<term_type>::variable2term(v) : i->second;
+        return i == this->end() ? core::term_traits<expression_type>::variable2term(v) : i->second;
       }
 
       /// \brief Returns a string representation of the map, for example [a := 3, b := true].

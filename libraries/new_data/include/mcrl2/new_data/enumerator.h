@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/sequence.h"
+#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/data_specification.h"
@@ -32,7 +33,7 @@ namespace new_data {
 namespace detail {
 
   template <typename VariableContainer, typename ExpressionContainer>
-  struct data_enumerator_replace_helper
+  struct data_enumerator_replace_helper: public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
   {
     const VariableContainer& variables_;
     const ExpressionContainer& replacements_;

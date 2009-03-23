@@ -15,8 +15,10 @@
 #include <utility>
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/new_data/detail/concepts.h"
 
 namespace mcrl2 {
 
@@ -104,19 +106,20 @@ namespace detail {
 template <typename Term, typename ReplaceFunction>
 Term replace_variables(Term t, ReplaceFunction r)
 {
+  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
   return detail::partial_replace(t, replace_variables_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
 template <typename VariableContainer, typename ExpressionContainer>
-struct variable_sequence_replace_helper
+struct variable_sequence_replace_helper: public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
 {
   const VariableContainer& variables_;
   const ExpressionContainer& replacements_;
 
   variable_sequence_replace_helper(const VariableContainer& variables,
-                                        const ExpressionContainer& replacements
-                                       )
+                                   const ExpressionContainer& replacements
+                                  )
     : variables_(variables), replacements_(replacements)
   {
     assert(variables.size() == replacements.size());
@@ -150,16 +153,16 @@ struct variable_sequence_replace_helper
 /// \p variables contains duplicates, the first match is selected.
 template <typename Term, typename VariableContainer, typename ExpressionContainer>
 Term variable_sequence_replace(Term t,
-                                    const VariableContainer& variables,
-                                    const ExpressionContainer& replacements
-                                   )
+                               const VariableContainer& variables,
+                               const ExpressionContainer& replacements
+                              )
 {
   return replace_variables(t, variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
 }
 
 /// \cond INTERNAL_DOCS
 template <typename MapContainer>
-struct variable_map_replace_helper
+struct variable_map_replace_helper: public core::substitution_function<typename MapContainer::key_type, typename MapContainer::mapped_type>
 {
   const MapContainer& replacements_;
 
