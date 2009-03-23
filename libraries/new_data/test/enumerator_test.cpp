@@ -14,9 +14,11 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/function_sort.h"
 #include "mcrl2/new_data/detail/sort_utility.h"
@@ -166,6 +168,44 @@ void test4()
   BOOST_CHECK(z.size() > 0);
 }
 
+// This test verifies that the enumerator is able to find all terms n
+// that satisfy n < 3, with n:Nat.
+void test5()
+{
+	data_specification data_spec;
+  data_spec.import_system_defined_sort(sort_nat::nat());
+  rewriter datar(data_spec);
+  number_postfix_generator generator("x_");
+  data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);
+  atermpp::deque<data_expression_with_variables> v;
+  variable n = parse_data_expression("n", "n: Nat;\n");
+  v.push_front(data_expression_with_variables(n, make_list(n)));
+  data_expression_with_variables three = sort_nat::pos2nat(parse_data_expression("3"));
+
+  while (!v.empty())
+  {
+    data_expression_with_variables e = v.back();
+    v.pop_back();
+    atermpp::vector<data_expression_with_variables> z = datae.enumerate(e);
+    for (atermpp::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
+    {
+      data_expression b = datar(greater(*i, three));
+      if (b == sort_bool_::false_())
+      {
+        std::cout << "found solution " << pp(*i) << std::endl;
+      }
+      if (b == sort_bool_::true_())
+      {
+        std::cout << "found non-solution " << pp(*i) << std::endl;
+      }
+      else
+      {
+        v.push_front(*i);
+      }
+    }
+  }
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -174,6 +214,8 @@ int test_main(int argc, char* argv[])
   test2();
   test3();
   test4();
+  test5();
+  BOOST_CHECK(false);
 
   return 0;
 }
