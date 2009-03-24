@@ -225,6 +225,7 @@ bool grape_event_detach_channel_communication::Do(  void  )
     dia_ptr->detach_channel_from_channel_communication( chan_ptr, comm_ptr );
   }
 
+  comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
   if ( comm_ptr )
   {
     assert( comm_ptr->count_channel() >= 2 ); // the communication should have two or more channels, or it should have been deleted
