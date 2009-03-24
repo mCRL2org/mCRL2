@@ -294,6 +294,12 @@ namespace new_data {
   class rewriter_map: public SubstitutionMap, public core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>
   {
     public:
+      /// \brief The variable type.
+      typedef typename core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>::variable_type variable_type;
+
+      /// \brief The expression type.
+      typedef typename core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>::expression_type expression_type;
+
       /// \brief Constructor.
       rewriter_map()
       {}

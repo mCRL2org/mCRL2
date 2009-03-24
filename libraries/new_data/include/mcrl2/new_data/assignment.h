@@ -86,7 +86,7 @@ namespace mcrl2 {
         template <typename Term>
         data_expression operator()(const Term& x) const
         {
-          return atermpp::replace(t, lhs(), rhs());
+          return atermpp::replace(x, lhs(), rhs());
         }
 
     }; // class assignment
