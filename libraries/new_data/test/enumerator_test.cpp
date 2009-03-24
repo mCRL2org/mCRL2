@@ -182,6 +182,8 @@ void test5()
   v.push_front(data_expression_with_variables(n, make_list(n)));
   data_expression_with_variables three = sort_nat::nat(3);
 
+  atermpp::vector< data_expression > result;
+
   while (!v.empty())
   {
     data_expression_with_variables e = v.back();
@@ -192,11 +194,12 @@ void test5()
       data_expression b = datar(greater(*i, three));
       if (b == sort_bool_::false_())
       {
-        std::cout << "found solution " << pp(*i) << std::endl;
+        std::clog << "found solution " << pp(*i) << std::endl;
+        result.push_back(*i);
       }
-      if (b == sort_bool_::true_())
+      else if (b == sort_bool_::true_())
       {
-        std::cout << "found non-solution " << pp(*i) << std::endl;
+        std::clog << "found non-solution " << pp(*i) << std::endl;
       }
       else
       {
@@ -204,6 +207,8 @@ void test5()
       }
     }
   }
+
+  BOOST_CHECK(result.size() == 4);
 }
 
 int test_main(int argc, char* argv[])
@@ -215,7 +220,6 @@ int test_main(int argc, char* argv[])
   test3();
   test4();
   test5();
-  BOOST_CHECK(false);
 
   return 0;
 }

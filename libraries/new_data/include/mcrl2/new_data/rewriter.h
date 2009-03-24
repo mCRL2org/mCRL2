@@ -23,6 +23,7 @@
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_reconstruct.h"
 #include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/find.h"
@@ -61,8 +62,20 @@ namespace new_data {
       {
       }
 
+      ATermAppl implement(data_specification const& specification) const
+      {
+        for (data_specification::aliases_const_range r(specification.aliases()); !r.empty(); r.advance_begin(1))
+        {
+          m_substitution_context = (r.front().reference().is_container_sort()) ?
+            core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context) :
+            core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
+        }
+
+        return detail::data_specification_to_aterm_data_spec(specification);
+      }
+
       /// \brief Performs data implementation before rewriting
-      ATermAppl implement(data_expression expression) const
+      ATermAppl implement(data_expression const& expression) const
       {
         ATermList substitution_context = m_substitution_context;
         ATermList new_data_equations   = ATmakeList0();
@@ -163,13 +176,11 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      basic_rewriter(data_specification d = data_specification(), strategy s = jitty)
+      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty)
         : m_substitution_context(ATmakeList0())
       {
-        ATermList substitution_context = m_substitution_context;
-        m_specification = detail::implement_data_specification(d, &substitution_context);
+        m_specification = implement(d);
         m_rewriter.reset(detail::createRewriter(m_specification, static_cast< detail::RewriteStrategy >(s)));
-        m_substitution_context = substitution_context;
         m_substitution_context.protect();
         m_specification.protect();
       }
@@ -248,7 +259,7 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter_with_variables(data_specification d = data_specification(), strategy s = jitty)
+      rewriter_with_variables(data_specification const& d = data_specification(), strategy s = jitty)
         : basic_rewriter<data_expression_with_variables>(d, s)
       { }
 
@@ -284,8 +295,7 @@ namespace new_data {
       {
         data_expression t = this->operator()(replace_variables(d, sigma));
         std::set<variable> v = find_all_variables(t);
-        data_expression_with_variables result(t, variable_list(v.begin(), v.end()));
-        return result;
+        return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
       }
   };
 

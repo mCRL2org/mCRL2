@@ -12,8 +12,11 @@
 #ifndef MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 #define MCRL2_NEW_DATA_DATA_SPECIFICATION_H
 
+#include <functional>
+
 #include "boost/iterator/transform_iterator.hpp"
 #include "boost/iterator/iterator_adaptor.hpp"
+#include "boost/function/function1.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
@@ -72,13 +75,13 @@ namespace mcrl2 {
 
           private:
 
-            ForwardTraversalIterator m_end;
-            sort_expression          m_sort;
+            ForwardTraversalIterator                         m_end;
+            boost::function< bool(sort_expression const&) >  m_predicate;
 
             void increment()
             {
               while (++(this->base_reference()) != m_end) {
-                if (this->base_reference()->is_alias() && (alias(*this->base_reference()).reference() == m_sort)) {
+                if (this->base_reference()->is_alias() && (!m_predicate || m_predicate(alias(*this->base_reference()).reference()))) {
                   break;
                 }
               }
@@ -90,8 +93,9 @@ namespace mcrl2 {
             { }
 
             explicit aliases_iterator(ForwardTraversalIterator const& begin,
-                      ForwardTraversalIterator const& end, sort_expression const& s) :
-                                  aliases_iterator::iterator_adaptor_(begin), m_end(end), m_sort(s)
+                      ForwardTraversalIterator const& end,
+                      boost::function< bool (sort_expression const&) > const& p = boost::function< bool(sort_expression const&) >()) :
+                                  aliases_iterator::iterator_adaptor_(begin), m_end(end), m_predicate(p)
             {
               if (!this->base_reference()->is_alias())
               {
@@ -239,13 +243,22 @@ namespace mcrl2 {
       }
 
       /// \brief Gets the aliases
+      inline
+      aliases_const_range aliases() const
+      {
+        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), m_sorts.end()),
+                      aliases_const_range::iterator(m_sorts.end()));
+      }
+
+      /// \brief Gets the aliases
       ///
       /// \param[in] s A sort expression
       /// \return The aliases of sort s
       inline
       aliases_const_range aliases(sort_expression const& s) const
       {
-        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), m_sorts.end(), s), aliases_const_range::iterator(m_sorts.end()));
+        return aliases_const_range(aliases_const_range::iterator(m_sorts.begin(), m_sorts.end(),
+                              std::bind1st(std::equal_to< sort_expression >(), s)), aliases_const_range::iterator(m_sorts.end()));
       }
 
       /// \brief Gets all constructors

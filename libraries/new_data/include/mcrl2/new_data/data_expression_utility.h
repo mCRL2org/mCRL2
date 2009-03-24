@@ -208,8 +208,8 @@ namespace mcrl2 {
       inline typename boost::enable_if< typename boost::is_integral< T >::type,
         typename boost::enable_if< typename boost::is_unsigned< T >::type, data_expression >::type >::type
       pos(const T t) {
-        return data_expression(core::detail::gsMakeDataExprPos(
-                const_cast< char* >(detail::as_decimal_string(t).c_str())));
+        return data_expression(core::detail::gsMakeOpId(
+                atermpp::aterm_string(detail::as_decimal_string(t).c_str()), sort_pos::pos()));
       }
 
       /// \brief Constructs expression of type Pos from a string
@@ -235,7 +235,7 @@ namespace mcrl2 {
 //        }
 //
 //        return result;
-        return data_expression(gsMakeDataExprPos(const_cast< char* >(n.c_str())));
+        return data_expression(gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_pos::pos()));
       }
     }
 
@@ -246,7 +246,9 @@ namespace mcrl2 {
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       nat(T t) {
         assert(0 <= t);
-        return data_expression(core::detail::gsMakeDataExprNat(const_cast< char* >(detail::as_decimal_string(t).c_str())));
+//// Temporary measure
+//        return data_expression(core::detail::gsMakeDataExprNat(const_cast< char* >(detail::as_decimal_string(t).c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(detail::as_decimal_string(t).c_str()), sort_nat::nat()));
       }
 
       /// \brief Constructs expression of type Nat from a string
@@ -257,7 +259,7 @@ namespace mcrl2 {
 //        }
 //
 //        return data_expression(core::detail::gsMakeDataExprCNat(sort_pos::pos(n)));
-        return data_expression(core::detail::gsMakeDataExprNat(const_cast< char* >(n.c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_nat::nat()));
       }
     }
 
@@ -269,8 +271,11 @@ namespace mcrl2 {
       int_(T t) {
         std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
 
-        return data_expression(core::detail::gsMakeDataExprInt(const_cast< char* >((0 < t) ?
-                        number.c_str() : std::string("-").append(number).c_str())));
+//// Temporary measure
+//        return data_expression(core::detail::gsMakeDataExprInt(const_cast< char* >((0 < t) ?
+//                        number.c_str() : std::string("-").append(number).c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string((0 < t) ?
+                        number.c_str() : std::string("-").append(number).c_str()), sort_int_::int_()));
       }
 
       /// \brief Constructs expression of type Int from a string
@@ -282,12 +287,11 @@ namespace mcrl2 {
 //        }
 //
 //        return data_expression(core::detail::gsMakeDataExprCInt(sort_nat::nat(n)));
-        return data_expression(core::detail::gsMakeDataExprInt(const_cast< char* >(n.c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_int_::int_()));
       }
     }
 
     namespace sort_real_ {
-
       /// \brief Constructs expression of type pos from an integral type
       //template < typename T >
       //inline typename boost::enable_if< typename boost::is_floating_point< T >::type, data_expression >::type
@@ -301,8 +305,11 @@ namespace mcrl2 {
       real_(T t) {
         std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
 
-        return data_expression(core::detail::gsMakeDataExprReal(const_cast< char* >((0 <= t) ?
-                        number.c_str() : std::string("-").append(number).c_str())));
+//// Temporary measure
+//        return data_expression(core::detail::gsMakeDataExprReal(const_cast< char* >((0 <= t) ?
+//                        number.c_str() : std::string("-").append(number).c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string((0 <= t) ?
+                        number.c_str() : std::string("-").append(number).c_str()), sort_real_::real_()));
       }
 
       /// \brief Constructs expression of type Real from a string
@@ -310,7 +317,7 @@ namespace mcrl2 {
       inline data_expression real_(std::string const& n) {
 //// Temporary measure
 //        return data_expression(core::detail::gsMakeDataExprCReal(sort_int_::int_(n), core::detail::gsMakeDataExprC1()));
-        return data_expression(core::detail::gsMakeDataExprReal(const_cast< char* >(n.c_str())));
+        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_real_::real_()));
       }
     }
 

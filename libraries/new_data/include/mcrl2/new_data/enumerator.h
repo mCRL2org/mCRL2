@@ -124,8 +124,7 @@ class data_enumerator
       {
         return i->second;
       }
-      function_symbol_vector r(m_data->constructors(s));
-      m_constructors[s].assign(r.begin(), r.end());
+      m_constructors[s] = m_data->constructors(s);
       return m_constructors[s];
     }
 
@@ -178,7 +177,7 @@ class data_enumerator
                 convert< data_expression_list >(w))), w));
         }
         else {
-          result.push_back(data_expression_with_variables((*m_rewriter)(*i), variable_list()));
+          result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
 
