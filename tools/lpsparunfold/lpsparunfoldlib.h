@@ -28,18 +28,18 @@ class Sorts
     std::set<mcrl2::new_data::function_symbol> consSet;
     std::set<mcrl2::new_data::function_symbol> mapSet;
     mcrl2::new_data::basic_sort sort_new;
-    mcrl2::new_data::function_symbol_list affectedConstructors;
+    mcrl2::new_data::function_symbol_vector affectedConstructors;
     //Functions
     mcrl2::new_data::basic_sort generateFreshSort( std::string str );
     mcrl2::core::identifier_string generateFreshConMapFuncName(std::string str);
     mcrl2::new_data::function_symbol createCMap(int k);
     mcrl2::new_data::function_symbol createDetMap();
-    mcrl2::new_data::function_symbol_list createProjectorFunctions( mcrl2::new_data::function_symbol_list m);
-    std::pair< mcrl2::new_data::variable_list , mcrl2::new_data::data_equation_list > createFunctionSection(mcrl2::new_data::function_symbol_list pi, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_list set_of_new_sorts,mcrl2::new_data::function_symbol_list k, mcrl2::new_data::function_symbol Detmap);
+    mcrl2::new_data::function_symbol_vector createProjectorFunctions( mcrl2::new_data::function_symbol_vector m);
+    std::pair< mcrl2::new_data::variable_vector , mcrl2::new_data::data_equation_vector > createFunctionSection(mcrl2::new_data::function_symbol_vector pi, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector set_of_new_sorts,mcrl2::new_data::function_symbol_vector k, mcrl2::new_data::function_symbol Detmap);
 
-    mcrl2::new_data::function_symbol_list determineAffectedConstructors();
-    mcrl2::new_data::function_symbol_list determineAffectedMappings();
-    mcrl2::new_data::function_symbol_list newSorts( mcrl2::new_data::function_symbol_list k );
+    mcrl2::new_data::function_symbol_vector determineAffectedConstructors();
+    mcrl2::new_data::function_symbol_vector determineAffectedMappings();
+    mcrl2::new_data::function_symbol_vector newSorts( mcrl2::new_data::function_symbol_vector k );
     std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
     std::set<mcrl2::core::identifier_string> sort_names;
 

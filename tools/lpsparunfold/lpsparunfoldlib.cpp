@@ -17,9 +17,9 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
 {
   m_data_specification = s;
   m_lps = lps;
-  for (sort_expression_list::const_iterator i =  s.sorts().begin();
-                                            i != s.sorts().end();
-                                            ++i){
+  for (data_specification::sorts_const_range::const_iterator i =  s.sorts().begin();
+                                                             i != s.sorts().end();
+                                                             ++i){
     sortSet.insert(*i);
     if (i->is_basic_sort()) {
       sort_names.insert( (basic_sort(*i)).name() );
@@ -30,10 +30,10 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
 
   {
     // Error: s.constructors( unfoldParameter ); -> 0 constructors 
-    function_symbol_list fsl= s.constructors();
-    for (function_symbol_list::const_iterator i = fsl.begin();
-                                              i != fsl.end();
-                                              ++i){
+    data_specification::constructors_const_range fsl= s.constructors();
+    for (data_specification::constructors_const_range::const_iterator i = fsl.begin();
+                                                                      i != fsl.end();
+                                                                      ++i){
       consSet.insert(*i);
       mapping_and_constructor_names.insert( i -> name() );
     };
@@ -42,10 +42,10 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
 
   {
     //Error: s.mappings( unfoldParameter ); -> 0 functions
-    boost::iterator_range<function_symbol_list::const_iterator> fsl= s.mappings();
-    for (function_symbol_list::const_iterator i = fsl.begin();
-                                              i != fsl.end();
-                                              ++i){
+    data_specification::mappings_const_range fsl= s.mappings();
+    for (data_specification::mappings_const_range::const_iterator i = fsl.begin();
+                                                                  i != fsl.end();
+                                                                  ++i){
       mapSet.insert(*i);
     };
     gsVerboseMsg("Specification has %d mappings \n", mapSet.size() );
@@ -76,14 +76,14 @@ mcrl2::core::identifier_string Sorts::generateFreshConMapFuncName(std::string st
 }
 
 
-function_symbol_list Sorts::determineAffectedConstructors()
+function_symbol_vector Sorts::determineAffectedConstructors()
 {
   using namespace mcrl2::new_data;
 
-  function_symbol_list k;
+  function_symbol_vector k;
   for( std::set<mcrl2::new_data::function_symbol>::iterator i = consSet.begin();
-                                                        i != consSet.end();
-                                                        ++i){
+                                                            i != consSet.end();
+                                                            ++i){
     if( i->sort().is_function_sort() ){
       if (function_sort( i->sort()).codomain() == unfoldParameter ){
         k.push_back(*i) ;
@@ -139,11 +139,11 @@ bool Sorts::basic_sortOccursInSort_expression( mcrl2::new_data::sort_expression 
   return false;
 }
 
-function_symbol_list Sorts::determineAffectedMappings()
+function_symbol_vector Sorts::determineAffectedMappings()
 {
   using namespace mcrl2::new_data;
 
-  function_symbol_list m;
+  function_symbol_vector m;
   for( std::set<mcrl2::new_data::function_symbol>::iterator i = mapSet.begin();
                                                         i != mapSet.end();
                                                          ++i){
@@ -164,13 +164,13 @@ function_symbol_list Sorts::determineAffectedMappings()
 }
 
 
-function_symbol_list Sorts::newSorts( mcrl2::new_data::function_symbol_list k )
+function_symbol_vector Sorts::newSorts( mcrl2::new_data::function_symbol_vector k )
 {
   using namespace mcrl2::new_data;
 
-  function_symbol_list set_of_new_sorts;
+  function_symbol_vector set_of_new_sorts;
 
-  for( function_symbol_list::iterator i = k.begin(); i != k.end(); ++i  )
+  for( function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i  )
   {
     std::string prefix = "c_";
     mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
@@ -190,7 +190,7 @@ mcrl2::new_data::function_symbol Sorts::createCMap(int k)
   std::string str = "C_";
   str.append( sort_new.name() );
   mcrl2::core::identifier_string idstr = generateFreshConMapFuncName( str );
-  mcrl2::new_data::sort_expression_list fsl;
+  mcrl2::new_data::sort_expression_vector fsl;
   fsl.push_back(sort_new);
   for(int i = 0; i < k; ++i)
   {
@@ -220,13 +220,13 @@ mcrl2::new_data::function_symbol Sorts::createDetMap()
   return fs;
 }
 
-mcrl2::new_data::function_symbol_list Sorts::createProjectorFunctions(function_symbol_list m)
+mcrl2::new_data::function_symbol_vector Sorts::createProjectorFunctions(function_symbol_vector m)
 {
-  mcrl2::new_data::function_symbol_list sfs;
+  mcrl2::new_data::function_symbol_vector sfs;
   std::string str = "pi_";
   str.append( sort_new.name() );
 
-  for( function_symbol_list::iterator i = m.begin() ; i != m.end(); ++i )
+  for( function_symbol_vector::iterator i = m.begin() ; i != m.end(); ++i )
   {
     if ( i->sort().is_function_sort() )
     {
@@ -246,10 +246,10 @@ mcrl2::new_data::function_symbol_list Sorts::createProjectorFunctions(function_s
   return sfs;
 }
 
-std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(function_symbol_list pi, function_symbol Cmap, function_symbol_list set_of_new_sorts, function_symbol_list k, function_symbol Detmap)
+std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(function_symbol_vector pi, function_symbol Cmap, function_symbol_vector set_of_new_sorts, function_symbol_vector k, function_symbol Detmap)
 {
-  variable_list vars;        /* Equation variables  */
-  data_equation_list del;    /* Generated equations */ 
+  variable_vector vars;        /* Equation variables  */
+  data_equation_vector del;    /* Generated equations */ 
   std::set<mcrl2::core::identifier_string> var_names; /* var_names */
   mcrl2::new_data::postfix_identifier_generator generator = mcrl2::new_data::postfix_identifier_generator ("");
   variable v;
@@ -277,15 +277,15 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
 
   /* Create Equations */ 
   int e = 0; 
-  for(function_symbol_list::iterator i = pi.begin(); i != pi.end(); ++i){
-    data_expression_list args;
+  for(function_symbol_vector::iterator i = pi.begin(); i != pi.end(); ++i){
+    data_expression_vector args;
     args.push_back(set_of_new_sorts[e]);
     for(int j = 0 ; j < int(pi.size()) ; ++j){
       args.push_back(vars[ j ]);
     }
     //Omslachtig:
     //Zou verwachten  application( data_expression, data_expression_list )
-    boost::iterator_range<data_expression_list::const_iterator> arg (args);
+    boost::iterator_range<data_expression_vector::const_iterator> arg (args);
     data_expression lhs = application(  Cmap , arg ); 
 
 
@@ -295,23 +295,23 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
   }
 
   {
-    data_expression_list args;
+    data_expression_vector args;
     args.push_back( vars[e+1] );
     for(int j = 0 ; j < int(pi.size()) ; ++j){
         args.push_back(vars[ e ]);
     }
-    boost::iterator_range<data_expression_list::const_iterator> arg (args); /* Omslachtig */
+    boost::iterator_range<data_expression_vector::const_iterator> arg (args); /* Omslachtig */
     data_expression lhs = application(  Cmap , arg ); 
     gsDebugMsg("Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     del.push_back( data_equation( lhs, vars[e] ) );
   }
 
   /* Creating Detector equations */
-  std::map< sort_expression, variable_list > type_var_list;  /* Function for looking up  Sort |-> [Variable] */
+  std::map< sort_expression, variable_vector > type_var_list;  /* Function for looking up  Sort |-> [Variable] */
   std::map< sort_expression, int           > type_var_count; /* Function for counting the unique #Sorts of an equation */
 
   e = 0;
-  for(function_symbol_list::iterator i = k.begin(); i != k.end(); ++i)
+  for(function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
   {
     type_var_count.clear();
 
@@ -326,7 +326,7 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
       function_sort fs = function_sort( i -> sort() );
       boost::iterator_range<sort_expression_list::const_iterator> sel = fs.domain();
 
-      data_expression_list dal;
+      data_expression_vector dal;
       for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); ++j )
       {
          if( j -> is_basic_sort() )
@@ -364,7 +364,7 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
            assert(false);
          } 
       }
-      boost::iterator_range<data_expression_list::const_iterator> arg (dal); /* Omslachtig */
+      boost::iterator_range<data_expression_vector::const_iterator> arg (dal); /* Omslachtig */
       data_expression narg = application( *i , arg );
       data_expression lhs = application( Detmap , narg );
       gsDebugMsg("Added equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
@@ -372,7 +372,7 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
     
       /* Equations for projection functions */
       int f = 0;
-      for(function_symbol_list::iterator j = pi.begin(); j != pi.end(); ++j){
+      for(function_symbol_vector::iterator j = pi.begin(); j != pi.end(); ++j){
         data_expression lhs = application( *j,  narg);  
         gsDebugMsg("Added equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
         del.push_back( data_equation( lhs, dal[f] ) );
@@ -382,7 +382,7 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
   e++;
   }
 
-  std::pair< variable_list, data_equation_list> tuple =  std::make_pair( vars , del );
+  std::pair< variable_vector, data_equation_vector> tuple =  std::make_pair( vars , del );
 
   return tuple;
 }
@@ -390,15 +390,15 @@ std::pair< variable_list, data_equation_list > Sorts::createFunctionSection(func
 void Sorts::algorithm()
 {
    /* Var Dec */
-   function_symbol_list m;
-   function_symbol_list k;
-   function_symbol_list set_of_new_sorts;
-   function_symbol_list set_of_ProjectorFunctions;
+   function_symbol_vector m;
+   function_symbol_vector k;
+   function_symbol_vector set_of_new_sorts;
+   function_symbol_vector set_of_ProjectorFunctions;
    function_symbol Cmap;
    function_symbol Detmap;
 //   variable_list data_equation_variables;
 //   data_equation_list data_equations;
-   std::pair< variable_list , data_equation_list > data_specification;
+   std::pair< variable_vector , data_equation_vector > data_specification;
    /*   Alg */
    /*     1 */ sort_new = generateFreshSort( unfoldParameter.name() );
    /*     2 */ k = determineAffectedConstructors();

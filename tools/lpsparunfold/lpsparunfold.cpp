@@ -30,7 +30,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" // must come after mcrl2/core/messaging.h
+#include "mcrl2/utilities/command_line_interface.h" 
+#include "mcrl2/utilities/command_line_messaging.h" 
 #include "mcrl2/core/print.h"
 
 
@@ -56,7 +57,7 @@ std::string file_name;
 
 void parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
-                           "Unfolds complex sorts of a linear process specification (LPS) in INFILE.");
+                           "Unfolds complex sorts of a linear process specification (LPS) in INFILE." ,  "");
 
   command_line_parser parser(clinterface, ac, av);
 
