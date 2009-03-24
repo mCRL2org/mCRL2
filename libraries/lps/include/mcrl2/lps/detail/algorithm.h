@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
@@ -65,7 +66,7 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
-  new_data::fresh_variable_generator generator(context);
+  new_data::fresh_variable_generator generator(context, new_data::sort_real_::real_());
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
