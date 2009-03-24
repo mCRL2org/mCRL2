@@ -920,12 +920,9 @@ bool grape_event_drag::Do( void )
           coordinate coord;
           coord.m_x = ( chan_1->get_coordinate().m_x + chan_2->get_coordinate().m_x ) / 2;
           coord.m_y = ( chan_1->get_coordinate().m_y + chan_2->get_coordinate().m_y ) / 2;
-          grape_event_add_channel_communication* event = new
-            grape_event_add_channel_communication( m_main_frame,
-            coord, chan_1, chan_2 );
-          // Only do something if the two channels are not on the same reference; note this check has been disabled because attach DOES allow it
-          //if ( chan_1->get_reference() != chan_2->get_reference() )
-          m_main_frame->get_event_handler()->Submit( event, true );
+          grape_event_add_channel_communication* event = new grape_event_add_channel_communication( m_main_frame, coord, chan_1, chan_2 );
+          // Only do something if the two channels are not on the same reference; note this check was disabled because attach DOES allow it. It is enabled because we don't use attach.
+          if ( chan_1->get_reference() != chan_2->get_reference() ) m_main_frame->get_event_handler()->Submit( event, true );
         }
         // or ended in a channel communication
         else if ( ( end_object_ptr != 0 ) && ( end_object_ptr->get_type() == CHANNEL_COMMUNICATION ) )
@@ -935,30 +932,19 @@ bool grape_event_drag::Do( void )
 
           grape_event_attach_channel_communication* event = new grape_event_attach_channel_communication( m_main_frame, comm_ptr, chan_ptr );
           // Only do something if none of the channels in the communication are on the same reference as this one.
-          /* note this check has been disabled because attach DOES allow it.
+          // Only do something if the channel is not already in the communication.
+          // note this check was disabled because attach DOES allow it. It is enabled because we don't use attach.
           bool all_different_references = true;
           for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
           {
             channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
-            if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() )
+            if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() || existing_chan_ptr->get_id() == chan_ptr->get_id() )
             {
               all_different_references = false;
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references ) */
-          // Only do something if the channel is not already in the communication.
-          bool channel_is_unique = true;
-          for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
-          {
-            channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
-            if ( existing_chan_ptr->get_id() == chan_ptr->get_id() )
-            {
-              channel_is_unique = false;
-              break; // break from the for loop, the boolean can never become true again anyway.
-            } // end if
-          } // end for
-          if ( channel_is_unique ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
         } // end else if
       }
       // or we began in a channel communication
@@ -972,30 +958,19 @@ bool grape_event_drag::Do( void )
 
           grape_event_attach_channel_communication* event = new grape_event_attach_channel_communication( m_main_frame, comm_ptr, chan_ptr );
           // Only do something if none of the channels in the communication are on the same reference as this one.
-          /* note this check has been disabled because attach DOES allow it.
+          // Only do something if the channel is not already in the communication.
+          // note this check was disabled because attach DOES allow it. It is enabled because we don't use attach.
           bool all_different_references = true;
           for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
           {
             channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
-            if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() )
+            if ( existing_chan_ptr->get_reference() == chan_ptr->get_reference() || existing_chan_ptr->get_id() == chan_ptr->get_id() )
             {
               all_different_references = false;
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references )*/
-          // Only do something if the channel is not already in the communication.
-          bool channel_is_unique = true;
-          for ( unsigned int i = 0; i < comm_ptr->count_channel(); ++i )
-          {
-            channel* existing_chan_ptr = comm_ptr->get_attached_channel( i );
-            if ( existing_chan_ptr->get_id() == chan_ptr->get_id() )
-            {
-              channel_is_unique = false;
-              break; // break from the for loop, the boolean can never become true again anyway.
-            } // end if
-          } // end for
-          if ( channel_is_unique ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
         }
       }
       break;
