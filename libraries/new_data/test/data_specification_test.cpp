@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jeroen Keiren, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/bag.h"
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/parser.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -333,6 +334,19 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
 }
 
+void test_constructor()
+{
+  std::string SPEC =
+    "sort                      \n"
+    "  D     = struct d1 | d2; \n"
+    "  Error = struct e;       \n"
+    "                          \n"
+    ;
+  data_specification data = parse_data_specification(SPEC);
+  ATermAppl a = new_data::detail::data_specification_to_aterm_data_spec(data);
+  data_specification spec1(a);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -342,6 +356,7 @@ int test_main(int argc, char** argv)
   test_functions();
   test_equations();
   test_is_certainly_finite();
+  test_constructor();
 
   return EXIT_SUCCESS;
 }
