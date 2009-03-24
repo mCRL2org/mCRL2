@@ -342,19 +342,22 @@ void architecture_diagram::attach_channel_communication_to_channel( channel_comm
   p_chan->attach_channel_communication( p_c_comm );
 }
 
-void architecture_diagram::detach_channel_from_channel_communication( channel* p_chan )
+void architecture_diagram::detach_channel_from_channel_communication( channel* p_chan, channel_communication* p_c_comm )
 {
   // Remove relationships
-  arr_channel_communication_ptr* chan_comm_ptr = p_chan->get_channel_communications();
+  p_c_comm->detach_channel( p_chan );
+  p_chan->detach_channel_communication( p_c_comm );
+/*  arr_channel_communication_ptr* chan_comm_ptr = p_chan->get_channel_communications();
   for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
   {
-    channel_communication* p_c_comm = chan_comm_ptr->Item( j );
-    if ( p_c_comm != 0 )
+    channel_communication* c_comm = chan_comm_ptr->Item( j );
+    if ( c_comm == p_c_comm )
     {
-      p_c_comm->detach_channel( p_chan );
-      p_chan->detach_channel_communication( p_c_comm );
+      c_comm->detach_channel( p_chan );
+      p_chan->detach_channel_communication( c_comm );
     }
   }
+*/
 }
 
 void architecture_diagram::select_all_objects( void )

@@ -185,6 +185,8 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
   {
     set_mode(GRAPE_MODE_SPEC);
     m_event_handler->Undo();
+    wxCommandEvent event;
+    event_menu_deselect_all(event);
     m_statusbar->SetStatusText(wxEmptyString);
     update_bars();
 
@@ -198,6 +200,8 @@ void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
   // redo last event
   set_mode(GRAPE_MODE_SPEC);
   m_event_handler->Redo();
+  wxCommandEvent event;
+  event_menu_deselect_all(event);
   m_statusbar->PopStatusText();
   m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
   update_bars();

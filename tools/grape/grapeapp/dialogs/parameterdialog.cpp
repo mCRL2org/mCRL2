@@ -95,7 +95,7 @@ void grape_parameter_dialog::check_parameters()
 {
   bool valid = true;
   
-  for ( unsigned int i = 0; i < m_grid->GetNumberRows(); ++i )
+  for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
   {
     valid = valid && ( !m_grid->GetCellValue(i, 1).IsEmpty() );
   }
@@ -112,7 +112,7 @@ void grape_parameter_dialog::event_change_text( wxGridEvent &p_event )
 void grape_parameter_dialog::event_ok(wxCommandEvent &WXUNUSED(p_event))
 {
   // save initialisation
-  for ( unsigned int i = 0; i < m_grid->GetNumberRows(); ++i )
+  for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
   {
     m_init[i].set_value(m_grid->GetCellValue(i, 1));
   }

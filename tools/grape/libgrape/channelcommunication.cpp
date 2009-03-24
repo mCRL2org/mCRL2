@@ -24,6 +24,8 @@ channel_communication::channel_communication( channel* p_channel_1, channel* p_c
 {
   m_communication.Empty();
   set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
+  p_channel_1->set_channel_type(HIDDEN_CHANNEL);
+  p_channel_2->set_channel_type(HIDDEN_CHANNEL);
   
   communication* comm_1 = new communication( p_channel_1 );
   communication* comm_2 = new communication( p_channel_2 );

@@ -73,6 +73,7 @@ grape_event_remove_channel::grape_event_remove_channel( grape_frame *p_main_fram
   m_chan = p_chan->get_id();
   m_normal = p_normal;
   m_name = p_chan->get_name();
+  m_rename = p_chan->get_rename_to();
   m_coordinate = p_chan->get_coordinate();
   m_ref = p_chan->get_reference()->get_id();
   m_width = p_chan->get_width();
@@ -137,6 +138,7 @@ bool grape_event_remove_channel::Undo( void )
   assert( ref != 0 );
   channel* new_chan = dia_ptr->add_channel( m_chan, m_coordinate, m_width, m_height, ref );
   new_chan->set_name( m_name );
+  new_chan->set_rename_to( m_rename );
   new_chan->set_channel_type( m_channel_type );
 
   // Perform remove event Undo for channel communications.

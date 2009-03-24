@@ -69,6 +69,12 @@ grape_event_remove_reference_state::grape_event_remove_reference_state( grape_fr
   m_normal = p_normal;
   m_ref_state = p_ref_state->get_id();
   m_name = p_ref_state->get_name();
+  process_diagram* proc_dia = p_ref_state->get_relationship_refers_to();
+  m_property_of = -1;
+  if (proc_dia != 0)
+  {
+    m_property_of = proc_dia->get_id();
+  }
   m_coordinate = p_ref_state->get_coordinate();
   m_width = p_ref_state->get_width();
   m_height = p_ref_state->get_height();
@@ -126,14 +132,7 @@ grape_event_remove_reference_state::grape_event_remove_reference_state( grape_fr
     }
   }
 
-  m_parameter_assignments.Empty();
-  list_of_varupdate p_param = p_ref_state->get_parameter_updates();
-  for ( unsigned int i = 0; i < p_param.GetCount(); ++i )
-  {
-    varupdate existing_var = p_param.Item( i );
-    varupdate* new_var = new varupdate( existing_var );
-    m_parameter_assignments.Add( new_var );
-  }
+  m_parameter_assignments = p_ref_state->get_parameter_updates();
 }
 
 grape_event_remove_reference_state::~grape_event_remove_reference_state( void )
@@ -191,14 +190,10 @@ bool grape_event_remove_reference_state::Undo( void )
   assert( dia_ptr != 0 );
   reference_state* new_ref_state = dia_ptr->add_reference_state( m_ref_state, m_coordinate, m_width, m_height );
   new_ref_state->set_name( m_name );
+  process_diagram* proc_dia = dynamic_cast<process_diagram*> ( find_diagram( m_property_of ) );
+  new_ref_state->set_relationship_refers_to( proc_dia );
   // Restore parameter assignments
-  list_of_varupdate param = new_ref_state->get_parameter_updates();
-  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
-  {
-    varupdate existing_var = m_parameter_assignments.Item( i );
-    varupdate* new_var = new varupdate( existing_var );
-    param.Add( new_var );
-  }
+  new_ref_state->set_parameter_updates( m_parameter_assignments );
 
   // Restore comment connections.
   for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )

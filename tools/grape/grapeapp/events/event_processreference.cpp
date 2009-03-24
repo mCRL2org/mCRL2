@@ -79,14 +79,13 @@ grape_event_remove_process_reference::grape_event_remove_process_reference( grap
 {
   m_proc_ref = p_proc_ref->get_id();
   m_name = p_proc_ref->get_name();
-  m_parameter_assignments.Empty();
-  list_of_varupdate param = p_proc_ref->get_parameter_updates();
-  for ( unsigned int i = 0; i < param.GetCount(); ++i )
+  process_diagram* proc_dia = p_proc_ref->get_relationship_refers_to();
+  m_property_of = -1;
+  if (proc_dia != 0)
   {
-    varupdate existing_var = param.Item( i );
-    varupdate* new_var = new varupdate( existing_var );
-    m_parameter_assignments.Add( new_var );
+    m_property_of = proc_dia->get_id();
   }
+  m_parameter_assignments = p_proc_ref->get_parameter_updates();
   m_coordinate = p_proc_ref->get_coordinate();
   m_width = p_proc_ref->get_width();
   m_height = p_proc_ref->get_height();
@@ -145,20 +144,15 @@ bool grape_event_remove_process_reference::Undo( void )
 {
   architecture_diagram* dia_ptr = dynamic_cast<architecture_diagram*> ( find_diagram( m_in_diagram ) );
   assert( dia_ptr != 0 );
+  process_diagram* proc_dia = dynamic_cast<process_diagram*> ( find_diagram( m_property_of ) );
   process_reference* new_proc_ref = dia_ptr->add_process_reference( m_proc_ref, m_coordinate, m_width, m_height );
 
   new_proc_ref->set_name( m_name );
   new_proc_ref->set_diagram( dia_ptr );
+  new_proc_ref->set_relationship_refers_to( proc_dia );
 
   // Restore parameter assignments
-  list_of_varupdate param = new_proc_ref->get_parameter_updates();
-  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
-  {
-    varupdate existing_var = m_parameter_assignments.Item( i );
-    varupdate* new_var = new varupdate( existing_var );
-    param.Add( new_var );
-  }
-
+  new_proc_ref->set_parameter_updates( m_parameter_assignments );
   // Restore comment connections.
   for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
   {

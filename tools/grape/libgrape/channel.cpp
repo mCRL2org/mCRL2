@@ -111,6 +111,7 @@ compound_reference* channel::get_reference( void )
 void channel::attach_channel_communication( channel_communication* p_comm )
 {
   m_channel_communication.Add(p_comm);
+  m_channel_type = HIDDEN_CHANNEL;
 }
 
 void channel::detach_channel_communication( channel_communication* p_comm )
@@ -120,8 +121,10 @@ void channel::detach_channel_communication( channel_communication* p_comm )
   {
     m_channel_communication.Remove( p_comm );
     m_channel_communication.Shrink();
-//    channel_communication* comm = *m_channel_communication.Detach( i );
-//    delete comm;
+  }
+  if (m_channel_communication.GetCount() == 0)
+  {
+    m_channel_type = VISIBLE_CHANNEL;
   }
 }
 

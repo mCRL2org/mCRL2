@@ -77,6 +77,12 @@ grape_event_remove_architecture_reference::grape_event_remove_architecture_refer
 {
   m_arch_ref = p_arch_ref->get_id();
   m_name = p_arch_ref->get_name();
+  architecture_diagram* arch_dia = p_arch_ref->get_relationship_refers_to();
+  m_property_of = -1;
+  if (arch_dia != 0)
+  {
+    m_property_of = arch_dia->get_id();
+  }
   m_coordinate = p_arch_ref->get_coordinate();
   m_width = p_arch_ref->get_width();
   m_height = p_arch_ref->get_height();
@@ -136,6 +142,8 @@ bool grape_event_remove_architecture_reference::Undo( void )
   architecture_reference* new_arch_ref = dia_ptr->add_architecture_reference( m_arch_ref, m_coordinate, m_width, m_height );
 
   new_arch_ref->set_name( m_name );
+  architecture_diagram* arch_dia = dynamic_cast<architecture_diagram*> ( find_diagram( m_property_of ) );
+  new_arch_ref->set_relationship_refers_to( arch_dia );
   new_arch_ref->set_diagram( dia_ptr );
   // Restore comment connections.
   for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )

@@ -69,6 +69,7 @@ namespace grape
         unsigned int                    m_chan; /**< Identifier of the to be deleted channel. */
         bool                            m_normal;       /**< Boolean value to indicate whether the channel should do anything to the channel communications it is attached to; a normal remove */
         wxString                        m_name; /**< Name of the channel. */
+        wxString                        m_rename; /**< Rename of the channel. */
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel. */
         unsigned int                    m_ref; /**< Identifier of the compound reference that the channel belonged to. */
         float                           m_width;        /**< Backup of the width of the channel. */

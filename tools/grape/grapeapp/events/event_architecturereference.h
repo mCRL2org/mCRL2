@@ -65,8 +65,9 @@ namespace grape
     class grape_event_remove_architecture_reference : public grape_event_base
     {
       private:
-        unsigned int                            m_arch_ref; /**< Identifier of the to be deleted process reference. */
+        unsigned int                            m_arch_ref; /**< Identifier of the to be deleted architecture reference. */
         wxString                        m_name;         /**< Backup of the name of the reference state. */
+        unsigned int                    m_property_of;  /**< Backup of the id of the architecture reference the architecture reference refers to. */
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the reference state. */
         float                           m_width;        /**< Backup of the width of the reference state. */
         float                           m_height;       /**< Backup of the height of the reference state. */

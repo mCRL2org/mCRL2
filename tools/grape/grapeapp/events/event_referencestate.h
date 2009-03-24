@@ -69,6 +69,7 @@ namespace grape
       private:
         unsigned int                m_ref_state; /**< Identifier of the to be deleted reference state. */
         wxString            m_name;         /**< Backup of the name of the reference state. */
+        unsigned int        m_property_of;  /**< Backup of the id of the process diagram the reference state refers to. */
         bool                m_normal;       /**< Boolean value to indicate whether the state should destroy all transitions and designators attached to it; a normal remove */
         list_of_varupdate   m_parameter_assignments;  /**< Backup of the initial parameter values of the reference state. */
         coordinate          m_coordinate;   /**< Backup of the coordinate of the reference state. */

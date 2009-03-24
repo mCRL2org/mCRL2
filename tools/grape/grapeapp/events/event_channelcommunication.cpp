@@ -24,6 +24,8 @@ grape_event_add_channel_communication::grape_event_add_channel_communication( gr
   m_coord = p_coord;
   m_chan_1 = p_chan_1->get_id();
   m_chan_2 = p_chan_2->get_id();
+  m_channel_type_1 = p_chan_1->get_channel_type();
+  m_channel_type_2 = p_chan_2->get_channel_type();
   architecture_diagram* dia_ptr = dynamic_cast<architecture_diagram*> ( m_main_frame->get_glcanvas()->get_diagram() );
   assert( dia_ptr != 0 );// The diagram has to exist and be of the specified type, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
@@ -59,6 +61,13 @@ bool grape_event_add_channel_communication::Undo( void )
   channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_c_comm, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
   dia_ptr->remove_channel_communication( comm_ptr );
 
+  // Find the channels that were connected to the channelcommunication and restore the properties
+  channel* chan_1 = dynamic_cast<channel*> ( find_object( m_chan_1, CHANNEL, dia_ptr->get_id() ) );
+  channel* chan_2 = dynamic_cast<channel*> ( find_object( m_chan_2, CHANNEL, dia_ptr->get_id() ) );
+  assert( ( chan_1 != 0 ) && ( chan_2 != 0 ) );
+  chan_1->set_channel_type(m_channel_type_1);
+  chan_2->set_channel_type(m_channel_type_2);
+
   finish_modification();
   return true;
 }
@@ -70,6 +79,7 @@ grape_event_remove_channel_communication::grape_event_remove_channel_communicati
   m_coordinate = p_c_comm->get_coordinate();
   m_width = p_c_comm->get_width();
   m_height = p_c_comm->get_height();
+  m_rename = p_c_comm->get_rename_to();
   m_comments.Empty();
   for ( unsigned int i = 0; i < p_c_comm->count_comment(); ++i )
   {
@@ -135,6 +145,7 @@ bool grape_event_remove_channel_communication::Undo( void )
     dia_ptr->attach_channel_communication_to_channel( new_comm, chan );
   }
 
+  new_comm->set_rename_to( m_rename );
   new_comm->set_channel_communication_type( m_channel_communication_type );
 
   finish_modification();
@@ -171,9 +182,10 @@ bool grape_event_attach_channel_communication::Do(  void  )
 bool grape_event_attach_channel_communication::Undo(  void  )
 {
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
+  channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication ) );
   channel* chan_ptr = static_cast<channel*> ( find_object( m_channel ) );
 
-  dia_ptr->detach_channel_from_channel_communication( chan_ptr );
+  dia_ptr->detach_channel_from_channel_communication( chan_ptr, comm_ptr );
 
   finish_modification();
   return true;
@@ -202,6 +214,7 @@ grape_event_detach_channel_communication::~grape_event_detach_channel_communicat
 bool grape_event_detach_channel_communication::Do(  void  )
 {
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
+  channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
   if ( m_remove_event ) // make a choice between deleting the channel communication
   {
     m_remove_event->Do();
@@ -209,10 +222,9 @@ bool grape_event_detach_channel_communication::Do(  void  )
   else // or just detaching one channel
   {
     channel* chan_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL, dia_ptr->get_id() ) );
-    dia_ptr->detach_channel_from_channel_communication( chan_ptr );
+    dia_ptr->detach_channel_from_channel_communication( chan_ptr, comm_ptr );
   }
 
-  channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
   if ( comm_ptr )
   {
     assert( comm_ptr->count_channel() >= 2 ); // the communication should have two or more channels, or it should have been deleted

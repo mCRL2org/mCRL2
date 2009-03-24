@@ -35,6 +35,8 @@ namespace grape
         coordinate            m_coord; /**< The coordinate that was clicked. */
         unsigned int                  m_chan_1; /**< Identifier of the first clicked channel. */
         unsigned int                  m_chan_2; /**< Identifier of the second clicked channel. */
+        channel_type                  m_channel_type_1; /**< Channel type of the first clicked channel. */
+        channel_type                  m_channel_type_2; /**< Channel type of the second clicked channel. */
         unsigned int                  m_in_diagram; /**< Identifier of the diagram the channel communication is added to. */
       public:
 
@@ -77,6 +79,7 @@ namespace grape
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel communication. */
         float                           m_width;        /**< Backup of the width of the channel communication. */
         float                           m_height;       /**< Backup of the height of the channel communicatione. */
+        wxString                        m_rename;       /**< Rename of the channel communication. */
         wxArrayLong                     m_comments;     /**< Identifiers of the list of comments attached to the channel communication. */
         unsigned int                            m_in_diagram;  /**< Identifier of the diagram from which the channel was deleted. */
         wxArrayLong                     m_channels;     /**< Identifiers of the channels the channel communication was attached to. */

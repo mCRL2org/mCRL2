@@ -215,8 +215,8 @@ namespace grape
          * Attaches the specified channel to the specified channel communication.
          * Detaches the channel from an existing channel communication or connection property first, if necessary.
          * @pre The channel and channel communication are both in this diagram.
-         * @param p_chan The channel.
          * @param p_c_comm The channel communication.
+         * @param p_chan The channel.
          */
         void attach_channel_communication_to_channel( channel_communication* p_c_comm, channel* p_chan );
 
@@ -224,8 +224,9 @@ namespace grape
          * Channel detachment function.
          * Detaches the specified channel from the channel communication it is currently in.
          * @param p_chan The channel.
+         * @param p_c_comm The channel communication.
          */
-        void detach_channel_from_channel_communication( channel* p_chan );
+        void detach_channel_from_channel_communication( channel* p_chan, channel_communication* p_c_comm );
 
         /**
          * Object selection function.
