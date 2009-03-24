@@ -23,6 +23,7 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 
 // sorts
 #include "mcrl2/new_data/sort_expression.h"
@@ -197,6 +198,7 @@ namespace mcrl2 {
           m_mappings(detail::aterm_map_spec_to_function_set(atermpp::arg3(t))),
           m_equations(detail::aterm_data_eqn_spec_to_equation_set(atermpp::arg4(t)))
       {
+        assert(core::detail::check_rule_DataSpec(t));
         make_system_defined_complete();
       }
 
