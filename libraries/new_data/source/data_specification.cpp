@@ -240,26 +240,19 @@ namespace mcrl2 {
       }
       else if (sort.is_structured_sort())
       {
-        for (aliases_const_range r(aliases(sort)); !r.empty(); r.advance_begin(1))
-        {
-          if (r.front().name().name()[0] == '@')
-          {
-            // a reference with internal identifier exists for structured sort so it is already part of specification
-            return;
-          }
+        if (aliases(sort).empty()) {
+          basic_sort identifier(static_cast< std::string >(fresh_identifier(sorts(), "struct@")));
+
+          structured_sort s_sort(sort);
+
+          add_system_defined_sort(alias(identifier, sort));
+          add_system_defined_constructors(boost::make_iterator_range(s_sort.constructor_functions(identifier)));
+          add_system_defined_mappings(boost::make_iterator_range(s_sort.projection_functions(identifier)));
+          add_system_defined_mappings(boost::make_iterator_range(s_sort.recogniser_functions(identifier)));
+          add_system_defined_equations(boost::make_iterator_range(s_sort.constructor_equations(identifier)));
+          add_system_defined_equations(boost::make_iterator_range(s_sort.projection_equations(identifier)));
+          add_system_defined_equations(boost::make_iterator_range(s_sort.recogniser_equations(identifier)));
         }
-
-        basic_sort identifier(static_cast< std::string >(fresh_identifier(sorts(), "@struct")));
-
-        structured_sort s_sort(sort);
-
-        add_system_defined_sort(alias(identifier, sort));
-        add_system_defined_constructors(boost::make_iterator_range(s_sort.constructor_functions(identifier)));
-        add_system_defined_mappings(boost::make_iterator_range(s_sort.projection_functions(identifier)));
-        add_system_defined_mappings(boost::make_iterator_range(s_sort.recogniser_functions(identifier)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.constructor_equations(identifier)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.projection_equations(identifier)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.recogniser_equations(identifier)));
       }
     }
 
