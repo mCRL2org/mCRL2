@@ -191,7 +191,7 @@ bool is_number(std::string s);
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE 
 #line 68 "chiparser.yy"
 {
   ATermAppl appl;

@@ -4003,7 +4003,7 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 
   switch (yyn)
     {
-
+      
       default: break;
     }
 }

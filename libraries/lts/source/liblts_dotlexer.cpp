@@ -554,7 +554,12 @@ static int yy_flex_strlen (yyconst char * );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -627,7 +632,7 @@ YY_DECL
 #line 74 "liblts_dotlexer.ll"
 
 
-#line 631 "liblts_dotlexer.cpp"
+#line 636 "liblts_dotlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -862,7 +867,7 @@ YY_RULE_SETUP
 #line 108 "liblts_dotlexer.ll"
 ECHO;
 	YY_BREAK
-#line 866 "liblts_dotlexer.cpp"
+#line 871 "liblts_dotlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();

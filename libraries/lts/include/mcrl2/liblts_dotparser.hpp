@@ -80,12 +80,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 35 "liblts_dotparser.yy"
+#line 34 "liblts_dotparser.yy"
 {
   ATermAppl aterm;
+  ATermList atermlist;
 }
 /* Line 1489 of yacc.c.  */
-#line 89 "liblts_dotparser.hpp"
+#line 90 "liblts_dotparser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

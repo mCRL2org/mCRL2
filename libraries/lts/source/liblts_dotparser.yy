@@ -12,8 +12,6 @@
 #include "liblts_dotparser.h"
 #include "liblts_dotlexer.h"
 
-#define YYMAXDEPTH 640000
-
 // Local variables
 ATermIndexedSet state2id, label2id;
 ATermAppl emptystring;
@@ -22,6 +20,7 @@ AFun singleton_fun, pair_fun, no_incoming_fun, has_incoming_fun;
 
 // Function declarations
 static void dot_add_transition(int from, ATermAppl label, int to);
+static void dot_add_transitions(ATermList states, ATermAppl label);
 static int dot_state(ATermAppl id, ATermAppl label);
 static void set_has_incoming(int state);
 
@@ -34,6 +33,7 @@ int dotyylex(void);
 
 %union {
   ATermAppl aterm;
+  ATermList atermlist;
 }
 
 //set name prefix
@@ -43,7 +43,8 @@ int dotyylex(void);
 
 %token DIGRAPH GRAPH STRICT SUBGRAPH NODE EDGE IS COMMA COLON SEMICOLON LBRACE RBRACE LBRACK RBRACK ARROW
 %token <aterm> ID
-%type  <aterm> attr_list a_list node_id edge_rhs
+%type  <aterm> attr_list a_list node_id
+%type  <atermlist> edge_list
 
 %%
 
@@ -87,8 +88,8 @@ stmt_list_or_empty : stmt_list
 
 stmt_list : stmt
           | stmt SEMICOLON
-          | stmt stmt_list
-          | stmt SEMICOLON stmt_list
+          | stmt_list stmt
+          | stmt_list stmt SEMICOLON
           ;
 
 stmt : node_stmt
@@ -105,28 +106,29 @@ attr_stmt : GRAPH attr_list
           ;
 
 attr_list : LBRACK RBRACK                   { safe_assign($$,NULL); }
-          | LBRACK RBRACK attr_list         { safe_assign($$,$3); }
           | LBRACK a_list RBRACK            { safe_assign($$,$2); }
-          | LBRACK a_list RBRACK attr_list  { if ( $2 != NULL ) { safe_assign($$,$2); } else { safe_assign($$,$4); } }
+          | attr_list LBRACK RBRACK         { safe_assign($$,$1); }
+          | attr_list LBRACK a_list RBRACK  { if ( $1 != NULL ) { safe_assign($$,$1); } else { safe_assign($$,$3); } }
           ;
 
 a_list : ID                     { safe_assign($$,NULL); }
-       | ID a_list              { safe_assign($$,$2); }
+       | a_list ID              { safe_assign($$,$1); }
        | ID COMMA               { safe_assign($$,NULL); }
-       | ID COMMA a_list        { safe_assign($$,$3); }
-       | ID IS ID               { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
-       | ID IS ID a_list        { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,$4); } }
-       | ID IS ID COMMA         { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
-       | ID IS ID COMMA a_list  { if ( !strcmp(ATgetName(ATgetAFun($$)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,$5); } }
+       | a_list ID COMMA        { safe_assign($$,$1); }
+       | ID IS ID               { if ( !strcmp(ATgetName(ATgetAFun($1)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
+       | a_list ID IS ID        { if ( !strcmp(ATgetName(ATgetAFun($2)),"label") ) { safe_assign($$,$4); } else { safe_assign($$,$1); } }
+       | ID IS ID COMMA         { if ( !strcmp(ATgetName(ATgetAFun($1)),"label") ) { safe_assign($$,$3); } else { safe_assign($$,NULL); } }
+       | a_list ID IS ID COMMA  { if ( !strcmp(ATgetName(ATgetAFun($2)),"label") ) { safe_assign($$,$4); } else { safe_assign($$,$1); } }
 
-edge_stmt : node_id ARROW     { dot_state($1,NULL); /* This is to ensure that the first node of the file gets id 0. */ }
-            edge_rhs          { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($4),pair_fun)?(ATermAppl) ATgetArgument($4,1):NULL,dot_state((ATermAppl) ATgetArgument($4,0),NULL)); }
+edge_stmt : edge_list
+                     { dot_add_transitions($1,NULL); }
+          | edge_list attr_list
+                     { dot_add_transitions($1,$2); }
           ;
 
-edge_rhs : node_id                 { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $1)); }
-         | node_id attr_list       { if ( $2 == NULL ) { safe_assign($$,ATmakeAppl1(singleton_fun,(ATerm) $1)); } else { safe_assign($$,ATmakeAppl2(pair_fun,(ATerm) $1,(ATerm) $2)); } }
-         | node_id ARROW edge_rhs        { dot_add_transition(dot_state($1,NULL),ATisEqualAFun(ATgetAFun($3),pair_fun)?(ATermAppl) ATgetArgument($3,1):NULL,dot_state((ATermAppl) ATgetArgument($3,0),NULL)); safe_assign($$,ATsetArgument($3,(ATerm) $1,0)); }
-         ;
+edge_list : node_id ARROW node_id   { safe_assign($$,ATmakeList2((ATerm) $3,(ATerm) $1)); }
+          | edge_list ARROW node_id { safe_assign($$,ATinsert($1,(ATerm) $3)); }
+          ;
 
 node_stmt : node_id                  { dot_state($1,NULL); }
           | node_id attr_list        { dot_state($1,$2); }
@@ -155,6 +157,19 @@ static void dot_add_transition(int from, ATermAppl label, int to)
 
   set_has_incoming(to);
   dot_lexer_obj->dot_lts->add_transition(from,idx,to);
+}
+
+static void dot_add_transitions(ATermList states, ATermAppl label)
+{
+  states = ATreverse(states); // to make sure that the first state in the file is added first and thus gets id 0
+  ATermAppl from = (ATermAppl) ATgetFirst(states);
+  states = ATgetNext(states);
+  for (; !ATisEmpty(states); states=ATgetNext(states))
+  {
+    ATermAppl to = (ATermAppl) ATgetFirst(states);
+    dot_add_transition(dot_state(from,NULL),label,dot_state(to,NULL));
+    from = to;
+  }
 }
 
 static int dot_state(ATermAppl id, ATermAppl label)

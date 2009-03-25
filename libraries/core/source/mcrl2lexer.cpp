@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -88,6 +87,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -636,7 +637,7 @@ int mcrl2yyFlexLexer::yylex(void) { return 1; }
 
 mcrl2_lexer *an_mcrl2_lexer = NULL;       /* lexer object, used by parse_streams */
 
-#line 640 "mcrl2lexer.cpp"
+#line 641 "mcrl2lexer.cpp"
 
 #define INITIAL 0
 
@@ -666,7 +667,12 @@ static int yy_flex_strlen (yyconst char * );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -739,7 +745,7 @@ YY_DECL
 #line 73 "mcrl2lexer.ll"
 
 
-#line 743 "mcrl2lexer.cpp"
+#line 749 "mcrl2lexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1316,7 +1322,7 @@ YY_RULE_SETUP
 #line 188 "mcrl2lexer.ll"
 ECHO;
 	YY_BREAK
-#line 1320 "mcrl2lexer.cpp"
+#line 1326 "mcrl2lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
