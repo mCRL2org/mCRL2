@@ -1413,12 +1413,17 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     return b;
   }
   else if (bes::is_if(b))
-  { //BESIF(x,y,z) => (x & y) | (!x&z)
+  { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
+    return translate_equation_for_vasy(i,
+                    and_optimized(then_branch(b),
+                         or_optimized(condition(b),else_branch(b))),s,bes_equations);
+
+    //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
     //Otherwise, the result is not monotonic,
     //which ought not to be possible.
-    const bes_expression y=then_branch(b);
+    /* const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
     if (is_true(y))
     { if (is_false(z))
@@ -1436,7 +1441,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
       exit(1);
-    }
+    } */
   }
   else
   {
@@ -1551,12 +1556,20 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
     }
   }
   else if (bes::is_if(b))
-  { //BESIF(x,y,z) => (x & y) | (!x&z)
+  { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
+    save_rhs_in_vasy_form(outputfile,
+                          and_optimized(then_branch(b),
+                            or_optimized(condition(b),else_branch(b))),
+                          variable_index,
+                          current_rank,
+                          bes_equations);
+
+    //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
     //Otherwise, the result is not monotonic,
     //which ought not to be possible.
-    const bes_expression y=then_branch(b);
+    /* const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
     if (is_true(y))
     { if (is_false(z))
@@ -1573,7 +1586,7 @@ static void save_rhs_in_vasy_form(ostream &outputfile,
     else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
       exit(1);
-    }
+    } */
   }
   else
   {
@@ -1648,12 +1661,16 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
     outputfile << "X" << get_variable(b);
   }
   else if (bes::is_if(b))
-  { //BESIF(x,y,z) => (x & y) | (!x&z)
+  { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
+    save_rhs_in_cwi_form(outputfile,and_optimized(then_branch(b),
+                                    or_optimized(condition(b),else_branch(b))),bes_equations);
+
+    //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
     //Otherwise, the result is not monotonic,
     //which ought not to be possible.
-    const bes_expression y=then_branch(b);
+    /* const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
     if (is_true(y))
     { if (is_false(z))
@@ -1671,7 +1688,7 @@ static void save_rhs_in_cwi_form(ostream &outputfile, bes_expression b,bes::equa
     { ATfprintf(stderr,"WHAT: %t\n",(ATerm)b);
       gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
       exit(1);
-    }
+    } */
   }
   else
   {
@@ -1738,12 +1755,16 @@ static pbes_expression generate_rhs_as_formula(bes_expression b)
     return   propositional_variable_instantiation(converter.str());
   }
   else if (bes::is_if(b))
-  { //BESIF(x,y,z) => (x & y) | (!x&z)
+  { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
+    return generate_rhs_as_formula(and_optimized(then_branch(b),
+                                   or_optimized(condition(b),else_branch(b))));
+
+    //BESIF(x,y,z) => (x & y) | (!x&z)
     //If y is true, this reduces to (x | z)
     //If z is false, this reduces to (x & y)
     //Otherwise, the result is not monotonic,
     //which ought not to be possible.
-    const bes_expression y=then_branch(b);
+    /* const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
     if (is_true(y))
     { if (is_false(z))
@@ -1760,7 +1781,7 @@ static pbes_expression generate_rhs_as_formula(bes_expression b)
     else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in PBES-format.\n");
       exit(1);
-    }
+    } */
   }
   else
   {

@@ -356,12 +356,51 @@ namespace bes
                            (atermpp::aterm)(b2)));
   }
 
+  inline bes_expression and_optimized(bes_expression b1,bes_expression b2)
+  { if (b1==true_())
+    { return b2;
+    }
+    if (b2==true_())
+    { return b1;
+    }
+    if (b1==false_())
+    { return false_();
+    }
+    if (b2==false_())
+    { return false_();
+    }
+    if (b1==b2)
+    { return b1;
+    }
+    return and_(b1,b2);
+  }
+
   inline bes_expression or_(bes_expression b1,bes_expression b2)
   { return bes_expression(
                ATmakeAppl2(AFunBESOr(),
                            (atermpp::aterm)(b1),
                            (atermpp::aterm)(b2)));
   }
+
+  inline bes_expression or_optimized(bes_expression b1,bes_expression b2)
+  { if (b1==true_())
+    { return true_();
+    }
+    if (b2==true_())
+    { return true_();
+    }
+    if (b1==false_())
+    { return b2;
+    }
+    if (b2==false_())
+    { return b1;
+    }
+    if (b1==b2)
+    { return b1;
+    }
+    return or_(b1,b2);
+  }
+
 
   inline bool is_variable(bes_expression b)
   { return b.type()==AT_INT;
