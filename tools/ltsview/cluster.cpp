@@ -18,15 +18,18 @@
 using namespace std;
 using namespace Utils;
 
-bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const {
+bool Comp_BCRadius::operator()(const Cluster* c1,const Cluster* c2) const
+{
   return (c1->getBCRadius() < c2->getBCRadius());
 }
 
-bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const {
+bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const
+{
   return (c1->getBCVolume() < c2->getBCVolume());
 }
 
-Cluster::Cluster(int r) {
+Cluster::Cluster(int r)
+{
   ancestor = NULL;
   position = 0.0f;
   baseRadius = 0.0f;
@@ -39,6 +42,9 @@ Cluster::Cluster(int r) {
   rank = r;
   selected = false;
   severedDescendantsC = 0;
+  bc_radius = 0.0f;
+  bc_height = 0.0f;
+  positionInRank = 0;
 
   for(size_t i = 0; i < descendants.size(); ++i)
   {

@@ -18,10 +18,11 @@
 class Transition;
 class State;
 
-class Simulation {
+class Simulation
+{
   public:
-    typedef boost::signal<void ()>      simulationSignal;
-    typedef boost::signals::connection  simConnection;
+    typedef boost::signal<void ()> simulationSignal;
+    typedef boost::signals::connection simConnection;
 
   public:
     Simulation();
@@ -31,38 +32,36 @@ class Simulation {
     void stop();
     void setInitialState(State* initialState);
 
-    std::vector< Transition* > const&   getTransHis()         const;
-    std::vector< State*>       const&   getStateHis()         const;
-    State*                              getCurrState()        const;
-    std::vector< Transition* > const&   getPosTrans()         const;
-    Transition*                         getChosenTrans()      const;
-    int                                 getChosenTransi()     const;
-    bool                                getStarted()          const;
+    std::vector< Transition* > const& getTransHis() const;
+    std::vector< State*> const& getStateHis() const;
+    State* getCurrState() const;
+    std::vector< Transition* > const& getPosTrans() const;
+    Transition* getChosenTrans() const;
+    int getChosenTransi() const;
+    bool getStarted() const;
 
     // Generates a back trace to initState.
     // Pre: initState is the initial state for the entire (top level) LTS
-    void                                traceBack(State* initState);
-
-
-    void                                chooseTrans(int i);
-    void                                followTrans();
-    void                                undoStep();
-    void                                resetSim();
+    void traceBack(State* initState);
+    void chooseTrans(int i);
+    void followTrans();
+    void undoStep();
+    void resetSim();
 
     simConnection connect(simulationSignal::slot_function_type subscriber);
     simConnection connectSel(simulationSignal::slot_function_type subscriber);
-    void          disconnect(simConnection subscriber);
+    void disconnect(simConnection subscriber);
 
   private:
-    bool                        started;
-    int                         chosenTrans;
-    State*                      initialState;
-    State*                      currState;
-    std::vector< Transition* >  posTrans;
-    std::vector< State* >       stateHis;
-    std::vector< Transition* >  transHis;
-    simulationSignal            signal;
-    simulationSignal            selChangeSignal;
+    bool started;
+    int chosenTrans;
+    State* initialState;
+    State* currState;
+    std::vector< Transition* > posTrans;
+    std::vector< State* > stateHis;
+    std::vector< Transition* > transHis;
+    simulationSignal signal;
+    simulationSignal selChangeSignal;
 };
 
 #endif //SIMULATION_H

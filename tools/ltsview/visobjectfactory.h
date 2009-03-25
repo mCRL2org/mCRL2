@@ -17,21 +17,20 @@
 class PrimitiveFactory; /* forward declaration */
 class VisObject; /* forward declaration */
 
-class VisObjectFactory {
-	public:
-		VisObjectFactory();
-		~VisObjectFactory();
-		void clear();
-		void drawObjects(PrimitiveFactory *pf,unsigned char alpha,
-                                 bool texture);
-		int  makeObject(int primitive, std::vector<int> &ids);
-		void sortObjects(Utils::Point3D viewpoint);
-		void updateObjectColor(int obj,Utils::RGB_Color color);
-                void updateObjectTexture(int obj,
-                                    std::vector<Utils::RGB_Color> &texColours);
-		void updateObjectMatrix(int obj);
-	private:
-		std::vector<VisObject*> objects;
-		std::vector<VisObject*> objects_sorted;
+class VisObjectFactory
+{
+  public:
+    VisObjectFactory();
+    ~VisObjectFactory();
+    void clear();
+    void drawObjects(PrimitiveFactory *pf,unsigned char alpha,bool texture);
+    int  makeObject(int primitive, std::vector<int> &ids);
+    void sortObjects(Utils::Point3D viewpoint);
+    void updateObjectColor(int obj,Utils::RGB_Color color);
+    void updateObjectTexture(int obj,std::vector<Utils::RGB_Color> &texColours);
+    void updateObjectMatrix(int obj);
+  private:
+    std::vector<VisObject*> objects;
+    std::vector<VisObject*> objects_sorted;
 };
 #endif
