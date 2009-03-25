@@ -12,6 +12,8 @@
 #include "liblts_dotparser.h"
 #include "liblts_dotlexer.h"
 
+#define YYMAXDEPTH 640000
+
 // Local variables
 ATermIndexedSet state2id, label2id;
 ATermAppl emptystring;
