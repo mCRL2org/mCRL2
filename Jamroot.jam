@@ -141,7 +141,7 @@ if [ path.exists ./tools ] {
 
       # Introduce tool targets
       for tool in $(targets) {
-        alias $(tool) : /tools/$(targets)//install /libraries//install ;
+        alias $(tool) : /tools/$(targets)//install/<link>shared : <link>shared:<source>/libraries//install/<link>shared ;
       }
 
       alias install : $(targets) ;
