@@ -19,7 +19,7 @@ namespace mcrl2 {
 
 namespace lps {
 
-specification binary(const specification& s, Rewriter& r);
+specification binary(const specification& s, new_data::rewriter& r);
 
 } // namespace lps
 

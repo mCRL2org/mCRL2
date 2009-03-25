@@ -26,9 +26,9 @@ test-suite lps
       [ run aterm_algorithm_test.cpp ]
       [ run parelm_test.cpp ]
       [ run sumelm_test.cpp ]
-#      [ run confcheck_test.cpp ]
-#      [ run binary_test.cpp ]
-#      [ run suminst_test.cpp ]
+      [ run confcheck_test.cpp ]
+      [ run binary_test.cpp ]
+      [ run suminst_test.cpp ]
       [ run untime_test.cpp ]
       [ compile-headers ../include ]
     ;

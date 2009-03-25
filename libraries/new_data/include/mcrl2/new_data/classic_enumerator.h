@@ -306,13 +306,35 @@ namespace mcrl2 {
           return m_impl->dereference();
         }
 
+        typename std::set< variable_type > make_set(variable const& variable) {
+          typename std::set< variable_type > variables;
+
+          variables.insert(variable);
+
+          return variables;
+        }
+
         typedef typename implementation_type::shared_context_type shared_context_type;
+
+        classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
+             variable_type const& variable, expression_type const& condition,
+             substitution_type const& substitution, Evaluator const& evaluator) {
+
+          implementation_type::create(m_impl, context, make_set(variable), condition, evaluator, substitution);
+        }
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              std::set< variable_type > const& variables, expression_type const& condition,
              substitution_type const& substitution, Evaluator const& evaluator) {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
+        }
+
+        classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
+                   variable_type const& variable, expression_type const& condition,
+                   substitution_type const& substitution) {
+
+          implementation_type::create(m_impl, context, make_set(variable), condition);
         }
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
@@ -367,11 +389,7 @@ namespace mcrl2 {
             variable_type const& variable,
             expression_type const& condition = sort_bool_::true_()) {
 
-          std::set< variable_type > variables;
-
-          variables.insert(variable);
-
-          implementation_type::create(m_impl, specification, variables, condition);
+          implementation_type::create(m_impl, specification, make_set(variable), condition);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -387,11 +405,7 @@ namespace mcrl2 {
             expression_type const& condition,
             substitution_type const& substitution) {
 
-          std::set< variable_type > variables;
-
-          variables.insert(variable);
-
-          implementation_type::create(m_impl, specification, variables, condition, substitution);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, substitution);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -439,11 +453,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition = sort_bool_::true_()) {
 
-          std::set< variable_type > variables;
-
-          variables.insert(variable);
-
-          implementation_type::create(m_impl, specification, variables, condition, evaluator);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -461,11 +471,7 @@ namespace mcrl2 {
             expression_type const& condition,
             substitution_type const& substitution) {
 
-          std::set< variable_type > variables;
-
-          variables.insert(variable);
-
-          implementation_type::create(m_impl, specification, variables, condition, evaluator, substitution);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator, substitution);
         }
     };
 

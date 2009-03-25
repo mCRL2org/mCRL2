@@ -17,7 +17,7 @@
 #include <mcrl2/lps/mcrl22lps.h>
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 ///All process parameters of sort D should have been translated to
@@ -32,8 +32,8 @@ void test_case_1()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -41,8 +41,8 @@ void test_case_1()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }
@@ -68,8 +68,8 @@ void test_case_2()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -77,8 +77,8 @@ void test_case_2()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }
@@ -104,8 +104,8 @@ void test_case_3()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -113,8 +113,8 @@ void test_case_3()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }
@@ -139,8 +139,8 @@ void test_case_4()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -148,8 +148,8 @@ void test_case_4()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::pos() || i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_pos::pos() || i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }
@@ -175,8 +175,8 @@ void test_case_5()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -184,8 +184,8 @@ void test_case_5()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }
@@ -214,8 +214,8 @@ void test_case_6()
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data());
-  specification s1 = binary(s0, *r);
+  rewriter r(s0.data());
+  specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -223,8 +223,8 @@ void test_case_6()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_expr::bool_());
-    if (i->sort() == sort_expr::bool_())
+    BOOST_CHECK(i->sort() == sort_bool_::bool_());
+    if (i->sort() == sort_bool_::bool_())
     {
       ++bool_param_count;
     }

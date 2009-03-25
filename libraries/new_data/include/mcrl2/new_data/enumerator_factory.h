@@ -12,10 +12,14 @@
 #ifndef _MCRL2_DATA_ENUMERATOR_FACTORY__HPP_
 #define _MCRL2_DATA_ENUMERATOR_FACTORY__HPP_
 
+#include "mcrl2/new_data/expression_traits.h"
 #include "mcrl2/new_data/classic_enumerator.h"
 
 namespace mcrl2 {
   namespace new_data {
+
+    template < typename Enumerator >
+    class enumerator_factory;
 
     /** \brief Factory for enumerator objects for a single data specification
      *
@@ -47,7 +51,7 @@ namespace mcrl2 {
         /// \brief The default selector type for constructed enumerators
        typedef Selector                                                                  selector_type;
        /// \brief The default enumerator type
-       typedef exhaustive_enumerator< substitution_type, evaluator_type, selector_type > enumerator_type;
+       typedef classic_enumerator< substitution_type, evaluator_type, selector_type >    enumerator_type;
         /// \brief The type of objects that represent variables
        typedef typename substitution_type::variable_type                                 variable_type;
         /// \brief The type of objects that represent expressions
@@ -55,7 +59,7 @@ namespace mcrl2 {
 
       private:
 
-        typedef typename enumerator_type::shared_context_type              shared_context_type
+        typedef typename enumerator_type::shared_context_type              shared_context_type;
 
         Evaluator                                m_internal_evaluator;
         Evaluator&                               m_evaluator;
@@ -89,62 +93,74 @@ namespace mcrl2 {
 
         /** \brief Creates enumerator using a default constructed condition evaluator
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variable a single variable for which to find valuations
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        enumerator_type make(std::set< variable_type > const& variables, expression_type const& condition = boolean_expression_traits< expression_type >::template constant< true >(),
-                         substitution_type const& substitution = substitution_type()) {
+        enumerator_type make(variable_type const& variable, expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type()) const {
+
+          return enumerator_type(m_enumeration_context, variable, condition, substitution, m_evaluator);
+        }
+
+        /** \brief Creates enumerator using a default constructed condition evaluator
+         *
+         * \param[in] variables the set of variables for which to find valuations
+         * \param[in] condition the enumeration condition
+         * \param[in] substitution template for substitutions
+         **/
+        enumerator_type make(std::set< variable_type > const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type()) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, m_evaluator);
         }
 
         /** \brief Creates enumerator using the default type
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] evaluator a condition evaluator object
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         enumerator_type make(std::set< variable_type > const& variables, Evaluator const& evaluator,
-                         expression_type const& condition = boolean_expression_traits< expression_type >::template constant< true >(),
-                         substitution_type const& substitution = substitution_type()) {
+                         expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type()) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, evaluator);
         }
 
         /** \brief Creates enumerator with an alternative condition evaluator component
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] evaluator a condition evaluator object
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         template < typename AlternativeEvaluator >
-        exhaustive_enumerator< substitution_type, AlternativeEvaluator, selector_type >
+        classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
           make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
-                         expression_type const& condition = boolean_expression_traits< expression_type >::template constant< true >(),
-                         substitution_type const& substitution = substitution_type()) {
+                         expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type()) const {
 
-          return exhaustive_enumerator<
+          return classic_enumerator<
                        substitution_type, AlternativeEvaluator, selector_type >
                                                         (m_enumeration_context, variables, condition, substitution, evaluator);
         }
 
         /** \brief Creates enumerator with an alternative selector component
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] evaluator a condition evaluator object
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         template < typename AlternativeSelector >
-        exhaustive_enumerator< substitution_type, evaluator_type, AlternativeSelector >
+        classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
           make(std::set< variable_type > const& variables, evaluator_type const& evaluator,
-            expression_type const& condition = boolean_expression_traits< expression_type >::template constant< true >(),
-            substitution_type const& substitution = substitution_type()) {
+            expression_type const& condition = expression_traits< expression_type >::true_(),
+            substitution_type const& substitution = substitution_type()) const {
 
-          return exhaustive_enumerator< substitution_type, evaluator_type, AlternativeSelector >
+          return classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
                                                         (m_enumeration_context, variables, condition, substitution, evaluator);
         }
 
@@ -152,34 +168,34 @@ namespace mcrl2 {
          *
          * The default condition evaluator component is passed.
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         template < typename AlternativeSelector >
-        exhaustive_enumerator< substitution_type, evaluator_type, AlternativeSelector >
+        classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
           make(std::set< variable_type > const& variables,
-                         expression_type const& condition = boolean_expression_traits< expression_type >::template constant< true >(),
-                         substitution_type const& substitution = substitution_type()) {
+                         expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type()) const {
 
-          return exhaustive_enumerator< substitution_type, evaluator_type, AlternativeSelector >
+          return classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
                                                         (m_enumeration_context, variables, condition, substitution, m_evaluator);
         }
 
         /** \brief Creates enumerator with alternative condition evaluator and selector components
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] evaluator a condition evaluator object
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         template < typename AlternativeEvaluator, typename AlternativeSelector >
-        exhaustive_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
+        classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
           make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
                          expression_type const& condition = sort_bool_::true_(),
-                         substitution_type const& substitution = substitution_type()) {
+                         substitution_type const& substitution = substitution_type()) const {
 
-          return exhaustive_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
+          return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
                                                         (m_enumeration_context, variables, condition, substitution, evaluator);
         }
 
@@ -187,17 +203,17 @@ namespace mcrl2 {
          *
          * The default condition evaluator component is passed.
          *
-         * \param[in] variables the set of variables for which to find evaluations
+         * \param[in] variables the set of variables for which to find valuations
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
         template < typename AlternativeEvaluator, typename AlternativeSelector >
-        exhaustive_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
+        classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
           make(std::set< variable_type > const& variables,
                          expression_type const& condition = sort_bool_::true_(),
-                         substitution_type const& substitution = substitution_type()) {
+                         substitution_type const& substitution = substitution_type()) const {
 
-          return exhaustive_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
+          return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
                                                         (m_enumeration_context, variables, condition, substitution, m_evaluator);
         }
     };

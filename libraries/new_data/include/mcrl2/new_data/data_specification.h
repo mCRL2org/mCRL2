@@ -279,10 +279,14 @@ namespace mcrl2 {
       /// \return The constructors for sort s in this specification.
       function_symbol_vector constructors(const sort_expression& s) const
       {
-        function_symbol_vector result = boost::copy_range< function_symbol_vector >(
-                 boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s)));
+        if (s.is_alias())
+        {
+          return boost::copy_range< function_symbol_vector >(
+            boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(alias(s).reference())));
+        }
 
-        return result;
+        return boost::copy_range< function_symbol_vector >(
+          boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s)));
       }
 
       /// \brief Gets all mappings in this specification

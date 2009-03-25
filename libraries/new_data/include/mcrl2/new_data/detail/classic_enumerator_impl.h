@@ -28,9 +28,6 @@ namespace mcrl2 {
     /// \cond INTERNAL
     namespace detail {
 
-      template < typename MutableSubstitution, typename Evaluator, typename Selector >
-      class classic_enumerator;
-
       // Shared context
       // Does not contain iterator specific state information. Used for
       // both performance and for making the iterators Multi Pass such that
@@ -152,6 +149,10 @@ namespace mcrl2 {
             ATermList assignment_list;
 
             while (m_generator->next(&assignment_list)) {
+              if (m_generator->errorOccurred()) {
+                throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
+              }
+
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
 std::clog << "ASSIGNMENT " << *i << std::endl;

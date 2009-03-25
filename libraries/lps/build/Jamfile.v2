@@ -7,9 +7,9 @@ project lps
 mcrl2-library lps
        :
          lin_std.cpp
-#         binary.cpp
+         binary.cpp
          sumelm.cpp
-#         suminst.cpp
+         suminst.cpp
          untime.cpp
 #         nextstate.cpp
 #         nextstate_standard.cpp

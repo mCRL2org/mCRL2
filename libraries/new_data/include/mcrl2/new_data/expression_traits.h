@@ -200,6 +200,13 @@ namespace core {
 
 } // namespace core
 
+namespace new_data {
+  /// \brief TODO replace term_traits by expression_traits
+  template < typename Expression >
+  struct expression_traits : public core::term_traits< Expression >
+  { };
+}
+
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_TERM_TRAITS_H

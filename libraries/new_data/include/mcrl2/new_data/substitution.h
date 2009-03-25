@@ -88,7 +88,7 @@ namespace mcrl2 {
         typedef typename std::map< variable_type, expression_type >::const_iterator const_iterator;
 
         /// \brief Iterator type for non-constant element access
-        typedef typename std::map< variable_type, expression_type >::iterator       iterator;
+        typedef typename std::map< variable_type, expression_type >::const_iterator iterator;
 
         /// \brief Wrapper class for internal storage and substitution updates using operator()
         class assignment {

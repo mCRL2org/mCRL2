@@ -53,7 +53,7 @@ namespace detail {
   atermpp::aterm_appl find_if(T const& t, MatchPredicate match, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
   {
     for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-      atermpp::aterm_appl result = atermpp::find_if(t, match);
+      atermpp::aterm_appl result = atermpp::find_if(*i, match);
 
       if (result != atermpp::aterm_appl()) {
         return result;
