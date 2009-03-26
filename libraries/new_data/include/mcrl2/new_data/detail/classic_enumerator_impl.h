@@ -25,6 +25,9 @@ namespace mcrl2 {
     template < typename MutableSubstitution, typename Evaluator, typename Selector >
     class classic_enumerator;
 
+    template < typename Enumerator >
+    class enumerator_factory;
+
     /// \cond INTERNAL
     namespace detail {
 
