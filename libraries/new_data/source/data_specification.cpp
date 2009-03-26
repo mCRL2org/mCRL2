@@ -86,17 +86,24 @@ namespace mcrl2 {
           {
             if (s.is_basic_sort())
             {
-              function_symbol_vector constructors_s(m_specification.constructors(s));
+              sort_expression actual_sort = m_specification.find_referenced_sort(s);
 
-              for (function_symbol_vector::const_iterator i = constructors_s.begin(); i != constructors_s.end(); ++i)
-              {
-                if (i->sort().is_function_sort())
+              if (actual_sort != s && !actual_sort.is_basic_sort()) {
+                add_generic_and_check(actual_sort);
+              }
+              else {
+                function_symbol_vector constructors_s(m_specification.constructors(actual_sort));
+
+                for (function_symbol_vector::const_iterator i = constructors_s.begin(); i != constructors_s.end(); ++i)
                 {
-                  function_sort f_sort(i->sort());
-
-                  for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
+                  if (i->sort().is_function_sort())
                   {
-                    add_generic_and_check(i.front());
+                    function_sort f_sort(i->sort());
+
+                    for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
+                    {
+                      add_generic_and_check(i.front());
+                    }
                   }
                 }
               }
@@ -335,7 +342,14 @@ namespace mcrl2 {
 
       if (s.is_basic_sort())
       {
-        function_symbol_vector fl(constructors(s));
+        sort_expression actual_sort = find_referenced_sort(s);
+
+        if (actual_sort != s && !actual_sort.is_basic_sort())
+        {
+          return is_certainly_finite(actual_sort);
+        }
+
+        function_symbol_vector fl(constructors(actual_sort));
 
         for (function_symbol_vector::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {

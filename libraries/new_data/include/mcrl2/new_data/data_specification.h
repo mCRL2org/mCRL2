@@ -285,8 +285,13 @@ namespace mcrl2 {
             boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(alias(s).reference())));
         }
 
-        return boost::copy_range< function_symbol_vector >(
-          boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s)));
+        boost::iterator_range< constructors_const_iterator > constructor_range(m_constructors.equal_range(s));
+
+        if (constructor_range.empty() && s.is_basic_sort() && !s.is_standard()) {
+          constructor_range = m_constructors.equal_range(find_referenced_sort(s));
+        }
+
+        return boost::copy_range< function_symbol_vector >(constructor_range);
       }
 
       /// \brief Gets all mappings in this specification
@@ -539,6 +544,36 @@ namespace mcrl2 {
         {
           add_system_defined_equation(*i);
         }
+      }
+
+      /// \brief Gets all constructors of a sort.
+      ///
+      /// \param[in] s A sort basic sort.
+      /// \return the final sort referenced by s or s in case of failure
+      sort_expression find_referenced_sort(basic_sort const& s) const
+      {
+        sort_expression result = s;
+
+        std::vector< alias > all_aliases = convert< std::vector< alias > >(aliases());
+
+        bool search_further = false;
+
+        do {
+          search_further = false;
+
+          // search aliases for a reference that matches s
+          for (std::vector< alias >::const_iterator i(all_aliases.begin()); i != all_aliases.end(); ++i)
+          {
+            if (i->name() == result)
+            {
+              result         = i->reference();
+              search_further = result.is_basic_sort();
+              break;
+            }
+          }
+        } while (search_further);
+
+        return result;
       }
 
       /// \brief Removes sort from specification.

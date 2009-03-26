@@ -90,6 +90,10 @@ void test_aliases()
   BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
   BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
   BOOST_CHECK(spec.aliases(s) == boost::make_iterator_range(aliases));
+
+  alias s3(basic_sort("S3"), basic_sort("S2"));
+
+  BOOST_CHECK(spec.find_referenced_sort(s3) == s);
 }
 
 void test_constructors()
