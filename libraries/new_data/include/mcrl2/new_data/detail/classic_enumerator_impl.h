@@ -57,7 +57,7 @@ namespace mcrl2 {
         friend class new_data::classic_enumerator< MutableSubstitution, Evaluator, Selector >;
 
         template < typename T >
-        friend class enumerator_factory;
+        friend class new_data::enumerator_factory;
 
         private:
 

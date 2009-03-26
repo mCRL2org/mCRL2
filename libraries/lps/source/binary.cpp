@@ -168,7 +168,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
 /// \return data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
 variable_list replace_enumerated_parameters(const lps::specification& specification,
-                                                 enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
+                                                 new_data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
                                                  table& new_parameters_table,
                                                  table& enumerated_elements_table)
 {
@@ -471,7 +471,7 @@ specification binary(const lps::specification& spec,
   table new_parameters_table(128, 50);
   table enumerated_elements_table(128,50);
 
-  enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
+  new_data::enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
 
   // This needs to be done in a counter-intuitive order because of the well-typedness checks
   // (they make sure we can't build up an intermediate result!)
