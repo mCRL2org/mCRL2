@@ -12,7 +12,6 @@
 #define LIBGRAPE_CHANNELCOMMUNICATION_H
 
 #include "communication.h"
-#include "channeltype.h"
 
 namespace grape
 {
@@ -20,18 +19,29 @@ namespace grape
   {
 
     /**
+     * \short Channel communication type enumeration.
+     * An enumeration that includes all possible channel communication types ({VISIBLE, HIDDEN, BLOCKED}).
+     */
+    enum channel_communication_type
+    {
+      VISIBLE_CHANNEL_COMMUNICATION = 0, 
+      HIDDEN_CHANNEL_COMMUNICATION, 
+      BLOCKED_CHANNEL_COMMUNICATION
+    };
+
+    /**
      * \short Represents a channel communication.
      * Two or more connected Channels that synchronize the Actions
      * that the Channels correspond to.
      * @see channel
      */
-    class channel_communication : public connection
+    class channel_communication : public object
     {
       protected:
         /** The communications involved in this channel communication. Each communication is associated with exactly one channel. */
-        arr_communication    m_communication;
-        channeltype          m_channeltype;     /**< type of channel communication. */
-        wxString             m_rename_to;       /**< rename of the channel communication. */
+        arr_communication           m_communication;
+        channel_communication_type  m_channel_communication_type; /**< type of channel communication. */
+        wxString                    m_rename_to;                  /**< rename of the channel communication. */
 
       public:
 
@@ -111,14 +121,14 @@ namespace grape
          * Channel communication type retrieval function
          * @return The channel communication type
          */
-        channeltype get_channeltype( void ) const;
+        channel_communication_type get_channel_communication_type( void ) const;
 
         /**
          * Channel communication type assignment function
          * Takes a new channeltype and assigns it to the channeltype of the channel.
          * @param p_channeltype The new channeltype
          */
-        void set_channeltype( const channeltype &p_channeltype );
+        void set_channel_communication_type( const channel_communication_type &p_channel_communication_type );
     };
 
     /**

@@ -1,10 +1,10 @@
-// Author(s): Diana Koenraadt, Remcgo Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file label.cpps
+/// \file label.cpp
 //
 // Implements the label datatype.
 
@@ -99,7 +99,8 @@ void label::set_actions_text( const wxString &p_actions )
       // check if there is a close bracket on the same level
       brackets_cnt = 0;
       tmp_index = -1;
-      while ((tmp_index+1) <= sub_text.Len())
+      int sub_text_length = sub_text.Len();
+      while ((tmp_index+1) <= sub_text_length)
       {    
         tmp_index += 1;
         wxString c = sub_text.GetChar(tmp_index);

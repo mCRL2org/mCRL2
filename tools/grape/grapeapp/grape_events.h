@@ -14,7 +14,6 @@
 #include "events/event_architecturediagram.h"
 #include "events/event_architecturereference.h"
 #include "events/event_base.h"
-#include "events/event_blocked.h"
 #include "events/event_channel.h"
 #include "events/event_channelcommunication.h"
 #include "events/event_comment.h"
@@ -28,11 +27,9 @@
 #include "events/event_object.h"
 #include "events/event_processdiagram.h"
 #include "events/event_processreference.h"
-#include "events/event_property.h"
 #include "events/event_referencestate.h"
 #include "events/event_select.h"
 #include "events/event_state.h"
 #include "events/event_terminatingtransition.h"
-#include "events/event_visible.h"
 
 #endif // GRAPEAPP_EVENTS_H

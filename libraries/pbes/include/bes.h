@@ -356,12 +356,51 @@ namespace bes
                            (atermpp::aterm)(b2)));
   }
 
+  inline bes_expression and_optimized(bes_expression b1,bes_expression b2)
+  { if (b1==true_())
+    { return b2;
+    }
+    if (b2==true_())
+    { return b1;
+    }
+    if (b1==false_())
+    { return false_();
+    }
+    if (b2==false_())
+    { return false_();
+    }
+    if (b1==b2)
+    { return b1;
+    }
+    return and_(b1,b2);
+  }
+
   inline bes_expression or_(bes_expression b1,bes_expression b2)
   { return bes_expression(
                ATmakeAppl2(AFunBESOr(),
                            (atermpp::aterm)(b1),
                            (atermpp::aterm)(b2)));
   }
+
+  inline bes_expression or_optimized(bes_expression b1,bes_expression b2)
+  { if (b1==true_())
+    { return true_();
+    }
+    if (b2==true_())
+    { return true_();
+    }
+    if (b1==false_())
+    { return b2;
+    }
+    if (b2==false_())
+    { return b1;
+    }
+    if (b1==b2)
+    { return b1;
+    }
+    return or_(b1,b2);
+  }
+
 
   inline bool is_variable(bes_expression b)
   { return b.type()==AT_INT;
@@ -383,65 +422,65 @@ namespace bes
     return if_(b1,b2,b3);
   }
 
-  inline bes_expression variable(variable_type n)
+  inline bes_expression variable(const variable_type &n) 
   { return bes_expression((atermpp::aterm)atermpp::aterm_int(n));
   }
 
-  inline bool is_false(bes_expression b)
+  inline bool is_false(const bes_expression &b) 
   {
     return b==false_();
   }
 
-  inline bool is_true(bes_expression b)
+  inline bool is_true(const bes_expression &b) 
   { return b==true_();
   }
 
-  inline bool is_dummy(bes_expression b)
+  inline bool is_dummy(const bes_expression &b) 
   { return b==dummy();
   }
 
-  inline bool is_and(bes_expression b)
+  inline bool is_and(const bes_expression &b) 
   { return ATgetAFun((_ATerm*)b)==AFunBESAnd();
   }
 
-  inline bool is_or(bes_expression b)
+  inline bool is_or(const bes_expression &b) 
   { return ATgetAFun((_ATerm*)b)==AFunBESOr();
   }
 
-  inline bool is_if(bes_expression b)
+  inline bool is_if(const bes_expression &b) 
   { return ATgetAFun((_ATerm*)b)==AFunBESIf();
   }
 
-  inline bes_expression lhs(bes_expression b)
+  inline bes_expression lhs(const bes_expression &b) 
   { assert(is_and(b) || is_or(b));
-    return bes_expression(atermpp::aterm_appl(b)(0));
+    return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
   }
 
-  inline bes_expression rhs(bes_expression b)
+  inline bes_expression rhs(const bes_expression &b)
   { assert(is_and(b) || is_or(b));
-    return bes_expression(atermpp::aterm_appl(b)(1));
+    return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
   }
 
-  inline bes_expression condition(bes_expression b)
+  inline bes_expression condition(const bes_expression &b)
   {
     assert(is_if(b));
-    return bes_expression(atermpp::aterm_appl(b)(0));
+    return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
   }
 
-  inline bes_expression then_branch(bes_expression b)
+  inline bes_expression then_branch(const bes_expression &b)
   { assert(is_if(b));
-    return bes_expression(atermpp::aterm_appl(b)(1));
+    return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(1));
   }
 
-  inline bes_expression else_branch(bes_expression b)
+  inline bes_expression else_branch(const bes_expression &b)
   {
     assert(is_if(b));
-    return bes_expression(atermpp::aterm_appl(b)(2));
+    return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(2));
   }
 
-  inline variable_type get_variable(bes_expression b)
+  inline variable_type get_variable(const bes_expression &b)
   { assert(is_variable(b));
-    return ((atermpp::aterm_int)b).value();
+    return ((atermpp::aterm_int)(const atermpp::aterm&)b).value();
   }
 
   inline bes_expression substitute_true_false_rec(
@@ -840,7 +879,7 @@ namespace bes
       bool construct_counter_example;
 
     protected:
-      inline void check_vector_sizes(variable_type v)
+      inline void check_vector_sizes(const variable_type v) 
       { if (v>nr_of_variables())
         { control_info.resize(v+1,0);
           right_hand_sides.resize(v+1,dummy());
@@ -868,7 +907,7 @@ namespace bes
           max_rank(0)
       {}
 
-      inline unsigned long nr_of_variables()
+      inline unsigned long nr_of_variables() const
       { return control_info.size()-1; /* there is no equation at position 0 */
       }
 
@@ -1208,7 +1247,7 @@ namespace bes
         refresh_relevances();
       }
 
-      bool is_relevant(variable_type v)
+      bool is_relevant(const variable_type v) 
       {
         assert(0<v);
         check_vector_sizes(v);

@@ -65,6 +65,7 @@ namespace grape
       private:
         unsigned int                        m_proc_ref; /**< A pointer to the to be deleted process reference. */
         wxString                    m_name;         /**< Backup of the name of the reference state. */
+        unsigned int                m_property_of;  /**< Backup of the id of the process diagram the process reference refers to. */
         list_of_varupdate           m_parameter_assignments;  /**< Backup of the initial parameter values of the reference state. */
         coordinate                  m_coordinate;   /**< Backup of the coordinate of the reference state. */
         float                       m_width;        /**< Backup of the width of the reference state. */

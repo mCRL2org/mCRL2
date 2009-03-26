@@ -40,8 +40,6 @@ namespace grape
       ADD_ARCHITECTURE_REFERENCE,
       ADD_CHANNEL,
       ADD_CHANNEL_COMMUNICATION,
-      ADD_VISIBLE,
-      ADD_BLOCKED,
       ADD_COMMENT,
     };
 
@@ -78,10 +76,6 @@ namespace grape
         grape_direction m_touched_click_location; /**< When a border of a visual is clicked, it is stored which border was clicked. This is needed for grape_event_drag to determine to which direction to resize. */
         bool            m_dragging;              /**< Whether the touched object was dragged. */
         bool            m_mousedown;             /**< Shall contain @c true when the left mouse button is pressed. */
-
-        coordinate m_visibility_frame_coordinate; /**< The center coordinate of the visibility frame. */
-        float m_visibility_frame_width;   /**< The width of the visibility frame of an architecture diagram. */
-        float m_visibility_frame_height;  /**< The height of the visibility frame of an architecture diagram. */
 
         DECLARE_EVENT_TABLE();        /**< The event table of this canvas. */
 
@@ -354,13 +348,6 @@ namespace grape
          * Returns an image containing what is on the canvas right now.
          */
         wxImage get_image( void );
-
-        /**
-         * Visibility frame test function.
-         * @param p_coord The coordinate that is to be tested.
-         * @return Returns whether the coordinate is inside the visibility frame.
-         */
-        bool is_inside_visibility_frame( coordinate &p_coord );
 
         /**
          * Font renderer retrieval function.

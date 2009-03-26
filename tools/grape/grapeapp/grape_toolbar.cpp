@@ -79,13 +79,11 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select objects in current diagram"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select objects in current diagram"), _T("Select objects in current diagram"));
 //  AddRadioTool(GRAPE_TOOL_ATTACH, _T("Attach objects"), g_icons[ _T("attach") ], wxNullBitmap, _T("Attach objects to eachother"), _T("Attach objects to eachother"));
-//  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
+  AddRadioTool(GRAPE_TOOL_DETACH, _T("Detach objects"), g_icons[ _T("detach") ], wxNullBitmap, _T("Detach objects from eachother"), _T("Detach objects from eachother"));
   AddRadioTool(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, _T("Add Architecture reference"), g_icons[ _T("archref") ], wxNullBitmap, _T("Add Architecture reference"), _T("Add Architecture reference"));
   AddRadioTool(GRAPE_TOOL_ADD_PROCESS_REFERENCE, _T("Add Process reference"), g_icons[ _T("procref") ], wxNullBitmap, _T("Add Process reference"), _T("Add Process reference"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL, _T("Add Channel"), g_icons[ _T("channel") ], wxNullBitmap, _T("Add Channel"), _T("Add Channel"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, _T("Add Channel communication"), g_icons[ _T("chancomm") ], wxNullBitmap, _T("Add Channel communication"), _T("Add Channel communication"));
-  AddRadioTool(GRAPE_TOOL_ADD_BLOCKED, _T("Add Blocked property"), g_icons[ _T("blocked") ], wxNullBitmap, _T("Add Blocked property"), _T("Add Blocked property"));
-  AddRadioTool(GRAPE_TOOL_ADD_VISIBLE, _T("Add Visible property"), g_icons[ _T("visible") ], wxNullBitmap, _T("Add Visible property"), _T("Add Visible property"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
   AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
 

@@ -21,9 +21,12 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 
   int lf = wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
 
+  wxFlexGridSizer* sizer = new wxFlexGridSizer(1,1,0,0);
+  sizer->AddGrowableRow(0);
+  sizer->AddGrowableCol(0);
   wxNotebook* topNotebook = new wxNotebook(this, wxID_ANY);
-  wxPanel* panel = new wxPanel(topNotebook, wxID_ANY);
 
+  wxPanel* panel = new wxPanel(topNotebook, wxID_ANY);
   lts_info = new wxListCtrl(panel,wxID_ANY,wxDefaultPosition,wxDefaultSize,
       wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_NO_HEADER);
   lts_info->InsertColumn(0, wxT(""));
@@ -43,7 +46,6 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   panel->SetSizer(topSizer);
   panel->Fit();
   panel->Layout();
-  topNotebook->AddPage(panel, wxT("LTS info"), false);
 
   wxPanel* clus_panel = new wxPanel(topNotebook, wxID_ANY);
   cluster_info = new wxListCtrl(clus_panel, wxID_ANY, wxDefaultPosition,
@@ -63,7 +65,6 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   clus_panel->SetSizer(clusSizer);
   clus_panel->Fit();
   clus_panel->Layout();
-  topNotebook->AddPage(clus_panel, wxT("Cluster info"), false);
 
 
   wxPanel* panel1 = new wxPanel(topNotebook, wxID_ANY);
@@ -79,10 +80,14 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   panel1->SetSizer(selSizer);
   panel1->Fit();
   panel1->Layout();
+
+  topNotebook->AddPage(panel, wxT("LTS info"), false);
+  topNotebook->AddPage(clus_panel, wxT("Cluster info"), false);
   topNotebook->AddPage(panel1, wxT("State info"), false);
 
-  //panel->Layout();
-  //panel->UpdateSize();
+  sizer->Add(topNotebook,0,wxEXPAND|wxALL,5);
+  SetSizer(sizer);
+  Layout();
 }
 
 void InfoDialog::setLTSInfo(int ns,int nt,int nc,int nr) {

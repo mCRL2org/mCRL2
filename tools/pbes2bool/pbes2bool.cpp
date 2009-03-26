@@ -90,7 +90,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
     enum bes_output_format {
       none,
       vasy,
-      cwi
+      cwi,
+      pbes
     };
 
     static bool initialise_types() {
@@ -107,7 +108,8 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface 
       output_format_enumeration.
         add(none, "none").
         add(vasy, "vasy").
-        add(cwi, "cwi");
+        add(cwi, "cwi").
+        add(cwi, "pbes");
 
       return true;
     }
@@ -219,6 +221,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     append(d.create< horizontal_box >().
                 append(format_selector.associate(none, "none")).
                 append(format_selector.associate(vasy, "vasy")).
+                append(format_selector.associate(pbes, "pbes")).
                 append(format_selector.associate(cwi, "cwi")),
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Strategy to generate a BES from a PBES: "), margins(8,5,0,5)).
@@ -306,7 +309,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
   using namespace mcrl2;
   // static std::string strategies[] = { "lazy", "fly" };
-  static std::string formats[]    = { "none", "vasy", "cwi" };
+  static std::string formats[]    = { "none", "vasy", "cwi", "pbes" };
 
   t_tool_options tool_options;
 
@@ -403,6 +406,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
       "use output format FORMAT:\n"
       " 'none' (default),\n"
       " 'vasy',\n"
+      " 'pbes' (save as a PBES in internal format),\n"
       " 'cwi'",
       'o').
     add_option("tree",
@@ -428,7 +432,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
     if (parser.options.count("output")) { // Output format
       std::string format = parser.option_argument("output");
 
-      if (!((format == "none") || (format == "vasy") || (format == "cwi"))) {
+      if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes"))) {
         parser.error("unknown output format specified (got `" + format + "')");
       }
 

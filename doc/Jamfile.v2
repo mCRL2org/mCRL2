@@ -12,6 +12,7 @@ boostbook doc
     :
     ## Build the various generated docs (Doxygen and QuickBook)...
 
+    <dependency>../libraries/data/doc//concept_manual
     <dependency>../libraries/data/doc//data_manual
     <dependency>../libraries/lps/doc//lps_manual
     <dependency>../libraries/pbes/doc//pbes_manual
@@ -19,6 +20,7 @@ boostbook doc
 
     ## Add path references to the QuickBook generated docs...
 
+    <implicit-dependency>../libraries/data/doc//concept_manual
     <implicit-dependency>../libraries/data/doc//data_manual
     <implicit-dependency>../libraries/lps/doc//lps_manual
     <implicit-dependency>../libraries/pbes/doc//pbes_manual

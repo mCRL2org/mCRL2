@@ -19,8 +19,9 @@ using namespace std;
 
 Simulation::Simulation()
 {
-  //currState = NULL;
-  started=false;
+  currState = NULL;
+  initialState = NULL;
+  started = false;
   chosenTrans = -1;
 }
 
@@ -29,17 +30,19 @@ void Simulation::setInitialState(State* init)
   initialState = init;
 }
 
-void Simulation::start() {
+void Simulation::start()
+{
   stateHis.push_back(initialState);
   initialState->setSimulated(true);
   currState = initialState;
-
   posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i) {
+  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
+  {
     posTrans.push_back(currState->getOutTransition(i));
     currState->getOutTransition(i)->getEndState()->setSimulated(true);
   }
-  for (int i = 0; i < currState->getNumLoops(); ++i) {
+  for (int i = 0; i < currState->getNumLoops(); ++i)
+  {
     posTrans.push_back(currState->getLoop(i));
   }
   if (posTrans.size() > 0)
@@ -50,7 +53,6 @@ void Simulation::start() {
   {
     chosenTrans = -1;
   }
-
   started = true;
   //Fire signal
   signal();
@@ -59,17 +61,14 @@ void Simulation::stop()
 {
   // Set started to false
   started = false;
-
   for (size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
-
   for(size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
   }
-
   chosenTrans = -1;
   // Clear history
   stateHis.clear();
@@ -78,47 +77,47 @@ void Simulation::stop()
   currState = NULL;
   // Fire signal
   signal();
-
 }
 
-Simulation::~Simulation() {
+Simulation::~Simulation()
+{
   //Stop simulation
   stop();
-
   transHis.clear();
-
   for(size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
-
   stateHis.clear();
-
   for(size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
   }
-
   posTrans.clear();
 }
 
-vector< Transition* > const& Simulation::getTransHis() const {
+vector< Transition* > const& Simulation::getTransHis() const
+{
   return transHis;
 }
 
-vector< State* > const& Simulation::getStateHis() const {
+vector< State* > const& Simulation::getStateHis() const
+{
   return stateHis;
 }
 
-State* Simulation::getCurrState() const {
+State* Simulation::getCurrState() const
+{
   return currState;
 }
 
-vector< Transition* > const& Simulation::getPosTrans() const {
+vector< Transition* > const& Simulation::getPosTrans() const
+{
   return posTrans;
 }
 
-Transition* Simulation::getChosenTrans() const {
+Transition* Simulation::getChosenTrans() const
+{
   if (chosenTrans >= 0)
   {
     return posTrans[chosenTrans];
@@ -129,10 +128,12 @@ Transition* Simulation::getChosenTrans() const {
   }
 }
 
-int Simulation::getChosenTransi() const {
+int Simulation::getChosenTransi() const
+{
   return chosenTrans;
 }
-bool Simulation::getStarted() const {
+bool Simulation::getStarted() const
+{
   return started;
 }
 
@@ -141,9 +142,7 @@ void Simulation::traceBack(State* initState)
   // First, reverse the vectors, so we can push each new transition at the back
   reverse(stateHis.begin(), stateHis.end());
   reverse(transHis.begin(), transHis.end());
-
   State* currPos = stateHis.back();
-
   while(currPos != initState)
   {
     transHis.push_back(currPos->getInTransition(0));
@@ -151,46 +150,40 @@ void Simulation::traceBack(State* initState)
     currPos->setSimulated(true);
     stateHis.push_back(currPos);
   }
-
   // Undo reversion
   reverse(transHis.begin(), transHis.end());
   reverse(stateHis.begin(), stateHis.end());
-
   signal();
 }
 
-void Simulation::followTrans() {
+void Simulation::followTrans()
+{
   if (chosenTrans != -1)
   {
     Transition* toFollow = posTrans[chosenTrans];
     State* nextState = toFollow->getEndState();
-
     transHis.push_back(posTrans[chosenTrans]);
-
     for(size_t i = 0; i < posTrans.size(); ++i)
     {
       posTrans[i]->getEndState()->setSimulated(false);
     }
-
     for(size_t i = 0; i < stateHis.size(); ++i)
     {
       stateHis[i]->setSimulated(true);
     }
-
     nextState->setSimulated(true);
-
     stateHis.push_back(nextState);
     currState = nextState;
-
     posTrans.clear();
-    for (int i = 0; i < nextState->getNumOutTransitions(); ++i) {
+    for (int i = 0; i < nextState->getNumOutTransitions(); ++i)
+    {
       posTrans.push_back(nextState->getOutTransition(i));
       nextState->getOutTransition(i)->getEndState()->setSimulated(true);
     }
-    for (int i = 0; i < nextState->getNumLoops(); ++i) {
+    for (int i = 0; i < nextState->getNumLoops(); ++i)
+    {
       posTrans.push_back(nextState->getLoop(i));
     }
-
     if (posTrans.size() > 0)
     {
       chosenTrans = 0;
@@ -199,47 +192,45 @@ void Simulation::followTrans() {
     {
       chosenTrans = -1;
     }
-
     //Fire signal
     signal();
   }
 }
-void Simulation::chooseTrans(int i) {
-  chosenTrans = i;
 
+void Simulation::chooseTrans(int i)
+{
+  chosenTrans = i;
   // Fire signal
   selChangeSignal();
 }
 
-void Simulation::undoStep() {
+void Simulation::undoStep()
+{
   State* lastState;
-
   // Remove last transition, state from history
   transHis.pop_back();
-
   stateHis.back()->setSimulated(false);
   stateHis.pop_back();
-
   for(size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
     posTrans[i]->getEndState()->deselect();
   }
-
   // Set new states
   lastState = stateHis.back();
   currState = lastState;
   currState->setSimulated(true);
 
   posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i) {
+  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
+  {
     posTrans.push_back(currState->getOutTransition(i));
     currState->getOutTransition(i)->getEndState()->setSimulated(true);
   }
-  for (int i = 0; i < currState->getNumLoops(); ++i) {
+  for (int i = 0; i < currState->getNumLoops(); ++i)
+  {
     posTrans.push_back(currState->getLoop(i));
   }
-
   if (posTrans.size() > 0)
   {
     chosenTrans = 0;
@@ -248,38 +239,33 @@ void Simulation::undoStep() {
   {
     chosenTrans = -1;
   }
-
   // Fire signal
   signal();
 }
 
-
-void Simulation::resetSim() {
+void Simulation::resetSim()
+{
   State* firstState = stateHis.front();
-
   transHis.clear();
   for (size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
-
   stateHis.clear();
 
   firstState->setSimulated(true);
-
   stateHis.push_back(firstState);
-
   currState = firstState;
-
   posTrans.clear();
-  for (int i = 0; i < currState->getNumOutTransitions(); ++i) {
+  for (int i = 0; i < currState->getNumOutTransitions(); ++i)
+  {
     posTrans.push_back(currState->getOutTransition(i));
     currState->getOutTransition(i)->getEndState()->setSimulated(true);
   }
-  for (int i = 0; i < currState->getNumLoops(); ++i) {
+  for (int i = 0; i < currState->getNumLoops(); ++i)
+  {
     posTrans.push_back(currState->getLoop(i));
   }
-
   if (posTrans.size() > 0)
   {
     chosenTrans = 0;
@@ -288,26 +274,21 @@ void Simulation::resetSim() {
   {
     chosenTrans = -1;
   }
-
   // Fire signal
   signal();
 }
 
 Simulation::simConnection Simulation::connectSel(
-              simulationSignal::slot_function_type subscriber
-            )
+    simulationSignal::slot_function_type subscriber)
 {
   simConnection result = selChangeSignal.connect(subscriber);
-
   // Send acknowledgement to subscriber;
   selChangeSignal();
-
   return result;
 }
 
 Simulation::simConnection Simulation::connect(
-              simulationSignal::slot_function_type subscriber
-            )
+    simulationSignal::slot_function_type subscriber)
 {
   simConnection result = signal.connect(subscriber);
   // Send acknowledge to subscriber
@@ -320,4 +301,3 @@ void Simulation::disconnect(Simulation::simConnection subscriber)
 {
   subscriber.disconnect();
 }
-

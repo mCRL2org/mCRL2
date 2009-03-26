@@ -18,7 +18,7 @@
 using namespace grape::grapeapp;
 
 grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
-: wxDialog( 0, wxID_ANY, _T( "Edit preamble" ), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, _T( "Edit preamble" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 {
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
 
@@ -67,7 +67,6 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   m_localvar_grid->SetColLabelValue(1, _T("Type"));
   m_localvar_grid->SetColLabelValue(2, _T("Value"));
   m_localvar_grid->SetRowLabelSize(30);
-  //p_preamble->get_local_variable_declarations()
   vsizer->Add(m_localvar_grid, 1, wxEXPAND );
 
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);

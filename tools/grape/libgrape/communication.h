@@ -11,6 +11,7 @@
 #ifndef LIBGRAPE_COMMUNICATION_H
 #define LIBGRAPE_COMMUNICATION_H
 
+#include "linetype.h"
 #include "channel.h"
 
 namespace grape
@@ -20,6 +21,7 @@ namespace grape
 
     // forward declarations
     class channel_communication;
+    class channel;
 
     /**
      * \short Represents a communication.

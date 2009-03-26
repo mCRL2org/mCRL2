@@ -58,7 +58,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
     /// The output formats of the tool.
     enum pbes_output_format {
-      of_binary,
+      of_pbes,
       of_internal,
       of_cwi
     };
@@ -99,9 +99,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     /// \param format An output format.
     void set_output_format(const std::string& format)
     {
-      if (format == "binary")
+      if (format == "pbes")
       {
-        m_output_format = of_binary;
+        m_output_format = of_pbes;
       }
       else if (format == "internal")
       {
@@ -127,7 +127,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       }
       catch (std::logic_error)
       {
-        set_output_format("binary");
+        set_output_format("pbes");
       }
 
       try
@@ -152,9 +152,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
           "  'oldlazy' for the previous version of the lazy algorithm.",
           's').
         add_option("output",
-          make_optional_argument("NAME", "binary"),
+          make_optional_argument("NAME", "pbes"),
           "store the BES in output format NAME:\n"
-          "  'binary' for the internal binary format (default),\n"
+          "  'pbes' for the internal binary format (default),\n"
           "  'internal' for the internal textual format, or\n"
           "  'cwi' for the format used by the CWI to solve a BES.",
           'o');
@@ -181,9 +181,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     /// \return A string representation of the output format.
     std::string output_format_string() const
     {
-      if (m_output_format == of_binary)
+      if (m_output_format == of_pbes)
       {
-        return "binary";
+        return "pbes";
       }
       else if (m_output_format == of_cwi)
       {
@@ -208,7 +208,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
           "standard output is used."
         ),
         m_strategy(ts_lazy),
-        m_output_format(of_binary)
+        m_output_format(of_pbes)
     {}
 
     /// Runs the algorithm.
@@ -298,7 +298,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
 
       output_format_enumeration.
-        add(of_binary, "binary").
+        add(of_pbes, "pbes").
         add(of_internal, "internal").
         add(of_cwi, "cwi");
 
@@ -335,7 +335,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
         return EXIT_SUCCESS;
       }
-      return super::execute(argc, argv);
+      return pbes2bes_tool::execute(argc, argv);
     }
 };
 
@@ -366,7 +366,7 @@ void squadt_pbes2bes_tool::user_interactive_configuration(tipi::configuration& c
 
   m.append(d.create< label >().set_text("Output format : ")).
     append(d.create< horizontal_box >().
-                append(format_selector.associate(of_binary, "binary")).
+                append(format_selector.associate(of_pbes, "pbes")).
                 append(format_selector.associate(of_internal, "internal")).
                 append(format_selector.associate(of_cwi, "cwi")),
           margins(0,5,0,5)).
@@ -423,7 +423,7 @@ bool squadt_pbes2bes_tool::check_configuration(tipi::configuration const& c) con
 
 bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
   static std::string strategies[] = { "lazy", "finite" };
-  static std::string formats[]    = { "binary", "internal", "cwi" };
+  static std::string formats[]    = { "pbes", "internal", "cwi" };
 
   m_input_filename = c.get_input(pbes_file_for_input).location();
   m_output_filename = c.get_output(pbes_file_for_output).location();

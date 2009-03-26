@@ -424,9 +424,12 @@ void MainFrame::onResetStatePositions(wxCommandEvent& /*event*/) {
 void MainFrame::createProgressDialog(const string title,const string text) {
   progDialog = new wxProgressDialog(wxString(title.c_str(),wxConvUTF8),
       wxString(text.c_str(),wxConvUTF8),100,this,
-      wxPD_APP_MODAL|wxPD_AUTO_HIDE|wxPD_ELAPSED_TIME);
+      wxPD_APP_MODAL|wxPD_AUTO_HIDE);
+  progDialog->SetMinSize(wxSize(400,100));
   progDialog->SetSize(wxSize(400,100));
   progDialog->CentreOnParent();
+  progDialog->Update(0,wxString(text.c_str(),wxConvUTF8));
+  progDialog->Show();
 }
 
 void MainFrame::updateProgressDialog(int val,string msg) {

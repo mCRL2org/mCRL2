@@ -83,7 +83,7 @@ namespace grape
          * Parameter assignment function.
          * @param p_parameters The new parameters of the action.
          */
-        void set_parameters( list_of_dataexpression &p_parameters);
+        void set_parameters( list_of_dataexpression p_parameters);
     };
 
     /**

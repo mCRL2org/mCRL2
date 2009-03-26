@@ -1,6 +1,11 @@
 import doxygen ;
 import quickbook ;
 
+xml concept_manual
+    :
+        concept_manual.qbk
+    ;
+
 xml data_manual
     :
         data_manual.qbk
@@ -8,7 +13,7 @@ xml data_manual
 
 boostbook standalone
     :
-        data_manual
+        concept_manual data_manual
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png

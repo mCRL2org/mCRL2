@@ -43,8 +43,6 @@ namespace grape
       CHANNEL_COMMUNICATION,
       PROCESS_REFERENCE,
       ARCHITECTURE_REFERENCE,
-      VISIBLE,
-      BLOCKED,
       ANY
     };
 

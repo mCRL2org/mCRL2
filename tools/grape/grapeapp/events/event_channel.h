@@ -13,8 +13,6 @@
 
 #include "event_base.h"
 
-#include "event_blocked.h"
-#include "event_visible.h"
 #include "event_channelcommunication.h"
 
 namespace grape
@@ -71,16 +69,16 @@ namespace grape
         unsigned int                    m_chan; /**< Identifier of the to be deleted channel. */
         bool                            m_normal;       /**< Boolean value to indicate whether the channel should do anything to the channel communications it is attached to; a normal remove */
         wxString                        m_name; /**< Name of the channel. */
+        wxString                        m_rename; /**< Rename of the channel. */
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel. */
         unsigned int                    m_ref; /**< Identifier of the compound reference that the channel belonged to. */
         float                           m_width;        /**< Backup of the width of the channel. */
         float                           m_height;       /**< Backup of the height of the channel. */
         wxArrayLong                     m_comments;     /**< Backup of the list of comments attached to the channel. */
         unsigned int                    m_in_diagram; /**< Identifier of the diagram from which the channel was deleted. */
+        channel_type                    m_channel_type; /**< Backup of the channel type. */
 
         // Below implemented with arrays instead of pointers, to prevent annoying pointer crashes.
-        arr_event_remove_visible     m_visible;  /**< Backup of the visible that was associated with the channel, if applicable. */
-        arr_event_remove_blocked     m_blocked;  /**< Backup of the blocked that was associated with the channel, if applicable. */
         arr_event_detach_channel_communication m_channel_communication; /**< Backup of the removed channel communication that the channel was attached to, if applicable. */
       public:
 
@@ -157,6 +155,7 @@ namespace grape
     {
       private:
         channel*   m_channel; /**< The channel that is to be detached. */
+        arr_event_detach_channel_communication m_channel_communication; /**< Backup of the removed channel communication that the channel was attached to, if applicable. */
       public:
 
         /**

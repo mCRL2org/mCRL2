@@ -59,6 +59,8 @@ class Visualizer: public Subscriber {
     void resetVelocities(Cluster* root);
     void forceDirectedInitPos(Cluster* root);
 
+    float distance_circle_to_poly(float angle,float radius);
+
   public:
     Visualizer(Mediator* owner,Settings* ss);
     ~Visualizer();

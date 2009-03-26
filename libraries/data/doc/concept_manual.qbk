@@ -1,6 +1,6 @@
-[library Data Library
+[library Concept Library
     [quickbook 1.4]
-    [authors [Wulp, Jeroen van der] [Wesselink, Wieger]]
+    [authors [Wulp, Jeroen van der], [Wesselink, Wieger]]
     [copyright 2005-2009 Technische Universiteit Eindhoven]
     [category string-text]
     [purpose
@@ -35,8 +35,8 @@ A class or built-in type X models the Substitution concept if it models Unary Fu
 
 [table Mutable Substitution Requirements (in addition to Substitution)
  [ [ Expression ] [ Return Type ] [ Assertion/ Pre-/Post-condition ] ]
- [ [ s[v] = e   ] [             ] [ post: s(v) == e ] ]
- [ [ s[v] = v   ] [             ] [ post: s(v) == v ] ] ]
+ [ [ s\[v\] = e   ] [             ] [ post: s(v) == e ] ]
+ [ [ s\[v\] = v   ] [             ] [ post: s(v) == v ] ] ]
 
 [endsect]
 

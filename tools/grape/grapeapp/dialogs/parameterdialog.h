@@ -12,12 +12,10 @@
 #define GRAPE_PARAMETER_DIALOG_H
 
 #include <wx/dialog.h>
+#include <wx/grid.h>
 
 #include "preamble.h"
 
-#define   GRAPE_PARAMETER_DIALOG_COMBO      2002
-
-class wxComboBox;
 class wxPanel;
 class wxTextCtrl;
 
@@ -33,8 +31,7 @@ namespace grape
     class grape_parameter_dialog : protected wxDialog
     {
       private:
-        wxComboBox    *m_combo;         /**< Combobox with all parameters. */
-        wxTextCtrl    *m_input;         /**< The input field shown in the dialog, used for parameter initialisation.*/
+        wxGrid        *m_grid;          /**< Grid shown in the dialog, used for parameters.*/
         list_of_decl_init m_init;       /**< The parameter initialisation. */
         int           m_combo_current;  /**< The current selected value in the combobox.*/
 
@@ -43,6 +40,19 @@ namespace grape
          */
         grape_parameter_dialog();
 
+        /**
+         * Check wether all parameters are filled.
+         * If not, the OK button is disabled
+         */
+        void check_parameters();
+        
+	      /**
+	       * Change grid event handler.
+	       * Appending grid rows.
+	       * @param p_event The generated event.
+      	 */
+         void event_change_text( wxGridEvent &p_event );
+       
         DECLARE_EVENT_TABLE();
 
       public:

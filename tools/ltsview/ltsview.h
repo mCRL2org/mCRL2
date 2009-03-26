@@ -23,7 +23,10 @@ class Visualizer;
 class MarkManager;
 class Settings;
 
-class LTSView : public mcrl2::utilities::wx::tool< LTSView >, public Mediator {
+class LTSView :
+  public mcrl2::utilities::wx::tool< LTSView >,
+  public Mediator
+{
   private:
     LTS *lts;
     unsigned int colourCounter;

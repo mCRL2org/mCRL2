@@ -580,8 +580,8 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
       { // children of xml_objectlist
 
         add_comment_list( xml_objectlist, &arch_dia );
-        add_blocked_list( xml_objectlist, &arch_dia );
-        add_visible_list( xml_objectlist, &arch_dia );
+//        add_blocked_list( xml_objectlist, &arch_dia );
+//        add_visible_list( xml_objectlist, &arch_dia );
         add_channel_communication_list( xml_objectlist, &arch_dia );
         add_channel_list( xml_objectlist, &arch_dia );
         add_architecture_reference_list( xml_objectlist, &arch_dia );
@@ -597,82 +597,6 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
     } // end offspring
 
   } // end for
-}
-
-void grape::libgrape::add_blocked_list( wxXmlNode* p_objectlist, architecture_diagram* p_arch_dia )
-{
-  /* node <blockedlist> */
-  wxXmlNode* xml_blocked_list = new wxXmlNode( p_objectlist, wxXML_ELEMENT_NODE,
-                                    _T( "blockedlist" ) );
-
-  { // children xml_blocked_list
-
-    // iterate over all blocked in the architecture diagram
-    int blocked_count = p_arch_dia->count_blocked();
-    for ( int i = blocked_count-1; i >= 0; --i )
-    {
-      wxXmlNode* xml_blocked = new wxXmlNode( xml_blocked_list, wxXML_ELEMENT_NODE,
-                                          _T( "blocked" ) );
-      blocked* blocked_ptr = p_arch_dia->get_blocked( i );
-
-      /* node <propertyof> */
-      wxXmlNode* xml_blocked_prop = new wxXmlNode( xml_blocked, wxXML_ELEMENT_NODE, _T( "propertyof" ) );
-
-      wxString prop = _T( "-1" );
-      connection* conn_ptr = blocked_ptr->get_attached_connection();
-      if ( conn_ptr != 0 )
-      {
-        prop = wxString::Format( _T( "%u" ), conn_ptr->get_id() );
-      }
-      new wxXmlNode( xml_blocked_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
-
-      write_linetype( xml_blocked, blocked_ptr->get_linetype() );
-
-      /* Inherited */
-
-      write_object_attributes( xml_blocked, blocked_ptr );
-    }
-  }
-}
-
-void grape::libgrape::add_visible_list( wxXmlNode* p_objectlist, architecture_diagram* p_arch_dia )
-{
-  /* node <visiblelist> */
-  wxXmlNode* xml_visible_list = new wxXmlNode( p_objectlist, wxXML_ELEMENT_NODE,
-                                    _T( "visiblelist" ) );
-
-  { // children xml_visible_list
-
-    // iterate over all visible in the architecture diagram
-    int visible_count = p_arch_dia->count_visible();
-    for ( int i = visible_count-1; i >= 0; --i )
-    {
-
-      wxXmlNode* xml_visible = new wxXmlNode( xml_visible_list, wxXML_ELEMENT_NODE,
-                                          _T( "visible" ) );
-      visible* visible_ptr = p_arch_dia->get_visible( i );
-
-      /* node <propertyof> */
-      wxXmlNode* xml_visible_prop = new wxXmlNode( xml_visible, wxXML_ELEMENT_NODE, _T( "propertyof" ) );
-
-      wxString prop = _T( "-1" );
-      connection* conn_ptr = visible_ptr->get_attached_connection();
-      if ( conn_ptr != 0 )
-      {
-        prop = wxString::Format( _T( "%u" ), conn_ptr->get_id() );
-      }
-      new wxXmlNode( xml_visible_prop, wxXML_TEXT_NODE, _T( "value" ), prop );
-
-      /*node <linetype>*/
-      write_linetype( xml_visible, visible_ptr->get_linetype() );
-
-      /*node <name> */
-      write_name( xml_visible, visible_ptr->get_name() );
-
-      /* Inherited */
-      write_object_attributes( xml_visible, visible_ptr );
-    }
-  }
 }
 
 void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, architecture_diagram* p_arch_dia )
@@ -702,7 +626,7 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
       {
         /* node <connectedtochannels> */
         wxXmlNode* xml_channel_communication_connected = new wxXmlNode( xml_channel_communication_conn_list, wxXML_ELEMENT_NODE,
-                                          _T( "connectedtochannels" ) );
+                                          _T( "connectedtochannel" ) );
 
         wxString text_connected = wxString::Format( _T( "%u" ), c_comm_ptr->get_communications()->Item( j ).get_channel()->get_id() );
 
@@ -712,7 +636,7 @@ void grape::libgrape::add_channel_communication_list( wxXmlNode* p_objectlist, a
       
       write_rename_to( xml_channel_communication, c_comm_ptr->get_rename_to() );     
       
-      write_channeltype( xml_channel_communication, c_comm_ptr->get_channeltype() );      
+      write_channel_communication_type( xml_channel_communication, c_comm_ptr->get_channel_communication_type() );      
 
       /* Inherited */
       write_object_attributes( xml_channel_communication, c_comm_ptr );
@@ -738,8 +662,25 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
                                           _T( "channel" ) );
       channel* channel_ptr = p_arch_dia->get_channel( i );
 
+      /* node <connectionlist> */
+      wxXmlNode* xml_channel_conn_list = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE,
+                                          _T( "connectionlist" ) );
+
+      int conn_count = channel_ptr->get_channel_communications()->GetCount();
+
+      for ( int j = conn_count-1; j >= 0; --j )
+      {
+        /* node <connectedtochannelcommunications> */
+        wxXmlNode* xml_channel_connected = new wxXmlNode( xml_channel_conn_list, wxXML_ELEMENT_NODE,
+                                          _T( "connectedtochannelcommunication" ) );
+
+        wxString text_connected = wxString::Format( _T( "%u" ), channel_ptr->get_channel_communications()->Item( j )->get_id() );
+
+        new wxXmlNode( xml_channel_connected, wxXML_TEXT_NODE, _T( "value" ), text_connected );
+
+      }
       /* node <onchannelcommunication> */
-      wxXmlNode* xml_channel_comm = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onchannelcommunication" ) );
+/*      wxXmlNode* xml_channel_comm = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onchannelcommunication" ) );
 
       channel_communication* chan_comm_ptr = channel_ptr->get_channel_communication();
 
@@ -748,7 +689,7 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
         wxString comm = wxString::Format( _T( "%u" ), chan_comm_ptr->get_id() );
         new wxXmlNode( xml_channel_comm, wxXML_TEXT_NODE, _T( "value" ), comm );
       }
-
+*/
       /* node <onreference> */
       wxXmlNode* xml_channel_prop = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onreference" ) );
 
@@ -760,7 +701,7 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
       
       write_rename_to( xml_channel, channel_ptr->get_rename_to() );      
 
-      write_channeltype( xml_channel, channel_ptr->get_channeltype() );      
+      write_channel_type( xml_channel, channel_ptr->get_channel_type() );      
       
       /* Inherited */
       write_object_attributes( xml_channel, channel_ptr );
@@ -987,22 +928,40 @@ void grape::libgrape::write_linetype( wxXmlNode *p_parent, linetype p_linetype )
   new wxXmlNode( xml_linetype, wxXML_TEXT_NODE, _T( "value" ), tt_linetype );
 }
 
-void grape::libgrape::write_channeltype( wxXmlNode *p_parent, channeltype p_channeltype )
+void grape::libgrape::write_channel_type( wxXmlNode *p_parent, channel_type p_channel_type )
 {
-  wxXmlNode* xml_channeltype = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "channeltype" ) );
+  wxXmlNode* xml_channel_type = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "channeltype" ) );
 
-  wxString cc_channeltype = wxEmptyString;
-  switch( p_channeltype )
+  wxString cc_channel_type = wxEmptyString;
+  switch( p_channel_type )
   {
-      case channel_hidden:
-        cc_channeltype = _T( "hidden" ); break;
-      case channel_blocked:
-        cc_channeltype = _T( "blocked" ); break;
-      case channel_visible:
-        cc_channeltype = _T( "visible" ); break;
+      case VISIBLE_CHANNEL:
+        cc_channel_type = _T( "visible" ); break;
+      case HIDDEN_CHANNEL:
+        cc_channel_type = _T( "hidden" ); break;
+      case BLOCKED_CHANNEL:
+        cc_channel_type = _T( "blocked" ); break;
   }
 
-  new wxXmlNode( xml_channeltype, wxXML_TEXT_NODE, _T( "value" ), cc_channeltype );
+  new wxXmlNode( xml_channel_type, wxXML_TEXT_NODE, _T( "value" ), cc_channel_type );
+}
+
+void grape::libgrape::write_channel_communication_type( wxXmlNode *p_parent, channel_communication_type p_channel_communication_type )
+{
+  wxXmlNode* xml_channel_communication_type = new wxXmlNode( p_parent, wxXML_ELEMENT_NODE, _T( "channelcommunicationtype" ) );
+
+  wxString cc_channel_communication_type = wxEmptyString;
+  switch( p_channel_communication_type )
+  {
+      case VISIBLE_CHANNEL_COMMUNICATION:
+        cc_channel_communication_type = _T( "visible" ); break;
+      case HIDDEN_CHANNEL_COMMUNICATION:
+        cc_channel_communication_type = _T( "hidden" ); break;
+      case BLOCKED_CHANNEL_COMMUNICATION:
+        cc_channel_communication_type = _T( "blocked" ); break;
+  }
+
+  new wxXmlNode( xml_channel_communication_type, wxXML_TEXT_NODE, _T( "value" ), cc_channel_communication_type );
 }
 
 // WxWidgets dynamic array implementation.

@@ -390,7 +390,6 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
 
   // load label
-  // t_label = <label>
   label trans_label;
   try
   {
@@ -434,7 +433,7 @@ void parse_transition(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, wxS
   // add optional variables
   if(variables != wxEmptyString)
   {
-    p_declaration += _T("sum ") + variables;
+    p_declaration += _T("sum ") + variables + _T(".");
   }
   // add optional condition
   if(condition != wxEmptyString)
@@ -687,7 +686,7 @@ void parse_transition_reference(wxXmlNode *p_doc_root, wxXmlNode *p_reference_st
   list_of_varupdate ref_inits;
   try
   {
-    parse_reference_parameters(p_reference_state, p_diagram_name, ref_inits, datatype_spec);
+    parse_reference_parameters(p_reference_state, p_diagram_name, ref_inits, p_preamble_parameter_decls, datatype_spec);
   }
   catch(...)
   {
@@ -1093,41 +1092,121 @@ wxString datatype_specification_mcrl2(wxXmlNode *p_doc_root)
 
 /**
  * Process reference inference function.
- * Infers the process references in a given process diagram.
- * @param p_process_diagram The XML process diagram to infer the process references for.
+ * Infers the process references in a given process or architecture diagram.
+ * @param p_diagram The XML process or architecture diagram to infer the process references for.
  * @return An array of identifiers of all process references in this diagram.
- * @pre p_process_diagram is a valid pointer to an XML process diagram.
- * @post An array of identifiers of all process references in p_process_diagram is returned or the empty array is returned and error messages are produced.
+ * @pre p_diagram is a valid pointer to an XML process or architecture diagram.
+ * @post An array of identifiers of all process references in p_diagram is returned or the empty array is returned and error messages are produced.
  */
-wxArrayString infer_process_references(wxXmlNode *p_process_diagram)
+wxArrayString infer_process_references(wxXmlNode *p_diagram)
 {
   wxArrayString refs;
   refs.Empty();
-  wxXmlNode *objects = get_child(p_process_diagram, _T("objectlist"));
-  wxString diagram_name = get_child_value(p_process_diagram, _T("name"));
-  if(objects == 0)
+
+  wxXmlNode *objects = get_child(p_diagram, _T("objectlist"));
+  wxString diagram_name = get_child_value(p_diagram, _T("name"));
+  wxXmlNode *ref_list;
+  if (p_diagram->GetName() == _T("processdiagram"))
   {
-    // ERROR: diagram has no objects
-    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-         << " contains no objects." << endl;
-    throw CONVERSION_ERROR;
+    if(objects == 0)
+    {
+      // ERROR: diagram has no objects
+      cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
+           << " contains no objects." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+    ref_list = get_child(objects, _T("referencestatelist"));
+    if(ref_list == 0)
+    {
+      // ERROR: no references
+      cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
+           << " contains no process references." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+  }
+  else if (p_diagram->GetName() == _T("architecturediagram"))
+  {
+    if(objects == 0)
+    {
+      // ERROR: diagram has no objects
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " contains no objects." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+    ref_list = get_child(objects, _T("processreferencelist"));
+    if(ref_list == 0)
+    {
+      // ERROR: no references
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " contains no process references." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+  }
+  else
+  {
+    // ERROR: no valid XML code
     return refs;
   }
-  wxXmlNode *ref_list = get_child(objects, _T("referencestatelist"));
-  if(ref_list == 0)
-  {
-    // ERROR: no references
-    cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
-         << " contains no process references." << endl;
-    throw CONVERSION_ERROR;
-    return refs;
-  }
+
   for(wxXmlNode *ref = ref_list->GetChildren(); ref != 0; ref = ref->GetNext())
   {
     wxString ref_id = get_child_value(ref, _T("propertyof"));
     refs.Add(ref_id);
   }
+  return refs;
+}
 
+/**
+ * Architecture reference inference function.
+ * Infers the architecture references in a given architecture diagram.
+ * @param p_diagram The XML architecture diagram to infer the architecture references for.
+ * @return An array of identifiers of all architecture references in this diagram.
+ * @pre p_diagram is a valid pointer to an XML architecture diagram.
+ * @post An array of identifiers of all architecture references in p_diagram is returned or the empty array is returned and error messages are produced.
+ */
+wxArrayString infer_architecture_references(wxXmlNode *p_diagram)
+{
+  wxArrayString refs;
+  refs.Empty();
+
+  wxXmlNode *objects = get_child(p_diagram, _T("objectlist"));
+  wxString diagram_name = get_child_value(p_diagram, _T("name"));
+  wxXmlNode *ref_list;
+  if (p_diagram->GetName() == _T("architecturediagram"))
+  {
+    if(objects == 0)
+    {
+      // ERROR: diagram has no objects
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " contains no objects." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+    ref_list = get_child(objects, _T("architecturereferencelist"));
+    if(ref_list == 0)
+    {
+      // ERROR: no references
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " contains no architecture references." << endl;
+      throw CONVERSION_ERROR;
+      return refs;
+    }
+  }
+  else
+  {
+    // ERROR: no valid XML code
+    return refs;
+  }
+
+  for(wxXmlNode *ref = ref_list->GetChildren(); ref != 0; ref = ref->GetNext())
+  {
+    wxString ref_id = get_child_value(ref, _T("propertyof"));
+    refs.Add(ref_id);
+  }
   return refs;
 }
 
@@ -1141,7 +1220,7 @@ wxArrayString infer_process_references(wxXmlNode *p_process_diagram)
  * @pre p_doc_root is a valid pointer to an XML specification, p_architecture_diagram is a valid pointer to an XML architecture diagram and p_possibles is a valid reference to an array of actions.
  * @post All possible actions in this architecture diagram are stored in p_possibles, sorted by reference.
  */
-void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_possibles)
+void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_possibles, ATermAppl &datatype_spec)
 {
   if(p_architecture_diagram->GetName() == _T("architecturediagram"))
   {
@@ -1162,53 +1241,10 @@ void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_arch
     if(procs == 0)
     {
       // ERROR: <architecturediagram> does not contain process references.
-      cerr << "mCRL2 conversion error: process diagram " << diagram_name.ToAscii()
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
            << " does not contain a list of process references." << endl;
       throw CONVERSION_ERROR;
       return;
-    }
-
-    // process architecture references
-    for(wxXmlNode *arch = archs->GetChildren(); arch != 0; arch = arch->GetNext())
-    {
-      action_reference aref;
-
-      wxString ref_id = get_child_value(arch, _T("propertyof"));
-      if(ref_id == wxEmptyString)
-      {
-        // ERROR: could not find reference
-        cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-             << " contains an empty architecture reference." << endl;
-        throw CONVERSION_ERROR;
-        return;
-      }
-      wxString ref_name = infer_architecture_name(p_doc_root, ref_id);
-      if(ref_name == wxEmptyString)
-      {
-        // ERROR: could not infer name
-        cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-             << " contains an architecture reference to an unnamed architecture diagram." << endl;
-        throw CONVERSION_ERROR;
-        return;
-      }
-      wxString reference_id = get_child_value(arch, _T("id"));
-      aref.m_reference = ref_name;
-      aref.m_reference_id = reference_id;
-      aref.m_diagram_id = ref_id;
-      aref.m_is_process_reference = false;
-
-      // infer possibles for this reference
-      wxXmlNode *arch_diagram = get_architecture_diagram(p_doc_root, ref_name);
-      if(arch_diagram == 0)
-      {
-        // ERROR: could not find architecture diagram
-        cerr << "mCRL2 conversion error: could not find architecture diagram "
-             << ref_name.ToAscii() << "." << endl;
-        throw CONVERSION_ERROR;
-        return;
-      }
-      aref.m_actions = infer_architecture_visibles(arch_diagram);
-      p_possibles.Add(aref);
     }
 
     // process process references
@@ -1240,20 +1276,63 @@ void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_arch
       aref.m_diagram_id = ref_id;
       aref.m_is_process_reference = true;
 
-      // validate datatype specification
-      ATermAppl datatype_spec;
-      if(!validate_datatype_specification(p_doc_root, datatype_spec))
-      {
-        // ERROR: datatype specification is not valid
-        cerr << "mCRL2 conversion error: datatype specification is not valid." << endl;
-        throw CONVERSION_ERROR;
-        return;
-      }
-
       // infer possible actions for this reference
       aref.m_actions = infer_process_actions(p_doc_root, ref_id, datatype_spec);
       p_possibles.Add(aref);
     }
+
+    // process architecture references
+    for(wxXmlNode *arch = archs->GetChildren(); arch != 0; arch = arch->GetNext())
+    {
+      action_reference aref;
+
+      wxString ref_id = get_child_value(arch, _T("propertyof"));
+      if(ref_id == wxEmptyString)
+      {
+        // ERROR: could not find reference
+        cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+             << " contains an empty architecture reference." << endl;
+        throw CONVERSION_ERROR;
+        return;
+      }
+      wxString ref_name = infer_architecture_name(p_doc_root, ref_id);
+      if(ref_name == wxEmptyString)
+      {
+        // ERROR: could not infer name
+        cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+             << " contains an architecture reference to an unnamed architecture diagram." << endl;
+        throw CONVERSION_ERROR;
+        return;
+      }
+
+      // infer possibles for this reference
+      wxXmlNode *arch_diagram = get_architecture_diagram(p_doc_root, ref_name);
+      if(arch_diagram == 0)
+      {
+        // ERROR: could not find architecture diagram
+        cerr << "mCRL2 conversion error: could not find architecture diagram "
+             << ref_name.ToAscii() << "." << endl;
+        throw CONVERSION_ERROR;
+        return;
+      }
+      // update vars for referenced architecture diagram
+      wxString reference_id = get_child_value(arch, _T("id"));
+      aref.m_reference = ref_name;
+      aref.m_reference_id = reference_id;
+      aref.m_diagram_id = ref_id;
+      aref.m_is_process_reference = false;
+      aref.m_actions = infer_architecture_visibles(p_doc_root, arch_diagram, datatype_spec);
+      p_possibles.Add(aref);
+    }
+    // update vars for architecture diagram
+    action_reference aref;
+    wxString reference_id = get_child_value(p_architecture_diagram, _T("id"));
+    aref.m_reference = diagram_name;
+    aref.m_reference_id = _T("-1");
+    aref.m_diagram_id = reference_id;
+    aref.m_is_process_reference = false;
+    aref.m_actions = infer_architecture_visibles(p_doc_root, p_architecture_diagram, datatype_spec);
+    p_possibles.Add(aref);
   }
 
   // ERROR: not called with valid XML node
@@ -1261,39 +1340,57 @@ void architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_arch
 }
 
 /**
- * Action reference array compacting function.
- * Removes duplicate actions for each reference contained in the array.
- * @param p_reference_action The array of action references.
- * @pre p_reference_action is a valid reference to an array of action references.
- * @post All duplicates in p_reference_actions are removed.
+ * Action list compacting function.
+ * Removes duplicate actions from the list.
+ * @param p_action The array of actions.
+ * @pre p_action is a valid list of action.
+ * @post All duplicates in p_actions are removed.
  */
-void compact_arr_action_reference(arr_action_reference &p_reference_actions)
+list_of_action compact_list_action(list_of_action &p_actions)
 {
-  for(unsigned int i=0; i<p_reference_actions.GetCount(); ++i)
-  {
-    list_of_action new_actions;
+  list_of_action new_actions;
 
-    // compact members
-    for(unsigned int j=0; j<p_reference_actions[i].m_actions.GetCount(); ++j)
+  // compact members
+  for(unsigned int j=0; j<p_actions.GetCount(); ++j)
+  {
+    bool found = false;
+    for(unsigned int k=0; k<new_actions.GetCount(); ++k)
     {
-      bool found = false;
-      for(unsigned int k=0; k<new_actions.GetCount(); ++k)
+      if(new_actions[k].get_name() == p_actions[j].get_name())
       {
-        if(new_actions[k].get_name() == p_reference_actions[i].m_actions[j].get_name())
+        if ( new_actions[k].get_parameters().GetCount() == p_actions[j].get_parameters().GetCount() )
         {
-          found = true;
-          break;
+          if ( new_actions[k].get_parameters().GetCount() == 0 )
+          {
+	          found = true;
+            break;
+          }
+	        else
+	        {
+	          list_of_dataexpression acts_params = new_actions[k].get_parameters();
+	          list_of_dataexpression actions_params = p_actions[j].get_parameters();
+            found = true;
+            unsigned int l = 0;
+            while ( found && l < acts_params.GetCount() )
+	          {
+              found = acts_params[l].get_type() == actions_params[l].get_type();
+              ++l;
+		        }
+            if (found)
+            {
+              break;
+            }
+  	      }
         }
       }
-
-      if(!found)
-      {
-        new_actions.Add(p_reference_actions[i].m_actions[j]);
-      }
     }
-
-    p_reference_actions[i].m_actions = new_actions;
+    if(!found)
+    {
+      new_actions.Add(p_actions[j]);
+    }
   }
+
+  return new_actions;
 }
 
 /**
@@ -1426,7 +1523,7 @@ wxString infer_channel_name(wxXmlNode *p_architecture_diagram, wxString &p_chann
  * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_reference_id is a valid reference to a reference identifier.
  * @post An array containing the names and identifiers of all channels of the given reference is returned or error messages are produced.
  */
-arr_channel_id infer_reference_channels(wxXmlNode *p_architecture_diagram, wxString &p_reference_id)
+arr_channel_id infer_reference_channels(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, action_reference &p_reference, ATermAppl &datatype_spec)
 {
   arr_channel_id channels;
   channels.Empty();
@@ -1454,18 +1551,24 @@ arr_channel_id infer_reference_channels(wxXmlNode *p_architecture_diagram, wxStr
       return channels;
     }
 
+    list_of_action reference_actions = infer_process_actions(p_doc_root, p_reference.m_diagram_id, datatype_spec);
     // determine channels associated with reference
     for(wxXmlNode *channel_child = channel_list->GetChildren(); channel_child != 0;  channel_child = channel_child->GetNext())
     {
       wxString channel_ref = get_child_value(channel_child, _T("onreference"));
-      if(channel_ref == p_reference_id)
+      if(channel_ref == p_reference.m_reference_id)
       {
-        wxString channel_name = get_child_value(channel_child, _T("name"));
-        channel_id ch_id;
-        ch_id.m_channel = channel_name;
-        wxString channel_identifier = get_child_value(channel_child, _T("id"));
-        ch_id.m_channel_id = channel_identifier;
-        channels.Add(ch_id);
+        for (unsigned int i = 0; i < reference_actions.GetCount(); ++i)
+        {
+          wxString channel_name = get_child_value(channel_child, _T("name"));
+          if (channel_name == reference_actions[i].get_name())
+          {
+            channel_id channel;
+            channel.m_channel = reference_actions[i];
+            channel.m_channel_id = get_child_value(channel_child, _T("id"));
+            channels.Add(channel);
+          }
+        }
       }
     }
   }
@@ -1507,27 +1610,34 @@ wxArrayString infer_reference_blocked_channels(wxXmlNode *p_architecture_diagram
       return blockeds;
     }
 
-    wxXmlNode *blocked_list = get_child(objects, _T("blockedlist"));
-    if(blocked_list == 0)
+    wxXmlNode *channel_list = get_child(objects, _T("channellist"));
+    if(channel_list == 0)
     {
-      // ERROR: no list of blockeds in spec
+      // ERROR: no list of channels in spec
       cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-           << " has no list of blocked properties." << endl;
+           << " has no list of channels." << endl;
       throw CONVERSION_ERROR;
       return blockeds;
     }
 
     // determine if reference p_reference_id has any associated blockeds
-    for(wxXmlNode *blocked_child = blocked_list->GetChildren(); blocked_child != 0; blocked_child = blocked_child->GetNext())
+    for(wxXmlNode *channel_child = channel_list->GetChildren(); channel_child != 0; channel_child = channel_child->GetNext())
     {
-      wxString blocked_of = get_child_value(blocked_child, _T("propertyof"));
-      if(is_channel_of_reference(p_architecture_diagram, blocked_of, p_reference_id))
+      // get channel type
+      wxString channel_type = get_child_value(channel_child, _T("channeltype"));
+      if (channel_type == _T("blocked"))
       {
-        // the blocked is associated with a channel of this reference, add name of channel to list
-        blockeds.Add(infer_channel_name(p_architecture_diagram, blocked_of));
+        // get channel id
+        wxString channel_id = get_child_value(channel_child, _T("id"));
+        if(is_channel_of_reference(p_architecture_diagram, channel_id, p_reference_id))
+        {
+          // get channel name
+          wxString channel_name = get_child_value(channel_child, _T("name"));
+          // the blocked channel belongs to this reference, add name of channel to list
+          blockeds.Add(channel_name);
+        }
       }
     }
-
   }
   else
   {
@@ -1560,7 +1670,7 @@ list_of_action infer_reference_hidden_actions(list_of_action &p_actions, arr_cha
     bool is_hidden = true;
     for(unsigned int j=0; j<p_channels.GetCount(); ++j)
     {
-      if(p_channels[j].m_channel == p_actions[i].get_name())
+      if(p_channels[j].m_channel.get_name() == p_actions[i].get_name())
       {
         is_hidden = false;
         break;
@@ -1605,7 +1715,7 @@ arr_channel_id infer_reference_renamed_actions(arr_channel_id &p_channels, wxArr
     bool is_renamed = true;
     for(unsigned int j=0; j<p_blockeds.GetCount(); ++j)
     {
-      if(p_blockeds[j] == p_channels[i].m_channel)
+      if(p_blockeds[j] == p_channels[i].m_channel.get_name())
       {
         is_renamed = false;
         break;
@@ -1618,7 +1728,46 @@ arr_channel_id infer_reference_renamed_actions(arr_channel_id &p_channels, wxArr
     }
   }
 
-  return ren;
+  arr_channel_id new_ren;
+  for (unsigned int i=0; i<ren.GetCount(); ++i)
+  {
+    bool found = false;
+    for (unsigned int j=0; j<new_ren.GetCount(); ++j)
+    {
+      if ( ren[i].m_channel.get_name() == new_ren[j].m_channel.get_name() )
+      {
+        list_of_dataexpression channel_params = ren[i].m_channel.get_parameters();
+        list_of_dataexpression new_channel_params = new_ren[j].m_channel.get_parameters();
+        if (channel_params.GetCount() == new_channel_params.GetCount())
+        {
+          if (channel_params.GetCount() == 0)
+          {
+            found = true;
+            break;
+          }
+          else
+          {
+            found = true;
+            unsigned int k = 0;
+            while ( found && k < channel_params.GetCount() )
+	          {
+              found = channel_params[k].get_type() == new_channel_params[k].get_type();
+              ++k;
+		        }
+            if (found)
+            {
+              break;
+            }
+  	      }
+        }
+      }
+    }
+    if(!found)
+    {
+      new_ren.Add(ren[i]);
+    }
+  }
+  return new_ren;
 }
 
 /**
@@ -1631,7 +1780,7 @@ arr_channel_id infer_reference_renamed_actions(arr_channel_id &p_channels, wxArr
  * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_renamed is a valid reference to an array of renamed channels.
  * @post An array of channel communications in this diagram is returned or error messages are produced.
  */
-arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs)
+arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, ATermAppl &datatype_spec)
 {
   arr_channel_comm comms;
   comms.Empty();
@@ -1649,6 +1798,16 @@ arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_architect
       return comms;
     }
 
+    wxXmlNode *channels = get_child(objects, _T("channellist"));
+    if(channels == 0)
+    {
+      // ERROR: no list of channels
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " does not contain a list of channels." << endl;
+      throw CONVERSION_ERROR;
+      return comms;
+    }
+
     wxXmlNode *channel_comms = get_child(objects, _T("channelcommunicationlist"));
     if(channel_comms == 0)
     {
@@ -1658,6 +1817,9 @@ arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_architect
       throw CONVERSION_ERROR;
       return comms;
     }
+
+    // get process references
+    wxXmlNode *proc_refs = get_child(objects, _T("processreferencelist"));
 
     for(wxXmlNode *child = channel_comms->GetChildren(); child != 0; child = child->GetNext())
     {
@@ -1682,18 +1844,38 @@ arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_architect
       for(wxXmlNode *connection = connectionlist->GetChildren(); connection != 0; connection = connection->GetNext())
       {
         wxString conn_id = connection->GetNodeContent();
+//        cerr << "conn id: " << conn_id.ToAscii() << endl;
         // search through renamed channels to find correct channel
         bool found = false;
+//        cerr << "refs: " << p_refs.GetCount() << endl;
         for(unsigned int i=0; i<p_refs.GetCount(); ++i)
         {
+//          cerr << "renameds: " << p_refs[i].m_renamed.GetCount() << endl;
           for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
           {
+//            cerr << "renamed: " << p_refs[i].m_renamed[j].m_channel.get_name().ToAscii() << ": ";
+            for (unsigned int k=0; k<p_refs[i].m_renamed[j].m_channel.get_parameters().GetCount(); ++k)
+            {
+//              cerr << p_refs[i].m_renamed[j].m_channel.get_parameters()[k].get_type().ToAscii();
+              if (k < p_refs[i].m_renamed[j].m_channel.get_parameters().GetCount()-1)
+              {
+//                cerr << " # ";
+              }
+            }
+//            cerr << endl;
+//            cerr << "renamed id: " << p_refs[i].m_renamed[j].m_channel_id << endl;
             if(p_refs[i].m_renamed[j].m_channel_id == conn_id)
             {
+//TODO: veel meer uitbreiden met type enzo.
               found = true;
+//              cerr << "added" << endl;
               current.m_channels.Add(p_refs[i].m_renamed[j]);
-              break;
+//              break;
             }
+          }
+          if (found)
+          {
+            break;
           }
         }
         if(!found)
@@ -1747,35 +1929,36 @@ arr_channel_comm infer_communication_blocked(wxXmlNode *p_architecture_diagram, 
       return comms;
     }
 
-    wxXmlNode *blockeds = get_child(objects, _T("blockedlist"));
-    if(blockeds == 0)
+    // get channel communications
+    wxXmlNode *channel_communications = get_child(objects, _T("channelcommunicationlist"));
+    if (channel_communications == 0)
     {
-      // ERROR: <architecturediagram> does not contain a list of blockeds
+      // ERROR: <objectlist> has no <channelcommunicationlist>
       cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-           << " does not contain a list of blocked properties." << endl;
+           << " does not contain any channel communications." << endl;
       throw CONVERSION_ERROR;
       return comms;
     }
 
-    // for each channel communication in p_communications, go through the list of blockeds
-    // in this specification and add it to comms if there is a blocked property for the
+    // for each channel communication in p_communications, go through the list of visibles
+    // in this specification and add it to comms if there is a visible property for the
     // channel communication.
-    for(unsigned int i=0; i<p_communications.GetCount(); ++i)
+    for(wxXmlNode *channel_communication_child = channel_communications->GetChildren(); channel_communication_child != 0; channel_communication_child = channel_communication_child->GetNext())
     {
-      bool is_blocked = false;
-      for(wxXmlNode *block_child = blockeds->GetChildren(); block_child != 0; block_child = block_child->GetNext())
+      // get channel communication type
+      wxString channel_communication_type = get_child_value(channel_communication_child, _T("channelcommunicationtype"));
+      if (channel_communication_type == _T("blocked"))
       {
-        wxString block_prop_id = get_child_value(block_child, _T("propertyof"));
-        if(block_prop_id == p_communications[i].m_id)
+        // get communication id
+        wxString channel_communication_id = get_child_value(channel_communication_child, _T("id"));
+        for(unsigned int i=0; i<p_communications.GetCount(); ++i)
         {
-          is_blocked = true;
-          break;
+          if(channel_communication_id == p_communications[i].m_id)
+          {
+            comms.Add(p_communications[i]);
+            break;
+          }
         }
-      }
-
-      if(is_blocked)
-      {
-        comms.Add(p_communications[i]);
       }
     }
   }
@@ -1817,12 +2000,13 @@ arr_channel_comm infer_communication_non_visible(wxXmlNode *p_architecture_diagr
       return comms;
     }
 
-    wxXmlNode *visibles = get_child(objects, _T("visiblelist"));
-    if(visibles == 0)
+    // get channel communications
+    wxXmlNode *channel_communications = get_child(objects, _T("channelcommunicationlist"));
+    if (channel_communications == 0)
     {
-      // ERROR: <objectlist> does not contain <visiblelist>
+      // ERROR: <objectlist> has no <channelcommunicationlist>
       cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
-           << " does not contain a list of visible properties." << endl;
+           << " does not contain any channel communications." << endl;
       throw CONVERSION_ERROR;
       return comms;
     }
@@ -1830,22 +2014,22 @@ arr_channel_comm infer_communication_non_visible(wxXmlNode *p_architecture_diagr
     // for each channel communication in p_communications, go through the list of visibles
     // in this specification and add it to comms if there is a visible property for the
     // channel communication.
-    for(unsigned int i=0; i<p_communications.GetCount(); ++i)
+    for(wxXmlNode *channel_communication_child = channel_communications->GetChildren(); channel_communication_child != 0; channel_communication_child = channel_communication_child->GetNext())
     {
-      bool is_visible = false;
-      for(wxXmlNode *vis_child = visibles->GetChildren(); vis_child != 0; vis_child = vis_child->GetNext())
+      // get channel communication type
+      wxString channel_communication_type = get_child_value(channel_communication_child, _T("channelcommunicationtype"));
+      if (channel_communication_type != _T("visible"))
       {
-        wxString vis_prop_id = get_child_value(vis_child, _T("propertyof"));
-        if(vis_prop_id == p_communications[i].m_id)
+        // get communication id
+        wxString channel_communication_id = get_child_value(channel_communication_child, _T("id"));
+        for(unsigned int i=0; i<p_communications.GetCount(); ++i)
         {
-          is_visible = true;
-          break;
+          if(channel_communication_id == p_communications[i].m_id)
+          {
+            comms.Add(p_communications[i]);
+            break;
+          }
         }
-      }
-
-      if(!is_visible)
-      {
-        comms.Add(p_communications[i]);
       }
     }
   }
@@ -1916,7 +2100,7 @@ void fix_architecture_references(wxXmlNode *p_doc_root, arr_action_reference &p_
 
       for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
       {
-        wxString channel_name = p_refs[i].m_renamed[j].m_channel;
+        wxString channel_name = p_refs[i].m_renamed[j].m_channel.get_name();
         for(wxXmlNode *vis = visibles->GetChildren(); vis != 0; vis = vis->GetNext())
         {
           wxString vis_name = get_child_value(vis, _T("name"));
@@ -1939,7 +2123,7 @@ void fix_architecture_references(wxXmlNode *p_doc_root, arr_action_reference &p_
           if(vis_name == channel_name)
           {
             // found match, save new name
-            p_refs[i].m_hidden[j].get_name() = channel_name + vis_id;
+            p_refs[i].m_hidden[j].set_name( channel_name + vis_id );
             break;
           }
         }
@@ -1992,7 +2176,139 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
       return ren;
     }
 
-    wxXmlNode *visibles = get_child(objects, _T("visiblelist"));
+    // get channels
+    wxXmlNode *channels = get_child(objects, _T("channellist"));
+    if (channels == 0)
+    {
+      // ERROR: <objectlist> has no <channellist>
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " does not contain any channels." << endl;
+      throw CONVERSION_ERROR;
+      return ren;
+    }
+
+    // get channel communications
+    wxXmlNode *channel_communications = get_child(objects, _T("channelcommunicationlist"));
+    if (channel_communications == 0)
+    {
+      // ERROR: <objectlist> has no <channelcommunicationlist>
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " does not contain any channel communications." << endl;
+      throw CONVERSION_ERROR;
+      return ren;
+    }
+
+    // for each channel in p_refs, go through the list of visibles
+    // in this specification and add it to ren if there is a visible property for the
+    // channel.
+    for(wxXmlNode *channel_child = channels->GetChildren(); channel_child != 0; channel_child = channel_child->GetNext())
+    {
+      // get channel type
+      wxString channel_type = get_child_value(channel_child, _T("channeltype"));
+      if (channel_type == _T("visible"))
+      {
+        bool is_found = false;
+        // get channel id
+        wxString channel_id = get_child_value(channel_child, _T("id"));
+        for(unsigned int i=0; i<p_refs.GetCount(); ++i)
+        {
+          // only renamed channels are candidates
+          for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
+          {
+            if(p_refs[i].m_renamed[j].m_channel_id == channel_id)
+            {
+              // found match
+              // get channel rename
+              wxString visible_channel_name = get_child_value(channel_child, _T("rename"));
+              if(visible_channel_name.IsEmpty())
+              {
+                visible_channel_name = get_child_value(channel_child, _T("name"));
+              }
+              renamed vis_ren;
+              vis_ren.m_old_name = p_refs[i].m_renamed[j].m_channel.get_name() + p_refs[i].m_renamed[j].m_channel_id;
+              vis_ren.m_new.set_name( visible_channel_name );
+              vis_ren.m_new.set_parameters( p_refs[i].m_renamed[j].m_channel.get_parameters() );
+              ren.Add(vis_ren);
+              is_found = true;
+              break;
+            }
+          }
+          if(is_found)
+          {
+            // stop search
+            break;
+          }
+        }
+      }
+    }
+
+    // for each channel communication in p_communications, go through the list of visibles
+    // in this specification and add it to ren if there is a visible property for the
+    // channel communication.
+    for(wxXmlNode *channel_communication_child = channel_communications->GetChildren(); channel_communication_child != 0; channel_communication_child = channel_communication_child->GetNext())
+    {
+      // get channel communication type
+      wxString channel_communication_type = get_child_value(channel_communication_child, _T("channelcommunicationtype"));
+      if (channel_communication_type == _T("visible"))
+      {
+        // get channel communication id
+        wxString channel_communication_id = get_child_value(channel_communication_child, _T("id"));
+        for(unsigned int i=0; i<p_communications.GetCount(); ++i)
+        {
+          if(channel_communication_id == p_communications[i].m_id)
+          {
+            // found match
+            for (unsigned int j=0; j<p_communications[i].m_channels.GetCount(); ++j)
+            {
+              bool found = false;
+              for (unsigned int k=j+1; k<p_communications[i].m_channels.GetCount(); ++k)
+              {
+                if (p_communications[i].m_channels[j].m_channel.get_parameters().GetCount() == p_communications[i].m_channels[k].m_channel.get_parameters().GetCount())
+                {
+                  if (p_communications[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+                  {
+                    found = true;
+                    break;
+                  }
+                  else
+                  {
+                    found = true;
+                    for (unsigned int l=0; l<p_communications[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                    {
+                      if (p_communications[i].m_channels[j].m_channel.get_parameters()[l].get_type() != p_communications[i].m_channels[k].m_channel.get_parameters()[l].get_type())
+                      {
+                        found = false;
+                        break;
+                      }
+                    }
+                    if (found)
+                    {
+                      break;
+                    }
+                  }
+                }
+              }
+              if (!found)
+              {
+                // get channel communication rename
+                wxString visible_channel_communication_name = get_child_value(channel_communication_child, _T("rename"));
+                renamed vis_ren;
+                vis_ren.m_old_name = p_communications[i].m_name;
+                vis_ren.m_new.set_name( visible_channel_communication_name );
+                vis_ren.m_new.set_parameters( p_communications[i].m_channels[j].m_channel.get_parameters() );
+                ren.Add(vis_ren);
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+/*  
+  
+  
+  wxXmlNode *visibles = get_child(objects, _T("visiblelist"));
     if(visibles == 0)
     {
       // ERROR: <objectlist> does not contain <visiblelist>
@@ -2017,10 +2333,56 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
         if(p_communications[i].m_id == vis_prop_id)
         {
           // found match
-          renamed vis_ren;
-          vis_ren.m_old_name = p_communications[i].m_name;
-          vis_ren.m_new_name = vis_name;
-          ren.Add(vis_ren);
+          for (unsigned int j=0; j<p_communications[i].m_channels.GetCount(); ++j)
+          {
+            bool found = false;
+            for (unsigned int k=j+1; k<p_communications[i].m_channels.GetCount(); ++k)
+            {
+              if (p_communications[i].m_channels[j].m_channel.get_parameters().GetCount() == p_communications[i].m_channels[k].m_channel.get_parameters().GetCount())
+              {
+                if (p_communications[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+                {
+                  found = true;
+                  break;
+                }
+                else
+                {
+                  found = true;
+                  for (unsigned int l=0; l<p_communications[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                  {
+                    if (p_communications[i].m_channels[j].m_channel.get_parameters()[l].get_type() != p_communications[i].m_channels[k].m_channel.get_parameters()[l].get_type())
+                    {
+                      found = false;
+                      break;
+                    }
+                  }
+                  if (found)
+                  {
+                    break;
+                  }
+                }
+              }
+            }
+            if (!found)
+            {
+              renamed vis_ren;
+              vis_ren.m_old_name = p_communications[i].m_name;
+              vis_ren.m_new.set_name( vis_name );
+//              cerr << "1 action found: " << vis_name.ToAscii() << " ";
+              vis_ren.m_new.set_parameters( p_communications[i].m_channels[j].m_channel.get_parameters() );
+/*              for (unsigned int k=0; k<p_communications[i].m_channels[j].m_channel.get_parameters().GetCount(); ++k)
+              {
+                if (k>0)
+                {
+                  cerr << " # ";
+                }
+                cerr << p_communications[i].m_channels[j].m_channel.get_parameters()[k].get_type().ToAscii();
+              }
+              cerr << endl;
+
+              ren.Add(vis_ren);
+            }
+          }
           is_found = true;
           break;
         }
@@ -2041,8 +2403,9 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
           {
             // found match
             renamed vis_ren;
-            vis_ren.m_old_name = p_refs[i].m_renamed[j].m_channel + p_refs[i].m_renamed[j].m_channel_id;
-            vis_ren.m_new_name = vis_name;
+            vis_ren.m_old_name = p_refs[i].m_renamed[j].m_channel.get_name() + p_refs[i].m_renamed[j].m_channel_id;
+            vis_ren.m_new.set_name( vis_name );
+            vis_ren.m_new.set_parameters( p_refs[i].m_renamed[j].m_channel.get_parameters() );
             ren.Add(vis_ren);
             is_found = true;
             break;
@@ -2066,6 +2429,7 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
       }
     }
   }
+*/
   else
   {
     // ERROR: not called with valid XML node
@@ -2136,10 +2500,33 @@ list_of_varupdate infer_process_reference_initialisation(wxXmlNode *p_doc_root, 
       throw CONVERSION_ERROR;
       return inits;
     }
+    
+
+    list_of_decl preamble_params;
+    list_of_decl_init preamble_vars;
+    wxString proc_ref_prop = get_child_value(reference, _T("propertyof"));
+    wxXmlNode *referenced_diagram = 0;
+    referenced_diagram = get_process_diagram(p_doc_root, proc_ref_prop);
+    if (referenced_diagram == 0) {
+      // ERROR: process_reference not found
+      cerr << "mCRL2 conversion error: architecture diagram " << diagram_name.ToAscii()
+           << " contains a process reference to a process that could not be inferred." << endl;
+      throw CONVERSION_ERROR;
+      return inits;
+    }
+    // parsed parameter initialisation to ref_inits
+    try
+    {
+      parse_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
+    }
+    catch(...)
+    {
+      return inits;
+    }
 
     try
     {
-      parse_reference_parameters(reference, diagram_name, inits, datatype_spec);
+      parse_reference_parameters(reference, diagram_name, inits, preamble_params, datatype_spec);
     }
     catch(...)
     {
@@ -2203,8 +2590,12 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
     cerr << "+inferred possible actions in " << diagram_name.ToAscii() << ":" << endl;
   }
   p_refs.Empty();
-  architecture_diagram_mcrl2_actions(p_doc_root, diagram, p_refs);
-  compact_arr_action_reference(p_refs);
+  architecture_diagram_mcrl2_actions(p_doc_root, diagram, p_refs, datatype_spec);
+  for(unsigned int i=0; i<p_refs.GetCount(); ++i)
+  {
+    p_refs[i].m_actions = compact_list_action(p_refs[i].m_actions);
+  }
+
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_refs.GetCount(); ++i)
@@ -2212,8 +2603,25 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
       cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
       for(unsigned int j=0; j<p_refs[i].m_actions.GetCount(); ++j)
       {
-        cerr << "  " << p_refs[i].m_actions[j].get_name().ToAscii() << endl;
-      }
+        cerr << "  " << p_refs[i].m_actions[j].get_name().ToAscii();
+        wxString action_text = wxEmptyString;
+        for(unsigned int k=0; k<p_refs[i].m_actions[j].get_parameters().GetCount(); ++k)
+        {
+          if (!p_refs[i].m_actions[j].get_parameters()[k].get_type().IsEmpty())
+          {
+            action_text += p_refs[i].m_actions[j].get_parameters()[k].get_type();
+            if (k != p_refs[i].m_actions[j].get_parameters().GetCount()-1)
+            {
+              action_text += _T(" # ");
+            }
+          }
+        }
+        if (!action_text.IsEmpty())
+        {
+          cerr << ": " << action_text.ToAscii();
+        }
+        cerr << endl;
+	    }    
     }
   }
 
@@ -2224,16 +2632,22 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   for(unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    p_refs[i].m_blockeds = infer_reference_blocked_channels(diagram, p_refs[i].m_reference_id);
+    if (p_refs[i].m_reference_id != _T("-1"))
+    {
+      p_refs[i].m_blockeds = infer_reference_blocked_channels(diagram, p_refs[i].m_reference_id);
+    }
   }
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_refs.GetCount(); ++i)
     {
-      cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
-      for(unsigned int j=0; j<p_refs[i].m_blockeds.GetCount(); ++j)
+      if (p_refs[i].m_reference_id != _T("-1"))
       {
-        cerr << "  " << p_refs[i].m_blockeds[j].ToAscii() << endl;
+        cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
+        for(unsigned int j=0; j<p_refs[i].m_blockeds.GetCount(); ++j)
+        {
+          cerr << "  " << p_refs[i].m_blockeds[j].ToAscii() << endl;
+        }
       }
     }
   }
@@ -2245,16 +2659,39 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   for(unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    p_refs[i].m_channels = infer_reference_channels(diagram, p_refs[i].m_reference_id);
+    if (p_refs[i].m_reference_id != _T("-1"))
+    {
+      p_refs[i].m_channels = infer_reference_channels(p_doc_root, diagram, p_refs[i], datatype_spec);
+    }
   }
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_refs.GetCount(); ++i)
     {
-      cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
-      for(unsigned int j=0; j<p_refs[i].m_channels.GetCount(); ++j)
+      if (p_refs[i].m_reference_id != _T("-1"))
       {
-        cerr << "  " << p_refs[i].m_channels[j].m_channel.ToAscii() << endl;
+        cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
+        for(unsigned int j=0; j<p_refs[i].m_channels.GetCount(); ++j)
+        {
+          cerr << "  " << p_refs[i].m_channels[j].m_channel.get_name().ToAscii();
+          wxString action_text = wxEmptyString;
+          for(unsigned int k=0; k<p_refs[i].m_channels[j].m_channel.get_parameters().GetCount(); ++k)
+          {
+            if (!p_refs[i].m_channels[j].m_channel.get_parameters()[k].get_type().IsEmpty())
+            {
+              action_text += p_refs[i].m_channels[j].m_channel.get_parameters()[k].get_type();
+              if (k != p_refs[i].m_channels[j].m_channel.get_parameters().GetCount()-1)
+              {
+                action_text += _T(" # ");
+              }
+            }
+          }
+          if (!action_text.IsEmpty())
+          {
+            cerr << ": " << action_text.ToAscii();
+          }
+          cerr << endl;
+        }
       }
     }
   }
@@ -2266,16 +2703,34 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   for(unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    p_refs[i].m_hidden = infer_reference_hidden_actions(p_refs[i].m_actions, p_refs[i].m_channels, p_refs[i].m_blockeds);
+    if (p_refs[i].m_reference_id != _T("-1"))
+    {
+      p_refs[i].m_hidden = infer_reference_hidden_actions(p_refs[i].m_actions, p_refs[i].m_channels, p_refs[i].m_blockeds);
+    }
   }
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_refs.GetCount(); ++i)
     {
-      cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
-      for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
+      if (p_refs[i].m_reference_id != _T("-1"))
       {
-        cerr << "  " << p_refs[i].m_hidden[j].get_name().ToAscii() << endl;
+        cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
+        for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
+        {
+          bool found = false;
+          for (unsigned int k=j+1; k<p_refs[i].m_hidden.GetCount(); ++k)
+          {
+            if (p_refs[i].m_hidden[j].get_name() == p_refs[i].m_hidden[k].get_name())
+            {
+              found = true;
+              break;
+            }
+          }
+          if (!found)
+          {
+            cerr << "  " << p_refs[i].m_hidden[j].get_name().ToAscii() << endl;
+          }
+        }
       }
     }
   }
@@ -2287,17 +2742,38 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   for(unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    p_refs[i].m_renamed = infer_reference_renamed_actions(p_refs[i].m_channels, p_refs[i].m_blockeds);
+    if (p_refs[i].m_reference_id != _T("-1"))
+    {
+      p_refs[i].m_renamed = infer_reference_renamed_actions(p_refs[i].m_channels, p_refs[i].m_blockeds);
+    }
   }
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_refs.GetCount(); ++i)
     {
-      cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
-      for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
+      if (p_refs[i].m_reference_id != _T("-1"))
       {
-        cerr << "  " << p_refs[i].m_renamed[j].m_channel.ToAscii() << " -> "
-             << p_refs[i].m_renamed[j].m_channel.ToAscii() << p_refs[i].m_renamed[j].m_channel_id.ToAscii() << endl;
+        cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
+        for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
+        {
+          bool found = false;
+          for (unsigned int k=j+1; k< p_refs[i].m_renamed.GetCount(); ++k)
+          {
+            if (p_refs[i].m_renamed[j].m_channel.get_name() == p_refs[i].m_renamed[k].m_channel.get_name())
+            {
+              if (p_refs[i].m_renamed[j].m_channel_id == p_refs[i].m_renamed[k].m_channel_id)
+              {
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found)
+          {
+            cerr << "  " << p_refs[i].m_renamed[j].m_channel.get_name().ToAscii() << " -> "
+                 << p_refs[i].m_renamed[j].m_channel.get_name().ToAscii() << p_refs[i].m_renamed[j].m_channel_id.ToAscii() << endl;
+          }
+        }
       }
     }
   }
@@ -2307,7 +2783,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   {
     cerr << "+channel communications in " << diagram_name.ToAscii() << ":" << endl;
   }
-  p_channel_comms = architecture_diagram_mcrl2_communication(diagram, p_refs);
+  p_channel_comms = architecture_diagram_mcrl2_communication(p_doc_root, diagram, p_refs, datatype_spec);
   for(unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
   {
     wxString comm_id;
@@ -2316,19 +2792,98 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   if(p_verbose)
   {
+    int unique_channel_comm_counter = 0;
     for(unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
     {
-      cerr << " ";
+//      cerr << "comms: " << p_channel_comms.GetCount() << endl;
+//      cerr << " ";
       for(unsigned int j=0; j<p_channel_comms[i].m_channels.GetCount(); ++j)
       {
-        if(j > 0)
+//        cerr << "channels: " << p_channel_comms[i].m_channels.GetCount() << endl;
+        bool found = false;
+        for (unsigned int k=j+1; k<p_channel_comms[i].m_channels.GetCount(); ++k)
         {
-          cerr << "|";
+/*          if (p_channel_comms[i].m_channels[j].m_channel_id == p_channel_comms[i].m_channels[k].m_channel_id)
+          {
+            found = true;
+            break;
+          }
+          else
+          {
+*/
+          if (p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount() == p_channel_comms[i].m_channels[k].m_channel.get_parameters().GetCount())
+            {
+              if (p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+              {
+                found = true;
+                break;
+              }
+              else
+              {
+                found = true;
+                for(unsigned int l=0; l<p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                {
+                  if (p_channel_comms[i].m_channels[j].m_channel.get_parameters()[l].get_type() != p_channel_comms[i].m_channels[k].m_channel.get_parameters()[l].get_type())
+                  {
+                    found = false;
+                    break;
+                  }
+                }
+                if (found)
+                {
+                  break;
+                }
+              }
+            }
+//          }
         }
-        cerr << p_channel_comms[i].m_channels[j].m_channel.ToAscii()
-             << p_channel_comms[i].m_channels[j].m_channel_id.ToAscii();
+        if (!found)
+        {
+          int channel_counter = 0;
+          for (unsigned int k=0; k<p_channel_comms[i].m_channels.GetCount(); ++k)
+          {
+            bool found2 = false;
+            for (unsigned int l=k+1; l<p_channel_comms[i].m_channels.GetCount(); ++l)
+            {
+              if (p_channel_comms[i].m_channels[k].m_channel_id == p_channel_comms[i].m_channels[l].m_channel_id)
+              {
+                found2 = true;
+                break;
+              }
+            }
+            if (!found2)
+            {
+
+            if(channel_counter > 0)
+              {
+                cerr << "|";
+              }
+              cerr << p_channel_comms[i].m_channels[k].m_channel.get_name().ToAscii()
+                   << p_channel_comms[i].m_channels[k].m_channel_id.ToAscii();
+              ++channel_counter;
+            }
+          }
+          cerr << " -> " << p_channel_comms[i].m_name.ToAscii();
+
+          wxString channel_comm_type_text = wxEmptyString;
+          for(unsigned int l=0; l<p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+          {
+            if (!p_channel_comms[i].m_channels[j].m_channel.get_parameters()[l].get_type().IsEmpty())
+            {
+              channel_comm_type_text += p_channel_comms[i].m_channels[j].m_channel.get_parameters()[l].get_type();
+              if (l != p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount()-1)
+              {
+                channel_comm_type_text += _T(" # ");
+              }
+            }
+          }
+          if (!channel_comm_type_text.IsEmpty())
+          {
+            cerr << ": " << channel_comm_type_text.ToAscii();
+          }
+          cerr << endl;
+        }
       }
-      cerr << " -> " << p_channel_comms[i].m_name.ToAscii() << endl;
     }
   }
 
@@ -2366,15 +2921,27 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   // infer all channels and channel communications connected to the visibility frame in this diagram
   if(p_verbose)
   {
-    cerr << "+channels and channel communications connected to the visibility frame in " << diagram_name.ToAscii() << ":" << endl;
+    cerr << "+visible channels and channel communications in " << diagram_name.ToAscii() << ":" << endl;
   }
   p_renameds = infer_communication_channel_renamed(p_doc_root, diagram, p_refs, p_channel_comms);
   if(p_verbose)
   {
     for(unsigned int i=0; i<p_renameds.GetCount(); ++i)
     {
-      cerr << " " << p_renameds[i].m_old_name.ToAscii()
-           << " -> " << p_renameds[i].m_new_name.ToAscii() << endl;
+      bool found = false;
+      for(unsigned int j=i+1; j<p_renameds.GetCount(); ++j)
+      {
+        if(p_renameds[i].m_old_name == p_renameds[j].m_old_name)
+        {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        cerr << " " << p_renameds[i].m_old_name.ToAscii()
+             << " -> " << p_renameds[i].m_new.get_name().ToAscii() << endl;
+      }
     }
   }
 
@@ -2386,13 +2953,27 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   if(p_renameds.GetCount() > 0)
   {
     spec += _T("rename({");
+    int unique_rename_counter = 0;
     for(unsigned int i=0; i<p_renameds.GetCount(); ++i)
     {
-      if(i > 0)
+      bool found = false;
+      for(unsigned int j=i+1; j<p_renameds.GetCount(); ++j)
       {
-        spec += _T(", ");
+        if(p_renameds[i].m_old_name == p_renameds[j].m_old_name)
+        {
+          found = true;
+          break;
+        }
       }
-      spec += p_renameds[i].m_old_name + _T(" -> ") + p_renameds[i].m_new_name;
+      if (!found)
+      {
+        if(unique_rename_counter > 0)
+        {
+          spec += _T(", ");
+        }
+        spec += p_renameds[i].m_old_name + _T(" -> ") + p_renameds[i].m_new.get_name();
+        ++unique_rename_counter;
+      }
     }
     spec += _T("}, ");
   }
@@ -2425,15 +3006,30 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   if(p_channel_comms.GetCount() > 0)
   {
     spec += _T("block({");
+    int unique_channel_counter = 0;
     for(unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
     {
       for(unsigned int j=0; j<p_channel_comms[i].m_channels.GetCount(); ++j)
       {
-        if((i > 0) || ((i == 0) && (j > 0)))
+    //    if((i > 0) || ((i == 0) && (j > 0)))
+        bool found = false;
+        for(unsigned int k=j+1; k<p_channel_comms[i].m_channels.GetCount(); ++k)
         {
-          spec += _T(", ");
+          if (p_channel_comms[i].m_channels[j].m_channel_id == p_channel_comms[i].m_channels[k].m_channel_id)
+          {
+            found = true;
+            break;
+          }
         }
-        spec += p_channel_comms[i].m_channels[j].m_channel + p_channel_comms[i].m_channels[j].m_channel_id;
+        if (!found)
+        {
+          if (unique_channel_counter > 0)
+          {
+            spec += _T(", ");
+          }
+          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + p_channel_comms[i].m_channels[j].m_channel_id;
+          ++unique_channel_counter;
+        }
       }
     }
     spec += _T("}, ");
@@ -2448,13 +3044,27 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
         spec += _T(", ");
       }
 
+      int unique_channel_counter = 0;
       for(unsigned int j=0; j<p_channel_comms[i].m_channels.GetCount(); ++j)
       {
-        if(j > 0)
+        bool found = false;
+        for (unsigned int k=j+1; k<p_channel_comms[i].m_channels.GetCount(); ++k)
         {
-          spec += _T("|");
+          if (p_channel_comms[i].m_channels[j].m_channel_id == p_channel_comms[i].m_channels[k].m_channel_id)
+          {
+            found = true;
+            break;
+          }
         }
-        spec += p_channel_comms[i].m_channels[j].m_channel + p_channel_comms[i].m_channels[j].m_channel_id;
+        if (!found)
+        {
+          if(unique_channel_counter > 0)
+          {
+            spec += _T("|");
+          }
+          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + p_channel_comms[i].m_channels[j].m_channel_id;
+          ++unique_channel_counter;
+        }
       }
       spec += _T(" -> ");
       spec += p_channel_comms[i].m_name;
@@ -2463,97 +3073,134 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
 
   // append references
+  int ref_counter = 0;
   for(unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    if(i > 0)
+    if (p_refs[i].m_reference != diagram_name)
     {
-      spec += _T("     || ");
-    }
-    else
-    {
-      spec += _T("\n        ");
-    }
-
-    if(p_refs[i].m_renamed.GetCount() > 0)
-    {
-      spec += _T("rename({");
-      for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
+      if(ref_counter > 0)
       {
-        if(j > 0)
-        {
-          spec += _T(", ");
-        }
-
-        spec += p_refs[i].m_renamed[j].m_channel;
-        spec += _T(" -> ");
-        spec += p_refs[i].m_renamed[j].m_channel + p_refs[i].m_renamed[j].m_channel_id;
+        spec += _T("     || ");
       }
-      spec += _T("}, ");
-    }
-    if(p_refs[i].m_hidden.GetCount() > 0)
-    {
-      spec += _T("hide({");
-      for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
+      else
       {
-        if(j > 0)
-        {
-          spec += _T(", ");
-        }
-        spec += p_refs[i].m_hidden[j].get_name();
+        spec += _T("\n        ");
       }
-      spec += _T("}, ");
-    }
-    if(p_refs[i].m_blockeds.GetCount() > 0)
-    {
-      spec += _T("block({");
-      for(unsigned int j=0; j<p_refs[i].m_blockeds.GetCount(); ++j)
+
+      if(p_refs[i].m_renamed.GetCount() > 0)
       {
-        if(j > 0)
+        spec += _T("rename({");
+        int unique_renamed_counter = 0;
+        for(unsigned int j=0; j<p_refs[i].m_renamed.GetCount(); ++j)
         {
-          spec += _T(", ");
+          bool found = false;
+          for (unsigned int k=j+1; k<p_refs[i].m_renamed.GetCount(); ++k)
+          {
+            if (p_refs[i].m_renamed[j].m_channel.get_name() == p_refs[i].m_renamed[k].m_channel.get_name())
+            {
+              if (p_refs[i].m_renamed[j].m_channel_id == p_refs[i].m_renamed[k].m_channel_id)
+              {
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found)
+          {
+            if(unique_renamed_counter > 0)
+            {
+              spec += _T(", ");
+            }
+
+            spec += p_refs[i].m_renamed[j].m_channel.get_name();
+            spec += _T(" -> ");
+            spec += p_refs[i].m_renamed[j].m_channel.get_name() + p_refs[i].m_renamed[j].m_channel_id;
+            ++unique_renamed_counter;
+          }
         }
-        spec += p_refs[i].m_blockeds[j];
+        spec += _T("}, ");
       }
-      spec += _T("}, ");
-    }
-
-    // append reference specification
-    spec += p_refs[i].m_reference;
-
-    // append optional parameter initialisation
-    if(p_refs[i].m_is_process_reference)
-    {
-      list_of_varupdate inits = infer_process_reference_initialisation(p_doc_root, diagram, p_refs[i].m_reference_id, p_refs[i].m_reference, datatype_spec);
-
-      if(inits.GetCount() > 0)
+      if(p_refs[i].m_hidden.GetCount() > 0)
       {
-        spec += _T("(");
-        for(unsigned int j=0; j<inits.GetCount(); ++j)
+        spec += _T("hide({");
+        int unique_hide_counter = 0;
+        for(unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
+        {
+          bool found = false;
+          for (unsigned int k=j+1; k<p_refs[i].m_hidden.GetCount(); ++k)
+          {
+            if (p_refs[i].m_hidden[j].get_name() == p_refs[i].m_hidden[k].get_name())
+            {
+              found = true;
+              break;
+            }
+          }
+          if (!found)
+          {
+            if(unique_hide_counter > 0)
+            {
+              spec += _T(", ");
+            }
+            spec += p_refs[i].m_hidden[j].get_name();
+            ++unique_hide_counter;
+          }
+        }
+        spec += _T("}, ");
+      }
+      if(p_refs[i].m_blockeds.GetCount() > 0)
+      {
+        spec += _T("block({");
+        for(unsigned int j=0; j<p_refs[i].m_blockeds.GetCount(); ++j)
         {
           if(j > 0)
           {
             spec += _T(", ");
           }
-          spec += inits[j].get_rhs();
+          spec += p_refs[i].m_blockeds[j];
         }
+        spec += _T("}, ");
+      }
+
+      // append reference specification
+      spec += p_refs[i].m_reference;
+
+      // append optional parameter initialisation
+      if(p_refs[i].m_is_process_reference)
+      {
+        list_of_varupdate inits = infer_process_reference_initialisation(p_doc_root, diagram, p_refs[i].m_reference_id, p_refs[i].m_reference, datatype_spec);
+
+        if(inits.GetCount() > 0)
+        {
+          spec += _T("(");
+          for(unsigned int j=0; j<inits.GetCount(); ++j)
+          {
+            if(j > 0)
+            {
+              spec += _T(", ");
+            }
+            spec += inits[j].get_rhs();
+          }
+          spec += _T(")");
+        }
+      }
+
+      // append closing brackets
+      if(p_refs[i].m_blockeds.GetCount() > 0)
+      {
         spec += _T(")");
       }
+      if(p_refs[i].m_hidden.GetCount() > 0)
+      {
+        spec += _T(")");
+      }
+      if(p_refs[i].m_renamed.GetCount() > 0)
+      {
+        spec += _T(")");
+      }
+      spec += _T("\n");
+      
+      ++ref_counter;
     }
-
-    // append closing brackets
-    if(p_refs[i].m_blockeds.GetCount() > 0)
-    {
-      spec += _T(")");
-    }
-    if(p_refs[i].m_hidden.GetCount() > 0)
-    {
-      spec += _T(")");
-    }
-    if(p_refs[i].m_renamed.GetCount() > 0)
-    {
-      spec += _T(")");
-    }
-    spec += _T("\n");
   }
 
   // append closing brackets
@@ -2643,13 +3290,13 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     cerr << "+preamble:" << endl;
     for(unsigned int i=0; i<preamble_parameter_decls.GetCount(); ++i)
     {
-      cerr << " parameter: " << preamble_parameter_decls[i].get_name().ToAscii() << " type: "
+      cerr << " " << preamble_parameter_decls[i].get_name().ToAscii() << ": "
            << preamble_parameter_decls[i].get_type().ToAscii() << endl;
     }
     for(unsigned int i=0; i<preamble_local_var_decls.GetCount(); ++i)
     {
-      cerr << " parameter: " << preamble_local_var_decls[i].get_name().ToAscii() << " type: "
-           << preamble_local_var_decls[i].get_type().ToAscii() << " value: "
+      cerr << " " << preamble_local_var_decls[i].get_name().ToAscii() << ": "
+           << preamble_local_var_decls[i].get_type().ToAscii() << " = "
            << preamble_local_var_decls[i].get_value().ToAscii() << endl;
     }
   }
@@ -2661,7 +3308,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     cerr << "+actions:" << endl;
     for(unsigned int i=0; i<acts.GetCount(); ++i)
     {
-      cerr << " action: " << acts[i].get_name().ToAscii();
+      cerr << " " << acts[i].get_name().ToAscii();
       wxString action_text = wxEmptyString;
       for(unsigned int j=0; j<acts[i].get_parameters().GetCount(); ++j)
       {
@@ -2676,7 +3323,7 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
       }
       if (!action_text.IsEmpty())
       {
-        cerr << " type: " << action_text.ToAscii();
+        cerr << ": " << action_text.ToAscii();
       }
       cerr << endl;
 	  }
@@ -2688,39 +3335,32 @@ void process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArra
     {
 	    if ( acts[i].get_name() == p_actions[j].get_name() )
 	    {
-        cerr << found << ": " << acts[i].get_name().ToAscii() << endl;
 	      if ( acts[i].get_parameters().GetCount() == p_actions[j].get_parameters().GetCount() )
 	      {
-          cerr << found << ": " << acts[i].get_parameters().GetCount() << " parameters" << endl;
 		      if ( acts[i].get_parameters().GetCount() == 0 )
 		      {
 		        found = true;
+            break;
 		      }
 		      else
 		      {
 		        list_of_dataexpression acts_params = acts[i].get_parameters();
 		        list_of_dataexpression actions_params = p_actions[j].get_parameters();
-            for ( unsigned int k = 0; k < acts_params.GetCount(); ++k )
+            found = true;
+            unsigned int k = 0;
+            while ( found && k < acts_params.GetCount() )
 		        {
-              if (!found)
-              {
-                found = acts_params[k].get_type() == actions_params[k].get_type();
-              }
-              cerr << found << ": " << acts_params[k].get_type().ToAscii() << "==" << actions_params[k].get_type().ToAscii() << endl;
+              found = acts_params[k].get_type() == actions_params[k].get_type();
+              ++k;
 		        }
+            if (found)
+            {
+              break;
+            }
 		      }
 	      }
-	      else
-	      {
-		      found = false;
-	      }
       }
-	    else if (!found)
-	    {
-	      found = false;
-	    }
     }
-    cerr << found << endl;
     if (!found)
     {
 	    p_actions.Add(acts[i]);
@@ -2766,12 +3406,6 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
 {
   try
   {
-    // assure specification is valid
-    if(!validate(p_spec))
-    {
-      throw CONVERSION_ERROR;
-    }
-
     list_of_action actions;                     // all occuring actions
     wxXmlNode       *doc_root;                  // stores the root node of the document
     wxArrayString   sort_expressions;           // stores all state sort expressions
@@ -2802,6 +3436,12 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
         continue;
       }
       in_mcrl2.Add(id, 1);
+
+      // assure specification is valid
+      if (!validate_process_diagram(p_spec, id))
+      {
+        throw CONVERSION_ERROR;
+      }
 
       // Apply steps of algorithm on XML data.
       process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose, datatype_spec);
@@ -2981,16 +3621,10 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
 {
   try
   {
-    // assure specification is valid
-    if(!validate(p_spec))
-    {
-      throw CONVERSION_ERROR;
-    }
-
     // an architecture diagram can contain both architecture references and process references,
     // this has to be taken into account in the main loop
 
-    list_of_action actions;                     // all occuring actions
+    list_of_action  actions;                    // all occuring actions
     wxXmlNode       *doc_root;                  // stores the root node of the document
     wxArrayString   sort_expressions;           // stores all state sort expressions
     wxArrayString   internal_specs;             // stores all internal process specifications
@@ -2998,9 +3632,12 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     wxArrayString   arch_specs;                 // stores all architecture diagram process specifications
 
     // stores all diagrams that need to be added to the mCRL2 specification.
-    wxArrayString to_mcrl2, in_mcrl2;
-    to_mcrl2.Add(p_diagram_id);
-    in_mcrl2.Empty();
+    // make difference between arch and proc
+    wxArrayString arch_to_mcrl2, proc_to_mcrl2, arch_in_mcrl2, proc_in_mcrl2;
+    arch_to_mcrl2.Add(p_diagram_id);
+    proc_to_mcrl2.Empty();
+    arch_in_mcrl2.Empty();
+    proc_in_mcrl2.Empty();
 
     doc_root = p_spec.GetRoot();
 
@@ -3011,96 +3648,207 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     internal_specs.Empty();
     specs.Empty();
     arch_specs.Empty();
-
-    while(!to_mcrl2.IsEmpty())
+    // collect all needed archs
+    while(!arch_to_mcrl2.IsEmpty())
     {
-      wxString id = to_mcrl2[0];
-      to_mcrl2.RemoveAt(0);
-      if(in_mcrl2.Index(id) != wxNOT_FOUND)
+      wxString arch_id = arch_to_mcrl2[0];
+      arch_to_mcrl2.RemoveAt(0);
+      arch_in_mcrl2.Add(arch_id);
+      
+      wxString arch_name = infer_architecture_name(doc_root, arch_id);
+      wxXmlNode *diagram = get_architecture_diagram(doc_root, arch_name);
+      wxArrayString proc_refs = infer_process_references(diagram);
+      for(unsigned int i=0; i<proc_refs.GetCount(); ++i)
       {
-        // diagram is already exported
-        continue;
-      }
-      in_mcrl2.Add(id);
-
-      // Apply steps of algorithm on XML data.
-      if(is_process_diagram(doc_root, id))
-      {
-        // export process diagram
-        process_diagram_mcrl2(doc_root, id, sort_expressions, actions, internal_specs, specs, p_verbose, datatype_spec);
-        wxXmlNode *diagram = get_process_diagram(doc_root, id);
-
-        // determine recursive process references
-        wxArrayString references = infer_process_references(diagram);
-        for(unsigned int i=0; i<references.GetCount(); ++i)
+        bool found = false;
+        for(unsigned int j=0; j<proc_to_mcrl2.GetCount(); ++j)
         {
-          bool found = false;
-          for(unsigned int j=0; j<in_mcrl2.GetCount(); ++j)
+          if(proc_to_mcrl2[j] == proc_refs[i])
           {
-            if(in_mcrl2[j] == references[i])
-            {
-              found = true;
-            }
+            found = true;
+            break;
           }
+        }
 
-          if(!found)
-          {
-            to_mcrl2.Add(references[i]);
-          }
+        if(!found)
+        {
+          proc_to_mcrl2.Add(proc_refs[i]);
         }
       }
-      else
-      {
-        // export architecture diagram
-        arr_action_reference refs;
-        arr_renamed renameds;
-        arr_channel_comm comms;
-        wxString arch_spec = architecture_diagram_mcrl2(doc_root, id, p_verbose, refs, renameds, comms, datatype_spec);
-        arch_specs.Add(arch_spec);
 
-        // add renamed new actions to actions
-        for(unsigned int i=0; i<renameds.GetCount(); ++i)
+      wxArrayString arch_refs = infer_architecture_references(diagram);
+      for(unsigned int i=0; i<arch_refs.GetCount(); ++i)
+      {
+        bool found = false;
+        for(unsigned int j=0; j<arch_in_mcrl2.GetCount(); ++j)
         {
-          action ren;
-          ren.set_name(renameds[i].m_new_name);
-          actions.Add(ren);
-        }
-        for(unsigned int i=0; i<refs.GetCount(); ++i)
-        {
-          for(unsigned int j=0; j<refs[i].m_renamed.GetCount(); ++j)
+          if(arch_in_mcrl2[j] == arch_refs[i])
           {
-            wxString ren = refs[i].m_renamed[j].m_channel + refs[i].m_renamed[j].m_channel_id;
-            action ren_decl;
-            ren_decl.set_name( ren );
-            actions.Add(ren_decl);
+            found = true;
+            break;
           }
         }
-        for(unsigned int i=0; i<comms.GetCount(); ++i)
+
+        if(!found)
         {
-          action ren;
-          ren.set_name( comms[i].m_name );
-          actions.Add(ren);
+          arch_to_mcrl2.Add(arch_refs[i]);
+        }
+      }
+    }
+
+    // collect all needed procs and process them
+    while(!proc_to_mcrl2.IsEmpty())
+    {
+      wxString proc_id = proc_to_mcrl2[0];
+      proc_to_mcrl2.RemoveAt(0);
+      proc_in_mcrl2.Add(proc_id);
+
+      // assure specification is valid
+      if (!validate_process_diagram(p_spec, proc_id))
+      {
+        throw CONVERSION_ERROR;
+      }
+      // make proc_specification
+      process_diagram_mcrl2(doc_root, proc_id, sort_expressions, actions, internal_specs, specs, p_verbose, datatype_spec);
+      wxXmlNode *diagram = get_process_diagram(doc_root, proc_id);
+      wxArrayString proc_refs = infer_process_references(diagram);
+      for(unsigned int i=0; i<proc_refs.GetCount(); ++i)
+      {
+        bool found = false;
+        for(unsigned int j=0; j<proc_in_mcrl2.GetCount(); ++j)
+        {
+          if(proc_in_mcrl2[j] == proc_refs[i])
+          {
+            found = true;
+            break;
+          }
         }
 
-        // determine recursive references
-        for(unsigned int i=0; i<refs.GetCount(); ++i)
+        if(!found)
+        {
+          proc_to_mcrl2.Add(proc_refs[i]);
+        }
+      }
+    }
+    arch_to_mcrl2 = arch_in_mcrl2;
+    arch_in_mcrl2.Empty();
+
+//TODO: @arcs: first collect actions from proc_refs (done above), then add type to channels (possible channel actions), then collect blocked, hidden, renamed channels
+//             then collect channelcommunications + add type to chan_comms, then collect blocked, hidden, renamed chan_coms
+//             make arch specification
+
+    // loop through archs 
+    while(!arch_to_mcrl2.IsEmpty())
+    {
+      wxString arch_id = arch_to_mcrl2[0];
+      arch_to_mcrl2.RemoveAt(0);
+      arch_in_mcrl2.Add(arch_id);
+
+      // assure specification is valid
+      if (!validate_architecture_diagram(p_spec, arch_id))
+      {
+        throw CONVERSION_ERROR;
+      }
+
+      wxString arch_name = infer_architecture_name(doc_root, arch_id);
+      wxXmlNode *diagram = get_architecture_diagram(doc_root, arch_name);
+      wxArrayString proc_refs = infer_process_references(diagram);
+
+      // export architecture diagram
+      arr_action_reference refs;
+      arr_renamed renameds;
+      arr_channel_comm comms;
+      wxString arch_spec = architecture_diagram_mcrl2(doc_root, arch_id, p_verbose, refs, renameds, comms, datatype_spec);
+      arch_specs.Add(arch_spec);
+
+      // add renamed new actions to actions
+      for(unsigned int i=0; i<renameds.GetCount(); ++i)
+      {
+        action ren;
+        ren.set_name(renameds[i].m_new.get_name());
+//        cerr << "action added: " << renameds[i].m_new.get_name().ToAscii() << " ";
+        ren.set_parameters(renameds[i].m_new.get_parameters());
+/*        for (unsigned int j=0; j<renameds[i].m_new.get_parameters().GetCount(); ++j)
+        {
+          if (j > 0) 
+          {
+            cerr << " # ";
+          }
+          cerr << renameds[i].m_new.get_parameters()[j].get_type().ToAscii();
+        }
+        cerr << endl;
+*/
+        actions.Add(ren);
+      }
+      // add channels
+      for(unsigned int i=0; i<refs.GetCount(); ++i)
+      {
+        for(unsigned int j=0; j<refs[i].m_renamed.GetCount(); ++j)
+        {
+          wxString ren = refs[i].m_renamed[j].m_channel.get_name() + refs[i].m_renamed[j].m_channel_id;
+          action ren_decl;
+          ren_decl.set_name( ren );
+//          cerr << "channel action added: " << ren.ToAscii() << " ";
+          ren_decl.set_parameters( refs[i].m_renamed[j].m_channel.get_parameters() );
+/*          for (unsigned int k=0; k<refs[i].m_renamed[j].m_channel.get_parameters().GetCount(); ++k)
+          {
+            if (k > 0)
+            {
+              cerr << " # ";
+            }
+            cerr << refs[i].m_renamed[j].m_channel.get_parameters()[k].get_type().ToAscii();
+          }
+          cerr << endl;
+*/
+          actions.Add(ren_decl);
+        }
+      }
+      // add channel communications
+      for(unsigned int i=0; i<comms.GetCount(); ++i)
+      {
+        for (unsigned int j=0; j<comms[i].m_channels.GetCount(); ++j)
         {
           bool found = false;
-          for(unsigned int j=0; j<in_mcrl2.GetCount(); ++j)
+          for (unsigned int k=j+1; k<comms[i].m_channels.GetCount(); ++k)
           {
-            if(in_mcrl2[j] == refs[i].m_diagram_id)
+            if (comms[i].m_channels[j].m_channel.get_parameters().GetCount() == comms[i].m_channels[k].m_channel.get_parameters().GetCount())
             {
-              found = true;
+              if (comms[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+              {
+                found = true;
+                break;
+              }
+              else
+              {
+                for (unsigned int l=0; l<comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                {
+                  found = true;
+                  if (comms[i].m_channels[j].m_channel.get_parameters()[l].get_type() != comms[i].m_channels[k].m_channel.get_parameters()[l].get_type())
+                  {
+                    found = false;
+                    break;
+                  }
+                }
+                if (found)
+                {
+                  break;
+                }
+              }
             }
           }
-
-          if(!found)
+          if (!found)
           {
-            to_mcrl2.Add(refs[i].m_diagram_id);
+            action ren;
+            ren.set_name( comms[i].m_name );
+            ren.set_parameters( comms[i].m_channels[j].m_channel.get_parameters() );
+            actions.Add(ren);
           }
         }
       }
     }
+
+    // remove duplicate actions
+    actions = compact_list_action(actions);
 
     // construct general expressions
     wxString dat_spec = datatype_specification_mcrl2(doc_root);

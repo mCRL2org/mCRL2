@@ -815,16 +815,16 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 
-void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channeltype p_channeltype)
+void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channel_type p_channel_type)
 {
   glPushMatrix();
 
   // perform necessary translation
   glTranslatef( p_center.m_x, p_center.m_y, 0.0f);
   // set the color for the fill of the ellipse
-  if (p_channeltype == channel_visible) set_color(g_color_channel_visible, p_selected);
-  if (p_channeltype == channel_blocked) set_color(g_color_channel_blocked, p_selected);
-  if (p_channeltype == channel_hidden) set_color(g_color_channel_hidden, p_selected);
+  if (p_channel_type == VISIBLE_CHANNEL) set_color(g_color_channel_visible, p_selected);
+  if (p_channel_type == HIDDEN_CHANNEL) set_color(g_color_channel_hidden, p_selected);
+  if (p_channel_type == BLOCKED_CHANNEL) set_color(g_color_channel_blocked, p_selected);
 
   // fill ellipse
   glBegin(GL_POLYGON);
@@ -849,6 +849,15 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
     }
   glEnd();
   glPopMatrix();
+}
+
+void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, bool p_selected, const channel_communication_type p_channel_communication_type)
+{
+  channel_type p_channel_type = VISIBLE_CHANNEL;
+  if (p_channel_communication_type == VISIBLE_CHANNEL_COMMUNICATION) p_channel_type = VISIBLE_CHANNEL;
+  if (p_channel_communication_type == HIDDEN_CHANNEL_COMMUNICATION) p_channel_type = HIDDEN_CHANNEL;
+  if (p_channel_communication_type == BLOCKED_CHANNEL_COMMUNICATION) p_channel_type = BLOCKED_CHANNEL;
+  draw_channel( p_center, p_radius, p_selected, p_channel_type );
 }
 
 void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color )

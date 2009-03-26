@@ -44,7 +44,7 @@ namespace grape
       float m_width;
       float m_height;
     };
-
+    
     /**
      * \short Represents an event.
      */
@@ -91,6 +91,7 @@ namespace grape
          * @return Returns a pointer to the desired diagram. Or @c 0 if the diagram couldn't be found.
          */
         diagram* find_diagram( unsigned int p_dia_id, grape_diagram_type p_dia_type = GRAPE_NO_DIAGRAM );
+        
       public:
 
         /**
@@ -108,6 +109,27 @@ namespace grape
          */
         ~grape_event_base( void );
     };
+    
+   /**
+    * Diagram retrieval function.
+    * Searches through all diagrams in the specification to find the one with the specified name and type.
+         * @param p_main_frame Pointer to the main frame.
+    * @param p_name The name of the wanted diagram.
+    * @param p_dia_type The type of the wanted diagram.
+    * @return Returns a pointer to the desired diagram. Or @c 0 if the diagram couldn't be found.
+    */
+    diagram* find_a_diagram( grape_frame *m_main_frame, wxString p_name, grape_diagram_type p_dia_type = GRAPE_NO_DIAGRAM );
+
+   /**
+    * Diagram retrieval function.
+    * Searches through all diagrams in the specification to find the one with the specified id and specified type.
+         * @param p_main_frame Pointer to the main frame.
+    * @param p_dia_id The identifier of the wanted diagram.
+    * @param p_dia_type The type of the wanted diagram.
+    * @return Returns a pointer to the desired diagram. Or @c 0 if the diagram couldn't be found.
+    */
+    diagram* find_a_diagram( grape_frame *m_main_frame, unsigned int p_dia_id, grape_diagram_type p_dia_type = GRAPE_NO_DIAGRAM );
+        
   }
 }
 
