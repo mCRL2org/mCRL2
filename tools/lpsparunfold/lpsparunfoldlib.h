@@ -4,6 +4,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/postfix_identifier_generator.h"
 #include "mcrl2/new_data/basic_sort.h"
@@ -45,6 +46,14 @@ class Sorts
 
     //Functie voor in data lib
     bool basic_sortOccursInSort_expression(mcrl2::new_data::sort_expression s, mcrl2::new_data::basic_sort b );
+    mcrl2::core::identifier_string generateFreshProcessParameterName(std::string str);
+    std::set<mcrl2::core::identifier_string> process_parameter_names;
+    void updateLPS(mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector);
+  
+    //Needed for additional process parameter in the LPS 
+    mcrl2::new_data::sort_expression_vector affectedSorts;
+    mcrl2::new_data::data_expression traverseAndSubtituteDataExpressions(mcrl2::new_data::data_expression de, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector AffectedConstructors);
+    std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj;
 
 };
 

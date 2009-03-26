@@ -55,7 +55,7 @@ using namespace mcrl2::new_data;
 /* Name of the file to read input from (or standard input if empty) */
 std::string file_name;
 
-void parse_command_line(int ac, char** av) {
+bool parse_command_line(int ac, char** av) {
   interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
                            "Unfolds complex sorts of a linear process specification (LPS) in INFILE." ,  "");
 
@@ -67,6 +67,8 @@ void parse_command_line(int ac, char** av) {
   if (1 < parser.arguments.size()) {
     parser.error("too many file arguments");
   }
+
+  return parser.continue_execution();
 }
         
 // SQuADT protocol interface
@@ -142,20 +144,21 @@ int main(int argc, char** argv)
       return EXIT_SUCCESS;
     }
 #endif
-    parse_command_line(argc,argv);
+    if (parse_command_line(argc,argv))
+    {
 
-    specification lps_specification;
-
-    lps_specification.load(file_name);
-    linear_process lps = lps_specification.process();
-    data_specification data_spec = lps_specification.data();
-    Sorts sorts( data_spec, lps );
-    //Debug-hack
-    sorts.unfoldParameter = basic_sort( "Frame" );
-    sorts.algorithm();
-
-    assert(false);
-
+      specification lps_specification;
+  
+      lps_specification.load(file_name);
+      linear_process lps = lps_specification.process();
+      data_specification data_spec = lps_specification.data();
+      Sorts sorts( data_spec, lps );
+      //Debug-hack
+      sorts.unfoldParameter = basic_sort( "Frame" );
+      sorts.algorithm();
+  
+      assert(false);
+    }
     return EXIT_SUCCESS;
   }
   catch (std::exception& e) {

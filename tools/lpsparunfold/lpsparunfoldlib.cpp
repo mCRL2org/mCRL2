@@ -236,9 +236,13 @@ mcrl2::new_data::function_symbol_vector Sorts::createProjectorFunctions(function
       for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
       {
         mcrl2::core::identifier_string idstr = generateFreshConMapFuncName( str );
-        std::cerr << j-> to_string() << std::endl;
+        //std::cerr << j-> to_string() << std::endl;
          
         sfs.push_back(function_symbol( idstr , mcrl2::new_data::function_sort( unfoldParameter , *j )));
+
+        //Needed for the process parameter extension of an LPS
+        affectedSorts.push_back(*j);
+
       }
     }
   }
@@ -387,6 +391,170 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
   return tuple;
 }
 
+mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::string str)
+{
+  mcrl2::new_data::postfix_identifier_generator generator = mcrl2::new_data::postfix_identifier_generator ("");
+  generator.add_identifiers( process_parameter_names );
+  mcrl2::core::identifier_string idstr = generator( str.append( "_pp" ) );
+  process_parameter_names.insert( idstr );
+  return idstr;
+}
+
+void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors)
+{
+   /* Get process parameters from lps */
+   mcrl2::new_data::variable_list lps_proc_pars =  m_lps.process_parameters();
+
+   /* Get process_parameters names from lps */
+   process_parameter_names.clear();
+   std::set<mcrl2::core::identifier_string> process_parameter_names;
+   for(mcrl2::new_data::variable_list::iterator i = lps_proc_pars.begin();
+                                                i != lps_proc_pars.end();
+                                                ++i)
+   {
+     process_parameter_names.insert(i -> name() );
+   }
+
+
+   /* Create new process parameters */
+   mcrl2::new_data::variable_vector new_process_parameters;
+   for(mcrl2::new_data::variable_list::iterator i = lps_proc_pars.begin();
+                                                i != lps_proc_pars.end();
+                                                ++i)
+   {
+     if( i->sort() == unfoldParameter)
+     {
+       gsVerboseMsg("unfold parameter %s found at index %d\n", i->name().c_str(), std::distance( lps_proc_pars.begin(), i ) );
+       gsDebugMsg("  Inject process parameters\n");
+       mcrl2::new_data::variable_vector process_parameters_injection;
+
+       /* Generate fresh process parameter for new Sort */
+       mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name());
+       process_parameters_injection.push_back( mcrl2::new_data::variable( idstr , sort_new ) );
+       gsVerboseMsg("  Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( sort_new ).c_str());
+
+       for( sort_expression_vector::iterator j = affectedSorts.begin()
+						; j != affectedSorts.end()
+						; ++j )
+       {
+         mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name());
+	 process_parameters_injection.push_back( mcrl2::new_data::variable( idstr , *j ) );
+	 gsVerboseMsg("  Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( *j ).c_str());
+       }
+       new_process_parameters.insert( new_process_parameters.end(), process_parameters_injection.begin(), process_parameters_injection.end() );
+
+       /* store mapping: process parameter -> process parameter injection:
+          Required for process parameter replacement in summands
+      */
+       proc_par_to_proc_par_inj[*i] = process_parameters_injection;
+
+     } else {
+       new_process_parameters.push_back( *i );
+     }
+   }
+   gsVerboseMsg("New LPS process parameters: %s\n", mcrl2::new_data::pp(new_process_parameters).c_str() );
+   /* Ambiguity
+	utility.h std::string mcrl2::new_data::pp(const Container&, typename boost::enable_if<typename mcrl2::new_data::detail::is_container<T>::type, void>::type*) [with Container = mcrl2::new_data::variable_vector]
+	print.h:  std::string mcrl2::core::pp(Term, mcrl2::core::t_pp_format) [with Term = atermpp::vector<mcrl2::new_data::variable, std::allocator<mcrl2::new_data::variable> >]
+   */
+
+   /*Process summands*/
+   mcrl2::lps::summand_list summands = m_lps.summands();
+   for( mcrl2::lps::summand_list::iterator i  = summands.begin()
+                                         ; i != summands.end()
+                                         ; ++i)
+   {
+     data_expression condition = traverseAndSubtituteDataExpressions( i ->condition(), Cmap, AffectedConstructors );
+     gsVerboseMsg("  condition: %s\n", pp(condition).c_str() );
+     /* Expected to use multi_action function instead of actions() */
+     gsVerboseMsg("  action %s\n", mcrl2::new_data::pp( i -> actions() ).c_str() );
+     gsVerboseMsg("  action %s\n", i -> is_tau() ? "true" : "false" );
+     
+   }
+
+}   
+
+mcrl2::new_data::data_expression Sorts::traverseAndSubtituteDataExpressions( mcrl2::new_data::data_expression de,
+                                                                        function_symbol Cmap,
+                                                                        function_symbol_vector AffectedConstructors
+                                                                      )
+{
+  if (de.is_application())
+  {
+    application ap = application(de);
+    /* Expected "data_expression_vector" instead of" */
+    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
+    data_expression_vector new_args;
+    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> i = args.begin();
+                                                                                             i != args.end();
+                                                                                             ++i
+    )
+    {
+      new_args.push_back( traverseAndSubtituteDataExpressions( *i, Cmap, AffectedConstructors ) );
+    }
+ 
+    return 
+      application 
+        ( ap.head()
+        , new_args
+        );
+  } 
+  if (de.is_variable())
+  {
+    variable var = variable(de);
+    if (proc_par_to_proc_par_inj.find( var ) == proc_par_to_proc_par_inj.end() )
+    {
+      return var;
+    } else {
+      /* Reconstruct Unfold parameter */
+      data_expression_vector new_args ;
+      new_args.push_back( proc_par_to_proc_par_inj[ var ][0] );
+      for(function_symbol_vector::iterator i =  AffectedConstructors.begin()
+                                         ; i != AffectedConstructors.end() 
+                                         ; ++i )
+      {
+        if ( i->sort().is_basic_sort() )
+        {
+          new_args.push_back( *i );
+        }
+
+        if ( i->sort().is_function_sort() )
+        {
+          data_expression_vector instantiate_domain;
+          function_sort::domain_range dcr = function_sort(i->sort()).domain();
+          for (function_sort::domain_const_range::iterator j  = dcr.begin()
+                                                         ; j != dcr.end() 
+                                                         ; j++ )
+          {
+            for(mcrl2::new_data::variable_vector::iterator k =  proc_par_to_proc_par_inj[ var ].begin() 
+                                                         ; k != proc_par_to_proc_par_inj[ var ].end()
+                                                         ; ++k )
+            {
+              if( *j == k->sort() )
+              {
+                instantiate_domain.push_back( *k );
+              } 
+            }   
+          }
+          new_args.push_back( application( *i, instantiate_domain )  );
+        }
+      }
+      data_expression new_expr = application(Cmap, new_args );
+      return new_expr;
+    }
+  } 
+  if (de.is_function_symbol())
+  {
+    return de;
+  } 
+  if (de.is_abstraction())
+  {
+    return de;
+  } 
+
+  return de;
+}
+
 void Sorts::algorithm()
 {
    /* Var Dec */
@@ -411,6 +579,8 @@ void Sorts::algorithm()
    /*  8-12 */ set_of_ProjectorFunctions = createProjectorFunctions(k); 
    /* 13-xx */ data_specification = createFunctionSection(set_of_ProjectorFunctions, Cmap, set_of_new_sorts, k, Detmap);
 
-   /*----------------*/  
-   
+   /*----------------*/
+
+   updateLPS(Cmap, k);  
+
 }
