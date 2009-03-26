@@ -20,7 +20,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/sort_utility.h"
+#include "mcrl2/new_data/detail/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -111,12 +111,12 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
   {
     for (new_data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
     {
-      if (is_function_symbol(*del_i))
+      if (del_i->is_function_symbol())
       { //If p is a OpId
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
-      else if (is_data_application(*del_i))
+      else if (del_i->is_application())
       { // If p is a data application
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
@@ -145,11 +145,11 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
   {
     if (enumerated_sorts->get(p->sort()) != NULL)
     { //sort is finite
-      if (is_function_symbol(*p))
+      if (p->is_function_symbol())
       { // If p is a correct data operation
         finite_expression = push_back(finite_expression, *p);
       }
-      else if (is_variable(*p))
+      else if (p->is_variable())
       { // If p is a freevar
         core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
         core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
@@ -183,7 +183,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  data_specification data = pbes_spec.data();
+  new_data::data_specification data = pbes_spec.data();
 
   propositional_variable_instantiation new_initial_state;
   atermpp::vector<pbes_equation> new_equation_system;
@@ -289,7 +289,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  data_specification data = pbes_spec.data();
+  new_data::data_specification data = pbes_spec.data();
 
   atermpp::vector<pbes_equation> result_eqsys;        // resulting equation system
   int nr_of_equations = 0;          // Nr of equations computed
@@ -307,12 +307,15 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     new_data::variable_list parameters = eq_i->variable().parameters();
     for (new_data::variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
     {
-      sort_expression current_sort = p->sort();
+      new_data::sort_expression current_sort = p->sort();
       if (sort_enumerations.get(current_sort) == NULL)
       {
-        if (check_finite(data.constructors(), current_sort))
+        // if (check_finite(data.constructors(), current_sort))
+        if (data.is_certainly_finite(current_sort))
         {
-          new_data::data_expression_list enumerations_from_sort = enumerate_constructors(data.constructors(), current_sort);
+          // new_data::data_expression_list enumerations_from_sort = new_data::detail::enumerate_constructors(data.constructors(), current_sort);
+          new_data::data_expression_vector v = new_data::detail::enumerate_constructors(data, current_sort);
+          new_data::data_expression_list enumerations_from_sort = new_data::make_data_expression_list(v);
           sort_enumerations.put(current_sort, enumerations_from_sort);
         }
       }

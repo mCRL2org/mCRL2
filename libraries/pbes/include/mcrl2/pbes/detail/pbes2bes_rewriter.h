@@ -65,12 +65,12 @@ namespace detail {
       {
         for (new_data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
         {
-          if (new_data::is_function_symbol(*del_i))
+          if (del_i->is_function_symbol())
           {
             propvar_name_current += "@";
             propvar_name_current += mcrl2::core::pp(*del_i);
           }
-          else if (new_data::is_data_application(*del_i))
+          else if (del_i->is_application())
           {
             propvar_name_current += "@";
             propvar_name_current += mcrl2::core::pp(*del_i);
