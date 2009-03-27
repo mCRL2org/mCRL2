@@ -163,18 +163,24 @@ namespace mcrl2 {
         function_symbol_vector constructors_s(d.constructors(s));
         for (function_symbol_vector::const_iterator i(constructors_s.begin()); i != constructors_s.end(); ++i)
         {
-                // Vector for all enumerated constructors
-                std::vector< new_data::data_expression_vector > argumentss;
-                // For each sort of the constructor...
-                for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+                if (i->sort().is_function_sort())
                 {
-                  // Put all values which the sort can have in a list
-                  argumentss.push_back(enumerate_constructors(d, j.front()));
+                  // Vector for all enumerated constructors
+                  std::vector< new_data::data_expression_vector > argumentss;
+                  // For each sort of the constructor...
+                  for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+                  {
+                    // Put all values which the sort can have in a list
+                    argumentss.push_back(enumerate_constructors(d, j.front()));
+                  }
+                  // Create data_expression_list out of the values which a sort can have
+                  new_data::data_expression_vector temp = create_data_expression_vector(*i, argumentss);
+                  //concatenate ces and temp
+                  ces.insert(ces.end(), temp.begin(), temp.end());
                 }
-                // Create data_expression_list out of the values which a sort can have
-                new_data::data_expression_vector temp = create_data_expression_vector(*i, argumentss);
-                //concatenate ces and temp
-                ces.insert(ces.end(), temp.begin(), temp.end());
+                else {
+                  ces.push_back(*i);
+                }
         }
         // Put ces in the correct order
         return ces;
