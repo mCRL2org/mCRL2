@@ -20,41 +20,60 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
 : wxDialog( 0, wxID_ANY, wxT("Edit channel"), wxDefaultPosition, wxDefaultSize )
 {  
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
+  
+  // create name text
+  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("name:"), wxDefaultPosition, wxSize(100, 25) );
 
-  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("channel name") );
-  wnd_sizer->Add(text_name, 0, wxALIGN_TOP, 0 );
-  wnd_sizer->AddSpacer( 5 );
+  // create name input
+  m_name_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_name(), wxDefaultPosition, wxSize(300, 25) );
 
-  m_name_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_name() );            
-  wnd_sizer->Add(m_name_input, 0, wxEXPAND, 0);
+  // create sizer
+  wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
+  name_sizer->Add( text_name );
+  name_sizer->Add( m_name_input );
+  wnd_sizer->Add( name_sizer );
+  
   wnd_sizer->AddSpacer( 5 );
   
-  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("channel rename") );
-  wnd_sizer->Add(text_rename, 0, wxALIGN_TOP, 0 );
-  wnd_sizer->AddSpacer( 5 );
+  // create rename text
+  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
 
-  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_rename_to() );            
-  wnd_sizer->Add(m_rename_input, 0, wxEXPAND, 0);
+  // create rename input
+  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );
+
+  // create sizer
+  wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
+  rename_sizer->Add( text_rename );
+  rename_sizer->Add( m_rename_input );
+  wnd_sizer->Add( rename_sizer );
+  
   wnd_sizer->AddSpacer( 5 );
 
   if (p_channel.get_channel_communications()->GetCount() == 0)
   {
-    wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("channel property") );
+    // create property text
+    wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("property:"), wxDefaultPosition, wxSize(100, 25) );
     wnd_sizer->Add(text_property, 0, wxALIGN_TOP, 0 );
     wnd_sizer->AddSpacer( 5 );
     
     // select the correct property of the channel
     int index = p_channel.get_channel_type();
     wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-    m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 3, combobox_list, wxCB_READONLY);
-    wnd_sizer->Add(m_combobox, 0, wxEXPAND, 0);
+    m_combobox = new wxComboBox( this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxSize(300, 25), 3, combobox_list, wxCB_READONLY );
+        
+    // create sizer
+    wxSizer *property_sizer = new wxBoxSizer(wxHORIZONTAL);
+    property_sizer->Add( text_property );
+    property_sizer->Add( m_combobox );
+    wnd_sizer->Add( property_sizer );
+  
     wnd_sizer->AddSpacer( 5 );
   }
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_BOTTOM, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
 
   // realize sizers
   SetSizer(wnd_sizer);

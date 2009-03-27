@@ -21,30 +21,40 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
 {  
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename channel communication") );
-  wnd_sizer->Add(text_rename, 0, wxALIGN_TOP, 0 );
-  wnd_sizer->AddSpacer( 5 );
+  // create rename text
+  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
   
-  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel_communication.get_rename_to() );            
-  wnd_sizer->Add(m_rename_input, 0, wxEXPAND, 0);
+  // create rename input
+  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel_communication.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );            
+    
+  // create sizer
+  wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
+  rename_sizer->Add( text_rename );
+  rename_sizer->Add( m_rename_input );
+  wnd_sizer->Add( rename_sizer );
+  
   wnd_sizer->AddSpacer( 5 );
 
-  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("channel communication property") );
-  wnd_sizer->Add(text_property, 0, wxALIGN_TOP, 0 );
-  wnd_sizer->AddSpacer( 5 );
+  // create property text
+  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("property:"), wxDefaultPosition, wxSize(100, 25) );
   
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
   wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-  m_combobox = new wxComboBox(this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxDefaultSize, 3, combobox_list, wxCB_READONLY);
+  m_combobox = new wxComboBox( this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxSize(300, 25), 3, combobox_list, wxCB_READONLY );
+    
+  // create sizer
+  wxSizer *property_sizer = new wxBoxSizer(wxHORIZONTAL);
+  property_sizer->Add( text_property );
+  property_sizer->Add( m_combobox );
+  wnd_sizer->Add( property_sizer );
   
-  wnd_sizer->Add(m_combobox, 0, wxEXPAND, 0);
   wnd_sizer->AddSpacer( 5 );
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_BOTTOM, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
 
   // realize sizers
   SetSizer(wnd_sizer);

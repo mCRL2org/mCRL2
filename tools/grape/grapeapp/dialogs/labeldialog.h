@@ -32,11 +32,13 @@ namespace grape
     class grape_label_dialog : public wxDialog
     {
       private:
-        wxTextCtrl     *m_var_decls_input;   /**< Input shown in the dialog, used for variable declarations.*/
+        wxTextCtrl     *m_var_decls_input;  /**< Input shown in the dialog, used for variable declarations.*/
         wxTextCtrl     *m_condition_input;  /**< Input shown in the dialog, used for condition.*/
         wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
-        wxTextCtrl     *m_multiaction_input; /**< Input shown in the dialog, used for a multi action.*/
-        wxTextCtrl     *m_var_updates_input;  /**< Input shown in the dialog, used for variable. updates*/
+        wxTextCtrl     *m_multiaction_input;/**< Input shown in the dialog, used for a multi action.*/
+        wxTextCtrl     *m_var_updates_input;/**< Input shown in the dialog, used for variable updates*/
+        
+        wxStatusBar    *m_statusbar;          /**< Statusbar shown in the dialog*/
 
         wxStaticText   *m_preview_text;     /**< Preview text.*/
 

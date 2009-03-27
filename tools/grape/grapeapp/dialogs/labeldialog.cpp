@@ -11,9 +11,11 @@
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
+#include <wx/statusbr.h>
 
 #include "grape_ids.h"
 #include "labeldialog.h"
+
 
 using namespace grape::grapeapp;
 
@@ -23,71 +25,103 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   m_label = new label( p_label );
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
 
-
   // create variable declarations text
-  wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Variable declarations:   id:N,...") );
-  vsizer->Add( text, 0, wxALIGN_TOP );
+  wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Variable declarations:" ), wxDefaultPosition, wxSize(200, 25) );
+  
   // create variable declarations text
-  m_var_decls_input = new wxTextCtrl(this, GRAPE_VAR_DECLS_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 25) );
+  m_var_decls_input = new wxTextCtrl(this, GRAPE_VAR_DECLS_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
   m_var_decls_input->ChangeValue( m_label->get_declarations_text() );
-  vsizer->Add( m_var_decls_input, 0, wxALIGN_TOP );
  
+  // create sizer
+  wxSizer *var_decl_sizer = new wxBoxSizer(wxHORIZONTAL);
+  var_decl_sizer->Add( text);
+  var_decl_sizer->Add( m_var_decls_input );
+  vsizer->Add( var_decl_sizer );
+  
   vsizer->AddSpacer( 5 );
     
   // create condition text
-  text = new wxStaticText( this, wxID_ANY, _T("Condition:") );
-  vsizer->Add( text );
+  text = new wxStaticText( this, wxID_ANY, _T("Condition:"), wxDefaultPosition, wxSize(200, 25) );
+  
   // create condition input
-  m_condition_input = new wxTextCtrl(this, GRAPE_CONDITION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 25) );
+  m_condition_input = new wxTextCtrl(this, GRAPE_CONDITION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
   m_condition_input->ChangeValue( m_label->get_condition() );
-  vsizer->Add( m_condition_input, 0, wxALIGN_TOP );
+ 
+  // create sizer
+  wxSizer *condition_sizer = new wxBoxSizer(wxHORIZONTAL);
+  condition_sizer->Add( text);
+  condition_sizer->Add( m_condition_input );
+  vsizer->Add( condition_sizer );
   
   vsizer->AddSpacer( 5 );
   
   // create multiaction text
-  text = new wxStaticText( this, wxID_ANY, _T("Multiaction:   act(par1,...)|...") );
-  vsizer->Add( text );
-  // create multiaction grid
-  m_multiaction_input = new wxTextCtrl(this, GRAPE_MULTIACTION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 25) );
-  m_multiaction_input->ChangeValue( m_label->get_actions_text() );
-  vsizer->Add( m_multiaction_input, 0, wxALIGN_TOP );
+  text = new wxStaticText( this, wxID_ANY, _T("Multiaction:"), wxDefaultPosition, wxSize(200, 25) );
  
+  // create multiaction grid
+  m_multiaction_input = new wxTextCtrl(this, GRAPE_MULTIACTION_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_multiaction_input->ChangeValue( m_label->get_actions_text() );
+
+  // create sizer
+  wxSizer *multiaction_sizer = new wxBoxSizer(wxHORIZONTAL);
+  multiaction_sizer->Add( text);
+  multiaction_sizer->Add( m_multiaction_input );
+  vsizer->Add( multiaction_sizer );
+  
   vsizer->AddSpacer( 5 );
   
   // create timestamp text
-  text = new wxStaticText( this, wxID_ANY, _T("Timestamp:") );
-  vsizer->Add( text );
+  text = new wxStaticText( this, wxID_ANY, _T("Timestamp:"), wxDefaultPosition, wxSize(200, 25) );
+
   // create timestamp grid
-  m_timestamp_input = new wxTextCtrl(this, GRAPE_TIMESTAMP_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 25) );
+  m_timestamp_input = new wxTextCtrl(this, GRAPE_TIMESTAMP_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
   m_timestamp_input->ChangeValue( m_label->get_timestamp() );
-  vsizer->Add( m_timestamp_input, 0, wxALIGN_TOP );
-    
+   
+  // create sizer
+  wxSizer *timestamp_sizer = new wxBoxSizer(wxHORIZONTAL);
+  timestamp_sizer->Add( text);
+  timestamp_sizer->Add( m_timestamp_input );
+  vsizer->Add( timestamp_sizer );
+  
   vsizer->AddSpacer( 5 );
   
   // create variable updates text
-  text = new wxStaticText( this, wxID_ANY, _T("Variable updates:   var:=expr,...") );
-  vsizer->Add( text );  
-  // create variable updates input
-  m_var_updates_input = new wxTextCtrl(this, GRAPE_VAR_UPDATES_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(570, 25) );
-  m_var_updates_input->ChangeValue( m_label->get_variable_updates_text() );
-  vsizer->Add( m_var_updates_input, 0, wxALIGN_TOP );
+  text = new wxStaticText( this, wxID_ANY, _T("Variable updates:"), wxDefaultPosition, wxSize(200, 25) );
 
-  vsizer->AddSpacer( 15 );
+  // create variable updates input
+  m_var_updates_input = new wxTextCtrl(this, GRAPE_VAR_UPDATES_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_var_updates_input->ChangeValue( m_label->get_variable_updates_text() );
+
+  // create sizer
+  wxSizer *var_updates_sizer = new wxBoxSizer(wxHORIZONTAL);
+  var_updates_sizer->Add( text);
+  var_updates_sizer->Add( m_var_updates_input );
+  vsizer->Add( var_updates_sizer );
+  
+  vsizer->AddSpacer( 10 );
   
   // add preview
   m_preview_text = new wxStaticText( this, wxID_ANY, m_label->get_text() );
-  vsizer->Add(m_preview_text, 0, wxALIGN_TOP );
-
+  vsizer->Add(m_preview_text );
+  
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
   vsizer->Add( sizer, 0, wxALIGN_RIGHT );
+  
+  // add statusbar
+  m_statusbar = new wxStatusBar(this, wxID_ANY);
+  m_statusbar->SetFieldsCount(1);
+  m_statusbar->SetStatusText(_T(""), 0);
+  vsizer->Add( m_statusbar, 0, wxALIGN_BOTTOM );
 
+  m_statusbar->GetFieldsCount();
   // realize sizers
   SetSizer(vsizer);
   vsizer->SetSizeHints(this);
   vsizer->Fit(this);
 
-  m_var_decls_input->SetFocus();
+  m_var_decls_input->SetFocus();  
+  
   Centre();
 }
 
@@ -106,6 +140,8 @@ void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )
   // fill label with variable declarations
   m_label->set_declarations_text( m_var_decls_input->GetValue() );
 
+  m_statusbar->SetStatusText(_T("Syntax: x:S,...,x:S for identifier x and sort expression S"), 0);
+  
   update_preview();
 }
 
@@ -113,6 +149,8 @@ void grape_label_dialog::event_change_var_updates_text( wxCommandEvent &p_event 
 {
   // fill label with variable updates
   m_label->set_variable_updates_text( m_var_updates_input->GetValue() );
+  
+  m_statusbar->SetStatusText(_T("Syntax: x:=d,...,x:=d for identifier x and data expression d"), 0);
 
   update_preview();
 }
@@ -122,6 +160,8 @@ void grape_label_dialog::event_change_multiaction_text( wxCommandEvent &p_event 
   // fill label with actions  
   m_label->set_actions_text( m_multiaction_input->GetValue() );
   
+  m_statusbar->SetStatusText(_T("Syntax: a(d,...,d)|...|a(d,...,d) for identifier data expression d and action a"), 0);
+  
   update_preview();
 }
 
@@ -130,6 +170,8 @@ void grape_label_dialog::event_change_condition_text( wxCommandEvent &p_event )
   // fill label with condition
   m_label->set_condition( m_condition_input->GetValue() );
 
+  m_statusbar->SetStatusText(_T("Enter an expression of sort bool"), 0);
+  
   update_preview();
 }
 
@@ -137,7 +179,9 @@ void grape_label_dialog::event_change_timestamp_text( wxCommandEvent &p_event )
 {
   // fill label with timestamp
   m_label->set_timestamp( m_timestamp_input->GetValue() );
- 
+
+  m_statusbar->SetStatusText(_T("Enter an expression of sort real"), 0);
+  
   update_preview();
 }
 
@@ -163,9 +207,9 @@ bool grape_label_dialog::show_modal( label &p_label )
 }
 
 BEGIN_EVENT_TABLE(grape_label_dialog, wxDialog)
-  EVT_TEXT(GRAPE_VAR_DECLS_INPUT_TEXT, grape_label_dialog::event_change_var_decls_text)
+  EVT_TEXT(GRAPE_VAR_DECLS_INPUT_TEXT, grape_label_dialog::event_change_var_decls_text) 
   EVT_TEXT(GRAPE_MULTIACTION_INPUT_TEXT, grape_label_dialog::event_change_multiaction_text)
   EVT_TEXT(GRAPE_CONDITION_INPUT_TEXT, grape_label_dialog::event_change_condition_text)
   EVT_TEXT(GRAPE_TIMESTAMP_INPUT_TEXT, grape_label_dialog::event_change_timestamp_text)
-  EVT_TEXT(GRAPE_VAR_UPDATES_INPUT_TEXT, grape_label_dialog::event_change_var_updates_text)
+  EVT_TEXT(GRAPE_VAR_UPDATES_INPUT_TEXT, grape_label_dialog::event_change_var_updates_text)  
 END_EVENT_TABLE()
