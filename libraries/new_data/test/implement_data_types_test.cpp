@@ -18,6 +18,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
@@ -2728,17 +2729,40 @@ void old_impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
     )))));
 }
 
-bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2) {
-  mcrl2::new_data::data_equation::variables_const_range o1variables(o1.variables());
-  mcrl2::new_data::data_equation::variables_const_range o2variables(o2.variables());
+data_equation normalise_equation(mcrl2::new_data::data_equation const& e) {
+  struct local {
+    static bool is_variable(atermpp::aterm_appl p) {
+     return data_expression(p).is_variable();
+    }
+  };
 
-  if (o1variables.size() == o2variables.size()) {
-    if (((o1.condition() == o2.condition()) &&
-         (o1.lhs() == o2.lhs()) && (o1.rhs() == o2.rhs()))) {
+  new_data::variable_vector variables;
+
+  atermpp::find_all_if(e, std::ptr_fun(&local::is_variable), std::back_inserter(variables));
+
+  if (e.variables().size() < variables.size()) {
+    variables.resize(e.variables().size());
+  }
+
+  return mcrl2::new_data::data_equation(variables, e.condition(), e.lhs(), e.rhs());
+}
+
+bool alpha_equivalent(mcrl2::new_data::data_equation const& o1, mcrl2::new_data::data_equation o2) {
+  using namespace mcrl2::new_data;
+
+  if (o1.variables().size() == o2.variables().size()) {
+    data_equation normalised_o1(normalise_equation(o1));
+    data_equation normalised_o2(normalise_equation(o2));
+
+    if (((normalised_o1.condition() == normalised_o2.condition()) &&
+         (normalised_o1.lhs() == normalised_o2.lhs()) && (normalised_o1.rhs() == normalised_o2.rhs()))) {
       return true;
     }
     else {
-      // chack alpha equivalence
+      data_equation::variables_const_range o1variables(normalised_o1.variables());
+      data_equation::variables_const_range o2variables(normalised_o2.variables());
+
+      // check alpha equivalence
       if (!o1variables.empty()) {
         atermpp::term_list< atermpp::aterm_appl > s;
 
@@ -2756,7 +2780,7 @@ bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_e
           o2variables.advance_begin(1);
         }
 
-        if (o1 == mcrl2::new_data::data_equation(gsSubstValues_Appl(s, o2, true))) {
+        if (normalised_o1 == mcrl2::new_data::data_equation(gsSubstValues_Appl(s, normalised_o2, true))) {
           return true;
         }
       }
@@ -2867,12 +2891,12 @@ bool compare_modulo_order_and_alpha(
 
     std::string old_differences;
 
-    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    // The relative order of equations in oldset and newset differs so olddiff.size() not necessarily newdiff.size()
     for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = olddiff.begin(); i != olddiff.end(); ++i) {
-      std::vector< mcrl2::new_data::data_equation >::const_iterator j =
-         std::find_if(newdiff.begin(), newdiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
+      std::set< mcrl2::new_data::data_equation, equation_smaller >::const_iterator j =
+         std::find_if(newset.begin(), newset.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
-      if (j == newdiff.end()) {
+      if (j == newset.end()) {
         old_differences.append(mcrl2::core::pp(*i)).append(",\n");
         old_differences.append(i->to_string()).append(",\n");
       }
@@ -2881,17 +2905,18 @@ bool compare_modulo_order_and_alpha(
     if (!old_differences.empty()) {
       BOOST_CHECK(!old_differences.empty());
 
-      std::clog << "IN OLD BUT NOT NEW " << old_differences.substr(0, old_differences.size() - 2) << std::endl;
+      std::clog << "IN OLD BUT NOT NEW: " << std::endl
+                << old_differences.substr(0, old_differences.size() - 2) << std::endl;
     }
 
     std::string new_differences;
 
-    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    // The relative order of equations in oldset and newset differs so olddiff.size() not necessarily newdiff.size()
     for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = newdiff.begin(); i != newdiff.end(); ++i) {
-      std::vector< mcrl2::new_data::data_equation >::const_iterator j =
-         std::find_if(olddiff.begin(), olddiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
+      std::set< mcrl2::new_data::data_equation, equation_smaller >::const_iterator j =
+         std::find_if(oldset.begin(), oldset.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
-      if (j == olddiff.end()) {
+      if (j == oldset.end()) {
         new_differences.append(mcrl2::core::pp(*i)).append(",\n");
         new_differences.append(i->to_string()).append(",\n");
       }
@@ -2900,7 +2925,8 @@ bool compare_modulo_order_and_alpha(
     if (!new_differences.empty()) {
       BOOST_CHECK(!new_differences.empty());
 
-      std::clog << "IN NEW BUT NOT OLD " << new_differences.substr(0, new_differences.size() - 2) << std::endl;
+      std::clog << "IN NEW BUT NOT OLD: " << std::endl
+                << new_differences.substr(0, new_differences.size() - 2) << std::endl;
     }
 
     return old_differences.empty() && new_differences.empty();
@@ -2910,7 +2936,7 @@ bool compare_modulo_order_and_alpha(
 }
 
 void compare(t_data_decls const& old_, t_data_decls const& new_) {
-  BOOST_CHECK(compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts),
                                    atermpp::term_list< sort_expression >(new_.sorts)));
 /*  
   if (!compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
