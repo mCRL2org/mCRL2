@@ -351,6 +351,15 @@ void test_constructor()
   data_specification spec1(a);
 }
 
+void test_system_defined()
+{
+  data_specification specification(parse_data_specification(
+    "sort S;"
+    "map f: Set(S);"));
+
+  BOOST_CHECK(boost::distance(specification.sorts()) == 3);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -361,6 +370,7 @@ int test_main(int argc, char** argv)
   test_equations();
   test_is_certainly_finite();
   test_constructor();
+  test_system_defined();
 
   return EXIT_SUCCESS;
 }

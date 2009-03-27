@@ -275,17 +275,17 @@ namespace mcrl2 {
       // sorts
       for (sorts_const_range r(sorts()); !r.empty(); r.advance_begin(1))
       {
-        dependent_sorts.add(r.front());
+        dependent_sorts.add(function_sort(sort_bool_::bool_(), r.front()));
       }
       // constructors
       for (constructors_const_range r(constructors()); !r.empty(); r.advance_begin(1))
       {
-        dependent_sorts.add(r.front().sort().target_sort());
+        dependent_sorts.add(function_sort(sort_bool_::bool_(), r.front().sort()));
       }
       // mappings
       for (mappings_const_range r(mappings()); !r.empty(); r.advance_begin(1))
       {
-        dependent_sorts.add(r.front().sort());
+        dependent_sorts.add(function_sort(sort_bool_::bool_(), r.front().sort()));
       }
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
