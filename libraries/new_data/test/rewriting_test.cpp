@@ -378,16 +378,16 @@ void bag_rewrite_test() {
   data_rewrite_test(R, bagin(nat(), p1, s), true_());
   data_rewrite_test(R, bagin(nat(), p2, s), true_());
 
-  data_rewrite_test(R, count(nat(), p0, s), p0);
-  data_rewrite_test(R, count(nat(), p1, s), p1);
-  data_rewrite_test(R, count(nat(), p2, s), p2);
+  data_rewrite_test(R, bagcount(nat(), p0, s), p0);
+  data_rewrite_test(R, bagcount(nat(), p1, s), p1);
+  data_rewrite_test(R, bagcount(nat(), p2, s), p2);
 
-  data_rewrite_test(R, bagunion_(nat(), s, emptybag(nat())), s);
-  data_rewrite_test(R, bagunion_(nat(), s1, s2), s);
+  data_rewrite_test(R, bagjoin(nat(), s, emptybag(nat())), s);
+  data_rewrite_test(R, bagjoin(nat(), s1, s2), s);
 
-  data_rewrite_test(R, bagintersection(nat(), s, emptybag(nat())), R(emptybag(nat())));
-  data_rewrite_test(R, bagintersection(nat(), s, s1), s1);
-  data_rewrite_test(R, bagintersection(nat(), s, s2), s2);
+  data_rewrite_test(R, bagintersect(nat(), s, emptybag(nat())), R(emptybag(nat())));
+  data_rewrite_test(R, bagintersect(nat(), s, s1), s1);
+  data_rewrite_test(R, bagintersect(nat(), s, s2), s2);
 
   data_rewrite_test(R, bagdifference(nat(), s, emptybag(nat())), s);
   data_rewrite_test(R, bagdifference(nat(), s, s1), s2);
