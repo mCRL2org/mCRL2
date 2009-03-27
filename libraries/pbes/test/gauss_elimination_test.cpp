@@ -26,7 +26,6 @@
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/pbes/pbes2bool.h"
 
-using namespace std;
 using namespace mcrl2;
 
 std::string BES1 =
@@ -163,10 +162,10 @@ const std::string FORMULA  = "[true*]<true*>true";
 void test_abp()
 {
   bool timed = false;
-  specification spec    = lps::mcrl22lps(ABP_SPECIFICATION);
+  lps::specification spec      = lps::mcrl22lps(ABP_SPECIFICATION);
   modal::state_formula formula = modal::detail::mcf2statefrm(FORMULA, spec);
 
-  pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
+  pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   int result = pbes_system::pbes_gauss_elimination(p);
   switch (result) {
     case 0: std::cout << "FALSE" << std::endl; break;
