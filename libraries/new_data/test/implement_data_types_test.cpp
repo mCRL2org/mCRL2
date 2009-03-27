@@ -292,7 +292,6 @@ void old_impl_sort_pos(t_data_decls *p_data_decls)
 
 void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
 {
-  std::clog << "impl_sort_natpair" << std::endl;
   //Declare sort NatPair
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair());
   //Declare constructors for sort NatPair
@@ -375,12 +374,10 @@ void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
          gsMakeDataExprGGDivMod(gsMakeDataExprCNat(p), n, q),
          gsMakeDataExprCPair(gsMakeDataExprDub(t, n), gsMakeDataExprGTESubtB(f, p, q)))
     ), p_data_decls->data_eqns);
-  std::clog << "end impl_sort_natpair" << std::endl;
 }
 
 void old_impl_sort_nat(t_data_decls *p_data_decls, bool recursive)
 {
-  std::clog << "impl_sort_nat" << std::endl;
   //add implementation of sort NatPair, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
     old_impl_sort_nat_pair(p_data_decls);
@@ -817,12 +814,10 @@ void old_impl_sort_nat(t_data_decls *p_data_decls, bool recursive)
 
     impl_sort_pos(p_data_decls, &new_equations);
   }  
-  std::clog << "end impl_sort_nat" << std::endl;
 }
 
 void old_impl_sort_int(t_data_decls *p_data_decls, bool recursive)
 {
-  std::clog << "impl_sort_int" << std::endl;
   //Declare sort Int
   p_data_decls->sorts = ATinsert(p_data_decls->sorts, (ATerm) gsMakeSortIdInt());
   //Declare constructors for sort Int
@@ -1097,7 +1092,6 @@ void old_impl_sort_int(t_data_decls *p_data_decls, bool recursive)
   if (recursive && ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
     old_impl_sort_nat(p_data_decls, recursive);
   }
-  std::clog << "end impl_sort_int" << std::endl;
 }
 
 void old_impl_sort_real(t_data_decls *p_data_decls, bool recursive)
@@ -2788,6 +2782,69 @@ struct equation_smaller {
   }
 };
 
+// compares function symbols of two lists, disregarding duplicates and function
+// order
+template < typename Element >
+bool compare_modulo_order(
+  atermpp::term_list< Element > olde,
+  atermpp::term_list< Element > newe) {
+
+  std::set< Element > oldset(olde.begin(), olde.end());
+  std::set< Element > newset(newe.begin(), newe.end());
+
+  if (oldset != newset) {
+    std::vector< Element > olddiff;
+    std::vector< Element > newdiff;
+
+    std::set_difference(oldset.begin(), oldset.end(), newset.begin(), newset.end(),
+      std::back_insert_iterator< std::vector< Element > >(olddiff));
+
+    std::set_difference(newset.begin(), newset.end(), oldset.begin(), oldset.end(),
+      std::back_insert_iterator< std::vector< Element > >(newdiff));
+
+    std::string old_differences;
+
+    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    for (typename std::vector< Element >::const_iterator i = olddiff.begin(); i != olddiff.end(); ++i) {
+      typename std::vector< Element >::const_iterator j =
+         std::find(newdiff.begin(), newdiff.end(), *i);
+
+      if (j == newdiff.end()) {
+        old_differences.append(mcrl2::core::pp(*i)).append(", ");
+      }
+    }
+
+    if (!old_differences.empty()) {
+      BOOST_CHECK(!old_differences.empty());
+
+      std::clog << "IN OLD BUT NOT NEW " << old_differences.substr(0, old_differences.size() - 2) << std::endl;
+    }
+
+    std::string new_differences;
+
+    // Because the order is not defined on term structure but on ATerm pointer values there always is a difference
+    for (typename std::vector< Element >::const_iterator i = newdiff.begin(); i != newdiff.end(); ++i) {
+      typename std::vector< Element >::const_iterator j =
+         std::find(olddiff.begin(), olddiff.end(), *i);
+
+      if (j == olddiff.end()) {
+        new_differences.append(mcrl2::core::pp(*i)).append(", ");
+      }
+    }
+
+    if (!new_differences.empty()) {
+      BOOST_CHECK(!new_differences.empty());
+
+      std::clog << "IN NEW BUT NOT OLD " << new_differences.substr(0, new_differences.size() - 2) << std::endl;
+    }
+
+    return old_differences.empty() && new_differences.empty();
+  }
+
+  return true;
+}
+
+
 // compares equations of two lists disregarding duplicates, equation order and variable naming
 bool compare_modulo_order_and_alpha(
   atermpp::term_list< mcrl2::new_data::data_equation > olde,
@@ -2841,7 +2898,7 @@ bool compare_modulo_order_and_alpha(
     if (!new_differences.empty()) {
       BOOST_CHECK(!new_differences.empty());
 
-      std::clog << "IN OLD BUT NOT NEW " << new_differences.substr(0, new_differences.size() - 2) << std::endl;
+      std::clog << "IN NEW BUT NOT OLD " << new_differences.substr(0, new_differences.size() - 2) << std::endl;
     }
 
     return old_differences.empty() && new_differences.empty();
@@ -2851,18 +2908,24 @@ bool compare_modulo_order_and_alpha(
 }
 
 void compare(t_data_decls const& old_, t_data_decls const& new_) {
-  BOOST_CHECK(old_.sorts     == new_.sorts);
-  if (old_.sorts != new_.sorts) {
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
+                                   atermpp::term_list< sort_expression >(new_.sorts)));
+  if (!compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
+                            atermpp::term_list< sort_expression >(new_.sorts))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.sorts) << std::endl
               << "NEW " << mcrl2::core::pp(new_.sorts) << std::endl;
   }
-  BOOST_CHECK(old_.cons_ops  == new_.cons_ops);
-  if (old_.cons_ops != new_.cons_ops) {
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
+                                   atermpp::term_list< new_data::function_symbol >(new_.cons_ops)));
+  if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
+                            atermpp::term_list< new_data::function_symbol >(new_.cons_ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.cons_ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.cons_ops) << std::endl;
   }
-  BOOST_CHECK(old_.ops == new_.ops);
-  if (old_.ops != new_.ops) {
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
+                                   atermpp::term_list< new_data::function_symbol >(new_.ops)));
+  if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
+                            atermpp::term_list< new_data::function_symbol >(new_.ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.ops) << std::endl;
   }
@@ -3013,41 +3076,7 @@ void implement_standard_functions_test()
   old_impl_standard_functions_sort(s, &data_decls_old);
   impl_standard_functions_sort(s, &data_decls_new);
 
-  std::clog << "old constructors:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_old.cons_ops).begin(); i != aterm_list(data_decls_old.cons_ops).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-  std::clog << "new constructors:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_new.cons_ops).begin(); i != aterm_list(data_decls_new.cons_ops).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-  std::clog << "old functions:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_old.ops).begin(); i != aterm_list(data_decls_old.ops).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-  std::clog << "new functions:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_new.ops).begin(); i != aterm_list(data_decls_new.ops).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-  std::clog << "old equations:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_old.data_eqns).begin(); i != aterm_list(data_decls_old.data_eqns).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-  std::clog << "new equations:" << std::endl;
-  for(aterm_list::iterator i = aterm_list(data_decls_new.data_eqns).begin(); i != aterm_list(data_decls_new.data_eqns).end(); ++i)
-  {
-    std::clog << *i << std::endl;
-  }
-
-  BOOST_CHECK(data_decls_old.sorts     == data_decls_new.sorts);
-  BOOST_CHECK(data_decls_old.cons_ops  == data_decls_new.cons_ops);
-  BOOST_CHECK(data_decls_old.ops       == data_decls_new.ops);
-  BOOST_CHECK(data_decls_old.data_eqns == data_decls_new.data_eqns);
+  compare(data_decls_old, data_decls_new);
 }
 
 void implement_structured_sort_test()
