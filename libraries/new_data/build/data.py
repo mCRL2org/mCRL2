@@ -25,7 +25,7 @@ def union_by_string(s,t):
 def difference_by_string(s,t):
   result = set([])
   for e in s:
-    if e.to_string() not in map(lambda x: x.to_string(), result):
+    if e.to_string() not in map(lambda x: x.to_string(), t):
       result |= set([e])
   return result
 
@@ -60,8 +60,8 @@ class variable_declaration():
     self.id = id
     self.sort_expression = sort_expr
 
-  def sort_parameters(self):
-    return self.sort_expression.sort_parameters()
+  def sort_parameters(self, sort_spec):
+    return self.sort_expression.sort_parameters(sort_spec)
 
   def to_string(self):
     return "%s : %s" % (self.id.to_string(), self.sort_expression.to_string())
@@ -126,15 +126,15 @@ class function_declaration():
           projection_arguments[a] += [value]
     return projection_arguments
 
-  def sort_parameters(self):
-    return self.sort_expression.sort_parameters()
+  def sort_parameters(self, sort_spec):
+    return self.sort_expression.sort_parameters(sort_spec)
 
   def to_string(self):
     return "%s : %s" % (self.id.to_string(), self.sort_expression.to_string())
 
   def generator_code(self, sort_spec, function_declarations):
     if self.namespace == self.original_namespace and self.namespace == function_declarations.namespace and self.namespace == sort_spec.namespace:
-      sort_params = self.sort_expression.sort_parameters()
+      sort_params = self.sort_expression.sort_parameters(sort_spec)
       # Determine whether this function is overloaded
       functions = filter(lambda x: (x.id.to_string() == self.id.to_string()) and (x.label.to_string() == self.label.to_string()), function_declarations.elements)
       extra_parameters = ""
@@ -170,10 +170,10 @@ class function_declaration_list():
     for e in self.elements:
       e.set_namespace(string)
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
     result = set()
     for e in self.elements:
-      result = union_by_string(result, e.sort_parameters())
+      result = union_by_string(result, e.sort_parameters(sort_spec))
     return result
 
   def find_function(self, function, argumentcount):
@@ -350,18 +350,18 @@ class function_declaration_list():
       def function_application_code(self, sort, polymorphic = False):
         code = ""
         comma = ""
-        if self.sort_expression_list.formal_parameters_code() <> "":
+        if self.sort_expression_list.formal_parameters_code(sort_spec) <> "":
           comma = ", "
         if isinstance(sort, sort_arrow):
           act_sort_params = []
           if polymorphic:
-            params = string.split(sort.domain.actual_parameters_code(), ", ")
+            params = string.split(sort.domain.actual_parameters_code(sort_spec), ", ")
             for p in params:
               act_sort_params += ["%s.sort()" % (p)]
-          if self.sort_expression_list.actual_parameters_code() <> "":
-            act_sort_params = [self.sort_expression_list.actual_parameters_code()] + act_sort_params
+          if self.sort_expression_list.actual_parameters_code(sort_spec) <> "":
+            act_sort_params = [self.sort_expression_list.actual_parameters_code(sort_spec)] + act_sort_params
 
-          code += self.function_application(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), comma, sort.domain.formal_parameters_code(), string.join(act_sort_params, ", "), sort.domain.actual_parameters_code())
+          code += self.function_application(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec), comma, sort.domain.formal_parameters_code(sort_spec), string.join(act_sort_params, ", "), sort.domain.actual_parameters_code(sort_spec))
           code += "\n"
           code += self.function_application_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
@@ -376,7 +376,7 @@ class function_declaration_list():
         code = ""
         if len(self.sort_expression_list.elements) == 1:
           sort = self.sort_expression_list.elements[0] # as len is 1
-          code += self.function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), sort.code(sort_spec))
+          code += self.function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec), sort.code(sort_spec))
           code += "\n"
           code += self.function_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
@@ -420,9 +420,9 @@ class function_declaration_list():
           domain_param_code = map(lambda x: "const sort_expression& %s" % (x.code(sort_spec)), new_domain_sorts)
 
           comma = ""
-          if self.sort_expression_list.formal_parameters_code() <> "":
+          if self.sort_expression_list.formal_parameters_code(sort_spec) <> "":
             comma = ", "
-          code += self.polymorphic_function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(), comma, string.join(domain_param_code, ", "), target_sort, new_sort.code(sort_spec))
+          code += self.polymorphic_function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec), comma, string.join(domain_param_code, ", "), target_sort, new_sort.code(sort_spec))
           code += "\n"
           code += self.function_recogniser(self.id.to_string(), self.label.to_string())
           code += "\n"
@@ -535,28 +535,20 @@ class equation_declaration():
   def code(self, sort_spec, function_spec, variable_spec):
     variables = self.lhs.free_variables()
     variables = union_by_string(variables, self.rhs.free_variables())
+    if self.condition <> None:
+      variables = union_by_string(variables, self.condition.free_variables())
+
+    variables_code = []
+    for v in variables:
+      variables_code += [v.code(sort_spec, function_spec, variable_spec)]
+    if len(variables_code) == 0:
+      variables_string = "variable_list()"
+    else:
+      variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
 
     if self.condition == None:
-      variables_code = []
-      for v in variables:
-        variables_code += [v.code(sort_spec, function_spec, variable_spec)]
-      if len(variables_code) == 0:
-        variables_string = "variable_list()"
-      else:
-        variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
-
       code = "data_equation(%s, %s, %s)" % (variables_string, self.lhs.code(sort_spec, function_spec, variable_spec), self.rhs.code(sort_spec, function_spec, variable_spec))
-
     else:
-      variables = union_by_string(variables, self.condition.free_variables())
-      variables_code = []
-      for v in variables:
-        variables_code += [v.code(sort_spec, function_spec, variable_spec)]
-      if len(variables_code) == 0:
-        variables_string = "variable_list()"
-      else:
-        variables_string = "make_vector(%s)" % (string.join(sorted(variables_code), ", "))
-
       code = "data_equation(%s, %s, %s, %s)" % (variables_string, self.condition.code(sort_spec, function_spec, variable_spec), self.lhs.code(sort_spec, function_spec, variable_spec), self.rhs.code(sort_spec, function_spec, variable_spec))
 
     return "result.push_back(%s);" % (code)
@@ -673,16 +665,25 @@ class data_application(data_expression):
 
   def code(self, sort_spec, function_spec, variable_spec):
     if isinstance(self.head, function_symbol):
-      head_code = self.head.code(sort_spec, function_spec, variable_spec, len(self.arguments.elements))
+      # FIXME: Extremely ugly workaround for set complement
+      if self.head.id.to_string() == "!" and len(self.arguments.elements) == 1 and isinstance(self.arguments.elements[0], data_application) and isinstance(self.arguments.elements[0].head, data_variable):
+        head_code = "sort_bool_::not_()"
+      # FIXME: Extremely ugly workaround for bag join
+      elif self.head.id.to_string() == "+" and len(self.arguments.elements) == 2 and isinstance(self.arguments.elements[0], data_application) and isinstance(self.arguments.elements[0].head, data_variable):
+        head_code = "sort_nat::plus()"
+      else:
+        head_code = self.head.code(sort_spec, function_spec, variable_spec, len(self.arguments.elements))
     else:
       head_code = self.head.code(sort_spec, function_spec, variable_spec)
     # make generated code a bit more readable 
     if isinstance(self.head, function_symbol):
       head_code = head_code[:head_code.find("(")]
-    sort_parameters = self.sort_parameters(sort_spec, function_spec, variable_spec)
     sort_parameters_code = []
-    for s in sort_parameters:
-      sort_parameters_code += [s.code(sort_spec)]
+      # FIXME: Extremely ugly workaround for set complement / bag joint
+    if isinstance(self.head, function_symbol) and (head_code <> "sort_bool_::not_" and head_code <> "sort_nat::plus"):
+      sort_parameters = self.sort_parameters(sort_spec, function_spec, variable_spec)
+      for s in sort_parameters:
+        sort_parameters_code += [s.code(sort_spec)]
     sort_parameters_code += [self.arguments.code(sort_spec, function_spec, variable_spec)]
 
     return "%s(%s)" % (head_code, string.join(sort_parameters_code, ", "))
@@ -715,7 +716,7 @@ class data_variable(data_expression):
     self.id = id
 
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    return variable_spec.find_variable(self).sort_expression.sort_parameters()
+    return variable_spec.find_variable(self).sort_expression.sort_parameters(sort_spec)
 
   def determinise_variable_or_function_symbol(self, function_spec, variable_spec):
     return self
@@ -745,7 +746,7 @@ class function_symbol(data_expression):
     self.id = id
 
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    return function_spec.find_function(self, -1).sort_expression.sort_parameters()
+    return function_spec.find_function(self, -1).sort_expression.sort_parameters(sort_spec)
 
   def determinise_variable_or_function_symbol(self, function_spec, variable_spec):
     return self
@@ -769,7 +770,7 @@ class function_symbol(data_expression):
   def code(self, sort_spec, function_spec, variable_spec, argumentcount = -1):
     f = function_spec.find_function(self, argumentcount)
     sort_parameters_code = []
-    for s in f.sort_parameters():
+    for s in f.sort_parameters(sort_spec):
       sort_parameters_code += [s.code(sort_spec)]
     if f.namespace == function_spec.namespace or is_standard_function(f.label.to_string()):
       return "%s(%s)" % (f.label.to_string(), string.join(sort_parameters_code, ", "))
@@ -784,7 +785,7 @@ class lambda_abstraction(data_expression):
     self.expression = expression
 
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    result = self.variable_declaration.sort_parameters()
+    result = self.variable_declaration.sort_parameters(sort_parameters)
     result = union_by_string(result, self.expression.sort_parameters(sort_spec, function_spec, variable_spec))
     return result
 
@@ -794,7 +795,7 @@ class lambda_abstraction(data_expression):
 
   def free_variables(self):
     result = self.expression.free_variables()
-    result = difference_by_string(result, data_variable(self.variable_declaration.id))
+    result = difference_by_string(result, set([data_variable(self.variable_declaration.id)]))
     return result
 
   def has_lambda(self):
@@ -820,7 +821,7 @@ class forall(data_expression):
     self.expression = expression
     
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    result = self.variable_declaration.sort_parameters()
+    result = self.variable_declaration.sort_parameters(sort_spec)
     result = union_by_string(result, self.expression.sort_parameters(sort_spec, function_spec, variable_spec))
     return result
 
@@ -830,7 +831,7 @@ class forall(data_expression):
 
   def free_variables(self):
     result = self.expression.free_variables()
-    result = difference_by_string(result, data_variable(self.variable_declaration.id))
+    result = difference_by_string(result, set([data_variable(self.variable_declaration.id)]))
     return result
 
   def has_lambda(self):
@@ -856,7 +857,7 @@ class exists(data_expression):
     self.expression = expression
 
   def sort_parameters(self, sort_spec, function_spec, variable_spec):
-    result = self.variable_declaration.sort_parameters()
+    result = self.variable_declaration.sort_parameters(sort_spec)
     result = union_by_string(result, self.expression.sort_parameters(sort_spec, function_spec, variable_spec))
     return result
 
@@ -866,7 +867,7 @@ class exists(data_expression):
 
   def free_variables(self):
     result = self.expression.free_variables()
-    result = difference_by_string(result, data_variable(self.variable_declaration.id))
+    result = difference_by_string(result, set([data_variable(self.variable_declaration.id)]))
     return result
 
   def has_lambda(self):
@@ -943,23 +944,23 @@ class sort_expression_list():
     assert(isinstance(element, sort_expression))
     self.elements += [element]
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
     result = set()
     for e in self.elements:
-      result = union_by_string(result, e.sort_parameters())
+      result = union_by_string(result, e.sort_parameters(sort_spec))
     return result
 
-  def formal_parameters_code(self):
+  def formal_parameters_code(self, sort_spec):
     code = ""
-    for p in self.sort_parameters():
+    for p in self.sort_parameters(sort_spec):
       if code != "":
         code += ", "
       code += "%s" % (p.formal_parameter_code())
     return code
 
-  def actual_parameters_code(self):
+  def actual_parameters_code(self, sort_spec):
     code = ""
-    for p in self.sort_parameters():
+    for p in self.sort_parameters(sort_spec):
       if code != "":
         code += ", "
       code += "%s" % (p.actual_parameter_code())
@@ -989,7 +990,7 @@ class sort_expression():
   def to_string(self):
     return ""
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
     return set()
 #
 #  def formal_parameter_code(self):
@@ -1006,7 +1007,9 @@ class sort_identifier(sort_expression):
     assert(isinstance(id, identifier))
     self.name = id
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
+    if any(map(lambda x: x.to_string() == self.to_string(), sort_spec.sort_parameters())):
+      return set([self])
     return set()
 
   def to_string(self):
@@ -1051,16 +1054,16 @@ class domain(sort_expression):
         arguments += [(e[1].to_string(), i)]
       return arguments
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
     result = set()
     for e in self.elements:
       if self.labelled:
-        result = union_by_string(result, e[0].sort_parameters())
+        result = union_by_string(result, e[0].sort_parameters(sort_spec))
       else:
-        result = union_by_string(result, e.sort_parameters())
+        result = union_by_string(result, e.sort_parameters(sort_spec))
     return result
 
-  def formal_parameters_code(self):
+  def formal_parameters_code(self, sort_spec):
     index = 0
     parameters = []
     for e in self.elements:
@@ -1068,7 +1071,7 @@ class domain(sort_expression):
       index += 1
     return string.join(parameters, ", ")
 
-  def actual_parameters_code(self):
+  def actual_parameters_code(self, sort_spec):
     index = 0
     parameters = []
     for e in self.elements:
@@ -1115,9 +1118,9 @@ class sort_arrow(sort_expression):
     self.domain = dom
     self.codomain = codom
 
-  def sort_parameters(self):
-    result = self.codomain.sort_parameters()
-    result = union_by_string(result, self.domain.sort_parameters())
+  def sort_parameters(self, sort_spec):
+    result = self.codomain.sort_parameters(sort_spec)
+    result = union_by_string(result, self.domain.sort_parameters(sort_spec))
     return result
 
   def to_string(self):
@@ -1134,7 +1137,7 @@ class sort_container(sort_expression):
     self.container = container
     self.element_sort = element_sort
 
-  def sort_parameters(self):
+  def sort_parameters(self, sort_spec):
     return set([self.element_sort])
 
   def to_string(self):
@@ -1185,21 +1188,22 @@ class structured_sort_declaration():
 
   def to_string(self):
     if self.arguments == None:
-      return "%s" % (id.to_string())
+      return "%s" % (self.id.to_string())
     else:
-      return "%s(%s)" % (id.to_string(), arguments.to_string())
+      return "%s(%s)" % (self.id.to_string(), self.arguments.to_string())
 
   def struct_constructor_arguments(self, sort_spec):
-    if self.arguments == None:
-      return "structured_constructor_argument_vector()"
-    else:
-      code = []
-      for a in self.arguments.elements:
-        code += ["structured_sort_constructor_argument(\"%s\", %s)" % (a[1].to_string(), a[0].code(sort_spec))]
-      return "make_vector(%s)" % (string.join(code, ", "))
+    assert self.arguments <> None
+    code = []
+    for a in self.arguments.elements:
+      code += ["structured_sort_constructor_argument(\"%s\", %s)" % (a[1].to_string(), a[0].code(sort_spec))]
+    return "make_vector(%s)" % (string.join(code, ", "))
 
   def code(self, sort_spec):
-    return "structured_sort_constructor(\"%s\", %s)" % (self.label.to_string(), self.struct_constructor_arguments(sort_spec))
+    if self.arguments == None:
+      return "structured_sort_constructor(\"%s\", \"%s\")" % (self.id.to_string(), self.label.to_string())
+    else:
+      return "structured_sort_constructor(\"%s\", boost::make_iterator_range(%s), \"%s\")" % (self.id.to_string(), self.struct_constructor_arguments(sort_spec), self.label.to_string())
 
 class structured_sort_declaration_list():
   def __init__(self, elements):
@@ -1255,7 +1259,7 @@ class structured_sort_specification():
     self.elements.set_namespace(string)
 
   def to_string(self):
-    return "struct %s" % (elements.to_string())
+    return "struct %s" % (self.elements.to_string())
 
   def code(self, sort_spec):
     return self.elements.code(sort_spec)
@@ -1270,6 +1274,12 @@ class sort_declaration():
     self.alias = alias
     self.namespace = ""
     self.original_namespace = ""
+
+  def sort_parameters(self):
+    if isinstance(self.sort_expression, sort_container):
+      return set([self.sort_expression.element_sort])
+    else:
+      return set()
 
   def merge_structured_sort(self, function_spec):
     if self.alias <> None:
@@ -1288,6 +1298,9 @@ class sort_declaration():
 
   def defines_container(self):
     return isinstance(self.sort_expression, sort_container)
+
+  def defines_struct(self):
+    return self.alias <> None
 
   def to_string(self):
     if self.alias == None:
@@ -1309,7 +1322,8 @@ class sort_declaration():
       if isinstance(self.sort_expression, sort_container):
         param = self.sort_expression.element_sort.to_string().lower()
       sort = "%s(%s)" % (self.label.to_string(), param)
-      return "        result = result + detail::%s_struct(%s).constructor_functions(%s);\n" % (self.label.to_string(), param, sort)
+      result = "        function_symbol_vector %s_constructors = detail::%s_struct(%s).constructor_functions(%s);\n" % (self.label.to_string(), self.label.to_string(), param, sort)
+      return result + "        result.insert(result.end(), %s_constructors.begin(), %s_constructors.end());\n" % (self.label.to_string(), self.label.to_string())
 
   def structured_sort_equation_code(self):
     if self.alias == None:
@@ -1319,7 +1333,8 @@ class sort_declaration():
       if isinstance(self.sort_expression, sort_container):
         param = self.sort_expression.element_sort.to_string().lower()
       sort = "%s(%s)" % (self.label.to_string(), param)
-      return "        result = result + detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label.to_string(), param, sort)
+      result = "        data_equation_vector %s_equations = detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label.to_string(), self.label.to_string(), param, sort)
+      return result + "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label.to_string(), self.label.to_string())
 
   def sort_expression_constructors(self, id, label):
     code = ""
@@ -1391,11 +1406,12 @@ class sort_declaration():
       else:
         param = ""
       code += "        /// \\ret The structured sort representing %s\n" % (escape(self.label.to_string()))
-      code += "        structured_sort %s_struct(%s)\n" % (self.label.to_string(), param)
+      code += "        inline\n"
+      code += "        structured_sort %s_struct(const sort_expression& %s)\n" % (self.label.to_string(), param)
       code += "        {\n"
       code += "          structured_sort_constructor_vector constructors;\n"
       code += "%s" % (self.alias.code(sort_spec))
-      code += "          structured_sort(constructors);\n"
+      code += "          return structured_sort(constructors);\n"
       code += "        }\n\n"
       code += "      } // namespace detail\n"
     return code
@@ -1406,6 +1422,12 @@ class sort_declaration_list():
     self.elements = elements
     self.namespace = ""
     self.original_namespace = ""
+
+  def sort_parameters(self):
+    result = set()
+    for e in self.elements:
+      result = union_by_string(result, e.sort_parameters())
+    return result
 
   def merge_structured_sorts(self, function_spec):
     for e in self.elements:
@@ -1432,6 +1454,9 @@ class sort_declaration_list():
 
   def defines_container(self):
     return any(map(lambda x: x.defines_container(), self.elements))
+
+  def defines_struct(self):
+    return any(map(lambda x: x.defines_struct(), self.elements))
 
   def to_string(self):
     s = ""
@@ -1526,12 +1551,12 @@ class mapping_specification():
 
   def code(self, sort_spec):
     assert(isinstance(sort_spec, sort_specification))
-    sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters()), ", ")
+    sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters(sort_spec)), ", ")
     assert(self.namespace == sort_spec.namespace)
     code = ""
     code += self.declarations.code(sort_spec)
     code += "      /// \\brief Give all system defined mappings for %s\n" % (escape(self.namespace))
-    for s in self.declarations.sort_parameters():
+    for s in self.declarations.sort_parameters(sort_spec):
       code += "      /// \\param %s A sort expression\n" % (escape(s.to_string().lower()))
     code += "      /// \\return All system defined mappings for %s\n" % (escape(self.namespace))
     code += "      inline\n"
@@ -1567,11 +1592,11 @@ class constructor_specification():
 
   def code(self, sort_spec):
     assert(isinstance(sort_spec, sort_specification))
-    sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters()), ", ")
+    sort_parameters = string.join(map(lambda x: "const sort_expression& %s" % (x.to_string().lower()), self.declarations.sort_parameters(sort_spec)), ", ")
     assert(self.namespace == sort_spec.namespace)
     code  = self.declarations.code(sort_spec)
     code += "      /// \\brief Give all system defined constructors for %s\n" % (escape(self.namespace))
-    for s in self.declarations.sort_parameters():
+    for s in self.declarations.sort_parameters(sort_spec):
       code += "      /// \\param %s A sort expression\n" % (escape(s.to_string().lower()))
     code += "      /// \\return All system defined constructors for %s\n" % (escape(self.namespace))
     code += "      inline\n"
@@ -1635,6 +1660,9 @@ class sort_specification():
     self.namespace = ""
     self.original_namespace = ""
 
+  def sort_parameters(self):
+    return self.declarations.sort_parameters()
+
   def is_alias(self, sort_expr):
     assert(isinstance(sort_expr, sort_expression))
     return self.declarations.is_alias(sort_expr)
@@ -1663,6 +1691,9 @@ class sort_specification():
 
   def defines_container(self):
     return self.declarations.defines_container()
+
+  def defines_struct(self):
+    return self.declarations.defines_struct()
 
   def merge_specification(self, spec):
     self.declarations.merge_declarations(spec.declarations)
@@ -1708,6 +1739,9 @@ class specification():
 
   def defines_container(self):
     return self.sort_specification.defines_container()
+
+  def defines_struct(self):
+    return self.sort_specification.defines_struct()
 
   def set_namespace(self):
     s = self.sort_specification.declarations.elements[0].label.to_string()
@@ -1755,6 +1789,8 @@ class specification():
       code += "#include \"mcrl2/new_data/exists.h\"\n"
     if self.defines_container():
       code += "#include \"mcrl2/new_data/container_sort.h\"\n"
+    if self.defines_struct():
+      code += "#include \"mcrl2/new_data/structured_sort.h\"\n"
     if self.includes != None:
       code += self.includes.code()
     code += "\n"

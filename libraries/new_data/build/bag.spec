@@ -1,34 +1,72 @@
-#include bool.spec
 #include nat.spec
+#include fbag.spec
+#include fset.spec
 #include set.spec
 
 sort Bag(S) <"bag">;
 
-map @bag <"bag_comprehension"> : (S -> Nat) <"arg"> -> Bag(S);
-    {} <"emptybag"> : Bag(S);
-    count <"count"> : S <"left"> # Bag(S) <"right"> -> Nat;
-    in <"bagin"> : S <"left"> # Bag(S) <"right"> -> Bool;
-    + <"bagunion_"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    - <"bagdifference"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    * <"bagintersection"> : Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
-    Bag2Set <"bag2set"> : Bag(S) <"arg"> -> Set(S);
-    Set2Bag <"set2bag"> : Set(S) <"arg"> -> Bag(S);
+map @bag <"bagconstructor">: (S -> Nat) <"left"> # FBag(S) <"right"> -> Bag(S);
+    {} <"emptybag">: Bag(S);
+    @bagfbag <"bagfbag">: FBag(S) <"arg"> -> Bag(S);
+    @bagcomp <"bagcomprehension">: (S -> Nat) <"arg"> -> Bag(S);
+    count <"bagcount">: S <"left"> # Bag(S) <"right"> -> Nat;
+    in <"bagin">: S <"left"> # Bag(S) <"right"> -> Bool;
+    + <"bagjoin">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    * <"bagintersect">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    - <"bagdifference">: Bag(S) <"left"> # Bag(S) <"right"> -> Bag(S);
+    Bag2Set <"bag2set">: Bag(S) <"arg"> -> Set(S);
+    Set2Bag <"set2bag">: Set(S) <"arg"> -> Bag(S);
+    @zero_ <"zero_function">: S <"arg"> -> Nat;
+    @one_ <"one_function">: S <"arg"> -> Nat;
+    @add_ <"add_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
+    @min_ <"min_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
+    @monus_ <"monus_function">: (S -> Nat) <"left"> # (S -> Nat) <"right"> -> S -> Nat;
+    @Nat2Bool_ <"nat2bool_function">: (S -> Nat) <"arg"> -> S -> Bool;
+    @Bool2Nat_ <"bool2nat_function">: (S -> Bool) <"arg"> -> S -> Nat;
 
-var d:S;
-    f:S->Nat;
-    g:S->Nat;
-    s:Bag(S);
-    t:Bag(S);
-    u:Set(S);
-eqn ==(@bag(f), @bag(g)) = ==(f, g);
-    {} = @bag(lambda(x:S, @c0));
-    count(d, @bag(f)) = f(d);
-    in(d,s) = >(count(d,s), @c0);
-    <=(@bag(f), @bag(g)) = forall(x:S, <=(f(x), g(x)));
-    <(s,t) = &&(<=(s,t), !=(s,t));
-    +(@bag(f),@bag(g)) = @bag(lambda(x:S, +(f(x),g(x))));
-    -(@bag(f),@bag(g)) = @bag(lambda(y:S, (lambda(m:Nat, lambda(n:Nat, if(>(m,n), @gtesubt(m,n),@c0)))(f(y)))(g(y))));
-    *(@bag(f),@bag(g)) = @bag(lambda(x:S, min(f(x),g(x))));
-    Bag2Set(s) = @set(lambda(x:S, in(x,s)));
-    Set2Bag(u) = @bag(lambda(x:S, if(in(x,u), @cNat(@c1), @c0)));
+var b: FBag(S);
+    c: FBag(S);
+    e: S;
+    f: S -> Nat;
+    g: S -> Nat;
+    h: S -> Bool;
+    s: FSet(S);
+    x: Bag(S);
+    y: Bag(S);
 
+eqn {}  =  @bag(@zero_, @fbag_empty);
+    @bagfbag(b)  =  @bag(@zero_, b);
+    @bagcomp(f)  =  @bag(f, @fbag_empty);
+    count(e, @bag(f, b))  =  @swap_zero(f(e), @fbag_count(e, b));
+    in(e, x)  =  >(count(e, x), @c0);
+    ==(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  ==(b, c);
+    !=(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c))));
+    <(x, y)  =  &&(<=(x, y), !=(x, y));
+    ==(f, g)  ->  <=(@bag(f, b), @bag(g, c))  =  @fbag_lte(f, b, c);
+    !=(f, g)  ->  <=(@bag(f, b), @bag(g, c))  =  forall(d:S, <=(count(d, @bag(f,b)), count(d, @bag(g,c))));
+    +(@bag(f, b), @bag(g, c))  =  @bag(@add_(f, g), @fbag_join(f, g, b, c));
+    *(@bag(f, b), @bag(g, c))  =  @bag(@min_(f, g), @fbag_inter(f, g, b, c));
+    -(@bag(f, b), @bag(g, c))  =  @bag(@monus_(f, g), @fbag_diff(f, g, b, c));
+    Bag2Set(@bag(f, b))  =  @set(@Nat2Bool_(f), @fbag2fset(f, b));
+    Set2Bag(@set(h, s))  =  @bag(@Bool2Nat_(h), @fset2fbag(s));
+    @zero_(e)  =  @c0;
+    @one_(e)  =  @cNat(@c1);
+    ==(@zero_, @one_)  =  false;
+    ==(@one_, @zero_)  =  false;
+    @add_(f, g)(e)  =  +(f(e), g(e));
+    @add_(f, @zero_)  =  f;
+    @add_(@zero_, f)  =  f;
+    @min_(f, g)(e)  =  min(f(e), g(e));
+    @min_(f, f)  =  f;
+    @min_(f, @zero_)  =  @zero_;
+    @min_(@zero_, f)  =  @zero_;
+    @monus_(f, g)(e)  =  @monus(f(e), g(e));
+    @monus_(f, f)  =  @zero_;
+    @monus_(f, @zero_)  =  f;
+    @monus_(@zero_, f)  =  @zero_;
+    @Nat2Bool_(f)(e)  =  >(f(e), @c0);
+    @Nat2Bool_(@zero_)  =  @false_;
+    @Nat2Bool_(@one_)  =  @true_;
+    @Bool2Nat_(h)(e)  =  if(h(e), @cNat(@c1), @c0);
+    @Bool2Nat_(@false_)  =  @zero_;
+    @Bool2Nat_(@true_)  =  @one_;

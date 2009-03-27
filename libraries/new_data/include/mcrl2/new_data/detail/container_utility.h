@@ -374,6 +374,75 @@ namespace mcrl2 {
       return v;
     }
 
+    /// \brief Constructs a vector with element type T of four arguments.
+    ///
+    /// \param[in] t1 The first element of the vector.
+    /// \param[in] t2 The second element of the vector.
+    /// \param[in] t3 The third element of the vector.
+    /// \param[in] t4 The fourth element of the vector.
+    /// \param[in] t5 The fifth element of the vector.
+    /// \param[in] t6 The sixth element of the vector.
+    template <typename T>
+    atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6)
+    {
+      atermpp::vector<T> v;
+      v.push_back(t1);
+      v.push_back(t2);
+      v.push_back(t3);
+      v.push_back(t4);
+      v.push_back(t5);
+      v.push_back(t6);
+      return v;
+    }
+
+    /// \brief Constructs a vector with element type T of four arguments.
+    ///
+    /// \param[in] t1 The first element of the vector.
+    /// \param[in] t2 The second element of the vector.
+    /// \param[in] t3 The third element of the vector.
+    /// \param[in] t4 The fourth element of the vector.
+    /// \param[in] t5 The fifth element of the vector.
+    /// \param[in] t6 The sixth element of the vector.
+    /// \param[in] t7 The seventh element of the vector.
+    template <typename T>
+    atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7)
+    {
+      atermpp::vector<T> v;
+      v.push_back(t1);
+      v.push_back(t2);
+      v.push_back(t3);
+      v.push_back(t4);
+      v.push_back(t5);
+      v.push_back(t6);
+      v.push_back(t7);
+      return v;
+    }
+
+    /// \brief Constructs a vector with element type T of four arguments.
+    ///
+    /// \param[in] t1 The first element of the vector.
+    /// \param[in] t2 The second element of the vector.
+    /// \param[in] t3 The third element of the vector.
+    /// \param[in] t4 The fourth element of the vector.
+    /// \param[in] t5 The fifth element of the vector.
+    /// \param[in] t6 The sixth element of the vector.
+    /// \param[in] t7 The seventh element of the vector.
+    /// \param[in] t8 The eighth element of the vector.
+    template <typename T>
+    atermpp::vector<T> make_vector(const T& t1, const T& t2, const T& t3, const T& t4, const T& t5, const T& t6, const T& t7, const T& t8)
+    {
+      atermpp::vector<T> v;
+      v.push_back(t1);
+      v.push_back(t2);
+      v.push_back(t3);
+      v.push_back(t4);
+      v.push_back(t5);
+      v.push_back(t6);
+      v.push_back(t7);
+      v.push_back(t8);
+      return v;
+    }
+
   } // namespace new_data
 
 } // namespace mcrl2

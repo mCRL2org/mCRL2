@@ -49,9 +49,17 @@ namespace mcrl2 {
           {
             result = core::detail::gsMakeSortSet();
           }
+          else if (s == "fset")
+          {
+            result = core::detail::gsMakeSortFSet();
+          }
           else if (s == "bag")
           {
             result = core::detail::gsMakeSortBag();
+          }
+          else if (s == "fbag")
+          {
+            result = core::detail::gsMakeSortFBag();
           }
           else
           {
@@ -79,9 +87,17 @@ namespace mcrl2 {
           {
             result = "set_";
           }
+          else if (core::detail::gsIsSortFSet(s))
+          {
+            result = "fset";
+          }
           else if (core::detail::gsIsSortBag(s))
           {
             result = "bag";
+          }
+          else if (core::detail::gsIsSortFBag(s))
+          {
+            result = "fbag";
           }
           else
           {

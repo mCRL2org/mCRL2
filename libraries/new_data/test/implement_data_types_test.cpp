@@ -72,6 +72,10 @@ ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
     sort_expr);
 }
 
+// Prototype
+void old_impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true);
+
 /* Old new_data implementation functions, plainly copied over */
 void old_impl_sort_bool(t_data_decls *p_data_decls)
 {
@@ -1595,7 +1599,7 @@ void old_impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_fset_id,
       (ATerm) gsMakeStructProj(gsMakeNil(), sort_fset_id)
       ), gsMakeNil())
   ));
-  impl_sort_struct(sort_struct, sort_fset_id, p_substs, p_data_decls);
+  old_impl_sort_struct(sort_struct, sort_fset_id, p_substs, p_data_decls);
 
   //declare operations for sort sort_fset_id
   ATermList new_ops = ATmakeList(6,
@@ -2137,7 +2141,7 @@ void old_impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id,
       (ATerm) gsMakeStructProj(gsMakeNil(), sort_fbag_id)
       ), gsMakeNil())
   ));
-  impl_sort_struct(sort_struct, sort_fbag_id, p_substs, p_data_decls);
+  old_impl_sort_struct(sort_struct, sort_fbag_id, p_substs, p_data_decls);
 
   //declare operations for sort sort_fbag_id
   ATermList new_ops = ATmakeList(10,
@@ -2508,12 +2512,10 @@ void old_impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls
     ), p_data_decls->data_eqns);
 }
 
-ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
-     ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true)
+void old_impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
+  ATermList *p_substs, t_data_decls *p_data_decls, bool recursive)
 {
   assert(gsIsSortStruct(sort_struct));
-  //declare fresh sort identifier for sort_struct 
-  ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortStructPrefix(), (ATerm) p_data_decls->sorts, false));
   assert(gsIsSortId(sort_id));
   assert(gsCount((ATerm) sort_id, (ATerm) p_data_decls->sorts) == 0);
   //declare sort sort_id as representative of sort sort_struct
@@ -2584,7 +2586,7 @@ ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
   //add declarations for the constructor, projection and recogniser operations
   p_data_decls->cons_ops = ATconcat(cons_ops, p_data_decls->cons_ops);
   p_data_decls->ops = ATconcat(ATconcat(proj_ops, rec_ops), p_data_decls->ops);
-  //Declare new_data equations for structured sort
+  //Declare data equations for structured sort
   // XXX more intelligent variable names would be nice
   ATermList vars = ATmakeList3(
     (ATerm) gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool()),
@@ -2629,7 +2631,7 @@ ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
       rec_eqns = ATinsert(rec_eqns,
          (ATerm) gsMakeDataEqn(args, gsMakeNil(),
            gsMakeDataAppl1(rec_op, gsMakeDataApplList(cons_op, args)),
-           (ATisEqual(cons_op, rec_cons_op)) ? gsMakeDataExprTrue() : gsMakeDataExprFalse()));
+           gsMakeDataExprBool_bool(ATisEqual(cons_op, rec_cons_op))));
     }
   }
   //Create equations for ==, <, and <= for every pair of constructors
@@ -2647,7 +2649,7 @@ ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
       // Create (fresh) variable arguments for constructor cons_op_lhs
       ATermList args_lhs = create_op_id_args(cons_op_lhs, &vars, (ATerm) id_ctx);
       // Create (fresh) variable arguments for constructor cons_op_rhs,
-      // where we make sure that we don't use the vars that occur in args_lhs 
+      // where we make sure that we don't use the vars that occur in args_lhs
       ATermList tmpvars = subtract_list(vars, args_lhs);
       ATermList args_rhs = create_op_id_args(cons_op_rhs, &tmpvars, (ATerm) ATconcat(args_lhs, id_ctx));
       // Update vars
@@ -2662,8 +2664,8 @@ ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
         // - rhs for c_i <  d_i: i < j
         // - rhs for c_i <= d_i: i < j
         eq_rhs  = gsMakeDataExprFalse();
-        lt_rhs  = (i < j) ? gsMakeDataExprTrue() : gsMakeDataExprFalse();
-        lte_rhs = lt_rhs;
+        lt_rhs  = gsMakeDataExprBool_bool(i < j);
+        lte_rhs = gsMakeDataExprBool_bool(i < j);
       } else { // i==j
         // Constructors are the same
         if (ATisEmpty(args_lhs)) {
@@ -2724,8 +2726,6 @@ ATermAppl old_impl_sort_struct(ATermAppl sort_struct,
     ATconcat(ATreverse(rec_eqns),
       p_data_decls->data_eqns
     )))));
-
-  return sort_id;
 }
 
 bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2) {
@@ -2873,7 +2873,8 @@ bool compare_modulo_order_and_alpha(
          std::find_if(newdiff.begin(), newdiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
       if (j == newdiff.end()) {
-        old_differences.append(mcrl2::core::pp(*i)).append(", ");
+        old_differences.append(mcrl2::core::pp(*i)).append(",\n");
+        old_differences.append(i->to_string()).append(",\n");
       }
     }
 
@@ -2891,7 +2892,8 @@ bool compare_modulo_order_and_alpha(
          std::find_if(olddiff.begin(), olddiff.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
       if (j == olddiff.end()) {
-        new_differences.append(mcrl2::core::pp(*i)).append(", ");
+        new_differences.append(mcrl2::core::pp(*i)).append(",\n");
+        new_differences.append(i->to_string()).append(",\n");
       }
     }
 
@@ -2910,30 +2912,38 @@ bool compare_modulo_order_and_alpha(
 void compare(t_data_decls const& old_, t_data_decls const& new_) {
   BOOST_CHECK(compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
                                    atermpp::term_list< sort_expression >(new_.sorts)));
+/*  
   if (!compare_modulo_order(atermpp::term_list< sort_expression >(old_.sorts), 
                             atermpp::term_list< sort_expression >(new_.sorts))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.sorts) << std::endl
               << "NEW " << mcrl2::core::pp(new_.sorts) << std::endl;
   }
+*/
   BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
                                    atermpp::term_list< new_data::function_symbol >(new_.cons_ops)));
+/*
   if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
                             atermpp::term_list< new_data::function_symbol >(new_.cons_ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.cons_ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.cons_ops) << std::endl;
   }
+*/
   BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
                                    atermpp::term_list< new_data::function_symbol >(new_.ops)));
+/*
   if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
                             atermpp::term_list< new_data::function_symbol >(new_.ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.ops) << std::endl;
   }
+*/
   BOOST_CHECK(compare_modulo_order_and_alpha(old_.data_eqns, new_.data_eqns));
+/*
   if (!compare_modulo_order_and_alpha(old_.data_eqns, new_.data_eqns)) {
     std::clog << "OLD " << mcrl2::core::pp(old_.data_eqns) << std::endl
               << "NEW " << mcrl2::core::pp(new_.data_eqns) << std::endl;
   }
+*/
 }
 
 
@@ -3058,8 +3068,8 @@ void implement_bag_test()
   basic_sort s("S");
   container_sort bs(new_data::sort_bag::bag(s));
   ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortBagPrefix(), atermpp::aterm(bs), false));
-  old_impl_sort_bag(bs, sort_id, &old_substs, &data_decls_old);
   ATermList equations = ATmakeList0();
+  old_impl_sort_bag(bs, sort_id, &old_substs, &data_decls_old);
   impl_sort_bag(bs, sort_id, &new_substs, &data_decls_new, &equations);
 
   std::clog << "== BAG COMPARISON ==" << std::endl;
@@ -3076,6 +3086,7 @@ void implement_standard_functions_test()
   old_impl_standard_functions_sort(s, &data_decls_old);
   impl_standard_functions_sort(s, &data_decls_new);
 
+  std::clog << "== STANDARD FUNCTIONS COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
 }
 
@@ -3116,9 +3127,10 @@ void implement_structured_sort_test()
      boost::make_iterator_range(arguments.begin() + 1, arguments.end()), "is_c"));
 
   new_data::structured_sort ls(boost::make_iterator_range(constructors));
-  old_impl_sort_struct(ls, &old_substs, &data_decls_old);
-  ATermList equations = ATmakeList0();
-  impl_exprs_appl(ls, &new_substs, &data_decls_new, &equations);
+  ATermAppl sort_id = make_fresh_struct_sort_id((ATerm) ATmakeList0());
+
+  old_impl_sort_struct(ls, sort_id, &old_substs, &data_decls_old);
+  impl_sort_struct(ls, sort_id, &new_substs, &data_decls_new);
 
   std::clog << "== STRUCTURED SORT COMPARISON ==" << std::endl;
   compare(data_decls_old, data_decls_new);
