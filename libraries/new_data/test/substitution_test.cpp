@@ -37,6 +37,7 @@ int test_main(int a, char**aa) {
   using mcrl2::new_data::concepts::MutableSubstitution;
 
   BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, data_expression > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, variable > >));
 
   mutable_map_substitution< variable, data_expression > s;
 

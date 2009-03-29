@@ -358,6 +358,34 @@ void test_system_defined()
     "map f: Set(S);"));
 
   BOOST_CHECK(boost::distance(specification.sorts()) == 3);
+
+  specification = parse_data_specification(
+    "sort D = Set(Nat);"
+    "sort E = D;"
+    "sort F = E;");
+
+  BOOST_CHECK(sort_set_::set__generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
+  BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
+  BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(specification.find_referenced_sort(basic_sort("D"))));
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
+  BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
+  BOOST_CHECK(data_specification(detail::data_specification_to_aterm_data_spec(specification)) == specification);
+
+  specification = parse_data_specification(
+    "sort D = struct d(bla : Bool)?is_d;"
+    "sort E = D;"
+    "sort F = E;");
+
+  BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
+  BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
+  BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(specification.find_referenced_sort(basic_sort("D"))));
+  BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
+  BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
+  BOOST_CHECK(data_specification(detail::data_specification_to_aterm_data_spec(specification)) == specification);
 }
 
 int test_main(int argc, char** argv)

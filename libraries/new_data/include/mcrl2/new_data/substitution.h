@@ -12,22 +12,10 @@
 #ifndef _MCRL2_NEW_DATA_SUBSTITUTION__HPP_
 #define _MCRL2_NEW_DATA_SUBSTITUTION__HPP_
 
-#include <map>
-#include <set>
-#include <stack>
-#include <vector>
-#include <memory>
-#include <functional>
-
-#include "boost/assert.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/add_cv.hpp"
-#include "boost/type_traits/add_pointer.hpp"
-#include "boost/type_traits/is_reference.hpp"
+#include "boost/type_traits/remove_cv.hpp"
 #include "boost/type_traits/is_same.hpp"
-#include "boost/range/iterator_range.hpp"
-#include "boost/iterator/indirect_iterator.hpp"
 
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/new_data/expression_traits.h"
 #include "mcrl2/new_data/replace.h"
 
@@ -37,6 +25,33 @@ namespace mcrl2 {
     // declare for use as template argument defaults
     class data_expression;
     class variable;
+
+    /// \brief INTERNAL_DOCS
+    namespace detail {
+      class inaccessible {
+
+        inaccessible() { }
+      };
+
+      template < bool Condition, typename Result >
+      struct choose_expression_type_or_inaccessible {
+        typedef inaccessible type;
+      };
+
+      template < typename Result >
+      struct choose_expression_type_or_inaccessible< false, Result > {
+        typedef Result type;
+      };
+
+      template < typename Variable, typename Expression >
+      struct expression_type_or_inaccessible {
+
+        typedef typename choose_expression_type_or_inaccessible< boost::is_same<
+            typename boost::remove_cv< Variable >::type,
+            typename boost::remove_cv< Expression >::type >::value, Expression >::type type;
+      };
+    }
+    /// \endcond
 
     /// \brief Procedure to be used with substitution to apply textual substitution an expression
     ///
@@ -85,23 +100,23 @@ namespace mcrl2 {
         typedef Expression                                                          expression_type;
 
         /// \brief Iterator type for constant element access
-        typedef typename std::map< variable_type, expression_type >::const_iterator const_iterator;
+        typedef typename atermpp::map< variable_type, expression_type >::const_iterator const_iterator;
 
         /// \brief Iterator type for non-constant element access
-        typedef typename std::map< variable_type, expression_type >::const_iterator iterator;
+        typedef typename atermpp::map< variable_type, expression_type >::const_iterator iterator;
 
         /// \brief Wrapper class for internal storage and substitution updates using operator()
         class assignment {
 
           private:
 
-            Variable                                    m_variable;
+            Variable                                        m_variable;
 
-            std::map< variable_type, expression_type >& m_map;
+            atermpp::map< variable_type, expression_type >& m_map;
 
           public:
 
-            assignment(variable_type const& v, std::map< variable_type, expression_type >& m) : m_variable(v), m_map(m) {
+            assignment(variable_type const& v, atermpp::map< variable_type, expression_type >& m) : m_variable(v), m_map(m) {
             }
 
             /** \brief Assigns expression on the right-hand side
@@ -123,13 +138,13 @@ namespace mcrl2 {
 
       private:
 
-        std::map< variable_type, expression_type > m_map;
+        atermpp::map< variable_type, expression_type > m_map;
 
         /// \brief traits class instance for expression_type
         typedef typename mcrl2::core::term_traits< expression_type >               expression_traits;
 
         expression_type const& lookup(variable_type const& v) const {
-          typename std::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
+          typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
 
           if (i == m_map.end()) {
             return v;
@@ -140,17 +155,6 @@ namespace mcrl2 {
 
       public:
 
-        /// \brief Apply on single single variable expression
-        /// \note This overload is only available if Expression is not equal to Variable
-        /// \param[in] v the variable expression to which to apply substitution
-        /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
-        typename boost::disable_if<
-          typename boost::is_same< typename boost::add_cv< Variable >::type,
-            typename boost::add_cv< Expression > >::type, Expression >::type
-                 operator()(Variable const& v) const {
-
-          return lookup(v); // clone
-        }
 
         /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
         const_iterator begin() const {
@@ -172,6 +176,13 @@ namespace mcrl2 {
           return m_map.end();
         }
 
+        /// \brief Apply on single single variable expression
+        /// \param[in] v the variable for which to give the associated expression
+        /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+        expression_type operator()(variable_type const& v) const {
+          return lookup(v);
+        }
+
         /** \brief Apply substitution to an expression
          *
          * Substitution respects bound variables e.g. (lambda x.x)[x := 1]
@@ -190,8 +201,9 @@ namespace mcrl2 {
          *
          * \param[in] e the expression to which to apply substitution
          * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+         * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
-        Expression operator()(Expression const& e) const {
+        expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
           return SubstitutionProcedure< mutable_map_substitution >::apply(*this, e);
         }
 
@@ -214,7 +226,7 @@ namespace mcrl2 {
          *
          * \return expression assignment for variable v, effect 
          **/
-        assignment operator[](Variable const& v) {
+        assignment operator[](variable_type const& v) {
           return assignment(v, m_map);
         }
 
@@ -224,8 +236,8 @@ namespace mcrl2 {
          * \return whether the substitution expressed by this object is equivalent to <|other|>
          **/
         bool operator==(mutable_map_substitution const& other) const {
-          typename std::map< variable_type, expression_type >::const_iterator i = m_map.begin();
-          typename std::map< variable_type, expression_type >::const_iterator j = other.m_map.begin();
+          const_iterator i = m_map.begin();
+          const_iterator j = other.m_map.begin();
 
           while (i != m_map.end() && j != other.m_map.end()) {
             expression_type const& ii(i->second);
