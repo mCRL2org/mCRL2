@@ -17,6 +17,7 @@
 
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/replace.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
@@ -2729,25 +2730,34 @@ void old_impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
     )))));
 }
 
-data_equation normalise_equation(mcrl2::new_data::data_equation const& e) {
-  struct local {
-    static bool is_variable(atermpp::aterm_appl p) {
-     return data_expression(p).is_variable();
-    }
-  };
+struct is_new_variable : std::unary_function< bool, atermpp::aterm_appl >
+{
+  std::set< atermpp::aterm_appl > seen;
 
-  new_data::variable_vector variables;
+  bool operator()(atermpp::aterm_appl p)
+  {
+   if (data_expression(p).is_variable() && seen.find(p) == seen.end())
+   {
+     seen.insert(p);
 
-  atermpp::find_all_if(e, std::ptr_fun(&local::is_variable), std::back_inserter(variables));
+     return true;
+   }
 
-  if (e.variables().size() < variables.size()) {
-    variables.resize(e.variables().size());
+   return false;
   }
+};
+
+data_equation normalise_equation(mcrl2::new_data::data_equation const& e)
+{
+  atermpp::vector< variable > variables;
+
+  atermpp::find_all_if(mcrl2::new_data::data_equation(e.condition(), e.lhs(), e.rhs()), is_new_variable(), std::back_inserter(variables));
 
   return mcrl2::new_data::data_equation(variables, e.condition(), e.lhs(), e.rhs());
 }
 
-bool alpha_equivalent(mcrl2::new_data::data_equation const& o1, mcrl2::new_data::data_equation o2) {
+bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2)
+{
   using namespace mcrl2::new_data;
 
   if (o1.variables().size() == o2.variables().size()) {
@@ -2764,7 +2774,7 @@ bool alpha_equivalent(mcrl2::new_data::data_equation const& o1, mcrl2::new_data:
 
       // check alpha equivalence
       if (!o1variables.empty()) {
-        atermpp::term_list< atermpp::aterm_appl > s;
+        std::map< variable, variable > replacement_map;
 
         // Assumes that the equation variables are declared in the same order
         while (!o1variables.empty() && !o2variables.empty()) {
@@ -2773,14 +2783,14 @@ bool alpha_equivalent(mcrl2::new_data::data_equation const& o1, mcrl2::new_data:
               return false;
             }
 
-            s = atermpp::push_front(s, atermpp::aterm_appl(gsMakeSubst_Appl(o2variables.front(), o1variables.front())));
+            replacement_map[o2variables.front()] = o1variables.front();
           }
 
           o1variables.advance_begin(1);
           o2variables.advance_begin(1);
         }
 
-        if (normalised_o1 == mcrl2::new_data::data_equation(gsSubstValues_Appl(s, normalised_o2, true))) {
+        if (normalised_o1 == new_data::variable_map_replace(normalised_o2, replacement_map)) {
           return true;
         }
       }

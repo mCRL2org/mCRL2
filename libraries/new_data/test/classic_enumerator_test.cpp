@@ -8,6 +8,7 @@
 
 #include <set>
 #include <sstream>
+#include <stack>
 
 #include <boost/test/minimal.hpp>
 

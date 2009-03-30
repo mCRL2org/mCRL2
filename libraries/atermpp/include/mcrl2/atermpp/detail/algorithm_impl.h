@@ -187,7 +187,7 @@ namespace detail {
       aterm_list l(t);
       for (aterm_list::iterator i = l.begin(); i != l.end(); ++i)
       {
-        find_all_if_impl(*i, op, destBegin);
+        find_all_if_impl< MatchPredicate >(*i, op, destBegin);
       }
     }
     else if (t.type() == AT_APPL) {
@@ -198,7 +198,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
       {
-        find_all_if_impl(*i, op, destBegin);
+        find_all_if_impl< MatchPredicate >(*i, op, destBegin);
       }
     }
     else {
@@ -227,7 +227,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
       {
-        partial_find_if_impl(*i, match, stop);
+        partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
       }
     }
 
@@ -235,7 +235,7 @@ namespace detail {
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        partial_find_if_impl(*i, match, stop);
+        partial_find_if_impl< MatchPredicate, StopPredicate >(*i, match, stop);
       }
     }
   }
@@ -260,7 +260,7 @@ namespace detail {
       }
       for (aterm_appl::iterator i = aterm_appl(t).begin(); i != aterm_appl(t).end(); ++i)
       {
-        partial_find_all_if_impl(*i, match, stop, destBegin);
+        partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
       }
     }
 
@@ -268,7 +268,7 @@ namespace detail {
     {
       for (aterm_list::iterator i = aterm_list(t).begin(); i != aterm_list(t).end(); ++i)
       {
-        partial_find_all_if_impl(*i, match, stop, destBegin);
+        partial_find_all_if_impl< MatchPredicate, StopPredicate >(*i, match, stop, destBegin);
       }
     }
   }
