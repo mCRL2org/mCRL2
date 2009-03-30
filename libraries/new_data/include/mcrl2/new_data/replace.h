@@ -238,9 +238,10 @@ struct replace_data_expressions_helper
 /// \param t A term
 /// \param r A replace function
 /// \return The replacement result
-template <typename Container, typename ReplaceFunction >
-Container replace_data_expressions(Container const t, ReplaceFunction r)
+template <typename Term, typename ReplaceFunction>
+Term replace_data_expressions(Term const t, ReplaceFunction r)
 {
+  BOOST_CONCEPT_ASSERT((boost::UnaryFunction<ReplaceFunction, data_expression, data_expression>));
   return detail::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
 }
 

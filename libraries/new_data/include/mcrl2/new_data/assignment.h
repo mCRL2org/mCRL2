@@ -125,6 +125,38 @@ namespace mcrl2 {
       return convert< assignment_list >(make_assignment_vector(lhs, rhs));
     }
 
+namespace detail {
+
+  /// \brief Function object that applies a substitution to the right hand side of an assignment
+  template <typename UnaryFunction>
+  struct assignment_substitute_rhs
+  {
+    const UnaryFunction& f;
+    
+    assignment_substitute_rhs(const UnaryFunction& f_)
+      : f(f_)
+    {}
+    
+    assignment operator()(const assignment& a) const
+    {
+      return assignment(a.lhs(), f(a.rhs()));
+    }
+  };
+
+} // namespace detail
+
+    /// \brief Applies a substitution function to data expressions appearing in the right hand
+    /// sides of assignments.
+    /// \param l                         A sequence of assignments
+    /// \param f A function that models the concept UnaryFunction with dependent
+    /// types argument_type and result_type equal to data_expression.
+    /// \return The substitution result.
+    template <typename UnaryFunction>
+    assignment_list replace_data_expressions(const assignment_list& l, UnaryFunction f)
+    {
+      return atermpp::apply(l, detail::assignment_substitute_rhs<UnaryFunction>(f));
+    }
+
     /// \brief Converts an iterator range to data_expression_list
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.

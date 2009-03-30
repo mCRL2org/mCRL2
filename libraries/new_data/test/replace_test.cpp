@@ -129,6 +129,19 @@ void test_assignment_list()
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t1);
   BOOST_CHECK(t0 == t2);
+
+  assignment_list m1 = atermpp::make_list(
+    assignment(d1, d2),
+    assignment(e1, d1)
+  );
+  assignment_list m2 = replace_data_expressions(m1, assignment(d2, d1));
+  assignment_list m3 = atermpp::make_list(
+    assignment(d1, d1),
+    assignment(e1, d1)
+  );
+  BOOST_CHECK(m2 == m3);
+  std::cout << "<m2>" << mcrl2::core::pp(m2) << std::endl;
+  std::cout << "<m3>" << mcrl2::core::pp(m3) << std::endl;
 }
 
 void test_variable_replace()
