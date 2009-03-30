@@ -52,7 +52,7 @@ class Sorts
   
     //Needed for additional process parameter in the LPS 
     mcrl2::new_data::sort_expression_vector affectedSorts;
-    mcrl2::new_data::data_expression traverseAndSubtituteDataExpressions(mcrl2::new_data::data_expression de, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector AffectedConstructors);
+    mcrl2::new_data::data_expression substituteVariable(mcrl2::new_data::data_expression var, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector AffectedConstructors);
     std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj;
 
 };

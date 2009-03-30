@@ -8,6 +8,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include <iterator>
+#include <mcrl2/lps/linear_process.h>
 
 using namespace std;
 using namespace mcrl2::core;
@@ -458,54 +459,27 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 	print.h:  std::string mcrl2::core::pp(Term, mcrl2::core::t_pp_format) [with Term = atermpp::vector<mcrl2::new_data::variable, std::allocator<mcrl2::new_data::variable> >]
    */
 
-   /*Process summands*/
-   mcrl2::lps::summand_list summands = m_lps.summands();
-   for( mcrl2::lps::summand_list::iterator i  = summands.begin()
-                                         ; i != summands.end()
-                                         ; ++i)
+   for(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector >::iterator 
+                        i =  proc_par_to_proc_par_inj.begin();
+                        i != proc_par_to_proc_par_inj.end();
+                        ++i              
+      )
    {
-     data_expression condition = traverseAndSubtituteDataExpressions( i ->condition(), Cmap, AffectedConstructors );
-     gsVerboseMsg("  condition: %s\n", pp(condition).c_str() );
-     /* Expected to use multi_action function instead of actions() */
-     gsVerboseMsg("  action %s\n", mcrl2::new_data::pp( i -> actions() ).c_str() );
-     gsVerboseMsg("  action %s\n", i -> is_tau() ? "true" : "false" );
-     
+     data_expression de = m_lps.summands().begin() -> condition();
+     cout << pp( //mcrl2::lps::linear_process(
+                  atermpp::replace( de , i -> first , substituteVariable( i->first , Cmap, AffectedConstructors ) ) ) 
+  //          )  
+          << endl;
+
    }
 
 }   
 
-mcrl2::new_data::data_expression Sorts::traverseAndSubtituteDataExpressions( mcrl2::new_data::data_expression de,
-                                                                        function_symbol Cmap,
-                                                                        function_symbol_vector AffectedConstructors
-                                                                      )
+mcrl2::new_data::data_expression Sorts::substituteVariable( data_expression var,
+                                                            function_symbol Cmap,
+                                                            function_symbol_vector AffectedConstructors
+                                                          )
 {
-  if (de.is_application())
-  {
-    application ap = application(de);
-    /* Expected "data_expression_vector" instead of" */
-    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
-    data_expression_vector new_args;
-    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> i = args.begin();
-                                                                                             i != args.end();
-                                                                                             ++i
-    )
-    {
-      new_args.push_back( traverseAndSubtituteDataExpressions( *i, Cmap, AffectedConstructors ) );
-    }
- 
-    return 
-      application 
-        ( ap.head()
-        , new_args
-        );
-  } 
-  if (de.is_variable())
-  {
-    variable var = variable(de);
-    if (proc_par_to_proc_par_inj.find( var ) == proc_par_to_proc_par_inj.end() )
-    {
-      return var;
-    } else {
       /* Reconstruct Unfold parameter */
       data_expression_vector new_args ;
       new_args.push_back( proc_par_to_proc_par_inj[ var ][0] );
@@ -541,19 +515,9 @@ mcrl2::new_data::data_expression Sorts::traverseAndSubtituteDataExpressions( mcr
       }
       data_expression new_expr = application(Cmap, new_args );
       return new_expr;
-    }
-  } 
-  if (de.is_function_symbol())
-  {
-    return de;
-  } 
-  if (de.is_abstraction())
-  {
-    return de;
-  } 
-
-  return de;
 }
+
+
 
 void Sorts::algorithm()
 {
