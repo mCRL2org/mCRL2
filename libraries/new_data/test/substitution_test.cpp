@@ -13,6 +13,7 @@
 
 #include "mcrl2/new_data/lambda.h"
 #include "mcrl2/new_data/substitution.h"
+#include "mcrl2/new_data/mutable_substitution_adapter.h"
 #include "mcrl2/new_data/detail/concepts.h"
 
 using namespace mcrl2;
@@ -26,8 +27,8 @@ data_expression operator*(data_expression const& l, data_expression const& r) {
   return sort_nat::times(l, r);
 }
 
-int test_main(int a, char**aa) {
-  MCRL2_ATERMPP_INIT(a, aa);
+void test1()
+{
   using namespace mcrl2::new_data::sort_nat;
 
   variable        x("x", sort_nat::nat());
@@ -62,6 +63,37 @@ int test_main(int a, char**aa) {
   // non-capture avoiding substitution
   BOOST_CHECK(s(lambda(y,y)) != lambda(y,y));
   BOOST_CHECK(s(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
+}
+
+void test_mutable_substitution_adapter()
+{
+  mutable_map_substitution<variable, data_expression> f;
+  variable x("x", sort_nat::nat());
+  variable y("y", sort_nat::nat());
+  variable z("z", sort_nat::nat());
+  f[x] = y;
+  
+  mutable_substitution_adapter<mutable_map_substitution<variable, data_expression> > g(f);
+  BOOST_CHECK(g(x) == y);
+
+  assignment a(y, z);
+  mutable_substitution_adapter<assignment> h(a);
+  BOOST_CHECK(h(x) == x);
+  BOOST_CHECK(h(y) == z);
+  h[x] = y;
+  BOOST_CHECK(h(x) == y);
+  h[y] = y;
+  BOOST_CHECK(h(y) == z);
+  h[z] = x;
+  BOOST_CHECK(h(y) == x);
+}
+
+int test_main(int a, char**aa)
+{
+  MCRL2_ATERMPP_INIT(a, aa);
+
+  test1();
+  test_mutable_substitution_adapter();
 
   return EXIT_SUCCESS;
 }
