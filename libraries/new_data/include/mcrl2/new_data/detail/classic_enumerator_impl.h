@@ -113,9 +113,15 @@ namespace mcrl2 {
 
             local converter(m_evaluator);
 
+            // Apply translation to variables
+            atermpp::aterm_list variables;
+
+            for (typename std::set< variable_type >::const_iterator i = v.begin(); i != v.end(); ++i) {
+              variables = atermpp::push_back(variables, converter.translate(*i));
+            }
+
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(
-                          static_cast< ATermList >(convert< atermpp::aterm_list >(v)),
+                        m_shared_context->m_enumerator.findSolutions(variables,
                   converter.translate(m_condition))));
 
             while (increment()) {

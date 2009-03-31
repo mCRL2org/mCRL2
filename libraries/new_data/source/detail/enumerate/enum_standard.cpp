@@ -387,6 +387,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                         fs_reset();
                 } else {
                         ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
+std::clog << "SORT " << atermpp::aterm(sort) << std::endl;
                         if ( ATisEmpty(l) )
                         {
                                 gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);

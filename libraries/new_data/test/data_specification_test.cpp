@@ -77,6 +77,8 @@ void test_aliases()
 
   data_specification spec;
 
+  BOOST_CHECK(boost::distance(spec.aliases()) == 0);
+
   atermpp::set< sort_expression > sorts;
   sorts.insert(s);
   sorts.insert(t);
@@ -346,9 +348,36 @@ void test_constructor()
     "  Error = struct e;       \n"
     "                          \n"
     ;
-  data_specification data = parse_data_specification(SPEC);
+  data_specification data = remove_all_system_defined(parse_data_specification(SPEC));
   ATermAppl a = new_data::detail::data_specification_to_aterm_data_spec(data);
   data_specification spec1(a);
+}
+
+void compare_for_equality(data_specification const& left, data_specification const& right)
+{
+  BOOST_CHECK(left == right);
+
+  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
+            << "Specification detailed comparison:" << std::endl;
+
+  if (left.sorts() != right.sorts()) {
+    std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
+    std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+  }
+  if (left.constructors() != right.constructors()) {
+    std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
+    std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+  }
+  if (left.mappings() != right.mappings()) {
+    std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
+    std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+  }
+  if (left.equations() != right.equations()) {
+    std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
+    std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+  }
+
+  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 }
 
 void test_system_defined()
@@ -356,8 +385,9 @@ void test_system_defined()
   data_specification specification(parse_data_specification(
     "sort S;"
     "map f: Set(S);"));
+std::clog << "Sorts (left) " << pp(specification.sorts()) << std::endl;
 
-  BOOST_CHECK(boost::distance(specification.sorts()) == 3);
+  BOOST_CHECK(boost::distance(specification.sorts()) == 3); // S, Set(S), Bool
 
   specification = parse_data_specification(
     "sort D = Set(Nat);"
@@ -371,7 +401,8 @@ void test_system_defined()
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
-  BOOST_CHECK(data_specification(detail::data_specification_to_aterm_data_spec(specification)) == specification);
+
+  compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
 
   specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
@@ -385,7 +416,8 @@ void test_system_defined()
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
-  BOOST_CHECK(data_specification(detail::data_specification_to_aterm_data_spec(specification)) == specification);
+
+  compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
 }
 
 int test_main(int argc, char** argv)

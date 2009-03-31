@@ -36,15 +36,19 @@
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/application.h"
-
 #include "mcrl2/new_data/data_equation.h"
-#include "mcrl2/new_data/detail/compatibility.h"
 
 namespace mcrl2 {
 
   namespace new_data {
 
     class data_specification;
+
+    /// \cond INTERNAL_DOCS
+    namespace detail {
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
+    }
+    /// \endcond
 
     /// \brief new_data specification.
     ///
@@ -98,7 +102,7 @@ namespace mcrl2 {
                       boost::function< bool (sort_expression const&) > const& p = boost::function< bool(sort_expression const&) >()) :
                                   aliases_iterator::iterator_adaptor_(begin), m_end(end), m_predicate(p)
             {
-              if (!this->base_reference()->is_alias())
+              if (this->base_reference() != m_end && !this->base_reference()->is_alias())
               {
                 increment();
               }
@@ -145,6 +149,7 @@ namespace mcrl2 {
 
         friend data_specification& remove_all_system_defined(data_specification&);
         friend data_specification  remove_all_system_defined(data_specification const&);
+        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
         ///\brief Adds system defined sorts when necessary to make the specification complete
         void make_system_defined_complete();
@@ -155,6 +160,9 @@ namespace mcrl2 {
 
         ///\brief Removes system defined sorts including constructors, mappings and equations
         void purge_system_defined();
+
+        ///\brief Builds a specification from aterm
+        void build_from_aterm(const atermpp::aterm_appl& t);
 
       protected:
 
@@ -193,12 +201,9 @@ namespace mcrl2 {
 
       ///\internal
       data_specification(const atermpp::aterm_appl& t)
-        : m_sorts(detail::aterm_sort_spec_to_sort_expression_set(atermpp::arg1(t))),
-          m_constructors(detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(t))),
-          m_mappings(detail::aterm_map_spec_to_function_set(atermpp::arg3(t))),
-          m_equations(detail::aterm_data_eqn_spec_to_equation_set(atermpp::arg4(t)))
       {
         assert(core::detail::check_rule_DataSpec(t));
+        build_from_aterm(t);
         make_system_defined_complete();
       }
 
@@ -237,6 +242,7 @@ namespace mcrl2 {
 
       /// \brief Gets the sort declarations
       ///
+      /// Time complexity of this operation is constant.
       /// \return The sort declarations of this specification.
       inline
       sorts_const_range sorts() const
@@ -245,6 +251,7 @@ namespace mcrl2 {
       }
 
       /// \brief Gets the aliases
+      /// Time complexity of this operation is constant.
       inline
       aliases_const_range aliases() const
       {
@@ -275,27 +282,19 @@ namespace mcrl2 {
 
       /// \brief Gets all constructors of a sort.
       ///
+      /// Time complexity of this operation is constant.
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
       function_symbol_vector constructors(const sort_expression& s) const
       {
-        if (s.is_alias())
-        {
-          return boost::copy_range< function_symbol_vector >(
-            boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(alias(s).reference())));
-        }
-
-        boost::iterator_range< constructors_const_iterator > constructor_range(m_constructors.equal_range(s));
-
-        if (constructor_range.empty() && s.is_basic_sort() && !s.is_standard()) {
-          constructor_range = m_constructors.equal_range(find_referenced_sort(s));
-        }
+        boost::iterator_range< constructors_const_iterator > constructor_range(m_constructors.equal_range(s.is_basic_sort() ? find_referenced_sort(s) : s));
 
         return boost::copy_range< function_symbol_vector >(constructor_range);
       }
 
       /// \brief Gets all mappings in this specification
       ///
+      /// Time complexity of this operation is constant.
       /// \return All mappings in this specification, including recognisers and
       /// projection functions from structured sorts.
       inline
@@ -311,10 +310,12 @@ namespace mcrl2 {
       /// right-hand side of the mapping's sort.
       function_symbol_vector mappings(const sort_expression& s) const
       {
+        sort_expression actual_sort(s.is_basic_sort() ? find_referenced_sort(s) : s);
+
         function_symbol_vector result;
         for (atermpp::set< function_symbol >::const_iterator i = m_mappings.begin(); i != m_mappings.end(); ++i)
         {
-          if(i->sort().target_sort() == s)
+          if(i->sort().target_sort() == actual_sort)
           { //TODO check.
             result.push_back(*i);
           }
@@ -325,6 +326,7 @@ namespace mcrl2 {
 
       /// \brief Gets all equations in this specification
       ///
+      /// Time complexity of this operation is constant.
       /// \return All equations in this specification, including those for
       ///  structured sorts.
       inline
@@ -337,11 +339,14 @@ namespace mcrl2 {
       ///
       /// \param[in] s A sort expression.
       /// \pre s does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of sorts_const_range
       inline
       void add_sort(const sort_expression& s)
       {
         assert(std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end());
-        m_sorts.insert(s);
+        // add aliases as names for sort expressions that are non-aliases
+        m_sorts.insert((s.is_alias() && alias(s).reference().is_basic_sort()) ?
+           alias(alias(s).name(), find_referenced_sort(alias(s).reference())) : s);
         add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
         add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
         make_system_defined_complete(s);
@@ -353,6 +358,7 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \pre s does not yet occur in this specification.
       /// \post is_system_defined(s) = true
+      /// \note this operation does not invalidate iterators of sorts_const_range
       inline
       void add_system_defined_sort(const sort_expression& s)
       {
@@ -364,6 +370,7 @@ namespace mcrl2 {
       ///
       /// \param[in] f A function symbol.
       /// \pre f does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of constructors_const_range
       inline
       void add_constructor(const function_symbol& f)
       {
@@ -380,6 +387,7 @@ namespace mcrl2 {
       /// \param[in] f A function symbol.
       /// \pre f does not yet occur in this specification.
       /// \post is_system_defined(f) == true
+      /// \note this operation does not invalidate iterators of constructors_const_range
       inline
       void add_system_defined_constructor(const function_symbol& f)
       {
@@ -390,6 +398,7 @@ namespace mcrl2 {
       /// \brief Adds a mapping to this specification
       ///
       /// \param[in] f A function symbol.
+      /// \note this operation does not invalidate iterators of mappings_const_range
       inline
       void add_mapping(const function_symbol& f)
       {
@@ -403,6 +412,7 @@ namespace mcrl2 {
       /// \param[in] f A function symbol.
       /// \pre f does not yet occur in this specification.
       /// \post is_system_defined(f) == true
+      /// \note this operation does not invalidate iterators of mappings_const_range
       inline
       void add_system_defined_mapping(const function_symbol& f)
       {
@@ -414,6 +424,7 @@ namespace mcrl2 {
       ///
       /// \param[in] e An equation.
       /// \pre e does not yet occur in this specification.
+      /// \note this operation does not invalidate iterators of equations_const_range
       inline
       void add_equation(const data_equation& e)
       {
@@ -427,6 +438,7 @@ namespace mcrl2 {
       /// \param[in] e An equation.
       /// \pre e does not yet occur in this specification.
       /// \post is_system_defined(f) == true
+      /// \note this operation does not invalidate iterators of equations_const_range
       inline
       void add_system_defined_equation(const data_equation& e)
       {
@@ -437,6 +449,7 @@ namespace mcrl2 {
       /// \brief Adds sorts to this specification
       ///
       /// \param[in] sl A range of sort expressions.
+      /// \note this operation does not invalidate iterators of sorts_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
@@ -452,6 +465,7 @@ namespace mcrl2 {
       ///
       /// \param[in] sl A range of sort expressions.
       /// \post for all s in sl: is_system_defined(s)
+      /// \note this operation does not invalidate iterators of sorts_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_system_defined_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
@@ -465,6 +479,7 @@ namespace mcrl2 {
       /// \brief Adds constructors to this specification
       ///
       /// \param[in] fl A range of function symbols.
+      /// \note this operation does not invalidate iterators of constructors_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
@@ -480,6 +495,7 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of function symbols.
       /// \post for all f in fl: is_system_defined(f)
+      /// \note this operation does not invalidate iterators of constructors_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_system_defined_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
@@ -493,6 +509,7 @@ namespace mcrl2 {
       /// \brief Adds mappings to this specification
       ///
       /// \param[in] fl A range of function symbols.
+      /// \note this operation does not invalidate iterators of mappings_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
@@ -508,6 +525,7 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of function symbols.
       /// \post for all f in fl: is_system_defined(f)
+      /// \note this operation does not invalidate iterators of mappings_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_system_defined_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
@@ -521,6 +539,7 @@ namespace mcrl2 {
       /// \brief Adds equations to this specification
       ///
       /// \param[in] el A range of equations.
+      /// \note this operation does not invalidate iterators of equations_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
@@ -536,6 +555,7 @@ namespace mcrl2 {
       ///
       /// \param[in] el A range of equations.
       /// \post for all e in el: is_system_defined(e)
+      /// \note this operation does not invalidate iterators of equations_const_range
       template < typename ForwardTraversalIterator >
       inline
       void add_system_defined_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
@@ -546,34 +566,34 @@ namespace mcrl2 {
         }
       }
 
-      /// \brief Gets all constructors of a sort.
+      /// \brief Follows aliases to the sort expression for which
+      /// constructors, mappings equations are added
       ///
       /// \param[in] s A sort basic sort.
       /// \return the final sort referenced by s or s in case of failure
       sort_expression find_referenced_sort(basic_sort const& s) const
       {
-        sort_expression result = s;
+        sort_expression found = s;
 
-        std::vector< alias > all_aliases = convert< std::vector< alias > >(aliases());
-
-        bool search_further = false;
+        std::set< sort_expression > visited;
+        std::vector< alias >        all_aliases = convert< std::vector< alias > >(aliases());
 
         do {
-          search_further = false;
+          visited.insert(found);
 
           // search aliases for a reference that matches s
           for (std::vector< alias >::const_iterator i(all_aliases.begin()); i != all_aliases.end(); ++i)
           {
-            if (i->name() == result)
+            if (i->name() == found)
             {
-              result         = i->reference();
-              search_further = result.is_basic_sort();
+              found = i->reference();
+
               break;
             }
           }
-        } while (search_further);
+        } while (found.is_basic_sort() && visited.find(found) == visited.end());
 
-        return result;
+        return found;
       }
 
       /// \brief Removes sort from specification.
@@ -582,6 +602,7 @@ namespace mcrl2 {
       /// for a sort.
       /// \param[in] s A sort expression.
       /// \post s does not occur in this specification.
+      /// \note this operation does not invalidate iterators of sorts_const_range, only if they point to the element that is removed
       inline
       void remove_sort(const sort_expression& s)
       {
@@ -613,6 +634,7 @@ namespace mcrl2 {
       /// \param[in] f A constructor.
       /// \pre f occurs in the specification as constructor.
       /// \post f does not occur as constructor.
+      /// \note this operation does not invalidate iterators of constructors_const_range, only if they point to the element that is removed
       inline
       void remove_constructor(const function_symbol& f)
       {
@@ -653,6 +675,7 @@ namespace mcrl2 {
       /// Note that this does not remove equations in which the mapping occurs.
       /// \param[in] f A function.
       /// \post f does not occur as constructor.
+      /// \note this operation does not invalidate iterators of mappings_const_range, only if they point to the element that is removed
       inline
       void remove_mapping(const function_symbol& f)
       {
@@ -681,6 +704,7 @@ namespace mcrl2 {
       ///
       /// \param[in] e An equation.
       /// \post e is removed from this specification.
+      /// \note this operation does not invalidate iterators of equations_const_range, only if they point to the element that is removed
       inline
       void remove_equation(const data_equation& e)
       {
@@ -783,17 +807,6 @@ namespace mcrl2 {
       bool is_well_typed() const;
 
     }; // class data_specification
-
-    /// \brief Pretty prints a data specification
-    /// \param[in] specification a data specification
-    inline std::string pp(data_specification const& specification)
-    {
-      return core::pp(core::detail::gsMakeDataSpec(
-        detail::sort_expression_list_to_aterm_sort_spec(specification.sorts()),
-               detail::constructor_list_to_aterm_cons_spec(specification.constructors()),
-               detail::function_list_to_aterm_map_spec(specification.mappings()),
-               detail::data_equation_list_to_aterm_eqn_spec(specification.equations())));
-    }
 
     /// \brief Removes all system defined sorts, constructors, mappings and equations
     /// \warning this makes a data specification incomplete with respect to system defined

@@ -26,6 +26,7 @@
 #include "mcrl2/new_data/assignment.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/find.h"
 
@@ -104,6 +105,13 @@ namespace mcrl2 {
       {
         *o = f(*i);
       }
+    }
+
+    /// \brief Pretty prints a data specification
+    /// \param[in] specification a data specification
+    inline std::string pp(data_specification const& specification)
+    {
+      return core::pp(detail::data_specification_to_aterm_data_spec(specification));
     }
 
     /// \brief Pretty prints the contents of a container

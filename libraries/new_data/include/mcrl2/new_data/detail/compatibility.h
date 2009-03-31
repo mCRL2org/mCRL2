@@ -94,50 +94,6 @@ namespace mcrl2 {
         return atermpp::set< data_equation >(el.begin(), el.end());
       }
 
-      /// \brief Convert a list of sort expressions in the new new_data format to a sort
-      ///        specification in the old new_data format before new_data implementation.
-      /// \param sl A list of sort expressions.
-      /// \return The sort specification in the old new_data format equivalent to sl.
-      template < typename ForwardTraversalIterator >
-      inline
-      atermpp::aterm_appl sort_expression_list_to_aterm_sort_spec(const boost::iterator_range< ForwardTraversalIterator >& sl)
-      {
-        return core::detail::gsMakeSortSpec(atermpp::aterm_list(sl.begin(), sl.end()));
-      }
-
-      /// \brief Convert a list of function symbols in the new new_data format to a constructor
-      ///        specification in the old new_data format before new_data implementation.
-      /// \param cl A list of function symbols.
-      /// \return The constructor specification in the old new_data format equivalent to cl.
-      template < typename ForwardTraversalIterator >
-      inline
-      atermpp::aterm_appl constructor_list_to_aterm_cons_spec(const boost::iterator_range< ForwardTraversalIterator >& cl)
-      {
-        return core::detail::gsMakeConsSpec(atermpp::aterm_list(cl.begin(), cl.end()));
-      }
-
-      /// \brief Convert a list of function symbols in the new new_data format to a map
-      ///        specification in the old new_data format before new_data implementation.
-      /// \param fl A list of function symbols.
-      /// \return The map specification in the old new_data format equivalent to fl.
-      template < typename ForwardTraversalIterator >
-      inline
-      atermpp::aterm_appl function_list_to_aterm_map_spec(const boost::iterator_range< ForwardTraversalIterator >& fl)
-      {
-        return core::detail::gsMakeMapSpec(atermpp::aterm_list(fl.begin(), fl.end()));
-      }
-
-      /// \brief Convert a list of new_data equations in the new new_data format to an equation
-      ///        specification in the old new_data format before new_data implementation.
-      /// \param el A list of new_data equations.
-      /// \return The equation specification in the old new_data format equivalent to el.
-      template < typename ForwardTraversalIterator >
-      inline
-      atermpp::aterm_appl data_equation_list_to_aterm_eqn_spec(const boost::iterator_range< ForwardTraversalIterator >& el)
-      {
-        return core::detail::gsMakeDataEqnSpec(atermpp::aterm_list(el.begin(), el.end()));
-      }
-
     } // namespace detail
 
   } // namespace new_data
