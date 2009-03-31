@@ -8,7 +8,7 @@
 //
 /// \file ./lpsinfo.cpp
 
-#include "boost.hpp" // precompiled headers
+/*include "boost.hpp" // precompiled headers*/
 
 #define NAME "lpsinfo"
 #define AUTHOR "Frank Stappers"
@@ -18,9 +18,7 @@
 #include <cstdio>
 #include <set>
 #include <algorithm>
-
-//Boost
-#include <boost/lexical_cast.hpp>
+#include <sstream>
 
 //mCRL2
 #include "mcrl2/atermpp/aterm.h"
@@ -39,6 +37,14 @@ using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
+
+template <class T>
+inline std::string to_string (const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -245,14 +251,14 @@ class info_tool
       /* Second column */
       m.append(d.create< vertical_box >().set_default_alignment(layout::left).
                 append(d.create< label >().set_text(c.get_input(input_file_name).location())).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.summands().size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_number_of_tau_summands(lps)))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > ((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps.process_parameters().size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.action_labels().size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (get_used_actions(lps).size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (used_multiactions(lps).size()))).
-                append(d.create< label >().set_text(boost::lexical_cast< std::string > (lps_specification.data().sorts().size()))));
+                append(d.create< label >().set_text(to_string(lps.summands().size()))).
+                append(d.create< label >().set_text(to_string(get_number_of_tau_summands(lps)))).
+                append(d.create< label >().set_text(to_string((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
+                append(d.create< label >().set_text(to_string(lps.process_parameters().size()))).
+                append(d.create< label >().set_text(to_string(lps_specification.action_labels().size()))).
+                append(d.create< label >().set_text(to_string(get_used_actions(lps).size()))).
+                append(d.create< label >().set_text(to_string(used_multiactions(lps).size()))).
+                append(d.create< label >().set_text(to_string(lps_specification.data().sorts().size()))));
 
       send_display_layout(d.manager(m));
 
