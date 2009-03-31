@@ -427,7 +427,7 @@ namespace detail {
           // remove the added substitutions from sigma
           for (typename variable_sequence_type::const_iterator j = x.begin(); j != x.end(); ++j)
           {
-            sigma.erase(*j);
+            sigma[*j] = *j; // erase *j
           }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
@@ -438,7 +438,7 @@ namespace detail {
         // remove the added substitutions from sigma
         for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
         {
-          sigma.erase(*i);
+          sigma[*i] = *i; // erase *i
         }
         term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG

@@ -280,6 +280,21 @@ namespace mcrl2 {
         }
     };
 
+    /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+    /// \return A string representation of the map.
+    template <typename MutableSubstitution>
+    std::string to_string(const MutableSubstitution& sigma)
+    {
+      std::stringstream result;
+      result << "[";
+      for (typename MutableSubstitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+      {
+        result << (i == sigma.begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
+      }
+      result << "]";
+      return result.str();
+    }
+
   }
 }
 

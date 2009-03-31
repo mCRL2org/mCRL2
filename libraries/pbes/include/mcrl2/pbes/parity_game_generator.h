@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/new_data/enumerator.h"
 #include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 
@@ -57,7 +58,7 @@ namespace pbes_system {
       typedef core::term_traits<pbes_expression> tr;
 
       /// \brief Substitution function type used by the PBES rewriter.
-      typedef new_data::rewriter_map<std::map<new_data::variable, new_data::data_expression_with_variables> > substitution_function;
+      typedef new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> substitution_function;
 
       /// \brief The PBES that is being solved.
       const pbes<>& m_pbes;

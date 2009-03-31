@@ -19,6 +19,7 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/detail/sort_utility.h"
 #include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/atermpp/algorithm.h"
 
 // JFG:
@@ -331,7 +332,7 @@ inline pbes_expression give_the_instantiated_rhs(
 
   new_data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
 
-  new_data::rewriter_map<atermpp::map<new_data::variable, new_data::data_expression> > sigma;
+  new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> sigma;
   for(new_data::variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
   {
@@ -456,7 +457,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                    const new_data::data_specification &data,
                    const new_data::rewriter& r,
                    const bool use_internal_rewrite_format,
-                   new_data::rewriter_map<atermpp::map<new_data::variable, new_data::data_expression> > &sigma)
+                   new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> &sigma)
 {
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
@@ -604,7 +605,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                      atermpp::term_list< new_data::variable >(function_arguments.begin(), function_arguments.end())));
                   sigma[*i]=d;
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma));
-                  sigma.erase(*i);
+                  sigma[*i] = *i; // erase *i
                   if (pbes_expr::is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
                   {
                     return pbes_expr::false_();
@@ -721,7 +722,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   sigma[*i]=d;
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma));
-                  sigma.erase(*i);
+                  sigma[*i] = *i; // erase *i
                   if (pbes_expr::is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   { // std::cerr << "Return true\n";
                     return pbes_expr::true_();

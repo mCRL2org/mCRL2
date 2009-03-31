@@ -20,6 +20,7 @@
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -93,7 +94,7 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
   namespace opt = new_data::lazy;
 
   // create a mapping from process parameters to initial values
-  new_data::rewriter_map<std::map<new_data::variable, new_data::data_expression> > replacements;
+  new_data::mutable_map_substitution<std::map<new_data::variable, new_data::data_expression> > replacements;
   new_data::data_expression_list::iterator j = init.begin();
   for (new_data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {

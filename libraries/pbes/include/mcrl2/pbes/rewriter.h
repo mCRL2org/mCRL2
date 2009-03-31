@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/expression_traits.h"
+#include "mcrl2/new_data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
@@ -165,9 +166,9 @@ namespace pbes_system {
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        typedef new_data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
-        substitution_map sigma;
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
+        typedef new_data::mutable_map_substitution<variable_type, data_term_type> substitution_function;
+        substitution_function sigma;
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
@@ -180,10 +181,11 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
-        term_type result = r(x, sigma);
+        typedef new_data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
+        term_type result = r(x, substitution_function(sigma));
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << std::endl;
 #endif
@@ -230,7 +232,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
         return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()), sigma);
       }

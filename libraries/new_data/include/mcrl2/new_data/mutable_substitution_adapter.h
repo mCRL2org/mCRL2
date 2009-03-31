@@ -131,7 +131,7 @@ namespace new_data {
   class mutable_substitution_adapter<mutable_map_substitution<Variable, Expression, SubstitutionProcedure > >
   {
     protected:
-      typedef mutable_map_substitution<Variable, Expression> substitution_type;
+      typedef mutable_map_substitution<Variable, Expression, SubstitutionProcedure> substitution_type;
 
     public:
       /// \brief type used to represent variables
@@ -150,10 +150,10 @@ namespace new_data {
       typedef typename substitution_type::assignment assignment;
 
     protected:
-      const mutable_map_substitution<Variable, Expression>& g_;
+      mutable_map_substitution<Variable, Expression>& g_;
 
     public:
-      mutable_substitution_adapter(const mutable_map_substitution<Variable, Expression>& g)
+      mutable_substitution_adapter(mutable_map_substitution<Variable, Expression>& g)
         : g_(g)
       {}
 

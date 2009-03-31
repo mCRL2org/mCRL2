@@ -23,6 +23,7 @@
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_reconstruct.h"
 #include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/replace.h"
@@ -301,59 +302,6 @@ namespace new_data {
         data_expression t = this->operator()(replace_variables(d, sigma));
         std::set<variable> v = find_all_variables(t);
         return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
-      }
-  };
-
-  /// \brief Function object that turns a map of substitutions to variables into a substitution function.
-  template <typename SubstitutionMap>
-  class rewriter_map: public SubstitutionMap, public core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>
-  {
-    public:
-      /// \brief The variable type.
-      typedef typename core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>::variable_type variable_type;
-
-      /// \brief The expression type.
-      typedef typename core::substitution_function<typename SubstitutionMap::key_type, typename SubstitutionMap::mapped_type>::expression_type expression_type;
-
-      /// \brief Constructor.
-      rewriter_map()
-      {}
-
-      /// \brief Constructor.
-      /// \param m A rewriter map.
-      rewriter_map(const rewriter_map<SubstitutionMap>& m)
-        : SubstitutionMap(m)
-      {}
-
-      /// \brief Constructor.
-      /// \param start The start of a range of substitutions.
-      /// \param end The end of a range of substitutions.
-      template <typename Iter>
-      rewriter_map(Iter start, Iter end)
-        : SubstitutionMap(start, end)
-      {}
-
-      /// \brief Function application.
-      /// \param v A variable
-      /// \return The corresponding value.
-      expression_type operator()(const variable_type& v) const
-      {
-        typename SubstitutionMap::const_iterator i = this->find(v);
-        return i == this->end() ? core::term_traits<expression_type>::variable2term(v) : i->second;
-      }
-
-      /// \brief Returns a string representation of the map, for example [a := 3, b := true].
-      /// \return A string representation of the map.
-      std::string to_string() const
-      {
-        std::stringstream result;
-        result << "[";
-        for (typename SubstitutionMap::const_iterator i = this->begin(); i != this->end(); ++i)
-        {
-          result << (i == this->begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
-        }
-        result << "]";
-        return result.str();
       }
   };
 

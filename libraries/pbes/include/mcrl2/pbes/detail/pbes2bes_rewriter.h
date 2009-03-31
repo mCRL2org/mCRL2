@@ -17,6 +17,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
@@ -28,7 +29,7 @@ namespace pbes_system {
 namespace detail {
 
   /// \brief The substitution function used by the pbes2bes rewriter.
-  typedef new_data::rewriter_map<atermpp::map<new_data::variable, new_data::data_expression_with_variables> > pbes2bes_substitution_function;
+  typedef new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> pbes2bes_substitution_function;
 
   /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// As a side effect propositional variable instantiations are being renamed

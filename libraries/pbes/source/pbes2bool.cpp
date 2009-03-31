@@ -46,6 +46,7 @@
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/replace.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/data_elimination.h"
 
@@ -375,7 +376,7 @@ static unsigned int largest_power_of_2_smaller_than(int i)
 static void assign_variables_in_tree(
                       ATerm t,
                       variable_list::iterator &var_iter,
-                      new_data::rewriter_map<atermpp::map<new_data::variable, new_data::data_expression> > &sigma, 
+                      new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> &sigma, 
                       // const rewriter &r,
                       const bool opt_precompile_pbes)
 { if (is_pair(t))
@@ -705,7 +706,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     {
 
       pbes_equation current_pbeq;
-      new_data::rewriter_map<atermpp::map<new_data::variable, new_data::data_expression> > sigma;
+      new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> sigma;
 
       // Add the required substitutions
       if (tool_options.opt_store_as_tree)

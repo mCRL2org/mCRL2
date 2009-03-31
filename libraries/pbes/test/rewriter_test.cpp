@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
@@ -115,7 +116,7 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2)
 template <typename Rewriter1, typename Rewriter2>
 void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl, std::string substitutions)
 {
-  new_data::rewriter_map<std::map<new_data::variable, new_data::data_expression_with_variables> > sigma;
+  new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> sigma;
   parse_substitutions(substitutions, sigma);
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
@@ -291,7 +292,7 @@ void test_substitutions1()
   new_data::rewriter  datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> r(datar);
 
-  new_data::rewriter_map<atermpp::map<new_data::variable, pbes_system::pbes_expression> > sigma;
+  new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> sigma;
   sigma[new_data::parse_variable("m: Pos")] = r(new_data::parse_data_expression("3"));
   sigma[new_data::parse_variable("n: Pos")] = r(new_data::parse_data_expression("4"));
 
@@ -412,7 +413,7 @@ void test_substitutions3()
   new_data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > r(datarv, datae);
 
-  new_data::rewriter_map<std::map<new_data::variable, new_data::data_expression_with_variables> > sigma;
+  new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> sigma;
   sigma[new_data::parse_variable("l_S:Nat")]             = new_data::parse_data_expression("0");
   sigma[new_data::parse_variable("m_S:Nat")]             = new_data::parse_data_expression("0");
   sigma[new_data::parse_variable("bst_K:Bool")]          = new_data::parse_data_expression("false");

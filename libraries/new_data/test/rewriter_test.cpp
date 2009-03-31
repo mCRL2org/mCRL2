@@ -98,7 +98,7 @@ void test2()
   BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<atermpp::map<variable, data_expression> > sigma;
+  mutable_map_substitution<variable, data_expression> sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -110,7 +110,7 @@ void test2()
 
 void test3()
 {
-  typedef atermpp::map<variable, data_expression_with_variables> substitution_map;
+  typedef mutable_map_substitution<variable, data_expression_with_variables> substitution_function;
 
   data_specification data_spec = parse_data_specification(
     "map dummy1:Pos;  \n"
@@ -132,7 +132,7 @@ void test3()
   BOOST_CHECK(z.variables().empty());
 
   std::string var_decl = "m, n: Pos;\n";
-  rewriter_map<substitution_map> sigma;
+  substitution_function sigma;
   variable m(variable("m", sort_pos::pos()));
   variable n(variable("n", sort_pos::pos()));
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
@@ -171,7 +171,7 @@ void parse_substitutions(std::string text, std::string data_spec, SubstitutionFu
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string data_spec, std::string substitutions)
 {
-  rewriter_map<std::map<variable, data_expression> > sigma;
+  mutable_map_substitution<variable, data_expression> sigma;
   parse_substitutions(substitutions, data_spec, sigma);
   data_expression d1 = parse_data_expression(expr1, "", data_spec);
   data_expression d2 = parse_data_expression(expr2, "", data_spec);
@@ -181,7 +181,7 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     std::cout << "d1           " << core::pp(d1) << std::endl;
     std::cout << "d2           " << core::pp(d2) << std::endl;
-    std::cout << "sigma\n      " << sigma.to_string() << std::endl;
+    std::cout << "sigma\n      " << to_string(sigma) << std::endl;
     std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
     std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
   }
