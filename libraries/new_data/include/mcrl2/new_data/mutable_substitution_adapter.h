@@ -42,15 +42,15 @@ namespace new_data {
       /// \brief The wrapped substitution
       const Substitution& f_;
 
-    public:
       /// \brief An additional mutable substitution
       mutable_map_substitution<variable_type, expression_type> g_;
-    
+
+    public:
       /// \brief Constructor
       mutable_substitution_adapter(const Substitution& f)
         : f_(f)
       {}
-      
+
       /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
       const_iterator begin() const {
         return g_.begin();
@@ -127,8 +127,8 @@ namespace new_data {
   };
 
   /// \brief Specialization for mutable_map_substitution.
-  template <typename Variable, typename Expression>
-  class mutable_substitution_adapter<mutable_map_substitution<Variable, Expression> >
+  template <typename Variable, typename Expression, template < class Substitution > class SubstitutionProcedure >
+  class mutable_substitution_adapter<mutable_map_substitution<Variable, Expression, SubstitutionProcedure > >
   {
     protected:
       typedef mutable_map_substitution<Variable, Expression> substitution_type;
@@ -151,12 +151,12 @@ namespace new_data {
 
     protected:
       const mutable_map_substitution<Variable, Expression>& g_;
-    
+
     public:
       mutable_substitution_adapter(const mutable_map_substitution<Variable, Expression>& g)
         : g_(g)
       {}
-      
+
       /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
       const_iterator begin() const {
         return g_.begin();
