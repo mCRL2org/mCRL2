@@ -1877,7 +1877,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                     else
                     {
                       // invalid node name! 
-/*                      return false;
+                      return false;
                     }
 
                     connected_channel_communication = connected_channel_communication->GetNext();

@@ -870,17 +870,23 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   if(arch_diag != 0)
   {
     // export architecture diagram
+    if (!validate_architecture_diagram(export_doc, diagram_id))
+    {
+      cerr << "+mcrl2 conversion failed: architecture diagram is not valid." << endl;
+      return false;
+    }
     if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true)) return false;
   }
-  else
+  else if(proc_diag != 0)
   {
-    if(proc_diag != 0)
+    // export process diagram
+    if (!validate_process_diagram(export_doc, diagram_id))
     {
-      // export process diagram
-      if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true)) return false;
+      cerr << "+mcrl2 conversion failed: process diagram is not valid." << endl;
+      return false;
     }
+    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true)) return false;
   }
-
   return true;
 }
 
